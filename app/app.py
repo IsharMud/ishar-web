@@ -2,6 +2,8 @@ import config
 import secrets
 from flask import Flask, redirect, render_template, request, url_for
 import mariadb
+import crypt
+import hmac
 
 # Name the "app" (as uwsgi expects)
 app = Flask(__name__)
@@ -70,32 +72,28 @@ def _check_credentials(user_email, user_password):
     if not user_password or user_password == '':
         return False
 
-    firstthree = user_password[0:3]
-    print(f"user email: {user_email} / user password: {firstthree}***...")
-
     try:
         dbc = _db_connect()
         cur = dbc.cursor()
-        cur.execute("SELECT account_id, email, password, account_name FROM accounts WHERE email = ?", (user_email,))
-        results = list(cur)
+        cur.execute("SELECT account_id, email, password FROM accounts WHERE email = ?", (user_email,))
+        r = cur.fetchall()
+        rc = cur.rowcount
         dbc.close()
 
         # No such account with that e-mail address
-        if len(results) == 0:
-            print(f"email not found: {user_email}")
+        if rc == 0:
             return False
 
-        elif len(results) == 1:
+        # Found an account...
+        elif rc == 1:
 
-            ## TODO: Password/crypt/MD5 logic
+            # Compare password hash
+            if hmac.compare_digest(crypt.crypt(user_password, r[0][2]), r[0][2]):
+                return r[0]
 
-            account_id = results[0]
-            print(f"id: {account_id}")
-
-            account_name = results[3]
-            print(f"name: {account_name}")
-
-            return results
+            # Invalid password
+            else:
+                return False
 
         # This should not really happen (unless an e-mail is in the database more than once?)
         else:
@@ -149,7 +147,7 @@ def process_login():
         if check_account == False or check_account == None:
             return error(title='Invalid Credentials', message="Sorry, but please <a href='" + url_for('login_form') + "'>go back</a> and enter a valid e-mail address and password.", code=401)
         else:
-            return render_template('portal.html.j2', email=email, account=check_account)
+            return render_template('portal.html.j2', account=check_account)
 
     except Exception as e:
         print(e)
