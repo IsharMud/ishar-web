@@ -58,6 +58,7 @@ def _db_connect(user=secrets.db_creds['user'], password=secrets.db_creds['passwo
     except mariadb.Error as e:
         print(e)
         return False
+
     except Exception as e:
         print(e)
         return e
@@ -89,7 +90,7 @@ def _check_credentials(user_email, user_password):
 
             # Compare password hash
             if hmac.compare_digest(crypt.crypt(user_password, r[0][2]), r[0][2]):
-                return r[0]
+                return r[0][0]
 
             # Invalid password
             else:
@@ -128,6 +129,21 @@ def help(page=None):
 def login_form():
     return render_template('login.html.j2')
 
+# Portal - /portal (after /login)
+@app.route('/portal', methods=['GET'])
+def portal(account_id=None):
+
+    dbc = _db_connect()
+    cur = dbc.cursor()
+    cur.execute("SELECT * FROM `accounts` where `account_id` = ?", (account_id,))
+    fields = [field_md[0] for field_md in cur.description]
+    result = [dict(zip(fields,row)) for row in cur.fetchall()]
+    print(result)
+    dbc.close()
+
+    return render_template('portal.html.j2', account=result[0])
+
+
 # POST /login, Process Log In attempt and welcome user
 @app.route('/login', methods=['POST'])
 def process_login():
@@ -142,12 +158,20 @@ def process_login():
         if not password or password == '':
             return error(title='Invalid Password', message="Sorry, but please <a href='" + url_for('login_form') + "'>go back</a> and enter a valid pasword.", code=400)
 
+        # Check credentials / get account details
         check_account = _check_credentials(email, password)
 
+        # Invalid credentials
         if check_account == False or check_account == None:
             return error(title='Invalid Credentials', message="Sorry, but please <a href='" + url_for('login_form') + "'>go back</a> and enter a valid e-mail address and password.", code=401)
-        else:
+
+        # Valid credentials! send them to the portal
+        elif isinstance(check_account, int):
+            return portal(account_id=check_account)
             return render_template('portal.html.j2', account=check_account)
+
+        else:
+            raise
 
     except Exception as e:
         print(e)
