@@ -1,0 +1,20 @@
+{% extends "index.html.j2" %}
+{% block title %} - Help{% endblock %}
+{% block content %}
+<h1>Help</h1>
+<dl>Search help:</dl>
+<p>
+<form method="get" action="https://www.google.com/custom">
+<input type="text" name="q" size=60 maxlength="256" value="">
+<input type="hidden" name="domains" value="isharmud.com">
+<input type="hidden" name="sitesearch" value="isharmud.com">
+<input type="hidden" name="cof" value="L:http://www.isharmud.com/style/logo.jpg;LH:88;LW:768;GL:2;BGC:#000000;T:#ffffff;LC:#ffaa77;VLC:#ffaa77;ALC:#ffaa77;GALT:#ffaa77;GFNT:#999999;GIMP:#ffffff;DIV:#ffaa77;LBGC:#000000;">
+<input type="hidden" name="safe" value="off">
+</form>
+<p>
+Browse all topics by the first letter in their name:
+<p>
+{% for letter in "abcdefghijklmnopqrstuvwxyz" | list %}
+<a href="{{ url_for('help', page=letter) }}">{{ letter }}</a>
+{% endfor %}
+{% endblock %}
