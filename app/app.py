@@ -1,3 +1,4 @@
+import config
 import secrets
 from flask import Flask, redirect, render_template, url_for
 
@@ -6,8 +7,8 @@ app = Flask(__name__)
 
 # /clients
 @app.route('/clients')
-def clients():
-    return render_template('clients.html.j2')
+def clients(mud_clients=config.mud_clients):
+    return render_template('clients.html.j2', mud_clients=mud_clients)
 
 # Redirect /connect to mudslinger.net
 @app.route('/connect')
@@ -17,7 +18,7 @@ def connect():
 # Redirect /discord to the link listed in secrets.py
 @app.route('/discord')
 def discord():
-    return redirect(secrets.discord_invite_link, code=302)
+    return redirect(config.discord_invite_link, code=302)
 
 # /help in progress
 @app.route('/help')
