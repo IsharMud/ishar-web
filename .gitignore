@@ -12,3 +12,4 @@
 .reload
 __pycache
 venv/
+secrets.py
