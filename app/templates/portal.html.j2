@@ -1,14 +1,23 @@
 {% extends "index.html.j2" %}
 {% block title %}Portal - {% endblock %}
 {% block content %}
+<div class="rightmenu">
+<dl>
+<dd><a href="{{ url_for('static', filename='Season_Proposal.pdf') }}" target="_blank">Seasons Proposal</a></dd>
+<dd><a href="{{ url_for('connect') }}" target="_blank">Connect to Ishar</a></dd>
+<dd><a href="{{ url_for('world') }}">The World of Ishar</a></dd>
+<dd><a href="{{ url_for('help', page='background') }}">Background</a></dd>
+<dd><a href="{{ url_for('help', page=None) }}">Search Help</a></dd>
+<dd><a href="{{ url_for('logout') }}">Log Out</a></dd>
+<dd><a href="{{ url_for('discord') }}" target="_blank">Discord</a></dd>
+</dl>
+</div>
 <h1>Portal</h1>
-<h3>Welcome to the new online portal for Ishar, {{ account['account_name'] | safe | title }}!</h3>
-<a href="{{ url_for('static', filename='Season_Proposal.pdf') }}" target="_blank">Check out the Seasonal Character Proposal here!</a>
-<p>
-You created your account on {{ account['created_at'].strftime('%c') }}.
+<h3>Welcome, {{ account['account_name'] | safe | title }}!</h3>
 <p>
 {% if players is defined and players is iterable and players|length > 0 %}
-You have {{ players|length }} players:
+You have <strong>{{ players|length }}</strong> players:
+<p>
 <table>
 <tr>
 <th>Name</th>
@@ -35,6 +44,9 @@ You have {{ players|length }} players:
 {% else %}
 You have not created any players yet.
 {% endif %}
+<p class="nomenu">
+</div>
 <p>
-<a href="{{ url_for('logout') }}">Log Out</a>
+<div class="under">
+<div class="lower">You created your account on {{ account['created_at'].strftime('%c') }}.</div>
 {% endblock %}
