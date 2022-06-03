@@ -31,4 +31,6 @@ You have {{ players|length }} players:
 {% else %}
 You have not created any players yet.
 {% endif %}
+<p>
+<a href="{{ url_for('logout') }}">Log Out</a>
 {% endblock %}

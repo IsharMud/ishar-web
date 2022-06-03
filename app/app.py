@@ -1,6 +1,6 @@
 import config
 import secrets
-from flask import Flask, redirect, render_template, request, url_for
+from flask import Flask, make_response, redirect, render_template, request, url_for
 import mariadb
 import crypt
 import hmac
@@ -39,6 +39,7 @@ def method_not_implemented(message):
 @app.errorhandler(503)
 def service_unavailable(message):
     return error(title='Service Unavailable', message=message, code=503)
+
 
 # Jinja filter for class ID to name
 @app.template_filter()
@@ -122,8 +123,12 @@ def _check_credentials(user_email, user_password):
         # Found an account...
         elif rc == 1:
 
-            # Compare password hash
-            if hmac.compare_digest(crypt.crypt(user_password, r[0][2]), r[0][2]):
+            # Compare directly to database
+            if (user_password == r[0][2]):
+                return r[0][0]
+
+            # Hash and compare to database
+            elif hmac.compare_digest(crypt.crypt(user_password, r[0][2]), r[0][2]):
                 return r[0][0]
 
             # Invalid password
@@ -160,13 +165,25 @@ def discord():
 def help(page=None):
     return render_template('help.html.j2', page=page)
 
+# GET /login (log in form, or handles cookie login)
 @app.route('/login', methods=['GET'])
 def login_form():
+
+    # Check for cookies
+    if request.cookies.get('email') and request.cookies.get('password') and request.cookies.get('email') != '' and request.cookies.get('password') != '':
+
+        # Check cookie credentials / get account details
+        check_account = _check_credentials(request.cookies.get('email'), request.cookies.get('password'))
+
+        # Return portal for valid cookie credentials
+        if isinstance(check_account, int):
+            return _portal(account_id=check_account)
+
+    # Otherwise, log in form
     return render_template('login.html.j2')
 
-# Portal - /portal (after /login)
-@app.route('/portal', methods=['GET'])
-def portal(account_id=None):
+# Internal function that takes a user ID for an authenticated user (after /login)
+def _portal(account_id=None):
 
     try:
 
@@ -187,12 +204,16 @@ def portal(account_id=None):
         players = [dict(zip(players_fields,row)) for row in cur.fetchall()]
         player_count = cur.rowcount
 
+        dbc.close()
+
         if player_count == 0:
             players = None
 
-        dbc.close()
-
-        return render_template('portal.html.j2', account=account[0], players=players)
+        # Set cookies of the e-mail address and password hash
+        resp = make_response(render_template('portal.html.j2', account=account[0], players=players))
+        resp.set_cookie('email', account[0]['email'], secure=True)
+        resp.set_cookie('password', account[0]['password'], secure=True)
+        return resp
 
 #
 #           TODO
@@ -216,7 +237,7 @@ def portal(account_id=None):
         print(e)
         return error(title='Unknown Error', message="Sorry, but please <a href='" + url_for('login_form') + "'>go back</a> and try again.", code=500)
 
-# POST /login, Process Log In attempt and welcome user
+# POST /login, process Log In attempt and welcome user
 @app.route('/login', methods=['POST'])
 def process_login():
 
@@ -224,34 +245,49 @@ def process_login():
         email =  request.form['email']
         password =  request.form['password']
 
-        if not email or email == '':
-            return error(title='Invalid E-mail Address', message="Sorry, but please <a href='" + url_for('login_form') + "'>go back</a> and enter a valid e-mail address.", code=400)
-
-        if not password or password == '':
-            return error(title='Invalid Password', message="Sorry, but please <a href='" + url_for('login_form') + "'>go back</a> and enter a valid pasword.", code=400)
+        # Empty credential fields
+        if not email or email == '' or not password or password == '':
+            raise Exception
 
         # Check credentials / get account details
         check_account = _check_credentials(email, password)
 
         # Invalid credentials
         if check_account == False or check_account == None:
-            return error(title='Invalid Credentials', message="Sorry, but please <a href='" + url_for('login_form') + "'>go back</a> and enter a valid e-mail address and password.", code=401)
+            raise Exception
 
         # Valid credentials! send them to the portal
         elif isinstance(check_account, int):
-            return portal(account_id=check_account)
+            return _portal(account_id=check_account)
 
         else:
             raise Exception
 
     except Exception as e:
         print(e)
-        return error(title='Unknown Error', message="Sorry, but please <a href='" + url_for('login_form') + "'>go back</a> and try again.", code=400)
+        return error(
+                        title='Invalid Credentials',
+                        message="Sorry, but please <a href='" + url_for('login_form') + "'>go back</a> and try again.",
+                        code=401
+                    )
+
+
+# /logout
+@app.route('/logout')
+def logout():
+
+    # Set empty cookies for the e-mail address and password hash
+    resp = make_response(render_template('error.html.j2', title='Log Out', message='You have been logged out.'))
+    resp.set_cookie('email', '', secure=True)
+    resp.set_cookie('password', '', secure=True)
+    return resp
+
 
 # /world
 @app.route('/world')
 def world():
     return render_template('world.html.j2')
+
 
 # Main page - /
 @app.route('/')
