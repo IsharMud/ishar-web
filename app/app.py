@@ -41,41 +41,6 @@ def service_unavailable(message):
     return error(title='Service Unavailable', message=message, code=503)
 
 
-# Jinja filter for class ID to name
-@app.template_filter()
-def class_id_to_name(class_id=None):
-    if isinstance(class_id, int):
-        try:
-            dbc = _db_connect()
-            cur = dbc.cursor()
-            cur.execute("SELECT `class_name` FROM `classes` WHERE `class_id` = ?", (class_id,))
-            r = cur.fetchall()
-            dbc.close()
-            return r[0][0].capitalize().replace('_', '-')
-        except Exception as e:
-            print(e)
-            return class_id
-    else:
-        return False
-
-# Jinja filter for race ID to name
-@app.template_filter()
-def race_id_to_name(race_id=None):
-    if isinstance(race_id, int):
-        try:
-            dbc = _db_connect()
-            cur = dbc.cursor()
-            cur.execute("SELECT `race_name` FROM `races` WHERE `race_id` = ?", (race_id,))
-            r = cur.fetchall()
-            dbc.close()
-            return r[0][0].capitalize().replace('_', '-')
-        except Exception as e:
-            print(e)
-            return race_id
-    else:
-        return False
-
-
 # Internal function to connect to the database
 def _db_connect(user=secrets.db_creds['user'], password=secrets.db_creds['password'], host=secrets.db_creds['host'], port=secrets.db_creds['port'], database=secrets.db_creds['database']):
 
@@ -199,10 +164,18 @@ def _portal(account_id=None):
         account = [dict(zip(account_fields,row)) for row in cur.fetchall()]
 
         # Get players information
-        cur.execute("SELECT * FROM `players` WHERE `account_id` = ?", (account_id,))
+        cur.execute("""SELECT \
+                    `id`, `account_id`, `name`, `level`, \
+                    `bankacc`, `renown`, `remorts`, FROM_UNIXTIME(`birth`) as `birth`, \
+                    `class_name`, `race_name` \
+                    FROM `players` \
+                    INNER JOIN `classes` ON `players`.`class_id` = `classes`.`class_id` \
+                    INNER JOIN `races` ON `players`.`race_id` = `races`.`race_id` \
+                    WHERE `account_id` = ?""", (account_id,))
         players_fields = [field_md[0] for field_md in cur.description]
         players = [dict(zip(players_fields,row)) for row in cur.fetchall()]
         player_count = cur.rowcount
+        print(players)
 
         dbc.close()
 

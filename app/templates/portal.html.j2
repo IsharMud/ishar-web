@@ -15,15 +15,19 @@ You have {{ players|length }} players:
 <th>Race</th>
 <th>Class</th>
 <th>Level</th>
+<th>Bank</th>
+<th>Birth</th>
 <th>Remort(s)</th>
 </tr>
 {% for player in players %}
 <tr>
 <!-- ID: {{ player['id'] }} -->
 <td>{{ player['name'] | safe }}</td>
-<td>{{ player['race_id'] | race_id_to_name }}</td>
-<td>{{ player['class_id'] | class_id_to_name }}</td>
+<td>{{ player['race_name'] | title | replace('_', '-') }}</td>
+<td>{{ player['class_name'] | title | replace('_', '-') }}</td>
 <td>{{ player['level'] }}</td>
+<td>{{ player['bankacc'] }}</td>
+<td>{{ player['birth'].strftime('%c') }}</td>
 <td>{{ player['remorts'] }}</td>
 </tr>
 {% endfor %}
