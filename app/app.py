@@ -40,6 +40,40 @@ def method_not_implemented(message):
 def service_unavailable(message):
     return error(title='Service Unavailable', message=message, code=503)
 
+# Jinja filter for class ID to name
+@app.template_filter()
+def class_id_to_name(class_id=None):
+    if isinstance(class_id, int):
+        try:
+            dbc = _db_connect()
+            cur = dbc.cursor()
+            cur.execute("SELECT `class_name` FROM `classes` WHERE `class_id` = ?", (class_id,))
+            r = cur.fetchall()
+            dbc.close()
+            return r[0][0].capitalize().replace('_', '-')
+        except Exception as e:
+            print(e)
+            return class_id
+    else:
+        return False
+
+# Jinja filter for race ID to name
+@app.template_filter()
+def race_id_to_name(race_id=None):
+    if isinstance(race_id, int):
+        try:
+            dbc = _db_connect()
+            cur = dbc.cursor()
+            cur.execute("SELECT `race_name` FROM `races` WHERE `race_id` = ?", (race_id,))
+            r = cur.fetchall()
+            dbc.close()
+            return r[0][0].capitalize().replace('_', '-')
+        except Exception as e:
+            print(e)
+            return race_id
+    else:
+        return False
+
 
 # Internal function to connect to the database
 def _db_connect(user=secrets.db_creds['user'], password=secrets.db_creds['password'], host=secrets.db_creds['host'], port=secrets.db_creds['port'], database=secrets.db_creds['database']):
@@ -61,7 +95,7 @@ def _db_connect(user=secrets.db_creds['user'], password=secrets.db_creds['passwo
 
     except Exception as e:
         print(e)
-        return e
+        return False
 
 
 # Internal function to validate e-mail address and password from the log in form
@@ -76,7 +110,7 @@ def _check_credentials(user_email, user_password):
     try:
         dbc = _db_connect()
         cur = dbc.cursor()
-        cur.execute("SELECT account_id, email, password FROM accounts WHERE email = ?", (user_email,))
+        cur.execute("SELECT `account_id`, `email`, `password` FROM `accounts` WHERE `email` = ?", (user_email,))
         r = cur.fetchall()
         rc = cur.rowcount
         dbc.close()
@@ -103,6 +137,7 @@ def _check_credentials(user_email, user_password):
     except Exception as e:
         print(e)
         return error(title='Unknown Error!', message="Sorry, but please <a href='" + url_for('login_form') + "'go back</a> and try again.", code=500)
+
 
 # /clients
 @app.route('/clients')
@@ -133,16 +168,53 @@ def login_form():
 @app.route('/portal', methods=['GET'])
 def portal(account_id=None):
 
-    dbc = _db_connect()
-    cur = dbc.cursor()
-    cur.execute("SELECT * FROM `accounts` where `account_id` = ?", (account_id,))
-    fields = [field_md[0] for field_md in cur.description]
-    result = [dict(zip(fields,row)) for row in cur.fetchall()]
-    print(result)
-    dbc.close()
+    try:
 
-    return render_template('portal.html.j2', account=result[0])
+        if not account_id or not isinstance(account_id, int):
+            raise Exception
 
+        dbc = _db_connect()
+        cur = dbc.cursor()
+
+        # Get account information
+        cur.execute("SELECT * FROM `accounts` WHERE `account_id` = ?", (account_id,))
+        account_fields = [field_md[0] for field_md in cur.description]
+        account = [dict(zip(account_fields,row)) for row in cur.fetchall()]
+
+        # Get players information
+        cur.execute("SELECT * FROM `players` WHERE `account_id` = ?", (account_id,))
+        players_fields = [field_md[0] for field_md in cur.description]
+        players = [dict(zip(players_fields,row)) for row in cur.fetchall()]
+        player_count = cur.rowcount
+
+        if player_count == 0:
+            players = None
+
+        dbc.close()
+
+        return render_template('portal.html.j2', account=account[0], players=players)
+
+#
+#           TODO
+#           Deal with player flags
+#
+
+#            player_ids = []
+#            for player in players:
+#                player_ids.append(player['id'])
+#            print(f"player ids: {player_ids}")
+#            players_idsc = [str(element) for element in player_ids]
+#            players_id_numbers = ",".join(players_idsc)
+#            print(f"players_id_numbers: {players_id_numbers}")
+
+            # Get player_flags information
+#            cur.execute(f"SELECT * FROM `player_player_flags` WHERE `player_id` IN ({players_id_numbers})")
+#            players_flags = cur.fetchall()
+#            print(f"players_flags: {players_flags}")
+
+    except Exception as e:
+        print(e)
+        return error(title='Unknown Error', message="Sorry, but please <a href='" + url_for('login_form') + "'>go back</a> and try again.", code=500)
 
 # POST /login, Process Log In attempt and welcome user
 @app.route('/login', methods=['POST'])
@@ -168,10 +240,9 @@ def process_login():
         # Valid credentials! send them to the portal
         elif isinstance(check_account, int):
             return portal(account_id=check_account)
-            return render_template('portal.html.j2', account=check_account)
 
         else:
-            raise
+            raise Exception
 
     except Exception as e:
         print(e)

@@ -3,4 +3,32 @@
 {% block content %}
 <h1>Portal</h1>
 <h3>Welcome to the new online portal for Ishar, {{ account['account_name'] | safe | title }}!</h3>
+<a href="{{ url_for('static', filename='Season_Proposal.pdf') }}" target="_blank">Check out the Seasonal Character Proposal here!</a>
+<p>
+You created your account on {{ account['created_at'].strftime('%c') }}.
+<p>
+{% if players is defined and players is iterable and players|length > 0 %}
+You have {{ players|length }} players:
+<table>
+<tr>
+<th>Name</th>
+<th>Race</th>
+<th>Class</th>
+<th>Level</th>
+<th>Remort(s)</th>
+</tr>
+{% for player in players %}
+<tr>
+<!-- ID: {{ player['id'] }} -->
+<td>{{ player['name'] | safe }}</td>
+<td>{{ player['race_id'] | race_id_to_name }}</td>
+<td>{{ player['class_id'] | class_id_to_name }}</td>
+<td>{{ player['level'] }}</td>
+<td>{{ player['remorts'] }}</td>
+</tr>
+{% endfor %}
+</table>
+{% else %}
+You have not created any players yet.
+{% endif %}
 {% endblock %}
