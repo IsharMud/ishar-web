@@ -45,7 +45,7 @@ def service_unavailable(message):
 def _get_account(account_id=None, dbc=None):
 
     if not account_id or account_id == '' or not isinstance(account_id, int):
-        return None;
+        return None
 
     try:
         print(f"_get_account() ...")
@@ -85,7 +85,7 @@ def _get_account(account_id=None, dbc=None):
 def _get_players(account_id=None, dbc=None):
 
     if not account_id or account_id == '' or not isinstance(account_id, int):
-        return None;
+        return None
 
     try:
 
