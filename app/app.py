@@ -30,7 +30,7 @@ def page_not_found(message):
 
 @app.errorhandler(500)
 def internal_server_error(message):
-    return error(tite='Internal Server Error', message=message, code=500)
+    return error(title='Internal Server Error', message=message, code=500)
 
 @app.errorhandler(501)
 def method_not_implemented(message):
@@ -41,129 +41,66 @@ def service_unavailable(message):
     return error(title='Service Unavailable', message=message, code=503)
 
 
-# Internal function to connect to the database
-def _db_connect(user=secrets.db_creds['user'], password=secrets.db_creds['password'], host=secrets.db_creds['host'], port=secrets.db_creds['port'], database=secrets.db_creds['database']):
+# Internal function to return account details from the database via account ID
+def _get_account(account_id=None, dbc=None):
+
+    if not account_id or account_id == '' or not isinstance(account_id, int):
+        return None;
 
     try:
-        conn = mariadb.connect(
-            user=user,
-            password=password,
-            host=host,
-            port=port,
-            database=database
-        )
+        print(f"_get_account() ...")
+        print(f"account_id: {account_id}")
 
-        return conn
-
-    except mariadb.Error as e:
-        print(e)
-        return False
-
-    except Exception as e:
-        print(e)
-        return False
-
-
-# Internal function to validate e-mail address and password from the log in form
-def _check_credentials(user_email, user_password):
-
-    if not user_email or user_email == '':
-        return False
-
-    if not user_password or user_password == '':
-        return False
-
-    try:
-        dbc = _db_connect()
-        cur = dbc.cursor()
-        cur.execute("SELECT `account_id`, `email`, `password` FROM `accounts` WHERE `email` = ?", (user_email,))
-        r = cur.fetchall()
-        rc = cur.rowcount
-        dbc.close()
-
-        # No such account with that e-mail address
-        if rc == 0:
-            return False
-
-        # Found an account...
-        elif rc == 1:
-
-            # Compare directly to database
-            if (user_password == r[0][2]):
-                return r[0][0]
-
-            # Hash and compare to database
-            elif hmac.compare_digest(crypt.crypt(user_password, r[0][2]), r[0][2]):
-                return r[0][0]
-
-            # Invalid password
-            else:
-                return False
-
-        # This should not really happen (unless an e-mail is in the database more than once?)
+        # Use existing database connection if we can
+        if not dbc:
+            dbc = _db_connect()
+            close_later = True
         else:
-            return error(title='Duplicate E-mail!', message="Sorry, but please <a href='" + url_for('login_form') + "'>go back</a> and try again.", code=500)
+            close_later = False
 
-    except Exception as e:
-        print(e)
-        return error(title='Unknown Error!', message="Sorry, but please <a href='" + url_for('login_form') + "'go back</a> and try again.", code=500)
-
-
-# /clients
-@app.route('/clients')
-def clients(mud_clients=config.mud_clients):
-    return render_template('clients.html.j2', mud_clients=mud_clients)
-
-# Redirect /connect to mudslinger.net
-@app.route('/connect')
-def connect():
-    return redirect('https://mudslinger.net/play/?host=isharmud.com&port=23', code=302)
-
-# Redirect /discord to the link listed in secrets.py
-@app.route('/discord')
-def discord():
-    return redirect(config.discord_invite_link, code=302)
-
-# /help in progress
-@app.route('/help')
-@app.route('/help/<string:page>')
-def help(page=None):
-    return render_template('help.html.j2', page=page)
-
-# GET /login (log in form, or handles cookie login)
-@app.route('/login', methods=['GET'])
-def login_form():
-
-    # Check for cookies
-    if request.cookies.get('email') and request.cookies.get('password') and request.cookies.get('email') != '' and request.cookies.get('password') != '':
-
-        # Check cookie credentials / get account details
-        check_account = _check_credentials(request.cookies.get('email'), request.cookies.get('password'))
-
-        # Return portal for valid cookie credentials
-        if isinstance(check_account, int):
-            return _portal(account_id=check_account)
-
-    # Otherwise, log in form
-    return render_template('login.html.j2')
-
-# Internal function that takes a user ID for an authenticated user (after /login)
-def _portal(account_id=None):
-
-    try:
-
-        if not account_id or not isinstance(account_id, int):
-            raise Exception
-
-        dbc = _db_connect()
+        # Get the account information based on the account ID
         cur = dbc.cursor()
-
-        # Get account information
-        cur.execute("SELECT * FROM `accounts` WHERE `account_id` = ?", (account_id,))
+        cur.execute("""SELECT \
+                    `account_id`, `email`, `created_at`, `password`, `account_name` \
+                    FROM `accounts` \
+                    WHERE `account_id` = ?""", (account_id,))
         account_fields = [field_md[0] for field_md in cur.description]
         account = [dict(zip(account_fields,row)) for row in cur.fetchall()]
+        print(f"account:\n{account[0]}\n")
 
-        # Get players information
+        # Close database connection if we made one
+        if close_later:
+            print(f"Closing database... {dbc}")
+            dbc.close()
+            print(f"Database closed. {dbc}")
+
+        return account
+
+    except Exception as e:
+        print(e)
+        return None
+
+
+# Internal function to return players details from the database via account ID
+def _get_players(account_id=None, dbc=None):
+
+    if not account_id or account_id == '' or not isinstance(account_id, int):
+        return None;
+
+    try:
+
+        print(f"_get_players() ...")
+        print(f"account_id: {account_id}")
+
+        # Use existing database connection if we can
+        if not dbc:
+            dbc = _db_connect()
+            close_later = True
+        else:
+            close_later = False
+
+        # Get the account information based on the account ID
+        cur = dbc.cursor()
         cur.execute("""SELECT \
                     `id`, `account_id`, `name`, `level`, \
                     `bankacc`, `renown`, `remorts`, FROM_UNIXTIME(`birth`) as `birth`, \
@@ -175,11 +112,263 @@ def _portal(account_id=None):
         players_fields = [field_md[0] for field_md in cur.description]
         players = [dict(zip(players_fields,row)) for row in cur.fetchall()]
         player_count = cur.rowcount
-        print(players)
+        print(f"player count: {player_count}")
+        print(f"players: \n{players}\n")
 
+        return players
+
+    except Exception as E:
+        print(e)
+        return None
+
+
+# Internal function to connect to the database
+def _db_connect(user=secrets.db_creds['user'], password=secrets.db_creds['password'], host=secrets.db_creds['host'], port=secrets.db_creds['port'], database=secrets.db_creds['database']):
+
+    try:
+        print(f"_db_connect() ...")
+
+        # Connect to the database
+        conn = mariadb.connect(
+            user=user,
+            password=password,
+            host=host,
+            port=port,
+            database=database
+        )
+
+        # Return the connection
+        print(f"Connected to database: {conn}")
+        return conn
+
+    except mariadb.Error as e:
+        print(e)
+        return False
+
+    except Exception as e:
+        print(e)
+        return False
+
+
+# Internal function to validate e-mail address and password
+# - either with the password hash from the cookies or from the log in form
+def _check_credentials(user_email=None, user_password=None, dbc=None):
+
+    if not user_email or user_email == '' or not user_password or user_password == '':
+        return None
+
+    try:
+
+        print(f"_check_credentials() ...")
+        print(f"user_email: {user_email}")
+
+        # Use existing database connection if we can
+        if not dbc:
+            dbc = _db_connect()
+            close_later = True
+        else:
+            close_later = False
+
+        # Get basic account information to compare e-mail address and password
+        cur = dbc.cursor()
+        cur.execute("SELECT `account_id`, `email`, `password` FROM `accounts` WHERE `email` = ?", (user_email,))
+        r = cur.fetchall()
+        rc = cur.rowcount
+
+        # Close database connection if we made one
+        if close_later:
+            print(f"Closing database... {dbc}")
+            dbc.close()
+            print(f"Database closed. {dbc}")
+
+        # No such account with that e-mail address
+        if rc == 0:
+            print(f"No account found for {user_email}")
+            return None
+
+        # Found an account...
+        elif rc == 1:
+
+            # Compare directly to database
+            # (for cookies, which contain the hashed password value)
+            if user_password == r[0][2]:
+                print(f"Hash match for {user_email}")
+                return r[0][0]
+
+            # Hash and compare to database
+            # (for POSTed form values)
+            elif hmac.compare_digest(crypt.crypt(user_password, r[0][2]), r[0][2]):
+                print(f"Password match for {user_email}")
+                return r[0][0]
+
+            # Invalid password
+            else:
+                print(f"Invalid password for {user_email}")
+                return False
+
+        # Duplicate e-mail address in the database should NOT happen
+        else:
+            print(f"Duplicate e-mail address in database? {user_email}")
+            return False
+
+    except Exception as e:
+        print(e)
+        return None
+
+
+# GET /password - form to allow a user to change their password
+@app.route('/password', methods=['GET'])
+def password():
+
+    try:
+
+        # Check authentication / get account ID
+        account_id = _check_auth()
+        print(f"account_id: {account_id}")
+        if not account_id or not isinstance(account_id, int):
+            print(f"Invalid account_id ({account_id})")
+            raise Exception
+
+        # Get account information from the database
+        account = _get_account(account_id=account_id)
+        print(f"account name: {account[0]['account_name']}")
+
+        return error(title='Under Construction', message='This page is a work in progress.')
+
+    except Exception as e:
+        print(e)
+        return error(title='Under Construction', message='This page is a work in progress.')
+
+#        return render_template('password.html.j2', account=account[0])
+
+
+# POST /password - process password change form
+@app.route('/password', methods=['POST'])
+def change_password():
+
+    try:
+
+        # Check authentication / get account ID
+        print("change_password() ...")
+        account_id = _check_auth()
+        print(f"account_id: {account_id}")
+        if not account_id or not isinstance(account_id, int):
+            print(f"Invalid account_id ({account_id})")
+            raise Exception
+
+        return error(title='Under Construction', message='This page is a work in progress.')
+
+    except Exception as e:
+        print(e)
+
+
+# /clients
+@app.route('/clients')
+def clients(mud_clients=config.mud_clients):
+    return render_template('clients.html.j2', mud_clients=mud_clients)
+
+
+# Redirect /connect to mudslinger.net
+@app.route('/connect')
+def connect():
+    return redirect('https://mudslinger.net/play/?host=isharmud.com&port=23', code=302)
+
+
+# Redirect /discord to the invite link (in config.py)
+@app.route('/discord')
+def discord():
+    return redirect(config.discord_invite_link, code=302)
+
+
+# /help
+#
+# TODO
+# Fix everything about this
+#
+@app.route('/help')
+@app.route('/help/<string:letter>')
+@app.route('/help/<string:letter>/')
+@app.route('/help/<string:letter>/<string:page>.html')
+def help(letter=None, page=None):
+    return render_template('help.html.j2', letter=letter, page=page)
+
+
+# Internal function to check for valid authentication
+# whether via hash from cookie or POSTed form value
+def _check_auth():
+
+    try:
+        print(f"_check_auth() ...")
+
+        # Check for cookies
+        if request.cookies.get('email') and request.cookies.get('password') and request.cookies.get('email') != '' and request.cookies.get('password') != '':
+            email = request.cookies.get('email')
+            password = request.cookies.get('password')
+            print("Using cookies...")
+
+        # Check for form values
+        elif request.form['email'] and request.form['password'] and request.form['email'] != '' and request.form['password'] != '':
+            email =  request.form['email']
+            password =  request.form['password']
+            print("Using form values...")
+
+        else:
+            print(f"Got nothing...")
+            return None
+
+        # Check credentials
+        print(f"Checking credentials... / {email}")
+        check_credentials = _check_credentials(email, password)
+        print(f"check_credentials: {check_credentials}")
+        return check_credentials
+
+    except Exception as e:
+        print(e)
+        return None
+
+
+# /login (log in form, or handles cookie login)
+@app.route('/login')
+def login():
+    print("login() ...")
+    account_id = _check_auth()
+    print(f"account_id: {account_id}")
+    if account_id and isinstance(account_id, int):
+        print(f"Successful log in for account_id {account_id}")
+        return redirect(url_for('portal'), code=302)
+
+    # Otherwise, return log in form
+    else:
+        print("No authentication, providing form...")
+        return render_template('login.html.j2')
+
+
+# /portal Portal - once logged in
+@app.route('/portal', methods=['GET', 'POST'])
+def portal():
+
+    try:
+
+        # Check authentication / get account ID
+        print(f"portal() ...")
+        account_id = _check_auth()
+        print(f"account_id: {account_id}")
+        if not account_id or not isinstance(account_id, int):
+            print(f"Invalid account_id ({account_id})")
+            raise Exception
+
+        # Get account and players information
+        dbc = _db_connect()
+        account = _get_account(account_id=account_id, dbc=dbc)
+        players = _get_players(account_id=account_id, dbc=dbc)
+
+        # Close database connection
+        print(f"Closing database... {dbc}")
         dbc.close()
+        print(f"Database closed. {dbc}")
 
-        if player_count == 0:
+        if len(players) == 0:
+            print(f"No players for account")
             players = None
 
         # Set cookies of the e-mail address and password hash
@@ -208,39 +397,9 @@ def _portal(account_id=None):
 
     except Exception as e:
         print(e)
-        return error(title='Unknown Error', message="Sorry, but please <a href='" + url_for('login_form') + "'>go back</a> and try again.", code=500)
-
-# POST /login, process Log In attempt and welcome user
-@app.route('/login', methods=['POST'])
-def process_login():
-
-    try:
-        email =  request.form['email']
-        password =  request.form['password']
-
-        # Empty credential fields
-        if not email or email == '' or not password or password == '':
-            raise Exception
-
-        # Check credentials / get account details
-        check_account = _check_credentials(email, password)
-
-        # Invalid credentials
-        if check_account == False or check_account == None:
-            raise Exception
-
-        # Valid credentials! send them to the portal
-        elif isinstance(check_account, int):
-            return _portal(account_id=check_account)
-
-        else:
-            raise Exception
-
-    except Exception as e:
-        print(e)
         return error(
                         title='Invalid Credentials',
-                        message="Sorry, but please <a href='" + url_for('login_form') + "'>go back</a> and try again.",
+                        message="Sorry, but please <a href='" + url_for('login') + "'>go back</a> and try again.",
                         code=401
                     )
 

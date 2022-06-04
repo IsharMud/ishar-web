@@ -3,7 +3,7 @@
 {% block content %}
 <h1>Enter the Realm</h1>
 <p class="shock">Please enter your e-mail address and password to visit our new online portal.</p><br>
-<form method="post" action="{{ url_for('process_login') }}">
+<form method="post" action="{{ url_for('portal') }}">
 <label for="email">E-mail Address:</label>
 <input type="email" id="email" name="email"><br>
 <label for="password">Password:</label>

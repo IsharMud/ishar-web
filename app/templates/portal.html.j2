@@ -6,14 +6,15 @@
 <dd><a href="{{ url_for('static', filename='Season_Proposal.pdf') }}" target="_blank">Seasons Proposal</a></dd>
 <dd><a href="{{ url_for('connect') }}" target="_blank">Connect to Ishar</a></dd>
 <dd><a href="{{ url_for('world') }}">The World of Ishar</a></dd>
-<dd><a href="{{ url_for('help', page='background') }}">Background</a></dd>
-<dd><a href="{{ url_for('help', page=None) }}">Search Help</a></dd>
+<dd><a href="{{ url_for('help', letter='b', page='background') }}">Background</a></dd>
+<dd><a href="{{ url_for('help', letter='s', page='search') }}">Search Help</a></dd>
+<dd><a href="{{ url_for('password') }}">Change Password</a></dd>
 <dd><a href="{{ url_for('logout') }}">Log Out</a></dd>
 <dd><a href="{{ url_for('discord') }}" target="_blank">Discord</a></dd>
 </dl>
 </div>
 <h1>Portal</h1>
-<h3>Welcome, {{ account['account_name'] | safe | title }}!</h3>
+<h3>Welcome{% if account is defined and account is iterable and account|length > 0 %}, {{ account['account_name'] | safe | title }}{% endif %}!</h3>
 <p>
 {% if players is defined and players is iterable and players|length > 0 %}
 You have <strong>{{ players|length }}</strong> players:
@@ -48,5 +49,5 @@ You have not created any players yet.
 </div>
 <p>
 <div class="under">
-<div class="lower">You created your account on {{ account['created_at'].strftime('%c') }}.</div>
+<div class="lower">You created your account on {{ account['created_at'] }}.</div>
 {% endblock %}

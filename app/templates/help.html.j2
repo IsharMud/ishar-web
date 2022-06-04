@@ -14,7 +14,7 @@
 <p>
 Browse all topics by the first letter in their name:
 <p>
-{% for letter in "abcdefghijklmnopqrstuvwxyz" | list %}
-<a href="{{ url_for('help', page=letter) }}">{{ letter }}</a>
+{% for choose_letter in "abcdefghijklmnopqrstuvwxyz" | list %}
+{% if choose_letter != letter %}<a href="{{ url_for('help', letter=letter, page=None) }}">{% endif %}{{ choose_letter }}{% if choose_letter != letter %}</a>{% endif %}
 {% endfor %}
 {% endblock %}
