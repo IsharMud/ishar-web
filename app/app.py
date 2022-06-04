@@ -113,6 +113,10 @@ def _get_players(account_id=None, dbc=None):
         players = [dict(zip(players_fields,row)) for row in cur.fetchall()]
         player_count = cur.rowcount
         print(f"player count: {player_count}")
+
+        if player_count == 0:
+            players = None
+
         print(f"players: \n{players}\n")
 
         return players
@@ -366,10 +370,6 @@ def portal():
         print(f"Closing database... {dbc}")
         dbc.close()
         print(f"Database closed. {dbc}")
-
-        if len(players) == 0:
-            print(f"No players for account")
-            players = None
 
         # Set cookies of the e-mail address and password hash
         resp = make_response(render_template('portal.html.j2', account=account[0], players=players))
