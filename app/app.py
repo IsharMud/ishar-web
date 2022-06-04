@@ -284,18 +284,23 @@ def discord():
     return redirect(config.discord_invite_link, code=302)
 
 
-# /help
-#
-# TODO
-# Fix everything about this
-#
-@app.route('/help')
+# /help - WIP!
+@app.route('/help', methods=['GET'])
 @app.route('/help/<string:letter>')
 @app.route('/help/<string:letter>/')
 @app.route('/help/<string:letter>/<string:page>.html')
 def help(letter=None, page=None):
     return render_template('help.html.j2', letter=letter, page=page)
 
+
+# POST /help - help search / WIP!!!
+@app.route('/help', methods=['POST'])
+def search_help(search_help=None):
+    if request.form['search_help'] and request.form['search_help'] != '':
+        search_help = request.form['search_help']
+        return help(letter=search_help[0], page=search_help)
+    else:
+        return help()
 
 # Internal function to check for valid authentication
 # whether via hash from cookie or POSTed form value
