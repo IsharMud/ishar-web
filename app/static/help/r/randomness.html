@@ -1,0 +1,68 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+<title>Help on: randomness - Ishar MUD</title>
+<link rel="stylesheet" type="text/css" href="/style/style.css">
+<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+<meta name="viewport" content="width=800,maximum-scale=1.0"> 
+
+</head>
+<body bgcolor="#000000" text="#ffffff">
+<div id=logo>
+
+<a href="/">
+<img src="/style/ishar-760x88.jpg" border=0 alt="Ishar MUD: a free online RPG" 
+width=760 height=88></a>
+
+</div>
+<div id=content>
+<div class=under>
+<h1>Help on: randomness</h1>
+
+<p>
+After some persistent complaints that Ishar's random number generator was
+"obviously biased", the gods went a little overboard on its replacement.
+
+<p>When the game boots, its random number generator is seeded with a large
+amount of cryptographically unguessable random data good for 10^6001 (a 1
+with 6001 zeros after it) rolls without repeating.  It also corrects for the
+slight amount of bias (1 in 10 million) present in the most commonly used
+random number generators as they convert from binary.  The result is that if
+the game asks for a 1d20 roll, the odds of producing each number are exactly
+1/20, with no correlation to past or future rolls.
+
+<p>The problem wasn't really that the old random number generator was broken,
+but that humans get confused when they see something resembling a pattern in
+randomness.  If you pull a coin out of your pocket and flip it enough times,
+you will eventually run into a streak of 8 heads in a row.  That doesn't make
+this unusual or change the odds of the 9th coming up heads, but people
+generally believe otherwise.
+
+<p>If you died because out of the blue you failed a bunch of rolls in a row in
+a way that you consider "impossible", be assured that this isn't a bug in
+anything but your expectations about how randomness should work.
+
+<p><a href="/help/"><img src="/style/back.gif" alt="[Back]"
+width=20 height=22 border=0></a>
+</div>
+<p id=copyright>
+
+<a href="/help/c/copyright.html">Copyright</a> &copy;1993-2012 Aaron
+Hopkins. All Rights Reserved.
+
+</p>
+</div>
+<script src="http://www.google-analytics.com/ga.js" type="text/javascript">
+</script>
+<script type="text/javascript">
+<!--
+try {
+var pageTracker = _gat._getTracker("UA-50820-1");
+pageTracker._trackPageview();
+} catch(err) {}
+if (top.location != self.location) top.location = self.location;
+// -->
+</script>
+</body>
+</html>
+

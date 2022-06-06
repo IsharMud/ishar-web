@@ -1,0 +1,76 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+<title>Help on: running - Ishar MUD</title>
+<link rel="stylesheet" type="text/css" href="/style/style.css">
+<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+<meta name="viewport" content="width=800,maximum-scale=1.0"> 
+
+</head>
+<body bgcolor="#000000" text="#ffffff">
+<div id=logo>
+
+<a href="/">
+<img src="/style/ishar-760x88.jpg" border=0 alt="Ishar MUD: a free online RPG" 
+width=760 height=88></a>
+
+</div>
+<div id=content>
+<div class=under>
+<h1>Help on: running</h1>
+<table>
+<tr><td align=right><strong>Syntax</strong>:</td><td>walking</td></tr>
+<tr><td align=right><strong>Level</strong>:</td><td>any</td></tr>
+<tr><td align=right><strong>Minimum</strong>:</td><td>wal</td></tr>
+</table>
+
+<p>Toggles a delay of your movement commands to conserve movement points.
+
+<p>How many movement points are used varies with the terrain of the room you
+are in, how much weight you are carrying, whether you are sneaking or
+detecting traps, and how much time as passed since your last move.
+
+<p>Every 1/5 of a second longer you wait, the less movement points are
+consumed, down to a minimum that varies with the terrain.  When you are
+consuming over twice the minimum points, the game warns you that you are
+"running", and over 3 times the minimum it mentions that you are "plowing"
+(which usually only can happen when you run with a very heavy load).
+
+<p>When you turn on `walking', the game delays your next movement command just
+long enough to consumes under twice the minimum movement points, avoiding
+the "running" warning.  You aren't lagged when you enter a room, and can
+immediately do other things, like attack.  But it kicks in if you try to
+leave that room quickly using one of the standard movement commands, such as
+`north', `south', `east', `west', `up', or `down'.  If you need to leave
+immediately and haven't used one of the standard movement commands yet, you
+can disable `walking', you can `flee', or you can use `go' instead (such as
+`go north'), which is never delayed.
+
+<p>You can conserve more movement if you go slower than `walking' makes you.
+
+<p>See Also: <a href="/help/m/movement.html">Movement</a>, <a href="/help/s/sneak.html">Sneak</a>, Find Traps, <a href="/help/f/flee.html">Flee</a>, Go
+
+<p><a href="/help/"><img src="/style/back.gif" alt="[Back]"
+width=20 height=22 border=0></a>
+</div>
+<p id=copyright>
+
+<a href="/help/c/copyright.html">Copyright</a> &copy;1993-2012 Aaron
+Hopkins. All Rights Reserved.
+
+</p>
+</div>
+<script src="http://www.google-analytics.com/ga.js" type="text/javascript">
+</script>
+<script type="text/javascript">
+<!--
+try {
+var pageTracker = _gat._getTracker("UA-50820-1");
+pageTracker._trackPageview();
+} catch(err) {}
+if (top.location != self.location) top.location = self.location;
+// -->
+</script>
+</body>
+</html>
+
