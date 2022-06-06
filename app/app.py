@@ -88,7 +88,6 @@ def _get_players(account_id=None, dbc=None):
         return None
 
     try:
-
         print(f"_get_players() ...")
         print(f"account_id: {account_id}")
 
@@ -118,6 +117,12 @@ def _get_players(account_id=None, dbc=None):
             players = None
 
         print(f"players: \n{players}\n")
+
+        # Close database connection if we made one
+        if close_later:
+            print(f"Closing database... {dbc}")
+            dbc.close()
+            print(f"Database closed. {dbc}")
 
         return players
 
