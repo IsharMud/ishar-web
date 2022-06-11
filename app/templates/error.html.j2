@@ -1,8 +1,8 @@
 {% extends "layout.html.j2" %}
-{% block title %}{{ title | default('Page Not Found') }} - {% endblock %}
+{% block title %}{{ title | default('Page Not Found') }}{% endblock %}
+{% block header %}{{ title | default('Page Not Found') }}{% endblock %}
 {% block content %}
-<h1>{{ title | default('Page Not Found') }}</h1>
 <p>{{ message | default("Hmmm... The page you are looking for can not be found.") }}</p>
 <p>You can try searching for something else on the <a href="{{ url_for('help') }}">help page</a>.
-Or you can return to the <a href="{{ url_for('index') }}">front page</a>.</p>
+Or you can return to the <a href="{{ url_for('welcome') }}">front page</a>.</p>
 {% endblock %}

@@ -1,7 +1,7 @@
 {% extends "layout.html.j2" %}
-{% block title %}Help - {% endblock %}
+{% block title %}Help{% endblock %}
+{% block header %}Help{% endblock %}
 {% block content %}
-<h1>Help</h1>
 <br>
 <form method="post" action="{{ url_for('help') }}">
 <input type="text" id="search_help" name="search_help">

@@ -1,9 +1,8 @@
 <nav id="navigation">
                     <ul>
-                        <li><a href="{{ url_for('help', page='mud_basics') }}">Getting Started</a></li>
+                        <li><a href="{{ url_for('getting_started') }}">Getting Started</a></li>
                         <li><a href="{{ url_for('areas') }}">The World of Ishar</a></li>
-                        <li><a href="{{ url_for('help', page='background') }}">Background</a></li>
-                        <li><a href="{{ url_for('help', page=None) }}">Search Help</a></li>
+                        <li><a href="{{ url_for('background') }}">Background</a></li>
                         <li><a href="{{ url_for('connect') }}" target="_blank">Connect to Ishar</a></li>
                         <li><a href="{{ url_for('discord') }}" target="_blank">Discord</a></li>
                         <li><a href="{{ url_for('login') }}">Player {% if current_user is defined and current_user.is_authenticated and current_user.account_name is defined -%}Portal ({{ current_user.account_name }}){%- else -%}Log In{%- endif -%}

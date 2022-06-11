@@ -1,19 +1,51 @@
 import secrets
 from flask import Flask, flash, make_response, redirect, render_template, request, url_for
+from flask_login import LoginManager, UserMixin
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import Column, String, TIMESTAMP, text
+from sqlalchemy.dialects.mysql import INTEGER, SMALLINT, TINYINT
 
 # Create/configure the app
 app = Flask('ishar')
+login_manager = LoginManager()
 app.config.from_pyfile('config.py')
+login_manager.init_app(app)
+db = SQLAlchemy(app)
+
+class account(db.Model, UserMixin):
+    __tablename__ = 'accounts'
+    account_id = Column(INTEGER(11), primary_key=True)
+    created_at = Column(TIMESTAMP, nullable=False, server_default=text("current_timestamp()"))
+    seasonal_points = Column(TINYINT(4), nullable=False, server_default=text("0"))
+    email = Column(String(30), nullable=False, unique=True)
+    password = Column(String(36), nullable=False)
+    create_isp = Column(String(25), nullable=False)
+    last_isp = Column(String(25), nullable=False)
+    create_ident = Column(String(25), nullable=False)
+    last_ident = Column(String(25), nullable=False)
+    create_haddr = Column(INTEGER(11), nullable=False)
+    last_haddr = Column(INTEGER(11), nullable=False)
+    account_name = Column(String(25), nullable=False, unique=True)
+
+@login_manager.user_loader
+def load_user(account_id):
+    return account.get(account_id)
 
 # Errors (404)
 @app.errorhandler(404)
 def page_not_found(message):
     return render_template('error.html.j2', title='Page Not Found', message=message), 404
 
-# Main index page (/)
+# Main welcome page/index (/)
+@app.route('/welcome')
 @app.route('/')
-def index():
-    return render_template('index.html.j2')
+def welcome():
+    return render_template('welcome.html.j2')
+
+# /background
+@app.route('/background')
+def background():
+    return render_template('background.html.j2')
 
 # Log-in form or processing (/login)
 @app.route('/login', methods=['GET', 'POST'])
@@ -75,15 +107,25 @@ def discord():
     discord_invite_link = 'https://discord.gg/VBmMXUpeve'
     return redirect(discord_invite_link, code=302)
 
-# /areas
+# /getstarted
+@app.route('/gettingstarted')
+@app.route('/getting_started')
+@app.route('/get_started')
+@app.route('/getstarted')
+def getting_started():
+    return render_template('getting_started.html.j2')
+
+# /areas (formerly "world" page)
 @app.route('/areas', methods=['GET'])
 @app.route('/areas/<string:area>', methods=['GET'])
 def areas(area=None):
 
-    # Try to find a user-specific area, otherwise, list them all
+    # Try to find an area based on user input
     try:
         areas = _get_help_area(area)
         code = 200
+
+    # Otherwise, list all areas found in the game "helptab" file
     except Exception as e:
         areas = _get_help_area(None)
         area = None
@@ -93,10 +135,13 @@ def areas(area=None):
     return render_template('areas.html.j2', areas=areas, area=area), code
 
 
-# Internal function to scrape areas from game helptab file
+# Internal function to scrape "areas" from game helptab file
+#
+# The "areas" are each listed in the "helptab" file on lines starting with "32 Area " ...
+# ...followed by descriptions until the character "#" on a single line itself
 def _get_help_area(area=None):
 
-    # Set "helptab" file name and open it
+    # Get game "helptab" file path/name, and open it
     helptab_file = secrets.helptab_file
     helptab_fh = open(helptab_file, 'r')
 
@@ -108,7 +153,6 @@ def _get_help_area(area=None):
 
     # Loop through each line, finding and keeping chunks staring with "32 Area "
     for line in helptab_fh:
-
         stripped = line.strip()
 
         # Stop line (#)
