@@ -34,8 +34,6 @@ class Account(Base):
     last_haddr = Column(INTEGER(11), nullable=False)
     account_name = Column(String(25), nullable=False, unique=True)
 
-    players = relationship('Player', secondary='player_accounts')
-
 
 class AffectFlag(Base):
     __tablename__ = 'affect_flags'
@@ -210,13 +208,6 @@ class Player(Base):
     account = relationship('Account')
     _class = relationship('Class')
     race = relationship('Race')
-
-
-t_player_accounts = Table(
-    'player_accounts', metadata,
-    Column('account_id', ForeignKey('accounts.account_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True),
-    Column('player_id', ForeignKey('players.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
-)
 
 
 t_player_affect_flags = Table(

@@ -10,17 +10,6 @@
     <body>
         <div id="logo"><a href="{{ url_for('index') }}"><img src="{{ url_for('static', filename='logo.jpg') }}" alt="Ishar MUD"></a></div>
         <div id="content">
-            {%- with messages = get_flashed_messages() -%}
-            {%- if messages -%}
-            <div id="flash">
-                <ul id="flashes">
-                {%- for message in messages -%}
-                    <li>{{ message }}</li>
-                {%- endfor -%}
-                </ul>
-            </div>
-            {%- endif -%}
-            {%- endwith -%}
             <div class="under">
             {%- block navigation %}{%- include('navigation.html.j2') -%}{% endblock -%}
             {%- block content %}{% endblock -%}
