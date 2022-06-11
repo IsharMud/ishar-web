@@ -44,14 +44,13 @@ img {
 #logo {
     margin: auto;
     text-align: center;
-    width: 75%;
 }
 
 #content {
     margin: auto;
     overflow: auto;
     padding: 1em;
-    width: 75%;
+    width: 70%;
 }
 
 #footer {
@@ -86,14 +85,12 @@ img {
 	float: right;
 	margin: 0px 0px 1em 1em;
     padding: 0px;
-	width: auto;
 }
 
 #navigation ol, #navigation li { 
     list-style: none;
 	margin: 0px;
 	padding: 0px;
-	width: auto;
 }
 
 #navigation a { 
@@ -102,7 +99,6 @@ img {
 	margin: 2px 0px 0px 0px;
 	padding: .25em .5em;
 	border: #686a65 1px solid;
-	width: auto;
 	text-decoration: none;
 }
 

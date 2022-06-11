@@ -1,5 +1,5 @@
 {% extends "layout.html.j2" %}
-{% block title %}{{ title | default('Not Found') }} - {% endblock %}
+{% block title %}{{ title | default('Page Not Found') }} - {% endblock %}
 {% block content %}
 <h1>{{ title | default('Page Not Found') }}</h1>
 <p>{{ message | default("Hmmm... The page you are looking for can not be found.") }}</p>

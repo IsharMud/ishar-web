@@ -1,6 +1,6 @@
 {% extends "layout.html.j2" %}
 {% block title %}Log In - {% endblock %}
-{% block content %}
+{%- block content %}
 <h1>Player Log In</h1>
 {% with messages = get_flashed_messages() %}
 {% if messages %}
@@ -18,4 +18,4 @@
 <input type="password" id="password" name="password"><br>
 <input type="submit" value="Log In">
 </form>
-{% endblock %}
+{%- endblock %}

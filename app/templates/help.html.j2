@@ -2,16 +2,15 @@
 {% block title %}Help - {% endblock %}
 {% block content %}
 <h1>Help</h1>
-<p>
+<br>
 <form method="post" action="{{ url_for('help') }}">
-<label for="search_help">Search Help:</label>
-<input type="text" id="search_help" name="search_help"><br>
+<input type="text" id="search_help" name="search_help">
 <input type="submit" value="Search!">
 </form>
-<p>
-Browse all topics by the first letter in their name:
-<p>
+{% if page is not defined or page == None %}
+<p>Browse all topics by the first letter in their name:</p>
 {% for choose_letter in "abcdefghijklmnopqrstuvwxyz" | list %}
 {% if choose_letter != letter %}<a href="{{ url_for('help', letter=choose_letter, page=None) }}">{% endif %}{{ choose_letter }}{% if choose_letter != letter %}</a>{% endif %}
 {% endfor %}
+{% endif %}
 {% endblock %}
