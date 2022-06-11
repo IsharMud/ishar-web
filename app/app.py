@@ -1,8 +1,8 @@
 import secrets
 from flask import Flask, flash, make_response, redirect, render_template, request, url_for
 
-# Create the "app" (as uwsgi expects)
-app = Flask(__name__)
+# Create/configure the app
+app = Flask('ishar')
 app.config.from_pyfile('config.py')
 
 # Errors (404)
@@ -66,19 +66,21 @@ def clients():
 # Redirect /connect to mudslinger.net
 @app.route('/connect')
 def connect():
-    return redirect('https://mudslinger.net/play/?host=isharmud.com&port=23', code=302)
+    mudslinger_app_link = 'https://mudslinger.net/play/?host=isharmud.com&port=23'
+    return redirect(mudslinger_app_link, code=302)
 
-# Redirect /discord to the invite link (in config.py)
+# Redirect /discord to the invite link
 @app.route('/discord')
 def discord():
     discord_invite_link = 'https://discord.gg/VBmMXUpeve'
-    return redirect(config.discord_invite_link, code=302)
+    return redirect(discord_invite_link, code=302)
 
 # /areas
 @app.route('/areas', methods=['GET'])
 @app.route('/areas/<string:area>', methods=['GET'])
 def areas(area=None):
 
+    # Try to find a user-specific area, otherwise, list them all
     try:
         areas = _get_help_area(area)
         code = 200
@@ -91,10 +93,11 @@ def areas(area=None):
     return render_template('areas.html.j2', areas=areas, area=area), code
 
 
+# Internal function to scrape areas from game helptab file
 def _get_help_area(area=None):
 
     # Set "helptab" file name and open it
-    helptab_file = '/home/ishartest/ishar-mud/lib/Misc/helptab'
+    helptab_file = secrets.helptab_file
     helptab_fh = open(helptab_file, 'r')
 
     # Prepare an empty "areas" dictionary
