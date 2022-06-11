@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+    {% block head %}
+        <title>{% block title %}{% endblock %}Ishar MUD: a free online text-adventure RPG</title>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+        <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    {% endblock %}
+    </head>
+    <body>
+        <div id="logo"><a href="{{ url_for('index') }}"><img src="{{ url_for('static', filename='logo.jpg') }}" alt="Ishar MUD"></a></div>
+        <div id="content">
+            {%- with messages = get_flashed_messages() -%}
+            {%- if messages -%}
+            <div id="flash">
+                <ul id="flashes">
+                {%- for message in messages -%}
+                    <li>{{ message }}</li>
+                {%- endfor -%}
+                </ul>
+            </div>
+            {%- endif -%}
+            {%- endwith -%}
+            <div class="under">
+            {%- block navigation %}{%- include('navigation.html.j2') -%}{% endblock -%}
+            {%- block content %}{% endblock -%}
+            </div>
+        </div>
+        <div id="footer">
+            {%- block footer %}
+                <div id="quote">
+                    Some say that the world was formed from the body of the dying Ishar,
+                    and that his bones became the mountains and his blood ran from his
+                    chest til it collected as the sea.  His flowing hair matted into the
+                    fields we till and his skin mouldered and fell away as soil.
+                    From his sinews and organs sprang the races of dwarves, elves, men, gnomes
+                    and all manner of creatures and plants.  And from his heart sprang the very
+                    gods themselves.
+                    <p id="attribution">-- Book of Thurvun, 1730</p>
+                </div>
+            {% endblock -%}
+        </div>
+    </body>
+</html>

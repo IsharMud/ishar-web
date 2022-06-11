@@ -12,4 +12,5 @@
 .reload
 __pycache
 venv/
+config.py
 secrets.py

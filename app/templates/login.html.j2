@@ -1,13 +1,21 @@
-{% extends "index.html.j2" %}
-{% block title %}Enter the Realm - {% endblock %}
+{% extends "layout.html.j2" %}
+{% block title %}Log In - {% endblock %}
 {% block content %}
-<h1>Enter the Realm</h1>
-<p class="shock">Please enter your e-mail address and password to visit our new online portal.</p><br>
-<form method="post" action="{{ url_for('portal') }}">
+<h1>Player Log In</h1>
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<ul class="flashes">
+{% for message in messages %}
+<li class="bright">{{ message }}</li>
+{% endfor %}
+</ul>
+{% endif %}
+{% endwith %}
+<form method="post" action="{{ url_for('login') }}">
 <label for="email">E-mail Address:</label>
 <input type="email" id="email" name="email"><br>
 <label for="password">Password:</label>
 <input type="password" id="password" name="password"><br>
-<input type="submit" value="Enter!">
+<input type="submit" value="Log In">
 </form>
 {% endblock %}
