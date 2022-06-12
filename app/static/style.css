@@ -22,14 +22,8 @@ h1, h2, h3, .bright {
     color: #fa7;
 }
 
-table {
-    border-width: 1px;
-    border-style: solid;
+hr {
     border-color: #fa7;
-}
-
-th {
-    color: #fa7;
 }
 
 tr:nth-child(2n) {
@@ -46,11 +40,21 @@ img {
     text-align: center;
 }
 
+#logo img {
+    width: 90%;
+}
+
 #content {
     margin: auto;
     overflow: auto;
     padding: 1em;
-    width: 70%;
+    width: 90%;
+}
+
+input {
+    background-color:   #313632;
+    border-color:       #fa7;
+    color:              #fa7;
 }
 
 #footer {
@@ -58,7 +62,7 @@ img {
     margin: auto;
     padding: 0.5em;
     text-align: center;
-    width: 70%;
+    width: 90%;
 }
 
 #quote {

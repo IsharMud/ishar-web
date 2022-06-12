@@ -1,17 +1,21 @@
 import secrets
-from flask import Flask, flash, make_response, redirect, render_template, request, url_for
-from flask_login import LoginManager, UserMixin
+import crypt
+from flask import abort, Flask, flash, make_response, redirect, render_template, request, url_for
+from flask_login import current_user, LoginManager, login_required, login_user, logout_user, UserMixin
 from flask_sqlalchemy import SQLAlchemy
+import hmac
 from sqlalchemy import Column, String, TIMESTAMP, text
-from sqlalchemy.dialects.mysql import INTEGER, SMALLINT, TINYINT
+from sqlalchemy.dialects.mysql import INTEGER, TINYINT
 
 # Create/configure the app
 app = Flask('ishar')
-login_manager = LoginManager()
 app.config.from_pyfile('config.py')
+login_manager = LoginManager()
 login_manager.init_app(app)
+login_manager.login_view = 'login'
 db = SQLAlchemy(app)
 
+# Account database class
 class account(db.Model, UserMixin):
     __tablename__ = 'accounts'
     account_id = Column(INTEGER(11), primary_key=True)
@@ -27,14 +31,41 @@ class account(db.Model, UserMixin):
     last_haddr = Column(INTEGER(11), nullable=False)
     account_name = Column(String(25), nullable=False, unique=True)
 
+    def get_id(self):
+        return str(self.account_id)
+
+    def check_password(self, password):
+        return hmac.compare_digest(crypt.crypt(password, self.password), self.password)
+
+
+# Login Manager user loader from database
 @login_manager.user_loader
 def load_user(account_id):
-    return account.get(account_id)
+    return account.query.get(int(account_id))
 
-# Errors (404)
+# Errors
+def error(title='Unknown Error', message='Sorry, but we experienced an unknown error', code=500):
+    return render_template('error.html.j2', title=title, message=message), code
+
+@app.errorhandler(400)
+def bad_request(message):
+    return error(title='Bad Request', message=message, code=400)
+
+@app.errorhandler(401)
+def not_authorized(message):
+    return error(title='Not Authorized', message=message, code=401)
+
+@app.errorhandler(403)
+def forbidden(message):
+    return error(title='Forbidden', message=message, code=403)
+
 @app.errorhandler(404)
 def page_not_found(message):
-    return render_template('error.html.j2', title='Page Not Found', message=message), 404
+    return error(title='Page Not Found', message=message, code=404)
+
+@app.errorhandler(500)
+def internal_server_error(message):
+    return error(title='Internal Server Error', message=message, code=500)
 
 # Main welcome page/index (/)
 @app.route('/welcome')
@@ -50,13 +81,39 @@ def background():
 # Log-in form or processing (/login)
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+
+    if current_user.is_authenticated:
+        return redirect('/portal')
+
     if request.method == 'POST':
-        if request.form['email'] != 'admin@isharmud.com' or request.form['password'] != 'secret':
-            flash('Please enter your e-mail address and password to log in.')
+        email = request.form['email']
+        user = account.query.filter_by(email = email).first()
+        print(user)
+
+        if user != None and user.check_password(request.form['password']):
+            flash('You successfully logged in!')
+            login_user(user)
         else:
-            flash('You were successfully logged in!')
+            flash('Sorry, but please enter a valid e-mail address and password.')
 
     return render_template('login.html.j2')
+
+# /logout (log out)
+@app.route('/logout', methods=['GET'])
+@login_required
+def logout():
+    try:
+        logout_user()
+        flash('You have been logged out!')
+        return login()
+    except:
+        return error()
+
+# /portal (log in required)
+@app.route('/portal', methods=['GET'])
+@login_required
+def portal(user=current_user):
+    return render_template('portal.html.j2', user=user)
 
 # /help
 @app.route('/help', methods=['GET'])
@@ -160,7 +217,7 @@ def _get_help_area(area=None):
             keep = False
 
         # Do not include "other levels" info (%%)
-        if keep and stripped.startswith('%% '):
+        if keep == True and stripped.startswith('%% '):
             keep = False
 
         # Append the current chunk to our areas dictionary, under the key of whatever started with "32 Area " last

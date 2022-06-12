@@ -1,0 +1,6 @@
+{% extends "layout.html.j2" %}
+{% block title %}Portal{% endblock %}
+{% block header %}Welcome{% if current_user.account_name is defined %}, {{ current_user.account_name }}{% endif %}!{% endblock %}
+{%- block content %}
+                <p>You logged in!!!</p>
+{%- endblock %}
