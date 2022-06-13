@@ -1,5 +1,4 @@
 import secrets
-import crypt
 import datetime
 from flask import abort, Flask, flash, make_response, redirect, render_template, request, url_for
 from flask_login import current_user, LoginManager, login_required, login_user, logout_user
