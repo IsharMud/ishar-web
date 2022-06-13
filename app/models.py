@@ -41,6 +41,12 @@ class Account(db.Model, UserMixin):
         return hmac.compare_digest(crypt.crypt(password, self.password), self.password)
 
 
+# Player Class database class
+class PlayerClass(db.Model):
+    __tablename__ = 'classes'
+    class_id = Column(Integer, primary_key=True)
+    class_name = Column(String(15), nullable=False, unique=True, server_default=FetchedValue())
+
 # Player database class
 class Player(db.Model):
     __tablename__ = 'players'
@@ -119,6 +125,8 @@ class Player(db.Model):
     total_renown = Column(Integer, nullable=False, server_default=FetchedValue())
     quests_completed = Column(Integer, nullable=False, server_default=FetchedValue())
     challenges_completed = Column(Integer, nullable=False, server_default=FetchedValue())
+    player_class = relationship('PlayerClass', primaryjoin='Player.class_id == PlayerClass.class_id', backref='players')
+
 
 
 class Season(db.Model):
