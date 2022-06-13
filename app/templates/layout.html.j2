@@ -16,11 +16,11 @@
                 {%- endblock %}
                 <h1>{% block header %}{% endblock %}</h1>
                 <hr>
-                {% with messages = get_flashed_messages() %}
+                {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
-                <ul class="flashes">
-                {% for message in messages %}
-                    <li class="bright">{{ message }}</li>
+                <ul id="flashes">
+                {% for category, message in messages %}
+                    <li class="flash-{{ category }}">{{ message }}</li>
                 {% endfor %}
                 </ul>
                 <hr>

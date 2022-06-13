@@ -4,8 +4,10 @@ from flask import abort, Flask, flash, make_response, redirect, render_template,
 from flask_login import current_user, LoginManager, login_required, login_user, logout_user, UserMixin
 from flask_sqlalchemy import SQLAlchemy
 import hmac
-from sqlalchemy import Column, String, TIMESTAMP, text
-from sqlalchemy.dialects.mysql import INTEGER, TINYINT
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, MetaData, SmallInteger, String, Table
+from sqlalchemy.schema import FetchedValue
+from sqlalchemy.orm import relationship
+
 
 # Create/configure the app
 app = Flask('ishar')
@@ -18,24 +20,117 @@ db = SQLAlchemy(app)
 # Account database class
 class account(db.Model, UserMixin):
     __tablename__ = 'accounts'
-    account_id = Column(INTEGER(11), primary_key=True)
-    created_at = Column(TIMESTAMP, nullable=False, server_default=text("current_timestamp()"))
-    seasonal_points = Column(TINYINT(4), nullable=False, server_default=text("0"))
+
+    account_id = Column(Integer, primary_key=True)
+    created_at = Column(DateTime, nullable=False, server_default=FetchedValue())
+    seasonal_points = Column(Integer, nullable=False, server_default=FetchedValue())
     email = Column(String(30), nullable=False, unique=True)
     password = Column(String(36), nullable=False)
     create_isp = Column(String(25), nullable=False)
     last_isp = Column(String(25), nullable=False)
     create_ident = Column(String(25), nullable=False)
     last_ident = Column(String(25), nullable=False)
-    create_haddr = Column(INTEGER(11), nullable=False)
-    last_haddr = Column(INTEGER(11), nullable=False)
+    create_haddr = Column(Integer, nullable=False)
+    last_haddr = Column(Integer, nullable=False)
     account_name = Column(String(25), nullable=False, unique=True)
+
+    def check_password(self, password):
+        return hmac.compare_digest(crypt.crypt(password, self.password), self.password)
 
     def get_id(self):
         return str(self.account_id)
 
+    def is_authenticated(self):
+        return isinstance(account_id, int)
+
+    def is_active(self):
+        return isinstance(account_id, int)
+
     def check_password(self, password):
         return hmac.compare_digest(crypt.crypt(password, self.password), self.password)
+
+
+# Player database class
+class player(db.Model):
+    __tablename__ = 'players'
+
+    id = Column(Integer, primary_key=True)
+    account_id = Column(ForeignKey('accounts.account_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
+    name = Column(String(15), nullable=False, unique=True, server_default=FetchedValue())
+    create_ident = Column(String(10), nullable=False, server_default=FetchedValue())
+    last_isp = Column(String(30), nullable=False, server_default=FetchedValue())
+    description = Column(String(240))
+    title = Column(String(45), nullable=False, server_default=FetchedValue())
+    poofin = Column(String(80), nullable=False, server_default=FetchedValue())
+    poofout = Column(String(80), nullable=False, server_default=FetchedValue())
+    bankacc = Column(Integer, nullable=False)
+    logon_delay = Column(SmallInteger, nullable=False)
+    true_level = Column(Integer, nullable=False)
+    renown = Column(Integer, nullable=False)
+    prompt = Column(String(42), nullable=False, server_default=FetchedValue())
+    remorts = Column(Integer, nullable=False)
+    favors = Column(Integer, nullable=False)
+    birth = Column(Integer, nullable=False)
+    logon = Column(Integer, nullable=False)
+    online = Column(Integer)
+    logout = Column(Integer, nullable=False)
+    bound_room = Column(Integer, nullable=False)
+    load_room = Column(Integer, nullable=False)
+    wimpy = Column(SmallInteger)
+    invstart_level = Column(Integer)
+    color_scheme = Column(SmallInteger)
+    sex = Column(Integer, nullable=False)
+    race_id = Column(ForeignKey('races.race_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
+    class_id = Column(ForeignKey('classes.class_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
+    level = Column(Integer, nullable=False)
+    weight = Column(SmallInteger, nullable=False)
+    height = Column(SmallInteger, nullable=False)
+    align = Column(SmallInteger, nullable=False)
+    comm = Column(SmallInteger, nullable=False)
+    karma = Column(SmallInteger, nullable=False)
+    experience_points = Column(Integer, nullable=False)
+    money = Column(Integer, nullable=False)
+    fg_color = Column(SmallInteger, nullable=False)
+    bg_color = Column(SmallInteger, nullable=False)
+    login_failures = Column(SmallInteger, nullable=False)
+    create_haddr = Column(Integer, nullable=False)
+    auto_level = Column(Integer, nullable=False)
+    login_fail_haddr = Column(Integer)
+    last_haddr = Column(Integer)
+    last_ident = Column(String(10), server_default=FetchedValue())
+    load_room_next = Column(Integer)
+    load_room_next_expires = Column(Integer)
+    aggro_until = Column(Integer)
+    inn_limit = Column(SmallInteger, nullable=False)
+    held_xp = Column(Integer)
+    last_isp_change = Column(Integer)
+    perm_hit_pts = Column(Integer, nullable=False)
+    perm_move_pts = Column(Integer, nullable=False)
+    perm_spell_pts = Column(Integer, nullable=False)
+    perm_favor_pts = Column(Integer, nullable=False)
+    curr_hit_pts = Column(Integer, nullable=False)
+    curr_move_pts = Column(Integer, nullable=False)
+    curr_spell_pts = Column(Integer, nullable=False)
+    curr_favor_pts = Column(Integer, nullable=False)
+    init_strength = Column(Integer, nullable=False)
+    init_agility = Column(Integer, nullable=False)
+    init_endurance = Column(Integer, nullable=False)
+    init_perception = Column(Integer, nullable=False)
+    init_focus = Column(Integer, nullable=False)
+    init_willpower = Column(Integer, nullable=False)
+    curr_strength = Column(Integer, nullable=False)
+    curr_agility = Column(Integer, nullable=False)
+    curr_endurance = Column(Integer, nullable=False)
+    curr_perception = Column(Integer, nullable=False)
+    curr_focus = Column(Integer, nullable=False)
+    curr_willpower = Column(Integer, nullable=False)
+    is_deleted = Column(Integer, nullable=False, server_default=FetchedValue())
+    deaths = Column(Integer, nullable=False, server_default=FetchedValue())
+    total_renown = Column(Integer, nullable=False, server_default=FetchedValue())
+    quests_completed = Column(Integer, nullable=False, server_default=FetchedValue())
+    challenges_completed = Column(Integer, nullable=False, server_default=FetchedValue())
+
+    account = relationship('account', primaryjoin='player.account_id == account.account_id', backref='players')
 
 
 # Login Manager user loader from database
@@ -82,21 +177,21 @@ def background():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
 
-    if current_user.is_authenticated:
-        return redirect('/portal')
+    players = None
 
     if request.method == 'POST':
-        email = request.form['email']
-        user = account.query.filter_by(email = email).first()
-        print(user)
-
+        user = account.query.filter_by(email = request.form['email']).first()
         if user != None and user.check_password(request.form['password']):
-            flash('You successfully logged in!')
+            flash('You successfully logged in!', 'success')
             login_user(user)
         else:
-            flash('Sorry, but please enter a valid e-mail address and password.')
+            flash('Sorry, but please enter a valid e-mail address and password.', 'error')
 
-    return render_template('login.html.j2')
+    print(current_user)
+    if current_user.is_authenticated:
+        return render_template('portal.html.j2', players=None)
+    else:
+        return render_template('login.html.j2')
 
 # /logout (log out)
 @app.route('/logout', methods=['GET'])
@@ -104,16 +199,10 @@ def login():
 def logout():
     try:
         logout_user()
-        flash('You have been logged out!')
+        flash('You have been logged out!', 'success')
         return login()
     except:
         return error()
-
-# /portal (log in required)
-@app.route('/portal', methods=['GET'])
-@login_required
-def portal(user=current_user):
-    return render_template('portal.html.j2', user=user)
 
 # /help
 @app.route('/help', methods=['GET'])

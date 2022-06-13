@@ -2,5 +2,25 @@
 {% block title %}Portal{% endblock %}
 {% block header %}Welcome{% if current_user.account_name is defined %}, {{ current_user.account_name }}{% endif %}!{% endblock %}
 {%- block content %}
-                <p>You logged in!!!</p>
+                {%- if players is defined and players != None and players != '' and players is iterable %}
+                <!-- {{ players }} -->
+                <!-- {{ current_user.players }} -->
+                <table>
+                    <tr>
+                        <th>Player</th>
+                    </tr>
+                    {%- for player in players %}
+                    <tr>
+                        <td>{{ player }}</td>
+                    </tr>
+                    {%- endfor %}
+                </table>
+                {%- else %}
+                <p><strong>You have not created any players yet.</strong></p>
+                {%- endif %}
 {%- endblock %}
+{%- if current_user.created_at is defined and current_user.created_at != '' %}
+{% block footer %}
+            <div id="created">You created your account on {{ current_user.created_at.strftime('%c') }}.</div>
+{%- endblock %}
+{%- endif %}

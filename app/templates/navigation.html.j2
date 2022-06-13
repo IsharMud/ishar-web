@@ -5,11 +5,11 @@
                         <li><a href="{{ url_for('background') }}">Background</a></li>
                         <li><a href="{{ url_for('connect') }}" target="_blank">Connect to Ishar</a></li>
                         <li><a href="{{ url_for('discord') }}" target="_blank">Discord</a></li>
-                        {%- if current_user is defined and current_user.is_authenticated and current_user.account_name is defined -%}
-                        <li><a href ="{{ url_for('portal') }}">Player Portal</a></li>
+                        {%- if current_user is defined and current_user.is_authenticated and current_user.account_name is defined %}
+                        <li><a href ="{{ url_for('login') }}">Player Portal</a></li>
                         <li><a href ="{{ url_for('logout') }}">Log Out ({{ current_user.account_name }})</a></li>
-                        {%- else -%}
-                        <li><a href="{{ url_for('login') }}">Player Log In</a></li>
-                        {%- endif -%}
+                        {%- else %}
+                        <li><a href ="{{ url_for('login') }}">Player Log In</a></li>
+                        {%- endif %}
                     </ul>
                 </nav>
