@@ -2,8 +2,14 @@
 {% block title %}Portal{% endblock %}
 {% block header %}Welcome{% if current_user.account_name is defined %}, {{ current_user.account_name }}{% endif %}!{% endblock %}
 {%- block content %}
+                {%- if season.season_id is defined and season.expiration_date is defined %}
+                <p id="season">It is <strong>season {{ season.season_id }}</strong> until <strong>{{ season.expiration_date | unix2human_time }}</strong>.</p>
+                {%- endif %}
+                {%- if current_user.seasonal_points is defined and current_user.seasonal_points > 0 %}
+                <p id="season-points">You have <strong>{{ current_user.seasonal_points }} season point{% if current_user.seasonal_points != 1 %}s{% endif %}</strong>!</p>
+                {%- endif %}
                 {%- if current_user.players is defined and current_user.players is iterable and current_user.players|length > 0 %}
-                <p>You have <strong>{{ current_user.players | length }}</strong> player{% if current_user.players|length != 1 %}s{% endif %}:</p>
+                <h3>You have {{ current_user.players | length }} player{% if current_user.players|length != 1 %}s{% endif %}:</h3>
                 <table>
                     <tr>
                         <th>Name</th>
