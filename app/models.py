@@ -1,7 +1,8 @@
 from app import app
+import crypt
 from flask_login import UserMixin
-
 from flask_sqlalchemy import SQLAlchemy
+import hmac
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, MetaData, SmallInteger, String, Table
 from sqlalchemy.schema import FetchedValue
 from sqlalchemy.orm import relationship
