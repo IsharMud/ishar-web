@@ -119,3 +119,11 @@ class Player(db.Model):
     total_renown = Column(Integer, nullable=False, server_default=FetchedValue())
     quests_completed = Column(Integer, nullable=False, server_default=FetchedValue())
     challenges_completed = Column(Integer, nullable=False, server_default=FetchedValue())
+
+
+class Season():
+    __tablename__ = 'seasons'
+    season_id = Column(Integer, primary_key=True)
+    is_active = Column(Integer, nullable=False)
+    effective_date = Column(Integer, nullable=False)
+    expiration_date = Column(Integer, nullable=False)
