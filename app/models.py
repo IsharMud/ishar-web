@@ -121,7 +121,7 @@ class Player(db.Model):
     challenges_completed = Column(Integer, nullable=False, server_default=FetchedValue())
 
 
-class Season():
+class Season(db.Model):
     __tablename__ = 'seasons'
     season_id = Column(Integer, primary_key=True)
     is_active = Column(Integer, nullable=False)

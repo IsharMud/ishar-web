@@ -86,8 +86,10 @@ def login():
 def portal():
     try:
         print(f"Portal visit: {current_user}")
-        return render_template('portal.html.j2')
+        season = models.Season.query.filter_by(is_active = 1).first()
+        return render_template('portal.html.j2', season=season)
     except Exception as e:
+        logout_user()
         print(f"Portal exception: {e}")
         flash('Sorry, but there was an error visiting the portal!', 'error')
         return login()
@@ -105,11 +107,6 @@ def logout():
         flash('Sorry, but there was an error logging you out!', 'error')
         return login()
 
-# /help
-@app.route('/help', methods=['GET'])
-@app.route('/help/<string:page>', methods=['GET'])
-def help(page=None):
-    return render_template('help.html.j2', page=page)
 
 # /clients
 @app.route('/clients')
