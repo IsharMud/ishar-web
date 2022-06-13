@@ -3,20 +3,19 @@
 {% block header %}Welcome{% if current_user.account_name is defined %}, {{ current_user.account_name }}{% endif %}!{% endblock %}
 {%- block content %}
                 {%- if current_user.players is defined and current_user.players is iterable and current_user.players|length > 0 %}
-                <p>You have <strong>{{ current_user.players | length }}</strong> player{% if current_user.players|length != 1 %}s{% endif %}.</p>
+                <p>You have <strong>{{ current_user.players | length }}</strong> player{% if current_user.players|length != 1 %}s{% endif %}:</p>
                 <table>
                     <tr>
                         <th>Name</th>
                         <th>Level</th>
                         <th>Remort(s)</th>
-                        <th>Birth</th>
                     </tr>
                     {%- for player in current_user.players %}
                     <tr>
-                        <td>{{ player.name }}</td>
-                        <td>{{ player.level }}</td>
-                        <td>{{ player.remorts }}</td>
-                        <td>{{ player.birth | unix2human_time }}</td>
+                        {% set player_title = player.title | replace('%s','<strong>' + player.name + '</strong>')  %}
+                        <td><span title="Born {{ player.birth | unix2human_time }}">{{ player_title | safe }}</span></td>
+                        <td class="players-right">{{ player.level }}</td>
+                        <td class="players-right">{{ player.remorts }}</td>
                     </tr>
                     {%- endfor %}
                 </table>

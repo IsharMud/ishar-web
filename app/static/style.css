@@ -32,12 +32,18 @@ tr:nth-child(2n) {
 }
 
 table {
-    border: #fa7 1px solid;
-    font-size:   1.25em;
+    border:     #fa7 1px solid;
+    font-size:  1.25em;
+    margin:     auto;
+    width:      50%;
 }
 
 td {
     border: #686a65 1px solid;
+}
+
+.players-right {
+    text-align: right;
 }
 
 img {
