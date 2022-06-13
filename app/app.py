@@ -156,6 +156,7 @@ def discord():
 @app.route('/getting_started')
 @app.route('/get_started')
 @app.route('/getstarted')
+@app.route('/getting_started')
 def getting_started():
     return render_template('getting_started.html.j2')
 
