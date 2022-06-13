@@ -42,6 +42,15 @@ td {
     border: #686a65 1px solid;
 }
 
+#season-details {
+    color:      #000;
+    text-align: center;
+}
+
+#season-details strong {
+    color:  #fa7;
+}
+
 .players-right {
     text-align: right;
 }
