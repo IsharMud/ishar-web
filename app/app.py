@@ -1,15 +1,142 @@
-import config
 import secrets
-from flask import Flask, make_response, redirect, render_template, request, url_for
-import mariadb
 import crypt
+import datetime
+from flask import abort, Flask, flash, make_response, redirect, render_template, request, url_for
+from flask_login import current_user, LoginManager, login_required, login_user, logout_user, UserMixin
+from flask_sqlalchemy import SQLAlchemy
 import hmac
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, MetaData, SmallInteger, String, Table
+from sqlalchemy.schema import FetchedValue
+from sqlalchemy.orm import relationship
 
-# Name the "app" (as uwsgi expects)
-app = Flask(__name__)
+# Create/configure the app
+app = Flask('ishar')
+app.config.from_pyfile('config.py')
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+db = SQLAlchemy(app)
 
-# Error handling
-def error(title='Page Not Found', message='Hmmm... the page you are looking for can not be found.', code=404):
+# Account database class
+class Account(db.Model, UserMixin):
+    __tablename__ = 'accounts'
+    account_id = Column(Integer, primary_key=True)
+    created_at = Column(DateTime, nullable=False, server_default=FetchedValue())
+    seasonal_points = Column(Integer, nullable=False, server_default=FetchedValue())
+    email = Column(String(30), nullable=False, unique=True)
+    password = Column(String(36), nullable=False)
+    create_isp = Column(String(25), nullable=False)
+    last_isp = Column(String(25), nullable=False)
+    create_ident = Column(String(25), nullable=False)
+    last_ident = Column(String(25), nullable=False)
+    create_haddr = Column(Integer, nullable=False)
+    last_haddr = Column(Integer, nullable=False)
+    account_name = Column(String(25), nullable=False, unique=True)
+    players = relationship('Player', lazy='select', backref='account')
+
+    def check_password(self, password):
+        return hmac.compare_digest(crypt.crypt(password, self.password), self.password)
+
+    def get_id(self):
+        return str(self.account_id)
+
+    def is_authenticated(self):
+        return isinstance(self.account_id, int)
+
+    def is_active(self):
+        return isinstance(self.account_id, int)
+
+    def check_password(self, password):
+        return hmac.compare_digest(crypt.crypt(password, self.password), self.password)
+
+
+# Player database class
+class Player(db.Model):
+    __tablename__ = 'players'
+    id = Column(Integer, primary_key=True)
+    account_id = Column(ForeignKey('accounts.account_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
+    name = Column(String(15), nullable=False, unique=True, server_default=FetchedValue())
+    create_ident = Column(String(10), nullable=False, server_default=FetchedValue())
+    last_isp = Column(String(30), nullable=False, server_default=FetchedValue())
+    description = Column(String(240))
+    title = Column(String(45), nullable=False, server_default=FetchedValue())
+    poofin = Column(String(80), nullable=False, server_default=FetchedValue())
+    poofout = Column(String(80), nullable=False, server_default=FetchedValue())
+    bankacc = Column(Integer, nullable=False)
+    logon_delay = Column(SmallInteger, nullable=False)
+    true_level = Column(Integer, nullable=False)
+    renown = Column(Integer, nullable=False)
+    prompt = Column(String(42), nullable=False, server_default=FetchedValue())
+    remorts = Column(Integer, nullable=False)
+    favors = Column(Integer, nullable=False)
+    birth = Column(Integer, nullable=False)
+    logon = Column(Integer, nullable=False)
+    online = Column(Integer)
+    logout = Column(Integer, nullable=False)
+    bound_room = Column(Integer, nullable=False)
+    load_room = Column(Integer, nullable=False)
+    wimpy = Column(SmallInteger)
+    invstart_level = Column(Integer)
+    color_scheme = Column(SmallInteger)
+    sex = Column(Integer, nullable=False)
+    race_id = Column(ForeignKey('races.race_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
+    class_id = Column(ForeignKey('classes.class_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
+    level = Column(Integer, nullable=False)
+    weight = Column(SmallInteger, nullable=False)
+    height = Column(SmallInteger, nullable=False)
+    align = Column(SmallInteger, nullable=False)
+    comm = Column(SmallInteger, nullable=False)
+    karma = Column(SmallInteger, nullable=False)
+    experience_points = Column(Integer, nullable=False)
+    money = Column(Integer, nullable=False)
+    fg_color = Column(SmallInteger, nullable=False)
+    bg_color = Column(SmallInteger, nullable=False)
+    login_failures = Column(SmallInteger, nullable=False)
+    create_haddr = Column(Integer, nullable=False)
+    auto_level = Column(Integer, nullable=False)
+    login_fail_haddr = Column(Integer)
+    last_haddr = Column(Integer)
+    last_ident = Column(String(10), server_default=FetchedValue())
+    load_room_next = Column(Integer)
+    load_room_next_expires = Column(Integer)
+    aggro_until = Column(Integer)
+    inn_limit = Column(SmallInteger, nullable=False)
+    held_xp = Column(Integer)
+    last_isp_change = Column(Integer)
+    perm_hit_pts = Column(Integer, nullable=False)
+    perm_move_pts = Column(Integer, nullable=False)
+    perm_spell_pts = Column(Integer, nullable=False)
+    perm_favor_pts = Column(Integer, nullable=False)
+    curr_hit_pts = Column(Integer, nullable=False)
+    curr_move_pts = Column(Integer, nullable=False)
+    curr_spell_pts = Column(Integer, nullable=False)
+    curr_favor_pts = Column(Integer, nullable=False)
+    init_strength = Column(Integer, nullable=False)
+    init_agility = Column(Integer, nullable=False)
+    init_endurance = Column(Integer, nullable=False)
+    init_perception = Column(Integer, nullable=False)
+    init_focus = Column(Integer, nullable=False)
+    init_willpower = Column(Integer, nullable=False)
+    curr_strength = Column(Integer, nullable=False)
+    curr_agility = Column(Integer, nullable=False)
+    curr_endurance = Column(Integer, nullable=False)
+    curr_perception = Column(Integer, nullable=False)
+    curr_focus = Column(Integer, nullable=False)
+    curr_willpower = Column(Integer, nullable=False)
+    is_deleted = Column(Integer, nullable=False, server_default=FetchedValue())
+    deaths = Column(Integer, nullable=False, server_default=FetchedValue())
+    total_renown = Column(Integer, nullable=False, server_default=FetchedValue())
+    quests_completed = Column(Integer, nullable=False, server_default=FetchedValue())
+    challenges_completed = Column(Integer, nullable=False, server_default=FetchedValue())
+
+
+# Login Manager user loader from database
+@login_manager.user_loader
+def load_user(account_id):
+    return Account.query.get(int(account_id))
+
+# Errors
+def error(title='Unknown Error', message='Sorry, but we experienced an unknown error', code=500):
     return render_template('error.html.j2', title=title, message=message), code
 
 @app.errorhandler(400)
@@ -32,406 +159,198 @@ def page_not_found(message):
 def internal_server_error(message):
     return error(title='Internal Server Error', message=message, code=500)
 
-@app.errorhandler(501)
-def method_not_implemented(message):
-    return error(title='Method Not Implemented', message=message, code=501)
+# Main welcome page/index (/)
+@app.route('/welcome')
+@app.route('/')
+def welcome():
+    return render_template('welcome.html.j2')
 
-@app.errorhandler(503)
-def service_unavailable(message):
-    return error(title='Service Unavailable', message=message, code=503)
+# /background
+@app.route('/background')
+def background():
+    return render_template('background.html.j2')
 
+# Log-in form or processing (/login)
+@app.route('/login', methods=['GET', 'POST'])
+def login():
 
-# Internal function to return account details from the database via account ID
-def _get_account(account_id=None, dbc=None):
+    # If someone is trying to log in (submitted the form), process it
+    if request.method == 'POST':
 
-    if not account_id or account_id == '' or not isinstance(account_id, int):
-        return None
+        # Try to find the user account by e-mail address
+        user = Account.query.filter_by(email = request.form['email']).first()
 
-    try:
-        print(f"_get_account() ...")
-        print(f"account_id: {account_id}")
+        # If we find the user and match the password, it is a successful log in, so redirect
+        if user != None and user.check_password(request.form['password']):
+            flash('You successfully logged in!', 'success')
+            login_user(user)
+            return redirect(url_for('portal'), code=302)
 
-        # Use existing database connection if we can
-        if not dbc:
-            dbc = _db_connect()
-            close_later = True
+        # Otherwise, there must have been invalid credentials
         else:
-            close_later = False
+            flash('Sorry, but please enter a valid e-mail address and password.', 'error')
 
-        # Get the account information based on the account ID
-        cur = dbc.cursor()
-        cur.execute("""SELECT \
-                    `account_id`, `email`, `created_at`, `password`, `account_name` \
-                    FROM `accounts` \
-                    WHERE `account_id` = ?""", (account_id,))
-        account_fields = [field_md[0] for field_md in cur.description]
-        account = [dict(zip(account_fields,row)) for row in cur.fetchall()]
-        print(f"account:\n{account[0]}\n")
-
-        # Close database connection if we made one
-        if close_later:
-            print(f"Closing database... {dbc}")
-            dbc.close()
-            print(f"Database closed. {dbc}")
-
-        return account
-
-    except Exception as e:
-        print(e)
-        return None
+    # # Redirect authenticated users to the portal
+    if current_user.is_authenticated:
+        return redirect(url_for('portal'), code=302)
+    else:
+        # Log-in form
+        return render_template('login.html.j2')
 
 
-# Internal function to return players details from the database via account ID
-def _get_players(account_id=None, dbc=None):
-
-    if not account_id or account_id == '' or not isinstance(account_id, int):
-        return None
-
+# Portal for logged in users
+@app.route('/portal', methods=['GET'])
+@login_required
+def portal():
     try:
-        print(f"_get_players() ...")
-        print(f"account_id: {account_id}")
-
-        # Use existing database connection if we can
-        if not dbc:
-            dbc = _db_connect()
-            close_later = True
-        else:
-            close_later = False
-
-        # Get the account information based on the account ID
-        cur = dbc.cursor()
-        cur.execute("""SELECT \
-                    `id`, `account_id`, `name`, `level`, \
-                    `bankacc`, `renown`, `remorts`, FROM_UNIXTIME(`birth`) as `birth`, \
-                    `class_name`, `race_name` \
-                    FROM `players` \
-                    INNER JOIN `classes` ON `players`.`class_id` = `classes`.`class_id` \
-                    INNER JOIN `races` ON `players`.`race_id` = `races`.`race_id` \
-                    WHERE `account_id` = ?""", (account_id,))
-        players_fields = [field_md[0] for field_md in cur.description]
-        players = [dict(zip(players_fields,row)) for row in cur.fetchall()]
-        player_count = cur.rowcount
-        print(f"player count: {player_count}")
-
-        if player_count == 0:
-            players = None
-
-        print(f"players: \n{players}\n")
-
-        # Close database connection if we made one
-        if close_later:
-            print(f"Closing database... {dbc}")
-            dbc.close()
-            print(f"Database closed. {dbc}")
-
-        return players
-
-    except Exception as E:
-        print(e)
-        return None
-
-
-# Internal function to connect to the database
-def _db_connect(user=secrets.db_creds['user'], password=secrets.db_creds['password'], host=secrets.db_creds['host'], port=secrets.db_creds['port'], database=secrets.db_creds['database']):
-
-    try:
-        print(f"_db_connect() ...")
-
-        # Connect to the database
-        conn = mariadb.connect(
-            user=user,
-            password=password,
-            host=host,
-            port=port,
-            database=database
-        )
-
-        # Return the connection
-        print(f"Connected to database: {conn}")
-        return conn
-
-    except mariadb.Error as e:
-        print(e)
-        return False
-
+        print(f"Portal visit: {current_user}")
+        return render_template('portal.html.j2')
     except Exception as e:
-        print(e)
-        return False
+        print(f"Portal exception: {e}")
+        flash('Sorry, but there was an error visiting the portal!', 'error')
+        return login()
 
-
-# Internal function to validate e-mail address and password
-# - either with the password hash from the cookies or from the log in form
-def _check_credentials(user_email=None, user_password=None, dbc=None):
-
-    if not user_email or user_email == '' or not user_password or user_password == '':
-        return None
-
+# /logout (log out)
+@app.route('/logout', methods=['GET'])
+@login_required
+def logout():
     try:
-
-        print(f"_check_credentials() ...")
-        print(f"user_email: {user_email}")
-
-        # Use existing database connection if we can
-        if not dbc:
-            dbc = _db_connect()
-            close_later = True
-        else:
-            close_later = False
-
-        # Get basic account information to compare e-mail address and password
-        cur = dbc.cursor()
-        cur.execute("SELECT `account_id`, `email`, `password` FROM `accounts` WHERE `email` = ?", (user_email,))
-        r = cur.fetchall()
-        rc = cur.rowcount
-
-        # Close database connection if we made one
-        if close_later:
-            print(f"Closing database... {dbc}")
-            dbc.close()
-            print(f"Database closed. {dbc}")
-
-        # No such account with that e-mail address
-        if rc == 0:
-            print(f"No account found for {user_email}")
-            return None
-
-        # Found an account...
-        elif rc == 1:
-
-            # Compare directly to database
-            # (for cookies, which contain the hashed password value)
-            if user_password == r[0][2]:
-                print(f"Hash match for {user_email}")
-                return r[0][0]
-
-            # Hash and compare to database
-            # (for POSTed form values)
-            elif hmac.compare_digest(crypt.crypt(user_password, r[0][2]), r[0][2]):
-                print(f"Password match for {user_email}")
-                return r[0][0]
-
-            # Invalid password
-            else:
-                print(f"Invalid password for {user_email}")
-                return False
-
-        # Duplicate e-mail address in the database should NOT happen
-        else:
-            print(f"Duplicate e-mail address in database? {user_email}")
-            return False
-
+        logout_user()
+        flash('You have been logged out successfully! See you again next time!', 'success')
+        return login()
     except Exception as e:
-        print(e)
-        return None
+        print(f"Logout exception: {e}")
+        flash('Sorry, but there was an error logging you out!', 'error')
+        return login()
 
-
-# GET /password - form to allow a user to change their password
-@app.route('/password', methods=['GET'])
-def password():
-
-    try:
-
-        # Check authentication / get account ID
-        account_id = _check_auth()
-        print(f"account_id: {account_id}")
-        if not account_id or not isinstance(account_id, int):
-            print(f"Invalid account_id ({account_id})")
-            raise Exception
-
-        # Get account information from the database
-        account = _get_account(account_id=account_id)
-        print(f"account name: {account[0]['account_name']}")
-
-        return error(title='Under Construction', message='This page is a work in progress.')
-
-    except Exception as e:
-        print(e)
-        return error(title='Under Construction', message='This page is a work in progress.')
-
-#        return render_template('password.html.j2', account=account[0])
-
-
-# POST /password - process password change form
-@app.route('/password', methods=['POST'])
-def change_password():
-
-    try:
-
-        # Check authentication / get account ID
-        print("change_password() ...")
-        account_id = _check_auth()
-        print(f"account_id: {account_id}")
-        if not account_id or not isinstance(account_id, int):
-            print(f"Invalid account_id ({account_id})")
-            raise Exception
-
-        return error(title='Under Construction', message='This page is a work in progress.')
-
-    except Exception as e:
-        print(e)
-
+# /help
+@app.route('/help', methods=['GET'])
+@app.route('/help/<string:page>', methods=['GET'])
+def help(page=None):
+    return render_template('help.html.j2', page=page)
 
 # /clients
 @app.route('/clients')
-def clients(mud_clients=config.mud_clients):
+def clients():
+
+    mud_clients = {
+        "Cross-Platform" : {
+            'Mudlet' : 'https://www.mudlet.org/'
+        },
+        "Android" : {
+            'Blowtorch' : 'http://bt.happygoatstudios.com/'
+        },
+        "Windows" : {
+            'ZMud' : 'http://www.zuggsoft.com/zmud/zmudinfo.htm',
+            'alclient' : 'http://www.ashavar.com/client/',
+            'yTin' : 'http://ytin.sourceforge.net/',
+            'Gosclient' : 'http://gosclient.altervista.org/eng/',
+            'MUSHclient' : 'http://www.gammon.com.au/downloads/dlmushclient.htm'
+        },
+        "Mac OS" : {
+            'Atlantis' : 'http://www.riverdark.net/atlantis/',
+            'MudWalker' : 'http://mudwalker.cubik.org/'
+        },
+        "Linux / UNIX" : {
+            'TinTin++' : 'http://tintin.sourceforge.net/',
+            'TinyFugue' : 'http://tinyfugue.sourceforge.net/'
+        }
+    }
+
     return render_template('clients.html.j2', mud_clients=mud_clients)
 
 
 # Redirect /connect to mudslinger.net
 @app.route('/connect')
 def connect():
-    return redirect('https://mudslinger.net/play/?host=isharmud.com&port=23', code=302)
+    mudslinger_app_link = 'https://mudslinger.net/play/?host=isharmud.com&port=23'
+    return redirect(mudslinger_app_link, code=302)
 
-
-# Redirect /discord to the invite link (in config.py)
+# Redirect /discord to the invite link
 @app.route('/discord')
 def discord():
-    return redirect(config.discord_invite_link, code=302)
+    discord_invite_link = 'https://discord.gg/VBmMXUpeve'
+    return redirect(discord_invite_link, code=302)
 
+# /getstarted
+@app.route('/gettingstarted')
+@app.route('/getting_started')
+@app.route('/get_started')
+@app.route('/getstarted')
+def getting_started():
+    return render_template('getting_started.html.j2')
 
-# /help - WIP!
-@app.route('/help', methods=['GET'])
-@app.route('/help/<string:letter>')
-@app.route('/help/<string:letter>/')
-@app.route('/help/<string:letter>/<string:page>.html')
-def help(letter=None, page=None):
-    return render_template('help.html.j2', letter=letter, page=page)
+# /areas (formerly "world" page)
+@app.route('/areas', methods=['GET'])
+@app.route('/areas/<string:area>', methods=['GET'])
+def areas(area=None):
 
-
-# POST /help - help search / WIP!!!
-@app.route('/help', methods=['POST'])
-def search_help(search_help=None):
-    if request.form['search_help'] and request.form['search_help'] != '':
-        search_help = request.form['search_help']
-        return help(letter=search_help[0], page=search_help)
-    else:
-        return help()
-
-# Internal function to check for valid authentication
-# whether via hash from cookie or POSTed form value
-def _check_auth():
-
+    # Try to find an area based on user input
     try:
-        print(f"_check_auth() ...")
+        areas = _get_help_area(area)
+        code = 200
 
-        # Check for cookies
-        if request.cookies.get('email') and request.cookies.get('password') and request.cookies.get('email') != '' and request.cookies.get('password') != '':
-            email = request.cookies.get('email')
-            password = request.cookies.get('password')
-            print("Using cookies...")
-
-        # Check for form values
-        elif request.form['email'] and request.form['password'] and request.form['email'] != '' and request.form['password'] != '':
-            email =  request.form['email']
-            password =  request.form['password']
-            print("Using form values...")
-
-        else:
-            print(f"Got nothing...")
-            return None
-
-        # Check credentials
-        print(f"Checking credentials... / {email}")
-        check_credentials = _check_credentials(email, password)
-        print(f"check_credentials: {check_credentials}")
-        return check_credentials
-
+    # Otherwise, list all areas found in the game "helptab" file
     except Exception as e:
-        print(e)
+        areas = _get_help_area(None)
+        area = None
+        code = 404
+        print(f"Bad area? {e}")
+
+    return render_template('areas.html.j2', areas=areas, area=area), code
+
+
+# Internal function to scrape "areas" from game helptab file
+#
+# The "areas" are each listed in the "helptab" file on lines starting with "32 Area " ...
+# ...followed by descriptions until the character "#" on a single line itself
+def _get_help_area(area=None):
+
+    # Get game "helptab" file path/name, and open it
+    helptab_file = secrets.helptab_file
+    helptab_fh = open(helptab_file, 'r')
+
+    # Prepare an empty "areas" dictionary
+    areas = {}
+
+    # Do not keep lines by default
+    keep = False
+
+    # Loop through each line, finding and keeping chunks staring with "32 Area "
+    for line in helptab_fh:
+        stripped = line.strip()
+
+        # Stop line (#)
+        if keep == True and stripped == '#':
+            keep = False
+
+        # Do not include "other levels" info (%%)
+        if keep == True and stripped.startswith('%% '):
+            keep = False
+
+        # Append the current chunk to our areas dictionary, under the key of whatever started with "32 Area " last
+        if keep == True and not stripped.startswith('32 Area '):
+            areas[area_name] += line
+
+        # Start new dictionary keys of chunks at lines beginning with "32 Area "
+        if stripped.startswith('32 Area '):
+            keep = True
+            area_name = stripped.replace('32 Area ', '')
+            areas[area_name] = ''
+
+    # Close the "helptab" file
+    helptab_fh.close()
+
+    # Return either the single area, or a list of them
+    if area != None and areas[area]:
+        return areas[area]
+    elif areas != None and len(areas) > 0:
+        return areas
+    else:
         return None
 
 
-# /login (log in form, or handles cookie login)
-@app.route('/login')
-def login():
-    print("login() ...")
-    account_id = _check_auth()
-    print(f"account_id: {account_id}")
-    if account_id and isinstance(account_id, int):
-        print(f"Successful log in for account_id {account_id}")
-        return redirect(url_for('portal'), code=302)
-
-    # Otherwise, return log in form
-    else:
-        print("No authentication, providing form...")
-        return render_template('login.html.j2')
-
-
-# /portal Portal - once logged in
-@app.route('/portal', methods=['GET', 'POST'])
-def portal():
-
-    try:
-
-        # Check authentication / get account ID
-        print(f"portal() ...")
-        account_id = _check_auth()
-        print(f"account_id: {account_id}")
-        if not account_id or not isinstance(account_id, int):
-            print(f"Invalid account_id ({account_id})")
-            raise Exception
-
-        # Get account and players information
-        dbc = _db_connect()
-        account = _get_account(account_id=account_id, dbc=dbc)
-        players = _get_players(account_id=account_id, dbc=dbc)
-
-        # Close database connection
-        print(f"Closing database... {dbc}")
-        dbc.close()
-        print(f"Database closed. {dbc}")
-
-        # Set cookies of the e-mail address and password hash
-        resp = make_response(render_template('portal.html.j2', account=account[0], players=players))
-        resp.set_cookie('email', account[0]['email'], secure=True)
-        resp.set_cookie('password', account[0]['password'], secure=True)
-        return resp
-
-#
-#           TODO
-#           Deal with player flags
-#
-
-#            player_ids = []
-#            for player in players:
-#                player_ids.append(player['id'])
-#            print(f"player ids: {player_ids}")
-#            players_idsc = [str(element) for element in player_ids]
-#            players_id_numbers = ",".join(players_idsc)
-#            print(f"players_id_numbers: {players_id_numbers}")
-
-            # Get player_flags information
-#            cur.execute(f"SELECT * FROM `player_player_flags` WHERE `player_id` IN ({players_id_numbers})")
-#            players_flags = cur.fetchall()
-#            print(f"players_flags: {players_flags}")
-
-    except Exception as e:
-        print(e)
-        return error(
-                        title='Invalid Credentials',
-                        message="Sorry, but please <a href='" + url_for('login') + "'>go back</a> and try again.",
-                        code=401
-                    )
-
-
-# /logout
-@app.route('/logout')
-def logout():
-
-    # Set empty cookies for the e-mail address and password hash
-    resp = make_response(render_template('error.html.j2', title='Log Out', message='You have been logged out.'))
-    resp.set_cookie('email', '', secure=True)
-    resp.set_cookie('password', '', secure=True)
-    return resp
-
-
-# /world
-@app.route('/world')
-def world():
-    return render_template('world.html.j2')
-
-
-# Main page - /
-@app.route('/')
-def index():
-    return render_template('index.html.j2')
+# Jinja2 template filter to convert UNIX timestamps to Python date-time objects
+@app.template_filter('unix2human_time')
+def unix2human_time(unix_time):
+    return datetime.datetime.fromtimestamp(unix_time).strftime('%c')

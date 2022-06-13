@@ -1,93 +1,138 @@
 body {
-	margin: 4px 4px 4px 4px;
-	padding: 0px 0px 0px 0px;
-	font-family: arial, sans-serif;
-	font-size: 100%;
-	background-color: #000;
-	color: #fff;
-	width: 100%;
-	text-align: center;
+	background-color:   #000;
+	color:              #fff;
+    font-family:        Arial, sans-serif;
 }
 
-#logo, #content {
-	width: 760px;
-	margin: 0px auto 0px auto;
-	padding: 0px 0px 0px 0px;
-	text-align: left;
+a {
+    color:  #fa7;
 }
 
-a { color: #fa7 }
-a:hover { color: #fdb }
-
-h1 { margin-top: 0px; font-size: 1.75em; }
-h2 { margin-top: 0px; font-size: 1.25em; }
-h3 { color: #fa7; }
-table { font-size: 1em; border: 1px solid #fa7; }
-th { color: #fa7; } 
-tr:nth-child(2n) { background-color: #999; color: #000; }
-pre,tt { font-family: monospace; font-size: 14px; }
-img { border-width: 0px border: none; }
-p { margin-bottom: 0px; }
-
-.quote { font-style: italic; font-size: .75em; }
-.attribution { padding-left: 5%; font-style: normal; font-weight: bold; }
-.shock { color: #fa7; }
-
-.lower {
-       text-align: center;
-       font-size: .75em;
-       color: #ccc;
+a:hover {
+    color:  #fdb;
 }
-.lower a { color: #c96; }
-.lower a:hover { color: #ca8; }
+
+a[target="_blank"]::after {
+    content:    url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAQElEQVR42qXKwQkAIAxDUUdxtO6/RBQkQZvSi8I/pL4BoGw/XPkh4XigPmsUgh0626AjRsgxHTkUThsG2T/sIlzdTsp52kSS1wAAAABJRU5ErkJggg==);
+    filter:     brightness(0) invert(1);
+    margin:     0 3px 0 5px;
+}
+
+h1, h2, h3, .bright, th {
+    color:  #fa7;
+}
+
+hr {
+    border-color:   #fa7;
+}
+
+tr:nth-child(2n) {
+    background-color:   #999;
+    color:              #000;
+}
+
+table {
+    border: #fa7 1px solid;
+    font-size:   1.25em;
+}
+
+td {
+    border: #686a65 1px solid;
+}
+
+img {
+    border: none;
+}
+
+#logo {
+    margin:     auto;
+    text-align: center;
+}
+
+#logo img {
+    width:  90%;
+}
+
+#flashes {
+    font-weight:    bold;
+}
+
+.flash-error {
+    color:  #ff5573;
+}
+
+.flash-success {
+    color:  #4cb898;
+}
+
+#content {
+    margin:     auto;
+    overflow:   auto;
+    padding:    1em;
+    width:      90%;
+}
+
+input {
+    background-color:   #313632;
+    border-color:       #fa7;
+    color:              #fa7;
+}
+
+#footer {
+    background-color:   #484a47;
+    margin:             auto;
+    padding:            0.5em;
+    text-align:         center;
+    width:              90%;
+}
+
+#created {
+    font-style: italic;
+    text-align: center;
+}
+
+#quote {
+    font-style: italic;
+    margin:     1.25em;
+    text-align: left;
+}
+
+#attribution {
+    font-style:     normal;
+    font-weight:    bold;
+    padding-left:   5%;
+    text-align:     left;
+}
 
 .under {
-	padding: 1em;
-	background-color: #484a47;
+    background-color:   #484a47;
+    overflow:           auto;
+	padding:            1em;
 }
 
-.rightmenu { 
-	white-space: nowrap;
-	float: right;
-	margin: 0px 0px 1em 1em;
-    padding: 0px;
-	width: auto;
-}
-.rightmenu dl, .rightmenu dd { 
-	margin: 0px;
-	padding: 0px;
-	width: auto;
-}
-.rightmenu a { 
-	background-color: #313632; 
-	display: block;
-	margin: 2px 0px 0px 0px;
-	padding: .25em .5em;
-	border: #686a65 1px solid;
-	width: auto;
-	text-decoration: none;
-}
-.rightmenu a:hover {
-	background-color: #686a65;
+#navigation { 
+	white-space:    nowrap;
+	float:          right;
+	margin:         0px 0px 1em 1em;
+    padding:        0px;
 }
 
-.nomenu {
-	clear: both;
-	margin: 0px;
-	padding: 0px;
+#navigation ol, #navigation li { 
+    list-style: none;
+	margin:     0px;
+	padding:    0px;
 }
 
-@media print
-{
-	body { margin: 0px; background-color: #fff; color: #000; background-image: none; font-size: 12pt }
-	a { color: #630; text-decoration: underline }
-	#content { width: auto; margin: 0px }
-	.under { background-color: #fff; border: #fff 1px dotted; }
-	.rightmenu { display: none }
+#navigation a { 
+	background-color:   #313632; 
+    border:             #686a65 1px solid;
+	display:            block;
+    font-size:          1.25em;
+	margin:             2px 0px 0px 0px;
+	padding:            0.25em 0.5em;
+	text-decoration:    none;
 }
 
-@media screen and (max-device-width: 480px)
-{
-	body,table { -webkit-text-size-adjust: 180% }
-	pre { -webkit-text-size-adjust: 110% }
+#navigation a:hover {
+	background-color:   #686a65;
 }

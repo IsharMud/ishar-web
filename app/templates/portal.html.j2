@@ -1,53 +1,31 @@
-{% extends "index.html.j2" %}
-{% block title %}Portal - {% endblock %}
-{% block content %}
-<div class="rightmenu">
-<dl>
-<dd><a href="{{ url_for('static', filename='Major_Update.pdf') }}" target="_blank">Major Update</a></dd>
-<dd><a href="{{ url_for('connect') }}" target="_blank">Connect to Ishar</a></dd>
-<dd><a href="{{ url_for('world') }}">The World of Ishar</a></dd>
-<dd><a href="{{ url_for('help', letter='b', page='background') }}">Background</a></dd>
-<dd><a href="{{ url_for('help', letter='s', page='search') }}">Search Help</a></dd>
-<dd><a href="{{ url_for('password') }}">Change Password</a></dd>
-<dd><a href="{{ url_for('logout') }}">Log Out</a></dd>
-<dd><a href="{{ url_for('discord') }}" target="_blank">Discord</a></dd>
-</dl>
-</div>
-<h1>Portal</h1>
-<h3>Welcome{% if account is defined and account is iterable and account|length > 0 %}, {{ account['account_name'] | safe | title }}{% endif %}!</h3>
-<p>
-{% if players is defined and players is iterable and players|length > 0 %}
-You have <strong>{{ players|length }}</strong> players:
-<p>
-<table>
-<tr>
-<th>Name</th>
-<th>Race</th>
-<th>Class</th>
-<th>Level</th>
-<th>Bank</th>
-<th>Birth</th>
-<th>Remort(s)</th>
-</tr>
-{% for player in players %}
-<tr>
-<!-- ID: {{ player['id'] }} -->
-<td>{{ player['name'] | safe }}</td>
-<td>{{ player['race_name'] | title | replace('_', '-') }}</td>
-<td>{{ player['class_name'] | title | replace('_', '-') }}</td>
-<td>{{ player['level'] }}</td>
-<td>{{ player['bankacc'] }}</td>
-<td>{{ player['birth'].strftime('%c') }}</td>
-<td>{{ player['remorts'] }}</td>
-</tr>
-{% endfor %}
-</table>
-{% else %}
-You have not created any players yet.
-{% endif %}
-<p class="nomenu">
-</div>
-<p>
-<div class="under">
-<div class="lower">You created your account on {{ account['created_at'] }}.</div>
-{% endblock %}
+{% extends "layout.html.j2" %}
+{% block title %}Portal{% endblock %}
+{% block header %}Welcome{% if current_user.account_name is defined %}, {{ current_user.account_name }}{% endif %}!{% endblock %}
+{%- block content %}
+                {%- if current_user.players is defined and current_user.players is iterable and current_user.players|length > 0 %}
+                <p>You have <strong>{{ current_user.players | length }}</strong> player{% if current_user.players|length != 1 %}s{% endif %}.</p>
+                <table>
+                    <tr>
+                        <th>Name</th>
+                        <th>Level</th>
+                        <th>Remorts</th>
+                        <th>Birth</th>
+                    </tr>
+                    {%- for player in current_user.players %}
+                    <tr>
+                        <td>{{ player.name }}</td>
+                        <td>{{ player.level }}</td>
+                        <td>{{ player.remorts }}</td>
+                        <td>{{ player.birth | unix2human_time }}</td>
+                    </tr>
+                    {%- endfor %}
+                </table>
+                {%- else %}
+                <p><strong>You have not created any players yet.</strong></p>
+                {%- endif %}
+{%- endblock %}
+{%- if current_user.created_at is defined and current_user.created_at != '' %}
+{% block footer %}
+            <div id="created">You created your account on {{ current_user.created_at.strftime('%c') }}.</div>
+{%- endblock %}
+{%- endif %}
