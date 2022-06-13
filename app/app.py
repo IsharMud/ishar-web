@@ -1,5 +1,6 @@
 import secrets
 import crypt
+import datetime
 from flask import abort, Flask, flash, make_response, redirect, render_template, request, url_for
 from flask_login import current_user, LoginManager, login_required, login_user, logout_user, UserMixin
 from flask_sqlalchemy import SQLAlchemy
@@ -7,7 +8,6 @@ import hmac
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, MetaData, SmallInteger, String, Table
 from sqlalchemy.schema import FetchedValue
 from sqlalchemy.orm import relationship
-
 
 # Create/configure the app
 app = Flask('ishar')
@@ -18,9 +18,8 @@ login_manager.login_view = 'login'
 db = SQLAlchemy(app)
 
 # Account database class
-class account(db.Model, UserMixin):
+class Account(db.Model, UserMixin):
     __tablename__ = 'accounts'
-
     account_id = Column(Integer, primary_key=True)
     created_at = Column(DateTime, nullable=False, server_default=FetchedValue())
     seasonal_points = Column(Integer, nullable=False, server_default=FetchedValue())
@@ -33,6 +32,7 @@ class account(db.Model, UserMixin):
     create_haddr = Column(Integer, nullable=False)
     last_haddr = Column(Integer, nullable=False)
     account_name = Column(String(25), nullable=False, unique=True)
+    players = relationship('Player', lazy='select', backref='account')
 
     def check_password(self, password):
         return hmac.compare_digest(crypt.crypt(password, self.password), self.password)
@@ -41,19 +41,18 @@ class account(db.Model, UserMixin):
         return str(self.account_id)
 
     def is_authenticated(self):
-        return isinstance(account_id, int)
+        return isinstance(self.account_id, int)
 
     def is_active(self):
-        return isinstance(account_id, int)
+        return isinstance(self.account_id, int)
 
     def check_password(self, password):
         return hmac.compare_digest(crypt.crypt(password, self.password), self.password)
 
 
 # Player database class
-class player(db.Model):
+class Player(db.Model):
     __tablename__ = 'players'
-
     id = Column(Integer, primary_key=True)
     account_id = Column(ForeignKey('accounts.account_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
     name = Column(String(15), nullable=False, unique=True, server_default=FetchedValue())
@@ -130,13 +129,11 @@ class player(db.Model):
     quests_completed = Column(Integer, nullable=False, server_default=FetchedValue())
     challenges_completed = Column(Integer, nullable=False, server_default=FetchedValue())
 
-    account = relationship('account', primaryjoin='player.account_id == account.account_id', backref='players')
-
 
 # Login Manager user loader from database
 @login_manager.user_loader
 def load_user(account_id):
-    return account.query.get(int(account_id))
+    return Account.query.get(int(account_id))
 
 # Errors
 def error(title='Unknown Error', message='Sorry, but we experienced an unknown error', code=500):
@@ -177,21 +174,41 @@ def background():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
 
-    players = None
-
+    # If someone is trying to log in (submitted the form), process it
     if request.method == 'POST':
-        user = account.query.filter_by(email = request.form['email']).first()
+
+        # Try to find the user account by e-mail address
+        user = Account.query.filter_by(email = request.form['email']).first()
+
+        # If we find the user and match the password, it is a successful log in, so redirect
         if user != None and user.check_password(request.form['password']):
             flash('You successfully logged in!', 'success')
             login_user(user)
+            return redirect(url_for('portal'), code=302)
+
+        # Otherwise, there must have been invalid credentials
         else:
             flash('Sorry, but please enter a valid e-mail address and password.', 'error')
 
-    print(current_user)
+    # # Redirect authenticated users to the portal
     if current_user.is_authenticated:
-        return render_template('portal.html.j2', players=None)
+        return redirect(url_for('portal'), code=302)
     else:
+        # Log-in form
         return render_template('login.html.j2')
+
+
+# Portal for logged in users
+@app.route('/portal', methods=['GET'])
+@login_required
+def portal():
+    try:
+        print(f"Portal visit: {current_user}")
+        return render_template('portal.html.j2')
+    except Exception as e:
+        print(f"Portal exception: {e}")
+        flash('Sorry, but there was an error visiting the portal!', 'error')
+        return login()
 
 # /logout (log out)
 @app.route('/logout', methods=['GET'])
@@ -199,10 +216,12 @@ def login():
 def logout():
     try:
         logout_user()
-        flash('You have been logged out!', 'success')
+        flash('You have been logged out successfully! See you again next time!', 'success')
         return login()
-    except:
-        return error()
+    except Exception as e:
+        print(f"Logout exception: {e}")
+        flash('Sorry, but there was an error logging you out!', 'error')
+        return login()
 
 # /help
 @app.route('/help', methods=['GET'])
@@ -329,3 +348,9 @@ def _get_help_area(area=None):
         return areas
     else:
         return None
+
+
+# Jinja2 template filter to convert UNIX timestamps to Python date-time objects
+@app.template_filter('unix2human_time')
+def unix2human_time(unix_time):
+    return datetime.datetime.fromtimestamp(unix_time).strftime('%c')

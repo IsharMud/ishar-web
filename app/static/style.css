@@ -18,7 +18,7 @@ a[target="_blank"]::after {
     margin:     0 3px 0 5px;
 }
 
-h1, h2, h3, .bright {
+h1, h2, h3, .bright, th {
     color:  #fa7;
 }
 
@@ -29,6 +29,15 @@ hr {
 tr:nth-child(2n) {
     background-color:   #999;
     color:              #000;
+}
+
+table {
+    border: #fa7 1px solid;
+    font-size:   1.25em;
+}
+
+td {
+    border: #686a65 1px solid;
 }
 
 img {
