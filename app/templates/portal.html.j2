@@ -2,14 +2,9 @@
 {% block title %}Portal{% endblock %}
 {% block header %}Welcome{% if current_user.account_name is defined %}, {{ current_user.account_name | title | safe }}{% endif %}!{% endblock %}
 {%- block content %}
-                {%- if current_user.is_admin is defined and current_user.is_admin == True %}
-                <h3 id="admin-bar">
-                    YOU'RE AN ADMIN!!!
-                </h3>
-                {%- endif %}
                 {%- if current_user.seasonal_points is defined and current_user.seasonal_points > 0 %}
                 <h3 id="seasonal-points">
-                    You have {{ current_user.seasonal_points }} seasonal point{% if current_user.seasonal_points != 1 %}s{% endif %}.
+                    Seasonal Point{% if current_user.seasonal_points != 1 %}s{% endif %}: {{ current_user.seasonal_points }}
                 </h3>
                 {%- endif %}
                 {%- if current_user.players is defined and current_user.players is iterable and current_user.players|length > 0 %}
@@ -26,23 +21,23 @@
                     </tr>
                     {%- for player in current_user.players %}
                     <tr>
-                        {%- set player_title = player.title | replace('%s','<strong>' + player.name + '</strong>')  %}
+                        {%- set player_title = player.title | replace('%s','<strong>' + player.name + '</strong>') %}
                         <td><span title="Born {{ player.birth | unix2human_time }}">{{ player_title | safe }}</span></td>
-                        <td>{{ player.player_class.class_name | title }}</td>
+                        <td>{{ player.player_class.class_name | title | safe }}</td>
                         <td class="players-right">{{ player.level }}</td>
                         <td class="players-right">{{ player.remorts }}</td>
                     </tr>
                     {%- endfor %}
                 </table>
                 {%- else %}
-                <p>
-                    <strong>You have not created any players yet.</strong>
-                </p>
+                <h3>
+                    You have not created any players yet!
+                </h3>
                 {%- endif %}
                 <br>
                 {%- if season.season_id is defined and season.effective_date is defined and season.expiration_date is defined %}
                 <h4 id="season-details">
-                    <strong>Season {{ season.season_id }}</strong> began <strong>{{ season.effective_date | unix2human_time }}</strong> and ends <strong>{{ season.expiration_date | unix2human_time }}</strong>.
+                    <strong>Season {{ season.season_id }}</strong> / <strong>{{ season.effective_date | unix2human_time }}</strong> ~ <strong>{{ season.expiration_date | unix2human_time }}</strong>
                 </h4>
                 {%- endif %}
 {%- endblock %}
