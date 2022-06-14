@@ -50,6 +50,10 @@ input[type="reset"], input[type="submit"], #login-form {
     text-align: center;
 }
 
+#season-details strong {
+    color:  #fa7;
+}
+
 #seasonal-points {
     float:  right;
 }
@@ -76,11 +80,11 @@ img {
 }
 
 .flash-error {
-    color:  #ff5573;
+    color:  #fa8072;
 }
 
 .flash-success {
-    color:  #4cb898;
+    color:  #4CBB17;
 }
 
 #content {

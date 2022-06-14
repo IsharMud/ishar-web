@@ -37,13 +37,6 @@ class Account(db.Model, UserMixin):
     def is_active(self):
         return isinstance(self.account_id, int)
 
-    def is_admin(self):
-        for player in self.players:
-            if (player.level >= secrets.admin_level):
-                return True
-
-        return False
-
     def check_password(self, password):
         return hmac.compare_digest(crypt.crypt(password, self.password), self.password)
 
