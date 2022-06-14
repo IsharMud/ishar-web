@@ -2,15 +2,20 @@
 {% block title %}Welcome{% endblock %}
 {% block header %}Welcome{% endblock %}
 {%- block content %}
-                Ishar is an online text-adventure RPG (commonly called a MUD) set in a
-                large, unique world of fantasy and magic.  Players do battle with fearsome
-                foes (and sometimes each other) to win great wealth and wrest rare prizes
-                from the treasure hoards or bloody corpses of their enemies.
                 <p>
-                Play the game for free by connecting via any <a href="/clients">MUD client</a>
-                to <strong>isharmud.com</strong> port <strong>23</strong> or <strong>9999</strong>.
+                    Ishar is an online text-adventure RPG (commonly called a MUD) set in a
+                    large, unique world of fantasy and magic.  Players do battle with fearsome
+                    foes (and sometimes each other) to win great wealth and wrest rare prizes
+                    from the treasure hoards or bloody corpses of their enemies.
+                </p>
                 <p>
-                Ishar has been open since May 1994 and has dozens of players connected during peak hours
+                    Play the game for free by connecting via any <a href="{{ url_for('mud_clients') }}">MUD client</a>
+                    to <strong>isharmud.com</strong> port <strong>23</strong> or <strong>9999</strong>.
+                </p>
                 <p>
-                <a href="/discord" target="_blank">Connect with the community on our Discord server!</a>
+                    Ishar has been open since May 1994 and has dozens of players connected during peak hours.
+                </p>
+                <p>
+                    <a href="{{ url_for('discord') }}" target="_blank">Connect with the community on our Discord server!</a>
+                </p>
 {%- endblock %}
