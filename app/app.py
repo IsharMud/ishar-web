@@ -48,7 +48,7 @@ def welcome():
     return render_template('welcome.html.j2')
 
 # /history (formerly "Background" page)
-@app.route('/background')
+@app.route('/history')
 def history():
     return render_template('history.html.j2')
 
