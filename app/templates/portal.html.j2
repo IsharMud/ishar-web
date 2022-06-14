@@ -2,6 +2,11 @@
 {% block title %}Portal{% endblock %}
 {% block header %}Welcome{% if current_user.account_name is defined %}, {{ current_user.account_name | title | safe }}{% endif %}!{% endblock %}
 {%- block content %}
+                {%- if current_user.is_admin is defined and current_user.is_admin == True %}
+                <h3 id="admin-bar">
+                    YOU'RE AN ADMIN!!!
+                </h3>
+                {%- endif %}
                 {%- if current_user.seasonal_points is defined and current_user.seasonal_points > 0 %}
                 <h3 id="seasonal-points">
                     You have {{ current_user.seasonal_points }} seasonal point{% if current_user.seasonal_points != 1 %}s{% endif %}.
@@ -11,6 +16,7 @@
                 <h3>
                     You have {{ current_user.players | length }} player{% if current_user.players|length != 1 %}s{% endif %}:
                 </h3>
+                <br>
                 <table>
                     <tr>
                         <th>Name</th>

@@ -10,7 +10,7 @@
 *.config
 *.env
 .reload
-__pycache
+__pycache__
 venv/
 config.py
 secrets.py

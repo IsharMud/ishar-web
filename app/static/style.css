@@ -18,7 +18,7 @@ a[target="_blank"]::after {
     margin:     0 3px 0 5px;
 }
 
-h1, h2, h3, .bright, th {
+h1, h2, h3, th {
     color:  #fa7;
 }
 
@@ -27,8 +27,7 @@ hr {
 }
 
 tr:nth-child(2n) {
-    background-color:   #999;
-    color:              #000;
+    background-color:   #888;
 }
 
 table {
@@ -43,12 +42,11 @@ td {
 }
 
 #season-details {
-    color:      #000;
     text-align: center;
 }
 
-#season-details strong {
-    color:  #fa7;
+#seasonal-points {
+    float:  right;
 }
 
 .players-right {
