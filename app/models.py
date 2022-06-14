@@ -25,9 +25,6 @@ class Account(db.Model, UserMixin):
     account_name = Column(String(25), nullable=False, unique=True)
     players = relationship('Player', lazy='select', backref='account')
 
-    def check_password(self, password):
-        return hmac.compare_digest(crypt.crypt(password, self.password), self.password)
-
     def get_id(self):
         return str(self.account_id)
 
