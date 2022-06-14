@@ -41,7 +41,12 @@ td {
     border: #686a65 1px solid;
 }
 
-#season-details {
+input[type="reset"], input[type="submit"], #login-form {
+    font-size:  1.25em;
+    text-align: center;
+}
+
+#area-name, #area-details, #season-details {
     text-align: center;
 }
 

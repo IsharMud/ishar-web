@@ -47,10 +47,10 @@ def internal_server_error(message):
 def welcome():
     return render_template('welcome.html.j2')
 
-# /background
+# /history (formerly "Background" page)
 @app.route('/background')
-def background():
-    return render_template('background.html.j2')
+def history():
+    return render_template('history.html.j2')
 
 # Log-in form or processing (/login)
 @app.route('/login', methods=['GET', 'POST'])
@@ -108,9 +108,10 @@ def logout():
         return login()
 
 
-# /clients
+# /clients or /mud_clients
 @app.route('/clients')
-def clients():
+@app.route('/mud_clients')
+def mud_clients():
 
     mud_clients = {
         "Cross-Platform" : {
@@ -136,7 +137,7 @@ def clients():
         }
     }
 
-    return render_template('clients.html.j2', mud_clients=mud_clients)
+    return render_template('mud_clients.html.j2', mud_clients=mud_clients)
 
 
 # Redirect /connect to mudslinger.net
@@ -151,19 +152,20 @@ def discord():
     discord_invite_link = 'https://discord.gg/VBmMXUpeve'
     return redirect(discord_invite_link, code=302)
 
-# /getstarted
+# /get_started
 @app.route('/gettingstarted')
 @app.route('/getting_started')
-@app.route('/get_started')
 @app.route('/getstarted')
-@app.route('/getting_started')
-def getting_started():
-    return render_template('getting_started.html.j2')
+@app.route('/get_started')
+def get_started():
+    return render_template('get_started.html.j2')
 
-# /areas (formerly "world" page)
-@app.route('/areas', methods=['GET'])
+# /world (or /areas)
 @app.route('/areas/<string:area>', methods=['GET'])
-def areas(area=None):
+@app.route('/areas', methods=['GET'])
+@app.route('/world/<string:area>', methods=['GET'])
+@app.route('/world', methods=['GET'])
+def world(area=None):
 
     # Try to find an area based on user input
     try:
@@ -177,7 +179,7 @@ def areas(area=None):
         code = 404
         print(f"Bad area? {e}")
 
-    return render_template('areas.html.j2', areas=areas, area=area), code
+    return render_template('world.html.j2', areas=areas, area=area), code
 
 
 # Jinja2 template filter to convert UNIX timestamps to Python date-time objects

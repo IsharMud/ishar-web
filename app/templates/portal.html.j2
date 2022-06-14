@@ -26,7 +26,7 @@
                     </tr>
                     {%- for player in current_user.players %}
                     <tr>
-                        {% set player_title = player.title | replace('%s','<strong>' + player.name + '</strong>')  %}
+                        {%- set player_title = player.title | replace('%s','<strong>' + player.name + '</strong>')  %}
                         <td><span title="Born {{ player.birth | unix2human_time }}">{{ player_title | safe }}</span></td>
                         <td>{{ player.player_class.class_name | title }}</td>
                         <td class="players-right">{{ player.level }}</td>

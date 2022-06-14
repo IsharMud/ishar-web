@@ -8,12 +8,14 @@
     {%- endblock %}
     </head>
     <body>
-        <div id="logo"><a href="{{ url_for('welcome') }}"><img src="{{ url_for('static', filename='logo.jpg') }}" alt="Ishar MUD"></a></div>
+        <div id="logo">
+            <a href="{{ url_for('welcome') }}"><img src="{{ url_for('static', filename='logo.jpg') }}" alt="Ishar MUD"></a>
+        </div>
         <div id="content">
             <div class="under">
-                {%- block navigation %}
-                {%- include('navigation.html.j2') %}
-                {%- endblock %}
+{%- block navigation %}
+{% include('navigation.html.j2') %}
+{%- endblock %}
                 <h1>{% block header %}{% endblock %}</h1>
                 <hr>
                 {%- with messages = get_flashed_messages(with_categories=true) %}

@@ -1,0 +1,35 @@
+{% extends "layout.html.j2" %}
+{% block title %}World{% endblock %}
+{% block header %}World{% endblock %}
+{%- block content %}
+                {%- if area is defined and area != None and areas is defined and areas != None %}
+                <h2 id="area-name">{{ area }}</h2>
+                <pre id="area-details">
+                    {{ areas }}
+                </pre>
+                <p>
+                    <a href="{{ url_for('world') }}"><img src="{{ url_for('static', filename='back.gif') }}" alt="Back to all areas"></a>
+                </p>
+                {%- else %}
+                <p>
+                    Ishar is a cohesive world with a living history.
+                    The vast world areas of Ishar have been written to include a detailed past that intrudes on the present,
+                    setting the scene for many of the adventures to be had here.</p>
+                <p>
+                    From the shattered ruins of <a href="{{ url_for('world', area='Torm Sarvek') }}">Torm Sarvek</a>
+                    to the splendor of <a href="{{ url_for('world', area='Mareldja') }}">Mareldja</a>, the darkness of Hedros,
+                    the dense Talrynian Forest, all of these lands and more are open to you.
+                </p>
+                <p>
+                    Whether treading across the barren wasteland of the Tundra or voyaging for the great Ocean, you will
+                never forget the sense of wonder and discovery to be experienced here.
+                </p>
+                <ul>
+                  {%- for area in areas %}
+                    <li>
+                        <a href="{{ url_for('world', area=area) }}">{{ area }}</a>
+                    </li>
+                  {%- endfor %}
+                </ul>
+                {%- endif %}
+{%- endblock %}
