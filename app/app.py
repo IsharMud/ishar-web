@@ -160,6 +160,12 @@ def discord():
 def get_started():
     return render_template('get_started.html.j2')
 
+# /support
+@app.route('/donate')
+@app.route('/support')
+def support():
+    return render_template('support.html.j2')
+
 # /world (or /areas)
 @app.route('/areas/<string:area>', methods=['GET'])
 @app.route('/areas', methods=['GET'])

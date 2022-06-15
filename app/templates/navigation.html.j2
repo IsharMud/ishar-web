@@ -16,6 +16,9 @@
                             <a href="{{ url_for('mud_clients') }}">MUD Clients</a>
                         </li>
                         <li>
+                            <a href="{{ url_for('support') }}">Support</a>
+                        </li>
+                        <li>
                             <a href="{{ url_for('world') }}">World of Ishar</a>
                         </li>
                         {%- if current_user is defined and current_user.is_authenticated and current_user.account_name is defined %}

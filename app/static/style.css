@@ -18,6 +18,12 @@ a[target="_blank"]::after {
     margin:     0 3px 0 5px;
 }
 
+#buy-coffee::after {
+    content:    none;
+    filter:     none;
+    margin:     normal;
+}
+
 h1, h2, h3, th {
     color:  #fa7;
 }
@@ -46,7 +52,7 @@ input[type="reset"], input[type="submit"], #login-form {
     text-align: center;
 }
 
-#area-name, #area-details, #season-details {
+#area-name, #area-details, #season-details, .support {
     text-align: center;
 }
 
