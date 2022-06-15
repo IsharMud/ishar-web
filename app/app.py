@@ -8,7 +8,8 @@ app = Flask('ishar')
 app.config.from_pyfile('config.py')
 login_manager = LoginManager()
 login_manager.init_app(app)
-login_manager.login_view = 'login'
+login_manager.login_view = 'login_form'
+login_manager.login_message_category = 'error'
 
 import models
 
