@@ -41,71 +41,88 @@ def page_not_found(message):
 def internal_server_error(message):
     return error(title='Internal Server Error', message=message, code=500)
 
+
 # Main welcome page/index (/)
 @app.route('/welcome')
 @app.route('/')
 def welcome():
     return render_template('welcome.html.j2')
 
+
 # /history (formerly "Background" page)
 @app.route('/history')
 def history():
     return render_template('history.html.j2')
 
-# Log-in form or processing (/login)
-@app.route('/login', methods=['GET', 'POST'])
+
+# Log in processing (POST /login)
+@app.route('/login', methods=['POST'])
 def login():
 
-    # If someone is trying to log in (submitted the form), process it
-    if request.method == 'POST':
+    try:
 
-        # Try to find the user account by e-mail address
+        # Find the user by e-mail address from the log in form
         user = models.Account.query.filter_by(email = request.form['email']).first()
 
-        # If we find the user and match the password, it is a successful log in, so redirect
+        # If we find the user and match the password, it is a successful log in, so redirect to portal
         if user != None and user.check_password(request.form['password']):
             flash('You successfully logged in!', 'success')
             login_user(user)
             return redirect(url_for('portal'), code=302)
 
-        # Otherwise, there must have been invalid credentials
+        # Otherwise, there must have been invalid credentials?
         else:
             flash('Sorry, but please enter a valid e-mail address and password.', 'error')
+            return login_form()
 
-    # # Redirect authenticated users to the portal
-    if current_user.is_authenticated:
-        return redirect(url_for('portal'), code=302)
-    else:
-        # Log-in form
-        return render_template('login.html.j2')
+    except Exception as e:
+        logout_user()
+        print(f"Log in exception: {e}")
+        flash('Sorry, but there was an error logging in!', 'error')
+        return login_form()
+
+
+# Log in page (GET /login)
+@app.route('/login', methods=['GET'])
+def login_form():
+    try:
+        logout_user()
+        return render_template('login_form.html.j2')
+    except Exception as e:
+        logout_user()
+        print(f"Log in form exception: {e}")
+        flash('Sorry, but there was an error with the log in form!', 'error')
+        return render_template('login_form.html.j2')
 
 
 # Portal for logged in users
 @app.route('/portal', methods=['GET'])
 @login_required
 def portal():
+
+    # Find the current season information and show the portal
     try:
-        print(f"Portal visit: {current_user}")
         season = models.Season.query.filter_by(is_active = 1).first()
         return render_template('portal.html.j2', season=season)
+
     except Exception as e:
         logout_user()
         print(f"Portal exception: {e}")
         flash('Sorry, but there was an error visiting the portal!', 'error')
-        return login()
+        return login_form()
 
-# /logout (log out)
+# /logout
 @app.route('/logout', methods=['GET'])
 @login_required
 def logout():
     try:
         logout_user()
         flash('You have been logged out successfully! See you again next time!', 'success')
-        return login()
+        return login_form()
     except Exception as e:
         print(f"Logout exception: {e}")
         flash('Sorry, but there was an error logging you out!', 'error')
-        return login()
+        return login_form()
 
 
 # /clients or /mud_clients
@@ -146,11 +163,13 @@ def connect():
     mudslinger_app_link = 'https://mudslinger.net/play/?host=isharmud.com&port=23'
     return redirect(mudslinger_app_link, code=302)
 
+
 # Redirect /discord to the invite link
 @app.route('/discord')
 def discord():
     discord_invite_link = 'https://discord.gg/VBmMXUpeve'
     return redirect(discord_invite_link, code=302)
+
 
 # /get_started
 @app.route('/gettingstarted')
@@ -160,11 +179,13 @@ def discord():
 def get_started():
     return render_template('get_started.html.j2')
 
-# /support
+
+# /support (or /donate)
 @app.route('/donate')
 @app.route('/support')
 def support():
     return render_template('support.html.j2')
+
 
 # /world (or /areas)
 @app.route('/areas/<string:area>', methods=['GET'])
@@ -192,5 +213,6 @@ def world(area=None):
 @app.template_filter('unix2human_time')
 def unix2human_time(unix_time):
     return datetime.datetime.fromtimestamp(unix_time).strftime('%c')
+
 
 import helptab
