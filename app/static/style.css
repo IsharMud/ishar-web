@@ -1,6 +1,6 @@
 body {
-	background-color:   #000;
-	color:              #fff;
+    background-color:   #000;
+    color:              #fff;
     font-family:        Arial, sans-serif;
 }
 
@@ -135,32 +135,31 @@ input {
 .under {
     background-color:   #484a47;
     overflow:           auto;
-	padding:            1em;
+    padding:            1em;
 }
 
-#navigation { 
-	white-space:    nowrap;
-	float:          right;
-	margin:         0px 0px 1em 1em;
-    padding:        0px;
+#navigation {
+    float:      right;
+    margin:     0px 0px 1em 1em;
+    padding:    0px;
 }
 
-#navigation ol, #navigation li { 
+#navigation ol, #navigation li {
     list-style: none;
-	margin:     0px;
-	padding:    0px;
+    margin:     0px;
+    padding:    0px;
 }
 
-#navigation a { 
-	background-color:   #313632; 
+#navigation a {
+    background-color:   #313632;
     border:             #686a65 1px solid;
-	display:            block;
+    display:            block;
     font-size:          1.25em;
-	margin:             2px 0px 0px 0px;
-	padding:            0.25em 0.5em;
-	text-decoration:    none;
+    margin:             2px 0px 0px 0px;
+    padding:            0.25em 0.5em;
+    text-decoration:    none;
 }
 
 #navigation a:hover {
-	background-color:   #686a65;
+    background-color:   #686a65;
 }
