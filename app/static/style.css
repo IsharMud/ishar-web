@@ -52,6 +52,15 @@ input[type="reset"], input[type="submit"], #login-form {
     text-align: center;
 }
 
+.login-email label::after, .login-password label::after {
+    content:        "\a";
+    white-space:    pre;
+}
+
+.login-remember {
+    font-size:  0.75em;
+}
+
 #area-name, #area-details, #season-details, .support {
     text-align: center;
 }

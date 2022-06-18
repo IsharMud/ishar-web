@@ -18,9 +18,11 @@
 {%- block navigation %}
 {% include('navigation.html.j2') %}
 {%- endblock %}
-                <h1>{% block header %}{% endblock %}</h1>
+                <h1>
+                    {% block header %}{% endblock %}
+                </h1>
                 <hr>
-                {%- with messages = get_flashed_messages(with_categories=true) %}
+                {%- with messages = get_flashed_messages(with_categories=True) %}
                 {%- if messages %}
                 <ul id="flashes">
                 {%- for category, message in messages %}

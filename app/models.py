@@ -2,24 +2,23 @@ from app import app
 import crypt
 from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
-from wtforms import Form, PasswordField, StringField, validators
+from flask_wtf import FlaskForm
+from wtforms import BooleanField, PasswordField, StringField, SubmitField, validators
+from wtforms.validators import DataRequired
 import hmac
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, MetaData, SmallInteger, String, Table
 from sqlalchemy.schema import FetchedValue
 from sqlalchemy.orm import relationship
+
+# Connect to the database
 db = SQLAlchemy(app)
 
 # Log In form class
-class LoginForm(Form):
-    email = StringField('Email Address', [
-            validators.Length(min=6, max=35),
-            validators.DataRequired()
-        ]
-    )
-    password = PasswordField('Password', [
-            validators.DataRequired()
-        ]
-    )
+class LoginForm(FlaskForm):
+    email       = StringField('E-mail Address', [validators.DataRequired()])
+    password    = PasswordField('Password', [validators.DataRequired()])
+    remember    = BooleanField('Remember Me')
+    submit      = SubmitField('Log In')
 
 
 # Account database class
@@ -37,7 +36,10 @@ class Account(db.Model, UserMixin):
     create_haddr    = Column(Integer, nullable=False)
     last_haddr      = Column(Integer, nullable=False)
     account_name    = Column(String(25), nullable=False, unique=True)
-    players         = relationship('Player', lazy='select', backref='account')
+    players         = relationship('Player',
+                        lazy='select',
+                        backref='account'
+                    )
 
     def get_id(self):
         return str(self.account_id)

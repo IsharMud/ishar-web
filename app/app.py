@@ -1,25 +1,28 @@
 import secrets
 import datetime
-from flask import abort, Flask, flash, make_response, redirect, render_template, request, url_for
+from flask import abort, Flask, flash, redirect, render_template, url_for
 from flask_login import current_user, LoginManager, login_required, login_user, logout_user
 
 # Create/configure the app
 app = Flask('ishar')
 app.config.from_pyfile('config.py')
+
+# Set up login manager
 login_manager = LoginManager()
 login_manager.init_app(app)
-login_manager.login_view = 'login_form'
-login_manager.login_message_category = 'error'
+login_manager.login_message_category    = 'error'
+login_manager.login_view                = 'login'
+login_manager.session_protection        = 'strong'
 
 import models
 
-# Login Manager user loader from database
+# Get users for the Flask Login Manager via Account object from the database
 @login_manager.user_loader
 def load_user(account_id):
     return models.Account.query.get(int(account_id))
 
-# Errors
-def error(title='Unknown Error', message='Sorry, but we experienced an unknown error', code=500):
+# Handle errors with a little template
+def error(title='Unknown Error', message='Sorry, but there was an unknown error.', code=500):
     return render_template('error.html.j2', title=title, message=message), code
 
 @app.errorhandler(400)
@@ -50,37 +53,38 @@ def welcome():
     return render_template('welcome.html.j2')
 
 
-# /history (formerly "Background" page)
+# /history (or /background)
+@app.route('/background', methods=['GET'])
 @app.route('/history', methods=['GET'])
 def history():
     return render_template('history.html.j2')
 
 
-# Log in processing (POST /login)
-@app.route('/login', methods=['POST'])
+# Log in (/login)
+@app.route('/login', methods=['GET', 'POST'])
 def login():
 
-    # Find the user by e-mail address from the log in form
-    user = models.Account.query.filter_by(email = request.form['email']).first()
+    # Get log in form object and check if submitted
+    login_form = models.LoginForm()
+    if login_form.validate_on_submit():
 
-    # If we find the user and match the password, it is a successful log in, so redirect to portal
-    if user != None and user.check_password(request.form['password']):
-        flash('You successfully logged in!', 'success')
-        login_user(user)
-        return redirect(url_for('portal'), code=302)
+        # Find the user by e-mail address from the log in form
+        user = models.Account.query.filter_by(email = login_form.email.data).first()
 
-    # Otherwise, there must have been invalid credentials?
-    else:
-        flash('Sorry, but please enter a valid e-mail address and password.', 'error')
-        return login_form()
+        # If we find the user email and match the password, it is a successful log in, so redirect to portal
+        if user != None and user.check_password(login_form.password.data):
+            flash('You have logged in!', 'success')
+            print(login_form.remember.data)
+            login_user(user, remember=login_form.remember.data)
+            return redirect(url_for('portal'), code=302)
 
+        # There must have been invalid credentials
+        else:
+            flash('Sorry, but please enter a valid e-mail address and password.', 'error')
 
-# Log in page (GET /login)
-@app.route('/login', methods=['GET'])
-def login_form():
-        logout_user()
-        form = models.LoginForm(request.form)
-        return render_template('login_form.html.j2', form=form)
+    # Make sure the user is logged out and show the log in form
+    logout_user()
+    return render_template('login.html.j2', login_form=login_form)
 
 
 # Portal for logged in users
@@ -98,8 +102,8 @@ def portal():
 @login_required
 def logout():
     logout_user()
-    flash('You have been logged out successfully! See you again next time!', 'success')
-    return login_form()
+    flash('You have logged out!', 'success')
+    return login()
 
 
 # /clients or /mud_clients
@@ -108,26 +112,26 @@ def logout():
 def mud_clients():
 
     mud_clients = {
-        "Cross-Platform" : {
-            'Mudlet' : 'https://www.mudlet.org/'
+        'Cross-Platform' : {
+            'Mudlet'        : 'https://www.mudlet.org/'
         },
-        "Android" : {
+        'Android' : {
             'Blowtorch' : 'http://bt.happygoatstudios.com/'
         },
-        "Windows" : {
-            'ZMud' : 'http://www.zuggsoft.com/zmud/zmudinfo.htm',
-            'alclient' : 'http://www.ashavar.com/client/',
-            'yTin' : 'http://ytin.sourceforge.net/',
-            'Gosclient' : 'http://gosclient.altervista.org/eng/',
-            'MUSHclient' : 'http://www.gammon.com.au/downloads/dlmushclient.htm'
+        'Windows' : {
+            'ZMud'          : 'https://www.zuggsoft.com/zmud/zmudinfo.htm',
+            'alclient'      : 'https://www.ashavar.com/client/',
+            'yTin'          : 'http://ytin.sourceforge.net/',
+            'Gosclient'     : 'http://gosclient.altervista.org/eng/',
+            'MUSHclient'    : 'https://www.gammon.com.au/downloads/dlmushclient.htm',
         },
-        "Mac OS" : {
-            'Atlantis' : 'http://www.riverdark.net/atlantis/',
-            'MudWalker' : 'http://mudwalker.cubik.org/'
+        'Mac OS' : {
+            'Atlantis'      : 'https://www.riverdark.net/atlantis/',
+            'MudWalker'     : 'http://mudwalker.cubik.org/'
         },
-        "Linux / UNIX" : {
-            'TinTin++' : 'http://tintin.sourceforge.net/',
-            'TinyFugue' : 'http://tinyfugue.sourceforge.net/'
+        'Linux / UNIX' : {
+            'TinTin++'      : 'http://tintin.sourceforge.net/',
+            'TinyFugue'     : 'http://tinyfugue.sourceforge.net/'
         }
     }
 
