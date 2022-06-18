@@ -79,7 +79,8 @@ def login():
 @app.route('/login', methods=['GET'])
 def login_form():
         logout_user()
-        return render_template('login_form.html.j2')
+        form = models.LoginForm(request.form)
+        return render_template('login_form.html.j2', form=form)
 
 
 # Portal for logged in users
