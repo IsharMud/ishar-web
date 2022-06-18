@@ -20,6 +20,12 @@ class LoginForm(FlaskForm):
     remember    = BooleanField('Remember Me')
     submit      = SubmitField('Log In')
 
+# Change Password form class
+class ChangePasswordForm(FlaskForm):
+    current_password        = PasswordField('Current Password', [validators.DataRequired()])
+    new_password            = PasswordField('New Password', [validators.DataRequired()])
+    confirm_new_password    = PasswordField('Confirm New Password', [validators.DataRequired()])
+    submit                  = SubmitField('Change Password')
 
 # Account database class
 class Account(db.Model, UserMixin):

@@ -1,7 +1,7 @@
 import secrets
 import datetime
 from flask import Flask, flash, redirect, render_template, url_for
-from flask_login import current_user, LoginManager, login_required, login_user, logout_user
+from flask_login import current_user, fresh_login_required, LoginManager, login_required, login_user, logout_user
 
 # Create/configure the app
 app = Flask('ishar')
@@ -10,9 +10,12 @@ app.config.from_pyfile('config.py')
 # Set up login manager
 login_manager = LoginManager()
 login_manager.init_app(app)
-login_manager.login_message_category    = 'error'
-login_manager.login_view                = 'login'
-login_manager.session_protection        = 'strong'
+login_manager.login_message_category            = 'error'
+login_manager.login_view                        = 'login'
+login_manager.needs_refresh_message             = 'To protect your account, please log in again.'
+login_manager.needs_refresh_message_category    = 'error'
+login_manager.refresh_view                      = 'login'
+login_manager.session_protection                = 'strong'
 
 import models
 
@@ -85,6 +88,18 @@ def login():
     logout_user()
     return render_template('login.html.j2', login_form=login_form)
 
+
+# Change password for logged in users (/password)
+@app.route('/password', methods=['GET', 'POST'])
+@fresh_login_required
+def change_password():
+
+    # Get change password form object and check if submitted
+    change_password_form = models.ChangePasswordForm()
+    if change_password_form.validate_on_submit():
+        pass
+
+    return render_template('change_password.html.j2', change_password_form=change_password_form)
 
 # Portal for logged in users
 @app.route('/portal', methods=['GET'])
