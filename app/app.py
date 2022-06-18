@@ -1,6 +1,6 @@
 import secrets
 import datetime
-from flask import abort, Flask, flash, redirect, render_template, url_for
+from flask import Flask, flash, redirect, render_template, url_for
 from flask_login import current_user, LoginManager, login_required, login_user, logout_user
 
 # Create/configure the app
