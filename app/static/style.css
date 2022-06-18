@@ -52,9 +52,13 @@ input[type="reset"], input[type="submit"], #login-form {
     text-align: center;
 }
 
-.login-email label::after, .login-password label::after {
+.login-email label::after, .login-password label::after, .change-password label::after {
     content:        "\a";
     white-space:    pre;
+}
+
+#change-password-form {
+    text-align: center;
 }
 
 .login-remember {

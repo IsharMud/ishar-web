@@ -1,11 +1,11 @@
 from app import app
 import crypt
+import hmac
 from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
 from wtforms import BooleanField, PasswordField, StringField, SubmitField, validators
-from wtforms.validators import DataRequired
-import hmac
+from wtforms.validators import DataRequired, Email, EqualTo
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, MetaData, SmallInteger, String, Table
 from sqlalchemy.schema import FetchedValue
 from sqlalchemy.orm import relationship
@@ -15,7 +15,7 @@ db = SQLAlchemy(app)
 
 # Log In form class
 class LoginForm(FlaskForm):
-    email       = StringField('E-mail Address', [validators.DataRequired()])
+    email       = StringField('E-mail Address', [validators.DataRequired(), validators.Email()])
     password    = PasswordField('Password', [validators.DataRequired()])
     remember    = BooleanField('Remember Me')
     submit      = SubmitField('Log In')
@@ -24,7 +24,7 @@ class LoginForm(FlaskForm):
 class ChangePasswordForm(FlaskForm):
     current_password        = PasswordField('Current Password', [validators.DataRequired()])
     new_password            = PasswordField('New Password', [validators.DataRequired()])
-    confirm_new_password    = PasswordField('Confirm New Password', [validators.DataRequired()])
+    confirm_new_password    = PasswordField('Confirm New Password', [validators.DataRequired(),validators.EqualTo('new_password')])
     submit                  = SubmitField('Change Password')
 
 # Account database class
