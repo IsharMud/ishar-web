@@ -74,7 +74,6 @@ def login():
         # If we find the user email and match the password, it is a successful log in, so redirect to portal
         if user != None and user.check_password(login_form.password.data):
             flash('You have logged in!', 'success')
-            print(login_form.remember.data)
             login_user(user, remember=login_form.remember.data)
             return redirect(url_for('portal'), code=302)
 
