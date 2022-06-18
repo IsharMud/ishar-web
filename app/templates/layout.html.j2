@@ -11,7 +11,9 @@
     </head>
     <body>
         <div id="logo">
-            <a href="{{ url_for('welcome') }}"><img src="{{ url_for('static', filename='logo.jpg') }}" alt="Ishar MUD"></a>
+            <a href="{{ url_for('welcome') }}">
+                <img src="{{ url_for('static', filename='logo.jpg') }}" alt="Ishar MUD">
+            </a>
         </div>
         <div id="content">
             <div class="under">
@@ -26,7 +28,9 @@
                 {%- if messages %}
                 <ul id="flashes">
                 {%- for category, message in messages %}
-                    <li class="flash-{{ category }}">{{ message }}</li>
+                    <li class="flash-{{ category }}">
+                        {{ message }}
+                    </li>
                 {%- endfor %}
                 </ul>
                 <hr>

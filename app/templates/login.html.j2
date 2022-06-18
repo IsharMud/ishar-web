@@ -6,15 +6,15 @@
                         {{ field.label | safe }}
                         {{ field(**kwargs) | safe }}
                     </p>
-{%- if field.errors %}
-    <ul class="flash-error">
-{%- for error in field.errors %}
-        <li>
-            {{ error }}
-        </li>
-{%- endfor %}
-    </ul>
-{%- endif %}
+    {%- if field.errors %}
+                <ul class="flash-error">
+        {%- for error in field.errors %}
+                    <li>
+                        {{ error }}
+                    </li>
+        {%- endfor %}
+                </ul>
+    {%- endif %}
 {%- endmacro %}
 {%- block content %}
     {%- if login_form is defined %}
