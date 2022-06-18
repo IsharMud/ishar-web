@@ -1,7 +1,7 @@
 {% extends "layout.html.j2" %}
 {% block title %}Player Log In{% endblock %}
 {% block header %}Player Log In{% endblock %}
-{% macro render_field(field) %}
+{%- macro render_field(field) %}
                     <p class="login-{{ field.name | safe }}">
                         {{ field.label | safe }}
                         {{ field(**kwargs) | safe }}

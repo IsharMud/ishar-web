@@ -1,8 +1,11 @@
 {% extends "layout.html.j2" %}
 {% block title %}{{ title | default('Page Not Found') }}{% endblock %}
 {% block header %}{{ title | default('Page Not Found') }}{% endblock %}
-{% block content %}
-<p>{{ message | default("Hmmm... The page you are looking for can not be found.") }}</p>
-<br>
-You may want to return to the <a href="{{ url_for('welcome') }}">front page</a>.</p>
-{% endblock %}
+{%- block content %}
+                <p>
+                    {{ message | default("Hmmm... The page you are looking for can not be found.") }}
+                </p>
+                <p>
+                    You may want to return to the <a href="{{ url_for('welcome') }}">front page</a>.
+                </p>
+{%- endblock %}
