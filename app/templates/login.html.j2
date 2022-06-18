@@ -1,0 +1,31 @@
+{% extends "layout.html.j2" %}
+{% block title %}Player Log In{% endblock %}
+{% block header %}Player Log In{% endblock %}
+{% macro render_field(field) %}
+                    <p class="login-{{ field.name | safe }}">
+                        {{ field.label | safe }}
+                        {{ field(**kwargs) | safe }}
+                    </p>
+{%- if field.errors %}
+    <ul class="flash-error">
+{%- for error in field.errors %}
+        <li>
+            {{ error }}
+        </li>
+{%- endfor %}
+    </ul>
+{%- endif %}
+{%- endmacro %}
+{%- block content %}
+    {%- if login_form is defined %}
+                <form method="post" action="{{ url_for('login') }}" id="login-form">
+                    {{ render_field(login_form.email) }}
+                    {{ render_field(login_form.password) }}
+                    {{ render_field(login_form.remember) }}
+                    {{ login_form.csrf_token }}
+                    {{ login_form.submit }}
+                </form>
+    {%- else %}
+                Missing form!
+    {%- endif %}
+{%- endblock %}
