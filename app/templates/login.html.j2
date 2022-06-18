@@ -7,7 +7,7 @@
                         {{ field(**kwargs) | safe }}
                     </p>
     {%- if field.errors %}
-                <ul class="flash-error">
+                <ul class="field-errors">
         {%- for error in field.errors %}
                     <li>
                         {{ error }}
@@ -24,6 +24,7 @@
                     {{ render_field(login_form.remember) }}
                     {{ login_form.csrf_token }}
                     {{ login_form.submit }}
+                    <input type="reset">
                 </form>
     {%- else %}
                 Missing form!

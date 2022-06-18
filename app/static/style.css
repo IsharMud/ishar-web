@@ -106,6 +106,12 @@ img {
     color:  #4CBB17;
 }
 
+.field-errors {
+    color:          #fa8072;
+    font-weight:    bold;
+    list-style:     none;
+}
+
 #content {
     margin:     auto;
     overflow:   auto;

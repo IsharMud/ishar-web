@@ -89,7 +89,7 @@ def login():
     return render_template('login.html.j2', login_form=login_form)
 
 
-# Change password for logged in users (/password)
+# Allow logged in users to change their passwords
 @app.route('/password', methods=['GET', 'POST'])
 @fresh_login_required
 def change_password():
@@ -97,9 +97,21 @@ def change_password():
     # Get change password form object and check if submitted
     change_password_form = models.ChangePasswordForm()
     if change_password_form.validate_on_submit():
-        pass
 
+        # Proceed if the user is authenticated and entered their current password correctly
+        if current_user.is_authenticated and current_user.check_password(change_password_form.current_password.data):
+            if current_user.change_password(change_password_form.confirm_new_password.data):
+                flash('Your password has been changed!', 'success')
+            else:
+                flash('Sorry, but your password could not be changed.', 'error')
+
+        # Otherwise, tell them to enter their current password correctly
+        else:
+            flash('Please enter your current password correctly!', 'error')
+
+    # Show the change password form
     return render_template('change_password.html.j2', change_password_form=change_password_form)
+
 
 # Portal for logged in users
 @app.route('/portal', methods=['GET'])

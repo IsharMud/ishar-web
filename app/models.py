@@ -4,7 +4,7 @@ import hmac
 from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
-from wtforms import BooleanField, PasswordField, StringField, SubmitField, validators
+from wtforms import BooleanField, EmailField, PasswordField, SubmitField, validators
 from wtforms.validators import DataRequired, Email, EqualTo
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, MetaData, SmallInteger, String, Table
 from sqlalchemy.schema import FetchedValue
@@ -13,19 +13,43 @@ from sqlalchemy.orm import relationship
 # Connect to the database
 db = SQLAlchemy(app)
 
+
 # Log In form class
 class LoginForm(FlaskForm):
-    email       = StringField('E-mail Address', [validators.DataRequired(), validators.Email()])
-    password    = PasswordField('Password', [validators.DataRequired()])
+    email       = EmailField('E-mail Address', [
+                    validators.DataRequired(),
+                    validators.Email()
+                    ]
+                )
+    password    = PasswordField('Password', [
+                    validators.DataRequired(),
+                    validators.Length(min=6, max=36)
+                    ]
+                )
     remember    = BooleanField('Remember Me')
     submit      = SubmitField('Log In')
 
+
 # Change Password form class
 class ChangePasswordForm(FlaskForm):
-    current_password        = PasswordField('Current Password', [validators.DataRequired()])
-    new_password            = PasswordField('New Password', [validators.DataRequired()])
-    confirm_new_password    = PasswordField('Confirm New Password', [validators.DataRequired(),validators.EqualTo('new_password')])
+    current_password        = PasswordField('Current Password', [
+                                validators.DataRequired(),
+                                validators.Length(min=6, max=36)
+                                ]
+                            )
+    new_password            = PasswordField('New Password', [
+                                validators.DataRequired(),
+                                validators.Length(min=6, max=36)
+                                ]
+                            )
+    confirm_new_password    = PasswordField('Confirm New Password', [
+                                validators.DataRequired(),
+                                validators.Length(min=6, max=36),
+                                validators.EqualTo('new_password', message='Please make sure that your new passwords match!')
+                                ]
+                            )
     submit                  = SubmitField('Change Password')
+
 
 # Account database class
 class Account(db.Model, UserMixin):
@@ -55,6 +79,15 @@ class Account(db.Model, UserMixin):
 
     def is_active(self):
         return isinstance(self.account_id, int)
+
+    # Method to allow users to change their account password
+    def change_password(self, new_password):
+        try:
+            self.password = crypt.crypt(new_password, crypt.mksalt(method=crypt.METHOD_MD5))
+            db.session.commit()
+            return True
+        except Exception as e:
+            return False
 
     def check_password(self, password):
         return hmac.compare_digest(crypt.crypt(password, self.password), self.password)
