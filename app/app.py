@@ -177,8 +177,9 @@ def discord():
     discord_invite_link = 'https://discord.gg/VBmMXUpeve'
     return redirect(discord_invite_link, code=302)
 
-# /faq (or /questions)
+# /faq (or /faqs or /questions)
 @app.route('/questions')
+@app.route('/faqs')
 @app.route('/faq')
 def faq():
 
