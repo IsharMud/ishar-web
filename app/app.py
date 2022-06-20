@@ -185,41 +185,41 @@ def faq():
 
     faqs = {
 
-            'Is Ishar MUD free?':
-                "<strong>Yes!</strong> While you are more than welcome to" \
-                " <a href=\"" + url_for('support') + "\">offer support</a> " \
-                "Ishar MUD is free to use, play, and enjoy.",
+            'Is Ishar MUD free?': [
+                "<strong>Yes!</strong> While you are more than welcome to " \
+                " <a href=\"" + url_for('support') + "\">offer support</a>, " \
+                "Ishar MUD is free to use, play, and enjoy."
+            ],
 
-            'Are there player classes?':
-                '<strong>Yes!</strong> There are five (5) player classes:' \
-                '<ol>' \
-                '<li>Cleric</li>' \
-                '<li>Magician</li>' \
-                '<li>Necromancer</li>' \
-                '<li>Rogue</li>' \
-                '<li>Warrior</li>' \
-                '</ol>',
+            'Are there player classes?': [
+                '<strong>Yes!</strong> There are five (5) player classes:',
+                ['Cleric', 'Magician', 'Necromancer', 'Rogue', 'Warrior']
+            ],
 
-            'Is there role-playing?':
-                '<strong>No.</strong> Ishar MUD does not require role-playing.',
+            'Is there role-playing?': [
+                '<strong>No.</strong> - Ishar MUD does not require role-playing.'
+            ],
 
-            'Is there player-killing (PK) or player-versus-player (PvP) combat?':
-                '<strong>Yes and no...</strong> While player-versus-player combat is possible,' \
-                'it is rare and not a requirement of the game.',
-
-            'What about my equipment when I log out?':
+            'What about my equipment when I log out?': [
                 'When you sign out or log off, your character\'s equipment, gear, ' \
-                'and inventory is simply <strong>preserved until the end of the season</strong>.' \
-                'The season currently changes every four (4) months.',
+                'and inventory is simply <strong>preserved until the end of the season</strong>.',
+                'The season currently changes every four (4) months.'
+            ],
 
-            'Is death permanent?':
-                'When first creating a character, <strong>you can choose</strong> whether to play in ' \
-                '"Survival" (aka "perma-death") or "Classic" mode. While survival mode gains experience faster, ' \
-                'classic mode subtracts experience upon death, but allows you to retrieve your character\'s corpse.',
+            'Is death permanent?': [
+                'When first creating a character, <strong>you can choose</strong> whether to play in "Survival" (aka "perma-death") or "Classic" mode.',
+                "While survival mode gains experience faster, classic mode subtracts experience upon death, but allows you to retrieve your character's corpse."
+            ],
 
-            'Can I have multiple characters or multi-play?':
-                'You may only have a single account with up to <strong>ten (10) characters per account</strong>.' \
+            'Can I have multiple characters or multi-play?': [
+                'You may only have a single account with up to <strong>ten (10) characters per account</strong>.',
                 'You may actively <strong>multi-play up to three (3) characters at once</strong>.'
+            ],
+
+            'Is there player-killing (PK) or player-versus-player (PvP) combat?': [
+                '<strong>Yes and no...</strong>',
+                "While player-versus-player combat (or PK'ing) is possible, it is very rare and not a requirement of the game."
+            ]
     }
 
     return render_template('faq.html.j2', faqs=faqs)
