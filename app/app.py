@@ -197,7 +197,7 @@ def faq():
             ],
 
             'Is there role-playing?': [
-                '<strong>No.</strong> - Ishar MUD does not require role-playing.'
+                '<strong>No.</strong> Ishar MUD does not require role-playing.'
             ],
 
             'What about my equipment when I log out?': [
