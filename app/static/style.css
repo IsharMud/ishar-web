@@ -182,3 +182,7 @@ input {
 #navigation a:hover {
     background-color:   #686a65;
 }
+
+.faq-answers, .faq-nested {
+    list-style: none;
+}

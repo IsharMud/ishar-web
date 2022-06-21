@@ -5,7 +5,7 @@
                 <p>
                     Here are a few common questions that we have seen and heard about Ishar MUD.
                     If there is any thing that you think is missing, please feel free to reach out
-                    by e-mailing <a href="mailto:admin@isharmud.com: target="_blank">admin@isharmud.com</a>.
+                    by e-mailing <a href="mailto:admin@isharmud.com" target="_blank">admin@isharmud.com</a>.
                 </p>
                 {%- if faqs is defined and faqs is iterable and faqs|length > 0 %}
                 <ul>
@@ -16,24 +16,30 @@
                     </li>
                     {%- endif %}
                     {%- if answers is defined %}
-                    <ul>
-                    {%- for answer in answers %}
+                    <li class="faq-answers">
+                        <ul>
+                        {%- for answer in answers %}
                         {%- if answer is defined %}
-                        <li>
                             {%- if answer is not string and answer is iterable and answer|length > 1 %}
-                            <ol>
-                            {%- for answer_item in answer %}
-                                <li>{{ answer_item }}</li>
-                            {%- endfor %}
-                            </ol>
+                            <li class="faq-nested">
+                                <ol>
+                                {%- for answer_item in answer %}
+                                    <li>
+                                        {{ answer_item }}
+                                    </li>
+                                {%- endfor %}
+                                </ol>
+                            </li>
                             {%- else %}
-                            {{ answer }}
+                            <li>
+                                {{ answer }}
+                            </li>
                             {%- endif %}
-                        </li>
                         {%- endif %}
-                    {%- endfor %}
-                    </ul>
-                    {% endif %}
+                        {%- endfor %}
+                        </ul>
+                    </li>
+                    {%- endif %}
                 {%- endfor %}
                 </ul>
             {%- endif %}
