@@ -62,7 +62,15 @@ input[type="reset"], input[type="submit"], #login-form, #new-account-form {
 }
 
 .login-remember {
-    font-size:  0.75em;
+    font-size:  0.85em;
+    text-alignn: center;
+}
+
+#new-account-link {
+    font-size:  0.9em;
+    display:    table;
+    margin:     0 auto;
+    margin-top: 1.5em;
 }
 
 #area-name, #area-details, #season-details, .support {

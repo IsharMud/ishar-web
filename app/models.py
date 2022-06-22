@@ -124,9 +124,9 @@ class Account(db.Model, UserMixin):
     def create_account(self):
         try:
             self.password = crypt.crypt(self.password, crypt.mksalt(method=crypt.METHOD_MD5))
-            id = db.session.add(self)
+            db.session.add(self)
             db.session.commit()
-            return id
+            return self.account_id
         except Exception as e:
             print(e)
             return e

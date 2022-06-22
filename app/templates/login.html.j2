@@ -25,8 +25,14 @@
                     {{ login_form.csrf_token }}
                     {{ login_form.submit }}
                     <input type="reset">
+                    <br>
                 </form>
     {%- else %}
                 Missing form!
     {%- endif %}
+                <span id="new-account-link">
+                    <a href="{{ url_for('new_account') }}">
+                        New Player?
+                    </a>
+                </span>
 {%- endblock %}

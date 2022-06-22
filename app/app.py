@@ -147,43 +147,49 @@ def new_account():
     # Get new account form object and check if submitted
     new_account_form = models.NewAccountForm()
     if new_account_form.validate_on_submit():
-        ip_address      = ipaddress.ip_address(request.remote_addr)
 
         # Check that e-mail address has not already been used
         find_email = models.Account.query.filter_by(email = new_account_form.email.data).first()
         if find_email:
-            flash('Sorry, but that e-mail address exists, please log in.')
+            flash('Sorry, but that e-mail address exists. Please log in.', 'error')
             return redirect(url_for('login'), code=302)
 
         # Check that the account name is not in use
         find_name = models.Account.query.filter_by(account_name = new_account_form.account_name.data).first()
         if find_name:
-            flash('Sorry, but that account name is already taken!')
+            flash('Sorry, but that account name is already being used!', 'error')
 
         # Otherwise, proceed in trying to create the new account
         else:
-
-            new_account     = models.Account(
+            ip_address = ipaddress.ip_address(request.remote_addr)
+            new_account = models.Account(
                 email           = new_account_form.email.data,
                 password        = new_account_form.confirm_password.data,
-                # FIX ME
+                ##########
+                # FIX ME #
+                ##########
                 create_isp      = '',
                 last_isp        = '',
                 create_ident    = '',
                 last_ident      = '',
+                ##########
+                # FIX ME #
+                ##########
                 create_haddr    = int(ip_address),
-                last_haddr      = 0,
+                last_haddr      = int(ip_address),
                 account_name    = new_account_form.account_name.data
             )
 
-            made_id = new_account.create_account()
-            print(made_id)
-            created_account = models.Account.query.filter_by(account_id = made_id).first()
+            # Create the account in the database, get the account ID, and log the user in
+            created_id = new_account.create_account()
+            created_account = models.Account.query.filter_by(account_id = created_id).first()
             if created_account:
                 login_user(created_account)
                 flash('Your account has been created!', 'success')
+            else:
+                flash('Sorry, but please try again!', 'error')
 
-    # Redirect users who are logged in to the portal
+    # Redirect users who are logged in to the portal, including newly created accounts
     if current_user.is_authenticated:
         return redirect(url_for('portal'), code=302)
 
