@@ -47,12 +47,12 @@ td {
     border: #686a65 1px solid;
 }
 
-input[type="reset"], input[type="submit"], #login-form {
+input[type="reset"], input[type="submit"], #login-form, #new-account-form {
     font-size:  1.25em;
     text-align: center;
 }
 
-.login-email label::after, .login-password label::after, .change-password label::after {
+.login-email label::after, .login-password label::after, .change-password label::after, .new-account label::after {
     content:        "\a";
     white-space:    pre;
 }

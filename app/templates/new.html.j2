@@ -1,0 +1,33 @@
+{% extends "layout.html.j2" %}
+{% block title %}New Account{% endblock %}
+{% block header %}New Account{% endblock %}
+{%- macro render_field(field) %}
+                    <p class="new-account">
+                        {{ field.label | safe }}
+                        {{ field(**kwargs) | safe }}
+                    </p>
+    {%- if field.errors %}
+                <ul class="field-errors">
+        {%- for error in field.errors %}
+                    <li>
+                        {{ error }}
+                    </li>
+        {%- endfor %}
+                </ul>
+    {%- endif %}
+{%- endmacro %}
+{%- block content %}
+    {%- if new_account_form is defined %}
+                <form autocomplete="off" method="post" action="{{ url_for('new_account') }}" id="new-account-form">
+                    {{ render_field(new_account_form.account_name, autocomplete='off') }}
+                    {{ render_field(new_account_form.email, autocomplete='off') }}
+                    {{ render_field(new_account_form.password, autocomplete='off') }}
+                    {{ render_field(new_account_form.confirm_password, autocomplete='off') }}
+                    {{ new_account_form.csrf_token }}
+                    {{ new_account_form.submit }}
+                    <input type="reset">
+                </form>
+    {%- else %}
+                Missing form!
+    {%- endif %}
+{%- endblock %}

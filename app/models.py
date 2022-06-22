@@ -4,15 +4,15 @@ import hmac
 from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
-from wtforms import BooleanField, EmailField, PasswordField, SubmitField, validators
+from wtforms import BooleanField, EmailField, PasswordField, StringField, SubmitField, validators
 from wtforms.validators import DataRequired, Email, EqualTo
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, MetaData, SmallInteger, String, Table
+from wtforms_validators import Alpha
+from sqlalchemy import exc, Column, DateTime, ForeignKey, Integer, MetaData, SmallInteger, String
 from sqlalchemy.schema import FetchedValue
 from sqlalchemy.orm import relationship
 
 # Connect to the database
 db = SQLAlchemy(app)
-
 
 # Log In form class
 class LoginForm(FlaskForm):
@@ -49,6 +49,32 @@ class ChangePasswordForm(FlaskForm):
                                 ]
                             )
     submit                  = SubmitField('Change Password')
+
+# New Account form class
+class NewAccountForm(FlaskForm):
+    account_name        = StringField('Friendly Name', [
+                                validators.DataRequired(),
+                                validators.Length(min=3, max=25),
+                                Alpha(message='Please only use letters in your friendly name!')
+                                ]
+                            )
+    email               = EmailField('E-mail Address', [
+                                validators.DataRequired(),
+                                validators.Email()
+                                ]
+                            )
+    password            = PasswordField('Password', [
+                                validators.DataRequired(),
+                                validators.Length(min=6, max=36)
+                                ]
+                            )
+    confirm_password    = PasswordField('Confirm Password', [
+                                validators.DataRequired(),
+                                validators.Length(min=6, max=36),
+                                validators.EqualTo('password', message='Please make sure that your passwords match!')
+                                ]
+                            )
+    submit              = SubmitField('Create Account')
 
 
 # Account database class
@@ -87,10 +113,23 @@ class Account(db.Model, UserMixin):
             db.session.commit()
             return True
         except Exception as e:
-            return False
+            print(e)
+            return e
 
+    # Method to check an account password
     def check_password(self, password):
         return hmac.compare_digest(crypt.crypt(password, self.password), self.password)
+
+    # Method to create new account
+    def create_account(self):
+        try:
+            self.password = crypt.crypt(self.password, crypt.mksalt(method=crypt.METHOD_MD5))
+            id = db.session.add(self)
+            db.session.commit()
+            return id
+        except Exception as e:
+            print(e)
+            return e
 
 
 # Player Class database class

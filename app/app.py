@@ -1,11 +1,20 @@
-import secrets
 import datetime
-from flask import Flask, flash, redirect, render_template, url_for
+from flask import Flask, flash, redirect, render_template, request, send_from_directory, url_for
 from flask_login import current_user, fresh_login_required, LoginManager, login_required, login_user, logout_user
+import ipaddress
+import secrets
+import socket
 
 # Create/configure the app
 app = Flask('ishar')
 app.config.from_pyfile('config.py')
+
+# Static root paths
+@app.route('/favicon.ico')
+@app.route('/robots.txt')
+@app.route('/sitemap.xml')
+def static_from_root():
+    return send_from_directory(app.static_folder, request.path[1:])
 
 # Set up login manager
 login_manager = LoginManager()
@@ -22,7 +31,7 @@ import models
 # Get users for the Flask Login Manager via Account object from the database
 @login_manager.user_loader
 def load_user(account_id):
-    return models.Account.query.get(int(account_id))
+    return models.Account.query.get(str(account_id))
 
 # Handle errors with a little template
 def error(title='Unknown Error', message='Sorry, but there was an unknown error.', code=500):
@@ -72,12 +81,12 @@ def login():
     if login_form.validate_on_submit():
 
         # Find the user by e-mail address from the log in form
-        user = models.Account.query.filter_by(email = login_form.email.data).first()
+        account = models.Account.query.filter_by(email = login_form.email.data).first()
 
         # If we find the user email and match the password, it is a successful log in, so redirect to portal
-        if user != None and user.check_password(login_form.password.data):
+        if account != None and account.check_password(login_form.password.data):
             flash('You have logged in!', 'success')
-            login_user(user, remember=login_form.remember.data)
+            login_user(account, remember=login_form.remember.data)
             return redirect(url_for('portal'), code=302)
 
         # There must have been invalid credentials
@@ -125,12 +134,61 @@ def portal():
 
 # /logout
 @app.route('/logout', methods=['GET'])
-@login_required
 def logout():
     logout_user()
     flash('You have logged out!', 'success')
     return login()
 
+
+# Allow anonymous users to create a new account
+@app.route('/new', methods=['GET', 'POST'])
+def new_account():
+
+    # Get new account form object and check if submitted
+    new_account_form = models.NewAccountForm()
+    if new_account_form.validate_on_submit():
+        ip_address      = ipaddress.ip_address(request.remote_addr)
+
+        # Check that e-mail address has not already been used
+        find_email = models.Account.query.filter_by(email = new_account_form.email.data).first()
+        if find_email:
+            flash('Sorry, but that e-mail address exists, please log in.')
+            return redirect(url_for('login'), code=302)
+
+        # Check that the account name is not in use
+        find_name = models.Account.query.filter_by(account_name = new_account_form.account_name.data).first()
+        if find_name:
+            flash('Sorry, but that account name is already taken!')
+
+        # Otherwise, proceed in trying to create the new account
+        else:
+
+            new_account     = models.Account(
+                email           = new_account_form.email.data,
+                password        = new_account_form.confirm_password.data,
+                # FIX ME
+                create_isp      = '',
+                last_isp        = '',
+                create_ident    = '',
+                last_ident      = '',
+                create_haddr    = int(ip_address),
+                last_haddr      = 0,
+                account_name    = new_account_form.account_name.data
+            )
+
+            made_id = new_account.create_account()
+            print(made_id)
+            created_account = models.Account.query.filter_by(account_id = made_id).first()
+            if created_account:
+                login_user(created_account)
+                flash('Your account has been created!', 'success')
+
+    # Redirect users who are logged in to the portal
+    if current_user.is_authenticated:
+        return redirect(url_for('portal'), code=302)
+
+    # Show the new account form
+    return render_template('new.html.j2', new_account_form=new_account_form)
 
 # /clients or /mud_clients
 @app.route('/clients', methods=['GET'])

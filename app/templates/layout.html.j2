@@ -2,6 +2,17 @@
 <html lang="en">
     <head>
     {%- block head %}
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="author" content="Ishar MUD">
+        <meta name="description" content="Ishar MUD">
+        <meta name="keywords" content="Ishar MUD, Ishar, IsharMUD, MUD, Multi User Dungeon, Multi-User Dungeon, Game">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta property="og:type" content="website">
+        <meta property="og:site_name" content="Ishar MUD">
+        <meta property="og:title" content="Ishar MUD">
+        <meta property="og:description" content="Ishar MUD: a free online text-adventure RPG">
+        <meta property="og:url" content="{{ url_for('welcome', _external=True) }}">
+        <meta property="og:image" content="{{ url_for('static', filename='ishar.png', _external=True) }}">
         <title>{% block title %}{% endblock %} - Ishar MUD: a free online text-adventure RPG</title>
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
         <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
