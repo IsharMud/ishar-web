@@ -106,6 +106,14 @@ class Account(db.Model, UserMixin):
     def is_active(self):
         return isinstance(self.account_id, int)
 
+    # Accounts with a player of a true_level greater than 22 are administrators
+    def is_admin(self):
+        for player in self.players:
+            if player.true_level > 22:
+                return True
+
+        return False
+
     # Method to allow users to change their account password
     def change_password(self, new_password):
         try:

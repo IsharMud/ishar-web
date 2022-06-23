@@ -129,7 +129,7 @@ def portal():
 
     # Find the current season information and show the portal
     season = models.Season.query.filter_by(is_active = 1).first()
-    return render_template('portal.html.j2', season=season)
+    return render_template('portal.html.j2', season=season, is_admin=current_user.is_admin())
 
 
 # /logout
@@ -329,7 +329,7 @@ def world(area=None, code=200):
 # Jinja2 template filter to convert UNIX timestamps to Python date-time objects
 @app.template_filter('unix2human_time')
 def unix2human_time(unix_time):
-    return datetime.datetime.fromtimestamp(unix_time).strftime('%c')
+    return datetime.datetime.fromtimestamp(unix_time).strftime('%A, %B %d, %Y %I:%M %p %Z')
 
 
 import helptab

@@ -47,22 +47,31 @@
                     </tr>
                     {%- endfor %}
                 </table>
+                <br>
                 {%- else %}
                 <h3>
                     You have not created any players yet!
                 </h3>
                 {%- endif %}
-                <br>
-                {%- if season.season_id is defined and season.effective_date is defined and season.expiration_date is defined %}
-                <h4 id="season-details">
-                    <strong>Season {{ season.season_id }}</strong> / <strong>{{ season.effective_date | unix2human_time }}</strong> ~ <strong>{{ season.expiration_date | unix2human_time }}</strong>
-                </h4>
+                {%- if is_admin is defined and is_admin == True %}
+                <div id="portal-admin">
+                    <p>
+                        <strong>You are an administrator.</strong>
+                    </p>
+                </div>
                 {%- endif %}
 {%- endblock %}
-{%- if current_user.created_at is defined and current_user.created_at != '' %}
 {% block footer %}
-            <div id="created">
-                You created your account on {{ current_user.created_at.strftime('%c') }}
-            </div>
+            {%- if current_user.created_at is defined and current_user.created_at != '' %}
+            <span id="created">
+                <strong>Account Created</strong>:<br>
+                {{ current_user.created_at.strftime('%A, %B %d, %Y %I:%M %p %Z') }}
+            </span>
+            {%- endif %}
+            {%- if season.season_id is defined and season.expiration_date is defined %}
+            <span id="season">
+                <strong>Season {{ season.season_id }}</strong>:<br>
+                ends {{ season.expiration_date | unix2human_time }}
+            </span>
+            {%- endif %}
 {%- endblock %}
-{%- endif %}

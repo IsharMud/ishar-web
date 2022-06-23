@@ -63,7 +63,7 @@ input[type="reset"], input[type="submit"], #login-form, #new-account-form {
 
 .login-remember {
     font-size:  0.85em;
-    text-alignn: center;
+    text-align: center;
 }
 
 #new-account-link {
@@ -73,12 +73,8 @@ input[type="reset"], input[type="submit"], #login-form, #new-account-form {
     margin-top: 1.5em;
 }
 
-#area-name, #area-details, #season-details, .support {
+#area-name, #area-details, .support, #portal-admin {
     text-align: center;
-}
-
-#season-details strong {
-    color:  #fa7;
 }
 
 #seasonal-points {
@@ -136,14 +132,24 @@ input {
 #footer {
     background-color:   #484a47;
     margin:             auto;
+    overflow:           auto;
     padding:            0.5em;
     text-align:         center;
     width:              90%;
 }
 
 #created {
-    font-style: italic;
-    text-align: center;
+    text-align: left;
+    float:      left;
+}
+
+#season {
+    text-align: right;
+    float:      right;
+}
+
+#season strong, #created strong {
+    color: #fa7;
 }
 
 #quote {
