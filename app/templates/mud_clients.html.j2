@@ -6,30 +6,39 @@
                     While you can certainly enjoy the game via <a href="{{ url_for('connect') }}" target="_blank">the Mudslinger web client</a>,
                     you might prefer to connect to the game with software designed specifically to help you play a MUD.
                 </p>
+
+                {%- if mud_clients is defined and mud_clients is iterable and mud_clients|length > 0 %}
                 <p>
                     Here are some of the MUD clients that we have heard good things about:
                 </p>
-
-                {%- for platform in mud_clients %}
-                <h2>
-                    {{ platform }}
-                </h2>
                 <ul>
-                {%- for name, link in mud_clients[platform].items() %}
-                    <li>
-                        <a href="{{ link }}" target="_blank" rel="noopener">
-                            {{ name }}
-                        </a>
+                    {%- for platform in mud_clients %}
+                    <li class="mud-client-platform">
+                        <h3>
+                            {{ platform }}
+                        </h3>
                     </li>
-                {%- endfor %}
+                    <li class="mud-clients">
+                        <ul>
+                            {%- for name, link in mud_clients[platform].items() %}
+                            <li>
+                                <a href="{{ link }}" target="_blank" rel="noopener">
+                                    {{ name }}
+                                </a>
+                            </li>
+                            {%- endfor %}
+                        </ul>
+                    </li>
+                    {%- endfor %}
                 </ul>
-                {%- endfor %}
-
                 <p>
-                    After you download one, tell it to connect to <strong>isharmud.com</strong> on port <strong>23</strong> or <strong>9999</strong>
-                    to connect to the game, then see our <a href="{{ url_for('get_started') }}">getting started guide</a> for tips on how to play.
+                    After you download a client, tell it to connect to
+                    <code>isharmud.com</code> on port <code>23</code> or <code>9999</code>
+                    to join the game, then see our <a href="{{ url_for('get_started') }}">getting started guide</a>.
                 </p>
                 <p>
-                    Everything listed here can be used at no cost. Do not be afraid to try a few, as they all have different strengths and weaknesses.
+                    Everything listed here can be used at no cost.
+                    Do not be afraid to try a few, as they all have different strengths and weaknesses.
                 </p>
+                {%- endif %}
 {%- endblock %}

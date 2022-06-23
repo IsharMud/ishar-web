@@ -9,13 +9,26 @@ faqs = {
 
     'Are there player classes?': [
         '<strong>Yes!</strong>',
-        'There are <strong>five (5)</strong> player classes:',
+        'There are <strong>five (5)</strong> classes available to choose from, when you create a player character:',
         [
             'Warrior -- For those who seek to master the art of war.',
             'Rogue -- Sly and cunning, skilled in all things sublime.',
             'Cleric -- The followers of the spirits, both good and evil.',
             'Magician -- Practitioners of the mystic arts, masters of magic.',
             'Necromancer -- Practitioners of necromancy, masters of the undead.',
+        ]
+    ],
+
+    'Are there player races?': [
+        '<strong>Yes!</strong>',
+        'There are <strong>six (6)</strong> races available to choose from, when you create a player character:',
+        [
+            'Human -- The dominant race around Mareldja, the home city.',
+            'Elf -- Tall, pointy-eared types.',
+            'Dwarf -- Short and hairy.',
+            'Hobbit -- Small, magically inclined creatures of the forest.',
+            'Gnome -- Small, compactly built mountain and forest dwellers.',
+            'Half-Elven -- Crossbreed, of Human and Elven descent.'
         ]
     ],
 

@@ -4,7 +4,7 @@ body {
     font-family:        Arial, sans-serif;
 }
 
-a {
+a, code {
     color:  #fa7;
 }
 
@@ -197,6 +197,6 @@ input {
     background-color:   #686a65;
 }
 
-.faq-answers, .faq-nested {
+.faq-answers, .faq-nested, .mud-clients {
     list-style: none;
 }
