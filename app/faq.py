@@ -9,7 +9,7 @@ faqs = {
 
     'Are there player classes?': [
         '<strong>Yes!</strong>',
-        'There are five (5) player classes:',
+        'There are <strong>five (5)</strong> player classes:',
         [
             'Warrior -- For those who seek to master the art of war.',
             'Rogue -- Sly and cunning, skilled in all things sublime.',
