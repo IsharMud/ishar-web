@@ -1,12 +1,10 @@
-from app import secrets
 # Internal function to scrape "areas" from game helptab file
 #
 # The "areas" are each listed in the "helptab" file on lines starting with "32 Area " ...
 # ...followed by descriptions until the character "#" on a single line itself
-def _get_help_area(area=None):
+def _get_help_area(helptab_file=None, area=None):
 
     # Get game "helptab" file path/name, and open it
-    helptab_file = secrets.helptab_file
     helptab_fh = open(helptab_file, 'r')
 
     # Prepare an empty "areas" dictionary

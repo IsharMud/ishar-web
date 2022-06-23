@@ -314,7 +314,7 @@ def world(area=None, code=200):
 
     # Try to find an area based on user input
     try:
-        areas = helptab._get_help_area(area)
+        areas = helptab._get_help_area(helptab_file=secrets.helptab_file, area=area)
 
     # Otherwise, list all areas found in the game "helptab" file
     except Exception as e:
