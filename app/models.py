@@ -106,10 +106,10 @@ class Account(db.Model, UserMixin):
     def is_active(self):
         return isinstance(self.account_id, int)
 
-    # Accounts with a player of a true_level greater than 22 are administrators
-    def is_admin(self):
+    # Accounts with a player above a certain level are administrators
+    def is_admin(self, admin_level):
         for player in self.players:
-            if player.true_level > 22:
+            if player.true_level > admin_level:
                 return True
 
         return False

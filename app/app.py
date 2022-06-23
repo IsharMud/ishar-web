@@ -129,7 +129,7 @@ def portal():
 
     # Find the current season information and show the portal
     season = models.Season.query.filter_by(is_active = 1).first()
-    return render_template('portal.html.j2', season=season, is_admin=current_user.is_admin())
+    return render_template('portal.html.j2', season=season, is_admin=current_user.is_admin(secrets.admin_level))
 
 
 # /logout
