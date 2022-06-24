@@ -77,12 +77,12 @@ input[type="reset"], input[type="submit"], #login-form, #new-account-form {
     text-align: center;
 }
 
-#seasonal-points {
+#essence {
     float:  right;
 }
 
-.players-right {
-    text-align: right;
+.survival-player {
+    color:   #fa8072;
 }
 
 img {

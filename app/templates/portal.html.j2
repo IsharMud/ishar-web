@@ -3,13 +3,13 @@
 {% block header %}Welcome{% if current_user.account_name is defined %}, {{ current_user.account_name | title | safe }}{% endif %}!{% endblock %}
 {%- block content %}
                 {%- if current_user.seasonal_points is defined and current_user.seasonal_points > 0 %}
-                <h3 id="seasonal-points">
-                    Seasonal Point{% if current_user.seasonal_points != 1 %}s{% endif %}: {{ current_user.seasonal_points }}
+                <h3 id="essence">
+                    Essence: {{ current_user.seasonal_points }}
                 </h3>
                 {%- endif %}
                 {%- if current_user.players is defined and current_user.players is iterable and current_user.players|length > 0 %}
                 <h3>
-                    You have {{ current_user.players | length }} player{% if current_user.players|length != 1 %}s{% endif %}:
+                    {{ current_user.players | length }} character{% if current_user.players|length != 1 %}s{% endif %}:
                 </h3>
                 <br>
                 <table>
@@ -27,7 +27,10 @@
                             Remort(s)
                         </th>
                         <th>
-                            Mode
+                            Deaths
+                        </th>
+                        <th>
+                            Type
                         </th>
                     </tr>
                     {%- for player in current_user.players %}
@@ -41,14 +44,24 @@
                         <td>
                             {{ player.player_class.class_name | title | safe }}
                         </td>
-                        <td class="players-right">
+                        <td>
                             {{ player.level }}
                         </td>
-                        <td class="players-right">
+                        <td>
                             {{ player.remorts }}
                         </td>
-                        <td class="players-right">
-{{ player.player_flags[45].value }}
+                        <td>
+                            {{ player.deaths }}
+                        </td>
+                        <td>
+                            {%- if player.player_flags[45].value == 1 %}
+                            <span class="survival-player">
+                                Survival
+                            </span>
+                            {%- else %}
+                            Classic
+                            {%- endif %}
+                            {#- FIXME: 45 = hard-coded value for PERM_DEATH player_flag #}
                         </td>
                     </tr>
                     {%- endfor %}
