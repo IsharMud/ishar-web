@@ -1,15 +1,28 @@
 import secrets
-TESTING = True
-DEBUG = True
-FLASK_ENV = 'staging'
-SECRET_KEY = secrets.secret_key
-SQLALCHEMY_DATABASE_URI = secrets.sql_uri
-SQLALCHEMY_ECHO = True
-SQLALCHEMY_POOL_RECYCLE = 3
-SQLALCHEMY_POOL_TIMEOUT = 3
-SQLALCHEMY_PRE_PING = True
-SQLALCHEMY_TRACK_MODIFICATIONS = False
-SQLALCHEMY_ENGINE_OPTIONS = {
+
+TESTING     = True
+DEBUG       = True
+FLASK_ENV   = 'staging'
+SECRET_KEY  = secrets.secret_key
+
+REMEMBER_COOKIE_DOMAIN      = '.isharmud.com'
+REMEMBER_COOKIE_DURATION    = 604800
+REMEMBER_COOKIE_HTTPONLY    = True
+REMEMBER_COOKIE_SECURE      = True
+
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE   = True
+
+SESSION_PROTECTION      = 'strong'
+USE_SESSION_FOR_NEXT    = True
+
+SQLALCHEMY_DATABASE_URI         = secrets.sql_uri
+SQLALCHEMY_ECHO                 = True
+SQLALCHEMY_POOL_RECYCLE         = 3
+SQLALCHEMY_POOL_TIMEOUT         = 3
+SQLALCHEMY_PRE_PING             = True
+SQLALCHEMY_TRACK_MODIFICATIONS  = False
+SQLALCHEMY_ENGINE_OPTIONS       = {
                                 'echo'                  : SQLALCHEMY_ECHO,
                                 'pool_recycle'          : SQLALCHEMY_POOL_RECYCLE,
                                 'pool_timeout'          : SQLALCHEMY_POOL_TIMEOUT,
