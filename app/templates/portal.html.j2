@@ -26,6 +26,9 @@
                         <th>
                             Remort(s)
                         </th>
+                        <th>
+                            Mode
+                        </th>
                     </tr>
                     {%- for player in current_user.players %}
                     <tr>
@@ -43,6 +46,9 @@
                         </td>
                         <td class="players-right">
                             {{ player.remorts }}
+                        </td>
+                        <td class="players-right">
+{{ player.player_flags[45].value }}
                         </td>
                     </tr>
                     {%- endfor %}

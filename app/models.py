@@ -147,6 +147,36 @@ class PlayerClass(db.Model):
     class_name      = Column(String(15), nullable=False, unique=True, server_default=FetchedValue())
 
 
+# Player Flag database class
+class PlayerFlag(db.Model):
+    __tablename__   = 'player_flags'
+    flag_id         = Column(Integer, primary_key=True)
+    name            = Column(String(20), nullable=False, unique=True)
+
+
+# Players Flags database class
+class PlayersFlags(db.Model):
+    __tablename__   = 'player_player_flags'
+    flag_id         = Column(
+                        ForeignKey('player_flags.flag_id',
+                            ondelete='CASCADE',
+                            onupdate='CASCADE'
+                        ), nullable=False, index=True, primary_key=True
+                    )
+    player_id       = Column(
+                        ForeignKey('players.id',
+                            ondelete='CASCADE',
+                            onupdate='CASCADE'
+                        ), nullable=False, index=True, primary_key=True
+                    )
+    value           = Column(Integer)
+    flag_name       = relationship('PlayerFlag',
+                        primaryjoin='PlayersFlags.flag_id == PlayerFlag.flag_id',
+                        backref='player_flags'
+                    )
+
+
+
 # Player database class
 class Player(db.Model):
     __tablename__           = 'players'
@@ -244,6 +274,11 @@ class Player(db.Model):
                                 primaryjoin='Player.class_id == PlayerClass.class_id',
                                 backref='players'
                             )
+    player_flags            = relationship('PlayersFlags',
+                                primaryjoin='Player.id == PlayersFlags.player_id',
+                                backref='players'
+                            )
+
 
 
 # Season database class
