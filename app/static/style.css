@@ -32,6 +32,14 @@ hr {
     border-color:   #fa7;
 }
 
+#news-top {
+    width:  75%;
+}
+
+.news-split {
+    width:  50%;
+}
+
 tr:nth-child(2n) {
     background-color:   #888;
 }
@@ -66,19 +74,21 @@ input[type="reset"], input[type="submit"], #login-form, #new-account-form {
     text-align: center;
 }
 
-#new-account-link {
+#new-account-link, #admin-link {
     font-size:  0.9em;
     display:    table;
     margin:     0 auto;
     margin-top: 1.5em;
 }
 
-#area-name, #area-details, .support, #portal-admin {
+#area-name, #area-details, .support {
     text-align: center;
 }
 
-#essence {
-    float:  right;
+.news-created {
+    float:      right;
+    font-style: italic;
+    font-style: italic;
 }
 
 .survival-player {
@@ -143,7 +153,7 @@ input {
     float:      left;
 }
 
-#season {
+#season, #essence {
     text-align: right;
     float:      right;
 }

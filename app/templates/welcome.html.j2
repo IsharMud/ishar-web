@@ -12,10 +12,29 @@
                     Play the game for free by connecting via any <a href="{{ url_for('mud_clients') }}">MUD client</a>
                     to <strong>isharmud.com</strong> port <strong>23</strong> or <strong>9999</strong>.
                 </p>
-                <p>
-                    Ishar has been open since May 1994 and has dozens of players connected during peak hours.
+                {%- if news is defined and news is iterable and news | length > 0 %}
+                <hr id="news-top">
+                <h2>
+                    Latest Updates
+                </h2>
+                {%- for news_post in news %}
+                <h3 class="news-subject">
+                    {{ news_post.subject | safe }}
+                </h3>
+                <p class="news-body">
+                    {{ news_post.body | safe }}
                 </p>
-                <p>
-                    <a href="{{ url_for('discord') }}" target="_blank">Connect with the community on our Discord server!</a>
-                </p>
+                <span class="news-created">
+                    {{ news_post.created_at.strftime('%A, %B %d, %Y') }}
+                </span>
+                ~
+                <span class="news-creator">
+                    {{ news_post.account.account_name | safe | title }}
+                </span>
+                <br>
+                {%- if not loop.last %}
+                <hr class="news-split">
+                {%- endif %}
+                {%- endfor %}
+                {%- endif %}
 {%- endblock %}

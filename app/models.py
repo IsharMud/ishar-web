@@ -4,10 +4,10 @@ import hmac
 from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
-from wtforms import BooleanField, EmailField, PasswordField, StringField, SubmitField, validators
+from wtforms import BooleanField, EmailField, PasswordField, StringField, SubmitField, TextAreaField, validators
 from wtforms.validators import DataRequired, Email, EqualTo
 from wtforms_validators import Alpha
-from sqlalchemy import exc, Column, DateTime, ForeignKey, Integer, MetaData, SmallInteger, String
+from sqlalchemy import exc, Column, DateTime, ForeignKey, Integer, MetaData, SmallInteger, String, Text
 from sqlalchemy.schema import FetchedValue
 from sqlalchemy.orm import relationship
 
@@ -50,6 +50,7 @@ class ChangePasswordForm(FlaskForm):
                             )
     submit                  = SubmitField('Change Password')
 
+
 # New Account form class
 class NewAccountForm(FlaskForm):
     account_name        = StringField('Friendly Name', [
@@ -75,6 +76,17 @@ class NewAccountForm(FlaskForm):
                                 ]
                             )
     submit              = SubmitField('Create Account')
+
+
+# News add form class to post news updates
+class NewsAddForm(FlaskForm):
+    subject     = StringField('Subject', [
+                                validators.DataRequired(),
+                                validators.Length(min=1, max=64),
+                                ]
+                            )
+    body        = TextAreaField('Message', [validators.DataRequired()] )
+    submit      = SubmitField('Post')
 
 
 # Account database class
@@ -174,7 +186,6 @@ class PlayersFlags(db.Model):
                         primaryjoin='PlayersFlags.flag_id == PlayerFlag.flag_id',
                         backref='player_flags'
                     )
-
 
 
 # Player database class
@@ -279,6 +290,34 @@ class Player(db.Model):
                                 backref='players'
                             )
 
+
+# News database class
+class News(db.Model):
+    __tablename__   = 'news'
+    news_id         = Column(Integer, primary_key=True)
+    account_id      = Column(
+                        ForeignKey('accounts.account_id',
+                            ondelete='CASCADE',
+                            onupdate='CASCADE'
+                        ), nullable=False, index=True
+                    )
+    created_at      = Column(DateTime, nullable=False, server_default=FetchedValue())
+    subject         = Column(String(64), nullable=False, server_default=FetchedValue())
+    body            = Column(Text, nullable=False)
+    account         = relationship('Account',
+                        primaryjoin='News.account_id == Account.account_id',
+                        backref='news'
+                    )
+
+
+    # Method to create new account
+    def add_news(self, subject=None, body=None):
+        try:
+            db.session.add(self)
+            db.session.commit()
+            return self.news_id
+        except Exception as e:
+            print(e)
 
 
 # Season database class

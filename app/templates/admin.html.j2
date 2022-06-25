@@ -1,0 +1,32 @@
+{% extends "layout.html.j2" %}
+{% block title %}Administration Portal{% endblock %}
+{% block header %}Welcome <span class="survival-player">Admin</span>{% if current_user.account_name is defined %}, {{ current_user.account_name | title | safe }}{% endif %}!{% endblock %}
+{%- block content %}
+{%- macro render_field(field) %}
+                    <p class="admin-{{ field.name | safe }}">
+                        {{ field.label | safe }}
+                        {{ field(**kwargs) | safe }}
+                    </p>
+    {%- if field.errors %}
+                <ul class="field-errors">
+        {%- for error in field.errors %}
+                    <li>
+                        {{ error }}
+                    </li>
+        {%- endfor %}
+                </ul>
+    {%- endif %}
+{%- endmacro %}
+{%- if news_add_form is defined %}
+                <form method="post" action="{{ url_for('admin_portal') }}" id="login-form">
+                    {{ render_field(news_add_form.subject) }}
+                    {{ render_field(news_add_form.body) }}
+                    {{ news_add_form.csrf_token }}
+                    {{ news_add_form.submit }}
+                    <input type="reset">
+                    <br>
+                </form>
+{%- else %}
+                Missing form!
+{%- endif %}
+{%- endblock %}

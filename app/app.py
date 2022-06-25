@@ -62,7 +62,9 @@ def internal_server_error(message):
 @app.route('/welcome', methods=['GET'])
 @app.route('/', methods=['GET'])
 def welcome():
-    return render_template('welcome.html.j2')
+    # Find the two (2) most recent news posts to show on the main page
+    news = models.News.query.order_by(-models.News.created_at).limit(2).all()
+    return render_template('welcome.html.j2', news=news)
 
 
 # /history (or /background)
@@ -126,10 +128,43 @@ def change_password():
 @app.route('/portal', methods=['GET'])
 @login_required
 def portal():
-
-    # Find the current season information and show the portal
+    # Find the current season information to show the portal
     season = models.Season.query.filter_by(is_active = 1).first()
     return render_template('portal.html.j2', season=season, is_admin=current_user.is_admin(secrets.admin_level))
+
+
+# Portal for administrators
+@app.route('/admin', methods=['GET', 'POST'])
+@fresh_login_required
+def admin_portal():
+
+    # Redirect non-administrators to the main page
+    if not current_user.is_admin(secrets.admin_level):
+        flash('Sorry, but you are not an administrator!', 'error')
+        return redirect(url_for('welcome'), code=302)
+
+    # Get news add form and check if submitted
+    news_add_form = models.NewsAddForm()
+    if news_add_form.validate_on_submit():
+
+        # Create the model for the new news post
+        new_news = models.News(
+            account_id      = current_user.account_id,
+            created_at      = datetime.datetime.now(),
+            subject         = news_add_form.subject.data,
+            body            = news_add_form.body.data
+        )
+
+        # Create the news post in the database, get the news post ID, and check that it worked
+        created_id = new_news.add_news()
+        created_post = models.News.query.filter_by(news_id = created_id).first()
+        if created_post:
+            flash('Your message has been posted!', 'success')
+        else:
+            flash('Sorry, but please try again!', 'error')
+
+    # Show the form to add news in the administration portal
+    return render_template('admin.html.j2', news_add_form=news_add_form)
 
 
 # /logout

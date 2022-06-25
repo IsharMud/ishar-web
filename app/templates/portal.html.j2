@@ -24,7 +24,7 @@
                             Level
                         </th>
                         <th>
-                            Remort(s)
+                            Remorts
                         </th>
                         <th>
                             Deaths
@@ -73,11 +73,9 @@
                 </h3>
                 {%- endif %}
                 {%- if is_admin is defined and is_admin == True %}
-                <div id="portal-admin">
-                    <p>
-                        <strong>You are an administrator.</strong>
-                    </p>
-                </div>
+                <p id="admin-link">
+                    <a title="Administration Portal" href="{{ url_for('admin_portal') }}">Administration</a>
+                </p>
                 {%- endif %}
 {%- endblock %}
 {% block footer %}
