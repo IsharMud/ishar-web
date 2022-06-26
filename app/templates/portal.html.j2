@@ -56,50 +56,59 @@
                     {%- for player in current_user.players %}
                     <tr>
                         {%- set player_title    = player.title | replace('%s','<strong>' + player.name + '</strong>') %}
-                        {%- set survival_player = False -%}
                         {%- set survival_dead   = False -%}
                         {#- FIXME: 45 = hard-coded value for PERM_DEATH player_flag #}
                         {%- if player.player_flags[45].value == 1 %}
-                            {%- set survival_player = True %}
+                            {%- set player_type = 'Survival' %}
                             {%- if player.curr_endurance <= 0 %}
-                                {%- set survival_dead = True -%}
+                                {%- set survival_dead   = True -%}
                             {%- endif %}
+                        {%- else %}
+                            {%- set player_type = 'Classic' %}
                         {%- endif %}
                         <td{%- if survival_dead == True or player.is_deleted == 1 %} class="player-gone"{%- endif %}>
-                            <span title="Born {{ player.birth | unix2human_time }}">
+                            <span title="{{ player.name | title | safe }} (Born {{ player.birth | unix2human_time }})">
                                 {{ player_title | safe }}
                             </span>
                         </td>
                         <td{%- if survival_dead == True or player.is_deleted == 1 %} class="player-gone"{%- endif %}>
-                            {{ player.player_class.class_name | title | safe }}
+                            <span title="Class: {{ player.player_class.class_name | title | safe }}">
+                                {{ player.player_class.class_name | title | safe }}
+                            </span>
                         </td>
                         <td{%- if survival_dead == True or player.is_deleted == 1 %} class="player-gone"{%- endif %}>
-                            {{ player.player_race.race_name | title | safe }}
-                        </td>
-                        <td>
-                            {{ player.level }}
-                        </td>
-                        <td>
-                            {{ player.remorts }}
-                        </td>
-                        <td>
-                            {{ player.deaths }}
-                        </td>
-                        <td>
-                            {%- if survival_player == True %}
-                            <span class="survival-player">
-                                Survival
+                            <span title="Race: {{ player.player_race.race_name | title | safe }}">
+                                {{ player.player_race.race_name | title | safe }}
                             </span>
-                             {%- if survival_dead == True %}
+                        </td>
+                        <td>
+                            <span title="Level: {{ player.level }}">
+                                {{ player.level }}
+                            </span>
+                        </td>
+                        <td>
+                            <span title="Remorts: {{ player.remorts }}">
+                                {{ player.remorts }}
+                            </span>
+                        </td>
+                        <td>
+                            <span title="Deaths: {{ player.deaths }}">
+                                {{ player.deaths }}
+                            </span>
+                        </td>
+                        <td>
+                            <span title="Type: {{ player_type }}" class="{{ player_type | lower }}-player">
+                                {{ player_type }}
+                            </span>
+                            {%- if survival_dead == True %}
                             <span title="Dead">
                                 ☠️
                             </span>
-                             {%- endif %}
-                            {%- else %}
-                            Classic
                             {%- endif %}
                             {%- if player.is_deleted == 1 %}
-                            (Deleted)
+                            <span title="Deleted">
+                                (Deleted)
+                            </span>
                             {%- endif %}
                         </td>
                     </tr>
@@ -107,12 +116,15 @@
                 </table>
                 <br>
                 {%- if quests is defined and quests is iterable and quests|length > 0 %}
+                <!--
                 <ul>
                     {%- for quest in quests %}
                     <li>
                         {{ quest }}
                     </li>
                     {%- endfor %}
+                </ul>
+                -->
                 {%- endif %}
                 {%- else %}
                 <h3>
