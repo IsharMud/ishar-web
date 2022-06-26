@@ -65,15 +65,15 @@
                                 {%- set survival_dead = True -%}
                             {%- endif %}
                         {%- endif %}
-                        <td{%- if survival_dead == True %} class="survival-dead"{%- endif %}>
+                        <td{%- if survival_dead == True or player.is_deleted == 1 %} class="player-gone"{%- endif %}>
                             <span title="Born {{ player.birth | unix2human_time }}">
                                 {{ player_title | safe }}
                             </span>
                         </td>
-                        <td{%- if survival_dead == True %} class="survival-dead"{%- endif %}>
+                        <td{%- if survival_dead == True or player.is_deleted == 1 %} class="player-gone"{%- endif %}>
                             {{ player.player_class.class_name | title | safe }}
                         </td>
-                        <td{%- if survival_dead == True %} class="survival-dead"{%- endif %}>
+                        <td{%- if survival_dead == True or player.is_deleted == 1 %} class="player-gone"{%- endif %}>
                             {{ player.player_race.race_name | title | safe }}
                         </td>
                         <td>
@@ -97,6 +97,9 @@
                              {%- endif %}
                             {%- else %}
                             Classic
+                            {%- endif %}
+                            {%- if player.is_deleted == 1 %}
+                            (Deleted)
                             {%- endif %}
                         </td>
                     </tr>
