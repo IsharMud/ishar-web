@@ -44,17 +44,6 @@ tr:nth-child(2n) {
     background-color:   #888;
 }
 
-table {
-    border:     #fa7 1px solid;
-    font-size:  1.25em;
-    margin:     auto;
-    width:      50%;
-}
-
-td {
-    border: #686a65 1px solid;
-}
-
 input[type="reset"], input[type="submit"], #login-form, #new-account-form {
     font-size:  1.25em;
     text-align: center;
@@ -79,6 +68,10 @@ input[type="reset"], input[type="submit"], #login-form, #new-account-form {
     display:    table;
     margin:     0 auto;
     margin-top: 1.5em;
+}
+
+table {
+    border: 1px solid #fa7;
 }
 
 #area-name, #area-details, .support {
@@ -209,4 +202,8 @@ input {
 
 .faq-answers, .faq-nested, .mud-clients {
     list-style: none;
+}
+
+.challenge-completed {
+    text-decoration:    line-through;
 }

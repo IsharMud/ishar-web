@@ -72,6 +72,47 @@
                     You have not created any players yet!
                 </h3>
                 {%- endif %}
+                {%- if challenges is defined and challenges is iterable and challenges|length > 1 %}
+                <h3>Challenges</h3>
+                <table>
+                    <tr>
+                        <th>
+                            Find and Kill
+                        </th>
+                        <th>
+                            Max People
+                        </th>
+                        <th>
+                            Max Level
+                        </th>
+                        <th>
+                            Reward Tier
+                        </th>
+                        <th>
+                            Completed by
+                        </th>
+                    </tr>
+                    {%- for challenge in challenges %}
+                    <tr>
+                        <td{%- if challenge.winner_desc != "" %} class="challenge-completed"{%- endif %}>
+                            {{ challenge.mob_name }}
+                        </td>
+                        <td>
+                            {{ challenge.adj_people }}
+                        </td>
+                        <td>
+                            {{ challenge.adj_level }}
+                        </td>
+                        <td>
+                            {{ challenge.adj_tier }}
+                        </td>
+                        <td>
+                            {{ challenge.winner_desc }}
+                        </td>
+                    </tr>
+                {%- endfor %}
+                </table>
+                {%- endif %}
                 {%- if is_admin is defined and is_admin == True %}
                 <p id="admin-link">
                     <a title="Administration Portal" href="{{ url_for('admin_portal') }}">Administration</a>

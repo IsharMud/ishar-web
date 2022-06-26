@@ -327,3 +327,19 @@ class Season(db.Model):
     is_active       = Column(Integer, nullable=False)
     effective_date  = Column(Integer, nullable=False)
     expiration_date = Column(Integer, nullable=False)
+
+# Challenge database class
+class Challenge(db.Model):
+    __tablename__   = 'challenges'
+    challenge_id    = Column(SmallInteger, primary_key=True)
+    mob_vnum        = Column(Integer, nullable=False)
+    orig_level      = Column(Integer, nullable=False)
+    orig_people     = Column(Integer, nullable=False)
+    orig_tier       = Column(Integer, nullable=False)
+    adj_level       = Column(Integer, nullable=False)
+    adj_people      = Column(Integer, nullable=False)
+    adj_tier        = Column(Integer, nullable=False)
+    challenge_desc  = Column(String(80), nullable=False)
+    winner_desc     = Column(String(80), nullable=False, server_default=FetchedValue())
+    mob_name        = Column(String(30), nullable=False)
+    is_active       = Column(Integer, nullable=False, server_default=FetchedValue())

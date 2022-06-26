@@ -128,10 +128,15 @@ def change_password():
 @app.route('/portal', methods=['GET'])
 @login_required
 def portal():
-    # Find the current season information to show the portal
-    season = models.Season.query.filter_by(is_active = 1).first()
-    return render_template('portal.html.j2', season=season, is_admin=current_user.is_admin(secrets.admin_level))
-
+    # Show the portal with the current season and challenges information
+    return render_template('portal.html.j2',
+                                season      = models.Season.query.filter_by(is_active = 1).first(),
+                                challenges  = models.Challenge.query.filter_by(is_active = 1).order_by(
+                                                    models.Challenge.winner_desc,
+                                                    -models.Challenge.adj_tier
+                                                ).all(),
+                                is_admin    = current_user.is_admin(secrets.admin_level)
+                            )
 
 # Portal for administrators
 @app.route('/admin', methods=['GET', 'POST'])
