@@ -55,16 +55,25 @@
                     </tr>
                     {%- for player in current_user.players %}
                     <tr>
-                        {%- set player_title = player.title | replace('%s','<strong>' + player.name + '</strong>') %}
-                        <td>
+                        {%- set player_title    = player.title | replace('%s','<strong>' + player.name + '</strong>') %}
+                        {%- set survival_player = False -%}
+                        {%- set survival_dead   = False -%}
+                        {#- FIXME: 45 = hard-coded value for PERM_DEATH player_flag #}
+                        {%- if player.player_flags[45].value == 1 %}
+                            {%- set survival_player = True %}
+                            {%- if player.curr_endurance <= 0 %}
+                                {%- set survival_dead = True -%}
+                            {%- endif %}
+                        {%- endif %}
+                        <td{%- if survival_dead == True %} class="survival-dead"{%- endif %}>
                             <span title="Born {{ player.birth | unix2human_time }}">
                                 {{ player_title | safe }}
                             </span>
                         </td>
-                        <td>
+                        <td{%- if survival_dead == True %} class="survival-dead"{%- endif %}>
                             {{ player.player_class.class_name | title | safe }}
                         </td>
-                        <td>
+                        <td{%- if survival_dead == True %} class="survival-dead"{%- endif %}>
                             {{ player.player_race.race_name | title | safe }}
                         </td>
                         <td>
@@ -77,11 +86,11 @@
                             {{ player.deaths }}
                         </td>
                         <td>
-                            {%- if player.player_flags[45].value == 1 %}
+                            {%- if survival_player == True %}
                             <span class="survival-player">
                                 Survival
                             </span>
-                             {%- if player.curr_endurance <= 0 %}
+                             {%- if survival_dead == True %}
                             <span title="Dead">
                                 ☠️
                             </span>
@@ -89,7 +98,6 @@
                             {%- else %}
                             Classic
                             {%- endif %}
-                            {#- FIXME: 45 = hard-coded value for PERM_DEATH player_flag #}
                         </td>
                     </tr>
                     {%- endfor %}

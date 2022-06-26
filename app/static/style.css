@@ -204,6 +204,6 @@ input {
     list-style: none;
 }
 
-.challenge-completed {
+.challenge-completed, .survival-dead {
     text-decoration:    line-through;
 }
