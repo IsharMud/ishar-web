@@ -187,6 +187,11 @@ class PlayersFlags(db.Model):
                         backref='player_flags'
                     )
 
+# Player Race database class
+class PlayerRace(db.Model):
+    __tablename__   = 'races'
+    race_id         = Column(Integer, primary_key=True)
+    race_name       = Column(String(15), nullable=False, unique=True)
 
 # Player database class
 class Player(db.Model):
@@ -289,7 +294,10 @@ class Player(db.Model):
                                 primaryjoin='Player.id == PlayersFlags.player_id',
                                 backref='players'
                             )
-
+    player_race             = relationship('PlayerRace',
+                                primaryjoin='Player.race_id == PlayerRace.race_id',
+                                backref='players'
+                            )
 
 # News database class
 class News(db.Model):
