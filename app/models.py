@@ -187,11 +187,35 @@ class PlayersFlags(db.Model):
                         backref='player_flags'
                     )
 
+
+# Players Quests database class
+class PlayersQuests(db.Model):
+    __tablename__   = 'player_quests'
+    quest_id        = Column(
+                        ForeignKey('quests.quest_id',
+                            ondelete='CASCADE',
+                            onupdate='CASCADE'
+                        ), nullable=False, index=True, primary_key=True
+                    )
+    player_id       = Column(
+                        ForeignKey('players.id',
+                            ondelete='CASCADE',
+                            onupdate='CASCADE'
+                        ), nullable=False, index=True, primary_key=True
+                    )
+    value           = Column('value', Integer, nullable=False)
+    quest           = relationship('Quest',
+                        primaryjoin='PlayersQuests.quest_id == Quest.quest_id',
+                        backref='player_quests'
+                    )
+
+
 # Player Race database class
 class PlayerRace(db.Model):
     __tablename__   = 'races'
     race_id         = Column(Integer, primary_key=True)
     race_name       = Column(String(15), nullable=False, unique=True)
+
 
 # Player database class
 class Player(db.Model):
@@ -294,10 +318,15 @@ class Player(db.Model):
                                 primaryjoin='Player.id == PlayersFlags.player_id',
                                 backref='players'
                             )
+    player_quests           = relationship('PlayersQuests',
+                                primaryjoin='Player.id == PlayersQuests.player_id',
+                                backref='players'
+                            )
     player_race             = relationship('PlayerRace',
                                 primaryjoin='Player.race_id == PlayerRace.race_id',
                                 backref='players'
                             )
+
 
 # News database class
 class News(db.Model):
@@ -351,3 +380,13 @@ class Challenge(db.Model):
     winner_desc     = Column(String(80), nullable=False, server_default=FetchedValue())
     mob_name        = Column(String(30), nullable=False)
     is_active       = Column(Integer, nullable=False, server_default=FetchedValue())
+
+# Quest database class
+class Quest(db.Model):
+    __tablename__ = 'quests'
+    quest_id = Column(Integer, primary_key=True)
+    name = Column(String(25), nullable=False, unique=True, server_default=FetchedValue())
+    display_name = Column(String(30), nullable=False)
+    is_major = Column(Integer, nullable=False, server_default=FetchedValue())
+    xp_reward = Column(Integer, nullable=False, server_default=FetchedValue())
+    completion_message = Column(String(80), nullable=False)

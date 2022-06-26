@@ -81,6 +81,11 @@
                             <span class="survival-player">
                                 Survival
                             </span>
+                             {%- if player.curr_endurance <= 0 %}
+                            <span title="Dead">
+                                ☠️
+                            </span>
+                             {%- endif %}
                             {%- else %}
                             Classic
                             {%- endif %}
@@ -90,13 +95,23 @@
                     {%- endfor %}
                 </table>
                 <br>
+                {%- if quests is defined and quests is iterable and quests|length > 0 %}
+                <ul>
+                    {%- for quest in quests %}
+                    <li>
+                        {{ quest }}
+                    </li>
+                    {%- endfor %}
+                {%- endif %}
                 {%- else %}
                 <h3>
                     You have not created any players yet!
                 </h3>
                 {%- endif %}
                 {%- if challenges is defined and challenges is iterable and challenges|length > 1 %}
-                <h3>Challenges</h3>
+                <h3>
+                    Challenges
+                </h3>
                 <table>
                     <tr>
                         <th>
