@@ -32,10 +32,9 @@
                         </li>
                         {%- if current_user is defined and current_user.is_authenticated and current_user.account_name is defined %}
                         <li>
-                            <a href ="{{ url_for('portal') }}" title="Player Portal">Player Portal</a>
-                        </li>
-                        <li>
-                            <a href ="{{ url_for('logout') }}" title="Player Log Out">Log Out ({{ current_user.account_name }})</a>
+                            <a href ="{{ url_for('portal') }}" title="Player Portal">
+                                Player Portal ({{ current_user.account_name }})
+                            </a>
                         </li>
                         {%- else %}
                         <li>

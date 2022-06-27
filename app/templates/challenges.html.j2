@@ -1,0 +1,92 @@
+{% extends "layout.html.j2" %}
+{% block title %}Challenges{% endblock %}
+{% block header %}Challenges{% endblock %}
+{%- macro challenge_tier(tier) -%}
+{%- set challenge_tiers = {
+    9: 'SS',
+    8: 'SS',
+    7: 'SS',
+    6: 'S',
+    5: 'A',
+    4: 'B',
+    3: 'C',
+    2: 'D',
+    1: 'F' } -%}
+{%- if challenge_tiers[tier] is defined  -%}
+                            {{ challenge_tiers[tier] }}
+{%- else -%}
+                            {{ tier }}
+{%- endif -%}
+{%- endmacro -%}
+{%- block content %}
+                {%- if challenges is defined and challenges is iterable and challenges|length > 1 %}
+                <table id="challenges">
+                    <tr>
+                        <th>
+                            Find and Kill
+                        </th>
+                        <th>
+                            Max People
+                        </th>
+                        <th>
+                            Max Level
+                        </th>
+                        <th>
+                            Reward Tier
+                        </th>
+                        <th>
+                            Completed by
+                        </th>
+                    </tr>
+                    {%- for challenge in challenges %}
+                        {%- if challenge.winner_desc != '' %}
+                            {%- set challenge_completed = True %}
+                            {%- set challenge_winners   = challenge.winner_desc.replace(' ', '').split(',') %}
+                        {%- else %}
+                            {%- set challenge_completed = False %}
+                        {%- endif %}
+                    <tr>
+                        <td{%- if challenge_completed == True %} class="challenge-completed"{%- endif %}>
+                            {{ challenge.mob_name }}
+                        </td>
+                        <td>
+                            {{ challenge.adj_people }}
+                        </td>
+                        <td>
+                            {{ challenge.adj_level }}
+                        </td>
+                        <td>
+                            {{ challenge_tier(challenge.adj_tier) }}
+                        </td>
+                        <td>
+                        {%- if challenge_completed == True %}
+                            {%- for challenge_winner in challenge_winners %}
+                                <a href="{{ url_for('show_player', player_name=challenge_winner) }}" title="Player: {{ challenge_winner }}">{{ challenge_winner | title | safe }}</a>
+                                {%- if not loop.last %},{%- endif %}
+                            {%- endfor %}
+                        {%- endif %}
+                        </td>
+                    </tr>
+                {%- endfor %}
+                </table>
+                {%- endif %}
+                <p>
+                    <a href="{{ url_for('portal') }}">
+                        <img src="{{ url_for('static', filename='back.gif') }}" alt="Back to Player Portal">
+                    </a>
+                </p>
+{%- endblock %}
+{% block footer %}
+            {%- if current_user.created_at is defined and current_user.created_at != '' %}
+            <span id="created">
+                <strong>Account Created</strong>:<br>
+                {{ current_user.created_at.strftime('%A, %B %d, %Y %I:%M %p %Z') }}
+            </span>
+            {%- endif %}
+            {%- if season.season_id is defined and season.expiration_date is defined %}
+            <span id="season">
+                <strong>Season {{ season.season_id }}</strong>:<br>
+                ends {{ season.expiration_date | unix2human_time }}
+            </span>
+            {%- endif %}
+{%- endblock %}
