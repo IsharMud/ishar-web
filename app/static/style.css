@@ -63,14 +63,14 @@ input[type="reset"], input[type="submit"], #login-form, #new-account-form {
     text-align: center;
 }
 
-#new-account-link, #admin-link, #change-password-link {
+#new-account-link, .bottom-portal-link {
     font-size:  0.9em;
     display:    table;
     margin:     0 auto;
     margin-top: 1.5em;
 }
 
-table {
+#players {
     border: 1px solid #fa7;
 }
 
