@@ -11,19 +11,20 @@
         {%- set player_type = 'Classic' %}
     {%- endif %}
     {%- if player.sex == 1 %}
-        {%- set player_gender   = 'he' %}
+        {%- set player_gender       = 'he' %}
         {%- set player_gender_own   = 'his' %}
     {%- elif player.sex == 2 %}
-        {%- set player_gender   = 'she' %}
+        {%- set player_gender       = 'she' %}
     {%- else %}
-        {%- set player_gender   = 'they' %}
+        {%- set player_gender       = 'they' %}
     {%- endif %}
     {%- if player.is_deleted == 1 or survival_dead == True %}
-        {%- set player_phrase   = 'was' %}
+        {%- set player_phrase       = 'was' %}
+        {%- set player_phrase_own   = 'were' %}
     {%- elif player_gender == 'they' -%}
-        {%- set player_phrase   = 'are' %}
+        {%- set player_phrase       = 'are' %}
     {%- else %}
-        {%- set player_phrase   = 'is' %}
+        {%- set player_phrase       = 'is' %}
     {%- endif %}
 {%- endif %}
 {%- block title %}
@@ -71,7 +72,7 @@
                     {{ player_gender | title }} last logged in {{ player.logon | unix2human_time }}.<br>
                     {{ player_gender | title }} last logged out {{ player.logout | unix2human_time }}.<br>
                     {{ player_gender |title }} played for {{ player.online }} seconds.<br><br>
-                    {{ player_gender_own | title }} statistics {{ player_phrase }}:<br>
+                    {{ player_gender_own | title }} statistics {{ player_phrase_own }}:<br>
                                         {{ player.curr_strength }} Strength / {{ player.curr_agility }} Agility / {{ player.curr_endurance }} Endurance<br>
                                         {{ player.curr_willpower }} Willpower / {{ player.curr_focus }} Focus / {{ player.curr_perception }} Perception<br>
                 </code>
