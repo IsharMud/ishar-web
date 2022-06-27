@@ -130,15 +130,15 @@ def change_password():
 def show_player(player_name=None):
 
     try:
-        code = 200
         find_player = models.Player.query.filter_by(name = player_name).first()
-        find_if_admin = find_player.is_admin(secrets.admin_level)
-        return render_template('player.html.j2', player=find_player, player_is_admin=find_if_admin), code
-
+        code = 200
     except Exception as e:
         print(e)
+        find_player = None
         flash('Sorry, but please choose a valid player!', 'error')
-        return redirect(url_for('portal'), code=302)
+        code = 404
+
+    return render_template('player.html.j2', player=find_player), code
 
 
 # Portal for logged in users
