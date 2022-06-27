@@ -10,10 +10,20 @@
     {%- else %}
         {%- set player_type = 'Classic' %}
     {%- endif %}
+    {%- if player.sex == 1 %}
+        {%- set player_gender   = 'he' %}
+        {%- set player_gender_own   = 'his' %}
+    {%- elif player.sex == 2 %}
+        {%- set player_gender   = 'she' %}
+    {%- else %}
+        {%- set player_gender   = 'they' %}
+    {%- endif %}
     {%- if player.is_deleted == 1 or survival_dead == True %}
-        {%- set player_phrase = 'were' %}
-    {%- else -%}
-        {%- set player_phrase = 'are' %}
+        {%- set player_phrase   = 'was' %}
+    {%- elif player_gender == 'they' -%}
+        {%- set player_phrase   = 'are' %}
+    {%- else %}
+        {%- set player_phrase   = 'is' %}
     {%- endif %}
 {%- endif %}
 {%- block title %}
@@ -39,9 +49,10 @@
 {%- block content %}
     {%- if player %}
                 <p>
-                    You {{ player_phrase }}: {{ player_title }}.
+                    {{ player_gender | title }} {{ player_phrase }}: {{ player_title }}.
                 </p>
                 <code>
+                    Birth: {{ player.birth | unix2human_time }}.<br>
                     Class: {{ player.player_class.class_name | replace('_', '-') | title | safe }}<br>
                     Level: {{ player.level }}<br>
                     Renown (Total): {{ player.renown }} ({{ player.total_renown }})<br>
@@ -54,14 +65,13 @@
                     Health: {{ player.curr_hit_pts / player.perm_hit_pts * 100 }}<br>
                     Movement: {{ player.curr_move_pts / player.perm_move_pts * 100 }}<br>
                     Spell: {{ player.curr_spell_pts / player.perm_spell_pts * 100 }}<br>
-                    You have {{ player.bankacc }} obsidian coins on deposit.<br>
+                    Bank: {{ player.bankacc }} obsidian coins on deposit<br>
                     {%- endif %}
-                    You {{ player_phrase }} a <span class="{{ player_type | lower }}-player">{{ player_type }}</span> character.<br>
-                    You were born {{ player.birth | unix2human_time }}.<br>
-                    You last logged in {{ player.logon | unix2human_time }}.<br>
-                    You last logged out {{ player.logout | unix2human_time }}.<br>
-                    You played for {{ player.online }} seconds.<br><br>
-                    Your statistics {{ player_phrase }}:<br>
+                    {{ player_gender | title }} {{ player_phrase }} a <span class="{{ player_type | lower }}-player">{{ player_type }}</span> character.<br>
+                    {{ player_gender | title }} last logged in {{ player.logon | unix2human_time }}.<br>
+                    {{ player_gender | title }} last logged out {{ player.logout | unix2human_time }}.<br>
+                    {{ player_gender |title }} played for {{ player.online }} seconds.<br><br>
+                    {{ player_gender_own | title }} statistics {{ player_phrase }}:<br>
                                         {{ player.curr_strength }} Strength / {{ player.curr_agility }} Agility / {{ player.curr_endurance }} Endurance<br>
                                         {{ player.curr_willpower }} Willpower / {{ player.curr_focus }} Focus / {{ player.curr_perception }} Perception<br>
                 </code>

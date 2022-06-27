@@ -314,6 +314,7 @@ def world(area=None):
 
     # Otherwise, list all areas found in the game "helptab" file
     except Exception as e:
+        print(e)
         flash('Sorry, but please choose a valid area!', 'error')
         areas   = helptab._get_help_area(None)
         area    = None
