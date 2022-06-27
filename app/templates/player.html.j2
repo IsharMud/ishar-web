@@ -5,10 +5,15 @@
     {%- if player.player_flags[45].value == 1 %}
         {%- set player_type = 'Survival' %}
         {%- if player.curr_endurance <= 0 %}
-            {%- set survival_dead = True -%}
+            {%- set survival_dead = True %}
         {%- endif %}
     {%- else %}
         {%- set player_type = 'Classic' %}
+    {%- endif %}
+    {%- if player.is_deleted == 1 or survival_dead == True %}
+        {%- set player_phrase = 'were' %}
+    {%- else -%}
+        {%- set player_phrase = 'are' %}
     {%- endif %}
 {%- endif %}
 {%- block title %}
@@ -34,22 +39,28 @@
 {%- block content %}
     {%- if player %}
                 <pre>
-                    You are: {{ player_title }}.
+                    You {{ player_phrase }}: {{ player_title }}.
                     Class: {{ player.player_class.class_name | replace('_', '-') | title | safe }}
                     Level: {{ player.level }}
+                    Renown (Total): {{ player.renown }} ({{ player.total_renown }})
+                    Remorts: {{ player.remorts }}
+                    Deaths: {{ player.deaths }}
                     Alignment: {{ player.align }}
+                    Karma: {{ player.karma }}
                     Origin: {{ player.player_race.race_name | replace('_', '-') | title | safe }}
+                    {%- if player_phrase == 'are' %}
                     Health: {{ player.curr_hit_pts / player.perm_hit_pts * 100 }}
                     Movement: {{ player.curr_move_pts / player.perm_move_pts * 100 }}
                     Spell: {{ player.curr_spell_pts / player.perm_spell_pts * 100 }}
                     You have {{ player.bankacc }} obsidian coins on deposit.
-                    You are a <span class="{{ player_type | lower }}-player">{{ player_type }}</span> character.
+                    {%- endif %}
+                    You {{ player_phrase }} a <span class="{{ player_type | lower }}-player">{{ player_type }}</span> character.
                     You were born {{ player.birth | unix2human_time }}.
                     You last logged in {{ player.logon | unix2human_time }}.
-                    You have played for {{ player.online }} seconds.
-                    Your karma is {{ player.karma }}.
+                    You last logged out {{ player.logout | unix2human_time }}.
+                    You played for {{ player.online }} seconds.
 
-                    Your statistics are:
+                    Your statistics {{ player_phrase }}:
                                         {{ player.curr_strength }} Strength    {{ player.curr_agility }} Agility   {{ player.curr_endurance }} Endurance
                                         {{ player.curr_willpower }} Willpower   {{ player.curr_focus }} Focus     {{ player.curr_perception }} Perception 
                 </pre>
