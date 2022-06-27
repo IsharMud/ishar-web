@@ -15,16 +15,20 @@
         {%- set player_gender_own   = 'his' %}
     {%- elif player.sex == 2 %}
         {%- set player_gender       = 'she' %}
+        {%- set_player_gender_own   = 'her' %}
     {%- else %}
         {%- set player_gender       = 'they' %}
+        {%- set player_gender_own   = 'their' %}
     {%- endif %}
     {%- if player.is_deleted == 1 or survival_dead == True %}
         {%- set player_phrase       = 'was' %}
         {%- set player_phrase_own   = 'were' %}
     {%- elif player_gender == 'they' -%}
         {%- set player_phrase       = 'are' %}
+        {%- set player_phrase_own   = 'are' %}
     {%- else %}
         {%- set player_phrase       = 'is' %}
+        {%- set player_phrase_own   = 'are' %}
     {%- endif %}
 {%- endif %}
 {%- block title %}
