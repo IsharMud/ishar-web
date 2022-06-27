@@ -48,6 +48,10 @@
                     You last logged in {{ player.logon | unix2human_time }}.
                     You have played for {{ player.online }} seconds.
                     Your karma is {{ player.karma }}.
+
+                    Your statistics are:
+                                        {{ player.curr_strength }} Strength    {{ player.curr_agility }} Agility   {{ player.curr_endurance }} Endurance
+                                        {{ player.curr_willpower }} Willpower   {{ player.curr_focus }} Focus     {{ player.curr_perception }} Perception 
                 </pre>
     {%- else %}
         Sorry, but please go back and choose a valid player.
