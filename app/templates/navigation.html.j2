@@ -35,9 +35,6 @@
                             <a href ="{{ url_for('portal') }}" title="Player Portal">Player Portal</a>
                         </li>
                         <li>
-                            <a href ="{{ url_for('change_password') }}" title="Change Password">Change Password</a>
-                        </li>
-                        <li>
                             <a href ="{{ url_for('logout') }}" title="Player Log Out">Log Out ({{ current_user.account_name }})</a>
                         </li>
                         {%- else %}

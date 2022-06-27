@@ -189,6 +189,9 @@
                 {%- endfor %}
                 </table>
                 {%- endif %}
+                <p id="change-password-link">
+                    <a title="Change Password" href="{{ url_for('change_password') }}">Change Password</a>
+                </p>
                 {%- if is_admin is defined and is_admin == True %}
                 <p id="admin-link">
                     <a title="Administration Portal" href="{{ url_for('admin_portal') }}">Administration</a>
