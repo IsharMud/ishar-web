@@ -82,8 +82,8 @@
                             </span>
                         </td>
                         <td{%- if survival_dead == True or player.is_deleted == 1 %} class="player-gone"{%- endif %}>
-                            <span title="Class: {{ player.player_class.class_name | title | safe }}">
-                                {{ player.player_class.class_name | title | safe }}
+                            <span title="Class: {{ player.player_class.class_name | replace('_', '-') | title | safe }}">
+                                {{ player.player_class.class_name | replace('_', '-') | title | safe }}
                             </span>
                         </td>
                         <td{%- if survival_dead == True or player.is_deleted == 1 %} class="player-gone"{%- endif %}>
