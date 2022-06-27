@@ -4,7 +4,7 @@
     {%- set survival_dead = False -%}
     {%- if player.player_flags[45].value == 1 %}
         {%- set player_type = 'Survival' %}
-        {%- if player.curr_endurance <= 0 %}
+        {%- if player.curr_endurance <= 0 and player.deaths > 0 %}
             {%- set survival_dead = True %}
         {%- endif %}
     {%- else %}
