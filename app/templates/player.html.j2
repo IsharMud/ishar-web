@@ -38,32 +38,34 @@
 {%- endblock %}
 {%- block content %}
     {%- if player %}
-                <pre>
+                <p>
                     You {{ player_phrase }}: {{ player_title }}.
-                    Class: {{ player.player_class.class_name | replace('_', '-') | title | safe }}
-                    Level: {{ player.level }}
-                    Renown (Total): {{ player.renown }} ({{ player.total_renown }})
-                    Remorts: {{ player.remorts }}
-                    Deaths: {{ player.deaths }}
-                    Alignment: {{ player.align }}
-                    Karma: {{ player.karma }}
-                    Origin: {{ player.player_race.race_name | replace('_', '-') | title | safe }}
+                </p>
+                <code>
+                    Class: {{ player.player_class.class_name | replace('_', '-') | title | safe }}<br>
+                    Level: {{ player.level }}<br>
+                    Renown (Total): {{ player.renown }} ({{ player.total_renown }})<br>
+                    Remorts: {{ player.remorts }}<br>
+                    Deaths: {{ player.deaths }}<br>
+                    Alignment: {{ player.align }}<br>
+                    Karma: {{ player.karma }}<br>
+                    Origin: {{ player.player_race.race_name | replace('_', '-') | title | safe }}<br>
                     {%- if player_phrase == 'are' %}
-                    Health: {{ player.curr_hit_pts / player.perm_hit_pts * 100 }}
-                    Movement: {{ player.curr_move_pts / player.perm_move_pts * 100 }}
-                    Spell: {{ player.curr_spell_pts / player.perm_spell_pts * 100 }}
-                    You have {{ player.bankacc }} obsidian coins on deposit.
+                    Health: {{ player.curr_hit_pts / player.perm_hit_pts * 100 }}<br>
+                    Movement: {{ player.curr_move_pts / player.perm_move_pts * 100 }}<br>
+                    Spell: {{ player.curr_spell_pts / player.perm_spell_pts * 100 }}<br>
+                    You have {{ player.bankacc }} obsidian coins on deposit.<br>
                     {%- endif %}
-                    You {{ player_phrase }} a <span class="{{ player_type | lower }}-player">{{ player_type }}</span> character.
-                    You were born {{ player.birth | unix2human_time }}.
-                    You last logged in {{ player.logon | unix2human_time }}.
-                    You last logged out {{ player.logout | unix2human_time }}.
-                    You played for {{ player.online }} seconds.
-
-                    Your statistics {{ player_phrase }}:
-                                        {{ player.curr_strength }} Strength    {{ player.curr_agility }} Agility   {{ player.curr_endurance }} Endurance
-                                        {{ player.curr_willpower }} Willpower   {{ player.curr_focus }} Focus     {{ player.curr_perception }} Perception 
-                </pre>
+                    You {{ player_phrase }} a <span class="{{ player_type | lower }}-player">{{ player_type }}</span> character.<br>
+                    You were born {{ player.birth | unix2human_time }}.<br>
+                    You last logged in {{ player.logon | unix2human_time }}.<br>
+                    You last logged out {{ player.logout | unix2human_time }}.<br>
+                    You played for {{ player.online }} seconds.<br><br>
+                    Your statistics {{ player_phrase }}:<br>
+                                        {{ player.curr_strength }} Strength / {{ player.curr_agility }} Agility / {{ player.curr_endurance }} Endurance<br>
+                                        {{ player.curr_willpower }} Willpower / {{ player.curr_focus }} Focus / {{ player.curr_perception }} Perception<br>
+                </code>
+                <br>
     {%- else %}
         Sorry, but please go back and choose a valid player.
     {%- endif %}
