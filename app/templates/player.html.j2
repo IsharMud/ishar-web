@@ -1,4 +1,18 @@
 {% extends "layout.html.j2" %}
+{%- macro render_field(field) %}
+                    <p class="player-search">
+                        {{ field(**kwargs) | safe }}
+                    </p>
+    {%- if field.errors %}
+                <ul class="field-errors">
+        {%- for error in field.errors %}
+                    <li>
+                        {{ error }}
+                    </li>
+        {%- endfor %}
+                </ul>
+    {%- endif %}
+{%- endmacro %}
 {%- if player %}
     {%- set player_title = player.title | replace('%s','<strong>' + player.name + '</strong>') %}
     {%- set survival_dead = False -%}
@@ -52,6 +66,14 @@
     {%- endif %}
 {%- endblock %}
 {%- block content %}
+    {%- if player_search_form is defined %}
+                <form method="post" action="{{ url_for('search_player') }}" id="player-search-form">
+                    {{ render_field(player_search_form.player_search_name) }}
+                    {{ player_search_form.csrf_token }}
+                    {{ render_field(player_search_form.submit) }}
+                    <br>
+                </form>
+    {%- endif %}
     {%- if player %}
                 <p>
                     {{ player_gender | title }} {{ player_phrase }}: {{ player_title }}.
@@ -81,8 +103,6 @@
                                         {{ player.curr_willpower }} Willpower / {{ player.curr_focus }} Focus / {{ player.curr_perception }} Perception<br>
                 </code>
                 <br>
-    {%- else %}
-        Sorry, but please go back and choose a valid player.
     {%- endif %}
                 <p>
                     <a href="{{ url_for('portal') }}">

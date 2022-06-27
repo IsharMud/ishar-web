@@ -124,7 +124,23 @@ def change_password():
     return render_template('change_password.html.j2', change_password_form=change_password_form)
 
 
-# Player information page
+# Process player search
+@app.route('/player/search', methods=['POST'])
+@login_required
+def search_player(player_name=None):
+    player_search_form = models.PlayerSearchForm()
+    if player_search_form.validate_on_submit():
+        player_search = models.Player.query.filter(models.Player.name.like(player_search_form.player_search_name.data + '%')).first()
+    try:
+        player_name = player_search.name
+    except Exception as e:
+        player_name = None
+        print(e)
+    return redirect(url_for('show_player', player_name=player_name), code=302)
+
+
+# Player pages
+@app.route('/player', methods=['GET'])
 @app.route('/player/<string:player_name>', methods=['GET'])
 @login_required
 def show_player(player_name=None):
@@ -138,7 +154,8 @@ def show_player(player_name=None):
         flash('Sorry, but please choose a valid player!', 'error')
         code = 404
 
-    return render_template('player.html.j2', player=find_player), code
+    player_search_form = models.PlayerSearchForm()
+    return render_template('player.html.j2', player=find_player, player_search_form=player_search_form), code
 
 
 # Portal for logged in users

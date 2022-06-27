@@ -89,6 +89,17 @@ class NewsAddForm(FlaskForm):
     submit      = SubmitField('Post')
 
 
+# Player search form class to search player names
+class PlayerSearchForm(FlaskForm):
+    player_search_name  = StringField('Player Name', [
+                                    validators.DataRequired(),
+                                    validators.Length(min=3, max=25),
+                                    Alpha(message='Player names may only contain letters!')
+                                ]
+                            )
+    submit              = SubmitField('Search')
+
+
 # Account database class
 class Account(db.Model, UserMixin):
     __tablename__   = 'accounts'
