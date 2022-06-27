@@ -65,7 +65,7 @@
                     </tr>
                     {%- for player in current_user.players %}
                     <tr>
-                        {%- set player_title    = player.title | replace('%s','<strong>' + player.name + '</strong>') %}
+                        {%- set player_title    = player.title | replace('%s', '<strong><a href="' + url_for('show_player', player_name=player.name) + '">' + player.name + '</a></strong>') %}
                         {%- set survival_dead   = False -%}
                         {#- FIXME: 45 = hard-coded value for PERM_DEATH player_flag #}
                         {%- if player.player_flags[45].value == 1 %}

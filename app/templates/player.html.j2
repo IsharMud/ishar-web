@@ -1,0 +1,39 @@
+{% extends "layout.html.j2" %}
+{%- set player_title = player.title | replace('%s','<strong>' + player.name + '</strong>') %}
+{%- set survival_dead = False -%}
+{%- if player.player_flags[45].value == 1 %}
+    {%- set player_type = 'Survival' %}
+    {%- if player.curr_endurance <= 0 %}
+        {%- set survival_dead = True -%}
+    {%- endif %}
+{%- else %}
+    {%- set player_type = 'Classic' %}
+{%- endif %}
+{% block title %}
+Player: {{ player.name }}{%- if survival_dead == True %} ☠️{%- endif %}
+{% endblock %}
+{% block header %}
+Player: {% if survival_dead == True or player.is_deleted == 1 %}
+<span class="player-gone">{{ player.name }}</span>{%- if survival_dead == True %} ☠️{%- endif %}
+{%- else %}
+{{ player.name }}
+{%- endif %}
+{% endblock %}
+{%- block content %}
+<pre>
+You are: {{ player_title }}.
+Class: {{ player.player_class.class_name | replace('_', '-') | title | safe }}
+Level: {{ player.level }}
+Alignment: {{ player.align }}
+Origin: {{ player.player_race.race_name | replace('_', '-') | title | safe }}
+Health: {{ player.curr_hit_pts / player.perm_hit_pts * 100 }}
+Movement: {{ player.curr_move_pts / player.perm_move_pts * 100 }}
+Spell: {{ player.curr_spell_pts / player.perm_spell_pts * 100 }}
+You have {{ player.bankacc }} obsidian coins on deposit.
+You are a <span class="{{ player_type | lower }}-player">{{ player_type }}</span> character.
+You were born {{ player.birth | unix2human_time }}.
+You last logged in {{ player.logon | unix2human_time }}.
+You have played for {{ player.online }} seconds.
+Your karma is {{ player.karma }}.
+</pre>
+{%- endblock %}

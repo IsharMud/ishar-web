@@ -327,6 +327,13 @@ class Player(db.Model):
                                 backref='players'
                             )
 
+    # Players above a certain level are administrators
+    def is_admin(self, admin_level):
+        if self.true_level > admin_level:
+                return True
+
+        return False
+
 
 # News database class
 class News(db.Model):

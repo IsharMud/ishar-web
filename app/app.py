@@ -124,6 +124,23 @@ def change_password():
     return render_template('change_password.html.j2', change_password_form=change_password_form)
 
 
+# Player information page
+@app.route('/player/<string:player_name>', methods=['GET'])
+@login_required
+def show_player(player_name=None):
+
+    try:
+        code = 200
+        find_player = models.Player.query.filter_by(name = player_name).first()
+        find_if_admin = find_player.is_admin(secrets.admin_level)
+        return render_template('player.html.j2', player=find_player, player_is_admin=find_if_admin), code
+
+    except Exception as e:
+        print(e)
+        flash('Sorry, but please choose a valid player!', 'error')
+        return redirect(url_for('portal'), code=302)
+
+
 # Portal for logged in users
 @app.route('/portal', methods=['GET'])
 @login_required
@@ -288,18 +305,19 @@ def support():
 @app.route('/areas', methods=['GET'])
 @app.route('/world/<string:area>', methods=['GET'])
 @app.route('/world', methods=['GET'])
-def world(area=None, code=200):
+def world(area=None):
 
     # Try to find an area based on user input
     try:
-        areas = helptab._get_help_area(helptab_file=secrets.helptab_file, area=area)
+        areas   = helptab._get_help_area(helptab_file=secrets.helptab_file, area=area)
+        code    = 200
 
     # Otherwise, list all areas found in the game "helptab" file
     except Exception as e:
         flash('Sorry, but please choose a valid area!', 'error')
-        areas = helptab._get_help_area(None)
-        area = None
-        code = 404
+        areas   = helptab._get_help_area(None)
+        area    = None
+        code    = 404
 
     return render_template('world.html.j2', areas=areas, area=area), code
 
@@ -307,7 +325,7 @@ def world(area=None, code=200):
 # Jinja2 template filter to convert UNIX timestamps to Python date-time objects
 @app.template_filter('unix2human_time')
 def unix2human_time(unix_time):
-    return datetime.datetime.fromtimestamp(unix_time).strftime('%A, %B %d, %Y %I:%M %p %Z')
+    return datetime.datetime.fromtimestamp(unix_time).strftime('%A, %B %d, %Y %I:%M %p')
 
 
 import helptab
