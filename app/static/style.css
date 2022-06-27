@@ -144,11 +144,13 @@ input {
 #created {
     text-align: left;
     float:      left;
+    padding:    1em;
 }
 
-#season, #essence {
+#season, #essence, #renown {
     text-align: right;
     float:      right;
+    padding:    1em;
 }
 
 #season strong, #created strong {

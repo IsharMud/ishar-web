@@ -21,10 +21,17 @@
 {%- block content %}
                 {%- if current_user.seasonal_points is defined and current_user.seasonal_points > 0 %}
                 <h3 id="essence">
-                    Essence: {{ current_user.seasonal_points }}
+                    <span title="Essence: {{ current_user.seasonal_points }}">
+                        Essence: {{ current_user.seasonal_points }}
+                    </span>
                 </h3>
                 {%- endif %}
                 {%- if current_user.players is defined and current_user.players is iterable and current_user.players|length > 0 %}
+                <h3 id="renown">
+                    <span title="Renown: {{ current_user.players | sum(attribute='renown') }} ({{ current_user.players | sum(attribute='total_renown') }})">
+                        Renown: {{ current_user.players | sum(attribute='renown') }} ({{ current_user.players | sum(attribute='total_renown') }})
+                    </span>
+                </h3>
                 <h3>
                     {{ current_user.players | length }} character{% if current_user.players|length != 1 %}s{% endif %}:
                 </h3>
@@ -47,10 +54,7 @@
                             Remorts
                         </th>
                         <th>
-                            Renown
-                        </th>
-                        <th>
-                            Accumulated Renown
+                            Renown (Total)
                         </th>
                         <th>
                             Deaths
@@ -98,13 +102,8 @@
                             </span>
                         </td>
                         <td>
-                            <span title="Renown: {{ player.renown }}">
-                                {{ player.renown }}
-                            </span>
-                        </td>
-                        <td>
-                            <span title="Accumulated Renown: {{ player.total_renown }}">
-                                {{ player.total_renown }}
+                            <span title="Renown: {{ player.renown }} ({{ player.total_renown }})">
+                                {{ player.renown }} ({{ player.total_renown }})
                             </span>
                         </td>
                         <td>
