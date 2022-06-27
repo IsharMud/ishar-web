@@ -206,6 +206,8 @@ input {
     list-style: none;
 }
 
-.challenge-completed, .player-gone {
-    text-decoration:    line-through;
+.challenge-completed {
+    text-decoration:            line-through;
+    text-decoration-color:      #fa7;
+    text-decoration-thickness:  0.18em;
 }

@@ -15,15 +15,13 @@
 {%- endmacro %}
 {%- if player %}
     {%- set player_title = player.title | replace('%s','<strong>' + player.name + '</strong>') %}
-    {%- set survival_dead = False -%}
     {%- if player.player_flags[45].value == 1 %}
         {%- set player_type = 'Survival' %}
-        {%- if player.curr_endurance <= 0 and player.deaths > 0 %}
-            {%- set survival_dead = True %}
-        {%- endif %}
     {%- else %}
         {%- set player_type = 'Classic' %}
     {%- endif %}
+    {%- set player_phrase           = 'is' %}
+    {%- set player_phrase_own       = 'are' %}
     {%- if player.sex == 1 %}
         {%- set player_gender       = 'he' %}
         {%- set player_gender_own   = 'his' %}
@@ -33,34 +31,19 @@
     {%- else %}
         {%- set player_gender       = 'they' %}
         {%- set player_gender_own   = 'their' %}
-    {%- endif %}
-    {%- if player.is_deleted == 1 or survival_dead == True %}
-        {%- set player_phrase       = 'was' %}
-        {%- set player_phrase_own   = 'were' %}
-    {%- elif player_gender == 'they' %}
         {%- set player_phrase       = 'are' %}
-        {%- set player_phrase_own   = 'are' %}
-    {%- else %}
-        {%- set player_phrase       = 'is' %}
-        {%- set player_phrase_own   = 'are' %}
     {%- endif %}
 {%- endif %}
 {%- block title %}
     {%- if player -%}
-        Player: {{ player.name }}{%- if survival_dead == True %} ☠️{%- endif -%}
+        Player: {{ player.name }}
     {%- else -%}
         Player Not Found
     {%- endif -%}
 {%- endblock %}
 {%- block header -%}
     {%- if player -%}
-        Player: {% if survival_dead == True or player.is_deleted == 1 -%}
-        <span class="player-gone">{{ player.name }}</span>
-        {%- if player.is_deleted == 1 %} (Deleted){%- endif %}
-            {%- if survival_dead == True %} ☠️{%- endif %}
-        {%- else -%}
-            {{ player.name }}
-        {%- endif -%}
+        Player: {{ player.name }}
     {%- else -%}
         Player Not Found
     {%- endif %}
@@ -88,16 +71,14 @@
                     Alignment: {{ player.align }}<br>
                     Karma: {{ player.karma }}<br>
                     Origin: {{ player.player_race.race_name | replace('_', '-') | title | safe }}<br>
-                    {%- if player_phrase == 'are' %}
                     Health: {{ player.curr_hit_pts / player.perm_hit_pts * 100 }}<br>
                     Movement: {{ player.curr_move_pts / player.perm_move_pts * 100 }}<br>
                     Spell: {{ player.curr_spell_pts / player.perm_spell_pts * 100 }}<br>
                     Bank: {{ player.bankacc }} obsidian coins on deposit<br>
-                    {%- endif %}
                     {{ player_gender | title }} {{ player_phrase }} a <span class="{{ player_type | lower }}-player">{{ player_type }}</span> character.<br>
                     {{ player_gender | title }} last logged in {{ player.logon | unix2human_time }}.<br>
                     {{ player_gender | title }} last logged out {{ player.logout | unix2human_time }}.<br>
-                    {{ player_gender |title }} played for {{ player.online }} seconds.<br><br>
+                    {{ player_gender |title }} has played for {{ player.online }} seconds.<br><br>
                     {{ player_gender_own | title }} statistics {{ player_phrase_own }}:<br>
                                         {{ player.curr_strength }} Strength / {{ player.curr_agility }} Agility / {{ player.curr_endurance }} Endurance<br>
                                         {{ player.curr_willpower }} Willpower / {{ player.curr_focus }} Focus / {{ player.curr_perception }} Perception<br>
