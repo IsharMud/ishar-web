@@ -117,7 +117,7 @@
                     <br>
                     {{ player_gender_own | title }} alignment {{ player_phrase }} {{ display_align(player.align) }} ({{ player.align }}).
                     <br>
-                    {%- if player.is_deleted != 1%}
+                    {%- if player.is_deleted != 1 and not player.true_level > 20 %}
                     {{ player_gender | title }} {{ player_phrase_owns }} died {{ player.deaths }} time{%- if player.deaths != 1 -%}s{%- endif -%}.
                     {%- endif %}
                 </p>
@@ -166,7 +166,7 @@
                 </table>
                 <br>
                 {%- endif %}
-                {%- if player.is_deleted != 1 %}
+                {%- if player.is_deleted != 1 and not player.true_level > 20 %}
                 <table>
                     <tr>
                         <th>
