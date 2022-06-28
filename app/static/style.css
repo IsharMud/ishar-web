@@ -84,6 +84,10 @@ input[type="reset"], input[type="submit"], #login-form, #new-account-form {
     font-style: italic;
 }
 
+.god-player {
+    color:  #00b7eb;
+}
+
 .survival-player {
     color:   #fa8072;
 }
@@ -212,7 +216,10 @@ input {
     text-decoration-thickness:  0.18em;
 }
 
+.god-player::after {
+    content:    '😇';
+}
+
 .deleted-player::after {
-    content:            ' ☠️';
-    text-decoration:    none;
+    content:    ' ☠️';
 }
