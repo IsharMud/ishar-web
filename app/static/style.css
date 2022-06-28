@@ -212,6 +212,7 @@ input {
     text-decoration-thickness:  0.18em;
 }
 
-.deleted-character::after {
-    content:    '☠️';
+.deleted-player::after {
+    content:            '☠️';
+    text-decoration:    none;
 }
