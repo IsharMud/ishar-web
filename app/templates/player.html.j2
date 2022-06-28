@@ -13,8 +13,42 @@
                 </ul>
     {%- endif %}
 {%- endmacro %}
+{%- macro display_align(align) %}
+    {%- if align <= -1000 -%}
+        Very Evil
+    {%- elif align > -1000 and align <= -500 -%}
+        Evil
+    {%- elif align > -500 and align <= -250 -%}
+        Slightly Evil
+    {%- elif align > -250 and align < 250 -%}
+        Neutral
+    {%- elif align >= 250 and align < 500 -%}
+        Slightly Good
+    {%- elif align >= 500 and align < 1000 -%}
+        Good
+    {%- elif align >= 1000 %}
+        Very Good
+    {%- else -%}
+        Un-Aligned Alien
+    {%- endif -%}
+{%- endmacro %}
+{%- macro display_class(class) %}
+    {%- if class == 'WARRIOR' -%}
+        mighty warrior
+    {%- elif class == 'ROGUE' -%}
+        stealthy rogue
+    {%- elif class == 'CLERIC' -%}
+        pious cleric
+    {%- elif class == 'MAGICIAN' -%}
+        fearsome mage
+    {%- elif class == 'NECROMANCER' -%}
+        shadowy necromancer
+    {%- else -%}
+        classless curiousity
+    {%- endif -%}
+{%- endmacro %}
 {%- if player %}
-    {%- set player_title = player.title | replace('%s','<strong>' + player.name + '</strong>') %}
+    {%- set player_title = player.title | replace('%s','<strong><a href="' + url_for('show_player', player_name=player.name) + '">' + player.name + '</a></strong>') | safe %}
     {%- if player.player_flags[45].value == 1 %}
         {%- set player_type = 'Survival' %}
     {%- else %}
@@ -54,36 +88,83 @@
                     {{ render_field(player_search_form.player_search_name) }}
                     {{ player_search_form.csrf_token }}
                     {{ render_field(player_search_form.submit) }}
-                    <br>
                 </form>
     {%- endif %}
     {%- if player %}
+                <h3 id="player">
+                    {{ player_title }}
+                </h2>
                 <p>
-                    {{ player_gender | title }} {{ player_phrase }}: {{ player_title }}.
+                    {{ player.name | title | safe }} {{ player_phrase }} a {{ display_class(player.player_class.class_name) }} of {{ player.player_race.race_name | replace('_', '-') | lower | safe }} origin.
+                    <br>
+                    {{ player_gender | title }} {{ player_phrase }} a <span class="{{ player_type | lower }}-player">{{ player_type }}</span> character.
+                    <br>
+                    {{ player_gender | title }} {{ player_phrase }} level {{ player.level }} and has remorted {{ player.remorts }} times.
+                    <br>
+                    {{ player_gender | title }} has died {{ player.deaths }} time{%- if player.deaths != 1 -%}s{%- endif -%}.
+                    <br>
+                    {{ player_gender | title }} has {{ player.renown }} unspent renown and has accumulated {{ player.total_renown }} renown.
+                    <br>
+                    {{ player_gender | title }} has {{ player.bankacc }} obsidian coins on deposit.
+                    <br>
+                    Alignment: {{ display_align(player.align) }} ({{ player.align }})
                 </p>
-                <code>
-                    Birth: {{ player.birth | unix2human_time }}.<br>
-                    Class: {{ player.player_class.class_name | replace('_', '-') | title | safe }}<br>
-                    Level: {{ player.level }}<br>
-                    Renown (Total): {{ player.renown }} ({{ player.total_renown }})<br>
-                    Remorts: {{ player.remorts }}<br>
-                    Deaths: {{ player.deaths }}<br>
-                    Alignment: {{ player.align }}<br>
-                    Karma: {{ player.karma }}<br>
-                    Origin: {{ player.player_race.race_name | replace('_', '-') | title | safe }}<br>
-                    Health: {{ player.curr_hit_pts / player.perm_hit_pts * 100 }}<br>
-                    Movement: {{ player.curr_move_pts / player.perm_move_pts * 100 }}<br>
-                    Spell: {{ player.curr_spell_pts / player.perm_spell_pts * 100 }}<br>
-                    Bank: {{ player.bankacc }} obsidian coins on deposit<br>
-                    {{ player_gender | title }} {{ player_phrase }} a <span class="{{ player_type | lower }}-player">{{ player_type }}</span> character.<br>
-                    {{ player_gender | title }} last logged in {{ player.logon | unix2human_time }}.<br>
-                    {{ player_gender | title }} last logged out {{ player.logout | unix2human_time }}.<br>
-                    {{ player_gender |title }} has played for {{ player.online }} seconds.<br><br>
-                    {{ player_gender_own | title }} statistics {{ player_phrase_own }}:<br>
-                                        {{ player.curr_strength }} Strength / {{ player.curr_agility }} Agility / {{ player.curr_endurance }} Endurance<br>
-                                        {{ player.curr_willpower }} Willpower / {{ player.curr_focus }} Focus / {{ player.curr_perception }} Perception<br>
-                </code>
-                <br>
+                <table id="stats">
+                    <tr>
+                        <th>
+                            Strength
+                        </th>
+                        <th>
+                            Agility
+                        </th>
+                        <th>
+                            Endurance
+                        </th>
+                        <th>
+                            Willpower
+                        </th>
+                        <th>
+                            Focus
+                        </th>
+                        <th>
+                            Perception
+                        </th>
+                    </tr>
+                    <tr>
+                        <td>
+                            {{ player.curr_strength }}
+                        </td>
+                        <td>
+                            {{ player.curr_agility }}
+                        </td>
+                        <td>
+                            {{ player.curr_endurance }}
+                        </td>
+                        <td>
+                            {{ player.curr_willpower }}
+                        </td>
+                        <td>
+                            {{ player.curr_focus }}
+                        </td>
+                        <td>
+                            {{ player.curr_perception }}
+                        </td>
+                    </tr>
+                </table>
+                <p>
+                    Health: {{ player.curr_hit_pts / player.perm_hit_pts * 100 }}
+                    <br>
+                    Movement: {{ player.curr_move_pts / player.perm_move_pts * 100 }}
+                    <br>
+                    Spell: {{ player.curr_spell_pts / player.perm_spell_pts * 100 }}
+                </p>
+                <p>
+                    {{ player_gender | title }} last logged in {{ player.logon | unix2human_time }}.
+                    <br>
+                    {{ player_gender | title }} last logged out {{ player.logout | unix2human_time }}.
+                    <br>
+                    {{ player_gender | title }} has played for {{ player.online }} seconds.
+                </p>
     {%- endif %}
                 <p>
                     <a href="{{ url_for('portal') }}">
