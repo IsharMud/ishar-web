@@ -206,8 +206,12 @@ input {
     list-style: none;
 }
 
-.challenge-completed, .deleted-character {
+.challenge-completed {
     text-decoration:            line-through;
     text-decoration-color:      #fa7;
     text-decoration-thickness:  0.18em;
+}
+
+.deleted-character::after {
+    content:    '☠️';
 }
