@@ -1,8 +1,6 @@
 {% extends "layout.html.j2" %}
-{%- macro render_field(field) %}
-                    <p class="player-search">
-                        {{ field(**kwargs) | safe }}
-                    </p>
+{%- macro render_field(field) -%}
+                    {{ field(**kwargs) | safe }}
     {%- if field.errors %}
                 <ul class="field-errors">
         {%- for error in field.errors %}
@@ -12,7 +10,7 @@
         {%- endfor %}
                 </ul>
     {%- endif %}
-{%- endmacro %}
+{%- endmacro -%}
 {%- macro display_align(align) %}
     {%- if align <= -1000 -%}
         Very Evil
@@ -31,7 +29,7 @@
     {%- else -%}
         Un-Aligned Alien
     {%- endif -%}
-{%- endmacro %}
+{%- endmacro -%}
 {%- macro display_class(class) %}
     {%- if class == 'WARRIOR' -%}
         mighty warrior
@@ -48,7 +46,7 @@
     {%- endif -%}
 {%- endmacro %}
 {%- if player %}
-    {%- set player_title = player.title | replace('%s','<strong><a href="' + url_for('show_player', player_name=player.name) + '">' + player.name + '</a></strong>') | safe %}
+    {%- set player_title = player.title | replace('%s','<a href="' + url_for('show_player', player_name=player.name) + '">' + player.name + '</a>') | safe %}
     {%- if player.player_flags[45].value == 1 %}
         {%- set player_type = 'Survival' %}
     {%- else %}
