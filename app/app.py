@@ -26,12 +26,18 @@ login_manager.needs_refresh_message_category    = 'error'
 login_manager.refresh_view                      = 'login'
 login_manager.session_protection                = 'strong'
 
+# Get database and form classes
 import models
 
 # Get users for the Flask Login Manager via Account object from the database
 @login_manager.user_loader
 def load_user(account_id):
     return models.Account.query.get(str(account_id))
+
+# Add the current season as a context processor
+@app.context_processor
+def inject_season():
+    return dict(season=models.Season.query.filter_by(is_active = 1).first())
 
 # Handle errors with a little template
 def error(title='Unknown Error', message='Sorry, but there was an unknown error.', code=500):
@@ -154,17 +160,18 @@ def show_player(player_name=None):
         flash('Sorry, but please choose a valid player!', 'error')
         code = 404
 
-    player_search_form = models.PlayerSearchForm()
-    return render_template('player.html.j2', player=find_player, player_search_form=player_search_form), code
+    return render_template('player.html.j2',
+                                player              = find_player,
+                                player_search_form  = models.PlayerSearchForm()
+                            ), code
 
 
 # Portal for logged in users
 @app.route('/portal', methods=['GET'])
 @login_required
 def portal():
-    # Show the portal with the current season and challenges information
+    # Show the portal
     return render_template('portal.html.j2',
-                                season      = models.Season.query.filter_by(is_active = 1).first(),
                                 is_admin    = current_user.is_admin(secrets.admin_level)
                             )
 
@@ -173,9 +180,8 @@ def portal():
 @app.route('/challenges', methods=['GET'])
 @login_required
 def challenges():
-    # Show the challenges with the current season and challenges information
+    # Show the current challenges
     return render_template('challenges.html.j2',
-                                season      = models.Season.query.filter_by(is_active = 1).first(),
                                 challenges  = models.Challenge.query.filter_by(is_active = 1).order_by(
                                                     models.Challenge.winner_desc,
                                                     -models.Challenge.adj_tier

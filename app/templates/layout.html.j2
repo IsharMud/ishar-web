@@ -53,7 +53,21 @@
             </div>
         </div>
         <div id="footer">
-            {%- block footer %}
+    {%- block footer %}
+        {%- if current_user is defined and current_user.is_authenticated %}
+            {%- if current_user.created_at is defined and current_user.created_at != '' %}
+            <span id="created">
+                <strong>Account Created</strong><br>
+                {{ current_user.created_at.strftime('%A, %B %d, %Y %I:%M %p %Z') }}
+            </span>
+            {%- endif %}
+            {%- if current_user.seasonal_points is defined and current_user.seasonal_points > 0 %}
+            <span id="essence">
+                <strong>Essence</strong><br>
+                {{ current_user.seasonal_points }} points
+            </span>
+            {%- endif %}
+        {%- else %}
             <div id="quote">
                 Some say that the world was formed from the body of the dying Ishar,
                 and that his bones became the mountains and his blood ran from his
@@ -66,7 +80,14 @@
                     -- Book of Thurvun, 1730
                 </p>
             </div>
-            {%- endblock %}
+        {%- endif %}
+        {%- if season is defined and season.season_id is defined and season.expiration_date is defined %}
+            <span id="season">
+                <strong>Season {{ season.season_id }}</strong><br>
+                ends {{ season.expiration_date | unix2human_time }}
+            </span>
+        {%- endif %}
+    {%- endblock %}
         </div>
     </body>
 </html>

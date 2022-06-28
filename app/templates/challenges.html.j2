@@ -76,17 +76,3 @@
                     </a>
                 </p>
 {%- endblock %}
-{% block footer %}
-            {%- if current_user.created_at is defined and current_user.created_at != '' %}
-            <span id="created">
-                <strong>Account Created</strong>:<br>
-                {{ current_user.created_at.strftime('%A, %B %d, %Y %I:%M %p %Z') }}
-            </span>
-            {%- endif %}
-            {%- if season.season_id is defined and season.expiration_date is defined %}
-            <span id="season">
-                <strong>Season {{ season.season_id }}</strong>:<br>
-                ends {{ season.expiration_date | unix2human_time }}
-            </span>
-            {%- endif %}
-{%- endblock %}

@@ -2,19 +2,7 @@
 {% block title %}Portal{% endblock %}
 {% block header %}Welcome{% if current_user.account_name is defined %}, {{ current_user.account_name | title | safe }}{% endif %}!{% endblock %}
 {%- block content %}
-                {%- if current_user.seasonal_points is defined and current_user.seasonal_points > 0 %}
-                <h3 id="essence">
-                    <span title="Essence: {{ current_user.seasonal_points }}">
-                        Essence: {{ current_user.seasonal_points }}
-                    </span>
-                </h3>
-                {%- endif %}
                 {%- if current_user.players is defined and current_user.players is iterable and current_user.players|length > 0 %}
-                <h3 id="renown">
-                    <span title="Renown: {{ current_user.players | sum(attribute='renown') }} ({{ current_user.players | sum(attribute='total_renown') }})">
-                        Renown: {{ current_user.players | sum(attribute='renown') }} ({{ current_user.players | sum(attribute='total_renown') }})
-                    </span>
-                </h3>
                 <h3>
                     {{ current_user.players | length }} character{% if current_user.players|length != 1 %}s{% endif %}:
                 </h3>
@@ -26,9 +14,6 @@
                         </th>
                         <th>
                             Class
-                        </th>
-                        <th>
-                            Race
                         </th>
                         <th>
                             Level
@@ -63,11 +48,6 @@
                         <td>
                             <span title="Class: {{ player.player_class.class_name | replace('_', '-') | title | safe }}">
                                 {{ player.player_class.class_name | replace('_', '-') | title | safe }}
-                            </span>
-                        </td>
-                        <td>
-                            <span title="Race: {{ player.player_race.race_name | replace('_', '-') | title | safe }}">
-                                {{ player.player_race.race_name | replace('_', '-') | title | safe }}
                             </span>
                         </td>
                         <td>
@@ -133,18 +113,4 @@
                     <a title="Administration Portal" href="{{ url_for('admin_portal') }}">Administration</a>
                 </p>
                 {%- endif %}
-{%- endblock %}
-{% block footer %}
-            {%- if current_user.created_at is defined and current_user.created_at != '' %}
-            <span id="created">
-                <strong>Account Created</strong>:<br>
-                {{ current_user.created_at.strftime('%A, %B %d, %Y %I:%M %p %Z') }}
-            </span>
-            {%- endif %}
-            {%- if season.season_id is defined and season.expiration_date is defined %}
-            <span id="season">
-                <strong>Season {{ season.season_id }}</strong>:<br>
-                ends {{ season.expiration_date | unix2human_time }}
-            </span>
-            {%- endif %}
 {%- endblock %}

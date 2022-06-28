@@ -141,19 +141,19 @@ input {
     width:              90%;
 }
 
-#created {
+#essence, #created {
     text-align: left;
     float:      left;
     padding:    1em;
 }
 
-#season, #essence, #renown {
+#season {
     text-align: right;
     float:      right;
-    padding:    1em;
+    padding:    0.5em;
 }
 
-#season strong, #created strong {
+#created strong, #essence strong, #season strong {
     color: #fa7;
 }
 
@@ -206,7 +206,7 @@ input {
     list-style: none;
 }
 
-.challenge-completed {
+.challenge-completed, .deleted-character {
     text-decoration:            line-through;
     text-decoration-color:      #fa7;
     text-decoration-thickness:  0.18em;

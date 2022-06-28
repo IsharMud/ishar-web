@@ -11,7 +11,7 @@
                 </ul>
     {%- endif %}
 {%- endmacro -%}
-{%- macro display_align(align) %}
+{%- macro display_align(align) -%}
     {%- if align <= -1000 -%}
         Very Evil
     {%- elif align > -1000 and align <= -500 -%}
@@ -30,7 +30,7 @@
         Un-Aligned Alien
     {%- endif -%}
 {%- endmacro -%}
-{%- macro display_class(class) %}
+{%- macro display_class(class) -%}
     {%- if class == 'WARRIOR' -%}
         mighty warrior
     {%- elif class == 'ROGUE' -%}
@@ -44,14 +44,21 @@
     {%- else -%}
         classless curiousity
     {%- endif -%}
-{%- endmacro %}
+{%- endmacro -%}
 {%- if player %}
-    {%- set player_title = player.title | replace('%s','<a href="' + url_for('show_player', player_name=player.name) + '">' + player.name + '</a>') | safe %}
     {%- if player.player_flags[45].value == 1 %}
-        {%- set player_type = 'Survival' %}
+        {%- set player_type         = 'Survival' %}
     {%- else %}
-        {%- set player_type = 'Classic' %}
+        {%- set player_type         = 'Classic' %}
     {%- endif %}
+    {%- if player.is_deleted == 1 %}
+        {%- set css_prefix  = 'deleted' %}
+    {%- elif player_type == 'Survival' %}
+        {%- set css_prefix  = 'survival' %}
+    {%- else %}
+        {%- set css_prefix  = 'player' %}
+    {%- endif %}
+    {%- set player_title = player.title | replace('%s','<a title="' + player.name + '" class="' + css_prefix + '-character" href="' + url_for('show_player', player_name=player.name) + '">' + player.name + '</a>') | safe %}
     {%- set player_phrase           = 'is' %}
     {%- set player_phrase_own       = 'are' %}
     {%- if player.sex == 1 %}
@@ -64,6 +71,10 @@
         {%- set player_gender       = 'they' %}
         {%- set player_gender_own   = 'their' %}
         {%- set player_phrase       = 'are' %}
+    {%- endif %}
+    {%- if player.is_deleted == 1 %}
+        {%- set player_phrase       = 'was' %}
+        {%- set player_phrase_own   = 'were' %}
     {%- endif %}
 {%- endif %}
 {%- block title %}
