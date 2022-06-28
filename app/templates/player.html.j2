@@ -107,6 +107,7 @@
                     <br>
                     Alignment: {{ display_align(player.align) }} ({{ player.align }})
                 </p>
+                {%- if player.true_level >= 5 %}
                 <table id="stats">
                     <tr>
                         <th>
@@ -149,6 +150,7 @@
                         </td>
                     </tr>
                 </table>
+                {%- endif %}
                 <p>
                     Health: {{ player.curr_hit_pts / player.perm_hit_pts * 100 }}
                     <br>
