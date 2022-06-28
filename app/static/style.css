@@ -213,6 +213,6 @@ input {
 }
 
 .deleted-player::after {
-    content:            '☠️';
+    content:            ' ☠️';
     text-decoration:    none;
 }
