@@ -191,7 +191,7 @@
                         </td>
                     </tr>
                 </table>
-                {%- else %}
+                {%- elif player.is_deleted == 1 %}
                 <p>
                     <span class="deleted-player">{{ player.name }}</span> is <span class="survival-player"><strong>DEAD</strong></span>!
                 </p>
