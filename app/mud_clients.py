@@ -5,15 +5,16 @@ mud_clients = {
     },
 
     'Android' : {
-        'Blowtorch' : 'http://bt.happygoatstudios.com/'
+        'Blowtorch'     : 'http://bt.happygoatstudios.com/'
     },
 
-    'Windows' : {
-        'ZMud'          : 'https://www.zuggsoft.com/zmud/zmudinfo.htm',
-        'alclient'      : 'https://www.ashavar.com/client/',
-        'yTin'          : 'http://ytin.sourceforge.net/',
-        'Gosclient'     : 'http://gosclient.altervista.org/eng/',
-        'MUSHclient'    : 'https://www.gammon.com.au/downloads/dlmushclient.htm',
+    'iOS' : {
+        'MUDRammer'     : 'https://splinesoft.net/mudrammer/'
+    },
+
+    'Linux / UNIX' : {
+        'TinTin++'      : 'http://tintin.sourceforge.net/',
+        'TinyFugue'     : 'http://tinyfugue.sourceforge.net/'
     },
 
     'Mac OS' : {
@@ -21,8 +22,11 @@ mud_clients = {
         'MudWalker'     : 'http://mudwalker.cubik.org/'
     },
 
-    'Linux / UNIX' : {
-        'TinTin++'      : 'http://tintin.sourceforge.net/',
-        'TinyFugue'     : 'http://tinyfugue.sourceforge.net/'
+    'Windows' : {
+        'ZMud'          : 'https://www.zuggsoft.com/zmud/zmudinfo.htm',
+        'alclient'      : 'https://www.ashavar.com/client/',
+        'yTin'          : 'http://ytin.sourceforge.net/',
+        'Gosclient'     : 'http://gosclient.altervista.org/eng/',
+        'MUSHclient'    : 'https://www.gammon.com.au/downloads/dlmushclient.htm'
     }
 }
