@@ -14,7 +14,7 @@
                 <ul>
                     {%- for platform in mud_clients %}
                     <li class="mud-client-platform">
-                        <h3>
+                        <h3 id="{{ platform | lower }}">
                             {{ platform }}
                         </h3>
                     </li>
