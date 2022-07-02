@@ -2,38 +2,6 @@
 {% block title %}Leader Board{% endblock %}
 {% block header %}Leader Board{% endblock %}
 {%- block content %}
-                <p>
-                    <strong>
-                        This page is a work-in-progress!
-                    </strong>
-                    It is currently sorted in descending order by:
-                </p>
-                        <ol>
-                            <li>
-                                Remorts
-                            </li>
-                            <li>
-                                Total Accumulated Renown
-                            </li>
-                            <li>
-                                Quests Completed
-                            </li>
-                            <li>
-                                Challenges Completed
-                            </li>
-                            <li>
-                                Current Unspent Renown
-                            </li>
-                            <li>
-                                Level
-                            </li>
-                            <li>
-                                Bank Account
-                            </li>
-                            <li>
-                                Deaths (ascending)
-                            </li>
-                        </ol>
                 {%- if leaders is defined and leaders is iterable and leaders|length > 1 %}
                 <table id="leader">
                     <tr>
