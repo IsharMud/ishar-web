@@ -32,13 +32,6 @@
                         </th>
                     </tr>
                     {%- for player in current_user.players %}
-                    <!--
-                    {%- for flag in player.flags %}
-                        {{ flag }}
-                        {{ flag.flag.name }}
-                        {{ flag.name }}
-                    {%- endfor %}
-                    -->    
                     {%- if player.true_level > 20 %}
                         {%- set player_type = 'God' %}
                         {%- set css_prefix  = 'god' %}
@@ -90,17 +83,6 @@
                     {%- endfor %}
                 </table>
                 <br>
-                {%- if quests is defined and quests is iterable and quests|length > 0 %}
-                <!--
-                <ul>
-                    {%- for quest in quests %}
-                    <li>
-                        {{ quest }}
-                    </li>
-                    {%- endfor %}
-                </ul>
-                -->
-                {%- endif %}
                 {%- else %}
                 <h3>
                     You have not created any players yet!
