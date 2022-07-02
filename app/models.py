@@ -3,102 +3,12 @@ import crypt
 import hmac
 from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
-from flask_wtf import FlaskForm
-from wtforms import BooleanField, EmailField, PasswordField, StringField, SubmitField, TextAreaField, validators
-from wtforms.validators import DataRequired, Email, EqualTo
-from wtforms_validators import Alpha
 from sqlalchemy import exc, Column, DateTime, ForeignKey, Integer, MetaData, SmallInteger, String, Text
 from sqlalchemy.schema import FetchedValue
 from sqlalchemy.orm import relationship
 
 # Connect to the database
 db = SQLAlchemy(app)
-
-# Log In form class
-class LoginForm(FlaskForm):
-    email       = EmailField('E-mail Address', [
-                    validators.DataRequired(),
-                    validators.Email()
-                    ]
-                )
-    password    = PasswordField('Password', [
-                    validators.DataRequired(),
-                    validators.Length(min=6, max=36)
-                    ]
-                )
-    remember    = BooleanField('Remember Me')
-    submit      = SubmitField('Log In')
-
-
-# Change Password form class
-class ChangePasswordForm(FlaskForm):
-    current_password        = PasswordField('Current Password', [
-                                validators.DataRequired(),
-                                validators.Length(min=6, max=36)
-                                ]
-                            )
-    new_password            = PasswordField('New Password', [
-                                validators.DataRequired(),
-                                validators.Length(min=6, max=36)
-                                ]
-                            )
-    confirm_new_password    = PasswordField('Confirm New Password', [
-                                validators.DataRequired(),
-                                validators.Length(min=6, max=36),
-                                validators.EqualTo('new_password', message='Please make sure that your new passwords match!')
-                                ]
-                            )
-    submit                  = SubmitField('Change Password')
-
-
-# New Account form class
-class NewAccountForm(FlaskForm):
-    account_name        = StringField('Friendly Name', [
-                                validators.DataRequired(),
-                                validators.Length(min=3, max=25),
-                                Alpha(message='Please only use letters in your friendly name!')
-                                ]
-                            )
-    email               = EmailField('E-mail Address', [
-                                validators.DataRequired(),
-                                validators.Email()
-                                ]
-                            )
-    password            = PasswordField('Password', [
-                                validators.DataRequired(),
-                                validators.Length(min=6, max=36)
-                                ]
-                            )
-    confirm_password    = PasswordField('Confirm Password', [
-                                validators.DataRequired(),
-                                validators.Length(min=6, max=36),
-                                validators.EqualTo('password', message='Please make sure that your passwords match!')
-                                ]
-                            )
-    submit              = SubmitField('Create Account')
-
-
-# News add form class to post news updates
-class NewsAddForm(FlaskForm):
-    subject     = StringField('Subject', [
-                                validators.DataRequired(),
-                                validators.Length(min=1, max=64),
-                                ]
-                            )
-    body        = TextAreaField('Message', [validators.DataRequired()] )
-    submit      = SubmitField('Post')
-
-
-# Player search form class to search player names
-class PlayerSearchForm(FlaskForm):
-    player_search_name  = StringField('Player Name', [
-                                    validators.DataRequired(),
-                                    validators.Length(min=3, max=25),
-                                    Alpha(message='Player names may only contain letters!')
-                                ]
-                            )
-    submit              = SubmitField('Search')
-
 
 # Account database class
 class Account(db.Model, UserMixin):
@@ -115,10 +25,7 @@ class Account(db.Model, UserMixin):
     create_haddr    = Column(Integer, nullable=False)
     last_haddr      = Column(Integer, nullable=False)
     account_name    = Column(String(25), nullable=False, unique=True)
-    players         = relationship('Player',
-                        lazy='select',
-                        backref='account'
-                    )
+    players         = relationship('Player', backref='account')
 
     def get_id(self):
         return str(self.account_id)
@@ -162,12 +69,8 @@ class Account(db.Model, UserMixin):
             print(e)
             return e
 
-
-# Player Class database class
-class PlayerClass(db.Model):
-    __tablename__   = 'classes'
-    class_id        = Column(Integer, primary_key=True)
-    class_name      = Column(String(15), nullable=False, unique=True, server_default=FetchedValue())
+    def __repr__(self):
+        return f'<Account> "{self.account_name}" ("{self.account_id}")'
 
 
 # Player Flag database class
@@ -175,7 +78,10 @@ class PlayerFlag(db.Model):
     __tablename__   = 'player_flags'
     flag_id         = Column(Integer, primary_key=True)
     name            = Column(String(20), nullable=False, unique=True)
+    flag            = relationship('PlayersFlags', backref='flag')
 
+    def __repr__(self):
+        return f'<PlayerFlag> "{self.name}" ("{self.flag_id}")'
 
 # Players Flags database class
 class PlayersFlags(db.Model):
@@ -193,40 +99,30 @@ class PlayersFlags(db.Model):
                         ), nullable=False, index=True, primary_key=True
                     )
     value           = Column(Integer)
-    flag_name       = relationship('PlayerFlag',
-                        primaryjoin='PlayersFlags.flag_id == PlayerFlag.flag_id',
-                        backref='player_flags'
-                    )
+    player          = relationship('Player', backref='flags')
 
+    def __repr__(self):
+        return f'<PlayersFlags> "{self.flag_id}" @ <Player> "{self.player_id}" : "{self.value}"'
 
-# Players Quests database class
-class PlayersQuests(db.Model):
-    __tablename__   = 'player_quests'
-    quest_id        = Column(
-                        ForeignKey('quests.quest_id',
-                            ondelete='CASCADE',
-                            onupdate='CASCADE'
-                        ), nullable=False, index=True, primary_key=True
-                    )
-    player_id       = Column(
-                        ForeignKey('players.id',
-                            ondelete='CASCADE',
-                            onupdate='CASCADE'
-                        ), nullable=False, index=True, primary_key=True
-                    )
-    value           = Column('value', Integer, nullable=False)
-    quest           = relationship('Quest',
-                        primaryjoin='PlayersQuests.quest_id == Quest.quest_id',
-                        backref='player_quests'
-                    )
+# Player Class database class
+class PlayerClass(db.Model):
+    __tablename__   = 'classes'
+    class_id        = Column(Integer, primary_key=True)
+    class_name      = Column(String(15), nullable=False, unique=True, server_default=FetchedValue())
+    player_class    = relationship('Player', backref='class')
 
+    def __repr__(self):
+        return f'<PlayerClass "{self.class_name}" @ "{self.class_id}"'
 
 # Player Race database class
 class PlayerRace(db.Model):
     __tablename__   = 'races'
     race_id         = Column(Integer, primary_key=True)
     race_name       = Column(String(15), nullable=False, unique=True)
+    player_race     = relationship('Player', backref='race')
 
+    def __repr__(self):
+        return f'<PlayerRace "{self.race_name}" @ "{self.race_id}"'
 
 # Player database class
 class Player(db.Model):
@@ -321,22 +217,6 @@ class Player(db.Model):
     total_renown            = Column(Integer, nullable=False, server_default=FetchedValue())
     quests_completed        = Column(Integer, nullable=False, server_default=FetchedValue())
     challenges_completed    = Column(Integer, nullable=False, server_default=FetchedValue())
-    player_class            = relationship('PlayerClass',
-                                primaryjoin='Player.class_id == PlayerClass.class_id',
-                                backref='players'
-                            )
-    player_flags            = relationship('PlayersFlags',
-                                primaryjoin='Player.id == PlayersFlags.player_id',
-                                backref='players'
-                            )
-    player_quests           = relationship('PlayersQuests',
-                                primaryjoin='Player.id == PlayersQuests.player_id',
-                                backref='players'
-                            )
-    player_race             = relationship('PlayerRace',
-                                primaryjoin='Player.race_id == PlayerRace.race_id',
-                                backref='players'
-                            )
 
     # Players above a certain level are administrators
     def is_admin(self, admin_level):
@@ -344,6 +224,9 @@ class Player(db.Model):
                 return True
 
         return False
+
+    def __repr__(self):
+        return f'<Player> "{self.name}" ("{self.id}")'
 
 
 # News database class
@@ -359,13 +242,9 @@ class News(db.Model):
     created_at      = Column(DateTime, nullable=False, server_default=FetchedValue())
     subject         = Column(String(64), nullable=False, server_default=FetchedValue())
     body            = Column(Text, nullable=False)
-    account         = relationship('Account',
-                        primaryjoin='News.account_id == Account.account_id',
-                        backref='news'
-                    )
+    account         = relationship('Account')
 
-
-    # Method to create new account
+    # Method to post news
     def add_news(self, subject=None, body=None):
         try:
             db.session.add(self)
@@ -373,6 +252,9 @@ class News(db.Model):
             return self.news_id
         except Exception as e:
             print(e)
+
+    def __repr__(self):
+        return f'<News> "{self.subject}" ("{self.news_id}")'
 
 
 # Season database class
@@ -382,6 +264,10 @@ class Season(db.Model):
     is_active       = Column(Integer, nullable=False)
     effective_date  = Column(Integer, nullable=False)
     expiration_date = Column(Integer, nullable=False)
+
+    def __repr__(self):
+        return f'<Season> "{self.season_id}" (until "{self.expiration_date}")'
+
 
 # Challenge database class
 class Challenge(db.Model):
@@ -399,12 +285,41 @@ class Challenge(db.Model):
     mob_name        = Column(String(30), nullable=False)
     is_active       = Column(Integer, nullable=False, server_default=FetchedValue())
 
+    def __repr__(self):
+        return f'<Challenge> "{self.mob_name}" ("{self.challenge_id}")'
+
+
+# Players Quests database class
+class PlayersQuests(db.Model):
+    __tablename__   = 'player_quests'
+    quest_id        = Column(
+                        ForeignKey('quests.quest_id',
+                            ondelete='CASCADE',
+                            onupdate='CASCADE'
+                        ), nullable=False, index=True, primary_key=True
+                    )
+    player_id       = Column(
+                        ForeignKey('players.id',
+                            ondelete='CASCADE',
+                            onupdate='CASCADE'
+                        ), nullable=False, index=True, primary_key=True
+                    )
+    value           = Column('value', Integer, nullable=False)
+    quest           = relationship('Quest')
+    player          = relationship('Player', backref='quests')
+
+    def __repr__(self):
+        return f'<PlayersQuests> "{self.quest_id}" @ "{self.player_id}" / "{self.value}"'
+
 # Quest database class
 class Quest(db.Model):
-    __tablename__ = 'quests'
-    quest_id = Column(Integer, primary_key=True)
-    name = Column(String(25), nullable=False, unique=True, server_default=FetchedValue())
-    display_name = Column(String(30), nullable=False)
-    is_major = Column(Integer, nullable=False, server_default=FetchedValue())
-    xp_reward = Column(Integer, nullable=False, server_default=FetchedValue())
-    completion_message = Column(String(80), nullable=False)
+    __tablename__       = 'quests'
+    quest_id            = Column(Integer, primary_key=True)
+    name                = Column(String(25), nullable=False, unique=True, server_default=FetchedValue())
+    display_name        = Column(String(30), nullable=False)
+    is_major            = Column(Integer, nullable=False, server_default=FetchedValue())
+    xp_reward           = Column(Integer, nullable=False, server_default=FetchedValue())
+    completion_message  = Column(String(80), nullable=False)
+
+    def __repr__(self):
+        return f'<Quest> "{self.name}" ("{self.quest_id}")'

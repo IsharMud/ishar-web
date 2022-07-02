@@ -1,0 +1,83 @@
+{% extends "layout.html.j2" %}
+{% block title %}Leader Board{% endblock %}
+{% block header %}Leader Board{% endblock %}
+{%- block content %}
+                <p>
+                    <strong>
+                        This page is a work-in-progress!
+                    </strong>
+                </p>
+                {%- if leaders is defined and leaders is iterable and leaders|length > 1 %}
+                <table id="leader">
+                    <tr>
+                        <th>
+                            Name
+                        </th>
+                        <th>
+                            Class
+                        </th>
+                        <th>
+                            Level
+                        </th>
+                        <th>
+                            Remorts
+                        </th>
+                        <th>
+                            Essence
+                        </th>
+                        <th>
+                            Renown (Total)
+                        </th>
+                        <th>
+                            Deaths
+                        </th>
+                        <th>
+                            Type
+                        </th>
+                    </tr>
+                    {%- for leader in leaders %}
+                    {%- if leader.flags[45].value == 1 %}
+                        {%- set player_type = 'Survival' %}
+                        {%- set css_prefix  = 'survival' %}
+                    {%- else %}
+                        {%- set player_type = 'Classic' %}
+                        {%- set css_prefix  = 'player' %}
+                    {%- endif %}
+                    {%- set leader_title = leader.title | replace('%s','<a title="' + leader.name + '" class="' + css_prefix + '-player" href="' + url_for('show_player', player_name=leader.name) + '">' + leader.name + '</a>') | safe %}
+                    <tr>
+                        <td>
+                            {{ leader_title }}
+                        </td>
+                        <td>
+                            <span title="Class: {{ leader.class.class_name | replace('_', '-') | title | safe }}">
+                                {{ leader.class.class_name | replace('_', '-') | title | safe }}
+                            </span>
+                        </td>
+                        <td>
+                            {{ leader.level }}
+                        </td>
+                        <td>
+                            {{ leader.remorts }}
+                        </td>
+                        <td>
+                            {{ leader.account.seasonal_points }}
+                        </td>
+                        <td>
+                            {{ leader.renown }} ({{ leader.total_renown }})
+                        </td>
+                        <td>
+                            {{ leader.deaths }}
+                        </td>
+                        <td>
+                            {{ player_type }}
+                        </td>
+                    </tr>
+                    {%- endfor %}
+                </table>
+                {%- endif %}
+                <p>
+                    <a href="{{ url_for('portal') }}">
+                        <img src="{{ url_for('static', filename='back.gif') }}" alt="Back to Player Portal">
+                    </a>
+                </p>
+{%- endblock %}

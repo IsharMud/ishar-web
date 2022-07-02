@@ -32,10 +32,17 @@
                         </th>
                     </tr>
                     {%- for player in current_user.players %}
+                    <!--
+                    {%- for flag in player.flags %}
+                        {{ flag }}
+                        {{ flag.flag.name }}
+                        {{ flag.name }}
+                    {%- endfor %}
+                    -->    
                     {%- if player.true_level > 20 %}
                         {%- set player_type = 'God' %}
                         {%- set css_prefix  = 'god' %}
-                    {%- elif player.player_flags[45].value == 1 %}
+                    {%- elif player.flags[45].value == 1 %}
                         {%- set player_type = 'Survival' %}
                         {%- set css_prefix  = 'survival' %}
                     {%- else %}
@@ -50,8 +57,8 @@
                             </span>
                         </td>
                         <td>
-                            <span title="Class: {{ player.player_class.class_name | replace('_', '-') | title | safe }}">
-                                {{ player.player_class.class_name | replace('_', '-') | title | safe }}
+                            <span title="Class: {{ player.class.class_name | replace('_', '-') | title | safe }}">
+                                {{ player.class.class_name | replace('_', '-') | title | safe }}
                             </span>
                         </td>
                         <td>

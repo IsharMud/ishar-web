@@ -28,6 +28,7 @@ login_manager.session_protection                = 'strong'
 
 # Get database and form classes
 import models
+import forms
 
 # Get users for the Flask Login Manager via Account object from the database
 @login_manager.user_loader
@@ -85,7 +86,7 @@ def history():
 def login():
 
     # Get log in form object and check if submitted
-    login_form = models.LoginForm()
+    login_form = forms.LoginForm()
     if login_form.validate_on_submit():
 
         # Find the user by e-mail address from the log in form
@@ -112,7 +113,7 @@ def login():
 def change_password():
 
     # Get change password form object and check if submitted
-    change_password_form = models.ChangePasswordForm()
+    change_password_form = forms.ChangePasswordForm()
     if change_password_form.validate_on_submit():
 
         # Proceed if the user is authenticated and entered their current password correctly
@@ -134,7 +135,7 @@ def change_password():
 @app.route('/player/search', methods=['POST'])
 @login_required
 def search_player(player_name=None):
-    player_search_form = models.PlayerSearchForm()
+    player_search_form = forms.PlayerSearchForm()
     if player_search_form.validate_on_submit():
         player_search = models.Player.query.filter(models.Player.name.like(player_search_form.player_search_name.data + '%')).first()
     try:
@@ -162,7 +163,7 @@ def show_player(player_name=None):
 
     return render_template('player.html.j2',
                                 player              = find_player,
-                                player_search_form  = models.PlayerSearchForm()
+                                player_search_form  = forms.PlayerSearchForm()
                             ), code
 
 
@@ -182,11 +183,30 @@ def portal():
 def challenges():
     # Show the current challenges
     return render_template('challenges.html.j2',
-                                challenges  = models.Challenge.query.filter_by(is_active = 1).order_by(
+                                challenges =    models.Challenge.query.filter_by(is_active = 1).order_by(
                                                     models.Challenge.winner_desc,
                                                     -models.Challenge.adj_tier
-                                                ).all(),
-                            )
+                                                ).all()
+                          )
+
+
+# Leader Board page for logged in users
+@app.route('/leaderboard', methods=['GET'])
+@app.route('/leader_board', methods=['GET'])
+@login_required
+def leader_board():
+    # Sort and list the current best living players
+    return render_template('leader_board.html.j2',
+                                leaders =   models.Player.query.filter_by(is_deleted = 0).join(models.Account).order_by(
+                                                    -models.Account.seasonal_points,
+                                                    -models.Player.remorts,
+                                                    -models.Player.total_renown,
+                                                    -models.Player.renown,
+                                                    -models.Player.level,
+                                                    models.Player.deaths
+                                            ).all()
+                          )
+
 
 # Portal for administrators
 @app.route('/admin', methods=['GET', 'POST'])
@@ -199,7 +219,7 @@ def admin_portal():
         return redirect(url_for('welcome'), code=302)
 
     # Get news add form and check if submitted
-    news_add_form = models.NewsAddForm()
+    news_add_form = forms.NewsAddForm()
     if news_add_form.validate_on_submit():
 
         # Create the model for the new news post
@@ -235,7 +255,7 @@ def logout():
 def new_account():
 
     # Get new account form object and check if submitted
-    new_account_form = models.NewAccountForm()
+    new_account_form = forms.NewAccountForm()
     if new_account_form.validate_on_submit():
 
         # Check that e-mail address has not already been used
