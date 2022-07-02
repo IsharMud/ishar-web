@@ -9,25 +9,19 @@
                             Name
                         </th>
                         <th>
-                            Class
+                            Level
                         </th>
                         <th>
                             Remorts
                         </th>
                         <th>
-                            Renown (Total)
+                            Total Renown
                         </th>
                         <th>
                             Quests
                         </th>
                         <th>
                             Challenges
-                        </th>
-                        <th>
-                            Level
-                        </th>
-                        <th>
-                            Bank
                         </th>
                         <th>
                             Deaths
@@ -50,27 +44,19 @@
                             {{ leader_title }}
                         </td>
                         <td>
-                            <span title="Class: {{ leader.class.class_name | replace('_', '-') | title | safe }}">
-                                {{ leader.class.class_name | replace('_', '-') | title | safe }}
-                            </span>
+                            {{ leader.level }}
                         </td>
                         <td>
                             {{ leader.remorts }}
                         </td>
                         <td>
-                            {{ leader.renown }} ({{ leader.total_renown }})
+                            {{ leader.total_renown }}
                         </td>
                         <td>
                             {{ leader.quests_completed }}
                         </td>
                         <td>
                             {{ leader.challenges_completed }}
-                        </td>
-                        <td>
-                            {{ leader.level }}
-                        </td>
-                        <td>
-                            {{ leader.bankacc }}
                         </td>
                         <td>
                             {{ leader.deaths }}
