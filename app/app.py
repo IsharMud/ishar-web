@@ -191,8 +191,8 @@ def challenges():
 
 
 # Leader Board page for logged in users
-@app.route('/leaderboard', methods=['GET'])
 @app.route('/leader_board', methods=['GET'])
+@app.route('/leaderboard', methods=['GET'])
 @login_required
 def leader_board():
     # Sort and list the current best living players
