@@ -4,9 +4,35 @@
 {%- block content %}
                 <p>
                     <strong>
-                        This page is a work-in-progress!
+                        This page is a work-in-progress! It is currently sorted in descending order by:
                     </strong>
                 </p>
+                        <ol>
+                            <li>
+                                Remorts
+                            </li>
+                            <li>
+                                Total Accumulated Renown
+                            </li>
+                            <li>
+                                Quests Completed
+                            </li>
+                            <li>
+                                Challenges Completed
+                            </li>
+                            <li>
+                                Current Unspent Renown
+                            </li>
+                            <li>
+                                Level
+                            </li>
+                            <li>
+                                Bank Account
+                            </li>
+                            <li>
+                                Deaths (ascending)
+                            </li>
+                        </ol>
                 {%- if leaders is defined and leaders is iterable and leaders|length > 1 %}
                 <table id="leader">
                     <tr>
@@ -17,16 +43,25 @@
                             Class
                         </th>
                         <th>
-                            Level
-                        </th>
-                        <th>
                             Remorts
                         </th>
                         <th>
-                            Essence
+                            Total Accumulated Renownl
                         </th>
                         <th>
-                            Renown (Total)
+                            Quests Completed
+                        </th>
+                        <th>
+                            Challenges Completed
+                        </th>
+                        <th>
+                            Current Unspent Renown
+                        </th>
+                        <th>
+                            Level
+                        </th>
+                        <th>
+                            Bank Account
                         </th>
                         <th>
                             Deaths
@@ -54,22 +89,33 @@
                             </span>
                         </td>
                         <td>
-                            {{ leader.level }}
-                        </td>
-                        <td>
                             {{ leader.remorts }}
                         </td>
                         <td>
-                            {{ leader.account.seasonal_points }}
+                            {{ leader.total_renown }}
                         </td>
                         <td>
-                            {{ leader.renown }} ({{ leader.total_renown }})
+                            {{ leader.quests_completed }}
+                        </td>
+                        <td>
+                            {{ leader.challenges_completed }}
+                        </td>
+                        <td>
+                            {{ leader.renown }}
+                        </td>
+                        <td>
+                            {{ leader.level }}
+                        </td>
+                        <td>
+                            {{ leader.bankacc }}
                         </td>
                         <td>
                             {{ leader.deaths }}
                         </td>
                         <td>
-                            {{ player_type }}
+                            <span title="Type: {{ player_type }}" class="{{ player_type | lower }}-player">
+                                {{ player_type }}
+                            </span>
                         </td>
                     </tr>
                     {%- endfor %}

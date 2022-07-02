@@ -183,7 +183,7 @@ def portal():
 def challenges():
     # Show the current challenges
     return render_template('challenges.html.j2',
-                                challenges =    models.Challenge.query.filter_by(is_active = 1).order_by(
+                                challenges  = models.Challenge.query.filter_by(is_active = 1).order_by(
                                                     models.Challenge.winner_desc,
                                                     -models.Challenge.adj_tier
                                                 ).all()
@@ -197,14 +197,19 @@ def challenges():
 def leader_board():
     # Sort and list the current best living players
     return render_template('leader_board.html.j2',
-                                leaders =   models.Player.query.filter_by(is_deleted = 0).join(models.Account).order_by(
-                                                    -models.Account.seasonal_points,
+                                leaders =   models.Player.query.filter(
+                                                    models.Player.true_level < secrets.admin_level,
+                                                    models.Player.is_deleted == 0
+                                                ).order_by(
                                                     -models.Player.remorts,
                                                     -models.Player.total_renown,
+                                                    -models.Player.quests_completed,
+                                                    -models.Player.challenges_completed,
                                                     -models.Player.renown,
                                                     -models.Player.level,
+                                                    -models.Player.bankacc,
                                                     models.Player.deaths
-                                            ).all()
+                                                ).all()
                           )
 
 
