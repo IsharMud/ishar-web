@@ -209,7 +209,7 @@ def leader_board():
                                                     -models.Player.level,
                                                     -models.Player.bankacc,
                                                     models.Player.deaths
-                                                ).all()
+                                                ).limit(10).all()
                           )
 
 
