@@ -41,7 +41,7 @@
                         {%- set player_type = 'Classic' %}
                         {%- set css_prefix  = 'player' %}
                     {%- endif %}
-                    {%- set leader_title = leader.title | replace('%s','<a title="' + leader.name + '" class="' + css_prefix + '-player" href="' + url_for('show_player', player_name=leader.name) + '">' + leader.name + '</a>') | safe %}
+                    {%- set leader_title = leader.title | replace('%s','<strong><a title="' + leader.name + '" class="' + css_prefix + '-player" href="' + url_for('show_player', player_name=leader.name) + '">' + leader.name + '</a></strong>') | safe %}
                     <tr>
                         <td>
                             {{ loop.index }}

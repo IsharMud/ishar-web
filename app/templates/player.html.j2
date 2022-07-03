@@ -56,7 +56,7 @@
         {%- set player_type = 'Classic' %}
         {%- set css_prefix  = 'player' %}
     {%- endif %}
-    {%- set player_title = player.title | replace('%s','<a title="' + player.name + '" class="' + css_prefix + '-player" href="' + url_for('show_player', player_name=player.name) + '">' + player.name + '</a>') | safe %}
+    {%- set player_title = player.title | replace('%s','<strong><a title="' + player.name + '" class="' + css_prefix + '-player" href="' + url_for('show_player', player_name=player.name) + '">' + player.name + '</a></strong>') | safe %}
     {%- set player_phrase           = 'is' %}
     {%- set player_phrase_own       = 'are' %}
     {%- set player_phrase_owns      = 'has' %}
@@ -162,36 +162,10 @@
                         </td>
                     </tr>
                 </table>
-                <br>
                 {%- endif %}
-                {%- if player.is_deleted != 1 and not player.true_level > 20 %}
-                <table>
-                    <tr>
-                        <th>
-                            Health
-                        </th>
-                        <th>
-                            Move
-                        </th>
-                        <th>
-                            Spell
-                        </th>
-                    </tr>
-                    <tr>
-                        <td>
-                            {{ player.curr_hit_pts / player.perm_hit_pts * 100 }}
-                        </td>
-                        <td>
-                            {{ player.curr_move_pts / player.perm_move_pts * 100 }}
-                        </td>
-                        <td>
-                            {{ player.curr_spell_pts / player.perm_spell_pts * 100 }}
-                        </td>
-                    </tr>
-                </table>
-                {%- elif player.is_deleted == 1 %}
+                {%- if player.is_deleted == 1 %}
                 <p>
-                    <span class="deleted-player">{{ player.name }}</span> is <span class="survival-player"><strong>DEAD</strong></span>!
+                    <strong><span class="deleted-player">{{ player.name }}</span></strong> is <span class="survival-player"><strong>DEAD</strong></span>!
                 </p>
                 {%- endif %}
                 <p>

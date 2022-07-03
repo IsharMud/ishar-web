@@ -42,7 +42,7 @@
                         {%- set player_type = 'Classic' %}
                         {%- set css_prefix  = 'player' %}
                         {%- endif %}
-                    {%- set player_title = player.title | replace('%s','<a title="' + player.name + '" class="' + css_prefix + '-player" href="' + url_for('show_player', player_name=player.name) + '">' + player.name + '</a>') | safe %}
+                    {%- set player_title = player.title | replace('%s','<strong><a title="' + player.name + '" class="' + css_prefix + '-player" href="' + url_for('show_player', player_name=player.name) + '">' + player.name + '</a></strong>') | safe %}
                     <tr>
                         <td>
                             <span title="{{ player.name | title | safe }} (Born {{ player.birth | unix2human_time }})">
