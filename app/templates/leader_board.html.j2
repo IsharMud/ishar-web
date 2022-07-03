@@ -6,6 +6,9 @@
                 <table id="leader">
                     <tr>
                         <th>
+                            #
+                        </th>
+                        <th>
                             Name
                         </th>
                         <th>
@@ -40,6 +43,9 @@
                     {%- endif %}
                     {%- set leader_title = leader.title | replace('%s','<a title="' + leader.name + '" class="' + css_prefix + '-player" href="' + url_for('show_player', player_name=leader.name) + '">' + leader.name + '</a>') | safe %}
                     <tr>
+                        <td>
+                            {{ loop.index }}
+                        </td>
                         <td>
                             {{ leader_title }}
                         </td>
