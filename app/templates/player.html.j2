@@ -45,6 +45,20 @@
         classless curiousity
     {%- endif -%}
 {%- endmacro -%}
+{%- macro display_online(seconds_online) -%}
+    {%- set time_map = {
+            'week': (seconds_online / 10080) % 10080,
+            'day': (seconds_online / 1440) % 7,
+            'hour': (seconds_online / 60) % 24,
+            'minute': (seconds_online % 60)
+        }
+    -%}
+    {%- for unit, duration in time_map.items() if duration >= 1 -%}
+        {%- if not loop.first -%}, {% endif -%}
+        {{ (duration | string).split('.')[0] }} {{ unit }}
+        {%- if duration != 1 -%}s{%- endif -%}
+    {%- endfor -%}
+{%- endmacro -%}
 {%- if player %}
     {%- if player.true_level > 20 %}
         {%- set player_type = 'God' %}
@@ -173,7 +187,7 @@
                     <br>
                     {{ player_gender | title }} last logged out {{ player.logout | unix2human_time }}.
                     <br>
-                    {{ player_gender | title }} {{ player_phrase_owns }} played for {{ player.online }} seconds.
+                    {{ player_gender | title }} {{ player_phrase_owns }} played for {{ display_online(player.online) }}.
                 </p>
     {%- endif %}
                 <p>
