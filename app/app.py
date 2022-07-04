@@ -387,4 +387,10 @@ def unix2human_time(unix_time):
     return datetime.datetime.fromtimestamp(unix_time).strftime('%A, %B %d, %Y %I:%M %p')
 
 
+# Jinja2 template filter to convert seconds to human-readable
+@app.template_filter('seconds2human_time')
+def seconds2human_time(seconds):
+    return str(datetime.timedelta(seconds=seconds))
+
+
 import helptab
