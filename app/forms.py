@@ -12,7 +12,7 @@ class LoginForm(FlaskForm):
                 )
     password    = PasswordField('Password', [
                     validators.DataRequired(),
-                    validators.Length(min=6, max=36)
+                    validators.Length(min=4, max=36)
                     ]
                 )
     remember    = BooleanField('Remember Me')
@@ -23,17 +23,17 @@ class LoginForm(FlaskForm):
 class ChangePasswordForm(FlaskForm):
     current_password        = PasswordField('Current Password', [
                                 validators.DataRequired(),
-                                validators.Length(min=6, max=36)
+                                validators.Length(min=4, max=36)
                                 ]
                             )
     new_password            = PasswordField('New Password', [
                                 validators.DataRequired(),
-                                validators.Length(min=6, max=36)
+                                validators.Length(min=4, max=36)
                                 ]
                             )
     confirm_new_password    = PasswordField('Confirm New Password', [
                                 validators.DataRequired(),
-                                validators.Length(min=6, max=36),
+                                validators.Length(min=4, max=36),
                                 validators.EqualTo('new_password', message='Please make sure that your new passwords match!')
                                 ]
                             )
@@ -55,12 +55,12 @@ class NewAccountForm(FlaskForm):
                             )
     password            = PasswordField('Password', [
                                 validators.DataRequired(),
-                                validators.Length(min=6, max=36)
+                                validators.Length(min=4, max=36)
                                 ]
                             )
     confirm_password    = PasswordField('Confirm Password', [
                                 validators.DataRequired(),
-                                validators.Length(min=6, max=36),
+                                validators.Length(min=4, max=36),
                                 validators.EqualTo('password', message='Please make sure that your passwords match!')
                                 ]
                             )
