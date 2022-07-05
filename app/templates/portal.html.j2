@@ -32,9 +32,24 @@
                         </th>
                     </tr>
                     {%- for player in current_user.players %}
-                        {%- if player.true_level > 20 %}
+                        {%- if player.true_level >= 26 %}
                             {%- set player_type = 'God' %}
                             {%- set css_prefix  = 'god' %}
+                        {%- elif player.true_level == 25 %}
+                            {%- set player_type = 'Forger' %}
+                            {%- set css_prefix  = 'forger' %}
+                        {%- elif player.true_level == 24 %}
+                            {%- set player_type = 'Eternal' %}
+                            {%- set css_prefix  = 'eternal' %}
+                        {%- elif player.true_level == 23 %}
+                            {%- set player_type = 'Artisan' %}
+                            {%- set css_prefix  = 'artisan' %}
+                        {%- elif player.true_level == 22 %}
+                            {%- set player_type = 'Immortal' %}
+                            {%- set css_prefix  = 'immortal' %}
+                        {%- elif player.true_level == 21 %}
+                            {%- set player_type = 'Consort' %}
+                            {%- set css_prefix  = 'consort' %}
                         {%- elif player.flags[45].value == 1 %}
                             {%- set player_type = 'Survival' %}
                             {%- if player.is_deleted == 1 %}
