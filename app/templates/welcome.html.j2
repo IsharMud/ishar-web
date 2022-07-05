@@ -15,7 +15,7 @@
                 {%- if news is defined and news is iterable and news | length > 0 %}
                 <hr id="news-top">
                 <h2>
-                    Latest Updates
+                    Latest Update{%- if news|length != 1 %}s{%- endif %}
                 </h2>
                 {%- for news_post in news %}
                 <h3 class="news-subject">
