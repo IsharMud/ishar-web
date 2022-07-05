@@ -32,17 +32,21 @@
                         </th>
                     </tr>
                     {%- for player in current_user.players %}
-                    {%- if player.true_level > 20 %}
-                        {%- set player_type = 'God' %}
-                        {%- set css_prefix  = 'god' %}
-                    {%- elif player.flags[45].value == 1 %}
-                        {%- set player_type = 'Survival' %}
-                        {%- set css_prefix  = 'survival' %}
-                    {%- else %}
-                        {%- set player_type = 'Classic' %}
-                        {%- set css_prefix  = 'player' %}
+                        {%- if player.true_level > 20 %}
+                            {%- set player_type = 'God' %}
+                            {%- set css_prefix  = 'god' %}
+                        {%- elif player.flags[45].value == 1 %}
+                            {%- set player_type = 'Survival' %}
+                            {%- if player.is_deleted == 1 %}
+                                {%- set css_prefix  = 'dead' %}
+                            {%- else %}
+                                {%- set css_prefix  = 'survival' %}
+                            {%- endif %}
+                        {%- else %}
+                            {%- set player_type = 'Classic' %}
+                            {%- set css_prefix  = 'regular' %}
                         {%- endif %}
-                    {%- set player_title = player.title | replace('%s','<strong><a title="' + player.name + '" class="' + css_prefix + '-player" href="' + url_for('show_player', player_name=player.name) + '">' + player.name + '</a></strong>') | safe %}
+                        {%- set player_title = player.title | replace('%s','<strong class="' + css_prefix + '-player"><a title="' + player.name + '" href="' + url_for('show_player', player_name=player.name) + '">' + player.name + '</a></strong>') | safe %}
                     <tr>
                         <td>
                             <span title="{{ player.name | title | safe }} (Born {{ player.birth | unix2human_time }})">
@@ -75,7 +79,7 @@
                             </span>
                         </td>
                         <td>
-                            <span title="Type: {{ player_type }}" class="{{ player_type | lower }}-player">
+                            <span title="Type: {{ player_type }}" class="{{ css_prefix }}-player">
                                 {{ player_type }}
                             </span>
                         </td>

@@ -51,12 +51,16 @@
         {%- set css_prefix  = 'god' %}
     {%- elif player.flags[45].value == 1 %}
         {%- set player_type = 'Survival' %}
-        {%- set css_prefix  = 'survival' %}
+        {%- if player.is_deleted == 1 %}
+            {%- set css_prefix  = 'dead' %}
+        {%- else %}
+            {%- set css_prefix  = 'survival' %}
+        {%- endif %}
     {%- else %}
         {%- set player_type = 'Classic' %}
-        {%- set css_prefix  = 'player' %}
+        {%- set css_prefix  = 'regular' %}
     {%- endif %}
-    {%- set player_title = player.title | replace('%s','<strong><a title="' + player.name + '" class="' + css_prefix + '-player" href="' + url_for('show_player', player_name=player.name) + '">' + player.name + '</a></strong>') | safe %}
+    {%- set player_title = player.title | replace('%s','<strong class="' + css_prefix + '-player"><a title="' + player.name + '" href="' + url_for('show_player', player_name=player.name) + '">' + player.name + '</a></strong>') | safe %}
     {%- set player_phrase           = 'is' %}
     {%- set player_phrase_own       = 'are' %}
     {%- set player_phrase_owns      = 'has' %}
@@ -162,11 +166,6 @@
                         </td>
                     </tr>
                 </table>
-                {%- endif %}
-                {%- if player.is_deleted == 1 %}
-                <p>
-                    <strong><span class="deleted-player">{{ player.name }}</span></strong> is <span class="survival-player"><strong>DEAD</strong></span>!
-                </p>
                 {%- endif %}
                 <p>
                     {%- set seconds_since_birth = now | int - player.birth | int %}
