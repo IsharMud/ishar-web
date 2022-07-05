@@ -147,6 +147,13 @@
                   {%- if quest.value == 1 %}
                     <li>
                         {{ quest.quest.display_name }}
+                        {%- if quest.quest.completion_message is defined and quest.quest.completion_message != '' %}
+                        <ul>
+                            <li>
+                                {{ quest.quest.completion_message }}
+                            </li>
+                        </ul>
+                        {%- endif %}
                     </li>
                   {%- endif %}
                 {%- endfor %}
