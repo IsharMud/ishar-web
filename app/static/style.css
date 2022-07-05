@@ -88,8 +88,16 @@ input[type="reset"], input[type="submit"], #login-form, #new-account-form {
     color:  #00b7eb;
 }
 
-.survival-player {
+.god-player::after {
+    content:    ' 😇';
+}
+
+.dead-player, .survival-player {
     color:   #fa8072;
+}
+
+.dead-player::after {
+    content:    ' ☠️';
 }
 
 img {
@@ -214,12 +222,4 @@ input {
     text-decoration:            line-through;
     text-decoration-color:      #fa7;
     text-decoration-thickness:  0.18em;
-}
-
-.god-player::after {
-    content:    '😇';
-}
-
-.deleted-player::after {
-    content:    ' ☠️';
 }
