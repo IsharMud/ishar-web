@@ -35,10 +35,13 @@ import forms
 def load_user(account_id):
     return models.Account.query.get(str(account_id))
 
-# Add the current season as a context processor
+# Add context processors
 @app.context_processor
-def inject_season():
-    return dict(season=models.Season.query.filter_by(is_active = 1).first())
+def injects():
+    return dict(
+            now     = datetime.datetime.now().timestamp(),
+            season  = models.Season.query.filter_by(is_active = 1).first()
+    )
 
 # Handle errors with a little template
 def error(title='Unknown Error', message='Sorry, but there was an unknown error.', code=500):

@@ -169,11 +169,14 @@
                 </p>
                 {%- endif %}
                 <p>
+                    {%- set seconds_since_birth = now | int - player.birth | int %}
+                    {{ player_gender | title }} was born {{ seconds_since_birth | seconds2human_time }} ago.
+                    <br>
                     {{ player_gender | title }} last logged in {{ player.logon | unix2human_time }}.
                     <br>
                     {{ player_gender | title }} last logged out {{ player.logout | unix2human_time }}.
                     <br>
-                    {{ player_gender | title }} {{ player_phrase_owns }} played for {{ player.online | seconds2human_time }} ({{ player.online }} seconds).
+                    {{ player_gender | title }} {{ player_phrase_owns }} played for {{ player.online | seconds2human_time }}.
                 </p>
     {%- endif %}
                 <p>
