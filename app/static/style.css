@@ -84,12 +84,16 @@ input[type="reset"], input[type="submit"], #login-form, #new-account-form {
     font-style: italic;
 }
 
-.god-player {
+.god-player, .forger-player, .eternal-player, .artisan-player, .immortal-player, .consort-player {
     color:  #00b7eb;
 }
 
 .god-player::after {
     content:    ' 😇';
+}
+
+.forger-player::after, .eternal-player::after, .artisan-player::after, .immortal-player::after, .consort-player::after {
+    content:    ' 👼';
 }
 
 .dead-player, .survival-player {
