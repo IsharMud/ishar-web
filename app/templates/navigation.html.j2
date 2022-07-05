@@ -30,16 +30,11 @@
                         <li>
                             <a href="{{ url_for('world') }}" title="World of Ishar">World of Ishar</a>
                         </li>
-                        {%- if current_user is defined and current_user.is_authenticated and current_user.account_name is defined %}
                         <li>
                             <a href ="{{ url_for('portal') }}" title="Player Portal">
-                                Player Portal ({{ current_user.account_name }})
+                                Player Portal
+                                {%- if current_user is defined and current_user.is_authenticated and current_user.account_name is defined %}({{ current_user.account_name }}){%- endif %}
                             </a>
                         </li>
-                        {%- else %}
-                        <li>
-                            <a href ="{{ url_for('login') }}" title="Player Portal">Player Portal</a>
-                        </li>
-                        {%- endif %}
                     </ul>
                 </nav>
