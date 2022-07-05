@@ -138,8 +138,25 @@
                     {{ player_gender | title }} {{ player_phrase_owns }} died {{ player.deaths }} time{%- if player.deaths != 1 -%}s{%- endif -%}.
                     {%- endif %}
                 </p>
+                {%- if player.quests_completed > 0 %}
+                <h3>
+                    Quests
+                </h3>
+                <ul>
+                {%- for quest in player.quests %}
+                  {%- if quest.value == 1 %}
+                    <li>
+                        {{ quest.quest.display_name }}
+                    </li>
+                  {%- endif %}
+                {%- endfor %}
+                </ul>
+                {%- endif %}
                 {%- if player.true_level >= 5 or player.is_deleted == 1 %}
-                <table id="stats">
+                <h3>
+                    Statistics
+                </h3>
+                <table>
                     <tr>
                         <th>
                             Strength
