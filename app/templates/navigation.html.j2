@@ -33,7 +33,7 @@
                         <li>
                             <a href ="{{ url_for('portal') }}" title="Player Portal">
                                 Player Portal
-                                {%- if current_user is defined and current_user.is_authenticated and current_user.account_name is defined %}({{ current_user.account_name }}){%- endif %}
+                                {%- if current_user is defined and current_user.is_authenticated and current_user.account_name is defined %} ({{ current_user.account_name }}){%- endif %}
                             </a>
                         </li>
                     </ul>
