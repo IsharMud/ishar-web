@@ -142,7 +142,7 @@
                 <h3>
                     Quests
                 </h3>
-                <ul>
+                <ol>
                 {%- for quest in player.quests %}
                   {%- if quest.value == 1 %}
                     <li>
@@ -157,7 +157,7 @@
                     </li>
                   {%- endif %}
                 {%- endfor %}
-                </ul>
+                </ol>
                 {%- endif %}
                 {%- if player.true_level >= 5 or player.is_deleted == 1 %}
                 <h3>
