@@ -257,7 +257,7 @@ def admin_portal():
 def logout():
     logout_user()
     flash('You have logged out!', 'success')
-    return login()
+    return welcome()
 
 
 # Allow anonymous users to create a new account
