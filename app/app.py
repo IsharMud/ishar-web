@@ -73,7 +73,7 @@ def internal_server_error(message):
 @app.route('/', methods=['GET'])
 def welcome():
     # Find the two (2) most recent news posts to show on the main page
-    news = models.News.query.order_by(-models.News.created_at).limit(2).all()
+    news = models.News.query.order_by(-models.News.created_at).limit(1).all()
     return render_template('welcome.html.j2', news=news)
 
 
