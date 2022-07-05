@@ -18,7 +18,7 @@
 {%- endmacro %}
 {%- block content %}
     {%- if login_form is defined %}
-                <form method="post" action="{{ url_for('login') }}" id="login-form">
+                <form method="post" id="login-form">
                     {{ render_field(login_form.email) }}
                     {{ render_field(login_form.password) }}
                     {{ render_field(login_form.remember) }}

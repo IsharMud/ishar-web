@@ -1,5 +1,5 @@
 import datetime
-from flask import Flask, flash, redirect, render_template, request, send_from_directory, url_for
+from flask import Flask, flash, redirect, render_template, request, send_from_directory, session, url_for
 from flask_login import current_user, fresh_login_required, LoginManager, login_required, login_user, logout_user
 import ipaddress
 import secrets
@@ -95,18 +95,20 @@ def login():
         # Find the user by e-mail address from the log in form
         account = models.Account.query.filter_by(email = login_form.email.data).first()
 
-        # If we find the user email and match the password, it is a successful log in, so redirect to portal
+        # If we find the user email and match the password, it is a successful log in
         if account != None and account.check_password(login_form.password.data):
             flash('You have logged in!', 'success')
             login_user(account, remember=login_form.remember.data)
-            return redirect(url_for('portal'), code=302)
 
         # There must have been invalid credentials
         else:
             flash('Sorry, but please enter a valid e-mail address and password.', 'error')
 
-    # Make sure the user is logged out and show the log in form
-    logout_user()
+    # Redirect users who are logged in to the portal
+    if current_user.is_authenticated:
+        return redirect(session['next'] or url_for('portal'))
+
+    # Show the log in form
     return render_template('login.html.j2', login_form=login_form)
 
 
@@ -146,7 +148,7 @@ def search_player(player_name=None):
     except Exception as e:
         player_name = None
         print(e)
-    return redirect(url_for('show_player', player_name=player_name), code=302)
+    return redirect(url_for('show_player', player_name=player_name))
 
 
 # Player pages
@@ -224,7 +226,7 @@ def admin_portal():
     # Redirect non-administrators to the main page
     if not current_user.is_admin(secrets.admin_level):
         flash('Sorry, but you are not an administrator!', 'error')
-        return redirect(url_for('welcome'), code=302)
+        return redirect(url_for('welcome'))
 
     # Get news add form and check if submitted
     news_add_form = forms.NewsAddForm()
@@ -270,7 +272,7 @@ def new_account():
         find_email = models.Account.query.filter_by(email = new_account_form.email.data).first()
         if find_email:
             flash('Sorry, but that e-mail address exists. Please log in.', 'error')
-            return redirect(url_for('login'), code=302)
+            return redirect(url_for('login'))
 
         # Check that the account name is not in use
         find_name = models.Account.query.filter_by(account_name = new_account_form.account_name.data).first()
@@ -309,7 +311,7 @@ def new_account():
 
     # Redirect users who are logged in to the portal, including newly created accounts
     if current_user.is_authenticated:
-        return redirect(url_for('portal'), code=302)
+        return redirect(url_for('portal'))
 
     # Show the new account form
     return render_template('new.html.j2', new_account_form=new_account_form)
@@ -326,14 +328,14 @@ def mud_clients():
 @app.route('/connect', methods=['GET'])
 def connect():
     mudslinger_app_link = 'https://mudslinger.net/play/?host=isharmud.com&port=23'
-    return redirect(mudslinger_app_link, code=302)
+    return redirect(mudslinger_app_link)
 
 
 # Redirect /discord to the invite link
 @app.route('/discord', methods=['GET'])
 def discord():
     discord_invite_link = 'https://discord.gg/VBmMXUpeve'
-    return redirect(discord_invite_link, code=302)
+    return redirect(discord_invite_link)
 
 
 # /faq (or /faqs or /questions)
