@@ -45,9 +45,6 @@
         classless curiousity
     {%- endif -%}
 {%- endmacro -%}
-{%- macro display_online(seconds_online) -%}
-    {{ seconds_online }}
-{%- endmacro -%}
 {%- if player %}
     {%- if player.true_level > 20 %}
         {%- set player_type = 'God' %}
@@ -176,8 +173,7 @@
                     <br>
                     {{ player_gender | title }} last logged out {{ player.logout | unix2human_time }}.
                     <br>
-                    {{ player_gender | title }} {{ player_phrase_owns }} played for
-                    {{ player.online | seconds2human_time }} ({{ player.online }} seconds).
+                    {{ player_gender | title }} {{ player_phrase_owns }} played for {{ player.online | seconds2human_time }} ({{ player.online }} seconds).
                 </p>
     {%- endif %}
                 <p>
