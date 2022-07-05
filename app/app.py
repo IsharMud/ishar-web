@@ -106,7 +106,10 @@ def login():
 
     # Redirect users who are logged in to the portal
     if current_user.is_authenticated:
-        return redirect(session['next'] or url_for('portal'))
+        try:
+            return redirect(session['next'])
+        except:
+            return redirect(url_for('portal'))
 
     # Show the log in form
     return render_template('login.html.j2', login_form=login_form)
