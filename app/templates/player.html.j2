@@ -127,19 +127,21 @@
                     {{ player.name | title | safe }} {{ player_phrase }} a {{ display_class(player.class.class_name) }} of {{ player.race.race_name | replace('_', '-') | lower | safe }} origin.
                     <br>
                     {{ player_gender | title }} {{ player_phrase }} a <span class="{{ player_type | lower }}-player">{{ player_type }}</span> character.
+                    {%- if player.true_level <= 20 %}
                     <br>
                     {{ player_gender | title }} {{ player_phrase }} level {{ player.level }} and {{ player_phrase_owns }} remorted {{ player.remorts }} times.
                     <br>
                     {{ player_gender | title }} {{ player_phrase_owns }} accumulated {{ player.total_renown }} renown.
                     <br>
-                    {{ player_gender | title }} {{ player_phrase_owns }} completeted {{ player.quests_completed }} quests.
+                    {{ player_gender | title }} {{ player_phrase_owns }} completeted {{ player.quests_completed }} quest{%- if player.quests_completed != 1 -%}s{%- endif -%}.
                     <br>
-                    {{ player_gender | title }} {{ player_phrase_owns }} completed {{ player.challenges_completed }} challenges.
+                    {{ player_gender | title }} {{ player_phrase_owns }} completed {{ player.challenges_completed }} challenge{%- if player.challenges_completed != 1 -%}s{%- endif -%}.
                     <br>
                     {{ player_gender_own | title }} alignment {{ player_phrase }} {{ display_align(player.align) }} ({{ player.align }}).
                     <br>
-                    {%- if player.is_deleted != 1 and not player.true_level > 20 %}
+                    {%- if player_type == 'Classic' %}
                     {{ player_gender | title }} {{ player_phrase_owns }} died {{ player.deaths }} time{%- if player.deaths != 1 -%}s{%- endif -%}.
+                    {%- endif %}
                     {%- endif %}
                 </p>
                 {%- if player.quests_completed > 0 %}
@@ -163,7 +165,7 @@
                 {%- endfor %}
                 </ol>
                 {%- endif %}
-                {%- if player.true_level >= 5 or player.is_deleted == 1 %}
+                {%- if player.true_level >= 5 and player.true_level <= 20 %}
                 <h3>
                     Statistics
                 </h3>
