@@ -132,6 +132,10 @@
                     <br>
                     {{ player_gender | title }} {{ player_phrase_owns }} accumulated {{ player.total_renown }} renown.
                     <br>
+                    {{ player_gender | title }} {{ player_phrase_owns }} completeted {{ player.quests_completed }} quests.
+                    <br>
+                    {{ player_gender | title }} {{ player_phrase_owns }} completed {{ player.challenges_completed }} challenges.
+                    <br>
                     {{ player_gender_own | title }} alignment {{ player_phrase }} {{ display_align(player.align) }} ({{ player.align }}).
                     <br>
                     {%- if player.is_deleted != 1 and not player.true_level > 20 %}
