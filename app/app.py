@@ -202,9 +202,9 @@ def challenges():
 @app.route('/leader_board', methods=['GET'])
 @app.route('/leaderboard', methods=['GET'])
 @login_required
-def leader_board():
+def leaderboard():
     # Sort and list the current best living players
-    return render_template('leader_board.html.j2',
+    return render_template('leaderboard.html.j2',
                                 leaders =   models.Player.query.filter(
                                                     models.Player.true_level < secrets.admin_level,
                                                     models.Player.is_deleted == 0
