@@ -15,5 +15,3 @@ It depends on a combination of:
 - MySQL
 - nginx
 - uwsgi
-
-You should absolutely check out [the website](https://isharmud.com/)!
