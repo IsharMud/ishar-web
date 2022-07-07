@@ -42,40 +42,10 @@
     {%- elif class == 'NECROMANCER' -%}
         shadowy necromancer
     {%- else -%}
-        classless curiousity
+        classless curiousity ({{ class | safe | title }})
     {%- endif -%}
 {%- endmacro -%}
 {%- if player %}
-    {%- if player.true_level >= 26 %}
-        {%- set player_type = 'God' %}
-        {%- set css_prefix  = 'god' %}
-    {%- elif player.true_level == 25 %}
-        {%- set player_type = 'Forger' %}
-        {%- set css_prefix  = 'forger' %}
-    {%- elif player.true_level == 24 %}
-        {%- set player_type = 'Eternal' %}
-        {%- set css_prefix  = 'eternal' %}
-    {%- elif player.true_level == 23 %}
-        {%- set player_type = 'Artisan' %}
-        {%- set css_prefix  = 'artisan' %}
-    {%- elif player.true_level == 22 %}
-        {%- set player_type = 'Immortal' %}
-        {%- set css_prefix  = 'immortal' %}
-    {%- elif player.true_level == 21 %}
-        {%- set player_type = 'Consort' %}
-        {%- set css_prefix  = 'consort' %}
-    {%- elif player.flags[45].value == 1 %}
-        {%- set player_type = 'Survival' %}
-        {%- if player.is_deleted == 1 %}
-            {%- set css_prefix  = 'dead' %}
-        {%- else %}
-            {%- set css_prefix  = 'survival' %}
-        {%- endif %}
-    {%- else %}
-        {%- set player_type = 'Classic' %}
-        {%- set css_prefix  = 'regular' %}
-    {%- endif %}
-    {%- set player_title = player.title | replace('%s','<strong class="' + css_prefix + '-player"><a title="' + player.name + '" href="' + url_for('show_player', player_name=player.name) + '">' + player.name + '</a></strong>') | safe %}
     {%- set player_phrase           = 'is' %}
     {%- set player_phrase_own       = 'are' %}
     {%- set player_phrase_owns      = 'has' %}
@@ -106,7 +76,10 @@
 {%- endblock %}
 {%- block header -%}
     {%- if player -%}
-        Player: <span class="{{ css_prefix }}-player">{{ player.name }}</span>
+        {%- set player_title = player_title(player) -%}
+        {%- set player_type = player_type(player) -%}
+        {%- set player_css = player_css(player) -%}
+        Player: <span class="{{ player_css }}">{{ player.name }}</span>
     {%- else -%}
         Player Not Found
     {%- endif %}
@@ -126,7 +99,7 @@
                 <p>
                     {{ player.name | title | safe }} {{ player_phrase }} a {{ display_class(player.class.class_name) }} of {{ player.race.race_name | replace('_', '-') | lower | safe }} origin.
                     <br>
-                    {{ player_gender | title }} {{ player_phrase }} a <span class="{{ player_type | lower }}-player">{{ player_type }}</span> character.
+                    {{ player_gender | title }} {{ player_phrase }} a <span class="{{ player_css }}">{{ player_type }}</span> character.
                     {%- if player.true_level <= 20 %}
                     <br>
                     {{ player_gender | title }} {{ player_phrase }} level {{ player.level }} and {{ player_phrase_owns }} remorted {{ player.remorts }} times.

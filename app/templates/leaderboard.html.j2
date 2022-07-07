@@ -18,7 +18,7 @@
                             Remorts
                         </th>
                         <th>
-                            Total Renown
+                            Renown
                         </th>
                         <th>
                             Quests
@@ -34,14 +34,8 @@
                         </th>
                     </tr>
                     {%- for leader in leaders %}
-                    {%- if leader.flags[45].value == 1 %}
-                        {%- set player_type = 'Survival' %}
-                        {%- set css_prefix  = 'survival' %}
-                    {%- else %}
-                        {%- set player_type = 'Classic' %}
-                        {%- set css_prefix  = 'player' %}
-                    {%- endif %}
-                    {%- set leader_title = leader.title | replace('%s','<strong><a title="' + leader.name + '" class="' + css_prefix + '-player" href="' + url_for('show_player', player_name=leader.name) + '">' + leader.name + '</a></strong>') | safe %}
+                    {%- set leader_title = player_title(leader) %}
+                    {%- set leader_type = player_type(leader) %}
                     <tr>
                         <td>
                             {{ loop.index }}
@@ -64,12 +58,14 @@
                         <td>
                             {{ leader.challenges_completed }}
                         </td>
+                        {%- if leader_type != 'Survival' %}
                         <td>
                             {{ leader.deaths }}
                         </td>
-                        <td>
-                            <span title="Type: {{ player_type }}" class="{{ player_type | lower }}-player">
-                                {{ player_type }}
+                        {%- endif %}
+                        <td{% if leader_type == 'Survival' %} colspan="2"{% endif %}>
+                            <span title="Type: {{ leader_type }}" class="{{ player_css(leader) }}">
+                                {{ leader_type }}
                             </span>
                         </td>
                     </tr>
