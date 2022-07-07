@@ -41,9 +41,10 @@
                         {%- set player_title = player_title(player) -%}
                         {%- set player_type = player_type(player) -%}
                         {%- set player_css = player_css(player) -%}
+                        {%- set player_birth = player.birth | unix2datetime -%}
                     <tr>
                         <td>
-                            <span title="{{ player.name | title | safe }} (Born {{ player.birth | unix2human_time }})">
+                            <span title="{{ player.name | title | safe }} (Born {{ player_birth.strftime('%A, %B %d, %Y %I:%M:%S %p') }})">
                                 {{ player_title | safe }}
                             </span>
                         </td>

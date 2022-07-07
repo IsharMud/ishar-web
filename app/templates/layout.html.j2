@@ -92,7 +92,7 @@
             {%- if current_user.created_at is defined and current_user.created_at != '' %}
             <span id="created">
                 <strong>Account Created</strong><br>
-                {{ current_user.created_at.strftime('%A, %B %d, %Y %I:%M %p %Z') }}
+                {{ current_user.created_at.strftime('%A, %B %d, %Y %I:%M:%S %p') }}
             </span>
             {%- endif %}
             {%- if current_user.seasonal_points is defined and current_user.seasonal_points > 0 %}
@@ -117,8 +117,9 @@
         {%- endif %}
         {%- if season is defined and season.season_id is defined and season.expiration_date is defined %}
             <span id="season">
+                {%- set season_end = season.expiration_date | unix2datetime -%}
                 <strong>Season {{ season.season_id }}</strong><br>
-                ends {{ season.expiration_date | unix2human_time }}
+                ends {{ season_end.strftime('%A, %B %d, %Y %I:%M %p') }}
             </span>
         {%- endif %}
     {%- endblock %}

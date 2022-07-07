@@ -187,13 +187,21 @@
                 {%- endif %}
                 <p>
                     {%- set seconds_since_birth = now | int - player.birth | int %}
-                    {{ player_gender | title }} was born {{ seconds_since_birth | seconds2human_time }} ago.
+                    {%- set birth_date = player.birth | unix2datetime %}
+                    {{ player_gender | title }} was born {{ seconds_since_birth | seconds2delta }} ago,
+                    on {{ birth_date.strftime('%A, %B %d, %Y %I:%M:%S %p') }}.
                     <br>
-                    {{ player_gender | title }} last logged in {{ player.logon | unix2human_time }}.
+                    {%- set seconds_since_logon = now | int - player.logon | int %}
+                    {%- set last_logon = player.logon | unix2datetime -%}
+                    {{ player_gender | title }} last logged in {{ seconds_since_logon | seconds2delta }} ago,
+                    on {{ last_logon.strftime('%A, %B %d, %Y %I:%M:%S %p') }}.
                     <br>
-                    {{ player_gender | title }} last logged out {{ player.logout | unix2human_time }}.
+                    {%- set seconds_since_logout = now | int - player.logout | int %}
+                    {%- set last_logout = player.logout | unix2datetime -%}
+                    {{ player_gender | title }} last logged out {{ seconds_since_logout | seconds2delta }} ago,
+                    on {{ last_logout.strftime('%A, %B %d, %Y %I:%M:%S %p') }}.
                     <br>
-                    {{ player_gender | title }} {{ player_phrase_owns }} played for {{ player.online | seconds2human_time }}.
+                    {{ player_gender | title }} {{ player_phrase_owns }} played for {{ player.online | seconds2delta }}.
                 </p>
     {%- endif %}
                 <p>
