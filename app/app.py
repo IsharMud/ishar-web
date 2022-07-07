@@ -199,10 +199,12 @@ def challenges():
 
 
 # Leader Board page for logged in users
+@app.route('/leader_board/<int:limit>', methods=['GET'])
+@app.route('/leaderboard/<int:limit>', methods=['GET'])
 @app.route('/leader_board', methods=['GET'])
 @app.route('/leaderboard', methods=['GET'])
 @login_required
-def leaderboard():
+def leaderboard(limit=10):
     # Sort and list the current best living players
     return render_template('leaderboard.html.j2',
                                 leaders =   models.Player.query.filter(
@@ -216,7 +218,7 @@ def leaderboard():
                                                     -models.Player.level,
                                                     -models.Player.bankacc,
                                                     models.Player.deaths
-                                                ).limit(10).all()
+                                                ).limit(limit).all()
                           )
 
 
