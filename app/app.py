@@ -206,8 +206,7 @@ def leaderboard():
     # Sort and list the current best living players
     return render_template('leaderboard.html.j2',
                                 leaders =   models.Player.query.filter(
-                                                    models.Player.true_level < secrets.admin_level,
-                                                    models.Player.is_deleted == 0
+                                                    models.Player.true_level < secrets.admin_level
                                                 ).order_by(
                                                     -models.Player.remorts,
                                                     -models.Player.total_renown,
