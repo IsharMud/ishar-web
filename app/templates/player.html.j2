@@ -102,7 +102,7 @@
                     {{ player_gender | title }} {{ player_phrase }} a <span class="{{ player_css }}">{{ player_type }}</span> character.
                     {%- if player.true_level <= 20 %}
                     <br>
-                    {{ player_gender | title }} {{ player_phrase }} level {{ player.level }} and {{ player_phrase_owns }} remorted {{ player.remorts }} times.
+                    {{ player_gender | title }} {{ player_phrase }} level {{ player.level }} and {{ player_phrase_owns }} remorted {{ player.remorts }} time{%- if player.remorts != 1 -%}s{%- endif -%}.
                     <br>
                     {{ player_gender | title }} {{ player_phrase_owns }} accumulated {{ player.total_renown }} renown.
                     <br>
