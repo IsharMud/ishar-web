@@ -2,7 +2,7 @@
 {% block title %}Portal{% endblock %}
 {% block header %}Welcome{% if current_user.account_name is defined %}, {{ current_user.account_name | title | safe }}{% endif %}!{% endblock %}
 {%- block content %}
-                {%- if current_user.players is defined and current_user.players is iterable and current_user.players|length > 0 %}
+    {%- if current_user.players is defined and current_user.players is iterable and current_user.players|length > 0 %}
                 <h3>
                     {{ current_user.players | length }} character{% if current_user.players|length != 1 %}s{% endif %}:
                 </h3>
@@ -37,11 +37,11 @@
                             Type
                         </th>
                     </tr>
-                    {%- for player in current_user.players %}
-                        {%- set player_title = player_title(player) -%}
-                        {%- set player_type = player_type(player) -%}
-                        {%- set player_css = player_css(player) -%}
-                        {%- set player_birth = player.birth | unix2datetime -%}
+        {%- for player in current_user.players %}
+            {%- set player_title = player_title(player) -%}
+            {%- set player_type = player_type(player) -%}
+            {%- set player_css = player_css(player) -%}
+            {%- set player_birth = player.birth | unix2datetime -%}
                     <tr>
                         <td>
                             <span title="{{ player.name | title | safe }} (Born {{ player_birth.strftime('%A, %B %d, %Y %I:%M:%S %p') }})">
@@ -78,27 +78,27 @@
                                 {{ player.challenges_completed }}
                             </span>
                         </td>
-                        {%- if player_type == 'Classic' %}
+            {%- if player_type == 'Classic' %}
                         <td>
                             <span title="Deaths: {{ player.deaths }}">
                                 {{ player.deaths }}
                             </span>
                         </td>
-                        {%- endif %}
+            {%- endif %}
                         <td{% if player_type != 'Classic' %} colspan="2"{% endif %}>
                             <span title="Type: {{ player_type }}" class="{{ player_css }}">
                                 {{ player_type }}
                             </span>
                         </td>
                     </tr>
-                    {%- endfor %}
+        {%- endfor %}
                 </table>
                 <br>
-                {%- else %}
+    {%- else %}
                 <h3>
                     You have not created any players yet!
                 </h3>
-                {%- endif %}
+    {%- endif %}
                 <p class="bottom-portal-link">
                     <a title="Challenges" href="{{ url_for('challenges') }}">
                         Challenges
@@ -116,9 +116,9 @@
                         Log Out
                     </a>
                 </p>
-                {%- if is_admin is defined and is_admin == True %}
+    {%- if is_admin is defined and is_admin == True %}
                 <p class="bottom-portal-link">
                     <a title="Administration Portal" href="{{ url_for('admin_portal') }}">Administration</a>
                 </p>
-                {%- endif %}
+    {%- endif %}
 {%- endblock %}

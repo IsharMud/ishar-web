@@ -90,55 +90,60 @@
                 </form>
     {%- endif %}
     {%- if player %}
-                {%- set player_title = player_title(player) -%}
-                {%- set player_type = player_type(player) -%}
-                {%- set player_css = player_css(player) -%}
+                {%- set player_title = player_title(player) %}
+                {%- set player_type = player_type(player) %}
+                {%- set player_css = player_css(player) %}
                 <h3>
                     {{ player_title }}
                 </h3>
                 <p>
-                    {{ player.name | title | safe }} {{ player_phrase }} a {{ display_class(player.class.class_name) }} of {{ player.race.race_name | replace('_', '-') | lower | safe }} origin.
+                    {{ player.name | title | safe }} {{ player_phrase }} a {{ display_class(player.class.class_name) }}
+                    of {{ player.race.race_name | replace('_', '-') | lower | safe }} origin.
                     <br>
                     {{ player_gender | title }} {{ player_phrase }} a <span class="{{ player_css }}">{{ player_type }}</span> character.
-                    {%- if player.true_level < immortal_level %}
+        {%- if player.true_level < immortal_level %}
                     <br>
-                    {{ player_gender | title }} {{ player_phrase }} level {{ player.level }} and {{ player_phrase_owns }} remorted {{ player.remorts }} time{%- if player.remorts != 1 -%}s{%- endif -%}.
+                    {{ player_gender | title }} {{ player_phrase }} level {{ player.level }} and {{ player_phrase_owns }}
+                    remorted {{ player.remorts }} time{%- if player.remorts != 1 -%}s{%- endif -%}.
                     <br>
                     {{ player_gender | title }} {{ player_phrase_owns }} accumulated {{ player.total_renown }} renown.
                     <br>
-                    {{ player_gender | title }} {{ player_phrase_owns }} completeted {{ player.quests_completed }} quest{%- if player.quests_completed != 1 -%}s{%- endif -%}.
+                    {{ player_gender | title }} {{ player_phrase_owns }} completeted {{ player.quests_completed }}
+                    quest{%- if player.quests_completed != 1 -%}s{%- endif -%}.
                     <br>
-                    {{ player_gender | title }} {{ player_phrase_owns }} completed {{ player.challenges_completed }} challenge{%- if player.challenges_completed != 1 -%}s{%- endif -%}.
+                    {{ player_gender | title }} {{ player_phrase_owns }} completed {{ player.challenges_completed }}
+                    challenge{%- if player.challenges_completed != 1 -%}s{%- endif -%}.
                     <br>
                     {{ player_gender_own | title }} alignment {{ player_phrase }} {{ display_align(player.align) }} ({{ player.align }}).
                     <br>
-                    {%- if player_type == 'Classic' %}
-                    {{ player_gender | title }} {{ player_phrase_owns }} died {{ player.deaths }} time{%- if player.deaths != 1 -%}s{%- endif -%}.
-                    {%- endif %}
-                    {%- endif %}
+            {%- if player_type == 'Classic' %}
+                    {{ player_gender | title }} {{ player_phrase_owns }} died {{ player.deaths }}
+                    time{%- if player.deaths != 1 -%}s{%- endif -%}.
+            {%- endif %}
                 </p>
-                {%- if player.quests_completed > 0 %}
+        {%- endif %}
+        {%- if player.quests | selectattr('value', 'equalto', 1) | list | length > 0 %}
                 <h3>
                     Quests
                 </h3>
                 <ol>
-                {%- for quest in player.quests %}
-                  {%- if quest.value == 1 %}
+            {%- for quest in player.quests %}
+                {%- if quest.value == 1 %}
                     <li>
                         {{ quest.quest.display_name }}
-                        {%- if quest.quest.completion_message is defined and quest.quest.completion_message != '' %}
+                    {%- if quest.quest.completion_message is defined and quest.quest.completion_message != '' %}
                         <ul>
                             <li>
                                 {{ quest.quest.completion_message }}
                             </li>
                         </ul>
-                        {%- endif %}
+                    {%- endif %}
                     </li>
-                  {%- endif %}
-                {%- endfor %}
-                </ol>
                 {%- endif %}
-                {%- if player.true_level >= 5 and player.true_level < immortal_level %}
+            {%- endfor %}
+                </ol>
+        {%- endif %}
+        {%- if player.true_level >= 5 and player.true_level < immortal_level %}
                 <h3>
                     Statistics
                 </h3>
@@ -184,20 +189,20 @@
                         </td>
                     </tr>
                 </table>
-                {%- endif %}
+        {%- endif %}
                 <p>
-                    {%- set seconds_since_birth = now | int - player.birth | int %}
-                    {%- set birth_date = player.birth | unix2datetime %}
+        {%- set seconds_since_birth = now | int - player.birth | int %}
+        {%- set birth_date = player.birth | unix2datetime %}
                     {{ player_gender | title }} was born {{ seconds_since_birth | seconds2delta }} ago,
                     on {{ birth_date.strftime('%A, %B %d, %Y %I:%M:%S %p') }}.
                     <br>
-                    {%- set seconds_since_logon = now | int - player.logon | int %}
-                    {%- set last_logon = player.logon | unix2datetime -%}
+        {%- set seconds_since_logon = now | int - player.logon | int %}
+        {%- set last_logon = player.logon | unix2datetime %}
                     {{ player_gender | title }} last logged in {{ seconds_since_logon | seconds2delta }} ago,
                     on {{ last_logon.strftime('%A, %B %d, %Y %I:%M:%S %p') }}.
                     <br>
-                    {%- set seconds_since_logout = now | int - player.logout | int %}
-                    {%- set last_logout = player.logout | unix2datetime -%}
+        {%- set seconds_since_logout = now | int - player.logout | int %}
+        {%- set last_logout = player.logout | unix2datetime %}
                     {{ player_gender | title }} last logged out {{ seconds_since_logout | seconds2delta }} ago,
                     on {{ last_logout.strftime('%A, %B %d, %Y %I:%M:%S %p') }}.
                     <br>
