@@ -290,16 +290,10 @@ def new_account():
             new_account = models.Account(
                 email           = new_account_form.email.data,
                 password        = new_account_form.confirm_password.data,
-                ##########
-                # FIX ME #
-                ##########
-                create_isp      = '',
+                create_isp      = ip_address,
                 last_isp        = '',
                 create_ident    = '',
                 last_ident      = '',
-                ##########
-                # FIX ME #
-                ##########
                 create_haddr    = int(ip_address),
                 last_haddr      = int(ip_address),
                 account_name    = new_account_form.account_name.data
