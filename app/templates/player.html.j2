@@ -76,10 +76,7 @@
 {%- endblock %}
 {%- block header -%}
     {%- if player -%}
-        {%- set player_title = player_title(player) -%}
-        {%- set player_type = player_type(player) -%}
-        {%- set player_css = player_css(player) -%}
-        Player: <span class="{{ player_css }}">{{ player.name }}</span>
+        Player: <span class="{{ player_css(player) }}">{{ player.name }}</span>
     {%- else -%}
         Player Not Found
     {%- endif %}
@@ -93,6 +90,9 @@
                 </form>
     {%- endif %}
     {%- if player %}
+                {%- set player_title = player_title(player) -%}
+                {%- set player_type = player_type(player) -%}
+                {%- set player_css = player_css(player) -%}
                 <h3>
                     {{ player_title }}
                 </h3>
