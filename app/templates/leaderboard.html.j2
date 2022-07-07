@@ -37,8 +37,8 @@
                     {%- set leader_title = player_title(leader) %}
                     {%- set leader_type = player_type(leader) %}
                     <tr>
-                        <td>
-                            {{ loop.index }}
+                        <td id="{{ loop.index }}">
+                            <a href="#{{ loop.index }}">{{ loop.index }}</a>
                         </td>
                         <td>
                             {{ leader_title }}
