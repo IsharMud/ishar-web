@@ -77,12 +77,14 @@
                                 {{ player.challenges_completed }}
                             </span>
                         </td>
+                        {%- if player_type == 'Classic' %}
                         <td>
                             <span title="Deaths: {{ player.deaths }}">
                                 {{ player.deaths }}
                             </span>
                         </td>
-                        <td>
+                        {%- endif %}
+                        <td{% if player_type != 'Classic' %} colspan="2"{% endif %}>
                             <span title="Type: {{ player_type }}" class="{{ player_css }}">
                                 {{ player_type }}
                             </span>
