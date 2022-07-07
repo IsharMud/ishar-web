@@ -39,8 +39,9 @@ def load_user(account_id):
 @app.context_processor
 def injects():
     return dict(
-            now     = datetime.datetime.now().timestamp(),
-            season  = models.Season.query.filter_by(is_active = 1).first()
+            now             = datetime.datetime.now().timestamp(),
+            season          = models.Season.query.filter_by(is_active = 1).first(),
+            immortal_level  = secrets.immortal_level
     )
 
 # Handle errors with a little template
@@ -208,7 +209,7 @@ def leaderboard(limit=10):
     # Sort and list the current best living players
     return render_template('leaderboard.html.j2',
                                 leaders =   models.Player.query.filter(
-                                                    models.Player.true_level < secrets.admin_level
+                                                    models.Player.true_level < secrets.immortal_level
                                                 ).order_by(
                                                     -models.Player.remorts,
                                                     -models.Player.total_renown,

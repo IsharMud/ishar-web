@@ -100,7 +100,7 @@
                     {{ player.name | title | safe }} {{ player_phrase }} a {{ display_class(player.class.class_name) }} of {{ player.race.race_name | replace('_', '-') | lower | safe }} origin.
                     <br>
                     {{ player_gender | title }} {{ player_phrase }} a <span class="{{ player_css }}">{{ player_type }}</span> character.
-                    {%- if player.true_level <= 20 %}
+                    {%- if player.true_level < immortal_level %}
                     <br>
                     {{ player_gender | title }} {{ player_phrase }} level {{ player.level }} and {{ player_phrase_owns }} remorted {{ player.remorts }} time{%- if player.remorts != 1 -%}s{%- endif -%}.
                     <br>
@@ -138,7 +138,7 @@
                 {%- endfor %}
                 </ol>
                 {%- endif %}
-                {%- if player.true_level >= 5 and player.true_level <= 20 %}
+                {%- if player.true_level >= 5 and player.true_level < immortal_level %}
                 <h3>
                     Statistics
                 </h3>
