@@ -1,0 +1,66 @@
+{% extends "layout.html.j2" %}
+{% block title %}Who's Online?{% endblock %}
+{% block header %}Who's Online?{% endblock %}
+{%- block content %}
+    {%- if players is defined and players is iterable and players|length > 1 %}
+                <h3>
+                    {{ players | length }} player{% if players != 1%}s{% endif %} online
+                </h3>
+                <table id="online">
+                    <tr>
+                        <th>
+                            #
+                        </th>
+                        <th>
+                            Name
+                        </th>
+                        <th>
+                            Level
+                        </th>
+                        <th>
+                            Remorts
+                        </th>
+                        <th>
+                            Type
+                        </th>
+                    </tr>
+        {%- for player in players %}
+            {%- set player_title = player_title(player) %}
+            {%- set player_type = player_type(player) %}
+                    <tr>
+                        <td id="{{ loop.index }}">
+                            {{ loop.index }}
+                        </td>
+                        <td>
+                            {{ player_title }}
+                        </td>
+                        <td>
+                            <span title="Level: {{ player.level }}">
+                                {{ player.level }}
+                            </span>
+                        </td>
+                        <td>
+                            <span title="Remorts: {{ player.remorts }}">
+                                {{ player.remorts }}
+                            </span>
+                        </td>
+                        <td>
+                            <span title="Type: {{ player_type }}" class="{{ player_css(player) }}">
+                                {{ player_type }}
+                            </span>
+                        </td>
+                    </tr>
+        {%- endfor %}
+                </table>
+    {%- else %}
+                    <h3>
+                        Unfortunately, nobody is online.
+                    </h3>
+                    <br>
+    {%- endif %}
+                <p>
+                    <a href="{{ url_for('portal') }}">
+                        <img src="{{ url_for('static', filename='back.gif') }}" alt="Back to Player Portal">
+                    </a>
+                </p>
+{%- endblock %}

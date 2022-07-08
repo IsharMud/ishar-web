@@ -199,14 +199,13 @@ def challenges():
                           )
 
 
-# Leader Board page for logged in users
+# Sort and list the best players for Leader Board page for logged in users
 @app.route('/leader_board/<int:limit>', methods=['GET'])
 @app.route('/leaderboard/<int:limit>', methods=['GET'])
 @app.route('/leader_board', methods=['GET'])
 @app.route('/leaderboard', methods=['GET'])
 @login_required
 def leaderboard(limit=10):
-    # Sort and list the current best living players
     return render_template('leaderboard.html.j2',
                                 leaders =   models.Player.query.filter(
                                                     models.Player.true_level < secrets.immortal_level
@@ -221,6 +220,27 @@ def leaderboard(limit=10):
                                                     models.Player.deaths
                                                 ).limit(limit).all()
                           )
+
+
+# Show online users (who)
+@app.route('/who', methods=['GET'])
+@login_required
+def who():
+    return render_template('who.html.j2',
+                                who =   models.Player.query.filter(
+                                            models.Player.true_level < secrets.immortal_level,
+                                            models.Player.logon == models.Player.logout
+                                        ).order_by(
+                                            -models.Player.level,
+                                            -models.Player.remorts,
+                                            -models.Player.total_renown,
+                                            -models.Player.quests_completed,
+                                            -models.Player.challenges_completed,
+                                            -models.Player.renown,
+                                            -models.Player.bankacc,
+                                            models.Player.deaths
+                                        ).all()
+                            )
 
 
 # Portal for administrators
