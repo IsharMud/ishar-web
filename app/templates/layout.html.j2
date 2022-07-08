@@ -40,25 +40,43 @@
         in
     {%- else %}
         now
-    {%- endif %}
+    {%- endif -%}
     {%- set delta = seconds_timestamp | seconds2delta %}
     {{ display_delta(delta) }}
-    {%- if now | int > unix_timestamp | int %}
-        ago
-    {%- endif -%}
+    {%- if now | int > unix_timestamp | int %} ago{%- endif %}
 {%- endmacro -%}
 {%- macro display_delta(delta) -%}
-    {%- if delta.days > 0 %}
-        {{ delta.days }} day{% if delta.days != 1 %}s{% endif %}
-    {%- else -%}
-        {%- set minutes = delta.seconds / 60 %}
-        {%- if minutes > 60 %}
-            {%- set hours = minutes / 60 %}
-            {{ hours | round | int }} hours
-        {%- else %}
-            {{ minutes | round | int }} minutes
+    {%- if delta.days > 0 -%}
+        {%- if delta.days > 30 -%}
+            {%- set months = delta.days / 30 %}
+            {%- if months > 12 -%}
+                {%- set years = months / 12 %}
+                {%- if years > 10 -%}
+                    {%- set decades = years / 10 -%}
+                    {%- set rounded_decades = decades | round | int -%}
+                    {{ rounded_decades }} decade{% if rounded_decades != 1 %}s{% endif %}
+                {%- else -%}
+                    {%- set rounded_years = years | round | int -%}
+                    {{ rounded_years }} year{% if rounded_years != 1 %}s{% endif %}
+                {%- endif -%}
+            {%- else -%}
+                {%- set rounded_months = months | round | int -%}
+                {{ rounded_months }} month{% if rounded_months != 1 %}s{% endif %}
+            {%- endif -%}
+        {%- else -%}
+            {{ delta.days }} day{% if delta.days != 1 %}s{% endif %}
         {%- endif %}
-    {%- endif %}
+    {%- else -%}
+        {%- set minutes = delta.seconds / 60 -%}
+        {%- if minutes >= 60 -%}
+            {%- set hours = minutes / 60 -%}
+            {%- set rounded_hours = hours | round | int -%}
+            {{ rounded_hours }} hour{% if rounded_hours != 1 %}s{% endif %}
+        {%- else -%}
+            {%- set rounded_minutes = minutes | round | int %}
+            {{ rounded_minutes }} minute{% if rounded_minutes != 1 %}s{% endif %}
+        {%- endif -%}
+    {%- endif -%}
 {%- endmacro -%}
 <!DOCTYPE html>
 <html lang="en">
