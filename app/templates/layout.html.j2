@@ -52,7 +52,12 @@
         {{ delta.days }} day{% if delta.days != 1 %}s{% endif %}
     {%- else -%}
         {%- set minutes = delta.seconds / 60 %}
-        {{ minutes | round | int }} minutes
+        {%- if minutes > 60 %}
+            {%- set hours = minutes / 60 %}
+            {{ hours | round | int }} hours
+        {%- else %}
+            {{ minutes | round | int }} minutes
+        {%- endif %}
     {%- endif %}
 {%- endmacro -%}
 <!DOCTYPE html>
