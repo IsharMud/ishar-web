@@ -51,7 +51,8 @@
     {%- if delta.days > 0 %}
         {{ delta.days }} day{% if delta.days != 1 %}s{% endif %}
     {%- else -%}
-        {{ delta }}
+        {%- set minutes = delta.seconds / 60 %}
+        {{ minutes | round | int }} minutes
     {%- endif %}
 {%- endmacro -%}
 <!DOCTYPE html>
