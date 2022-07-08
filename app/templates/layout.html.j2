@@ -48,7 +48,11 @@
     {%- endif -%}
 {%- endmacro -%}
 {%- macro display_delta(delta) -%}
-    {{ delta.days }} days
+    {%- if delta.days > 0 %}
+        {{ delta.days }} day{% if delta.days != 1 %}s{% endif %}
+    {%- else -%}
+        {{ delta }}
+    {%- endif %}
 {%- endmacro -%}
 <!DOCTYPE html>
 <html lang="en">
