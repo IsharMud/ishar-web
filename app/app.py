@@ -286,7 +286,7 @@ def new_account():
 
         # Otherwise, proceed in trying to create the new account
         else:
-            ip_address = ipaddress.ip_address(request.remote_addr)
+            ip_address  = ipaddress.ip_address(request.remote_addr)
             new_account = models.Account(
                 email           = new_account_form.email.data,
                 password        = new_account_form.confirm_password.data,
@@ -300,7 +300,7 @@ def new_account():
             )
 
             # Create the account in the database, get the account ID, and log the user in
-            created_id = new_account.create_account()
+            created_id      = new_account.create_account()
             created_account = models.Account.query.filter_by(account_id = created_id).first()
             if created_account:
                 login_user(created_account)
@@ -394,7 +394,7 @@ def unix2datetime(unix_time):
 # Jinja2 template filter to convert seconds to human-readable delta
 @app.template_filter('seconds2delta')
 def seconds2delta(seconds):
-    return str(datetime.timedelta(seconds=seconds))
+    return datetime.timedelta(seconds=seconds)
 
 
 import helptab

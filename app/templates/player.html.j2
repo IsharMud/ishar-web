@@ -97,22 +97,22 @@
                     {{ player_title }}
                 </h3>
                 <p>
-                    {{ player.name | title | safe }} {{ player_phrase }} a {{ display_class(player.class.class_name) }}
-                    of {{ player.race.race_name | replace('_', '-') | lower | safe }} origin.
+                    {{ player.name | title | safe }} {{ player_phrase }} a {{ display_class(player.class.class_name) }} of
+                    {{ player.race.race_name | replace('_', '-') | lower | safe }} origin.
                     <br>
                     {{ player_gender | title }} {{ player_phrase }} a <span class="{{ player_css }}">{{ player_type }}</span> character.
         {%- if player.true_level < immortal_level %}
                     <br>
-                    {{ player_gender | title }} {{ player_phrase }} level {{ player.level }} and {{ player_phrase_owns }}
-                    remorted {{ player.remorts }} time{%- if player.remorts != 1 -%}s{%- endif -%}.
+                    {{ player_gender | title }} {{ player_phrase }} level {{ player.level }} and {{ player_phrase_owns }} remorted
+                    {{ player.remorts }} time{%- if player.remorts != 1 -%}s{%- endif -%}.
                     <br>
                     {{ player_gender | title }} {{ player_phrase_owns }} accumulated {{ player.total_renown }} renown.
                     <br>
-                    {{ player_gender | title }} {{ player_phrase_owns }} completeted {{ player.quests_completed }}
-                    quest{%- if player.quests_completed != 1 -%}s{%- endif -%}.
+                    {{ player_gender | title }} {{ player_phrase_owns }} completeted {{ player.quests_completed }} quest
+                    {%- if player.quests_completed != 1 -%}s{%- endif -%}.
                     <br>
-                    {{ player_gender | title }} {{ player_phrase_owns }} completed {{ player.challenges_completed }}
-                    challenge{%- if player.challenges_completed != 1 -%}s{%- endif -%}.
+                    {{ player_gender | title }} {{ player_phrase_owns }} completed {{ player.challenges_completed }} challenge
+                    {%- if player.challenges_completed != 1 -%}s{%- endif -%}.
                     <br>
                     {{ player_gender_own | title }} alignment {{ player_phrase }} {{ display_align(player.align) }} ({{ player.align }}).
                     <br>
@@ -191,20 +191,17 @@
                 </table>
         {%- endif %}
                 <p>
-        {%- set seconds_since_birth = now | int - player.birth | int %}
         {%- set birth_date = player.birth | unix2datetime %}
-                    {{ player_gender | title }} was born {{ seconds_since_birth | seconds2delta }} ago,
-                    on {{ birth_date.strftime('%A, %B %d, %Y %I:%M:%S %p') }}.
+                    {{ player_gender | title }} was born {{ display_timestamp(player.birth) }},
+                    on {{ birth_date.strftime('%A, %B %d, %Y') }}.
                     <br>
-        {%- set seconds_since_logon = now | int - player.logon | int %}
         {%- set last_logon = player.logon | unix2datetime %}
-                    {{ player_gender | title }} last logged in {{ seconds_since_logon | seconds2delta }} ago,
-                    on {{ last_logon.strftime('%A, %B %d, %Y %I:%M:%S %p') }}.
+                    {{ player_gender | title }} last logged in {{ display_timestamp(player.logon) }},
+                    on {{ last_logon.strftime('%A, %B %d, %Y') }}.
                     <br>
-        {%- set seconds_since_logout = now | int - player.logout | int %}
         {%- set last_logout = player.logout | unix2datetime %}
-                    {{ player_gender | title }} last logged out {{ seconds_since_logout | seconds2delta }} ago,
-                    on {{ last_logout.strftime('%A, %B %d, %Y %I:%M:%S %p') }}.
+                    {{ player_gender | title }} last logged out {{ display_timestamp(player.logout) }},
+                    on {{ last_logout.strftime('%A, %B %d, %Y') }}.
                     <br>
                     {{ player_gender | title }} {{ player_phrase_owns }} played for {{ player.online | seconds2delta }}.
                 </p>

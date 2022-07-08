@@ -32,6 +32,24 @@
     {%- set player_title = player.title | replace('%s','<strong class="' + player_css(player) + '"><a title="' + player.name + '" href="' + url_for('show_player', player_name=player.name) + '">' + player.name + '</a></strong>') | safe -%}
     {{ player_title }}
 {%- endmacro -%}
+{%- macro display_timestamp(unix_timestamp) -%}
+    {%- if now | int > unix_timestamp | int %}
+        {%- set seconds_timestamp = now | int - unix_timestamp | int %}
+    {%- elif now | int < unix_timestamp | int %}
+        {%- set seconds_timestamp = unix_timestamp | int - now | int %}
+        in
+    {%- else %}
+        now
+    {%- endif %}
+    {%- set delta = seconds_timestamp | seconds2delta %}
+    {{ display_delta(delta) }}
+    {%- if now | int > unix_timestamp | int %}
+        ago
+    {%- endif -%}
+{%- endmacro -%}
+{%- macro display_delta(delta) -%}
+    {{ delta.days }} days
+{%- endmacro -%}
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -90,14 +108,20 @@
     {%- block footer %}
         {%- if current_user is defined and current_user.is_authenticated %}
             {%- if current_user.created_at is defined and current_user.created_at != '' %}
-            <span id="created">
-                <strong>Account Created</strong><br>
-                {{ current_user.created_at.strftime('%A, %B %d, %Y %I:%M:%S %p') }}
+            <span id="created" title="Account Created: {{ current_user.created_at.strftime('%A, %B %d, %Y %H:%M:%S %p') }}">
+                <strong>
+                    Account Created
+                </strong>
+                <br>
+                {{ current_user.created_at.strftime('%A, %B %d, %Y') }}
             </span>
             {%- endif %}
             {%- if current_user.seasonal_points is defined and current_user.seasonal_points > 0 %}
-            <span id="essence">
-                <strong>Essence</strong><br>
+            <span id="essence" title="Essence: {{ current_user.seasonal_points }} points">
+                <strong>
+                    Essence
+                </strong>
+                <br>
                 {{ current_user.seasonal_points }} points
             </span>
             {%- endif %}
@@ -116,10 +140,16 @@
             </div>
         {%- endif %}
         {%- if season is defined and season.season_id is defined and season.expiration_date is defined %}
-            <span id="season">
-                {%- set season_end = season.expiration_date | unix2datetime -%}
-                <strong>Season {{ season.season_id }}</strong><br>
-                ends {{ season_end.strftime('%A, %B %d, %Y %I:%M %p') }}
+            {%- set seconds_until_season_end = season.expiration_date | int - now | int %}
+            {%- set season_end_delta = seconds_until_season_end | seconds2delta %}
+            {%- set season_end = season.expiration_date | unix2datetime %}
+            <span id="season" title="Season End: {{ season_end.strftime('%A, %B %d, %Y %H:%M:%S %p') }}">
+                <strong>
+                    Season {{ season.season_id }}
+                </strong>
+                <br>
+                ends {{ display_timestamp(season.expiration_date) }},
+                on {{ season_end.strftime('%A, %B %d, %Y') }}.
             </span>
         {%- endif %}
     {%- endblock %}
