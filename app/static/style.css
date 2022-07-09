@@ -229,8 +229,18 @@ input {
     padding:    1em;
 }
 
+#leader th {
+    background-color:   #000;
+    color:              #fff;
+}
+
 .challenge-completed {
     text-decoration:            line-through;
     text-decoration-color:      #fa7;
     text-decoration-thickness:  0.18em;
+}
+
+#go-back button {
+    background-color:   #000;
+    color:              #fff;
 }

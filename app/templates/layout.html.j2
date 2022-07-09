@@ -96,9 +96,9 @@
         <title>{% block title %}Welcome{% endblock %} - Ishar MUD</title>
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
         <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
-    {%- endblock %}
+    {%- endblock head %}
     {%- block scripts %}
-    {%- endblock %}
+    {%- endblock scripts %}
     </head>
     <body>
         <div id="logo">
@@ -110,7 +110,7 @@
             <div class="under">
 {%- block navigation %}
 {% include('navigation.html.j2') %}
-{%- endblock %}
+{%- endblock navigation %}
                 <h1>
                     {% block header %}{% endblock %}
                 </h1>
