@@ -222,6 +222,11 @@ input {
     list-style: none;
 }
 
+#leaderboard-choices ul li {
+    display:    inline;
+    padding:    1em;
+}
+
 .challenge-completed {
     text-decoration:            line-through;
     text-decoration-color:      #fa7;

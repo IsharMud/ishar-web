@@ -2,7 +2,25 @@
 {% block title %}Leader Board{% endblock %}
 {% block header %}Leader Board{% endblock %}
 {%- block content %}
-                {%- if leaders is defined and leaders is iterable and leaders|length > 1 %}
+    {%- set limit_choices = [5, 10, 25, 50, 100] %}
+    {%- if limit is defined and limit is number and limit_choices is defined and limit_choices is iterable %}
+                <div id="leaderboard-choices">
+                    <ul>
+        {%- for limit_choice in limit_choices %}
+                        <li>
+            {%- if limit_choice != limit %}
+                            <a href="{{ url_for('leaderboard', limit=limit_choice) }}">
+            {%- endif %}
+                                Top {{ limit_choice }}
+            {%- if limit_choice != limit %}
+                            </a>
+            {%- endif %}
+                        </li>
+        {%- endfor %}
+                    </ul>
+                </div>
+    {%- endif %}
+    {%- if leaders is defined and leaders is iterable and leaders|length > 1 %}
                 <table id="leader">
                     <tr>
                         <th>
@@ -33,9 +51,9 @@
                             Type
                         </th>
                     </tr>
-                    {%- for leader in leaders %}
-                    {%- set leader_title = player_title(leader) %}
-                    {%- set leader_type = player_type(leader) %}
+        {%- for leader in leaders %}
+        {%- set leader_title = player_title(leader) %}
+        {%- set leader_type = player_type(leader) %}
                     <tr>
                         <td id="{{ loop.index }}">
                             <a href="#{{ loop.index }}">{{ loop.index }}</a>
@@ -69,9 +87,9 @@
                             </span>
                         </td>
                     </tr>
-                    {%- endfor %}
+        {%- endfor %}
                 </table>
-                {%- endif %}
+    {%- endif %}
                 <p>
                     <a href="{{ url_for('portal') }}">
                         <img src="{{ url_for('static', filename='back.gif') }}" alt="Back to Player Portal">
