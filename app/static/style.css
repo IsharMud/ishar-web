@@ -77,7 +77,7 @@ input[type="reset"], input[type="submit"], #login-form {
 }
 
 .support {
-    text-align: center;
+#    text-align: center;
 }
 
 .news-created {
