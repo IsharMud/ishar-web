@@ -59,13 +59,13 @@ input[type="reset"], input[type="submit"], #login-form {
 
 .login-remember {
     font-size:  0.85em;
-    text-align: center;
+#    text-align: center;
 }
 
 #new-account-link, .bottom-portal-link {
     font-size:  0.9em;
     display:    table;
-    margin:     0 auto;
+#    margin:     0 auto;
     margin-top: 1.5em;
 }
 
@@ -73,7 +73,10 @@ input[type="reset"], input[type="submit"], #login-form {
     border: 1px solid #fa7;
 }
 
-#area-name, #area-details, .support {
+#area-name, #area-details, {
+}
+
+.support {
     text-align: center;
 }
 
