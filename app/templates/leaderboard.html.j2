@@ -28,7 +28,7 @@
         {%- for leader in leaders %}
             {%- set leader_title = player_title(leader) %}
             {%- set leader_type = player_type(leader) %}
-            {%- if loop.index == 1 or loop.index % 10 == 0 %}
+            {%- if loop.index0 % 10 == 0 %}
                     <tr>
                         <th>
                             #
