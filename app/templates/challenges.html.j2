@@ -1,4 +1,7 @@
 {% extends "layout.html.j2" %}
+{% block meta_title %}Challenges{% endblock meta_title %}
+{% block meta_description %}Challenges, winners, and rewards currently available{% endblock %}
+{% block meta_url %}{{ url_for('challenges', _external=True) }}{% endblock meta_url %}">
 {% block title %}Challenges{% endblock %}
 {% block header %}Challenges{% endblock %}
 {%- macro challenge_tier(tier) -%}
@@ -70,9 +73,5 @@
                 {%- endfor %}
                 </table>
                 {%- endif %}
-                <p>
-                    <a href="{{ url_for('portal') }}">
-                        <img src="{{ url_for('static', filename='back.gif') }}" alt="Back to Player Portal">
-                    </a>
-                </p>
+{% include('back.html.j2') %}
 {%- endblock %}

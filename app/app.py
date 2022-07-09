@@ -188,7 +188,6 @@ def portal():
 
 # Challenges page for logged in users
 @app.route('/challenges', methods=['GET'])
-@login_required
 def challenges():
     # Show the current challenges
     return render_template('challenges.html.j2',
@@ -204,7 +203,6 @@ def challenges():
 @app.route('/leaderboard/<int:limit>', methods=['GET'])
 @app.route('/leader_board', methods=['GET'])
 @app.route('/leaderboard', methods=['GET'])
-@login_required
 def leaderboard(limit=10):
     if limit > max([5, 10, 25, 50, 100]):
         return redirect(url_for('leaderboard', limit=10))

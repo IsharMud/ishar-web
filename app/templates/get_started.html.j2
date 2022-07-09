@@ -1,4 +1,7 @@
 {% extends "layout.html.j2" %}
+{% block meta_title %}Get Started{% endblock meta_title %}
+{% block meta_description %}Get Started with these tips and background information about the game{% endblock %}
+{% block meta_url %}{{ url_for('get_started', _external=True) }}{% endblock meta_url %}">
 {% block title %}Get Started{% endblock %}
 {% block header %}Get Started{% endblock %}
 {%- block content %}
@@ -113,11 +116,5 @@
                 <p>
                     Once you make it past the first few hours and want to advance your standing
                     in the game, see "help levelling".
-                </p>
-
-                <p>
-                    <a href="{{ url_for('welcome') }}">
-                        <img src="{{ url_for('static', filename='back.gif') }}" alt="Back to main page">
-                    </a>
                 </p>
 {%- endblock %}

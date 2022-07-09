@@ -1,4 +1,7 @@
 {% extends "layout.html.j2" %}
+{% block meta_title %}Portal{% endblock meta_title %}
+{% block meta_description %}Portal for players to see information about their account and characters{% endblock %}
+{% block meta_url %}{{ url_for('portal', _external=True) }}{% endblock meta_url %}">
 {% block title %}Portal{% endblock %}
 {% block header %}Welcome{% if current_user.account_name is defined %}, {{ current_user.account_name | title | safe }}{% endif %}!{% endblock %}
 {%- block content %}

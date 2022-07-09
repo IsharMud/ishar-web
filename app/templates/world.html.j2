@@ -1,4 +1,7 @@
 {% extends "layout.html.j2" %}
+{% block meta_title %}World{% endblock meta_title %}
+{% block meta_description %}The World of Ishar is vast and very detailed with many areas{% endblock %}
+{% block meta_url %}{{ url_for('world', area=area, _external=True) }}{% endblock meta_url %}">
 {% block title %}World{% endblock %}
 {% block header %}World{% endblock %}
 {%- block content %}
@@ -9,11 +12,7 @@
                 <pre id="area-details">
                     {{ areas }}
                 </pre>
-                <p>
-                    <a href="{{ url_for('world') }}">
-                        <img src="{{ url_for('static', filename='back.gif') }}" alt="Back to all areas">
-                    </a>
-                </p>
+{% include('back.html.j2') %}
                 {%- else %}
                 <p>
                     Ishar is a cohesive world with a living history.

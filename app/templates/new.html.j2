@@ -1,4 +1,7 @@
 {% extends "layout.html.j2" %}
+{% block meta_title %}New Account{% endblock meta_title %}
+{% block meta_description %}New Account sign up for new players{% endblock %}
+{% block meta_url %}{{ url_for('challenges', _external=True) }}{% endblock meta_url %}">
 {% block title %}New Account{% endblock %}
 {% block header %}New Account{% endblock %}
 {%- macro render_field(field) %}

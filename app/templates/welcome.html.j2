@@ -1,4 +1,7 @@
 {% extends "layout.html.j2" %}
+{% block meta_title %}Welcome{% endblock meta_title %}
+{% block meta_description %}Welcome to Ishar MUD{% endblock %}
+{% block meta_url %}{{ url_for('welcome', _external=True) }}{% endblock meta_url %}">
 {% block title %}Welcome{% endblock %}
 {% block header %}Welcome{% endblock %}
 {%- block content %}

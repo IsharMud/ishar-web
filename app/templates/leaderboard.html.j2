@@ -1,4 +1,7 @@
 {% extends "layout.html.j2" %}
+{% block meta_title %}Leader Board{% endblock meta_title %}
+{% block meta_description %}Leader Board of top players of the game and their achievements{% endblock %}
+{% block meta_url %}{{ url_for('leaderboard', _external=True) }}{% endblock meta_url %}">
 {% block title %}Leader Board{% endblock %}
 {% block header %}Leader Board{% endblock %}
 {%- block content %}
@@ -90,9 +93,5 @@
         {%- endfor %}
                 </table>
     {%- endif %}
-                <p>
-                    <a href="{{ url_for('portal') }}">
-                        <img src="{{ url_for('static', filename='back.gif') }}" alt="Back to Player Portal">
-                    </a>
-                </p>
+{% include('back.html.j2') %}
 {%- endblock %}

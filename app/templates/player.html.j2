@@ -67,9 +67,24 @@
         {%- set player_phrase_owns  = 'had' %}
     {%- endif %}
 {%- endif %}
+{%- block meta_title -%}
+    {%- if player -%}
+        Player: {{ player.name }}{% if player.is_deleted == 1 %} ☠️{%- endif %}
+    {%- else -%}
+        Player Not Found
+    {%- endif -%}
+{%- endblock meta_title -%}
+{%- block meta_description %}
+    {%- if player -%}
+        Player: {{ player.name }}{% if player.is_deleted == 1 %} ☠️{%- endif %}
+    {%- else -%}
+        Player Not Found
+    {%- endif -%}
+{%- endblock meta_description -%}
+{% block meta_url %}{{ url_for('show_player', player_name=player.name, _external=True) }}{% endblock meta_url %}">
 {%- block title %}
     {%- if player -%}
-        Player: {{ player.name }}
+        Player: {{ player.name }}{% if player.is_deleted == 1 %} ☠️{%- endif %}
     {%- else -%}
         Player Not Found
     {%- endif -%}
@@ -206,9 +221,5 @@
                     {{ player_gender | title }} {{ player_phrase_owns }} played for {{ player.online | seconds2delta }}.
                 </p>
     {%- endif %}
-                <p>
-                    <a href="{{ url_for('portal') }}">
-                        <img src="{{ url_for('static', filename='back.gif') }}" alt="Back to Player Portal">
-                    </a>
-                </p>
+{% include('back.html.j2') %}
 {%- endblock %}

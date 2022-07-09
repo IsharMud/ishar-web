@@ -44,9 +44,9 @@ tr:nth-child(2n) {
     background-color:   #888;
 }
 
-input[type="reset"], input[type="submit"], #login-form, #new-account-form {
+input[type="reset"], input[type="submit"], #login-form {
     font-size:  1.25em;
-    text-align: center;
+#    text-align: center;
 }
 
 .login-email label::after, .login-password label::after, .change-password label::after, .new-account label::after {
@@ -55,7 +55,6 @@ input[type="reset"], input[type="submit"], #login-form, #new-account-form {
 }
 
 #change-password-form {
-    text-align: center;
 }
 
 .login-remember {

@@ -74,7 +74,7 @@ class NewsAddForm(FlaskForm):
                                 validators.Length(min=1, max=64),
                                 ]
                             )
-    body        = TextAreaField('Message', [validators.DataRequired()] )
+    body        = TextAreaField('Message', [validators.DataRequired()])
     submit      = SubmitField('Post')
 
 

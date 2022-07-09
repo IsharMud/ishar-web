@@ -1,4 +1,7 @@
 {% extends "layout.html.j2" %}
+{% block meta_title %}History{% endblock meta_title %}
+{% block meta_description %}History of the development and creation of the game{% endblock %}
+{% block meta_url %}{{ url_for('history', _external=True) }}{% endblock meta_url %}">
 {% block title %}History{% endblock %}
 {% block header %}History{% endblock %}
 {%- block content %}

@@ -1,4 +1,7 @@
 {% extends "layout.html.j2" %}
+{% block meta_title %}Who's Online?{% endblock meta_title %}
+{% block meta_description %}Who's Online on the MUD right now?{% endblock %}
+{% block meta_url %}{{ url_for('who', _external=True) }}{% endblock meta_url %}">
 {% block title %}Who's Online?{% endblock %}
 {% block header %}Who's Online?{% endblock %}
 {%- block content %}
@@ -58,9 +61,5 @@
                     </h3>
                     <br>
     {%- endif %}
-                <p>
-                    <a href="{{ url_for('portal') }}">
-                        <img src="{{ url_for('static', filename='back.gif') }}" alt="Back to Player Portal">
-                    </a>
-                </p>
+{% include('back.html.j2') %}
 {%- endblock %}

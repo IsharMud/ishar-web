@@ -33,24 +33,24 @@
     {{ player_title }}
 {%- endmacro -%}
 {%- macro display_timestamp(unix_timestamp) -%}
-    {%- if now | int > unix_timestamp | int %}
-        {%- set seconds_timestamp = now | int - unix_timestamp | int %}
-    {%- elif now | int < unix_timestamp | int %}
-        {%- set seconds_timestamp = unix_timestamp | int - now | int %}
-        in
-    {%- else %}
-        now
+    {%- if now | int > unix_timestamp | int -%}
+        {%- set seconds_timestamp = now | int - unix_timestamp | int -%}
+    {%- elif now | int < unix_timestamp | int -%}
+        {%- set seconds_timestamp = unix_timestamp | int - now | int -%}
+    {%- else -%}
+        now 
     {%- endif -%}
-    {%- set delta = seconds_timestamp | seconds2delta %}
+    {%- set delta = seconds_timestamp | seconds2delta -%}
+    {%- if now | int < unix_timestamp | int %}in {% endif -%}
     {{ display_delta(delta) }}
-    {%- if now | int > unix_timestamp | int %} ago{%- endif %}
+    {%- if now | int > unix_timestamp | int %} ago{%- endif -%}
 {%- endmacro -%}
 {%- macro display_delta(delta) -%}
     {%- if delta.days > 0 -%}
         {%- if delta.days > 30 -%}
-            {%- set months = delta.days / 30 %}
+            {%- set months = delta.days / 30 -%}
             {%- if months > 12 -%}
-                {%- set years = months / 12 %}
+                {%- set years = months / 12 -%}
                 {%- if years > 10 -%}
                     {%- set decades = years / 10 -%}
                     {%- set rounded_decades = decades | round | int -%}
@@ -65,7 +65,7 @@
             {%- endif -%}
         {%- else -%}
             {{ delta.days }} day{% if delta.days != 1 %}s{% endif %}
-        {%- endif %}
+        {%- endif -%}
     {%- else -%}
         {%- set minutes = delta.seconds / 60 -%}
         {%- if minutes >= 60 -%}
@@ -73,7 +73,7 @@
             {%- set rounded_hours = hours | round | int -%}
             {{ rounded_hours }} hour{% if rounded_hours != 1 %}s{% endif %}
         {%- else -%}
-            {%- set rounded_minutes = minutes | round | int %}
+            {%- set rounded_minutes = minutes | round | int -%}
             {{ rounded_minutes }} minute{% if rounded_minutes != 1 %}s{% endif %}
         {%- endif -%}
     {%- endif -%}
@@ -89,11 +89,11 @@
         <meta name="viewport" content="width=device-width, initial-scale=0.8">
         <meta property="og:type" content="website">
         <meta property="og:site_name" content="Ishar MUD">
-        <meta property="og:title" content="Ishar MUD">
-        <meta property="og:description" content="Ishar MUD: a free online text-adventure RPG">
-        <meta property="og:url" content="{{ url_for('welcome', _external=True) }}">
-        <meta property="og:image" content="{{ url_for('static', filename='ishar.png', _external=True) }}">
-        <title>{% block title %}{% endblock %} - Ishar MUD: a free online text-adventure RPG</title>
+        <meta property="og:title" content="{% block meta_title %}Welcome{% endblock meta_title %} - Ishar MUD">
+        <meta property="og:description" content="Ishar MUD: {% block meta_description %}a free online text-adventure RPG{% endblock %}">
+        <meta property="og:url" content="{% block meta_url %}{{ url_for('welcome', _external=True) }}{% endblock meta_url %}">
+        <meta property="og:image" content="{% block meta_image %}{{ url_for('static', filename='ishar.png', _external=True) }}{% endblock meta_image %}">
+        <title>{% block title %}Welcome{% endblock %} - Ishar MUD</title>
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
         <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
     {%- endblock %}
@@ -176,8 +176,7 @@
                     Season {{ season.season_id }}
                 </strong>
                 <br>
-                ends {{ display_timestamp(season.expiration_date) }},
-                on {{ season_end.strftime('%A, %B %d, %Y') }}
+                ends {{ display_timestamp(season.expiration_date) }}, on {{ season_end.strftime('%A, %B %d, %Y') }}
             </span>
         {%- endif %}
     {%- endblock %}
