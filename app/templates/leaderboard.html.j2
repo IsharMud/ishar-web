@@ -25,6 +25,10 @@
     {%- endif %}
     {%- if leaders is defined and leaders is iterable and leaders|length > 1 %}
                 <table id="leader">
+        {%- for leader in leaders %}
+            {%- set leader_title = player_title(leader) %}
+            {%- set leader_type = player_type(leader) %}
+            {%- if loop.index == 1 or loop.index % 10 == 0 %}
                     <tr>
                         <th>
                             #
@@ -54,9 +58,7 @@
                             Type
                         </th>
                     </tr>
-        {%- for leader in leaders %}
-        {%- set leader_title = player_title(leader) %}
-        {%- set leader_type = player_type(leader) %}
+            {%- endif %}
                     <tr>
                         <td id="{{ loop.index }}">
                             <a href="#{{ loop.index }}">{{ loop.index }}</a>
