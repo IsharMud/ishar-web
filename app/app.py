@@ -113,7 +113,7 @@ def login():
             return redirect(url_for('portal'))
 
     # Show the log in form
-    return render_template('login.html.j2', login_form=login_form)
+    return render_template('login.html.j2', login_form=login_form), 401
 
 
 # Allow logged in users to change their passwords
