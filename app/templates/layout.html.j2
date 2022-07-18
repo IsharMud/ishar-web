@@ -114,7 +114,6 @@
                 <h1>
                     {% block header %}{% endblock %}
                 </h1>
-                <hr>
                 {%- with messages = get_flashed_messages(with_categories=True) %}
                 {%- if messages %}
                 <ul id="flashes">
@@ -124,7 +123,6 @@
                     </li>
                 {%- endfor %}
                 </ul>
-                <hr>
                 {%- endif %}
                 {%- endwith %}
                 <br>

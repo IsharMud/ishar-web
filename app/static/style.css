@@ -1,11 +1,16 @@
+@font-face {
+    font-family:        'Andale Mono';
+    src:                url('/static/Andale_Mono.woff');
+}
+
 body {
     background-color:   #000;
     color:              #fff;
-    font-family:        Courier, monospace;
+    font-family:        'Andale Mono', 'Courier New', monospace;
 }
 
-a, .connect {
-    color:  #fa7;
+a, .connect, #created strong, #essence strong, #season strong, h1, h2, h3, th {
+    color:              #fa7;
 }
 
 a {
@@ -13,32 +18,28 @@ a {
 }
 
 a:hover, a:active {
+    font-weight:        bold;
     text-decoration:    underline;
 }
 
 a[target="_blank"]::after {
-    content:    url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAQElEQVR42qXKwQkAIAxDUUdxtO6/RBQkQZvSi8I/pL4BoGw/XPkh4XigPmsUgh0626AjRsgxHTkUThsG2T/sIlzdTsp52kSS1wAAAABJRU5ErkJggg==);
-    filter:     brightness(0) invert(1);
-    margin:     0 3px 0 5px;
+    content:            url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAQElEQVR42qXKwQkAIAxDUUdxtO6/RBQkQZvSi8I/pL4BoGw/XPkh4XigPmsUgh0626AjRsgxHTkUThsG2T/sIlzdTsp52kSS1wAAAABJRU5ErkJggg==);
+    filter:             brightness(0) invert(1);
+    margin:             0 3px 0 5px;
 }
 
 #buy-coffee::after {
-    content:    none;
-    filter:     none;
-    margin:     normal;
-}
-
-h1, h2, h3, th {
-    color:              #fa7;
+    content:            none;
+    filter:             none;
+    margin:             normal;
 }
 
 hr {
-    border-color:   #fa7;
+    border-color:       #fa7;
 }
 
 tr:nth-child(2n) {
     background-color:   #444;
-//    color:              #000;
 }
 
 input[type="reset"], input[type="submit"], #login-form {
@@ -48,102 +49,86 @@ input[type="reset"], input[type="submit"], #login-form {
 }
 
 .login-email label::after, .login-password label::after, .change-password label::after, .new-account label::after {
-    content:        "\a";
-    white-space:    pre;
-}
-
-#change-password-form {
+    content:            "\a";
+    white-space:        pre;
 }
 
 .login-remember {
-    font-size:  0.85em;
-#    text-align: center;
+    font-size:          0.85em;
 }
 
 #new-account-link, .bottom-portal-link {
-    font-size:  0.9em;
-    display:    table;
-#    margin:     0 auto;
-    margin-top: 1.5em;
+    font-size:          0.9em;
+    display:            table;
+    margin-top:         1.5em;
 }
 
-#players {
-    border: 1px solid #fa7;
-}
-
-#area-name, #area-details, {
-}
-
-.support {
-#    text-align: center;
+th, td {
+    padding:            0.5em;
 }
 
 .news-created {
-    float:      right;
-    font-style: italic;
-    font-style: italic;
+    float:              right;
+    font-style:         italic;
 }
 
 .god-player, .forger-player, .eternal-player, .artisan-player, .immortal-player, .consort-player {
-    color:  #00b7eb;
+    color:              #00b7eb;
 }
 
 .non-classic {
-    text-align: center;
+    text-align:         center;
 }
 
 .god-player::after {
-    content:    ' 😇';
+    content:            ' 😇';
 }
 
 .forger-player::after, .eternal-player::after, .artisan-player::after, .immortal-player::after, .consort-player::after {
-    content:    ' 👼';
+    content:            ' 👼';
 }
 
 .dead-player, .survival-player {
-    color:   #fa8072;
+    color:              #fa8072;
 }
 
 .dead-player::after {
-    content:    ' ☠️';
-}
-
-img {
-    border: none;
+    content:            ' ☠️';
 }
 
 #logo {
-    margin:     auto;
-    text-align: center;
+    margin:             auto;
+    text-align:         center;
 }
 
 #logo img {
-    width:  90%;
+    width:              90vw;
+    border:             1px solid #fa7;
 }
 
 #flashes {
-    font-weight:    bold;
+    font-weight:        bold;
 }
 
 .flash-error {
-    color:  #fa8072;
+    color:              #fa8072;
 }
 
 .flash-success {
-    color:  #4CBB17;
+    color:              #4cbb17;
 }
 
 .field-errors {
-    color:          #fa8072;
-    font-weight:    bold;
-    list-style:     none;
+    color:              #fa8072;
+    font-weight:        bold;
+    list-style:         none;
 }
 
 #content {
-    margin:         auto;
-    overflow:       auto;
-    padding:        1em;
-    width:          90%;
+    margin:             auto;
+    overflow:           auto;
+    padding:            1em;
+    width:              90vw;
 }
 
 input, textarea {
@@ -153,102 +138,80 @@ input, textarea {
 }
 
 textarea {
-    height:     10em;
-    width:      60vw;
+    height:             10em;
+    width:              60vw;
 }
 
 #footer {
-    border-color:       #484a47;
-    border-style:       solid;
-    border-width:       0.25em;
-//    background-color:   #484a47;
+    border:             1px solid #fa7;
     margin:             auto;
     overflow:           auto;
     padding:            0.5em;
     text-align:         center;
-    width:              90%;
+    width:              90vw;
 }
 
 #essence, #created {
-    text-align: left;
-    float:      left;
-    padding:    1em;
+    text-align:         left;
+    float:              left;
+    padding:            1em;
 }
 
 #season {
-    text-align: right;
-    float:      right;
-    padding:    0.5em;
-}
-
-#created strong, #essence strong, #season strong {
-    color: #fa7;
+    text-align:         right;
+    float:              right;
+    padding:            0.5em;
 }
 
 #quote {
-    font-style: italic;
-    margin:     1.25em;
-    text-align: left;
+    font-style:         italic;
+    margin:             1.25em;
+    text-align:         left;
 }
 
 #attribution {
-    font-style:     normal;
-    font-weight:    bold;
-    padding-left:   5%;
-    text-align:     left;
+    font-style:         normal;
+    font-weight:        bold;
+    padding-left:       5vw;
+    text-align:         left;
 }
 
 .under {
-//    background-color:   #484a47;
-    border-color:       #484a47;
-    border-style:       solid;
-    border-width:       0.25em;
+    border:             1px solid #fa7;
     overflow:           auto;
     padding:            1em;
 }
 
 #navigation {
-    float:      right;
-    margin:     0px 0px 1em 1em;
-    padding:    0px;
+    float:              right;
+    margin:             0px 0px 1em 1em;
+    padding:            0px;
 }
 
 #navigation ol, #navigation li {
-    list-style: none;
-    margin:     0px;
-    padding:    0px;
+    list-style:         none;
+    margin:             0px;
+    padding:            0px;
 }
 
 #navigation a {
-//    background-color:   #313632;
-//    border-color:       #000;
-//    border-style:       solid;
-//    border-width:       0.1em;
-//    border:             #686a65 1px solid;
     display:            block;
-    font-size:          1.25em;
-    margin:             2px 0px 0px 0px;
-    padding:            0.25em 0.5em;
+    padding:            0.5em 0.5em;
 }
 
 .faq-answers, .faq-nested, .mud-clients {
-    list-style: none;
+    list-style:         none;
 }
 
 #leaderboard-choices ul li {
-    display:    inline;
-    padding:    1em;
-}
-
-#leader th {
-    background-color:   #000;
-    color:              #fff;
+    display:            inline;
+    padding:            1em;
 }
 
 .challenge-completed {
     text-decoration:            line-through;
     text-decoration-color:      #fa7;
-    text-decoration-thickness:  0.18em;
+    text-decoration-thickness:  0.17em;
 }
 
 #go-back button {
