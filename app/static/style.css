@@ -13,13 +13,10 @@ a, .connect, #created strong, #essence strong, #season strong, h1, h2, h3, th {
     color:              #fa7;
 }
 
-a {
-    text-decoration:    none;
-}
-
 a:hover, a:active {
     font-weight:        bold;
-    text-decoration:    underline;
+    background-color:   #fa7;
+    color: #000;
 }
 
 a[target="_blank"]::after {
@@ -197,6 +194,12 @@ textarea {
 #navigation a {
     display:            block;
     padding:            0.5em 0.5em;
+}
+
+#navigation a:hover,  #navigation a:active {
+    background-color:   #fa7;
+    color:              #000;
+    text-decoration:    none;
 }
 
 .faq-answers, .faq-nested, .mud-clients {
