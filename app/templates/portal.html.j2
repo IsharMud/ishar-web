@@ -88,7 +88,7 @@
                             </span>
                         </td>
             {%- endif %}
-                        <td{% if player_type != 'Classic' %} colspan="2"{% endif %}>
+                        <td{% if player_type != 'Classic' %} colspan="2" class="non-classic"{% endif %}>
                             <span title="Type: {{ player_type }}" class="{{ player_css }}">
                                 {{ player_type }}
                             </span>
@@ -103,21 +103,13 @@
                 </h3>
     {%- endif %}
                 <p class="bottom-portal-link">
-                    <a title="Challenges" href="{{ url_for('challenges') }}">
-                        Challenges
-                    </a>
+                    <a title="Challenges" href="{{ url_for('challenges') }}">Challenges</a>
                     |
-                    <a title="Change Password" href="{{ url_for('change_password') }}">
-                        Change Password
-                    </a>
+                    <a title="Change Password" href="{{ url_for('change_password') }}">Change Password</a>
                     |
-                    <a title="Leader Board" href="{{ url_for('leaderboard') }}">
-                        Leader Board
-                    </a>
+                    <a title="Leader Board" href="{{ url_for('leaderboard') }}">Leader Board</a>
                     |
-                    <a title="Log Out" href="{{ url_for('logout') }}">
-                        Log Out
-                    </a>
+                    <a title="Log Out" href="{{ url_for('logout') }}">Log Out</a>
                 </p>
     {%- if is_admin is defined and is_admin == True %}
                 <p class="bottom-portal-link">

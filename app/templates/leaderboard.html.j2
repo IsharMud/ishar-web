@@ -86,7 +86,7 @@
                             {{ leader.deaths }}
                         </td>
                         {%- endif %}
-                        <td{% if leader_type == 'Survival' %} colspan="2"{% endif %}>
+                        <td{% if player_type != 'Classic' %} colspan="2" class="non-classic"{% endif %}>
                             <span title="Type: {{ leader_type }}" class="{{ player_css(leader) }}">
                                 {{ leader_type }}
                             </span>
