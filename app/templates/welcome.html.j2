@@ -15,12 +15,11 @@
                     Play the game for free by connecting via any <a href="{{ url_for('mud_clients') }}">MUD client</a>
                     to <code class="connect">isharmud.com</code> on port <code class="connect">23</code> or <code class="connect">9999</code>.
                 </p>
-                {%- if news is defined and news is iterable and news | length > 0 %}
-                <hr id="news-top">
+    {%- if news is defined and news is iterable and news | length > 0 %}
                 <h2>
                     Latest Update{%- if news|length != 1 %}s{%- endif %}
                 </h2>
-                {%- for news_post in news %}
+        {%- for news_post in news %}
                 <h3 class="news-subject">
                     {{ news_post.subject | safe }}
                 </h3>
@@ -35,9 +34,9 @@
                     {{ news_post.account.account_name | safe | title }}
                 </span>
                 <br>
-                {%- if not loop.last %}
-                <hr class="news-split">
-                {%- endif %}
-                {%- endfor %}
-                {%- endif %}
+            {%- if not loop.last %}
+                <hr>
+            {%- endif %}
+        {%- endfor %}
+    {%- endif %}
 {%- endblock %}
