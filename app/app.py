@@ -359,6 +359,15 @@ def discord():
     return redirect(discord_invite_link)
 
 
+@app.route('/latest_patch', methods=['GET'])
+def latest_patch(patch_directory='static/patches/'):
+    import glob
+    import os
+    pdfs    = glob.glob(patch_directory + '*.pdf')
+    latest  = max(pdfs, key=os.path.getctime)
+    return redirect(latest)
+
+
 # /faq (or /faqs or /questions)
 @app.route('/questions')
 @app.route('/faqs')
