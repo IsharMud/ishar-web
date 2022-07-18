@@ -1,15 +1,19 @@
 body {
     background-color:   #000;
     color:              #fff;
-    font-family:        Arial, sans-serif;
+    font-family:        Courier, monospace;
 }
 
 a, .connect {
     color:  #fa7;
 }
 
-a:hover {
-    color:  #fdb;
+a {
+    text-decoration:    none;
+}
+
+a:hover, a:active {
+    text-decoration:    underline;
 }
 
 a[target="_blank"]::after {
@@ -25,28 +29,22 @@ a[target="_blank"]::after {
 }
 
 h1, h2, h3, th {
-    color:  #fa7;
+    color:              #fa7;
 }
 
 hr {
     border-color:   #fa7;
 }
 
-#news-top {
-    width:  75%;
-}
-
-.news-split {
-    width:  50%;
-}
-
 tr:nth-child(2n) {
-    background-color:   #888;
+    background-color:   #444;
+//    color:              #000;
 }
 
 input[type="reset"], input[type="submit"], #login-form {
-    font-size:  1.25em;
-#    text-align: center;
+    background-color:   #000;
+    color:              #fa7;
+    font-size:          1.25em;
 }
 
 .login-email label::after, .login-password label::after, .change-password label::after, .new-account label::after {
@@ -88,6 +86,10 @@ input[type="reset"], input[type="submit"], #login-form {
 
 .god-player, .forger-player, .eternal-player, .artisan-player, .immortal-player, .consort-player {
     color:  #00b7eb;
+}
+
+.non-classic {
+    text-align: center;
 }
 
 .god-player::after {
@@ -138,20 +140,28 @@ img {
 }
 
 #content {
-    margin:     auto;
-    overflow:   auto;
-    padding:    1em;
-    width:      90%;
+    margin:         auto;
+    overflow:       auto;
+    padding:        1em;
+    width:          90%;
 }
 
-input {
-    background-color:   #313632;
+input, textarea {
+    background-color:   #000;
     border-color:       #fa7;
     color:              #fa7;
 }
 
+textarea {
+    height:     10em;
+    width:      60vw;
+}
+
 #footer {
-    background-color:   #484a47;
+    border-color:       #484a47;
+    border-style:       solid;
+    border-width:       0.25em;
+//    background-color:   #484a47;
     margin:             auto;
     overflow:           auto;
     padding:            0.5em;
@@ -189,7 +199,10 @@ input {
 }
 
 .under {
-    background-color:   #484a47;
+//    background-color:   #484a47;
+    border-color:       #484a47;
+    border-style:       solid;
+    border-width:       0.25em;
     overflow:           auto;
     padding:            1em;
 }
@@ -207,17 +220,15 @@ input {
 }
 
 #navigation a {
-    background-color:   #313632;
-    border:             #686a65 1px solid;
+//    background-color:   #313632;
+//    border-color:       #000;
+//    border-style:       solid;
+//    border-width:       0.1em;
+//    border:             #686a65 1px solid;
     display:            block;
     font-size:          1.25em;
     margin:             2px 0px 0px 0px;
     padding:            0.25em 0.5em;
-    text-decoration:    none;
-}
-
-#navigation a:hover {
-    background-color:   #686a65;
 }
 
 .faq-answers, .faq-nested, .mud-clients {
