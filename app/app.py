@@ -364,7 +364,7 @@ def latest_patch(patch_directory='static/patches/'):
     import glob
     import os
     pdfs    = glob.glob(patch_directory + '*.pdf')
-    latest  = max(pdfs, key=os.path.getctime)
+    latest  = max(pdfs, key=os.path.getmtime)
     return redirect(latest)
 
 
