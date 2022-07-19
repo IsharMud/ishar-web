@@ -180,7 +180,6 @@ def show_player(player_name=None):
 @app.route('/portal', methods=['GET'])
 @login_required
 def portal():
-    # Show the portal
     return render_template('portal.html.j2',
                                 is_admin    = current_user.is_admin(secrets.admin_level)
                             )
@@ -189,7 +188,6 @@ def portal():
 # Challenges page for logged in users
 @app.route('/challenges', methods=['GET'])
 def challenges():
-    # Show the current challenges
     return render_template('challenges.html.j2',
                                 challenges  = models.Challenge.query.filter_by(is_active = 1).order_by(
                                                     models.Challenge.winner_desc,
@@ -284,7 +282,7 @@ def admin_portal():
 def logout():
     logout_user()
     flash('You have logged out!', 'success')
-    return welcome()
+    return redirect(url_for('welcome'))
 
 
 # Allow anonymous users to create a new account
@@ -359,13 +357,12 @@ def discord():
     return redirect(discord_invite_link)
 
 
+# /latest_patch - redirect to latest static patch .pdf
 @app.route('/latest_patch', methods=['GET'])
 def latest_patch(patch_directory='static/patches/'):
     import glob
     import os
-    pdfs    = glob.glob(patch_directory + '*.pdf')
-    latest  = max(pdfs, key=os.path.getmtime)
-    return redirect(latest)
+    return redirect(max(glob.glob(patch_directory + '*.pdf'), key=os.path.getmtime))
 
 
 # /faq (or /faqs or /questions)
