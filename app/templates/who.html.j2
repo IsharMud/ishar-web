@@ -2,10 +2,15 @@
 {% block meta_title %}Who's Online?{% endblock meta_title %}
 {% block meta_description %}Who's Online on the MUD right now?{% endblock %}
 {% block meta_url %}{{ url_for('who', _external=True) }}{% endblock meta_url %}">
-{% block title %}Who's Online?{% endblock %}
+{%- block title -%}
+Who's Online?
+{%- if who is defined and who is iterable and who | length > 0 %}
+ / {{ who | length }} player{%- if who | length != 1%}s{%- endif -%}
+{%- endif -%}
+{%- endblock title -%}
 {% block header %}Who's Online?{% endblock %}
 {%- block content %}
-    {%- if who is defined and who is iterable and who | length > 1 %}
+    {%- if who is defined and who is iterable and who | length > 0 %}
                 <h3>
                     {{ who | length }} player{% if who | length != 1%}s{% endif %} online
                 </h3>
@@ -30,7 +35,7 @@
                         <td>
                             {{ player_title }}
                         </td>
-                        <td>
+                        <td class="who-right">
                             <span title="Level: {{ player.level }}">
                                 {{ player.level }}
                             </span>

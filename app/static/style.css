@@ -87,6 +87,10 @@ th, td {
     text-align:         center;
 }
 
+.who-right {
+    text-align:         right;
+}
+
 .god-player::after {
     content:            ' 😇';
 }

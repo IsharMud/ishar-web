@@ -224,17 +224,16 @@ def leaderboard(limit=10):
 
 # Show online users (who)
 @app.route('/who', methods=['GET'])
-@login_required
 def who():
-    return render_template('who.html.j2',
-                                who =   models.Player.query.filter(
-                                            models.Player.logon == models.Player.logout
-                                        ).order_by(
-                                            -models.Player.level,
-                                            -models.Player.remorts,
-                                            -models.Player.name,
-                                        ).all()
-                            )
+    who =   models.Player.query.filter(
+                models.Player.logon >= models.Player.logout
+            ).order_by(
+                -models.Player.level,
+                -models.Player.remorts,
+                models.Player.name,
+             ).all()
+    print(f"who:\n{who}")
+    return render_template('who.html.j2', who=who)
 
 
 # Portal for administrators
