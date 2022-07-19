@@ -10,7 +10,7 @@
                     If there is any thing that you think is missing, please feel free to reach out
                     by e-mailing <a href="mailto:admin@isharmud.com" target="_blank">admin@isharmud.com</a>.
                 </p>
-                {%- if faqs is defined and faqs is iterable and faqs|length > 0 %}
+                {%- if faqs is defined and faqs is iterable and faqs | length > 0 %}
                 <ul>
                 {%- for question, answers in faqs.items() %}
                     {%- if question is defined %}
@@ -23,7 +23,7 @@
                         <ul>
                         {%- for answer in answers %}
                         {%- if answer is defined %}
-                            {%- if answer is not string and answer is iterable and answer|length > 1 %}
+                            {%- if answer is not string and answer is iterable and answer | length > 0 %}
                             <li class="faq-nested">
                                 <ol>
                                 {%- for answer_item in answer %}

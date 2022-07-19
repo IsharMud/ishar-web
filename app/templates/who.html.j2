@@ -26,11 +26,19 @@ Who's Online?
                             Level (Remorts)
                         </th>
                         <th>
+                            Race
+                        </th>
+                        <th>
+                            Class
+                        </th>
+                        <th>
                             Player
                         </th>
                     </tr>
         {%- for player in who %}
             {%- set player_title = player_title(player) %}
+            {%- set player_type = player_type(player) %}
+            {%- set player_css = player_css(player) %}
                     <tr>
                         <td id="{{ loop.index }}" title="{{ loop.index }}">
                             {{ loop.index }}
@@ -38,7 +46,8 @@ Who's Online?
                         <td title="{{ player_title | striptags }}">
                             {{ player_title }}
                         </td>
-                        <td class="who-right">
+            {%- if player.true_level < immortal_level %}
+                        <td>
                             <span title="Level: {{ player.level }}">
                                 {{ player.level }}
                             </span>
@@ -46,6 +55,22 @@ Who's Online?
                                 ({{ player.remorts }})
                             </span>
                         </td>
+                        <td>
+                            <span title="Race: {{ player.race.race_name | replace('_', '-') | title | safe }}">
+                                {{ player.race.race_name | replace('_', '-') | title | safe }}
+                            </span>
+                        </td>
+                        <td>
+                            <span title="Class: {{ player.class.class_name | title | safe }}">
+                                {{ player.class.class_name | title | safe }}
+                        </td>
+            {%- else %}
+                        <td class="non-classic" colspan="3">
+                            <span title="Type: {{ player_type }}" class="{{ player_css }}">
+                                {{ player_type }}
+                            </span>
+                        </td>
+            {%- endif %}
                         <td class="who-right">
                             <span title="Player: {{ player.account.account_name | title | safe }}">
                                 {{ player.account.account_name | title | safe }}

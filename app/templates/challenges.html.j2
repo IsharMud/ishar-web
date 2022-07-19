@@ -22,7 +22,7 @@
 {%- endif -%}
 {%- endmacro -%}
 {%- block content %}
-                {%- if challenges is defined and challenges is iterable and challenges|length > 1 %}
+                {%- if challenges is defined and challenges is iterable and challenges | length > 0 %}
                 <table id="challenges">
                     <tr>
                         <th>

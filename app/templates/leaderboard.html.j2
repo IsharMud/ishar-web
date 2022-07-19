@@ -5,7 +5,7 @@
 {% block title %}Leader Board{% endblock %}
 {% block header %}Leader Board{% endblock %}
 {%- block content %}
-    {%- if leaders is defined and leaders is iterable and leaders|length > 1 %}
+    {%- if leaders is defined and leaders is iterable and leaders | length > 0 %}
                 <table id="leaders">
         {%- for leader in leaders %}
             {%- set leader_title = player_title(leader) %}
