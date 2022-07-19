@@ -137,7 +137,7 @@
             {%- endif %}
                 </p>
         {%- endif %}
-        {%- if player.quests | selectattr('value', 'equalto', 1) | list | length > 0 %}
+        {%- if player.is_deleted != 1 and player.quests | selectattr('value', 'equalto', 1) | list | length > 0 %}
                 <h3>
                     Quests
                 </h3>
