@@ -398,18 +398,19 @@ def support():
 @app.route('/areas', methods=['GET'])
 @app.route('/world/<string:area>', methods=['GET'])
 @app.route('/world', methods=['GET'])
-def world(area=None):
+def world(helptab_file=secrets.helptab_file, area=None):
+    import helptab
 
     # Try to find an area based on user input
     try:
-        areas   = helptab._get_help_area(helptab_file=secrets.helptab_file, area=area)
+        areas   = helptab._get_help_area(helptab_file=helptab_file, area=area)
         code    = 200
 
     # Otherwise, list all areas found in the game "helptab" file
     except Exception as e:
         print(e)
         flash('Sorry, but please choose a valid area!', 'error')
-        areas   = helptab._get_help_area(None)
+        areas   = helptab._get_help_area(helptab_file=helptab_file, area=None)
         area    = None
         code    = 404
 
@@ -426,6 +427,3 @@ def unix2datetime(unix_time):
 @app.template_filter('seconds2delta')
 def seconds2delta(seconds):
     return datetime.timedelta(seconds=seconds)
-
-
-import helptab
