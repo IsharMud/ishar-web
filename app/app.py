@@ -357,12 +357,14 @@ def discord():
     return redirect(discord_invite_link)
 
 
-# /latest_patch - redirect to latest static patch .pdf
+# Redirect /latest_patch (or /patch) to the latest static patch .pdf
+@app.route('/patch', methods=['GET'])
 @app.route('/latest_patch', methods=['GET'])
-def latest_patch(patch_directory='static/patches/'):
+def latest_patch(patch_dir='patches'):
     import glob
     import os
-    return redirect(max(glob.glob(patch_directory + '*.pdf'), key=os.path.getmtime))
+    pdfs = glob.glob('static/' + patch_dir + '/*.pdf')
+    return redirect('/' + max(pdfs, key=os.path.getmtime))
 
 
 # /faq (or /faqs or /questions)
