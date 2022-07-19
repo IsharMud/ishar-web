@@ -14,9 +14,9 @@ a, .connect, #created strong, #essence strong, #season strong, h1, h2, h3, th {
 }
 
 a:hover, a:active {
-    font-weight:        bold;
     background-color:   #fa7;
-    color: #000;
+    color:              #000;
+    text-decoration:    none;
 }
 
 a[target="_blank"]::after {
@@ -60,6 +60,16 @@ input[type="reset"], input[type="submit"], #login-form {
     margin-top:         1.5em;
 }
 
+table {
+    border:             1px solid #fa7;
+}
+
+pre {
+    border:             1px solid #fa7;
+    width:              60vw;
+    white-space:        pre-wrap;
+}
+
 th, td {
     padding:            0.5em;
 }
@@ -99,8 +109,12 @@ th, td {
 }
 
 #logo img {
-    width:              90vw;
     border:             1px solid #fa7;
+    width:              90vw;
+}
+
+#logo a {
+    background-color:   #000;
 }
 
 #flashes {
@@ -181,25 +195,28 @@ textarea {
 
 #navigation {
     float:              right;
-    margin:             0px 0px 1em 1em;
-    padding:            0px;
 }
 
 #navigation ol, #navigation li {
+    border:             1px solid #fa7;
     list-style:         none;
-    margin:             0px;
-    padding:            0px;
 }
+
+
 
 #navigation a {
     display:            block;
-    padding:            0.5em 0.5em;
+    padding:            0.25em;
+    text-decoration:    none;
+}
+
+li {
+    padding:            0.25em;
 }
 
 #navigation a:hover,  #navigation a:active {
     background-color:   #fa7;
     color:              #000;
-    text-decoration:    none;
 }
 
 .faq-answers, .faq-nested, .mud-clients {
