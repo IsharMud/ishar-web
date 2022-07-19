@@ -222,7 +222,9 @@ def leaderboard(limit=10):
                           )
 
 
-# Show online users (who)
+# Show online users (/who, or /online, or /users)
+@app.route('/online', methods=['GET'])
+@app.route('/users', methods=['GET'])
 @app.route('/who', methods=['GET'])
 def who():
     who =   models.Player.query.filter(

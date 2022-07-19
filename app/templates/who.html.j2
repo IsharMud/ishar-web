@@ -1,11 +1,14 @@
 {% extends "layout.html.j2" %}
-{% block meta_title %}Who's Online?{% endblock meta_title %}
+{%- block meta_title -%}
+Who's Online?
+{%- if who is defined and who is iterable and who | length > 0 %} / {{ who | length }} player{%- if who | length != 1%}s{%- endif -%}
+{%- endif -%}
+{%- endblock meta_title -%}
 {% block meta_description %}Who's Online on the MUD right now?{% endblock %}
 {% block meta_url %}{{ url_for('who', _external=True) }}{% endblock meta_url %}">
 {%- block title -%}
 Who's Online?
-{%- if who is defined and who is iterable and who | length > 0 %}
- / {{ who | length }} player{%- if who | length != 1%}s{%- endif -%}
+{%- if who is defined and who is iterable and who | length > 0 %} / {{ who | length }} player{%- if who | length != 1%}s{%- endif -%}
 {%- endif -%}
 {%- endblock title -%}
 {% block header %}Who's Online?{% endblock %}
