@@ -5,9 +5,9 @@
 {% block title %}Who's Online?{% endblock %}
 {% block header %}Who's Online?{% endblock %}
 {%- block content %}
-    {%- if players is defined and players is iterable and players|length > 1 %}
+    {%- if who is defined and who is iterable and who | length > 1 %}
                 <h3>
-                    {{ players | length }} player{% if players != 1%}s{% endif %} online
+                    {{ who | length }} player{% if who | length != 1%}s{% endif %} online
                 </h3>
                 <table id="online">
                     <tr>
@@ -18,18 +18,11 @@
                             Name
                         </th>
                         <th>
-                            Level
-                        </th>
-                        <th>
-                            Remorts
-                        </th>
-                        <th>
-                            Type
+                            Level (Remorts)
                         </th>
                     </tr>
-        {%- for player in players %}
+        {%- for player in who %}
             {%- set player_title = player_title(player) %}
-            {%- set player_type = player_type(player) %}
                     <tr>
                         <td id="{{ loop.index }}">
                             {{ loop.index }}
@@ -41,15 +34,8 @@
                             <span title="Level: {{ player.level }}">
                                 {{ player.level }}
                             </span>
-                        </td>
-                        <td>
                             <span title="Remorts: {{ player.remorts }}">
-                                {{ player.remorts }}
-                            </span>
-                        </td>
-                        <td>
-                            <span title="Type: {{ player_type }}" class="{{ player_css(player) }}">
-                                {{ player_type }}
+                                ({{ player.remorts }})
                             </span>
                         </td>
                     </tr>
