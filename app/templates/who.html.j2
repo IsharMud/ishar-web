@@ -25,14 +25,17 @@ Who's Online?
                         <th>
                             Level (Remorts)
                         </th>
+                        <th>
+                            Player
+                        </th>
                     </tr>
         {%- for player in who %}
             {%- set player_title = player_title(player) %}
                     <tr>
-                        <td id="{{ loop.index }}">
+                        <td id="{{ loop.index }}" title="{{ loop.index }}">
                             {{ loop.index }}
                         </td>
-                        <td>
+                        <td title="{{ player_title | striptags }}">
                             {{ player_title }}
                         </td>
                         <td class="who-right">
@@ -41,6 +44,11 @@ Who's Online?
                             </span>
                             <span title="Remorts: {{ player.remorts }}">
                                 ({{ player.remorts }})
+                            </span>
+                        </td>
+                        <td class="who-right">
+                            <span title="Player: {{ player.account.account_name | title | safe }}">
+                                {{ player.account.account_name | title | safe }}
                             </span>
                         </td>
                     </tr>
