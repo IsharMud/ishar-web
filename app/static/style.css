@@ -1,12 +1,7 @@
-@font-face {
-    font-family:        'Andale Mono';
-    src:                url('/static/Andale_Mono.woff');
-}
-
 body {
     background-color:   #000;
     color:              #fff;
-    font-family:        'Andale Mono', 'Courier New', monospace;
+    font-family:        'Courier New', monospace;
 }
 
 a, .connect, #created strong, #essence strong, #season strong, h1, h2, h3, th {
@@ -16,6 +11,7 @@ a, .connect, #created strong, #essence strong, #season strong, h1, h2, h3, th {
 a:hover, a:active {
     background-color:   #fa7;
     color:              #000;
+    font-weight:        bold;
     text-decoration:    none;
 }
 
