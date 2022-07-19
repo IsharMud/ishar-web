@@ -228,17 +228,11 @@ def leaderboard(limit=10):
 def who():
     return render_template('who.html.j2',
                                 who =   models.Player.query.filter(
-                                            models.Player.true_level < secrets.immortal_level,
                                             models.Player.logon == models.Player.logout
                                         ).order_by(
                                             -models.Player.level,
                                             -models.Player.remorts,
-                                            -models.Player.total_renown,
-                                            -models.Player.quests_completed,
-                                            -models.Player.challenges_completed,
-                                            -models.Player.renown,
-                                            -models.Player.bankacc,
-                                            models.Player.deaths
+                                            -models.Player.name,
                                         ).all()
                             )
 
