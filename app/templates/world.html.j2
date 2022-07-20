@@ -39,13 +39,13 @@
                 </p>
         {%- if areas and areas is iterable and areas | length > 0 %}
                 <ul>
-                  {%- for area in areas %}
+            {%- for area in areas %}
                     <li>
                         <a href="{{ url_for('world', area=area) }}">
                             {{ area }}
                         </a>
                     </li>
-                  {%- endfor %}
+            {%- endfor %}
                   </ul>
         {%- endif %}
     {%- endif %}
