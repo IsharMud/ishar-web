@@ -36,9 +36,6 @@
                         <th>
                             Deaths
                         </th>
-                        <th>
-                            Type
-                        </th>
                     </tr>
             {%- endif %}
                     <tr>
@@ -63,17 +60,20 @@
                         <td>
                             {{ leader.challenges_completed }}
                         </td>
-                        {%- if leader_type == 'Classic' %}
-                        <td>
-                            {{ leader.deaths }}
-                        </td>
-                        {%- endif %}
-                        <td{% if player_type != 'Classic' %} colspan="2" class="non-classic"{% endif %}>
+            {%- if leader_type != 'Classic' %}
+                        <td class="non-classic">
                             <span title="Type: {{ leader_type }}" class="{{ player_css(leader) }}">
                                 {{ leader_type }}
                             </span>
                         </td>
+            {%- else %}
+                        <td>
+                            <span title="Deaths: {{ leader.deaths }}">
+                                {{ leader.deaths }}
+                            </span>
+                        </td>
                     </tr>
+            {%- endif %}
         {%- endfor %}
                 </table>
     {%- endif %}

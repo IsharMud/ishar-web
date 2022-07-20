@@ -36,9 +36,6 @@
                         <th>
                             Deaths
                         </th>
-                        <th>
-                            Type
-                        </th>
                     </tr>
         {%- for player in current_user.players %}
             {%- set player_title = player_title(player) -%}
@@ -81,18 +78,19 @@
                                 {{ player.challenges_completed }}
                             </span>
                         </td>
-            {%- if player_type == 'Classic' %}
+            {%- if player_type != 'Classic' %}
+                        <td class="non-classic">
+                            <span title="Type: {{ player_type }}" class="{{ player_css }}">
+                                {{ player_type }}
+                            </span>
+                        </td>
+            {%- else %}
                         <td>
                             <span title="Deaths: {{ player.deaths }}">
                                 {{ player.deaths }}
                             </span>
                         </td>
             {%- endif %}
-                        <td{% if player_type != 'Classic' %} colspan="2" class="non-classic"{% endif %}>
-                            <span title="Type: {{ player_type }}" class="{{ player_css }}">
-                                {{ player_type }}
-                            </span>
-                        </td>
                     </tr>
         {%- endfor %}
                 </table>
