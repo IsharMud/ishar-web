@@ -1,7 +1,7 @@
 body {
     background-color:   #000;
     color:              #fff;
-    font-family:        'Courier New', monospace;
+    font-family:        'Open Sans', sans-serif;
 }
 
 a, .connect, #created strong, #essence strong, #season strong, h1, h2, h3, th {
@@ -11,7 +11,6 @@ a, .connect, #created strong, #essence strong, #season strong, h1, h2, h3, th {
 a:hover, a:active {
     background-color:   #fa7;
     color:              #000;
-    font-weight:        bold;
     text-decoration:    none;
 }
 
@@ -58,6 +57,7 @@ input[type="reset"], input[type="submit"], #login-form {
 
 table {
     border:             1px solid #fa7;
+    font-family:        'Courier New', monospace;
 }
 
 pre {
@@ -195,6 +195,7 @@ textarea {
 
 #navigation {
     float:              right;
+    font-family:        'Courier New', monospace;
 }
 
 #navigation ol, #navigation li {
