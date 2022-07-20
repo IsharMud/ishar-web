@@ -61,7 +61,7 @@ table {
 }
 
 pre {
-    border:             1px solid #fa7;
+    padding-left:       5vw;
     width:              60vw;
     white-space:        pre-wrap;
 }
