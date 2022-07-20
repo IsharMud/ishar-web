@@ -396,20 +396,20 @@ def support():
 @app.route('/world/<string:area>', methods=['GET'])
 @app.route('/world', methods=['GET'])
 def world(helptab_file=secrets.helptab_file, area=None):
+
+    # Get all of the areas from the helptab file
     import helptab
+    areas   = helptab._get_help_areas(helptab_file=helptab_file)
+    code    = 200
 
-    # Try to find an area based on user input
-    try:
-        areas   = helptab._get_help_area(helptab_file=helptab_file, area=area)
-        code    = 200
-
-    # Otherwise, list all areas found in the game "helptab" file
-    except Exception as e:
-        print(e)
-        flash('Sorry, but please choose a valid area!', 'error')
-        areas   = helptab._get_help_area(helptab_file=helptab_file, area=None)
-        area    = None
-        code    = 404
+    # Try to find an area based on any user input
+    if area:
+        if area in areas.keys():
+            areas = areas[area]
+        else:
+            area = None
+            code = 404
+            flash('Sorry, but please choose a valid area!', 'error')
 
     return render_template('world.html.j2', areas=areas, area=area), code
 

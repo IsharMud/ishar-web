@@ -2,7 +2,7 @@
 #
 # The "areas" are each listed in the "helptab" file on lines starting with "32 Area " ...
 # ...followed by descriptions until the character "#" on a single line itself
-def _get_help_area(helptab_file=None, area=None):
+def _get_help_areas(helptab_file=None):
 
     # Get game "helptab" file path/name, and open it
     helptab_fh = open(helptab_file, 'r')
@@ -35,13 +35,6 @@ def _get_help_area(helptab_file=None, area=None):
             area_name = stripped.replace('32 Area ', '')
             areas[area_name] = ''
 
-    # Close the "helptab" file
+    # Close the "helptab" file and return the list of areas
     helptab_fh.close()
-
-    # Return either the single area, or a list of them
-    if area != None and areas[area]:
-        return areas[area]
-    elif areas != None and len(areas) > 0:
-        return areas
-    else:
-        return None
+    return areas

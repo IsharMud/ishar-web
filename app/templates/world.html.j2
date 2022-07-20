@@ -15,14 +15,13 @@
     {%- endif -%}
 {%- endblock title -%}
 {%- block content %}
-    {%- if area is defined and area != None and areas is defined and areas != None %}
+    {%- if area and areas %}
                 <h2 id="area-name">
                     {{ area }}
                 </h2>
                 <pre id="area-details">
                     {{ areas }}
                 </pre>
-        {%- include('back.html.j2') %}
     {%- else %}
                 <p>
                     Ishar is a cohesive world with a living history.
@@ -38,6 +37,7 @@
                     Whether treading across the barren wasteland of the Tundra or voyaging for the great Ocean, you will
                     never forget the sense of wonder and discovery to be experienced here.
                 </p>
+        {%- if areas and areas is iterable and areas | length > 0 %}
                 <ul>
                   {%- for area in areas %}
                     <li>
@@ -46,6 +46,8 @@
                         </a>
                     </li>
                   {%- endfor %}
-                </ul>
-                {%- endif %}
+                  </ul>
+        {%- endif %}
+    {%- endif %}
+    {%- include('back.html.j2') %}
 {%- endblock %}
