@@ -4,7 +4,16 @@
 {% block meta_url %}{{ url_for('leaderboard', _external=True) }}{% endblock meta_url %}">
 {% block title %}Leader Board{% endblock %}
 {% block header %}Leader Board{% endblock %}
+{%- block scripts %}
+        <script async src="{{ url_for('static', filename='leaderboard.js') }}"></script>
+{%- endblock %}
 {%- block content %}
+    <p>
+        <input type="checkbox" onchange="deadLeaders(this.checked);" id="include-dead" name="include-dead">
+        <label for="include-dead">
+            Include Dead
+        </label>
+    </p>
     {%- if leaders is defined and leaders is iterable and leaders | length > 0 %}
                 <table id="leaders">
         {%- for leader in leaders %}

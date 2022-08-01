@@ -208,20 +208,37 @@ def leaderboard(limit=10):
     if limit > max([5, 10, 25, 50, 100]):
         return redirect(url_for('leaderboard', limit=10))
 
+    if request.args.get('dead') and request.args.get('dead') == 'false':
+        leaders = models.Player.query.filter(
+                        models.Player.true_level < secrets.immortal_level,
+                        models.Player.is_deleted != 1
+                    ).order_by(
+                        -models.Player.remorts,
+                        -models.Player.total_renown,
+                        -models.Player.quests_completed,
+                        -models.Player.challenges_completed,
+                        -models.Player.renown,
+                        -models.Player.level,
+                        -models.Player.bankacc,
+                        models.Player.deaths
+                    ).limit(limit).all()
+    else:
+        leaders = models.Player.query.filter(
+                        models.Player.true_level < secrets.immortal_level
+                    ).order_by(
+                        -models.Player.remorts,
+                        -models.Player.total_renown,
+                        -models.Player.quests_completed,
+                        -models.Player.challenges_completed,
+                        -models.Player.renown,
+                        -models.Player.level,
+                        -models.Player.bankacc,
+                        models.Player.deaths
+                    ).limit(limit).all()
+
     return render_template('leaderboard.html.j2',
-                                leaders         =   models.Player.query.filter(
-                                                        models.Player.true_level < secrets.immortal_level
-                                                    ).order_by(
-                                                        -models.Player.remorts,
-                                                        -models.Player.total_renown,
-                                                        -models.Player.quests_completed,
-                                                        -models.Player.challenges_completed,
-                                                        -models.Player.renown,
-                                                        -models.Player.level,
-                                                        -models.Player.bankacc,
-                                                        models.Player.deaths
-                                                    ).limit(limit).all(),
-                                limit           =   limit
+                                leaders = leaders,
+                                limit   = limit
                           )
 
 
