@@ -289,6 +289,40 @@ class Challenge(db.Model):
         return f'<Challenge> "{self.mob_name}" ("{self.challenge_id}")'
 
 
+# Players Remort Upgrades database class
+class PlayersRemortUpgrades(db.Model):
+    __tablename__   = 'player_remort_upgrades'
+    upgrade_id      = Column(
+                        ForeignKey('remort_upgrades.upgrade_id',
+                            ondelete='CASCADE',
+                            onupdate='CASCADE'
+                        ), nullable=False, index=True, primary_key=True
+                    )
+    player_id       = Column(
+                        ForeignKey('players.id',
+                            ondelete='CASCADE',
+                            onupdate='CASCADE'
+                        ), nullable=False, index=True, primary_key=True
+                    )
+    value           = Column('value', Integer, nullable=False)
+    remort_upgrade  = relationship('RemortUpgrade')
+    player          = relationship('Player', backref='remort_upgrades')
+
+    def __repr__(self):
+        return f'<PlayersRemortUpgrades> Upgrade ID "{self.upgrade_id}" @ Player "{self.player.name}" (ID: "{self.player_id}") / Value: "{self.value}"'
+
+# Remort Upgrade database class
+class RemortUpgrade(db.Model):
+    __tablename__   = 'remort_upgrades'
+    upgrade_id      = Column(Integer, primary_key=True)
+    name            = Column(String(20), nullable=False, unique=True, server_default=FetchedValue())
+    renown_cost     = Column(SmallInteger, nullable=False)
+    max_value       = Column(SmallInteger, nullable=False)
+
+    def __repr__(self):
+        return f'<RemortUpgrade> "{self.name}" (ID: "{self.upgrade_id}") / Cost: "{self.renown_cost}" /  Max Value: "{self.max_value}"'
+
+
 # Players Quests database class
 class PlayersQuests(db.Model):
     __tablename__   = 'player_quests'

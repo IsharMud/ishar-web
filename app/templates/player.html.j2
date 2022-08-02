@@ -204,6 +204,21 @@
                         </td>
                     </tr>
                 </table>
+            {%- if player.remort_upgrades %}
+                <h3>
+                    Remort Upgrades
+                </h3>
+                <ol>
+                {%- for remort_upgrade in player.remort_upgrades %}
+                    {%- if remort_upgrade.value > 0 %}
+                    <li>
+                        {{ remort_upgrade.remort_upgrade.name | replace('_', '-') | title | safe }}
+<!--                        (Cost: {{ remort_upgrade.remort_upgrade.renown_cost }} - Value: {{ remort_upgrade.value }} / Max: {{ remort_upgrade.remort_upgrade.max_value }}) -->
+                    </li>
+                    {%- endif %}
+                {%- endfor %}
+                </ol>
+            {%- endif %}
         {%- endif %}
                 <p>
         {%- set birth_date = player.birth | unix2datetime %}
