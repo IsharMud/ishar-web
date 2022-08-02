@@ -101,9 +101,9 @@
                 </h3>
     {%- endif %}
     {% if current_user.account_upgrades and current_user.account_upgrades | selectattr('amount', '>', 0) | list | length > 0 %}
-                <h3>
+                <h4>
                     Account Upgrades
-                </h3>
+                </h4>
                 <p class="account-upgrades">
                     <ol>
         {%- for account_upgrade in current_user.account_upgrades %}
