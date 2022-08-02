@@ -212,8 +212,10 @@
                 {%- for remort_upgrade in player.remort_upgrades %}
                     {%- if remort_upgrade.value > 0 %}
                     <li>
-                        {{ remort_upgrade.remort_upgrade.name | replace('_', '-') | title | safe }}
-<!--                        (Cost: {{ remort_upgrade.remort_upgrade.renown_cost }} - Value: {{ remort_upgrade.value }} / Max: {{ remort_upgrade.remort_upgrade.max_value }}) -->
+                        {{ remort_upgrade.remort_upgrade.name | replace('_', ' ') | title | safe }}
+                        {%- if remort_upgrade.value > 1 %}
+                            ({{remort_upgrade.value }}x)
+                        {%- endif %}
                     </li>
                     {%- endif %}
                 {%- endfor %}
