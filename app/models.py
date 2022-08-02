@@ -4,6 +4,7 @@ import hmac
 from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import exc, Column, DateTime, ForeignKey, Integer, MetaData, SmallInteger, String, Text
+from sqlalchemy.dialects.mysql import TINYINT
 from sqlalchemy.schema import FetchedValue
 from sqlalchemy.orm import relationship
 
@@ -73,15 +74,40 @@ class Account(db.Model, UserMixin):
         return f'<Account> "{self.account_name}" ("{self.account_id}")'
 
 
-# Player Flag database class
-class PlayerFlag(db.Model):
-    __tablename__   = 'player_flags'
-    flag_id         = Column(Integer, primary_key=True)
-    name            = Column(String(20), nullable=False, unique=True)
-    flag            = relationship('PlayersFlags', backref='flag')
+# Accounts Upgrades database class
+class AccountsUpgrades(db.Model):
+    __tablename__       = 'accounts_account_upgrades'
+    account_upgrades_id = Column(
+                            ForeignKey('account_upgrades.id',
+                                ondelete='CASCADE',
+                                onupdate='CASCADE'
+                            ), nullable=False, index=True, primary_key=True
+                        )
+    account_id          = Column(
+                            ForeignKey('accounts.account_id',
+                                ondelete='CASCADE',
+                                onupdate='CASCADE'
+                            ), nullable=False, index=True, primary_key=True
+                        )
+    amount              = Column('amount', TINYINT(4), nullable=False)
+    account_upgrade     = relationship('AccountUpgrade')
+    account             = relationship('Account', backref='account_upgrades')
 
     def __repr__(self):
-        return f'<PlayerFlag> "{self.name}" ("{self.flag_id}")'
+        return f'<AccountsUpgrades> "{self.account_upgrade.name}" (ID: "{self.account_upgrades_id}") / Account "{self.account.account_name}" ({self.account_id}) / Amount: {self.amount}'
+
+# Account Upgrade database class
+class AccountUpgrade(db.Model):
+    __tablename__   = 'account_upgrades'
+    id              = Column(TINYINT(4), primary_key=True)
+    cost            = Column(TINYINT(4), nullable=False)
+    description     = Column(String(200), nullable=False)
+    name            = Column(String(30), nullable=False, unique=True)
+    max_value       = Column(TINYINT(4), nullable=False, server_default=FetchedValue())
+
+    def __repr__(self):
+        return f'<AccountUpgrade> "{self.name}" (ID: "{self.id}") / Cost: "{self.cost}" / Max Value: "{self.max_value}"'
+
 
 # Players Flags database class
 class PlayersFlags(db.Model):
@@ -104,6 +130,17 @@ class PlayersFlags(db.Model):
     def __repr__(self):
         return f'<PlayersFlags> "{self.flag_id}" @ <Player> "{self.player_id}" : "{self.value}"'
 
+# Player Flag database class
+class PlayerFlag(db.Model):
+    __tablename__   = 'player_flags'
+    flag_id         = Column(Integer, primary_key=True)
+    name            = Column(String(20), nullable=False, unique=True)
+    flag            = relationship('PlayersFlags', backref='flag')
+
+    def __repr__(self):
+        return f'<PlayerFlag> "{self.name}" ("{self.flag_id}")'
+
+
 # Player Class database class
 class PlayerClass(db.Model):
     __tablename__   = 'classes'
@@ -114,6 +151,7 @@ class PlayerClass(db.Model):
     def __repr__(self):
         return f'<PlayerClass "{self.class_name}" @ "{self.class_id}"'
 
+
 # Player Race database class
 class PlayerRace(db.Model):
     __tablename__   = 'races'
@@ -123,6 +161,7 @@ class PlayerRace(db.Model):
 
     def __repr__(self):
         return f'<PlayerRace "{self.race_name}" @ "{self.race_id}"'
+
 
 # Player database class
 class Player(db.Model):
