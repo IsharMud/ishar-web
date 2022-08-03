@@ -56,7 +56,6 @@ input[type="reset"], input[type="submit"], #login-form {
 }
 
 table {
-    border:             1px solid #fa7;
     font-family:        'Courier New', monospace;
 }
 
@@ -109,7 +108,6 @@ th, td {
 }
 
 #logo img {
-    border:             1px solid #fa7;
     width:              90vw;
 }
 
@@ -154,7 +152,7 @@ textarea {
 }
 
 #footer {
-    border:             1px solid #fa7;
+    border-top:         1px solid #fa7;
     margin:             auto;
     overflow:           auto;
     padding:            0.5em;
@@ -188,7 +186,7 @@ textarea {
 }
 
 .under {
-    border:             1px solid #fa7;
+    border-top:         1px solid #fa7;
     overflow:           auto;
     padding:            1em;
 }
