@@ -1,0 +1,34 @@
+{% extends "layout.html.j2" %}
+{% block meta_title %}Wiz List{% endblock meta_title %}
+{% block meta_description %}A list of the current Immortals through Gods{% endblock %}
+{% block meta_url %}{{ url_for('wizlist', _external=True) }}{% endblock meta_url %}">
+{% block title %}Wiz List{% endblock %}
+{% block header %}Wiz List{% endblock %}
+{%- block content %}
+    {%- if immortals is defined and immortals is iterable and immortals | length > 0 %}
+                <table id="wizlist">
+                    <tr>
+                        <th>
+                            Name
+                        </th>
+                        <th>
+                            Type
+                        </th>
+                    </tr>
+        {%- for immortal in immortals %}
+            {%- set immortal_title = player_title(immortal) %}
+            {%- set immortal_type = player_type(immortal) %}
+                    <tr>
+                        <td>
+                            {{ immortal_title }}
+                        </td>
+                        <td class="non-classic">
+                            <span title="Type: {{ immortal_type }}" class="{{ player_css(immortal) }}">
+                                {{ immortal_type }}
+                            </span>
+                        </td>
+                    </tr>
+        {%- endfor %}
+                </table>
+    {%- endif %}
+{%- endblock %}

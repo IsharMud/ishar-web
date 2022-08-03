@@ -103,7 +103,7 @@ th, td {
     content:            ' ☠️';
 }
 
-#logo {
+#logo, #wizlist {
     margin:             auto;
     text-align:         center;
 }

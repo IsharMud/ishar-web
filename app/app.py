@@ -218,7 +218,7 @@ def leaderboard(limit=10):
                         -models.Player.quests_completed,
                         -models.Player.challenges_completed,
                         -models.Player.renown,
-                        -models.Player.level,
+                        -models.Player.true_level,
                         -models.Player.bankacc,
                         models.Player.deaths
                     ).limit(limit).all()
@@ -231,7 +231,7 @@ def leaderboard(limit=10):
                         -models.Player.quests_completed,
                         -models.Player.challenges_completed,
                         -models.Player.renown,
-                        -models.Player.level,
+                        -models.Player.true_level,
                         -models.Player.bankacc,
                         models.Player.deaths
                     ).limit(limit).all()
@@ -250,12 +250,23 @@ def who():
     who =   models.Player.query.filter(
                 models.Player.logon >= models.Player.logout
             ).order_by(
-                -models.Player.level,
+                -models.Player.true_level,
                 -models.Player.remorts,
-                models.Player.name,
-             ).all()
-    print(f"who:\n{who}")
+                models.Player.name
+            ).all()
     return render_template('who.html.j2', who=who)
+
+
+# Wizlist showing immortals through gods (/wizlist, or /wiz_list)
+@app.route('/wiz_list', methods=['GET'])
+@app.route('/wizlist', methods=['GET'])
+def wizlist():
+    immortals = models.Player.query.filter(
+                    models.Player.true_level >= secrets.immortal_level
+                ).order_by(
+                    -models.Player.true_level
+                ).all()
+    return render_template('wizlist.html.j2', immortals=immortals)
 
 
 # Portal for administrators
