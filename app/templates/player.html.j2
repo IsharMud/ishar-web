@@ -105,46 +105,58 @@
                 </form>
     {%- endif %}
     {%- if player %}
-                {%- set player_title = player_title(player) %}
-                {%- set player_type = player_type(player) %}
-                {%- set player_css = player_css(player) %}
+        {%- set player_title = player_title(player) %}
+        {%- set player_type = player_type(player) %}
+        {%- set player_css = player_css(player) %}
+            <div id="player-details">
                 <h3>
                     {{ player_title }}
                 </h3>
                 <p>
-                    {{ player_gender | title }} {{ player_phrase }} a <span class="{{ player_css }}">{{ player_type }}</span> character.
+                    {{ player.name | title | safe }} {{ player_phrase }} a <span class="{{ player_css }}">{{ player_type }}</span> character.
                     <br>
         {%- if player.true_level < immortal_level %}
                     {{ player.name | title | safe }} {{ player_phrase }} a {{ display_class(player.class.class_name) }} of
                     {{ player.race.race_name | replace('_', '-') | lower | safe }} origin.
                     <br>
-                    {{ player_gender | title }} {{ player_phrase }} level {{ player.level }} and {{ player_phrase_owns }} remorted
-                    {{ player.remorts }} time{%- if player.remorts != 1 -%}s{%- endif -%}.
+                    {{ player_gender | title }} {{ player_phrase }} level {{ player.level }}
+            {%- if player.remorts > 0 -%}
+                    and {{ player_phrase_owns }} remorted {{ player.remorts }} time{%- if player.remorts != 1 -%}s{%- endif -%}
+            {%- endif -%}.
                     <br>
+            {%- if player.total_renown > 0 -%}
                     {{ player_gender | title }} {{ player_phrase_owns }} accumulated {{ player.total_renown }} renown.
                     <br>
+            {%- endif -%}
+            {%- if player.quests_completed > 0 -%}
                     {{ player_gender | title }} {{ player_phrase_owns }} completeted {{ player.quests_completed }} quest
                     {%- if player.quests_completed != 1 -%}s{%- endif -%}.
                     <br>
+            {%- endif -%}
+            {%- if player.challenges_completed > 0 -%}
                     {{ player_gender | title }} {{ player_phrase_owns }} completed {{ player.challenges_completed }} challenge
                     {%- if player.challenges_completed != 1 -%}s{%- endif -%}.
                     <br>
+            {%- endif -%}
                     {{ player_gender_own | title }} alignment {{ player_phrase }} {{ display_align(player.align) }} ({{ player.align }}).
                     <br>
             {%- if player_type == 'Classic' %}
                     {{ player_gender | title }} {{ player_phrase_owns }} died {{ player.deaths }}
                     time{%- if player.deaths != 1 -%}s{%- endif -%}.
+                    <br>
             {%- endif %}
                 </p>
+            </div>
         {%- endif %}
         {%- if player.is_deleted == 1 %}
-            <p>
+            <div id="player-dead-note">
                 {{ player.name | title | safe }} is <span class="{{ player_css }}">DEAD</span>!
                 <br>
                 {{ player_gender | title }} died too often. {{ player_gender | title }} can not be resurrected!
-            </p>
+            </div>
         {%- endif %}
         {%- if player.is_deleted != 1 and player.quests | selectattr('value', 'equalto', 1) | list | length > 0 %}
+            <div id="player-quests">
                 <h3>
                     Quests
                 </h3>
@@ -164,8 +176,29 @@
                 {%- endif %}
             {%- endfor %}
                 </ol>
+            </div>
+        {%- endif %}
+        {%- if player.remort_upgrades and player.remort_upgrades | selectattr('value', '>=', 1) | list | length > 0 %}
+            <div id="player-remort-upgrades">
+                <h3>
+                    Remort Upgrades
+                </h3>
+                <ol>
+                {%- for remort_upgrade in player.remort_upgrades %}
+                    {%- if remort_upgrade.value > 0 %}
+                    <li>
+                        {{ remort_upgrade.remort_upgrade.name | replace('_', ' ') | title | safe }}
+                        {%- if remort_upgrade.value > 1 %}
+                            (x{{remort_upgrade.value }})
+                        {%- endif %}
+                    </li>
+                    {%- endif %}
+                {%- endfor %}
+                </ol>
+            </div>
         {%- endif %}
         {%- if player.true_level >= 5 and player.true_level < immortal_level %}
+            <div id="player-statistics">
                 <h3>
                     Statistics
                 </h3>
@@ -211,24 +244,9 @@
                         </td>
                     </tr>
                 </table>
-            {%- if player.remort_upgrades %}
-                <h3>
-                    Remort Upgrades
-                </h3>
-                <ol>
-                {%- for remort_upgrade in player.remort_upgrades %}
-                    {%- if remort_upgrade.value > 0 %}
-                    <li>
-                        {{ remort_upgrade.remort_upgrade.name | replace('_', ' ') | title | safe }}
-                        {%- if remort_upgrade.value > 1 %}
-                            (x{{remort_upgrade.value }})
-                        {%- endif %}
-                    </li>
-                    {%- endif %}
-                {%- endfor %}
-                </ol>
-            {%- endif %}
+            </div>
         {%- endif %}
+            <div id="player-time">
                 <p>
         {%- set birth_date = player.birth | unix2datetime %}
                     {{ player_gender | title }} was born {{ display_timestamp(player.birth) }},
@@ -244,6 +262,7 @@
                     <br>
                     {{ player_gender | title }} {{ player_phrase_owns }} played for {{ player.online | seconds2delta }}.
                 </p>
+            </div>
     {%- endif %}
 {% include('back.html.j2') %}
 {%- endblock %}
