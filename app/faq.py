@@ -40,8 +40,8 @@ faqs = {
     'What about my equipment when I log out?': [
         "When you sign out or log off, your character's equipment, gear, " \
         'and inventory is simply <strong>preserved until the end of the season</strong>.',
-        'The season currently changes every four (4) months, but you can find more information about seasons at the latest ' \
-        '<a href="' + url_for('static', filename='Major_Update.pdf') + '" title="Major Update" target="_blank">major update</a>.'
+        'The season currently changes every four (4) months, but you can find more information about seasons at the ' \
+        '<a href="' + url_for('latest_patch') + '" title="latest patch" target="_blank">latest patch</a>.'
     ],
 
     'Is death permanent?': [
