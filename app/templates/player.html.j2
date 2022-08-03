@@ -111,7 +111,7 @@
                 <h3>
                     {{ player_title }}
                 </h3>
-                <div id="player-details">
+                <p>
                     {{ player_gender | title }} {{ player_phrase }} a <span class="{{ player_css }}">{{ player_type }}</span> character.
                     <br>
         {%- if player.true_level < immortal_level %}
@@ -134,126 +134,116 @@
             {%- if player_type == 'Classic' %}
                     {{ player_gender | title }} {{ player_phrase_owns }} died {{ player.deaths }}
                     time{%- if player.deaths != 1 -%}s{%- endif -%}.
-                    <br>
             {%- endif %}
-                    <br>
-            {%- if player.is_deleted != 1 and player.quests | selectattr('value', 'equalto', 1) | list | length > 0 %}
-                <div id="quests">
-                    <h3>
-                        Quests
-                    </h3>
-                    <ol>
-                {%- for quest in player.quests %}
-                    {%- if quest.value == 1 %}
-                        <li>
-                            {{ quest.quest.display_name }}
-                        {%- if quest.quest.completion_message is defined and quest.quest.completion_message != '' %}
-                            <ul>
-                                <li>
-                                    {{ quest.quest.completion_message }}
-                                </li>
-                            </ul>
+                </p>
+        {%- endif %}
+        {%- if player.is_deleted == 1 %}
+            <p>
+                {{ player.name | title | safe }} is <span class="{{ player_css }}">DEAD</span>!
+                <br>
+                {{ player_gender | title }} died too often. {{ player_gender | title }} can not be resurrected!
+            </p>
+        {%- endif %}
+        {%- if player.is_deleted != 1 and player.quests | selectattr('value', 'equalto', 1) | list | length > 0 %}
+                <h3>
+                    Quests
+                </h3>
+                <ol>
+            {%- for quest in player.quests %}
+                {%- if quest.value == 1 %}
+                    <li>
+                        {{ quest.quest.display_name }}
+                    {%- if quest.quest.completion_message is defined and quest.quest.completion_message != '' %}
+                        <ul>
+                            <li>
+                                {{ quest.quest.completion_message }}
+                            </li>
+                        </ul>
+                    {%- endif %}
+                    </li>
+                {%- endif %}
+            {%- endfor %}
+                </ol>
+        {%- endif %}
+        {%- if player.true_level >= 5 and player.true_level < immortal_level %}
+                <h3>
+                    Statistics
+                </h3>
+                <table>
+                    <tr>
+                        <th>
+                            Strength
+                        </th>
+                        <th>
+                            Agility
+                        </th>
+                        <th>
+                            Endurance
+                        </th>
+                        <th>
+                            Willpower
+                        </th>
+                        <th>
+                            Focus
+                        </th>
+                        <th>
+                            Perception
+                        </th>
+                    </tr>
+                    <tr>
+                        <td>
+                            {{ player.curr_strength }}
+                        </td>
+                        <td>
+                            {{ player.curr_agility }}
+                        </td>
+                        <td>
+                            {{ player.curr_endurance }}
+                        </td>
+                        <td>
+                            {{ player.curr_willpower }}
+                        </td>
+                        <td>
+                            {{ player.curr_focus }}
+                        </td>
+                        <td>
+                            {{ player.curr_perception }}
+                        </td>
+                    </tr>
+                </table>
+            {%- if player.remort_upgrades %}
+                <h3>
+                    Remort Upgrades
+                </h3>
+                <ol>
+                {%- for remort_upgrade in player.remort_upgrades %}
+                    {%- if remort_upgrade.value > 0 %}
+                    <li>
+                        {{ remort_upgrade.remort_upgrade.name | replace('_', ' ') | title | safe }}
+                        {%- if remort_upgrade.value > 1 %}
+                            (x{{remort_upgrade.value }})
                         {%- endif %}
-                        </li>
+                    </li>
                     {%- endif %}
                 {%- endfor %}
-                    </ol>
-                </div>
+                </ol>
             {%- endif %}
-                </div>
-                <div id="player-time">
-            {%- set birth_date = player.birth | unix2datetime %}
+        {%- endif %}
+                <p>
+        {%- set birth_date = player.birth | unix2datetime %}
                     {{ player_gender | title }} was born {{ display_timestamp(player.birth) }},
                     on {{ birth_date.strftime('%A, %B %d, %Y') }}.
                     <br>
-            {%- set last_logon = player.logon | unix2datetime %}
+        {%- set last_logon = player.logon | unix2datetime %}
                     {{ player_gender | title }} last logged in {{ display_timestamp(player.logon) }},
                     on {{ last_logon.strftime('%A, %B %d, %Y') }}.
                     <br>
-            {%- set last_logout = player.logout | unix2datetime %}
+        {%- set last_logout = player.logout | unix2datetime %}
                     {{ player_gender | title }} last logged out {{ display_timestamp(player.logout) }},
                     on {{ last_logout.strftime('%A, %B %d, %Y') }}.
                     <br>
                     {{ player_gender | title }} {{ player_phrase_owns }} played for {{ player.online | seconds2delta }}.
-                    <br>
-        {%- if player.remort_upgrades and player.remort_upgrades | selectattr('value', '>=', 1) | list | length > 0 %}
-                    <div id="remort-upgrades">
-                        <h3>
-                            Remort Upgrades
-                        </h3>
-                        <ol>
-            {%- for remort_upgrade in player.remort_upgrades %}
-                {%- if remort_upgrade.value > 0 %}
-                            <li>
-                                {{ remort_upgrade.remort_upgrade.name | replace('_', ' ') | title | safe }}
-                    {%- if remort_upgrade.value > 1 %}
-                                (x{{remort_upgrade.value }})
-                    {%- endif %}
-                            </li>
-                {%- endif %}
-            {%- endfor %}
-                        </ol>
-                    </div>
-        {%- endif %}
-                </div>
-    {%- endif %}
-    {%- if player.is_deleted == 1 %}
-                <div id="player-dead">
-                    {{ player.name | title | safe }} is <span class="{{ player_css }}">DEAD</span>!
-                    <br>
-                    {{ player_gender | title }} died too often. {{ player_gender | title }} can not be resurrected!
-                    <br>
-                </div>
-    {%- endif %}
-    {%- if player.true_level >= 5 and player.true_level < immortal_level %}
-                <div id="statistics">
-                    <h3>
-                        Statistics
-                    </h3>
-                    <table>
-                        <tr>
-                            <th>
-                                Strength
-                            </th>
-                            <th>
-                                Agility
-                            </th>
-                            <th>
-                                Endurance
-                            </th>
-                            <th>
-                                Willpower
-                            </th>
-                            <th>
-                                Focus
-                            </th>
-                            <th>
-                                Perception
-                            </th>
-                        </tr>
-                        <tr>
-                            <td>
-                                {{ player.curr_strength }}
-                            </td>
-                            <td>
-                                {{ player.curr_agility }}
-                            </td>
-                            <td>
-                                {{ player.curr_endurance }}
-                            </td>
-                            <td>
-                                {{ player.curr_willpower }}
-                            </td>
-                            <td>
-                                {{ player.curr_focus }}
-                            </td>
-                            <td>
-                                {{ player.curr_perception }}
-                            </td>
-                        </tr>
-                    </table>
-                </div>
-        {%- endif %}
+                </p>
     {%- endif %}
 {% include('back.html.j2') %}
 {%- endblock %}

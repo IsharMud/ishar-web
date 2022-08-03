@@ -196,20 +196,6 @@ textarea {
     font-family:        'Courier New', monospace;
 }
 
-#player-details {
-    float:              left;
-    display:            inline;
-}
-
-#player-time {
-    float:              right;
-    display:            inline;
-}
-
-#player-dead, #statistics {
-    clear:              both;
-}
-
 #navigation ol, #navigation li {
     border:             1px solid #fa7;
     list-style:         none;
