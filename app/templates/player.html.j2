@@ -137,6 +137,13 @@
             {%- endif %}
                 </p>
         {%- endif %}
+        {%- if player.is_deleted == 1 %}
+            <p>
+                {{ player.name | title | safe }} is <span class="{{ player_css }}">DEAD</span>!
+                <br>
+                {{ player_gender | title }} died too often. {{ player_gender | title }} can not be resurrected!
+            </p>
+        {%- endif %}
         {%- if player.is_deleted != 1 and player.quests | selectattr('value', 'equalto', 1) | list | length > 0 %}
                 <h3>
                     Quests
