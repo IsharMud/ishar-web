@@ -7,8 +7,6 @@
 {%- block content %}
                 <p>
                     Here are a few common questions that we have seen and heard about Ishar MUD.
-                    If there is any thing that you think is missing, please feel free to reach out
-                    by e-mailing <a href="mailto:admin@isharmud.com" target="_blank">admin@isharmud.com</a>.
                 </p>
                 {%- if faqs is defined and faqs is iterable and faqs | length > 0 %}
                 <ul>
@@ -47,5 +45,9 @@
                     {%- endif %}
                 {%- endfor %}
                 </ul>
+                <p>
+                    If there is any thing that you think is missing, please feel free to reach out
+                    by e-mailing <a href="mailto:admin@isharmud.com" target="_blank">admin@isharmud.com</a>.
+                </p>
             {%- endif %}
 {%- endblock %}
