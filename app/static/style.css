@@ -23,7 +23,6 @@ a[target="_blank"]::after {
 #buy-coffee::after {
     content:            none;
     filter:             none;
-    margin:             normal;
 }
 
 hr {
