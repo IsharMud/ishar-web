@@ -61,11 +61,6 @@ input[type="reset"], input[type="submit"],
     font-size:          0.9em;
 }
 
-.bottom-portal-link {
-//    font-size:          1.15em;
-//    display:            table;
-}
-
 .news-created {
     float:              right;
     font-style:         italic;
@@ -210,5 +205,4 @@ nav li {
 }
 
 #player-details, #player-dead-note, #player-quests, #player-remort-upgrades, #player-statistics, #player-time {
-//  WIP
 }
