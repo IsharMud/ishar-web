@@ -113,8 +113,8 @@
                     {{ player_title }}
                 </h3>
         {%- if player.true_level < immortal_level %}
-                 <ul>
-                     <li>
+                <ul>
+                    <li>
                         {{ player.name | title | safe }} {{ player_phrase }} a {{ display_class(player.class.class_name) }} of
                         {{ player.race.race_name | replace('_', '-') | lower | safe }} origin.
                     </li>
@@ -124,23 +124,23 @@
                         and {{ player_phrase_owns }} remorted {{ player.remorts }} time{%- if player.remorts != 1 -%}s{%- endif -%}
             {%- endif %}.
                     </li>
-            {%- if player.total_renown > 0 -%}
+            {%- if player.total_renown > 0 %}
                     <li>
                         {{ player_gender | title }} {{ player_phrase_owns }} accumulated {{ player.total_renown }} renown.
                     </li>
-            {%- endif -%}
-            {%- if player.quests_completed > 0 -%}
+            {%- endif %}
+            {%- if player.quests_completed > 0 %}
                     <li>
                         {{ player_gender | title }} {{ player_phrase_owns }} completeted {{ player.quests_completed }} quest
                         {%- if player.quests_completed != 1 -%}s{%- endif -%}.
                     </li>
-            {%- endif -%}
-            {%- if player.challenges_completed > 0 -%}
+            {%- endif %}
+            {%- if player.challenges_completed > 0 %}
                     <li>
                         {{ player_gender | title }} {{ player_phrase_owns }} completed {{ player.challenges_completed }} challenge
                         {%- if player.challenges_completed != 1 -%}s{%- endif -%}.
                     </li>
-            {%- endif -%}
+            {%- endif %}
                     <li>
                         {{ player_gender_own | title }} alignment {{ player_phrase }} {{ display_align(player.align) }} ({{ player.align }}).
                     </li>
@@ -165,33 +165,30 @@
                     </li>
                 </ul>
             </div>
-        {%- else -%}
-            {{ player.name | title | safe }} {{ player_phrase }} a <span class="{{ player_css }}">{{ player_type }}</span> character!
-        {%- endif %}
-        {%- if player.is_deleted != 1 and player.quests | selectattr('value', 'equalto', 1) | list | length > 0 %}
+            {%- if player.is_deleted != 1 and player.quests | selectattr('value', 'equalto', 1) | list | length > 0 %}
             <div id="player-quests">
                 <h3>
                     Quests
                 </h3>
                 <ol>
-            {%- for quest in player.quests %}
-                {%- if quest.value == 1 %}
+                {%- for quest in player.quests %}
+                    {%- if quest.value == 1 %}
                     <li>
                         {{ quest.quest.display_name }}
-                    {%- if quest.quest.completion_message is defined and quest.quest.completion_message != '' %}
+                        {%- if quest.quest.completion_message is defined and quest.quest.completion_message != '' %}
                         <ul>
                             <li>
                                 {{ quest.quest.completion_message }}
                             </li>
                         </ul>
-                    {%- endif %}
+                        {%- endif %}
                     </li>
-                {%- endif %}
-            {%- endfor %}
+                    {%- endif %}
+                {%- endfor %}
                 </ol>
             </div>
-        {%- endif %}
-        {%- if player.remort_upgrades and player.remort_upgrades | selectattr('value', '>=', 1) | list | length > 0 %}
+            {%- endif %}
+            {%- if player.remort_upgrades and player.remort_upgrades | selectattr('value', '>=', 1) | list | length > 0 %}
             <div id="player-remort-upgrades">
                 <h3>
                     Remort Upgrades
@@ -209,8 +206,8 @@
                 {%- endfor %}
                 </ol>
             </div>
-        {%- endif %}
-        {%- if player.true_level >= 5 and player.true_level < immortal_level %}
+            {%- endif %}
+            {%- if player.true_level >= 5 %}
             <div id="player-statistics">
                 <h3>
                     Statistics
@@ -258,24 +255,27 @@
                     </tr>
                 </table>
             </div>
-        {%- endif %}
+            {%- endif %}
             <div id="player-time">
                 <p>
-        {%- set birth_date = player.birth | unix2datetime %}
+            {%- set birth_date = player.birth | unix2datetime %}
                     {{ player_gender | title }} was born {{ display_timestamp(player.birth) }},
                     on {{ birth_date.strftime('%A, %B %d, %Y') }}.
                     <br>
-        {%- set last_logon = player.logon | unix2datetime %}
+            {%- set last_logon = player.logon | unix2datetime %}
                     {{ player_gender | title }} last logged in {{ display_timestamp(player.logon) }},
                     on {{ last_logon.strftime('%A, %B %d, %Y') }}.
                     <br>
-        {%- set last_logout = player.logout | unix2datetime %}
+            {%- set last_logout = player.logout | unix2datetime %}
                     {{ player_gender | title }} last logged out {{ display_timestamp(player.logout) }},
                     on {{ last_logout.strftime('%A, %B %d, %Y') }}.
                     <br>
                     {{ player_gender | title }} {{ player_phrase_owns }} played for {{ player.online | seconds2delta }}.
                 </p>
             </div>
+        {%- else %}
+            {{ player.name | title | safe }} {{ player_phrase }} a <span class="{{ player_css }}">{{ player_type }}</span> character!
+        {%- endif %}
     {%- endif %}
 {% include('back.html.j2') %}
 {%- endblock %}

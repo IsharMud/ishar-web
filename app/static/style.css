@@ -30,6 +30,10 @@ hr {
     border-color:       #fa7;
 }
 
+pre {
+    padding-left:       2.5em;
+}
+
 th, td {
     padding:            0.25em;
 }
@@ -56,12 +60,6 @@ input[type="reset"], input[type="submit"],
 .bottom-portal-link {
     font-size:          1.15em;
     display:            table;
-}
-
-pre {
-    padding-left:       5vw;
-    width:              60vw;
-    white-space:        pre-wrap;
 }
 
 .news-created {
