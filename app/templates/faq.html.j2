@@ -15,7 +15,9 @@
                 {%- for question, answers in faqs.items() %}
                     {%- if question is defined %}
                     <li>
-                        <h3>{{ question }}</h3>
+                        <h3>
+                            {{ question }}
+                        </h3>
                     </li>
                     {%- endif %}
                     {%- if answers is defined %}

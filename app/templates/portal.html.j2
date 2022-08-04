@@ -37,10 +37,10 @@
                         </th>
                     </tr>
         {%- for player in current_user.players %}
-            {%- set player_title = player_title(player) -%}
-            {%- set player_type = player_type(player) -%}
-            {%- set player_css = player_css(player) -%}
-            {%- set player_birth = player.birth | unix2datetime -%}
+            {%- set player_title = player_title(player) %}
+            {%- set player_type = player_type(player) %}
+            {%- set player_css = player_css(player) %}
+            {%- set player_birth = player.birth | unix2datetime %}
                     <tr>
                         <td>
                             <span title="{{ player.name | title | safe }} (Born {{ player_birth.strftime('%A, %B %d, %Y %I:%M:%S %p') }})">
@@ -102,22 +102,20 @@
                 <h4>
                     Account Upgrades
                 </h4>
-                <p class="account-upgrades">
-                    <ol>
+                <ol id="portal-account-upgrades">
         {%- for account_upgrade in current_user.account_upgrades %}
             {%- if account_upgrade.amount > 0 %}
-                        <li>
-                            {{ account_upgrade.account_upgrade.name }}
-                            <ul>
-                                <li>
-                                    {{ account_upgrade.account_upgrade.description }}
-                                </li>
-                            </ul>
-                        </li>
+                    <li>
+                        {{ account_upgrade.account_upgrade.name }}
+                        <ul>
+                            <li>
+                                {{ account_upgrade.account_upgrade.description }}
+                            </li>
+                        </ul>
+                    </li>
             {%- endif %}
         {%- endfor %}
-                    </ol>
-                </p>
+                </ol>
     {%- endif %}
                 <p class="bottom-portal-link">
                     <a title="Challenges" href="{{ url_for('challenges') }}">Challenges</a>

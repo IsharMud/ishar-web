@@ -58,9 +58,13 @@ input[type="reset"], input[type="submit"],
     font-size:          0.9em;
 }
 
+#portal-account-upgrades {
+    font-size:          0.9em;
+}
+
 .bottom-portal-link {
-    font-size:          1.15em;
-    display:            table;
+//    font-size:          1.15em;
+//    display:            table;
 }
 
 .news-created {
@@ -101,7 +105,8 @@ header {
     text-align:         center;
 }
 
-header img, footer {
+header img {
+    border-bottom:      1px solid #fa7;
     width:              95vw;
 }
 
@@ -143,6 +148,7 @@ footer {
     margin:             auto;
     overflow:           auto;
     text-align:         center;
+    width:              95vw;
 }
 
 #essence, #created {
@@ -165,7 +171,7 @@ nav {
 nav a {
     display:            block;
     font-size:          1.1em;
-    padding:            0.15em;
+    padding:            0.25em;
     text-decoration:    none;
 }
 
@@ -177,11 +183,7 @@ nav a:hover, nav a:active {
 nav li {
     border:             1px solid #fa7;
     list-style:         none;
-    padding:            0.15em;
-}
-
-h2 {
-    padding-left:       1.5vw;
+    padding:            0.25em;
 }
 
 #content {
