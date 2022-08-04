@@ -34,7 +34,7 @@ pre {
     white-space:        pre-wrap;
 }
 
-th, td {
+th, td, #content li {
     padding:            0.25em;
 }
 
@@ -167,6 +167,7 @@ nav a {
     font-size:          1.1em;
     padding:            0.25em;
     text-decoration:    none;
+    width:              15vw;
 }
 
 nav a:hover, nav a:active {
