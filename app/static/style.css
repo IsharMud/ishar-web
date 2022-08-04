@@ -32,6 +32,7 @@ hr {
 
 pre {
     padding-left:       2.5em;
+    white-space:        pre-wrap;
 }
 
 th, td {
