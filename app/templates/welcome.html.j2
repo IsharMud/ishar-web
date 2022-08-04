@@ -16,13 +16,13 @@
                     to <code class="connect">isharmud.com</code> on port <code class="connect">23</code> or <code class="connect">9999</code>.
                 </p>
     {%- if news is defined and news is iterable and news | length > 0 %}
-                <h2>
+                <h3>
                     Latest Update{%- if news | length != 1 %}s{%- endif %}
-                </h2>
-        {%- for news_post in news %}
-                <h3 class="news-subject">
-                    {{ news_post.subject | safe }}
                 </h3>
+        {%- for news_post in news %}
+                <h4 class="news-subject">
+                    {{ news_post.subject | safe }}
+                </h4>
                 <p class="news-body">
                     {{ news_post.body | safe }}
                 </p>

@@ -184,8 +184,8 @@ footer {
 }
 
 nav {
-    float:              right;
-    padding-right:      5vw;
+    float:             right;
+    margin-right:      3vw;
 }
 
 nav a {
@@ -206,16 +206,20 @@ nav li {
     padding:            0.25em;
 }
 
-h1, h2 {
+h1 {
     margin-left:        1em;
 }
 
-h3, h4 {
+h2 {
     margin-left:        2em;
 }
 
-table, p, input {
-    margin-left:        2.5em;
+h3 {
+    margin-left:        3em;
+}
+
+h4, table, p, input, ol, ul {
+    margin-left:        4em;
 }
 
 .faq-answers, .faq-nested, .mud-clients {

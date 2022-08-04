@@ -103,9 +103,11 @@
     </head>
     <body>
         <header>
-            <a href="{{ url_for('welcome') }}">
-                <img src="{{ url_for('static', filename='logo.jpg') }}" alt="Ishar MUD">
-            </a>
+            <h1>
+                <a href="{{ url_for('welcome') }}">
+                    <img src="{{ url_for('static', filename='logo.jpg') }}" alt="Ishar MUD">
+                </a>
+            </h1>
         </header>
         <nav>
 {%- block navigation %}
@@ -113,9 +115,9 @@
 {%- endblock navigation %}
         </nav>
         <content>
-            <h1>
+            <h2>
                 {% block header %}{% endblock %}
-            </h1>
+            </h2>
 {%- with messages = get_flashed_messages(with_categories=True) %}
     {%- if messages %}
             <ul id="flashes">
