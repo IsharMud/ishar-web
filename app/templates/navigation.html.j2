@@ -1,38 +1,40 @@
-                <ul>
-                    <li>
-                        <a href="{{ url_for('connect') }}" title="Connect to Ishar MUD" target="_blank">Connect</a>
-                    </li>
-                    <li>
-                        <a href="{{ url_for('discord') }}" title="Discord Invitation" target="_blank">Discord</a>
-                    </li>
-                    <li>
-                        <a href="mailto:admin@isharmud.com" title="E-mail Us" target="_blank">E-mail Us</a>
-                    </li>
-                    <li>
-                       <a href="{{ url_for('faq') }}" title="Frequently Asked Questions">FAQs</a>
-                    </li>
-                    <li>
-                        <a href="{{ url_for('get_started') }}" title="Get Started">Get Started</a>
-                    </li>
-                    <li>
-                        <a href="{{ url_for('history') }}" title="History">History</a>
-                    </li>
-                    <li>
-                        <a href="{{ url_for('latest_patch') }}" title="Latest Patch" target="_blank">Latest Patch</a>
-                    </li>
-                    <li>
-                        <a href="{{ url_for('mud_clients') }}" title="MUD Clients">MUD Clients</a>
-                    </li>
-                    <li>
-                        <a href="{{ url_for('support') }}" title="Support Ishar MUD">Support Ishar</a>
-                    </li>
-                    <li>
-                        <a href="{{ url_for('world') }}" title="World of Ishar">World of Ishar</a>
-                    </li>
-                    <li>
-                        <a href ="{{ url_for('portal') }}" title="Player Portal">
-                            Player Portal
-                            {%- if current_user is defined and current_user.is_authenticated and current_user.account_name is defined %} ({{ current_user.account_name }}){%- endif %}
-                        </a>
-                    </li>
-                </ul>
+            <ul>
+                <li>
+                    <a href="{{ url_for('connect') }}" title="Connect to Ishar MUD" target="_blank">Connect</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('discord') }}" title="Discord Invitation" target="_blank">Discord</a>
+                </li>
+                <li>
+                    <a href="mailto:admin@isharmud.com" title="E-mail Us" target="_blank">E-mail Us</a>
+                </li>
+                <li>
+                   <a href="{{ url_for('faq') }}" title="Frequently Asked Questions">FAQs</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('get_started') }}" title="Get Started">Get Started</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('history') }}" title="History">History</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('latest_patch') }}" title="Latest Patch" target="_blank">Latest Patch</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('mud_clients') }}" title="MUD Clients">MUD Clients</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('support') }}" title="Support Ishar MUD">Support Ishar</a>
+                </li>
+                <li>
+                    <a href="{{ url_for('world') }}" title="World of Ishar">World of Ishar</a>
+                </li>
+                <li>
+                    <a href ="{{ url_for('portal') }}" title="Player Portal">
+                        Player Portal
+{%- if current_user is defined and current_user.is_authenticated and current_user.account_name is defined %}
+                        ({{ current_user.account_name }})
+{%- endif %}
+                    </a>
+                </li>
+            </ul>
