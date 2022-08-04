@@ -120,18 +120,21 @@
             </h2>
 {%- with messages = get_flashed_messages(with_categories=True) %}
     {%- if messages %}
-            <ul id="flashes">
+            <div id="flashes">
+                <ul>
         {%- for category, message in messages %}
-                <li class="flash-{{ category }}">
-                    {{ message }}
-                </li>
+                    <li class="flash-{{ category }}">
+                        {{ message }}
+                    </li>
         {%- endfor %}
-            </ul>
-            <br>
+                </ul>
+            </div>
     {%- endif %}
 {%- endwith %}
-                {%- block content %}
-                {%- endblock %}
+            <div id="content">
+{%- block content %}
+{%- endblock %}
+            </div>
         </content>
         <footer>
 {%- block footer %}
@@ -154,19 +157,6 @@
                 {{ current_user.seasonal_points }} points
             </span>
         {%- endif %}
-    {%- else %}
-            <div id="quote">
-                Some say that the world was formed from the body of the dying Ishar,
-                and that his bones became the mountains and his blood ran from his
-                chest til it collected as the sea.  His flowing hair matted into the
-                fields we till and his skin mouldered and fell away as soil.
-                From his sinews and organs sprang the races of dwarves, elves, men, gnomes
-                and all manner of creatures and plants.  And from his heart sprang the very
-                gods themselves.
-                <p id="attribution">
-                    -- Book of Thurvun, 1730
-                </p>
-            </div>
     {%- endif %}
     {%- if season is defined and season.season_id is defined and season.expiration_date is defined %}
         {%- set seconds_until_season_end = season.expiration_date | int - now | int %}

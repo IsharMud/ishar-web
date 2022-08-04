@@ -30,6 +30,10 @@ hr {
     border-color:       #fa7;
 }
 
+th {
+    padding:            0.25em;
+}
+
 tr:nth-child(2n) {
     background-color:   #444;
 }
@@ -44,19 +48,9 @@ input[type="reset"], input[type="submit"],
     font-size:          1.25em;
 }
 
-.login-email label::after, .login-password label::after, .change-password label::after, .new-account label::after {
-    content:            "\a";
-    white-space:        pre;
-}
-
-.login-remember {
-    font-size:          0.85em;
-}
-
-#new-account-link {
-    font-size:          0.9em;
+.login-remember, #new-account-link {
     display:            table;
-    margin-top:         1.5em;
+    font-size:          0.9em;
 }
 
 .bottom-portal-link {
@@ -68,10 +62,6 @@ pre {
     padding-left:       5vw;
     width:              60vw;
     white-space:        pre-wrap;
-}
-
-th, td {
-    padding:            0.5em;
 }
 
 .news-created {
@@ -107,13 +97,13 @@ th, td {
     content:            ' ☠️';
 }
 
-header, #wizlist {
+header {
     margin:             auto;
     text-align:         center;
 }
 
-header, header img {
-    width:              100%;
+header img, footer {
+    width:              95vw;
 }
 
 header a, header a:hover {
@@ -153,9 +143,7 @@ footer {
     border-top:         1px solid #fa7;
     margin:             auto;
     overflow:           auto;
-    padding:            0.75em;
     text-align:         center;
-    width:              95vw;
 }
 
 #essence, #created {
@@ -167,31 +155,18 @@ footer {
 #season, #player-search-form {
     text-align:         right;
     float:              right;
-    padding:            0.5em;
-}
-
-#quote {
-    font-style:         italic;
-    margin:             1.25em;
-    text-align:         left;
-}
-
-#attribution {
-    font-style:         normal;
-    font-weight:        bold;
-    padding-left:       5vw;
-    text-align:         left;
+    padding:            1em;
 }
 
 nav {
-    float:             right;
-    margin-right:      3vw;
+    float:              right;
+    padding-right:      3vw;
 }
 
 nav a {
     display:            block;
     font-size:          1.1em;
-    padding:            0.25em;
+    padding:            0.15em;
     text-decoration:    none;
 }
 
@@ -203,23 +178,15 @@ nav a:hover, nav a:active {
 nav li {
     border:             1px solid #fa7;
     list-style:         none;
-    padding:            0.25em;
-}
-
-h1 {
-    margin-left:        1em;
+    padding:            0.15em;
 }
 
 h2 {
-    margin-left:        2em;
+    padding-left:       1.5vw;
 }
 
-h3 {
-    margin-left:        3em;
-}
-
-h4, table, p, ol, ul {
-    margin-left:        4em;
+#content {
+    padding-left:       3vw;
 }
 
 .faq-answers, .faq-nested, .mud-clients {
