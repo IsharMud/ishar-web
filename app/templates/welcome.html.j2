@@ -26,13 +26,12 @@
                 <p class="news-body">
                     {{ news_post.body | safe }}
                 </p>
-                <span class="news-created">
+                <p class="news-created">
                     {{ news_post.created_at.strftime('%A, %B %d, %Y') }}
-                </span>
-                ~
-                <span class="news-creator">
-                    {{ news_post.account.account_name | safe | title }}
-                </span>
+                </p>
+                <p class="news-creator">
+                    ~ {{ news_post.account.account_name | safe | title }}
+                </p>
                 <br>
             {%- if not loop.last %}
                 <hr>

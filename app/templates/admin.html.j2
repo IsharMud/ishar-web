@@ -21,7 +21,7 @@
     {%- endif %}
 {%- endmacro %}
 {%- if news_add_form is defined %}
-                <form method="post" action="{{ url_for('admin_portal') }}" id="login-form">
+                <form method="post" action="{{ url_for('admin_portal') }}" id="news-add-form">
                     {{ render_field(news_add_form.subject) }}
                     {{ render_field(news_add_form.body) }}
                     {{ news_add_form.csrf_token }}

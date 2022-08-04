@@ -34,7 +34,11 @@ tr:nth-child(2n) {
     background-color:   #444;
 }
 
-input[type="reset"], input[type="submit"], #login-form {
+input[type="reset"], input[type="submit"],
+#news-add-form,
+#change-password-form,
+#login-form,
+#new-account-form {
     background-color:   #000;
     color:              #fa7;
     font-size:          1.25em;
@@ -49,14 +53,15 @@ input[type="reset"], input[type="submit"], #login-form {
     font-size:          0.85em;
 }
 
-#new-account-link, .bottom-portal-link {
+#new-account-link {
     font-size:          0.9em;
     display:            table;
     margin-top:         1.5em;
 }
 
-table {
-    font-family:        'Courier New', monospace;
+.bottom-portal-link {
+    font-size:          1.15em;
+    display:            table;
 }
 
 pre {
@@ -102,16 +107,16 @@ th, td {
     content:            ' ☠️';
 }
 
-#logo, #wizlist {
+header, #wizlist {
     margin:             auto;
     text-align:         center;
 }
 
-#logo img {
-    width:              90vw;
+header, header img {
+    width:              100%;
 }
 
-#logo a {
+header a, header a:hover {
     background-color:   #000;
 }
 
@@ -133,13 +138,6 @@ th, td {
     list-style:         none;
 }
 
-#content {
-    margin:             auto;
-    overflow:           auto;
-    padding:            1em;
-    width:              90vw;
-}
-
 input, textarea {
     background-color:   #000;
     border-color:       #fa7;
@@ -151,13 +149,13 @@ textarea {
     width:              60vw;
 }
 
-#footer {
+footer {
     border-top:         1px solid #fa7;
     margin:             auto;
     overflow:           auto;
-    padding:            0.5em;
+    padding:            0.75em;
     text-align:         center;
-    width:              90vw;
+    width:              95vw;
 }
 
 #essence, #created {
@@ -166,7 +164,7 @@ textarea {
     padding:            1em;
 }
 
-#season {
+#season, #player-search-form {
     text-align:         right;
     float:              right;
     padding:            0.5em;
@@ -185,37 +183,39 @@ textarea {
     text-align:         left;
 }
 
-.under {
-    border-top:         1px solid #fa7;
-    overflow:           auto;
-    padding:            1em;
-}
-
-#navigation {
+nav {
     float:              right;
-    font-family:        'Courier New', monospace;
+    padding-right:      5vw;
 }
 
-#navigation ol, #navigation li {
-    border:             1px solid #fa7;
-    list-style:         none;
-}
-
-
-
-#navigation a {
+nav a {
     display:            block;
+    font-size:          1.1em;
     padding:            0.25em;
     text-decoration:    none;
 }
 
-li {
+nav a:hover, nav a:active {
+    background-color:   #fa7;
+    color:              #000;
+}
+
+nav li {
+    border:             1px solid #fa7;
+    list-style:         none;
     padding:            0.25em;
 }
 
-#navigation a:hover,  #navigation a:active {
-    background-color:   #fa7;
-    color:              #000;
+h1, h2 {
+    margin-left:        1em;
+}
+
+h3, h4 {
+    margin-left:        2em;
+}
+
+table, p, input {
+    margin-left:        2.5em;
 }
 
 .faq-answers, .faq-nested, .mud-clients {
