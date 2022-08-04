@@ -17,7 +17,7 @@
                 <ul>
                     {%- for platform in mud_clients %}
                     <li class="mud-client-platform">
-                        <h3 id="{{ platform | lower }}">
+                        <h3 title="{{ platform }}">
                             {{ platform }}
                         </h3>
                     </li>
@@ -25,7 +25,7 @@
                         <ul>
                             {%- for name, link in mud_clients[platform].items() %}
                             <li>
-                                <a href="{{ link }}" target="_blank" rel="noopener">
+                                <a href="{{ link }}" target="_blank" rel="noopener" title="{{ name }}">
                                     {{ name }}
                                 </a>
                             </li>
