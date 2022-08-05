@@ -1,8 +1,13 @@
 {% extends "layout.html.j2" %}
-{% block meta_title %}Challenges{% endblock meta_title %}
-{% block meta_description %}Challenges, winners, and rewards currently available{% endblock %}
+{%- if challenges is defined and challenges is iterable and challenges | length > 0 %}
+    {%- set challenges_completed    = challenges | selectattr('winner_desc', '!=', '') | list | length %}
+    {%- set challenges_total        = challenges | list | length %}
+    {%- set challenges_title        = challenges_completed | string + '/' + challenges_total | string + ' complete'  %}
+{%- endif %}
+{% block meta_title %}Challenges{% if challenges_title %} ({{ challenges_title}}){% endif %}{% endblock meta_title %}
+{% block meta_description %}Challenges{% if challenges_title %} ({{ challenges_title}}){% endif %} winners, and rewards currently available.{% endblock %}
 {% block meta_url %}{{ url_for('challenges', _external=True) }}{% endblock meta_url %}">
-{% block title %}Challenges{% endblock %}
+{% block title %}Challenges{% if challenges_title %} ({{ challenges_title}}){% endif %}{% endblock %}
 {% block header %}Challenges{% endblock %}
 {%- macro challenge_tier(tier) -%}
     {%- set challenge_tiers = {
@@ -24,11 +29,11 @@
 {%- endmacro -%}
 {%- block content %}
     {%- if challenges is defined and challenges is iterable and challenges | length > 0 %}
-        {%- set challenges_completed    = challenges | selectattr('winner_desc', '!=', '') | list | length %}
-        {%- set challenges_total        = challenges | list | length %}
+        {%- if challenges_completed and challenges_total %}
             <h3>
                 {{ challenges_completed }} of {{ challenges_total }} challenges complete
             </h3>
+        {%- endif %}
             <table id="challenges">
                 <tr>
                     <th>
