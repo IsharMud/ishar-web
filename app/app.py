@@ -193,8 +193,7 @@ def portal():
 def challenges():
     return render_template('challenges.html.j2',
                                 challenges  = models.Challenge.query.filter_by(is_active = 1).order_by(
-                                                    models.Challenge.adj_level,
-                                                    models.Challenge.adj_people
+                                                    models.Challenge.adj_level
                                                 ).all()
                           )
 
