@@ -188,7 +188,7 @@ def portal():
                             )
 
 
-# Challenges page for logged in users
+# Challenges page
 @app.route('/challenges', methods=['GET'])
 def challenges():
     return render_template('challenges.html.j2',
@@ -198,7 +198,7 @@ def challenges():
                           )
 
 
-# Sort and list the best players for Leader Board page for logged in users
+# Sort and list the best players for Leader Board page
 @app.route('/leader_board/<int:limit>', methods=['GET'])
 @app.route('/leaderboard/<int:limit>', methods=['GET'])
 @app.route('/leader_board', methods=['GET'])
