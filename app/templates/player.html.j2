@@ -274,7 +274,11 @@
                 </p>
             </div>
         {%- else %}
-            {{ player.name | title | safe }} {{ player_phrase }} a <span class="{{ player_css }}">{{ player_type }}</span> character!
+            <ul>
+                <li>
+                    {{ player.name | title | safe }} {{ player_phrase }} a <span class="{{ player_css }}">{{ player_type }}</span> character!
+                </li>
+            </ul>
         {%- endif %}
     {%- endif %}
 {% include('back.html.j2') %}
