@@ -1,9 +1,8 @@
 import datetime
 from flask import Flask, flash, redirect, render_template, request, send_from_directory, session, url_for
-from flask_login import current_user, fresh_login_required, LoginManager, login_required, login_user, logout_user
+from flask_login import current_user, fresh_login_required, login_required, login_user, logout_user, LoginManager
 import ipaddress
 import secrets
-import socket
 
 # Create/configure the app
 app = Flask(__name__)
