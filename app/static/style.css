@@ -8,7 +8,7 @@ a, .connect, #created strong, #essence strong, #season strong, h1, h2, h3, h4, t
     color:              #fa7;
 }
 
-a:hover, a:active {
+a:hover, a:active, #active-nav {
     background-color:   #fa7;
     color:              #000;
     text-decoration:    none;

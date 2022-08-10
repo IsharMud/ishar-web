@@ -9,28 +9,28 @@
                     <a href="mailto:admin@isharmud.com" title="E-mail Us" target="_blank">E-mail Us</a>
                 </li>
                 <li>
-                   <a href="{{ url_for('faq') }}" title="Frequently Asked Questions">FAQs</a>
+                   <a href="{{ url_for('faq') }}" title="Frequently Asked Questions" {%- if page == 'faq' %} id="active-nav"{% endif %}>FAQs</a>
                 </li>
                 <li>
-                    <a href="{{ url_for('get_started') }}" title="Get Started">Get Started</a>
+                    <a href="{{ url_for('get_started') }}" title="Get Started" {%- if page == 'get_started' %} id="active-nav"{% endif %}>Get Started</a>
                 </li>
                 <li>
-                    <a href="{{ url_for('history') }}" title="History">History</a>
+                    <a href="{{ url_for('history') }}" title="History" {%- if page == 'history' %} id="active-nav"{% endif %}>History</a>
                 </li>
                 <li>
                     <a href="{{ url_for('latest_patch') }}" title="Latest Patch" target="_blank">Latest Patch</a>
                 </li>
                 <li>
-                    <a href="{{ url_for('mud_clients') }}" title="MUD Clients">MUD Clients</a>
+                    <a href="{{ url_for('mud_clients') }}" title="MUD Clients" {%- if page == 'mud_clients' %} id="active-nav"{% endif%}>MUD Clients</a>
                 </li>
                 <li>
-                    <a href="{{ url_for('support') }}" title="Support Ishar MUD">Support Ishar</a>
+                    <a href="{{ url_for('support') }}" title="Support Ishar MUD" {%- if page == 'support' %} id="active-nav"{% endif%}>Support Ishar</a>
                 </li>
                 <li>
-                    <a href="{{ url_for('world') }}" title="World of Ishar">World of Ishar</a>
+                    <a href="{{ url_for('world') }}" title="World of Ishar" {%- if page == 'world' %} id="active-nav"{% endif%}>World of Ishar</a>
                 </li>
                 <li>
-                    <a href ="{{ url_for('portal') }}" title="Player Portal">
+                    <a href ="{{ url_for('portal') }}" title="Player Portal" {%- if page == 'portal' %} id="active-nav"{% endif%}>
                         Player Portal
 {%- if current_user is defined and current_user.is_authenticated and current_user.account_name is defined %}
                         ({{ current_user.account_name }})
