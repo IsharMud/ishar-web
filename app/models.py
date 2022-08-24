@@ -277,10 +277,10 @@ class Player(db.Model):
     # Start with two (2) points for existing, then do renown and remort calculations
     @hybrid_property
     def seasonal_earned(self):
-        c = self.total_renown / 10 + 2
+        c = int(self.total_renown / 10) + 2
         if self.remorts > 0:
-            c += (self.remorts / 5) * 3 + 1
-        return int(c)
+            c += int(self.remorts / 5) * 3 + 1
+        return c
 
     def __repr__(self):
         return f'<Player> "{self.name}" ("{self.id}")'
