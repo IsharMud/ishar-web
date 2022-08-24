@@ -4,6 +4,7 @@ import hmac
 from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import exc, Column, DateTime, ForeignKey, Integer, MetaData, SmallInteger, String, Text
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.dialects.mysql import TINYINT
 from sqlalchemy.schema import FetchedValue
 from sqlalchemy.orm import relationship
@@ -44,6 +45,15 @@ class Account(db.Model, UserMixin):
                 return True
 
         return False
+
+    # Find player under the account with the highest amount of seasonal points earned
+    @hybrid_property
+    def seasonal_earned(self):
+        s = 0
+        for player in self.players:
+            if player.seasonal_earned > s:
+                s = player.seasonal_earned
+        return s
 
     # Method to allow users to change their account password
     def change_password(self, new_password):
@@ -263,6 +273,14 @@ class Player(db.Model):
                 return True
 
         return False
+
+    # Start with two (2) points for existing, then do renown and remort calculations
+    @hybrid_property
+    def seasonal_earned(self):
+        c = self.total_renown / 10 + 2
+        if self.remorts > 0:
+            c += (self.remorts / 5) * 3 + 1
+        return int(c)
 
     def __repr__(self):
         return f'<Player> "{self.name}" ("{self.id}")'

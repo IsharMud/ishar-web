@@ -145,13 +145,14 @@
                 {{ current_user.created_at.strftime('%A, %B %d, %Y') }}
             </span>
         {%- endif %}
-        {%- if current_user.seasonal_points is defined and current_user.seasonal_points > 0 %}
-            <span id="essence" title="Essence: {{ current_user.seasonal_points }} points">
+        {%- if current_user.seasonal_points and current_user.seasonal_earned %}
+            <span id="essence" title="Essence: {{ current_user.seasonal_points }} points ({{ current_user.seasonal_earned }} earned)">
                 <strong>
                     Essence
                 </strong>
                 <br>
                 {{ current_user.seasonal_points }} points
+                ({{ current_user.seasonal_earned }} earned)
             </span>
         {%- endif %}
     {%- endif %}
