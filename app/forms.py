@@ -1,7 +1,8 @@
 from flask_wtf import FlaskForm
-from wtforms import BooleanField, EmailField, PasswordField, SelectField, StringField, SubmitField, TextAreaField, validators
+from wtforms import BooleanField, EmailField, PasswordField, RadioField, StringField, SubmitField, TextAreaField, validators
 from wtforms.validators import DataRequired, Email, EqualTo
 from wtforms_validators import Alpha
+
 
 # Log In form class
 class LoginForm(FlaskForm):
@@ -21,7 +22,10 @@ class LoginForm(FlaskForm):
 
 # Essence Shop form class
 class EssenceShopForm(FlaskForm):
-    upgrade     = SelectField(u'Upgrade', [validators.DataRequired()], choices=[('cpp', 'C++'), ('py', 'Python'), ('text', 'Plain Text')])
+    upgrade     = RadioField('Upgrade', [
+                    validators.DataRequired()
+                    ]
+                )
     submit      = SubmitField('Purchase')
 
 

@@ -145,16 +145,6 @@
                 {{ current_user.created_at.strftime('%A, %B %d, %Y') }}
             </span>
         {%- endif %}
-        {%- if current_user.seasonal_points is defined and current_user.seasonal_earned is defined %}
-            <span id="essence" title="Essence: {{ current_user.seasonal_points }} points ({{ current_user.seasonal_earned }} earned)">
-                <strong>
-                    Essence
-                </strong>
-                <br>
-                {{ current_user.seasonal_points }} points
-                ({{ current_user.seasonal_earned }} earned)
-            </span>
-        {%- endif %}
     {%- endif %}
     {%- if season is defined and season.season_id is defined and season.expiration_date is defined %}
         {%- set seconds_until_season_end = season.expiration_date | int - now | int %}

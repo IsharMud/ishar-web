@@ -20,33 +20,49 @@
     {%- endif %}
 {%- endmacro %}
 {%- block content %}
-    {%- if account_upgrades is defined and account_upgrades is iterable and account_upgrades | length > 0 %}
+    {%- if current_user.seasonal_points is defined %}
                 <h4>
-                    Available Account Upgrades
+                    Current
                 </h4>
+                {{ current_user.seasonal_points }} essence point{% if current_user.seasonal_points != 1 %}s{% endif %}
+    {%- endif %}
+    {%- if current_user.seasonal_earned is defined %}
+                <h4>
+                    Earned
+                </h4>
+                {{ current_user.seasonal_earned }} essence point{% if current_user.seasonal_earned != 1 %}s{% endif %}
+    {%- endif %}
+    {% if current_user.account_upgrades is defined %}
+                <h4>
+                    Upgrades
+                </h4>
+        {%- if current_user.account_upgrades is iterable and current_user.account_upgrades | length > 0 %}
                 <ol>
-        {%- for account_upgrade in account_upgrades %}
+            {%- for upgrade in current_user.account_upgrades | selectattr('amount', '>', 0) %}
                     <li>
-                        <code>
-                            {{ account_upgrade }}
-                        </code>
+                        {{ upgrade.account_upgrade.name }}
+                        <ul>
+                            <li>
+                                {{ upgrade.account_upgrade.description }}
+                            </li>
+                        </ul>
                     </li>
-        {%- endfor %}
+            {%- endfor %}
                 </ol>
+        {%- else %}
+                <ul>
+                    <li>
+                        <i>None</i>
+                    </li>
+                </ul>
+        {%- endif %}
     {%- endif %}
     {%- if essence_shop_form is defined %}
                 <form method="post" action="{{ url_for('essence_shop') }}" id="essence-shop-form">
+                    {{ render_field(essence_shop_form.upgrade) }}
                     {{ essence_shop_form.csrf_token }}
                     {{ essence_shop_form.submit }}
                 </form>
-    {%- endif %}
-    {%- if current_user.seasonal_points is defined %}
-                <h4>
-                    Current Balance
-                </h4>
-                <h5>
-                    {{ current_user.seasonal_points }} point{% if current_user.seasonal_points != 1 %}s{% endif %}
-                </h5>
     {%- endif %}
 {% include('back.html.j2') %}
 {%- endblock %}

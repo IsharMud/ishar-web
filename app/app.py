@@ -122,15 +122,13 @@ def login():
 @app.route('/shop', methods=['GET', 'POST'])
 @login_required
 def essence_shop():
-
-    # Get essence account upgrades, shop form object, and check if submitted
-    account_upgrades    = models.AccountUpgrade.query.order_by(models.AccountUpgrade.id).all()
-    essence_shop_form   = forms.EssenceShopForm()
+    account_upgrades                    = models.AccountUpgrade.query.order_by(models.AccountUpgrade.id).all()
+    essence_shop_form                   = forms.EssenceShopForm()
+    essence_shop_form.upgrade.choices   = account_upgrades
     if essence_shop_form.validate_on_submit():
         flash('The shop functionality is still a work in progress.', 'error')
         flash('We sincerely appreciate your patience - thank you!', 'success')
 
-    # Show the essence shop form
     return render_template('essence_shop.html.j2', account_upgrades=account_upgrades, essence_shop_form=essence_shop_form)
 
 
