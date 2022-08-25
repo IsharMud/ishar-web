@@ -123,16 +123,15 @@ def login():
 @login_required
 def essence_shop():
 
-    account_upgrades    = None
-
-    # Get essence shop form object and check if submitted
-    essence_shop_form = forms.EssenceShopForm()
+    # Get essence account upgrades, shop form object, and check if submitted
+    account_upgrades    = models.AccountUpgrade.query.order_by(models.AccountUpgrade.id).all()
+    essence_shop_form   = forms.EssenceShopForm()
     if essence_shop_form.validate_on_submit():
         flash('The shop functionality is still a work in progress.', 'error')
         flash('We sincerely appreciate your patience - thank you!', 'success')
 
     # Show the essence shop form
-    return render_template('essence_shop.html.j2', essence_shop_form=essence_shop_form)
+    return render_template('essence_shop.html.j2', account_upgrades=account_upgrades, essence_shop_form=essence_shop_form)
 
 
 # Allow logged in users to change their passwords

@@ -20,6 +20,20 @@
     {%- endif %}
 {%- endmacro %}
 {%- block content %}
+    {%- if account_upgrades is defined and account_upgrades is iterable and account_upgrades | length > 0 %}
+                <h4>
+                    Available Account Upgrades
+                </h4>
+                <ol>
+        {%- for account_upgrade in account_upgrades %}
+                    <li>
+                        <code>
+                            {{ account_upgrade }}
+                        </code>
+                    </li>
+        {%- endfor %}
+                </ol>
+    {%- endif %}
     {%- if essence_shop_form is defined %}
                 <form method="post" action="{{ url_for('essence_shop') }}" id="essence-shop-form">
                     {{ essence_shop_form.csrf_token }}
