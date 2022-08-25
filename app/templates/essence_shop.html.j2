@@ -1,0 +1,38 @@
+{% extends "layout.html.j2" %}
+{% block meta_title %}Essence Shop{% endblock meta_title %}
+{% block meta_description %}View and spend your seasonally rewarded essence points{% endblock%}
+{% block meta_url %}{{ url_for('essence_shop', _external=True) }}{% endblock meta_url %}">
+{% block title %}Essence Shop{% endblock %}
+{% block header %}Essence Shop{% endblock %}
+{%- macro render_field(field) %}
+                    <p class="essence-shop">
+                        {{ field.label | safe }}
+                        {{ field(**kwargs) | safe }}
+                    </p>
+    {%- if field.errors %}
+                <ul class="field-errors">
+        {%- for error in field.errors %}
+                    <li>
+                        {{ error }}
+                    </li>
+        {%- endfor %}
+                </ul>
+    {%- endif %}
+{%- endmacro %}
+{%- block content %}
+    {%- if essence_shop_form is defined %}
+                <form method="post" action="{{ url_for('essence_shop') }}" id="essence-shop-form">
+                    {{ essence_shop_form.csrf_token }}
+                    {{ essence_shop_form.submit }}
+                </form>
+    {%- endif %}
+    {%- if current_user.seasonal_points is defined %}
+                <h4>
+                    Current Balance
+                </h4>
+                <h5>
+                    {{ current_user.seasonal_points }} point{% if current_user.seasonal_points != 1 %}s{% endif %}
+                </h5>
+    {%- endif %}
+{% include('back.html.j2') %}
+{%- endblock %}

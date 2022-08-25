@@ -118,6 +118,23 @@ def login():
     return render_template('login.html.j2', login_form=login_form), 401
 
 
+# Allow logged in users to view and spend their essence/seasonal points
+@app.route('/shop', methods=['GET', 'POST'])
+@login_required
+def essence_shop():
+
+    account_upgrades    = None
+
+    # Get essence shop form object and check if submitted
+    essence_shop_form = forms.EssenceShopForm()
+    if essence_shop_form.validate_on_submit():
+        flash('The shop functionality is still a work in progress.', 'error')
+        flash('We sincerely appreciate your patience - thank you!', 'success')
+
+    # Show the essence shop form
+    return render_template('essence_shop.html.j2', essence_shop_form=essence_shop_form)
+
+
 # Allow logged in users to change their passwords
 @app.route('/password', methods=['GET', 'POST'])
 @fresh_login_required
@@ -190,12 +207,11 @@ def portal():
 # Challenges page
 @app.route('/challenges', methods=['GET'])
 def challenges():
-    return render_template('challenges.html.j2',
-                                challenges  = models.Challenge.query.filter_by(is_active = 1).order_by(
+    challenges  = models.Challenge.query.filter_by(is_active = 1).order_by(
                                                     models.Challenge.adj_level,
                                                     models.Challenge.adj_people
-                                                ).all()
-                          )
+                ).all()
+    return render_template('challenges.html.j2', challenges=challenges)
 
 
 # Sort and list the best players for Leader Board page

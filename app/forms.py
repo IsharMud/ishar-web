@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import BooleanField, EmailField, PasswordField, StringField, SubmitField, TextAreaField, validators
+from wtforms import BooleanField, EmailField, PasswordField, SelectField, StringField, SubmitField, TextAreaField, validators
 from wtforms.validators import DataRequired, Email, EqualTo
 from wtforms_validators import Alpha
 
@@ -17,6 +17,12 @@ class LoginForm(FlaskForm):
                 )
     remember    = BooleanField('Remember Me')
     submit      = SubmitField('Log In')
+
+
+# Essence Shop form class
+class EssenceShopForm(FlaskForm):
+    upgrade     = SelectField(u'Upgrade', [validators.DataRequired()], choices=[('cpp', 'C++'), ('py', 'Python'), ('text', 'Plain Text')])
+    submit      = SubmitField('Purchase')
 
 
 # Change Password form class
