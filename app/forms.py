@@ -22,10 +22,7 @@ class LoginForm(FlaskForm):
 
 # Essence Shop form class
 class EssenceShopForm(FlaskForm):
-    upgrade     = RadioField('Upgrade', [
-                    validators.DataRequired()
-                    ], coerce=int
-                )
+    upgrade     = RadioField('Upgrade', coerce=int)
     submit      = SubmitField('Purchase')
 
 

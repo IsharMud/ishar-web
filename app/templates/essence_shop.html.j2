@@ -5,16 +5,17 @@
 {% block title %}Essence Shop{% endblock %}
 {% block header %}Essence Shop{% endblock %}
 {%- macro render_field(field) %}
-                    <p class="essence-shop">
-                        {{ field.label }}
-                        {{ field(**kwargs) }}
-                    </p>
-{% for subfield in field %}
-<!--
-    {{ subfield }}
-    {{ subfield.label }}
--->
-{% endfor %}
+                    <ul class="essence-shop">
+    {% for subfield in field %}
+                        <li>
+                            {{ subfield}}
+                            {{ subfield.label }}
+                            <ul>
+                                <li>{{ account_upgrades[subfield.data | int - 1].description }}</li>
+                            </ul>
+                        </li>
+    {% endfor %}
+                    </ul>
     {%- if field.errors %}
                 <ul class="field-errors">
         {%- for error in field.errors %}
@@ -42,6 +43,7 @@
                 <h4>
                     Upgrades
                 </h4>
+                <h5>Purchased</h5>
         {%- if current_user.account_upgrades is iterable and current_user.account_upgrades | length > 0 %}
                 <ol>
             {%- for upgrade in current_user.account_upgrades | selectattr('amount', '>', 0) %}
@@ -64,6 +66,7 @@
         {%- endif %}
     {%- endif %}
     {%- if essence_shop_form is defined %}
+                <h5>Available</h5>
                 <form method="post" action="{{ url_for('essence_shop') }}" id="essence-shop-form">
                     {{ render_field(essence_shop_form.upgrade) }}
                     {{ essence_shop_form.csrf_token }}
