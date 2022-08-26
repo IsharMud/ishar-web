@@ -24,7 +24,7 @@ class LoginForm(FlaskForm):
 class EssenceShopForm(FlaskForm):
     upgrade     = RadioField('Upgrade', [
                     validators.DataRequired()
-                    ]
+                    ], coerce=int
                 )
     submit      = SubmitField('Purchase')
 

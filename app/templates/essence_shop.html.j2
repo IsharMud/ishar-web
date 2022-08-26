@@ -6,9 +6,15 @@
 {% block header %}Essence Shop{% endblock %}
 {%- macro render_field(field) %}
                     <p class="essence-shop">
-                        {{ field.label | safe }}
-                        {{ field(**kwargs) | safe }}
+                        {{ field.label }}
+                        {{ field(**kwargs) }}
                     </p>
+{% for subfield in field %}
+<!--
+    {{ subfield }}
+    {{ subfield.label }}
+-->
+{% endfor %}
     {%- if field.errors %}
                 <ul class="field-errors">
         {%- for error in field.errors %}

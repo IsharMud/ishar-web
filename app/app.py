@@ -124,7 +124,7 @@ def login():
 def essence_shop():
     account_upgrades                    = models.AccountUpgrade.query.order_by(models.AccountUpgrade.id).all()
     essence_shop_form                   = forms.EssenceShopForm()
-    essence_shop_form.upgrade.choices   = account_upgrades
+    essence_shop_form.upgrade.choices   = [(u.id, f"{u.name} - {u.description}") for u in account_upgrades]
     if essence_shop_form.validate_on_submit():
         flash('The shop functionality is still a work in progress.', 'error')
         flash('We sincerely appreciate your patience - thank you!', 'success')
