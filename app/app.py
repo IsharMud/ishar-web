@@ -126,11 +126,17 @@ def essence_shop():
     essence_shop_form                   = forms.EssenceShopForm()
     essence_shop_form.upgrade.choices   = [(str(u.id), u.name) for u in account_upgrades]
     if essence_shop_form.validate_on_submit():
-        cat = 'error'
-    else:
-        cat = 'warn'
+        if essence_shop_form.upgrade.data == 4:
+            flash('This upgrade is still a work in progress.', 'error')
+        else:
+            chosen_upgrade  = account_upgrades[essence_shop_form.upgrade.data - 1]
+            if chosen_upgrade.cost > current_user.seasonal_points:
+                flash('You do not have enough essence to acquire that upgrade.', 'error')
+            else:
+                flash(f'You would have been charged {chosen_upgrade.cost} essence, if this form worked.', 'success')
 
-    flash('Please visit the shop in-game to make purchases. Shopping here is a work in progress.', cat)
+            flash('Please visit the shop in-game to make purchases. Shopping here is a work in progress.', 'warn')
+
     return render_template('essence_shop.html.j2', account_upgrades=account_upgrades, essence_shop_form=essence_shop_form)
 
 
