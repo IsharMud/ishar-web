@@ -99,25 +99,6 @@
                     You have not created any players yet!
                 </h3>
     {%- endif %}
-    {% if current_user.account_upgrades and current_user.account_upgrades | selectattr('amount', '>', 0) | list | length > 0 %}
-                <h4>
-                    Account Upgrades
-                </h4>
-                <ol id="portal-account-upgrades">
-        {%- for account_upgrade in current_user.account_upgrades %}
-            {%- if account_upgrade.amount > 0 %}
-                    <li>
-                        {{ account_upgrade.account_upgrade.name }}
-                        <ul>
-                            <li>
-                                {{ account_upgrade.account_upgrade.description }}
-                            </li>
-                        </ul>
-                    </li>
-            {%- endif %}
-        {%- endfor %}
-                </ol>
-    {%- endif %}
                 <p class="bottom-portal-link">
                     <a title="Challenges" href="{{ url_for('challenges') }}">Challenges</a>
                     |
