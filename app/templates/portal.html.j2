@@ -123,7 +123,12 @@
                     |
                     <a title="Change Password" href="{{ url_for('change_password') }}">Change Password</a>
                     |
-                    <a title="Essence Shop (WIP)" href="{{ url_for('essence_shop') }}">Essence Shop</a>
+    {%- if current_user.seasonal_points > 0 %}
+        {%- set essence_extra = ' (' + current_user.seasonal_points | string + ')' %}
+    {%- else %}
+        {%- set essence_extra = '' %}
+    {%- endif %}
+                    <a title="Essence Shop{{ essence_extra }}" href="{{ url_for('essence_shop') }}">Essence Shop{{ essence_extra }}</a>
                     |
                     <a title="Leader Board" href="{{ url_for('leaderboard') }}">Leader Board</a>
                     |

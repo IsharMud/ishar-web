@@ -8,10 +8,20 @@
                     <ul class="essence-shop">
     {% for subfield in field %}
                         <li>
-                            {{ subfield}}
+                            {{ subfield }}
                             {{ subfield.label }}
                             <ul>
-                                <li>{{ account_upgrades[subfield.data | int - 1].description }}</li>
+                                <li>
+                                    {{ account_upgrades[subfield.data | int - 1].description }}
+                                </li>
+        {%- if current_user.seasonal_points >= account_upgrades[subfield.data | int - 1].cost  %}
+            {%- set cost_css = 'success' %}
+        {%- else %}
+            {%- set cost_css = 'error' %}
+        {%- endif %}
+                                <li title="Cost: {{ account_upgrades[subfield.data | int - 1].cost }} essence">
+                                    <span class="flash-{{ cost_css }}">{{ account_upgrades[subfield.data | int - 1].cost }} essence</span>
+                                </li>
                             </ul>
                         </li>
     {% endfor %}
@@ -28,45 +38,57 @@
 {%- endmacro %}
 {%- block content %}
     {%- if current_user.seasonal_points is defined %}
-                <h4>
-                    Current
-                </h4>
-                {{ current_user.seasonal_points }} essence point{% if current_user.seasonal_points != 1 %}s{% endif %}
+                <ul class="essence-shop">
+                    <li>
+        {%- if current_user.seasonal_points > 0 %}
+                        You have <strong>{{ current_user.seasonal_points }} essence available</strong> to spend!
+        {%- else %}
+                        <i>You do not have any essence available to spend.</i>
+        {%- endif %}
+                    </li>
+                </ul>
     {%- endif %}
     {%- if current_user.seasonal_earned is defined %}
-                <h4>
-                    Earned
-                </h4>
-                {{ current_user.seasonal_earned }} essence point{% if current_user.seasonal_earned != 1 %}s{% endif %}
+                <ul class="essence-shop">
+                    <li>
+        {%- if current_user.seasonal_earned > 0 %}
+                        You have <strong>earned {{ current_user.seasonal_earned }} essence</strong> this season.
+        {%- else %}
+                        <i>You have not earned any essence this season.</i>
+        {%- endif %}
+                    </li>
+                </ul>
     {%- endif %}
-    {% if current_user.account_upgrades is defined %}
                 <h4>
                     Upgrades
                 </h4>
-                <h5>Purchased</h5>
-        {%- if current_user.account_upgrades is iterable and current_user.account_upgrades | length > 0 %}
-                <ol>
+    {%- if current_user.account_upgrades is defined and current_user.account_upgrades is iterable and current_user.account_upgrades | selectattr('amount', '>', 0) | list | length > 0 %}
+                <ol class="essence-shop">
             {%- for upgrade in current_user.account_upgrades | selectattr('amount', '>', 0) %}
                     <li>
-                        {{ upgrade.account_upgrade.name }}
+                        <strong>{{ upgrade.account_upgrade.name }}</strong>
                         <ul>
                             <li>
                                 {{ upgrade.account_upgrade.description }}
+                            </li>
+                            <li>
+                                Amount: {{ upgrade.amount }}
                             </li>
                         </ul>
                     </li>
             {%- endfor %}
                 </ol>
-        {%- else %}
+    {%- else %}
                 <ul>
                     <li>
-                        <i>None</i>
+                        <i>You have not purchased any account upgrades.</i>
                     </li>
                 </ul>
-        {%- endif %}
     {%- endif %}
     {%- if essence_shop_form is defined %}
-                <h5>Available</h5>
+                <h4>
+                    Purchase
+                </h4>
                 <form method="post" action="{{ url_for('essence_shop') }}" id="essence-shop-form">
                     {{ render_field(essence_shop_form.upgrade) }}
                     {{ essence_shop_form.csrf_token }}

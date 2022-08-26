@@ -4,7 +4,7 @@ body {
     font-family:        'Open Sans', sans-serif;
 }
 
-a, .connect, #created strong, #essence strong, #season strong, h1, h2, h3, h4, th {
+a, .connect, #created strong, #season strong, h1, h2, h3, h4, th, .essence-shop strong, #essence-shop-form label {
     color:              #fa7;
 }
 
@@ -203,7 +203,4 @@ nav li {
 #go-back button {
     background-color:   #000;
     color:              #fff;
-}
-
-#player-details, #player-dead-note, #player-quests, #player-remort-upgrades, #player-statistics, #player-time {
 }
