@@ -122,13 +122,15 @@ def login():
 @app.route('/shop', methods=['GET', 'POST'])
 @login_required
 def essence_shop():
-#    flash('The Essence Shop is still a work in progress. We sincerely appreciate your patience - thank you!', 'success')
     account_upgrades                    = models.AccountUpgrade.query.order_by(models.AccountUpgrade.id).all()
     essence_shop_form                   = forms.EssenceShopForm()
     essence_shop_form.upgrade.choices   = [(str(u.id), u.name) for u in account_upgrades]
     if essence_shop_form.validate_on_submit():
-        flash('Please visit the shop in-game. Purchasing upgrades here is a work in progress. Thank you for your patience!', 'error')
+        cat = 'error'
+    else:
+        cat = 'warn'
 
+    flash('Please visit the shop in-game to make purchases. Shopping here is a work in progress.', cat)
     return render_template('essence_shop.html.j2', account_upgrades=account_upgrades, essence_shop_form=essence_shop_form)
 
 

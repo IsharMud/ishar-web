@@ -120,6 +120,10 @@ header a, header a:hover {
     color:              #4cbb17;
 }
 
+.flash-warn {
+    color:              #f80;
+}
+
 .field-errors {
     color:              #fa8072;
     font-weight:        bold;
@@ -185,7 +189,7 @@ nav li {
     padding-left:       3vw;
 }
 
-.faq-answers, .faq-nested, .mud-clients {
+.faq-answers, .faq-nested, .mud-clients, .essence-upgrades {
     list-style:         none;
 }
 

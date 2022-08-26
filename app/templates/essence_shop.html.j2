@@ -7,7 +7,7 @@
 {%- macro render_field(field) %}
                     <ul class="essence-shop">
     {% for subfield in field %}
-                        <li>
+                        <li class="essence-upgrades">
                             {{ subfield }}
                             {{ subfield.label }}
                             <ul>
@@ -37,33 +37,26 @@
     {%- endif %}
 {%- endmacro %}
 {%- block content %}
-    {%- if current_user.seasonal_points is defined %}
+                <p>
+                    Welcome to the seasonal shop! This is where you can find information on the
+                    current season, as well as view your accumulated essence balance and spend it
+                    to upgrade your account.
+                </p>
                 <ul class="essence-shop">
                     <li>
-        {%- if current_user.seasonal_points > 0 %}
-                        You have <strong>{{ current_user.seasonal_points }} essence available</strong> to spend!
-        {%- else %}
-                        <i>You do not have any essence available to spend.</i>
-        {%- endif %}
+                        You currently have: <strong>{{ current_user.seasonal_points }} essence</strong>.
                     </li>
                 </ul>
-    {%- endif %}
-    {%- if current_user.seasonal_earned is defined %}
                 <ul class="essence-shop">
                     <li>
-        {%- if current_user.seasonal_earned > 0 %}
-                        You have <strong>earned {{ current_user.seasonal_earned }} essence</strong> this season.
-        {%- else %}
-                        <i>You have not earned any essence this season.</i>
-        {%- endif %}
+                        This season, you have earned: <strong>{{ current_user.seasonal_earned }} essence</strong>.
                     </li>
                 </ul>
-    {%- endif %}
                 <h4>
                     Upgrades
                 </h4>
     {%- if current_user.account_upgrades is defined and current_user.account_upgrades is iterable and current_user.account_upgrades | selectattr('amount', '>', 0) | list | length > 0 %}
-                <ol class="essence-shop">
+                <ul class="essence-shop">
             {%- for upgrade in current_user.account_upgrades | selectattr('amount', '>', 0) %}
                     <li>
                         <strong>{{ upgrade.account_upgrade.name }}</strong>
@@ -77,11 +70,11 @@
                         </ul>
                     </li>
             {%- endfor %}
-                </ol>
+                </ul>
     {%- else %}
                 <ul>
                     <li>
-                        <i>You have not purchased any account upgrades.</i>
+                        <i>You have not purchased any upgrades.</i>
                     </li>
                 </ul>
     {%- endif %}
