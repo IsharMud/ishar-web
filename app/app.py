@@ -126,16 +126,32 @@ def essence_shop():
     essence_shop_form                   = forms.EssenceShopForm()
     essence_shop_form.upgrade.choices   = [(str(u.id), u.name) for u in account_upgrades]
     if essence_shop_form.validate_on_submit():
-        if essence_shop_form.upgrade.data == 4:
-            flash('This upgrade is still a work in progress.', 'error')
-        else:
-            chosen_upgrade  = account_upgrades[essence_shop_form.upgrade.data - 1]
-            if chosen_upgrade.cost > current_user.seasonal_points:
-                flash('You do not have enough essence to acquire that upgrade.', 'error')
-            else:
-                flash(f'You would have been charged {chosen_upgrade.cost} essence, if this form worked.', 'success')
 
-            flash('Please visit the shop in-game to make purchases. Shopping here is a work in progress.', 'warn')
+        # Find the upgrade the user wants to purchase
+        chosen_upgrade = account_upgrades[essence_shop_form.upgrade.data - 1]
+
+        # Do not let users spend essence that they do not have
+        if current_user.seasonal_points < chosen_upgrade.cost:
+            flash(f'You do not have enough essence to acquire that upgrade ({chosen_upgrade.name}).', 'error')
+
+        # Do not let users upgrade beyond the max
+        elif current_user.account_upgrades[chosen_upgrade.id - 1].amount == chosen_upgrade.max_value:
+            flash(f'Sorry, but you already have the max value in that upgrade ({chosen_upgrade.name}).', 'error')
+
+        # Account Upgrade ID 4 ("Improved Starting Gear") is a work-in-progress
+        elif chosen_upgrade.id == 4:
+            flash(f'Sorry, but this upgrade (<strong>{chosen_upgrade.name}</strong>) is still a work in progress.', 'error')
+
+        # Proceed with processing valid essence upgrade purchase requests
+        elif chosen_upgrade.id in [u.id for u in account_upgrades]:
+            if current_user.upgrade(chosen_upgrade):
+                flash(f'You have been charged <strong>{chosen_upgrade.cost} essence</strong> for <strong>{chosen_upgrade.name}</strong>.', 'success')
+            else:
+                flash('Sorry, but something went wrong. Please try again.', 'error')
+
+        # Invalid upgrade
+        else:
+            flash('Sorry, but an invalid upgrade was chosen. Please try again.', 'error')
 
     return render_template('essence_shop.html.j2', account_upgrades=account_upgrades, essence_shop_form=essence_shop_form)
 

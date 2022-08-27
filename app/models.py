@@ -55,6 +55,21 @@ class Account(db.Model, UserMixin):
                 s = player.seasonal_earned
         return s
 
+    # Method to allow users to buy an account upgrade to spend esssence
+    def upgrade(self, chosen_upgrade):
+        try:
+            upgrade_me = self.account_upgrades[chosen_upgrade.id - 1]
+            if upgrade_me.amount < chosen_upgrade.max_value:
+                upgrade_me.amount = upgrade_me.amount + 1
+                if self.spend_essence(chosen_upgrade.cost):
+                    db.session.commit()
+                    return True
+            return False
+
+        except Exception as e:
+            print(e)
+            return e
+
     # Method to allow users to change their account password
     def change_password(self, new_password):
         try:
@@ -79,6 +94,20 @@ class Account(db.Model, UserMixin):
         except Exception as e:
             print(e)
             return e
+
+    # Method to spend an amount of essence
+    def spend_essence(self, amount):
+        try:
+            if self.seasonal_points >= amount:
+                self.seasonal_points = self.seasonal_points - amount
+                db.session.commit()
+                return True
+
+            return False
+
+        except Exception as e:
+            print(e)
+            return False
 
     def __repr__(self):
         return f'<Account> "{self.account_name}" ("{self.account_id}")'
