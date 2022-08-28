@@ -4,43 +4,47 @@
 {% block meta_url %}{{ url_for('essence_shop', _external=True) }}{% endblock meta_url %}">
 {% block title %}Essence Shop{% endblock %}
 {% block header %}Essence Shop{% endblock %}
-{%- macro render_field(field) %}
+{%- macro render_field(field) -%}
                     <ul class="essence-shop">
     {%- for subfield in field %}
-        {%- if current_user.account_upgrades[subfield.data | int - 1].amount != account_upgrades[subfield.data | int - 1].max_value %}
-            {%- if current_user.seasonal_points < account_upgrades[subfield.data | int - 1].cost %}
+                        <li class="essence-upgrades" title="{{ subfield.label | striptags }}">
+                            {{ subfield }}
+                            {{ subfield.label }}
+                            <ul>
+        {%- for ug in current_user.upgrades | selectattr('account_upgrades_id', 'equalto', subfield.data) %}
+                                <li title="{{ ug.upgrade.description | replace('\n', ' ') }}">
+                                    {{ ug.upgrade.description | replace('\n', ' ')}}
+                                </li>
+            {%- if current_user.seasonal_points < ug.upgrade.cost %}
                 {%- set cost_css = 'error' %}
             {%- else %}
                 {%- set cost_css = 'success' %}
             {%- endif %}
-                        <li class="essence-upgrades">
-                            {{ subfield }}
-                            <span title="{{ account_upgrades[subfield.data | int - 1].name }}">{{ subfield.label }}</span>
-                            <ul>
-                                <li title="{{ account_upgrades[subfield.data | int - 1].description }}">
-                                    {{ account_upgrades[subfield.data | int - 1].description }}
+                                <li title="Cost: {{ ug.upgrade.cost }} essence">
+                                    <span class="flash-{{ cost_css }}">
+                                        {{ ug.upgrade.cost }} essence
+                                    </span>
                                 </li>
-                                <li title="Cost: {{ account_upgrades[subfield.data | int - 1].cost }} essence">
-                                    <span class="flash-{{ cost_css }}">{{ account_upgrades[subfield.data | int - 1].cost }} essence</span>
-                                </li>
+        {%- endfor %}
                             </ul>
                         </li>
-        {%- endif %}
     {%- endfor %}
                     </ul>
     {%- if field.errors %}
-                <ul class="field-errors">
+                    <ul class="field-errors">
         {%- for error in field.errors %}
-                    <li>
-                        {{ error }}
-                    </li>
+                        <li title="{{ error }}">
+                            {{ error }}
+                        </li>
         {%- endfor %}
-                </ul>
+                    </ul>
     {%- endif %}
-{%- endmacro %}
+{%- endmacro -%}
 {%- block content %}
                 <p>
-                    Welcome to the seasonal shop!
+                    <strong>
+                        Welcome to the seasonal shop!
+                    </strong>
                 </p>
                 <p>
                     This is where you can find information on the current season
@@ -59,19 +63,13 @@
                 <h4 title="Upgrades">
                     Upgrades
                 </h4>
-    {%- if current_user.account_upgrades is defined and current_user.account_upgrades is iterable and current_user.account_upgrades | selectattr('amount', '>', 0) | list | length > 0 %}
+    {%- if current_user.upgrades is defined and current_user.upgrades is iterable and current_user.upgrades | selectattr('amount', '>', 0) | list | length > 0 %}
                 <ul class="essence-shop">
-            {%- for upgrade in current_user.account_upgrades | selectattr('amount', '>', 0) %}
-                    <li title="{{ upgrade.account_upgrade.name }}">
-                        <strong>{{ upgrade.account_upgrade.name }}</strong>
-                        {% if upgrade.amount > 1 %}(x{{ upgrade.amount}}){% endif %}
-                        <ul>
-                            <li title="{{ upgrade.account_upgrade.description }}">
-                                {{ upgrade.account_upgrade.description }}
-                            </li>
-                        </ul>
+        {%- for upgraded in current_user.upgrades | selectattr('amount', '>', 0) %}
+                    <li title="{{ upgraded.upgrade.name }}">
+                        <strong>{{ upgraded.upgrade.name }}</strong>{% if upgraded.amount > 1 %} (x{{ upgraded.amount}}){% endif %}
                     </li>
-            {%- endfor %}
+        {%- endfor %}
                 </ul>
     {%- else %}
                 <ul>

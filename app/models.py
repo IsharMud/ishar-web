@@ -5,7 +5,7 @@ from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import exc, Column, DateTime, ForeignKey, Integer, MetaData, SmallInteger, String, Text
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.dialects.mysql import TINYINT
+from sqlalchemy.dialects.mysql import TINYINT, MEDIUMINT
 from sqlalchemy.schema import FetchedValue
 from sqlalchemy.orm import relationship
 
@@ -43,7 +43,6 @@ class Account(db.Model, UserMixin):
         for player in self.players:
             if player.true_level > admin_level:
                 return True
-
         return False
 
     # Find player under the account with the highest amount of seasonal points earned
@@ -55,21 +54,6 @@ class Account(db.Model, UserMixin):
                 s = player.seasonal_earned
         return s
 
-    # Method to allow users to buy an account upgrade to spend esssence
-    def upgrade(self, chosen_upgrade):
-        try:
-            upgrade_me = self.account_upgrades[chosen_upgrade.id - 1]
-            if upgrade_me.amount < chosen_upgrade.max_value:
-                upgrade_me.amount = upgrade_me.amount + 1
-                if self.spend_essence(chosen_upgrade.cost):
-                    db.session.commit()
-                    return True
-            return False
-
-        except Exception as e:
-            print(e)
-            return e
-
     # Method to allow users to change their account password
     def change_password(self, new_password):
         try:
@@ -78,7 +62,7 @@ class Account(db.Model, UserMixin):
             return True
         except Exception as e:
             print(e)
-            return e
+        return False
 
     # Method to check an account password
     def check_password(self, password):
@@ -93,24 +77,10 @@ class Account(db.Model, UserMixin):
             return self.account_id
         except Exception as e:
             print(e)
-            return e
-
-    # Method to spend an amount of essence
-    def spend_essence(self, amount):
-        try:
-            if self.seasonal_points >= amount:
-                self.seasonal_points = self.seasonal_points - amount
-                db.session.commit()
-                return True
-
-            return False
-
-        except Exception as e:
-            print(e)
-            return False
+        return False
 
     def __repr__(self):
-        return f'<Account> "{self.account_name}" ("{self.account_id}")'
+        return f'<Account> "{self.account_name}" ({self.account_id})'
 
 
 # Accounts Upgrades database class
@@ -128,24 +98,35 @@ class AccountsUpgrades(db.Model):
                                 onupdate='CASCADE'
                             ), nullable=False, index=True, primary_key=True
                         )
-    amount              = Column('amount', TINYINT(4), nullable=False)
-    account_upgrade     = relationship('AccountUpgrade')
-    account             = relationship('Account', backref='account_upgrades')
+    amount              = Column('amount', MEDIUMINT(4), nullable=False)
+    account             = relationship('Account', backref='upgrades')
+
+    # Method to increment an account upgrade and reduce account seasonal points (essence)
+    def do_upgrade(self, increment=1):
+        try:
+            self.amount = self.amount + increment
+            self.account.seasonal_points = self.account.seasonal_points - self.upgrade.cost
+            db.session.commit()
+            return True
+        except Exception as e:
+            print(e)
+        return False
 
     def __repr__(self):
-        return f'<AccountsUpgrades> "{self.account_upgrade.name}" (ID: "{self.account_upgrades_id}") / Account "{self.account.account_name}" ({self.account_id}) / Amount: {self.amount}'
+        return f'<AccountsUpgrades> "{self.upgrade.name}" ({self.account_upgrades_id}) @ <Account> "{self.account.account_name}" ({self.account_id}) / Amount: {self.amount}'
 
 # Account Upgrade database class
 class AccountUpgrade(db.Model):
-    __tablename__   = 'account_upgrades'
-    id              = Column(TINYINT(4), primary_key=True)
-    cost            = Column(TINYINT(4), nullable=False)
-    description     = Column(String(200), nullable=False)
-    name            = Column(String(30), nullable=False, unique=True)
-    max_value       = Column(TINYINT(4), nullable=False, server_default=FetchedValue())
+    __tablename__       = 'account_upgrades'
+    id                  = Column(TINYINT(4), primary_key=True)
+    cost                = Column(TINYINT(4), nullable=False)
+    description         = Column(String(200), nullable=False)
+    name                = Column(String(30), nullable=False, unique=True)
+    max_value           = Column(TINYINT(4), nullable=False, server_default=FetchedValue())
+    accounts_upgrades   = relationship('AccountsUpgrades', backref='upgrade')
 
     def __repr__(self):
-        return f'<AccountUpgrade> "{self.name}" (ID: "{self.id}") / Cost: "{self.cost}" / Max Value: "{self.max_value}"'
+        return f'<AccountUpgrade> "{self.name}" ({self.id}) / Cost: {self.cost} / Max Value: {self.max_value}'
 
 
 # Players Flags database class
@@ -167,7 +148,7 @@ class PlayersFlags(db.Model):
     player          = relationship('Player', backref='flags')
 
     def __repr__(self):
-        return f'<PlayersFlags> "{self.flag_id}" @ <Player> "{self.player_id}" : "{self.value}"'
+        return f'<PlayersFlags> {self.flag_id} @ <Player> {self.player_id} : {self.value}'
 
 # Player Flag database class
 class PlayerFlag(db.Model):
@@ -177,7 +158,7 @@ class PlayerFlag(db.Model):
     flag            = relationship('PlayersFlags', backref='flag')
 
     def __repr__(self):
-        return f'<PlayerFlag> "{self.name}" ("{self.flag_id}")'
+        return f'<PlayerFlag> "{self.name}" ({self.flag_id})'
 
 
 # Player Class database class
@@ -188,7 +169,7 @@ class PlayerClass(db.Model):
     player_class    = relationship('Player', backref='class')
 
     def __repr__(self):
-        return f'<PlayerClass "{self.class_name}" @ "{self.class_id}"'
+        return f'<PlayerClass> "{self.class_name}" ({self.class_id})'
 
 
 # Player Race database class
@@ -199,7 +180,7 @@ class PlayerRace(db.Model):
     player_race     = relationship('Player', backref='race')
 
     def __repr__(self):
-        return f'<PlayerRace "{self.race_name}" @ "{self.race_id}"'
+        return f'<PlayerRace> "{self.race_name}" ({self.race_id})'
 
 
 # Player database class
@@ -300,7 +281,6 @@ class Player(db.Model):
     def is_admin(self, admin_level):
         if self.true_level > admin_level:
                 return True
-
         return False
 
     # Start with two (2) points for existing, then do renown and remort calculations
@@ -312,7 +292,7 @@ class Player(db.Model):
         return c
 
     def __repr__(self):
-        return f'<Player> "{self.name}" ("{self.id}")'
+        return f'<Player> "{self.name}" ({self.id})'
 
 
 # News database class
@@ -338,9 +318,10 @@ class News(db.Model):
             return self.news_id
         except Exception as e:
             print(e)
+        return False
 
     def __repr__(self):
-        return f'<News> "{self.subject}" ("{self.news_id}")'
+        return f'<News> "{self.subject}" ({self.news_id})'
 
 
 # Season database class
@@ -352,7 +333,7 @@ class Season(db.Model):
     expiration_date = Column(Integer, nullable=False)
 
     def __repr__(self):
-        return f'<Season> "{self.season_id}" (until "{self.expiration_date}")'
+        return f'<Season> {self.season_id} (until "{self.expiration_date}")'
 
 
 # Challenge database class
@@ -372,7 +353,7 @@ class Challenge(db.Model):
     is_active       = Column(Integer, nullable=False, server_default=FetchedValue())
 
     def __repr__(self):
-        return f'<Challenge> "{self.mob_name}" ("{self.challenge_id}")'
+        return f'<Challenge> "{self.mob_name}" ({self.challenge_id})'
 
 
 # Players Remort Upgrades database class
@@ -391,11 +372,10 @@ class PlayersRemortUpgrades(db.Model):
                         ), nullable=False, index=True, primary_key=True
                     )
     value           = Column('value', Integer, nullable=False)
-    remort_upgrade  = relationship('RemortUpgrade')
     player          = relationship('Player', backref='remort_upgrades')
 
     def __repr__(self):
-        return f'<PlayersRemortUpgrades> Upgrade ID "{self.upgrade_id}" @ Player "{self.player.name}" (ID: "{self.player_id}") / Value: "{self.value}"'
+        return f'<PlayersRemortUpgrades> "{self.remort_upgrade.name}" ({self.upgrade_id}) @ <Player> "{self.player.name}" ({self.player_id}) / Value: {self.value}'
 
 # Remort Upgrade database class
 class RemortUpgrade(db.Model):
@@ -404,9 +384,10 @@ class RemortUpgrade(db.Model):
     name            = Column(String(20), nullable=False, unique=True, server_default=FetchedValue())
     renown_cost     = Column(SmallInteger, nullable=False)
     max_value       = Column(SmallInteger, nullable=False)
+    remort_upgrades = relationship('PlayersRemortUpgrades', backref='remort_upgrade')
 
     def __repr__(self):
-        return f'<RemortUpgrade> "{self.name}" (ID: "{self.upgrade_id}") / Cost: "{self.renown_cost}" /  Max Value: "{self.max_value}"'
+        return f'<RemortUpgrade> "{self.name}" ({self.upgrade_id}) / Cost: {self.renown_cost} /  Max Value: {self.max_value}'
 
 
 # Players Quests database class
@@ -429,7 +410,7 @@ class PlayersQuests(db.Model):
     player          = relationship('Player', backref='quests')
 
     def __repr__(self):
-        return f'<PlayersQuests> "{self.quest_id}" @ "{self.player_id}" / "{self.value}"'
+        return f'<PlayersQuests> "{self.quest.name}" ({self.quest_id}) @ <Player> "{self.player.name}" ({self.player_id}) / Value: {self.value}'
 
 # Quest database class
 class Quest(db.Model):
@@ -442,4 +423,4 @@ class Quest(db.Model):
     completion_message  = Column(String(80), nullable=False)
 
     def __repr__(self):
-        return f'<Quest> "{self.name}" ("{self.quest_id}")'
+        return f'<Quest> "{self.name}" ({self.quest_id})'

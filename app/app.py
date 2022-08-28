@@ -122,38 +122,42 @@ def login():
 @app.route('/shop', methods=['GET', 'POST'])
 @login_required
 def essence_shop():
-    account_upgrades                    = models.AccountUpgrade.query.order_by(models.AccountUpgrade.id).all()
+
+    # Get essence shop form object, fill upgrade choices, and check if submitted
     essence_shop_form                   = forms.EssenceShopForm()
-    essence_shop_form.upgrade.choices   = [(str(u.id), u.name) for u in account_upgrades]
+    essence_shop_form.upgrade.choices   = [(ug.upgrade.id, ug.upgrade.name) for ug in current_user.upgrades]
     if essence_shop_form.validate_on_submit():
 
-        # Find the upgrade the user wants to purchase
-        chosen_upgrade = account_upgrades[essence_shop_form.upgrade.data - 1]
+        # Find the upgrade the user chose
+        for u in current_user.upgrades:
+            if u.account_upgrades_id == essence_shop_form.upgrade.data:
+                chosen          = u
+                chosen.upgrade  = u.upgrade
 
-        # Do not let users spend essence that they do not have
-        if current_user.seasonal_points < chosen_upgrade.cost:
-            flash(f'You do not have enough essence to acquire that upgrade ({chosen_upgrade.name}).', 'error')
+        # Process the chosen upgrade
+        if chosen and chosen.upgrade:
 
-        # Do not let users upgrade beyond the max
-        elif current_user.account_upgrades[chosen_upgrade.id - 1].amount == chosen_upgrade.max_value:
-            flash(f'Sorry, but you already have the max value in that upgrade ({chosen_upgrade.name}).', 'error')
+            # Do not let users spend essence they do not have
+            if current_user.seasonal_points < chosen.upgrade.cost:
+                flash(f'Sorry, but you do not have enough essence to acquire that upgrade ({chosen.upgrade.name}).', 'error')
 
-        # Account Upgrade ID 4 ("Improved Starting Gear") is a work-in-progress
-        elif chosen_upgrade.id == 4:
-            flash(f'Sorry, but this upgrade (<strong>{chosen_upgrade.name}</strong>) is still a work in progress.', 'error')
+            # Do not let users upgrade beyond max
+            elif chosen.amount >= chosen.upgrade.max_value:
+                flash(f'Sorry, but you already have the max value in that upgrade ({chosen.upgrade.name}).', 'error')
 
-        # Proceed with processing valid essence upgrade purchase requests
-        elif chosen_upgrade.id in [u.id for u in account_upgrades]:
-            if current_user.upgrade(chosen_upgrade):
-                flash(f'You have been charged <strong>{chosen_upgrade.cost} essence</strong> for <strong>{chosen_upgrade.name}</strong>.', 'success')
+            # Account Upgrade ID 4 ("Improved Starting Gear") is a work-in-progress
+            elif chosen.upgrade.id == 4:
+                flash(f'Sorry, but this upgrade ({chosen.upgrade.name}) is still a work in progress.', 'error')
+
+            # Proceed with processing valid essence upgrade purchase requests
             else:
-                flash('Sorry, but something went wrong. Please try again.', 'error')
+                if chosen.do_upgrade():
+                    flash(f'You have been charged {chosen.upgrade.cost} essence (for {chosen.upgrade.name}).', 'success')
+                else:
+                    flash('Sorry, but please try again!', 'error')
 
-        # Invalid upgrade
-        else:
-            flash('Sorry, but an invalid upgrade was chosen. Please try again.', 'error')
-
-    return render_template('essence_shop.html.j2', account_upgrades=account_upgrades, essence_shop_form=essence_shop_form)
+    # Show the seasonal upgrade essence shop form
+    return render_template('essence_shop.html.j2', essence_shop_form=essence_shop_form)
 
 
 # Allow logged in users to change their passwords
