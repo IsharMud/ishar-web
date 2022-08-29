@@ -231,7 +231,7 @@
                     'Willpower':    player.curr_willpower
                 } -%}
                     <tr>
-                        <th title="{{ primary_stat }}: {{ player_stats[primary_stat] }}">
+                        <th id="player-primary-stat-header" title="{{ primary_stat }}: {{ player_stats[primary_stat] }}">
                             {{ primary_stat }}
                         </th>
                 {%- for k, v in player_stats.items() %}
@@ -243,7 +243,7 @@
                 {%- endfor %}
                     </tr>
                     <tr>
-                        <td title="{{ primary_stat }}: {{ player_stats[primary_stat] }}">
+                        <td id="player-primary-stat-value" title="{{ primary_stat }}: {{ player_stats[primary_stat] }}">
                             {{ player_stats[primary_stat] }}
                         </td>
                 {%- for k, v in player_stats.items() %}
