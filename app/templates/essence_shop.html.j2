@@ -82,6 +82,13 @@
                     </ul>
     {%- endif %}
 {%- endmacro -%}
+{%- macro display_essence(essence) -%}
+    {%- if essence > 0 %}
+        <strong>{{ essence }} essence</strong>
+    {%- else %}
+        <span class="flash-error">{{ essence }} essence</span>
+    {%- endif %}
+{%- endmacro -%}
 {%- block content %}
             <p>
                 <strong>
@@ -94,17 +101,10 @@
             </p>
             <ul class="essence-shop">
                 <li title="You currently have: {{ current_user.seasonal_points }} essence.">
-                    You currently have:
-    {%- if current_user.seasonal_points > 0 %}
-                    <strong>{{ current_user.seasonal_points }} essence</strong>.
-    {%- else %}
-                    <span class="flash-error">{{ current_user.seasonal_points }} essence</span>.
-    {%- endif %}
+                    You currently have: {{ display_essence(current_user.seasonal_points) }}.
                 </li>
-            </ul>
-            <ul class="essence-shop">
                 <li title="This season, you have earned: {{ current_user.seasonal_earned }} essence.">
-                    This season, you have earned: <strong>{{ current_user.seasonal_earned }} essence</strong>.
+                    This season, you have earned: {{ display_essence(current_user.seasonal_earned) }}.
                 </li>
             </ul>
             <h4 title="Upgrades">
@@ -114,7 +114,8 @@
             <ul class="essence-shop">
         {%- for upgraded in current_user.upgrades | selectattr('amount', '>', 0) %}
                 <li title="{{ upgraded.upgrade.name }}">
-                    <strong>{{ upgraded.upgrade.name }}</strong>{% if upgraded.amount > 1 %} (x{{ upgraded.amount}}){% endif %}
+                    {{ upgraded.upgrade.name }}
+                    {%- if upgraded.amount > 1 %} (x{{ upgraded.amount}}){% endif %}
                 </li>
         {%- endfor %}
             </ul>
