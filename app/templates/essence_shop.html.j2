@@ -11,13 +11,15 @@
             function confirmSpend() {
 
                 // Set the account upgrades and find chosen
-                const upgrades  = { {%- for upgrade in current_user.upgrades -%}
+                const upgrades  = {
+                    {%- for upgrade in current_user.upgrades %}
                     {{ upgrade.account_upgrades_id }} : { amount: {{ upgrade.amount }}, cost: {{ upgrade.upgrade.cost }}, max_value: {{ upgrade.upgrade.max_value }}, name: '{{ upgrade.upgrade.name }}' }
                     {%- if not loop.last %}, {% endif %}
-                {%- endfor -%} };
+                {%- endfor %}
+                };
                 const radios    = document.getElementsByName('upgrade');
                 const selected  = Array.from(radios).find(radio => radio.checked);
-                upgrade            = upgrades[selected.value];
+                const upgrade   = upgrades[selected.value];
 
                 // Account Upgrade ID 4 ("Improved Starting Gear") is a work-in-progress
                 if (selected.value == 4) {
