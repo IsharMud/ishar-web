@@ -137,17 +137,17 @@ def essence_shop():
         # Process the chosen upgrade
         if chosen and chosen.upgrade:
 
-            # Do not let users spend essence they do not have
-            if current_user.seasonal_points < chosen.upgrade.cost:
-                flash(f'Sorry, but you do not have enough essence to acquire that upgrade ({chosen.upgrade.name}).', 'error')
+            # Account Upgrade ID 4 ("Improved Starting Gear") is a work-in-progress
+            if chosen.upgrade.id == 4:
+                flash(f'Sorry, but this upgrade ({chosen.upgrade.name}) is still a work in progress.', 'error')
 
             # Do not let users upgrade beyond max
             elif chosen.amount >= chosen.upgrade.max_value:
                 flash(f'Sorry, but you already have the max value in that upgrade ({chosen.upgrade.name}).', 'error')
 
-            # Account Upgrade ID 4 ("Improved Starting Gear") is a work-in-progress
-            elif chosen.upgrade.id == 4:
-                flash(f'Sorry, but this upgrade ({chosen.upgrade.name}) is still a work in progress.', 'error')
+            # Do not let users spend essence they do not have
+            elif current_user.seasonal_points < chosen.upgrade.cost:
+                flash(f'Sorry, but you do not have enough essence to acquire that upgrade ({chosen.upgrade.name}).', 'error')
 
             # Proceed with processing valid essence upgrade purchase requests
             else:
