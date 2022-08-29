@@ -222,7 +222,7 @@
                 {%- else %}
                     {%- set primary_stat    = 'Endurance' %}
                 {%- endif %}
-                {%- set stats = {
+                {%- set player_stats = {
                     'Agility':      player.curr_agility,
                     'Endurance':    player.curr_endurance,
                     'Focus':        player.curr_focus,
@@ -231,10 +231,10 @@
                     'Willpower':    player.curr_willpower
                 } -%}
                     <tr>
-                        <th title="{{ primary_stat }}: {{ stats[primary_stat] }}">
+                        <th title="{{ primary_stat }}: {{ player_stats[primary_stat] }}">
                             {{ primary_stat }}
                         </th>
-                {%- for k, v in stats.items()  %}
+                {%- for k, v in player_stats.items() %}
                     {%- if k != primary_stat %}
                         <th title="{{ k }}: {{ v }}">
                             {{ k }}
@@ -243,10 +243,10 @@
                 {%- endfor %}
                     </tr>
                     <tr>
-                        <td title="{{ primary_stat }}: {{ stats[primary_stat] }}">
-                            {{ stats[primary_stat] }}
+                        <td title="{{ primary_stat }}: {{ player_stats[primary_stat] }}">
+                            {{ player_stats[primary_stat] }}
                         </td>
-                {%- for k, v in stats.items() %}
+                {%- for k, v in player_stats.items() %}
                     {%- if k != primary_stat %}
                         <td title="{{ k }}: {{ v }}">
                             {{ v }}
