@@ -12,9 +12,9 @@
     {%- elif player.true_level == 21 %}
         {%- set player_type         = 'Consort' -%}
     {%- elif player.flags[45].value == 1 %}
-        {%- set player_type     = 'Survival' -%}
+        {%- set player_type         = 'Survival' -%}
     {%- else -%}
-        {%- set player_type = 'Classic' -%}
+        {%- set player_type         = 'Classic' -%}
     {%- endif -%}
     {{ player_type }}
 {%- endmacro -%}
@@ -115,8 +115,9 @@
         </nav>
         <div id="content">
             <h2>
-                {% block header %}{% endblock %}
+                {% block header %}{% endblock header %}
             </h2>
+            {% block pre_messages %}{% endblock pre_messages %}
 {%- with messages = get_flashed_messages(with_categories=True) %}
     {%- if messages %}
             <div id="flashes">
@@ -131,7 +132,7 @@
     {%- endif %}
 {%- endwith %}
 {%- block content %}
-{%- endblock %}
+{%- endblock content %}
         </div>
         <footer>
 {%- block footer %}
@@ -158,7 +159,7 @@
                 ends {{ display_timestamp(season.expiration_date) }}, on {{ season_end.strftime('%A, %B %d, %Y') }}
             </span>
     {%- endif %}
-{%- endblock %}
+{%- endblock footer %}
         </footer>
     </body>
 </html>
