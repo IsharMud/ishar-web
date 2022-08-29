@@ -113,7 +113,7 @@
     {%- if current_user.upgrades is defined and current_user.upgrades is iterable and current_user.upgrades | selectattr('amount', '>', 0) | list | length > 0 %}
             <ul class="essence-shop">
         {%- for upgraded in current_user.upgrades | selectattr('amount', '>', 0) %}
-                <li title="{{ upgraded.upgrade.name }}">
+                <li title="{{ upgraded.upgrade.name }}{% if upgraded.amount > 1 %} (x{{ upgraded.amount}}){% endif %}">
                     {{ upgraded.upgrade.name }}
                     {%- if upgraded.amount > 1 %} (x{{ upgraded.amount}}){% endif %}
                 </li>
