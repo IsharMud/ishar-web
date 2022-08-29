@@ -4,41 +4,43 @@
 {% block meta_url %}{{ url_for('essence_shop', _external=True) }}{% endblock meta_url %}">
 {% block title %}Essence Shop{% endblock %}
 {% block header %}Essence Shop{% endblock %}
-{%- block scripts -%}
-<script>
-    // Create a JavaScript function to confirm with the user how much they are spending
-    function confirmSpend() {
+{%- block scripts %}
+        <script>
 
-        // Set the account upgrades and find chosen
-        const upgrades  = { {%- for upgrade in current_user.upgrades -%}
-            {{ upgrade.account_upgrades_id }} : { amount: {{ upgrade.amount }}, cost: {{ upgrade.upgrade.cost }}, max_value: {{ upgrade.upgrade.max_value }}, name: '{{ upgrade.upgrade.name }}' }
-            {%- if not loop.last %}, {% endif %}
-        {%- endfor -%} };
-        const radios    = document.getElementsByName('upgrade');
-        const selected  = Array.from(radios).find(radio => radio.checked);
-        upgrade            = upgrades[selected.value];
+            // Create a JavaScript function to confirm with the user how much they are spending
+            function confirmSpend() {
 
-        // Account Upgrade ID 4 ("Improved Starting Gear") is a work-in-progress
-        if (selected.value == 4) {
-            alert('Sorry, but this upgrade (' + upgrade.name + ') is still a work in progress.');
-            return false;
+                // Set the account upgrades and find chosen
+                const upgrades  = { {%- for upgrade in current_user.upgrades -%}
+                    {{ upgrade.account_upgrades_id }} : { amount: {{ upgrade.amount }}, cost: {{ upgrade.upgrade.cost }}, max_value: {{ upgrade.upgrade.max_value }}, name: '{{ upgrade.upgrade.name }}' }
+                    {%- if not loop.last %}, {% endif %}
+                {%- endfor -%} };
+                const radios    = document.getElementsByName('upgrade');
+                const selected  = Array.from(radios).find(radio => radio.checked);
+                upgrade            = upgrades[selected.value];
 
-        // Do not let users upgrade beyond max
-        } else if ( upgrade.amount >= upgrade.max_value) {
-            alert('Sorry, but you already have the max value in that upgrade (' + upgrade.name + ').');
-            return false;
+                // Account Upgrade ID 4 ("Improved Starting Gear") is a work-in-progress
+                if (selected.value == 4) {
+                    alert('Sorry, but this upgrade (' + upgrade.name + ') is still a work in progress.');
+                    return false;
 
-        // Do not let users spend essence they do not have
-        } else if ({{ current_user.seasonal_points }} < upgrade.cost) {
-            alert('Sorry, but you do not have enough essence to acquire that upgrade (' + upgrade.name + ').');
-            return false;
-        };
+                // Do not let users upgrade beyond max
+                } else if ( upgrade.amount >= upgrade.max_value) {
+                    alert('Sorry, but you already have the max value in that upgrade (' + upgrade.name + ').');
+                    return false;
 
-        // Proceed by having the user confirm their choice
-        return confirm('Are you sure you want to spend ' + upgrade.cost + ' essence for ' + upgrade.name + '?');
-    };
-</script>
-{%- endblock %}
+                // Do not let users spend essence they do not have
+                } else if ({{ current_user.seasonal_points }} < upgrade.cost) {
+                    alert('Sorry, but you do not have enough essence to acquire that upgrade (' + upgrade.name + ').');
+                    return false;
+                };
+
+                // Proceed by having the user confirm their choice
+                return confirm('Are you sure you want to spend ' + upgrade.cost + ' essence for ' + upgrade.name + '?');
+            };
+
+        </script>
+{%- endblock scripts %}
 {%- macro render_field(field) %}
             <ul class="essence-shop">
     {%- for subfield in field %}
@@ -85,7 +87,12 @@
             </p>
             <ul class="essence-shop">
                 <li title="You currently have: {{ current_user.seasonal_points }} essence.">
-                    You currently have: <strong>{{ current_user.seasonal_points }} essence</strong>.
+                    You currently have:
+    {%- if current_user.seasonal_points > 0 %}
+                    <strong>{{ current_user.seasonal_points }} essence</strong>.
+    {%- else %}
+                    <span class="flash-error">{{ current_user.seasonal_points }} essence</span>.
+    {%- endif %}
                 </li>
             </ul>
             <ul class="essence-shop">
