@@ -4,32 +4,45 @@
 {% block meta_url %}{{ url_for('essence_shop', _external=True) }}{% endblock meta_url %}">
 {% block title %}Essence Shop{% endblock %}
 {% block header %}Essence Shop{% endblock %}
-{%- macro render_field(field) -%}
-                    <ul class="essence-shop">
+{%- block scripts -%}
+<script>
+    // Create a JavaScript function to confirm with the user how much they are spending
+    function confirmSpend() {
+        const upgrades  = { {%- for upgrade in current_user.upgrades -%}
+            {{ upgrade.account_upgrades_id }} : { cost: {{ upgrade.upgrade.cost }}, name: '{{ upgrade.upgrade.name }}' }
+            {%- if not loop.last %}, {% endif %}
+        {%- endfor -%} };
+        const radios    = document.getElementsByName('upgrade');
+        const selected  = Array.from(radios).find(radio => radio.checked);
+        upgrade            = upgrades[selected.value];
+        return confirm('Are you sure you want to spend ' + upgrade.cost + ' essence for ' + upgrade.name + '?');
+    };
+</script>
+{%- endblock %}
+{%- macro render_field(field) %}
+            <ul class="essence-shop">
     {%- for subfield in field %}
-                        <li class="essence-upgrades" title="{{ subfield.label | striptags }}">
-                            {{ subfield }}
-                            {{ subfield.label }}
-                            <ul>
+                <li class="essence-upgrades" title="{{ subfield.label | striptags }}">
+                    {{ subfield }}
+                    {{ subfield.label }}
+                    <ul>
         {%- for ug in current_user.upgrades | selectattr('account_upgrades_id', 'equalto', subfield.data) %}
-                                <li title="{{ ug.upgrade.description | replace('\n', ' ') }}">
-                                    {{ ug.upgrade.description | replace('\n', ' ')}}
-                                </li>
+                        <li title="{{ ug.upgrade.description | replace('\n', ' ') }}">
+                            {{ ug.upgrade.description | replace('\n', ' ')}}
+                        </li>
             {%- if current_user.seasonal_points < ug.upgrade.cost %}
                 {%- set cost_css = 'error' %}
             {%- else %}
                 {%- set cost_css = 'success' %}
             {%- endif %}
-                                <li title="Cost: {{ ug.upgrade.cost }} essence">
-                                    <span class="flash-{{ cost_css }}">
-                                        {{ ug.upgrade.cost }} essence
-                                    </span>
-                                </li>
-        {%- endfor %}
-                            </ul>
+                        <li title="Cost: {{ ug.upgrade.cost }} essence">
+                            <span class="flash-{{ cost_css }}">{{ ug.upgrade.cost }} essence</span>
                         </li>
-    {%- endfor %}
+        {%- endfor %}
                     </ul>
+                </li>
+    {%- endfor %}
+            </ul>
     {%- if field.errors %}
                     <ul class="field-errors">
         {%- for error in field.errors %}
@@ -41,52 +54,52 @@
     {%- endif %}
 {%- endmacro -%}
 {%- block content %}
-                <p>
-                    <strong>
-                        Welcome to the seasonal shop!
-                    </strong>
-                </p>
-                <p>
-                    This is where you can find information on the current season
-                    as well as view your accumulated essence balance and spend it to upgrade your account.
-                </p>
-                <ul class="essence-shop">
-                    <li title="You currently have: {{ current_user.seasonal_points }} essence.">
-                        You currently have: <strong>{{ current_user.seasonal_points }} essence</strong>.
-                    </li>
-                </ul>
-                <ul class="essence-shop">
-                    <li title="This season, you have earned: {{ current_user.seasonal_earned }} essence.">
-                        This season, you have earned: <strong>{{ current_user.seasonal_earned }} essence</strong>.
-                    </li>
-                </ul>
-                <h4 title="Upgrades">
-                    Upgrades
-                </h4>
+            <p>
+                <strong>
+                    Welcome to the seasonal shop!
+                </strong>
+            </p>
+            <p>
+                This is where you can find information on the current season
+                as well as view your accumulated essence balance and spend it to upgrade your account.
+            </p>
+            <ul class="essence-shop">
+                <li title="You currently have: {{ current_user.seasonal_points }} essence.">
+                    You currently have: <strong>{{ current_user.seasonal_points }} essence</strong>.
+                </li>
+            </ul>
+            <ul class="essence-shop">
+                <li title="This season, you have earned: {{ current_user.seasonal_earned }} essence.">
+                    This season, you have earned: <strong>{{ current_user.seasonal_earned }} essence</strong>.
+                </li>
+            </ul>
+            <h4 title="Upgrades">
+                Upgrades
+            </h4>
     {%- if current_user.upgrades is defined and current_user.upgrades is iterable and current_user.upgrades | selectattr('amount', '>', 0) | list | length > 0 %}
-                <ul class="essence-shop">
+            <ul class="essence-shop">
         {%- for upgraded in current_user.upgrades | selectattr('amount', '>', 0) %}
-                    <li title="{{ upgraded.upgrade.name }}">
-                        <strong>{{ upgraded.upgrade.name }}</strong>{% if upgraded.amount > 1 %} (x{{ upgraded.amount}}){% endif %}
-                    </li>
+                <li title="{{ upgraded.upgrade.name }}">
+                    <strong>{{ upgraded.upgrade.name }}</strong>{% if upgraded.amount > 1 %} (x{{ upgraded.amount}}){% endif %}
+                </li>
         {%- endfor %}
-                </ul>
+            </ul>
     {%- else %}
-                <ul>
-                    <li>
-                        <i>You have not purchased any upgrades.</i>
-                    </li>
-                </ul>
+            <ul>
+                <li>
+                    <i>You have not purchased any upgrades.</i>
+                </li>
+            </ul>
     {%- endif %}
     {%- if essence_shop_form is defined %}
-                <h4 title="Purchase">
-                    Purchase
-                </h4>
-                <form method="post" action="{{ url_for('essence_shop') }}" id="essence-shop-form">
-                    {{ render_field(essence_shop_form.upgrade) }}
-                    {{ essence_shop_form.csrf_token }}
-                    {{ essence_shop_form.submit }}
-                </form>
+            <h4 title="Purchase">
+                Purchase
+            </h4>
+            <form method="post" action="{{ url_for('essence_shop') }}" id="essence-shop-form" onSubmit="return confirmSpend();">
+                {{ render_field(essence_shop_form.upgrade) }}
+                {{ essence_shop_form.csrf_token }}
+                {{ essence_shop_form.submit }}
+            </form>
     {%- endif %}
 {% include('back.html.j2') %}
 {%- endblock %}
