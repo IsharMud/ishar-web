@@ -12,10 +12,15 @@
 
                 // Set the account upgrades and find chosen
                 const upgrades  = {
-                    {%- for upgrade in current_user.upgrades %}
-                    {{ upgrade.account_upgrades_id }} : { amount: {{ upgrade.amount }}, cost: {{ upgrade.upgrade.cost }}, max_value: {{ upgrade.upgrade.max_value }}, name: '{{ upgrade.upgrade.name }}' }
-                    {%- if not loop.last %}, {% endif %}
-                {%- endfor %}
+    {%- for upgrade in current_user.upgrades %}
+                    {{ upgrade.account_upgrades_id }}: {
+                        amount: {{ upgrade.amount }},
+                        cost: {{ upgrade.upgrade.cost }},
+                        max_value: {{ upgrade.upgrade.max_value }},
+                        name: '{{ upgrade.upgrade.name }}'
+                    }
+        {%- if not loop.last %},{% endif %}
+    {%- endfor %}
                 };
                 const radios    = document.getElementsByName('upgrade');
                 const selected  = Array.from(radios).find(radio => radio.checked);
