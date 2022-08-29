@@ -27,22 +27,22 @@
     {%- elif align >= 1000 %}
         Very Good
     {%- else -%}
-        Neutral
+        Neutral? ({{ align | string | safe }})
     {%- endif -%}
 {%- endmacro -%}
-{%- macro display_class(class) -%}
-    {%- if class == 'WARRIOR' -%}
+{%- macro display_class(player_class_name) -%}
+    {%- if player_class_name == 'WARRIOR' -%}
         mighty warrior
-    {%- elif class == 'ROGUE' -%}
+    {%- elif player_class_name == 'ROGUE' -%}
         stealthy rogue
-    {%- elif class == 'CLERIC' -%}
+    {%- elif player_class_name == 'CLERIC' -%}
         pious cleric
-    {%- elif class == 'MAGICIAN' -%}
+    {%- elif player_class_name == 'MAGICIAN' -%}
         fearsome mage
-    {%- elif class == 'NECROMANCER' -%}
+    {%- elif player_class_name == 'NECROMANCER' -%}
         shadowy necromancer
     {%- else -%}
-        classless curiosity ({{ class | safe | title }})
+        classless curiosity ({{ player_class_name | safe | title }})
     {%- endif -%}
 {%- endmacro -%}
 {%- if player %}
@@ -121,7 +121,7 @@
                     <li>
                         {{ player_gender | title }} {{ player_phrase }} level {{ player.level }}
             {%- if player.remorts > 0 %}
-                        and {{ player_phrase_owns }} remorted {{ player.remorts }} time{%- if player.remorts != 1 -%}s{%- endif -%}
+                        and {{ player_phrase_owns }} remorted {{ player.remorts }} time{%- if player.remorts != 1 %}s{% endif %}
             {%- endif %}.
                     </li>
             {%- if player.total_renown > 0 %}
@@ -132,23 +132,23 @@
             {%- if player.quests_completed > 0 %}
                     <li>
                         {{ player_gender | title }} {{ player_phrase_owns }} completeted {{ player.quests_completed }} quest
-                        {%- if player.quests_completed != 1 -%}s{%- endif -%}.
+                        {%- if player.quests_completed != 1 %}s{% endif %}.
                     </li>
             {%- endif %}
             {%- if player.challenges_completed > 0 %}
                     <li>
                         {{ player_gender | title }} {{ player_phrase_owns }} completed {{ player.challenges_completed }} challenge
-                        {%- if player.challenges_completed != 1 -%}s{%- endif -%}.
+                        {%- if player.challenges_completed != 1 %}s{% endif %}.
                     </li>
             {%- endif %}
                     <li>
-                        {{ player_gender_own | title }} alignment {{ player_phrase }} {{ display_align(player.align) }} ({{ player.align }}).
+                        {{ player_gender_own | title }} alignment {{ player_phrase }} {{ display_align(player.align) }}.
                     </li>
                     <li>
             {%- if player_type == 'Classic' %}
                 {%- if player.deaths > 0 %}
                         {{ player_gender | title }} {{ player_phrase_owns }} died {{ player.deaths }}
-                        time{%- if player.deaths != 1 -%}s{%- endif -%}.
+                        time{% if player.deaths != 1 %}s{% endif %}.
                 {%- else %}
                         {{ player_gender | title }} has never died!
                 {%- endif %}
@@ -156,7 +156,7 @@
                         {{ player.name | title | safe }} is <span class="{{ player_css }}">DEAD</span>!
                         <ul>
                             <li>
-                                {{ player_gender | title }} died too often. {{ player_gender | title }} can not be resurrected!
+                                {{ player.name | title | safe }} died too often. {{ player_gender | title }} can not be resurrected!
                             </li>
                         </ul>
             {%- elif player_type == 'Survival' %}
@@ -171,38 +171,34 @@
                     Quests
                 </h3>
                 <ol>
-                {%- for quest in player.quests %}
-                    {%- if quest.value == 1 %}
-                    <li>
-                        {{ quest.quest.display_name }}
-                        {%- if quest.quest.completion_message is defined and quest.quest.completion_message != '' %}
-                        <ul>
-                            <li>
-                                {{ quest.quest.completion_message }}
-                            </li>
-                        </ul>
-                        {%- endif %}
-                    </li>
+                {%- for quest in player.quests | selectattr('value', 'equalto', 1) %}
+                <li>
+                    {{ quest.quest.display_name }}
+                    {%- if quest.quest.completion_message is defined and quest.quest.completion_message != '' %}
+                    <ul>
+                        <li>
+                            {{ quest.quest.completion_message }}
+                        </li>
+                    </ul>
                     {%- endif %}
+                </li>
                 {%- endfor %}
                 </ol>
             </div>
             {%- endif %}
-            {%- if player.remort_upgrades and player.remort_upgrades | selectattr('value', '>=', 1) | list | length > 0 %}
+            {%- if player.remort_upgrades and player.remort_upgrades | selectattr('value', '>', 0) | list | length > 0 %}
             <div id="player-remort-upgrades">
                 <h3>
                     Remort Upgrades
                 </h3>
                 <ol>
-                {%- for remort_upgrade in player.remort_upgrades %}
-                    {%- if remort_upgrade.value > 0 %}
+                {%- for remort_upgrade in player.remort_upgrades | selectattr('value', '>', 0) %}
                     <li>
                         {{ remort_upgrade.remort_upgrade.name | replace('_', ' ') | title | safe }}
-                        {%- if remort_upgrade.value > 1 %}
-                            (x{{remort_upgrade.value }})
-                        {%- endif %}
-                    </li>
+                    {%- if remort_upgrade.value > 1 %}
+                        (x{{ remort_upgrade.value }})
                     {%- endif %}
+                    </li>
                 {%- endfor %}
                 </ol>
             </div>
@@ -213,26 +209,49 @@
                     Statistics
                 </h3>
                 <table>
+                {%- if player.class.class_name == 'WARRIOR' %}
+                    {%- set primary_stat    = 'Strength' %}
+                {%- elif player.class.class_name == 'ROGUE' %}
+                    {%- set primary_stat    = 'Agility' %}
+                {%- elif player.class.class_name == 'CLERIC' %}
+                    {%- set primary_stat    = 'Willpower' %}
+                {%- elif player.class.class_name == 'MAGICIAN' %}
+                    {%- set primary_stat    = 'Perception' %}
+                {%- elif player.class.class_name == 'NECROMANCER' %}
+                    {%- set primary_stat    = 'Focus' %}
+                {%- else %}
+                    {%- set primary_stat    = 'Endurance' %}
+                {%- endif %}
                 {%- set stats = {
-                    'Agility': player.curr_agility,
-                    'Endurance': player.curr_endurance,
-                    'Focus': player.curr_focus,
-                    'Perception': player.curr_perception,
-                    'Strength': player.curr_strength,
-                    'Willpower': player.curr_willpower
+                    'Agility':      player.curr_agility,
+                    'Endurance':    player.curr_endurance,
+                    'Focus':        player.curr_focus,
+                    'Perception':   player.curr_perception,
+                    'Strength':     player.curr_strength,
+                    'Willpower':    player.curr_willpower
                 } -%}
                     <tr>
-                {%- for k, v in stats.items() %}
+                        <th title="{{ primary_stat }}: {{ stats[primary_stat] }}">
+                            {{ primary_stat }}
+                        </th>
+                {%- for k, v in stats.items()  %}
+                    {%- if k != primary_stat %}
                         <th title="{{ k }}: {{ v }}">
                             {{ k }}
                         </th>
+                    {%- endif %}
                 {%- endfor %}
                     </tr>
                     <tr>
+                        <td title="{{ primary_stat }}: {{ stats[primary_stat] }}">
+                            {{ stats[primary_stat] }}
+                        </td>
                 {%- for k, v in stats.items() %}
+                    {%- if k != primary_stat %}
                         <td title="{{ k }}: {{ v }}">
                             {{ v }}
                         </td>
+                    {%- endif %}
                 {%- endfor %}
                     </tr>
                 </table>

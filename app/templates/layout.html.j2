@@ -117,7 +117,6 @@
             <h2>
                 {% block header %}{% endblock header %}
             </h2>
-            {% block pre_messages %}{% endblock pre_messages %}
 {%- with messages = get_flashed_messages(with_categories=True) %}
     {%- if messages %}
             <div id="flashes">
