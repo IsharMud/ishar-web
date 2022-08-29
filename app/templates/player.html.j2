@@ -27,7 +27,7 @@
     {%- elif align >= 1000 %}
         Very Good
     {%- else -%}
-        Un-Aligned Alien
+        Neutral
     {%- endif -%}
 {%- endmacro -%}
 {%- macro display_class(class) -%}
@@ -209,49 +209,31 @@
             {%- endif %}
             {%- if player.true_level >= 5 %}
             <div id="player-statistics">
-                <h3>
+                <h3 title="Statistics">
                     Statistics
                 </h3>
                 <table>
+                {%- set stats = {
+                    'Agility': player.curr_agility,
+                    'Endurance': player.curr_endurance,
+                    'Focus': player.curr_focus,
+                    'Perception': player.curr_perception,
+                    'Strength': player.curr_strength,
+                    'Willpower': player.curr_willpower
+                } -%}
                     <tr>
-                        <th>
-                            Strength
+                {%- for k, v in stats.items() %}
+                        <th title="{{ k }}: {{ v }}">
+                            {{ k }}
                         </th>
-                        <th>
-                            Agility
-                        </th>
-                        <th>
-                            Endurance
-                        </th>
-                        <th>
-                            Willpower
-                        </th>
-                        <th>
-                            Focus
-                        </th>
-                        <th>
-                            Perception
-                        </th>
+                {%- endfor %}
                     </tr>
                     <tr>
-                        <td>
-                            {{ player.curr_strength }}
+                {%- for k, v in stats.items() %}
+                        <td title="{{ k }}: {{ v }}">
+                            {{ v }}
                         </td>
-                        <td>
-                            {{ player.curr_agility }}
-                        </td>
-                        <td>
-                            {{ player.curr_endurance }}
-                        </td>
-                        <td>
-                            {{ player.curr_willpower }}
-                        </td>
-                        <td>
-                            {{ player.curr_focus }}
-                        </td>
-                        <td>
-                            {{ player.curr_perception }}
-                        </td>
+                {%- endfor %}
                     </tr>
                 </table>
             </div>
