@@ -210,17 +210,17 @@
                 </h3>
                 <table>
                 {%- if player.class.class_name == 'WARRIOR' %}
-                    {%- set primary_stat    = 'Strength' %}
+                    {%- set stat_order  = [ 'Strength', 'Agility', 'Endurance', 'Willpower', 'Focus', 'Perception' ] %}
                 {%- elif player.class.class_name == 'ROGUE' %}
-                    {%- set primary_stat    = 'Agility' %}
+                    {%- set stat_order  = [ 'Agility', 'Perception', 'Strength', 'Focus', 'Endurance', 'Willpower' ] %}
                 {%- elif player.class.class_name == 'CLERIC' %}
-                    {%- set primary_stat    = 'Willpower' %}
+                    {%- set stat_order  = [ 'Willpower', 'Strength', 'Perception', 'Endurance', 'Focus', 'Agility' ] %}
                 {%- elif player.class.class_name == 'MAGICIAN' %}
-                    {%- set primary_stat    = 'Perception' %}
+                    {%- set stat_order  = [ 'Perception', 'Focus', 'Agility', 'Willpower', 'Endurance', 'Strength' ] %}
                 {%- elif player.class.class_name == 'NECROMANCER' %}
-                    {%- set primary_stat    = 'Focus' %}
+                    {%- set stat_order  = [ 'Focus', 'Willpower', 'Perception', 'Agility', 'Strength', 'Endurance' ] %}
                 {%- else %}
-                    {%- set primary_stat    = 'Endurance' %}
+                    {%- set stat_order  = [ 'Agility', 'Endurance', 'Focus', 'Perception', 'Strength', 'Willpower' ] %}
                 {%- endif %}
                 {%- set player_stats = {
                     'Agility':      player.curr_agility,
@@ -231,27 +231,17 @@
                     'Willpower':    player.curr_willpower
                 } -%}
                     <tr>
-                        <th id="player-primary-stat-header" title="{{ primary_stat }}: {{ player_stats[primary_stat] }}">
-                            {{ primary_stat }}
+                {%- for stat in stat_order %}
+                        <th title="{{ stat }}: {{ player_stats[stat] }}">
+                            {{ stat }}
                         </th>
-                {%- for k, v in player_stats.items() %}
-                    {%- if k != primary_stat %}
-                        <th title="{{ k }}: {{ v }}">
-                            {{ k }}
-                        </th>
-                    {%- endif %}
                 {%- endfor %}
                     </tr>
                     <tr>
-                        <td id="player-primary-stat-value" title="{{ primary_stat }}: {{ player_stats[primary_stat] }}">
-                            {{ player_stats[primary_stat] }}
+                {%- for stat in stat_order %}
+                        <td title="{{ stat }}: {{ player_stats[stat] }}">
+                            {{ player_stats[stat] }}
                         </td>
-                {%- for k, v in player_stats.items() %}
-                    {%- if k != primary_stat %}
-                        <td title="{{ k }}: {{ v }}">
-                            {{ v }}
-                        </td>
-                    {%- endif %}
                 {%- endfor %}
                     </tr>
                 </table>
