@@ -233,13 +233,13 @@
                     <tr>
                 {%- for stat in stat_order %}
                         <th title="{{ stat }}: {{ player_stats[stat] }}">
-                            {{ stat }}
+                                {{ stat }}
                         </th>
                 {%- endfor %}
                     </tr>
                     <tr>
                 {%- for stat in stat_order %}
-                        <td title="{{ stat }}: {{ player_stats[stat] }}">
+                        <td title="{{ stat }}: {{ player_stats[stat] }}" {%- if loop.first %} id="primary-stat"{% endif %}>
                             {{ player_stats[stat] }}
                         </td>
                 {%- endfor %}

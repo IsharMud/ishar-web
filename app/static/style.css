@@ -108,7 +108,7 @@ header a, header a:hover {
     background-color:   #000;
 }
 
-#flashes {
+#flashes, #primary-stat {
     font-weight:        bold;
 }
 
