@@ -71,10 +71,25 @@ class Account(db.Model, UserMixin):
     # Method to create new account
     def create_account(self):
         try:
+
+            # Hash the password and add the account to the database
             self.password = crypt.crypt(self.password, crypt.mksalt(method=crypt.METHOD_MD5))
             db.session.add(self)
             db.session.commit()
+
+            # Start each available account upgrade at zero (0)
+            for init_ugrade in AccountUpgrade.query.all():
+                create_upgrade  = AccountsUpgrades(
+                    account_upgrades_id     = init_ugrade.id,
+                    account_id              = self.account_id,
+                    amount                  = 0
+                )
+                db.session.add(create_upgrade)
+            db.session.commit()
+
+            # Return the new account ID
             return self.account_id
+
         except Exception as e:
             print(e)
         return False
