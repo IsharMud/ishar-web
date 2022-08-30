@@ -118,7 +118,7 @@
                         {{ player.name | title | safe }} {{ player_phrase }} a {{ display_class(player.class.class_name) }} of
                         {{ player.race.race_name | replace('_', '-') | lower | safe }} origin.
                     </li>
-                    <li title="Level: {{ player.level }} {%- if player.remorts > 0 %} / Remorts {{ player.remorts }}{% endif %}">
+                    <li title="Level: {{ player.level }} {%- if player.remorts > 0 %} / Remorts: {{ player.remorts }}{% endif %}">
                         {{ player_gender | title }} {{ player_phrase }} level {{ player.level }}
             {%- if player.remorts > 0 %}
                         and {{ player_phrase_owns }} remorted {{ player.remorts }} time{%- if player.remorts != 1 %}s{% endif %}
