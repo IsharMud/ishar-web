@@ -14,10 +14,10 @@
                 const upgrades  = {
     {%- for upgrade in current_user.upgrades %}
                     {{ upgrade.account_upgrades_id }}: {
-                        amount: {{ upgrade.amount }},
-                        cost: {{ upgrade.upgrade.cost }},
-                        max_value: {{ upgrade.upgrade.max_value }},
-                        name: '{{ upgrade.upgrade.name }}'
+                        amount:     {{ upgrade.amount }},
+                        cost:       {{ upgrade.upgrade.cost }},
+                        max_value:  {{ upgrade.upgrade.max_value }},
+                        name:       '{{ upgrade.upgrade.name }}'
                     }
         {%- if not loop.last %},{% endif %}
     {%- endfor %}

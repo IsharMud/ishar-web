@@ -385,12 +385,10 @@ def new_account():
                 account_name    = new_account_form.account_name.data
             )
 
-            # Create the account in the database and confirm the account ID
+            # Create the account in the database, confirm the account ID, and log the user in
             created_id      = new_account.create_account()
             created_account = models.Account.query.filter_by(account_id = created_id).first()
             if created_account:
-
-                # Log the user in to their new account and greet them
                 login_user(created_account)
                 flash('Your account has been created!', 'success')
 
