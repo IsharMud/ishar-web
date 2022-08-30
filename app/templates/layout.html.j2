@@ -137,7 +137,7 @@
 {%- block footer %}
     {%- if current_user is defined and current_user.is_authenticated %}
         {%- if current_user.created_at is defined and current_user.created_at != '' %}
-            <span id="created" title="Account Created: {{ current_user.created_at.strftime('%A, %B %d, %Y %H:%M:%S %p') }}">
+            <span id="created" title="Account Created: {{ current_user.created_at.strftime('%A, %B %d, %Y %H:%M:%S') }}">
                 <strong>
                     Account Created
                 </strong>
@@ -150,7 +150,7 @@
         {%- set seconds_until_season_end = season.expiration_date | int - now | int %}
         {%- set season_end_delta = seconds_until_season_end | seconds2delta %}
         {%- set season_end = season.expiration_date | unix2datetime %}
-            <span id="season" title="Season End: {{ season_end.strftime('%A, %B %d, %Y %H:%M:%S %p') }}">
+            <span id="season" title="Season End: {{ season_end.strftime('%A, %B %d, %Y %H:%M:%S') }}">
                 <strong>
                     Season {{ season.season_id }}
                 </strong>
