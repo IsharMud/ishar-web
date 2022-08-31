@@ -51,7 +51,7 @@
                         <td id="{{ loop.index }}" title="#{{ loop.index }}">
                             <a href="#{{ loop.index }}">{{ loop.index }}</a>
                         </td>
-                        <td title="Name: {{ leader.name }}">
+                        <td title="{{ leader_title | striptags | safe }}">
                             {{ leader_title }}
                         </td>
                         <td title="Level: {{ leader.level }}">
@@ -70,7 +70,7 @@
                             {{ leader.challenges_completed }}
                         </td>
             {%- if leader_type != 'Classic' %}
-                        <td class="non-classic" title="Type: {{ leader_type }}">
+                        <td class="non-classic" title="Type: {{ leader_type }} {%- if leader.is_deleted == 1 %} (Dead){% endif %}">
                             <span class="{{ player_css(leader) }}">
                                 {{ leader_type }}
                             </span>

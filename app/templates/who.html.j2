@@ -46,7 +46,7 @@ Who's Online?
                         <td id="{{ loop.index }}" title="#{{ loop.index }}">
                             {{ loop.index }}
                         </td>
-                        <td title="{{ player_title | striptags }}">
+                        <td title="{{ player_title | striptags | safe }}">
                             {{ player_title }}
                         </td>
             {%- if player.true_level < immortal_level %}
