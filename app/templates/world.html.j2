@@ -30,9 +30,9 @@
                     setting the scene for many of the adventures to be had here.
                 </p>
                 <p>
-                    From the shattered ruins of <a href="{{ url_for('world', area='Torm Sarvek') }}">Torm Sarvek</a>
-                    to the splendor of <a href="{{ url_for('world', area='Mareldja') }}">Mareldja</a>, the darkness of Hedros,
-                    the dense Talrynian Forest, all of these lands and more are open to you.
+                    From the shattered ruins of <a href="{{ url_for('world', area='Torm Sarvek') }}" title="Area: Torm Sarvek">Torm Sarvek</a>
+                    to the splendor of <a href="{{ url_for('world', area='Mareldja') }}" title="Area: Mareldja">Mareldja</a>,
+                    the darkness of Hedros, the dense Talrynian Forest, all of these lands and more are open to you.
                 </p>
                 <p>
                     Whether treading across the barren wasteland of the Tundra or voyaging for the great Ocean, you will
@@ -41,7 +41,7 @@
         {%- if areas and areas is iterable and areas | length > 0 %}
                 <ul>
             {%- for area in areas %}
-                    <li>
+                    <li title="Area: {{ area }}">
                         <a href="{{ url_for('world', area=area) }}">
                             {{ area }}
                         </a>

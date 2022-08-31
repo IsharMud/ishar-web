@@ -10,76 +10,74 @@
 {%- block content %}
                 <p>
                     <input type="checkbox" onchange="deadLeaders(this.checked);" id="include-dead" name="include-dead">
-                    <label for="include-dead">
+                    <label for="include-dead" title="Include Dead">
                         Include Dead
                     </label>
                 </p>
     {%- if leaders is defined and leaders is iterable and leaders | length > 0 %}
-                <table id="leaders">
+                <table id="leaders" title="Leaders">
         {%- for leader in leaders %}
             {%- set leader_title = player_title(leader) %}
             {%- set leader_type = player_type(leader) %}
             {%- if loop.index0 % 10 == 0 %}
                     <tr>
-                        <th>
+                        <th title="#">
                             #
                         </th>
-                        <th>
+                        <th title="Name">
                             Name
                         </th>
-                        <th>
+                        <th title="Level">
                             Level
                         </th>
-                        <th>
+                        <th title="Remorts">
                             Remorts
                         </th>
-                        <th>
+                        <th title="Renown">
                             Renown
                         </th>
-                        <th>
+                        <th title="Quests">
                             Quests
                         </th>
-                        <th>
+                        <th title="Challenges">
                             Challenges
                         </th>
-                        <th>
+                        <th title="Deaths">
                             Deaths
                         </th>
                     </tr>
             {%- endif %}
                     <tr>
-                        <td id="{{ loop.index }}">
+                        <td id="{{ loop.index }}" title="#{{ loop.index }}">
                             <a href="#{{ loop.index }}">{{ loop.index }}</a>
                         </td>
-                        <td>
+                        <td title="Name: {{ leader.name }}">
                             {{ leader_title }}
                         </td>
-                        <td>
+                        <td title="Level: {{ leader.level }}">
                             {{ leader.level }}
                         </td>
-                        <td>
+                        <td title="Remorts: {{ leader.remorts }}">
                             {{ leader.remorts }}
                         </td>
-                        <td>
+                        <td title="Renown: {{ leader.total_renown }}">
                             {{ leader.total_renown }}
                         </td>
-                        <td>
+                        <td title="Quests: {{ leader.quests_completed }}">
                             {{ leader.quests_completed }}
                         </td>
-                        <td>
+                        <td title="Challenges: {{ leader.challenges_completed }}">
                             {{ leader.challenges_completed }}
                         </td>
             {%- if leader_type != 'Classic' %}
-                        <td class="non-classic">
-                            <span title="Type: {{ leader_type }}" class="{{ player_css(leader) }}">
+                        <td class="non-classic" title="Type: {{ leader_type }}">
+                            <span class="{{ player_css(leader) }}">
                                 {{ leader_type }}
                             </span>
                         </td>
             {%- else %}
-                        <td>
-                            <span title="Deaths: {{ leader.deaths }}">
-                                {{ leader.deaths }}
-                            </span>
+                        <td title="Deaths: {{ leader.deaths }}">
+                            {{ leader.deaths }}
                         </td>
                     </tr>
             {%- endif %}
@@ -91,7 +89,7 @@
                 <div id="leaderboard-choices">
                     <ul>
         {%- for limit_choice in limit_choices %}
-                        <li>
+                        <li title="Top {{ limit_choice }}">
             {%- if limit_choice != limit -%}
                             <a href="{{ url_for('leaderboard', limit=limit_choice) }}">
             {%- endif -%}

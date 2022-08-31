@@ -4,6 +4,47 @@
 {% block meta_url %}{{ url_for('essence_shop', _external=True) }}{% endblock meta_url %}">
 {% block title %}Essence Shop{% endblock %}
 {% block header %}Essence Shop{% endblock %}
+{%- macro render_field(field) %}
+            <ul class="essence-shop">
+    {%- for subfield in field %}
+                <li class="essence-upgrades" title="{{ subfield.label | striptags }}">
+                    {{ subfield }}
+                    {{ subfield.label }}
+                    <ul>
+        {%- for ug in current_user.upgrades | selectattr('account_upgrades_id', 'equalto', subfield.data) %}
+                        <li title="{{ ug.upgrade.description | replace('\n', ' ') }}">
+                            {{ ug.upgrade.description | replace('\n', ' ')}}
+                        </li>
+            {%- if current_user.seasonal_points < ug.upgrade.cost %}
+                {%- set cost_css = 'error' %}
+            {%- else %}
+                {%- set cost_css = 'success' %}
+            {%- endif %}
+                        <li title="Cost: {{ ug.upgrade.cost }} essence">
+                            <span class="flash-{{ cost_css }}">{{ ug.upgrade.cost }} essence</span>
+                        </li>
+        {%- endfor %}
+                    </ul>
+                </li>
+    {%- endfor %}
+            </ul>
+    {%- if field.errors %}
+                    <ul class="field-errors">
+        {%- for error in field.errors %}
+                        <li title="{{ error }}">
+                            {{ error }}
+                        </li>
+        {%- endfor %}
+                    </ul>
+    {%- endif %}
+{%- endmacro -%}
+{%- macro display_essence(essence) -%}
+    {%- if essence > 0 %}
+        <strong>{{ essence }} essence</strong>
+    {%- else %}
+        <span class="flash-error">{{ essence }} essence</span>
+    {%- endif %}
+{%- endmacro -%}
 {%- block scripts %}
         <script>
 
@@ -48,47 +89,6 @@
 
         </script>
 {%- endblock scripts %}
-{%- macro render_field(field) %}
-            <ul class="essence-shop">
-    {%- for subfield in field %}
-                <li class="essence-upgrades" title="{{ subfield.label | striptags }}">
-                    {{ subfield }}
-                    {{ subfield.label }}
-                    <ul>
-        {%- for ug in current_user.upgrades | selectattr('account_upgrades_id', 'equalto', subfield.data) %}
-                        <li title="{{ ug.upgrade.description | replace('\n', ' ') }}">
-                            {{ ug.upgrade.description | replace('\n', ' ')}}
-                        </li>
-            {%- if current_user.seasonal_points < ug.upgrade.cost %}
-                {%- set cost_css = 'error' %}
-            {%- else %}
-                {%- set cost_css = 'success' %}
-            {%- endif %}
-                        <li title="Cost: {{ ug.upgrade.cost }} essence">
-                            <span class="flash-{{ cost_css }}">{{ ug.upgrade.cost }} essence</span>
-                        </li>
-        {%- endfor %}
-                    </ul>
-                </li>
-    {%- endfor %}
-            </ul>
-    {%- if field.errors %}
-                    <ul class="field-errors">
-        {%- for error in field.errors %}
-                        <li title="{{ error }}">
-                            {{ error }}
-                        </li>
-        {%- endfor %}
-                    </ul>
-    {%- endif %}
-{%- endmacro -%}
-{%- macro display_essence(essence) -%}
-    {%- if essence > 0 %}
-        <strong>{{ essence }} essence</strong>
-    {%- else %}
-        <span class="flash-error">{{ essence }} essence</span>
-    {%- endif %}
-{%- endmacro -%}
 {%- block content %}
             <p>
                 <strong>

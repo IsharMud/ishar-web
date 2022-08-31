@@ -38,88 +38,72 @@
                         </th>
                     </tr>
         {%- for player in current_user.players %}
-            {%- set player_title = player_title(player) %}
-            {%- set player_type = player_type(player) %}
-            {%- set player_css = player_css(player) %}
-            {%- set player_birth = player.birth | unix2datetime %}
+            {%- set player_title    = player_title(player) %}
+            {%- set player_type     = player_type(player) %}
+            {%- set player_css      = player_css(player) %}
+            {%- set player_birth    = player.birth | unix2datetime %}
                     <tr>
-                        <td>
-                            <span title="{{ player.name | title | safe }} (Born {{ player_birth.strftime('%A, %B %d, %Y %I:%M:%S %p') }})">
-                                {{ player_title | safe }}
-                            </span>
+                        <td title="{{ player.name | title | safe }} (Born {{ player_birth.strftime('%A, %B %d, %Y %I:%M:%S %p') }})">
+                            {{ player_title | safe }}
                         </td>
-                        <td>
-                            <span title="Class: {{ player.class.class_name | replace('_', '-') | title | safe }}">
-                                {{ player.class.class_name | replace('_', '-') | title | safe }}
-                            </span>
+                        <td title="Class: {{ player.class.class_name | replace('_', '-') | title | safe }}">
+                            {{ player.class.class_name | replace('_', '-') | title | safe }}
                         </td>
-                        <td>
-                            <span title="Level: {{ player.level }}">
-                                {{ player.level }}
-                            </span>
+                        <td title="Level: {{ player.level }}">
+                            {{ player.level }}
                         </td>
-                        <td>
-                            <span title="Remorts: {{ player.remorts }}">
-                                {{ player.remorts }}
-                            </span>
+                        <td title="Remorts: {{ player.remorts }}">
+                            {{ player.remorts }}
                         </td>
-                        <td>
-                            <span title="Renown: {{ player.renown }} ({{ player.total_renown }})">
-                                {{ player.renown }} ({{ player.total_renown }})
-                            </span>
+                        <td title="Renown: {{ player.renown }} ({{ player.total_renown }})">
+                            {{ player.renown }} ({{ player.total_renown }})
                         </td>
-                        <td>
-                            <span title="Quests: {{ player.quests_completed }}">
-                                {{ player.quests_completed }}
-                            </span>
+                        <td title="Quests: {{ player.quests_completed }}">
+                            {{ player.quests_completed }}
                         </td>
-                        <td>
-                            <span title="Challenges: {{ player.challenges_completed }}">
-                                {{ player.challenges_completed }}
-                            </span>
+                        <td title="Challenges: {{ player.challenges_completed }}">
+                            {{ player.challenges_completed }}
                         </td>
             {%- if player_type != 'Classic' %}
-                        <td class="non-classic">
-                            <span title="Type: {{ player_type }}" class="{{ player_css }}">
+                        <td class="non-classic" title="Type: {{ player_type }}">
+                            <span class="{{ player_css }}">
                                 {{ player_type }}
                             </span>
                         </td>
             {%- else %}
-                        <td>
-                            <span title="Deaths: {{ player.deaths }}">
-                                {{ player.deaths }}
-                            </span>
+                        <td title="Deaths: {{ player.deaths }}">
+                            {{ player.deaths }}
                         </td>
             {%- endif %}
                     </tr>
         {%- endfor %}
                 </table>
     {%- else %}
-                <h3>
+                <h3 title="You have not created any players yet!">
                     You have not created any players yet!
                 </h3>
     {%- endif %}
                 <p class="bottom-portal-link">
-                    <a title="Challenges" href="{{ url_for('challenges') }}">Challenges</a>
+                    <a href="{{ url_for('challenges') }}" title="Challenges">Challenges</a>
                     |
-                    <a title="Change Password" href="{{ url_for('change_password') }}">Change Password</a>
+                    <a href="{{ url_for('change_password') }}" title="Change Password">Change Password</a>
                     |
     {%- if current_user.seasonal_points > 0 %}
         {%- set essence_extra = ' (' + current_user.seasonal_points | string + ')' %}
     {%- else %}
         {%- set essence_extra = '' %}
     {%- endif %}
-                    <a title="Essence Shop{{ essence_extra }}" href="{{ url_for('essence_shop') }}">Essence Shop{{ essence_extra }}</a>
+                    <a href="{{ url_for('essence_shop') }}" title="Essence Shop{{ essence_extra }}">Essence Shop{{ essence_extra }}</a>
                     |
-                    <a title="Leader Board" href="{{ url_for('leaderboard') }}">Leader Board</a>
+                    <a href="{{ url_for('leaderboard') }}" title="Leader Board">Leader Board</a>
                     |
-                    <a title="Who's Online?" href="{{ url_for('who') }}">Who's Online?</a>
+                    <a href="{{ url_for('who') }}" title="Who's Online?">Who's Online?</a>
                     |
-                    <a title="Log Out" href="{{ url_for('logout') }}">Log Out</a>
+                    <a href="{{ url_for('logout') }}" title="Log Out">Log Out</a>
                 </p>
     {%- if is_admin is defined and is_admin == True %}
                 <p class="bottom-portal-link">
-                    <a title="Administration Portal" href="{{ url_for('admin_portal') }}">Administration</a>
+                    <a href="{{ url_for('admin_portal') }}" title="Administration Portal">Administration</a>
                 </p>
     {%- endif %}
 {%- endblock %}

@@ -19,28 +19,28 @@
     {{ player_type }}
 {%- endmacro -%}
 {%- macro player_css(player) %}
-    {%- set player_type = player_type(player) -%}
+    {%- set player_type     = player_type(player) -%}
     {%- if player.is_deleted == 1 -%}
-        {%- set player_css = 'dead' -%}
+        {%- set player_css  = 'dead' -%}
     {%- else -%}
-        {%- set player_css = player_type | lower -%}
+        {%- set player_css  = player_type | lower -%}
     {%- endif -%}
     {{ player_css }}-player
 {%- endmacro -%}
 {%- macro player_title(player) -%}
-    {%- set player_type = player_type(player) -%}
-    {%- set player_title = player.title | replace('%s','<strong class="' + player_css(player) + '"><a title="' + player.name + '" href="' + url_for('show_player', player_name=player.name) + '">' + player.name + '</a></strong>') | safe -%}
+    {%- set player_type     = player_type(player) -%}
+    {%- set player_title    = player.title | replace('%s','<strong class="' + player_css(player) + '"><a href="' + url_for('show_player', player_name=player.name) + '">' + player.name + '</a></strong>') | safe -%}
     {{ player_title }}
 {%- endmacro -%}
 {%- macro display_timestamp(unix_timestamp) -%}
     {%- if now | int > unix_timestamp | int -%}
-        {%- set seconds_timestamp = now | int - unix_timestamp | int -%}
+        {%- set seconds_timestamp   = now | int - unix_timestamp | int -%}
     {%- elif now | int < unix_timestamp | int -%}
-        {%- set seconds_timestamp = unix_timestamp | int - now | int -%}
+        {%- set seconds_timestamp   = unix_timestamp | int - now | int -%}
     {%- else -%}
         now 
     {%- endif -%}
-    {%- set delta = seconds_timestamp | seconds2delta -%}
+    {%- set delta   = seconds_timestamp | seconds2delta -%}
     {%- if now | int < unix_timestamp | int %}in {% endif -%}
     {{ display_delta(delta) }}
     {%- if now | int > unix_timestamp | int %} ago{%- endif -%}
@@ -48,19 +48,19 @@
 {%- macro display_delta(delta) -%}
     {%- if delta.days > 0 -%}
         {%- if delta.days > 30 -%}
-            {%- set months = delta.days / 30 -%}
+            {%- set months                  = delta.days / 30 -%}
             {%- if months > 12 -%}
-                {%- set years = months / 12 -%}
+                {%- set years               = months / 12 -%}
                 {%- if years > 10 -%}
-                    {%- set decades = years / 10 -%}
+                    {%- set decades         = years / 10 -%}
                     {%- set rounded_decades = decades | round | int -%}
                     {{ rounded_decades }} decade{% if rounded_decades != 1 %}s{% endif %}
                 {%- else -%}
-                    {%- set rounded_years = years | round | int -%}
+                    {%- set rounded_years   = years | round | int -%}
                     {{ rounded_years }} year{% if rounded_years != 1 %}s{% endif %}
                 {%- endif -%}
             {%- else -%}
-                {%- set rounded_months = months | round | int -%}
+                {%- set rounded_months      = months | round | int -%}
                 {{ rounded_months }} month{% if rounded_months != 1 %}s{% endif %}
             {%- endif -%}
         {%- else -%}
@@ -69,11 +69,11 @@
     {%- else -%}
         {%- set minutes = delta.seconds / 60 -%}
         {%- if minutes >= 60 -%}
-            {%- set hours = minutes / 60 -%}
-            {%- set rounded_hours = hours | round | int -%}
+            {%- set hours               = minutes / 60 -%}
+            {%- set rounded_hours       = hours | round | int -%}
             {{ rounded_hours }} hour{% if rounded_hours != 1 %}s{% endif %}
         {%- else -%}
-            {%- set rounded_minutes = minutes | round | int -%}
+            {%- set rounded_minutes     = minutes | round | int -%}
             {{ rounded_minutes }} minute{% if rounded_minutes != 1 %}s{% endif %}
         {%- endif -%}
     {%- endif -%}
@@ -138,22 +138,18 @@
     {%- if current_user is defined and current_user.is_authenticated %}
         {%- if current_user.created_at is defined and current_user.created_at != '' %}
             <span id="created" title="Account Created: {{ current_user.created_at.strftime('%A, %B %d, %Y %H:%M:%S') }}">
-                <strong>
-                    Account Created
-                </strong>
+                <strong>Account Created</strong>
                 <br>
                 {{ current_user.created_at.strftime('%A, %B %d, %Y') }}
             </span>
         {%- endif %}
     {%- endif %}
     {%- if season is defined and season.season_id is defined and season.expiration_date is defined %}
-        {%- set seconds_until_season_end = season.expiration_date | int - now | int %}
-        {%- set season_end_delta = seconds_until_season_end | seconds2delta %}
-        {%- set season_end = season.expiration_date | unix2datetime %}
-            <span id="season" title="Season End: {{ season_end.strftime('%A, %B %d, %Y %H:%M:%S') }}">
-                <strong>
-                    Season {{ season.season_id }}
-                </strong>
+        {%- set seconds_until_season_end    = season.expiration_date | int - now | int %}
+        {%- set season_end_delta            = seconds_until_season_end | seconds2delta %}
+        {%- set season_end                  = season.expiration_date | unix2datetime %}
+            <span id="season" title="Season {{ season.season_id }} ends {{ display_timestamp(season.expiration_date) }}, on {{ season_end.strftime('%A, %B %d, %Y %H:%M:%S') }}">
+                <strong>Season {{ season.season_id }}</strong>
                 <br>
                 ends {{ display_timestamp(season.expiration_date) }}, on {{ season_end.strftime('%A, %B %d, %Y') }}
             </span>

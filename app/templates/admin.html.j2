@@ -26,11 +26,9 @@
                     {{ render_field(news_add_form.body) }}
                     {{ news_add_form.csrf_token }}
                     {{ news_add_form.submit }}
-                    <input type="reset">
+                    <input title="reset" type="reset">
                     <br>
                 </form>
-{% include('back.html.j2') %}
-{%- else %}
-                Missing form!
 {%- endif %}
+{% include('back.html.j2') %}
 {%- endblock %}

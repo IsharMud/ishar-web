@@ -27,7 +27,7 @@
     {%- elif align >= 1000 %}
         Very Good
     {%- else -%}
-        Neutral? ({{ align | string | safe }})
+        Unknown
     {%- endif -%}
 {%- endmacro -%}
 {%- macro display_class(player_class_name) -%}
@@ -98,11 +98,11 @@
 {%- endblock %}
 {%- block content %}
     {%- if player_search_form is defined %}
-                <form method="post" action="{{ url_for('search_player') }}" id="player-search-form">
-                    {{ render_field(player_search_form.player_search_name) }}
-                    {{ player_search_form.csrf_token }}
-                    {{ render_field(player_search_form.submit) }}
-                </form>
+            <form method="post" action="{{ url_for('search_player') }}" id="player-search-form">
+                {{ render_field(player_search_form.player_search_name) }}
+                {{ player_search_form.csrf_token }}
+                {{ render_field(player_search_form.submit) }}
+            </form>
     {%- endif %}
     {%- if player %}
         {%- set player_title = player_title(player) %}
@@ -203,7 +203,7 @@
                 </ol>
             </div>
             {%- endif %}
-            {%- if player.true_level >= 5 %}
+            {%- if player.true_level >= 5 or player.online >= 3600 %}
             <div id="player-statistics">
                 <h3 title="Statistics">
                     Statistics

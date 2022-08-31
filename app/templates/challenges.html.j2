@@ -36,19 +36,19 @@
         {%- endif %}
             <table id="challenges">
                 <tr>
-                    <th>
+                    <th title="Find and Kill">
                         Find and Kill
                     </th>
-                    <th>
+                    <th title="Max People">
                         Max People
                     </th>
-                    <th>
+                    <th title="Max Level">
                         Max Level
                     </th>
-                    <th>
+                    <th title="Reward Tier">
                         Reward Tier
                     </th>
-                    <th>
+                    <th title="Completed by">
                         Completed by
                     </th>
                 </tr>
@@ -60,16 +60,16 @@
                 {%- set challenge_completed = False %}
             {%- endif %}
                 <tr>
-                    <td{%- if challenge_completed == True %} class="challenge-completed"{%- endif %}>
+                    <td title="{{ challenge.mob_name }} {%- if challenge_completed == True %} (Completed){% endif %}" {%- if challenge_completed == True %} class="challenge-completed"{% endif %}>
                         {{ challenge.mob_name }}
                     </td>
-                    <td>
+                    <td title="Max People: {{ challenge.adj_people }}">
                         {{ challenge.adj_people }}
                     </td>
-                    <td>
+                    <td title="Max Level: {{ challenge.adj_level }}">
                         {{ challenge.adj_level }}
                     </td>
-                    <td>
+                    <td title="Reward Tier: {{ challenge_tier(challenge.adj_tier) }}">
                         {{ challenge_tier(challenge.adj_tier) }}
                     </td>
                     <td>
