@@ -245,40 +245,45 @@ def challenges():
 @app.route('/leader_board', methods=['GET'])
 @app.route('/leaderboard', methods=['GET'])
 def leaderboard(limit=10):
-    if limit > max([5, 10, 25, 50, 100]):
+    limit_choices   = [5, 10, 25, 50, 100]
+    if limit not in limit_choices or limit > max(limit_choices):
         return redirect(url_for('leaderboard', limit=10))
 
     if request.args.get('dead') and request.args.get('dead') == 'false':
-        leaders = models.Player.query.filter(
-                        models.Player.true_level < secrets.immortal_level,
-                        models.Player.is_deleted != 1
-                    ).order_by(
-                        -models.Player.remorts,
-                        -models.Player.total_renown,
-                        -models.Player.quests_completed,
-                        -models.Player.challenges_completed,
-                        -models.Player.renown,
-                        -models.Player.true_level,
-                        -models.Player.bankacc,
-                        models.Player.deaths
-                    ).limit(limit).all()
+        include_dead    = False
+        leaders         = models.Player.query.filter(
+                            models.Player.true_level < secrets.immortal_level,
+                            models.Player.is_deleted != 1
+                        ).order_by(
+                            -models.Player.remorts,
+                            -models.Player.total_renown,
+                            -models.Player.quests_completed,
+                            -models.Player.challenges_completed,
+                            -models.Player.renown,
+                            -models.Player.true_level,
+                            -models.Player.bankacc,
+                            models.Player.deaths
+                        ).limit(limit).all()
     else:
-        leaders = models.Player.query.filter(
-                        models.Player.true_level < secrets.immortal_level
-                    ).order_by(
-                        -models.Player.remorts,
-                        -models.Player.total_renown,
-                        -models.Player.quests_completed,
-                        -models.Player.challenges_completed,
-                        -models.Player.renown,
-                        -models.Player.true_level,
-                        -models.Player.bankacc,
-                        models.Player.deaths
-                    ).limit(limit).all()
+        include_dead    = True
+        leaders         = models.Player.query.filter(
+                            models.Player.true_level < secrets.immortal_level
+                        ).order_by(
+                            -models.Player.remorts,
+                            -models.Player.total_renown,
+                            -models.Player.quests_completed,
+                            -models.Player.challenges_completed,
+                            -models.Player.renown,
+                            -models.Player.true_level,
+                            -models.Player.bankacc,
+                            models.Player.deaths
+                        ).limit(limit).all()
 
     return render_template('leaderboard.html.j2',
-                                leaders = leaders,
-                                limit   = limit
+                                include_dead    = include_dead,
+                                leaders         = leaders,
+                                limit           = limit,
+                                limit_choices   = limit_choices
                           )
 
 
