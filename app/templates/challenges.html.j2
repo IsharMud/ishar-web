@@ -30,7 +30,7 @@
 {%- block content %}
     {%- if challenges is defined and challenges is iterable and challenges | length > 0 %}
         {%- if challenges_title %}
-            <h3>
+            <h3 title="{{ challenges_title }}">
                 {{ challenges_title }}
             </h3>
         {%- endif %}
