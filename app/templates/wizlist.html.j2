@@ -5,25 +5,27 @@
 {% block title %}Wiz List{% endblock %}
 {% block header %}Wiz List{% endblock %}
 {%- block content %}
+                <p>
+                    A list of the current Immortals through Gods.
+                </p>
     {%- if immortals is defined and immortals is iterable and immortals | length > 0 %}
                 <table id="wizlist">
                     <tr>
-                        <th>
+                        <th title="Name">
                             Name
                         </th>
-                        <th>
+                        <th title="Type">
                             Type
                         </th>
                     </tr>
         {%- for immortal in immortals %}
-            {%- set immortal_title = player_title(immortal) %}
-            {%- set immortal_type = player_type(immortal) %}
                     <tr>
-                        <td>
-                            {{ immortal_title }}
+                        <td title="Name: {{ immortal.name }}">
+                            {{ immortal.name }}
                         </td>
-                        <td class="non-classic">
-                            <span title="Type: {{ immortal_type }}" class="{{ player_css(immortal) }}">
+            {%- set immortal_type   = player_type(immortal) %}
+                        <td class="non-classic" title="Type: {{ immortal_type }}">
+                            <span class="{{ player_css(immortal) }}">
                                 {{ immortal_type }}
                             </span>
                         </td>

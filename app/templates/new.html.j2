@@ -28,7 +28,7 @@
                     {{ render_field(new_account_form.confirm_password, autocomplete='off') }}
                     {{ new_account_form.csrf_token }}
                     {{ new_account_form.submit }}
-                    <input type="reset">
+                    <input title="Reset/Clear Form" type="reset">
                 </form>
     {%- else %}
                 Missing form!
