@@ -302,7 +302,8 @@ def who():
 @app.route('/wizlist', methods=['GET'])
 def wizlist():
     immortals = models.Player.query.filter(
-                    models.Player.level >= secrets.immortal_level
+                    models.Player.level         >= secrets.immortal_level,
+                    models.Player.true_level    >= secrets.immortal_level
                 ).order_by(
                     -models.Player.true_level
                 ).all()
