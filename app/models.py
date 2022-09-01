@@ -305,8 +305,9 @@ class PlayersFlag(db.Model):
 class PlayerRace(db.Model):
     __tablename__   = 'races'
 
-    race_id     = Column(TINYINT(3), primary_key=True)
-    race_name   = Column(String(15), nullable=False, unique=True)
+    race_id             = Column(TINYINT(3), primary_key=True)
+    race_name           = Column(String(15), nullable=False, unique=True)
+    race_description    = Column(String(64))
 
     player_race = relationship('Player', backref='race')
 

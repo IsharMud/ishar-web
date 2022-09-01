@@ -445,6 +445,10 @@ def latest_patch(patch_dir='patches'):
 @app.route('/faqs')
 @app.route('/faq')
 def faq():
+    player_classes  = models.PlayerClass.query.filter(models.PlayerClass.class_description != None).all()
+    player_races    = models.PlayerRace.query.filter(models.PlayerRace.race_description != None).all()
+    print(f'FAQ PLAYER Classes: {player_classes}')
+    print(f'FAQ PLAYER Races: {player_races}')
     import faq
     return render_template('faq.html.j2', faqs=faq.faqs)
 
