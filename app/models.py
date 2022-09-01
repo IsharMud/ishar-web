@@ -3,38 +3,43 @@ import crypt
 import hmac
 from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import exc, Column, DateTime, ForeignKey, Integer, MetaData, SmallInteger, String, Text
+from sqlalchemy import Column, DateTime, ForeignKey, String, TIMESTAMP, Text
+from sqlalchemy.dialects.mysql import INTEGER, MEDIUMINT, SMALLINT, TINYINT
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.dialects.mysql import TINYINT, MEDIUMINT
 from sqlalchemy.schema import FetchedValue
 from sqlalchemy.orm import relationship
 
 # Connect to the database
 db = SQLAlchemy(app)
 
+
 # Account database class
 class Account(db.Model, UserMixin):
     __tablename__   = 'accounts'
-    account_id      = Column(Integer, primary_key=True)
-    created_at      = Column(DateTime, nullable=False, server_default=FetchedValue())
-    seasonal_points = Column(Integer, nullable=False, server_default=FetchedValue())
+    account_id      = Column(INTEGER(11), primary_key=True)
+    created_at      = Column(TIMESTAMP, nullable=False, server_default=FetchedValue())
+    seasonal_points = Column(MEDIUMINT(4), nullable=False, server_default=FetchedValue())
     email           = Column(String(30), nullable=False, unique=True)
     password        = Column(String(36), nullable=False)
     create_isp      = Column(String(25), nullable=False)
     last_isp        = Column(String(25), nullable=False)
     create_ident    = Column(String(25), nullable=False)
     last_ident      = Column(String(25), nullable=False)
-    create_haddr    = Column(Integer, nullable=False)
-    last_haddr      = Column(Integer, nullable=False)
+    create_haddr    = Column(INTEGER(11), nullable=False)
+    last_haddr      = Column(INTEGER(11), nullable=False)
     account_name    = Column(String(25), nullable=False, unique=True)
+
     players         = relationship('Player', backref='account')
 
+    # flask-login method to return account ID
     def get_id(self):
         return str(self.account_id)
 
+    # flask-login method to return boolean whether user is authenticated
     def is_authenticated(self):
         return isinstance(self.account_id, int)
 
+    # flask-login method to return boolean whether user is active
     def is_active(self):
         return isinstance(self.account_id, int)
 
@@ -45,9 +50,11 @@ class Account(db.Model, UserMixin):
                 return True
         return False
 
-    # Find player under the account with the highest amount of seasonal points earned
+    # Hybrid property containing the amount of essence earned for the account
     @hybrid_property
     def seasonal_earned(self):
+
+        # Start at (0) zero, and return the points from the player within the account whom has earned the highest amount
         s = 0
         for player in self.players:
             if player.seasonal_earned > s:
@@ -79,7 +86,7 @@ class Account(db.Model, UserMixin):
 
             # Start each available account upgrade at zero (0)
             for init_ugrade in AccountUpgrade.query.all():
-                create_upgrade  = AccountsUpgrades(
+                create_upgrade  = AccountsUpgrade(
                     account_upgrades_id     = init_ugrade.id,
                     account_id              = self.account_id,
                     amount                  = 0
@@ -98,8 +105,23 @@ class Account(db.Model, UserMixin):
         return f'<Account> "{self.account_name}" ({self.account_id})'
 
 
-# Accounts Upgrades database class
-class AccountsUpgrades(db.Model):
+# Account Upgrade database class
+class AccountUpgrade(db.Model):
+    __tablename__ = 'account_upgrades'
+    id          = Column(TINYINT(4), primary_key=True)
+    cost        = Column(MEDIUMINT(4), nullable=False)
+    description = Column(String(200), nullable=False)
+    name        = Column(String(30), nullable=False, unique=True)
+    max_value   = Column(MEDIUMINT(4), nullable=False, server_default=FetchedValue())
+
+    accounts_upgrade    = relationship('AccountsUpgrade', backref='upgrade')
+
+    def __repr__(self):
+        return f'<AccountUpgrade> "{self.name}" ({self.id}) / Cost: {self.cost} / Max Value: {self.max_value}'
+
+
+# Accounts Upgrade database class
+class AccountsUpgrade(db.Model):
     __tablename__       = 'accounts_account_upgrades'
     account_upgrades_id = Column(
                             ForeignKey('account_upgrades.id',
@@ -113,7 +135,8 @@ class AccountsUpgrades(db.Model):
                                 onupdate='CASCADE'
                             ), nullable=False, index=True, primary_key=True
                         )
-    amount              = Column('amount', MEDIUMINT(4), nullable=False)
+    amount              = Column(MEDIUMINT(4), nullable=False)
+
     account             = relationship('Account', backref='upgrades')
 
     # Method to increment an account upgrade and reduce account seasonal points (essence)
@@ -128,204 +151,75 @@ class AccountsUpgrades(db.Model):
         return False
 
     def __repr__(self):
-        return f'<AccountsUpgrades> "{self.upgrade.name}" ({self.account_upgrades_id}) @ <Account> "{self.account.account_name}" ({self.account_id}) / Amount: {self.amount}'
+        return f'<AccountsUpgrade> "{self.upgrade.name}" ({self.account_upgrades_id}) @ <Account> "{self.account.account_name}" ({self.account_id}) / Amount: {self.amount}'
 
-# Account Upgrade database class
-class AccountUpgrade(db.Model):
-    __tablename__       = 'account_upgrades'
-    id                  = Column(TINYINT(4), primary_key=True)
-    cost                = Column(TINYINT(4), nullable=False)
-    description         = Column(String(200), nullable=False)
-    name                = Column(String(30), nullable=False, unique=True)
-    max_value           = Column(TINYINT(4), nullable=False, server_default=FetchedValue())
-    accounts_upgrades   = relationship('AccountsUpgrades', backref='upgrade')
+
+# Affect Flag database class
+class AffectFlag(db.Model):
+    __tablename__   = 'affect_flags'
+    flag_id = Column(TINYINT(4), primary_key=True)
+    name    = Column(String(30), nullable=False, unique=True)
 
     def __repr__(self):
-        return f'<AccountUpgrade> "{self.name}" ({self.id}) / Cost: {self.cost} / Max Value: {self.max_value}'
+        return f'<AffectFlag> "{self.name}" ({self.flag_id})'
 
 
-# Players Flags database class
-class PlayersFlags(db.Model):
-    __tablename__   = 'player_player_flags'
-    flag_id         = Column(
-                        ForeignKey('player_flags.flag_id',
-                            ondelete='CASCADE',
-                            onupdate='CASCADE'
-                        ), nullable=False, index=True, primary_key=True
-                    )
-    player_id       = Column(
-                        ForeignKey('players.id',
-                            ondelete='CASCADE',
-                            onupdate='CASCADE'
-                        ), nullable=False, index=True, primary_key=True
-                    )
-    value           = Column(Integer)
-    player          = relationship('Player', backref='flags')
+# Board database class
+class Board(db.Model):
+    __tablename__   = 'boards'
+    board_id    = Column(TINYINT(4), primary_key=True)
+    board_name  = Column(String(15), nullable=False)
 
     def __repr__(self):
-        return f'<PlayersFlags> {self.flag_id} @ <Player> {self.player_id} : {self.value}'
-
-# Player Flag database class
-class PlayerFlag(db.Model):
-    __tablename__   = 'player_flags'
-    flag_id         = Column(Integer, primary_key=True)
-    name            = Column(String(20), nullable=False, unique=True)
-    flag            = relationship('PlayersFlags', backref='flag')
-
-    def __repr__(self):
-        return f'<PlayerFlag> "{self.name}" ({self.flag_id})'
+        return f'<Board> "{self.board_name}" ({self.board_id})'
 
 
-# Player Class database class
-class PlayerClass(db.Model):
-    __tablename__   = 'classes'
-    class_id        = Column(Integer, primary_key=True)
-    class_name      = Column(String(15), nullable=False, unique=True, server_default=FetchedValue())
-    player_class    = relationship('Player', backref='class')
-
-    def __repr__(self):
-        return f'<PlayerClass> "{self.class_name}" ({self.class_id})'
-
-
-# Player Race database class
-class PlayerRace(db.Model):
-    __tablename__   = 'races'
-    race_id         = Column(Integer, primary_key=True)
-    race_name       = Column(String(15), nullable=False, unique=True)
-    player_race     = relationship('Player', backref='race')
+# Challenge database class
+class Challenge(db.Model):
+    __tablename__   = 'challenges'
+    challenge_id    = Column(SMALLINT(4), primary_key=True)
+    mob_vnum        = Column(INTEGER(11), nullable=False)
+    orig_level      = Column(TINYINT(4), nullable=False)
+    orig_people     = Column(TINYINT(4), nullable=False)
+    orig_tier       = Column(TINYINT(4), nullable=False)
+    adj_level       = Column(TINYINT(4), nullable=False)
+    adj_people      = Column(TINYINT(4), nullable=False)
+    adj_tier        = Column(TINYINT(4), nullable=False)
+    challenge_desc  = Column(String(80), nullable=False)
+    winner_desc     = Column(String(80), nullable=False, server_default=FetchedValue())
+    mob_name        = Column(String(30), nullable=False)
+    is_active       = Column(TINYINT(1), nullable=False, server_default=FetchedValue())
 
     def __repr__(self):
-        return f'<PlayerRace> "{self.race_name}" ({self.race_id})'
+        return f'<Challenge> "{self.mob_name}" ({self.challenge_id}) / Active: {self.is_active} / Winner: "{self.winner_desc}"'
 
 
-# Player database class
-class Player(db.Model):
-    __tablename__           = 'players'
-    id                      = Column(Integer, primary_key=True)
-    account_id              = Column(
-                                ForeignKey('accounts.account_id',
-                                    ondelete='CASCADE',
-                                    onupdate='CASCADE'
-                                ), nullable=False, index=True
-                            )
-    name                    = Column(String(15), nullable=False, unique=True, server_default=FetchedValue())
-    create_ident            = Column(String(10), nullable=False, server_default=FetchedValue())
-    last_isp                = Column(String(30), nullable=False, server_default=FetchedValue())
-    description             = Column(String(240))
-    title                   = Column(String(45), nullable=False, server_default=FetchedValue())
-    poofin                  = Column(String(80), nullable=False, server_default=FetchedValue())
-    poofout                 = Column(String(80), nullable=False, server_default=FetchedValue())
-    bankacc                 = Column(Integer, nullable=False)
-    logon_delay             = Column(SmallInteger, nullable=False)
-    true_level              = Column(Integer, nullable=False)
-    renown                  = Column(Integer, nullable=False)
-    prompt                  = Column(String(42), nullable=False, server_default=FetchedValue())
-    remorts                 = Column(Integer, nullable=False)
-    favors                  = Column(Integer, nullable=False)
-    birth                   = Column(Integer, nullable=False)
-    logon                   = Column(Integer, nullable=False)
-    online                  = Column(Integer)
-    logout                  = Column(Integer, nullable=False)
-    bound_room              = Column(Integer, nullable=False)
-    load_room               = Column(Integer, nullable=False)
-    wimpy                   = Column(SmallInteger)
-    invstart_level          = Column(Integer)
-    color_scheme            = Column(SmallInteger)
-    sex                     = Column(Integer, nullable=False)
-    race_id                 = Column(
-                                ForeignKey('races.race_id',
-                                    ondelete='CASCADE',
-                                    onupdate='CASCADE'
-                                ), nullable=False, index=True
-                            )
-    class_id                = Column(
-                                ForeignKey('classes.class_id',
-                                    ondelete='CASCADE',
-                                    onupdate='CASCADE'
-                                ), nullable=False, index=True
-                            )
-    level                   = Column(Integer, nullable=False)
-    weight                  = Column(SmallInteger, nullable=False)
-    height                  = Column(SmallInteger, nullable=False)
-    align                   = Column(SmallInteger, nullable=False)
-    comm                    = Column(SmallInteger, nullable=False)
-    karma                   = Column(SmallInteger, nullable=False)
-    experience_points       = Column(Integer, nullable=False)
-    money                   = Column(Integer, nullable=False)
-    fg_color                = Column(SmallInteger, nullable=False)
-    bg_color                = Column(SmallInteger, nullable=False)
-    login_failures          = Column(SmallInteger, nullable=False)
-    create_haddr            = Column(Integer, nullable=False)
-    auto_level              = Column(Integer, nullable=False)
-    login_fail_haddr        = Column(Integer)
-    last_haddr              = Column(Integer)
-    last_ident              = Column(String(10), server_default=FetchedValue())
-    load_room_next          = Column(Integer)
-    load_room_next_expires  = Column(Integer)
-    aggro_until             = Column(Integer)
-    inn_limit               = Column(SmallInteger, nullable=False)
-    held_xp                 = Column(Integer)
-    last_isp_change         = Column(Integer)
-    perm_hit_pts            = Column(Integer, nullable=False)
-    perm_move_pts           = Column(Integer, nullable=False)
-    perm_spell_pts          = Column(Integer, nullable=False)
-    perm_favor_pts          = Column(Integer, nullable=False)
-    curr_hit_pts            = Column(Integer, nullable=False)
-    curr_move_pts           = Column(Integer, nullable=False)
-    curr_spell_pts          = Column(Integer, nullable=False)
-    curr_favor_pts          = Column(Integer, nullable=False)
-    init_strength           = Column(Integer, nullable=False)
-    init_agility            = Column(Integer, nullable=False)
-    init_endurance          = Column(Integer, nullable=False)
-    init_perception         = Column(Integer, nullable=False)
-    init_focus              = Column(Integer, nullable=False)
-    init_willpower          = Column(Integer, nullable=False)
-    curr_strength           = Column(Integer, nullable=False)
-    curr_agility            = Column(Integer, nullable=False)
-    curr_endurance          = Column(Integer, nullable=False)
-    curr_perception         = Column(Integer, nullable=False)
-    curr_focus              = Column(Integer, nullable=False)
-    curr_willpower          = Column(Integer, nullable=False)
-    is_deleted              = Column(Integer, nullable=False, server_default=FetchedValue())
-    deaths                  = Column(Integer, nullable=False, server_default=FetchedValue())
-    total_renown            = Column(Integer, nullable=False, server_default=FetchedValue())
-    quests_completed        = Column(Integer, nullable=False, server_default=FetchedValue())
-    challenges_completed    = Column(Integer, nullable=False, server_default=FetchedValue())
-
-    # Players above a certain level are administrators
-    def is_admin(self, admin_level):
-        if self.true_level > admin_level:
-                return True
-        return False
-
-    # Start with two (2) points for existing, then do renown and remort calculations
-    @hybrid_property
-    def seasonal_earned(self):
-        c = int(self.total_renown / 10) + 2
-        if self.remorts > 0:
-            c += int(self.remorts / 5) * 3 + 1
-        return c
+# DisplayOption database class
+class DisplayOption(db.Model):
+    __tablename__ = 'display_options'
+    display_id = Column(TINYINT(4), primary_key=True)
+    name = Column(String(20), nullable=False, unique=True)
 
     def __repr__(self):
-        return f'<Player> "{self.name}" ({self.id})'
+        return f'<DisplayOption> "{self.name}" ({self.display_id})'
 
 
 # News database class
 class News(db.Model):
-    __tablename__   = 'news'
-    news_id         = Column(Integer, primary_key=True)
-    account_id      = Column(
-                        ForeignKey('accounts.account_id',
-                            ondelete='CASCADE',
-                            onupdate='CASCADE'
-                        ), nullable=False, index=True
-                    )
-    created_at      = Column(DateTime, nullable=False, server_default=FetchedValue())
-    subject         = Column(String(64), nullable=False, server_default=FetchedValue())
-    body            = Column(Text, nullable=False)
-    account         = relationship('Account')
+    __tablename__ = 'news'
 
-    # Method to post news
+    news_id     = Column(INTEGER(11), primary_key=True)
+    account_id  = Column(
+                    ForeignKey('accounts.account_id',
+                        ondelete='CASCADE', onupdate='CASCADE'
+                    ), nullable=False, index=True
+                )
+    created_at  = Column(TIMESTAMP, nullable=False, server_default=FetchedValue())
+    subject     = Column(String(64), nullable=False, server_default=FetchedValue())
+    body        = Column(Text, nullable=False)
+    account     = relationship('Account')
+
+    # Method to add a news post
     def add_news(self, subject=None, body=None):
         try:
             db.session.add(self)
@@ -339,103 +233,274 @@ class News(db.Model):
         return f'<News> "{self.subject}" ({self.news_id})'
 
 
-# Season database class
-class Season(db.Model):
-    __tablename__   = 'seasons'
-    season_id       = Column(Integer, primary_key=True)
-    is_active       = Column(Integer, nullable=False)
-    effective_date  = Column(Integer, nullable=False)
-    expiration_date = Column(Integer, nullable=False)
+# PlayerClass database class
+class PlayerClass(db.Model):
+    __tablename__   = 'classes'
+    class_id            = Column(TINYINT(3), primary_key=True)
+    class_name          = Column(String(15), nullable=False, unique=True, server_default=FetchedValue())
+    class_display       = Column(String(32))
+    class_description   = Column(String(64))
+
+    player_class    = relationship('Player', backref='class')
 
     def __repr__(self):
-        return f'<Season> {self.season_id} (until "{self.expiration_date}")'
+        return f'<PlayerClass> "{self.name}" ({self.condition_id})'
 
 
-# Challenge database class
-class Challenge(db.Model):
-    __tablename__   = 'challenges'
-    challenge_id    = Column(SmallInteger, primary_key=True)
-    mob_vnum        = Column(Integer, nullable=False)
-    orig_level      = Column(Integer, nullable=False)
-    orig_people     = Column(Integer, nullable=False)
-    orig_tier       = Column(Integer, nullable=False)
-    adj_level       = Column(Integer, nullable=False)
-    adj_people      = Column(Integer, nullable=False)
-    adj_tier        = Column(Integer, nullable=False)
-    challenge_desc  = Column(String(80), nullable=False)
-    winner_desc     = Column(String(80), nullable=False, server_default=FetchedValue())
-    mob_name        = Column(String(30), nullable=False)
-    is_active       = Column(Integer, nullable=False, server_default=FetchedValue())
+# Player Condition database class
+class PlayerCondition(db.Model):
+    __tablename__   = 'conditions'
+    condition_id    = Column(TINYINT(4), primary_key=True)
+    name            = Column(String(20), nullable=False, unique=True)
 
     def __repr__(self):
-        return f'<Challenge> "{self.mob_name}" ({self.challenge_id})'
+        return f'<PlayerCondition> "{self.name}" ({self.condition_id})'
 
 
-# Players Remort Upgrades database class
-class PlayersRemortUpgrades(db.Model):
-    __tablename__   = 'player_remort_upgrades'
-    upgrade_id      = Column(
-                        ForeignKey('remort_upgrades.upgrade_id',
-                            ondelete='CASCADE',
-                            onupdate='CASCADE'
-                        ), nullable=False, index=True, primary_key=True
-                    )
-    player_id       = Column(
-                        ForeignKey('players.id',
-                            ondelete='CASCADE',
-                            onupdate='CASCADE'
-                        ), nullable=False, index=True, primary_key=True
-                    )
-    value           = Column('value', Integer, nullable=False)
-    player          = relationship('Player', backref='remort_upgrades')
+# Player Flag database class
+class PlayerFlag(db.Model):
+    __tablename__ = 'player_flags'
+    flag_id = Column(INTEGER(11), primary_key=True)
+    name    = Column(String(20), nullable=False, unique=True)
+
+    flag    = relationship('PlayersFlag', backref='flag')
 
     def __repr__(self):
-        return f'<PlayersRemortUpgrades> "{self.remort_upgrade.name}" ({self.upgrade_id}) @ <Player> "{self.player.name}" ({self.player_id}) / Value: {self.value}'
-
-# Remort Upgrade database class
-class RemortUpgrade(db.Model):
-    __tablename__   = 'remort_upgrades'
-    upgrade_id      = Column(Integer, primary_key=True)
-    name            = Column(String(20), nullable=False, unique=True, server_default=FetchedValue())
-    renown_cost     = Column(SmallInteger, nullable=False)
-    max_value       = Column(SmallInteger, nullable=False)
-    remort_upgrades = relationship('PlayersRemortUpgrades', backref='remort_upgrade')
-
-    def __repr__(self):
-        return f'<RemortUpgrade> "{self.name}" ({self.upgrade_id}) / Cost: {self.renown_cost} /  Max Value: {self.max_value}'
+        return f'<PlayerFlag> "{self.name}" ({self.flag_id})'
 
 
-# Players Quests database class
-class PlayersQuests(db.Model):
-    __tablename__   = 'player_quests'
-    quest_id        = Column(
-                        ForeignKey('quests.quest_id',
-                            ondelete='CASCADE',
-                            onupdate='CASCADE'
-                        ), nullable=False, index=True, primary_key=True
-                    )
-    player_id       = Column(
-                        ForeignKey('players.id',
-                            ondelete='CASCADE',
-                            onupdate='CASCADE'
-                        ), nullable=False, index=True, primary_key=True
-                    )
-    value           = Column('value', Integer, nullable=False)
-    quest           = relationship('Quest')
-    player          = relationship('Player', backref='quests')
+# Players Flag database class
+class PlayersFlag(db.Model):
+    __tablename__   = 'player_player_flags'
+    flag_id     = Column(
+                    ForeignKey('player_flags.flag_id',
+                        ondelete='CASCADE', onupdate='CASCADE'
+                    ), nullable=False, index=True, primary_key=True
+                )
+    player_id   = Column(
+                    ForeignKey('players.id',
+                        ondelete='CASCADE', onupdate='CASCADE'
+                    ), nullable=False, index=True, primary_key=True
+                )
+    value       = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
+
+    player  = relationship('Player', backref='flags')
 
     def __repr__(self):
-        return f'<PlayersQuests> "{self.quest.name}" ({self.quest_id}) @ <Player> "{self.player.name}" ({self.player_id}) / Value: {self.value}'
+        return f'<PlayersFlag> "{self.flag.name}" ({self.flag_id}) @ <Player> "{self.player.name}" ({self.player_id}) : {self.value}'
+
+
+# Player Race database class
+class PlayerRace(db.Model):
+    __tablename__   = 'races'
+    race_id     = Column(TINYINT(3), primary_key=True)
+    race_name   = Column(String(15), nullable=False, unique=True)
+
+    player_race = relationship('Player', backref='race')
+
+    def __repr__(self):
+        return f'<PlayerRace> "{self.race_name}" ({self.race_id})'
+
 
 # Quest database class
 class Quest(db.Model):
-    __tablename__       = 'quests'
-    quest_id            = Column(Integer, primary_key=True)
+    __tablename__   = 'quests'
+    quest_id            = Column(INTEGER(11), primary_key=True)
     name                = Column(String(25), nullable=False, unique=True, server_default=FetchedValue())
     display_name        = Column(String(30), nullable=False)
-    is_major            = Column(Integer, nullable=False, server_default=FetchedValue())
-    xp_reward           = Column(Integer, nullable=False, server_default=FetchedValue())
+    is_major            = Column(TINYINT(1), nullable=False, server_default=FetchedValue())
+    xp_reward           = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
     completion_message  = Column(String(80), nullable=False)
 
     def __repr__(self):
-        return f'<Quest> "{self.name}" ({self.quest_id})'
+        return f'<Quest> "{self.name}" ({self.quest_id}) / "{self.display_name}"'
+
+
+# Player Quest database class
+class PlayerQuest(db.Model):
+    __tablename__   = 'player_quests'
+    quest_id    = Column(
+                    ForeignKey('quests.quest_id',
+                        ondelete='CASCADE', onupdate='CASCADE'
+                    ), nullable=False, index=True, primary_key=True
+                )
+    player_id   = Column(
+                    ForeignKey('players.id',
+                        ondelete='CASCADE', onupdate='CASCADE'
+                    ), nullable=False, index=True, primary_key=True
+                )
+    value       = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
+
+    quest   = relationship('Quest')
+    player  = relationship('Player', backref='quests')
+
+    def __repr__(self):
+        return f'<PlayerQuest> "{self.quest.name}" ({self.quest_id}) @ <Player> "{self.player.name}" ({self.player_id}) / Value: {self.value}'
+
+
+# Remort Upgrades database class
+class RemortUpgrade(db.Model):
+    __tablename__   = 'remort_upgrades'
+    upgrade_id  = Column(INTEGER(11), primary_key=True)
+    name        = Column(String(20), nullable=False, unique=True, server_default=FetchedValue())
+    renown_cost = Column(SMALLINT(6), nullable=False)
+    max_value   = Column(SMALLINT(6), nullable=False)
+
+    remort_upgrades = relationship('PlayerRemortUpgrade', backref='remort_upgrade')
+
+    def __repr__(self):
+        return f'<RemortUpgrade> "{self.name}" ({self.upgrade_id}) / Cost: {self.renown_cost} / Max: {self.max_value}'
+
+
+# Player Remort Upgrades database class
+class PlayerRemortUpgrade(db.Model):
+    __tablename__   = 'player_remort_upgrades'
+    upgrade_id  = Column(
+                    ForeignKey('remort_upgrades.upgrade_id',
+                        ondelete='CASCADE', onupdate='CASCADE'
+                    ), nullable=False, index=True, primary_key=True
+                )
+    player_id   = Column(
+                    ForeignKey('players.id',
+                        ondelete='CASCADE', onupdate='CASCADE'
+                    ), nullable=False, index=True, primary_key=True
+                )
+    value       = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
+
+    player      = relationship('Player', backref='remort_upgrades')
+
+    def __repr__(self):
+        return f'<PlayerRemortUpgrade> "{self.remort_upgrade.name}" ({self.upgrade_id}) @ <Player> "{self.player.name}" ({self.player_id}) / Value: {self.value}'
+
+
+# Season database class
+class Season(db.Model):
+    __tablename__   = 'seasons'
+    season_id       = Column(INTEGER(11), primary_key=True)
+    is_active       = Column(TINYINT(4), nullable=False)
+    effective_date  = Column(INTEGER(11), nullable=False)
+    expiration_date = Column(INTEGER(11), nullable=False)
+
+    def __repr__(self):
+        return f'<Season> ID {self.season_id} / Active: {self.is_active} / Effective: {self.effective_date} / Expiration: {self.expiration_date}'
+
+
+# Skill database class
+class Skill(db.Model):
+    __tablename__   = 'skills'
+    skill_id    = Column(INTEGER(11), primary_key=True)
+    class_id    = Column(INTEGER(11), nullable=False)
+    max_value   = Column(INTEGER(11), nullable=False)
+    difficulty  = Column(INTEGER(11), nullable=False)
+
+    def __repr__(self):
+        return f'<Skill> ID {self.skill_id} / Class ID {self.class_id} / Max: {self.max_value} / Difficulty: {self.difficulty}'
+
+
+# Player database class
+class Player(db.Model):
+    __tablename__   = 'players'
+
+    id                      = Column(INTEGER(11), primary_key=True)
+    account_id              = Column(
+                                ForeignKey('accounts.account_id',
+                                    ondelete='CASCADE', onupdate='CASCADE'
+                                ), nullable=False, index=True
+                            )
+    name                    = Column(String(15), nullable=False, unique=True, server_default=FetchedValue())
+    create_ident            = Column(String(10), nullable=False, server_default=FetchedValue())
+    last_isp                = Column(String(30), nullable=False, server_default=FetchedValue())
+    description             = Column(String(240))
+    title                   = Column(String(45), nullable=False, server_default=FetchedValue())
+    poofin                  = Column(String(80), nullable=False, server_default=FetchedValue())
+    poofout                 = Column(String(80), nullable=False, server_default=FetchedValue())
+    bankacc                 = Column(INTEGER(11), nullable=False)
+    logon_delay             = Column(SMALLINT(6), nullable=False)
+    true_level              = Column(INTEGER(11), nullable=False)
+    renown                  = Column(INTEGER(11), nullable=False)
+    prompt                  = Column(String(42), nullable=False, server_default=FetchedValue())
+    remorts                 = Column(INTEGER(11), nullable=False)
+    favors                  = Column(INTEGER(11), nullable=False)
+    birth                   = Column(INTEGER(11), nullable=False)
+    logon                   = Column(INTEGER(11), nullable=False)
+    online                  = Column(INTEGER(11))
+    logout                  = Column(INTEGER(11), nullable=False)
+    bound_room              = Column(INTEGER(11), nullable=False)
+    load_room               = Column(INTEGER(11), nullable=False)
+    wimpy                   = Column(SMALLINT(6))
+    invstart_level          = Column(INTEGER(11))
+    color_scheme            = Column(SMALLINT(6))
+    sex                     = Column(TINYINT(3), nullable=False)
+    race_id                 = Column(
+                                ForeignKey('races.race_id',
+                                    ondelete='CASCADE', onupdate='CASCADE'
+                                ), nullable=False, index=True
+                            )
+    class_id                = Column(
+                                ForeignKey('classes.class_id',
+                                    ondelete='CASCADE', onupdate='CASCADE'
+                                ), nullable=False, index=True
+                            )
+    level                   = Column(INTEGER(11), nullable=False)
+    weight                  = Column(SMALLINT(6), nullable=False)
+    height                  = Column(SMALLINT(6), nullable=False)
+    align                   = Column(SMALLINT(6), nullable=False)
+    comm                    = Column(SMALLINT(6), nullable=False)
+    karma                   = Column(SMALLINT(6), nullable=False)
+    experience_points       = Column(INTEGER(11), nullable=False)
+    money                   = Column(INTEGER(11), nullable=False)
+    fg_color                = Column(SMALLINT(6), nullable=False)
+    bg_color                = Column(SMALLINT(6), nullable=False)
+    login_failures          = Column(SMALLINT(6), nullable=False)
+    create_haddr            = Column(INTEGER(11), nullable=False)
+    auto_level              = Column(INTEGER(11), nullable=False)
+    login_fail_haddr        = Column(INTEGER(11))
+    last_haddr              = Column(INTEGER(11))
+    last_ident              = Column(String(10), server_default=FetchedValue())
+    load_room_next          = Column(INTEGER(11))
+    load_room_next_expires  = Column(INTEGER(11))
+    aggro_until             = Column(INTEGER(11))
+    inn_limit               = Column(SMALLINT(6), nullable=False)
+    held_xp                 = Column(INTEGER(11))
+    last_isp_change         = Column(INTEGER(11))
+    perm_hit_pts            = Column(INTEGER(11), nullable=False)
+    perm_move_pts           = Column(INTEGER(11), nullable=False)
+    perm_spell_pts          = Column(INTEGER(11), nullable=False)
+    perm_favor_pts          = Column(INTEGER(11), nullable=False)
+    curr_hit_pts            = Column(INTEGER(11), nullable=False)
+    curr_move_pts           = Column(INTEGER(11), nullable=False)
+    curr_spell_pts          = Column(INTEGER(11), nullable=False)
+    curr_favor_pts          = Column(INTEGER(11), nullable=False)
+    init_strength           = Column(TINYINT(4), nullable=False)
+    init_agility            = Column(TINYINT(4), nullable=False)
+    init_endurance          = Column(TINYINT(4), nullable=False)
+    init_perception         = Column(TINYINT(4), nullable=False)
+    init_focus              = Column(TINYINT(4), nullable=False)
+    init_willpower          = Column(TINYINT(4), nullable=False)
+    curr_strength           = Column(TINYINT(4), nullable=False)
+    curr_agility            = Column(TINYINT(4), nullable=False)
+    curr_endurance          = Column(TINYINT(4), nullable=False)
+    curr_perception         = Column(TINYINT(4), nullable=False)
+    curr_focus              = Column(TINYINT(4), nullable=False)
+    curr_willpower          = Column(TINYINT(4), nullable=False)
+    is_deleted              = Column(TINYINT(4), nullable=False, server_default=FetchedValue())
+    deaths                  = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
+    total_renown            = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
+    quests_completed        = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
+    challenges_completed    = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
+
+    # Players above a certain level are administrators
+    def is_admin(self, admin_level):
+        if self.true_level > admin_level:
+                return True
+        return False
+
+    # Hybrid property containing the amount of essence earned for the player
+    @hybrid_property
+    def seasonal_earned(self):
+
+        # Start with two (2) points for existing, with renown/remort equation
+        c = int(self.total_renown / 10) + 2
+        if self.remorts > 0:
+            c += int(self.remorts / 5) * 3 + 1
+        return c
