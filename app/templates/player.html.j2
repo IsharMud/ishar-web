@@ -11,40 +11,6 @@
                 </ul>
     {%- endif %}
 {%- endmacro -%}
-{%- macro display_align(align) -%}
-    {%- if align <= -1000 -%}
-        Very Evil
-    {%- elif align > -1000 and align <= -500 -%}
-        Evil
-    {%- elif align > -500 and align <= -250 -%}
-        Slightly Evil
-    {%- elif align > -250 and align < 250 -%}
-        Neutral
-    {%- elif align >= 250 and align < 500 -%}
-        Slightly Good
-    {%- elif align >= 500 and align < 1000 -%}
-        Good
-    {%- elif align >= 1000 %}
-        Very Good
-    {%- else -%}
-        Unknown
-    {%- endif -%}
-{%- endmacro -%}
-{%- macro display_class(player_class_name) -%}
-    {%- if player_class_name == 'WARRIOR' -%}
-        mighty warrior
-    {%- elif player_class_name == 'ROGUE' -%}
-        stealthy rogue
-    {%- elif player_class_name == 'CLERIC' -%}
-        pious cleric
-    {%- elif player_class_name == 'MAGICIAN' -%}
-        fearsome mage
-    {%- elif player_class_name == 'NECROMANCER' -%}
-        shadowy necromancer
-    {%- else -%}
-        classless curiosity ({{ player_class_name | safe | title }})
-    {%- endif -%}
-{%- endmacro -%}
 {%- if player %}
     {%- set player_phrase           = 'is' %}
     {%- set player_phrase_own       = 'are' %}
@@ -61,7 +27,7 @@
         {%- set player_phrase       = 'are' %}
         {%- set player_phrase_owns  = 'have' %}
     {%- endif %}
-    {%- if player.is_deleted == 1 %}
+    {%- if player.player_type == 'Dead' %}
         {%- set player_phrase       = 'was' %}
         {%- set player_phrase_own   = 'were' %}
         {%- set player_phrase_owns  = 'had' %}
@@ -69,14 +35,14 @@
 {%- endif %}
 {%- block meta_title -%}
     {%- if player -%}
-        Player: {{ player.name }}{% if player.is_deleted == 1 %} ☠️{%- endif %}
+        Player: {{ player.name }}{% if player.player_type == 'Dead' %} ☠️{%- endif %}
     {%- else -%}
         Player Not Found
     {%- endif -%}
 {%- endblock meta_title -%}
 {%- block meta_description %}
     {%- if player -%}
-        Player: {{ player.name }}{% if player.is_deleted == 1 %} ☠️{%- endif %}
+        Player: {{ player.name }}{% if player.player_type == 'Dead' %} ☠️{%- endif %}
     {%- else -%}
         Player Not Found
     {%- endif -%}
@@ -84,7 +50,7 @@
 {% block meta_url %}{{ url_for('show_player', player_name=player.name, _external=True) }}{% endblock meta_url %}">
 {%- block title %}
     {%- if player -%}
-        Player: {{ player.name }}{% if player.is_deleted == 1 %} ☠️{%- endif %}
+        Player: {{ player.name }}{% if player.player_type == 'Dead' %} ☠️{%- endif %}
     {%- else -%}
         Player Not Found
     {%- endif -%}
@@ -112,7 +78,7 @@
         {%- if player.true_level < immortal_level %}
                 <ul>
                     <li title="Name: {{ player.name | title | safe }} / Class: {{ player.class.class_name | title | safe }} / Race: {{ player.race.race_name | replace('_', '-') | title | safe }}">
-                        {{ player.name | title | safe }} {{ player_phrase }} a {{ display_class(player.class.class_name) }} of
+                        {{ player.name | title | safe }} {{ player_phrase }} a {{ player.class.class_display }} of
                         {{ player.race.race_name | replace('_', '-') | lower | safe }} origin.
                     </li>
                     <li title="Level: {{ player.level }} {%- if player.remorts > 0 %} / Remorts: {{ player.remorts }}{% endif %}">
@@ -138,8 +104,8 @@
                         {%- if player.challenges_completed != 1 %}s{% endif %}.
                     </li>
             {%- endif %}
-                    <li title="Alignment: {{ display_align(player.align) | striptags | safe }} ({{ player.align }})">
-                        {{ player_gender_own | title }} alignment {{ player_phrase }} {{ display_align(player.align) }}.
+                    <li title="Alignment: {{ player.player_alignment }} ({{ player.align }})">
+                        {{ player_gender_own | title }} alignment {{ player_phrase }} {{ player.player_alignment }}.
                     </li>
                     <li title="{%- if player.player_type == 'Classic' %}Deaths: {{ player.deaths }}{% elif player.player_type == 'Dead' %}{{ player.name | title | safe }} is DEAD!{% else %}{{ player.name | title | safe }} is a {{ player.player_type }} player!{% endif %}">
             {%- if player.player_type == 'Classic' %}
@@ -272,7 +238,8 @@
         {%- else %}
             <ul>
                 <li>
-                    {{ player.name | title | safe }} {{ player_phrase }} a <span class="{{ player.player_css }}">{{ player.player_type }}</span> character!
+                    {{ player.name | title | safe }} {{ player_phrase }} a {%- if player.player_type[0] | lower in ['a', 'e', 'i', 'o', 'u', 'y' ] %}n{% endif %}
+                    <span class="{{ player.player_css }}">{{ player.player_type }}</span> character!
                 </li>
             </ul>
         {%- endif %}

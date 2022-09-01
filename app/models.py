@@ -525,6 +525,28 @@ class Player(db.Model):
             return True
         return False
 
+    # Hybrid property to return player alignment
+    @hybrid_property
+    def player_alignment(self):
+        if self.align <= -1000:
+            r   = 'Very Evil'
+        elif self.align > -1000 and self.align <= -500:
+            r   = 'Evil'
+        elif self.align > -500 and self.align <= -250:
+            r   = 'Slightly Evil'
+        elif self.align > -250 and self.align < 250:
+            r   = 'Neutral'
+        elif self.align >= 250 and self.align < 500:
+            r   = 'Slightly Good'
+        elif self.align >= 500 and self.align < 1000:
+            r   = 'Good'
+        elif self.align >= 1000:
+            r   = 'Very Good'
+        else:
+            r   = 'Unknown'
+    
+        return r
+
     # Hybrid property to return player CSS class
     @hybrid_property
     def player_css(self):
@@ -539,11 +561,7 @@ class Player(db.Model):
     # Hybrid property to return player "type"
     @hybrid_property
     def player_type(self):
-        if self.is_deleted:
-            r   = 'Dead'
-        elif self.is_survival:
-            r   = 'Survival'
-        elif self.true_level >= 26:
+        if self.true_level >= 26:
             r   = 'God'
         elif self.true_level == 25:
             r   = 'Forger'
@@ -555,6 +573,10 @@ class Player(db.Model):
             r   = 'Immortal'
         elif self.true_level == 21:
             r   = 'Consort'
+        elif self.is_deleted:
+            r   = 'Dead'
+        elif self.is_survival:
+            r   = 'Survival'
         else:
             r   = 'Classic'
 
