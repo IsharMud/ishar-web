@@ -51,17 +51,6 @@ class Account(db.Model, UserMixin):
                 return True
         return False
 
-    # Hybrid property containing the amount of essence earned for the account
-    @hybrid_property
-    def seasonal_earned(self):
-
-        # Start at (0) zero, and return the points from the player within the account whom has earned the highest amount
-        s = 0
-        for player in self.players:
-            if player.seasonal_earned > s:
-                s = player.seasonal_earned
-        return s
-
     # Method to allow users to change their account password
     def change_password(self, new_password):
         try:
@@ -102,18 +91,29 @@ class Account(db.Model, UserMixin):
             print(e)
         return False
 
+    # Hybrid property containing the amount of essence earned for the account
+    @hybrid_property
+    def seasonal_earned(self):
+
+        # Start at (0) zero, and return the points from the player within the account whom has earned the highest amount
+        s = 0
+        for player in self.players:
+            if player.seasonal_earned > s:
+                s = player.seasonal_earned
+        return s
+
     def __repr__(self):
         return f'<Account> "{self.account_name}" ({self.account_id})'
 
 
 # Account Upgrade database class
 class AccountUpgrade(db.Model):
-    __tablename__ = 'account_upgrades'
-    id          = Column(TINYINT(4), primary_key=True)
-    cost        = Column(MEDIUMINT(4), nullable=False)
-    description = Column(String(200), nullable=False)
-    name        = Column(String(30), nullable=False, unique=True)
-    max_value   = Column(MEDIUMINT(4), nullable=False, server_default=FetchedValue())
+    __tablename__   = 'account_upgrades'
+    id                  = Column(TINYINT(4), primary_key=True)
+    cost                = Column(MEDIUMINT(4), nullable=False)
+    description         = Column(String(200), nullable=False)
+    name                = Column(String(30), nullable=False, unique=True)
+    max_value           = Column(MEDIUMINT(4), nullable=False, server_default=FetchedValue())
 
     accounts_upgrade    = relationship('AccountsUpgrade', backref='upgrade')
 
@@ -124,6 +124,7 @@ class AccountUpgrade(db.Model):
 # Accounts Upgrade database class
 class AccountsUpgrade(db.Model):
     __tablename__       = 'accounts_account_upgrades'
+
     account_upgrades_id = Column(
                             ForeignKey('account_upgrades.id',
                                 ondelete='CASCADE',
@@ -158,6 +159,7 @@ class AccountsUpgrade(db.Model):
 # Affect Flag database class (unused)
 class AffectFlag(db.Model):
     __tablename__   = 'affect_flags'
+
     flag_id = Column(TINYINT(4), primary_key=True)
     name    = Column(String(30), nullable=False, unique=True)
 
@@ -168,6 +170,7 @@ class AffectFlag(db.Model):
 # Board database class (unused)
 class Board(db.Model):
     __tablename__   = 'boards'
+
     board_id    = Column(TINYINT(4), primary_key=True)
     board_name  = Column(String(15), nullable=False)
 
@@ -178,6 +181,7 @@ class Board(db.Model):
 # Challenge database class
 class Challenge(db.Model):
     __tablename__   = 'challenges'
+
     challenge_id    = Column(SMALLINT(4), primary_key=True)
     mob_vnum        = Column(INTEGER(11), nullable=False)
     orig_level      = Column(TINYINT(4), nullable=False)
@@ -197,9 +201,10 @@ class Challenge(db.Model):
 
 # DisplayOption database class (unused)
 class DisplayOption(db.Model):
-    __tablename__ = 'display_options'
-    display_id = Column(TINYINT(4), primary_key=True)
-    name = Column(String(20), nullable=False, unique=True)
+    __tablename__   = 'display_options'
+
+    display_id  = Column(TINYINT(4), primary_key=True)
+    name        = Column(String(20), nullable=False, unique=True)
 
     def __repr__(self):
         return f'<DisplayOption> "{self.name}" ({self.display_id})'
@@ -207,7 +212,7 @@ class DisplayOption(db.Model):
 
 # News database class
 class News(db.Model):
-    __tablename__ = 'news'
+    __tablename__   = 'news'
 
     news_id     = Column(INTEGER(11), primary_key=True)
     account_id  = Column(
@@ -218,6 +223,7 @@ class News(db.Model):
     created_at  = Column(TIMESTAMP, nullable=False, server_default=FetchedValue())
     subject     = Column(String(64), nullable=False, server_default=FetchedValue())
     body        = Column(Text, nullable=False)
+
     account     = relationship('Account')
 
     # Method to add a news post
@@ -237,12 +243,13 @@ class News(db.Model):
 # Player Class database class
 class PlayerClass(db.Model):
     __tablename__   = 'classes'
+
     class_id            = Column(TINYINT(3), primary_key=True)
     class_name          = Column(String(15), nullable=False, unique=True, server_default=FetchedValue())
     class_display       = Column(String(32))
     class_description   = Column(String(64))
 
-    player_class    = relationship('Player', backref='class')
+    player_class        = relationship('Player', backref='class')
 
     def __repr__(self):
         return f'<PlayerClass> "{self.class_name}" ({self.class_id})'
@@ -251,6 +258,7 @@ class PlayerClass(db.Model):
 # Player Condition database class (unused)
 class PlayerCondition(db.Model):
     __tablename__   = 'conditions'
+
     condition_id    = Column(TINYINT(4), primary_key=True)
     name            = Column(String(20), nullable=False, unique=True)
 
@@ -260,7 +268,8 @@ class PlayerCondition(db.Model):
 
 # Player Flag database class
 class PlayerFlag(db.Model):
-    __tablename__ = 'player_flags'
+    __tablename__   = 'player_flags'
+
     flag_id = Column(INTEGER(11), primary_key=True)
     name    = Column(String(20), nullable=False, unique=True)
 
@@ -273,6 +282,7 @@ class PlayerFlag(db.Model):
 # Players Flag database class
 class PlayersFlag(db.Model):
     __tablename__   = 'player_player_flags'
+
     flag_id     = Column(
                     ForeignKey('player_flags.flag_id',
                         ondelete='CASCADE', onupdate='CASCADE'
@@ -285,7 +295,7 @@ class PlayersFlag(db.Model):
                 )
     value       = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
 
-    player  = relationship('Player', backref='flags')
+    player      = relationship('Player', backref='flags')
 
     def __repr__(self):
         return f'<PlayersFlag> "{self.flag.name}" ({self.flag_id}) @ <Player> "{self.player.name}" ({self.player_id}) : {self.value}'
@@ -294,6 +304,7 @@ class PlayersFlag(db.Model):
 # Player Race database class
 class PlayerRace(db.Model):
     __tablename__   = 'races'
+
     race_id     = Column(TINYINT(3), primary_key=True)
     race_name   = Column(String(15), nullable=False, unique=True)
 
@@ -306,6 +317,7 @@ class PlayerRace(db.Model):
 # Quest database class
 class Quest(db.Model):
     __tablename__   = 'quests'
+
     quest_id            = Column(INTEGER(11), primary_key=True)
     name                = Column(String(25), nullable=False, unique=True, server_default=FetchedValue())
     display_name        = Column(String(30), nullable=False)
@@ -320,6 +332,7 @@ class Quest(db.Model):
 # Player Quest database class
 class PlayerQuest(db.Model):
     __tablename__   = 'player_quests'
+
     quest_id    = Column(
                     ForeignKey('quests.quest_id',
                         ondelete='CASCADE', onupdate='CASCADE'
@@ -332,8 +345,8 @@ class PlayerQuest(db.Model):
                 )
     value       = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
 
-    quest   = relationship('Quest')
-    player  = relationship('Player', backref='quests')
+    quest       = relationship('Quest')
+    player      = relationship('Player', backref='quests')
 
     def __repr__(self):
         return f'<PlayerQuest> "{self.quest.name}" ({self.quest_id}) @ <Player> "{self.player.name}" ({self.player_id}) / Value: {self.value}'
@@ -342,10 +355,11 @@ class PlayerQuest(db.Model):
 # Remort Upgrades database class
 class RemortUpgrade(db.Model):
     __tablename__   = 'remort_upgrades'
-    upgrade_id  = Column(INTEGER(11), primary_key=True)
-    name        = Column(String(20), nullable=False, unique=True, server_default=FetchedValue())
-    renown_cost = Column(SMALLINT(6), nullable=False)
-    max_value   = Column(SMALLINT(6), nullable=False)
+
+    upgrade_id      = Column(INTEGER(11), primary_key=True)
+    name            = Column(String(20), nullable=False, unique=True, server_default=FetchedValue())
+    renown_cost     = Column(SMALLINT(6), nullable=False)
+    max_value       = Column(SMALLINT(6), nullable=False)
 
     remort_upgrades = relationship('PlayerRemortUpgrade', backref='remort_upgrade')
 
@@ -356,6 +370,7 @@ class RemortUpgrade(db.Model):
 # Player Remort Upgrades database class
 class PlayerRemortUpgrade(db.Model):
     __tablename__   = 'player_remort_upgrades'
+
     upgrade_id  = Column(
                     ForeignKey('remort_upgrades.upgrade_id',
                         ondelete='CASCADE', onupdate='CASCADE'
@@ -377,6 +392,7 @@ class PlayerRemortUpgrade(db.Model):
 # Season database class
 class Season(db.Model):
     __tablename__   = 'seasons'
+
     season_id       = Column(INTEGER(11), primary_key=True)
     is_active       = Column(TINYINT(4), nullable=False)
     effective_date  = Column(INTEGER(11), nullable=False)
@@ -389,6 +405,7 @@ class Season(db.Model):
 # Skill database class (unused)
 class Skill(db.Model):
     __tablename__   = 'skills'
+
     skill_id    = Column(INTEGER(11), primary_key=True)
 #    class_id    = Column(INTEGER(11), nullable=False)
     class_id    = Column(
