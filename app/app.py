@@ -2,7 +2,6 @@ import datetime
 from flask import Flask, flash, redirect, render_template, request, send_from_directory, session, url_for
 from flask_login import current_user, fresh_login_required, login_required, login_user, logout_user, LoginManager
 import ipaddress
-import secrets
 
 # Create/configure the app
 app = Flask(__name__)
@@ -28,9 +27,10 @@ login_manager.needs_refresh_message_category    = 'error'
 login_manager.refresh_view                      = 'login'
 login_manager.session_protection                = 'strong'
 
-# Get database and form classes
-import models
+# Get forms, database classes/models, and level types
 import forms
+import models
+import levels
 
 # Get users for the Flask Login Manager via Account object from the database
 @login_manager.user_loader
@@ -41,9 +41,8 @@ def load_user(account_id):
 @app.context_processor
 def injects():
     return dict(
-            now             = datetime.datetime.now().timestamp(),
-            season          = models.Season.query.filter_by(is_active = 1).first(),
-            immortal_level  = secrets.immortal_level
+            now     = datetime.datetime.now().timestamp(),
+            season  = models.Season.query.filter_by(is_active = 1).first(),
     )
 
 # Handle errors with a little template
@@ -224,9 +223,7 @@ def show_player(player_name=None):
 @app.route('/portal', methods=['GET'])
 @login_required
 def portal():
-    return render_template('portal.html.j2',
-                                is_admin    = current_user.is_admin(secrets.admin_level)
-                            )
+    return render_template('portal.html.j2')
 
 
 # Challenges page
@@ -245,6 +242,7 @@ def challenges():
 @app.route('/leader_board', methods=['GET'])
 @app.route('/leaderboard', methods=['GET'])
 def leaderboard(limit=10):
+
     limit_choices   = [5, 10, 25, 50, 100]
     if limit not in limit_choices or limit > max(limit_choices):
         return redirect(url_for('leaderboard', limit=10))
@@ -252,8 +250,8 @@ def leaderboard(limit=10):
     if request.args.get('dead') and request.args.get('dead') == 'false':
         include_dead    = False
         leaders         = models.Player.query.filter(
-                            models.Player.true_level < secrets.immortal_level,
-                            models.Player.is_deleted != 1
+                            models.Player.true_level    < levels.immortal_level,
+                            models.Player.is_deleted    != 1
                         ).order_by(
                             -models.Player.remorts,
                             -models.Player.total_renown,
@@ -267,7 +265,7 @@ def leaderboard(limit=10):
     else:
         include_dead    = True
         leaders         = models.Player.query.filter(
-                            models.Player.true_level < secrets.immortal_level
+                            models.Player.true_level    < levels.immortal_level
                         ).order_by(
                             -models.Player.remorts,
                             -models.Player.total_renown,
@@ -284,7 +282,7 @@ def leaderboard(limit=10):
                                 leaders         = leaders,
                                 limit           = limit,
                                 limit_choices   = limit_choices
-                          )
+                            )
 
 
 # Show online users (/who, or /online, or /users)
@@ -292,13 +290,13 @@ def leaderboard(limit=10):
 @app.route('/users', methods=['GET'])
 @app.route('/who', methods=['GET'])
 def who():
-    who =   models.Player.query.filter(
-                models.Player.logon >= models.Player.logout
-            ).order_by(
-                -models.Player.true_level,
-                -models.Player.remorts,
-                models.Player.name
-            ).all()
+    who = models.Player.query.filter(
+            models.Player.logon >= models.Player.logout
+        ).order_by(
+            -models.Player.true_level,
+            -models.Player.remorts,
+            models.Player.name
+        ).all()
     return render_template('who.html.j2', who=who)
 
 
@@ -307,8 +305,7 @@ def who():
 @app.route('/wizlist', methods=['GET'])
 def wizlist():
     immortals = models.Player.query.filter(
-                    models.Player.level         >= secrets.immortal_level,
-                    models.Player.true_level    >= secrets.immortal_level
+                    models.Player.true_level    >= levels.immortal_level
                 ).order_by(
                     -models.Player.true_level
                 ).all()
@@ -321,12 +318,12 @@ def wizlist():
 def admin_portal():
 
     # Redirect non-administrators to the main page
-    if not current_user.is_admin(secrets.admin_level):
+    if not current_user.is_admin:
         flash('Sorry, but you are not an administrator!', 'error')
         return redirect(url_for('welcome'))
 
     # Get news add form and check if submitted
-    news_add_form = forms.NewsAddForm()
+    news_add_form   = forms.NewsAddForm()
     if news_add_form.validate_on_submit():
 
         # Create the model for the new news post
@@ -338,8 +335,8 @@ def admin_portal():
         )
 
         # Create the news post in the database, get the news post ID, and check that it worked
-        created_id = new_news.add_news()
-        created_post = models.News.query.filter_by(news_id = created_id).first()
+        created_id      = new_news.add_news()
+        created_post    = models.News.query.filter_by(news_id = created_id).first()
         if created_post:
             flash('Your message has been posted!', 'success')
         else:
@@ -362,17 +359,17 @@ def logout():
 def new_account():
 
     # Get new account form object and check if submitted
-    new_account_form = forms.NewAccountForm()
+    new_account_form    = forms.NewAccountForm()
     if new_account_form.validate_on_submit():
 
         # Check that e-mail address has not already been used
-        find_email = models.Account.query.filter_by(email = new_account_form.email.data).first()
+        find_email  = models.Account.query.filter_by(email = new_account_form.email.data).first()
         if find_email:
             flash('Sorry, but that e-mail address exists. Please log in.', 'error')
             return redirect(url_for('login'))
 
         # Check that the account name is not in use
-        find_name = models.Account.query.filter_by(account_name = new_account_form.account_name.data).first()
+        find_name   = models.Account.query.filter_by(account_name = new_account_form.account_name.data).first()
         if find_name:
             flash('Sorry, but that account name is already being used!', 'error')
 
@@ -408,6 +405,7 @@ def new_account():
     # Show the new account form
     return render_template('new.html.j2', new_account_form=new_account_form)
 
+
 # /clients or /mud_clients
 @app.route('/clients', methods=['GET'])
 @app.route('/mud_clients', methods=['GET'])
@@ -436,8 +434,7 @@ def discord():
 def latest_patch(patch_dir='patches'):
     import glob
     import os
-    pdfs = glob.glob('static/' + patch_dir + '/*.pdf')
-    return redirect('/' + max(pdfs, key=os.path.getmtime))
+    return redirect('/' + max(glob.glob('static/' + patch_dir + '/*.pdf'), key=os.path.getmtime))
 
 
 # /faq (or /faqs or /questions)
@@ -474,7 +471,7 @@ def support():
 @app.route('/areas', methods=['GET'])
 @app.route('/world/<string:area>', methods=['GET'])
 @app.route('/world', methods=['GET'])
-def world(helptab_file=secrets.helptab_file, area=None):
+def world(helptab_file='/home/ishar/ishar-mud/lib/Misc/helptab', area=None):
 
     # Get all of the areas from the helptab file
     import helptab
@@ -484,10 +481,10 @@ def world(helptab_file=secrets.helptab_file, area=None):
     # Try to find an area based on any user input
     if area:
         if area in areas.keys():
-            areas = areas[area]
+            areas   = areas[area]
         else:
-            area = None
-            code = 404
+            area    = None
+            code    = 404
             flash('Sorry, but please choose a valid area!', 'error')
 
     return render_template('world.html.j2', areas=areas, area=area), code

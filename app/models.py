@@ -1,6 +1,7 @@
 from app import app
 import crypt
 import hmac
+import levels
 from flask import url_for
 from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
@@ -44,10 +45,11 @@ class Account(db.Model, UserMixin):
     def is_active(self):
         return isinstance(self.account_id, int)
 
-    # Accounts with a player above a certain level are administrators
-    def is_admin(self, admin_level):
+    # Hybrid property returning boolean whether user is an admin
+    @hybrid_property
+    def is_admin(self):
         for player in self.players:
-            if player.true_level > admin_level:
+            if player.is_god:
                 return True
         return False
 
@@ -95,7 +97,7 @@ class Account(db.Model, UserMixin):
     @hybrid_property
     def seasonal_earned(self):
 
-        # Start at (0) zero, and return the points from the player within the account whom has earned the highest amount
+        # Start at zero (0), and return the points from the player within the account whom has earned the highest amount
         s = 0
         for player in self.players:
             if player.seasonal_earned > s:
@@ -127,14 +129,12 @@ class AccountsUpgrade(db.Model):
 
     account_upgrades_id = Column(
                             ForeignKey('account_upgrades.id',
-                                ondelete='CASCADE',
-                                onupdate='CASCADE'
+                                ondelete='CASCADE', onupdate='CASCADE'
                             ), nullable=False, index=True, primary_key=True
                         )
     account_id          = Column(
                             ForeignKey('accounts.account_id',
-                                ondelete='CASCADE',
-                                onupdate='CASCADE'
+                                ondelete='CASCADE', onupdate='CASCADE'
                             ), nullable=False, index=True, primary_key=True
                         )
     amount              = Column(MEDIUMINT(4), nullable=False)
@@ -199,6 +199,17 @@ class Challenge(db.Model):
         return f'<Challenge> "{self.mob_name}" ({self.challenge_id}) / Active: {self.is_active} / Winner: "{self.winner_desc}"'
 
 
+# Condition database class (unused)
+class Condition(db.Model):
+    __tablename__   = 'conditions'
+
+    condition_id    = Column(TINYINT(4), primary_key=True)
+    name            = Column(String(20), nullable=False, unique=True)
+
+    def __repr__(self):
+        return f'<PlayerCondition> "{self.name}" ({self.condition_id})'
+
+
 # DisplayOption database class (unused)
 class DisplayOption(db.Model):
     __tablename__   = 'display_options'
@@ -253,17 +264,6 @@ class PlayerClass(db.Model):
 
     def __repr__(self):
         return f'<PlayerClass> "{self.class_name}" ({self.class_id})'
-
-
-# Player Condition database class (unused)
-class PlayerCondition(db.Model):
-    __tablename__   = 'conditions'
-
-    condition_id    = Column(TINYINT(4), primary_key=True)
-    name            = Column(String(20), nullable=False, unique=True)
-
-    def __repr__(self):
-        return f'<PlayerCondition> "{self.name}" ({self.condition_id})'
 
 
 # Player Flag database class
@@ -407,18 +407,41 @@ class Season(db.Model):
 class Skill(db.Model):
     __tablename__   = 'skills'
 
-    skill_id    = Column(INTEGER(11), primary_key=True)
-#    class_id    = Column(INTEGER(11), nullable=False)
-    class_id    = Column(
-                    ForeignKey('classes.class_id',
-                        ondelete='CASCADE', onupdate='CASCADE'
-                    ), nullable=False, index=True
-                )
-    max_value   = Column(INTEGER(11), nullable=False)
-    difficulty  = Column(INTEGER(11), nullable=False)
+    skill_id        = Column(INTEGER(11), primary_key=True)
+    class_id        = Column(
+                        ForeignKey('classes.class_id',
+                            ondelete='CASCADE', onupdate='CASCADE'
+                        ), nullable=False, index=True
+                    )
+    max_value       = Column(INTEGER(11), nullable=False)
+    difficulty      = Column(INTEGER(11), nullable=False)
+
+#    player_skills   = relationship('PlayerSkill', backref='skill')
+
 
     def __repr__(self):
         return f'<Skill> ID {self.skill_id} / Class ID {self.class_id} / Max: {self.max_value} / Difficulty: {self.difficulty}'
+
+# Player Skill database class (unused)
+class PlayerSkill(db.Model):
+    __tablename__   = 'player_skills'
+
+    skill_id        = Column(
+                        ForeignKey('skills.skill_id',
+                            ondelete='CASCADE', onupdate='CASCADE'
+                        ), nullable=False, index=True, primary_key=True
+                    )
+    player_id       = Column(
+                        ForeignKey('players.id',
+                            ondelete='CASCADE', onupdate='CASCADE'
+                        ), nullable=False, index=True, primary_key=True
+                    )
+    skill_level     = Column(TINYINT(11), nullable=False, server_default=FetchedValue())
+
+#    player         = relationship('Player', backref='skills')
+
+    def __repr__(self):
+        return f'<PlayerSkill> {self.skill_id} @ <Player> "{self.player.name}" ({self.player_id}) / Skill Level: {self.skill_level}'
 
 
 # Player database class
@@ -513,10 +536,18 @@ class Player(db.Model):
     quests_completed        = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
     challenges_completed    = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
 
-    # Players above a certain level are administrators
-    def is_admin(self, admin_level):
-        if self.true_level > admin_level:
-                return True
+    # Hybrid property returning boolean whether player is a God
+    @hybrid_property
+    def is_god(self):
+        if self.true_level >= levels.god_level:
+            return True
+        return False
+
+    # Hybrid property returning boolean whether player is an immortal
+    @hybrid_property
+    def is_immortal(self):
+        if self.true_level in levels.types.keys():
+            return True
         return False
 
     # Hybrid property returning boolean whether player is a survival ("PERM_DEATH") character
@@ -530,24 +561,22 @@ class Player(db.Model):
     @hybrid_property
     def player_alignment(self):
         if self.align <= -1000:
-            r   = 'Very Evil'
+            return 'Very Evil'
         elif self.align > -1000 and self.align <= -500:
-            r   = 'Evil'
+            return 'Evil'
         elif self.align > -500 and self.align <= -250:
-            r   = 'Slightly Evil'
+            return 'Slightly Evil'
         elif self.align > -250 and self.align < 250:
-            r   = 'Neutral'
+            return 'Neutral'
         elif self.align >= 250 and self.align < 500:
-            r   = 'Slightly Good'
+            return 'Slightly Good'
         elif self.align >= 500 and self.align < 1000:
-            r   = 'Good'
+            return 'Good'
         elif self.align >= 1000:
-            r   = 'Very Good'
+            return 'Very Good'
         else:
-            r   = 'Unknown'
+            return 'Unknown'
     
-        return r
-
     # Hybrid property to return player CSS class
     @hybrid_property
     def player_css(self):
@@ -562,26 +591,14 @@ class Player(db.Model):
     # Hybrid property to return player "type"
     @hybrid_property
     def player_type(self):
-        if self.true_level >= 26:
-            r   = 'God'
-        elif self.true_level == 25:
-            r   = 'Forger'
-        elif self.true_level == 24:
-            r   = 'Eternal'
-        elif self.true_level == 23:
-            r   = 'Artisan'
-        elif self.true_level == 22:
-            r   = 'Immortal'
-        elif self.true_level == 21:
-            r   = 'Consort'
+        if self.true_level in levels.types.keys():
+            return levels.types[self.true_level]
         elif self.is_deleted:
-            r   = 'Dead'
+            return 'Dead'
         elif self.is_survival:
-            r   = 'Survival'
+            return 'Survival'
         else:
-            r   = 'Classic'
-
-        return r
+            return 'Classic'
 
     # Hybrid property returning the amount of essence earned for the player
     @hybrid_property

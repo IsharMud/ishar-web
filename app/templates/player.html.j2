@@ -75,7 +75,7 @@
                 <h3 title="{{ player.player_title | striptags | safe }}">
                     {{ player.player_title }}
                 </h3>
-        {%- if player.true_level < immortal_level %}
+        {%- if not player.is_immortal %}
                 <ul>
                     <li title="Name: {{ player.name | title | safe }} / Class: {{ player.class.class_name | title | safe }} / Race: {{ player.race.race_name | replace('_', '-') | title | safe }}">
                         {{ player.name | title | safe }} {{ player_phrase }} a {{ player.class.class_display }} of

@@ -46,7 +46,7 @@ Who's Online?
                         <td title="{{ player.player_title | striptags | safe }}">
                             {{ player.player_title }}
                         </td>
-            {%- if player.true_level < immortal_level %}
+            {%- if not player.is_immortal %}
                         <td title="Level: {{ player.level }} (Remorts: {{ player.remorts }})">
                             {{ player.level }} ({{ player.remorts }})
                         </td>

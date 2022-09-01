@@ -1,9 +1,14 @@
-import secrets
-
 TESTING     = True
 DEBUG       = True
 FLASK_ENV   = 'staging'
-SECRET_KEY  = secrets.secret_key
+SECRET_KEY  = 'SECRET'
+
+db_creds = {
+    'user'      : 'ishar',
+    'password'  : 'SECRET',
+    'host'      : '127.0.0.1',
+    'database'  : 'ishar'
+}
 
 REMEMBER_COOKIE_DOMAIN      = '.isharmud.com'
 REMEMBER_COOKIE_DURATION    = 604800
@@ -16,7 +21,7 @@ SESSION_COOKIE_SECURE   = True
 SESSION_PROTECTION      = 'strong'
 USE_SESSION_FOR_NEXT    = True
 
-SQLALCHEMY_DATABASE_URI         = secrets.sql_uri
+SQLALCHEMY_DATABASE_URI         = f"mysql+pymysql://{db_creds['user']}:{db_creds['password']}@{db_creds['host']}/{db_creds['database']}"
 SQLALCHEMY_ECHO                 = True
 SQLALCHEMY_POOL_RECYCLE         = 3
 SQLALCHEMY_POOL_TIMEOUT         = 3

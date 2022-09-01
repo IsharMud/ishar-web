@@ -99,7 +99,7 @@
                     |
                     <a href="{{ url_for('logout') }}" title="Log Out">Log Out</a>
                 </p>
-    {%- if is_admin is defined and is_admin == True %}
+    {%- if current_user.is_admin is defined and current_user.is_admin == True %}
                 <p class="bottom-portal-link">
                     <a href="{{ url_for('admin_portal') }}" title="Administration Portal">Administration</a>
                 </p>
