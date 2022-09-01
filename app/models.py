@@ -1,6 +1,7 @@
 from app import app
 import crypt
 import hmac
+from flask import url_for
 from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, DateTime, ForeignKey, String, TIMESTAMP, Text
@@ -154,7 +155,7 @@ class AccountsUpgrade(db.Model):
         return f'<AccountsUpgrade> "{self.upgrade.name}" ({self.account_upgrades_id}) @ <Account> "{self.account.account_name}" ({self.account_id}) / Amount: {self.amount}'
 
 
-# Affect Flag database class
+# Affect Flag database class (unused)
 class AffectFlag(db.Model):
     __tablename__   = 'affect_flags'
     flag_id = Column(TINYINT(4), primary_key=True)
@@ -164,7 +165,7 @@ class AffectFlag(db.Model):
         return f'<AffectFlag> "{self.name}" ({self.flag_id})'
 
 
-# Board database class
+# Board database class (unused)
 class Board(db.Model):
     __tablename__   = 'boards'
     board_id    = Column(TINYINT(4), primary_key=True)
@@ -194,7 +195,7 @@ class Challenge(db.Model):
         return f'<Challenge> "{self.mob_name}" ({self.challenge_id}) / Active: {self.is_active} / Winner: "{self.winner_desc}"'
 
 
-# DisplayOption database class
+# DisplayOption database class (unused)
 class DisplayOption(db.Model):
     __tablename__ = 'display_options'
     display_id = Column(TINYINT(4), primary_key=True)
@@ -230,10 +231,10 @@ class News(db.Model):
         return False
 
     def __repr__(self):
-        return f'<News> "{self.subject}" ({self.news_id})'
+        return f'<News> "{self.subject}" ({self.news_id}) / by "{self.account.name}" / at "{self.created_at}"'
 
 
-# PlayerClass database class
+# Player Class database class
 class PlayerClass(db.Model):
     __tablename__   = 'classes'
     class_id            = Column(TINYINT(3), primary_key=True)
@@ -244,10 +245,10 @@ class PlayerClass(db.Model):
     player_class    = relationship('Player', backref='class')
 
     def __repr__(self):
-        return f'<PlayerClass> "{self.name}" ({self.condition_id})'
+        return f'<PlayerClass> "{self.class_name}" ({self.class_id})'
 
 
-# Player Condition database class
+# Player Condition database class (unused)
 class PlayerCondition(db.Model):
     __tablename__   = 'conditions'
     condition_id    = Column(TINYINT(4), primary_key=True)
@@ -313,7 +314,7 @@ class Quest(db.Model):
     completion_message  = Column(String(80), nullable=False)
 
     def __repr__(self):
-        return f'<Quest> "{self.name}" ({self.quest_id}) / "{self.display_name}"'
+        return f'<Quest> "{self.name}" ({self.quest_id}) / "{self.display_name}" / XP: {self.xp_reward}'
 
 
 # Player Quest database class
@@ -385,11 +386,16 @@ class Season(db.Model):
         return f'<Season> ID {self.season_id} / Active: {self.is_active} / Effective: {self.effective_date} / Expiration: {self.expiration_date}'
 
 
-# Skill database class
+# Skill database class (unused)
 class Skill(db.Model):
     __tablename__   = 'skills'
     skill_id    = Column(INTEGER(11), primary_key=True)
-    class_id    = Column(INTEGER(11), nullable=False)
+#    class_id    = Column(INTEGER(11), nullable=False)
+    class_id    = Column(
+                    ForeignKey('classes.class_id',
+                        ondelete='CASCADE', onupdate='CASCADE'
+                    ), nullable=False, index=True
+                )
     max_value   = Column(INTEGER(11), nullable=False)
     difficulty  = Column(INTEGER(11), nullable=False)
 
@@ -495,7 +501,49 @@ class Player(db.Model):
                 return True
         return False
 
-    # Hybrid property containing the amount of essence earned for the player
+    # Hybrid property returning boolean whether player is a survival ("PERM_DEATH") character
+    @hybrid_property
+    def is_survival(self):
+        if self.flags[45].flag.name == 'PERM_DEATH' and self.flags[45].value == 1:
+            return True
+        return False
+
+    # Hybrid property to return player CSS class
+    @hybrid_property
+    def player_css(self):
+        return self.player_type.lower() + '-player'
+
+    # Hybrid property to return player title
+    @hybrid_property
+    def player_title(self):
+        url = url_for('show_player', player_name=self.name)
+        return self.title.replace('%s', f'<a href="{url}">{self.name}</a>')
+
+    # Hybrid property to return player "type"
+    @hybrid_property
+    def player_type(self):
+        if self.is_deleted:
+            r   = 'Dead'
+        elif self.is_survival:
+            r   = 'Survival'
+        elif self.true_level >= 26:
+            r   = 'God'
+        elif self.true_level == 25:
+            r   = 'Forger'
+        elif self.true_level == 24:
+            r   = 'Eternal'
+        elif self.true_level == 23:
+            r   = 'Artisan'
+        elif self.true_level == 22:
+            r   = 'Immortal'
+        elif self.true_level == 21:
+            r   = 'Consort'
+        else:
+            r   = 'Classic'
+
+        return r
+
+    # Hybrid property returning the amount of essence earned for the player
     @hybrid_property
     def seasonal_earned(self):
 

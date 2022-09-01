@@ -39,15 +39,12 @@ Who's Online?
                         </th>
                     </tr>
         {%- for player in who %}
-            {%- set player_title = player_title(player) %}
-            {%- set player_type = player_type(player) %}
-            {%- set player_css = player_css(player) %}
                     <tr>
                         <td id="{{ loop.index }}" title="#{{ loop.index }}">
                             {{ loop.index }}
                         </td>
-                        <td title="{{ player_title | striptags | safe }}">
-                            {{ player_title }}
+                        <td title="{{ player.player_title | striptags | safe }}">
+                            {{ player.player_title }}
                         </td>
             {%- if player.true_level < immortal_level %}
                         <td title="Level: {{ player.level }} (Remorts: {{ player.remorts }})">
@@ -60,9 +57,9 @@ Who's Online?
                             {{ player.class.class_name | title | safe }}
                         </td>
             {%- else %}
-                        <td class="non-classic" colspan="3" title="Type: {{ player_type }}">
-                            <span class="{{ player_css }}">
-                                {{ player_type }}
+                        <td class="non-classic" colspan="3" title="Type: {{ player.player_type }}">
+                            <span class="{{ player.player_css }}">
+                                {{ player.player_type }}
                             </span>
                         </td>
             {%- endif %}

@@ -17,8 +17,6 @@
     {%- if leaders is defined and leaders is iterable and leaders | length > 0 %}
                 <table id="leaders" title="Leaders">
         {%- for leader in leaders %}
-            {%- set leader_title = player_title(leader) %}
-            {%- set leader_type = player_type(leader) %}
             {%- if loop.index0 % 10 == 0 %}
                     <tr>
                         <th title="#">
@@ -51,8 +49,8 @@
                         <td id="{{ loop.index }}" title="#{{ loop.index }}">
                             <a href="#{{ loop.index }}">{{ loop.index }}</a>
                         </td>
-                        <td title="{{ leader_title | striptags | safe }}">
-                            {{ leader_title }}
+                        <td title="{{ leader.player_title | striptags | safe }}">
+                            {{ leader.player_title }}
                         </td>
                         <td title="Level: {{ leader.level }}">
                             {{ leader.level }}
@@ -69,18 +67,18 @@
                         <td title="Challenges: {{ leader.challenges_completed }}">
                             {{ leader.challenges_completed }}
                         </td>
-            {%- if leader_type != 'Classic' %}
-                        <td class="non-classic" title="Type: {{ leader_type }} {%- if leader.is_deleted == 1 %} (Dead){% endif %}">
-                            <span class="{{ player_css(leader) }}">
-                                {{ leader_type }}
+            {%- if leader.player_type != 'Classic' %}
+                        <td class="non-classic" title="Type: {{ leader.player_type }}">
+                            <span class="{{ leader.player_css }}">
+                                {{ leader.player_type }}
                             </span>
                         </td>
             {%- else %}
                         <td title="Deaths: {{ leader.deaths }}">
                             {{ leader.deaths }}
                         </td>
-                    </tr>
             {%- endif %}
+                    </tr>
         {%- endfor %}
                 </table>
     {%- endif %}

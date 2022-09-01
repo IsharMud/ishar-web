@@ -23,10 +23,9 @@
                         <td title="Name: {{ immortal.name }}">
                             {{ immortal.name }}
                         </td>
-            {%- set immortal_type   = player_type(immortal) %}
-                        <td class="non-classic" title="Type: {{ immortal_type }}">
-                            <span class="{{ player_css(immortal) }}">
-                                {{ immortal_type }}
+                        <td class="non-classic" title="Type: {{ immortal.player_type }}">
+                            <span class="{{ immortal.player_css }}">
+                                {{ immortal.player_title }}
                             </span>
                         </td>
                     </tr>

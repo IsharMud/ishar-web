@@ -91,7 +91,7 @@
 {%- endblock %}
 {%- block header -%}
     {%- if player -%}
-        Player: <span class="{{ player_css(player) }}">{{ player.name }}</span>
+        Player: {{ player.name }}
     {%- else -%}
         Player Not Found
     {%- endif %}
@@ -105,12 +105,9 @@
             </form>
     {%- endif %}
     {%- if player %}
-        {%- set player_title = player_title(player) %}
-        {%- set player_type = player_type(player) %}
-        {%- set player_css = player_css(player) %}
             <div id="player-details">
-                <h3 title="{{ player_title | striptags | safe }}">
-                    {{ player_title }}
+                <h3 title="{{ player.player_title | striptags | safe }}">
+                    {{ player.player_title }}
                 </h3>
         {%- if player.true_level < immortal_level %}
                 <ul>
@@ -144,28 +141,28 @@
                     <li title="Alignment: {{ display_align(player.align) | striptags | safe }} ({{ player.align }})">
                         {{ player_gender_own | title }} alignment {{ player_phrase }} {{ display_align(player.align) }}.
                     </li>
-                    <li title="{%- if player_type == 'Classic' %}Deaths: {{ player.deaths }}{% elif player.is_deleted == 1 %}{{ player.name | title | safe }} is DEAD!{% else %}{{ player.name | title | safe }} is a Survival player!{% endif %}">
-            {%- if player_type == 'Classic' %}
+                    <li title="{%- if player.player_type == 'Classic' %}Deaths: {{ player.deaths }}{% elif player.player_type == 'Dead' %}{{ player.name | title | safe }} is DEAD!{% else %}{{ player.name | title | safe }} is a {{ player.player_type }} player!{% endif %}">
+            {%- if player.player_type == 'Classic' %}
                 {%- if player.deaths > 0 %}
                         {{ player_gender | title }} {{ player_phrase_owns }} died {{ player.deaths }}
                         time{% if player.deaths != 1 %}s{% endif %}.
                 {%- else %}
                         {{ player_gender | title }} has never died!
                 {%- endif %}
-            {%- elif player.is_deleted == 1 %}
-                        {{ player.name | title | safe }} is <span class="{{ player_css }}">DEAD</span>!
+            {%- elif player.player_type == 'Dead' %}
+                        {{ player.name | title | safe }} is <span class="{{ player.player_css }}">DEAD</span>!
                         <ul>
                             <li title="{{ player.name | title | safe }} died too often. {{ player_gender | title }} can not be resurrected!">
                                 {{ player.name | title | safe }} died too often. {{ player_gender | title }} can not be resurrected!
                             </li>
                         </ul>
-            {%- elif player_type == 'Survival' %}
-                        {{ player.name | title | safe }} {{ player_phrase }} a <span class="{{ player_css }}">{{ player_type }}</span> player.
+            {%- elif player.player_type == 'Survival' %}
+                        {{ player.name | title | safe }} {{ player_phrase }} a <span class="{{ player.player_css }}">{{ player.player_type }}</span> player.
             {%- endif %}
                     </li>
                 </ul>
             </div>
-            {%- if player.is_deleted != 1 and player.quests | selectattr('value', 'equalto', 1) | list | length > 0 %}
+            {%- if player.player_type != 'Dead' and player.quests | selectattr('value', 'equalto', 1) | list | length > 0 %}
             <div id="player-quests">
                 <h3 title="Quests">
                     Quests
@@ -275,7 +272,7 @@
         {%- else %}
             <ul>
                 <li>
-                    {{ player.name | title | safe }} {{ player_phrase }} a <span class="{{ player_css }}">{{ player_type }}</span> character!
+                    {{ player.name | title | safe }} {{ player_phrase }} a <span class="{{ player.player_css }}">{{ player.player_type }}</span> character!
                 </li>
             </ul>
         {%- endif %}

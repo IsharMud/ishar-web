@@ -38,13 +38,11 @@
                         </th>
                     </tr>
         {%- for player in current_user.players %}
-            {%- set player_title    = player_title(player) %}
-            {%- set player_type     = player_type(player) %}
-            {%- set player_css      = player_css(player) %}
+
             {%- set player_birth    = player.birth | unix2datetime %}
                     <tr>
                         <td title="{{ player.name | title | safe }} (Born {{ player_birth.strftime('%A, %B %d, %Y %I:%M:%S %p') }})">
-                            {{ player_title | safe }}
+                            {{ player.player_title }}
                         </td>
                         <td title="Class: {{ player.class.class_name | replace('_', '-') | title | safe }}">
                             {{ player.class.class_name | replace('_', '-') | title | safe }}
@@ -64,10 +62,10 @@
                         <td title="Challenges: {{ player.challenges_completed }}">
                             {{ player.challenges_completed }}
                         </td>
-            {%- if player_type != 'Classic' %}
-                        <td class="non-classic" title="Type: {{ player_type }}">
-                            <span class="{{ player_css }}">
-                                {{ player_type }}
+            {%- if player.player_type != 'Classic' %}
+                        <td class="non-classic" title="Type: {{ player.player_type }}">
+                            <span class="{{ player.player_css }}">
+                                {{ player.player_type }}
                             </span>
                         </td>
             {%- else %}
