@@ -206,12 +206,12 @@ def show_player(player_name=None):
 
     try:
         find_player = models.Player.query.filter_by(name = player_name).first()
-        code = 200
+        code        = 200
     except Exception as e:
         print(e)
         find_player = None
+        code        = 404
         flash('Sorry, but please choose a valid player!', 'error')
-        code = 404
 
     return render_template('player.html.j2',
                                 player              = find_player,
