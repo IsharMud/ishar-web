@@ -42,7 +42,7 @@ def load_user(account_id):
 def injects():
     return dict(
             now     = datetime.datetime.now().timestamp(),
-            season  = models.Season.query.filter_by(is_active = 1).first(),
+            season  = models.Season.query.filter_by(is_active = 1).first()
     )
 
 # Handle errors with a little template
