@@ -78,8 +78,7 @@
         {%- if not player.is_immortal %}
                 <ul>
                     <li title="Name: {{ player.name | title | safe }} / Class: {{ player.class.class_name | title | safe }} / Race: {{ player.race.race_name | replace('_', '-') | title | safe }}">
-                        {{ player.name | title | safe }} {{ player_phrase }} a {{ player.class.class_display }} of
-                        {{ player.race.race_name | replace('_', '-') | lower | safe }} origin.
+                        {{ player.name | title | safe }} {{ player_phrase }} a {{ player.class.class_display }} of {{ player.race.race_name | replace('_', '-') | lower | safe }} origin.
                     </li>
                     <li title="Level: {{ player.level }} {%- if player.remorts > 0 %} / Remorts: {{ player.remorts }}{% endif %}">
                         {{ player_gender | title }} {{ player_phrase }} level {{ player.level }}
