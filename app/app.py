@@ -187,9 +187,10 @@ def change_password():
 @app.route('/player', methods=['GET', 'POST'])
 @app.route('/player/<string:player_name>', methods=['GET'])
 @login_required
-def show_player(player=None, player_name=None):
+def show_player(player_name=None):
 
     # Get player search form object and check if submitted
+    player  = None
     player_search_form  = forms.PlayerSearchForm()
     if player_search_form.validate_on_submit():
 
