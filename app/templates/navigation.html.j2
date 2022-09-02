@@ -26,8 +26,8 @@
                 <li title="Support Ishar MUD">
                     <a href="{{ url_for('support') }}" {%- if page == 'support' %} id="active-nav"{% endif%}>Support Ishar</a>
                 </li>
-                <li title="World of Ishar">
-                    <a href="{{ url_for('world') }}" {%- if page == 'world' %} id="active-nav"{% endif%}>World of Ishar</a>
+                <li title="World">
+                    <a href="{{ url_for('world') }}" {%- if page == 'world' %} id="active-nav"{% endif%}>World</a>
                 </li>
                 <li title="Player Portal {%- if current_user is defined and current_user.is_authenticated and current_user.account_name is defined %} ({{ current_user.account_name }}){% endif %}">
                     <a href ="{{ url_for('portal') }}" {%- if page == 'portal' %} id="active-nav"{% endif%}>
