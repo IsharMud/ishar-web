@@ -225,8 +225,8 @@ def portal():
 @app.route('/challenges', methods=['GET'])
 def challenges():
     challenges  = models.Challenge.query.filter_by(is_active = 1).order_by(
-                                                    models.Challenge.adj_level,
-                                                    models.Challenge.adj_people
+                    models.Challenge.adj_level,
+                    models.Challenge.adj_people
                 ).all()
     return render_template('challenges.html.j2', challenges=challenges)
 
@@ -285,7 +285,7 @@ def leaderboard(limit=10):
 @app.route('/users', methods=['GET'])
 @app.route('/who', methods=['GET'])
 def who():
-    whoq= models.Player.query.filter(
+    who = models.Player.query.filter(
             models.Player.logon >= models.Player.logout
         ).order_by(
             -models.Player.true_level,
