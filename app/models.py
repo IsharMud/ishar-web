@@ -582,11 +582,17 @@ class Player(db.Model):
     def player_css(self):
         return self.player_type.lower() + '-player'
 
+    # Hybrid property to return player link
+    @hybrid_property
+    def player_link(self):
+        url = url_for('show_player', player_name=self.name)
+        return f'<a href="{url}">{self.name}</a>'
+
     # Hybrid property to return player title
     @hybrid_property
     def player_title(self):
-        url = url_for('show_player', player_name=self.name)
-        return self.title.replace('%s', f'<a href="{url}">{self.name}</a>')
+        title   = self.title
+        return title.replace('%s', self.player_link)
 
     # Hybrid property to return player "type"
     @hybrid_property
