@@ -73,7 +73,7 @@
     {%- if player %}
             <div id="player-details">
                 <h3 title="{{ player.player_title | striptags | safe }}">
-                    {{ player.player_lin }}
+                    {{ player.player_title }}
                 </h3>
         {%- if not player.is_immortal %}
                 <ul>
@@ -148,7 +148,7 @@
                 </ol>
             </div>
             {%- endif %}
-            {%- if player.remort_upgrades and player.remort_upgrades | selectattr('value', '>', 0) | list | length > 0 %}
+            {%- if player.remort_upgrades is defined and player.remort_upgrades is iterable and player.remort_upgrades | selectattr('value', '>', 0) | list | length > 0 %}
             <div id="player-remort-upgrades">
                 <h3 title="Remort Upgrades">
                     Remort Upgrades
@@ -165,7 +165,7 @@
                 </ol>
             </div>
             {%- endif %}
-            {%- if player.true_level >= 5 or player.online >= 3600 %}
+            {%- if player.true_level >= 5 or player.online >= 3600 or player.player_type == 'Dead' %}
             <div id="player-statistics">
                 <h3 title="Statistics">
                     Statistics
