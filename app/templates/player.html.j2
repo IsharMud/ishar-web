@@ -64,7 +64,7 @@
 {%- endblock %}
 {%- block content %}
     {%- if player_search_form is defined %}
-            <form method="post" action="{{ url_for('search_player') }}" id="player-search-form">
+            <form method="post" action="{{ url_for('show_player') }}" id="player-search-form">
                 {{ render_field(player_search_form.player_search_name) }}
                 {{ player_search_form.csrf_token }}
                 {{ render_field(player_search_form.submit) }}

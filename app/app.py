@@ -183,39 +183,33 @@ def change_password():
     return render_template('change_password.html.j2', change_password_form=change_password_form)
 
 
-# Process player search
-@app.route('/player/search', methods=['POST'])
-@login_required
-def search_player(player_name=None):
-    player_search_form = forms.PlayerSearchForm()
-    if player_search_form.validate_on_submit():
-        player_search = models.Player.query.filter(models.Player.name.like(player_search_form.player_search_name.data + '%')).first()
-    try:
-        player_name = player_search.name
-    except Exception as e:
-        player_name = None
-        print(e)
-    return redirect(url_for('show_player', player_name=player_name))
-
-
-# Player pages
-@app.route('/player', methods=['GET'])
+# Player pages, and search
+@app.route('/player', methods=['GET', 'POST'])
 @app.route('/player/<string:player_name>', methods=['GET'])
 @login_required
-def show_player(player_name=None):
+def show_player(player=None, player_name=None):
 
-    try:
-        find_player = models.Player.query.filter_by(name = player_name).first()
-        code        = 200
-    except Exception as e:
-        print(e)
-        find_player = None
-        code        = 404
-        flash('Sorry, but please choose a valid player!', 'error')
+    # Get player search form object and check if submitted
+    player_search_form  = forms.PlayerSearchForm()
+    if player_search_form.validate_on_submit():
+
+        # Perform a MySQL "LIKE" search query on the name, followed by a wildcard (%) to try to find the player
+        player  = models.Player.query.filter(models.Player.name.like(player_search_form.player_search_name.data + '%')).first()
+
+    # Find the player, in the database, by exact name
+    elif player_name:
+        player  = models.Player.query.filter_by(name = player_name).first()
+
+    # If our search returned something, we found a player
+    if player:
+        code    = 200
+    else:
+        code    = 404
+        flash('Sorry, but that player was not found!', 'error')
 
     return render_template('player.html.j2',
-                                player              = find_player,
-                                player_search_form  = forms.PlayerSearchForm()
+                                player              = player,
+                                player_search_form  = player_search_form
                             ), code
 
 
@@ -226,7 +220,7 @@ def portal():
     return render_template('portal.html.j2')
 
 
-# Challenges page
+# Sort and list active challenges from the database
 @app.route('/challenges', methods=['GET'])
 def challenges():
     challenges  = models.Challenge.query.filter_by(is_active = 1).order_by(
@@ -290,7 +284,7 @@ def leaderboard(limit=10):
 @app.route('/users', methods=['GET'])
 @app.route('/who', methods=['GET'])
 def who():
-    who = models.Player.query.filter(
+    whoq= models.Player.query.filter(
             models.Player.logon >= models.Player.logout
         ).order_by(
             -models.Player.true_level,
