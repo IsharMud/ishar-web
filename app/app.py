@@ -358,7 +358,7 @@ Administration portal to allow for Gods to make news posts
 def admin_portal():
 
     # Redirect non-administrators to the main page
-    if not current_user.is_admin:
+    if not current_user.is_god:
         flash('Sorry, but you are not an administrator!', 'error')
         return redirect(url_for('welcome'))
 

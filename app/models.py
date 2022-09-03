@@ -57,9 +57,9 @@ class Account(db.Model, UserMixin):
     def is_active(self):
         return isinstance(self.account_id, int)
 
-    # Hybrid property returning boolean whether user is an admin
+    # Hybrid property returning boolean whether user is a "God"
     @hybrid_property
-    def is_admin(self):
+    def is_god(self):
         for player in self.players:
             if player.is_god:
                 return True
@@ -522,7 +522,7 @@ class Player(db.Model):
         # Otherwise, return False
         return False
 
-    # Hybrid property returning boolean whether player is a God
+    # Hybrid property returning boolean whether player is a "God"
     @hybrid_property
     def is_god(self):
         if self.true_level >= levels.god_level:
