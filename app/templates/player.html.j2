@@ -57,7 +57,7 @@
 {%- endblock %}
 {%- block header -%}
     {%- if player -%}
-        Player: {{ player.name }}
+        Player: <span class="{{ player.player_css }}">{{ player.name }}</span>
     {%- else -%}
         Player Not Found
     {%- endif %}
@@ -120,7 +120,7 @@
                         {{ player_gender | title }} has never died!
                 {%- endif %}
             {%- elif player.player_type == 'Dead' %}
-                        {{ player.name | title | safe }} is <span class="{{ player.player_css }}">DEAD</span>!
+                        {{ player.name | title | safe }} is <span class="flash-error">DEAD</span>!
                         <ul>
                             <li title="{{ player.name | title | safe }} died too often. {{ player_gender | title }} can not be resurrected!">
                                 {{ player.name | title | safe }} died too often. {{ player_gender | title }} can not be resurrected!
