@@ -13,4 +13,3 @@
 __pycache__
 venv/
 config.py
-secrets.py
