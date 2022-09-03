@@ -76,7 +76,7 @@
                     {{ player.player_title }}
                 </h3>
         {%- if player.description is defined and player.description | trim != '' %}
-                <p title="{{ player.description | replace('\n', ' ') | striptags | trim | safe }}">
+                <p id="player-description" title="{{ player.description | replace('\n', ' ') | striptags | trim | safe }}">
                     {{ player.description | replace('\n', ' ') | striptags | trim | safe }}
                 </p>
         {%- endif %}
