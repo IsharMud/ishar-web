@@ -75,6 +75,11 @@
                 <h3 title="{{ player.player_title | striptags | safe }}">
                     {{ player.player_title }}
                 </h3>
+        {%- if player.description is defined and player.description | trim != '' %}
+                <p title="{{ player.description | replace('\n', ' ') | striptags | trim | safe }}">
+                    {{ player.description | replace('\n', ' ') | striptags | trim | safe }}
+                </p>
+        {%- endif %}
         {%- if not player.is_immortal %}
                 <ul>
                     <li title="Name: {{ player.name | title | safe }} / Class: {{ player.class.class_name | title | safe }} / Race: {{ player.race.race_name | replace('_', '-') | title | safe }}">
