@@ -1,10 +1,15 @@
+"""
+Flask forms classes
+"""
 from flask_wtf import FlaskForm
 from wtforms import BooleanField, EmailField, PasswordField, RadioField, StringField, SubmitField, TextAreaField, validators
 from wtforms.validators import DataRequired, Email, EqualTo
 from wtforms_validators import Alpha
 
 
-# Log In form class
+"""
+Log In form class
+"""
 class LoginForm(FlaskForm):
     email       = EmailField('E-mail Address', [
                     validators.DataRequired(),
@@ -20,13 +25,17 @@ class LoginForm(FlaskForm):
     submit      = SubmitField('Log In')
 
 
-# Essence Shop form class
+"""
+Essence Shop form class
+"""
 class EssenceShopForm(FlaskForm):
     upgrade     = RadioField('Upgrade', coerce=int)
     submit      = SubmitField('Purchase')
 
 
-# Change Password form class
+"""
+Change Password form class
+"""
 class ChangePasswordForm(FlaskForm):
     current_password        = PasswordField('Current Password', [
                                 validators.DataRequired(),
@@ -47,7 +56,9 @@ class ChangePasswordForm(FlaskForm):
     submit                  = SubmitField('Change Password')
 
 
-# New Account form class
+"""
+New Account form class
+"""
 class NewAccountForm(FlaskForm):
     account_name        = StringField('Friendly Name', [
                                 validators.DataRequired(),
@@ -74,7 +85,9 @@ class NewAccountForm(FlaskForm):
     submit              = SubmitField('Create Account')
 
 
-# News add form class to post news updates
+"""
+News add form class, for Gods to post news updates
+"""
 class NewsAddForm(FlaskForm):
     subject     = StringField('Subject', [
                                 validators.DataRequired(),
@@ -85,7 +98,9 @@ class NewsAddForm(FlaskForm):
     submit      = SubmitField('Post')
 
 
-# Player search form class to search player names
+"""
+Player search form class to search player names
+"""
 class PlayerSearchForm(FlaskForm):
     player_search_name  = StringField('Player Name', [
                                     validators.DataRequired(),

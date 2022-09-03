@@ -3,21 +3,28 @@ from flask import Flask, flash, redirect, render_template, request, send_from_di
 from flask_login import current_user, fresh_login_required, login_required, login_user, logout_user, LoginManager
 import ipaddress
 
-# Create/configure the app
+
+"""
+Start Flask application and get configuration file which has database credentials
+"""
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
 
 if __name__ == '__main__':
     app.run(debug=True)
 
-# Static root paths
-@app.route('/favicon.ico')
-@app.route('/robots.txt')
-@app.route('/sitemap.xml')
-def static_from_root():
-    return send_from_directory(app.static_folder, request.path[1:])
 
-# Set up login manager
+"""
+Import forms, database classes/models, and player character level types
+"""
+import forms
+import models
+import levels
+
+
+"""
+Set up flask-login Login Manager settings
+"""
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_message_category            = 'error'
@@ -27,25 +34,28 @@ login_manager.needs_refresh_message_category    = 'error'
 login_manager.refresh_view                      = 'login'
 login_manager.session_protection                = 'strong'
 
-# Get forms, database classes/models, and level types
-import forms
-import models
-import levels
 
-# Get users for the Flask Login Manager via Account object from the database
+"""
+Get users for flask-login via Account object from the database
+"""
 @login_manager.user_loader
 def load_user(account_id):
     return models.Account.query.get(str(account_id))
 
-# Add context processors
+"""
+Add context processors
+Season info is on the layout Jinja2 template (therefore on every page)
+"""
 @app.context_processor
 def injects():
     return dict(
-            now     = datetime.datetime.now().timestamp(),
-            season  = models.Season.query.filter_by(is_active = 1).first()
+        now     = datetime.datetime.now().timestamp(),
+        season  = models.Season.query.filter_by(is_active = 1).first()
     )
 
-# Handle errors with a little template
+"""
+Handle errors with a little template
+"""
 def error(title='Unknown Error', message='Sorry, but there was an unknown error.', code=500):
     return render_template('error.html.j2', title=title, message=message), code
 
@@ -70,7 +80,9 @@ def internal_server_error(message):
     return error(title='Internal Server Error', message=message, code=500)
 
 
-# Main welcome page/index (/)
+"""
+Main welcome page/index
+"""
 @app.route('/welcome', methods=['GET'])
 @app.route('/', methods=['GET'])
 def welcome(num_posts=1):
@@ -79,14 +91,20 @@ def welcome(num_posts=1):
     return render_template('welcome.html.j2', news=news)
 
 
-# /history (or /background)
+"""
+/history (or /background)
+History page mostly copied from the old website
+"""
 @app.route('/background', methods=['GET'])
 @app.route('/history', methods=['GET'])
 def history():
     return render_template('history.html.j2')
 
 
-# Log in (/login)
+"""
+/login
+Log-in form page and processing
+"""
 @app.route('/login', methods=['GET', 'POST'])
 def login():
 
@@ -117,7 +135,10 @@ def login():
     return render_template('login.html.j2', login_form=login_form), 401
 
 
-# Allow logged in users to view and spend their essence/seasonal points
+"""
+/shop
+Allow logged in users to view and spend their essence/seasonal points
+"""
 @app.route('/shop', methods=['GET', 'POST'])
 @login_required
 def essence_shop():
@@ -159,7 +180,10 @@ def essence_shop():
     return render_template('essence_shop.html.j2', essence_shop_form=essence_shop_form)
 
 
-# Allow logged in users to change their passwords
+"""
+/password
+Allow logged in users to change their passwords
+"""
 @app.route('/password', methods=['GET', 'POST'])
 @fresh_login_required
 def change_password():
@@ -183,7 +207,10 @@ def change_password():
     return render_template('change_password.html.j2', change_password_form=change_password_form)
 
 
-# Player pages, and search
+"""
+/player
+Player page to show detailed information about a player, and player name search form
+"""
 @app.route('/player', methods=['GET', 'POST'])
 @app.route('/player/<string:player_name>', methods=['GET'])
 @login_required
@@ -214,14 +241,20 @@ def show_player(player_name=None):
                             ), code
 
 
-# Portal for logged in users
+"""
+/portal
+Main portal page for welcoming users as they log in, so that they can view their player(s) information
+"""
 @app.route('/portal', methods=['GET'])
 @login_required
 def portal():
     return render_template('portal.html.j2')
 
 
-# Sort and list active challenges from the database
+"""
+/challenges
+Sort and list active challenges, along with their tiers and winners, from the database
+"""
 @app.route('/challenges', methods=['GET'])
 def challenges():
     challenges  = models.Challenge.query.filter_by(is_active = 1).order_by(
@@ -231,7 +264,10 @@ def challenges():
     return render_template('challenges.html.j2', challenges=challenges)
 
 
-# Sort and list the best players for Leader Board page
+"""
+/leaderboard (or /leader_board)
+# Sort and list the best players, with a limit option, and boolean to include/exclude dead characters
+"""
 @app.route('/leader_board/<int:limit>', methods=['GET'])
 @app.route('/leaderboard/<int:limit>', methods=['GET'])
 @app.route('/leader_board', methods=['GET'])
@@ -280,7 +316,10 @@ def leaderboard(limit=10):
                             )
 
 
-# Show online users (/who, or /online, or /users)
+"""
+/who (or /online, or /users)
+Show online users according to the logon and logout times within the database
+"""
 @app.route('/online', methods=['GET'])
 @app.route('/users', methods=['GET'])
 @app.route('/who', methods=['GET'])
@@ -295,7 +334,10 @@ def who():
     return render_template('who.html.j2', who=who)
 
 
-# Wizlist showing immortals through gods (/wizlist, or /wiz_list)
+"""
+/wizlist (or /wiz_list)
+Wizlist showing Immortals through Gods
+"""
 @app.route('/wiz_list', methods=['GET'])
 @app.route('/wizlist', methods=['GET'])
 def wizlist():
@@ -307,7 +349,10 @@ def wizlist():
     return render_template('wizlist.html.j2', immortals=immortals)
 
 
-# Portal for administrators
+"""
+/admin
+Administration portal to allow for Gods to make news posts
+"""
 @app.route('/admin', methods=['GET', 'POST'])
 @fresh_login_required
 def admin_portal():
@@ -341,7 +386,10 @@ def admin_portal():
     return render_template('admin.html.j2', news_add_form=news_add_form)
 
 
-# /logout
+"""
+/logout
+Allow users to log out
+"""
 @app.route('/logout', methods=['GET'])
 def logout():
     logout_user()
@@ -349,7 +397,10 @@ def logout():
     return redirect(url_for('welcome'))
 
 
-# Allow anonymous users to create a new account
+"""
+/new
+New account creation page, which allows users to submit a form to create a new account
+"""
 @app.route('/new', methods=['GET', 'POST'])
 def new_account():
 
@@ -389,7 +440,6 @@ def new_account():
             if created_account:
                 login_user(created_account)
                 flash('Your account has been created!', 'success')
-
             else:
                 flash('Sorry, but please try again!', 'error')
 
@@ -401,7 +451,10 @@ def new_account():
     return render_template('new.html.j2', new_account_form=new_account_form)
 
 
-# /clients or /mud_clients
+"""
+/clients (or /mud_clients)
+Page showing a dynamic list of various MUD clients for different platforms
+"""
 @app.route('/clients', methods=['GET'])
 @app.route('/mud_clients', methods=['GET'])
 def mud_clients():
@@ -409,21 +462,30 @@ def mud_clients():
     return render_template('mud_clients.html.j2', mud_clients=mud_clients.mud_clients)
 
 
-# Redirect /connect to mudslinger.net
+"""
+/connect
+Redirect to mudslinger.net
+"""
 @app.route('/connect', methods=['GET'])
 def connect():
     mudslinger_app_link = 'https://mudslinger.net/play/?host=isharmud.com&port=23'
     return redirect(mudslinger_app_link)
 
 
-# Redirect /discord to the invite link
+"""
+/discord
+Redirect /discord to the Discord invitation link
+"""
 @app.route('/discord', methods=['GET'])
 def discord():
     discord_invite_link = 'https://discord.gg/VBmMXUpeve'
     return redirect(discord_invite_link)
 
 
-# Redirect /latest_patch (or /patch) to the latest static patch .pdf
+"""
+/latest_patch (or /patch)
+Redirect to the latest found static patch .pdf file
+"""
 @app.route('/patch', methods=['GET'])
 @app.route('/latest_patch', methods=['GET'])
 def latest_patch(patch_dir='patches'):
@@ -432,20 +494,29 @@ def latest_patch(patch_dir='patches'):
     return redirect('/' + max(glob.glob('static/' + patch_dir + '/*.pdf'), key=os.path.getmtime))
 
 
-# /faq (or /faqs or /questions)
+"""
+/faq (or /faqs, or /questions)
+A few frequently asked questions, stored in a dictionary of lists, to be displayed pretty
+"""
 @app.route('/questions')
 @app.route('/faqs')
 @app.route('/faq')
 def faq():
+
+    # TODO: Include the count and list of playable classes and races dynamically
     player_classes  = models.PlayerClass.query.filter(models.PlayerClass.class_description != None).all()
     player_races    = models.PlayerRace.query.filter(models.PlayerRace.race_description != None).all()
     print(f'FAQ PLAYER Classes: {player_classes}')
     print(f'FAQ PLAYER Races: {player_races}')
+
     import faq
     return render_template('faq.html.j2', faqs=faq.faqs)
 
 
-# /get_started
+"""
+/get_started
+Get Started page partly copied from the old website
+"""
 @app.route('/gettingstarted')
 @app.route('/getting_started')
 @app.route('/getstarted')
@@ -454,14 +525,20 @@ def get_started():
     return render_template('get_started.html.j2')
 
 
-# /support (or /donate)
+"""
+/support (or /donate)
+Support page so users can contribute
+"""
 @app.route('/donate', methods=['GET'])
 @app.route('/support', methods=['GET'])
 def support():
     return render_template('support.html.j2')
 
 
-# /world (or /areas)
+"""
+/world (or /areas)
+"World" page that uses the game's existing "helptab" file to display information about each in-game area
+"""
 @app.route('/areas/<string:area>', methods=['GET'])
 @app.route('/areas', methods=['GET'])
 @app.route('/world/<string:area>', methods=['GET'])
@@ -470,7 +547,7 @@ def world(helptab_file='/home/ishar/ishar-mud/lib/Misc/helptab', area=None):
 
     # Get all of the areas from the helptab file
     import helptab
-    areas   = helptab._get_help_areas(helptab_file=helptab_file)
+    areas   = helptab.get_help_areas(helptab_file=helptab_file)
     code    = 200
 
     # Try to find an area based on any user input
@@ -485,13 +562,27 @@ def world(helptab_file='/home/ishar/ishar-mud/lib/Misc/helptab', area=None):
     return render_template('world.html.j2', areas=areas, area=area), code
 
 
-# Jinja2 template filter to convert UNIX timestamps to Python date-time objects
+"""
+Jinja2 template filter to convert UNIX timestamps to Python date-time objects
+"""
 @app.template_filter('unix2datetime')
 def unix2datetime(unix_time):
     return datetime.datetime.fromtimestamp(unix_time)
 
 
-# Jinja2 template filter to convert seconds to human-readable delta
+"""
+Jinja2 template filter to convert seconds to human-readable delta
+"""
 @app.template_filter('seconds2delta')
 def seconds2delta(seconds):
     return datetime.timedelta(seconds=seconds)
+
+
+"""
+Set up a few static content paths
+"""
+@app.route('/favicon.ico')
+@app.route('/robots.txt')
+@app.route('/sitemap.xml')
+def static_from_root():
+    return send_from_directory(app.static_folder, request.path[1:])

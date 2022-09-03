@@ -1,3 +1,6 @@
+"""
+Database classes/models
+"""
 from app import app
 import crypt
 import hmac
@@ -11,11 +14,20 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.schema import FetchedValue
 from sqlalchemy.orm import relationship
 
-# Connect to the database
-db = SQLAlchemy(app)
+
+"""
+Connect to the database
+"""
+db  = SQLAlchemy(app)
 
 
-# Account database class
+"""
+Account database class
+An account can have multiple players belonging to it
+Accounts exist to log-in in-game, and are also used on the website for flask-login/authentication, and registration
+"Seasonal points"/"essence" and "account upgrades" are per account, and can be spent any time (in-game, or on the website)
+However, "renown" and "remort upgrades" are per player - and these are only available to purchase in-game, at the "shrine"
+"""
 class Account(db.Model, UserMixin):
     __tablename__   = 'accounts'
     account_id      = Column(INTEGER(11), primary_key=True)
@@ -67,7 +79,7 @@ class Account(db.Model, UserMixin):
     def check_password(self, password):
         return hmac.compare_digest(crypt.crypt(password, self.password), self.password)
 
-    # Method to create new account
+    # Method to create a new account
     def create_account(self):
         try:
 
@@ -108,7 +120,10 @@ class Account(db.Model, UserMixin):
         return f'<Account> "{self.account_name}" ({self.account_id})'
 
 
-# Account Upgrade database class
+"""
+Account Upgrade database class
+Account upgrade available to accounts, as well as the essence cost and max value
+"""
 class AccountUpgrade(db.Model):
     __tablename__   = 'account_upgrades'
     id                  = Column(TINYINT(4), primary_key=True)
@@ -123,7 +138,10 @@ class AccountUpgrade(db.Model):
         return f'<AccountUpgrade> "{self.name}" ({self.id}) / Cost: {self.cost} / Max Value: {self.max_value}'
 
 
-# Accounts Upgrade database class
+"""
+Accounts Upgrade database class
+Account upgrade associated with account, and the level of upgrade
+"""
 class AccountsUpgrade(db.Model):
     __tablename__       = 'accounts_account_upgrades'
 
@@ -156,29 +174,10 @@ class AccountsUpgrade(db.Model):
         return f'<AccountsUpgrade> "{self.upgrade.name}" ({self.account_upgrades_id}) @ <Account> "{self.account.account_name}" ({self.account_id}) / Amount: {self.amount}'
 
 
-# Affect Flag database class (unused)
-#class AffectFlag(db.Model):
-#    __tablename__   = 'affect_flags'
-
-#    flag_id = Column(TINYINT(4), primary_key=True)
-#    name    = Column(String(30), nullable=False, unique=True)
-
-#    def __repr__(self):
-#        return f'<AffectFlag> "{self.name}" ({self.flag_id})'
-
-
-# Board database class (unused)
-#class Board(db.Model):
-#    __tablename__   = 'boards'
-
-#    board_id    = Column(TINYINT(4), primary_key=True)
-#    board_name  = Column(String(15), nullable=False)
-
-#    def __repr__(self):
-#        return f'<Board> "{self.board_name}" ({self.board_id})'
-
-
-# Challenge database class
+"""
+Challenge database class
+Challenge along with the in-game mobile ("mob")/target number (mob_vnum), as well as level/group requirements, and tier
+"""
 class Challenge(db.Model):
     __tablename__   = 'challenges'
 
@@ -199,29 +198,10 @@ class Challenge(db.Model):
         return f'<Challenge> "{self.mob_name}" ({self.challenge_id}) / Active: {self.is_active} / Winner: "{self.winner_desc}"'
 
 
-# Condition database class (unused)
-#class Condition(db.Model):
-#    __tablename__   = 'conditions'
-
-#    condition_id    = Column(TINYINT(4), primary_key=True)
-#    name            = Column(String(20), nullable=False, unique=True)
-
-#    def __repr__(self):
-#        return f'<PlayerCondition> "{self.name}" ({self.condition_id})'
-
-
-# DisplayOption database class (unused)
-#class DisplayOption(db.Model):
-#    __tablename__   = 'display_options'
-
-#    display_id  = Column(TINYINT(4), primary_key=True)
-#    name        = Column(String(20), nullable=False, unique=True)
-
-#    def __repr__(self):
-#        return f'<DisplayOption> "{self.name}" ({self.display_id})'
-
-
-# News database class
+"""
+News database class
+News post for the main/welcome page
+"""
 class News(db.Model):
     __tablename__   = 'news'
 
@@ -251,7 +231,10 @@ class News(db.Model):
         return f'<News> "{self.subject}" ({self.news_id}) / by "{self.account.name}" / at "{self.created_at}"'
 
 
-# Player Class database class
+"""
+Player Class database class
+Playable character "class" in-game such as warrior, magician, cleric, rogue, necromancer, etc.
+"""
 class PlayerClass(db.Model):
     __tablename__   = 'classes'
 
@@ -266,7 +249,10 @@ class PlayerClass(db.Model):
         return f'<PlayerClass> "{self.class_name}" ({self.class_id})'
 
 
-# Player Flag database class
+"""
+Player Flag database class
+Flag for a setting affecting a player character in-game (such as perm-death/survival character, see is_survival)
+"""
 class PlayerFlag(db.Model):
     __tablename__   = 'player_flags'
 
@@ -277,7 +263,10 @@ class PlayerFlag(db.Model):
         return f'<PlayerFlag> "{self.name}" ({self.flag_id})'
 
 
-# Players Flag database class
+"""
+Players Flag database class
+Flag associated with player and the flag value
+"""
 class PlayersFlag(db.Model):
     __tablename__   = 'player_player_flags'
 
@@ -297,7 +286,10 @@ class PlayersFlag(db.Model):
         return f'<PlayersFlag> "{self.flag.name}" ({self.flag_id}) @ <Player> "{self.player.name}" ({self.player_id}) : {self.value}'
 
 
-# Player Race database class
+"""
+Player Race database class
+Playable character "race" in-game such as elf, gnome, human, etc.
+"""
 class PlayerRace(db.Model):
     __tablename__   = 'races'
 
@@ -311,7 +303,10 @@ class PlayerRace(db.Model):
         return f'<PlayerRace> "{self.race_name}" ({self.race_id})'
 
 
-# Quest database class
+"""
+Quest database class
+Quest that can be achieved, and its rewards
+"""
 class Quest(db.Model):
     __tablename__   = 'quests'
 
@@ -326,30 +321,36 @@ class Quest(db.Model):
         return f'<Quest> "{self.name}" ({self.quest_id}) / "{self.display_name}" / XP: {self.xp_reward}'
 
 
-# Player Quest database class
+"""
+Player Quest database class
+Quest associated with players completion
+"""
 class PlayerQuest(db.Model):
     __tablename__   = 'player_quests'
 
-    quest_id    = Column(
-                    ForeignKey('quests.quest_id',
-                        ondelete='CASCADE', onupdate='CASCADE'
-                    ), nullable=False, index=True, primary_key=True
-                )
-    player_id   = Column(
-                    ForeignKey('players.id',
-                        ondelete='CASCADE', onupdate='CASCADE'
-                    ), nullable=False, index=True, primary_key=True
-                )
-    value       = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
+    quest_id        = Column(
+                        ForeignKey('quests.quest_id',
+                            ondelete='CASCADE', onupdate='CASCADE'
+                        ), nullable=False, index=True, primary_key=True
+                    )
+    player_id       = Column(
+                        ForeignKey('players.id',
+                            ondelete='CASCADE', onupdate='CASCADE'
+                        ), nullable=False, index=True, primary_key=True
+                    )
+    value           = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
 
-    quest       = relationship('Quest')
-    player      = relationship('Player', backref='quests')
+    quest           = relationship('Quest')
+    player          = relationship('Player', backref='quests')
 
     def __repr__(self):
         return f'<PlayerQuest> "{self.quest.name}" ({self.quest_id}) @ <Player> "{self.player.name}" ({self.player_id}) / Value: {self.value}'
 
 
-# Remort Upgrades database class
+"""
+Remort Upgrades database class
+Remort upgrade available to players, as well as the renown cost and max value
+"""
 class RemortUpgrade(db.Model):
     __tablename__   = 'remort_upgrades'
 
@@ -364,29 +365,35 @@ class RemortUpgrade(db.Model):
         return f'<RemortUpgrade> "{self.name}" ({self.upgrade_id}) / Cost: {self.renown_cost} / Max: {self.max_value}'
 
 
-# Player Remort Upgrades database class
+"""
+Player Remort Upgrades database class
+Remort upgrade associated with player, and the level of upgrade
+"""
 class PlayerRemortUpgrade(db.Model):
     __tablename__   = 'player_remort_upgrades'
 
-    upgrade_id  = Column(
-                    ForeignKey('remort_upgrades.upgrade_id',
-                        ondelete='CASCADE', onupdate='CASCADE'
-                    ), nullable=False, index=True, primary_key=True
-                )
-    player_id   = Column(
-                    ForeignKey('players.id',
-                        ondelete='CASCADE', onupdate='CASCADE'
-                    ), nullable=False, index=True, primary_key=True
-                )
-    value       = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
+    upgrade_id      = Column(
+                        ForeignKey('remort_upgrades.upgrade_id',
+                            ondelete='CASCADE', onupdate='CASCADE'
+                        ), nullable=False, index=True, primary_key=True
+                    )
+    player_id       = Column(
+                        ForeignKey('players.id',
+                            ondelete='CASCADE', onupdate='CASCADE'
+                        ), nullable=False, index=True, primary_key=True
+                    )
+    value           = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
 
-    player      = relationship('Player', backref='remort_upgrades')
+    player          = relationship('Player', backref='remort_upgrades')
 
     def __repr__(self):
         return f'<PlayerRemortUpgrade> "{self.remort_upgrade.name}" ({self.upgrade_id}) @ <Player> "{self.player.name}" ({self.player_id}) / Value: {self.value}'
 
 
-# Season database class
+"""
+Season database class
+In-game cyclical season detail and dates
+"""
 class Season(db.Model):
     __tablename__   = 'seasons'
 
@@ -399,50 +406,12 @@ class Season(db.Model):
         return f'<Season> ID {self.season_id} / Active: {self.is_active} / Effective: {self.effective_date} / Expiration: {self.expiration_date}'
 
 
-# Skill database class (unused)
-#class Skill(db.Model):
-#    __tablename__   = 'skills'
-
-#    skill_id        = Column(INTEGER(11), primary_key=True)
-#    class_id        = Column(
-#                        ForeignKey('classes.class_id',
-#                            ondelete='CASCADE', onupdate='CASCADE'
-#                        ), nullable=False, index=True
-#                    )
-#    max_value       = Column(INTEGER(11), nullable=False)
-#    difficulty      = Column(INTEGER(11), nullable=False)
-
-#    player_skills   = relationship('PlayerSkill', backref='skill')
-
-
-#    def __repr__(self):
-#        return f'<Skill> ID {self.skill_id} / Class ID {self.class_id} / Max: {self.max_value} / Difficulty: {self.difficulty}'
-
-# Player Skill database class (unused)
-#class PlayerSkill(db.Model):
-#    __tablename__   = 'player_skills'
-
-#    skill_id        = Column(
-#                        ForeignKey('skills.skill_id',
-#                            ondelete='CASCADE', onupdate='CASCADE'
-#                        ), nullable=False, index=True, primary_key=True
-#                    )
-#    player_id       = Column(
-#                        ForeignKey('players.id',
-#                            ondelete='CASCADE', onupdate='CASCADE'
-#                        ), nullable=False, index=True, primary_key=True
-#                    )
-#    skill_level     = Column(TINYINT(11), nullable=False, server_default=FetchedValue())
-
-#    player         = relationship('Player', backref='skills')
-
-#    def __repr__(self):
-#        return f'<PlayerSkill> {self.skill_id} @ <Player> "{self.player.name}" ({self.player_id}) / Skill Level: {self.skill_level}'
-
-
-# Player database class
+"""
+Player database class
+An in-game player, which belongs to an account
+"""
 class Player(db.Model):
-    __tablename__   = 'players'
+    __tablename__           = 'players'
 
     id                      = Column(INTEGER(11), primary_key=True)
     account_id              = Column(
@@ -576,21 +545,21 @@ class Player(db.Model):
     @hybrid_property
     def player_alignment(self):
         if self.align <= -1000:
-            return 'Very Evil'
+            return  'Very Evil'
         elif self.align > -1000 and self.align <= -500:
-            return 'Evil'
+            return  'Evil'
         elif self.align > -500 and self.align <= -250:
-            return 'Slightly Evil'
+            return  'Slightly Evil'
         elif self.align > -250 and self.align < 250:
-            return 'Neutral'
+            return  'Neutral'
         elif self.align >= 250 and self.align < 500:
-            return 'Slightly Good'
+            return  'Slightly Good'
         elif self.align >= 500 and self.align < 1000:
-            return 'Good'
+            return  'Good'
         elif self.align >= 1000:
-            return 'Very Good'
+            return  'Very Good'
         else:
-            return 'Unknown'
+            return  'Unknown'
     
     # Hybrid property to return player CSS class
     @hybrid_property
@@ -600,7 +569,7 @@ class Player(db.Model):
     # Hybrid property to return player link
     @hybrid_property
     def player_link(self):
-        url = url_for('show_player', player_name=self.name)
+        url     = url_for('show_player', player_name=self.name)
         return f'<a href="{url}">{self.name}</a>'
 
     # Hybrid property to return player title
@@ -626,7 +595,96 @@ class Player(db.Model):
     def seasonal_earned(self):
 
         # Start with two (2) points for existing, with renown/remort equation
-        c = int(self.total_renown / 10) + 2
+        earned  = int(self.total_renown / 10) + 2
         if self.remorts > 0:
-            c += int(self.remorts / 5) * 3 + 1
-        return c
+            earned  += int(self.remorts / 5) * 3 + 1
+        return earned
+
+"""
+TODO: Unused below
+There is eventually a place for all of these... somewhere... somehow - plus more!
+"""
+
+# Affect Flag database class (unused)
+#class AffectFlag(db.Model):
+#    __tablename__   = 'affect_flags'
+
+#    flag_id = Column(TINYINT(4), primary_key=True)
+#    name    = Column(String(30), nullable=False, unique=True)
+
+#    def __repr__(self):
+#        return f'<AffectFlag> "{self.name}" ({self.flag_id})'
+
+
+# Board database class (unused)
+#class Board(db.Model):
+#    __tablename__   = 'boards'
+
+#    board_id    = Column(TINYINT(4), primary_key=True)
+#    board_name  = Column(String(15), nullable=False)
+
+#    def __repr__(self):
+#        return f'<Board> "{self.board_name}" ({self.board_id})'
+
+
+# Condition database class (unused)
+#class Condition(db.Model):
+#    __tablename__   = 'conditions'
+
+#    condition_id    = Column(TINYINT(4), primary_key=True)
+#    name            = Column(String(20), nullable=False, unique=True)
+
+#    def __repr__(self):
+#        return f'<PlayerCondition> "{self.name}" ({self.condition_id})'
+
+
+# DisplayOption database class (unused)
+#class DisplayOption(db.Model):
+#    __tablename__   = 'display_options'
+
+#    display_id  = Column(TINYINT(4), primary_key=True)
+#    name        = Column(String(20), nullable=False, unique=True)
+
+#    def __repr__(self):
+#        return f'<DisplayOption> "{self.name}" ({self.display_id})'
+
+
+# Skill database class (unused)
+#class Skill(db.Model):
+#    __tablename__   = 'skills'
+
+#    skill_id        = Column(INTEGER(11), primary_key=True)
+#    class_id        = Column(
+#                        ForeignKey('classes.class_id',
+#                            ondelete='CASCADE', onupdate='CASCADE'
+#                        ), nullable=False, index=True
+#                    )
+#    max_value       = Column(INTEGER(11), nullable=False)
+#    difficulty      = Column(INTEGER(11), nullable=False)
+
+#    player_skills   = relationship('PlayerSkill', backref='skill')
+
+
+#    def __repr__(self):
+#        return f'<Skill> ID {self.skill_id} / Class ID {self.class_id} / Max: {self.max_value} / Difficulty: {self.difficulty}'
+
+# Player Skill database class (unused)
+#class PlayerSkill(db.Model):
+#    __tablename__   = 'player_skills'
+
+#    skill_id        = Column(
+#                        ForeignKey('skills.skill_id',
+#                            ondelete='CASCADE', onupdate='CASCADE'
+#                        ), nullable=False, index=True, primary_key=True
+#                    )
+#    player_id       = Column(
+#                        ForeignKey('players.id',
+#                            ondelete='CASCADE', onupdate='CASCADE'
+#                        ), nullable=False, index=True, primary_key=True
+#                    )
+#    skill_level     = Column(TINYINT(11), nullable=False, server_default=FetchedValue())
+
+#    player         = relationship('Player', backref='skills')
+
+#    def __repr__(self):
+#        return f'<PlayerSkill> {self.skill_id} @ <Player> "{self.player.name}" ({self.player_id}) / Skill Level: {self.skill_level}'

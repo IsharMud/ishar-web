@@ -1,3 +1,6 @@
+"""
+MUD Clients
+"""
 mud_clients = {
 
     'Cross-Platform' : {

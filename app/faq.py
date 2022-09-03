@@ -1,3 +1,6 @@
+"""
+Frequently Asked Questions
+"""
 from flask import url_for
 faqs = {
 

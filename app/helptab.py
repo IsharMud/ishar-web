@@ -1,8 +1,10 @@
-# Internal function to scrape "areas" from game helptab file
-#
-# The "areas" are each listed in the "helptab" file on lines starting with "32 Area " ...
-# ...followed by descriptions until the character "#" on a single line itself
-def _get_help_areas(helptab_file=None):
+"""
+Internal function to scrape "areas" from game helptab file
+
+The "areas" are each listed in the "helptab" file on lines starting with "32 Area " ...
+...followed by descriptions until the character "#" on a single line itself
+"""
+def get_help_areas(helptab_file=None):
 
     # Get game "helptab" file path/name, and open it
     helptab_fh = open(helptab_file, 'r')

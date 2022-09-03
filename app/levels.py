@@ -1,3 +1,6 @@
+"""
+Set names of the various Immortal levels
+"""
 types           = {
                     26: 'God',
                     25: 'Forger',
