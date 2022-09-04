@@ -30,6 +30,7 @@ However, "renown" and "remort upgrades" are per player - and these are only avai
 """
 class Account(db.Model, UserMixin):
     __tablename__   = 'accounts'
+
     account_id      = Column(INTEGER(11), primary_key=True)
     created_at      = Column(TIMESTAMP, nullable=False, server_default=FetchedValue())
     seasonal_points = Column(MEDIUMINT(4), nullable=False, server_default=FetchedValue())
@@ -126,6 +127,7 @@ Account upgrade available to accounts, as well as the essence cost and max value
 """
 class AccountUpgrade(db.Model):
     __tablename__   = 'account_upgrades'
+
     id                  = Column(TINYINT(4), primary_key=True)
     cost                = Column(MEDIUMINT(4), nullable=False)
     description         = Column(String(200), nullable=False)
@@ -143,7 +145,7 @@ Accounts Upgrade database class
 Account upgrade associated with account, and the level of upgrade
 """
 class AccountsUpgrade(db.Model):
-    __tablename__       = 'accounts_account_upgrades'
+    __tablename__   = 'accounts_account_upgrades'
 
     account_upgrades_id = Column(
                             ForeignKey('account_upgrades.id',
@@ -545,22 +547,23 @@ class Player(db.Model):
     @hybrid_property
     def player_alignment(self):
         if self.align <= -1000:
-            return  'Very Evil'
+            r   = 'Very Evil'
         elif self.align > -1000 and self.align <= -500:
-            return  'Evil'
+            r   = 'Evil'
         elif self.align > -500 and self.align <= -250:
-            return  'Slightly Evil'
+            r   = 'Slightly Evil'
         elif self.align > -250 and self.align < 250:
-            return  'Neutral'
+            r   = 'Neutral'
         elif self.align >= 250 and self.align < 500:
-            return  'Slightly Good'
+            r   = 'Slightly Good'
         elif self.align >= 500 and self.align < 1000:
-            return  'Good'
+            r   = 'Good'
         elif self.align >= 1000:
-            return  'Very Good'
+            r   = 'Very Good'
         else:
-            return  'Unknown'
-    
+            r   = 'Unknown'
+        return r
+
     # Hybrid property to return player CSS class
     @hybrid_property
     def player_css(self):
