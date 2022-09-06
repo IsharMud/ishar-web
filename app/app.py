@@ -25,7 +25,7 @@ import levels
 """
 Set up flask-login Login Manager settings
 """
-login_manager = LoginManager()
+login_manager                                   = LoginManager()
 login_manager.init_app(app)
 login_manager.login_message_category            = 'error'
 login_manager.login_view                        = 'login'
