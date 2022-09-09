@@ -38,7 +38,7 @@ async def challenges(ctx: interactions.CommandContext):
             completed = completed + 1
     what    = 'challenge'
     if completed != 1:
-        what += s
+        what += 's'
     await ctx.send(f"There are currently {completed} completed {what}, of {count} total challenges.")
 
 
