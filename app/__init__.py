@@ -493,21 +493,16 @@ def discord_post():
     verify_key  = VerifyKey(bytes.fromhex(discord_public_key))
     signature   = request.headers['X-Signature-Ed25519']
     timestamp   = request.headers['X-Signature-Timestamp']
-    body        = request.data.decode("utf-8")
-
-    print('body: ', body)
+    body        = request.data.decode('utf-8')
 
     try:
         verify_key.verify(f'{timestamp}{body}'.encode(), bytes.fromhex(signature))
-        print('passed')
     except BadSignatureError as e:
         print(e)
         return not_authorized(message='Sorry, but there appears to have been an invalid key.')
 
-    if request.json['type'] and request.json['type'] == 1:
+    if request.json['type'] == 1:
         data    = { 'type': 1 }
-    else:
-        data    = { 'body': 'OK' }
 
     return render_template('discord.html.j2', data=json.dumps(data))
 
