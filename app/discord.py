@@ -15,9 +15,9 @@ async def season(ctx: interactions.CommandContext):
     """Show the current Ishar MUD season information"""
     season  = models.Season.query.filter_by(is_active = 1).first()
     print(season)
-    end_dt = filters.unix2datetime(season.expiration_date)
+    end_dt  = filters.unix2datetime(season.expiration_date)
     diff_dt = end_dt - datetime.datetime.today()
-    what = 'day'
+    what    = 'day'
     if diff_dt.days != 1:
         what += 's'
     await ctx.send(f"It is currently Season {season.season_id}, which ends in {diff_dt.days} {what}, on {end_dt.strftime('%A, %B %d, %Y')}!")
@@ -36,7 +36,10 @@ async def challenges(ctx: interactions.CommandContext):
     for challenge in challenges:
         if challenge.winner_desc != '':
             completed = completed + 1
-    await ctx.send(f"There are currently {count} challenges, and {completed} completed.")
+    what    = 'challenge'
+    if completed != 1:
+        what += s
+    await ctx.send(f"There are currently {completed} completed {what}, of {count} total challenges.")
 
 
 @bot.command()
@@ -56,7 +59,10 @@ async def who(ctx: interactions.CommandContext):
         print('names: ', names)
         online  = ', '.join(names)
         print('online: ', online)
-        msg = f"There are currently {count} users online: {online}"
+        what    = 'player'
+        if count != 1:
+            what += 's'
+        msg = f"There are currently {count} {what} online: {online}"
     else:
         msg = 'Unfortunately, nobody is online right now.'
 
