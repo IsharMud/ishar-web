@@ -1,30 +1,33 @@
+from database import db_session
 import datetime
 from flask import Flask, flash, redirect, render_template, request, send_from_directory, session, url_for
 from flask_login import current_user, fresh_login_required, login_required, login_user, logout_user, LoginManager
+import filters
+import forms
+import glob
 import ipaddress
+import json
+import levels
+import models
+from nacl.signing import VerifyKey
+from nacl.exceptions import BadSignatureError
+import os
 
 
 """
-Start Flask application and get configuration file which has database credentials
+Start/configure Flask app
 """
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
 
+# Add Jinja2 template filter methods, from import
+app.add_template_filter(name='unix2datetime', f=filters.unix2datetime)
+app.add_template_filter(name='seconds2delta', f=filters.seconds2delta)
+
 if __name__ == '__main__':
     app.run(debug=True)
 
-
-"""
-Import forms, database classes/models, and player character level types
-"""
-import forms
-import models
-import levels
-
-
-"""
-Set up flask-login Login Manager settings
-"""
+# Set up flask-login Login Manager settings
 login_manager                                   = LoginManager()
 login_manager.init_app(app)
 login_manager.login_message_category            = 'error'
@@ -34,18 +37,13 @@ login_manager.needs_refresh_message_category    = 'error'
 login_manager.refresh_view                      = 'login'
 login_manager.session_protection                = 'strong'
 
-
-"""
-Get users for flask-login via Account object from the database
-"""
+# Get users for flask-login via Account object from the database
 @login_manager.user_loader
 def load_user(account_id):
     return models.Account.query.get(str(account_id))
 
-"""
-Add context processors
-Season info is on the layout Jinja2 template (therefore on every page)
-"""
+
+# Add context processors, like season info is on the layout Jinja2 template (therefore on every page)
 @app.context_processor
 def injects():
     return dict(
@@ -53,12 +51,12 @@ def injects():
         season  = models.Season.query.filter_by(is_active = 1).first()
     )
 
-"""
-Handle errors with a little template
-"""
+
+# Error template
 def error(title='Unknown Error', message='Sorry, but there was an unknown error.', code=500):
     return render_template('error.html.j2', title=title, message=message), code
 
+# Error codes to template above
 @app.errorhandler(400)
 def bad_request(message):
     return error(title='Bad Request', message=message, code=400)
@@ -80,15 +78,14 @@ def internal_server_error(message):
     return error(title='Internal Server Error', message=message, code=500)
 
 
-"""
-Main welcome page/index
-"""
+# Main welcome page/index
 @app.route('/welcome', methods=['GET'])
 @app.route('/', methods=['GET'])
 def welcome(num_posts=1):
     # Find the most recent news posts to show on the main page
-    news = models.News.query.order_by(-models.News.created_at).limit(num_posts).all()
-    return render_template('welcome.html.j2', news=news)
+    return render_template('welcome.html.j2',
+        news    = models.News.query.order_by(-models.News.created_at).limit(num_posts).all()
+    )
 
 
 """
@@ -464,22 +461,55 @@ def mud_clients():
 
 """
 /connect
-Redirect to mudslinger.net
+Redirect /connect to mudslinger.net web client
 """
 @app.route('/connect', methods=['GET'])
-def connect():
-    mudslinger_app_link = 'https://mudslinger.net/play/?host=isharmud.com&port=23'
+def connect(mudslinger_app_link = 'https://mudslinger.net/play/?host=isharmud.com&port=23'):
     return redirect(mudslinger_app_link)
 
 
 """
-/discord
-Redirect /discord to the Discord invitation link
+/discord GET
+Redirect /discord GET requests to the Discord invitation link
 """
 @app.route('/discord', methods=['GET'])
-def discord():
-    discord_invite_link = 'https://discord.gg/VBmMXUpeve'
+def discord(discord_invite_link = 'https://discord.gg/VBmMXUpeve'):
     return redirect(discord_invite_link)
+
+
+"""
+/discord POST
+Handle /discord POST requests from Discord
+"""
+@app.route('/discord', methods=['POST'])
+def discord_post():
+
+    # Return 400 for non-JSON requests
+    if not request.is_json:
+        return bad_request(message='Sorry, but this end-point only communicates via JSON.')
+
+    discord_public_key  = '01514d2b04f3bf5c279142c0bf6089a7e16dc67f67b9a7eb29c9768eb20f28d1'
+
+    verify_key  = VerifyKey(bytes.fromhex(discord_public_key))
+    signature   = request.headers['X-Signature-Ed25519']
+    timestamp   = request.headers['X-Signature-Timestamp']
+    body        = request.data.decode("utf-8")
+
+    print('body: ', body)
+
+    try:
+        verify_key.verify(f'{timestamp}{body}'.encode(), bytes.fromhex(signature))
+        print('passed')
+    except BadSignatureError as e:
+        print(e)
+        return not_authorized(message='Sorry, but there appears to have been an invalid key.')
+
+    if request.json['type'] and request.json['type'] == 1:
+        data    = { 'type': 1 }
+    else:
+        data    = { 'body': 'OK' }
+
+    return render_template('discord.html.j2', data=json.dumps(data))
 
 
 """
@@ -489,8 +519,6 @@ Redirect to the latest found static patch .pdf file
 @app.route('/patch', methods=['GET'])
 @app.route('/latest_patch', methods=['GET'])
 def latest_patch(patch_dir='patches'):
-    import glob
-    import os
     return redirect('/' + max(glob.glob('static/' + patch_dir + '/*.pdf'), key=os.path.getmtime))
 
 
@@ -503,11 +531,11 @@ A few frequently asked questions, stored in a dictionary of lists, to be display
 @app.route('/faq')
 def faq():
 
-    # TODO: Include the count and list of playable classes and races dynamically
-    player_classes  = models.PlayerClass.query.filter(models.PlayerClass.class_description != None).all()
-    player_races    = models.PlayerRace.query.filter(models.PlayerRace.race_description != None).all()
-    print(f'FAQ PLAYER Classes: {player_classes}')
-    print(f'FAQ PLAYER Races: {player_races}')
+#    TODO: Include the count and list of playable classes and races dynamically
+#    player_classes  = models.PlayerClass.query.filter(models.PlayerClass.class_description != None).all()
+#    player_races    = models.PlayerRace.query.filter(models.PlayerRace.race_description != None).all()
+#    print(f'FAQ PLAYER Classes: {player_classes}')
+#    print(f'FAQ PLAYER Races: {player_races}')
 
     import faq
     return render_template('faq.html.j2', faqs=faq.faqs)
@@ -562,27 +590,15 @@ def world(helptab_file='/home/ishar/ishar-mud/lib/Misc/helptab', area=None):
     return render_template('world.html.j2', areas=areas, area=area), code
 
 
-"""
-Jinja2 template filter to convert UNIX timestamps to Python date-time objects
-"""
-@app.template_filter('unix2datetime')
-def unix2datetime(unix_time):
-    return datetime.datetime.fromtimestamp(unix_time)
-
-
-"""
-Jinja2 template filter to convert seconds to human-readable delta
-"""
-@app.template_filter('seconds2delta')
-def seconds2delta(seconds):
-    return datetime.timedelta(seconds=seconds)
-
-
-"""
-Set up a few static content paths
-"""
+# Static content
 @app.route('/favicon.ico')
 @app.route('/robots.txt')
 @app.route('/sitemap.xml')
 def static_from_root():
     return send_from_directory(app.static_folder, request.path[1:])
+
+
+# Remove database session at request teardown
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    db_session.remove()

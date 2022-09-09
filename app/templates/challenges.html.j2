@@ -10,17 +10,7 @@
 {% block title %}Challenges{% if challenges_title %} ({{ challenges_title }}){% endif %}{% endblock %}
 {% block header %}Challenges{% endblock %}
 {%- macro challenge_tier(tier) -%}
-    {%- set challenge_tiers = {
-        9: 'SS',
-        8: 'SS',
-        7: 'SS',
-        6: 'S',
-        5: 'A',
-        4: 'B',
-        3: 'C',
-        2: 'D',
-        1: 'F'
-    } -%}
+    {%- set challenge_tiers = { 9: 'SS', 8: 'SS', 7: 'SS', 6: 'S', 5: 'A', 4: 'B', 3: 'C', 2: 'D', 1: 'F' } -%}
     {%- if challenge_tiers[tier] is defined  -%}
         {{ challenge_tiers[tier] }}
     {%- else -%}

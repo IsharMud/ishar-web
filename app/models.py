@@ -1,24 +1,17 @@
 """
 Database classes/models
 """
-from app import app
 import crypt
 import hmac
 import levels
+from database import Base, db_session
 from flask import url_for
 from flask_login import UserMixin
-from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, DateTime, ForeignKey, String, TIMESTAMP, Text
 from sqlalchemy.dialects.mysql import INTEGER, MEDIUMINT, SMALLINT, TINYINT
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.schema import FetchedValue
 from sqlalchemy.orm import relationship
-
-
-"""
-Connect to the database
-"""
-db  = SQLAlchemy(app)
 
 
 """
@@ -28,7 +21,7 @@ Accounts exist to log-in in-game, and are also used on the website for flask-log
 "Seasonal points"/"essence" and "account upgrades" are per account, and can be spent any time (in-game, or on the website)
 However, "renown" and "remort upgrades" are per player - and these are only available to purchase in-game, at the "shrine"
 """
-class Account(db.Model, UserMixin):
+class Account(Base, UserMixin):
     __tablename__   = 'accounts'
 
     account_id      = Column(INTEGER(11), primary_key=True)
@@ -70,7 +63,7 @@ class Account(db.Model, UserMixin):
     def change_password(self, new_password):
         try:
             self.password = crypt.crypt(new_password, crypt.mksalt(method=crypt.METHOD_MD5))
-            db.session.commit()
+            db_session.commit()
             return True
         except Exception as e:
             print(e)
@@ -86,8 +79,8 @@ class Account(db.Model, UserMixin):
 
             # Hash the password and add the account to the database
             self.password = crypt.crypt(self.password, crypt.mksalt(method=crypt.METHOD_MD5))
-            db.session.add(self)
-            db.session.commit()
+            db_session.add(self)
+            db_session.commit()
 
             # Start each available account upgrade at zero (0)
             for init_ugrade in AccountUpgrade.query.all():
@@ -96,8 +89,8 @@ class Account(db.Model, UserMixin):
                     account_id              = self.account_id,
                     amount                  = 0
                 )
-                db.session.add(create_upgrade)
-            db.session.commit()
+                db_session.add(create_upgrade)
+            db_session.commit()
 
             # Return the new account ID
             return self.account_id
@@ -125,8 +118,8 @@ class Account(db.Model, UserMixin):
 Account Upgrade database class
 Account upgrade available to accounts, as well as the essence cost and max value
 """
-class AccountUpgrade(db.Model):
-    __tablename__   = 'account_upgrades'
+class AccountUpgrade(Base):
+    __tablename__       = 'account_upgrades'
 
     id                  = Column(TINYINT(4), primary_key=True)
     cost                = Column(MEDIUMINT(4), nullable=False)
@@ -144,7 +137,7 @@ class AccountUpgrade(db.Model):
 Accounts Upgrade database class
 Account upgrade associated with account, and the level of upgrade
 """
-class AccountsUpgrade(db.Model):
+class AccountsUpgrade(Base):
     __tablename__   = 'accounts_account_upgrades'
 
     account_upgrades_id = Column(
@@ -166,7 +159,7 @@ class AccountsUpgrade(db.Model):
         try:
             self.amount = self.amount + increment
             self.account.seasonal_points = self.account.seasonal_points - self.upgrade.cost
-            db.session.commit()
+            db_session.commit()
             return True
         except Exception as e:
             print(e)
@@ -180,7 +173,7 @@ class AccountsUpgrade(db.Model):
 Challenge database class
 Challenge along with the in-game mobile ("mob")/target number (mob_vnum), as well as level/group requirements, and tier
 """
-class Challenge(db.Model):
+class Challenge(Base):
     __tablename__   = 'challenges'
 
     challenge_id    = Column(SMALLINT(4), primary_key=True)
@@ -204,26 +197,26 @@ class Challenge(db.Model):
 News database class
 News post for the main/welcome page
 """
-class News(db.Model):
+class News(Base):
     __tablename__   = 'news'
 
-    news_id     = Column(INTEGER(11), primary_key=True)
-    account_id  = Column(
-                    ForeignKey('accounts.account_id',
-                        ondelete='CASCADE', onupdate='CASCADE'
-                    ), nullable=False, index=True
-                )
-    created_at  = Column(TIMESTAMP, nullable=False, server_default=FetchedValue())
-    subject     = Column(String(64), nullable=False, server_default=FetchedValue())
-    body        = Column(Text, nullable=False)
+    news_id         = Column(INTEGER(11), primary_key=True)
+    account_id      = Column(
+                        ForeignKey('accounts.account_id',
+                            ondelete='CASCADE', onupdate='CASCADE'
+                        ), nullable=False, index=True
+                    )
+    created_at      = Column(TIMESTAMP, nullable=False, server_default=FetchedValue())
+    subject         = Column(String(64), nullable=False, server_default=FetchedValue())
+    body            = Column(Text, nullable=False)
 
-    account     = relationship('Account')
+    account         = relationship('Account')
 
     # Method to add a news post
     def add_news(self, subject=None, body=None):
         try:
-            db.session.add(self)
-            db.session.commit()
+            db_session.add(self)
+            db_session.commit()
             return self.news_id
         except Exception as e:
             print(e)
@@ -237,8 +230,8 @@ class News(db.Model):
 Player Class database class
 Playable character "class" in-game such as warrior, magician, cleric, rogue, necromancer, etc.
 """
-class PlayerClass(db.Model):
-    __tablename__   = 'classes'
+class PlayerClass(Base):
+    __tablename__       = 'classes'
 
     class_id            = Column(TINYINT(3), primary_key=True)
     class_name          = Column(String(15), nullable=False, unique=True, server_default=FetchedValue())
@@ -255,7 +248,7 @@ class PlayerClass(db.Model):
 Player Flag database class
 Flag for a setting affecting a player character in-game (such as perm-death/survival character, see is_survival)
 """
-class PlayerFlag(db.Model):
+class PlayerFlag(Base):
     __tablename__   = 'player_flags'
 
     flag_id = Column(INTEGER(11), primary_key=True)
@@ -269,20 +262,20 @@ class PlayerFlag(db.Model):
 Players Flag database class
 Flag associated with player and the flag value
 """
-class PlayersFlag(db.Model):
+class PlayersFlag(Base):
     __tablename__   = 'player_player_flags'
 
-    flag_id     = Column(
-                    ForeignKey('player_flags.flag_id',
-                        ondelete='CASCADE', onupdate='CASCADE'
-                    ), nullable=False, index=True, primary_key=True
-                )
-    player_id   = Column(
-                    ForeignKey('players.id',
-                        ondelete='CASCADE', onupdate='CASCADE'
-                    ), nullable=False, index=True, primary_key=True
-                )
-    value       = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
+    flag_id         = Column(
+                        ForeignKey('player_flags.flag_id',
+                            ondelete='CASCADE', onupdate='CASCADE'
+                        ), nullable=False, index=True, primary_key=True
+                    )
+    player_id       = Column(
+                        ForeignKey('players.id',
+                            ondelete='CASCADE', onupdate='CASCADE'
+                        ), nullable=False, index=True, primary_key=True
+                    )
+    value           = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
 
     def __repr__(self):
         return f'<PlayersFlag> "{self.flag.name}" ({self.flag_id}) @ <Player> "{self.player.name}" ({self.player_id}) : {self.value}'
@@ -292,14 +285,14 @@ class PlayersFlag(db.Model):
 Player Race database class
 Playable character "race" in-game such as elf, gnome, human, etc.
 """
-class PlayerRace(db.Model):
-    __tablename__   = 'races'
+class PlayerRace(Base):
+    __tablename__       = 'races'
 
     race_id             = Column(TINYINT(3), primary_key=True)
     race_name           = Column(String(15), nullable=False, unique=True)
     race_description    = Column(String(64))
 
-    player_race = relationship('Player', backref='race')
+    player_race         = relationship('Player', backref='race')
 
     def __repr__(self):
         return f'<PlayerRace> "{self.race_name}" ({self.race_id})'
@@ -309,8 +302,8 @@ class PlayerRace(db.Model):
 Quest database class
 Quest that can be achieved, and its rewards
 """
-class Quest(db.Model):
-    __tablename__   = 'quests'
+class Quest(Base):
+    __tablename__       = 'quests'
 
     quest_id            = Column(INTEGER(11), primary_key=True)
     name                = Column(String(25), nullable=False, unique=True, server_default=FetchedValue())
@@ -327,7 +320,7 @@ class Quest(db.Model):
 Player Quest database class
 Quest associated with players completion
 """
-class PlayerQuest(db.Model):
+class PlayerQuest(Base):
     __tablename__   = 'player_quests'
 
     quest_id        = Column(
@@ -353,7 +346,7 @@ class PlayerQuest(db.Model):
 Remort Upgrades database class
 Remort upgrade available to players, as well as the renown cost and max value
 """
-class RemortUpgrade(db.Model):
+class RemortUpgrade(Base):
     __tablename__   = 'remort_upgrades'
 
     upgrade_id      = Column(INTEGER(11), primary_key=True)
@@ -371,7 +364,7 @@ class RemortUpgrade(db.Model):
 Player Remort Upgrades database class
 Remort upgrade associated with player, and the level of upgrade
 """
-class PlayerRemortUpgrade(db.Model):
+class PlayerRemortUpgrade(Base):
     __tablename__   = 'player_remort_upgrades'
 
     upgrade_id      = Column(
@@ -396,7 +389,7 @@ class PlayerRemortUpgrade(db.Model):
 Season database class
 In-game cyclical season detail and dates
 """
-class Season(db.Model):
+class Season(Base):
     __tablename__   = 'seasons'
 
     season_id       = Column(INTEGER(11), primary_key=True)
@@ -412,7 +405,7 @@ class Season(db.Model):
 Player database class
 An in-game player, which belongs to an account
 """
-class Player(db.Model):
+class Player(Base):
     __tablename__           = 'players'
 
     id                      = Column(INTEGER(11), primary_key=True)
@@ -512,7 +505,7 @@ class Player(db.Model):
                                 name    = flag_name
                             ).first()
 
-            # Find the flag value for the player, and return True if the flag value is 1
+            # Find the flag value for the player, and return True if the flag value is 1, otherwise False
             if player_flag.flag_id and isinstance(player_flag.flag_id, int):
                 players_flag    = PlayersFlag.query.filter_by(
                                     flag_id     = player_flag.flag_id,
@@ -521,7 +514,6 @@ class Player(db.Model):
                 if players_flag.value == 1:
                     return True
 
-        # Otherwise, return False
         return False
 
     # Hybrid property returning boolean whether player is a "God"
@@ -609,7 +601,7 @@ There is eventually a place for all of these... somewhere... somehow - plus more
 """
 
 # Affect Flag database class (unused)
-#class AffectFlag(db.Model):
+#class AffectFlag(Base):
 #    __tablename__   = 'affect_flags'
 
 #    flag_id = Column(TINYINT(4), primary_key=True)
@@ -620,18 +612,18 @@ There is eventually a place for all of these... somewhere... somehow - plus more
 
 
 # Board database class (unused)
-#class Board(db.Model):
-#    __tablename__   = 'boards'
+#class Board(Base):
+#    __tablename__  = 'boards'
 
-#    board_id    = Column(TINYINT(4), primary_key=True)
-#    board_name  = Column(String(15), nullable=False)
+#    board_id       = Column(TINYINT(4), primary_key=True)
+#    board_name     = Column(String(15), nullable=False)
 
 #    def __repr__(self):
 #        return f'<Board> "{self.board_name}" ({self.board_id})'
 
 
 # Condition database class (unused)
-#class Condition(db.Model):
+#class Condition(Base):
 #    __tablename__   = 'conditions'
 
 #    condition_id    = Column(TINYINT(4), primary_key=True)
@@ -642,18 +634,18 @@ There is eventually a place for all of these... somewhere... somehow - plus more
 
 
 # DisplayOption database class (unused)
-#class DisplayOption(db.Model):
-#    __tablename__   = 'display_options'
+#class DisplayOption(Base):
+#    __tablename__  = 'display_options'
 
-#    display_id  = Column(TINYINT(4), primary_key=True)
-#    name        = Column(String(20), nullable=False, unique=True)
+#    display_id     = Column(TINYINT(4), primary_key=True)
+#    name           = Column(String(20), nullable=False, unique=True)
 
 #    def __repr__(self):
 #        return f'<DisplayOption> "{self.name}" ({self.display_id})'
 
 
 # Skill database class (unused)
-#class Skill(db.Model):
+#class Skill(Base):
 #    __tablename__   = 'skills'
 
 #    skill_id        = Column(INTEGER(11), primary_key=True)
@@ -672,20 +664,20 @@ There is eventually a place for all of these... somewhere... somehow - plus more
 #        return f'<Skill> ID {self.skill_id} / Class ID {self.class_id} / Max: {self.max_value} / Difficulty: {self.difficulty}'
 
 # Player Skill database class (unused)
-#class PlayerSkill(db.Model):
-#    __tablename__   = 'player_skills'
+#class PlayerSkill(Base):
+#    __tablename__  = 'player_skills'
 
-#    skill_id        = Column(
+#    skill_id       = Column(
 #                        ForeignKey('skills.skill_id',
 #                            ondelete='CASCADE', onupdate='CASCADE'
 #                        ), nullable=False, index=True, primary_key=True
 #                    )
-#    player_id       = Column(
+#    player_id      = Column(
 #                        ForeignKey('players.id',
 #                            ondelete='CASCADE', onupdate='CASCADE'
 #                        ), nullable=False, index=True, primary_key=True
 #                    )
-#    skill_level     = Column(TINYINT(11), nullable=False, server_default=FetchedValue())
+#    skill_level    = Column(TINYINT(11), nullable=False, server_default=FetchedValue())
 
 #    player         = relationship('Player', backref='skills')
 

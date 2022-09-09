@@ -1,7 +1,3 @@
-"""
-Configuration
-"""
-
 TESTING     = True
 DEBUG       = True
 FLASK_ENV   = 'staging'
@@ -17,26 +13,3 @@ SESSION_COOKIE_SECURE   = True
 
 SESSION_PROTECTION      = 'strong'
 USE_SESSION_FOR_NEXT    = True
-
-"""
-SQLAlchemy settings
-"""
-db_creds = {
-    'user'      : 'ishar',
-    'password'  : 'SECRET',
-    'host'      : '127.0.0.1',
-    'database'  : 'ishar'
-}
-
-SQLALCHEMY_DATABASE_URI         = f"mysql+pymysql://{db_creds['user']}:{db_creds['password']}@{db_creds['host']}/{db_creds['database']}"
-SQLALCHEMY_ECHO                 = True
-SQLALCHEMY_POOL_RECYCLE         = 3
-SQLALCHEMY_POOL_TIMEOUT         = 3
-SQLALCHEMY_PRE_PING             = True
-SQLALCHEMY_TRACK_MODIFICATIONS  = False
-SQLALCHEMY_ENGINE_OPTIONS       = {
-                                    'echo'          : SQLALCHEMY_ECHO,
-                                    'pool_recycle'  : SQLALCHEMY_POOL_RECYCLE,
-                                    'pool_timeout'  : SQLALCHEMY_POOL_TIMEOUT,
-                                    'pool_pre_ping' : SQLALCHEMY_PRE_PING
-                                }
