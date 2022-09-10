@@ -1,12 +1,14 @@
-import filters
 import datetime
 import discord_secret
 import interactions
 import models
 
 """
-Testing Discord Bot here
+Discord bot simply runs in a screen session, for now
+So far, there are only three "slash commands" (/):
+/season, /challenges, and /who
 """
+
 guild   = '636680767921061909'
 bot     = interactions.Client(token=discord_secret.token, default_scope=guild)
 
@@ -15,12 +17,7 @@ async def season(ctx: interactions.CommandContext):
     """Show the current Ishar MUD season information"""
     season  = models.Season.query.filter_by(is_active = 1).first()
     print(season)
-    end_dt  = filters.unix2datetime(season.expiration_date)
-    diff_dt = end_dt - datetime.datetime.today()
-    what    = 'day'
-    if diff_dt.days != 1:
-        what += 's'
-    await ctx.send(f"It is currently Season {season.season_id}, which ends in {diff_dt.days} {what}, on {end_dt.strftime('%A, %B %d, %Y')}!")
+    await ctx.send(f"It is currently Season {season.season_id}, which ends in {season.ends_in}, on {season.end_dt.strftime('%A, %B %d, %Y')}!")
 
 
 @bot.command()

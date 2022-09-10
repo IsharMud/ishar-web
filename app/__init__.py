@@ -2,7 +2,6 @@ from database import db_session
 import datetime
 from flask import Flask, flash, redirect, render_template, request, send_from_directory, session, url_for
 from flask_login import current_user, fresh_login_required, login_required, login_user, logout_user, LoginManager
-import filters
 import forms
 import glob
 import ipaddress
@@ -19,10 +18,6 @@ Start/configure Flask app
 """
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
-
-# Add Jinja2 template filter methods, from import
-app.add_template_filter(name='unix2datetime', f=filters.unix2datetime)
-app.add_template_filter(name='seconds2delta', f=filters.seconds2delta)
 
 if __name__ == '__main__':
     app.run(debug=True)
@@ -47,7 +42,6 @@ def load_user(account_id):
 @app.context_processor
 def injects():
     return dict(
-        now     = datetime.datetime.now().timestamp(),
         season  = models.Season.query.filter_by(is_active = 1).first()
     )
 

@@ -216,26 +216,23 @@
             {%- endif %}
             <div id="player-time">
                 <p>
-            {%- set birth_date = player.birth | unix2datetime %}
-                    <span title="Birth: {{ display_timestamp(player.birth) }} ({{ birth_date.strftime('%A, %B %d, %Y %H:%M:%S') }})">
-                        {{ player_gender | title }} was born {{ display_timestamp(player.birth) }},
-                        on {{ birth_date.strftime('%A, %B %d, %Y') }}.
+                    <span title="Birth: {{ player.birth_ago }} ({{ player.birth_dt.strftime('%A, %B %d, %Y %H:%M:%S') }})">
+                        {{ player_gender | title }} was born {{ player.birth_ago }} ago,
+                        on {{ player.birth_dt.strftime('%A, %B %d, %Y') }}.
                     </span>
                     <br>
-            {%- set last_logon = player.logon | unix2datetime %}
-                    <span title="Logged In: {{ display_timestamp(player.logon) }} ({{ last_logon.strftime('%A, %B %d, %Y %H:%M:%S') }})">
-                        {{ player_gender | title }} last logged in {{ display_timestamp(player.logon) }},
-                        on {{ last_logon.strftime('%A, %B %d, %Y') }}.
+                    <span title="Logged On: {{ player.logon_ago }} ago ({{ player.logon_dt.strftime('%A, %B %d, %Y @ %H:%M:%S') }})">
+                        {{ player_gender | title }} last logged in {{ player.logon_ago }} ago,
+                        on {{ player.logon_dt.strftime('%A, %B %d, %Y') }}.
                     </span>
                     <br>
-            {%- set last_logout = player.logout | unix2datetime %}
-                    <span title="Logged Out: {{ display_timestamp(player.logout) }} ({{ last_logout.strftime('%A, %B %d, %Y %H:%M:%S') }})">
-                        {{ player_gender | title }} last logged out {{ display_timestamp(player.logout) }},
-                        on {{ last_logout.strftime('%A, %B %d, %Y') }}.
+                    <span title="Logged Out: {{ player.logout_ago }} ago ({{ player.logout_dt.strftime('%A, %B %d, %Y @ %H:%M:%S') }})">
+                        {{ player_gender | title }} last logged out {{ player.logout_ago}} ago,
+                        on {{ player.logout_dt.strftime('%A, %B %d, %Y') }}.
                     </span>
                     <br>
-                    <span title="Played For: {{ player.online | seconds2delta }}">
-                        {{ player_gender | title }} {{ player_phrase_owns }} played for {{ player.online | seconds2delta }}.
+                    <span title="Played For: {{ player.online_delta | string }}">
+                        {{ player_gender | title }} {{ player_phrase_owns }} played for {{ player.online_delta | string }}.
                     </span>
                 </p>
             </div>

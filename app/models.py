@@ -1,17 +1,17 @@
-"""
-Database classes/models
-"""
 import crypt
 import hmac
 import levels
 from database import Base, db_session
+import datetime
 from flask import url_for
 from flask_login import UserMixin
-from sqlalchemy import Column, DateTime, ForeignKey, String, TIMESTAMP, Text
+from sqlalchemy import Column, ForeignKey, String, TIMESTAMP, Text
 from sqlalchemy.dialects.mysql import INTEGER, MEDIUMINT, SMALLINT, TINYINT
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.schema import FetchedValue
 from sqlalchemy.orm import relationship
+
+# Database classes/models
 
 
 """
@@ -43,12 +43,12 @@ class Account(Base, UserMixin):
     def get_id(self):
         return str(self.account_id)
 
-    # flask-login method to return boolean whether user is authenticated
-    def is_authenticated(self):
-        return isinstance(self.account_id, int)
-
     # flask-login method to return boolean whether user is active
     def is_active(self):
+        return isinstance(self.account_id, int)
+
+    # flask-login method to return boolean whether user is authenticated
+    def is_authenticated(self):
         return isinstance(self.account_id, int)
 
     # Hybrid property returning boolean whether user is a "God"
@@ -58,6 +58,18 @@ class Account(Base, UserMixin):
             if player.is_god:
                 return True
         return False
+
+    # Hybrid property containing the amount of essence earned for the account
+    @hybrid_property
+    def seasonal_earned(self):
+
+        # Start at zero (0), and return the points from the player within the account whom has earned the highest amount
+        s = 0
+        for player in self.players:
+            if player.seasonal_earned > s:
+                s = player.seasonal_earned
+        return s
+
 
     # Method to allow users to change their account password
     def change_password(self, new_password):
@@ -99,17 +111,6 @@ class Account(Base, UserMixin):
             print(e)
         return False
 
-    # Hybrid property containing the amount of essence earned for the account
-    @hybrid_property
-    def seasonal_earned(self):
-
-        # Start at zero (0), and return the points from the player within the account whom has earned the highest amount
-        s = 0
-        for player in self.players:
-            if player.seasonal_earned > s:
-                s = player.seasonal_earned
-        return s
-
     def __repr__(self):
         return f'<Account> "{self.account_name}" ({self.account_id})'
 
@@ -138,7 +139,7 @@ Accounts Upgrade database class
 Account upgrade associated with account, and the level of upgrade
 """
 class AccountsUpgrade(Base):
-    __tablename__   = 'accounts_account_upgrades'
+    __tablename__       = 'accounts_account_upgrades'
 
     account_upgrades_id = Column(
                             ForeignKey('account_upgrades.id',
@@ -251,8 +252,8 @@ Flag for a setting affecting a player character in-game (such as perm-death/surv
 class PlayerFlag(Base):
     __tablename__   = 'player_flags'
 
-    flag_id = Column(INTEGER(11), primary_key=True)
-    name    = Column(String(20), nullable=False, unique=True)
+    flag_id         = Column(INTEGER(11), primary_key=True)
+    name            = Column(String(20), nullable=False, unique=True)
 
     def __repr__(self):
         return f'<PlayerFlag> "{self.name}" ({self.flag_id})'
@@ -397,8 +398,28 @@ class Season(Base):
     effective_date  = Column(INTEGER(11), nullable=False)
     expiration_date = Column(INTEGER(11), nullable=False)
 
+    # Hybrid property returning Python datetime object of the season start
+    @hybrid_property
+    def effective_dt(self):
+        return datetime.datetime.fromtimestamp(self.effective_date)
+
+    # Hybrid property returning Python datetime object of the season end
+    @hybrid_property
+    def expiration_dt(self):
+        return datetime.datetime.fromtimestamp(self.expiration_date)
+
+    # Hybrid property returning time delta until season ends
+    @hybrid_property
+    def expiration_delta(self):
+        return self.expiration_dt - datetime.datetime.now()
+
+    # Hybrid property returning stringified approximate Python timedelta until season ends
+    @hybrid_property
+    def expires_in(self):
+        return str(self.expiration_delta).split(',')[0]
+
     def __repr__(self):
-        return f'<Season> ID {self.season_id} / Active: {self.is_active} / Effective: {self.effective_date} / Expiration: {self.expiration_date}'
+        return f'<Season> ID {self.season_id} / Active: {self.is_active} / Effective: "{self.effective_dt}" / Expiration: "{self.expires_in}" ("{expiration_delta}")'
 
 
 """
@@ -505,7 +526,7 @@ class Player(Base):
                                 name    = flag_name
                             ).first()
 
-            # Find the flag value for the player, and return True if the flag value is 1, otherwise False
+            # Find the flag value for the player, and return True if the flag value is 1
             if player_flag.flag_id and isinstance(player_flag.flag_id, int):
                 players_flag    = PlayersFlag.query.filter_by(
                                     flag_id     = player_flag.flag_id,
@@ -513,8 +534,60 @@ class Player(Base):
                                 ).first()
                 if players_flag.value == 1:
                     return True
-
         return False
+
+    # Hybrid property returning Python datetime of player birth
+    @hybrid_property
+    def birth_dt(self):
+        return datetime.datetime.fromtimestamp(self.birth)
+
+    # Hybrid property returning Python timedelta since player birth
+    @hybrid_property
+    def birth_delta(self):
+        return datetime.datetime.now() - self.birth_dt
+
+    # Hybrid property returning stringified approximate Python timedelta since player birth
+    @hybrid_property
+    def birth_ago(self):
+        return str(self.birth_delta).split(',')[0]
+
+    # Hybrid property returning Python datetime of last player log on
+    @hybrid_property
+    def logon_dt(self):
+        return datetime.datetime.fromtimestamp(self.logon)
+
+    # Hybrid property returning Python timedelta since player log on
+    @hybrid_property
+    def logon_delta(self):
+        return datetime.datetime.now() - self.logon_dt
+
+    # Hybrid property returning stringified approximate Python timedelta since player log on
+    @hybrid_property
+    def logon_ago(self):
+        return str(self.logon_delta).split(',')[0]
+
+    # Hybrid property returning Python datetime of last player log out
+    @hybrid_property
+    def logout_dt(self):
+        return datetime.datetime.fromtimestamp(self.logout)
+
+    # Hybrid property returning Python timedelta since player log out
+    @hybrid_property
+    def logout_delta(self):
+        return datetime.datetime.now() - self.logout_dt
+
+    # Hybrid property returning stringified approximate Python timedelta since player log out
+    @hybrid_property
+    def logout_ago(self):
+        return str(self.logout_delta).split(',')[0]
+
+    # Hybrid property returning Python timedelta of player total online time
+    @hybrid_property
+    def online_delta(self):
+        try:
+            return datetime.timedelta(seconds=self.online)
+        except:
+            return datetime.timedelta(seconds=0)
 
     # Hybrid property returning boolean whether player is a "God"
     @hybrid_property
@@ -539,22 +612,21 @@ class Player(Base):
     @hybrid_property
     def player_alignment(self):
         if self.align <= -1000:
-            r   = 'Very Evil'
+            return 'Very Evil'
         elif self.align > -1000 and self.align <= -500:
-            r   = 'Evil'
+            return 'Evil'
         elif self.align > -500 and self.align <= -250:
-            r   = 'Slightly Evil'
+            return 'Slightly Evil'
         elif self.align > -250 and self.align < 250:
-            r   = 'Neutral'
+            return 'Neutral'
         elif self.align >= 250 and self.align < 500:
-            r   = 'Slightly Good'
+            return 'Slightly Good'
         elif self.align >= 500 and self.align < 1000:
-            r   = 'Good'
+            return 'Good'
         elif self.align >= 1000:
-            r   = 'Very Good'
+            return 'Very Good'
         else:
-            r   = 'Unknown'
-        return r
+            return 'Unknown'
 
     # Hybrid property to return player CSS class
     @hybrid_property
@@ -594,92 +666,3 @@ class Player(Base):
         if self.remorts > 0:
             earned  += int(self.remorts / 5) * 3 + 1
         return earned
-
-"""
-TODO: Unused below
-There is eventually a place for all of these... somewhere... somehow - plus more!
-"""
-
-# Affect Flag database class (unused)
-#class AffectFlag(Base):
-#    __tablename__   = 'affect_flags'
-
-#    flag_id = Column(TINYINT(4), primary_key=True)
-#    name    = Column(String(30), nullable=False, unique=True)
-
-#    def __repr__(self):
-#        return f'<AffectFlag> "{self.name}" ({self.flag_id})'
-
-
-# Board database class (unused)
-#class Board(Base):
-#    __tablename__  = 'boards'
-
-#    board_id       = Column(TINYINT(4), primary_key=True)
-#    board_name     = Column(String(15), nullable=False)
-
-#    def __repr__(self):
-#        return f'<Board> "{self.board_name}" ({self.board_id})'
-
-
-# Condition database class (unused)
-#class Condition(Base):
-#    __tablename__   = 'conditions'
-
-#    condition_id    = Column(TINYINT(4), primary_key=True)
-#    name            = Column(String(20), nullable=False, unique=True)
-
-#    def __repr__(self):
-#        return f'<PlayerCondition> "{self.name}" ({self.condition_id})'
-
-
-# DisplayOption database class (unused)
-#class DisplayOption(Base):
-#    __tablename__  = 'display_options'
-
-#    display_id     = Column(TINYINT(4), primary_key=True)
-#    name           = Column(String(20), nullable=False, unique=True)
-
-#    def __repr__(self):
-#        return f'<DisplayOption> "{self.name}" ({self.display_id})'
-
-
-# Skill database class (unused)
-#class Skill(Base):
-#    __tablename__   = 'skills'
-
-#    skill_id        = Column(INTEGER(11), primary_key=True)
-#    class_id        = Column(
-#                        ForeignKey('classes.class_id',
-#                            ondelete='CASCADE', onupdate='CASCADE'
-#                        ), nullable=False, index=True
-#                    )
-#    max_value       = Column(INTEGER(11), nullable=False)
-#    difficulty      = Column(INTEGER(11), nullable=False)
-
-#    player_skills   = relationship('PlayerSkill', backref='skill')
-
-
-#    def __repr__(self):
-#        return f'<Skill> ID {self.skill_id} / Class ID {self.class_id} / Max: {self.max_value} / Difficulty: {self.difficulty}'
-
-# Player Skill database class (unused)
-#class PlayerSkill(Base):
-#    __tablename__  = 'player_skills'
-
-#    skill_id       = Column(
-#                        ForeignKey('skills.skill_id',
-#                            ondelete='CASCADE', onupdate='CASCADE'
-#                        ), nullable=False, index=True, primary_key=True
-#                    )
-#    player_id      = Column(
-#                        ForeignKey('players.id',
-#                            ondelete='CASCADE', onupdate='CASCADE'
-#                        ), nullable=False, index=True, primary_key=True
-#                    )
-#    skill_level    = Column(TINYINT(11), nullable=False, server_default=FetchedValue())
-
-#    player         = relationship('Player', backref='skills')
-
-#    def __repr__(self):
-#        return f'<PlayerSkill> {self.skill_id} @ <Player> "{self.player.name}" ({self.player_id}) / Skill Level: {self.skill_level}'
