@@ -419,7 +419,7 @@ class Season(Base):
         return str(self.expiration_delta).split(',')[0]
 
     def __repr__(self):
-        return f'<Season> ID {self.season_id} / Active: {self.is_active} / Effective: "{self.effective_dt}" / Expiration: "{self.expires_in}" ("{expiration_delta}")'
+        return f'<Season> ID {self.season_id} / Active: {self.is_active} / Effective: "{self.effective_dt}" / Expiration: "{self.expires_in}" ("{self.expiration_dt}")'
 
 
 """
