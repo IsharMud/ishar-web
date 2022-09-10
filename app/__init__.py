@@ -202,8 +202,7 @@ def change_password():
 /player
 Player page to show detailed information about a player, and player name search form
 """
-@app.route('/player', methods=['GET', 'POST'])
-@app.route('/player/<string:player_name>', methods=['GET'])
+@app.route('/player/<string:player_name>', methods=['GET', 'POST'])
 @login_required
 def show_player(player_name=None):
 
@@ -214,9 +213,15 @@ def show_player(player_name=None):
 
         # Perform a MySQL "LIKE" search query on the name, followed by a wildcard (%) to try to find the player
         player  = models.Player.query.filter(models.Player.name.like(player_search_form.player_search_name.data + '%')).first()
+        if player:
+            who = player.name
+        else:
+            who = player_search_form.player_search_name.data
+
+        return redirect(url_for('show_player', player_name=who))
 
     # Find the player, in the database, by exact name
-    elif player_name:
+    if player_name:
         player  = models.Player.query.filter_by(name = player_name).first()
 
     # If our search returned something, we found a player

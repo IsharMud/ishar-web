@@ -64,7 +64,7 @@
 {%- endblock %}
 {%- block content %}
     {%- if player_search_form is defined %}
-            <form method="post" action="{{ url_for('show_player') }}" id="player-search-form">
+            <form method="post" id="player-search-form">
                 {{ render_field(player_search_form.player_search_name) }}
                 {{ player_search_form.csrf_token }}
                 {{ render_field(player_search_form.submit) }}
@@ -216,7 +216,7 @@
             {%- endif %}
             <div id="player-time">
                 <p>
-                    <span title="Birth: {{ player.birth_ago }} ({{ player.birth_dt.strftime('%A, %B %d, %Y %H:%M:%S') }})">
+                    <span title="Birth: {{ player.birth_ago }} ({{ player.birth_dt.strftime('%A, %B %d, %Y @ %H:%M:%S') }})">
                         {{ player_gender | title }} was born {{ player.birth_ago }} ago,
                         on {{ player.birth_dt.strftime('%A, %B %d, %Y') }}.
                     </span>
