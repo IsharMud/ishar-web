@@ -17,7 +17,7 @@ async def season(ctx: interactions.CommandContext):
     """Show the current Ishar MUD season information"""
     season  = models.Season.query.filter_by(is_active = 1).first()
     print(season)
-    await ctx.send(f"It is currently Season {season.season_id}, which ends in {season.expires_in}, on {season.end_dt.strftime('%A, %B %d, %Y')}!")
+    await ctx.send(f"It is currently Season {season.season_id}, which ends in {season.expires_in}, on {season.expiration_dt.strftime('%A, %B %d, %Y')}!")
 
 
 @bot.command()
