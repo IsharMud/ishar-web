@@ -1,0 +1,30 @@
+{% extends "layout.html.j2" %}
+{% block meta_title %}Season {{ season.season_id }}{% endblock meta_title %}
+{% block meta_description %}Information about season {{ season.season_id }} of Ishar MUD{% endblock %}
+{% block meta_url %}{{ url_for('leaderboard', _external=True) }}{% endblock meta_url %}">
+{% block title %}Season {{ season.season_id }}{% endblock %}
+{% block header %}Season {{ season.season_id }}{% endblock %}
+{%- block scripts %}
+{%- endblock %}
+{%- block content %}
+    {%- if season is defined %}
+        <p>
+            You want to know about <strong>Season {{ season.season_id }}</strong>, huh?
+        </p>
+        <ul>
+            <li>Season {{ season.season_id }} started:</li>
+            <li>
+                <ul>
+                    <li>...{{ season.effective }} ago on {{ season.effective_dt.strftime('%A, %B %d, %Y @ %H:%M:%S') }}!</li>
+                    <li>...and ends in {{ season.expires }} on {{ season.expiration_dt.strftime('%A, %B %d, %Y @ %H:%M:%S') }}!</li>
+                </ul>
+            </li>
+        {%- if current_user is defined and current_user.seasonal_earned is defined %}
+            <li>...also, you have earned <strong>{{ current_user.seasonal_earned }} essence</strong> so far this season!</li>
+            <li>...and you can spend your essence <a href="{{ url_for('essence_shop') }} ">at the shop</a></li>
+            <li>...or by typing <code>shop</code> in-game, once logged in!</li>
+        {%- endif %}
+        </ul>
+    {%- endif %}
+{% include('back.html.j2') %}
+{%- endblock %}

@@ -64,11 +64,11 @@
             </span>
         {%- endif %}
     {%- endif %}
-    {%- if season is defined %}
-            <span id="season" title="Season {{ season.season_id }} ends in {{ season.expires_in }} on {{ season.expiration_dt.strftime('%A, %B %d, %Y @ %H:%M:%S') }}">
-                <strong>Season {{ season.season_id }}</strong>
+    {%- if current_season is defined %}
+            <span id="season" title="Season {{ current_season.season_id }} ends in {{ current_season.expires }} on {{ current_season.expiration_dt.strftime('%A, %B %d, %Y @ %H:%M:%S') }}">
+                <strong>Season {{ current_season.season_id }}</strong>
                 <br>
-                ends in {{ season.expires_in }} on {{ season.expiration_dt.strftime('%A, %B %d, %Y')}}.
+                ends in {{ current_season.expires }} on {{ current_season.expiration_dt.strftime('%A, %B %d, %Y')}}
             </span>
     {%- endif %}
 {%- endblock footer %}

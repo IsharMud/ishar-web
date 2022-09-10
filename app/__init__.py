@@ -13,9 +13,7 @@ from nacl.exceptions import BadSignatureError
 import os
 
 
-"""
-Start/configure Flask app
-"""
+# Start/configure Flask app
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
 
@@ -38,11 +36,11 @@ def load_user(account_id):
     return models.Account.query.get(str(account_id))
 
 
-# Add context processors, like season info is on the layout Jinja2 template (therefore on every page)
+# Add context processors, like current season info is on the layout Jinja2 template (therefore on every page)
 @app.context_processor
 def injects():
     return dict(
-        season  = models.Season.query.filter_by(is_active = 1).first()
+        current_season  = models.Season.query.filter_by(is_active = 1).first()
     )
 
 
@@ -124,6 +122,25 @@ def login():
 
     # Show the log in form
     return render_template('login.html.j2', login_form=login_form), 401
+
+
+"""
+/season
+A page with information about the current season
+"""
+@app.route('/season/<int:season_id>', methods=['GET'])
+@app.route('/season', methods=['GET'])
+def season(season_id=None):
+    season  = None
+    if season_id:
+        season  = models.Season.query.filter_by(season_id = season_id).first()
+
+    if not season:
+        season  = models.Season.query.filter_by(is_active = 1).first()
+
+    seasons = models.Season.query.order_by(-models.Season.season_id).all()
+
+    return render_template('season.html.j2', season=season, seasons=seasons)
 
 
 """

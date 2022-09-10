@@ -404,6 +404,16 @@ class Season(Base):
     def effective_dt(self):
         return datetime.datetime.fromtimestamp(self.effective_date)
 
+    # Hybrid property returning Python time delta since season started
+    @hybrid_property
+    def effective_delta(self):
+        return datetime.datetime.now() - self.effective_dt
+
+    # Hybrid property returning stringified approximate Python timedelta since season started
+    @hybrid_property
+    def effective(self):
+        return delta.stringify(self.effective_delta)
+
     # Hybrid property returning Python datetime object of the season end
     @hybrid_property
     def expiration_dt(self):
@@ -416,11 +426,11 @@ class Season(Base):
 
     # Hybrid property returning stringified approximate Python timedelta until season ends
     @hybrid_property
-    def expires_in(self):
+    def expires(self):
         return delta.stringify(self.expiration_delta)
 
     def __repr__(self):
-        return f'<Season> ID {self.season_id} / Active: {self.is_active} / Effective: "{self.effective_dt}" / Expiration: "{self.expires_in}" ("{self.expiration_dt}")'
+        return f'<Season> ID {self.season_id} / Active: {self.is_active} / Effective: "{self.effective}" ("{self.effective_dt}") - Delta: "{self.effective_delta}") / Expire: "{self.expires}" ("{self.expiration_dt}") - Delta: "{self.expiration_delta}"'
 
 
 """
