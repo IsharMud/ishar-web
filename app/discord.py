@@ -33,10 +33,7 @@ async def challenges(ctx: interactions.CommandContext):
     for challenge in challenges:
         if challenge.winner_desc != '':
             completed = completed + 1
-    what    = 'challenge'
-    if completed != 1:
-        what += 's'
-    await ctx.send(f"There are currently {completed} completed {what}, of {count} total challenges.")
+    await ctx.send(f"Challenges: {completed} completed / {challenges} total")
 
 
 @bot.command()
