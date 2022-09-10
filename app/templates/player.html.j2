@@ -231,7 +231,7 @@
                         on {{ player.logout_dt.strftime('%A, %B %d, %Y') }}.
                     </span>
                     <br>
-                    <span title="Played For: {{ player.online_time }}">
+                    <span title="Played For: {{ player.online_delta | string }}">
                         {{ player_gender | title }} {{ player_phrase_owns }} played for {{ player.online_time }}.
                     </span>
                 </p>
