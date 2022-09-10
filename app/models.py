@@ -3,6 +3,7 @@ import hmac
 import levels
 from database import Base, db_session
 import datetime
+import delta
 from flask import url_for
 from flask_login import UserMixin
 from sqlalchemy import Column, ForeignKey, String, TIMESTAMP, Text
@@ -416,7 +417,7 @@ class Season(Base):
     # Hybrid property returning stringified approximate Python timedelta until season ends
     @hybrid_property
     def expires_in(self):
-        return str(self.expiration_delta).split(',')[0]
+        return delta.stringify(self.expiration_delta)
 
     def __repr__(self):
         return f'<Season> ID {self.season_id} / Active: {self.is_active} / Effective: "{self.effective_dt}" / Expiration: "{self.expires_in}" ("{self.expiration_dt}")'
@@ -549,7 +550,7 @@ class Player(Base):
     # Hybrid property returning stringified approximate Python timedelta since player birth
     @hybrid_property
     def birth_ago(self):
-        return str(self.birth_delta).split(',')[0]
+        return delta.stringify(self.birth_delta)
 
     # Hybrid property returning Python datetime of last player log on
     @hybrid_property
@@ -564,7 +565,7 @@ class Player(Base):
     # Hybrid property returning stringified approximate Python timedelta since player log on
     @hybrid_property
     def logon_ago(self):
-        return str(self.logon_delta).split(',')[0]
+        return delta.stringify(self.logon_delta)
 
     # Hybrid property returning Python datetime of last player log out
     @hybrid_property
@@ -579,7 +580,7 @@ class Player(Base):
     # Hybrid property returning stringified approximate Python timedelta since player log out
     @hybrid_property
     def logout_ago(self):
-        return str(self.logout_delta).split(',')[0]
+        return delta.stringify(self.logout_delta)
 
     # Hybrid property returning Python timedelta of player total online time
     @hybrid_property
@@ -588,6 +589,11 @@ class Player(Base):
             return datetime.timedelta(seconds=self.online)
         except:
             return datetime.timedelta(seconds=0)
+
+    # Hybrid property returning stringified approximate Python timedelta of player total online time
+    @hybrid_property
+    def online_time(self):
+        return delta.stringify(self.online_delta)
 
     # Hybrid property returning boolean whether player is a "God"
     @hybrid_property
