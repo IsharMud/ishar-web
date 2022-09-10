@@ -38,13 +38,6 @@
                     </ul>
     {%- endif %}
 {%- endmacro -%}
-{%- macro display_essence(essence) -%}
-    {%- if essence > 0 %}
-        <strong>{{ essence }} essence</strong>
-    {%- else %}
-        <span class="flash-error">{{ essence }} essence</span>
-    {%- endif %}
-{%- endmacro -%}
 {%- block scripts %}
         <script>
 

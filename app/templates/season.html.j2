@@ -5,26 +5,60 @@
 {% block title %}Season {{ season.season_id }}{% endblock %}
 {% block header %}Season {{ season.season_id }}{% endblock %}
 {%- block scripts %}
+        <script>
+            var expire  = new Date({{ season.expiration_date }}*1000).getTime();
+            var x   = setInterval(function() {
+                var now     = new Date().getTime();
+                var t       = expire - now;
+                var days    = Math.floor(t / (1000 * 60 * 60 * 24));
+                var hours   = Math.floor((t%(1000 * 60 * 60 * 24))/(1000 * 60 * 60));
+                var minutes = Math.floor((t % (1000 * 60 * 60)) / (1000 * 60));
+                var seconds = Math.floor((t % (1000 * 60)) / 1000);
+                document.getElementById("season-countdown").innerHTML   = days + "d " + hours + "h " + minutes + "m " + seconds + "s ";
+                if (t < 0) {
+                    clearInterval(x);
+                    document.getElementById("season-countdown").innerHTML = "Expired";
+                }
+            }, 1000);
+        </script>
 {%- endblock %}
 {%- block content %}
     {%- if season is defined %}
-        <p>
-            You want to know about <strong>Season {{ season.season_id }}</strong>, huh?
-        </p>
-        <ul>
-            <li>Season {{ season.season_id }} started:</li>
-            <li>
-                <ul>
-                    <li>...{{ season.effective }} ago on {{ season.effective_dt.strftime('%A, %B %d, %Y @ %H:%M:%S') }}!</li>
-                    <li>...and ends in {{ season.expires }} on {{ season.expiration_dt.strftime('%A, %B %d, %Y @ %H:%M:%S') }}!</li>
-                </ul>
-            </li>
-        {%- if current_user is defined and current_user.seasonal_earned is defined %}
-            <li>...also, you have earned <strong>{{ current_user.seasonal_earned }} essence</strong> so far this season!</li>
-            <li>...and you can spend your essence <a href="{{ url_for('essence_shop') }} ">at the shop</a></li>
-            <li>...or by typing <code>shop</code> in-game, once logged in!</li>
+            <p>
+               This is some information about <strong>season {{ season.season_id }}</strong> of Ishar MUD.
+            </p>
+            <ul>
+                <li>
+                    Season {{ season.season_id }} began {{ season.effective }} ago
+                    on {{ season.effective_dt.strftime('%A, %B %d, %Y @ %H:%M:%S') }}
+                </li>
+                <li>
+                    Season {{ season.season_id }} ends in {{ season.expires }}
+                    on {{ season.expiration_dt.strftime('%A, %B %d, %Y @ %H:%M:%S') }}
+                </li>
+                <li>
+                    <span id="season-countdown"></span>
+                </li>
+            </ul>
+            <h4>
+                Essence
+            </h4>
+            <p>
+                "Essence" are the rewards points earned for your account during the season!
+                Essence is preserved across seasons, and can be spent at any time
+                <a href="{{ url_for('essence_shop') }} ">at the Essence Shop</a>
+                or by typing <code>shop</code> in-game, once logged in.
+            </p>
+        {%- if current_user is defined and current_user.seasonal_points is defined and current_user.seasonal_earned is defined %}
+            <ul class="essence-shop">
+                <li title="You currently have: {{ current_user.seasonal_points }} essence.">
+                    You currently have: {{ display_essence(current_user.seasonal_points) }}.
+                </li>
+                <li title="This season, you have earned: {{ current_user.seasonal_earned }} essence.">
+                    This season, you have earned: {{ display_essence(current_user.seasonal_earned) }}.
+                </li>
+            </ul>
         {%- endif %}
-        </ul>
     {%- endif %}
 {% include('back.html.j2') %}
 {%- endblock %}

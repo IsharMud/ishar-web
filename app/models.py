@@ -71,7 +71,6 @@ class Account(Base, UserMixin):
                 s = player.seasonal_earned
         return s
 
-
     # Method to allow users to change their account password
     def change_password(self, new_password):
         try:
@@ -191,8 +190,23 @@ class Challenge(Base):
     mob_name        = Column(String(30), nullable=False)
     is_active       = Column(TINYINT(1), nullable=False, server_default=FetchedValue())
 
+    # Hybrid property returning boolean whether challenge is completed
+    @hybrid_property
+    def is_completed(self):
+        if self.winner_desc != '':
+            return True
+        return False
+
+    # Hybrid property returning reward tier string
+    @hybrid_property
+    def reward_tier(self):
+        tiers   = { 9: 'SS', 8: 'SS', 7: 'SS', 6: 'S', 5: 'A', 4: 'B', 3: 'C', 2: 'D', 1: 'F' }
+        if self.adj_tier in tiers.keys():
+            return tiers[self.adj_tier]
+        return self.adj_tier
+
     def __repr__(self):
-        return f'<Challenge> "{self.mob_name}" ({self.challenge_id}) / Active: {self.is_active} / Winner: "{self.winner_desc}"'
+        return f'<Challenge> "{self.mob_name}" ({self.challenge_id}) / Active: {self.is_active} / Reward: "{self.reward_tier}" ({self.adj_tier}) / winner_desc: "{self.winner_desc}"'
 
 
 """
