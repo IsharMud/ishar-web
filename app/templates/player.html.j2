@@ -140,14 +140,7 @@
                 <ol>
                 {%- for quest in player.quests | selectattr('value', 'equalto', 1) %}
                     <li title="{{ quest.quest.display_name }}">
-                    {{ quest.quest.display_name }}
-                    {%- if quest.quest.completion_message is defined and quest.quest.completion_message != '' %}
-                        <ul>
-                            <li title="{{ quest.quest.completion_message }}">
-                                {{ quest.quest.completion_message }}
-                            </li>
-                        </ul>
-                    {%- endif %}
+                        {{ quest.quest.display_name }}
                     </li>
                 {%- endfor %}
                 </ol>
