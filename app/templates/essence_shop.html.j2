@@ -92,26 +92,30 @@
                 This is where you can find information on the current season
                 as well as view your accumulated essence balance and spend it to upgrade your account.
             </p>
-            <ul id="essence-balance">
-                <li title="You currently have: {{ current_user.seasonal_points }} essence.">
-                    You currently have: {{ display_essence(current_user.seasonal_points) }}.
-                </li>
-                <li title="This season, you have earned: {{ current_user.seasonal_earned }} essence.">
-                    This season, you have earned: {{ display_essence(current_user.seasonal_earned) }}.
-                </li>
-            </ul>
+            <div id="essence-balance">
+                <ul>
+                    <li title="You currently have: {{ current_user.seasonal_points }} essence.">
+                        You currently have: {{ display_essence(current_user.seasonal_points) }}.
+                    </li>
+                    <li title="This season, you have earned: {{ current_user.seasonal_earned }} essence.">
+                        This season, you have earned: {{ display_essence(current_user.seasonal_earned) }}.
+                    </li>
+                </ul>
+            </div>
             <h4 title="Upgrades">
                 Upgrades
             </h4>
     {%- if current_user.upgrades is defined and current_user.upgrades is iterable and current_user.upgrades | selectattr('amount', '>', 0) | list | length > 0 %}
-            <ul id="essence-upgrades">
+            <div id="essence-upgrades">
+                <ul>
         {%- for upgraded in current_user.upgrades | selectattr('amount', '>', 0) %}
-                <li title="{{ upgraded.upgrade.name }}{% if upgraded.amount > 1 %} (x{{ upgraded.amount}}){% endif %}">
-                    {{ upgraded.upgrade.name }}
-                    {%- if upgraded.amount > 1 %} (x{{ upgraded.amount}}){% endif %}
-                </li>
+                    <li title="{{ upgraded.upgrade.name }}{% if upgraded.amount > 1 %} (x{{ upgraded.amount}}){% endif %}">
+                        {{ upgraded.upgrade.name }}
+                        {%- if upgraded.amount > 1 %} (x{{ upgraded.amount}}){% endif %}
+                    </li>
         {%- endfor %}
-            </ul>
+                </ul>
+            </div>
     {%- else %}
             <ul>
                 <li>

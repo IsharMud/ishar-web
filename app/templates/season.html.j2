@@ -4,39 +4,6 @@
 {% block meta_url %}{{ url_for('leaderboard', _external=True) }}{% endblock meta_url %}">
 {% block title %}Season {{ season.season_id }}{% endblock %}
 {% block header %}Season {{ season.season_id }}{% endblock %}
-{%- block scripts %}
-        <script>
-
-            // Set the date of the season expiration, that we are counting down to
-            var seasonExpiration    = new Date({{ season.expiration_date }}*1000).getTime();
-
-            // Update the count down every 1 second
-            var x = setInterval(function() {
-
-                // Get current date and time
-                var now = new Date().getTime();
-
-                // Find the distance between now and the end of the season
-                var distance = countDownDate - now;
-
-                // Time calculations for days, hours, minutes and seconds
-                var days    = Math.floor(distance / (1000 * 60 * 60 * 24));
-                var hours   = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                var seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-                // Display the result in the element with id="season-countdown"
-                document.getElementById("season-countdown").innerHTML = days + "d " + hours + "h "
-                    + minutes + "m " + seconds + "s ";
-
-                // If the count down is finished, write some text
-                if (distance < 0) {
-                    clearInterval(x);
-                    document.getElementById("season-countdown").innerHTML = "Expired";
-                }
-            }, 1000);
-        </script>
-{%- endblock %}
 {%- block content %}
     {%- if season is defined %}
             <p>
@@ -51,7 +18,6 @@
                     Season {{ season.season_id }} ends in {{ season.expires }}
                     on {{ season.expiration_dt.strftime('%A, %B %d, %Y @ %H:%M:%S') }}
                 </li>
-                <span id="season-countdown"></span>
             </ul>
             <h4>
                 Essence
@@ -63,14 +29,16 @@
                 or by typing <code>shop</code> in-game, once logged in.
             </p>
         {%- if current_user is defined and current_user.seasonal_points is defined and current_user.seasonal_earned is defined %}
-            <ul id="essence-balance">
-                <li title="You currently have: {{ current_user.seasonal_points }} essence.">
-                    You currently have: {{ display_essence(current_user.seasonal_points) }}.
-                </li>
-                <li title="This season, you have earned: {{ current_user.seasonal_earned }} essence.">
-                    This season, you have earned: {{ display_essence(current_user.seasonal_earned) }}.
-                </li>
-            </ul>
+            <div id="essence-balance">
+                <ul>
+                    <li title="You currently have: {{ current_user.seasonal_points }} essence.">
+                        You currently have: {{ display_essence(current_user.seasonal_points) }}.
+                    </li>
+                    <li title="This season, you have earned: {{ current_user.seasonal_earned }} essence.">
+                        This season, you have earned: {{ display_essence(current_user.seasonal_earned) }}.
+                    </li>
+                </ul>
+            </div>
         {%- endif %}
     {%- endif %}
 {% include('back.html.j2') %}

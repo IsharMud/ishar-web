@@ -1,9 +1,9 @@
 {%- macro display_essence(essence) -%}
-    {%- if essence > 0 %}
+    {%- if essence > 0 -%}
         <strong>{{ essence }} essence</strong>
-    {%- else %}
+    {%- else -%}
         <span class="flash-error">{{ essence }} essence</span>
-    {%- endif %}
+    {%- endif -%}
 {%- endmacro -%}
 <!DOCTYPE html>
 <html lang="en">
@@ -23,6 +23,7 @@
         <title>{% block title %}Welcome{% endblock %} - Ishar MUD</title>
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
         <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+        <script async src="{{ url_for('season_expire_js') }}"></script>
     {%- endblock head %}
     {%- block scripts %}
     {%- endblock scripts %}
@@ -75,7 +76,7 @@
             <span id="season" title="Season {{ current_season.season_id }} ends in {{ current_season.expires }} on {{ current_season.expiration_dt.strftime('%A, %B %d, %Y @ %H:%M:%S') }}">
                 <a href="{{ url_for('season') }}">Season {{ current_season.season_id }}</a>
                 <br>
-                ends in {{ current_season.expires }} on {{ current_season.expiration_dt.strftime('%A, %B %d, %Y')}}
+                ends in <span id="season-countdown">{{ current_season.expires }}</span> on {{ current_season.expiration_dt.strftime('%A, %B %d, %Y')}}
             </span>
     {%- endif %}
 {%- endblock footer %}

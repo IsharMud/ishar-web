@@ -1,6 +1,6 @@
 from database import db_session
 import datetime
-from flask import Flask, flash, redirect, render_template, request, send_from_directory, session, url_for
+from flask import Flask, flash, make_response, redirect, render_template, request, send_from_directory, session, url_for
 from flask_login import current_user, fresh_login_required, login_required, login_user, logout_user, LoginManager
 import forms
 import glob
@@ -8,8 +8,6 @@ import ipaddress
 import json
 import levels
 import models
-from nacl.signing import VerifyKey
-from nacl.exceptions import BadSignatureError
 import os
 
 
@@ -40,7 +38,7 @@ def load_user(account_id):
 @app.context_processor
 def injects():
     return dict(
-        current_season  = models.Season.query.filter_by(is_active = 1).first()
+        current_season  = current_season()
     )
 
 
@@ -69,6 +67,16 @@ def page_not_found(message):
 def internal_server_error(message):
     return error(title='Internal Server Error', message=message, code=500)
 
+# Method to return the current season
+def current_season():
+    return models.Season.query.filter_by(is_active = 1).order_by(-models.Season.season_id).first()
+
+# Season expiration count-down timer JavaScript
+@app.route('/seasonExpire.js', methods=['GET'])
+def season_expire_js():
+    r = make_response(render_template('seasonExpire.js.j2'))
+    r.headers['Content-Type'] = 'text/javascript'
+    return r
 
 # Main welcome page/index
 @app.route('/welcome', methods=['GET'])
@@ -128,19 +136,9 @@ def login():
 /season
 A page with information about the current season
 """
-@app.route('/season/<int:season_id>', methods=['GET'])
 @app.route('/season', methods=['GET'])
-def season(season_id=None):
-    season  = None
-    if season_id:
-        season  = models.Season.query.filter_by(season_id = season_id).first()
-
-    if not season:
-        season  = models.Season.query.filter_by(is_active = 1).first()
-
-    seasons = models.Season.query.order_by(-models.Season.season_id).all()
-
-    return render_template('season.html.j2', season=season, seasons=seasons)
+def season(season=current_season()):
+    return render_template('season.html.j2', season=season)
 
 
 """
@@ -491,36 +489,6 @@ Redirect /discord GET requests to the Discord invitation link
 @app.route('/discord', methods=['GET'])
 def discord(discord_invite_link = 'https://discord.gg/VBmMXUpeve'):
     return redirect(discord_invite_link)
-
-
-"""
-/discord POST
-Handle /discord POST requests from Discord
-"""
-@app.route('/discord', methods=['POST'])
-def discord_post():
-
-    # Return 400 for non-JSON requests
-    if not request.is_json:
-        return bad_request(message='Sorry, but this end-point only communicates via JSON.')
-
-    discord_public_key  = '01514d2b04f3bf5c279142c0bf6089a7e16dc67f67b9a7eb29c9768eb20f28d1'
-
-    verify_key  = VerifyKey(bytes.fromhex(discord_public_key))
-    signature   = request.headers['X-Signature-Ed25519']
-    timestamp   = request.headers['X-Signature-Timestamp']
-    body        = request.data.decode('utf-8')
-
-    try:
-        verify_key.verify(f'{timestamp}{body}'.encode(), bytes.fromhex(signature))
-    except BadSignatureError as e:
-        print(e)
-        return not_authorized(message='Sorry, but there appears to have been an invalid key.')
-
-    if request.json['type'] == 1:
-        data    = { 'type': 1 }
-
-    return render_template('discord.html.j2', data=json.dumps(data))
 
 
 """

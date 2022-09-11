@@ -1,11 +1,10 @@
-import crypt
-import hmac
-import levels
 from database import Base, db_session
 import datetime
 import delta
 from flask import url_for
 from flask_login import UserMixin
+import levels
+from passlib.hash import md5_crypt
 from sqlalchemy import Column, ForeignKey, String, TIMESTAMP, Text
 from sqlalchemy.dialects.mysql import INTEGER, MEDIUMINT, SMALLINT, TINYINT
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -74,7 +73,7 @@ class Account(Base, UserMixin):
     # Method to allow users to change their account password
     def change_password(self, new_password):
         try:
-            self.password = crypt.crypt(new_password, crypt.mksalt(method=crypt.METHOD_MD5))
+            self.password = md5_crypt.hash(new_password)
             db_session.commit()
             return True
         except Exception as e:
@@ -83,14 +82,14 @@ class Account(Base, UserMixin):
 
     # Method to check an account password
     def check_password(self, password):
-        return hmac.compare_digest(crypt.crypt(password, self.password), self.password)
+        return md5_crypt.verify(password, self.password)
 
     # Method to create a new account
     def create_account(self):
         try:
 
             # Hash the password and add the account to the database
-            self.password = crypt.crypt(self.password, crypt.mksalt(method=crypt.METHOD_MD5))
+            self.password = md5_crypt.hash(self.password)
             db_session.add(self)
             db_session.commit()
 
