@@ -48,7 +48,7 @@
                 or by typing <code>shop</code> in-game, once logged in.
             </p>
         {%- if current_user is defined and current_user.seasonal_points is defined and current_user.seasonal_earned is defined %}
-            <ul class="essence-shop">
+            <ul id="essence-balance">
                 <li title="You currently have: {{ current_user.seasonal_points }} essence.">
                     You currently have: {{ display_essence(current_user.seasonal_points) }}.
                 </li>

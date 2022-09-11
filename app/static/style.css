@@ -4,7 +4,7 @@ body {
     font-family:        'Open Sans', sans-serif;
 }
 
-a, .connect, #created strong, h1, h2, h3, h4, th, .essence-shop strong, #essence-shop-form label {
+a, .connect, #created strong, h1, h2, h3, h4, th, #essence-balance strong, .essence-shop strong, #essence-shop-form label {
     color:              #fa7;
 }
 
@@ -38,13 +38,13 @@ pre {
     padding-left:       2.5em;
 }
 
-#player-remort-upgrades ol, #player-details ul, #player-quests ol, #player-time ul, .essence-shop {
+#player-remort-upgrades ol, #player-details ul, #player-quests ol, #player-time ul, #essence-balance {
     column-count:       2;
     column-gap:         5em;
     column-rule:        0.1em dotted #fa7;
 }
 
-#player-details ul ul, .essence-shop ul, .essence-shop ul ul {
+#player-details ul ul, #essence-balance ul {
     column-count:       initial;
 }
 
