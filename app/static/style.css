@@ -48,15 +48,13 @@ pre {
 
 #essence-balance,
 #essence-upgrades,
-#mud-client-list,
-#player-remort-upgrades ol,
-#player-details ul,
-#player-quests ol,
-#player-time ul,
+#player-remort-upgrades,
+#player-details,
+#player-quests,
+#player-time,
 #world-list
 {
     column-count:       2;
-    column-gap:         5em;
     column-rule:        0.1em dotted #fa7;
 }
 

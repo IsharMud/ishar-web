@@ -71,15 +71,15 @@
             </form>
     {%- endif %}
     {%- if player %}
-            <div id="player-details">
-                <h3 title="{{ player.player_title | striptags | safe }}">
-                    {{ player.player_title }}
-                </h3>
+            <h3 title="{{ player.player_title | striptags | safe }}">
+                {{ player.player_title }}
+            </h3>
         {%- if player.description is defined and player.description | replace('\n', ' ') | striptags | trim | safe  != '' %}
-                <p id="player-description">
-                    {{ player.description | replace('\n', ' ') | striptags | trim | safe }}
-                </p>
+            <p id="player-description">
+                {{ player.description | replace('\n', ' ') | striptags | trim | safe }}
+            </p>
         {%- endif %}
+            <div id="player-details">
         {%- if not player.is_immortal %}
                 <ul>
                     <li title="Name: {{ player.name | title | safe }} / Class: {{ player.class.class_name | title | safe }} / Race: {{ player.race.race_name | replace('_', '-') | title | safe }}">
@@ -133,10 +133,10 @@
                 </ul>
             </div>
             {%- if player.player_type != 'Dead' and player.quests | selectattr('value', 'equalto', 1) | list | length > 0 %}
+            <h3 title="Quests">
+                Quests
+            </h3>
             <div id="player-quests">
-                <h3 title="Quests">
-                    Quests
-                </h3>
                 <ol>
                 {%- for quest in player.quests | selectattr('value', 'equalto', 1) %}
                     <li title="{{ quest.quest.display_name }}">
@@ -147,10 +147,10 @@
             </div>
             {%- endif %}
             {%- if player.remort_upgrades is defined and player.remort_upgrades is iterable and player.remort_upgrades | selectattr('value', '>', 0) | list | length > 0 %}
+            <h3 title="Remort Upgrades">
+                Remort Upgrades
+            </h3>
             <div id="player-remort-upgrades">
-                <h3 title="Remort Upgrades">
-                    Remort Upgrades
-                </h3>
                 <ol>
                 {%- for remort_upgrade in player.remort_upgrades | selectattr('value', '>', 0) %}
                     <li title="{{ remort_upgrade.remort_upgrade.name | replace('_', ' ') | title | safe }} {%- if remort_upgrade.value > 1 %} (x{{ remort_upgrade.value }}){% endif %}">
@@ -164,10 +164,10 @@
             </div>
             {%- endif %}
             {%- if player.true_level >= 5 or player.online >= 3600 or player.player_type == 'Dead' %}
+            <h3 title="Statistics">
+                Statistics
+            </h3>
             <div id="player-statistics">
-                <h3 title="Statistics">
-                    Statistics
-                </h3>
                 <table>
                 {%- if player.class.class_name == 'WARRIOR' %}
                     {%- set stat_order  = [ 'Strength', 'Agility', 'Endurance', 'Willpower', 'Focus', 'Perception' ] %}
@@ -207,10 +207,10 @@
                 </table>
             </div>
             {%- endif %}
+            <h3 title="Time">
+                Time
+            </h3>
             <div id="player-time">
-                <h3 title="Time">
-                    Time
-                </h3>
                 <ul>
                     <li title="Birth: {{ player.birth_ago }} ({{ player.birth_dt.strftime('%A, %B %d, %Y @ %H:%M:%S') }})">
                         {{ player_gender | title }} was born {{ player.birth_ago }} ago,
