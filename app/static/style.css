@@ -38,13 +38,13 @@ pre {
     padding-left:       2.5em;
 }
 
-#player-remort-upgrades ol, #player-details ul, #player-quests ol, #player-time ul {
+#player-remort-upgrades ol, #player-details ul, #player-quests ol, #player-time ul, .essence-shop {
     column-count:       2;
     column-gap:         5em;
     column-rule:        0.1em dotted #fa7;
 }
 
-#player-details ul ul {
+#player-details ul ul, .essence-shop ul, .essence-shop ul ul {
     column-count:       initial;
 }
 
