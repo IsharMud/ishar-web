@@ -39,7 +39,7 @@
                     never forget the sense of wonder and discovery to be experienced here.
                 </p>
         {%- if areas and areas is iterable and areas | length > 0 %}
-                <ul>
+                <ul id="world-list">
             {%- for area in areas %}
                     <li title="Area: {{ area }}">
                         <a href="{{ url_for('world', area=area) }}">

@@ -38,7 +38,7 @@ pre {
     padding-left:       2.5em;
 }
 
-#player-remort-upgrades ol, #player-details ul, #player-quests ol, #player-time ul, #essence-balance {
+#player-remort-upgrades ol, #player-details ul, #player-quests ol, #player-time ul, #essence-balance, #world-list {
     column-count:       2;
     column-gap:         5em;
     column-rule:        0.1em dotted #fa7;
