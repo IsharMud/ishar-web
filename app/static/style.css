@@ -44,8 +44,8 @@ pre {
     column-rule:        0.1em dotted #fa7;
 }
 
-#player-quests ul {
-    column-count:       initial;   
+#player-quests ul, #player-details ul ul {
+    column-count:       initial;
 }
 
 th, td, #content li {
