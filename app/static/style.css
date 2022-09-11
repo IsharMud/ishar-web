@@ -38,6 +38,16 @@ pre {
     padding-left:       2.5em;
 }
 
+#player-remort-upgrades ol, #player-details ul, #player-quests ol, #player-time ul {
+    column-count:       2;
+    column-gap:         5em;
+    column-rule:        0.1em dotted #fa7;
+}
+
+#player-quests ul {
+    column-count:       initial;   
+}
+
 th, td, #content li {
     padding:            0.25em;
 }

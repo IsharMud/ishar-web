@@ -139,16 +139,16 @@
                 </h3>
                 <ol>
                 {%- for quest in player.quests | selectattr('value', 'equalto', 1) %}
-                <li title="{{ quest.quest.display_name }}">
+                    <li title="{{ quest.quest.display_name }}">
                     {{ quest.quest.display_name }}
                     {%- if quest.quest.completion_message is defined and quest.quest.completion_message != '' %}
-                    <ul>
-                        <li title="{{ quest.quest.completion_message }}">
-                            {{ quest.quest.completion_message }}
-                        </li>
-                    </ul>
+                        <ul>
+                            <li title="{{ quest.quest.completion_message }}">
+                                {{ quest.quest.completion_message }}
+                            </li>
+                        </ul>
                     {%- endif %}
-                </li>
+                    </li>
                 {%- endfor %}
                 </ol>
             </div>
@@ -215,26 +215,26 @@
             </div>
             {%- endif %}
             <div id="player-time">
-                <p>
-                    <span title="Birth: {{ player.birth_ago }} ({{ player.birth_dt.strftime('%A, %B %d, %Y @ %H:%M:%S') }})">
+                <h3 title="Time">
+                    Time
+                </h3>
+                <ul>
+                    <li title="Birth: {{ player.birth_ago }} ({{ player.birth_dt.strftime('%A, %B %d, %Y @ %H:%M:%S') }})">
                         {{ player_gender | title }} was born {{ player.birth_ago }} ago,
                         on {{ player.birth_dt.strftime('%A, %B %d, %Y') }}.
-                    </span>
-                    <br>
-                    <span title="Logged On: {{ player.logon_ago }} ago ({{ player.logon_dt.strftime('%A, %B %d, %Y @ %H:%M:%S') }})">
+                    </li>
+                    <li title="Logged On: {{ player.logon_ago }} ago ({{ player.logon_dt.strftime('%A, %B %d, %Y @ %H:%M:%S') }})">
                         {{ player_gender | title }} last logged in {{ player.logon_ago }} ago,
                         on {{ player.logon_dt.strftime('%A, %B %d, %Y') }}.
-                    </span>
-                    <br>
-                    <span title="Logged Out: {{ player.logout_ago }} ago ({{ player.logout_dt.strftime('%A, %B %d, %Y @ %H:%M:%S') }})">
+                    </li>
+                    <li title="Logged Out: {{ player.logout_ago }} ago ({{ player.logout_dt.strftime('%A, %B %d, %Y @ %H:%M:%S') }})">
                         {{ player_gender | title }} last logged out {{ player.logout_ago}} ago,
                         on {{ player.logout_dt.strftime('%A, %B %d, %Y') }}.
-                    </span>
-                    <br>
-                    <span title="Played For: {{ player.online_delta | string }}">
+                    </li>
+                    <li title="Played For: {{ player.online_delta | string }}">
                         {{ player_gender | title }} {{ player_phrase_owns }} played for {{ player.online_time }}.
-                    </span>
-                </p>
+                    </li>
+                </ul>
             </div>
         {%- else %}
             <ul>
