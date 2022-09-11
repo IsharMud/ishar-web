@@ -4,7 +4,15 @@ body {
     font-family:        'Open Sans', sans-serif;
 }
 
-a, .connect, #created strong, h1, h2, h3, h4, th, #essence-balance strong, .essence-shop strong, #essence-shop-form label {
+a,
+.connect,
+#created strong,
+h1, h2, h3, h4,
+th,
+#essence-balance strong,
+.essence-shop strong,
+#essence-shop-form label
+{
     color:              #fa7;
 }
 
@@ -38,19 +46,25 @@ pre {
     padding-left:       2.5em;
 }
 
+#essence-balance,
+#essence-upgrades,
+#mud-client-list,
 #player-remort-upgrades ol,
 #player-details ul,
 #player-quests ol,
 #player-time ul,
-#essence-balance,
-#essence-upgrades,
-#world-list {
+#world-list
+{
     column-count:       2;
     column-gap:         5em;
     column-rule:        0.1em dotted #fa7;
 }
 
-#player-details ul ul, #essence-balance ul {
+#essence-balance ul,
+#mud-client-list ul,
+#mud-client-list ul ul,
+#player-details ul ul
+{
     column-count:       initial;
 }
 
@@ -66,7 +80,8 @@ input[type="reset"], input[type="submit"],
 #news-add-form,
 #change-password-form,
 #login-form,
-#new-account-form {
+#new-account-form
+{
     background-color:   #000;
     color:              #fa7;
     font-size:          1.25em;
@@ -86,7 +101,13 @@ input[type="reset"], input[type="submit"],
     font-style:         italic;
 }
 
-.god-player, .forger-player, .eternal-player, .artisan-player, .immortal-player, .consort-player {
+.god-player,
+.forger-player,
+.eternal-player,
+.artisan-player,
+.immortal-player,
+.consort-player
+{
     color:              #00b7eb;
 }
 
@@ -102,11 +123,18 @@ input[type="reset"], input[type="submit"],
     content:            ' 😇';
 }
 
-.forger-player::after, .eternal-player::after, .artisan-player::after, .immortal-player::after, .consort-player::after {
+.forger-player::after,
+.eternal-player::after,
+.artisan-player::after,
+.immortal-player::after,
+.consort-player::after
+{
     content:            ' 👼';
 }
 
-.dead-player, .survival-player {
+.dead-player,
+.survival-player
+{
     color:              #fa8072;
 }
 
@@ -209,7 +237,11 @@ nav li {
     padding-left:       3vw;
 }
 
-.faq-answers, .faq-nested, .mud-clients, .essence-upgrades {
+.faq-answers,
+.faq-nested,
+.mud-clients,
+.essence-upgrades
+{
     list-style:         none;
 }
 
