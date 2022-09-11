@@ -14,10 +14,10 @@
                 var hours   = Math.floor((t%(1000 * 60 * 60 * 24))/(1000 * 60 * 60));
                 var minutes = Math.floor((t % (1000 * 60 * 60)) / (1000 * 60));
                 var seconds = Math.floor((t % (1000 * 60)) / 1000);
-                document.getElementById("season-countdown").innerHTML   = days + "d " + hours + "h " + minutes + "m " + seconds + "s ";
+                document.getElementById("season-countdown").innerHTML   = "<li>" + days + "d " + hours + "h " + minutes + "m " + seconds + "s</li>";
                 if (t < 0) {
                     clearInterval(x);
-                    document.getElementById("season-countdown").innerHTML = "Expired";
+                    document.getElementById("season-countdown").innerHTML = "<li>Expired</li>";
                 }
             }, 1000);
         </script>
@@ -36,9 +36,7 @@
                     Season {{ season.season_id }} ends in {{ season.expires }}
                     on {{ season.expiration_dt.strftime('%A, %B %d, %Y @ %H:%M:%S') }}
                 </li>
-                <li>
-                    <span id="season-countdown"></span>
-                </li>
+                <span id="season-countdown"></span>
             </ul>
             <h4>
                 Essence
