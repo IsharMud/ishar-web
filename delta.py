@@ -22,7 +22,9 @@ def stringify(delta=None):
 
         # Less than a month
         elif delta.days < 30:
-            r = { 'value': delta.days, 'interval': 'day'}
+            hours   = int(delta.seconds // (60 * 60))
+            minutes = int((delta.seconds // 60) % 60)
+            return f"{delta.days}d {hours}h {minutes}m"
 
         # At least a month
         elif delta.days >= 30:
