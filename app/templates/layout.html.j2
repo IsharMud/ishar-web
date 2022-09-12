@@ -66,7 +66,7 @@
     {%- if current_user is defined and current_user.is_authenticated %}
         {%- if current_user.created_at is defined and current_user.created_at != '' %}
             <span id="created" title="Account Created: {{ current_user.created_at.strftime('%A, %B %d, %Y @ %H:%M:%S') }}">
-                <strong>Account Created</strong>
+                <a href="{{ url_for('account') }}">Account Created</a>
                 <br>
                 {{ current_user.created_at.strftime('%A, %B %d, %Y') }}
             </span>

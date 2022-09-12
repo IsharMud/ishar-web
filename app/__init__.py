@@ -361,6 +361,16 @@ def wizlist():
 
 
 """
+/account
+Allow users to view information about, and manage their, accounts
+"""
+@app.route('/account', methods=['GET'])
+@login_required
+def account():
+    return render_template('account.html.j2')
+
+
+"""
 /admin
 Administration portal to allow for Gods to make news posts
 """

@@ -39,15 +39,17 @@
                     never forget the sense of wonder and discovery to be experienced here.
                 </p>
         {%- if areas and areas is iterable and areas | length > 0 %}
-                <ul id="world-list">
+                <div id="world-list">
+                    <ul>
             {%- for area in areas %}
-                    <li title="Area: {{ area }}">
-                        <a href="{{ url_for('world', area=area) }}">
-                            {{ area }}
-                        </a>
-                    </li>
+                        <li title="Area: {{ area }}">
+                            <a href="{{ url_for('world', area=area) }}">
+                                {{ area }}
+                            </a>
+                        </li>
             {%- endfor %}
-                  </ul>
+                    </ul>
+                </div>
         {%- endif %}
     {%- endif %}
     {%- include('back.html.j2') %}

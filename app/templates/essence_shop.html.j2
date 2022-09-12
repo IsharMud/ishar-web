@@ -92,6 +92,9 @@
                 This is where you can find information on the current season
                 as well as view your accumulated essence balance and spend it to upgrade your account.
             </p>
+            <h4>
+                Essence
+            </h4>
             <div id="essence-balance">
                 <ul>
                     <li title="You currently have: {{ current_user.seasonal_points }} essence.">
@@ -118,7 +121,7 @@
             </div>
     {%- else %}
             <ul>
-                <li>
+                <li title="You have not purchased any upgrades.">
                     <i>You have not purchased any upgrades.</i>
                 </li>
             </ul>
