@@ -10,11 +10,11 @@
                This is some information about <strong>season {{ season.season_id }}</strong> of Ishar MUD.
             </p>
             <ul>
-                <li>
+                <li title="Season {{ season.season_id }} began {{ season.effective }} ago on {{ season.effective_dt.strftime('%A, %B %d, %Y @ %H:%M:%S') }}">
                     Season {{ season.season_id }} began {{ season.effective }} ago
                     on {{ season.effective_dt.strftime('%A, %B %d, %Y @ %H:%M:%S') }}
                 </li>
-                <li>
+                <li title="Season {{ season.season_id }} ends in {{ season.expires }} on {{ season.expiration_dt.strftime('%A, %B %d, %Y @ %H:%M:%S') }}">
                     Season {{ season.season_id }} ends in {{ season.expires }}
                     on {{ season.expiration_dt.strftime('%A, %B %d, %Y @ %H:%M:%S') }}
                 </li>
