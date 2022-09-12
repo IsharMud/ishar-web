@@ -1,7 +1,7 @@
 {% extends "layout.html.j2" %}
 {% block meta_title %}Account ({{ current_user.account_name }}){% endblock meta_title %}
 {% block meta_description %}View information about, and manage your, Ishar MUD{% endblock%}
-{% block meta_url %}{{ url_for('essence_shop', _external=True) }}{% endblock meta_url %}">
+{% block meta_url %}{{ url_for('account', _external=True) }}{% endblock meta_url %}">
 {% block title %}Account ({{ current_user.account_name }}){% endblock %}
 {% block header %}Account ({{ current_user.account_name }}){% endblock %}
 {%- block content %}
