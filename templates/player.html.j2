@@ -79,8 +79,8 @@
                 {{ player.description | replace('\n', ' ') | striptags | trim | safe }}
             </p>
         {%- endif %}
-            <div id="player-details">
         {%- if not player.is_immortal %}
+            <div id="player-details">
                 <ul>
                     <li title="Name: {{ player.name | title | safe }} / Class: {{ player.class.class_name | title | safe }} / Race: {{ player.race.race_name | replace('_', '-') | title | safe }}">
                         {{ player.name | title | safe }} {{ player_phrase }} a {{ player.class.class_display }} of {{ player.race.race_name | replace('_', '-') | lower | safe }} origin.
