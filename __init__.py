@@ -4,10 +4,12 @@ from flask import Flask, flash, make_response, redirect, render_template, reques
 from flask_login import current_user, fresh_login_required, login_required, login_user, logout_user, LoginManager
 import forms
 import glob
+import helptab
 import ipaddress
 import json
 import levels
 import models
+import mud_clients
 import os
 
 
@@ -38,7 +40,7 @@ def load_user(account_id):
 @app.context_processor
 def injects():
     return dict(
-        current_season  = current_season()
+        current_season  = get_current_season()
     )
 
 
@@ -68,7 +70,7 @@ def internal_server_error(message):
     return error(title='Internal Server Error', message=message, code=500)
 
 # Method to return the current season
-def current_season():
+def get_current_season():
     return models.Season.query.filter_by(is_active = 1).order_by(-models.Season.season_id).first()
 
 # Season expiration count-down timer JavaScript
@@ -137,7 +139,7 @@ def login():
 A page with information about the current season
 """
 @app.route('/season', methods=['GET'])
-def season(season=current_season()):
+def season(season=get_current_season()):
     return render_template('season.html.j2', season=season)
 
 
@@ -478,9 +480,8 @@ Page showing a dynamic list of various MUD clients for different platforms
 """
 @app.route('/clients', methods=['GET'])
 @app.route('/mud_clients', methods=['GET'])
-def mud_clients():
-    import mud_clients
-    return render_template('mud_clients.html.j2', mud_clients=mud_clients.mud_clients)
+def mud_clients(mud_clients=mud_clients.mud_clients):
+    return render_template('mud_clients.html.j2', mud_clients=mud_clients)
 
 
 """
@@ -519,14 +520,12 @@ A few frequently asked questions, stored in a dictionary of lists, to be display
 @app.route('/faqs')
 @app.route('/faq')
 def faq():
-
+    import faq
 #    TODO: Include the count and list of playable classes and races dynamically
 #    player_classes  = models.PlayerClass.query.filter(models.PlayerClass.class_description != None).all()
 #    player_races    = models.PlayerRace.query.filter(models.PlayerRace.race_description != None).all()
 #    print(f'FAQ PLAYER Classes: {player_classes}')
 #    print(f'FAQ PLAYER Races: {player_races}')
-
-    import faq
     return render_template('faq.html.j2', faqs=faq.faqs)
 
 
@@ -560,11 +559,10 @@ def support():
 @app.route('/areas', methods=['GET'])
 @app.route('/world/<string:area>', methods=['GET'])
 @app.route('/world', methods=['GET'])
-def world(helptab_file='/home/ishar/ishar-mud/lib/Misc/helptab', area=None):
+def world(area=None):
 
     # Get all of the areas from the helptab file
-    import helptab
-    areas   = helptab.get_help_areas(helptab_file=helptab_file)
+    areas   = helptab.get_help_areas()
     code    = 200
 
     # Try to find an area based on any user input
