@@ -27,7 +27,7 @@
                     {{ news_post.body | safe }}
                 </p>
                 <p class="news-created" title="Posted: {{ news_post.created_at.strftime('%A, %B %d, %Y @ %H:%M:%S') }}">
-                    {{ news_post.created_at.strftime('%A, %B %d, %Yls') }}
+                    {{ news_post.created_at.strftime('%A, %B %d, %Y') }}
                 </p>
                 <p class="news-creator" title="Posted by: {{ news_post.account.account_name | safe | title }}">
                     ~ {{ news_post.account.account_name | safe | title }}
