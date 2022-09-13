@@ -2,7 +2,8 @@
 Flask forms classes
 """
 from flask_wtf import FlaskForm
-from wtforms import BooleanField, EmailField, PasswordField, RadioField, StringField, SubmitField, TextAreaField, validators
+from wtforms import BooleanField, EmailField, PasswordField, RadioField, \
+    StringField, SubmitField, TextAreaField, validators
 from wtforms.validators import DataRequired, Email, EqualTo
 from wtforms_validators import Alpha
 

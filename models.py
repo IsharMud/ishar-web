@@ -629,7 +629,10 @@ class Player(Base):
 
     @hybrid_property
     def online_time(self):
-        """Hybrid property returning stringified approximate Python timedelta of player total online time"""
+        """
+        Hybrid property returning stringified approximate
+            Python timedelta of player total online time
+        """
         return delta.stringify(self.online_delta)
 
     @hybrid_property
@@ -648,7 +651,10 @@ class Player(Base):
 
     @hybrid_property
     def is_survival(self):
-        """Hybrid property returning boolean whether player is a survival ("PERM_DEATH") character"""
+        """
+        Hybrid property returning boolean whether
+            player is a survival ("PERM_DEATH") character
+        """
         return self.get_flag('PERM_DEATH')
 
     @hybrid_property

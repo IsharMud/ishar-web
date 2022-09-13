@@ -9,8 +9,10 @@ import ipaddress
 import json
 import os
 from random import choices
-from flask import Flask, flash, redirect, render_template, request, send_from_directory, session, url_for
-from flask_login import current_user, fresh_login_required, login_required, login_user, logout_user, LoginManager
+from flask import Flask, flash, redirect, render_template, request, \
+    send_from_directory, session, url_for
+from flask_login import current_user, fresh_login_required, login_required, \
+    login_user, logout_user, LoginManager
 from database import db_session
 import forms
 import helptab

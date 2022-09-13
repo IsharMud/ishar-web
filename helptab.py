@@ -1,14 +1,16 @@
 """
-Internal function to scrape "areas" from game helptab file
-
-The "areas" are each listed in the "helptab" file on lines starting with "32 Area " ...
-...followed by descriptions until the character "#" on a single line itself
+Read/process the "helptab" file used by the MUD itself in-game
 """
 import helptab_secret
 def get_help_areas(helptab_file=helptab_secret.filename):
+    """
+    Method to scrape "areas" from game helptab file
+    The "areas" are each listed in the "helptab" file on lines starting with "32 Area "
+        followed by descriptions until the character "#" on a single line itself
+    """
 
     # Get game "helptab" file path/name, and open it
-    helptab_fh = open(helptab_file, 'r')
+    helptab_fh = open(helptab_file, mode='r', encoding='utf8')
 
     # Prepare an empty "areas" dictionary
     areas = {}
@@ -21,15 +23,16 @@ def get_help_areas(helptab_file=helptab_secret.filename):
         stripped = line.strip()
 
         # Stop line (#)
-        if keep == True and stripped == '#':
+        if keep and stripped == '#':
             keep = False
 
         # Do not include "other levels" info (%%)
-        if keep == True and stripped.startswith('%% '):
+        if keep and stripped.startswith('%% '):
             keep = False
 
-        # Append the current chunk to our areas dictionary, under the key of whatever started with "32 Area " last
-        if keep == True and not stripped.startswith('32 Area '):
+        # Append the current chunk to our areas dictionary,
+        #   under the key of whatever started with "32 Area " last
+        if keep and not stripped.startswith('32 Area '):
             areas[area_name] += line
 
         # Start new dictionary keys of chunks at lines beginning with "32 Area "
