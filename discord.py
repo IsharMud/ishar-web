@@ -35,31 +35,4 @@ async def challenges(ctx: interactions.CommandContext):
             completed = completed + 1
     await ctx.send(f"Challenges: {completed} completed / {count} total")
 
-
-@bot.command()
-async def who(ctx: interactions.CommandContext):
-    """Show the current in-game list of users online"""
-    who = models.Player.query.filter(
-        models.Player.logon >= models.Player.logout
-    ).order_by(
-        -models.Player.true_level,
-        -models.Player.remorts,
-        models.Player.name
-    ).all()
-    print(who)
-    count   = len(who)
-    if count > 0:
-        names   = [p.name for p in who]
-        print('names: ', names)
-        online  = ', '.join(names)
-        print('online: ', online)
-        what    = 'player'
-        if count != 1:
-            what += 's'
-        msg = f"There are currently {count} {what} online: {online}"
-    else:
-        msg = 'Unfortunately, nobody is online right now.'
-
-    await ctx.send(msg)
-
 bot.start()

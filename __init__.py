@@ -330,24 +330,6 @@ def leaderboard(limit=10):
 
 
 """
-/who (or /online, or /users)
-Show online users according to the logon and logout times within the database
-"""
-@app.route('/online', methods=['GET'])
-@app.route('/users', methods=['GET'])
-@app.route('/who', methods=['GET'])
-def who():
-    who = models.Player.query.filter(
-            models.Player.logon >= models.Player.logout
-        ).order_by(
-            -models.Player.true_level,
-            -models.Player.remorts,
-            models.Player.name
-        ).all()
-    return render_template('who.html.j2', who=who)
-
-
-"""
 /wizlist (or /wiz_list)
 Wizlist showing Immortals through Gods
 """
