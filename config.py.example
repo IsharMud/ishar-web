@@ -1,9 +1,10 @@
-TESTING     = True
-DEBUG       = True
-FLASK_ENV   = 'staging'
+"""Flask config"""
+TESTING     = False
+DEBUG       = False
+FLASK_ENV   = 'production'
 SECRET_KEY  = 'SECRET'
 
-REMEMBER_COOKIE_DOMAIN      = '127.0.0.1'
+REMEMBER_COOKIE_DOMAIN      = '.isharmud.com'
 REMEMBER_COOKIE_DURATION    = 604800
 #REMEMBER_COOKIE_HTTPONLY    = True
 #REMEMBER_COOKIE_SECURE      = True

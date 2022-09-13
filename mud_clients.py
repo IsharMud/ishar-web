@@ -1,6 +1,4 @@
-"""
-MUD Clients
-"""
+"""MUD Clients"""
 clients = {
 
     'Cross-Platform' : {
