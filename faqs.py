@@ -7,12 +7,14 @@ faqs = {
     'Is Ishar MUD free?': [
         '<strong>Yes!</strong>',
         'While you are more than welcome to ' \
-        '<a href="' + url_for('support') + '" title="Support">offer support</a>, Ishar MUD is free to use, play, and enjoy.'
+        '<a href="' + url_for('support') + '" title="Support">offer support</a>, ' \
+        'Ishar MUD is free to use, play, and enjoy.'
     ],
 
     'Are there player classes?': [
         '<strong>Yes!</strong>',
-        'There are <strong>five (5)</strong> classes available to choose from, when you create a player character:',
+        'There are <strong>five (5)</strong> classes available to choose from, ' \
+        'when you create a player character:',
         [
             'Warrior -- For those who seek to master the art of war.',
             'Rogue -- Sly and cunning, skilled in all things sublime.',
@@ -24,7 +26,8 @@ faqs = {
 
     'Are there player races?': [
         '<strong>Yes!</strong>',
-        'There are <strong>six (6)</strong> races available to choose from, when you create a player character:',
+        'There are <strong>six (6)</strong> races available to choose from, ' \
+        'when you create a player character:',
         [
             'Human -- The dominant race around Mareldja, the home city.',
             'Elf -- Tall, pointy-eared types.',
@@ -43,15 +46,17 @@ faqs = {
     'What about my equipment when I log out?': [
         "When you sign out or log off, your character's equipment, gear, " \
         'and inventory is simply <strong>preserved until the end of the season</strong>.',
-        'The season currently changes every four (4) months, but you can find more information about seasons at the ' \
-        '<a href="' + url_for('latest_patch') + '" title="latest patch" target="_blank">latest patch</a>.'
+        'The season currently changes every four (4) months, ' \
+        'but you can find more information about seasons at the ' \
+        '<a href="' + url_for('latest_patch') + '" title="latest patch" target="_blank">' \
+        'latest patch</a>.'
     ],
 
     'Is death permanent?': [
         '<strong>You can choose</strong> whether to play in "Survival" (aka "perma-death") ' \
         'or "Classic" mode, each time you create a player character.',
-        'While survival mode gains experience faster, classic mode subtracts experience upon death, ' \
-        "but allows you to retrieve your character's corpse."
+        'While survival mode gains experience faster, classic mode subtracts experience ' \
+        "upon death, but allows you to retrieve your character's corpse."
     ],
 
     'Can I have multiple characters or multi-play?': [
@@ -62,7 +67,8 @@ faqs = {
 
     'Is there player-killing (PK) or player-versus-player (PvP) combat?': [
         '<strong>Yes and no...</strong>',
-        "While player-versus-player combat (or PK'ing) is possible, it is very rare, and not a requirement of the game."
+        "While player-versus-player combat (or PK'ing) is possible, " \
+        'it is very rare, and not a requirement of the game.'
     ],
 
 #    'What is your next question?': [

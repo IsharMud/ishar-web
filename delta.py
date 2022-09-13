@@ -1,4 +1,6 @@
+"""Time delta handling"""
 def stringify(delta=None):
+    """Stringify time deltas"""
     try:
 
         # Less than a day
@@ -12,13 +14,13 @@ def stringify(delta=None):
                 if minutes >= 60:
                     hours = int(minutes / 60)
                     if hours >= 1:
-                        r = { 'value': hours, 'interval': 'hour'}
+                        ret = { 'value': hours, 'interval': 'hour'}
                     else:
-                        r = { 'value': minutes, 'interval': 'minute'}
+                        ret = { 'value': minutes, 'interval': 'minute'}
                 else:
-                    r = { 'value': minutes, 'interval': 'minute'}
+                    ret = { 'value': minutes, 'interval': 'minute'}
             else:
-                r = { 'value': delta.seconds, 'interval': 'second'}
+                ret = { 'value': delta.seconds, 'interval': 'second'}
 
         # Less than a month
         elif delta.days < 30:
@@ -37,20 +39,20 @@ def stringify(delta=None):
                 # A decade or more
                 if years >= 10:
                     decades = int(years / 10)
-                    r = { 'value': decades, 'interval': 'decade'}
+                    ret = { 'value': decades, 'interval': 'decade'}
                 else:
-                    r = { 'value': years, 'interval': 'year'}
+                    ret = { 'value': years, 'interval': 'year'}
             else:
-                r = { 'value': months, 'interval': 'month'}
+                ret = { 'value': months, 'interval': 'month'}
         else:
             return str(delta)
 
         # Append "s", if not singular
-        if r and r['value'] != 1:
-            r['interval'] += 's'
+        if ret and ret['value'] != 1:
+            ret['interval'] += 's'
 
-        return f"{r['value']} {r['interval']}"
+        return f"{ret['value']} {ret['interval']}"
 
-    except Exception as e:
-        print(e)
+    except Exception as err:
+        print(err)
         return str(delta)

@@ -27,7 +27,7 @@
             </p>
             <p>
                 Essence is preserved across seasons, and can be spent at any time
-                <a href="{{ url_for('essence_shop') }} ">at the Essence Shop</a>
+                <a href="{{ url_for('shop') }} ">at the Shop</a>
                 or by typing <code>shop</code> in-game, once logged in.
             </p>
         {%- if current_user is defined and current_user.seasonal_points is defined and current_user.seasonal_earned is defined %}

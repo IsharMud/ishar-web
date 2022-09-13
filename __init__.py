@@ -1,16 +1,22 @@
-from database import db_session
+"""
+ishar_web
+https://isharmud.com/
+https://github.com/IsharMud/ishar-web
+"""
 import datetime
-from flask import Flask, flash, make_response, redirect, render_template, request, send_from_directory, session, url_for
-from flask_login import current_user, fresh_login_required, login_required, login_user, logout_user, LoginManager
-import forms
 import glob
-import helptab
 import ipaddress
 import json
+import os
+from random import choices
+from flask import Flask, flash, redirect, render_template, request, send_from_directory, session, url_for
+from flask_login import current_user, fresh_login_required, login_required, login_user, logout_user, LoginManager
+from database import db_session
+import forms
+import helptab
 import levels
 import models
 import mud_clients
-import os
 
 
 # Start/configure Flask app
@@ -30,94 +36,99 @@ login_manager.needs_refresh_message_category    = 'error'
 login_manager.refresh_view                      = 'login'
 login_manager.session_protection                = 'strong'
 
-# Get users for flask-login via Account object from the database
 @login_manager.user_loader
 def load_user(account_id):
+    """Get users for flask-login via Account object from the database"""
     return models.Account.query.get(str(account_id))
 
 
-# Add context processors, like current season info is on the layout Jinja2 template (therefore on every page)
 @app.context_processor
 def injects():
+    """
+    Add context processors
+    such as season info on every page via layout Jinja2 template
+    """
     return dict(
         current_season  = get_current_season()
     )
 
 
-# Error template
 def error(title='Unknown Error', message='Sorry, but there was an unknown error.', code=500):
+    """Error template"""
     return render_template('error.html.j2', title=title, message=message), code
 
-# Error codes to template above
+
 @app.errorhandler(400)
 def bad_request(message):
+    """Error codes to template above"""
     return error(title='Bad Request', message=message, code=400)
 
 @app.errorhandler(401)
 def not_authorized(message):
+    """Error codes to template above"""
     return error(title='Not Authorized', message=message, code=401)
 
 @app.errorhandler(403)
 def forbidden(message):
+    """Error codes to template above"""
     return error(title='Forbidden', message=message, code=403)
 
 @app.errorhandler(404)
 def page_not_found(message):
+    """Error codes to template above"""
     return error(title='Page Not Found', message=message, code=404)
 
 @app.errorhandler(500)
 def internal_server_error(message):
+    """Error codes to template above"""
     return error(title='Internal Server Error', message=message, code=500)
 
-# Method to return the current season
+
 def get_current_season():
+    """Method to return the current season"""
     return models.Season.query.filter_by(is_active = 1).order_by(-models.Season.season_id).first()
 
-# Season expiration count-down timer JavaScript
-@app.route('/seasonExpire.js', methods=['GET'])
-def season_expire_js():
-    r = make_response(render_template('seasonExpire.js.j2'))
-    r.headers['Content-Type'] = 'text/javascript'
-    return r
 
-# Main welcome page/index
 @app.route('/welcome', methods=['GET'])
 @app.route('/', methods=['GET'])
 def welcome(num_posts=1):
-    # Find the most recent news posts to show on the main page
+    """
+    Main welcome page/index
+    includes the most recent news posts to show on the main page
+    """
     return render_template('welcome.html.j2',
         news    = models.News.query.order_by(-models.News.created_at).limit(num_posts).all()
     )
 
 
-"""
-/history (or /background)
-History page mostly copied from the old website
-"""
 @app.route('/background', methods=['GET'])
 @app.route('/history', methods=['GET'])
 def history():
+    """
+    /history (or /background)
+    History page mostly copied from the old website
+    """
     return render_template('history.html.j2')
 
 
-"""
-/login
-Log-in form page and processing
-"""
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    """
+    /login
+    Log-in form page and processing
+    """
 
     # Get log in form object and check if submitted
     login_form = forms.LoginForm()
     if login_form.validate_on_submit():
 
         # Find the user by e-mail address from the log in form
-        account = models.Account.query.filter_by(email = login_form.email.data).first()
+        find = models.Account.query.filter_by(email = login_form.email.data).first()
 
         # If we find the user email and match the password, it is a successful log in
-        if account != None and account.check_password(login_form.password.data):
+        if find is not None and find.check_password(login_form.password.data):
             flash('You have logged in!', 'success')
-            login_user(account, remember=login_form.remember.data)
+            login_user(find, remember=login_form.remember.data)
 
         # There must have been invalid credentials
         else:
@@ -127,81 +138,87 @@ def login():
     if current_user.is_authenticated:
         try:
             return redirect(session['next'])
-        except:
+        except Exception as err:
+            print(err)
             return redirect(url_for('portal'))
 
     # Show the log in form
     return render_template('login.html.j2', login_form=login_form), 401
 
 
-"""
-/season
-A page with information about the current season
-"""
 @app.route('/season', methods=['GET'])
-def season(season=get_current_season()):
-    return render_template('season.html.j2', season=season)
+def season():
+    """
+    /season
+    A page with information about the current season
+    """
+    return render_template('season.html.j2', season=get_current_season())
 
 
-"""
-/shop
-Allow logged in users to view and spend their essence/seasonal points
-"""
 @app.route('/shop', methods=['GET', 'POST'])
 @login_required
-def essence_shop():
+def shop():
+    """
+    /shop
+    Allow logged in users to view and spend their essence/seasonal points
+    """
 
-    # Get essence shop form object, fill upgrade choices, and check if submitted
-    essence_shop_form                   = forms.EssenceShopForm()
-    essence_shop_form.upgrade.choices   = [(ug.upgrade.id, ug.upgrade.name) for ug in current_user.upgrades]
-    if essence_shop_form.validate_on_submit():
+    # Get shop form object, fill upgrade choices, and check if submitted
+    shop_form = forms.ShopForm()
+    opt = [(ug.upgrade.id, ug.upgrade.name) for ug in current_user.upgrades]
+    shop_form.upgrade.choices   = opt
+    if shop_form.validate_on_submit():
 
         # Find the upgrade the user chose
-        for u in current_user.upgrades:
-            if u.account_upgrades_id == essence_shop_form.upgrade.data:
-                chosen          = u
-                chosen.upgrade  = u.upgrade
+        for upgrade in current_user.upgrades:
+            if upgrade.account_upgrades_id == shop_form.upgrade.data:
+                chosen          = upgrade
+                chosen.upgrade  = upgrade.upgrade
 
         # Process the chosen upgrade
         if chosen and chosen.upgrade:
 
             # Account Upgrade ID 4 ("Improved Starting Gear") is a work-in-progress
             if chosen.upgrade.id == 4:
-                flash(f'Sorry, but this upgrade ({chosen.upgrade.name}) is still a work in progress.', 'error')
+                flash(f'Sorry, but this upgrade ({chosen.upgrade.name}) is ' \
+                    'still a work in progress.', 'error')
 
             # Do not let users upgrade beyond max
             elif chosen.amount >= chosen.upgrade.max_value:
-                flash(f'Sorry, but you already have the max value in that upgrade ({chosen.upgrade.name}).', 'error')
+                flash('Sorry, but you already have the max value in that' \
+                    f'upgrade ({chosen.upgrade.name}).', 'error')
 
             # Do not let users spend essence they do not have
             elif current_user.seasonal_points < chosen.upgrade.cost:
-                flash(f'Sorry, but you do not have enough essence to acquire that upgrade ({chosen.upgrade.name}).', 'error')
+                flash('Sorry, but you do not have enough essence to acquire' \
+                   f'that upgrade ({chosen.upgrade.name}).', 'error')
 
             # Proceed with processing valid essence upgrade purchase requests
             else:
                 if chosen.do_upgrade():
-                    flash(f'You have been charged {chosen.upgrade.cost} essence (for {chosen.upgrade.name}).', 'success')
+                    flash(f'You have been charged {chosen.upgrade.cost} essence' \
+                        f'(for {chosen.upgrade.name}).', 'success')
                 else:
                     flash('Sorry, but please try again!', 'error')
 
     # Show the seasonal upgrade essence shop form
-    return render_template('essence_shop.html.j2', essence_shop_form=essence_shop_form)
+    return render_template('shop.html.j2', shop_form=shop_form)
 
 
-"""
-/password
-Allow logged in users to change their passwords
-"""
 @app.route('/password', methods=['GET', 'POST'])
 @fresh_login_required
 def change_password():
+    """
+    /password
+    Allow logged in users to change their passwords
+    """
 
     # Get change password form object and check if submitted
     change_password_form = forms.ChangePasswordForm()
     if change_password_form.validate_on_submit():
 
-        # Proceed if the user is authenticated and entered their current password correctly
-        if current_user.is_authenticated and current_user.check_password(change_password_form.current_password.data):
+        # Proceed if the user entered their current password correctly
+        if current_user.check_password(change_password_form.current_password.data):
             if current_user.change_password(change_password_form.confirm_new_password.data):
                 flash('Your password has been changed!', 'success')
             else:
@@ -215,21 +232,27 @@ def change_password():
     return render_template('change_password.html.j2', change_password_form=change_password_form)
 
 
-"""
-/player
-Player page to show detailed information about a player, and player name search form
-"""
 @app.route('/player/<string:player_name>', methods=['GET', 'POST'])
 @login_required
 def show_player(player_name=None):
+    """
+    /player
+    Player page to show detailed information about a player,
+        and player name search form
+    """
 
     # Get player search form object and check if submitted
     player  = None
     player_search_form  = forms.PlayerSearchForm()
     if player_search_form.validate_on_submit():
 
-        # Perform a MySQL "LIKE" search query on the name, followed by a wildcard (%) to try to find the player
-        player  = models.Player.query.filter(models.Player.name.like(player_search_form.player_search_name.data + '%')).first()
+        # Perform a MySQL "LIKE" search query on the name,
+        # followed by a wildcard (%) to try to find the player
+        player  = models.Player.query.filter(
+                    models.Player.name.like(
+                        player_search_form.player_search_name.data + '%'
+                    )
+                ).first()
         if player:
             who = player.name
         else:
@@ -254,39 +277,41 @@ def show_player(player_name=None):
                             ), code
 
 
-"""
-/portal
-Main portal page for welcoming users as they log in, so that they can view their player(s) information
-"""
 @app.route('/portal', methods=['GET'])
 @login_required
 def portal():
+    """
+    /portal
+    Main portal page for welcoming users as they log in,
+        so that they can view their player(s) information
+    """
     return render_template('portal.html.j2')
 
 
-"""
-/challenges
-Sort and list active challenges, along with their tiers and winners, from the database
-"""
 @app.route('/challenges', methods=['GET'])
 def challenges():
-    challenges  = models.Challenge.query.filter_by(is_active = 1).order_by(
-                    models.Challenge.adj_level,
-                    models.Challenge.adj_people
-                ).all()
-    return render_template('challenges.html.j2', challenges=challenges)
+    """
+    /challenges
+    Sort and list active challenges,
+        along with their tiers and winners, from the database
+    """
+    find    = models.Challenge.query.filter_by(is_active = 1).order_by(
+                models.Challenge.adj_level,
+                models.Challenge.adj_people
+            ).all()
+    return render_template('challenges.html.j2', challenges=find)
 
 
-"""
-/leaderboard (or /leader_board)
-# Sort and list the best players, with a limit option, and boolean to include/exclude dead characters
-"""
 @app.route('/leader_board/<int:limit>', methods=['GET'])
 @app.route('/leaderboard/<int:limit>', methods=['GET'])
 @app.route('/leader_board', methods=['GET'])
 @app.route('/leaderboard', methods=['GET'])
 def leaderboard(limit=10):
-
+    """
+    /leaderboard (or /leader_board)
+    Sort and list the best players, with a limit option,
+        and boolean to include/exclude dead characters
+    """
     limit_choices   = [5, 10, 25, 50, 100]
     if limit not in limit_choices or limit > max(limit_choices):
         return redirect(url_for('leaderboard', limit=10))
@@ -329,13 +354,13 @@ def leaderboard(limit=10):
                             )
 
 
-"""
-/wizlist (or /wiz_list)
-Wizlist showing Immortals through Gods
-"""
 @app.route('/wiz_list', methods=['GET'])
 @app.route('/wizlist', methods=['GET'])
 def wizlist():
+    """
+    /wizlist (or /wiz_list)
+    Wizlist showing Immortals through Gods
+    """
     immortals = models.Player.query.filter(
                     models.Player.true_level    >= levels.immortal_level
                 ).order_by(
@@ -344,23 +369,24 @@ def wizlist():
     return render_template('wizlist.html.j2', immortals=immortals)
 
 
-"""
-/account
-Allow users to view information about, and manage their, accounts
-"""
 @app.route('/account', methods=['GET'])
 @login_required
 def account():
+    """
+    /account
+    Allow users to view information about,
+        and manage, their accounts
+    """
     return render_template('account.html.j2')
 
 
-"""
-/admin
-Administration portal to allow for Gods to make news posts
-"""
 @app.route('/admin', methods=['GET', 'POST'])
 @fresh_login_required
 def admin_portal():
+    """
+    /admin
+    Administration portal to allow Gods to make news posts
+    """
 
     # Redirect non-administrators to the main page
     if not current_user.is_god:
@@ -379,7 +405,8 @@ def admin_portal():
             body            = news_add_form.body.data
         )
 
-        # Create the news post in the database, get the news post ID, and check that it worked
+        # Create the news post in the database,
+        #   get the news post ID, and check that it worked
         created_id      = new_news.add_news()
         created_post    = models.News.query.filter_by(news_id = created_id).first()
         if created_post:
@@ -391,23 +418,24 @@ def admin_portal():
     return render_template('admin.html.j2', news_add_form=news_add_form)
 
 
-"""
-/logout
-Allow users to log out
-"""
 @app.route('/logout', methods=['GET'])
 def logout():
+    """
+    /logout
+    Allow users to log out
+    """
     logout_user()
     flash('You have logged out!', 'success')
     return redirect(url_for('welcome'))
 
 
-"""
-/new
-New account creation page, which allows users to submit a form to create a new account
-"""
 @app.route('/new', methods=['GET', 'POST'])
 def new_account():
+    """
+    /new
+    New account creation page,
+        which allows users to submit a form to create a new account
+    """
 
     # Get new account form object and check if submitted
     new_account_form    = forms.NewAccountForm()
@@ -420,14 +448,16 @@ def new_account():
             return redirect(url_for('login'))
 
         # Check that the account name is not in use
-        find_name   = models.Account.query.filter_by(account_name = new_account_form.account_name.data).first()
+        find_name   = models.Account.query.filter_by(
+                        account_name    = new_account_form.account_name.data
+                    ).first()
         if find_name:
             flash('Sorry, but that account name is already being used!', 'error')
 
         # Otherwise, proceed in trying to create the new account
         else:
             ip_address  = ipaddress.ip_address(request.remote_addr)
-            new_account = models.Account(
+            new_uacct   = models.Account(
                 email           = new_account_form.email.data,
                 password        = new_account_form.confirm_password.data,
                 create_isp      = ip_address,
@@ -440,8 +470,10 @@ def new_account():
             )
 
             # Create the account in the database, confirm the account ID, and log the user in
-            created_id      = new_account.create_account()
-            created_account = models.Account.query.filter_by(account_id = created_id).first()
+            created_id      = new_uacct.create_account()
+            created_account = models.Account.query.filter_by(
+                                account_id  = created_id
+                            ).first()
             if created_account:
                 login_user(created_account)
                 flash('Your account has been created!', 'success')
@@ -456,92 +488,97 @@ def new_account():
     return render_template('new.html.j2', new_account_form=new_account_form)
 
 
-"""
-/clients (or /mud_clients)
-Page showing a dynamic list of various MUD clients for different platforms
-"""
-@app.route('/clients', methods=['GET'])
 @app.route('/mud_clients', methods=['GET'])
-def mud_clients(mud_clients=mud_clients.mud_clients):
-    return render_template('mud_clients.html.j2', mud_clients=mud_clients)
+@app.route('/clients', methods=['GET'])
+def clients():
+    """
+    /clients (or /mud_clients)
+    Page showing a dynamic list of various MUD clients for different platforms
+    """
+    return render_template('clients.html.j2', clients=mud_clients.clients)
 
 
-"""
-/connect
-Redirect /connect to mudslinger.net web client
-"""
 @app.route('/connect', methods=['GET'])
-def connect(mudslinger_app_link = 'https://mudslinger.net/play/?host=isharmud.com&port=23'):
-    return redirect(mudslinger_app_link)
+def connect():
+    """
+    /connect GET
+    Redirect /connect GET requests to mudslinger.net web client
+    """
+    return redirect('https://mudslinger.net/play/?host=isharmud.com&port=23')
 
 
-"""
-/discord GET
-Redirect /discord GET requests to the Discord invitation link
-"""
 @app.route('/discord', methods=['GET'])
-def discord(discord_invite_link = 'https://discord.gg/VBmMXUpeve'):
-    return redirect(discord_invite_link)
+def discord():
+    """
+    /discord GET
+    Redirect /discord GET requests to the Discord invitation link
+    """
+    return redirect('https://discord.gg/VBmMXUpeve')
 
 
-"""
-/latest_patch (or /patch)
-Redirect to the latest found static patch .pdf file
-"""
 @app.route('/patch', methods=['GET'])
 @app.route('/latest_patch', methods=['GET'])
-def latest_patch(patch_dir='patches'):
-    return redirect('/' + max(glob.glob('static/' + patch_dir + '/*.pdf'), key=os.path.getmtime))
+def latest_patch():
+    """
+    /latest_patch (or /patch)
+    Redirect to the latest found static patch .pdf file
+    """
+    return redirect('/' + max(glob.glob('static/patches/*.pdf'), key=os.path.getmtime))
 
 
-"""
-/faq (or /faqs, or /questions)
-A few frequently asked questions, stored in a dictionary of lists, to be displayed pretty
-"""
 @app.route('/questions')
 @app.route('/faqs')
 @app.route('/faq')
 def faq():
-    import faq
-#    TODO: Include the count and list of playable classes and races dynamically
-#    player_classes  = models.PlayerClass.query.filter(models.PlayerClass.class_description != None).all()
-#    player_races    = models.PlayerRace.query.filter(models.PlayerRace.race_description != None).all()
-#    print(f'FAQ PLAYER Classes: {player_classes}')
-#    print(f'FAQ PLAYER Races: {player_races}')
-    return render_template('faq.html.j2', faqs=faq.faqs)
+    """
+    /faq (or /faqs, or /questions)
+    A few frequently asked questions, stored in a dictionary of lists, to be displayed pretty
+    TODO: Eventually, Include the count and list of playable classes and races dynamically
+    player_classes  = models.PlayerClass.query.filter(
+                        models.PlayerClass.class_description != None
+                    ).all()
+    player_races    = models.PlayerRace.query.filter(
+                        models.PlayerRace.race_description != None
+                    ).all()
+    print(f'FAQ PLAYER Classes: {player_classes}')
+    print(f'FAQ PLAYER Races: {player_races}')
+    """
+    import faqs
+    return render_template('faq.html.j2', faqs=faqs.faqs)
 
 
-"""
-/get_started
-Get Started page partly copied from the old website
-"""
 @app.route('/gettingstarted')
 @app.route('/getting_started')
 @app.route('/getstarted')
 @app.route('/get_started')
 def get_started():
+    """
+    /get_started
+    Get Started page partly copied from the old website
+    """
     return render_template('get_started.html.j2')
 
 
-"""
-/support (or /donate)
-Support page so users can contribute
-"""
 @app.route('/donate', methods=['GET'])
 @app.route('/support', methods=['GET'])
 def support():
+    """
+    /support (or /donate)
+    Support page so users can contribute
+    """
     return render_template('support.html.j2')
 
 
-"""
-/world (or /areas)
-"World" page that uses the game's existing "helptab" file to display information about each in-game area
-"""
 @app.route('/areas/<string:area>', methods=['GET'])
 @app.route('/areas', methods=['GET'])
 @app.route('/world/<string:area>', methods=['GET'])
 @app.route('/world', methods=['GET'])
 def world(area=None):
+    """
+    /world (or /areas)
+    "World" page that uses the game's existing "helptab" file
+        to display information about each in-game area
+    """
 
     # Get all of the areas from the helptab file
     areas   = helptab.get_help_areas()
@@ -559,15 +596,15 @@ def world(area=None):
     return render_template('world.html.j2', areas=areas, area=area), code
 
 
-# Static content
 @app.route('/favicon.ico')
 @app.route('/robots.txt')
 @app.route('/sitemap.xml')
 def static_from_root():
+    """Static content"""
     return send_from_directory(app.static_folder, request.path[1:])
 
 
-# Remove database session at request teardown
 @app.teardown_appcontext
-def shutdown_session(exception=None):
+def shutdown_session(_exception=None):
+    """Remove database session at request teardown"""
     db_session.remove()

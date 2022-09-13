@@ -10,8 +10,8 @@ a,
 h1, h2, h3, h4,
 th,
 #essence-balance strong,
-.essence-shop strong,
-#essence-shop-form label
+.shop strong,
+#shop-form label
 {
     color:              #fa7;
 }

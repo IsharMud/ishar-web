@@ -1,16 +1,13 @@
-import datetime
-import discord_secret
-import interactions
-import models
-
 """
 Discord bot simply runs in a screen session, for now
 So far, there are only three "slash commands" (/):
 /season, /challenges, and /who
 """
+import discord_secret
+import interactions
+import models
 
-guild   = '636680767921061909'
-bot     = interactions.Client(token=discord_secret.token, default_scope=guild)
+bot     = interactions.Client(token=discord_secret.TOKEN, default_scope=discord_secret.GUILD)
 
 @bot.command()
 async def season(ctx: interactions.CommandContext):

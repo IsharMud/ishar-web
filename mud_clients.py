@@ -1,7 +1,7 @@
 """
 MUD Clients
 """
-mud_clients = {
+clients = {
 
     'Cross-Platform' : {
         'Mudlet'        : 'https://www.mudlet.org/'

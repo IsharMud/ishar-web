@@ -2,7 +2,7 @@
 {% extends "layout.html.j2" %}
 {% block meta_title %}MUD Clients{% endblock meta_title %}
 {% block meta_description %}MUD Clients that are freely available to use and try to play Ishar MUD{% endblock %}
-{% block meta_url %}{{ url_for('mud_clients', _external=True) }}{% endblock meta_url %}">
+{% block meta_url %}{{ url_for('clients', _external=True) }}{% endblock meta_url %}">
 {% block title %}MUD Clients{% endblock %}
 {% block header %}MUD Clients{% endblock %}
 {%- block content %}
@@ -12,12 +12,12 @@
                     you might prefer to connect to the game with software designed specifically to help you play a MUD.
                 </p>
 
-                {%- if mud_clients is defined and mud_clients is iterable and mud_clients | length > 0 %}
+                {%- if clients is defined and clients is iterable and clients | length > 0 %}
                 <p>
                     Here are some of the MUD clients that we have heard good things about:
                 </p>
                 <ul id="mud-client-list">
-                    {%- for platform in mud_clients %}
+                    {%- for platform in clients %}
                     <li class="mud-client-platform" title="{{ platform }}">
                         <h3>
                             {{ platform }}
@@ -25,7 +25,7 @@
                     </li>
                     <li class="mud-clients" title="{{ platform }}">
                         <ul>
-                            {%- for name, link in mud_clients[platform].items() %}
+                            {%- for name, link in clients[platform].items() %}
                             <li title="{{ name }}">
                                 <a href="{{ link }}" target="_blank" rel="noopener">
                                     {{ name }}

@@ -7,10 +7,10 @@ from wtforms.validators import DataRequired, Email, EqualTo
 from wtforms_validators import Alpha
 
 
-"""
-Log In form class
-"""
 class LoginForm(FlaskForm):
+    """
+    Log In form class
+    """
     email       = EmailField('E-mail Address', [
                     validators.DataRequired(),
                     validators.Email()
@@ -25,18 +25,18 @@ class LoginForm(FlaskForm):
     submit      = SubmitField('Log In')
 
 
-"""
-Essence Shop form class
-"""
-class EssenceShopForm(FlaskForm):
+class ShopForm(FlaskForm):
+    """
+    Shop form class
+    """
     upgrade     = RadioField('Upgrade', coerce=int)
     submit      = SubmitField('Purchase')
 
 
-"""
-Change Password form class
-"""
 class ChangePasswordForm(FlaskForm):
+    """
+    Change Password form class
+    """
     current_password        = PasswordField('Current Password', [
                                 validators.DataRequired(),
                                 validators.Length(min=4, max=36)
@@ -50,16 +50,17 @@ class ChangePasswordForm(FlaskForm):
     confirm_new_password    = PasswordField('Confirm New Password', [
                                 validators.DataRequired(),
                                 validators.Length(min=4, max=36),
-                                validators.EqualTo('new_password', message='Please make sure that your new passwords match!')
+                                validators.EqualTo('new_password',
+                                    message='Please make sure that your new passwords match!')
                                 ]
                             )
     submit                  = SubmitField('Change Password')
 
 
-"""
-New Account form class
-"""
 class NewAccountForm(FlaskForm):
+    """
+    New Account form class
+    """
     account_name        = StringField('Friendly Name', [
                                 validators.DataRequired(),
                                 validators.Length(min=3, max=25),
@@ -79,16 +80,17 @@ class NewAccountForm(FlaskForm):
     confirm_password    = PasswordField('Confirm Password', [
                                 validators.DataRequired(),
                                 validators.Length(min=4, max=36),
-                                validators.EqualTo('password', message='Please make sure that your passwords match!')
+                                validators.EqualTo('password',
+                                    message='Please make sure that your passwords match!')
                                 ]
                             )
     submit              = SubmitField('Create Account')
 
 
-"""
-News add form class, for Gods to post news updates
-"""
 class NewsAddForm(FlaskForm):
+    """
+    News add form class, for Gods to post news updates
+    """
     subject     = StringField('Subject', [
                                 validators.DataRequired(),
                                 validators.Length(min=1, max=64),
@@ -98,10 +100,10 @@ class NewsAddForm(FlaskForm):
     submit      = SubmitField('Post')
 
 
-"""
-Player search form class to search player names
-"""
 class PlayerSearchForm(FlaskForm):
+    """
+    Player search form class to search player names
+    """
     player_search_name  = StringField('Player Name', [
                                     validators.DataRequired(),
                                     validators.Length(min=3, max=25),

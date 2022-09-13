@@ -1,11 +1,11 @@
 {% extends "layout.html.j2" %}
-{% block meta_title %}Essence Shop{% endblock meta_title %}
+{% block meta_title %}Shop{% endblock meta_title %}
 {% block meta_description %}View and spend your seasonally rewarded essence points{% endblock%}
-{% block meta_url %}{{ url_for('essence_shop', _external=True) }}{% endblock meta_url %}">
-{% block title %}Essence Shop{% endblock %}
-{% block header %}Essence Shop{% endblock %}
+{% block meta_url %}{{ url_for('shop', _external=True) }}{% endblock meta_url %}">
+{% block title %}Shop{% endblock %}
+{% block header %}Shop{% endblock %}
 {%- macro render_field(field) %}
-            <ul class="essence-shop">
+            <ul class="shop">
     {%- for subfield in field %}
                 <li class="essence-upgrades" title="{{ subfield.label | striptags }}">
                     {{ subfield }}
@@ -126,14 +126,14 @@
                 </li>
             </ul>
     {%- endif %}
-    {%- if essence_shop_form is defined %}
+    {%- if shop_form is defined %}
             <h4 title="Purchase">
                 Purchase
             </h4>
-            <form method="post" action="{{ url_for('essence_shop') }}" id="essence-shop-form" onSubmit="return confirmSpend();">
-                {{ render_field(essence_shop_form.upgrade) }}
-                {{ essence_shop_form.csrf_token }}
-                {{ essence_shop_form.submit }}
+            <form method="post" action="{{ url_for('shop') }}" id="shop-form" onSubmit="return confirmSpend();">
+                {{ render_field(shop_form.upgrade) }}
+                {{ shop_form.csrf_token }}
+                {{ shop_form.submit }}
             </form>
     {%- endif %}
 {% include('back.html.j2') %}

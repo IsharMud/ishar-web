@@ -85,11 +85,11 @@
                     <a href="{{ url_for('change_password') }}" title="Change Password">Change Password</a>
                     |
     {%- if current_user.seasonal_points > 0 %}
-        {%- set essence_extra = ' (' + current_user.seasonal_points | string + ')' %}
+        {%- set essence = '(' + current_user.seasonal_points | string + ')' %}
     {%- else %}
-        {%- set essence_extra = '' %}
+        {%- set essence = '' %}
     {%- endif %}
-                    <a href="{{ url_for('essence_shop') }}" title="Essence Shop{{ essence_extra }}">Essence Shop{{ essence_extra }}</a>
+                    <a href="{{ url_for('shop') }}" title="Shop {{- essence }}">Shop {{- essence }}</a>
                     |
                     <a href="{{ url_for('leaderboard') }}" title="Leader Board">Leader Board</a>
                     |
