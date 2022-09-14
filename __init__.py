@@ -6,7 +6,6 @@ https://github.com/IsharMud/ishar-web
 import datetime
 import glob
 import ipaddress
-import json
 import os
 from random import choices
 from flask import Flask, flash, redirect, render_template, request, \
@@ -93,13 +92,13 @@ def get_current_season():
 
 @app.route('/welcome', methods=['GET'])
 @app.route('/', methods=['GET'])
-def welcome(num_posts=1):
+def welcome():
     """
     Main welcome page/index
     includes the most recent news posts to show on the main page
     """
     return render_template('welcome.html.j2',
-        news    = models.News.query.order_by(-models.News.created_at).limit(num_posts).all()
+        news    = models.News.query.order_by(-models.News.created_at).limit(1).all()
     )
 
 
