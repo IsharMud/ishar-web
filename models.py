@@ -82,16 +82,15 @@ class Account(Base, UserMixin):
     def create_account(self):
         """Method to create a new account"""
         try:
-
             # Hash the password and add the account to the database
             self.password = md5_crypt.hash(self.password)
             db_session.add(self)
             db_session.commit()
 
             # Start each available account upgrade at zero (0)
-            for init_ugrade in AccountUpgrade.query.all():
+            for init_upgrade in AccountUpgrade.query.all():
                 create_upgrade  = AccountsUpgrade()
-                create_upgrade.account_upgrades_id  = init_ugrade.id
+                create_upgrade.account_upgrades_id  = init_upgrade.id
                 create_upgrade.account_id           = self.account_id
                 create_upgrade.amount               = 0
                 db_session.add(create_upgrade)
@@ -147,7 +146,8 @@ class AccountsUpgrade(Base):
     account             = relationship('Account', backref='upgrades')
 
     def do_upgrade(self, increment=1):
-        """Method to increment an account upgrade and reduce account seasonal points (essence)"""
+        """Method to increment an account upgrade
+            and reduce account seasonal points (essence)"""
         try:
             self.amount = self.amount + increment
             self.account.seasonal_points = self.account.seasonal_points - self.upgrade.cost
@@ -425,7 +425,7 @@ class Season(Base):
     @property
     def effective(self):
         """Stringified approximate timedelta since season started"""
-        return delta.stringify(datetime.datetime.now() - self.effective_dt)
+        return delta.stringify(datetime.datetime.utcnow() - self.effective_dt)
 
     @property
     def expiration_dt(self):
@@ -435,7 +435,7 @@ class Season(Base):
     @property
     def expires(self):
         """Stringified approximate timedelta until season ends"""
-        return delta.stringify(self.expiration_dt - datetime.datetime.now())
+        return delta.stringify(self.expiration_dt - datetime.datetime.utcnow())
 
     def __repr__(self):
         return f'<Season> ID {self.season_id} / Active: {self.is_active} / ' \
@@ -567,7 +567,7 @@ class Player(Base):
     @property
     def birth_ago(self):
         """Stringified approximate timedelta since player birth"""
-        return delta.stringify(datetime.datetime.now() - self.birth_dt)
+        return delta.stringify(datetime.datetime.utcnow() - self.birth_dt)
 
     @property
     def logon_dt(self):
@@ -577,7 +577,7 @@ class Player(Base):
     @property
     def logon_ago(self):
         """timedelta since player log on"""
-        return delta.stringify(datetime.datetime.now() - self.logon_dt)
+        return delta.stringify(datetime.datetime.utcnow() - self.logon_dt)
 
     @property
     def logout_dt(self):
@@ -587,16 +587,12 @@ class Player(Base):
     @property
     def logout_ago(self):
         """Stringified approximate timedelta since player log out"""
-        return delta.stringify(datetime.datetime.now() - self.logout_dt)
+        return delta.stringify(datetime.datetime.utcnow() - self.logout_dt)
 
     @property
     def online_delta(self):
         """Timedelta of player total online time"""
-        try:
-            return datetime.timedelta(seconds=self.online)
-        except Exception as err:
-            print(err)
-            return datetime.timedelta(seconds=0)
+        return datetime.timedelta(seconds=self.online)
 
     @property
     def online_time(self):
@@ -651,7 +647,7 @@ class Player(Base):
     @property
     def player_link(self):
         """Return player link"""
-        url     = url_for('show_player', player_name=self.name)
+        url = url_for('show_player', player_name=self.name)
         return f'<a href="{url}">{self.name}</a>'
 
     @property

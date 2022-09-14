@@ -39,7 +39,7 @@
                     </tr>
         {%- for player in current_user.players %}
                     <tr>
-                        <td title="{{ player.name | title | safe }} (Born {{ player.birth_dt.strftime('%A, %B %d, %Y @ %H:%M:%S') }})">
+                        <td title="{{ player.name | title | safe }} (Born {{ player.birth_dt.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }})">
                             {{ player.player_title }}
                         </td>
                         <td title="Class: {{ player.class.class_name | replace('_', '-') | title | safe }}">

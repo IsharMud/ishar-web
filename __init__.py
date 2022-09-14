@@ -401,7 +401,7 @@ def admin_portal():
         # Create the model for the new news post
         new_news = models.News(
             account_id      = current_user.account_id,
-            created_at      = datetime.datetime.now(),
+            created_at      = datetime.datetime.utcnow(),
             subject         = news_add_form.subject.data,
             body            = news_add_form.body.data
         )

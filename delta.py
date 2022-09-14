@@ -1,58 +1,27 @@
 """Time delta handling"""
+
+def pluralish(input=0):
+    """Append "s" to stringified timedeltas, if not singular"""
+    if input['value'] != 1:
+        input['interval'] += 's'
+    return f"{input['value']} {input['interval']}"
+
 def stringify(delta=None):
     """Stringify time deltas"""
-    try:
-
-        # Less than a day
-        if delta.days < 1:
-
-            # A minute or more
-            if delta.seconds >= 60:
-                minutes = int(delta.seconds / 60)
-
-                # An hour or more
-                if minutes >= 60:
-                    hours = int(minutes / 60)
-                    if hours >= 1:
-                        ret = { 'value': hours, 'interval': 'hour'}
-                    else:
-                        ret = { 'value': minutes, 'interval': 'minute'}
-                else:
-                    ret = { 'value': minutes, 'interval': 'minute'}
-            else:
-                ret = { 'value': delta.seconds, 'interval': 'second'}
-
-        # Less than a month
-        elif delta.days < 30:
-            hours   = int(delta.seconds // (60 * 60))
-            minutes = int((delta.seconds // 60) % 60)
-            return f"{delta.days}d {hours}h {minutes}m"
-
-        # At least a month
-        elif delta.days >= 30:
-            months  = int(delta.days / 30)
-
-            # A year or more
-            if months >= 12:
-                years   = int(months / 12)
-
-                # A decade or more
-                if years >= 10:
-                    decades = int(years / 10)
-                    ret = { 'value': decades, 'interval': 'decade'}
-                else:
-                    ret = { 'value': years, 'interval': 'year'}
-            else:
-                ret = { 'value': months, 'interval': 'month'}
-        else:
-            return str(delta)
-
-        # Append "s", if not singular
-        if ret and ret['value'] != 1:
-            ret['interval'] += 's'
-
-        return f"{ret['value']} {ret['interval']}"
-
-    except Exception as err:
-        print(err)
+    if delta.seconds < 60:
+        ret = { 'value': delta.seconds, 'interval': 'second'}
+    elif delta.seconds >= 60 and delta.seconds < 3600:
+        ret = { 'value': int(delta.seconds / 60), 'interval': 'minute'}
+    elif delta.seconds >= 3600 and delta.days < 1:
+        ret = { 'value': int(delta.seconds / 3600), 'interval': 'hour'}
+    elif delta.days >= 1 and delta.days < 7:
+        ret = { 'value': delta.days, 'interval': 'day'}
+    elif delta.days >= 7 and delta.days < 30:
+        ret = { 'value': int(delta.days / 7), 'interval': 'week'}
+    elif delta.days >= 30 and delta.days < 365:
+        ret = { 'value': int(delta.days / 30), 'interval': 'month'}
+    elif delta.days >= 365:
+        ret = { 'value': int(delta.days / 365), 'interval': 'year'}
+    else:
         return str(delta)
+    return pluralish(ret)
