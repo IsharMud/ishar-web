@@ -8,12 +8,13 @@ def pluralish(input=0):
 
 def stringify(delta=None):
     """Stringify time deltas"""
-    if delta.seconds < 60:
-        ret = { 'value': delta.seconds, 'interval': 'second'}
-    elif delta.seconds >= 60 and delta.seconds < 3600:
-        ret = { 'value': int(delta.seconds / 60), 'interval': 'minute'}
-    elif delta.seconds >= 3600 and delta.days < 1:
-        ret = { 'value': int(delta.seconds / 3600), 'interval': 'hour'}
+    delta_seconds   = delta.total_seconds()
+    if delta_seconds < 60:
+        ret = { 'value': delta_seconds, 'interval': 'second'}
+    elif delta_seconds >= 60 and delta_seconds < 3600:
+        ret = { 'value': int(delta_seconds / 60), 'interval': 'minute'}
+    elif delta_seconds >= 3600 and delta.days < 1:
+        ret = { 'value': int(delta_seconds / 3600), 'interval': 'hour'}
     elif delta.days >= 1 and delta.days < 7:
         ret = { 'value': delta.days, 'interval': 'day'}
     elif delta.days >= 7 and delta.days < 30:
