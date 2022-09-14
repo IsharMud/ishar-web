@@ -7,38 +7,35 @@ def get_help_areas(helptab_file=helptab_secret.FILENAME):
         followed by descriptions until the character "#" on a single line itself
     """
 
-    # Get game "helptab" file path/name, and open it
-    helptab_fh = open(helptab_file, mode='r', encoding='utf8')
-
     # Prepare an empty "areas" dictionary
-    areas = {}
+    #   and do not keep lines by default
+    areas   = {}
+    keep    = False
 
-    # Do not keep lines by default
-    keep = False
+    # Read game "helptab" file
+    with open(helptab_file, mode='r', encoding='utf8') as helptab_fh:
 
-    # Loop through each line, finding and keeping chunks staring with "32 Area "
-    for line in helptab_fh:
-        stripped = line.strip()
+        # Loop through each line, finding and keeping chunks staring with "32 Area "
+        for line in helptab_fh:
+            stripped = line.strip()
 
-        # Stop line (#)
-        if keep and stripped == '#':
-            keep = False
+            # Stop line (#)
+            if keep and stripped == '#':
+                keep = False
 
-        # Do not include "other levels" info (%%)
-        if keep and stripped.startswith('%% '):
-            keep = False
+            # Do not include "other levels" info (%%)
+            if keep and stripped.startswith('%% '):
+                keep = False
 
-        # Append the current chunk to our areas dictionary,
-        #   under the key of whatever started with "32 Area " last
-        if keep and not stripped.startswith('32 Area '):
-            areas[area_name] += line
+            # Append the current chunk to our areas dictionary,
+            #   under the key of whatever started with "32 Area " last
+            if keep and not stripped.startswith('32 Area '):
+                areas[area_name] += line
 
-        # Start new dictionary keys of chunks at lines beginning with "32 Area "
-        if stripped.startswith('32 Area '):
-            keep = True
-            area_name = stripped.replace('32 Area ', '')
-            areas[area_name] = ''
+            # Start new dictionary keys of chunks at lines beginning with "32 Area "
+            if stripped.startswith('32 Area '):
+                keep = True
+                area_name = stripped.replace('32 Area ', '')
+                areas[area_name] = ''
 
-    # Close the "helptab" file and return the list of areas
-    helptab_fh.close()
     return areas

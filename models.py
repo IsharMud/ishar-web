@@ -1,13 +1,10 @@
-"""
-Database classes/models
-"""
+"""Database classes/models"""
 import datetime
 from flask import url_for
 from flask_login import UserMixin
 from passlib.hash import md5_crypt
 from sqlalchemy import Column, ForeignKey, String, TIMESTAMP, Text
 from sqlalchemy.dialects.mysql import INTEGER, MEDIUMINT, SMALLINT, TINYINT
-from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.schema import FetchedValue
 from sqlalchemy.orm import relationship
 from database import Base, db_session
@@ -16,18 +13,7 @@ import levels
 
 
 class Account(Base, UserMixin):
-    """
-    Account database class
-    An account can have multiple players belonging to it
-    Accounts exist to log-in in-game,
-        and are also used on the website
-        for flask-login/authentication, and registration
-    "Seasonal points"/"essence" and "account upgrades"
-        are per account, and can be spent any time
-        (in-game, or on the website)
-    However, "renown" and "remort upgrades" are per player,
-        and these are only available to purchase in-game, at the "shrine"
-    """
+    """Account used to log in to the website and MUD in-game"""
     __tablename__   = 'accounts'
 
     account_id      = Column(INTEGER(11), primary_key=True)
@@ -46,28 +32,30 @@ class Account(Base, UserMixin):
     players         = relationship('Player', backref='account')
 
     def get_id(self):
-        """flask-login method to return account ID"""
+        """flask-login account ID"""
         return str(self.account_id)
 
+    @property
     def is_active(self):
-        """flask-login method to return boolean whether user is active"""
+        """flask-login boolean whether user is active"""
         return isinstance(self.account_id, int)
 
+    @property
     def is_authenticated(self):
-        """flask-login method to return boolean whether user is authenticated"""
+        """flask-login boolean whether user is authenticated"""
         return isinstance(self.account_id, int)
 
-    @hybrid_property
+    @property
     def is_god(self):
-        """Hybrid property returning boolean whether user is a "God" """
+        """Boolean whether user is a 'God'"""
         for player in self.players:
             if player.is_god:
                 return True
         return False
 
-    @hybrid_property
+    @property
     def seasonal_earned(self):
-        """Hybrid property containing the amount of essence earned for the account"""
+        """Amount of essence earned for the account"""
         # Start at zero (0),
         #   and return the points from the player within
         #   the account whom has earned the highest amount
@@ -102,11 +90,10 @@ class Account(Base, UserMixin):
 
             # Start each available account upgrade at zero (0)
             for init_ugrade in AccountUpgrade.query.all():
-                create_upgrade  = AccountsUpgrade(
-                    account_upgrades_id     = init_ugrade.id,
-                    account_id              = self.account_id,
-                    amount                  = 0
-                )
+                create_upgrade  = AccountsUpgrade()
+                create_upgrade.account_upgrades_id  = init_ugrade.id
+                create_upgrade.account_id           = self.account_id
+                create_upgrade.amount               = 0
                 db_session.add(create_upgrade)
             db_session.commit()
 
@@ -122,17 +109,17 @@ class Account(Base, UserMixin):
 
 
 class AccountUpgrade(Base):
-    """
-    Account Upgrade database class
-    Account upgrade available to accounts, as well as the essence cost and max value
-    """
+    """Account upgrade with the essence cost and max value"""
     __tablename__       = 'account_upgrades'
 
     id                  = Column(TINYINT(4), primary_key=True)
     cost                = Column(MEDIUMINT(4), nullable=False)
     description         = Column(String(200), nullable=False)
     name                = Column(String(30), nullable=False, unique=True)
-    max_value           = Column(MEDIUMINT(4), nullable=False, server_default=FetchedValue())
+    max_value           = Column(MEDIUMINT(4),
+                            nullable=False,
+                            server_default=FetchedValue()
+                        )
 
     accounts_upgrade    = relationship('AccountsUpgrade', backref='upgrade')
 
@@ -142,10 +129,7 @@ class AccountUpgrade(Base):
 
 
 class AccountsUpgrade(Base):
-    """
-    Accounts Upgrade database class
-    Account upgrade associated with account, and the level of upgrade
-    """
+    """Account upgrade associated with account, and the level of upgrade"""
     __tablename__       = 'accounts_account_upgrades'
 
     account_upgrades_id = Column(
@@ -182,11 +166,8 @@ class AccountsUpgrade(Base):
 
 
 class Challenge(Base):
-    """
-    Challenge database class
-    Challenge along with the in-game mobile ("mob")/target number (mob_vnum),
-        as well as level/group requirements, and tier
-    """
+    """Challenge along with the in-game mobile ("mob")/target number (mob_vnum),
+        as well as level/group requirements, and tier"""
     __tablename__   = 'challenges'
 
     challenge_id    = Column(SMALLINT(4), primary_key=True)
@@ -202,19 +183,20 @@ class Challenge(Base):
     mob_name        = Column(String(30), nullable=False)
     is_active       = Column(TINYINT(1), nullable=False, server_default=FetchedValue())
 
-    @hybrid_property
+    @property
     def is_completed(self):
-        """Hybrid property returning boolean whether challenge is completed"""
+        """Boolean whether challenge is completed"""
         if self.winner_desc != '':
             return True
         return False
 
-    @hybrid_property
+    @property
     def reward_tier(self):
-        """Hybrid property returning reward tier string"""
-        tiers = { 9: 'SS', 8: 'SS', 7: 'SS', 6: 'S', 5: 'A', 4: 'B', 3: 'C', 2: 'D', 1: 'F' }
-        if self.adj_tier in tiers.keys():
-            return tiers[self.adj_tier]
+        """Reward tier string"""
+        tiers   = { 9: 'SS', 8: 'SS', 7: 'SS', 6: 'S', 5: 'A', 4: 'B', 3: 'C', 2: 'D', 1: 'F' }
+        for tier in tiers:
+            if self.adj_tier == tier:
+                return tiers[self.adj_tier]
         return self.adj_tier
 
     def __repr__(self):
@@ -224,10 +206,7 @@ class Challenge(Base):
 
 
 class News(Base):
-    """
-    News database class
-    News post for the main/welcome page
-    """
+    """News post for the main/welcome page"""
     __tablename__   = 'news'
 
     news_id         = Column(INTEGER(11), primary_key=True)
@@ -258,11 +237,8 @@ class News(Base):
 
 
 class PlayerClass(Base):
-    """
-    Player Class database class
-    Playable character "class" in-game
-        such as warrior, magician, cleric, rogue, necromancer, etc.
-    """
+    """Playable character "class" in-game
+        such as warrior, magician, cleric, rogue, necromancer, etc."""
     __tablename__       = 'classes'
 
     class_id            = Column(TINYINT(3), primary_key=True)
@@ -281,11 +257,8 @@ class PlayerClass(Base):
 
 
 class PlayerFlag(Base):
-    """
-    Player Flag database class
-    Flag for a setting affecting a player character in-game
-        (such as perm-death/survival character, see is_survival)
-    """
+    """Player flag for a setting affecting a player character in-game
+        (such as perm-death/survival character, see is_survival)"""
     __tablename__   = 'player_flags'
 
     flag_id         = Column(INTEGER(11), primary_key=True)
@@ -312,7 +285,9 @@ class PlayersFlag(Base):
                             ondelete='CASCADE', onupdate='CASCADE'
                         ), nullable=False, index=True, primary_key=True
                     )
-    value           = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
+    value           = Column(INTEGER(11), nullable=False,
+                        server_default=FetchedValue()
+                    )
 
     def __repr__(self):
         return f'<PlayersFlag> "{self.flag.name}" ({self.flag_id}) ' \
@@ -442,41 +417,25 @@ class Season(Base):
     effective_date  = Column(INTEGER(11), nullable=False)
     expiration_date = Column(INTEGER(11), nullable=False)
 
-    @hybrid_property
+    @property
     def effective_dt(self):
-        """Hybrid property returning Python datetime object of the season start"""
+        """Datetime of the season start"""
         return datetime.datetime.fromtimestamp(self.effective_date)
 
-    @hybrid_property
-    def effective_delta(self):
-        """Hybrid property returning Python time delta since season started"""
-        return datetime.datetime.now() - self.effective_dt
-
-    @hybrid_property
+    @property
     def effective(self):
-        """
-        Hybrid property returning stringified approximate
-            Python timedelta since season started
-        """
-        return delta.stringify(self.effective_delta)
+        """Stringified approximate timedelta since season started"""
+        return delta.stringify(datetime.datetime.now() - self.effective_dt)
 
-    @hybrid_property
+    @property
     def expiration_dt(self):
-        """Hybrid property returning Python datetime object of the season end"""
+        """Datetime object of the season end"""
         return datetime.datetime.fromtimestamp(self.expiration_date)
 
-    @hybrid_property
-    def expiration_delta(self):
-        """Hybrid property returning time delta until season ends"""
-        return self.expiration_dt - datetime.datetime.now()
-
-    @hybrid_property
+    @property
     def expires(self):
-        """
-        Hybrid property returning stringified approximate
-            Python timedelta until season ends
-        """
-        return delta.stringify(self.expiration_delta)
+        """Stringified approximate timedelta until season ends"""
+        return delta.stringify(self.expiration_dt - datetime.datetime.now())
 
     def __repr__(self):
         return f'<Season> ID {self.season_id} / Active: {self.is_active} / ' \
@@ -586,12 +545,12 @@ class Player(Base):
 
         # Ensure a flag name string was passed, and find its ID
         if flag_name and isinstance(flag_name, str):
-            player_flag     = PlayerFlag.query.filter_by(
+            player_flag = PlayerFlag.query.filter_by(
                                 name    = flag_name
                             ).first()
 
             # Find the flag value for the player, and return True if the flag value is 1
-            if player_flag.flag_id and isinstance(player_flag.flag_id, int):
+            if isinstance(player_flag.flag_id, int):
                 players_flag    = PlayersFlag.query.filter_by(
                                     flag_id     = player_flag.flag_id,
                                     player_id   = self.id
@@ -600,103 +559,72 @@ class Player(Base):
                     return True
         return False
 
-    @hybrid_property
+    @property
     def birth_dt(self):
-        """Hybrid property returning Python datetime of player birth"""
+        """Datetime of player birth"""
         return datetime.datetime.fromtimestamp(self.birth)
 
-    @hybrid_property
-    def birth_delta(self):
-        """Hybrid property returning Python timedelta since player birth"""
-        return datetime.datetime.now() - self.birth_dt
-
-
-    @hybrid_property
+    @property
     def birth_ago(self):
-        """
-        Hybrid property returning stringified approximate
-            Python timedelta since player birth
-        """
-        return delta.stringify(self.birth_delta)
+        """Stringified approximate timedelta since player birth"""
+        return delta.stringify(datetime.datetime.now() - self.birth_dt)
 
-    @hybrid_property
+    @property
     def logon_dt(self):
-        """Hybrid property returning Python datetime of last player log on"""
+        """Datetime of last player log on"""
         return datetime.datetime.fromtimestamp(self.logon)
 
-    @hybrid_property
-    def logon_delta(self):
-        """Hybrid property returning Python timedelta since player log on"""
-        return datetime.datetime.now() - self.logon_dt
-
-    @hybrid_property
+    @property
     def logon_ago(self):
-        """
-        Hybrid property returning stringified approximate
-            Python timedelta since player log on
-        """
-        return delta.stringify(self.logon_delta)
+        """timedelta since player log on"""
+        return delta.stringify(datetime.datetime.now() - self.logon_dt)
 
-    @hybrid_property
+    @property
     def logout_dt(self):
-        """Hybrid property returning Python datetime of last player log out"""
+        """Datetime of last player log out"""
         return datetime.datetime.fromtimestamp(self.logout)
 
-    @hybrid_property
-    def logout_delta(self):
-        """Hybrid property returning Python timedelta since player log out"""
-        return datetime.datetime.now() - self.logout_dt
-
-    @hybrid_property
+    @property
     def logout_ago(self):
-        """
-        Hybrid property returning stringified approximate
-            Python timedelta since player log out
-        """
-        return delta.stringify(self.logout_delta)
+        """Stringified approximate timedelta since player log out"""
+        return delta.stringify(datetime.datetime.now() - self.logout_dt)
 
-    @hybrid_property
+    @property
     def online_delta(self):
-        """Hybrid property returning Python timedelta of player total online time"""
+        """Timedelta of player total online time"""
         try:
             return datetime.timedelta(seconds=self.online)
         except Exception as err:
             print(err)
             return datetime.timedelta(seconds=0)
 
-    @hybrid_property
+    @property
     def online_time(self):
-        """
-        Hybrid property returning stringified approximate
-            Python timedelta of player total online time
-        """
+        """Stringified approximate timedelta of player total online time"""
         return delta.stringify(self.online_delta)
 
-    @hybrid_property
+    @property
     def is_god(self):
-        """Hybrid property returning boolean whether player is a "God" """
+        """Boolean whether player is a 'God'"""
         if self.true_level >= levels.god_level:
             return True
         return False
 
-    @hybrid_property
+    @property
     def is_immortal(self):
-        """Hybrid property returning boolean whether player is an immortal"""
+        """Boolean whether player is an immortal"""
         if self.true_level in levels.types.keys():
             return True
         return False
 
-    @hybrid_property
+    @property
     def is_survival(self):
-        """
-        Hybrid property returning boolean whether
-            player is a survival ("PERM_DEATH") character
-        """
+        """Boolean whether player is a survival ('PERM_DEATH') character"""
         return self.get_flag('PERM_DEATH')
 
-    @hybrid_property
+    @property
     def player_alignment(self):
-        """Hybrid property to return player alignment"""
+        """Player alignment"""
         if self.align <= -1000:
             ret = 'Very Evil'
         elif self.align > -1000 and self.align <= -500:
@@ -715,39 +643,39 @@ class Player(Base):
             ret = 'Unknown'
         return ret
 
-    @hybrid_property
+    @property
     def player_css(self):
-        """Hybrid property to return player CSS class"""
+        """Player CSS class"""
         return f'{self.player_type}'.lower() + '-player'
 
-    @hybrid_property
+    @property
     def player_link(self):
-        """Hybrid property to return player link"""
+        """Return player link"""
         url     = url_for('show_player', player_name=self.name)
         return f'<a href="{url}">{self.name}</a>'
 
-    @hybrid_property
+    @property
     def player_title(self):
-        """Hybrid property to return player title"""
+        """Player title"""
         title   = self.title
         return title.replace('%s', self.player_link)
 
-    @hybrid_property
+    @property
     def player_type(self):
-        """Hybrid property to return player "type" """
+        """Player "type" """
         if self.true_level in levels.types.keys():
             ret = levels.types[self.true_level]
         elif self.is_deleted:
             ret = 'Dead'
-        elif self.is_survival:
+        elif self.get_flag('PERM_DEATH'):
             ret = 'Survival'
         else:
             ret = 'Classic'
         return ret
 
-    @hybrid_property
+    @property
     def seasonal_earned(self):
-        """Hybrid property returning the amount of essence earned for the player"""
+        """Amount of essence earned for the player"""
         # Start with two (2) points for existing, with renown/remort equation
         earned  = int(self.total_renown / 10) + 2
         if self.remorts > 0:
