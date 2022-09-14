@@ -1,6 +1,14 @@
 name: Pylint
 
-on: [push]
+on:
+  pull_request:
+    types:
+      - 'opened'
+  push:
+    branches:
+      - 'main'
+    paths:
+      - '**.py'
 
 jobs:
   build:
@@ -19,7 +27,6 @@ jobs:
         python -m pip install --upgrade pip
         pip install pylint
         pip install -r requirements.txt
-
-    - name: Analysing the code with pylint
+    - name: Run pylint
       run: |
         pylint --disable=E0401,C0415,R0903,R0904,W0703,R0912,W0611 --fail-under=9.0 $(git ls-files '*.py')
