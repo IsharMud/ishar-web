@@ -1,28 +1,28 @@
 """Time delta handling"""
 
-def pluralish(input=0):
+def pluralish(timing=None):
     """Append "s" to stringified timedeltas, if not singular"""
-    if input['value'] != 1:
-        input['interval'] += 's'
-    return f"{input['value']} {input['interval']}"
+    if timing['value'] != 1:
+        timing['interval'] += 's'
+    return f"{timing['value']} {timing['interval']}"
 
 def stringify(delta=None):
     """Stringify time deltas"""
     delta_seconds   = delta.total_seconds()
     if delta_seconds < 60:
-        ret = { 'value': delta_seconds, 'interval': 'second'}
+        ret = {'value': delta_seconds, 'interval': 'second'}
     elif delta_seconds >= 60 and delta_seconds < 3600:
-        ret = { 'value': int(delta_seconds / 60), 'interval': 'minute'}
+        ret = {'value': int(delta_seconds / 60), 'interval': 'minute'}
     elif delta_seconds >= 3600 and delta.days < 1:
-        ret = { 'value': int(delta_seconds / 3600), 'interval': 'hour'}
+        ret = {'value': int(delta_seconds / 3600), 'interval': 'hour'}
     elif delta.days >= 1 and delta.days < 7:
-        ret = { 'value': delta.days, 'interval': 'day'}
+        ret = {'value': delta.days, 'interval': 'day'}
     elif delta.days >= 7 and delta.days < 30:
-        ret = { 'value': int(delta.days / 7), 'interval': 'week'}
+        ret = {'value': int(delta.days / 7), 'interval': 'week'}
     elif delta.days >= 30 and delta.days < 365:
-        ret = { 'value': int(delta.days / 30), 'interval': 'month'}
+        ret = {'value': int(delta.days / 30), 'interval': 'month'}
     elif delta.days >= 365:
-        ret = { 'value': int(delta.days / 365), 'interval': 'year'}
+        ret = {'value': int(delta.days / 365), 'interval': 'year'}
     else:
         return str(delta)
-    return pluralish(ret)
+    return pluralish(timing=ret)
