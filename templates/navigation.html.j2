@@ -29,11 +29,11 @@
                 <li title="World">
                     <a href="{{ url_for('world') }}" {%- if page == 'world' %} id="active-nav"{% endif%}>World</a>
                 </li>
-                <li title="Player Portal {%- if current_user is defined and current_user.is_authenticated and current_user.account_name is defined %} ({{ current_user.account_name }}){% endif %}">
+                <li title="Player Portal {%- if current_user is defined and current_user.is_authenticated and current_user.account_name is defined %} ({{ current_user.account_name | title | safe }}){% endif %}">
                     <a href ="{{ url_for('portal') }}" {%- if page == 'portal' %} id="active-nav"{% endif%}>
                         Player Portal
 {%- if current_user is defined and current_user.is_authenticated and current_user.account_name is defined %}
-                        ({{ current_user.account_name }})
+                        ({{ current_user.account_name | title | safe }})
 {%- endif %}
                     </a>
                 </li>
