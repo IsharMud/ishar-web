@@ -1,5 +1,6 @@
 """Database classes/models"""
 import datetime
+from dateutil.relativedelta import relativedelta
 from flask import url_for
 from flask_login import UserMixin
 from passlib.hash import md5_crypt
@@ -104,7 +105,7 @@ class Account(Base, UserMixin):
         return False
 
     def __repr__(self):
-        return f'<Account> "{self.account_name}" ({self.account_id})'
+        return f'<Account> "{self.account_name}" (ID: {self.account_id})'
 
 
 class AccountUpgrade(Base):
@@ -414,35 +415,47 @@ class Season(Base):
 
     season_id       = Column(INTEGER(11), primary_key=True)
     is_active       = Column(TINYINT(4), nullable=False)
-    effective_date  = Column(INTEGER(11), nullable=False)
-    expiration_date = Column(INTEGER(11), nullable=False)
+    effective_date  = Column(TIMESTAMP, nullable=False, server_default=FetchedValue())
+    expiration_date = Column(TIMESTAMP, nullable=False, server_default=FetchedValue())
 
-    @property
-    def effective_dt(self):
-        """Datetime of the season start"""
-        return datetime.datetime.fromtimestamp(self.effective_date)
+    def create(self, start_when=datetime.datetime.utcnow(), length_months=4):
+        """Method to create a new active season in the database"""
+        try:
+            self.is_active          = 1
+            self.effective_date     = start_when
+            self.expiration_date    = self.effective_date + relativedelta(months=+length_months)
+            db_session.add(self)
+            db_session.commit()
+            return self.season_id
+        except Exception as err:
+            print(err)
+        return False
+
+    def expire(self, expire_when=datetime.datetime.utcnow()):
+        """Method to expire a season in the database"""
+        try:
+            self.is_active  = 0
+            self.expiration_date = expire_when
+            db_session.commit()
+            return True
+        except Exception as err:
+            print(err)
+        return False
 
     @property
     def effective(self):
         """Stringified approximate timedelta since season started"""
-        return delta.stringify(datetime.datetime.utcnow() - self.effective_dt)
-
-    @property
-    def expiration_dt(self):
-        """Datetime object of the season end"""
-        return datetime.datetime.fromtimestamp(self.expiration_date)
+        return delta.stringify(datetime.datetime.utcnow() - self.effective_date)
 
     @property
     def expires(self):
         """Stringified approximate timedelta until season ends"""
-        return delta.stringify(self.expiration_dt - datetime.datetime.utcnow())
+        return delta.stringify(self.expiration_date - datetime.datetime.utcnow())
 
     def __repr__(self):
         return f'<Season> ID {self.season_id} / Active: {self.is_active} / ' \
-            f'Effective: "{self.effective}" ("{self.effective_dt}") - ' \
-            f'Delta: "{self.effective_delta}") / Expire: "{self.expires}" ' \
-            f'("{self.expiration_dt}") - Delta: "{self.expiration_delta}"'
-
+            f'Effective: "{self.effective}" ("{self.effective_date}") - ' \
+            f'Expires: "{self.expires}" ("{self.expiration_date}")'
 
 class Player(Base):
     """
@@ -672,6 +685,8 @@ class Player(Base):
     @property
     def seasonal_earned(self):
         """Amount of essence earned for the player"""
+        if self.is_immortal:
+            return 0
         # Start with two (2) points for existing, with renown/remort equation
         earned  = int(self.total_renown / 10) + 2
         if self.remorts > 0:

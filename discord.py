@@ -4,8 +4,12 @@ So far, there are only two "slash commands" (/):
 /season and /challenges
 """
 import interactions
+import sentry_sdk
 import discord_secret
 import models
+import sentry_secret
+
+sentry_sdk.init(dsn=sentry_secret.DSN, traces_sample_rate=1.0)
 
 bot = interactions.Client(token=discord_secret.TOKEN, default_scope=discord_secret.GUILD)
 
@@ -16,7 +20,7 @@ async def season(ctx: interactions.CommandContext):
     await ctx.send(
         f'It is currently Season {current_season.season_id}, ' \
         f'which ends in {current_season.expires}, on ' \
-        f"{current_season.expiration_dt.strftime('%A, %B %d, %Y')}!"
+        f"{current_season.expiration_date.strftime('%A, %B %d, %Y')}!"
     )
 
 @bot.command()

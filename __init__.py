@@ -7,17 +7,23 @@ import datetime
 import glob
 import ipaddress
 import os
-from random import choices
 from flask import Flask, flash, redirect, render_template, request, \
     send_from_directory, session, url_for
 from flask_login import current_user, fresh_login_required, login_required, \
     login_user, logout_user, LoginManager
+import sentry_sdk
+from sentry_sdk.integrations.flask import FlaskIntegration
 from database import db_session
 import forms
 import helptab
 import levels
 import models
 import mud_clients
+import sentry_secret
+
+
+# Set up Sentry
+sentry_sdk.init(dsn=sentry_secret.DSN, traces_sample_rate=1.0, integrations=[FlaskIntegration()])
 
 
 # Start/configure Flask app
@@ -609,3 +615,7 @@ def static_from_root():
 def shutdown_session(_exception=None):
     """Remove database session at request teardown"""
     db_session.remove()
+
+@app.route('/debug-sentry')
+def trigger_error():
+    division_by_zero = 1 / 0
