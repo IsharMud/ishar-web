@@ -85,7 +85,7 @@
                     <a href="{{ url_for('change_password') }}" title="Change Password">Change Password</a>
                     |
     {%- if current_user.seasonal_points > 0 %}
-        {%- set essence = '(' + current_user.seasonal_points | string + ')' %}
+        {%- set essence = ' (' + current_user.seasonal_points | string + ')' %}
     {%- else %}
         {%- set essence = '' %}
     {%- endif %}
