@@ -555,21 +555,10 @@ class Player(Base):
 
     def get_flag(self, flag_name=None):
         """Method to return boolean for a specific player flag, by its flag name"""
-
-        # Ensure a flag name string was passed, and find its ID
-        if flag_name and isinstance(flag_name, str):
-            player_flag = PlayerFlag.query.filter_by(
-                                name    = flag_name
-                            ).first()
-
-            # Find the flag value for the player, and return True if the flag value is 1
-            if isinstance(player_flag.flag_id, int):
-                players_flag    = PlayersFlag.query.filter_by(
-                                    flag_id     = player_flag.flag_id,
-                                    player_id   = self.id
-                                ).first()
-                if players_flag.value == 1:
-                    return True
+        flag    = PlayerFlag.query.filter_by(name  = flag_name).first()
+        pflag   = PlayersFlag.query.filter_by(flag_id = flag.flag_id, player_id = self.id).first()
+        if pflag.value == 1:
+            return True
         return False
 
     @property
