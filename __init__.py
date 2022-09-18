@@ -44,9 +44,9 @@ login_manager.refresh_view                      = 'login'
 login_manager.session_protection                = 'strong'
 
 @login_manager.user_loader
-def load_user(email):
+def load_user(user_email):
     """Get users for flask-login via Account object from the database"""
-    return models.Account.query.filter_by(email = email)
+    return models.Account.query.filter_by(email = user_email).first()
 
 
 @app.context_processor
