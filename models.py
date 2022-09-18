@@ -34,7 +34,7 @@ class Account(Base, UserMixin):
 
     def get_id(self):
         """flask-login account ID"""
-        return str(self.account_id)
+        return self.email
 
     @property
     def is_active(self):
@@ -631,26 +631,46 @@ class Player(Base):
         """Boolean whether player is a survival ('PERM_DEATH') character"""
         return self.get_flag('PERM_DEATH')
 
+
+    @property
+    def is_evil(self):
+        """Boolean whether player is evil aligned"""
+        if self.align <= -500:
+            return True
+        return False
+
+    @property
+    def is_good(self):
+        """Boolean whether player is good aligned"""
+        if self.align >= 500:
+            return True
+        return False
+
+    @property
+    def is_neutral(self):
+        """Boolean whether player is neutral/un-aligned"""
+        if self.align > -500 and self.align < 500:
+            return True
+        return False
+
     @property
     def player_alignment(self):
         """Player alignment"""
         if self.align <= -1000:
-            ret = 'Very Evil'
-        elif self.align > -1000 and self.align <= -500:
-            ret = 'Evil'
-        elif self.align > -500 and self.align <= -250:
-            ret = 'Slightly Evil'
-        elif self.align > -250 and self.align < 250:
-            ret = 'Neutral'
-        elif self.align >= 250 and self.align < 500:
-            ret = 'Slightly Good'
-        elif self.align >= 500 and self.align < 1000:
-            ret = 'Good'
-        elif self.align >= 1000:
-            ret = 'Very Good'
-        else:
-            ret = 'Unknown'
-        return ret
+            return 'Very Evil'
+        if self.align > -1000 and self.align <= -500:
+            return 'Evil'
+        if self.align > -500 and self.align <= -250:
+            return 'Slightly Evil'
+        if self.align > -250 and self.align < 250:
+            return 'Neutral'
+        if self.align >= 250 and self.align < 500:
+            return 'Slightly Good'
+        if self.align >= 500 and self.align < 1000:
+            return 'Good'
+        if self.align >= 1000:
+            return 'Very Good'
+        return 'Unknown'
 
     @property
     def player_css(self):
@@ -660,14 +680,12 @@ class Player(Base):
     @property
     def player_link(self):
         """Return player link"""
-        url = url_for('show_player', player_name=self.name)
-        return f'<a href="{url}">{self.name}</a>'
+        return '<a href="' + url_for('show_player', player_name=self.name) + f'">{self.name}</a>'
 
     @property
     def player_title(self):
         """Player title"""
-        title   = self.title
-        return title.replace('%s', self.player_link)
+        return self.title.replace('%s', self.player_link)
 
     @property
     def player_type(self):

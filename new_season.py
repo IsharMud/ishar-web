@@ -18,9 +18,7 @@ SEPARATOR   = '~-=-=-=-~=~-=-=-=-~=~-=-=-=-~=~-=-=-=-~'
 print('IsharMUD Season Manager\n')
 print(SEPARATOR)
 NOW = datetime.datetime.utcnow()
-print(f'The current time is:')
-print(NOW.strftime('%A, %B %d, %Y @ %H:%M:%S %Z'))
-print(NOW)
+print(f"{NOW.strftime('%A, %B %d, %Y @ %H:%M:%S %Z')} ({NOW})")
 print(SEPARATOR)
 
 # Do not create a new season by default
@@ -35,8 +33,7 @@ active_seasons  = models.Season.query.filter_by(
 
 # Create new season if there are none active
 if len(active_seasons) == 0:
-    print('There are NO active seasons in the database! \n')
-    print('Creating a new season... \n')
+    print('There are NO active seasons in the database! Creating a new season. \n')
     CREATE  = True
 
 # Normal state is a single active season
@@ -45,12 +42,12 @@ elif len(active_seasons) == 1:
     # Display current active season details
     current_season  = active_seasons[0]
     print(f'The current season is: {current_season.season_id}')
-    print(f' - Started: {current_season.effective_date} ({current_season.effective})')
-    print(f' - Expires: {current_season.expiration_date} ({current_season.expires})\n')
+    print(f'Start: {current_season.effective_date} ({current_season.effective}) / ' \
+        f'Expires: {current_season.expiration_date} ({current_season.expires})')
 
     # Prompt to expire the current season
     confirm_expire  = input('Do you want to expire the current season ' \
-                        f'(season {current_season.season_id}) now? ')
+                        f'(season {current_season.season_id}) NOW? [n] ')
     print('\n')
 
     # Expire the current season if requested, and start new season
@@ -60,14 +57,14 @@ elif len(active_seasons) == 1:
                             season_id   = current_season.season_id
                         ).first()
         print(f'Season EXPIRED: {expired_season.season_id}')
-        print(f' - Started: {expired_season.effective_date} ({expired_season.effective})')
-        print(f' - Expired: {expired_season.expiration_date} ({expired_season.expires})\n')
+        print(f'Start: {expired_season.effective_date} ({expired_season.effective}) / ' \
+            f'Expired: {expired_season.expiration_date} ({expired_season.expires})\n')
         CREATE  = True
 
 # More than one active season is invalid so expire all, and start new season
 elif len(active_seasons) > 1:
-    print('There are multiple active seasons in the database! ')
-    print('Expiring all active seasons and creating a new season... \n')
+    print('There are multiple active seasons in the database!' \
+        'Expiring all active seasons, and creating a new season.')
     for active_season in active_seasons:
         active_season.expire(expire_when=NOW)
     CREATE  = True
@@ -79,26 +76,27 @@ if CREATE:
     print('Creating new season...')
 
     # Prompt for the length of the season in months, defaulting to 4 months
-    create_length   = input('How long will the season be in months? [default: 4] ') or 4
+    create_length   = input('How long will the season be (in months)? [4] ') or 4
 
     # Add the new season to the database and check that it worked
     created_id      = models.Season().create(start_when=NOW, length_months=int(create_length))
     created_season  = models.Season.query.filter_by(season_id = created_id).first()
 
     # Display newly created active season details
-    print(f'The new season is: {created_season.season_id} ')
-    print(f' - Started: {created_season.effective_date} ({created_season.effective})')
-    print(f' - Expires: {created_season.expiration_date} ({created_season.expires})')
+    print(f'The new season is: {created_season.season_id}')
+    print(f'Start: {created_season.effective_date} ({created_season.effective}) / ' \
+        f'Expires: {created_season.expiration_date} ({created_season.expires})')
     print(SEPARATOR)
 
 # Prompt to determine if a player-wipe should be performed
-confirm_pwipe   = input('Do you want to WIPE ALL PLAYERS from the database?\n' \
+do_pwipe    = input('Do you want to perform a player wipe?\n' \
                     'This will calculate all account essence earned and apply it.\n' \
-                    'CAUTION!!! Enter "YES" to confirm: ')
+                    'You will have a final chance to confirm, before players are wiped.\n' \
+                    'Proceed? [n] ')
 print('\n')
 
-# Start player wipe if requested
-if confirm_pwipe == 'YES':
+# Start processing potentional player wipe, if requested
+if do_pwipe.lower() == 'yes' or do_pwipe.lower() == 'y':
     print(SEPARATOR)
     print('OK.... \n')
 
@@ -111,12 +109,10 @@ if confirm_pwipe == 'YES':
     for account in accounts:
 
         # Determine the new total essence for the account
-        new_total   = account.seasonal_points + account.seasonal_earned
-        print(f'- {account.account_name}:\n' \
-            f'  -> {account.seasonal_points} existing + {account.seasonal_earned} earned\n' \
-            f'  --> {new_total} essence')
-        print('  + Deleting... ')
-        account.seasonal_points =   new_total
+        new_essence = account.seasonal_points + account.seasonal_earned
+        print(f'- {account.account_name}: {account.seasonal_points} existing + ' \
+            f'{account.seasonal_earned} earned = {new_essence} essence')
+        account.seasonal_points =   new_essence
 
         # Loop through each (non-immortal) player within the account
         for del_player in account.players:
@@ -136,18 +132,24 @@ if confirm_pwipe == 'YES':
                 if os.path.exists(del_path):
                     podir_del.append(del_path)
 
-    # Prompt for final confirmation of player wipe before database commit
-    final_confirm   = input('\nIs this OK? Type "YES" to commit the changes: ')
-    if final_confirm == 'YES':
+    # Prompt for final confirmation of player wipe
+    confirm_pwipe   = input('\nIs this OK?\nCAUTION: All mortals will be wiped!\n' \
+                        'Type "YES" to commit the changes: ')
+    if confirm_pwipe == 'YES':
+
+        # Delete each "Podir" file and commit the database changes wiping players
         for podir_file in podir_del:
             print('Deleted Podir file ({podir_file})')
             os.remove(podir_file)
         db_session.commit()
+        print(SEPARATOR)
         print('\nWIPED!\n')
+
     else:
+        print(SEPARATOR)
         print('\nSkipping Player Wipe...\n')
 
 print(SEPARATOR)
-print('Have a lovely day!\n')
+print('Good bye!\n')
 
 db_session.close()
