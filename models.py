@@ -689,16 +689,14 @@ class Player(Base):
 
     @property
     def player_type(self):
-        """Player "type" """
-        if self.true_level in levels.types.keys():
-            ret = levels.types[self.true_level]
-        elif self.is_deleted:
-            ret = 'Dead'
-        elif self.get_flag('PERM_DEATH'):
-            ret = 'Survival'
-        else:
-            ret = 'Classic'
-        return ret
+        """Player type"""
+        if self.true_level >= levels.immortal_level:
+            return levels.types[self.true_level]
+        if self.is_deleted:
+            return 'Dead'
+        if self.is_survival:
+            return 'Survival'
+        return 'Classic'
 
     @property
     def seasonal_earned(self):
