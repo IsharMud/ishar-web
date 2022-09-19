@@ -17,11 +17,11 @@
                 <li title="History">
                     <a href="{{ url_for('history') }}" {%- if page == 'history' %} id="active-nav"{% endif %}>History</a>
                 </li>
-                <li title="Latest Patch">
-                    <a href="{{ url_for('latest_patch') }}" target="_blank">Latest Patch</a>
-                </li>
                 <li title="MUD Clients">
                     <a href="{{ url_for('clients') }}" {%- if page == 'mud_clients' %} id="active-nav"{% endif%}>MUD Clients</a>
+                </li>
+                <li title="Patches">
+                    <a href="{{ url_for('patches') }}" {%- if page == 'patches' %} id="active-nav"{% endif%}>Patches</a>
                 </li>
                 <li title="Support Ishar MUD">
                     <a href="{{ url_for('support') }}" {%- if page == 'support' %} id="active-nav"{% endif%}>Support Ishar</a>

@@ -533,6 +533,16 @@ def latest_patch():
     return redirect('/' + max(glob.glob('static/patches/*.pdf'), key=os.path.getmtime))
 
 
+@app.route('/patches/', methods=['GET'])
+@app.route('/patches', methods=['GET'])
+def patches():
+    """
+    /patches (or /patches/)
+    Page showing a dynamic list of patches
+    """
+    return render_template('patches.html.j2', patches=os.listdir('static/patches'))
+
+
 @app.route('/questions')
 @app.route('/faqs')
 @app.route('/faq')

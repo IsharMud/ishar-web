@@ -1,0 +1,30 @@
+{%- set page = 'patches' -%}
+{% extends "layout.html.j2" %}
+{% block meta_title %}Patches{% endblock meta_title %}
+{% block meta_description %}The latest patches to Ishar MUD{% endblock %}
+{% block meta_url %}{{ url_for('patches', _external=True) }}{% endblock meta_url %}">
+{% block title %}Patches{% endblock %}
+{% block header %}Patches{% endblock %}
+{%- block content %}
+                <p>
+                    Ishar MUD is under regular development, and constantly being improved!
+                <p>
+                <p>
+                    This is where we document the changes that have been made for your enjoyment.
+                </p>
+                {%- if patches is defined and patches is iterable and patches | length > 0 %}
+                <p>
+                     These are the latest patch notes for Ishar MUD:
+                </p>
+                <ul id="patches-list">
+                    {%- for patch in patches %}
+                        {%- set name = patch.rstrip('.pdf') | replace('_', ' ') | title %}
+                    <li class="patch-item" title="{{ name }}">
+                        <h3>
+                            <a href="{{ url_for('static', filename='patches/' + patch) }}" target="_blank">{{ name }}</a>
+                        </h3>
+                    </li>
+                    {%- endfor %}
+                </ul>
+                {%- endif %}
+{%- endblock %}
