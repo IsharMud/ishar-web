@@ -541,7 +541,7 @@ def patches():
     Page showing a dynamic list of patches
     """
     return render_template('patches.html.j2',
-                            patches = os.listdir('static/patches').sort(reverse=True)
+                            patches = sorted(os.listdir('static/patches'), reverse=True)
                         )
 
 
