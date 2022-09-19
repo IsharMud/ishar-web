@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Manage seasons for IsharMUD via CLI
-Optionally expire the season and/or perform a player-wipe of non-immortals
+Optionally expire the season and/or erase mortal players
 """
 import datetime
 import os
@@ -18,7 +18,7 @@ SEPARATOR   = '~-=-=-=-~=~-=-=-=-~=~-=-=-=-~=~-=-=-=-~'
 print('IsharMUD Season Manager\n')
 print(SEPARATOR)
 NOW = datetime.datetime.utcnow()
-print(f"{NOW.strftime('%A, %B %d, %Y @ %H:%M:%S %Z')} ({NOW})")
+print(f"{NOW.strftime('%A, %B %d, %Y @ %H:%M:%S %Z')}\n{NOW}")
 print(SEPARATOR)
 
 # Do not create a new season by default
@@ -31,9 +31,16 @@ active_seasons  = models.Season.query.filter_by(
                     -models.Season.season_id
                 ).all()
 
+def display_season(season=active_seasons[0]):
+    """Method to display the details of a season"""
+    print(f'SEASON {season.season_id} / ' \
+        f'Effective: {season.effective_date} ({season.effective}) / ' \
+        f'Expiration: {season.expiration_date} ({season.expires})')
+
+
 # Create new season if there are none active
 if len(active_seasons) == 0:
-    print('There are NO active seasons in the database! Creating a new season. \n')
+    print('There are NO active seasons in the database! Creating a new season.')
     CREATE  = True
 
 # Normal state is a single active season
@@ -41,9 +48,8 @@ elif len(active_seasons) == 1:
 
     # Display current active season details
     current_season  = active_seasons[0]
-    print(f'The current season is: {current_season.season_id}')
-    print(f'Start: {current_season.effective_date} ({current_season.effective}) / ' \
-        f'Expires: {current_season.expiration_date} ({current_season.expires})')
+    print('CURRENT: ')
+    display_season(season=current_season)
 
     # Prompt to expire the current season
     confirm_expire  = input('Do you want to expire the current season ' \
@@ -56,9 +62,8 @@ elif len(active_seasons) == 1:
         expired_season  = models.Season.query.filter_by(
                             season_id   = current_season.season_id
                         ).first()
-        print(f'Season EXPIRED: {expired_season.season_id}')
-        print(f'Start: {expired_season.effective_date} ({expired_season.effective}) / ' \
-            f'Expired: {expired_season.expiration_date} ({expired_season.expires})\n')
+        print('EXPIRED: ')
+        display_season(season=expired_season)
         CREATE  = True
 
 # More than one active season is invalid so expire all, and start new season
@@ -69,9 +74,8 @@ elif len(active_seasons) > 1:
         active_season.expire(expire_when=NOW)
     CREATE  = True
 
-print(SEPARATOR)
-
 # Create a new season if needed
+print(SEPARATOR)
 if CREATE:
     print('Creating new season...')
 
@@ -83,27 +87,28 @@ if CREATE:
     created_season  = models.Season.query.filter_by(season_id = created_id).first()
 
     # Display newly created active season details
-    print(f'The new season is: {created_season.season_id}')
-    print(f'Start: {created_season.effective_date} ({created_season.effective}) / ' \
-        f'Expires: {created_season.expiration_date} ({created_season.expires})')
-    print(SEPARATOR)
+    print('CREATED: ')
+    display_season(season=created_season)
+else:
+    print('Skipping new season creation...')
 
 # Prompt to determine if a player-wipe should be performed
+print(SEPARATOR)
 do_pwipe    = input('Do you want to perform a player wipe?\n' \
                     'This will calculate all account essence earned and apply it.\n' \
                     'You will have a final chance to confirm, before players are wiped.\n' \
                     'Proceed? [n] ')
 print('\n')
+print(SEPARATOR)
 
 # Start processing potentional player wipe, if requested
 if do_pwipe.lower() == 'yes' or do_pwipe.lower() == 'y':
-    print(SEPARATOR)
-    print('OK.... \n')
+    print('Calculating player wipe... \n')
 
     # Find all accounts and set up an empty list of Podir files to delete
     accounts    = models.Account.query.filter().all()
-    PODIR       = '/home/ishartest/ishar-mud/lib/Podir'
     podir_del   = []
+    PODIR       = '/home/ishartest/ishar-mud/lib/Podir'
 
     # Loop through each account
     for account in accounts:
@@ -135,19 +140,21 @@ if do_pwipe.lower() == 'yes' or do_pwipe.lower() == 'y':
     # Prompt for final confirmation of player wipe
     confirm_pwipe   = input('\nIs this OK?\nCAUTION: All mortals will be wiped!\n' \
                         'Type "YES" to commit the changes: ')
-    if confirm_pwipe == 'YES':
+    print('\n')
 
-        # Delete each "Podir" file and commit the database changes wiping players
+    # Delete each "Podir" file and commit the database changes wiping players
+    print(SEPARATOR)
+    if confirm_pwipe == 'YES':
         for podir_file in podir_del:
             print('Deleted Podir file ({podir_file})')
             os.remove(podir_file)
         db_session.commit()
-        print(SEPARATOR)
         print('\nWIPED!\n')
 
     else:
-        print(SEPARATOR)
-        print('\nSkipping Player Wipe...\n')
+        print('Skipping player wipe at final confirmation... \n')
+else:
+    print('Skipping player wipe... \n')
 
 print(SEPARATOR)
 print('Good bye!\n')
