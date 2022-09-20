@@ -6,6 +6,7 @@ So far, there are only two "slash commands" (/):
 import interactions
 import sentry_sdk
 import discord_secret
+from database import db_session
 import models
 import sentry_secret
 
@@ -22,6 +23,7 @@ async def season(ctx: interactions.CommandContext):
         f'which ends in {current_season.expires}, on ' \
         f"{current_season.expiration_date.strftime('%A, %B %d, %Y')}!"
     )
+    db_session.close()
 
 @bot.command()
 async def challenges(ctx: interactions.CommandContext):
@@ -36,5 +38,6 @@ async def challenges(ctx: interactions.CommandContext):
         if challenge.winner_desc != '':
             completed   = completed + 1
     await ctx.send(f"Challenges: {completed} completed / {count} total")
+    db_session.close()
 
 bot.start()

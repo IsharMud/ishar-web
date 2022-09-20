@@ -6,6 +6,7 @@ import os
 import sys
 import sentry_sdk
 from database import db_session
+from mud_secret import PODIR
 import models
 import sentry_secret
 
@@ -100,23 +101,18 @@ if __name__ == "__main__":
 
         # Player wipe
         elif opt == '--pwipe':
-
             podir_del   = []
-
-            # TODO: Make this variable for staging/prod
-            PODIR       = '/home/ishartest/ishar-mud/lib/Podir'
-
             for account in models.Account.query.filter().all():
                 new_essence = account.seasonal_points + account.seasonal_earned
                 print(f'- {account.account_name}: {account.seasonal_points} existing + ' \
                     f'{account.seasonal_earned} earned = {new_essence} essence')
-                account.seasonal_points =   new_essence
+                account.seasonal_points = new_essence
 
                 for del_player in account.players:
                     if not del_player.is_immortal:
-                        print(f'    - {del_player.name}')
                         del_id      = del_player.id
                         del_path    = f'{PODIR}/{del_player.name}'
+                        print(f'    - {del_player.name} ({del_path})')
                         db_session.query(models.PlayersFlag).filter_by(player_id = del_id).delete()
                         db_session.query(models.PlayerQuest).filter_by(player_id = del_id).delete()
                         db_session.query(models.PlayerRemortUpgrade).filter_by(player_id = del_id).delete()
@@ -133,7 +129,7 @@ if __name__ == "__main__":
             if confirm_pwipe == 'YES':
                 for podir_file in podir_del:
                     if os.remove(podir_file):
-                        print('Deleted: ({podir_file})')
+                        print(f'Deleted: {podir_file}')
                 db_session.commit()
                 finish(code=0, message='Player wipe complete')
 

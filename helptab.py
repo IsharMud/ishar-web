@@ -1,6 +1,6 @@
 """Read/process the "helptab" file used by the MUD itself in-game"""
-import helptab_secret
-def get_help_areas(helptab_file=helptab_secret.FILENAME):
+from mud_secret import HELPTAB
+def get_help_areas(helptab_file=HELPTAB):
     """
     Method to scrape "areas" from game helptab file
     The "areas" are each listed in the "helptab" file on lines starting with "32 Area "
