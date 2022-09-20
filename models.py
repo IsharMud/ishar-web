@@ -1,6 +1,5 @@
 """Database classes/models"""
 import datetime
-from dateutil.relativedelta import relativedelta
 from flask import url_for
 from flask_login import UserMixin
 from passlib.hash import md5_crypt
@@ -11,7 +10,6 @@ from sqlalchemy.orm import relationship
 from database import Base, db_session
 import delta
 import levels
-
 
 class Account(Base, UserMixin):
     """Account used to log in to the website and MUD in-game"""
@@ -418,30 +416,6 @@ class Season(Base):
     effective_date  = Column(TIMESTAMP, nullable=False, server_default=FetchedValue())
     expiration_date = Column(TIMESTAMP, nullable=False, server_default=FetchedValue())
 
-    def create(self, start_when=datetime.datetime.utcnow(), length_months=4):
-        """Method to create a new active season in the database"""
-        try:
-            self.is_active          = 1
-            self.effective_date     = start_when
-            self.expiration_date    = self.effective_date + relativedelta(months=+length_months)
-            db_session.add(self)
-            db_session.commit()
-            return self.season_id
-        except Exception as err:
-            print(err)
-        return False
-
-    def expire(self, expire_when=datetime.datetime.utcnow()):
-        """Method to expire a season in the database"""
-        try:
-            self.is_active  = 0
-            self.expiration_date = expire_when
-            db_session.commit()
-            return True
-        except Exception as err:
-            print(err)
-        return False
-
     @property
     def effective(self):
         """Stringified approximate timedelta since season started"""
@@ -454,8 +428,8 @@ class Season(Base):
 
     def __repr__(self):
         return f'<Season> ID {self.season_id} / Active: {self.is_active} / ' \
-            f'Effective: "{self.effective}" ("{self.effective_date}") - ' \
-            f'Expires: "{self.expires}" ("{self.expiration_date}")'
+            f'Effective: {self.effective_date} ("{self.effective}") - ' \
+            f'Expires: {self.expiration_date} ("{self.expires}")'
 
 class Player(Base):
     """
