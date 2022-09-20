@@ -1,9 +1,11 @@
 """
 Flask forms classes
 """
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 from flask_wtf import FlaskForm
-from wtforms import BooleanField, EmailField, PasswordField, RadioField, \
-    StringField, SubmitField, TextAreaField, validators
+from wtforms import BooleanField, DateTimeLocalField, EmailField, PasswordField, \
+    RadioField, StringField, SubmitField, TextAreaField, validators
 from wtforms.validators import DataRequired, Email, EqualTo
 from wtforms_validators import Alpha
 
@@ -22,8 +24,26 @@ class LoginForm(FlaskForm):
                     validators.Length(min=4, max=36)
                     ]
                 )
-    remember    = BooleanField('Remember Me')
+    remember    = BooleanField('Remember Me?')
     submit      = SubmitField('Log In')
+
+
+class SeasonAddForm(FlaskForm):
+    """
+    Season Add form class
+    """
+    effective_date  = DateTimeLocalField('Effective Date',
+                        format      = '%Y-%m-%dT%H:%M',
+                        default     = datetime.utcnow(),
+                        validators  = [validators.DataRequired()]
+                    )
+    expiration_date = DateTimeLocalField('Expiration Date',
+                        format      = '%Y-%m-%dT%H:%M',
+                        default     = datetime.now() + relativedelta(months=+4),
+                        validators  = [validators.DataRequired()]
+                    )
+    expire_active   = BooleanField('Expire Active?', default=True)
+    submit          = SubmitField('Add Season')
 
 
 class ShopForm(FlaskForm):

@@ -107,12 +107,12 @@ input[type="reset"], input[type="submit"],
     color:              #00b7eb;
 }
 
-.non-classic {
-    text-align:         center;
+.active-season td {
+    background-color:   #4cbb17;
 }
 
-.who-right {
-    text-align:         right;
+.non-classic {
+    text-align:         center;
 }
 
 .god-player::after {

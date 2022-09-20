@@ -1,10 +1,9 @@
 {% extends "layout.html.j2" %}
-{% block meta_title %}Administration Portal{% endblock meta_title %}
+{% block meta_title %}News / Administration Portal{% endblock meta_title %}
 {% block meta_description %}Administration portal to post news updates to the front page{% endblock %}
-{% block meta_url %}{{ url_for('admin_portal', _external=True) }}{% endblock meta_url %}">
-{% block title %}Administration Portal{% endblock %}
-{% block header %}Welcome <span class="survival-player">Admin</span>{% if current_user.account_name is defined %}, {{ current_user.account_name | title | safe }}{% endif %}!{% endblock %}
-{%- block content %}
+{% block meta_url %}{{ url_for('admin_news', _external=True) }}{% endblock meta_url %}">
+{% block title %}News / Administration Portal{% endblock %}
+{% block header %}News{% endblock %}
 {%- macro render_field(field) %}
                     <p class="admin-{{ field.name | safe }}">
                         {{ field.label | safe }}
@@ -20,13 +19,13 @@
                 </ul>
     {%- endif %}
 {%- endmacro %}
+{%- block content %}
 {%- if news_add_form is defined %}
-                <form method="post" action="{{ url_for('admin_portal') }}" id="news-add-form">
+                <form method="post" action="{{ url_for('admin_news') }}" id="news-add-form">
                     {{ render_field(news_add_form.subject, autocomplete='off') }}
                     {{ render_field(news_add_form.body, autocomplete='off') }}
                     {{ news_add_form.csrf_token }}
                     {{ news_add_form.submit }}
-                    <input title="Reset/Clear Form" type="reset">
                     <br>
                 </form>
 {%- endif %}

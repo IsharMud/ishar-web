@@ -3,7 +3,7 @@ ishar_web
 https://isharmud.com/
 https://github.com/IsharMud/ishar-web
 """
-import datetime
+from datetime import datetime, timedelta
 import glob
 import ipaddress
 import os
@@ -22,18 +22,15 @@ import mud_clients
 import sentry_secret
 
 
-# Set up Sentry
+# Set up Sentry and start/configure Flask
 sentry_sdk.init(dsn=sentry_secret.DSN, traces_sample_rate=1.0, integrations=[FlaskIntegration()])
-
-
-# Start/configure Flask app
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
 
 if __name__ == '__main__':
     app.run(debug=True)
 
-# Set up flask-login Login Manager settings
+# Set up flask-login
 login_manager                                   = LoginManager()
 login_manager.init_app(app)
 login_manager.login_message_category            = 'error'
@@ -51,19 +48,13 @@ def load_user(user_email):
 
 @app.context_processor
 def injects():
-    """
-    Add context processors
-    such as season info on every page via layout Jinja2 template
-    """
-    return dict(
-        current_season  = get_current_season()
-    )
+    """Add context processor for season info on every page"""
+    return dict(current_season  = get_current_season())
 
 
 def error(title='Unknown Error', message='Sorry, but there was an unknown error.', code=500):
     """Error template"""
     return render_template('error.html.j2', title=title, message=message), code
-
 
 @app.errorhandler(400)
 def bad_request(message):
@@ -99,10 +90,7 @@ def get_current_season():
 @app.route('/welcome', methods=['GET'])
 @app.route('/', methods=['GET'])
 def welcome():
-    """
-    Main welcome page/index
-    includes the most recent news posts to show on the main page
-    """
+    """Main welcome page/index, includes the most recent news"""
     return render_template('welcome.html.j2',
         news    = models.News.query.order_by(-models.News.created_at).limit(1).all()
     )
@@ -111,19 +99,13 @@ def welcome():
 @app.route('/background', methods=['GET'])
 @app.route('/history', methods=['GET'])
 def history():
-    """
-    /history (or /background)
-    History page mostly copied from the old website
-    """
+    """History page mostly copied from the old website"""
     return render_template('history.html.j2')
 
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    """
-    /login
-    Log-in form page and processing
-    """
+    """Log-in form page and processing"""
 
     # Get log in form object and check if submitted
     login_form = forms.LoginForm()
@@ -155,20 +137,14 @@ def login():
 
 @app.route('/season', methods=['GET'])
 def season():
-    """
-    /season
-    A page with information about the current season
-    """
+    """Information about the current season"""
     return render_template('season.html.j2', season=get_current_season())
 
 
 @app.route('/shop', methods=['GET', 'POST'])
 @login_required
 def shop():
-    """
-    /shop
-    Allow logged in users to view and spend their essence/seasonal points
-    """
+    """Allow logged in users to view and spend their essence/seasonal points"""
 
     # Get shop form object, fill upgrade choices, and check if submitted
     shop_form = forms.ShopForm()
@@ -215,10 +191,7 @@ def shop():
 @app.route('/password', methods=['GET', 'POST'])
 @fresh_login_required
 def change_password():
-    """
-    /password
-    Allow logged in users to change their passwords
-    """
+    """Allow logged in users to change their password"""
 
     # Get change password form object and check if submitted
     change_password_form = forms.ChangePasswordForm()
@@ -242,11 +215,8 @@ def change_password():
 @app.route('/player/<string:player_name>', methods=['GET', 'POST'])
 @login_required
 def show_player(player_name=None):
-    """
-    /player
-    Player page to show detailed information about a player,
-        and player name search form
-    """
+    """Player page to show detailed information about a player
+    along with player name searching"""
 
     # Get player search form object and check if submitted
     player  = None
@@ -287,21 +257,13 @@ def show_player(player_name=None):
 @app.route('/portal', methods=['GET'])
 @login_required
 def portal():
-    """
-    /portal
-    Main portal page for welcoming users as they log in,
-        so that they can view their player(s) information
-    """
+    """Main portal page for players logging in"""
     return render_template('portal.html.j2')
 
 
 @app.route('/challenges', methods=['GET'])
 def challenges():
-    """
-    /challenges
-    Sort and list active challenges,
-        along with their tiers and winners, from the database
-    """
+    """Sort and list active challenges, along with their tiers and winners"""
     find    = models.Challenge.query.filter_by(is_active = 1).order_by(
                 models.Challenge.adj_level,
                 models.Challenge.adj_people
@@ -314,11 +276,9 @@ def challenges():
 @app.route('/leader_board', methods=['GET'])
 @app.route('/leaderboard', methods=['GET'])
 def leaderboard(limit=10):
-    """
-    /leaderboard (or /leader_board)
-    Sort and list the best players, with a limit option,
-        and boolean to include/exclude dead characters
-    """
+    """    Sort and list the best players, with a limit option,
+        and boolean to include/exclude dead characters"""
+
     limit_choices   = [5, 10, 25, 50, 100]
     if limit not in limit_choices or limit > max(limit_choices):
         return redirect(url_for('leaderboard', limit=10))
@@ -364,10 +324,7 @@ def leaderboard(limit=10):
 @app.route('/wiz_list', methods=['GET'])
 @app.route('/wizlist', methods=['GET'])
 def wizlist():
-    """
-    /wizlist (or /wiz_list)
-    Wizlist showing Immortals through Gods
-    """
+    """Wizlist showing Immortals through Gods"""
     immortals = models.Player.query.filter(
                     models.Player.true_level    >= levels.immortal_level
                 ).order_by(
@@ -379,26 +336,29 @@ def wizlist():
 @app.route('/account', methods=['GET'])
 @login_required
 def account():
-    """
-    /account
-    Allow users to view information about,
-        and manage, their accounts
-    """
+    """Allow users to view/manage their accounts"""
     return render_template('account.html.j2')
 
 
 @app.route('/admin', methods=['GET', 'POST'])
 @fresh_login_required
 def admin_portal():
-    """
-    /admin
-    Administration portal to allow Gods to make news posts
-    """
+    """Administration portal main page for Gods"""
 
     # Redirect non-administrators to the main page
     if not current_user.is_god:
-        flash('Sorry, but you are not an administrator!', 'error')
+        flash('Sorry, but you are not godly enough!', 'error')
         return redirect(url_for('welcome'))
+
+    # Show the administration portal
+    return render_template('admin/portal.html.j2')
+
+
+@app.route('/admin/news', methods=['GET', 'POST'])
+@fresh_login_required
+def admin_news():
+    """Administration portal to allow Gods to post news
+    /admin/news"""
 
     # Get news add form and check if submitted
     news_add_form   = forms.NewsAddForm()
@@ -407,7 +367,7 @@ def admin_portal():
         # Create the model for the new news post
         new_news = models.News(
             account_id      = current_user.account_id,
-            created_at      = datetime.datetime.utcnow(),
+            created_at      = datetime.utcnow(),
             subject         = news_add_form.subject.data,
             body            = news_add_form.body.data
         )
@@ -422,15 +382,89 @@ def admin_portal():
             flash('Sorry, but please try again!', 'error')
 
     # Show the form to add news in the administration portal
-    return render_template('admin.html.j2', news_add_form=news_add_form)
+    return render_template('admin/news.html.j2', news_add_form=news_add_form)
+
+
+@app.route('/admin/season', methods=['GET'])
+@fresh_login_required
+def admin_season():
+    """Administration portal to allow Gods to view/manage seasons
+    /admin/season"""
+
+    # Redirect non-administrators to the main page
+    if not current_user.is_god:
+        flash('Sorry, but you are not godly enough!', 'error')
+        return redirect(url_for('welcome'))
+
+    # Get all seasons for admins
+    seasons = models.Season.query.order_by(
+                -models.Season.is_active,
+                -models.Season.season_id
+            ).all()
+    return render_template('admin/season.html.j2', seasons=seasons)
+
+
+@app.route('/admin/season/add', methods=['GET', 'POST'])
+@fresh_login_required
+def admin_season_add():
+    """Administration portal to allow Gods to add seasons
+    /admin/season/add"""
+
+    # Redirect non-administrators to the main page
+    if not current_user.is_god:
+        flash('Sorry, but you are not godly enough!', 'error')
+        return redirect(url_for('welcome'))
+
+    # Get season add form, and check if submitted
+    season_add_form = forms.SeasonAddForm()
+    if season_add_form.validate_on_submit():
+
+        # Create the model for the new season and add it to the database
+        new_season  = models.Season(
+            is_active       = 1,
+            effective_date  = season_add_form.effective_date.data,
+            expiration_date = season_add_form.expiration_date.data
+        )
+        db_session.add(new_season)
+        db_session.commit()
+        if new_season.season_id:
+            flash(f'Season {new_season.season_id} created!', 'success')
+        else:
+            flash('Sorry, but please try again!', 'error')
+
+    # Show the form to add a season in the administration portal
+    return render_template('admin/season_add.html.j2', season_add_form=season_add_form)
+
+
+@app.route('/admin/season/expire/<int:expire_season>', methods=['GET'])
+@fresh_login_required
+def admin_season_expire(expire_season=None):
+    """Administration portal to allow Gods to expire seasons
+    /admin/season/expire"""
+
+    # Redirect non-administrators to the main page
+    if not current_user.is_god:
+        flash('Sorry, but you are not godly enough!', 'error')
+        return redirect(url_for('welcome'))
+
+    find_expire = models.Season.query.filter_by(
+                    is_active   = 1,
+                    season_id   = expire_season
+                ).first()
+    if find_expire:
+        find_expire.is_active       = 0
+        find_expire.expiration_date = datetime.utcnow()
+        db_session.commit()
+        flash(f'Season {find_expire.season_id} expired {find_expire.expiration_date}!', 'success')
+    else:
+        flash('Sorry, but that season could not be found, or may already be expired!', 'error')
+
+    return admin_season()
 
 
 @app.route('/logout', methods=['GET'])
 def logout():
-    """
-    /logout
-    Allow users to log out
-    """
+    """Allow users to log out (/logout)"""
     logout_user()
     flash('You have logged out!', 'success')
     return redirect(url_for('welcome'))
@@ -438,11 +472,7 @@ def logout():
 
 @app.route('/new', methods=['GET', 'POST'])
 def new_account():
-    """
-    /new
-    New account creation page,
-        which allows users to submit a form to create a new account
-    """
+    """New account creation page (/new)"""
 
     # Get new account form object and check if submitted
     new_account_form    = forms.NewAccountForm()
@@ -507,39 +537,26 @@ def clients():
 
 @app.route('/connect', methods=['GET'])
 def connect():
-    """
-    /connect GET
-    Redirect /connect GET requests to mudslinger.net web client
-    """
+    """Redirect /connect GET requests to mudslinger.net web client"""
     return redirect('https://mudslinger.net/play/?host=isharmud.com&port=23')
 
 
 @app.route('/discord', methods=['GET'])
 def discord():
-    """
-    /discord GET
-    Redirect /discord GET requests to the Discord invitation link
-    """
+    """Redirect /discord GET requests to the Discord invitation link"""
     return redirect('https://discord.gg/VBmMXUpeve')
 
 
-@app.route('/patch', methods=['GET'])
 @app.route('/latest_patch', methods=['GET'])
 def latest_patch():
-    """
-    /latest_patch (or /patch)
-    Redirect to the latest found static patch .pdf file
-    """
+    """Redirect /latest_patch latest found static patch .pdf file"""
     return redirect('/' + max(glob.glob('static/patches/*.pdf'), key=os.path.getmtime))
 
 
 @app.route('/patches/', methods=['GET'])
 @app.route('/patches', methods=['GET'])
 def patches():
-    """
-    /patches (or /patches/)
-    Page showing a dynamic list of patches
-    """
+    """Page showing a dynamic list of patches (/patches)"""
     return render_template('patches.html.j2',
                             patches = sorted(os.listdir('static/patches'), reverse=True)
                         )
@@ -571,20 +588,14 @@ def faq():
 @app.route('/getstarted')
 @app.route('/get_started')
 def get_started():
-    """
-    /get_started
-    Get Started page partly copied from the old website
-    """
+    """Get Started page partly copied from the old website"""
     return render_template('get_started.html.j2')
 
 
 @app.route('/donate', methods=['GET'])
 @app.route('/support', methods=['GET'])
 def support():
-    """
-    /support (or /donate)
-    Support page so users can contribute
-    """
+    """Support page"""
     return render_template('support.html.j2')
 
 
@@ -593,11 +604,8 @@ def support():
 @app.route('/world/<string:area>', methods=['GET'])
 @app.route('/world', methods=['GET'])
 def world(area=None):
-    """
-    /world (or /areas)
-    "World" page that uses the game's existing "helptab" file
-        to display information about each in-game area
-    """
+    """World page that uses the game's existing helptab file
+        to display information about each in-game area"""
 
     # Get all of the areas from the helptab file
     areas   = helptab.get_help_areas()
@@ -627,7 +635,3 @@ def static_from_root():
 def shutdown_session(_exception=None):
     """Remove database session at request teardown"""
     db_session.remove()
-
-@app.route('/debug-sentry')
-def trigger_error():
-    division_by_zero = 1 / 0

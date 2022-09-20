@@ -1,0 +1,24 @@
+{% extends "layout.html.j2" %}
+{% block meta_title %}Administration Portal{% endblock meta_title %}
+{% block meta_description %}Administration portal for Gods of Ishar MUD{% endblock %}
+{% block meta_url %}{{ url_for('admin_portal', _external=True) }}{% endblock meta_url %}">
+{% block title %}Administration Portal{% endblock %}
+{% block header %}Administration{% endblock %}
+{%- block content %}
+            <p>
+                Welcome to the Ishar MUD web administration portal.
+            </p>
+            <p>
+                From here, you can post a news update to the main page.
+                Additionally, you can add and expire seasons.
+            </p>
+            <ul>
+                <li title="News">
+                    <a href="{{ url_for('admin_news') }}">News</a>
+                </li>
+                <li title="Season Management">
+                    <a href="{{ url_for('admin_season') }}">Season Management</a>
+                </li>
+            </ul>
+{% include('back.html.j2') %}
+{%- endblock %}

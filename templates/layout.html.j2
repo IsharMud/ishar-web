@@ -71,7 +71,7 @@
             </span>
         {%- endif %}
     {%- endif %}
-    {%- if current_season is defined %}
+    {%- if current_season is defined and current_season != None %}
             <span id="season" title="Season {{ current_season.season_id }} ends in {{ current_season.expires }} on {{ current_season.expiration_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}">
                 <a href="{{ url_for('season') }}">Season {{ current_season.season_id }}</a>
                 <br>
