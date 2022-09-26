@@ -26,9 +26,9 @@ async def season(ctx: interactions.CommandContext):
     diff = relativedelta(start_time, end_time)
     diff_str = ""
     if (diff.months > 0):
-        diff_str += "%d months, " % diff.months
+        diff_str += "%d months, " % (diff.months)
     
-    diff_str += "%d days , and %d hours" % diff.days, diff.hours
+    diff_str += "%d days , and %d hours" % (diff.days, diff.hours)
     await ctx.send(
         f'It is currently Season {current_season.season_id}, ' \
         f'which ends in {current_season.expires}, on ' \
