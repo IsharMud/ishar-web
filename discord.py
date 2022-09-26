@@ -24,7 +24,7 @@ async def season(ctx: interactions.CommandContext):
     start_time = datetime.utcnow()
     end_time = current_season.expiration_date
     diff = relativedelta(start_time, end_time)
-    diff_str
+    diff_str = ""
     if (diff.months > 0):
         diff_str += "%d months, " % diff.months
     
