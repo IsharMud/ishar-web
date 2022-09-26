@@ -21,13 +21,18 @@ bot = interactions.Client(token=discord_secret.TOKEN, default_scope=discord_secr
 async def season(ctx: interactions.CommandContext):
     """Show the current Ishar MUD season information"""
     current_season  = models.Season.query.filter_by(is_active = 1).first()
-    start_time = datetime.strptime(datetime.utcnow(), '%Y-%m-%d %H')
-    end_time = current_season.expiration_date.strftime("%Y-%m-%d %H")
+    start_time = datetime.utcnow()
+    end_time = current_season.expiration_date
     diff = relativedelta(start_time, end_time)
+    diff_str
+    if (diff.months > 0):
+        diff_str += "%d months, " % diff.months
+    
+    diff_str += "%d days , and %d hours" % diff.days, diff.hours
     await ctx.send(
         f'It is currently Season {current_season.season_id}, ' \
         f'which ends in {current_season.expires}, on ' \
-        f"{diff}!"
+        f"{diff_str}!"
     )
     db_session.close()
 
