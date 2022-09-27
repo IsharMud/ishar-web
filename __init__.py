@@ -23,7 +23,12 @@ import sentry_secret
 
 
 # Set up Sentry and start/configure Flask
-sentry_sdk.init(dsn=sentry_secret.DSN, traces_sample_rate=1.0, integrations=[FlaskIntegration()])
+sentry_sdk.init(
+    dsn                 = sentry_secret.DSN,
+    environment         = sentry_secret.ENV,
+    traces_sample_rate  = 1.0,
+    integrations        = [FlaskIntegration()]
+)
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
 
