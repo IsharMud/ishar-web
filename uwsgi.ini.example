@@ -1,0 +1,9 @@
+[uwsgi]
+die-on-term     = yes
+wsgi-file       = __init__.py
+socket          = /run/uwsgi/isharmud.com/socket
+chmod-socket    = 775
+callable        = app
+virtualenv      = /var/www/isharmud.com/ishar-web/.venv
+enable-threads  = yes
+logger          = syslog
