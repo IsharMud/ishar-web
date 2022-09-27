@@ -84,11 +84,32 @@ class Condition(Base):
     name = Column(String(20), nullable=False, unique=True)
 
 
-class DisplayOption(Base):
-    __tablename__ = 'display_options'
+class ConfigurationOption(Base):
+    __tablename__ = 'configuration_options'
 
-    display_id = Column(TINYINT(4), primary_key=True)
+    configuration_option_id = Column(TINYINT(4), primary_key=True)
     name = Column(String(20), nullable=False, unique=True)
+    is_display = Column(TINYINT(1), nullable=False, server_default=text("0"))
+
+
+t_objects = Table(
+    'objects', metadata,
+    Column('vnum', INTEGER(11), nullable=False),
+    Column('seed', SMALLINT(6), nullable=False),
+    Column('timer', SMALLINT(6), nullable=False),
+    Column('otype', TINYINT(4), nullable=False),
+    Column('equipped', TINYINT(4), nullable=False),
+    Column('size', SMALLINT(6), nullable=False),
+    Column('weight', INTEGER(11), nullable=False),
+    Column('value', INTEGER(11), nullable=False),
+    Column('val0', INTEGER(11), nullable=False),
+    Column('val1', INTEGER(11), nullable=False),
+    Column('val2', INTEGER(11), nullable=False),
+    Column('val3', INTEGER(11), nullable=False),
+    Column('state', INTEGER(11), nullable=False),
+    Column('min_level', TINYINT(4), nullable=False),
+    Column('loaded_on', INTEGER(11), nullable=False)
+)
 
 
 class PlayerFlag(Base):
@@ -131,8 +152,8 @@ class Season(Base):
 
     season_id = Column(INTEGER(11), primary_key=True)
     is_active = Column(TINYINT(4), nullable=False)
-    effective_date = Column(INTEGER(11), nullable=False)
-    expiration_date = Column(INTEGER(11), nullable=False)
+    effective_date = Column(TIMESTAMP, nullable=False, server_default=text("current_timestamp() ON UPDATE current_timestamp()"))
+    expiration_date = Column(TIMESTAMP, nullable=False, server_default=text("'0000-00-00 00:00:00'"))
 
 
 class Skill(Base):
@@ -149,6 +170,14 @@ t_accounts_account_upgrades = Table(
     Column('account_upgrades_id', ForeignKey('account_upgrades.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True),
     Column('account_id', ForeignKey('accounts.account_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True),
     Column('amount', MEDIUMINT(4), nullable=False)
+)
+
+
+t_accounts_configuration_options = Table(
+    'accounts_configuration_options', metadata,
+    Column('account_id', ForeignKey('accounts.account_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True),
+    Column('configuration_option_id', ForeignKey('configuration_options.configuration_option_id'), nullable=False, index=True),
+    Column('value', String(42), nullable=False)
 )
 
 
@@ -180,7 +209,7 @@ class Player(Base):
     logon_delay = Column(SMALLINT(6), nullable=False)
     true_level = Column(INTEGER(11), nullable=False)
     renown = Column(INTEGER(11), nullable=False)
-    prompt = Column(String(42), nullable=False, server_default=text("''"))
+    prompt = Column(String(42), nullable=False, server_default=text("'\"\"'"))
     remorts = Column(INTEGER(11), nullable=False)
     favors = Column(INTEGER(11), nullable=False)
     birth = Column(INTEGER(11), nullable=False)
@@ -191,7 +220,7 @@ class Player(Base):
     load_room = Column(INTEGER(11), nullable=False)
     wimpy = Column(SMALLINT(6))
     invstart_level = Column(INTEGER(11))
-    color_scheme = Column(SMALLINT(6))
+    color_scheme = Column(SMALLINT(6), server_default=text("3"))
     sex = Column(TINYINT(3), nullable=False)
     race_id = Column(ForeignKey('races.race_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
     class_id = Column(ForeignKey('classes.class_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
@@ -203,11 +232,11 @@ class Player(Base):
     karma = Column(SMALLINT(6), nullable=False)
     experience_points = Column(INTEGER(11), nullable=False)
     money = Column(INTEGER(11), nullable=False)
-    fg_color = Column(SMALLINT(6), nullable=False)
-    bg_color = Column(SMALLINT(6), nullable=False)
+    fg_color = Column(SMALLINT(6), nullable=False, server_default=text("7"))
+    bg_color = Column(SMALLINT(6), nullable=False, server_default=text("0"))
     login_failures = Column(SMALLINT(6), nullable=False)
     create_haddr = Column(INTEGER(11), nullable=False)
-    auto_level = Column(INTEGER(11), nullable=False)
+    auto_level = Column(INTEGER(11), nullable=False, server_default=text("0"))
     login_fail_haddr = Column(INTEGER(11))
     last_haddr = Column(INTEGER(11))
     last_ident = Column(String(10), server_default=text("''"))
@@ -285,12 +314,22 @@ t_player_conditions = Table(
 )
 
 
-t_player_display_options = Table(
-    'player_display_options', metadata,
+t_player_configuration_options = Table(
+    'player_configuration_options', metadata,
     Column('player_id', ForeignKey('players.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True),
-    Column('display_id', ForeignKey('display_options.display_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True),
-    Column('value', INTEGER(11), nullable=False)
+    Column('configuration_option_id', ForeignKey('configuration_options.configuration_option_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True),
+    Column('value', String(42), nullable=False)
 )
+
+
+class PlayerKillBucket(Base):
+    __tablename__ = 'player_kill_buckets'
+
+    player_id = Column(ForeignKey('players.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
+    bucket_id = Column(INTEGER(11), primary_key=True)
+    bucket_data = Column(INTEGER(11), nullable=False)
+
+    player = relationship('Player')
 
 
 t_player_player_flags = Table(
