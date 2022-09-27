@@ -10,8 +10,11 @@ from mud_secret import PODIR
 import models
 import sentry_secret
 
-# Sentry
-sentry_sdk.init(dsn=sentry_secret.DSN, traces_sample_rate=1.0)
+sentry_sdk.init(
+    dsn                 = sentry_secret.DSN,
+    environment         = sentry_secret.ENV,
+    traces_sample_rate  = 1.0
+)
 
 print('Ishar MUD CLI\n')
 now = datetime.utcnow()

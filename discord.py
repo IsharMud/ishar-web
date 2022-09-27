@@ -13,7 +13,11 @@ from dateutil.relativedelta import relativedelta
 from datetime import datetime
 
 
-sentry_sdk.init(dsn=sentry_secret.DSN, traces_sample_rate=1.0)
+entry_sdk.init(
+    dsn                 = sentry_secret.DSN,
+    environment         = sentry_secret.ENV,
+    traces_sample_rate  = 1.0
+)
 
 bot = interactions.Client(token=discord_secret.TOKEN, default_scope=discord_secret.GUILD)
 
