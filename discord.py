@@ -3,20 +3,21 @@ Discord bot simply runs in a screen session, for now
 So far, there are only two "slash commands" (/):
 /season and /challenges
 """
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 import interactions
 import sentry_sdk
+from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 import discord_secret
 from database import db_session
 import models
 import sentry_secret
-from dateutil.relativedelta import relativedelta
-from datetime import datetime
 
-
-entry_sdk.init(
+sentry_sdk.init(
     dsn                 = sentry_secret.DSN,
     environment         = sentry_secret.ENV,
-    traces_sample_rate  = 1.0
+    traces_sample_rate  = 1.0,
+    integrations        = [SqlalchemyIntegration()]
 )
 
 bot = interactions.Client(token=discord_secret.TOKEN, default_scope=discord_secret.GUILD)
@@ -29,10 +30,9 @@ async def season(ctx: interactions.CommandContext):
     end_time = current_season.expiration_date
     diff = relativedelta(start_time, end_time)
     diff_str = ""
-    if (diff.months > 0):
-        diff_str += "%d months, " % (diff.months)
-    
-    diff_str += "%d days , and %d hours" % (diff.days, diff.hours)
+    if diff.months > 0:
+        diff_str += f"{diff.months} months, "
+    diff_str += f"{diff.days} days , and {diff.hours} hours"
     await ctx.send(
         f'It is currently Season {current_season.season_id}, ' \
         f'which ends in {current_season.expires}, on ' \

@@ -13,6 +13,7 @@ from flask_login import current_user, fresh_login_required, login_required, \
     login_user, logout_user, LoginManager
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
+from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 from database import db_session
 import forms
 import helptab
@@ -27,7 +28,7 @@ sentry_sdk.init(
     dsn                 = sentry_secret.DSN,
     environment         = sentry_secret.ENV,
     traces_sample_rate  = 1.0,
-    integrations        = [FlaskIntegration()]
+    integrations        = [FlaskIntegration(), SqlalchemyIntegration()]
 )
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
