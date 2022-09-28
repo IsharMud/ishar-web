@@ -6,16 +6,9 @@ So far, there are only two "slash commands" (/):
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import interactions
-import sentry_sdk
-from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 import discord_secret
 from database import db_session
 import models
-
-sentry_sdk.init(
-    traces_sample_rate  = 1.0,
-    integrations        = [SqlalchemyIntegration()]
-)
 
 bot = interactions.Client(token=discord_secret.TOKEN, default_scope=discord_secret.GUILD)
 
