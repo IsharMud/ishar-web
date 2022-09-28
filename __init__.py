@@ -282,7 +282,7 @@ def challenges():
 @app.route('/leader_board', methods=['GET'])
 @app.route('/leaderboard', methods=['GET'])
 def leaderboard(limit=10):
-    """    Sort and list the best players, with a limit option,
+    """Sort and list the best players, with a limit option,
         and boolean to include/exclude dead characters"""
 
     limit_choices   = [5, 10, 25, 50, 100]
