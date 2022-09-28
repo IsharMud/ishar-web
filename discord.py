@@ -11,11 +11,8 @@ from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 import discord_secret
 from database import db_session
 import models
-import sentry_secret
 
 sentry_sdk.init(
-    dsn                 = sentry_secret.DSN,
-    environment         = sentry_secret.ENV,
     traces_sample_rate  = 1.0,
     integrations        = [SqlalchemyIntegration()]
 )

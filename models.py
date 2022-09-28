@@ -256,8 +256,7 @@ class PlayerClass(Base):
 
 
 class PlayerFlag(Base):
-    """Player flag for a setting affecting a player character in-game
-        (such as perm-death/survival character, see is_survival)"""
+    """Player flag for a setting affecting a player character in-game"""
     __tablename__   = 'player_flags'
 
     flag_id         = Column(INTEGER(11), primary_key=True)
@@ -590,12 +589,6 @@ class Player(Base):
         return False
 
     @property
-    def is_survival(self):
-        """Boolean whether player is a survival ('PERM_DEATH') character"""
-        return self.get_flag('PERM_DEATH')
-
-
-    @property
     def is_evil(self):
         """Boolean whether player is evil aligned"""
         if self.align <= -500:
@@ -655,9 +648,9 @@ class Player(Base):
         """Player type"""
         if self.true_level >= levels.immortal_level:
             return levels.types[self.true_level]
-        if self.is_deleted:
+        if self.is_deleted == 1:
             return 'Dead'
-        if self.is_survival:
+        if self.get_flag('PERM_DEATH'):
             return 'Survival'
         return 'Classic'
 

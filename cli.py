@@ -8,13 +8,8 @@ import sentry_sdk
 from database import db_session
 from mud_secret import PODIR
 import models
-import sentry_secret
 
-sentry_sdk.init(
-    dsn                 = sentry_secret.DSN,
-    environment         = sentry_secret.ENV,
-    traces_sample_rate  = 1.0
-)
+sentry_sdk.init(traces_sample_rate=1.0)
 
 print('Ishar MUD CLI\n')
 now = datetime.utcnow()
@@ -116,10 +111,18 @@ if __name__ == "__main__":
                         del_id      = del_player.id
                         del_path    = f'{PODIR}/{del_player.name}'
                         print(f'    - {del_player.name} ({del_path})')
-                        db_session.query(models.PlayersFlag).filter_by(player_id = del_id).delete()
-                        db_session.query(models.PlayerQuest).filter_by(player_id = del_id).delete()
-                        db_session.query(models.PlayerRemortUpgrade).filter_by(player_id = del_id).delete()
-                        db_session.query(models.Player).filter_by(id = del_id).delete()
+                        db_session.query(models.PlayersFlag).filter_by(
+                            player_id = del_id
+                        ).delete()
+                        db_session.query(models.PlayerQuest).filter_by(
+                            player_id = del_id
+                        ).delete()
+                        db_session.query(models.PlayerRemortUpgrade).filter_by(
+                            player_id = del_id
+                        ).delete()
+                        db_session.query(models.Player).filter_by(
+                            id = del_id
+                        ).delete()
 
                         # Append the player Podir file name to be deleted, if it exists
                         if os.path.exists(del_path):

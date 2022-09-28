@@ -7,11 +7,12 @@ from datetime import datetime, timedelta
 import glob
 import ipaddress
 import os
-from flask import Flask, flash, redirect, render_template, request, \
-    send_from_directory, session, url_for
+from flask import Flask, flash, redirect, render_template, request, session, \
+    send_from_directory, url_for
 from flask_login import current_user, fresh_login_required, login_required, \
     login_user, logout_user, LoginManager
 import sentry_sdk
+from sentry_sdk import capture_exception
 from sentry_sdk.integrations.flask import FlaskIntegration
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 from database import db_session
@@ -20,23 +21,22 @@ import helptab
 import levels
 import models
 import mud_clients
-import sentry_secret
 
-
-# Set up Sentry and start/configure Flask
+# Sentry
 sentry_sdk.init(
-    dsn                 = sentry_secret.DSN,
-    environment         = sentry_secret.ENV,
     traces_sample_rate  = 1.0,
-    integrations        = [FlaskIntegration(), SqlalchemyIntegration()]
+    integrations        = [FlaskIntegration(), SqlalchemyIntegration()],
+    send_default_pii    = True
 )
+
+# Flask
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
 
 if __name__ == '__main__':
     app.run(debug=True)
 
-# Set up flask-login
+# Flask-Login
 login_manager                                   = LoginManager()
 login_manager.init_app(app)
 login_manager.login_message_category            = 'error'
@@ -48,7 +48,7 @@ login_manager.session_protection                = 'strong'
 
 @login_manager.user_loader
 def load_user(user_email):
-    """Get users for flask-login via Account object from the database"""
+    """Get users for flask-login via Account object from the database, via unique e-mail address"""
     return models.Account.query.filter_by(email = user_email).first()
 
 
@@ -135,6 +135,7 @@ def login():
             return redirect(session['next'])
         except Exception as err:
             print(err)
+            capture_exception(err)
             return redirect(url_for('portal'))
 
     # Show the log in form
@@ -632,9 +633,14 @@ def world(area=None):
 @app.route('/favicon.ico')
 @app.route('/robots.txt')
 @app.route('/sitemap.xml')
-def static_from_root():
+def static_root():
     """Static content"""
     return send_from_directory(app.static_folder, request.path[1:])
+
+@app.route('/debug-sentry')
+def trigger_error():
+    """Trigger error for Sentry"""
+    return 1 / 0
 
 
 @app.teardown_appcontext
