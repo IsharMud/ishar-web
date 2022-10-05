@@ -72,7 +72,7 @@ tr:nth-child(2n) {
     background-color:   #444;
 }
 
-input[type="reset"], input[type="submit"],
+input[type="reset"], input[type="submit"], input[type="checkbox"],
 #news-add-form,
 #change-password-form,
 #login-form,
@@ -160,6 +160,10 @@ header a, header a:hover {
     color:              #fa8072;
 }
 
+.flash-info {
+    color:              #09f;
+}
+
 .flash-success {
     color:              #4cbb17;
 }
@@ -196,6 +200,12 @@ footer {
 #essence, #created {
     text-align:         left;
     float:              left;
+    padding:            1em;
+}
+
+#admin-layout-link {
+    text-align:         center;
+    float:              center;
     padding:            1em;
 }
 

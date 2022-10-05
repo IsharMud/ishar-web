@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Manage Ishar MUD via CLI with argument parsing"""
-from datetime import datetime, timedelta
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 import getopt
 import os
 import sys
@@ -58,9 +59,8 @@ if __name__ == "__main__":
         # Create
         elif opt in ('--create'):
             try:
-                length  = int(arg) * 30
-                expire  = now + timedelta(days=length)
-                season = models.Season(
+                expire  = now + relativedelta(months=int(arg))
+                season  = models.Season(
                     is_active       = 1,
                     effective_date  = now,
                     expiration_date = expire

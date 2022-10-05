@@ -13,9 +13,9 @@
         <meta name="author" content="Ishar MUD">
         <meta name="description" content="Ishar MUD">
         <meta name="keywords" content="Ishar MUD, Ishar, IsharMUD, MUD, Multi User Dungeon, Multi-User Dungeon, Game">
-        {%- if span is defined and span != None %}
-        <meta name="sentry-trace" content="{{ span.toSentryTrace() }}">
-        <meta name="baggage" content="{{ serializeBaggage(span.getBaggage()) }}">
+        {%- if sentry_span is defined and sentry_span != None %}
+        <meta name="sentry-trace" content="{{ sentry_span.toSentryTrace() }}">
+        <meta name="baggage" content="{{ serializeBaggage(sentry_span.getBaggage()) }}">
         {%- endif %}
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta property="og:type" content="website">
@@ -27,6 +27,9 @@
         <title>{% block title %}Welcome{% endblock %} - Ishar MUD</title>
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
         <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+        {%- if sentry_js is defined and sentry_js != None and sentry_js != '' %}
+        <script src="{{ sentry_js }}" crossorigin="anonymous"></script>
+        {%- endif %}
     {%- endblock head %}
     {%- block scripts %}
     {%- endblock scripts %}
@@ -69,11 +72,17 @@
     {%- if current_user is defined and current_user.is_authenticated %}
         {%- if current_user.created_at is defined and current_user.created_at != '' %}
             <span id="created" title="Account Created: {{ current_user.created_at.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}">
-                <a href="{{ url_for('account') }}">Account Created</a>
+                <a href="{{ url_for('manage_account') }}">Account Created</a>
                 <br>
                 {{ current_user.created_at.strftime('%A, %B %d, %Y') }}
             </span>
         {%- endif %}
+    {%- endif %}
+    {%- if current_user is defined and current_user.is_god %}
+            <span id="admin-layout-link" title="Administration Portal">
+                <br>
+                <a href="{{ url_for('admin_portal') }}" title="Administration Portal">Administration Portal</a>
+            </span>
     {%- endif %}
     {%- if current_season is defined and current_season != None %}
             <span id="season" title="Season {{ current_season.season_id }} ends in {{ current_season.expires }} on {{ current_season.expiration_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}">

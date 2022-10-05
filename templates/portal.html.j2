@@ -95,9 +95,4 @@
                     |
                     <a href="{{ url_for('logout') }}" title="Log Out">Log Out</a>
                 </p>
-    {%- if current_user.is_god %}
-                <p class="bottom-portal-link">
-                    <a href="{{ url_for('admin_portal') }}" title="Administration Portal">Administration</a>
-                </p>
-    {%- endif %}
 {%- endblock %}

@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 import glob
 import ipaddress
 import os
+from urllib.parse import urlparse
 from flask import Flask, flash, redirect, render_template, request, session, \
     send_from_directory, url_for
 from flask_login import current_user, fresh_login_required, login_required, \
@@ -18,9 +19,9 @@ from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 from database import db_session
 import forms
 import helptab
-import levels
 import models
 import mud_clients
+import mud_secret
 
 # Sentry
 sentry_sdk.init(
@@ -51,11 +52,13 @@ def load_user(user_email):
     """Get users for flask-login via Account object from the database, via unique e-mail address"""
     return models.Account.query.filter_by(email = user_email).first()
 
-
 @app.context_processor
 def injects():
-    """Add context processor for season info on every page"""
-    return dict(current_season  = get_current_season())
+    """Add context processor for certain variables on all pages"""
+    return dict(
+        current_season  = get_current_season(),
+        sentry_js       = get_sentry_js()
+    )
 
 
 def error(title='Unknown Error', message='Sorry, but there was an unknown error.', code=500):
@@ -91,6 +94,17 @@ def internal_server_error(message):
 def get_current_season():
     """Method to return the current season"""
     return models.Season.query.filter_by(is_active = 1).order_by(-models.Season.season_id).first()
+
+
+def get_sentry_js():
+    """Method to return the Sentry JavaScript SDK URI based on environment secret"""
+    sentry_js   = None
+    sentry_dsn  = os.getenv('SENTRY_DSN')
+    if sentry_dsn:
+        sentry_uri  = urlparse(sentry_dsn)
+        if sentry_uri.username and sentry_uri.username != '':
+            sentry_js   = f'https://js.sentry-cdn.com/{sentry_uri.username}.min.js'
+    return sentry_js
 
 
 @app.route('/welcome', methods=['GET'])
@@ -293,8 +307,8 @@ def leaderboard(limit=10):
     if request.args.get('dead') and request.args.get('dead') == 'false':
         include_dead    = False
         leaders         = models.Player.query.filter(
-                            models.Player.true_level    < levels.immortal_level,
-                            models.Player.is_deleted    != 1
+                            models.Player.true_level < mud_secret.IMMORTAL_LEVEL,
+                            models.Player.is_deleted != 1
                         ).order_by(
                             -models.Player.remorts,
                             -models.Player.total_renown,
@@ -308,7 +322,7 @@ def leaderboard(limit=10):
     else:
         include_dead    = True
         leaders         = models.Player.query.filter(
-                            models.Player.true_level    < levels.immortal_level
+                            models.Player.true_level < mud_secret.IMMORTAL_LEVEL
                         ).order_by(
                             -models.Player.remorts,
                             -models.Player.total_renown,
@@ -332,17 +346,17 @@ def leaderboard(limit=10):
 @app.route('/wizlist', methods=['GET'])
 def wizlist():
     """Wizlist showing Immortals through Gods"""
-    immortals = models.Player.query.filter(
-                    models.Player.true_level    >= levels.immortal_level
-                ).order_by(
-                    -models.Player.true_level
-                ).all()
+    immortals   =   models.Player.query.filter(
+                        models.Player.true_level >= mud_secret.IMMORTAL_LEVEL
+                    ).order_by(
+                        -models.Player.true_level
+                    ).all()
     return render_template('wizlist.html.j2', immortals=immortals)
 
 
 @app.route('/account', methods=['GET'])
 @login_required
-def account():
+def manage_account():
     """Allow users to view/manage their accounts"""
     return render_template('account.html.j2')
 
@@ -371,19 +385,16 @@ def admin_news():
     news_add_form   = forms.NewsAddForm()
     if news_add_form.validate_on_submit():
 
-        # Create the model for the new news post
+        # Create the model for the new news post and add it to the database
         new_news = models.News(
             account_id      = current_user.account_id,
             created_at      = datetime.utcnow(),
             subject         = news_add_form.subject.data,
             body            = news_add_form.body.data
         )
-
-        # Create the news post in the database,
-        #   get the news post ID, and check that it worked
-        created_id      = new_news.add_news()
-        created_post    = models.News.query.filter_by(news_id = created_id).first()
-        if created_post:
+        db_session.add(new_news)
+        db_session.commit()
+        if new_news.news_id:
             flash('Your message has been posted!', 'success')
         else:
             flash('Sorry, but please try again!', 'error')
@@ -411,62 +422,74 @@ def admin_season():
     return render_template('admin/season.html.j2', seasons=seasons)
 
 
-@app.route('/admin/season/add', methods=['GET', 'POST'])
+@app.route('/admin/season/cycle', methods=['GET', 'POST'])
 @fresh_login_required
-def admin_season_add():
-    """Administration portal to allow Gods to add seasons
-    /admin/season/add"""
+def admin_season_cycle():
+    """Administration portal to allow Gods to cycle seasons, while wiping players
+    /admin/season/cycle"""
 
     # Redirect non-administrators to the main page
     if not current_user.is_god:
         flash('Sorry, but you are not godly enough!', 'error')
         return redirect(url_for('welcome'))
 
-    # Get season add form, and check if submitted
-    season_add_form = forms.SeasonAddForm()
-    if season_add_form.validate_on_submit():
+    # Get season cycle form, and check if submitted
+    season_cycle_form = forms.SeasonCycleForm()
+    if season_cycle_form.validate_on_submit():
 
-        # Create the model for the new season and add it to the database
+        # Expire any existing active seasons
+        for active_season in models.Season.query.filter_by(is_active = 1).all():
+            active_season.is_active         = 0
+            active_season.expiration_date   = datetime.utcnow()
+            flash(f'Season {active_season.season_id} expired.', 'success')
+
+        # Create the model for the new season for the database entry
         new_season  = models.Season(
             is_active       = 1,
-            effective_date  = season_add_form.effective_date.data,
-            expiration_date = season_add_form.expiration_date.data
+            effective_date  = season_cycle_form.effective_date.data,
+            expiration_date = season_cycle_form.expiration_date.data
         )
         db_session.add(new_season)
+
+        # Loop through all accounts
+        #   to apply essence, and delete mortal players
+        for account in models.Account.query.filter().all():
+            if account.seasonal_earned > 0:
+                calculated_essence  = account.seasonal_points + account.seasonal_earned
+                flash(f'Account "{account.account_name}" ({ account.account_id}) ' \
+                    f'now has {calculated_essence} essence. ' \
+                    f'({account.seasonal_points} existing + {account.seasonal_earned} earned)', 'success')
+                account.seasonal_points = calculated_essence
+            else:
+                flash(f'Account "{account.account_name}" ({ account.account_id}) earned no essence', 'warn')
+
+            player_delete_count = 0
+            for delete_player in account.players:
+                if not delete_player.is_immortal:
+                    delete_path = f'{mud_secret.PODIR}/{delete_player.name}'
+                    if os.path.exists(delete_path):
+                        os.remove(delete_path)
+                        flash(f'Deleted {delete_path}.' 'success')
+                    db_session.query(models.PlayersFlag).filter_by(player_id = delete_player.id).delete()
+                    db_session.query(models.PlayerQuest).filter_by(player_id = delete_player.id).delete()
+                    db_session.query(models.PlayerRemortUpgrade).filter_by(player_id = delete_player.id).delete()
+                    db_session.query(models.Player).filter_by(id = delete_player.id).delete()
+                    flash(f'Deleted mortal player: {delete_player.name} ({delete_player.id}).', 'success')
+                    player_delete_count     += 1
+                else:
+                    flash(f'Skipping immortal {delete_player.name}.', 'warn')
+
         db_session.commit()
+
         if new_season.season_id:
-            flash(f'Season {new_season.season_id} created!', 'success')
-        else:
-            flash('Sorry, but please try again!', 'error')
+            flash(f'Season {new_season.season_id} created.', 'success')
 
-    # Show the form to add a season in the administration portal
-    return render_template('admin/season_add.html.j2', season_add_form=season_add_form)
+        find_players = models.Player.query.filter(models.Player.true_level < mud_secret.IMMORTAL_LEVEL).all()
+        if not find_players:
+            flash(f'All ({player_delete_count}) mortal players have been deleted.', 'info')
 
-
-@app.route('/admin/season/expire/<int:expire_season>', methods=['GET'])
-@fresh_login_required
-def admin_season_expire(expire_season=None):
-    """Administration portal to allow Gods to expire seasons
-    /admin/season/expire"""
-
-    # Redirect non-administrators to the main page
-    if not current_user.is_god:
-        flash('Sorry, but you are not godly enough!', 'error')
-        return redirect(url_for('welcome'))
-
-    find_expire = models.Season.query.filter_by(
-                    is_active   = 1,
-                    season_id   = expire_season
-                ).first()
-    if find_expire:
-        find_expire.is_active       = 0
-        find_expire.expiration_date = datetime.utcnow()
-        db_session.commit()
-        flash(f'Season {find_expire.season_id} expired {find_expire.expiration_date}!', 'success')
-    else:
-        flash('Sorry, but that season could not be found, or may already be expired!', 'error')
-
-    return admin_season()
+    # Show the form to cycle a season in the administration portal
+    return render_template('admin/season_cycle.html.j2', season_cycle_form=season_cycle_form)
 
 
 @app.route('/logout', methods=['GET'])

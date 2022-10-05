@@ -67,15 +67,15 @@
                         <td title="Challenges: {{ leader.challenges_completed }}">
                             {{ leader.challenges_completed }}
                         </td>
-            {%- if leader.player_type != 'Classic' %}
+            {%- if leader.player_type == 'Classic' %}
+                        <td title="Deaths: {{ leader.deaths }}">
+                            {{ leader.deaths }}
+                        </td>
+            {%- else %}
                         <td class="non-classic" title="Type: {{ leader.player_type }}">
                             <span class="{{ leader.player_css }}">
                                 {{ leader.player_type }}
                             </span>
-                        </td>
-            {%- else %}
-                        <td title="Deaths: {{ leader.deaths }}">
-                            {{ leader.deaths }}
                         </td>
             {%- endif %}
                     </tr>

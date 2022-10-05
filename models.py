@@ -9,7 +9,7 @@ from sqlalchemy.schema import FetchedValue
 from sqlalchemy.orm import relationship
 from database import Base, db_session
 import delta
-import levels
+import mud_secret
 
 class Account(Base, UserMixin):
     """Account used to log in to the website and MUD in-game"""
@@ -220,16 +220,6 @@ class News(Base):
 
     account         = relationship('Account')
 
-    def add_news(self):
-        """Method to add a news post"""
-        try:
-            db_session.add(self)
-            db_session.commit()
-            return self.news_id
-        except Exception as err:
-            print(err)
-        return False
-
     def __repr__(self):
         return f'<News> "{self.subject}" ({self.news_id}) / ' \
             f'by "{self.account.name}" / at "{self.created_at}"'
@@ -430,6 +420,7 @@ class Season(Base):
             f'Effective: {self.effective_date} ("{self.effective}") - ' \
             f'Expires: {self.expiration_date} ("{self.expires}")'
 
+
 class Player(Base):
     """
     Player database class
@@ -528,7 +519,7 @@ class Player(Base):
 
     def get_flag(self, flag_name=None):
         """Method to return boolean for a specific player flag, by its flag name"""
-        flag    = PlayerFlag.query.filter_by(name  = flag_name).first()
+        flag    = PlayerFlag.query.filter_by(name = flag_name).first()
         pflag   = PlayersFlag.query.filter_by(flag_id = flag.flag_id, player_id = self.id).first()
         if pflag.value == 1:
             return True
@@ -576,36 +567,15 @@ class Player(Base):
 
     @property
     def is_god(self):
-        """Boolean whether player is a 'God'"""
-        if self.true_level >= levels.god_level:
+        """Boolean whether player is a God"""
+        if self.true_level >= mud_secret.GOD_LEVEL:
             return True
         return False
 
     @property
     def is_immortal(self):
         """Boolean whether player is an immortal"""
-        if self.true_level in levels.types.keys():
-            return True
-        return False
-
-    @property
-    def is_evil(self):
-        """Boolean whether player is evil aligned"""
-        if self.align <= -500:
-            return True
-        return False
-
-    @property
-    def is_good(self):
-        """Boolean whether player is good aligned"""
-        if self.align >= 500:
-            return True
-        return False
-
-    @property
-    def is_neutral(self):
-        """Boolean whether player is neutral/un-aligned"""
-        if self.align > -500 and self.align < 500:
+        if self.true_level >= mud_secret.IMMORTAL_LEVEL:
             return True
         return False
 
@@ -646,10 +616,10 @@ class Player(Base):
     @property
     def player_type(self):
         """Player type"""
-        if self.true_level >= levels.immortal_level:
-            return levels.types[self.true_level]
         if self.is_deleted == 1:
             return 'Dead'
+        if self.is_immortal:
+            return mud_secret.LEVELS[self.true_level]
         if self.get_flag('PERM_DEATH'):
             return 'Survival'
         return 'Classic'
@@ -657,8 +627,11 @@ class Player(Base):
     @property
     def seasonal_earned(self):
         """Amount of essence earned for the player"""
+
+        # Immortal players do not earn essence
         if self.is_immortal:
             return 0
+
         # Start with two (2) points for existing, with renown/remort equation
         earned  = int(self.total_renown / 10) + 2
         if self.remorts > 0:

@@ -1,9 +1,9 @@
 {% extends "layout.html.j2" %}
-{% block meta_title %}Season Management / Administration Portal{% endblock meta_title %}
+{% block meta_title %}Seasons / Administration Portal{% endblock meta_title %}
 {% block meta_description %}Administration portal page to manage seasons{% endblock %}
-{% block meta_url %}{{ url_for('admin_season_add', _external=True) }}{% endblock meta_url %}">
-{% block title %}Season Management / Administration Portal{% endblock %}
-{% block header %}Season Management{% endblock %}
+{% block meta_url %}{{ url_for('admin_season', _external=True) }}{% endblock meta_url %}">
+{% block title %}Seasons / Administration Portal{% endblock %}
+{% block header %}Seasons{% endblock %}
 {%- block content %}
             <table>
     {%- if seasons is defined and seasons is iterable and seasons | length > 0 %}
@@ -24,9 +24,6 @@
                 <tr {%- if season.is_active == 1 %} class="active-season"{% endif %}>
                     <td title="ID: {{ season.season_id }}">
                         {{ season.season_id }}
-                        {%- if season.is_active == 1 %}
-                        <a title="Expire" href="{{ url_for('admin_season_expire', expire_season=season.season_id) }}">❌</a>
-                        {%- endif %}
                     </td>
                     <td title="Effective: {{ season.effective_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}">
                         {{ season.effective_date }}
@@ -44,8 +41,11 @@
                 </tr>
     {%- endif %}
             </table>
-            <p>
-                <a href="{{ url_for('admin_season_add') }}">Add Season</a>
-            </p>
+            <br>
+            <ul>
+                <li>
+                    <a href="{{ url_for('admin_season_cycle') }}">Cycle Seasons (Player Wipe!)</a>
+                </li>
+            </ul>
 {% include('back.html.j2') %}
 {%- endblock %}

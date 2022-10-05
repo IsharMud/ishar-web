@@ -1,0 +1,50 @@
+{% extends "layout.html.j2" %}
+{% block meta_title %}Cycle Seasons / Administration Portal{% endblock meta_title %}
+{% block meta_description %}Administration portal page to cycle seasons{% endblock %}
+{% block meta_url %}{{ url_for('admin_season_cycle', _external=True) }}{% endblock meta_url %}">
+{% block title %}Cycle Seasons/ Administration Portal{% endblock %}
+{% block header %}Cycle Seasons{% endblock %}
+{%- macro render_field(field) %}
+                    <p class="admin-{{ field.name | safe }}">
+                        {{ field.label | safe }}
+                        {{ field(**kwargs) | safe }}
+                    </p>
+    {%- if field.errors %}
+                <ul class="field-errors">
+        {%- for error in field.errors %}
+                    <li>
+                        {{ error }}
+                    </li>
+        {%- endfor %}
+                </ul>
+    {%- endif %}
+{%- endmacro %}
+{%- block content %}
+{%- if current_season is defined and current_season != None %}
+                <h4>
+                    Current Season
+                </h4>
+                <ul>
+                    <li>
+                        Season {{ current_season.season_id }}
+                    </li>
+                    <li>
+                        Effective: {{ current_season.effective }} on {{ current_season.effective_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}
+                    </li>
+                    <li>
+                        Expires: {{ current_season.expires }} on {{ current_season.expiration_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}
+                    </li>
+                </ul>
+{%- endif %}
+{%- if season_cycle_form is defined %}
+                <form method="post" action="{{ url_for('admin_season_cycle') }}" id="season-add-form">
+                    {{ render_field(season_cycle_form.effective_date, autocomplete='off') }}
+                    {{ render_field(season_cycle_form.expiration_date, autocomplete='off') }}
+                    {{ render_field(season_cycle_form.confirm_wipe, autocomplete='off') }}
+                    {{ season_cycle_form.csrf_token }}
+                    {{ season_cycle_form.submit }}
+                    <br>
+                </form>
+{%- endif %}
+{% include('back.html.j2') %}
+{%- endblock %}

@@ -16,6 +16,7 @@ class AccountUpgrade(Base):
     description = Column(String(200), nullable=False)
     name = Column(String(30), nullable=False, unique=True)
     max_value = Column(MEDIUMINT(4), nullable=False, server_default=text("1"))
+    scale = Column(TINYINT(4), nullable=False, server_default=text("0"))
 
 
 class Account(Base):
