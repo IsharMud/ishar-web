@@ -458,10 +458,12 @@ def admin_season_cycle():
                 calculated_essence  = account.seasonal_points + account.seasonal_earned
                 flash(f'Account "{account.account_name}" ({ account.account_id}) ' \
                     f'now has {calculated_essence} essence. ' \
-                    f'({account.seasonal_points} existing + {account.seasonal_earned} earned)', 'success')
+                    f'({account.seasonal_points} existing + ' \
+                    f'{account.seasonal_earned} earned)', 'success')
                 account.seasonal_points = calculated_essence
             else:
-                flash(f'Account "{account.account_name}" ({ account.account_id}) earned no essence', 'warn')
+                flash(f'Account "{account.account_name}" ' \
+                    f'({ account.account_id}) earned no essence', 'warn')
 
             player_delete_count = 0
             for delete_player in account.players:
@@ -470,11 +472,16 @@ def admin_season_cycle():
                     if os.path.exists(delete_path):
                         os.remove(delete_path)
                         flash(f'Deleted {delete_path}.' 'success')
-                    db_session.query(models.PlayersFlag).filter_by(player_id = delete_player.id).delete()
-                    db_session.query(models.PlayerQuest).filter_by(player_id = delete_player.id).delete()
-                    db_session.query(models.PlayerRemortUpgrade).filter_by(player_id = delete_player.id).delete()
-                    db_session.query(models.Player).filter_by(id = delete_player.id).delete()
-                    flash(f'Deleted mortal player: {delete_player.name} ({delete_player.id}).', 'success')
+                    db_session.query(models.PlayersFlag).filter_by(
+                        player_id = delete_player.id).delete()
+                    db_session.query(models.PlayerQuest).filter_by(
+                        player_id = delete_player.id).delete()
+                    db_session.query(models.PlayerRemortUpgrade).filter_by(
+                        player_id = delete_player.id).delete()
+                    db_session.query(models.Player).filter_by(
+                        id = delete_player.id).delete()
+                    flash(f'Deleted mortal player: {delete_player.name} ' \
+                        f'({delete_player.id}).', 'success')
                     player_delete_count     += 1
                 else:
                     flash(f'Skipping immortal {delete_player.name}.', 'warn')
@@ -484,7 +491,9 @@ def admin_season_cycle():
         if new_season.season_id:
             flash(f'Season {new_season.season_id} created.', 'success')
 
-        find_players = models.Player.query.filter(models.Player.true_level < mud_secret.IMMORTAL_LEVEL).all()
+        find_players    = models.Player.query.filter(
+                            models.Player.true_level < mud_secret.IMMORTAL_LEVEL
+                        ).all()
         if not find_players:
             flash(f'All ({player_delete_count}) mortal players have been deleted.', 'info')
 
