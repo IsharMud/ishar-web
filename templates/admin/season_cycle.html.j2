@@ -2,7 +2,7 @@
 {% block meta_title %}Cycle Seasons / Administration Portal{% endblock meta_title %}
 {% block meta_description %}Administration portal page to cycle seasons{% endblock %}
 {% block meta_url %}{{ url_for('admin_season_cycle', _external=True) }}{% endblock meta_url %}">
-{% block title %}Cycle Seasons/ Administration Portal{% endblock %}
+{% block title %}Cycle Seasons / Administration Portal{% endblock %}
 {% block header %}Cycle Seasons{% endblock %}
 {%- macro render_field(field) %}
                     <p class="admin-{{ field.name | safe }}">
@@ -37,6 +37,9 @@
                 </ul>
 {%- endif %}
 {%- if season_cycle_form is defined %}
+                <h4>
+                    Cycle Seasons
+                </h4>
                 <form method="post" action="{{ url_for('admin_season_cycle') }}" id="season-add-form">
                     {{ render_field(season_cycle_form.effective_date, autocomplete='off') }}
                     {{ render_field(season_cycle_form.expiration_date, autocomplete='off') }}
