@@ -73,13 +73,13 @@ def bad_request(message):
 @app.errorhandler(401)
 def not_authorized(message):
     """Error codes to template above"""
-    sentry_sdk.capture_message(f'Not Authorized: {message}')
+    sentry_sdk.capture_message(f'Not Authorized: {message}', level='error')
     return error(title='Not Authorized', message=message, code=401)
 
 @app.errorhandler(403)
 def forbidden(message):
     """Error codes to template above"""
-    sentry_sdk.capture_message(f'Forbidden: {message}')
+    sentry_sdk.capture_message(f'Forbidden: {message}', level='error')
     return error(title='Forbidden', message=message, code=403)
 
 @app.errorhandler(404)
@@ -90,7 +90,7 @@ def page_not_found(message):
 @app.errorhandler(500)
 def internal_server_error(message):
     """Error codes to template above"""
-    sentry_sdk.capture_message(f'Internal Server Error: {message}')
+    sentry_sdk.capture_message(f'Internal Server Error: {message}', level='error')
     return error(title='Internal Server Error', message=message, code=500)
 
 
@@ -685,7 +685,7 @@ def world(area=None):
 @app.route('/debug-sentry')
 def trigger_error():
     """Trigger error for Sentry"""
-    sentry_sdk.capture_message('Triggering error for Sentry')
+    sentry_sdk.capture_message('Triggering error for Sentry', level='error')
     return 1 / 0
 
 
