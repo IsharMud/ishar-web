@@ -73,11 +73,13 @@ def bad_request(message):
 @app.errorhandler(401)
 def not_authorized(message):
     """Error codes to template above"""
+    sentry_sdk.capture_message(f'Not Authorized: {message}')
     return error(title='Not Authorized', message=message, code=401)
 
 @app.errorhandler(403)
 def forbidden(message):
     """Error codes to template above"""
+    sentry_sdk.capture_message(f'Forbidden: {message}')
     return error(title='Forbidden', message=message, code=403)
 
 @app.errorhandler(404)
@@ -88,6 +90,7 @@ def page_not_found(message):
 @app.errorhandler(500)
 def internal_server_error(message):
     """Error codes to template above"""
+    sentry_sdk.capture_message(f'Internal Server Error: {message}')
     return error(title='Internal Server Error', message=message, code=500)
 
 
