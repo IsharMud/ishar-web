@@ -107,10 +107,6 @@ input[type="reset"], input[type="submit"], input[type="checkbox"],
     color:              #00b7eb;
 }
 
-.active-season td {
-    background-color:   #4cbb17;
-}
-
 .non-classic {
     text-align:         center;
 }
@@ -164,7 +160,7 @@ header a, header a:hover {
     color:              #09f;
 }
 
-.flash-success {
+.flash-success, .active-season td {
     color:              #4cbb17;
 }
 

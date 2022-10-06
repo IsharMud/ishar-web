@@ -8,12 +8,11 @@ import glob
 import ipaddress
 import os
 from urllib.parse import urlparse
-from flask import Flask, flash, redirect, render_template, request, session, \
-    send_from_directory, url_for
+from flask import Flask, abort, flash, redirect, render_template, request, \
+    session, send_from_directory, url_for
 from flask_login import current_user, fresh_login_required, login_required, \
     login_user, logout_user, LoginManager
 import sentry_sdk
-from sentry_sdk import capture_exception
 from sentry_sdk.integrations.flask import FlaskIntegration
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 from database import db_session
@@ -48,9 +47,10 @@ login_manager.refresh_view                      = 'login'
 login_manager.session_protection                = 'strong'
 
 @login_manager.user_loader
-def load_user(user_email):
-    """Get users for flask-login via Account object from the database, via unique e-mail address"""
-    return models.Account.query.filter_by(email = user_email).first()
+def load_user(email):
+    """Use Account database object for flask-login, via unique e-mail address"""
+    return models.Account.query.filter_by(email = email).first()
+
 
 @app.context_processor
 def injects():
@@ -145,11 +145,19 @@ def login():
 
     # Redirect users who are logged in to the portal
     if current_user.is_authenticated:
+        sentry_user = {
+            'id'            : current_user.account_id,
+            'username'      : current_user.account_name,
+            'email'         : current_user.email,
+            'ip_address'    : request.remote_addr,
+        }
+        sentry_sdk.set_user(sentry_user)
+
         try:
             return redirect(session['next'])
         except Exception as err:
             print(err)
-            capture_exception(err)
+            sentry_sdk.capture_exception(err)
             return redirect(url_for('portal'))
 
     # Show the log in form
@@ -200,8 +208,9 @@ def shop():
             # Proceed with processing valid essence upgrade purchase requests
             else:
                 if chosen.do_upgrade():
-                    flash(f'You have been charged {chosen.upgrade.cost} essence' \
+                    flash(f'You have been charged {chosen.upgrade.cost} essence ' \
                         f'(for {chosen.upgrade.name}).', 'success')
+                    sentry_sdk.capture_message(f'Upgrade: {current_user} {chosen.upgrade}')
                 else:
                     flash('Sorry, but please try again!', 'error')
 
@@ -366,10 +375,10 @@ def manage_account():
 def admin_portal():
     """Administration portal main page for Gods"""
 
-    # Redirect non-administrators to the main page
+    # Only allow access to Gods
     if not current_user.is_god:
         flash('Sorry, but you are not godly enough!', 'error')
-        return redirect(url_for('welcome'))
+        abort(401)
 
     # Show the administration portal
     return render_template('admin/portal.html.j2')
@@ -396,6 +405,7 @@ def admin_news():
         db_session.commit()
         if new_news.news_id:
             flash('Your message has been posted!', 'success')
+            sentry_sdk.capture_message(f'News Posted: {new_news}')
         else:
             flash('Sorry, but please try again!', 'error')
 
@@ -409,10 +419,10 @@ def admin_season():
     """Administration portal to allow Gods to view/manage seasons
     /admin/season"""
 
-    # Redirect non-administrators to the main page
+    # Only allow access to Gods
     if not current_user.is_god:
         flash('Sorry, but you are not godly enough!', 'error')
-        return redirect(url_for('welcome'))
+        abort(401)
 
     # Get all seasons for admins
     seasons = models.Season.query.order_by(
@@ -428,10 +438,10 @@ def admin_season_cycle():
     """Administration portal to allow Gods to cycle seasons, while wiping players
     /admin/season/cycle"""
 
-    # Redirect non-administrators to the main page
+    # Only allow access to Gods
     if not current_user.is_god:
         flash('Sorry, but you are not godly enough!', 'error')
-        return redirect(url_for('welcome'))
+        abort(401)
 
     # Get season cycle form, and check if submitted
     season_cycle_form = forms.SeasonCycleForm()
@@ -442,6 +452,7 @@ def admin_season_cycle():
             active_season.is_active         = 0
             active_season.expiration_date   = datetime.utcnow()
             flash(f'Season {active_season.season_id} expired.', 'success')
+            sentry_sdk.capture_message(f'Season Expired: {active_season}')
 
         # Create the model for the new season for the database entry
         new_season  = models.Season(
@@ -453,6 +464,8 @@ def admin_season_cycle():
 
         # Loop through all accounts
         #   to apply essence, and delete mortal players
+        total_rewarded_essence  = 0
+        total_players_deleted   = 0
         for account in models.Account.query.filter().all():
             if account.seasonal_earned > 0:
                 calculated_essence  = account.seasonal_points + account.seasonal_earned
@@ -461,17 +474,17 @@ def admin_season_cycle():
                     f'({account.seasonal_points} existing + ' \
                     f'{account.seasonal_earned} earned)', 'success')
                 account.seasonal_points = calculated_essence
+                total_rewarded_essence  += calculated_essence
             else:
                 flash(f'Account "{account.account_name}" ' \
                     f'({ account.account_id}) earned no essence', 'warn')
 
-            player_delete_count = 0
             for delete_player in account.players:
                 if not delete_player.is_immortal:
                     delete_path = f'{mud_secret.PODIR}/{delete_player.name}'
                     if os.path.exists(delete_path):
                         os.remove(delete_path)
-                        flash(f'Deleted {delete_path}.' 'success')
+                        flash(f'Deleted <code>{delete_path}</code>.', 'success')
                     db_session.query(models.PlayersFlag).filter_by(
                         player_id = delete_player.id).delete()
                     db_session.query(models.PlayerQuest).filter_by(
@@ -480,22 +493,28 @@ def admin_season_cycle():
                         player_id = delete_player.id).delete()
                     db_session.query(models.Player).filter_by(
                         id = delete_player.id).delete()
-                    flash(f'Deleted mortal player: {delete_player.name} ' \
+                    flash(f'Deleted Player: {delete_player.name} ' \
                         f'({delete_player.id}).', 'success')
-                    player_delete_count     += 1
+                    total_players_deleted   += 1
                 else:
-                    flash(f'Skipping immortal {delete_player.name}.', 'warn')
+                    flash(f'Skipping immortal {delete_player.name}.', 'info')
 
         db_session.commit()
+        flash('All essence has been rewarded.', 'success')
+        flash(f'Total Rewarded Essence: {total_rewarded_essence} essence', 'info')
+        sentry_sdk.capture_message(f'Essence Rewarded: {total_rewarded_essence} essence')
 
         if new_season.season_id:
             flash(f'Season {new_season.season_id} created.', 'success')
+            sentry_sdk.capture_message(f'Season Created: {new_season}')
 
         find_players    = models.Player.query.filter(
                             models.Player.true_level < mud_secret.IMMORTAL_LEVEL
                         ).all()
         if not find_players:
-            flash(f'All ({player_delete_count}) mortal players have been deleted.', 'info')
+            flash('All mortal players have been deleted.', 'success')
+            flash(f'Total Players Deleted: {total_players_deleted}', 'info')
+            sentry_sdk.capture_message(f'Player Wipe: {total_players_deleted} mortals deleted')
 
     # Show the form to cycle a season in the administration portal
     return render_template('admin/season_cycle.html.j2', season_cycle_form=season_cycle_form)
@@ -506,6 +525,7 @@ def logout():
     """Allow users to log out (/logout)"""
     logout_user()
     flash('You have logged out!', 'success')
+    sentry_sdk.set_user(None)
     return redirect(url_for('welcome'))
 
 
@@ -553,11 +573,20 @@ def new_account():
             if created_account:
                 login_user(created_account)
                 flash('Your account has been created!', 'success')
+
             else:
                 flash('Sorry, but please try again!', 'error')
 
     # Redirect users who are logged in to the portal, including newly created accounts
     if current_user.is_authenticated:
+        sentry_user = {
+            'id'            : current_user.account_id,
+            'username'      : current_user.account_name,
+            'email'         : current_user.email,
+            'ip_address'    : request.remote_addr,
+        }
+        sentry_sdk.set_user(sentry_user)
+        sentry_sdk.capture_message(f'Account Created: {current_user}')
         return redirect(url_for('portal'))
 
     # Show the new account form
@@ -605,19 +634,7 @@ def patches():
 @app.route('/faqs')
 @app.route('/faq')
 def faq():
-    """
-    /faq (or /faqs, or /questions)
-    A few frequently asked questions, stored in a dictionary of lists, to be displayed pretty
-    TODO: Eventually, Include the count and list of playable classes and races dynamically
-    player_classes  = models.PlayerClass.query.filter(
-                        models.PlayerClass.class_description != None
-                    ).all()
-    player_races    = models.PlayerRace.query.filter(
-                        models.PlayerRace.race_description != None
-                    ).all()
-    print(f'FAQ PLAYER Classes: {player_classes}')
-    print(f'FAQ PLAYER Races: {player_races}')
-    """
+    """A few frequently asked questions (/faq, /faqs, or /questions)"""
     import faqs
     return render_template('faq.html.j2', faqs=faqs.faqs)
 
@@ -662,16 +679,10 @@ def world(area=None):
     return render_template('world.html.j2', areas=areas, area=area), code
 
 
-@app.route('/favicon.ico')
-@app.route('/robots.txt')
-@app.route('/sitemap.xml')
-def static_root():
-    """Static content"""
-    return send_from_directory(app.static_folder, request.path[1:])
-
 @app.route('/debug-sentry')
 def trigger_error():
     """Trigger error for Sentry"""
+    sentry_sdk.capture_message('Triggering error for Sentry')
     return 1 / 0
 
 
