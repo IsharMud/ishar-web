@@ -23,6 +23,7 @@ import mud_secret
 
 # Sentry
 sentry_sdk.init(
+    environment         = os.getenv('SENTRY_ENV') or 'development',
     traces_sample_rate  = 1.0,
     integrations        = [FlaskIntegration(), SqlalchemyIntegration()],
     send_default_pii    = True
@@ -48,7 +49,15 @@ login_manager.session_protection                = 'strong'
 @login_manager.user_loader
 def load_user(email):
     """Use Account database object for flask-login, via unique e-mail address"""
-    return models.Account.query.filter_by(email = email).first()
+    user_account    = models.Account.query.filter_by(email = email).first()
+    sentry_user     = {
+        'id'            : user_account.account_id,
+        'username'      : user_account.account_name,
+        'email'         : user_account.email,
+        'ip_address'    : request.remote_addr,
+    }
+    sentry_sdk.set_user(sentry_user)
+    return user_account
 
 
 @app.context_processor
@@ -147,13 +156,6 @@ def login():
 
     # Redirect users who are logged in to the portal
     if current_user.is_authenticated:
-        sentry_user = {
-            'id'            : current_user.account_id,
-            'username'      : current_user.account_name,
-            'email'         : current_user.email,
-            'ip_address'    : request.remote_addr,
-        }
-        sentry_sdk.set_user(sentry_user)
         return redirect(session['next'] or url_for('portal'))
 
     # Show the log in form
@@ -575,13 +577,6 @@ def new_account():
 
     # Redirect users who are logged in to the portal, including newly created accounts
     if current_user.is_authenticated:
-        sentry_user = {
-            'id'            : current_user.account_id,
-            'username'      : current_user.account_name,
-            'email'         : current_user.email,
-            'ip_address'    : request.remote_addr,
-        }
-        sentry_sdk.set_user(sentry_user)
         sentry_sdk.capture_message(f'Account Created: {current_user}')
         return redirect(url_for('portal'))
 
