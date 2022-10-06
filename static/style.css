@@ -80,16 +80,10 @@ input[type="reset"], input[type="submit"], input[type="checkbox"],
 {
     background-color:   #000;
     color:              #fa7;
-    font-size:          1.25em;
 }
 
 .login-remember, #new-account-link {
     display:            table;
-    font-size:          0.9em;
-}
-
-#portal-account-upgrades {
-    font-size:          0.9em;
 }
 
 .news-created {
@@ -218,7 +212,6 @@ nav {
 
 nav a {
     display:            block;
-    font-size:          1.1em;
     padding:            0.25em;
     text-decoration:    none;
     width:              15vw;

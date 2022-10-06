@@ -8,10 +8,9 @@ import glob
 import ipaddress
 import os
 from urllib.parse import urlparse
-from flask import Flask, abort, flash, redirect, render_template, request, \
-    session, send_from_directory, url_for
-from flask_login import current_user, fresh_login_required, login_required, \
-    login_user, logout_user, LoginManager
+from flask import Flask, abort, flash, redirect, render_template, request, session, url_for
+from flask_login import current_user, fresh_login_required, login_required, login_user, \
+    logout_user, LoginManager
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
@@ -155,13 +154,7 @@ def login():
             'ip_address'    : request.remote_addr,
         }
         sentry_sdk.set_user(sentry_user)
-
-        try:
-            return redirect(session['next'])
-        except Exception as err:
-            print(err)
-            sentry_sdk.capture_exception(err)
-            return redirect(url_for('portal'))
+        return redirect(session['next'] or url_for('portal'))
 
     # Show the log in form
     return render_template('login.html.j2', login_form=login_form), 401
