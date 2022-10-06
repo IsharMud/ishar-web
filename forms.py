@@ -5,7 +5,7 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from flask_wtf import FlaskForm
 from wtforms import BooleanField, DateTimeLocalField, EmailField, PasswordField, \
-    RadioField, StringField, SubmitField, TextAreaField, validators
+    RadioField, StringField, SubmitField, TextAreaField
 from wtforms.validators import DataRequired, Email, EqualTo, Length
 from wtforms_validators import Alpha
 
@@ -127,7 +127,7 @@ class NewAccountForm(FlaskForm):
                                 )
                             ]
                         )
-    confirm_password    = PasswordField('Confirm Password', 
+    confirm_password    = PasswordField('Confirm Password',
                             validators  = [
                                 DataRequired(),
                                 Length(

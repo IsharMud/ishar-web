@@ -15,11 +15,11 @@ import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 from database import db_session
+from models import Account, Challenge, News, Player, Season
+from mud_secret import PODIR, IMM_LEVELS
 import forms
 import helptab
-import models
 import mud_clients
-import mud_secret
 
 # Sentry
 sentry_sdk.init(
@@ -49,7 +49,7 @@ login_manager.session_protection                = 'strong'
 @login_manager.user_loader
 def load_user(email):
     """Use Account database object for flask-login, via unique e-mail address"""
-    user_account    = models.Account.query.filter_by(email = email).first()
+    user_account    = Account.query.filter_by(email = email).first()
     sentry_user     = {
         'id'            : user_account.account_id,
         'username'      : user_account.account_name,
@@ -81,13 +81,13 @@ def bad_request(message):
 @app.errorhandler(401)
 def not_authorized(message):
     """Error codes to template above"""
-    sentry_sdk.capture_message(f'Not Authorized: {message}', level='error')
+    sentry_sdk.capture_message(message, level='error')
     return error(title='Not Authorized', message=message, code=401)
 
 @app.errorhandler(403)
 def forbidden(message):
     """Error codes to template above"""
-    sentry_sdk.capture_message(f'Forbidden: {message}', level='error')
+    sentry_sdk.capture_message(message, level='error')
     return error(title='Forbidden', message=message, code=403)
 
 @app.errorhandler(404)
@@ -98,13 +98,13 @@ def page_not_found(message):
 @app.errorhandler(500)
 def internal_server_error(message):
     """Error codes to template above"""
-    sentry_sdk.capture_message(f'Internal Server Error: {message}', level='error')
+    sentry_sdk.capture_message(message, level='error')
     return error(title='Internal Server Error', message=message, code=500)
 
 
 def get_current_season():
     """Method to return the current season"""
-    return models.Season.query.filter_by(is_active = 1).order_by(-models.Season.season_id).first()
+    return Season.query.filter_by(is_active = 1).order_by(-Season.season_id).first()
 
 
 def get_sentry_js():
@@ -123,7 +123,7 @@ def get_sentry_js():
 def welcome():
     """Main welcome page/index, includes the most recent news"""
     return render_template('welcome.html.j2',
-        news    = models.News.query.order_by(-models.News.created_at).limit(1).all()
+        news    = News.query.order_by(-News.created_at).limit(1).all()
     )
 
 
@@ -143,7 +143,7 @@ def login():
     if login_form.validate_on_submit():
 
         # Find the user by e-mail address from the log in form
-        find = models.Account.query.filter_by(email = login_form.email.data).first()
+        find = Account.query.filter_by(email = login_form.email.data).first()
 
         # If we find the user email and match the password, it is a successful log in
         if find is not None and find.check_password(login_form.password.data):
@@ -253,8 +253,8 @@ def show_player(player_name=None):
 
         # Perform a MySQL "LIKE" search query on the name,
         # followed by a wildcard (%) to try to find the player
-        player  = models.Player.query.filter(
-                    models.Player.name.like(
+        player  = Player.query.filter(
+                    Player.name.like(
                         player_search_form.player_search_name.data + '%'
                     )
                 ).first()
@@ -267,7 +267,7 @@ def show_player(player_name=None):
 
     # Find the player, in the database, by exact name
     if player_name:
-        player  = models.Player.query.filter_by(name = player_name).first()
+        player  = Player.query.filter_by(name = player_name).first()
 
     # If our search returned something, we found a player
     if player:
@@ -292,9 +292,9 @@ def portal():
 @app.route('/challenges', methods=['GET'])
 def challenges():
     """Sort and list active challenges, along with their tiers and winners"""
-    find    = models.Challenge.query.filter_by(is_active = 1).order_by(
-                models.Challenge.adj_level,
-                models.Challenge.adj_people
+    find    = Challenge.query.filter_by(is_active = 1).order_by(
+                Challenge.adj_level,
+                Challenge.adj_people
             ).all()
     return render_template('challenges.html.j2', challenges=find)
 
@@ -313,32 +313,32 @@ def leaderboard(limit=10):
 
     if request.args.get('dead') and request.args.get('dead') == 'false':
         include_dead    = False
-        leaders         = models.Player.query.filter(
-                            models.Player.true_level < mud_secret.IMMORTAL_LEVEL,
-                            models.Player.is_deleted != 1
+        leaders         = Player.query.filter(
+                            Player.true_level < min(IMM_LEVELS),
+                            Player.is_deleted != 1
                         ).order_by(
-                            -models.Player.remorts,
-                            -models.Player.total_renown,
-                            -models.Player.quests_completed,
-                            -models.Player.challenges_completed,
-                            -models.Player.renown,
-                            -models.Player.true_level,
-                            -models.Player.bankacc,
-                            models.Player.deaths
+                            -Player.remorts,
+                            -Player.total_renown,
+                            -Player.quests_completed,
+                            -Player.challenges_completed,
+                            -Player.renown,
+                            -Player.true_level,
+                            -Player.bankacc,
+                            Player.deaths
                         ).limit(limit).all()
     else:
         include_dead    = True
-        leaders         = models.Player.query.filter(
-                            models.Player.true_level < mud_secret.IMMORTAL_LEVEL
+        leaders         = Player.query.filter(
+                            Player.true_level < min(IMM_LEVELS),
                         ).order_by(
-                            -models.Player.remorts,
-                            -models.Player.total_renown,
-                            -models.Player.quests_completed,
-                            -models.Player.challenges_completed,
-                            -models.Player.renown,
-                            -models.Player.true_level,
-                            -models.Player.bankacc,
-                            models.Player.deaths
+                            -Player.remorts,
+                            -Player.total_renown,
+                            -Player.quests_completed,
+                            -Player.challenges_completed,
+                            -Player.renown,
+                            -Player.true_level,
+                            -Player.bankacc,
+                            Player.deaths
                         ).limit(limit).all()
 
     return render_template('leaderboard.html.j2',
@@ -353,10 +353,10 @@ def leaderboard(limit=10):
 @app.route('/wizlist', methods=['GET'])
 def wizlist():
     """Wizlist showing Immortals through Gods"""
-    immortals   =   models.Player.query.filter(
-                        models.Player.true_level >= mud_secret.IMMORTAL_LEVEL
+    immortals   =   Player.query.filter(
+                        Player.true_level >= min(IMM_LEVELS)
                     ).order_by(
-                        -models.Player.true_level
+                        -Player.true_level
                     ).all()
     return render_template('wizlist.html.j2', immortals=immortals)
 
@@ -393,7 +393,7 @@ def admin_news():
     if news_add_form.validate_on_submit():
 
         # Create the model for the new news post and add it to the database
-        new_news = models.News(
+        new_news = News(
             account_id      = current_user.account_id,
             created_at      = datetime.utcnow(),
             subject         = news_add_form.subject.data,
@@ -423,9 +423,9 @@ def admin_season():
         abort(401)
 
     # Get all seasons for admins
-    seasons = models.Season.query.order_by(
-                -models.Season.is_active,
-                -models.Season.season_id
+    seasons = Season.query.order_by(
+                -Season.is_active,
+                -Season.season_id
             ).all()
     return render_template('admin/season.html.j2', seasons=seasons)
 
@@ -446,14 +446,14 @@ def admin_season_cycle():
     if season_cycle_form.validate_on_submit():
 
         # Expire any existing active seasons
-        for active_season in models.Season.query.filter_by(is_active = 1).all():
+        for active_season in Season.query.filter_by(is_active = 1).all():
             active_season.is_active         = 0
             active_season.expiration_date   = datetime.utcnow()
             flash(f'Season {active_season.season_id} expired.', 'success')
             sentry_sdk.capture_message(f'Season Expired: {active_season}')
 
         # Create the model for the new season for the database entry
-        new_season  = models.Season(
+        new_season  = Season(
             is_active       = 1,
             effective_date  = season_cycle_form.effective_date.data,
             expiration_date = season_cycle_form.expiration_date.data
@@ -464,7 +464,7 @@ def admin_season_cycle():
         #   to apply essence, and delete mortal players
         total_rewarded_essence  = 0
         total_players_deleted   = 0
-        for account in models.Account.query.filter().all():
+        for account in Account.query.filter().all():
             if account.seasonal_earned > 0:
                 calculated_essence  = account.seasonal_points + account.seasonal_earned
                 flash(f'Account "{account.account_name}" ({ account.account_id}) ' \
@@ -479,17 +479,17 @@ def admin_season_cycle():
 
             for delete_player in account.players:
                 if not delete_player.is_immortal:
-                    delete_path = f'{mud_secret.PODIR}/{delete_player.name}'
+                    delete_path = f'{PODIR}/{delete_player.name}'
                     if os.path.exists(delete_path):
                         os.remove(delete_path)
                         flash(f'Deleted <code>{delete_path}</code>.', 'success')
-                    db_session.query(models.PlayersFlag).filter_by(
+                    db_session.query(PlayersFlag).filter_by(
                         player_id = delete_player.id).delete()
-                    db_session.query(models.PlayerQuest).filter_by(
+                    db_session.query(PlayerQuest).filter_by(
                         player_id = delete_player.id).delete()
-                    db_session.query(models.PlayerRemortUpgrade).filter_by(
+                    db_session.query(PlayerRemortUpgrade).filter_by(
                         player_id = delete_player.id).delete()
-                    db_session.query(models.Player).filter_by(
+                    db_session.query(Player).filter_by(
                         id = delete_player.id).delete()
                     flash(f'Deleted Player: {delete_player.name} ' \
                         f'({delete_player.id}).', 'success')
@@ -506,8 +506,8 @@ def admin_season_cycle():
             flash(f'Season {new_season.season_id} created.', 'success')
             sentry_sdk.capture_message(f'Season Created: {new_season}')
 
-        find_players    = models.Player.query.filter(
-                            models.Player.true_level < mud_secret.IMMORTAL_LEVEL
+        find_players    = Player.query.filter(
+                            Player.true_level < min(IMM_LEVELS)
                         ).all()
         if not find_players:
             flash('All mortal players have been deleted.', 'success')
@@ -536,13 +536,13 @@ def new_account():
     if new_account_form.validate_on_submit():
 
         # Check that e-mail address has not already been used
-        find_email  = models.Account.query.filter_by(email = new_account_form.email.data).first()
+        find_email  = Account.query.filter_by(email = new_account_form.email.data).first()
         if find_email:
             flash('Sorry, but that e-mail address exists. Please log in.', 'error')
             return redirect(url_for('login'))
 
         # Check that the account name is not in use
-        find_name   = models.Account.query.filter_by(
+        find_name   = Account.query.filter_by(
                         account_name    = new_account_form.account_name.data
                     ).first()
         if find_name:
@@ -551,7 +551,7 @@ def new_account():
         # Otherwise, proceed in trying to create the new account
         else:
             ip_address  = ipaddress.ip_address(request.remote_addr)
-            new_uacct   = models.Account(
+            new_uacct   = Account(
                 email           = new_account_form.email.data,
                 password        = new_account_form.confirm_password.data,
                 create_isp      = ip_address,
@@ -565,7 +565,7 @@ def new_account():
 
             # Create the account in the database, confirm the account ID, and log the user in
             created_id      = new_uacct.create_account()
-            created_account = models.Account.query.filter_by(
+            created_account = Account.query.filter_by(
                                 account_id  = created_id
                             ).first()
             if created_account:

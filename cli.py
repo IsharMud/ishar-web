@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """Manage Ishar MUD via CLI with argument parsing"""
-from datetime import datetime
-from dateutil.relativedelta import relativedelta
 import getopt
 import os
 import sys
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 import sentry_sdk
 from database import db_session
+from models import Account, Player, PlayersFlag, PlayerQuest, PlayerRemortUpgrade, Season
 from mud_secret import PODIR
-import models
 
 sentry_sdk.init(traces_sample_rate=1.0)
 
@@ -60,7 +60,7 @@ if __name__ == "__main__":
         elif opt in ('--create'):
             try:
                 expire  = now + relativedelta(months=int(arg))
-                season  = models.Season(
+                season  = Season(
                     is_active       = 1,
                     effective_date  = now,
                     expiration_date = expire
@@ -79,7 +79,7 @@ if __name__ == "__main__":
 
         # Expiration
         elif opt in ('-e', '-x', '--expire'):
-            season = models.Season.query.filter_by(
+            season = Season.query.filter_by(
                         season_id   = int(arg),
                     ).first()
             if season:
@@ -92,7 +92,7 @@ if __name__ == "__main__":
                     print('Expired:\n')
                     finish(
                         code    = 0,
-                        message = models.Season.query.filter_by(season_id=int(arg)).first()
+                        message = Season.query.filter_by(season_id=int(arg)).first()
                     )
             else:
                 finish(code=1, message='Invalid season expiration')
@@ -100,7 +100,7 @@ if __name__ == "__main__":
         # Player wipe
         elif opt == '--pwipe':
             podir_del   = []
-            for account in models.Account.query.filter().all():
+            for account in Account.query.filter().all():
                 new_essence = account.seasonal_points + account.seasonal_earned
                 print(f'- {account.account_name}: {account.seasonal_points} existing + ' \
                     f'{account.seasonal_earned} earned = {new_essence} essence')
@@ -111,16 +111,16 @@ if __name__ == "__main__":
                         del_id      = del_player.id
                         del_path    = f'{PODIR}/{del_player.name}'
                         print(f'    - {del_player.name} ({del_path})')
-                        db_session.query(models.PlayersFlag).filter_by(
+                        db_session.query(PlayersFlag).filter_by(
                             player_id = del_id
                         ).delete()
-                        db_session.query(models.PlayerQuest).filter_by(
+                        db_session.query(PlayerQuest).filter_by(
                             player_id = del_id
                         ).delete()
-                        db_session.query(models.PlayerRemortUpgrade).filter_by(
+                        db_session.query(PlayerRemortUpgrade).filter_by(
                             player_id = del_id
                         ).delete()
-                        db_session.query(models.Player).filter_by(
+                        db_session.query(Player).filter_by(
                             id = del_id
                         ).delete()
 
@@ -141,7 +141,7 @@ if __name__ == "__main__":
 
         # List Active
         elif opt in ('-l', '--list'):
-            seasons = models.Season.query.filter_by(is_active=1).all()
+            seasons = Season.query.filter_by(is_active=1).all()
             if seasons:
                 for season in seasons:
                     print(season)
@@ -151,7 +151,7 @@ if __name__ == "__main__":
 
         # List All
         elif opt in ('--list-all'):
-            seasons = models.Season.query.order_by(models.Season.season_id).all()
+            seasons = Season.query.order_by(Season.season_id).all()
             if seasons:
                 for season in seasons:
                     print(season)

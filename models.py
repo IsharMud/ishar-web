@@ -8,8 +8,8 @@ from sqlalchemy.dialects.mysql import INTEGER, MEDIUMINT, SMALLINT, TINYINT
 from sqlalchemy.schema import FetchedValue
 from sqlalchemy.orm import relationship
 from database import Base, db_session
+from mud_secret import IMM_LEVELS
 import delta
-import mud_secret
 
 class Account(Base, UserMixin):
     """Account used to log in to the website and MUD in-game"""
@@ -46,7 +46,7 @@ class Account(Base, UserMixin):
 
     @property
     def is_god(self):
-        """Boolean whether user is a 'God'"""
+        """Boolean whether user is a God"""
         for player in self.players:
             if player.is_god:
                 return True
@@ -568,14 +568,14 @@ class Player(Base):
     @property
     def is_god(self):
         """Boolean whether player is a God"""
-        if self.true_level >= mud_secret.GOD_LEVEL:
+        if self.true_level >= max(IMM_LEVELS):
             return True
         return False
 
     @property
     def is_immortal(self):
         """Boolean whether player is an immortal"""
-        if self.true_level >= mud_secret.IMMORTAL_LEVEL:
+        if self.true_level >= min(IMM_LEVELS):
             return True
         return False
 
@@ -619,7 +619,7 @@ class Player(Base):
         if self.is_deleted == 1:
             return 'Dead'
         if self.is_immortal:
-            return mud_secret.LEVELS[self.true_level]
+            return IMM_LEVELS[self.true_level]
         if self.get_flag('PERM_DEATH'):
             return 'Survival'
         return 'Classic'
