@@ -25,13 +25,7 @@
                             Remorts
                         </th>
                         <th>
-                            Renown (Total)
-                        </th>
-                        <th>
-                            Quests
-                        </th>
-                        <th>
-                            Challenges
+                            Renown
                         </th>
                         <th>
                             Deaths
@@ -51,14 +45,8 @@
                         <td title="Remorts: {{ player.remorts }}">
                             {{ player.remorts }}
                         </td>
-                        <td title="Renown: {{ player.renown }} ({{ player.total_renown }})">
-                            {{ player.renown }} ({{ player.total_renown }})
-                        </td>
-                        <td title="Quests: {{ player.quests_completed }}">
-                            {{ player.quests_completed }}
-                        </td>
-                        <td title="Challenges: {{ player.challenges_completed }}">
-                            {{ player.challenges_completed }}
+                        <td title="Renown: {{ player.renown }}">
+                            {{ player.renown }}
                         </td>
             {%- if player.player_type != 'Classic' %}
                         <td class="non-classic" title="Type: {{ player.player_type }}">

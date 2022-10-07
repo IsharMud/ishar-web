@@ -1,67 +1,34 @@
+
 body {
-    background-color:   #000;
-    color:              #fff;
     font-family:        'Open Sans', sans-serif;
 }
 
-a,
-.connect,
-#created strong,
-h1, h2, h3, h4,
-th,
-#essence-balance strong,
-.shop strong,
-#shop-form label
-{
-    color:              #fa7;
+a:link, a:hover {
+    color:               #09f;
 }
 
-a:hover, a:active, #active-nav {
-    background-color:   #fa7;
-    color:              #000;
-    text-decoration:    none;
+a:active, a:visited {
+    color:                #6082b6;
 }
 
-a[target="_blank"]::after {
-    content:            url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAQElEQVR42qXKwQkAIAxDUUdxtO6/RBQkQZvSi8I/pL4BoGw/XPkh4XigPmsUgh0626AjRsgxHTkUThsG2T/sIlzdTsp52kSS1wAAAABJRU5ErkJggg==);
-    filter:             brightness(0) invert(1);
-    margin:             0 3px 0 5px;
+header, header h1, nav, nav ul, nav li {
+    display:                inline-block;
 }
 
-#buy-coffee::after {
-    content:            none;
-    filter:             none;
+nav li {
+    padding:                1vw;
 }
 
-hr {
-    border-color:       #fa7;
+header h1 a {
+    text-decoration:        none;
 }
 
-pre {
-    padding-left:       2.5em;
-    white-space:        pre-wrap;
+header img {
+    height:                 15vh;
 }
 
-#player-description {
-    padding-left:       2.5em;
-}
-
-#player-remort-upgrades,
-#player-details,
-#player-quests,
-#player-time,
-#world-list
-{
-    column-count:       2;
-    column-rule:        0.1em dotted #fa7;
-}
-
-#essence-balance ul,
-#mud-client-list ul,
-#mud-client-list ul ul,
-#player-details ul ul
-{
-    column-count:       initial;
+#content{
+    margin:                 1vw;
 }
 
 th, td, #content li {
@@ -69,17 +36,37 @@ th, td, #content li {
 }
 
 tr:nth-child(2n) {
-    background-color:   #444;
+    background-color:   #eee;
 }
 
-input[type="reset"], input[type="submit"], input[type="checkbox"],
-#news-add-form,
-#change-password-form,
-#login-form,
-#new-account-form
+a[target="_blank"]::after {
+    content:            url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAQElEQVR42qXKwQkAIAxDUUdxtO6/RBQkQZvSi8I/pL4BoGw/XPkh4XigPmsUgh0626AjRsgxHTkUThsG2T/sIlzdTsp52kSS1wAAAABJRU5ErkJggg==);
+    margin:             0 3px 0 5px;
+    filter:             invert(1);
+}
+
+pre {
+    padding-left:       2.5em;
+    white-space:        pre-wrap;
+}
+
+textarea {
+    height:             10em;
+    width:              60vw;
+}
+
+.faq-answers,
+.faq-nested,
+.mud-clients,
+.essence-upgrades
 {
-    background-color:   #000;
-    color:              #fa7;
+    list-style:         none;
+}
+
+.challenge-completed {
+    text-decoration:            line-through;
+    text-decoration-color:      #a00;
+    text-decoration-thickness:  0.2em;
 }
 
 .login-remember, #new-account-link {
@@ -87,7 +74,6 @@ input[type="reset"], input[type="submit"], input[type="checkbox"],
 }
 
 .news-created {
-    float:              right;
     font-style:         italic;
 }
 
@@ -118,34 +104,12 @@ input[type="reset"], input[type="submit"], input[type="checkbox"],
     content:            ' 👼';
 }
 
-.dead-player,
-.survival-player
-{
-    color:              #fa8072;
-}
-
 .dead-player::after {
     content:            ' ☠️';
 }
 
-header {
-    margin:             auto;
-    text-align:         center;
-}
-
-header img {
-    border-bottom:      1px solid #fa7;
-    width:              95vw;
-}
-
-header a, header a:hover {
-    background-color:   #000;
-}
-
-#flashes, #primary-stat {
-    font-weight:        bold;
-}
-
+.dead-player,
+.survival-player,
 .flash-error {
     color:              #fa8072;
 }
@@ -168,76 +132,8 @@ header a, header a:hover {
     list-style:         none;
 }
 
-input, textarea {
-    background-color:   #000;
-    border-color:       #fa7;
-    color:              #fa7;
-}
-
-textarea {
-    height:             10em;
-    width:              60vw;
-}
-
-footer {
-    border-top:         1px solid #fa7;
-    margin:             auto;
-    overflow:           auto;
-    text-align:         center;
-    width:              95vw;
-}
-
-#essence, #created {
-    text-align:         left;
-    float:              left;
-    padding:            1em;
-}
-
-#admin-layout-link {
-    text-align:         center;
-    float:              center;
-    padding:            1em;
-}
-
-#season, #player-search-form {
-    text-align:         right;
-    float:              right;
-    padding:            1em;
-}
-
-nav {
-    float:              right;
-    padding-right:      3vw;
-}
-
-nav a {
-    display:            block;
-    padding:            0.25em;
-    text-decoration:    none;
-    width:              15vw;
-}
-
-nav a:hover, nav a:active {
-    background-color:   #fa7;
-    color:              #000;
-}
-
-nav li {
-    border:             1px solid #fa7;
-    list-style:         none;
-    padding:            0.25em;
-}
-
-#content {
-    padding-left:       3vw;
-}
-
-.faq-answers,
-.faq-nested,
-.mud-clients,
-.essence-upgrades
-{
-    list-style:         none;
+#flashes, #primary-stat {
+    font-weight:        bold;
 }
 
 #leaderboard-choices ul li {
@@ -245,13 +141,60 @@ nav li {
     padding:            1em;
 }
 
-.challenge-completed {
-    text-decoration:            line-through;
-    text-decoration-color:      #fa7;
-    text-decoration-thickness:  0.17em;
+#buy-coffee::after {
+    content:            none;
+    filter:             none;
+}
+
+#player-description {
+    padding-left:       2.5em;
+}
+
+#player-remort-upgrades,
+#player-details,
+#player-quests,
+#player-time,
+#world-list
+{
+    column-count:       2;
+    column-rule:        0.1em dotted #d6d6d7;
+}
+
+#essence-balance ul,
+#mud-client-list ul,
+#mud-client-list ul ul,
+#player-details ul ul
+{
+    column-count:       initial;
+}
+
+#essence, #created {
+    text-align:         left;
+}
+
+#admin-layout-link {
+    text-align:         center;
+    padding:            1em;
+}
+
+#season, #player-search-form {
+    text-align:         right;
 }
 
 #go-back button {
-    background-color:   #000;
-    color:              #fff;
+    background-color:   #fff;
+    color:              #000;
+}
+
+@media (prefers-color-scheme: dark) {
+
+    body, #go-back button {
+        background-color:   #323639;
+        color:              #d6d6d7;
+    }
+
+    tr:nth-child(2n) {
+        background-color:   #555;
+    }
+
 }

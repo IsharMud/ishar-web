@@ -8,17 +8,10 @@
                 <li title="E-mail Us">
                     <a href="mailto:admin@isharmud.com" target="_blank">E-mail Us</a>
                 </li>
+            </ul>
+            <ul>
                 <li title="Frequently Asked Questions">
                    <a href="{{ url_for('faq') }}" {%- if page == 'faq' %} id="active-nav"{% endif %}>FAQs</a>
-                </li>
-                <li title="Get Started">
-                    <a href="{{ url_for('get_started') }}" {%- if page == 'get_started' %} id="active-nav"{% endif %}>Get Started</a>
-                </li>
-                <li title="History">
-                    <a href="{{ url_for('history') }}" {%- if page == 'history' %} id="active-nav"{% endif %}>History</a>
-                </li>
-                <li title="MUD Clients">
-                    <a href="{{ url_for('clients') }}" {%- if page == 'mud_clients' %} id="active-nav"{% endif%}>MUD Clients</a>
                 </li>
                 <li title="Patches">
                     <a href="{{ url_for('patches') }}" {%- if page == 'patches' %} id="active-nav"{% endif%}>Patches</a>

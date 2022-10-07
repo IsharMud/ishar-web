@@ -23,10 +23,10 @@
         <meta property="og:title" content="{% block meta_title %}Welcome{% endblock meta_title %} - Ishar MUD">
         <meta property="og:description" content="Ishar MUD: {% block meta_description %}a free online text-adventure RPG{% endblock %}">
         <meta property="og:url" content="{% block meta_url %}{{ url_for('welcome', _external=True) }}{% endblock meta_url %}">
-        <meta property="og:image" content="{% block meta_image %}{{ url_for('static', filename='ishar.png', _external=True) }}{% endblock meta_image %}">
+        <meta property="og:image" content="{% block meta_image %}{{ url_for('static', filename='images/cropped_ishar_logo_trans.png', _external=True) }}{% endblock meta_image %}">
         <title>{% block title %}Welcome{% endblock %} - Ishar MUD</title>
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
-        <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+        <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
         {%- if sentry_js is defined and sentry_js != None and sentry_js != '' %}
         <script src="{{ sentry_js }}" crossorigin="anonymous"></script>
         {%- endif %}
@@ -38,7 +38,8 @@
         <header>
             <h1 title="Ishar MUD">
                 <a href="{{ url_for('welcome') }}">
-                    <img src="{{ url_for('static', filename='logo.jpg') }}" alt="Ishar MUD">
+                    <img src="{{ url_for('static', filename='images/cropped_ishar_logo_trans.png') }}" alt="Ishar MUD Logo">
+                    <img src="{{ url_for('static', filename='images/cropped_ishar_text_trans.png') }}" id="logo-text" alt="Ishar MUD">
                 </a>
             </h1>
         </header>
@@ -69,28 +70,27 @@
         </div>
         <footer>
 {%- block footer %}
+            <ul>
     {%- if current_user is defined and current_user.is_authenticated %}
         {%- if current_user.created_at is defined and current_user.created_at != '' %}
-            <span id="created" title="Account Created: {{ current_user.created_at.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}">
-                <a href="{{ url_for('manage_account') }}">Account Created</a>
-                <br>
-                {{ current_user.created_at.strftime('%A, %B %d, %Y') }}
-            </span>
+                <li title="Account Created: {{ current_user.created_at.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}">
+                    <a href="{{ url_for('manage_account') }}">Account Created</a>
+                    {{ current_user.created_at.strftime('%A, %B %d, %Y') }}
+                </li>
+        {%- endif %}
+        {%- if current_user.is_god %}
+                <li title="Administration Portal">
+                    <a href="{{ url_for('admin_portal') }}" title="Administration Portal">Administration Portal</a>
+                </li>
         {%- endif %}
     {%- endif %}
-    {%- if current_user is defined and current_user.is_god %}
-            <span id="admin-layout-link" title="Administration Portal">
-                <br>
-                <a href="{{ url_for('admin_portal') }}" title="Administration Portal">Administration Portal</a>
-            </span>
+    {%- if current_season is defined and current_season.expires is defined and current_season.expiration_date is defined %}
+              <li title="Season {{ current_season.season_id }} ends in {{ current_season.expires }} on {{ current_season.expiration_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}">
+                    <a href="{{ url_for('season') }}">Season {{ current_season.season_id }}</a>
+                    ends in <span id="season-countdown">{{ current_season.expires }}</span> on {{ current_season.expiration_date.strftime('%A, %B %d, %Y')}}
+                </li>
     {%- endif %}
-    {%- if current_season is defined and current_season != None %}
-            <span id="season" title="Season {{ current_season.season_id }} ends in {{ current_season.expires }} on {{ current_season.expiration_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}">
-                <a href="{{ url_for('season') }}">Season {{ current_season.season_id }}</a>
-                <br>
-                ends in <span id="season-countdown">{{ current_season.expires }}</span> on {{ current_season.expiration_date.strftime('%A, %B %d, %Y')}}
-            </span>
-    {%- endif %}
+            </ul>
 {%- endblock footer %}
         </footer>
     </body>
