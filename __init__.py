@@ -15,7 +15,8 @@ import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 from database import db_session
-from models import Account, Challenge, News, Player, Season
+from models import Account, Challenge, News, Player, PlayersFlag, PlayerQuest, \
+    PlayerRemortUpgrade, Season
 from mud_secret import PODIR, IMM_LEVELS
 import forms
 import helptab
