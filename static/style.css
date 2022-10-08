@@ -14,7 +14,7 @@ a[target='_blank']::after {
     filter:             invert(1);
 }
 
-a, header h1 a:hover {
+a {
     color:                #09f;
     text-decoration:        none;
 }
@@ -31,7 +31,7 @@ a:active, a:visited {
     color:              #6082b6;
 }
 
-header, header h1, nav, nav ul, nav li {
+header, nav, nav li {
     display:                inline-block;
 }
 
@@ -39,12 +39,9 @@ header img {
     height:                 15vh;
 }
 
-#header-text {
-    filter:             invert(1);
-}
-
 nav li {
-    padding:                1vw;
+    padding-left:           1vw;
+    padding-right:          1vw;
 }
 
 #content{

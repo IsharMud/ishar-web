@@ -8,23 +8,23 @@
 {%- block content %}
                 <p>
                     Ishar MUD is under regular development, and constantly being improved!
-                <p>
+                </p>
                 <p>
                     This is where we document the changes that have been made for your enjoyment.
                 </p>
-                {%- if patches is defined and patches is iterable and patches | length > 0 %}
+    {%- if patches is defined and patches is iterable and patches | length > 0 %}
                 <p>
                      These are the latest patch notes for Ishar MUD:
                 </p>
                 <ul id="patches-list">
-                    {%- for patch in patches %}
-                        {%- set name = patch.rstrip('.pdf') | replace('_', ' ') | title %}
-                    <li class="patch-item" title="{{ name }}">
+        {%- for patch in patches %}
+            {%- set patch_name  = patch.rstrip('.pdf') | replace('_', ' ') | replace('-', ' ') | title | safe %}
+                    <li class="patch-item" title="{{ patch_name }}">
                         <h3>
-                            <a href="{{ url_for('static', filename='patches/' + patch) }}" target="_blank">{{ name }}</a>
+                            <a href="{{ url_for('static', filename='patches/' + patch) }}" target="_blank">{{ patch_name }}</a>
                         </h3>
                     </li>
-                    {%- endfor %}
+        {%- endfor %}
                 </ul>
-                {%- endif %}
+    {%- endif %}
 {%- endblock %}
