@@ -1,5 +1,5 @@
 {%- set page = 'admin' -%}
-% extends "layout.html.j2" %}
+{% extends "layout.html.j2" %}
 {% block meta_title %}Edit Account ({{ edit_account.account_name | title | safe }}) / Administration Portal{% endblock meta_title %}
 {% block meta_description %}Administration portal to edit a user account{% endblock %}
 {% block meta_url %}{{ url_for('admin_edit_account', edit_account_id=edit_account.account_id, _external=True) }}{% endblock meta_url %}">
