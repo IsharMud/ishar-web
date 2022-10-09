@@ -4,7 +4,10 @@
 {% block meta_description %}Administration portal page to view accounts{% endblock %}
 {% block meta_url %}{{ url_for('admin_account', manage_account_id=manage_account.account_id | default(''), _external=True) }}{% endblock meta_url %}">
 {% block title %}Manage Account ({{ manage_account.account_name | title | safe }}) / Administration Portal{% endblock %}
-{% block header %}Admin Account ({{ manage_account.account_name | title | safe }}){% endblock %}
+{% block header -%}
+                Admin Account ({{ manage_account.account_name | title | safe }})
+                <a href="{{ url_for('admin_edit_account', edit_account_id=manage_account.account_id) }}">✏️</a>
+{%- endblock %}
 {%- block content %}
     {%- if manage_account is defined %}
             <div id="account-details">
@@ -49,6 +52,61 @@
                     </li>
                 </ul>
             </div>
+        {%- endif %}
+        {%- if manage_account.players is defined and manage_account.players is iterable and manage_account.players | length > 0 %}
+            <h4>
+                Players ({{ manage_account.players | length }})
+            </h4>
+            <table id="players">
+                    <tr>
+                        <th>
+                            Name
+                        </th>
+                        <th>
+                            Level
+                        </th>
+                        <th>
+                            Remorts
+                        </th>
+                        <th>
+                            Renown
+                        </th>
+                        <th>
+                            Deaths
+                        </th>
+                    </tr>
+            {%- for player in manage_account.players %}
+                    <tr>
+                        <td title="{{ player.name | title | safe }} (Born {{ player.birth_dt.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }})">
+                            {{ player.player_title }}
+                        </td>
+                        <td title="Level: {{ player.level }}">
+                            {{ player.level }}
+                        </td>
+                        <td title="Remorts: {{ player.remorts }}">
+                            {{ player.remorts }}
+                        </td>
+                        <td title="Renown: {{ player.renown }}">
+                            {{ player.renown }}
+                        </td>
+                {%- if player.player_type != 'Classic' %}
+                        <td class="non-classic" title="Type: {{ player.player_type }}">
+                            <span class="{{ player.player_css }}">
+                                {{ player.player_type }}
+                            </span>
+                        </td>
+                {%- else %}
+                        <td title="Deaths: {{ player.deaths }}">
+                            {{ player.deaths }}
+                        </td>
+                {%- endif %}
+                    </tr>
+            {%- endfor %}
+                </table>
+        {%- else %}
+                <h3 title="No players yet!">
+                    No players yet!
+                </h3>
         {%- endif %}
     {%- endif %}
 {%- endblock %}

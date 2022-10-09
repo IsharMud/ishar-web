@@ -448,11 +448,16 @@ def admin_edit_account(edit_account_id=None):
             edit_account.change_password(edit_account_form.confirm_password.data)
             if edit_account.change_password(edit_account_form.confirm_password.data):
                 flash('The account password was reset.', 'success')
+                sentry_sdk.capture_message('Admin Password Reset: ' \
+                    f'{current_user} reset {edit_account}', level='warn')
             else:
                 flash('The account password could not be reset.', 'error')
+                sentry_sdk.capture_message('Admin Password Reset Fail: ' \
+                    f'{current_user} failed to reset {edit_account}', level='error')
 
         db_session.commit()
         flash('The account was updated successfully.', 'success')
+        sentry_sdk.capture_message(f'Admin Edit Account: {current_user} edited {edit_account}')
 
     return render_template('admin/edit_account.html.j2',
                             edit_account        = edit_account,
@@ -576,7 +581,8 @@ def admin_season_cycle():
         if not find_players:
             flash('All mortal players have been deleted.', 'success')
             flash(f'Total Players Deleted: {total_players_deleted}', 'info')
-            sentry_sdk.capture_message(f'Player Wipe: {total_players_deleted} mortals deleted')
+            sentry_sdk.capture_message('Player Wipe: ' \
+                f'{total_players_deleted} mortals deleted', level='warn')
 
     # Show the form to cycle a season in the administration portal
     return render_template('admin/season_cycle.html.j2', season_cycle_form=season_cycle_form)
@@ -635,13 +641,12 @@ def new_account():
             if created_account:
                 login_user(created_account)
                 flash('Your account has been created!', 'success')
-
+                sentry_sdk.capture_message(f'Account Created: {current_user}')
             else:
                 flash('Sorry, but please try again!', 'error')
 
     # Redirect users who are logged in to the portal, including newly created accounts
     if current_user.is_authenticated:
-        sentry_sdk.capture_message(f'Account Created: {current_user}')
         return redirect(url_for('portal'))
 
     # Show the new account form
@@ -651,10 +656,8 @@ def new_account():
 @app.route('/mud_clients', methods=['GET'])
 @app.route('/clients', methods=['GET'])
 def clients():
-    """
-    /clients (or /mud_clients)
-    Page showing a dynamic list of various MUD clients for different platforms
-    """
+    """Page showing a dynamic list of various MUD clients for different platforms
+        /clients (or /mud_clients)"""
     return render_template('clients.html.j2', clients=mud_clients.clients)
 
 
