@@ -423,6 +423,41 @@ def admin_account(manage_account_id=None):
     )
 
 
+@app.route('/admin/account/edit/<int:edit_account_id>', methods=['GET', 'POST'])
+@fresh_login_required
+def admin_edit_account(edit_account_id=None):
+    """Administration portal to allow Gods to edit accounts
+    /admin/account/edit"""
+
+    # Only allow access to Gods
+    if not current_user.is_god:
+        flash('Sorry, but you are not godly enough!', 'error')
+        abort(401)
+
+    edit_account    = Account.query.filter_by(account_id = edit_account_id).first()
+
+    # Get edit account form and check if submitted
+    edit_account_form   = forms.EditAccountForm()
+    if edit_account_form.validate_on_submit():
+        edit_account.account_name       = edit_account_form.account_name.data
+        edit_account.email              = edit_account_form.email.data
+        edit_account.seasonal_points    = edit_account_form.seasonal_points.data
+        if edit_account_form.password.data != '' and edit_account_form.confirm_password.data != '':
+            edit_account.change_password(edit_account_form.confirm_password.data)
+            if edit_account.change_password(edit_account_form.confirm_password.data):
+                flash('The account password was reset.', 'success')
+            else:
+                flash('The account password could not be reset.', 'error')
+
+        db_session.commit()
+        flash('The account was updated successfully.', 'success')
+
+    return render_template('admin/edit_account.html.j2',
+                            edit_account        = edit_account,
+                            edit_account_form   = edit_account_form
+                        )
+
+
 @app.route('/admin/accounts', methods=['GET'])
 @fresh_login_required
 def admin_accounts():

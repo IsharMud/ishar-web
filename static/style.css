@@ -47,7 +47,9 @@ nav li {
 #content{
     margin:                 1vw;
     border-bottom:          1px dotted #d6d6d7;
+    padding-bottom:         0.25em;
     border-top:             1px dotted #d6d6d7;
+    padding-top:            0.25em;
 }
 
 th, td, #content li {

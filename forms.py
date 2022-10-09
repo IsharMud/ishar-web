@@ -4,8 +4,8 @@ Flask forms classes
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from flask_wtf import FlaskForm
-from wtforms import BooleanField, DateTimeLocalField, EmailField, PasswordField, \
-    RadioField, StringField, SubmitField, TextAreaField
+from wtforms import BooleanField, DateTimeLocalField, EmailField, IntegerField, \
+    PasswordField, RadioField, StringField, SubmitField, TextAreaField
 from wtforms.validators import DataRequired, Email, EqualTo, Length
 from wtforms_validators import Alpha
 
@@ -164,15 +164,47 @@ class NewsAddForm(FlaskForm):
 class PlayerSearchForm(FlaskForm):
     """Player search form class to search player names"""
     player_search_name  = StringField('Player Name',
-                                        validators  = [
-                                            DataRequired(),
-                                            Length(
-                                                min = 3,
-                                                max = 25
-                                            ),
-                                            Alpha(
-                                                message = 'Player names may only contain letters!'
-                                            )
-                                        ]
-                                    )
+                            validators  = [
+                                DataRequired(),
+                                Length(
+                                    min = 3,
+                                    max = 25
+                                ),
+                                Alpha(
+                                    message = 'Player names may only contain letters!'
+                                )
+                            ]
+                        )
     submit              = SubmitField('Search')
+
+
+class EditAccountForm(FlaskForm):
+    """Edit Account form class"""
+    account_name        = StringField('Friendly Name',
+                            validators  = [
+                                DataRequired(),
+                                Length(
+                                    min = 3,
+                                    max = 25
+                                ),
+                                Alpha(
+                                    message = 'Please only use letters in the friendly name!'
+                                )
+                            ]
+                        )
+    email               = EmailField('E-mail Address',
+                            validators  = [
+                                DataRequired(),
+                                Email()
+                            ]
+                        )
+    seasonal_points     = IntegerField('Seasonal Points')
+    password            = PasswordField('Password')
+    confirm_password    = PasswordField('Confirm Password',
+                            validators  = [
+                                EqualTo('password',
+                                    message = 'Please make sure that the passwords match!'
+                                )
+                            ]
+                        )
+    submit              = SubmitField('Edit Account')

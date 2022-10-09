@@ -38,6 +38,7 @@
                         <td title="Name: {{ account.account_name | title | safe }}">
                             <a href="{{ url_for('admin_account', manage_account_id=account.account_id) }}">{{ account.account_name | title | safe }}</a>
                             <a title="E-mail: {{ account.email }}" href="mailto:{{ account.email }}">📧</a>
+                            <a title="Edit {{ account.account_name | title | safe }} (ID: {{ account.account_id }})" href="{{ url_for('admin_edit_account', edit_account_id=account.account_id) }}">✏️</a>
                         </td>
                         <td title="Players: {{ account.players | length }}">
                             {{ account.players | length }}

@@ -1,0 +1,36 @@
+{% extends "layout.html.j2" %}
+{% block meta_title %}Edit Account ({{ edit_account.account_name | title | safe }}) / Administration Portal{% endblock meta_title %}
+{% block meta_description %}Administration portal to edit a user account{% endblock %}
+{% block meta_url %}{{ url_for('admin_edit_account', edit_account_id=edit_account.account_id, _external=True) }}{% endblock meta_url %}">
+{% block title %}Edit Account ({{ edit_account.account_name | title | safe }}) / Administration Portal{% endblock %}
+{% block header %}Edit Account ({{ edit_account.account_name | title | safe }}){% endblock %}
+{%- macro render_field(field) %}
+                    <p class="admin-{{ field.name | safe }}">
+                        {{ field.label | safe }}
+                        {{ field(**kwargs) | safe }}
+                    </p>
+    {%- if field.errors %}
+                <ul class="field-errors">
+        {%- for error in field.errors %}
+                    <li>
+                        {{ error }}
+                    </li>
+        {%- endfor %}
+                </ul>
+    {%- endif %}
+{%- endmacro %}
+{%- block content %}
+    {%- if edit_account is defined and edit_account_form is defined %}
+                <form method="post" action="{{ url_for('admin_edit_account', edit_account_id=edit_account.account_id) }}" id="account-edit-form">
+                    <strong>Account ID:</strong> {{ edit_account.account_id }}
+                    {{ render_field(edit_account_form.account_name, value=edit_account.account_name, autocomplete='off') }}
+                    {{ render_field(edit_account_form.email, value=edit_account.email, autocomplete='off') }}
+                    {{ render_field(edit_account_form.seasonal_points, value=edit_account.seasonal_points, autocomplete='off') }}
+                    {{ render_field(edit_account_form.password, value='', autocomplete='off') }}
+                    {{ render_field(edit_account_form.confirm_password, value='', autocomplete='off') }}
+                    {{ edit_account_form.csrf_token }}
+                    {{ edit_account_form.submit }}
+                    <br>
+                </form>
+    {%- endif %}
+{%- endblock %}
