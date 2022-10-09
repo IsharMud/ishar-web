@@ -408,6 +408,7 @@ def admin_news():
 
 
 @app.route('/admin/account/<int:manage_account_id>', methods=['GET'])
+@fresh_login_required
 def admin_account(manage_account_id=None):
     """Administration portal to allow Gods to view accounts
     /admin/account"""
@@ -423,6 +424,7 @@ def admin_account(manage_account_id=None):
 
 
 @app.route('/admin/accounts', methods=['GET'])
+@fresh_login_required
 def admin_accounts():
     """Administration portal to allow Gods to view accounts
     /admin/accounts"""
