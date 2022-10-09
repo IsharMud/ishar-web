@@ -1,5 +1,6 @@
 """Database classes/models"""
 import datetime
+from functools import cached_property
 from flask import url_for
 from flask_login import UserMixin
 from passlib.hash import md5_crypt
@@ -36,15 +37,15 @@ class Account(Base, UserMixin):
 
     @property
     def is_active(self):
-        """flask-login boolean whether user is active"""
+        """Boolean whether user is active"""
         return isinstance(self.account_id, int)
 
     @property
     def is_authenticated(self):
-        """flask-login boolean whether user is authenticated"""
+        """Boolean whether user is authenticated"""
         return isinstance(self.account_id, int)
 
-    @property
+    @cached_property
     def is_god(self):
         """Boolean whether user is a God"""
         for player in self.players:
@@ -182,14 +183,14 @@ class Challenge(Base):
     mob_name        = Column(String(30), nullable=False)
     is_active       = Column(TINYINT(1), nullable=False, server_default=FetchedValue())
 
-    @property
+    @cached_property
     def is_completed(self):
         """Boolean whether challenge is completed"""
         if self.winner_desc != '':
             return True
         return False
 
-    @property
+    @cached_property
     def reward_tier(self):
         """Reward tier string"""
         tiers   = { 9: 'SS', 8: 'SS', 7: 'SS', 6: 'S', 5: 'A', 4: 'B', 3: 'C', 2: 'D', 1: 'F' }
@@ -525,61 +526,61 @@ class Player(Base):
             return True
         return False
 
-    @property
+    @cached_property
     def birth_dt(self):
         """Datetime of player birth"""
         return datetime.datetime.fromtimestamp(self.birth)
 
-    @property
+    @cached_property
     def birth_ago(self):
         """Stringified approximate timedelta since player birth"""
         return delta.stringify(datetime.datetime.utcnow() - self.birth_dt)
 
-    @property
+    @cached_property
     def logon_dt(self):
         """Datetime of last player log on"""
         return datetime.datetime.fromtimestamp(self.logon)
 
-    @property
+    @cached_property
     def logon_ago(self):
         """timedelta since player log on"""
         return delta.stringify(datetime.datetime.utcnow() - self.logon_dt)
 
-    @property
+    @cached_property
     def logout_dt(self):
         """Datetime of last player log out"""
         return datetime.datetime.fromtimestamp(self.logout)
 
-    @property
+    @cached_property
     def logout_ago(self):
         """Stringified approximate timedelta since player log out"""
         return delta.stringify(datetime.datetime.utcnow() - self.logout_dt)
 
-    @property
+    @cached_property
     def online_delta(self):
         """Timedelta of player total online time"""
         return datetime.timedelta(seconds=self.online)
 
-    @property
+    @cached_property
     def online_time(self):
         """Stringified approximate timedelta of player total online time"""
         return delta.stringify(self.online_delta)
 
-    @property
+    @cached_property
     def is_god(self):
         """Boolean whether player is a God"""
         if self.true_level >= max(IMM_LEVELS):
             return True
         return False
 
-    @property
+    @cached_property
     def is_immortal(self):
         """Boolean whether player is an immortal"""
         if self.true_level >= min(IMM_LEVELS):
             return True
         return False
 
-    @property
+    @cached_property
     def player_alignment(self):
         """Player alignment"""
         if self.align <= -1000:
@@ -598,22 +599,22 @@ class Player(Base):
             return 'Very Good'
         return 'Unknown'
 
-    @property
+    @cached_property
     def player_css(self):
         """Player CSS class"""
         return f'{self.player_type}'.lower() + '-player'
 
-    @property
+    @cached_property
     def player_link(self):
         """Return player link"""
         return '<a href="' + url_for('show_player', player_name=self.name) + f'">{self.name}</a>'
 
-    @property
+    @cached_property
     def player_title(self):
         """Player title"""
         return self.title.replace('%s', self.player_link)
 
-    @property
+    @cached_property
     def player_type(self):
         """Player type"""
         if self.is_deleted == 1:

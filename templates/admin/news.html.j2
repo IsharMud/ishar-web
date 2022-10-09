@@ -20,7 +20,7 @@
     {%- endif %}
 {%- endmacro %}
 {%- block content %}
-{%- if news_add_form is defined %}
+    {%- if news_add_form is defined %}
                 <form method="post" action="{{ url_for('admin_news') }}" id="news-add-form">
                     {{ render_field(news_add_form.subject, autocomplete='off') }}
                     {{ render_field(news_add_form.body, autocomplete='off') }}
@@ -28,6 +28,5 @@
                     {{ news_add_form.submit }}
                     <br>
                 </form>
-{%- endif %}
-{% include('back.html.j2') %}
+    {%- endif %}
 {%- endblock %}

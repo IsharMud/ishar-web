@@ -1,0 +1,53 @@
+{% extends "layout.html.j2" %}
+{% block meta_title %}Accounts / Administration Portal{% endblock meta_title %}
+{% block meta_description %}Administration portal page to view accounts{% endblock %}
+{% block meta_url %}{{ url_for('admin_account', manage_account_id=manage_account.account_id | default(''), _external=True) }}{% endblock meta_url %}">
+{% block title %}Manage Account ({{ manage_account.account_name | title | safe }}) / Administration Portal{% endblock %}
+{% block header %}Admin Account ({{ manage_account.account_name | title | safe }}){% endblock %}
+{%- block content %}
+    {%- if manage_account is defined %}
+            <div id="account-details">
+                <ul>
+                    <li title="Account Created: {{ manage_account.created_at.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}">
+                        Account Created: {{ manage_account.created_at.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}
+                    </li>
+                </ul>
+            </div>
+            <h4 title="Upgrades">
+                Upgrades
+            </h4>
+        {%- if manage_account.upgrades is defined and manage_account.upgrades is iterable and manage_account.upgrades | selectattr('amount', '>', 0) | list | length > 0 %}
+            <div id="essence-upgrades">
+                <ul>
+            {%- for upgraded in manage_account.upgrades | selectattr('amount', '>', 0) %}
+                    <li title="{{ upgraded.upgrade.name }}{% if upgraded.amount > 1 %} (x{{ upgraded.amount}}){% endif %}">
+                        {{ upgraded.upgrade.name }}
+                        {%- if upgraded.amount > 1 %} (x{{ upgraded.amount}}){% endif %}
+                    </li>
+            {%- endfor %}
+                </ul>
+            </div>
+        {%- else %}
+            <ul>
+                <li title="No account upgrades.">
+                    <i>No account upgrades.</i>
+                </li>
+            </ul>
+        {%- endif %}
+            <h4>
+                Essence
+            </h4>
+        {%- if manage_account is defined and manage_account.seasonal_points is defined and manage_account.seasonal_earned is defined %}
+            <div id="essence-balance">
+                <ul>
+                    <li title="Essence: {{ manage_account.seasonal_points }}">
+                        {{ manage_account.account_name | title | safe }} currently has: {{ display_essence(manage_account.seasonal_points) }}.
+                    </li>
+                    <li title="Essence earned this season: {{ manage_account.seasonal_earned }}">
+                        This season, {{ manage_account.account_name | title | safe }} has earned: {{ display_essence(manage_account.seasonal_earned) }}.
+                    </li>
+                </ul>
+            </div>
+        {%- endif %}
+    {%- endif %}
+{%- endblock %}

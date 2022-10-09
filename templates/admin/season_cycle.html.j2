@@ -20,7 +20,7 @@
     {%- endif %}
 {%- endmacro %}
 {%- block content %}
-{%- if current_season is defined and current_season != None %}
+    {%- if current_season is defined and current_season != None %}
                 <h4>
                     Current Season
                 </h4>
@@ -35,8 +35,8 @@
                         Expires: {{ current_season.expires }} on {{ current_season.expiration_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}
                     </li>
                 </ul>
-{%- endif %}
-{%- if season_cycle_form is defined %}
+    {%- endif %}
+    {%- if season_cycle_form is defined %}
                 <h4>
                     Cycle Seasons
                 </h4>
@@ -48,6 +48,5 @@
                     {{ season_cycle_form.submit }}
                     <br>
                 </form>
-{%- endif %}
-{% include('back.html.j2') %}
+    {%- endif %}
 {%- endblock %}

@@ -8,14 +8,15 @@ import glob
 import ipaddress
 import os
 from urllib.parse import urlparse
-from flask import Flask, abort, flash, redirect, render_template, request, session, url_for
+from flask import Flask, abort, current_app, flash, redirect, render_template, request, \
+    session, url_for
 from flask_login import current_user, fresh_login_required, login_required, login_user, \
     logout_user, LoginManager
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 from database import db_session
-from models import Account, Challenge, News, Player, PlayersFlag, PlayerQuest, \
+from models import Account, AccountsUpgrade, Challenge, News, Player, PlayersFlag, PlayerQuest, \
     PlayerRemortUpgrade, Season
 from mud_secret import PODIR, IMM_LEVELS
 import forms
@@ -34,12 +35,8 @@ sentry_sdk.init(
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
 
-if __name__ == '__main__':
-    app.run(debug=True)
-
 # Flask-Login
-login_manager                                   = LoginManager()
-login_manager.init_app(app)
+login_manager                                   = LoginManager(app)
 login_manager.login_message_category            = 'error'
 login_manager.login_view                        = 'login'
 login_manager.needs_refresh_message             = 'To protect your account, please log in again.'
@@ -55,6 +52,7 @@ def load_user(email):
         'id'            : user_account.account_id,
         'username'      : user_account.account_name,
         'email'         : user_account.email,
+        'essence'       : user_account.seasonal_points,
         'ip_address'    : request.remote_addr,
     }
     sentry_sdk.set_user(sentry_user)
@@ -108,9 +106,8 @@ def get_current_season():
     return Season.query.filter_by(is_active = 1).order_by(-Season.season_id).first()
 
 
-def get_sentry_js():
+def get_sentry_js(sentry_js=None):
     """Method to return the Sentry JavaScript SDK URI based on environment secret"""
-    sentry_js   = None
     sentry_dsn  = os.getenv('SENTRY_DSN')
     if sentry_dsn:
         sentry_uri  = urlparse(sentry_dsn)
@@ -123,9 +120,7 @@ def get_sentry_js():
 @app.route('/', methods=['GET'])
 def welcome():
     """Main welcome page/index, includes the most recent news"""
-    return render_template('welcome.html.j2',
-        news    = News.query.order_by(-News.created_at).limit(1).all()
-    )
+    return render_template('welcome.html.j2', news=News.query.order_by(-News.created_at).first())
 
 
 @app.route('/background', methods=['GET'])
@@ -323,7 +318,7 @@ def leaderboard(limit=10):
                             -Player.quests_completed,
                             -Player.challenges_completed,
                             -Player.renown,
-                            -Player.true_level,
+                            -Player.level,
                             -Player.bankacc,
                             Player.deaths
                         ).limit(limit).all()
@@ -337,7 +332,7 @@ def leaderboard(limit=10):
                             -Player.quests_completed,
                             -Player.challenges_completed,
                             -Player.renown,
-                            -Player.true_level,
+                            -Player.level,
                             -Player.bankacc,
                             Player.deaths
                         ).limit(limit).all()
@@ -410,6 +405,35 @@ def admin_news():
 
     # Show the form to add news in the administration portal
     return render_template('admin/news.html.j2', news_add_form=news_add_form)
+
+
+@app.route('/admin/account/<int:manage_account_id>', methods=['GET'])
+def admin_account(manage_account_id=None):
+    """Administration portal to allow Gods to view accounts
+    /admin/account"""
+
+    # Only allow access to Gods
+    if not current_user.is_god:
+        flash('Sorry, but you are not godly enough!', 'error')
+        abort(401)
+
+    return render_template('admin/account.html.j2',
+        manage_account  = Account.query.filter_by(account_id = manage_account_id).first()
+    )
+
+
+@app.route('/admin/accounts', methods=['GET'])
+def admin_accounts():
+    """Administration portal to allow Gods to view accounts
+    /admin/accounts"""
+
+    # Only allow access to Gods
+    if not current_user.is_god:
+        flash('Sorry, but you are not godly enough!', 'error')
+        abort(401)
+
+    accounts    = Account.query.order_by(Account.account_id).all()
+    return render_template('admin/accounts.html.j2', accounts=accounts)
 
 
 @app.route('/admin/season', methods=['GET'])
@@ -682,3 +706,7 @@ def trigger_error():
 def shutdown_session(_exception=None):
     """Remove database session at request teardown"""
     db_session.remove()
+
+
+if __name__ == '__main__':
+    app.run(debug=True)

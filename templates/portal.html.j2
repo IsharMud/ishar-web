@@ -67,20 +67,4 @@
                     You have not created any players yet!
                 </h3>
     {%- endif %}
-                <p class="bottom-portal-link">
-                    <a href="{{ url_for('challenges') }}" title="Challenges">Challenges</a>
-                    |
-                    <a href="{{ url_for('change_password') }}" title="Change Password">Change Password</a>
-                    |
-    {%- if current_user.seasonal_points > 0 %}
-        {%- set essence = ' (' + current_user.seasonal_points | string + ')' %}
-    {%- else %}
-        {%- set essence = '' %}
-    {%- endif %}
-                    <a href="{{ url_for('shop') }}" title="Shop {{- essence }}">Shop {{- essence }}</a>
-                    |
-                    <a href="{{ url_for('leaderboard') }}" title="Leader Board">Leader Board</a>
-                    |
-                    <a href="{{ url_for('logout') }}" title="Log Out">Log Out</a>
-                </p>
 {%- endblock %}
