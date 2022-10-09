@@ -44,6 +44,11 @@ nav li {
     padding-right:          1vw;
 }
 
+#active-nav {
+    font-weight:        bold;
+    text-decoration:    underline;
+}
+
 #content{
     margin:                 1vw;
     border-bottom:          1px dotted #d6d6d7;

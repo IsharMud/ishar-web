@@ -52,14 +52,14 @@
             <ul>
     {%- if current_user.is_god %}
                 <li title="Administration Portal">
-                    <a href="{{ url_for('admin_portal') }}" title="Administration Portal">Administration</a>
+                    <a href="{{ url_for('admin_portal') }}" {%- if page == 'admin' %} id="active-nav"{% endif%} title="Administration Portal">Administration</a>
                 </li>
     {%- endif %}
                 <li>
-                    <a href="{{ url_for('challenges') }}" title="Challenges">Challenges</a>
+                    <a href="{{ url_for('challenges') }}" {%- if page == 'challenges' %} id="active-nav"{% endif%} title="Challenges">Challenges</a>
                 </li>
                 <li>
-                    <a href="{{ url_for('leaderboard') }}" title="Leader Board">Leader Board</a>
+                    <a href="{{ url_for('leaderboard') }}" {%- if page == 'leaderboard' %} id="active-nav"{% endif%} title="Leader Board">Leader Board</a>
                 </li>
     {%- if current_user.seasonal_points > 0 %}
         {%- set essence = ' (' + current_user.seasonal_points | string + ')' %}
@@ -67,7 +67,7 @@
         {%- set essence = '' %}
     {%- endif %}
                 <li>
-                    <a href="{{ url_for('shop') }}" title="Shop {{- essence }}">Shop {{- essence }}</a>
+                    <a href="{{ url_for('shop') }}" {%- if page == 'shop' %} id="active-nav"{% endif%} title="Shop {{- essence }}">Shop {{- essence }}</a>
                 </li>
                 <li>
                     <a href="{{ url_for('logout') }}" title="Log Out">Log Out</a>
