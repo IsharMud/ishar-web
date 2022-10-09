@@ -18,6 +18,9 @@
                     <li title="You created your account on {{ current_user.created_at.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}">
                         You created your account on {{ current_user.created_at.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}.
                     </li>
+                    <li title="Click here to change your password!">
+                        You can <a href="{{ url_for('change_password') }}">change your password here</a>.
+                    </li>
                 </ul>
             </div>
             <h4 title="Upgrades">
