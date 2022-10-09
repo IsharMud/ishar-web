@@ -19,6 +19,10 @@ a {
     text-decoration:        none;
 }
 
+header img {
+    height:              15vh;
+}
+
 h2, h3, h4, h5, strong, code {
     color:              #fa7;
 }
@@ -35,8 +39,8 @@ header, nav, nav li {
     display:                inline-block;
 }
 
-header img {
-    height:                 15vh;
+header h1 a {
+    background:             url('/static/images/header_test_alpha.png') no-repeat transparent;
 }
 
 nav li {
