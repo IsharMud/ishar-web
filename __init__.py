@@ -449,7 +449,7 @@ def admin_edit_account(edit_account_id=None):
             if edit_account.change_password(edit_account_form.confirm_password.data):
                 flash('The account password was reset.', 'success')
                 sentry_sdk.capture_message('Admin Password Reset: ' \
-                    f'{current_user} reset {edit_account}', level='warn')
+                    f'{current_user} reset {edit_account}', level='warning')
             else:
                 flash('The account password could not be reset.', 'error')
                 sentry_sdk.capture_message('Admin Password Reset Fail: ' \
@@ -544,7 +544,7 @@ def admin_season_cycle():
                 total_rewarded_essence  += calculated_essence
             else:
                 flash(f'Account "{account.account_name}" ' \
-                    f'({ account.account_id}) earned no essence', 'warn')
+                    f'({ account.account_id}) earned no essence', 'warning')
 
             for delete_player in account.players:
                 if not delete_player.is_immortal:
@@ -582,7 +582,7 @@ def admin_season_cycle():
             flash('All mortal players have been deleted.', 'success')
             flash(f'Total Players Deleted: {total_players_deleted}', 'info')
             sentry_sdk.capture_message('Player Wipe: ' \
-                f'{total_players_deleted} mortals deleted', level='warn')
+                f'{total_players_deleted} mortals deleted', level='warning')
 
     # Show the form to cycle a season in the administration portal
     return render_template('admin/season_cycle.html.j2', season_cycle_form=season_cycle_form)

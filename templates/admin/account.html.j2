@@ -5,15 +5,34 @@
 {% block meta_url %}{{ url_for('admin_account', manage_account_id=manage_account.account_id | default(''), _external=True) }}{% endblock meta_url %}">
 {% block title %}Manage Account ({{ manage_account.account_name | title | safe }}) / Administration Portal{% endblock %}
 {% block header -%}
-                Admin Account ({{ manage_account.account_name | title | safe }})
+                Manage Account: {{ manage_account.account_name | title | safe }}
                 <a href="{{ url_for('admin_edit_account', edit_account_id=manage_account.account_id) }}">✏️</a>
 {%- endblock %}
 {%- block content %}
     {%- if manage_account is defined %}
             <div id="account-details">
-                <ul>
-                    <li title="Account Created: {{ manage_account.created_at.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}">
-                        Account Created: {{ manage_account.created_at.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}
+                <ul title="Account Created: {{ manage_account.created_at.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}">
+                    <li>
+                        Account Created
+                    </li>
+                    <li class="faq-nested">
+                        <ul>
+                            <li>
+                                {{ manage_account.created_at.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+                <ul title="E-mail Address: {{ manage_account.email }}">
+                    <li>
+                        E-mail Address
+                    </li>
+                    <li class="faq-nested">
+                        <ul>
+                            <li>
+                                <a href="mailto:{{ manage_account.email }}" target="_blank">{{ manage_account.email }}</a>
+                            </li>
+                        </ul>
                     </li>
                 </ul>
             </div>
@@ -44,11 +63,25 @@
         {%- if manage_account is defined and manage_account.seasonal_points is defined and manage_account.seasonal_earned is defined %}
             <div id="essence-balance">
                 <ul>
-                    <li title="Essence: {{ manage_account.seasonal_points }}">
-                        {{ manage_account.account_name | title | safe }} currently has: {{ display_essence(manage_account.seasonal_points) }}.
+                    <li title="Essence Current Balance: {{ manage_account.seasonal_points }}">
+                        Current Balance
+                    </li>
+                    <li class="faq-nested">
+                        <ul>
+                            <li>
+                                {{ manage_account.seasonal_points }} essence
+                            </li>
+                        </ul>
                     </li>
                     <li title="Essence earned this season: {{ manage_account.seasonal_earned }}">
-                        This season, {{ manage_account.account_name | title | safe }} has earned: {{ display_essence(manage_account.seasonal_earned) }}.
+                        Essence earned this season
+                    </li>
+                    <li class="faq-nested">
+                        <ul>
+                            <li>
+                                {{ manage_account.seasonal_earned }} essence
+                            </li>
+                        </ul>
                     </li>
                 </ul>
             </div>
