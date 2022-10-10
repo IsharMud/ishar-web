@@ -223,7 +223,7 @@ class News(Base):
 
     def __repr__(self):
         return f'<News> "{self.subject}" ({self.news_id}) / ' \
-            f'by "{self.account.name}" / at "{self.created_at}"'
+            f'by "{self.account.account_name}" / at "{self.created_at}"'
 
 
 class PlayerClass(Base):

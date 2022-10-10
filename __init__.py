@@ -391,7 +391,7 @@ def admin_news():
     if news_add_form.validate_on_submit():
 
         # Create the model for the new news post and add it to the database
-        new_news = News(
+        new_news    = News(
             account_id      = current_user.account_id,
             created_at      = datetime.utcnow(),
             subject         = news_add_form.subject.data,

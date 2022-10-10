@@ -93,7 +93,7 @@ textarea {
     display:            table;
 }
 
-.news-created {
+.news-created, .news-creation {
     font-style:         italic;
 }
 
