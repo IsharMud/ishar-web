@@ -26,7 +26,7 @@
 {%- endmacro %}
 {%- block content %}
     {%- if edit_account is defined and edit_account_form is defined %}
-                <form method="post" action="{{ url_for('admin_edit_account', edit_account_id=edit_account.account_id) }}" id="account-edit-form">
+                <form autocomplete="off" method="post" action="{{ url_for('admin_edit_account', edit_account_id=edit_account.account_id) }}" id="account-edit-form">
                     <table>
                         <tr>
                             <td>

@@ -16,7 +16,7 @@ import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 from database import db_session
-from models import Account, AccountsUpgrade, Challenge, News, Player, PlayersFlag, PlayerQuest, \
+from models import Account, Challenge, News, Player, PlayersFlag, PlayerQuest, \
     PlayerRemortUpgrade, Season
 from mud_secret import PODIR, IMM_LEVELS
 import forms
@@ -745,8 +745,11 @@ def trigger_error():
 
 
 @app.teardown_appcontext
-def shutdown_session(_exception=None):
-    """Remove database session at request teardown"""
+def shutdown_session(exception=None):
+    """Remove database session at request teardown
+        and capture any exceptions"""
+    if exception:
+        sentry_sdk.capture_exception(exception)
     db_session.remove()
 
 
