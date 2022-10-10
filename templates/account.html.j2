@@ -5,21 +5,29 @@
 {% block title %}Manage Account ({{ current_user.account_name | title | safe }}){% endblock %}
 {% block header %}Manage Account ({{ current_user.account_name | title | safe }}){% endblock %}
 {%- block content %}
-            <p>
+            <h3>
                 <strong>
                     Welcome to your account page!
                 </strong>
-            </p>
+            </h3>
             <p>
-                You can view information about, <i>and eventually manage,</i> your Ishar MUD account.
+                You can view information about, and manage, your Ishar MUD account from here.
             </p>
             <div id="account-details">
                 <ul>
                     <li title="You created your account on {{ current_user.created_at.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}">
-                        You created your account on {{ current_user.created_at.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}.
+                        You created your account on:
+                        <ul>
+                            <li>
+                                 {{ current_user.created_at.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}
+                            </li>
+                        </ul>
                     </li>
-                    <li title="Click here to change your password!">
-                        You can <a href="{{ url_for('change_password') }}">change your password here</a>.
+                    <li title="Change your password">
+                        You can <a href="{{ url_for('change_password') }}">change your password here</a>
+                    </li>
+                    <li title="View your players">
+                        You can <a href="{{ url_for('portal') }}">view your players here</a>
                     </li>
                 </ul>
             </div>
@@ -52,7 +60,7 @@
             </p>
             <p>
                 Essence is preserved across seasons, and can be spent at any time
-                <a href="{{ url_for('shop') }} ">at the Shop</a>
+                <a href="{{ url_for('shop') }} ">at the Essence Shop</a>
                 or by typing <code>shop</code> in-game, once logged in.
             </p>
         {%- if current_user is defined and current_user.seasonal_points is defined and current_user.seasonal_earned is defined %}
@@ -63,6 +71,9 @@
                     </li>
                     <li title="This season, you have earned: {{ current_user.seasonal_earned }} essence.">
                         This season, you have earned: {{ display_essence(current_user.seasonal_earned) }}.
+                    </li>
+                    <li title="Spend your essence at the Shop">
+                        You can <a href="{{ url_for('shop') }}">spend your essence at the Shop</a>
                     </li>
                 </ul>
             </div>

@@ -84,25 +84,33 @@
         </script>
 {%- endblock scripts %}
 {%- block content %}
-            <p>
-                <strong>
-                    Welcome to the seasonal shop!
-                </strong>
-            </p>
-            <p>
-                This is where you can find information on the current season
-                as well as view your accumulated essence balance and spend it to upgrade your account.
-            </p>
+            <h3>
+                Welcome to the seasonal shop!
+            </h3>
             <h4>
                 Essence
             </h4>
             <div id="essence-balance">
                 <ul>
                     <li title="You currently have: {{ current_user.seasonal_points }} essence.">
-                        You currently have: {{ display_essence(current_user.seasonal_points) }}.
+                        You currently have:
+                    </li>
+                    <li class="faq-nested">
+                        <ul>
+                            <li>
+                                {{ display_essence(current_user.seasonal_points) }}
+                            </li>
+                        </ul>
                     </li>
                     <li title="This season, you have earned: {{ current_user.seasonal_earned }} essence.">
-                        This season, you have earned: {{ display_essence(current_user.seasonal_earned) }}.
+                        This season, you have earned:
+                    </li>
+                    <li class="faq-nested">
+                        <ul>
+                            <li>
+                                {{ display_essence(current_user.seasonal_earned) }}
+                            </li>
+                        </ul>
                     </li>
                 </ul>
             </div>

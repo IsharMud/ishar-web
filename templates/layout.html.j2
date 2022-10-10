@@ -49,7 +49,7 @@
 {%- endblock navigation %}
         </nav>
 {%- if current_user is defined and current_user.is_authenticated and current_user.account_name is defined %}
-        <nav>
+        <nav id="logged-in-nav">
             <ul>
     {%- if current_user.is_god %}
                 <li title="Administration Portal">

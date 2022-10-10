@@ -4,14 +4,18 @@ body, button, input, textarea {
     color:              #d6d6d7;
 }
 
-button, input, textarea {
-    border:             1px solid #d6d6d7;
+header img {
+    height:     15vh;
+}
+
+button, input, textarea{
+    border:     1px solid #d6d6d7;
 }
 
 a[target='_blank']::after {
-    content:            url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAQElEQVR42qXKwQkAIAxDUUdxtO6/RBQkQZvSi8I/pL4BoGw/XPkh4XigPmsUgh0626AjRsgxHTkUThsG2T/sIlzdTsp52kSS1wAAAABJRU5ErkJggg==);
-    margin-left:        0.25em;
-    filter:             invert(1);
+    content:        url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAQElEQVR42qXKwQkAIAxDUUdxtO6/RBQkQZvSi8I/pL4BoGw/XPkh4XigPmsUgh0626AjRsgxHTkUThsG2T/sIlzdTsp52kSS1wAAAABJRU5ErkJggg==);
+    margin-left:    0.25em;
+    filter:         invert(1);
 }
 
 a {
@@ -28,25 +32,26 @@ a:hover {
 }
 
 a:active, a:visited {
-    color:              #6082b6;
+    color:                  #6082b6;
 }
 
-header, nav, nav li {
-    display:                inline-block;
-}
-
-header img {
-    height:                 15vh;
+nav {
+    margin:                 1vw;
 }
 
 nav li {
-    padding-left:           1vw;
-    padding-right:          1vw;
+    display:                inline-block;
+    padding:                1vw;
+    padding:                1vw;
+}
+
+#logged-in-nav {
+    border-top:             1px dotted #d6d6d7;
 }
 
 #active-nav {
-    font-weight:        bold;
-    text-decoration:    underline;
+    font-weight:            bold;
+    text-decoration:        underline;
 }
 
 #content{
@@ -57,22 +62,22 @@ nav li {
     padding-top:            0.25em;
 }
 
-th, td, #content li {
-    padding:            0.25em;
+th, td {
+    padding:                0.25em;
 }
 
 tr:nth-child(2n) {
-    background-color:   #555;
+    background-color:       #555;
 }
 
 pre {
-    padding-left:       2.5em;
-    white-space:        pre-wrap;
+    padding-left:           2.5em;
+    white-space:            pre-wrap;
 }
 
 textarea {
-    height:             10em;
-    width:              60vw;
+    height:                 10em;
+    width:                  60vw;
 }
 
 .faq-answers,
@@ -80,7 +85,7 @@ textarea {
 .mud-clients,
 .essence-upgrades
 {
-    list-style:         none;
+    list-style:             none;
 }
 
 .challenge-completed {
