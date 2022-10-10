@@ -401,7 +401,6 @@ def admin_news():
         db_session.commit()
         if new_news.news_id:
             flash('Your message has been posted!', 'success')
-            sentry_sdk.capture_message(f'News Posted: {new_news}')
         else:
             flash('Sorry, but please try again!', 'error')
 
@@ -641,7 +640,7 @@ def new_account():
             if created_account:
                 login_user(created_account)
                 flash('Your account has been created!', 'success')
-                sentry_sdk.capture_message(f'Account Created: {current_user}')
+                sentry_sdk.capture_message(f'Account Created: {created_account}')
             else:
                 flash('Sorry, but please try again!', 'error')
 
@@ -740,7 +739,6 @@ def world(area=None):
 @app.route('/debug-sentry')
 def trigger_error():
     """Trigger error for Sentry"""
-    sentry_sdk.capture_message('Triggering error for Sentry', level='error')
     return 1 / 0
 
 
