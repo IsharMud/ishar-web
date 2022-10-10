@@ -25,7 +25,7 @@ import mud_clients
 
 # Sentry
 sentry_sdk.init(
-    environment         = os.getenv('SENTRY_ENV') or 'development',
+    environment         = os.getenv('USER'),
     traces_sample_rate  = 1.0,
     integrations        = [FlaskIntegration(), SqlalchemyIntegration()],
     send_default_pii    = True
