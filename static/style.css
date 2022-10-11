@@ -45,6 +45,7 @@ nav li {
 }
 
 #active-nav {
+    color:                  #d6d6d7;
     font-weight:            bold;
     text-decoration:        underline;
 }
