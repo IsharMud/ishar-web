@@ -8,12 +8,26 @@
     {%- if season is defined %}
             <ul>
                 <li title="Season {{ season.season_id }} began {{ season.effective }} ago on {{ season.effective_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}">
-                    Season {{ season.season_id }} began {{ season.effective }} ago
-                    on {{ season.effective_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}
+                    Started:
+                    <ul>
+                        <li>
+                            {{ season.effective_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}
+                        </li>
+                        <li>
+                            {{ season.effective }} ago
+                        </li>
+                    </ul>
                 </li>
                 <li title="Season {{ season.season_id }} ends in {{ season.expires }} on {{ season.expiration_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}">
-                    Season {{ season.season_id }} ends in {{ season.expires }}
-                    on {{ season.expiration_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}
+                    Ends:
+                    <ul>
+                        <li>
+                            {{ season.expiration_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}
+                        </li>
+                        <li>
+                            in {{ season.expires }}
+                        </li>
+                    </ul>
                 </li>
             </ul>
             <h3>

@@ -11,14 +11,14 @@
             </h3>
             <div id="account-details">
                 <ul>
-                    <li title="You created your account on {{ current_user.created_at.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }} ({{ current_user.created }} ago)">
-                        You created your account on:
+                    <li title="You created your account {{ current_user.created_at.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }} ({{ current_user.created }} ago)">
+                        You created your account:
                         <ul>
                             <li>
                                  {{ current_user.created_at.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}
                             </li>
                             <li>
-                                {{ current_user.created }} ago
+                                {{ current_user.created_ago }}
                             </li>
                         </ul>
                     </li>

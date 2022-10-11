@@ -122,7 +122,11 @@ def get_sentry_js(sentry_js=None):
 @app.route('/', methods=['GET'])
 def welcome():
     """Main welcome page/index, includes the most recent news"""
-    return render_template('welcome.html.j2', news=News.query.order_by(-News.created_at).first())
+    return render_template('welcome.html.j2',
+                            news    = News.query.order_by(
+                                        -News.created_at
+                                    ).first()
+                        )
 
 
 @app.route('/background', methods=['GET'])

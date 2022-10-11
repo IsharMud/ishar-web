@@ -173,15 +173,3 @@ textarea {
 {
     column-count:       initial;
 }
-
-#essence, #created {
-    text-align:         left;
-}
-
-#admin-layout-link {
-    text-align:         center;
-}
-
-#season, #player-search-form {
-    text-align:         right;
-}

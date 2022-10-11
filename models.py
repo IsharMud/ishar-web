@@ -55,8 +55,13 @@ class Account(Base, UserMixin):
 
     @cached_property
     def created(self):
+        """timedelta since account created"""
+        return datetime.datetime.utcnow() - self.created_at
+
+    @cached_property
+    def created_ago(self):
         """Stringified approximate timedelta since account created"""
-        return delta.stringify(datetime.datetime.utcnow() - self.created_at)
+        return delta.stringify(self.created) + ' ago'
 
     @property
     def seasonal_earned(self):
@@ -88,16 +93,17 @@ class Account(Base, UserMixin):
         """Method to create a new account"""
         try:
             # Hash the password and add the account to the database
-            self.password = md5_crypt.hash(self.password)
+            self.password   = md5_crypt.hash(self.password)
             db_session.add(self)
             db_session.commit()
 
             # Start each available account upgrade at zero (0)
             for init_upgrade in AccountUpgrade.query.all():
-                create_upgrade  = AccountsUpgrade()
-                create_upgrade.account_upgrades_id  = init_upgrade.id
-                create_upgrade.account_id           = self.account_id
-                create_upgrade.amount               = 0
+                create_upgrade  = AccountsUpgrade(
+                                    account_upgrades_id  = init_upgrade.id,
+                                    account_id           = self.account_id,
+                                    amount               = 0
+                )
                 db_session.add(create_upgrade)
             db_session.commit()
 
@@ -548,7 +554,7 @@ class Player(Base):
 
     @cached_property
     def logon_ago(self):
-        """timedelta since player log on"""
+        """Stringified approximate timedelta since player log on"""
         return delta.stringify(datetime.datetime.utcnow() - self.logon_dt)
 
     @cached_property
