@@ -27,7 +27,8 @@ h2, h3, h4, h5, strong, code {
     color:              #fa7;
 }
 
-a:hover {
+a:hover, #active-nav {
+    color:                  #d6d6d7;
     text-decoration:        underline;
 }
 
@@ -42,12 +43,6 @@ nav {
 nav li {
     display:                inline-block;
     padding:                0.5vw;
-}
-
-#active-nav {
-    color:                  #d6d6d7;
-    font-weight:            bold;
-    text-decoration:        underline;
 }
 
 #content{
