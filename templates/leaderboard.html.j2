@@ -43,14 +43,20 @@
                         <th title="Name">
                             Name
                         </th>
+                        <th title="Remorts">
+                            Remorts
+                        </th>
                     </tr>
             {%- endif %}
                     <tr>
                         <td id="{{ loop.index }}" title="#{{ loop.index }}">
                             <a href="#{{ loop.index }}">{{ loop.index }}</a>
                         </td>
-                        <td class="{{ leader.player_css }}" title="{{ leader.player_title | striptags | safe }}">
-                            {{ leader.player_title }}
+                        <td class="{{ leader.player_css }}" title="Player: {{ leader.player_title | striptags | safe }}">
+                            {{ leader.player_title | safe }}
+                        </td>
+                        <td title="Remorts: {{ leader.remorts }}">
+                            {{ leader.remorts }}
                         </td>
                     </tr>
         {%- endfor %}
