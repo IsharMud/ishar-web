@@ -16,28 +16,16 @@
                             Name
                         </th>
                         <th>
-                            Class
-                        </th>
-                        <th>
                             Level
                         </th>
                         <th>
                             Remorts
                         </th>
-                        <th>
-                            Renown
-                        </th>
-                        <th>
-                            Deaths
-                        </th>
                     </tr>
         {%- for player in current_user.players %}
                     <tr>
-                        <td title="{{ player.name | title | safe }} (Born {{ player.birth_dt.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }})">
+                        <td class="{{ player.player_css }}" title="{{ player.name | title | safe }} (Born {{ player.birth_dt.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }})">
                             {{ player.player_title }}
-                        </td>
-                        <td title="Class: {{ player.class.class_name | replace('_', '-') | title | safe }}">
-                            {{ player.class.class_name | replace('_', '-') | title | safe }}
                         </td>
                         <td title="Level: {{ player.level }}">
                             {{ player.level }}
@@ -45,20 +33,6 @@
                         <td title="Remorts: {{ player.remorts }}">
                             {{ player.remorts }}
                         </td>
-                        <td title="Renown: {{ player.renown }}">
-                            {{ player.renown }}
-                        </td>
-            {%- if player.player_type != 'Classic' %}
-                        <td class="non-classic" title="Type: {{ player.player_type }}">
-                            <span class="{{ player.player_css }}">
-                                {{ player.player_type }}
-                            </span>
-                        </td>
-            {%- else %}
-                        <td title="Deaths: {{ player.deaths }}">
-                            {{ player.deaths }}
-                        </td>
-            {%- endif %}
                     </tr>
         {%- endfor %}
                 </table>
