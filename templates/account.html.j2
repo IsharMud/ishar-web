@@ -1,33 +1,32 @@
+{%- set page = 'account' -%}
 {% extends "layout.html.j2" %}
-{% block meta_title %}Manage Account ({{ current_user.account_name | title | safe }}){% endblock meta_title %}
-{% block meta_description %}Manage your Ishar MUD account{% endblock%}
+{% block meta_title %}Account ({{ current_user.account_name | title | safe }}){% endblock meta_title %}
+{% block meta_description %}Your Ishar MUD Account{% endblock%}
 {% block meta_url %}{{ url_for('manage_account', _external=True) }}{% endblock meta_url %}">
-{% block title %}Manage Account ({{ current_user.account_name | title | safe }}){% endblock %}
-{% block header %}Manage Account ({{ current_user.account_name | title | safe }}){% endblock %}
+{% block title %}Account ({{ current_user.account_name | title | safe }}){% endblock %}
+{% block header %}Account ({{ current_user.account_name | title | safe }}){% endblock %}
 {%- block content %}
             <h3>
-                <strong>
-                    Welcome to your account page!
-                </strong>
+                Welcome to your account page, {{ current_user.account_name | title | safe }}.
             </h3>
-            <p>
-                You can view information about, and manage, your Ishar MUD account from here.
-            </p>
             <div id="account-details">
                 <ul>
-                    <li title="You created your account on {{ current_user.created_at.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}">
+                    <li title="You created your account on {{ current_user.created_at.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }} ({{ current_user.created }} ago)">
                         You created your account on:
                         <ul>
                             <li>
                                  {{ current_user.created_at.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}
                             </li>
+                            <li>
+                                {{ current_user.created }} ago
+                            </li>
                         </ul>
                     </li>
                     <li title="Change your password">
-                        You can <a href="{{ url_for('change_password') }}">change your password here</a>
+                        You can <a href="{{ url_for('change_password') }}">change your password here.</a>
                     </li>
                     <li title="View your players">
-                        You can <a href="{{ url_for('portal') }}">view your players here</a>
+                        You can <a href="{{ url_for('portal') }}">view your players here.</a>
                     </li>
                 </ul>
             </div>
@@ -63,17 +62,28 @@
                 <a href="{{ url_for('shop') }} ">at the Essence Shop</a>
                 or by typing <code>shop</code> in-game, once logged in.
             </p>
-        {%- if current_user is defined and current_user.seasonal_points is defined and current_user.seasonal_earned is defined %}
+    {%- if current_user.seasonal_points is defined and current_user.seasonal_earned is defined %}
             <div id="essence-balance">
                 <ul>
                     <li title="You currently have: {{ current_user.seasonal_points }} essence.">
-                        You currently have: {{ display_essence(current_user.seasonal_points) }}.
+                        You currently have:
+                    </li>
+                    <li class="faq-nested">
+                        <ul>
+                            <li>
+                                {{ display_essence(current_user.seasonal_points) }}
+                            </li>
+                        </ul>
                     </li>
                     <li title="This season, you have earned: {{ current_user.seasonal_earned }} essence.">
-                        This season, you have earned: {{ display_essence(current_user.seasonal_earned) }}.
+                        This season, you have earned:
                     </li>
-                    <li title="Spend your essence at the Shop">
-                        You can <a href="{{ url_for('shop') }}">spend your essence at the Shop</a>
+                    <li class="faq-nested">
+                        <ul>
+                            <li>
+                                {{ display_essence(current_user.seasonal_earned) }}
+                            </li>
+                        </ul>
                     </li>
                 </ul>
             </div>

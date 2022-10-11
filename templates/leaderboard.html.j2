@@ -26,59 +26,15 @@
                         <th title="Name">
                             Name
                         </th>
-                        <th title="Level">
-                            Level
-                        </th>
-                        <th title="Remorts">
-                            Remorts
-                        </th>
-                        <th title="Renown">
-                            Renown
-                        </th>
-                        <th title="Quests">
-                            Quests
-                        </th>
-                        <th title="Challenges">
-                            Challenges
-                        </th>
-                        <th title="Deaths">
-                            Deaths
-                        </th>
                     </tr>
             {%- endif %}
                     <tr>
                         <td id="{{ loop.index }}" title="#{{ loop.index }}">
                             <a href="#{{ loop.index }}">{{ loop.index }}</a>
                         </td>
-                        <td title="{{ leader.player_title | striptags | safe }}">
+                        <td class="{{ leader.player_css }}" title="{{ leader.player_title | striptags | safe }}">
                             {{ leader.player_title }}
                         </td>
-                        <td title="Level: {{ leader.level }}">
-                            {{ leader.level }}
-                        </td>
-                        <td title="Remorts: {{ leader.remorts }}">
-                            {{ leader.remorts }}
-                        </td>
-                        <td title="Renown: {{ leader.total_renown }}">
-                            {{ leader.total_renown }}
-                        </td>
-                        <td title="Quests: {{ leader.quests_completed }}">
-                            {{ leader.quests_completed }}
-                        </td>
-                        <td title="Challenges: {{ leader.challenges_completed }}">
-                            {{ leader.challenges_completed }}
-                        </td>
-            {%- if leader.player_type == 'Classic' %}
-                        <td title="Deaths: {{ leader.deaths }}">
-                            {{ leader.deaths }}
-                        </td>
-            {%- else %}
-                        <td class="non-classic" title="Type: {{ leader.player_type }}">
-                            <span class="{{ leader.player_css }}">
-                                {{ leader.player_type }}
-                            </span>
-                        </td>
-            {%- endif %}
                     </tr>
         {%- endfor %}
                 </table>

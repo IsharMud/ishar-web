@@ -53,6 +53,11 @@ class Account(Base, UserMixin):
                 return True
         return False
 
+    @cached_property
+    def created(self):
+        """Stringified approximate timedelta since account created"""
+        return delta.stringify(datetime.datetime.utcnow() - self.created_at)
+
     @property
     def seasonal_earned(self):
         """Amount of essence earned for the account"""

@@ -85,11 +85,8 @@
 {%- endblock scripts %}
 {%- block content %}
             <h3>
-                Welcome to the seasonal shop!
-            </h3>
-            <h4>
                 Essence
-            </h4>
+            </h3>
             <div id="essence-balance">
                 <ul>
                     <li title="You currently have: {{ current_user.seasonal_points }} essence.">
@@ -114,9 +111,9 @@
                     </li>
                 </ul>
             </div>
-            <h4 title="Upgrades">
+            <h3 title="Upgrades">
                 Upgrades
-            </h4>
+            </h3>
     {%- if current_user.upgrades is defined and current_user.upgrades is iterable and current_user.upgrades | selectattr('amount', '>', 0) | list | length > 0 %}
             <div id="essence-upgrades">
                 <ul>
@@ -136,9 +133,9 @@
             </ul>
     {%- endif %}
     {%- if shop_form is defined %}
-            <h4 title="Purchase">
+            <h3 title="Purchase">
                 Purchase
-            </h4>
+            </h3>
             <form method="post" action="{{ url_for('shop') }}" id="shop-form" onSubmit="return confirmSpend();">
                 {{ render_field(shop_form.upgrade) }}
                 {{ shop_form.csrf_token }}

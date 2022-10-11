@@ -11,7 +11,7 @@
 {%- block content %}
     {%- if manage_account is defined %}
             <div id="account-details">
-                <ul title="Account Created: {{ manage_account.created_at.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}">
+                <ul title="Account Created: {{ manage_account.created_at.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }} ({{manage_account.created }} ago)">
                     <li>
                         Account Created
                     </li>
@@ -19,6 +19,9 @@
                         <ul>
                             <li>
                                 {{ manage_account.created_at.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}
+                            </li>
+                            <li>
+                                {{ manage_account.created }} ago
                             </li>
                         </ul>
                     </li>

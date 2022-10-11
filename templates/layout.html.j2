@@ -23,7 +23,7 @@
         <meta property="og:title" content="{% block meta_title %}Welcome{% endblock meta_title %} - Ishar MUD">
         <meta property="og:description" content="Ishar MUD: {% block meta_description %}a free online text-adventure RPG{% endblock %}">
         <meta property="og:url" content="{% block meta_url %}{{ url_for('welcome', _external=True) }}{% endblock meta_url %}">
-        <meta property="og:image" content="{% block meta_image %}{{ url_for('static', filename='images/header_test_alpha.png', _external=True) }}{% endblock meta_image %}">
+        <meta property="og:image" content="{% block meta_image %}{{ url_for('static', filename='images/header_alpha.png', _external=True) }}{% endblock meta_image %}">
         <title>{% block title %}Welcome{% endblock %} - Ishar MUD</title>
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
         <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
@@ -40,7 +40,7 @@
                 <h1 hidden="yes" title="Ishar MUD">
                     Ishar MUD
                 </h1>
-                <img src="{{ url_for('static', filename='images/header_test_alpha.png' )}}">
+                <img src="{{ url_for('static', filename='images/header_alpha.png' )}}">
             </a>
         </header>
         <nav>
@@ -50,30 +50,7 @@
         </nav>
 {%- if current_user is defined and current_user.is_authenticated and current_user.account_name is defined %}
         <nav id="logged-in-nav">
-            <ul>
-    {%- if current_user.is_god %}
-                <li title="Administration Portal">
-                    <a href="{{ url_for('admin_portal') }}" {%- if page == 'admin' %} id="active-nav"{% endif%} title="Administration Portal">Administration</a>
-                </li>
-    {%- endif %}
-                <li>
-                    <a href="{{ url_for('challenges') }}" {%- if page == 'challenges' %} id="active-nav"{% endif%} title="Challenges">Challenges</a>
-                </li>
-                <li>
-                    <a href="{{ url_for('leaderboard') }}" {%- if page == 'leaderboard' %} id="active-nav"{% endif%} title="Leader Board">Leader Board</a>
-                </li>
-    {%- if current_user.seasonal_points > 0 %}
-        {%- set essence = ' (' + current_user.seasonal_points | string + ')' %}
-    {%- else %}
-        {%- set essence = '' %}
-    {%- endif %}
-                <li>
-                    <a href="{{ url_for('shop') }}" {%- if page == 'shop' %} id="active-nav"{% endif%} title="Shop {{- essence }}">Shop {{- essence }}</a>
-                </li>
-                <li>
-                    <a href="{{ url_for('logout') }}" title="Log Out">Log Out</a>
-                </li>
-            </ul>
+{%- include('navigation_user.html.j2') %}
         </nav>
 {%- endif %}
         <div id="content">
@@ -98,22 +75,15 @@
         </div>
         <footer>
 {%- block footer %}
-            <ul>
-    {%- if current_user is defined and current_user.is_authenticated %}
-        {%- if current_user.created_at is defined and current_user.created_at != '' %}
-                <li title="Account Created: {{ current_user.created_at.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}">
-                    <a href="{{ url_for('manage_account') }}">Account Created</a>
-                    {{ current_user.created_at.strftime('%A, %B %d, %Y') }}
-                </li>
-        {%- endif %}
-    {%- endif %}
     {%- if current_season is defined and current_season.expires is defined and current_season.expiration_date is defined %}
+            <ul>
               <li title="Season {{ current_season.season_id }} ends in {{ current_season.expires }} on {{ current_season.expiration_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}">
                     <a href="{{ url_for('season') }}">Season {{ current_season.season_id }}</a>
-                    ends in <span id="season-countdown">{{ current_season.expires }}</span> on {{ current_season.expiration_date.strftime('%A, %B %d, %Y')}}
+                    ends in <span id="season-countdown">{{ current_season.expires }}</span>,
+                    on {{ current_season.expiration_date.strftime('%A, %B %d, %Y')}}
                 </li>
-    {%- endif %}
             </ul>
+    {%- endif %}
 {%- endblock footer %}
         </footer>
     </body>

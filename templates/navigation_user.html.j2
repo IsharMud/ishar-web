@@ -1,0 +1,24 @@
+{%- if current_user.seasonal_points > 0 %}
+    {%- set essence = ' (' + current_user.seasonal_points | string + ')' %}
+{%- else %}
+    {%- set essence = '' %}
+{%- endif %}
+            <ul>
+    {%- if current_user.is_god %}
+                <li title="Administration Portal">
+                    <a href="{{ url_for('admin_portal') }}" {%- if page == 'admin' %} id="active-nav"{% endif%}>Administration</a>
+                </li>
+    {%- endif %}
+                <li title="Account">
+                    <a href="{{ url_for('manage_account') }}" {%- if page == 'account' %} id="active-nav"{% endif%}>Account</a>
+                </li>
+                <li title="Challenges">
+                    <a href="{{ url_for('challenges') }}" {%- if page == 'challenges' %} id="active-nav"{% endif%}>Challenges</a>
+                </li>
+                <li title="Leader Board">
+                    <a href="{{ url_for('leaderboard') }}" {%- if page == 'leaderboard' %} id="active-nav"{% endif%}>Leader Board</a>
+                </li>
+                <li title="Shop {{- essence }}">
+                    <a href="{{ url_for('shop') }}" {%- if page == 'shop' %} id="active-nav"{% endif%}>Shop {{- essence }}</a>
+                </li>
+            </ul>

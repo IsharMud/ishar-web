@@ -30,4 +30,9 @@
 {%- endif %}
                     </a>
                 </li>
+{%- if current_user is defined and current_user.is_authenticated and current_user.account_name is defined %}
+                <li>
+                    <a href="{{ url_for('logout') }}" title="Log Out">Log Out</a>
+                </li>
+{%- endif %}
             </ul>

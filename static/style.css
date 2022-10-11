@@ -36,17 +36,12 @@ a:active, a:visited {
 }
 
 nav {
-    margin:                 1vw;
+    border-top:             1px dotted #d6d6d7;
 }
 
 nav li {
     display:                inline-block;
-    padding:                1vw;
-    padding:                1vw;
-}
-
-#logged-in-nav {
-    border-top:             1px dotted #d6d6d7;
+    padding:                0.5vw;
 }
 
 #active-nav {
