@@ -4,6 +4,10 @@ body, button, input, textarea {
     color:              #d6d6d7;
 }
 
+header, nav {
+    margin:             1vw;
+}
+
 header img {
     height:     15vh;
 }
@@ -46,7 +50,7 @@ nav li {
 }
 
 #content{
-    margin:                 1vw;
+    margin:                 1.5vw;
     border-bottom:          1px dotted #d6d6d7;
     padding-bottom:         0.25em;
     border-top:             1px dotted #d6d6d7;

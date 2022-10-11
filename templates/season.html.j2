@@ -6,9 +6,6 @@
 {% block header %}Season {{ season.season_id }}{% endblock %}
 {%- block content %}
     {%- if season is defined %}
-            <p>
-               This is some information about <strong>season {{ season.season_id }}</strong> of Ishar MUD.
-            </p>
             <ul>
                 <li title="Season {{ season.season_id }} began {{ season.effective }} ago on {{ season.effective_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}">
                     Season {{ season.season_id }} began {{ season.effective }} ago
@@ -19,9 +16,9 @@
                     on {{ season.expiration_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}
                 </li>
             </ul>
-            <h4>
+            <h3>
                 Essence
-            </h4>
+            </h3>
             <p>
                 "Essence" are the rewards points earned for your account during the season!
             </p>
@@ -30,14 +27,28 @@
                 <a href="{{ url_for('shop') }} ">at the Shop</a>
                 or by typing <code>shop</code> in-game, once logged in.
             </p>
-        {%- if current_user is defined and current_user.seasonal_points is defined and current_user.seasonal_earned is defined %}
+    {%- if current_user.seasonal_points is defined and current_user.seasonal_earned is defined %}
             <div id="essence-balance">
                 <ul>
                     <li title="You currently have: {{ current_user.seasonal_points }} essence.">
-                        You currently have: {{ display_essence(current_user.seasonal_points) }}.
+                        You currently have:
+                    </li>
+                    <li class="faq-nested">
+                        <ul>
+                            <li>
+                                {{ display_essence(current_user.seasonal_points) }}
+                            </li>
+                        </ul>
                     </li>
                     <li title="This season, you have earned: {{ current_user.seasonal_earned }} essence.">
-                        This season, you have earned: {{ display_essence(current_user.seasonal_earned) }}.
+                        This season, you have earned:
+                    </li>
+                    <li class="faq-nested">
+                        <ul>
+                            <li>
+                                {{ display_essence(current_user.seasonal_earned) }}
+                            </li>
+                        </ul>
                     </li>
                 </ul>
             </div>

@@ -45,12 +45,12 @@
         </header>
         <nav>
 {%- block navigation %}
-{% include('navigation.html.j2') %}
+    {%- include('navigation.html.j2') %}
 {%- endblock navigation %}
         </nav>
 {%- if current_user is defined and current_user.is_authenticated and current_user.account_name is defined %}
         <nav id="logged-in-nav">
-{%- include('navigation_user.html.j2') %}
+    {%- include('navigation_user.html.j2') %}
         </nav>
 {%- endif %}
         <div id="content">

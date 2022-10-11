@@ -18,6 +18,9 @@
                 <li title="Leader Board">
                     <a href="{{ url_for('leaderboard') }}" {%- if page == 'leaderboard' %} id="active-nav"{% endif%}>Leader Board</a>
                 </li>
+                <li title="Player Portal">
+                    <a href ="{{ url_for('portal') }}" {%- if page == 'portal' %} id="active-nav"{% endif%}>Player Portal</a>
+                </li>
                 <li title="Shop {{- essence }}">
                     <a href="{{ url_for('shop') }}" {%- if page == 'shop' %} id="active-nav"{% endif%}>Shop {{- essence }}</a>
                 </li>
