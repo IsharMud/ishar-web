@@ -46,7 +46,7 @@ nav ul {
     padding:                0;
 }
 
-nav li {
+nav li, #leaderboard-choices ul li {
     display:                inline-block;
     padding-left:           1vw;
     padding-right:          1vw;
@@ -145,10 +145,6 @@ textarea {
 
 #flashes, #primary-stat {
     font-weight:        bold;
-}
-
-#leaderboard-choices ul li {
-    display:            inline;
 }
 
 #buy-coffee::after {
