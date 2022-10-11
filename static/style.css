@@ -4,7 +4,11 @@ body, button, input, textarea {
     color:              #d6d6d7;
 }
 
-header, nav {
+header {
+    margin:             1.5vw;
+}
+
+nav {
     margin:             1vw;
 }
 
