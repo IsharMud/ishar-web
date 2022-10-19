@@ -46,17 +46,33 @@
                         <th title="Remorts">
                             Remorts
                         </th>
+                        <th title="Renown">
+                            Renown
+                        </th>
+                        <th title="Deaths">
+                            Deaths
+                        </th>
                     </tr>
             {%- endif %}
                     <tr>
                         <td id="{{ loop.index }}" title="#{{ loop.index }}">
                             <a href="#{{ loop.index }}">{{ loop.index }}</a>
                         </td>
-                        <td class="{{ leader.player_css }}" title="Player: {{ leader.player_title | striptags | safe }}">
+                        <td title="Player: {{ leader.player_title | striptags | safe }}">
                             {{ leader.player_title | safe }}
                         </td>
                         <td title="Remorts: {{ leader.remorts }}">
                             {{ leader.remorts }}
+                        </td>
+                        <td title="Renown: {{ leader.total_renown }}">
+                            {{ leader.total_renown }}
+                        </td>
+                        <td class="{{ leader.player_css }}" title="{%- if leader.player_type == 'Classic' -%}Deaths: {{ leader.deaths }}{%- else %}Type: {{ leader.player_type }}{%- endif %}">
+                {%- if leader.player_type == 'Classic' -%}
+                            {{ leader.deaths }}
+                {%- else %}
+                            {{ leader.player_type }}
+                {%- endif %}
                         </td>
                     </tr>
         {%- endfor %}
