@@ -28,7 +28,7 @@
                 </li>
 {%- else %}
                 <li>
-                    <a href="{{ url_for('logout') }}" title="Log Out">Log Out ({{ current_user.account_name }})</a>
+                    <a href="{{ url_for('logout') }}" title="Log Out">Log Out ({{ current_user.account_name | title | safe }})</a>
                 </li>
 {%- endif %}
             </ul>
