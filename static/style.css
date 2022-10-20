@@ -92,6 +92,10 @@ table {
     table {
         width:              85vw;
     }
+
+    #logo {
+        width:              50vw;
+    }
 }
 
 ol, ul {
