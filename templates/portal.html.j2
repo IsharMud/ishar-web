@@ -19,19 +19,56 @@
                             Level
                         </th>
                         <th>
+                            Class
+                        </th>
+                        <th>
                             Remorts
+                        </th>
+                        <th>
+                            Renown
+                        </th>
+                        <th>
+                            Quests
+                        </th>
+                        <th>
+                            Challenges
+                        </th>
+                        <th>
+                            Deaths
                         </th>
                     </tr>
         {%- for player in current_user.players %}
                     <tr>
-                        <td class="{{ player.player_css }}" title="{{ player.name | title | safe }} (Born {{ player.birth_dt.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }})">
-                            {{ player.player_title }}
+                        <td title="{{ player.name }} (Born {{ player.birth_dt.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }})">
+                            {{ player.player_link }}
                         </td>
                         <td title="Level: {{ player.level }}">
                             {{ player.level }}
                         </td>
+                        <td title="Class: {{ player.class.class_name }}">
+                            {{ player.class.class_name | title }}
+                        </td>
                         <td title="Remorts: {{ player.remorts }}">
                             {{ player.remorts }}
+                        </td>
+                        <td title="Renown: {{ player.total_renown }}">
+                            {{ player.total_renown }}
+                        </td>
+                        <td title="Quests: {{ player.quests_completed }}">
+                            {{ player.quests_completed }}
+                        </td>
+                        <td title="Challenges: {{ player.challenges_completed }}">
+                            {{ player.challenges_completed }}
+                        </td>
+            {%- if player.player_type != 'Classic' %}
+                        <td class="non-classic" title="Type: {{ player.player_type }}">
+                            <span class="{{ player.player_css }}">
+                                {{ player.player_type }}
+                            </span>
+            {%- else %}
+                        <td title="Deaths: {{ player.deaths }}">
+                            {{ player.deaths }}
+            {%- endif %}
                         </td>
                     </tr>
         {%- endfor %}

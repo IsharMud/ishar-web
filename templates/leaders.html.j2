@@ -64,8 +64,8 @@
                         <td id="{{ loop.index }}" title="#{{ loop.index }}">
                             <a href="#{{ loop.index }}">{{ loop.index }}</a>
                         </td>
-                        <td title="Player: {{ leader.player_link | striptags | safe }}">
-                            {{ leader.player_link | safe }}
+                        <td title="Player: {{ leader.name }}">
+                            {{ leader.player_link }}
                         </td>
                         <td title="Remorts: {{ leader.remorts }}">
                             {{ leader.remorts }}
