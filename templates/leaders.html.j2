@@ -1,27 +1,27 @@
-{%- set page = 'leaderboard' -%}
+{%- set page = 'leaders' -%}
 {% extends "layout.html.j2" %}
-{% block meta_title %}Leader Board{% endblock meta_title %}
-{% block meta_description %}Leader Board of top players of the game and their achievements{% endblock %}
-{% block meta_url %}{{ url_for('leaderboard', _external=True) }}{% endblock meta_url %}">
-{% block title %}Leader Board{% endblock %}
-{% block header %}Leader Board{% endblock %}
+{% block meta_title %}Leaders{% endblock meta_title %}
+{% block meta_description %}Leader board of top players of the game and their achievements{% endblock %}
+{% block meta_url %}{{ url_for('leaders', _external=True) }}{% endblock meta_url %}">
+{% block title %}Leaders{% endblock %}
+{% block header %}Leaders{% endblock %}
 {%- block scripts %}
-        <script async src="{{ url_for('static', filename='leaderBoard.js') }}"></script>
+        <script async src="{{ url_for('static', filename='leaders.js') }}"></script>
 {%- endblock %}
 {%- block content %}
                 <p>
                     <input type="checkbox" onchange="deadLeaders(this.checked);" id="include-dead" name="include-dead">
                     <label for="include-dead" title="Include Dead">
-                        Include Dead
+                        Include Dead ☠️
                     </label>
                 </p>
     {%- if limit is defined and limit is number and limit_choices is defined and limit_choices is iterable %}
-                <div id="leaderboard-choices">
+                <div id="leader-choices">
                     <ul>
         {%- for limit_choice in limit_choices %}
                         <li title="Top {{ limit_choice }}">
             {%- if limit_choice != limit -%}
-                            <a href="{{ url_for('leaderboard', limit=limit_choice) }} {%- if include_dead == False %}?dead=false{% endif %}">
+                            <a href="{{ url_for('leaders', limit=limit_choice) }} {%- if include_dead == False %}?dead=false{% endif %}">
             {%- endif -%}
                                 {{ limit_choice }}
             {%- if limit_choice != limit -%}
@@ -32,9 +32,9 @@
                     </ul>
                 </div>
     {%- endif %}
-    {%- if leaders is defined and leaders is iterable and leaders | length > 0 %}
+    {%- if leader_players is defined and leader_players is iterable and leader_players | length > 0 %}
                 <table id="leaders" title="Leaders">
-        {%- for leader in leaders %}
+        {%- for leader in leader_players %}
             {%- if loop.index0 % 10 == 0 %}
                     <tr>
                         <th title="#">
@@ -49,6 +49,12 @@
                         <th title="Renown">
                             Renown
                         </th>
+                        <th title="Quests">
+                            Quests
+                        </th>
+                        <th title="Challenges">
+                            Challenges
+                        </th>
                         <th title="Deaths">
                             Deaths
                         </th>
@@ -58,14 +64,20 @@
                         <td id="{{ loop.index }}" title="#{{ loop.index }}">
                             <a href="#{{ loop.index }}">{{ loop.index }}</a>
                         </td>
-                        <td title="Player: {{ leader.player_title | striptags | safe }}">
-                            {{ leader.player_title | safe }}
+                        <td title="Player: {{ leader.player_link | striptags | safe }}">
+                            {{ leader.player_link | safe }}
                         </td>
                         <td title="Remorts: {{ leader.remorts }}">
                             {{ leader.remorts }}
                         </td>
                         <td title="Renown: {{ leader.total_renown }}">
                             {{ leader.total_renown }}
+                        </td>
+                        <td title="Quests: {{ leader.quests_completed }}">
+                            {{ leader.quests_completed }}
+                        </td>
+                        <td title="Challenges: {{ leader.challenges_completed }}">
+                            {{ leader.challenges_completed }}
                         </td>
                         <td class="{{ leader.player_css }}" title="{%- if leader.player_type == 'Classic' -%}Deaths: {{ leader.deaths }}{%- else %}Type: {{ leader.player_type }}{%- endif %}">
                 {%- if leader.player_type == 'Classic' -%}

@@ -2,33 +2,18 @@
                 <li title="Connect to Ishar MUD">
                     <a href="{{ url_for('connect') }}" target="_blank">Connect</a>
                 </li>
-                <li title="Discord Invitation">
-                    <a href="{{ url_for('discord') }}" target="_blank">Discord</a>
-                </li>
-                <li title="E-mail Us">
-                    <a href="mailto:admin@isharmud.com" target="_blank">E-mail Us</a>
-                </li>
-            </ul>
-            <ul>
                 <li title="Frequently Asked Questions">
                    <a href="{{ url_for('faq') }}" {%- if page == 'faq' %} id="active-nav"{% endif %}>FAQs</a>
                 </li>
                 <li title="Patches">
                     <a href="{{ url_for('patches') }}" {%- if page == 'patches' %} id="active-nav"{% endif%}>Patches</a>
                 </li>
-                <li title="Support Ishar MUD">
-                    <a href="{{ url_for('support') }}" {%- if page == 'support' %} id="active-nav"{% endif%}>Support Ishar</a>
-                </li>
                 <li title="World">
                     <a href="{{ url_for('world') }}" {%- if page == 'world' %} id="active-nav"{% endif%}>World</a>
                 </li>
 {%- if current_user is defined and not current_user.is_authenticated and current_user.account_name is not defined %}
-                <li title="Player Portal">
-                    <a href ="{{ url_for('portal') }}">Player Portal</a>
-                </li>
-{%- else %}
-                <li>
-                    <a href="{{ url_for('logout') }}" title="Log Out">Log Out ({{ current_user.account_name | title | safe }})</a>
+                <li title="Portal">
+                    <a href ="{{ url_for('portal') }}">Portal</a>
                 </li>
 {%- endif %}
             </ul>

@@ -1,14 +1,16 @@
 {% extends "layout.html.j2" %}
 {% block meta_title %}Season {{ season.season_id }}{% endblock meta_title %}
 {% block meta_description %}Information about season {{ season.season_id }} of Ishar MUD{% endblock %}
-{% block meta_url %}{{ url_for('leaderboard', _external=True) }}{% endblock meta_url %}">
+{% block meta_url %}{{ url_for('season', _external=True) }}{% endblock meta_url %}">
 {% block title %}Season {{ season.season_id }}{% endblock %}
 {% block header %}Season {{ season.season_id }}{% endblock %}
 {%- block content %}
     {%- if season is defined %}
             <ul>
                 <li title="Season {{ season.season_id }} began {{ season.effective }} ago on {{ season.effective_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}">
-                    Started:
+                    <strong>
+                        Started
+                    </strong>
                     <ul>
                         <li>
                             {{ season.effective_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}
@@ -19,7 +21,9 @@
                     </ul>
                 </li>
                 <li title="Season {{ season.season_id }} ends in {{ season.expires }} on {{ season.expiration_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}">
-                    Ends:
+                    <strong>
+                        Ends
+                    </strong>
                     <ul>
                         <li>
                             {{ season.expiration_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}
@@ -34,12 +38,13 @@
                 Essence
             </h3>
             <p>
-                "Essence" are the rewards points earned for your account during the season!
+                &quot;<a title="Essence" href="{{ url_for('manage_account') }}#essence-balance">Essence</a>&quot;
+                are the rewards points that you earn during the season!
+
             </p>
             <p>
                 Essence is preserved across seasons, and can be spent at any time
-                <a href="{{ url_for('shop') }} ">at the Shop</a>
-                or by typing <code>shop</code> in-game, once logged in.
+                by typing <code>shop</code> after logging in.
             </p>
     {%- if current_user.seasonal_points is defined and current_user.seasonal_earned is defined %}
             <div id="essence-balance">

@@ -7,8 +7,8 @@
 {% block header %}Welcome{% if current_user.account_name is defined %}, {{ current_user.account_name | title | safe }}{% endif %}!{% endblock %}
 {%- block content %}
     {%- if current_user.players is defined and current_user.players is iterable and current_user.players | length > 0 %}
-                <h3>
-                    {{ current_user.players | length }} character{% if current_user.players | length != 1 %}s{% endif %}
+                <h3 title="You have {{ current_user.players | length }} character{% if current_user.players | length != 1 %}s{% endif %}">
+                    You have {{ current_user.players | length }} character{% if current_user.players | length != 1 %}s{% endif %}:
                 </h3>
                 <table id="players">
                     <tr>

@@ -170,54 +170,6 @@ def season():
     return render_template('season.html.j2', season=get_current_season())
 
 
-@app.route('/shop', methods=['GET', 'POST'])
-@login_required
-def shop():
-    """Allow logged in users to view and spend their essence/seasonal points"""
-
-    # Get shop form object, fill upgrade choices, and check if submitted
-    shop_form = forms.ShopForm()
-    opt = [(ug.upgrade.id, ug.upgrade.name) for ug in current_user.upgrades]
-    shop_form.upgrade.choices   = opt
-    if shop_form.validate_on_submit():
-
-        # Find the upgrade the user chose
-        for upgrade in current_user.upgrades:
-            if upgrade.account_upgrades_id == shop_form.upgrade.data:
-                chosen          = upgrade
-                chosen.upgrade  = upgrade.upgrade
-
-        # Process the chosen upgrade
-        if chosen and chosen.upgrade:
-
-            # Account Upgrade ID 4 ("Improved Starting Gear") is a work-in-progress
-            if chosen.upgrade.id == 4:
-                flash(f'Sorry, but this upgrade ({chosen.upgrade.name}) is ' \
-                    'still a work in progress.', 'error')
-
-            # Do not let users upgrade beyond max
-            elif chosen.amount >= chosen.upgrade.max_value:
-                flash('Sorry, but you already have the max value in that' \
-                    f'upgrade ({chosen.upgrade.name}).', 'error')
-
-            # Do not let users spend essence they do not have
-            elif current_user.seasonal_points < chosen.upgrade.cost:
-                flash('Sorry, but you do not have enough essence to acquire' \
-                   f'that upgrade ({chosen.upgrade.name}).', 'error')
-
-            # Proceed with processing valid essence upgrade purchase requests
-            else:
-                if chosen.do_upgrade():
-                    flash(f'You have been charged {chosen.upgrade.cost} essence ' \
-                        f'(for {chosen.upgrade.name}).', 'success')
-                    sentry_sdk.capture_message(f'Upgrade: {current_user} {chosen.upgrade}')
-                else:
-                    flash('Sorry, but please try again!', 'error')
-
-    # Show the seasonal upgrade essence shop form
-    return render_template('shop.html.j2', shop_form=shop_form)
-
-
 @app.route('/password', methods=['GET', 'POST'])
 @fresh_login_required
 def change_password():
@@ -301,21 +253,21 @@ def challenges():
     return render_template('challenges.html.j2', challenges=find)
 
 
-@app.route('/leader_board/<int:limit>', methods=['GET'])
-@app.route('/leaderboard/<int:limit>', methods=['GET'])
-@app.route('/leader_board', methods=['GET'])
 @app.route('/leaderboard', methods=['GET'])
-def leaderboard(limit=10):
+@app.route('/leaderboard/<int:limit>', methods=['GET'])
+@app.route('/leaders/<int:limit>', methods=['GET'])
+@app.route('/leaders', methods=['GET'])
+def leaders(limit=10):
     """Sort and list the best players, with a limit option,
         and boolean to include/exclude dead characters"""
 
-    limit_choices   = [5, 10, 25, 50, 100]
+    limit_choices   = [5, 10, 15, 20]
     if limit not in limit_choices or limit > max(limit_choices):
-        return redirect(url_for('leaderboard', limit=10))
+        return redirect(url_for('leaders', limit=10))
 
     if request.args.get('dead') and request.args.get('dead') == 'false':
         include_dead    = False
-        leaders         = Player.query.filter(
+        leader_players  = Player.query.filter(
                             Player.true_level < min(IMM_LEVELS),
                             Player.is_deleted != 1
                         ).order_by(
@@ -323,32 +275,26 @@ def leaderboard(limit=10):
                             -Player.total_renown,
                             -Player.quests_completed,
                             -Player.challenges_completed,
-                            -Player.renown,
-                            -Player.level,
-                            -Player.bankacc,
                             Player.deaths
                         ).limit(limit).all()
     else:
         include_dead    = True
-        leaders         = Player.query.filter(
+        leader_players  = Player.query.filter(
                             Player.true_level < min(IMM_LEVELS),
                         ).order_by(
                             -Player.remorts,
                             -Player.total_renown,
                             -Player.quests_completed,
                             -Player.challenges_completed,
-                            -Player.renown,
-                            -Player.level,
-                            -Player.bankacc,
                             Player.deaths
                         ).limit(limit).all()
 
-    return render_template('leaderboard.html.j2',
-                                include_dead    = include_dead,
-                                leaders         = leaders,
-                                limit           = limit,
-                                limit_choices   = limit_choices
-                            )
+    return render_template('leaders.html.j2',
+                            include_dead    = include_dead,
+                            leader_players  = leader_players,
+                            limit           = limit,
+                            limit_choices   = limit_choices
+                        )
 
 
 @app.route('/wiz_list', methods=['GET'])
@@ -598,62 +544,6 @@ def logout():
     flash('You have logged out!', 'success')
     sentry_sdk.set_user(None)
     return redirect(url_for('welcome'))
-
-
-@app.route('/new', methods=['GET', 'POST'])
-def new_account():
-    """New account creation page (/new)"""
-
-    # Get new account form object and check if submitted
-    new_account_form    = forms.NewAccountForm()
-    if new_account_form.validate_on_submit():
-
-        # Check that e-mail address has not already been used
-        find_email  = Account.query.filter_by(email = new_account_form.email.data).first()
-        if find_email:
-            flash('Sorry, but that e-mail address exists. Please log in.', 'error')
-            return redirect(url_for('login'))
-
-        # Check that the account name is not in use
-        find_name   = Account.query.filter_by(
-                        account_name    = new_account_form.account_name.data
-                    ).first()
-        if find_name:
-            flash('Sorry, but that account name is already being used!', 'error')
-
-        # Otherwise, proceed in trying to create the new account
-        else:
-            ip_address  = ipaddress.ip_address(request.remote_addr)
-            new_uacct   = Account(
-                email           = new_account_form.email.data,
-                password        = new_account_form.confirm_password.data,
-                create_isp      = ip_address,
-                last_isp        = '',
-                create_ident    = '',
-                last_ident      = '',
-                create_haddr    = int(ip_address),
-                last_haddr      = int(ip_address),
-                account_name    = new_account_form.account_name.data
-            )
-
-            # Create the account in the database, confirm the account ID, and log the user in
-            created_id      = new_uacct.create_account()
-            created_account = Account.query.filter_by(
-                                account_id  = created_id
-                            ).first()
-            if created_account:
-                login_user(created_account)
-                flash('Your account has been created!', 'success')
-                sentry_sdk.capture_message(f'Account Created: {created_account}')
-            else:
-                flash('Sorry, but please try again!', 'error')
-
-    # Redirect users who are logged in to the portal, including newly created accounts
-    if current_user.is_authenticated:
-        return redirect(url_for('portal'))
-
-    # Show the new account form
-    return render_template('new.html.j2', new_account_form=new_account_form)
 
 
 @app.route('/mud_clients', methods=['GET'])

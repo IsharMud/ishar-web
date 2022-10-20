@@ -17,7 +17,7 @@
         <meta name="sentry-trace" content="{{ sentry_span.toSentryTrace() }}">
         <meta name="baggage" content="{{ serializeBaggage(sentry_span.getBaggage()) }}">
         {%- endif %}
-        <meta name="viewport" content="width=device-width">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta property="og:type" content="website">
         <meta property="og:site_name" content="Ishar MUD">
         <meta property="og:title" content="{% block meta_title %}Welcome{% endblock meta_title %} - Ishar MUD">
@@ -37,10 +37,10 @@
     <body>
         <header>
             <a href="{{ url_for('welcome') }}" title="Ishar MUD">
-                <h1 hidden="yes" title="Ishar MUD">
+                <h1>
                     Ishar MUD
                 </h1>
-                <img src="{{ url_for('static', filename='images/header_alpha.png' )}}">
+                <img id="logo" alt="Ishar MUD" src="{{ url_for('static', filename='images/header_alpha.png' )}}">
             </a>
         </header>
         <nav>
@@ -75,14 +75,23 @@
         </div>
         <footer>
 {%- block footer %}
-    {%- if current_season is defined and current_season.expires is defined and current_season.expiration_date is defined %}
             <ul>
-              <li title="Season {{ current_season.season_id }} ends in {{ current_season.expires }} on {{ current_season.expiration_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}">
-                    <a href="{{ url_for('season') }}">Season {{ current_season.season_id }}</a>
-                    ends in <span id="season-countdown">{{ current_season.expires }}</span>,
-                    on {{ current_season.expiration_date.strftime('%A, %B %d, %Y')}}
+                <li>
+                    <a href="{{ url_for('support') }}" {%- if page == 'support' %} id="active-nav"{% endif%}>❤️ Support Ishar MUD</a>
+                </li>
+                <li>
+                    <a title="Join us on Discord!" href="{{ url_for('discord') }}" id="discord" target="_blank"><img alt="Discord" src="{{ url_for('static', filename='images/discord.png') }}"> Join us on Discord!</a>
+                </li>
+                <li>
+                    <a title="E-mail Us!" href="mailto:admin@isharmud.com" id="email" target="_blank">✉️ E-mail us!</a>
                 </li>
             </ul>
+    {%- if current_season is defined and current_season.expires is defined and current_season.expiration_date is defined %}
+            <p title="Season {{ current_season.season_id }} ends in {{ current_season.expires }} on {{ current_season.expiration_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}">
+                <a href="{{ url_for('season') }}">Season {{ current_season.season_id }}</a>
+                ends in <span id="season-countdown">{{ current_season.expires }}</span>,
+                on {{ current_season.expiration_date.strftime('%A, %B %d, %Y')}}
+            </p>
     {%- endif %}
 {%- endblock footer %}
         </footer>

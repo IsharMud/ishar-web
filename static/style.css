@@ -4,16 +4,25 @@ body, button, input, textarea {
     color:              #d6d6d7;
 }
 
-header img {
-    height:             15vh;
-    margin:             1vw;
+#logo {
+    width:             25vw;
 }
 
-button, input, textarea{
+header {
+    margin:             1vw;
+    text-align:         center;
+}
+
+h1 {
+    display:            none;
+    visibility:         hidden;
+}
+
+button, input, textarea {
     border:             1px solid #d6d6d7;
 }
 
-a[target='_blank']::after {
+a[target="_blank"]::after {
     content:            url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAQElEQVR42qXKwQkAIAxDUUdxtO6/RBQkQZvSi8I/pL4BoGw/XPkh4XigPmsUgh0626AjRsgxHTkUThsG2T/sIlzdTsp52kSS1wAAAABJRU5ErkJggg==);
     margin-left:        0.25em;
     filter:             invert(1);
@@ -28,28 +37,60 @@ h2, h3, h4, h5, strong, code {
     color:              #fa7;
 }
 
+a:active, a:visited {
+    color:                  #6082b6;
+}
+
 a:hover, #active-nav {
     color:                  #d6d6d7;
     text-decoration:        underline;
 }
 
-a:active, a:visited {
-    color:                  #6082b6;
+#discord::after, #email::after, #coffee::after, #patron::after {
+    content:            none;
+    filter:             none;
+    text-decoration:    none;
 }
 
-nav, footer, #content {
-    border-top:             1px dotted #d6d6d7;
-    margin:                 1vw;
+#discord img {
+    width:              1em;
 }
 
 nav ul {
     padding:                0;
 }
 
-nav li, #leaderboard-choices ul li {
+nav, footer {
+    border-top:         1px dotted #d6d6d7;
+    text-align:         center;
+}
+
+footer {
+    margin-top:        2vh;
+}
+
+footer ul li, nav li, #leader-choices ul li {
     display:                inline-block;
     padding-left:           1vw;
     padding-right:          1vw;
+}
+
+footer ul {
+    font-size:              0.8em;
+    padding-inline-start:   0;
+}
+
+#leader-choices ul li {
+    display:                inline-block;
+    word-spacing:           5vw;
+}
+
+table {
+    width:                  50vw;
+}
+
+ol, ul {
+    padding-inline-start:   2vw;
 }
 
 tr:nth-child(2n) {
@@ -145,11 +186,6 @@ textarea {
 
 #flashes, #primary-stat {
     font-weight:        bold;
-}
-
-#buy-coffee::after {
-    content:            none;
-    filter:             none;
 }
 
 #player-description {

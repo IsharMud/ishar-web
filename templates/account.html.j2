@@ -6,9 +6,6 @@
 {% block title %}Account ({{ current_user.account_name | title | safe }}){% endblock %}
 {% block header %}Account ({{ current_user.account_name | title | safe }}){% endblock %}
 {%- block content %}
-            <h3>
-                Welcome to your account page, {{ current_user.account_name | title | safe }}.
-            </h3>
             <div id="account-details">
                 <ul>
                     <li title="You created your account {{ current_user.created_at.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }} ({{ current_user.created }} ago)">
@@ -18,7 +15,7 @@
                                  {{ current_user.created_at.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}
                             </li>
                             <li>
-                                {{ current_user.created_ago }}
+                                {{ current_user.created_ago }} ({{ current_user.created }} ago)
                             </li>
                         </ul>
                     </li>
@@ -51,18 +48,10 @@
                 </li>
             </ul>
     {%- endif %}
-            <h4>
+    {%- if current_user.seasonal_points is defined and current_user.seasonal_earned is defined %}
+            <h4 title="Essence">
                 Essence
             </h4>
-            <p>
-                "Essence" are the rewards points earned for your account during the season!
-            </p>
-            <p>
-                Essence is preserved across seasons, and can be spent at any time
-                <a href="{{ url_for('shop') }} ">at the Shop</a>
-                or by typing <code>shop</code> in-game, once logged in.
-            </p>
-    {%- if current_user.seasonal_points is defined and current_user.seasonal_earned is defined %}
             <div id="essence-balance">
                 <ul>
                     <li title="You currently have: {{ current_user.seasonal_points }} essence.">

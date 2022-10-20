@@ -31,6 +31,20 @@ class Account(Base, UserMixin):
 
     players         = relationship('Player', backref='account')
 
+    def change_password(self, new_password):
+        """Method to allow users to change their account password"""
+        try:
+            self.password = md5_crypt.hash(new_password)
+            db_session.commit()
+            return True
+        except Exception as err:
+            print(err)
+        return False
+
+    def check_password(self, password):
+        """Method to check an account password"""
+        return md5_crypt.verify(password, self.password)
+
     def get_id(self):
         """flask-login account ID"""
         return self.email
@@ -75,61 +89,21 @@ class Account(Base, UserMixin):
                 earned  = player.seasonal_earned
         return earned
 
-    def change_password(self, new_password):
-        """Method to allow users to change their account password"""
-        try:
-            self.password = md5_crypt.hash(new_password)
-            db_session.commit()
-            return True
-        except Exception as err:
-            print(err)
-        return False
-
-    def check_password(self, password):
-        """Method to check an account password"""
-        return md5_crypt.verify(password, self.password)
-
-    def create_account(self):
-        """Method to create a new account"""
-        try:
-            # Hash the password and add the account to the database
-            self.password   = md5_crypt.hash(self.password)
-            db_session.add(self)
-            db_session.commit()
-
-            # Start each available account upgrade at zero (0)
-            for init_upgrade in AccountUpgrade.query.all():
-                create_upgrade  = AccountsUpgrade(
-                                    account_upgrades_id  = init_upgrade.id,
-                                    account_id           = self.account_id,
-                                    amount               = 0
-                )
-                db_session.add(create_upgrade)
-            db_session.commit()
-
-            # Return the new account ID
-            return self.account_id
-
-        except Exception as err:
-            print(err)
-        return False
-
     def __repr__(self):
         return f'<Account> "{self.account_name}" (ID: {self.account_id})'
 
 
 class AccountUpgrade(Base):
-    """Account upgrade with the essence cost and max value"""
-    __tablename__       = 'account_upgrades'
+    """Account upgrades that are available to accounts"""
+    __tablename__   = 'account_upgrades'
 
-    id                  = Column(TINYINT(4), primary_key=True)
-    cost                = Column(MEDIUMINT(4), nullable=False)
-    description         = Column(String(200), nullable=False)
-    name                = Column(String(30), nullable=False, unique=True)
-    max_value           = Column(MEDIUMINT(4),
-                            nullable=False,
-                            server_default=FetchedValue()
-                        )
+    id              = Column(TINYINT(4), primary_key=True)
+    cost            = Column(MEDIUMINT(4), nullable=False)
+    description     = Column(String(200), nullable=False)
+    name            = Column(String(30), nullable=False, unique=True)
+    max_value       = Column(MEDIUMINT(4), nullable=False, server_default=FetchedValue())
+    scale           = Column(TINYINT(4), nullable=False, server_default=FetchedValue())
+    is_disabled     = Column(TINYINT(1), nullable=False, server_default=FetchedValue())
 
     accounts_upgrade    = relationship('AccountsUpgrade', backref='upgrade')
 
@@ -155,18 +129,6 @@ class AccountsUpgrade(Base):
     amount              = Column(MEDIUMINT(4), nullable=False)
 
     account             = relationship('Account', backref='upgrades')
-
-    def do_upgrade(self, increment=1):
-        """Method to increment an account upgrade
-            and reduce account seasonal points (essence)"""
-        try:
-            self.amount = self.amount + increment
-            self.account.seasonal_points = self.account.seasonal_points - self.upgrade.cost
-            db_session.commit()
-            return True
-        except Exception as err:
-            print(err)
-        return False
 
     def __repr__(self):
         return f'<AccountsUpgrade> "{self.upgrade.name}" ' \
@@ -200,15 +162,6 @@ class Challenge(Base):
         if self.winner_desc != '':
             return True
         return False
-
-    @cached_property
-    def reward_tier(self):
-        """Reward tier string"""
-        tiers   = { 9: 'SS', 8: 'SS', 7: 'SS', 6: 'S', 5: 'A', 4: 'B', 3: 'C', 2: 'D', 1: 'F' }
-        for tier in tiers:
-            if self.adj_tier == tier:
-                return tiers[self.adj_tier]
-        return self.adj_tier
 
     def __repr__(self):
         return f'<Challenge> "{self.mob_name}" ({self.challenge_id}) / ' \

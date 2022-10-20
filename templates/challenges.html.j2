@@ -1,38 +1,38 @@
 {%- set page = 'challenges' -%}
 {% extends "layout.html.j2" %}
+{%- set challenges_pre  = 'Challenges' -%}
 {%- if challenges is defined and challenges is iterable and challenges | length > 0 %}
     {%- set challenges_completed    = challenges | selectattr('winner_desc', '!=', '') | list | length %}
     {%- set challenges_total        = challenges | list | length %}
-    {%- set challenges_title        = challenges_completed | string + '/' + challenges_total | string + ' complete'  %}
+    {%- set challenges_title        = challenges_pre + ' (' + challenges_completed | string + '/' + challenges_total | string + ')'  %}
 {%- endif %}
-{% block meta_title %}Challenges{% if challenges_title %} ({{ challenges_title }}){% endif %}{% endblock meta_title %}
-{% block meta_description %}Challenges{% if challenges_title %} ({{ challenges_title }}){% endif %} winners, and rewards currently available.{% endblock %}
+{% block meta_title %}Challenges{% endblock meta_title %}
+{% block meta_description %}Challenges, winners, and rewards currently available.{% endblock %}
 {% block meta_url %}{{ url_for('challenges', _external=True) }}{% endblock meta_url %}">
-{% block title %}Challenges{% if challenges_title %} ({{ challenges_title }}){% endif %}{% endblock %}
-{% block header %}Challenges{% endblock %}
+{% block title %}{{ challenges_title }}{% endblock %}
+{% block header %}{{ challenges_title }}{% endblock %}
+{%- macro display_tier(reward_tier) -%}
+    {%- set tiers   = { 9: 'SS', 8: 'SS', 7: 'SS', 6: 'S', 5: 'A', 4: 'B', 3: 'C', 2: 'D', 1: 'F' } -%}
+    {{- tiers[reward_tier] -}}
+{%- endmacro -%}
 {%- block content %}
     {%- if challenges is defined and challenges is iterable and challenges | length > 0 %}
-        {%- if challenges_title %}
-            <h3 title="{{ challenges_title }}">
-                {{ challenges_title }}
-            </h3>
-        {%- endif %}
             <table id="challenges">
                 <tr>
                     <th title="Find and Kill">
                         Find and Kill
                     </th>
-                    <th title="Max People">
-                        Max People
+                    <th title="People">
+                        People
                     </th>
-                    <th title="Max Level">
-                        Max Level
+                    <th title="Level">
+                        Level
                     </th>
-                    <th title="Reward Tier">
-                        Reward Tier
+                    <th title="Reward">
+                        Reward
                     </th>
-                    <th title="Completed by">
-                        Completed by
+                    <th title="Completed">
+                        Completed
                     </th>
                 </tr>
         {%- for challenge in challenges %}
@@ -40,14 +40,14 @@
                     <td title="{{ challenge.mob_name }} {%- if challenge.is_completed %} (Completed){% endif %}" {%- if challenge.is_completed %} class="challenge-completed"{% endif %}>
                         {{ challenge.mob_name }}
                     </td>
-                    <td title="Max People: {{ challenge.adj_people }}">
+                    <td title="People: {{ challenge.adj_people }}">
                         {{ challenge.adj_people }}
                     </td>
-                    <td title="Max Level: {{ challenge.adj_level }}">
+                    <td title="Level: {{ challenge.adj_level }}">
                         {{ challenge.adj_level }}
                     </td>
-                    <td title="Reward Tier: {{ challenge.reward_tier }}">
-                        {{ challenge.reward_tier }}
+                    <td title="Reward: {{ display_tier(challenge.orig_tier) }}{%- if challenge.is_completed %} {{ display_tier(challenge.adj_tier) }}{% endif %}">
+                        {{ display_tier(challenge.orig_tier) }}{%- if challenge.is_completed %} ({{ display_tier(challenge.adj_tier) }}){% endif %}
                     </td>
                     <td>
             {%- if challenge.is_completed %}
