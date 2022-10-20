@@ -88,6 +88,12 @@ table {
     width:                  50vw;
 }
 
+@media (max-width: 1024px) {
+    table {
+        width:              85vw;
+    }
+}
+
 ol, ul {
     padding-inline-start:   2vw;
 }
