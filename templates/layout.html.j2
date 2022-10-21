@@ -54,15 +54,13 @@
             </h2>
 {%- with messages = get_flashed_messages(with_categories=True) %}
     {%- if messages %}
-            <div id="flashes">
-                <ul>
+            <ul id="flashes">
         {%- for category, message in messages %}
-                    <li class="flash-{{ category }}">
-                        {{ message }}
-                    </li>
+                <li class="flash-{{ category }}">
+                    {{ message }}
+                </li>
         {%- endfor %}
-                </ul>
-            </div>
+            </ul>
     {%- endif %}
 {%- endwith %}
 {%- block content %}

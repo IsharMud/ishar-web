@@ -7,7 +7,7 @@
 {% block header %}Season {{ season.season_id }}{% endblock %}
 {%- block content %}
     {%- if season is defined %}
-            <ul>
+            <ul id="season-details">
                 <li title="Season {{ season.season_id }} began {{ season.effective }} ago on {{ season.effective_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}">
                     <strong>
                         Started
@@ -48,30 +48,28 @@
                 by typing <code>shop</code> after logging in.
             </p>
     {%- if current_user.seasonal_points is defined and current_user.seasonal_earned is defined %}
-            <div id="essence-balance">
-                <ul>
-                    <li title="You currently have: {{ current_user.seasonal_points }} essence.">
-                        You currently have:
-                    </li>
-                    <li class="nested-list">
-                        <ul>
-                            <li>
-                                {{ display_essence(current_user.seasonal_points) }}
-                            </li>
-                        </ul>
-                    </li>
-                    <li title="This season, you have earned: {{ current_user.seasonal_earned }} essence.">
-                        This season, you have earned:
-                    </li>
-                    <li class="nested-list">
-                        <ul>
-                            <li>
-                                {{ display_essence(current_user.seasonal_earned) }}
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
+            <ul id="essence-balance">
+                <li title="You currently have: {{ current_user.seasonal_points }} essence.">
+                    You currently have:
+                </li>
+                <li class="nested-list">
+                    <ul>
+                        <li>
+                            {{ display_essence(current_user.seasonal_points) }}
+                        </li>
+                    </ul>
+                </li>
+                <li title="This season, you have earned: {{ current_user.seasonal_earned }} essence.">
+                    This season, you have earned:
+                </li>
+                <li class="nested-list">
+                    <ul>
+                        <li>
+                            {{ display_essence(current_user.seasonal_earned) }}
+                        </li>
+                    </ul>
+                </li>
+            </ul>
         {%- endif %}
     {%- endif %}
 {%- endblock %}

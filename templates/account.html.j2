@@ -6,75 +6,70 @@
 {% block title %}Account ({{ current_user.account_name | title | safe }}){% endblock %}
 {% block header %}Account ({{ current_user.account_name | title | safe }}){% endblock %}
 {%- block content %}
-            <div id="account-details">
-                <ul>
-                    <li title="You created your account {{ current_user.created_at.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }} ({{ current_user.created }} ago)">
-                        You created your account:
-                        <ul>
-                            <li>
-                                 {{ current_user.created_at.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}
-                            </li>
-                            <li>
-                                {{ current_user.created_ago }} ({{ current_user.created }} ago)
-                            </li>
-                        </ul>
-                    </li>
-                    <li title="Change your password">
-                        You can <a href="{{ url_for('change_password') }}">change your password here.</a>
-                    </li>
-                    <li title="View your players">
-                        You can <a href="{{ url_for('portal') }}">view your players here.</a>
-                    </li>
-                </ul>
-            </div>
-            <h4 title="Upgrades">
-                Upgrades
+            <h4 title="Created">
+                Created
             </h4>
-    {%- if current_user.upgrades is defined and current_user.upgrades is iterable and current_user.upgrades | selectattr('amount', '>', 0) | list | length > 0 %}
-            <div id="essence-upgrades">
-                <ul>
-        {%- for upgraded in current_user.upgrades | selectattr('amount', '>', 0) %}
-                    <li title="{{ upgraded.upgrade.name }}{% if upgraded.amount > 1 %} (x{{ upgraded.amount}}){% endif %}">
-                        {{ upgraded.upgrade.name }}
-                        {%- if upgraded.amount > 1 %} (x{{ upgraded.amount}}){% endif %}
-                    </li>
-        {%- endfor %}
-                </ul>
-            </div>
-    {%- else %}
-            <ul>
-                <li title="You have not purchased any upgrades.">
-                    <i>You have not purchased any upgrades.</i>
+            <ul id="account-details" title="Created: {{ current_user.created_at.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }} ({{ current_user.created }} ago)">
+                <li>
+                    {{ current_user.created_at.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}
+                </li>
+                <li>
+                    {{ current_user.created_ago }}
                 </li>
             </ul>
-    {%- endif %}
+            <h4 title="Manage">
+                Manage
+            </h4>
+            <ul id="account-manage">
+                <li title="Change your password">
+                    <a href="{{ url_for('change_password') }}">Change your password</a>
+                </li>
+                <li title="View your players">
+                    <a href="{{ url_for('portal') }}">View your players</a>
+                </li>
+            </ul>
     {%- if current_user.seasonal_points is defined and current_user.seasonal_earned is defined %}
             <h4 title="Essence">
                 Essence
             </h4>
-            <div id="essence-balance">
-                <ul>
-                    <li title="You currently have: {{ current_user.seasonal_points }} essence.">
-                        You currently have:
-                    </li>
-                    <li class="nested-list">
-                        <ul>
-                            <li>
-                                {{ display_essence(current_user.seasonal_points) }}
-                            </li>
-                        </ul>
-                    </li>
-                    <li title="This season, you have earned: {{ current_user.seasonal_earned }} essence.">
-                        This season, you have earned:
-                    </li>
-                    <li class="nested-list">
-                        <ul>
-                            <li>
-                                {{ display_essence(current_user.seasonal_earned) }}
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
+            <ul id="essence-balance">
+                <li title="You currently have: {{ current_user.seasonal_points }} essence.">
+                    You currently have:
+                </li>
+                <li class="nested-list">
+                    <ul>
+                        <li>
+                            {{ display_essence(current_user.seasonal_points) }}
+                        </li>
+                    </ul>
+                </li>
+                <li title="This season, you have earned: {{ current_user.seasonal_earned }} essence.">
+                    This season, you have earned:
+                </li>
+                <li class="nested-list">
+                    <ul>
+                        <li>
+                            {{ display_essence(current_user.seasonal_earned) }}
+                        </li>
+                    </ul>
+                </li>
+            </ul>
     {%- endif %}
+            <h4 title="Upgrades">
+                Upgrades
+            </h4>
+            <ul id="essence-upgrades">
+    {%- if current_user.upgrades is defined and current_user.upgrades is iterable and current_user.upgrades | selectattr('amount', '>', 0) | list | length > 0 %}
+        {%- for upgraded in current_user.upgrades | selectattr('amount', '>', 0) %}
+                <li title="{{ upgraded.upgrade.name }}{% if upgraded.amount > 1 %} (x{{ upgraded.amount}}){% endif %}">
+                    {{ upgraded.upgrade.name }}
+                    {%- if upgraded.amount > 1 %} (x{{ upgraded.amount}}){% endif %}
+                </li>
+        {%- endfor %}
+    {%- else %}
+                <li title="You have not purchased any upgrades.">
+                    <i>You have not purchased any upgrades.</i>
+                </li>
+    {%- endif %}
+            </ul>
 {%- endblock %}

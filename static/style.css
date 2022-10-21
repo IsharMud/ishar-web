@@ -5,7 +5,7 @@ body, button, input, textarea {
 }
 
 #logo {
-    width:             25rem;
+    width:              20rem;
 }
 
 h1 {
@@ -19,7 +19,7 @@ button, input, textarea {
 
 a[target="_blank"]::after {
     content:            url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAQElEQVR42qXKwQkAIAxDUUdxtO6/RBQkQZvSi8I/pL4BoGw/XPkh4XigPmsUgh0626AjRsgxHTkUThsG2T/sIlzdTsp52kSS1wAAAABJRU5ErkJggg==);
-    margin-left:        0.25em;
+    margin-left:        0.25rem;
     filter:             invert(1);
 }
 
@@ -40,30 +40,30 @@ a:hover, #active-nav {
     color:                  #d6d6d7;
 }
 
-#discord::after, #email::after, #coffee::after, #patron::after {
+#discord::after,
+#email::after,
+#coffee::after,
+#patron::after
+{
     content:            none;
     filter:             none;
     text-decoration:    none;
 }
 
 #discord img {
-    width:              1em;
+    width:              1rem;
+}
+
+header, nav, nav li, #leader-choices li {
+    display:                inline-block;
+    padding:                0.5rem;
 }
 
 nav ul {
-    padding:                0;
+    padding-inline-start:   0;
 }
 
-header, nav, footer {
-    text-align:             center;
-}
-
-nav li {
-    display:                inline-block;
-    padding:                0.75rem;
-}
-
-nav, #content, footer {
+#content, footer {
     border-top:             1px dotted #d6d6d7;
 }
 
@@ -71,20 +71,15 @@ footer {
     margin-top:             2vh;
 }
 
-footer ul li, #leader-choices ul li {
+footer ul li {
     display:                inline-block;
     padding-left:           1vw;
     padding-right:          1vw;
 }
 
 footer ul {
-    font-size:              0.8em;
+    font-size:              0.8rem;
     padding-inline-start:   0;
-}
-
-#leader-choices ul li {
-    display:                inline-block;
-    word-spacing:           5vw;
 }
 
 table {
@@ -97,12 +92,16 @@ table {
     }
 
     #logo {
-        width:              20rem;
+        width:              8rem;
+    }
+
+    nav {
+        font-size:          0.8rem;
     }
 }
 
 ol, ul {
-    padding-inline-start:   2vw;
+    padding-inline-start:   1rem;
 }
 
 tr:nth-child(2n) {
@@ -122,7 +121,7 @@ textarea {
 .faq-answers,
 .nested-list,
 .mud-clients,
-#essence-upgrades
+#leader-choices
 {
     list-style:             none;
 }
@@ -130,7 +129,7 @@ textarea {
 .challenge-completed {
     text-decoration:            line-through;
     text-decoration-color:      #a00;
-    text-decoration-thickness:  0.15em;
+    text-decoration-thickness:  0.15rem;
 }
 
 .news-created, .news-creation {
@@ -195,21 +194,15 @@ textarea {
 }
 
 #account-details,
+#account-manage,
 #essence-balance,
 #essence-upgrades,
 #player-remort-upgrades,
 #player-details,
 #player-quests,
 #player-time,
+#season-details,
 #world-list
 {
     column-count:       2;
-}
-
-#essence-balance ul,
-#mud-client-list ul,
-#mud-client-list ul ul,
-#player-details ul ul
-{
-    column-count:       initial;
 }

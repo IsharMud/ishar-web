@@ -47,7 +47,7 @@ faqs = {
         'and inventory is simply <strong>preserved until the end of the season</strong>.',
         'The <a href="' + url_for('season') + '" title="Season">season</a> currently changes every four (4) months.',
         'You can find more information about seasons at the ' \
-        '<a href="' + url_for('latest_patch') + '" title="Patches">latest patch</a> page.'
+        '<a href="' + url_for('patches') + '" title="Patches">patches</a> page.'
     ],
 
     'Is death permanent?': [

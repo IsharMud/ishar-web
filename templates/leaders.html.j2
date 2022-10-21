@@ -16,21 +16,19 @@
                     </label>
                 </p>
     {%- if limit is defined and limit is number and limit_choices is defined and limit_choices is iterable %}
-                <div id="leader-choices">
-                    <ul>
+                <ul id="leader-choices">
         {%- for limit_choice in limit_choices %}
-                        <li title="Top {{ limit_choice }}">
+                    <li title="Top {{ limit_choice }}">
             {%- if limit_choice != limit -%}
-                            <a href="{{ url_for('leaders', limit=limit_choice) }} {%- if include_dead == False %}?dead=false{% endif %}">
+                        <a href="{{ url_for('leaders', limit=limit_choice) }} {%- if include_dead == False %}?dead=false{% endif %}">
             {%- endif -%}
-                                {{ limit_choice }}
+                            {{ limit_choice }}
             {%- if limit_choice != limit -%}
-                            </a>
+                        </a>
             {%- endif -%}
-                        </li>
+                    </li>
         {%- endfor %}
-                    </ul>
-                </div>
+                </ul>
     {%- endif %}
     {%- if leader_players is defined and leader_players is iterable and leader_players | length > 0 %}
                 <table id="leaders" title="Leaders">
