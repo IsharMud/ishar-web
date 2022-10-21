@@ -12,7 +12,7 @@ h1 {
     display:                none;
     visibility:             hidden;
 }
-
+ 
 button, input, textarea {
     border:                 1px solid #d6d6d7;
 }
@@ -62,7 +62,7 @@ nav ul, footer ul {
     padding-inline-start:   0;
 }
 
-nav ul li, footer ul li {
+nav ul li, footer ul li, #leader-choices li {
     padding-left:           0.5rem;
     padding-right:          0.5rem;
 }
