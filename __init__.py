@@ -214,7 +214,7 @@ def show_player(player_name=None):
         else:
             who = player_search_form.player_search_name.data
 
-        return redirect(url_for('show_player', player_name=who))
+        return redirect(url_for('show_player', player_name=who, _anchor='player'))
 
     # Find the player, in the database, by exact name
     if player_name:

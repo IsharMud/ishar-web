@@ -71,7 +71,7 @@
             </form>
     {%- endif %}
     {%- if player %}
-            <h3 title="{{ player.player_title | striptags | safe }}">
+            <h3 id="player" title="{{ player.player_title | striptags | safe }}">
                 {{ player.player_title }}
             </h3>
         {%- if player.description is defined and player.description | replace('\n', ' ') | striptags | trim | safe  != '' %}

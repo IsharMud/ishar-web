@@ -45,14 +45,9 @@
         </header>
         <nav>
 {%- block navigation %}
-    {%- include('navigation.html.j2') %}
+{% include('navigation.html.j2') %}
 {%- endblock navigation %}
         </nav>
-{%- if current_user is defined and current_user.is_authenticated and current_user.account_name is defined %}
-        <nav id="logged-in-nav">
-    {%- include('navigation_user.html.j2') %}
-        </nav>
-{%- endif %}
         <div id="content">
             <h2>
                 {% block header %}{% endblock header %}
@@ -89,8 +84,8 @@
     {%- if current_season is defined and current_season.expires is defined and current_season.expiration_date is defined %}
             <p title="Season {{ current_season.season_id }} ends in {{ current_season.expires }} on {{ current_season.expiration_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}">
                 <a href="{{ url_for('season') }}" {%- if page == 'season' %} id="active-nav"{% endif%}>Season {{ current_season.season_id }}</a>
-                ends in <span id="season-countdown">{{ current_season.expires }}</span>,
-                on {{ current_season.expiration_date.strftime('%A, %B %d, %Y')}}
+                ends in {{ current_season.expires }}<br>
+                <small>{{ current_season.expiration_date.strftime('%A, %B %d, %Y')}}</small>
             </p>
     {%- endif %}
 {%- endblock footer %}

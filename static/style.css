@@ -5,11 +5,7 @@ body, button, input, textarea {
 }
 
 #logo {
-    width:             25vw;
-}
-
-header {
-    text-align:         center;
+    width:             25rem;
 }
 
 h1 {
@@ -64,8 +60,11 @@ header, nav, footer {
 
 nav li {
     display:                inline-block;
-    border:                 1px solid #d6d6d7;
-    padding:                0.8vw;
+    padding:                0.75rem;
+}
+
+nav, #content, footer {
+    border-top:             1px dotted #d6d6d7;
 }
 
 footer {
@@ -98,7 +97,7 @@ table {
     }
 
     #logo {
-        width:              50vw;
+        width:              20rem;
     }
 }
 
@@ -132,10 +131,6 @@ textarea {
     text-decoration:            line-through;
     text-decoration-color:      #a00;
     text-decoration-thickness:  0.15em;
-}
-
-.login-remember, #new-account-link {
-    display:            table;
 }
 
 .news-created, .news-creation {
@@ -189,12 +184,6 @@ textarea {
 
 .flash-warn {
     color:              #f80;
-}
-
-.field-errors {
-    color:              #fa8072;
-    font-weight:        bold;
-    list-style:         none;
 }
 
 #flashes, #primary-stat {

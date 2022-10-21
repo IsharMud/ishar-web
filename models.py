@@ -571,7 +571,8 @@ class Player(Base):
     @cached_property
     def player_link(self):
         """Return player link"""
-        return '<a href="' + url_for('show_player', player_name=self.name) + f'">{self.name}</a>'
+        return '<a href="' + url_for('show_player', player_name=self.name, _anchor='player') + \
+            f'">{self.name}</a>'
 
     @cached_property
     def player_title(self):
