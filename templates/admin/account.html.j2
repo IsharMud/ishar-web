@@ -15,7 +15,7 @@
                     <li>
                         Account Created
                     </li>
-                    <li class="faq-nested">
+                    <li class="nested-list">
                         <ul>
                             <li>
                                 {{ manage_account.created_at.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}
@@ -30,7 +30,7 @@
                     <li>
                         E-mail Address
                     </li>
-                    <li class="faq-nested">
+                    <li class="nested-list">
                         <ul>
                             <li>
                                 <a href="mailto:{{ manage_account.email }}" target="_blank">{{ manage_account.email }}</a>
@@ -69,7 +69,7 @@
                     <li title="Essence Current Balance: {{ manage_account.seasonal_points }}">
                         Current Balance
                     </li>
-                    <li class="faq-nested">
+                    <li class="nested-list">
                         <ul>
                             <li>
                                 {{ display_essence(manage_account.seasonal_points) }}
@@ -79,7 +79,7 @@
                     <li title="Essence earned this season: {{ manage_account.seasonal_earned }}">
                         Essence earned this season
                     </li>
-                    <li class="faq-nested">
+                    <li class="nested-list">
                         <ul>
                             <li>
                                 {{ display_essence(manage_account.seasonal_earned) }}

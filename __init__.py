@@ -122,11 +122,8 @@ def get_sentry_js(sentry_js=None):
 @app.route('/', methods=['GET'])
 def welcome():
     """Main welcome page/index, includes the most recent news"""
-    return render_template('welcome.html.j2',
-                            news    = News.query.order_by(
-                                        -News.created_at
-                                    ).first()
-                        )
+    news    = News.query.order_by(-News.created_at).first()
+    return render_template('welcome.html.j2', news=news)
 
 
 @app.route('/background', methods=['GET'])
@@ -156,7 +153,7 @@ def login():
         else:
             flash('Sorry, but please enter a valid e-mail address and password.', 'error')
 
-    # Redirect users who are logged in to the portal
+    # Redirect authenticated users to the portal
     if current_user.is_authenticated:
         return redirect(session['next'] or url_for('portal'))
 

@@ -7,7 +7,7 @@
 {% block header %}Frequently Asked Questions{% endblock %}
 {%- block content %}
                 <p>
-                    Here are a few common questions that we have seen and heard about Ishar MUD.
+                    Here are a few common questions that are asked about Ishar MUD.
                 </p>
     {%- if faqs is defined and faqs is iterable and faqs | length > 0 %}
                 <ul>
@@ -25,7 +25,7 @@
                 {%- for answer in answers %}
                     {%- if answer is defined %}
                         {%- if answer is not string and answer is iterable and answer | length > 0 %}
-                            <li class="faq-nested">
+                            <li class="nested-list">
                                 <ol>
                             {%- for answer_item in answer %}
                                     <li>
