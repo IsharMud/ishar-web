@@ -12,22 +12,25 @@
                 </h3>
                 <table id="players">
                     <tr>
-                        <th>
+                        <th title="Name">
                             Name
                         </th>
-                        <th>
+                        <th title="Level">
                             Level
                         </th>
-                        <th>
-                            Class
-                        </th>
-                        <th>
+                        <th title="Remorts">
                             Remorts
                         </th>
-                        <th>
+                        <th title="Renown">
                             Renown
                         </th>
-                        <th>
+                        <th title="Quests">
+                            Quests
+                        </th>
+                        <th title="Challenges">
+                            Challenges
+                        </th>
+                        <th title="Deaths">
                             Deaths
                         </th>
                     </tr>
@@ -39,14 +42,17 @@
                         <td title="Level: {{ player.level }}">
                             {{ player.level }}
                         </td>
-                        <td title="Class: {{ player.class.class_name }}">
-                            {{ player.class.class_name | title }}
-                        </td>
                         <td title="Remorts: {{ player.remorts }}">
                             {{ player.remorts }}
                         </td>
                         <td title="Renown: {{ player.total_renown }}">
                             {{ player.total_renown }}
+                        </td>
+                        <td title="Quests: {{ player.quests_completed }}">
+                            {{ player.quests_completed }}
+                        </td>
+                        <td title="Challenges: {{ player.challenges_completed }}">
+                            {{ player.challenges_completed }}
                         </td>
             {%- if player.player_type != 'Classic' %}
                         <td class="non-classic" title="Type: {{ player.player_type }}">

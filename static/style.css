@@ -5,7 +5,7 @@ body, button, input, textarea {
 }
 
 #logo {
-    width:                  20rem;
+    width:                  20vw;
 }
 
 h1 {
@@ -19,7 +19,7 @@ button, input, textarea {
 
 a[target="_blank"]::after {
     content:                url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAQElEQVR42qXKwQkAIAxDUUdxtO6/RBQkQZvSi8I/pL4BoGw/XPkh4XigPmsUgh0626AjRsgxHTkUThsG2T/sIlzdTsp52kSS1wAAAABJRU5ErkJggg==);
-    margin-left:            0.5rem;
+    margin-left:            0.25rem;
     filter:                 invert(1);
 }
 
@@ -56,30 +56,29 @@ a:hover, #active-nav {
 
 header, nav, nav li, #leader-choices li, footer ul li {
     display:                inline-block;
-    padding:                0.5rem;
 }
 
 nav ul, footer ul {
     padding-inline-start:   0;
 }
 
+nav ul li, footer ul li {
+    padding-left:           0.5rem;
+    padding-right:          0.5rem;
+}
+
+td, th {
+    padding:                0.25rem;
+}
+
 #content {
     border-top:             1px dotted #d6d6d7;
     border-bottom:          1px dotted #d6d6d7;
+    padding-bottom:         1rem;
 }
+
 footer {
     font-size:              0.8rem;
-}
-
-@media (max-width: 1024px) {
-
-    #logo {
-        width:              8rem;
-    }
-
-    nav {
-        font-size:          0.8rem;
-    }
 }
 
 ol, ul {
