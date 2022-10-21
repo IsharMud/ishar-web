@@ -45,7 +45,8 @@ faqs = {
     'What about my equipment when I log out?': [
         "When you sign out or log off, your character's equipment, gear, " \
         'and inventory is simply <strong>preserved until the end of the season</strong>.',
-        'The <a href="' + url_for('season') + '" title="Season">season</a> currently changes every four (4) months.',
+        'The <a href="' + url_for('season') + '" title="Season">season</a> ' \
+        'currently changes every four (4) months.',
         'You can find more information about seasons at the ' \
         '<a href="' + url_for('patches') + '" title="Patches">patches</a> page.'
     ],

@@ -80,11 +80,15 @@
                 </li>
             </ul>
     {%- if current_season is defined and current_season.expires is defined and current_season.expiration_date is defined %}
-            <p title="Season {{ current_season.season_id }} ends in {{ current_season.expires }} on {{ current_season.expiration_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}">
-                <a href="{{ url_for('season') }}" {%- if page == 'season' %} id="active-nav"{% endif%}>Season {{ current_season.season_id }}</a>
-                ends in {{ current_season.expires }}<br>
-                <small>{{ current_season.expiration_date.strftime('%A, %B %d, %Y')}}</small>
-            </p>
+            <ul>
+                <li title="Season {{ current_season.season_id }} ends in {{ current_season.expires }}">
+                    <a href="{{ url_for('season') }}" {%- if page == 'season' %} id="active-nav"{% endif%}>Season {{ current_season.season_id }}</a>
+                    ends in {{ current_season.expires }}
+                </li>
+                <li title="Ends {{ current_season.expiration_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}">
+                    {{ current_season.expiration_date.strftime('%A, %B %d, %Y') }}
+                </li>
+            </ul>
     {%- endif %}
 {%- endblock footer %}
         </footer>
