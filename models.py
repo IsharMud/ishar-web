@@ -191,9 +191,8 @@ class News(Base):
 
 
 class PlayerClass(Base):
-    """Playable character "class" in-game
-        such as warrior, magician, cleric, rogue, necromancer, etc."""
-    __tablename__       = 'classes'
+    """Playable character class such as warrior, rogue, or casters..."""
+    __tablename__   = 'classes'
 
     class_id            = Column(TINYINT(3), primary_key=True)
     class_name          = Column(String(15),
@@ -203,8 +202,6 @@ class PlayerClass(Base):
                         )
     class_display       = Column(String(32))
     class_description   = Column(String(64))
-
-    player_class        = relationship('Player', backref='class')
 
     def __repr__(self):
         return f'<PlayerClass> "{self.class_name}" ({self.class_id})'
@@ -248,17 +245,13 @@ class PlayersFlag(Base):
 
 
 class PlayerRace(Base):
-    """
-    Player Race database class
-    Playable character "race" in-game such as elf, gnome, human, etc.
-    """
+    """Player Race database class
+    Playable character race, such as elf, gnome, human, etc."""
     __tablename__       = 'races'
 
     race_id             = Column(TINYINT(3), primary_key=True)
     race_name           = Column(String(15), nullable=False, unique=True)
     race_description    = Column(String(64))
-
-    player_race         = relationship('Player', backref='race')
 
     def __repr__(self):
         return f'<PlayerRace> "{self.race_name}" ({self.race_id})'
@@ -304,7 +297,6 @@ class PlayerQuest(Base):
     value           = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
 
     quest           = relationship('Quest')
-    player          = relationship('Player', backref='quests')
 
     def __repr__(self):
         return f'<PlayerQuest> "{self.quest.name}" ({self.quest_id}) @ ' \
@@ -481,6 +473,9 @@ class Player(Base):
     total_renown            = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
     quests_completed        = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
     challenges_completed    = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
+
+    player_class    = relationship('PlayerClass')
+    player_race     = relationship('PlayerRace')
 
     def get_flag(self, flag_name=None):
         """Method to return boolean for a specific player flag, by its flag name"""

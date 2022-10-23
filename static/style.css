@@ -54,7 +54,7 @@ a:hover, #active-nav {
     width:                  1rem;
 }
 
-header, nav, nav li, #leader-choices li, footer ul li {
+header, nav, nav li, footer ul li {
     display:                inline-block;
 }
 
@@ -62,7 +62,7 @@ nav ul, footer ul {
     padding-inline-start:   0;
 }
 
-nav ul li, footer ul li, #leader-choices li {
+nav ul li, footer ul li {
     padding-left:           0.5rem;
     padding-right:          0.5rem;
 }
@@ -101,8 +101,7 @@ textarea {
 
 .faq-answers,
 .nested-list,
-.mud-clients,
-#leader-choices
+.mud-clients
 {
     list-style:             none;
 }

@@ -251,46 +251,30 @@ def challenges():
 
 
 @app.route('/leaderboard', methods=['GET'])
-@app.route('/leaderboard/<int:limit>', methods=['GET'])
-@app.route('/leaders/<int:limit>', methods=['GET'])
 @app.route('/leaders', methods=['GET'])
-def leaders(limit=10):
-    """Sort and list the best players, with a limit option,
-        and boolean to include/exclude dead characters"""
+def leaders(include_dead=True):
+    """Sort and list the best players, with boolean to include/exclude dead characters"""
 
-    limit_choices   = [5, 10, 15, 20]
-    if limit not in limit_choices or limit > max(limit_choices):
-        return redirect(url_for('leaders', limit=10))
-
+    leader_players  = Player.query.filter(
+                        Player.true_level < min(IMM_LEVELS)
+                    )
     if request.args.get('dead') and request.args.get('dead') == 'false':
         include_dead    = False
-        leader_players  = Player.query.filter(
-                            Player.true_level < min(IMM_LEVELS),
-                            Player.is_deleted != 1
-                        ).order_by(
-                            -Player.remorts,
-                            -Player.total_renown,
-                            -Player.quests_completed,
-                            -Player.challenges_completed,
-                            Player.deaths
-                        ).limit(limit).all()
-    else:
-        include_dead    = True
-        leader_players  = Player.query.filter(
-                            Player.true_level < min(IMM_LEVELS),
-                        ).order_by(
-                            -Player.remorts,
-                            -Player.total_renown,
-                            -Player.quests_completed,
-                            -Player.challenges_completed,
-                            Player.deaths
-                        ).limit(limit).all()
+        leader_players  = leader_players.filter_by(
+                            is_deleted = 0
+                        )
+
+    leader_players  = leader_players.order_by(
+                        -Player.remorts,
+                        -Player.total_renown,
+                        -Player.quests_completed,
+                        -Player.challenges_completed,
+                        Player.deaths
+                    ).limit(10).all()
 
     return render_template('leaders.html.j2',
                             include_dead    = include_dead,
-                            leader_players  = leader_players,
-                            limit           = limit,
-                            limit_choices   = limit_choices
+                            leader_players  = leader_players
                         )
 
 
@@ -332,6 +316,11 @@ def admin_portal():
 def admin_news():
     """Administration portal to allow Gods to post news
     /admin/news"""
+
+    # Only allow access to Gods
+    if not current_user.is_god:
+        flash('Sorry, but you are not godly enough!', 'error')
+        abort(401)
 
     # Get news add form and check if submitted
     news_add_form   = forms.NewsAddForm()

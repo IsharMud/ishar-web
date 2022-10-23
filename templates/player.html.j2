@@ -81,8 +81,8 @@
         {%- endif %}
         {%- if not player.is_immortal %}
             <ul id="player-details">
-                <li title="Name: {{ player.name | title | safe }} / Class: {{ player.class.class_name | title | safe }} / Race: {{ player.race.race_name | replace('_', '-') | title | safe }}">
-                    {{ player.name | title | safe }} {{ player_phrase }} a {{ player.class.class_display }} of {{ player.race.race_name | replace('_', '-') | lower | safe }} origin.
+                <li title="Name: {{ player.name | title | safe }} / Class: {{ player.player_class.class_name | title | safe }} / Race: {{ player.player_race.race_name | replace('_', '-') | title | safe }}">
+                    {{ player.name | title | safe }} {{ player_phrase }} a {{ player.player_class.class_display }} of {{ player.player_race.race_name | replace('_', '-') | lower | safe }} origin.
                 </li>
                 <li title="Level: {{ player.level }} {%- if player.remorts > 0 %} / Remorts: {{ player.remorts }}{% endif %}">
                     {{ player_gender | title }} {{ player_phrase }} level {{ player.level }}
@@ -161,15 +161,15 @@
             <h3 title="Statistics">
                 Statistics
             </h3>
-                {%- if player.class.class_name == 'WARRIOR' %}
+                {%- if player.player_class.class_name == 'WARRIOR' %}
                     {%- set stat_order  = [ 'Strength', 'Agility', 'Endurance', 'Willpower', 'Focus', 'Perception' ] %}
-                {%- elif player.class.class_name == 'ROGUE' %}
+                {%- elif player.player_class.class_name == 'ROGUE' %}
                     {%- set stat_order  = [ 'Agility', 'Perception', 'Strength', 'Focus', 'Endurance', 'Willpower' ] %}
-                {%- elif player.class.class_name == 'CLERIC' %}
+                {%- elif player.player_class.class_name == 'CLERIC' %}
                     {%- set stat_order  = [ 'Willpower', 'Strength', 'Perception', 'Endurance', 'Focus', 'Agility' ] %}
-                {%- elif player.class.class_name == 'MAGICIAN' %}
+                {%- elif player.player_class.class_name == 'MAGICIAN' %}
                     {%- set stat_order  = [ 'Perception', 'Focus', 'Agility', 'Willpower', 'Endurance', 'Strength' ] %}
-                {%- elif player.class.class_name == 'NECROMANCER' %}
+                {%- elif player.player_class.class_name == 'NECROMANCER' %}
                     {%- set stat_order  = [ 'Focus', 'Willpower', 'Perception', 'Agility', 'Strength', 'Endurance' ] %}
                 {%- else %}
                     {%- set stat_order  = [ 'Agility', 'Endurance', 'Focus', 'Perception', 'Strength', 'Willpower' ] %}

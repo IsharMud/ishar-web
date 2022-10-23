@@ -2,38 +2,23 @@
 {% extends "layout.html.j2" %}
 {% block meta_title %}Leaders{% endblock meta_title %}
 {% block meta_description %}Leader board of top players of the game and their achievements{% endblock %}
-{% block meta_url %}{{ url_for('leaders', _external=True) }}{% endblock meta_url %}">
+{% block meta_url %}{{ url_for(request.endpoint, _external=True) }}{% endblock meta_url %}">
 {% block title %}Leaders{% endblock %}
 {% block header %}Leaders{% endblock %}
 {%- block scripts %}
         <script async src="{{ url_for('static', filename='leaders.js') }}"></script>
 {%- endblock %}
 {%- block content %}
+    {%- if include_dead is defined %}
                 <p>
-                    <input type="checkbox" onchange="deadLeaders(this.checked);" id="include-dead" name="include-dead">
                     <label for="include-dead" title="Include Dead">
                         Include Dead ☠️
                     </label>
+                    <input type="checkbox" onchange="deadLeaders(this.checked);" id="include-dead" name="include-dead" {%- if include_dead %} checked="yes"{% endif %}>
                 </p>
-    {%- if limit is defined and limit is number and limit_choices is defined and limit_choices is iterable %}
-                <ul id="leader-choices">
-        {%- for limit_choice in limit_choices %}
-                    <li title="Top {{ limit_choice }}">
-            {%- if limit_choice != limit -%}
-                        <a href="{{ url_for('leaders', limit=limit_choice) }} {%- if include_dead == False %}?dead=false{% endif %}">
-            {%- endif -%}
-                            {{ limit_choice }}
-            {%- if limit_choice != limit -%}
-                        </a>
-            {%- endif -%}
-                    </li>
-        {%- endfor %}
-                </ul>
     {%- endif %}
     {%- if leader_players is defined and leader_players is iterable and leader_players | length > 0 %}
                 <table id="leaders" title="Leaders">
-        {%- for leader in leader_players %}
-            {%- if loop.index0 % 10 == 0 %}
                     <tr>
                         <th title="#">
                             #
@@ -57,10 +42,10 @@
                             Deaths
                         </th>
                     </tr>
-            {%- endif %}
+        {%- for leader in leader_players %}
                     <tr>
                         <td id="{{ loop.index }}" title="#{{ loop.index }}">
-                            <a href="#{{ loop.index }}">{{ loop.index }}</a>
+                           {{ loop.index }}
                         </td>
                         <td title="Player: {{ leader.name }}">
                             {{ leader.player_link }}
