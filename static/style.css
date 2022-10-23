@@ -69,6 +69,7 @@ nav ul li, footer ul li {
 
 td, th {
     padding:                0.25rem;
+    border:                 1px dotted #d6d6d7;
 }
 
 #content {
