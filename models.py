@@ -8,7 +8,7 @@ from sqlalchemy import Column, ForeignKey, String, TIMESTAMP, Text
 from sqlalchemy.dialects.mysql import INTEGER, MEDIUMINT, SMALLINT, TINYINT
 from sqlalchemy.schema import FetchedValue
 from sqlalchemy.orm import relationship
-from database import Base, db_session
+from database import Base, db_session, metadata
 from mud_secret import IMM_LEVELS
 import delta
 

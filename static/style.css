@@ -1,4 +1,4 @@
-body, button, input, textarea {
+body {
     font-family:            'Open Sans', sans-serif;
     background-color:       #323639;
     color:                  #d6d6d7;
@@ -12,8 +12,13 @@ h1 {
     display:                none;
     visibility:             hidden;
 }
+
+h2, h3, h4, h5, strong, code, th, label, button, input, textarea {
+    color:                  #fa7;
+}
  
 button, input, textarea {
+    background-color:       #323639;
     border:                 1px solid #d6d6d7;
 }
 
@@ -26,10 +31,6 @@ a[target="_blank"]::after {
 a {
     color:                #09f;
     text-decoration:        none;
-}
-
-h2, h3, h4, h5, strong, code, th {
-    color:                  #fa7;
 }
 
 a:active, a:visited {

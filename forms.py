@@ -1,6 +1,4 @@
-"""
-Flask forms classes
-"""
+"""Flask forms classes"""
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from flask_wtf import FlaskForm

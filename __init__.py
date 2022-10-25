@@ -48,16 +48,14 @@ login_manager.session_protection                = 'strong'
 def load_user(email):
     """Use Account database object for flask-login, via unique e-mail address"""
     user_account    = Account.query.filter_by(email = email).first()
-    sentry_user     = None
     if user_account:
-        sentry_user     = {
+        sentry_sdk.set_user({
             'id'            : user_account.account_id,
             'username'      : user_account.account_name,
             'email'         : user_account.email,
             'essence'       : user_account.seasonal_points,
-            'ip_address'    : request.remote_addr,
-        }
-    sentry_sdk.set_user(sentry_user)
+            'ip_address'    : request.remote_addr
+        })
     return user_account
 
 
