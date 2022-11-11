@@ -1,14 +1,26 @@
 {% extends "layout.html.j2" %}
 {% block meta_title %}Error{% endblock meta_title %}
-{% block meta_description %}Error: {{ message | default('Hmmm... the page you are looking for can not be found.') }}{% endblock %}
+{% block meta_description %}Error: {{ message | default('Hmmm... the page you are looking for can not be found.') }}{% endblock meta_description %}
 {% block meta_url %}{% endblock meta_url %}
-{% block title %}{{ title | default('Page Not Found') }}{% endblock %}
-{% block header %}{{ title | default('Page Not Found') }}{% endblock %}
+{% block title %}{{ title | default('Page Not Found') }}{% endblock title %}
+{% block header %}{{ title | default('Page Not Found') }}{% endblock header %}
+{%- block scripts %}
+    {%- if sentry_dsn and sentry_event_id %}
+        <!-- {{ sentry_dsn }} -->
+        <!-- {{ sentry_event_id }} -->
+        <script>
+            function sentryReport() {
+                Sentry.init({ dsn: "{{ sentry_dsn }}" });
+                Sentry.showReportDialog({ eventId: "{{ sentry_event_id }}" });
+            };
+        </script>
+    {%- endif %}
+{%- endblock scripts %}
 {%- block content %}
                 <p>
-                    {{ message | default("Hmmm... The page you are looking for can not be found.") }}
+                    {{ message | default('Hmmm... The page you are looking for can not be found.') }}
                 </p>
                 <p>
-                    You may want to return to the <a href="{{ url_for('welcome') }}">front page</a>.
+                    You may want to return to the <a href="{{ url_for('welcome') }}">front page</a>{%- if sentry_event_id %} or <a href="#" onclick="sentryReport();">send a report</a>{%- endif %}.
                 </p>
-{%- endblock %}
+{%- endblock content %}

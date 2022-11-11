@@ -8,7 +8,7 @@ from sqlalchemy import Column, ForeignKey, String, TIMESTAMP, Text
 from sqlalchemy.dialects.mysql import INTEGER, MEDIUMINT, SMALLINT, TINYINT
 from sqlalchemy.schema import FetchedValue
 from sqlalchemy.orm import relationship
-from database import Base, db_session, metadata
+from database import Base, db_session
 from mud_secret import IMM_LEVELS
 import delta
 
@@ -32,7 +32,7 @@ class Account(Base, UserMixin):
     players         = relationship('Player', backref='account')
 
     def change_password(self, new_password):
-        """Method to allow users to change their account password"""
+        """Method to change an account password"""
         try:
             self.password = md5_crypt.hash(new_password)
             db_session.commit()

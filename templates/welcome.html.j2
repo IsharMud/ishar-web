@@ -15,7 +15,7 @@
                     Play the game for free by connecting via any <a href="{{ url_for('clients') }}">MUD client</a>
                     by connecting to <code>isharmud.com</code> on port number <code>23</code> or <code>9999</code>.
                 </p>
-    {%- if news is defined and news != '' and news != None %}
+    {%- if news %}
                 <h3 class="news-subject" title="{{ news.subject | safe }}">
                     {{ news.subject | safe }}
                 </h3>

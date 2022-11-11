@@ -63,8 +63,9 @@ def load_user(email):
 def injects():
     """Add context processor for certain variables on all pages"""
     return dict(
-        current_season  = get_current_season(),
-        sentry_js       = get_sentry_js()
+        current_season  = Season.query.filter_by(is_active = 1).order_by(-Season.season_id).first(),
+        sentry_dsn      = os.getenv('SENTRY_DSN'),
+        sentry_event_id = sentry_sdk.last_event_id()
     )
 
 
@@ -99,21 +100,6 @@ def internal_server_error(message):
     """Error codes to template above"""
     sentry_sdk.capture_message(message, level='error')
     return error(title='Internal Server Error', message=message, code=500)
-
-
-def get_current_season():
-    """Method to return the current season"""
-    return Season.query.filter_by(is_active = 1).order_by(-Season.season_id).first()
-
-
-def get_sentry_js(sentry_js=None):
-    """Method to return the Sentry JavaScript SDK URI based on environment secret"""
-    sentry_dsn  = os.getenv('SENTRY_DSN')
-    if sentry_dsn:
-        sentry_uri  = urlparse(sentry_dsn)
-        if sentry_uri.username and sentry_uri.username != '':
-            sentry_js   = f'https://js.sentry-cdn.com/{sentry_uri.username}.min.js'
-    return sentry_js
 
 
 @app.route('/welcome', methods=['GET'])
@@ -162,7 +148,7 @@ def login():
 @app.route('/season', methods=['GET'])
 def season():
     """Information about the current season"""
-    return render_template('season.html.j2', season=get_current_season())
+    return render_template('season.html.j2')
 
 
 @app.route('/password', methods=['GET', 'POST'])

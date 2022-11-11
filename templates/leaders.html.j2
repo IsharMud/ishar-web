@@ -7,7 +7,7 @@
 {% block header %}Leaders{% endblock %}
 {%- block scripts %}
         <script async src="{{ url_for('static', filename='leaders.js') }}"></script>
-{%- endblock %}
+{%- endblock scripts %}
 {%- block content %}
     {%- if include_dead is defined %}
                 <p>
@@ -76,4 +76,4 @@
         {%- endfor %}
                 </table>
     {%- endif %}
-{%- endblock %}
+{%- endblock content %}

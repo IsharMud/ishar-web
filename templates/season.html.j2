@@ -1,36 +1,36 @@
 {%- set page = 'season' -%}
 {% extends "layout.html.j2" %}
-{% block meta_title %}Season {{ season.season_id }}{% endblock meta_title %}
-{% block meta_description %}Information about season {{ season.season_id }} of Ishar MUD{% endblock %}
+{% block meta_title %}Season {{ current_season.season_id }}{% endblock meta_title %}
+{% block meta_description %}Information about season {{ current_season.season_id }} of Ishar MUD{% endblock %}
 {% block meta_url %}{{ url_for('season', _external=True) }}{% endblock meta_url %}">
-{% block title %}Season {{ season.season_id }}{% endblock %}
-{% block header %}Season {{ season.season_id }}{% endblock %}
+{% block title %}Season {{ current_season.season_id }}{% endblock %}
+{% block header %}Season {{ current_season.season_id }}{% endblock %}
 {%- block content %}
-    {%- if season is defined %}
+    {%- if current_season is defined %}
             <ul id="season-details">
-                <li title="Season {{ season.season_id }} began {{ season.effective }} ago on {{ season.effective_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}">
+                <li title="Season {{ current_season.season_id }} began {{ current_season.effective }} ago on {{ current_season.effective_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}">
                     <strong>
                         Started
                     </strong>
                     <ul>
                         <li>
-                            {{ season.effective_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}
+                            {{ current_season.effective_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}
                         </li>
                         <li>
-                            {{ season.effective }} ago
+                            {{ current_season.effective }} ago
                         </li>
                     </ul>
                 </li>
-                <li title="Season {{ season.season_id }} ends in {{ season.expires }} on {{ season.expiration_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}">
+                <li title="Season {{ current_season.season_id }} ends in {{ current_season.expires }} on {{ current_season.expiration_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}">
                     <strong>
                         Ends
                     </strong>
                     <ul>
                         <li>
-                            {{ season.expiration_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}
+                            {{ current_season.expiration_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}
                         </li>
                         <li>
-                            in {{ season.expires }}
+                            in {{ current_season.expires }}
                         </li>
                     </ul>
                 </li>
