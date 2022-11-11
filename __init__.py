@@ -53,7 +53,6 @@ def load_user(email):
             'id'            : user_account.account_id,
             'username'      : user_account.account_name,
             'email'         : user_account.email,
-            'essence'       : user_account.seasonal_points,
             'ip_address'    : request.remote_addr
         })
     return user_account
@@ -62,9 +61,12 @@ def load_user(email):
 @app.context_processor
 def injects():
     """Add context processor for certain variables on all pages"""
+    sentry_dsn  = os.getenv('SENTRY_DSN')
+    sentry_uri  = urlparse(sentry_dsn)
     return dict(
         current_season  = Season.query.filter_by(is_active = 1).order_by(-Season.season_id).first(),
-        sentry_dsn      = os.getenv('SENTRY_DSN'),
+        sentry_dsn      = sentry_dsn,
+        sentry_user     = sentry_uri.username,
         sentry_event_id = sentry_sdk.last_event_id()
     )
 
