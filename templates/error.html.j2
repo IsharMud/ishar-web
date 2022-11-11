@@ -11,7 +11,11 @@
         <script>
             function sentryReport() {
                 Sentry.init({ dsn: "{{ sentry_dsn }}" });
-                Sentry.showReportDialog({ eventId: "{{ sentry_event_id }}" });
+                Sentry.showReportDialog({
+                    user.name:  "{{ current_user.account_name | title | safe }}",
+                    user.email: "{{ current_user.email }}",
+                    eventId:    "{{ sentry_event_id }}"
+                });
             };
         </script>
     {%- endif %}
