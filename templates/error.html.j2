@@ -6,16 +6,16 @@
 {% block header %}{{ title | default('Page Not Found') }}{% endblock header %}
 {%- block scripts %}
     {%- if sentry_dsn and sentry_event_id %}
-        <!-- {{ sentry_dsn }} -->
-        <!-- {{ sentry_event_id }} -->
         <script>
             function sentryReport() {
                 Sentry.init({ dsn: "{{ sentry_dsn }}" });
                 Sentry.showReportDialog({
+        {%- if current_user %}
                     user:       {
                         name:   "{{ current_user.account_name | title | safe }}",
                         email:  "{{ current_user.email }}"
                     },
+        {%- endif %}
                     eventId:    "{{ sentry_event_id }}"
                 });
             };
