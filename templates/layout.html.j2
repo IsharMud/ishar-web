@@ -13,10 +13,6 @@
         <meta name="author" content="Ishar MUD">
         <meta name="description" content="Ishar MUD">
         <meta name="keywords" content="Ishar MUD, Ishar, IsharMUD, MUD, Multi User Dungeon, Multi-User Dungeon, Game">
-        {%- if sentry_span %}
-        <meta name="sentry-trace" content="{{ sentry_span.toSentryTrace() }}">
-        <meta name="baggage" content="{{ serializeBaggage(sentry_span.getBaggage()) }}">
-        {%- endif %}
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta property="og:type" content="website">
         <meta property="og:site_name" content="Ishar MUD">
@@ -27,7 +23,6 @@
         <title>{% block title %}Welcome{% endblock %} - Ishar MUD</title>
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
         <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
-        <script src="https://browser.sentry-cdn.com/7.18.0/bundle.min.js" integrity="sha384-YC/EVW17onWCzzbxK9vx85T6cQ8zRiMoq2PZZhMjhq1gYKyKrOAj9LuInlcfJgzn" crossorigin="anonymous"></script>
         {%- if sentry_user %}
         <script src="https://js.sentry-cdn.com/{{ sentry_user }}.min.js" crossorigin="anonymous"></script>
         {%- endif %}
