@@ -9,8 +9,9 @@ from sqlalchemy.dialects.mysql import INTEGER, MEDIUMINT, SMALLINT, TINYINT
 from sqlalchemy.schema import FetchedValue
 from sqlalchemy.orm import relationship
 from database import Base, db_session
-from mud_secret import IMM_LEVELS
+from mud_secret import ALIGNMENTS, IMM_LEVELS
 import delta
+
 
 class Account(Base, UserMixin):
     """Account used to log in to the website and MUD in-game"""
@@ -542,20 +543,9 @@ class Player(Base):
     @cached_property
     def player_alignment(self):
         """Player alignment"""
-        if self.align <= -1000:
-            return 'Very Evil'
-        if self.align > -1000 and self.align <= -500:
-            return 'Evil'
-        if self.align > -500 and self.align <= -250:
-            return 'Slightly Evil'
-        if self.align > -250 and self.align < 250:
-            return 'Neutral'
-        if self.align >= 250 and self.align < 500:
-            return 'Slightly Good'
-        if self.align >= 500 and self.align < 1000:
-            return 'Good'
-        if self.align >= 1000:
-            return 'Very Good'
+        for text, (low, high) in ALIGNMENTS.items():
+            if self.align >= low and self.align <= high:
+                return text
         return 'Unknown'
 
     @cached_property
