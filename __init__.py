@@ -5,7 +5,6 @@ https://github.com/IsharMud/ishar-web
 """
 from datetime import datetime, timedelta
 import glob
-import ipaddress
 import os
 from urllib.parse import urlparse
 from flask import Flask, abort, current_app, flash, redirect, render_template, request, \
