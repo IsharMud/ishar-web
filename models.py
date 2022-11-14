@@ -583,8 +583,14 @@ class Player(Base):
         if self.is_immortal:
             return 0
 
+        # Survival players earn less essence from renown
+        if self.get_flag('PERM_DEATH'):
+            divisor = 20
+        else:
+            divisor = 10
+
         # Start with two (2) points for existing, with renown/remort equation
-        earned  = int(self.total_renown / 10) + 2
+        earned  = int(self.total_renown / divisor) + 2
         if self.remorts > 0:
             earned  += int(self.remorts / 5) * 3 + 1
         return earned
