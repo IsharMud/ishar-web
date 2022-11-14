@@ -41,8 +41,8 @@ a:hover, #active-nav {
     color:                  #d6d6d7;
 }
 
-#discord::after,
-#email::after,
+#join-discord::after,
+#email-us::after,
 #coffee::after,
 #patron::after
 {
@@ -51,7 +51,7 @@ a:hover, #active-nav {
     text-decoration:        none;
 }
 
-#discord img {
+#join-discord img {
     width:                  1rem;
 }
 

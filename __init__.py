@@ -400,6 +400,36 @@ def admin_accounts():
     return render_template('admin/accounts.html.j2', accounts=accounts)
 
 
+@app.route('/admin/player/edit/<int:edit_player_id>', methods=['GET', 'POST'])
+@fresh_login_required
+def admin_edit_player(edit_player_id=None):
+    """Administration portal to allow Gods to edit player characters
+    /admin/player/edit"""
+
+    # Only allow access to Gods
+    if not current_user.is_god:
+        flash('Sorry, but you are not godly enough!', 'error')
+        abort(401)
+
+    edit_player = Player.query.filter_by(id = edit_player_id).first()
+
+    # Get edit player form and check if submitted
+    edit_player_form    = forms.EditPlayerForm()
+    if edit_player_form.validate_on_submit():
+        edit_player.name    = edit_player_form.name.data
+        edit_player.align   = edit_player_form.align.data
+        edit_player.karma   = edit_player_form.karma.data
+        edit_player.renown  = edit_player_form.renown.data
+        db_session.commit()
+        flash('The player was updated successfully.', 'success')
+        sentry_sdk.capture_message(f'Admin Edit Player: {current_user} edited {edit_player}')
+
+    return render_template('admin/edit_player.html.j2',
+                            edit_player         = edit_player,
+                            edit_player_form    = edit_player_form
+                        )
+
+
 @app.route('/admin/season', methods=['GET'])
 @fresh_login_required
 def admin_season():
@@ -599,6 +629,30 @@ def world(area=None):
             flash('Sorry, but please choose a valid area!', 'error')
 
     return render_template('world.html.j2', areas=areas, area=area), code
+
+
+@app.route('/help/<string:topic>', methods=['GET'])
+@app.route('/help/<string:topic>/', methods=['GET'])
+@app.route('/help/', methods=['GET'])
+@app.route('/help', methods=['GET'])
+def help_page(topic=None):
+    """Help page that uses the game's existing helptab file
+        to display information about each topic"""
+
+    # Get all of the topics from the helptab file
+    topics   = helptab.get_helptab()
+    code    = 200
+
+    # Try to find a topic based on any user input
+    if topic:
+        if topic in topics.keys():
+            topics   = topics[topic]
+        else:
+            topic   = None
+            code    = 404
+            flash('Sorry, but please choose a valid topic!', 'error')
+
+    return render_template('helptab.html.j2', topics=topics, topic=topic), code
 
 
 @app.route('/debug-sentry')

@@ -1,5 +1,7 @@
 """Read/process the "helptab" file used by the MUD itself in-game"""
 from mud_secret import HELPTAB
+
+
 def get_help_areas(helptab_file=HELPTAB):
     """
     Method to scrape "areas" from game helptab file
@@ -39,3 +41,31 @@ def get_help_areas(helptab_file=HELPTAB):
                 areas[area_name] = ''
 
     return areas
+
+
+def get_helptab(helptab_file=HELPTAB):
+    """WIP method to scrape topics from game helptab file"""
+
+    with open(helptab_file, mode='r', encoding='utf8') as helptab_fh:
+
+        topics      = {}
+        keep        = False
+
+        for line in helptab_fh:
+
+            stripped    = line.strip()
+
+            if stripped.startswith('32 '):
+                topic           = stripped.replace('32 ', '')
+                topics[topic]   = str()
+
+            elif stripped == '*':
+                keep    = True
+
+            elif stripped == '#':
+                keep    = False
+
+            if keep and topics and topic and line:
+                topics[topic]   += line
+
+    return topics
