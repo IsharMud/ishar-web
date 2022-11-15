@@ -14,13 +14,6 @@
 
 ---
 
-### More complicated...
-
-#### Deleting players via `cli.py --pwipe` is problematic in two ways
-
-- uwsgi is running as the `www-data` user which cannot delete files in `/home/ishar`
-    * Should I switch `uwsgi` to run as the same `ishar` user, which the MUD runs as?
-
 - _Currently_, players need to have their related records deleted first/separately, for some reason, before Player - like so:
     ```
     db_session.query(models.PlayersFlag).filter_by(player_id = del_id).delete()
