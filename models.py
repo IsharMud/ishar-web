@@ -387,13 +387,8 @@ class Player(Base):
     __tablename__           = 'players'
 
     id                      = Column(INTEGER(11), primary_key=True)
-    account_id              = Column(
-                                ForeignKey('accounts.account_id',
-                                    ondelete='CASCADE', onupdate='CASCADE'
-                                ), nullable=False, index=True
-                            )
-    name                    = Column(String(15),
-                                nullable=False, unique=True, server_default=FetchedValue())
+    account_id              = Column(ForeignKey('accounts.account_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
+    name                    = Column(String(15), nullable=False, unique=True, server_default=FetchedValue())
     create_ident            = Column(String(10), nullable=False, server_default=FetchedValue())
     last_isp                = Column(String(30), nullable=False, server_default=FetchedValue())
     description             = Column(String(240))
@@ -417,16 +412,8 @@ class Player(Base):
     invstart_level          = Column(INTEGER(11))
     color_scheme            = Column(SMALLINT(6))
     sex                     = Column(TINYINT(3), nullable=False)
-    race_id                 = Column(
-                                ForeignKey('races.race_id',
-                                    ondelete='CASCADE', onupdate='CASCADE'
-                                ), nullable=False, index=True
-                            )
-    class_id                = Column(
-                                ForeignKey('classes.class_id',
-                                    ondelete='CASCADE', onupdate='CASCADE'
-                                ), nullable=False, index=True
-                            )
+    race_id                 = Column(ForeignKey('races.race_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
+    class_id                = Column(ForeignKey('classes.class_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
     level                   = Column(INTEGER(11), nullable=False)
     weight                  = Column(SMALLINT(6), nullable=False)
     height                  = Column(SMALLINT(6), nullable=False)
@@ -435,11 +422,11 @@ class Player(Base):
     karma                   = Column(SMALLINT(6), nullable=False)
     experience_points       = Column(INTEGER(11), nullable=False)
     money                   = Column(INTEGER(11), nullable=False)
-    fg_color                = Column(SMALLINT(6), nullable=False)
-    bg_color                = Column(SMALLINT(6), nullable=False)
+    fg_color                = Column(SMALLINT(6), nullable=False, server_default=FetchedValue())
+    bg_color                = Column(SMALLINT(6), nullable=False, server_default=FetchedValue())
     login_failures          = Column(SMALLINT(6), nullable=False)
     create_haddr            = Column(INTEGER(11), nullable=False)
-    auto_level              = Column(INTEGER(11), nullable=False)
+    auto_level              = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
     login_fail_haddr        = Column(INTEGER(11))
     last_haddr              = Column(INTEGER(11))
     last_ident              = Column(String(10), server_default=FetchedValue())
@@ -474,17 +461,10 @@ class Player(Base):
     total_renown            = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
     quests_completed        = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
     challenges_completed    = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
+    game_type               = Column(TINYINT(4), nullable=False, server_default=FetchedValue())
 
     player_class    = relationship('PlayerClass')
     player_race     = relationship('PlayerRace')
-
-    def get_flag(self, flag_name=None):
-        """Method to return boolean for a specific player flag, by its flag name"""
-        flag    = PlayerFlag.query.filter_by(name = flag_name).first()
-        pflag   = PlayersFlag.query.filter_by(flag_id = flag.flag_id, player_id = self.id).first()
-        if pflag.value == 1:
-            return True
-        return False
 
     @cached_property
     def birth_dt(self):
@@ -541,6 +521,13 @@ class Player(Base):
         return False
 
     @cached_property
+    def is_survival(self):
+        """Boolean whether player is Survival (permdeath)"""
+        if self.game_type == 1:
+            return True
+        return False
+
+    @cached_property
     def player_alignment(self):
         """Player alignment"""
         for text, (low, high) in ALIGNMENTS.items():
@@ -569,10 +556,10 @@ class Player(Base):
         """Player type"""
         if self.is_deleted == 1:
             return 'Dead'
+        if self.is_survival:
+            return 'Survival'
         if self.is_immortal:
             return IMM_LEVELS[self.true_level]
-        if self.get_flag('PERM_DEATH'):
-            return 'Survival'
         return 'Classic'
 
     @property
@@ -584,7 +571,7 @@ class Player(Base):
             return 0
 
         # Survival players earn less essence from renown
-        if self.get_flag('PERM_DEATH'):
+        if self.is_survival:
             divisor = 20
         else:
             divisor = 10
