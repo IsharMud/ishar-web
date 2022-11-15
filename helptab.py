@@ -1,6 +1,14 @@
-"""Read/process the "helptab" file used by the MUD itself in-game"""
+"""helptab"""
+import logging
+import re
 from mud_secret import HELPTAB
 
+# Logging configuration
+logging.basicConfig(
+    level   = logging.INFO,
+    format  = '%(asctime)s [%(levelname)s] %(message)s',
+    datefmt = '%Y-%m-%d %H:%M:%S %Z'
+)
 
 def get_help_areas(helptab_file=HELPTAB):
     """
@@ -43,29 +51,96 @@ def get_help_areas(helptab_file=HELPTAB):
     return areas
 
 
-def get_helptab(helptab_file=HELPTAB):
-    """WIP method to scrape topics from game helptab file"""
+def get_all_help(helptab_file=HELPTAB):
+    """Read/process the 'helptab' file used by the MUD"""
 
-    with open(helptab_file, mode='r', encoding='utf8') as helptab_fh:
+    all_help    = None
 
-        topics      = {}
-        keep        = False
+    with open(file=helptab_file, mode='r', encoding='utf-8') as helptab_fh:
+        all_help    = helptab_fh.read()
+    helptab_fh.close()
 
-        for line in helptab_fh:
+    return all_help
+
+
+def get_helptab():
+    """Find help in helptab"""
+
+    help_topics = get_all_help().split('\n#\n')
+    topics  = {}
+#    names   = re.compile(r'[0-9]{0,2} [a-zA-Z]+')
+    names   = re.compile(r'32 [a-zA-Z]+')
+
+    logging.info('Help Topics\t%i', len(help_topics))
+    for help_topic in help_topics:
+
+        logging.info('Help Topic:\t%s', help_topic)
+
+        lines   = help_topic.split('\n')
+        LINE_NO = 0
+        HEADER  = True
+
+        this_topic = {
+            'level':    int(),
+            'aliases':  [],
+            'text':     ''
+        }
+
+        for line in lines:
 
             stripped    = line.strip()
+            LINE_NO     += 1
 
-            if stripped.startswith('32 '):
-                topic           = stripped.replace('32 ', '')
-                topics[topic]   = str()
+            print(f'{LINE_NO}: {line}')
 
-            elif stripped == '*':
-                keep    = True
+            # End of the header
+            if line == '*':
+                HEADER  = False
+                continue
 
-            elif stripped == '#':
-                keep    = False
+            elif stripped.startswith('%% '):
+                break
 
-            if keep and topics and topic and line:
-                topics[topic]   += line
+            if HEADER:
+
+                if LINE_NO == 1 and stripped.isdigit():
+                    this_topic['level']    = int(stripped)
+
+                elif names.match(line):
+                    this_topic['aliases'].append(stripped)
+
+            elif not HEADER:
+
+                if line.startswith('Syntax : '):
+                    syntax  = stripped.replace('Syntax : ', '')
+                    this_topic['syntax']   = syntax
+
+                elif line.startswith('Minimum: '):
+                    minimum = stripped.replace('Minimum: ', '')
+                    this_topic['minimum']   = minimum
+
+                elif line.startswith('Class  : '):
+                    player_class    = stripped.replace('Class  : ', '')
+                    this_topic['player_class']  = player_class
+
+                elif line.startswith('Level  : '):
+                    player_level    = stripped.replace('Level  : ', '')
+                    this_topic['player_level']  = player_level
+
+                elif line.startswith('Save   : '):
+                    save    = stripped.replace('Save   : ', '')
+                    this_topic['save']  = save
+
+                elif stripped.startswith('See also: '):
+                    similar  = stripped.replace('See also: ', '')
+                    this_topic['related']  = similar.split(',')
+
+                else:
+                    this_topic['text'] += line + "\n"
+
+        print(this_topic)
+        if this_topic['aliases'] and this_topic['level'] < 20:
+            topic_name  = this_topic['aliases'][0].replace('32 ', '')
+            topics[topic_name]  = this_topic
 
     return topics

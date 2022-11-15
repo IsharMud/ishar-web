@@ -1,39 +1,90 @@
 {%- set page = 'help' -%}
 {% extends "layout.html.j2" %}
-{%- block meta_title -%}
-    Help
-    {%- if topic is defined and topic != None and topics is defined and topics != None -%}
-        : {{ topic }}
-    {%- endif -%}
-{%- endblock meta_title -%}
-{% block meta_description %}WIP: Help pages for Ishar MUD{% endblock %}
-{% block meta_url %}{{ url_for('help_page', topic=topic, _external=True) }}{% endblock meta_url %}">
-{% block header %}Help{% endblock %}
-{%- block title -%}
-    Help
-    {%- if topic is defined and topic != None and topics is defined and topics != None -%}
-        : {{ topic }}
-    {%- endif -%}
-{%- endblock title -%}
+{%- if topic is defined and topic is iterable and topic['aliases'] is defined %}
+    {%- set topic_alias = topic['aliases'][0] | replace('32 ', '') %}
+{%- endif %}
+{%- block meta_title -%}Help{%- if topic_alias -%}: {{ topic_alias }}{%- endif -%}{%- endblock meta_title -%}
+{% block meta_description %}Help pages for Ishar MUD{% endblock %}
+{% block meta_url %}{{ url_for('help_page', topic=topic, _external=True) }}{% endblock meta_url %}
+{% block header -%}Help{%- if topic_alias -%}: {{ topic_alias }}{%- endif -%}{%- endblock header -%}
+{%- block title -%}Help{%- if topic_alias -%}: {{ topic_alias }}{%- endif -%}{%- endblock title -%}
 {%- block content %}
-    {%- if topic and topics %}
-                <h3 id="area-name" title="{{ topic }}">
-                    {{ topic | safe }}
-                </h3>
-                <pre id="area-details">
-                    {{ topics | replace('<', '&lt;') | replace('>', '&gt;') }}
-                </pre>
-    {%- else %}
-        {%- if topics and topics is iterable and topics | length > 0 %}
-                <ul id="world-list">
-            {%- for topic in topics %}
-                    <li title="Topic: {{ topic }}">
-                        <a href="{{ url_for('help_page', topic=topic) }}">
-                            {{ topic }}
-                        </a>
-                    </li>
-            {%- endfor %}
-                </ul>
-        {%- endif %}
+    {%- if topic %}
+            <ul>
+            {%- if topic['syntax'] %}
+                <li class="nested-list">
+                    <li>Syntax:</li>
+                    <ul>
+                        <li><code>{{ topic['syntax'] }}</code></li>
+                    </ul>
+                </li>
+            {%- endif %}
+            {%- if topic['minimum'] %}
+                <li class="nested-list">
+                    <li>Minimum:</li>
+                    <ul>
+                        <li><code>{{ topic['minimum'] }}</code></li>
+                    </ul>
+                </li>
+            {%- endif %}
+            {%- if topic['player_class'] %}
+                <li class="nested-list">
+                    <li>Player Class:</li>
+                    <ul>
+                        <li><code>{{ topic['player_class'] }}</code></li>
+                    </ul>
+                </li>
+            {%- endif %}
+            {%- if topic['player_level'] %}
+                <li class="nested-list">
+                    <li>Player Level:</li>
+                    <ul>
+                        <li><code>{{ topic['player_level'] }}</code></li>
+                    </ul>
+                </li>
+            {%- endif %}
+
+            {%- if topic['save'] %}
+                <li class="nested-list">
+                    <li>Save:</li>
+                    <ul>
+                        <li><code>{{ topic['save'] }}</code></li>
+                    </ul>
+                </li>
+            {%- endif %}
+            </ul>
+
+            <pre>
+                {{ topic['text'] | safe | replace('>', '&gt;') | replace('<', '&lt;') }}
+            </pre>
+
+            {%- if topic['related'] and topic['related'] is iterable and topic['related'] | length > 0 %}
+            <ul>
+                <li class="nested-list">
+                    <i>See Also:</i>
+                </li>
+                    <ul>
+                {%- for related_topic in topic['related'] %}
+                        <li>
+                            <a href="{{ url_for('help_page', topic=related_topic) }}">{{ related_topic }}</a>
+                        </li>
+                {%- endfor %}
+                    </ul>
+            </ul>
+            {%- endif %}
+
+            <br><hr><br>
+    {%- endif %}
+    {%- if topics and topics is iterable and topics | length > 0 %}
+            <ul id="world-list">
+        {%- for list_topic in topics %}
+                {%- set list_topic_parse = list_topic | replace('32 ', '') | trim %}
+                <li title="Topic: {{ list_topic_parse }}">
+                    <a href="{{ url_for('help_page', topic=list_topic_parse) }}">
+                        {{ list_topic_parse }}
+                    </a>
+                </li>
+        {%- endfor %}
+            </ul>
     {%- endif %}
 {%- endblock %}

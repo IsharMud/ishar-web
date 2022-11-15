@@ -640,19 +640,19 @@ def help_page(topic=None):
         to display information about each topic"""
 
     # Get all of the topics from the helptab file
-    topics   = helptab.get_helptab()
+    topics  = helptab.get_helptab()
     code    = 200
 
-    # Try to find a topic based on any user input
+    # Try to find an topic based on any user input
     if topic:
         if topic in topics.keys():
-            topics   = topics[topic]
+            topic   = topics[topic]
         else:
-            topic   = None
+            topic    = None
             code    = 404
             flash('Sorry, but please choose a valid topic!', 'error')
 
-    return render_template('helptab.html.j2', topics=topics, topic=topic), code
+    return render_template('helptab.html.j2', topic=topic, topics=topics), code
 
 
 @app.route('/debug-sentry')
