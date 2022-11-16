@@ -78,7 +78,7 @@
     {%- if topics and topics is iterable and topics | length > 0 %}
             <ul id="world-list">
         {%- for list_topic in topics %}
-                {%- set list_topic_parse = list_topic | replace('32 ', '') | trim %}
+                {%- set list_topic_parse = list_topic | replace('32 ', '')  %}
                 <li title="Topic: {{ list_topic_parse }}">
                     <a href="{{ url_for('help_page', topic=list_topic_parse) }}">
                         {{ list_topic_parse }}

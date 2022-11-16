@@ -30,7 +30,7 @@ class Account(Base, UserMixin):
     last_haddr      = Column(INTEGER(11), nullable=False)
     account_name    = Column(String(25), nullable=False, unique=True)
 
-    players         = relationship('Player', backref='account')
+    players = relationship('Player', backref='account')
 
     def change_password(self, new_password):
         """Method to change an account password"""
@@ -115,7 +115,7 @@ class AccountUpgrade(Base):
 
 class AccountsUpgrade(Base):
     """Account upgrade associated with account, and the level of upgrade"""
-    __tablename__       = 'accounts_account_upgrades'
+    __tablename__   = 'accounts_account_upgrades'
 
     account_upgrades_id = Column(
                             ForeignKey('account_upgrades.id',
@@ -129,7 +129,7 @@ class AccountsUpgrade(Base):
                         )
     amount              = Column(MEDIUMINT(4), nullable=False)
 
-    account             = relationship('Account', backref='upgrades')
+    account = relationship('Account', backref='upgrades')
 
     def __repr__(self):
         return f'<AccountsUpgrade> "{self.upgrade.name}" ' \
@@ -184,7 +184,7 @@ class News(Base):
     subject         = Column(String(64), nullable=False, server_default=FetchedValue())
     body            = Column(Text, nullable=False)
 
-    account         = relationship('Account')
+    account = relationship('Account')
 
     def __repr__(self):
         return f'<News> "{self.subject}" ({self.news_id}) / ' \
@@ -208,47 +208,9 @@ class PlayerClass(Base):
         return f'<PlayerClass> "{self.class_name}" ({self.class_id})'
 
 
-class PlayerFlag(Base):
-    """Player flag for a setting affecting a player character in-game"""
-    __tablename__   = 'player_flags'
-
-    flag_id         = Column(INTEGER(11), primary_key=True)
-    name            = Column(String(20), nullable=False, unique=True)
-
-    def __repr__(self):
-        return f'<PlayerFlag> "{self.name}" ({self.flag_id})'
-
-
-class PlayersFlag(Base):
-    """
-    Players Flag database class
-    Flag associated with player and the flag value
-    """
-    __tablename__   = 'player_player_flags'
-
-    flag_id         = Column(
-                        ForeignKey('player_flags.flag_id',
-                            ondelete='CASCADE', onupdate='CASCADE'
-                        ), nullable=False, index=True, primary_key=True
-                    )
-    player_id       = Column(
-                        ForeignKey('players.id',
-                            ondelete='CASCADE', onupdate='CASCADE'
-                        ), nullable=False, index=True, primary_key=True
-                    )
-    value           = Column(INTEGER(11), nullable=False,
-                        server_default=FetchedValue()
-                    )
-
-    def __repr__(self):
-        return f'<PlayersFlag> "{self.flag.name}" ({self.flag_id}) ' \
-            f'@ <Player> "{self.player.name}" ({self.player_id}) : {self.value}'
-
-
 class PlayerRace(Base):
-    """Player Race database class
-    Playable character race, such as elf, gnome, human, etc."""
-    __tablename__       = 'races'
+    """Playable character race, such as elf, gnome, human, etc."""
+    __tablename__   = 'races'
 
     race_id             = Column(TINYINT(3), primary_key=True)
     race_name           = Column(String(15), nullable=False, unique=True)
@@ -259,10 +221,7 @@ class PlayerRace(Base):
 
 
 class Quest(Base):
-    """
-    Quest database class
-    Quest that can be achieved, and its rewards
-    """
+    """Quest that can be achieved, and its rewards"""
     __tablename__       = 'quests'
 
     quest_id            = Column(INTEGER(11), primary_key=True)
@@ -297,7 +256,7 @@ class PlayerQuest(Base):
                     )
     value           = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
 
-    quest           = relationship('Quest')
+    quest   = relationship('Quest')
 
     def __repr__(self):
         return f'<PlayerQuest> "{self.quest.name}" ({self.quest_id}) @ ' \
@@ -325,25 +284,22 @@ class RemortUpgrade(Base):
 
 
 class PlayerRemortUpgrade(Base):
-    """
-    Player Remort Upgrades database class
-    Remort upgrade associated with player, and the level of upgrade
-    """
+    """Remort upgrade associated with player, and the level of upgrade"""
     __tablename__   = 'player_remort_upgrades'
 
-    upgrade_id      = Column(
+    upgrade_id  = Column(
                         ForeignKey('remort_upgrades.upgrade_id',
                             ondelete='CASCADE', onupdate='CASCADE'
                         ), nullable=False, index=True, primary_key=True
                     )
-    player_id       = Column(
+    player_id   = Column(
                         ForeignKey('players.id',
                             ondelete='CASCADE', onupdate='CASCADE'
                         ), nullable=False, index=True, primary_key=True
                     )
-    value           = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
+    value       = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
 
-    player          = relationship('Player', backref='remort_upgrades')
+    player  = relationship('Player', backref='remort_upgrades')
 
     def __repr__(self):
         return f'<PlayerRemortUpgrade> "{self.remort_upgrade.name}" ' \
@@ -352,10 +308,7 @@ class PlayerRemortUpgrade(Base):
 
 
 class Season(Base):
-    """
-    Season database class
-    In-game cyclical season detail and dates
-    """
+    """In-game cyclical season detail and dates"""
     __tablename__   = 'seasons'
 
     season_id       = Column(INTEGER(11), primary_key=True)
@@ -384,7 +337,7 @@ class Player(Base):
     Player database class
     An in-game player, which belongs to an account
     """
-    __tablename__           = 'players'
+    __tablename__   = 'players'
 
     id                      = Column(INTEGER(11), primary_key=True)
     account_id              = Column(ForeignKey('accounts.account_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
@@ -543,8 +496,8 @@ class Player(Base):
     @cached_property
     def player_link(self):
         """Return player link"""
-        return '<a href="' + url_for('show_player', player_name=self.name, _anchor='player') + \
-            f'">{self.name}</a>'
+        player_url  = url_for('show_player', player_name=self.name, _anchor='player')
+        return f'<a href="{player_url}">{self.name}</a>'
 
     @cached_property
     def player_title(self):
@@ -571,10 +524,9 @@ class Player(Base):
             return 0
 
         # Survival players earn less essence from renown
+        divisor = 10
         if self.is_survival:
             divisor = 20
-        else:
-            divisor = 10
 
         # Start with two (2) points for existing, with renown/remort equation
         earned  = int(self.total_renown / divisor) + 2

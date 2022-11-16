@@ -7,16 +7,14 @@ from datetime import datetime, timedelta
 import glob
 import os
 from urllib.parse import urlparse
-from flask import Flask, abort, current_app, flash, redirect, render_template, request, \
-    session, url_for
+from flask import Flask, abort, flash, redirect, render_template, request, session, url_for
 from flask_login import current_user, fresh_login_required, login_required, login_user, \
     logout_user, LoginManager
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 from database import db_session
-from models import Account, Challenge, News, Player, PlayersFlag, PlayerQuest, \
-    PlayerRemortUpgrade, Season
+from models import Account, Challenge, News, Player, Season
 from mud_secret import PODIR, IMM_LEVELS
 import forms
 import helptab
@@ -502,12 +500,6 @@ def admin_season_cycle():
                     if os.path.exists(delete_path):
                         os.remove(delete_path)
                         flash(f'Deleted <code>{delete_path}</code>.', 'success')
-                    db_session.query(PlayersFlag).filter_by(
-                        player_id = delete_player.id).delete()
-                    db_session.query(PlayerQuest).filter_by(
-                        player_id = delete_player.id).delete()
-                    db_session.query(PlayerRemortUpgrade).filter_by(
-                        player_id = delete_player.id).delete()
                     db_session.query(Player).filter_by(
                         id = delete_player.id).delete()
                     flash(f'Deleted Player: {delete_player.name} ' \
