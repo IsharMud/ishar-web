@@ -1,0 +1,61 @@
+{%- set page = 'leaders' -%}
+{% extends "layout.html.j2" %}
+{% block meta_title %}Deaths{% endblock meta_title %}
+{% block meta_description %}Players who have died the most while on their adventures{% endblock %}
+{% block meta_url %}{{ url_for('dead_leaders', _external=True) }}{% endblock meta_url %}">
+{% block title %}Deaths{% endblock %}
+{% block header %}Deaths{% endblock %}
+{%- block content %}
+    {%- if deadheads is defined and deadheads is iterable and deadheads | length > 0 %}
+                <table id="deaths" title="Deaths">
+                    <tr>
+                        <th title="#">
+                            #
+                        </th>
+                        <th title="Name">
+                            Name
+                        </th>
+                        <th title="Remorts">
+                            Remorts
+                        </th>
+                        <th title="Renown">
+                            Renown
+                        </th>
+                        <th title="Quests">
+                            Quests
+                        </th>
+                        <th title="Challenges">
+                            Challenges
+                        </th>
+                        <th title="Deaths">
+                            Deaths
+                        </th>
+                    </tr>
+        {%- for deadhead in deadheads %}
+                    <tr>
+                        <td id="{{ loop.index }}" title="#{{ loop.index }}">
+                           {{ loop.index }}
+                        </td>
+                        <td title="Player: {{ deadhead.name }}">
+                            {{ deadhead.player_link }}
+                        </td>
+                        <td title="Remorts: {{ deadhead.remorts }}">
+                            {{ deadhead.remorts }}
+                        </td>
+                        <td title="Renown: {{ deadhead.total_renown }}">
+                            {{ deadhead.total_renown }}
+                        </td>
+                        <td title="Quests: {{ deadhead.quests_completed }}">
+                            {{ deadhead.quests_completed }}
+                        </td>
+                        <td title="Challenges: {{ deadhead.challenges_completed }}">
+                            {{ deadhead.challenges_completed }}
+                        </td>
+                        <td title="Deaths: {{ deadhead.deaths }}">
+                            {{ deadhead.deaths }}
+                        </td>
+                    </tr>
+        {%- endfor %}
+                </table>
+    {%- endif %}
+{%- endblock content %}

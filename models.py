@@ -81,9 +81,8 @@ class Account(Base, UserMixin):
     @property
     def seasonal_earned(self):
         """Amount of essence earned for the account"""
-        # Start at zero (0),
-        #   and return the points from the player within
-        #   the account whom has earned the highest amount
+        # Start at zero (0), and return the points from
+        #   the player within the account that has the highest amount
         earned  = 0
         for player in self.players:
             if player.seasonal_earned > earned:
@@ -98,13 +97,13 @@ class AccountUpgrade(Base):
     """Account upgrades that are available to accounts"""
     __tablename__   = 'account_upgrades'
 
-    id              = Column(TINYINT(4), primary_key=True)
-    cost            = Column(MEDIUMINT(4), nullable=False)
-    description     = Column(String(200), nullable=False)
-    name            = Column(String(30), nullable=False, unique=True)
-    max_value       = Column(MEDIUMINT(4), nullable=False, server_default=FetchedValue())
-    scale           = Column(TINYINT(4), nullable=False, server_default=FetchedValue())
-    is_disabled     = Column(TINYINT(1), nullable=False, server_default=FetchedValue())
+    id          = Column(TINYINT(4), primary_key=True)
+    cost        = Column(MEDIUMINT(4), nullable=False)
+    description = Column(String(200), nullable=False)
+    name        = Column(String(30), nullable=False, unique=True)
+    max_value   = Column(MEDIUMINT(4), nullable=False, server_default=FetchedValue())
+    scale       = Column(TINYINT(4), nullable=False, server_default=FetchedValue())
+    is_disabled = Column(TINYINT(1), nullable=False, server_default=FetchedValue())
 
     accounts_upgrade    = relationship('AccountsUpgrade', backref='upgrade')
 
@@ -117,16 +116,8 @@ class AccountsUpgrade(Base):
     """Account upgrade associated with account, and the level of upgrade"""
     __tablename__   = 'accounts_account_upgrades'
 
-    account_upgrades_id = Column(
-                            ForeignKey('account_upgrades.id',
-                                ondelete='CASCADE', onupdate='CASCADE'
-                            ), nullable=False, index=True, primary_key=True
-                        )
-    account_id          = Column(
-                            ForeignKey('accounts.account_id',
-                                ondelete='CASCADE', onupdate='CASCADE'
-                            ), nullable=False, index=True, primary_key=True
-                        )
+    account_upgrades_id = Column(ForeignKey('account_upgrades.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True, primary_key=True)
+    account_id          = Column(ForeignKey('accounts.account_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True, primary_key=True)
     amount              = Column(MEDIUMINT(4), nullable=False)
 
     account = relationship('Account', backref='upgrades')
@@ -174,15 +165,11 @@ class News(Base):
     """News post for the main/welcome page"""
     __tablename__   = 'news'
 
-    news_id         = Column(INTEGER(11), primary_key=True)
-    account_id      = Column(
-                        ForeignKey('accounts.account_id',
-                            ondelete='CASCADE', onupdate='CASCADE'
-                        ), nullable=False, index=True
-                    )
-    created_at      = Column(TIMESTAMP, nullable=False, server_default=FetchedValue())
-    subject         = Column(String(64), nullable=False, server_default=FetchedValue())
-    body            = Column(Text, nullable=False)
+    news_id     = Column(INTEGER(11), primary_key=True)
+    account_id  = Column(ForeignKey('accounts.account_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
+    created_at  = Column(TIMESTAMP, nullable=False, server_default=FetchedValue())
+    subject     = Column(String(64), nullable=False, server_default=FetchedValue())
+    body        = Column(Text, nullable=False)
 
     account = relationship('Account')
 
@@ -196,11 +183,7 @@ class PlayerClass(Base):
     __tablename__   = 'classes'
 
     class_id            = Column(TINYINT(3), primary_key=True)
-    class_name          = Column(String(15),
-                            nullable=False,
-                            unique=True,
-                            server_default=FetchedValue()
-                        )
+    class_name          = Column(String(15), nullable=False, unique=True, server_default=FetchedValue())
     class_display       = Column(String(32))
     class_description   = Column(String(64))
 
@@ -225,8 +208,7 @@ class Quest(Base):
     __tablename__       = 'quests'
 
     quest_id            = Column(INTEGER(11), primary_key=True)
-    name                = Column(String(25),
-                            nullable=False, unique=True, server_default=FetchedValue())
+    name                = Column(String(25), nullable=False, unique=True, server_default=FetchedValue())
     display_name        = Column(String(30), nullable=False)
     is_major            = Column(TINYINT(1), nullable=False, server_default=FetchedValue())
     xp_reward           = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
@@ -244,17 +226,9 @@ class PlayerQuest(Base):
     """
     __tablename__   = 'player_quests'
 
-    quest_id        = Column(
-                        ForeignKey('quests.quest_id',
-                            ondelete='CASCADE', onupdate='CASCADE'
-                        ), nullable=False, index=True, primary_key=True
-                    )
-    player_id       = Column(
-                        ForeignKey('players.id',
-                            ondelete='CASCADE', onupdate='CASCADE'
-                        ), nullable=False, index=True, primary_key=True
-                    )
-    value           = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
+    quest_id    = Column(ForeignKey('quests.quest_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True, primary_key=True)
+    player_id   = Column(ForeignKey('players.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True, primary_key=True)
+    value       = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
 
     quest   = relationship('Quest')
 
@@ -271,10 +245,10 @@ class RemortUpgrade(Base):
     """
     __tablename__   = 'remort_upgrades'
 
-    upgrade_id      = Column(INTEGER(11), primary_key=True)
-    name            = Column(String(20), nullable=False, unique=True, server_default=FetchedValue())
-    renown_cost     = Column(SMALLINT(6), nullable=False)
-    max_value       = Column(SMALLINT(6), nullable=False)
+    upgrade_id  = Column(INTEGER(11), primary_key=True)
+    name        = Column(String(20), nullable=False, unique=True, server_default=FetchedValue())
+    renown_cost = Column(SMALLINT(6), nullable=False)
+    max_value   = Column(SMALLINT(6), nullable=False)
 
     remort_upgrades = relationship('PlayerRemortUpgrade', backref='remort_upgrade')
 
@@ -287,16 +261,8 @@ class PlayerRemortUpgrade(Base):
     """Remort upgrade associated with player, and the level of upgrade"""
     __tablename__   = 'player_remort_upgrades'
 
-    upgrade_id  = Column(
-                        ForeignKey('remort_upgrades.upgrade_id',
-                            ondelete='CASCADE', onupdate='CASCADE'
-                        ), nullable=False, index=True, primary_key=True
-                    )
-    player_id   = Column(
-                        ForeignKey('players.id',
-                            ondelete='CASCADE', onupdate='CASCADE'
-                        ), nullable=False, index=True, primary_key=True
-                    )
+    upgrade_id  = Column(ForeignKey('remort_upgrades.upgrade_id',ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True, primary_key=True)
+    player_id   = Column(ForeignKey('players.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True, primary_key=True)
     value       = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
 
     player  = relationship('Player', backref='remort_upgrades')

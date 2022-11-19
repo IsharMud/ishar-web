@@ -235,17 +235,22 @@ def challenges():
 
 @app.route('/leaderboard', methods=['GET'])
 @app.route('/leaders', methods=['GET'])
-def leaders(include_dead=True):
-    """Sort and list the best players, with boolean to include/exclude dead characters"""
+def leaders(include_dead=True, include_survival=True):
+    """Sort and list the best players
+        with booleans to include/exclude dead and/or survival characters"""
 
     leader_players  = Player.query.filter(
                         Player.true_level < min(IMM_LEVELS)
                     )
+
     if request.args.get('dead') and request.args.get('dead') == 'false':
         include_dead    = False
-        leader_players  = leader_players.filter_by(
-                            is_deleted = 0
-                        )
+        leader_players  = leader_players.filter_by(is_deleted=0)
+
+    if request.args.get('survival') and request.args.get('survival') == 'false':
+        # WIP/TODO
+        include_survival    = False
+        leader_players      = leader_players.filter_by(game_type=0)
 
     leader_players  = leader_players.order_by(
                         -Player.remorts,
@@ -256,9 +261,20 @@ def leaders(include_dead=True):
                     ).limit(10).all()
 
     return render_template('leaders.html.j2',
-                            include_dead    = include_dead,
-                            leader_players  = leader_players
+                            include_dead        = include_dead,
+                            include_survival    = include_survival,
+                            leader_players      = leader_players
                         )
+
+
+@app.route('/deaths/', methods=['GET'])
+@app.route('/deaths', methods=['GET'])
+def dead_leaders():
+    """Sort and list the mortal players who have died most"""
+    deadheads    = Player.query.filter_by(is_deleted=0,game_type=0).filter(
+                        Player.true_level < min(IMM_LEVELS),
+                    ).order_by(-Player.deaths).limit(10).all()
+    return render_template('deaths.html.j2', deadheads=deadheads)
 
 
 @app.route('/wiz_list', methods=['GET'])

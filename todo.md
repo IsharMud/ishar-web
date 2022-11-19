@@ -2,6 +2,16 @@
 
 ## Fun Features
 
+### `Include Survival` checkbox on `/leaders` page?
+- Sort of a work-in-progress
+    * The server-side/backend Python works-ish:
+        - `/leaders?dead=false` works
+        - `/leaders?survival=false` works
+        - `/leaders?dead=false&survival=false`
+            - Works, _albeit redundant since only survival players can be dead_
+    * The `Include Dead` and `Include Survival` checkboxes on the front-end both need exposed and to cooperate with one another...
+        - Should there be a `Survival Only` checkbox... or another page for Survival entirely???
+
 ### Fancy sortable and filter-able tables for leader board
 -  Maybe this?
     * https://blog.miguelgrinberg.com/post/beautiful-interactive-tables-for-your-flask-templates

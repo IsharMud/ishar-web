@@ -9,14 +9,19 @@
         <script async src="{{ url_for('static', filename='leaders.js') }}"></script>
 {%- endblock scripts %}
 {%- block content %}
-    {%- if include_dead is defined %}
                 <p>
                     <label for="include-dead" title="Include Dead">
                         Include Dead ☠️
                     </label>
                     <input type="checkbox" onchange="deadLeaders(this.checked);" id="include-dead" name="include-dead" {%- if include_dead %} checked="yes"{% endif %}>
+                <!--
+                        &nbsp; &nbsp; &nbsp;
+                    <label for="include-survival" title="Include Survival">
+                        Include <span class="survival-player">Survival</span>
+                    </label>
+                    <input type="checkbox" onchange="survivalLeaders(this.checked);" id="include-survival" name="include-survival" {%- if include_survival %} checked="yes"{% endif %}>
+                -->
                 </p>
-    {%- endif %}
     {%- if leader_players is defined and leader_players is iterable and leader_players | length > 0 %}
                 <table id="leaders" title="Leaders">
                     <tr>
