@@ -473,12 +473,12 @@ class Player(Base):
     @cached_property
     def player_type(self):
         """Player type"""
+        if self.is_immortal:
+            return IMM_LEVELS[self.true_level]
         if self.is_deleted == 1:
             return 'Dead'
         if self.is_survival:
             return 'Survival'
-        if self.is_immortal:
-            return IMM_LEVELS[self.true_level]
         return 'Classic'
 
     @property
