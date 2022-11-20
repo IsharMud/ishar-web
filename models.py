@@ -461,7 +461,7 @@ class Player(Base):
 
     @cached_property
     def player_link(self):
-        """Return player link"""
+        """Player link"""
         player_url  = url_for('show_player', player_name=self.name, _anchor='player')
         return f'<a href="{player_url}">{self.name}</a>'
 
@@ -472,7 +472,10 @@ class Player(Base):
 
     @cached_property
     def player_type(self):
-        """Player type"""
+        """Player type - returns string, one of:
+            an immortal description (one of mud_secret.IMM_LEVELS), or
+            Dead, Survival, or Classic
+        """
         if self.is_immortal:
             return IMM_LEVELS[self.true_level]
         if self.is_deleted == 1:
