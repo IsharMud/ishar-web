@@ -5,8 +5,8 @@ from mud_secret import HELPTAB
 
 # Logging configuration
 logging.basicConfig(
-    level   = logging.INFO,
-    format  = '%(asctime)s [%(levelname)s] %(message)s',
+    level = logging.INFO,
+    format = '%(asctime)s [%(levelname)s] %(message)s',
     datefmt = '%Y-%m-%d %H:%M:%S %Z'
 )
 
@@ -19,8 +19,8 @@ def get_help_areas(helptab_file=HELPTAB):
 
     # Prepare an empty "areas" dictionary
     #   and do not keep lines by default
-    areas   = {}
-    keep    = False
+    areas = {}
+    keep = False
 
     # Read game "helptab" file
     with open(helptab_file, mode='r', encoding='utf8') as helptab_fh:
@@ -53,11 +53,10 @@ def get_help_areas(helptab_file=HELPTAB):
 
 def get_all_help(helptab_file=HELPTAB):
     """Read/process the 'helptab' file used by the MUD"""
-
-    all_help    = None
+    all_help = None
 
     with open(file=helptab_file, mode='r', encoding='utf-8') as helptab_fh:
-        all_help    = helptab_fh.read()
+        all_help = helptab_fh.read()
     helptab_fh.close()
 
     return all_help
@@ -67,18 +66,18 @@ def get_helptab():
     """Find help in helptab"""
 
     help_topics = get_all_help().split('\n#\n')
-    topics  = {}
-#    names   = re.compile(r'[0-9]{0,2} [a-zA-Z]+')
-    names   = re.compile(r'32 [a-zA-Z]+')
+    topics = {}
+#    names = re.compile(r'[0-9]{0,2} [a-zA-Z]+')
+    names = re.compile(r'32 [a-zA-Z]+')
 
     logging.info('Help Topics\t%i', len(help_topics))
     for help_topic in help_topics:
 
         logging.info('Help Topic:\t%s', help_topic)
 
-        lines   = help_topic.split('\n')
-        LINE_NO = 0
-        HEADER  = True
+        lines = help_topic.split('\n')
+        line_no = 0
+        in_header = True
 
         this_topic = {
             'level':    int(),
@@ -88,59 +87,57 @@ def get_helptab():
 
         for line in lines:
 
-            stripped    = line.strip()
-            LINE_NO     += 1
-
-            print(f'{LINE_NO}: {line}')
+            stripped = line.strip()
+            line_no += 1
 
             # End of the header
             if line == '*':
-                HEADER  = False
+                in_header = False
                 continue
 
-            elif stripped.startswith('%% '):
+            if stripped.startswith('%% '):
                 break
 
-            if HEADER:
+            if in_header:
 
-                if LINE_NO == 1 and stripped.isdigit():
-                    this_topic['level']    = int(stripped)
+                if line_no == 1 and stripped.isdigit():
+                    this_topic['level'] = int(stripped)
 
                 elif names.match(line):
                     this_topic['aliases'].append(stripped)
 
-            elif not HEADER:
+            elif not in_header:
 
                 if line.startswith('Syntax : '):
-                    syntax  = stripped.replace('Syntax : ', '')
-                    this_topic['syntax']   = syntax
+                    syntax = stripped.replace('Syntax : ', '')
+                    this_topic['syntax'] = syntax
 
                 elif line.startswith('Minimum: '):
                     minimum = stripped.replace('Minimum: ', '')
-                    this_topic['minimum']   = minimum
+                    this_topic['minimum'] = minimum
 
                 elif line.startswith('Class  : '):
-                    player_class    = stripped.replace('Class  : ', '')
-                    this_topic['player_class']  = player_class
+                    player_class = stripped.replace('Class  : ', '')
+                    this_topic['player_class'] = player_class
 
                 elif line.startswith('Level  : '):
-                    player_level    = stripped.replace('Level  : ', '')
-                    this_topic['player_level']  = player_level
+                    player_level = stripped.replace('Level  : ', '')
+                    this_topic['player_level'] = player_level
 
                 elif line.startswith('Save   : '):
-                    save    = stripped.replace('Save   : ', '')
-                    this_topic['save']  = save
+                    save = stripped.replace('Save   : ', '')
+                    this_topic['save'] = save
 
                 elif stripped.startswith('See also: '):
-                    similar  = stripped.replace('See also: ', '')
-                    this_topic['related']  = similar.split(',')
+                    similar = stripped.replace('See also: ', '')
+                    this_topic['related'] = similar.split(',')
 
                 else:
                     this_topic['text'] += line + "\n"
 
         print(this_topic)
         if this_topic['aliases'] and this_topic['level'] < 20:
-            topic_name  = this_topic['aliases'][0].replace('32 ', '')
-            topics[topic_name]  = this_topic
+            topic_name = this_topic['aliases'][0].replace('32 ', '')
+            topics[topic_name] = this_topic
 
     return topics

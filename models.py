@@ -8,8 +8,8 @@ from sqlalchemy import Column, ForeignKey, String, TIMESTAMP, Text
 from sqlalchemy.dialects.mysql import INTEGER, MEDIUMINT, SMALLINT, TINYINT
 from sqlalchemy.schema import FetchedValue
 from sqlalchemy.orm import relationship
-from database import Base, db_session
 from mud_secret import ALIGNMENTS, IMM_LEVELS
+from database import Base, db_session
 import delta
 
 
