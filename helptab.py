@@ -1,14 +1,6 @@
 """helptab"""
-import logging
 import re
 from mud_secret import HELPTAB
-
-# Logging configuration
-logging.basicConfig(
-    level = logging.INFO,
-    format = '%(asctime)s [%(levelname)s] %(message)s',
-    datefmt = '%Y-%m-%d %H:%M:%S %Z'
-)
 
 def get_help_areas(helptab_file=HELPTAB):
     """
@@ -70,10 +62,7 @@ def get_helptab():
 #    names = re.compile(r'[0-9]{0,2} [a-zA-Z]+')
     names = re.compile(r'32 [a-zA-Z]+')
 
-    logging.info('Help Topics\t%i', len(help_topics))
     for help_topic in help_topics:
-
-        logging.info('Help Topic:\t%s', help_topic)
 
         lines = help_topic.split('\n')
         line_no = 0
@@ -135,7 +124,6 @@ def get_helptab():
                 else:
                     this_topic['text'] += line + "\n"
 
-        print(this_topic)
         if this_topic['aliases'] and this_topic['level'] < 20:
             topic_name = this_topic['aliases'][0].replace('32 ', '')
             topics[topic_name] = this_topic
