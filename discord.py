@@ -6,9 +6,10 @@ So far, there are only two "slash commands" (/):
 import interactions
 import discord_secret
 from database import db_session
-from models import Challenge, Season
+from models import Challenge, Player, Season
 
 bot = interactions.Client(token=discord_secret.TOKEN, default_scope=discord_secret.GUILD)
+
 
 @bot.command()
 async def season(ctx: interactions.CommandContext):
@@ -19,6 +20,7 @@ async def season(ctx: interactions.CommandContext):
         f'which ends in {current_season.expires}.'
     )
     db_session.close()
+
 
 @bot.command()
 async def challenges(ctx: interactions.CommandContext):
@@ -34,5 +36,14 @@ async def challenges(ctx: interactions.CommandContext):
             completed   = completed + 1
     await ctx.send(f"Challenges: {completed} completed / {count} total")
     db_session.close()
+
+
+@bot.command()
+async def deadhead(ctx: interactions.CommandContext):
+    """Show the name and count of player with the most deaths"""
+    deadman = Player.query.filter_by(is_deleted=0,game_type=0).order_by(-Player.deaths).first()
+    await ctx.send(f"The player who has died most is: {deadman.name} - {deadman.deaths} times!")
+    db_session.close()
+
 
 bot.start()
