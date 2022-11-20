@@ -1,8 +1,4 @@
-"""
-Discord bot simply runs in a screen session, for now
-So far, there are only two "slash commands" (/):
-/season and /challenges
-"""
+"""IsharMUD Discord bot"""
 import interactions
 import discord_secret
 from database import db_session
@@ -13,8 +9,8 @@ bot = interactions.Client(token=discord_secret.TOKEN, default_scope=discord_secr
 
 @bot.command()
 async def season(ctx: interactions.CommandContext):
-    """Show the current Ishar MUD season information"""
-    current_season  = Season.query.filter_by(is_active=1).order_by(-Season.season_id).first()
+    """Show the current Ishar MUD season"""
+    current_season = Season.query.filter_by(is_active=1).order_by(-Season.season_id).first()
     await ctx.send(
         f'It is currently Season {current_season.season_id}, ' \
         f'which ends in {current_season.expires}.'
@@ -40,7 +36,7 @@ async def challenges(ctx: interactions.CommandContext):
 
 @bot.command()
 async def deadhead(ctx: interactions.CommandContext):
-    """Show the name and count of player with the most deaths"""
+    """Show the player with the most in-game deaths"""
     deadman = Player.query.filter_by(is_deleted=0,game_type=0).order_by(-Player.deaths).first()
     await ctx.send(f"The player who has died most is: {deadman.name} - {deadman.deaths} times!")
     db_session.close()
