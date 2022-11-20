@@ -42,7 +42,7 @@ async def challenges(ctx: interactions.CommandContext):
 async def deadhead(ctx: interactions.CommandContext):
     """Show the name and count of player with the most deaths"""
     deadman = Player.query.filter_by(is_deleted=0,game_type=0).order_by(-Player.deaths).first()
-    await ctx.send(f"The player who has died most is {deadman.player_title} - {deadman.deaths} times!")
+    await ctx.send(f"The player who has died most is: {deadman.name} - {deadman.deaths} times!")
     db_session.close()
 
 
