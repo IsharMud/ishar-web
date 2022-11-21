@@ -4,6 +4,7 @@ https://isharmud.com/
 https://github.com/IsharMud/ishar-web
 """
 from datetime import datetime
+from functools import wraps
 import glob
 import os
 from urllib.parse import urlparse
@@ -53,6 +54,18 @@ def load_user(email):
             'ip_address':   request.remote_addr
         })
     return user_account
+
+
+def god_required(func):
+    """Decorator to allow access only to Gods"""
+    @wraps(func)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_god:
+            flash('Sorry, but you are not godly enough!', 'error')
+            abort(401)
+        return func(*args, **kwargs)
+
+    return decorated_function
 
 
 @app.context_processor
@@ -286,28 +299,18 @@ def manage_account():
 
 @app.route('/admin', methods=['GET', 'POST'])
 @fresh_login_required
+@god_required
 def admin_portal():
     """Administration portal main page for Gods"""
-
-    # Only allow access to Gods
-    if not current_user.is_god:
-        flash('Sorry, but you are not godly enough!', 'error')
-        abort(401)
-
-    # Show the administration portal
     return render_template('admin/portal.html.j2')
 
 
 @app.route('/admin/news', methods=['GET', 'POST'])
 @fresh_login_required
+@god_required
 def admin_news():
     """Administration portal to allow Gods to post news
         /admin/news"""
-
-    # Only allow access to Gods
-    if not current_user.is_god:
-        flash('Sorry, but you are not godly enough!', 'error')
-        abort(401)
 
     # Get news add form and check if submitted
     news_add_form = forms.NewsAddForm()
@@ -333,15 +336,10 @@ def admin_news():
 
 @app.route('/admin/account/<int:manage_account_id>', methods=['GET'])
 @fresh_login_required
+@god_required
 def admin_account(manage_account_id=None):
     """Administration portal to allow Gods to view accounts
         /admin/account"""
-
-    # Only allow access to Gods
-    if not current_user.is_god:
-        flash('Sorry, but you are not godly enough!', 'error')
-        abort(401)
-
     return render_template('admin/account.html.j2',
                            manage_account=Account.query.filter_by(account_id=manage_account_id).first()
                            )
@@ -349,15 +347,10 @@ def admin_account(manage_account_id=None):
 
 @app.route('/admin/account/edit/<int:edit_account_id>', methods=['GET', 'POST'])
 @fresh_login_required
+@god_required
 def admin_edit_account(edit_account_id=None):
     """Administration portal to allow Gods to edit accounts
         /admin/account/edit"""
-
-    # Only allow access to Gods
-    if not current_user.is_god:
-        flash('Sorry, but you are not godly enough!', 'error')
-        abort(401)
-
     edit_account = Account.query.filter_by(account_id=edit_account_id).first()
 
     # Get edit account form and check if submitted
@@ -389,31 +382,19 @@ def admin_edit_account(edit_account_id=None):
 
 @app.route('/admin/accounts', methods=['GET'])
 @fresh_login_required
+@god_required
 def admin_accounts():
     """Administration portal to allow Gods to view accounts
         /admin/accounts"""
-
-    # Only allow access to Gods
-    if not current_user.is_god:
-        flash('Sorry, but you are not godly enough!', 'error')
-        abort(401)
-
-    return render_template('admin/accounts.html.j2',
-                           accounts=Account.query.order_by(Account.account_id).all()
-                           )
+    return render_template('admin/accounts.html.j2', accounts=Account.query.order_by(Account.account_id).all())
 
 
 @app.route('/admin/player/edit/<int:edit_player_id>', methods=['GET', 'POST'])
 @fresh_login_required
+@god_required
 def admin_edit_player(edit_player_id=None):
     """Administration portal to allow Gods to edit player characters
         /admin/player/edit"""
-
-    # Only allow access to Gods
-    if not current_user.is_god:
-        flash('Sorry, but you are not godly enough!', 'error')
-        abort(401)
-
     edit_player = Player.query.filter_by(id=edit_player_id).first()
 
     # Get edit player form and check if submitted
@@ -435,16 +416,10 @@ def admin_edit_player(edit_player_id=None):
 
 @app.route('/admin/season', methods=['GET'])
 @fresh_login_required
+@god_required
 def admin_season():
     """Administration portal to allow Gods to view/manage seasons
         /admin/season"""
-
-    # Only allow access to Gods
-    if not current_user.is_god:
-        flash('Sorry, but you are not godly enough!', 'error')
-        abort(401)
-
-    # Get all seasons for admins
     return render_template('admin/season.html.j2',
                            seasons=Season.query.order_by(-Season.is_active, -Season.season_id).all()
                            )
@@ -452,14 +427,10 @@ def admin_season():
 
 @app.route('/admin/season/cycle', methods=['GET', 'POST'])
 @fresh_login_required
+@god_required
 def admin_season_cycle():
     """Administration portal to allow Gods to cycle seasons, while wiping players
         /admin/season/cycle"""
-
-    # Only allow access to Gods
-    if not current_user.is_god:
-        flash('Sorry, but you are not godly enough!', 'error')
-        abort(401)
 
     # Get season cycle form, and check if submitted
     season_cycle_form = forms.SeasonCycleForm()
