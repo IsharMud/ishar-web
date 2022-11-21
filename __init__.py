@@ -48,10 +48,10 @@ def load_user(email):
     user_account = Account.query.filter_by(email=email).first()
     if user_account:
         sentry_sdk.set_user({
-            'id':           user_account.account_id,
-            'username':     user_account.account_name,
-            'email':        user_account.email,
-            'ip_address':   request.remote_addr
+            'id': user_account.account_id,
+            'username': user_account.account_name,
+            'email': user_account.email,
+            'ip_address': request.remote_addr
         })
     return user_account
 
@@ -64,7 +64,6 @@ def god_required(func):
             flash('Sorry, but you are not godly enough!', 'error')
             abort(401)
         return func(*args, **kwargs)
-
     return decorated_function
 
 
@@ -258,12 +257,12 @@ def leaders(include_dead=True, include_survival=True):
         leader_players = leader_players.filter_by(game_type=0)
 
     leader_players = leader_players.order_by(
-                        -Player.remorts,
-                        -Player.total_renown,
-                        -Player.quests_completed,
-                        -Player.challenges_completed,
-                        Player.deaths
-                    ).limit(10).all()
+        -Player.remorts,
+        -Player.total_renown,
+        -Player.quests_completed,
+        -Player.challenges_completed,
+        Player.deaths
+    ).limit(10).all()
 
     return render_template('leaders.html.j2',
                            include_dead=include_dead,
@@ -277,8 +276,8 @@ def leaders(include_dead=True, include_survival=True):
 def dead_leaders():
     """Sort and list the mortal players who have died most"""
     deadheads = Player.query.filter_by(is_deleted=0, game_type=0).filter(
-                    Player.true_level < min(IMM_LEVELS)
-                ).order_by(-Player.deaths).limit(10).all()
+        Player.true_level < min(IMM_LEVELS)
+    ).order_by(-Player.deaths).limit(10).all()
     return render_template('deaths.html.j2', deadheads=deadheads)
 
 
@@ -456,7 +455,7 @@ def admin_season_cycle():
         for account in Account.query.filter().all():
             if account.seasonal_earned > 0:
                 calculated_essence = account.seasonal_points + account.seasonal_earned
-                flash(f'Account "{account.account_name}" ({ account.account_id}) '
+                flash(f'Account "{account.account_name}" ({account.account_id}) '
                       f'now has {calculated_essence} essence. '
                       f'({account.seasonal_points} existing + '
                       f'{account.seasonal_earned} earned)', 'success')
@@ -464,7 +463,7 @@ def admin_season_cycle():
                 total_rewarded_essence += calculated_essence
             else:
                 flash(f'Account "{account.account_name}"'
-                      f'({ account.account_id}) earned no essence', 'warning')
+                      f'({account.account_id}) earned no essence', 'warning')
 
             for delete_player in account.players:
                 if not delete_player.is_immortal:
