@@ -15,7 +15,7 @@ async def challenges(ctx: interactions.CommandContext):
     for challenge in all_challenges:
         if challenge.winner_desc != '':
             completed = completed + 1
-    await ctx.send(f'There are currently {completed} completed / {len(all_challenges)} total')
+    await ctx.send(f'There are currently {completed} completed / {len(all_challenges)} total challenges!')
     db_session.close()
 
 
@@ -31,7 +31,7 @@ async def deadhead(ctx: interactions.CommandContext):
 async def season(ctx: interactions.CommandContext):
     """Show the current Ishar MUD season"""
     current_season = Season.query.filter_by(is_active=1).order_by(-Season.season_id).first()
-    await ctx.send(f'It is currently Season {current_season.season_id} which ends in {current_season.expires}.')
+    await ctx.send(f'It is currently Season {current_season.season_id} which ends in {current_season.expires}!')
     db_session.close()
 
 
