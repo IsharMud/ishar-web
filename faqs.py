@@ -1,18 +1,16 @@
-"""
-Frequently Asked Questions
-"""
+"""Frequently Asked Questions"""
 from flask import url_for
-faqs = {
+ALL_FAQS = {
 
     'Is Ishar MUD free?': [
-        '<strong>Yes</strong>! While you are more than welcome to ' \
-        '<a href="' + url_for('support') + '" title="Support">offer support</a>, ' \
+        '<strong>Yes</strong>! While you are more than welcome to '
+        '<a href="' + url_for('support') + '" title="Support">offer support</a>, '
         'Ishar MUD is free to use, play, and enjoy.'
     ],
 
     'Are there player classes?': [
-        '<strong>Yes</strong>! ' \
-        'There are <strong>five (5)</strong> classes available to choose from, ' \
+        '<strong>Yes</strong>! '
+        'There are <strong>five (5)</strong> classes available to choose from, '
         'when you create a player character:',
         [
             'Warrior -- For those who seek to master the art of war.',
@@ -24,8 +22,8 @@ faqs = {
     ],
 
     'Are there player races?': [
-        '<strong>Yes</strong>! ' \
-        'There are <strong>six (6)</strong> races available to choose from, ' \
+        '<strong>Yes</strong>! '
+        'There are <strong>six (6)</strong> races available to choose from, '
         'when you create a player character:',
         [
             'Human -- The dominant race around Mareldja, the home city.',
@@ -38,23 +36,23 @@ faqs = {
     ],
 
     'Is there role-playing?': [
-        '<strong>No</strong>, ' \
+        '<strong>No</strong>, '
         'Ishar MUD does not require role-playing.'
     ],
 
     'What about my equipment when I log out?': [
-        "When you sign out or log off, your character's equipment, gear, " \
+        "When you sign out or log off, your character's equipment, gear, "
         'and inventory is simply <strong>preserved until the end of the season</strong>.',
-        'The <a href="' + url_for('season') + '" title="Season">season</a> ' \
+        'The <a href="' + url_for('season') + '" title="Season">season</a> '
         'currently changes every four (4) months.',
-        'You can find more information about seasons at the ' \
+        'You can find more information about seasons at the '
         '<a href="' + url_for('patches') + '" title="Patches">patches</a> page.'
     ],
 
     'Is death permanent?': [
-        '<strong>You can choose</strong> whether to play in "Survival" (aka "perma-death") ' \
+        '<strong>You can choose</strong> whether to play in "Survival" (aka "perma-death") '
         'or "Classic" mode, each time you create a player character.',
-        'While survival mode gains experience faster, classic mode subtracts experience ' \
+        'While survival mode gains experience faster, classic mode subtracts experience '
         "upon death, but allows you to retrieve your character's corpse."
     ],
 
@@ -65,15 +63,8 @@ faqs = {
     ],
 
     'Is there player-killing (PK) or player-versus-player (PvP) combat?': [
-        '<strong>Yes and no</strong>... ' \
-        "While player-versus-player combat (or PK'ing) is possible, " \
+        '<strong>Yes and no</strong>... '
+        "While player-versus-player combat (or PK'ing) is possible, "
         'it is very rare, and not a requirement of the game.'
-    ],
-
-#    'What is your next question?': [
-#        '<strong>Bueller?</strong>',
-#        'Bueller..?',
-#        "Bueller's not here!"
-#    ]
-
+    ]
 }

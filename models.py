@@ -127,7 +127,7 @@ class AccountsUpgrade(Base):
             f'({self.account_upgrades_id}) @ ' \
             f'<Account> "{self.account.account_name}" ' \
             f'({self.account_id}) / ' \
-            f'Amount: {self.amount}' \
+            f'Amount: {self.amount}'
 
 
 class Challenge(Base):

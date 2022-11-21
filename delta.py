@@ -1,8 +1,8 @@
 """Time delta handling"""
 
 
-def pluralish(timing=None):
-    """Append "s" to stringified timedeltas, if not singular"""
+def pluralize(timing=None):
+    """Append "s" and stringifies time-deltas, if not singular"""
     if timing['value'] != 1:
         timing['interval'] += 's'
 
@@ -29,4 +29,4 @@ def stringify(delta=None):
     else:
         ret = {'value': delta.seconds, 'interval': 'second'}
 
-    return pluralish(timing=ret)
+    return pluralize(timing=ret)
