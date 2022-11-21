@@ -12,7 +12,6 @@ from flask_login import current_user, fresh_login_required, login_required, logi
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
-from faqs import ALL_FAQS
 from database import db_session
 from models import Account, Challenge, News, Player, Season
 from mud_secret import PODIR, IMM_LEVELS
@@ -573,6 +572,7 @@ def patches():
 @app.route('/faq', methods=['GET'])
 def faq():
     """A few frequently asked questions (/faq, /faqs, or /questions)"""
+    from faqs import ALL_FAQS
     return render_template('faq.html.j2', faqs=ALL_FAQS)
 
 
