@@ -7,37 +7,42 @@
 {% block header %}Leaders{% endblock %}
 {%- block scripts %}
         <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
+        <script>
+            function showLeaders(where) {
+                new gridjs.Grid({
+                    columns: [
+                      { id: 'name', name: 'Player' },
+                      { id: 'remorts', name: 'Remorts' },
+                      { id: 'renown', name: 'Renown' },
+                      { id: 'quests', name: 'Quests' },
+                      { id: 'challenges', name: 'Challenges' },
+                      { id: 'deaths', name: 'Deaths' }
+                    ],
+                    data: [
+                      {%- for leader in leader_players %}
+                        {
+                          name: "{{ leader.name }}",
+                          remorts: {{ leader.remorts }},
+                          renown: {{ leader.total_renown }},
+                          quests: {{ leader.quests_completed }},
+                          challenges: {{ leader.challenges_completed }},
+                          deaths:
+                          {%- if leader.player_type != 'Classic' %} "{{ leader.player_type }}"
+                          {%- else %} {{ leader.deaths }}
+                          {%- endif %}
+                        }{% if not loop.last %},{% endif %}
+                      {%- endfor %}
+                    ],
+                    search: true,
+                    sort: true,
+                    pagination: true,
+                  }).render(where);
+            };
+        </script>
 {%- endblock scripts %}
 {%- block content %}
                 <div id="leaders"></div>
                 <script>
-                    new gridjs.Grid({
-                        columns: [
-                          { id: 'name', name: 'Player' },
-                          { id: 'remorts', name: 'Remorts' },
-                          { id: 'renown', name: 'Renown' },
-                          { id: 'quests', name: 'Quests' },
-                          { id: 'challenges', name: 'Challenges' },
-                          { id: 'deaths', name: 'Deaths' }
-                        ],
-                        data: [
-                          {%- for leader in leader_players %}
-                            {
-                              name: "{{ leader.name }}",
-                              remorts: {{ leader.remorts }},
-                              renown: {{ leader.total_renown }},
-                              quests: {{ leader.quests_completed }},
-                              challenges: {{ leader.challenges_completed }},
-                              deaths:
-                              {%- if leader.player_type != 'Classic' %} "{{ leader.player_type }}"
-                              {%- else %} {{ leader.deaths }}
-                              {%- endif %}
-                            }{% if not loop.last %},{% endif %}
-                          {%- endfor %}
-                        ],
-                        search: true,
-                        sort: true,
-                        pagination: true,
-                      }).render(document.getElementById('leaders'));
+                    showLeaders(document.getElementById('leaders'));
                 </script>
 {%- endblock content %}
