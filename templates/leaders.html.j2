@@ -29,7 +29,7 @@
                               quests: {{ leader.quests_completed }},
                               challenges: {{ leader.challenges_completed }},
                               deaths:
-                              {%- if leader.player_type != 'Classic' %}"{{ leader.player_type }}"
+                              {%- if leader.player_type != 'Classic' %} "{{ leader.player_type }}"
                               {%- else %} {{ leader.deaths }}
                               {%- endif %}
                             }{% if not loop.last %},{% endif %}
