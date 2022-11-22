@@ -6,79 +6,38 @@
 {% block title %}Leaders{% endblock %}
 {% block header %}Leaders{% endblock %}
 {%- block scripts %}
-        <script async src="{{ url_for('static', filename='leaders.js') }}"></script>
+        <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
 {%- endblock scripts %}
 {%- block content %}
-                <p>
-                    <label for="include-dead" title="Include Dead">
-                        Include Dead ☠️
-                    </label>
-                    <input type="checkbox" onchange="deadLeaders(this.checked);" id="include-dead" name="include-dead" {%- if include_dead %} checked="yes"{% endif %}>
-                <!--
-                        &nbsp; &nbsp; &nbsp;
-                    <label for="include-survival" title="Include Survival">
-                        Include <span class="survival-player">Survival</span>
-                    </label>
-                    <input type="checkbox" onchange="survivalLeaders(this.checked);" id="include-survival" name="include-survival" {%- if include_survival %} checked="yes"{% endif %}>
-                -->
-                </p>
-    {%- if leader_players is defined and leader_players is iterable and leader_players | length > 0 %}
-                <table id="leaders" title="Leaders">
-                    <tr>
-                        <th title="#">
-                            #
-                        </th>
-                        <th title="Name">
-                            Name
-                        </th>
-                        <th title="Remorts">
-                            Remorts
-                        </th>
-                        <th title="Renown">
-                            Renown
-                        </th>
-                        <th title="Quests">
-                            Quests
-                        </th>
-                        <th title="Challenges">
-                            Challenges
-                        </th>
-                        <th title="Deaths">
-                            Deaths
-                        </th>
-                    </tr>
-        {%- for leader in leader_players %}
-                    <tr>
-                        <td id="{{ loop.index }}" title="#{{ loop.index }}">
-                           {{ loop.index }}
-                        </td>
-                        <td title="Player: {{ leader.name }}">
-                            {{ leader.player_link }}
-                        </td>
-                        <td title="Remorts: {{ leader.remorts }}">
-                            {{ leader.remorts }}
-                        </td>
-                        <td title="Renown: {{ leader.total_renown }}">
-                            {{ leader.total_renown }}
-                        </td>
-                        <td title="Quests: {{ leader.quests_completed }}">
-                            {{ leader.quests_completed }}
-                        </td>
-                        <td title="Challenges: {{ leader.challenges_completed }}">
-                            {{ leader.challenges_completed }}
-                        </td>
-            {%- if leader.player_type != 'Classic' %}
-                        <td class="non-classic" title="Type: {{ leader.player_type }}">
-                            <span class="{{ leader.player_css }}">
-                                {{ leader.player_type }}
-                            </span>
-            {%- else %}
-                        <td title="Deaths: {{ leader.deaths }}">
-                            {{ leader.deaths }}
-            {%- endif %}
-                        </td>
-                    </tr>
-        {%- endfor %}
-                </table>
-    {%- endif %}
+                <div id="leaders"></div>
+                <script>
+                    new gridjs.Grid({
+                        columns: [
+                          { id: 'name', name: 'Player' },
+                          { id: 'remorts', name: 'Remorts' },
+                          { id: 'renown', name: 'Renown' },
+                          { id: 'quests', name: 'Quests' },
+                          { id: 'challenges', name: 'Challenges' },
+                          { id: 'deaths', name: 'Deaths' }
+                        ],
+                        data: [
+                          {%- for leader in leader_players %}
+                            {
+                              name: "{{ leader.name }}",
+                              remorts: {{ leader.remorts }},
+                              renown: {{ leader.total_renown }},
+                              quests: {{ leader.quests_completed }},
+                              challenges: {{ leader.challenges_completed }},
+                              deaths:
+                              {%- if leader.player_type != 'Classic' %}"{{ leader.player_type }}"
+                              {%- else %} {{ leader.deaths }}
+                              {%- endif %}
+                            }{% if not loop.last %},{% endif %}
+                          {%- endfor %}
+                        ],
+                        search: true,
+                        sort: true,
+                        pagination: true,
+                      }).render(document.getElementById('leaders'));
+                </script>
 {%- endblock content %}
