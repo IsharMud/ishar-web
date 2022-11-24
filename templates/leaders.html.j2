@@ -11,7 +11,11 @@
             function showLeaders(where) {
                 new gridjs.Grid({
                     columns: [
-                      { id: 'name', name: 'Player' },
+                      {
+                        id: 'name',
+                        name: 'Player',
+                        formatter: (cell) => gridjs.html(`<a href="/player/${cell}#player">${cell}</a>`)
+                      },
                       { id: 'remorts', name: 'Remorts' },
                       { id: 'renown', name: 'Renown' },
                       { id: 'quests', name: 'Quests' },
