@@ -5,13 +5,13 @@ https://github.com/IsharMud/ishar-web
 """
 import os
 from urllib.parse import urlparse
-from flask import Flask, flash, render_template, request
+from flask import Flask, render_template, request
 from flask_login import LoginManager
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 from database import db_session
-from models import Account, Challenge, News, Season
+from models import Account, News, Season
 
 from admin import admin
 from challenges import challenges

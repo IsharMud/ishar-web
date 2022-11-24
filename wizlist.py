@@ -1,7 +1,7 @@
 """Frequently Asked Questions"""
 from flask import Blueprint, render_template
-from models import Player
 from mud_secret import IMM_LEVELS
+from models import Player
 
 wizlist = Blueprint('wizlist', __name__)
 

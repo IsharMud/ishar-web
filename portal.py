@@ -2,7 +2,7 @@
 from flask import Blueprint, flash, redirect, render_template, session, url_for
 from flask_login import current_user, fresh_login_required, login_required, login_user, logout_user
 import sentry_sdk
-import forms
+from forms import ChangePasswordForm, LoginForm
 from models import Account
 
 
@@ -23,7 +23,7 @@ def login():
     """Log-in form page and processing"""
 
     # Get log in form object and check if submitted
-    login_form = forms.LoginForm()
+    login_form = LoginForm()
     if login_form.validate_on_submit():
 
         # Find the user by e-mail address from the log-in form
@@ -73,7 +73,7 @@ def change_password():
     """Allow users to change their password"""
 
     # Get change password form object and check if submitted
-    change_password_form = forms.ChangePasswordForm()
+    change_password_form = ChangePasswordForm()
     if change_password_form.validate_on_submit():
 
         # Proceed if the user entered their current password correctly
