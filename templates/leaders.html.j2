@@ -31,7 +31,7 @@
                           quests: {{ leader.quests_completed }},
                           challenges: {{ leader.challenges_completed }},
                           deaths:
-                          {%- if leader.player_type != 'Classic' %} "{{ leader.player_type }}"
+                          {%- if leader.player_type != 'Classic' %} gridjs.html(`<span class="{{ leader.player_css }}">{{ leader.player_type }}</span>`)
                           {%- else %} {{ leader.deaths }}
                           {%- endif %}
                         }{% if not loop.last %},{% endif %}
@@ -40,7 +40,7 @@
                     search: true,
                     sort: true,
                     pagination: true,
-                  }).render(where);
+                }).render(where);
             };
         </script>
 {%- endblock scripts %}
