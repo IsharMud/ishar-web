@@ -5,35 +5,35 @@
 {% block meta_url %}{{ url_for('leaders', _external=True) }}{% endblock meta_url %}">
 {% block title %}Leaders{% endblock %}
 {% block header %}Leaders{% endblock %}
+{%- macro display_deaths(player) -%}
+    {%- if player.player_type != 'Classic' -%}
+        gridjs.html(`<span class="{{ player.player_css }}">{{ player.player_type }}</span>`)
+    {%- else -%}
+        {{ player.deaths }}
+    {%- endif -%}
+{%- endmacro -%}
 {%- block scripts %}
         <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
         <script>
             function showLeaders(where) {
                 new gridjs.Grid({
                     columns: [
-                      {
-                        id: 'name',
-                        name: 'Player',
-                        formatter: (cell) => gridjs.html(`<a href="/player/${cell}#player">${cell}</a>`)
-                      },
-                      { id: 'remorts', name: 'Remorts' },
-                      { id: 'renown', name: 'Renown' },
-                      { id: 'quests', name: 'Quests' },
-                      { id: 'challenges', name: 'Challenges' },
-                      { id: 'deaths', name: 'Deaths' }
+                        { id: 'name', name: 'Player', formatter: (cell) => gridjs.html(`<a href="/player/${cell}#player">${cell}</a>`) },
+                        { id: 'remorts', name: 'Remorts' },
+                        { id: 'renown', name: 'Renown' },
+                        { id: 'quests', name: 'Quests' },
+                        { id: 'challenges', name: 'Challenges' },
+                        { id: 'deaths', name: 'Deaths' }
                     ],
                     data: [
                       {%- for leader in leader_players %}
                         {
-                          name: "{{ leader.name }}",
-                          remorts: {{ leader.remorts }},
-                          renown: {{ leader.total_renown }},
-                          quests: {{ leader.quests_completed }},
-                          challenges: {{ leader.challenges_completed }},
-                          deaths:
-                          {%- if leader.player_type != 'Classic' %} gridjs.html(`<span class="{{ leader.player_css }}">{{ leader.player_type }}</span>`)
-                          {%- else %} {{ leader.deaths }}
-                          {%- endif %}
+                            name:         "{{ leader.name }}",
+                            remorts:      {{ leader.remorts }},
+                            renown:       {{ leader.total_renown }},
+                            quests:       {{ leader.quests_completed }},
+                            challenges:   {{ leader.challenges_completed }},
+                            deaths:       {{ display_deaths(leader) }}
                         }{% if not loop.last %},{% endif %}
                       {%- endfor %}
                     ],
