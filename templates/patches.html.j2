@@ -2,7 +2,7 @@
 {% extends "layout.html.j2" %}
 {% block meta_title %}Patches{% endblock meta_title %}
 {% block meta_description %}The latest patches to Ishar MUD{% endblock %}
-{% block meta_url %}{{ url_for('patches', _external=True) }}{% endblock meta_url %}">
+{% block meta_url %}{{ url_for('patches.index', _external=True) }}{% endblock meta_url %}">
 {% block title %}Patches{% endblock %}
 {% block header %}Patches{% endblock %}
 {%- block content %}

@@ -66,10 +66,10 @@
 {%- block footer %}
             <ul>
                 <li>
-                    <a href="{{ url_for('support') }}" {%- if page == 'support' %} id="active-nav"{% endif%}>❤️ Support Ishar MUD</a>
+                    <a href="{{ url_for('support.index') }}" {%- if page == 'support' %} id="active-nav"{% endif%}>❤️ Support Ishar MUD</a>
                 </li>
                 <li>
-                    <a title="Join us on Discord!" href="{{ url_for('discord') }}" id="join-discord" target="_blank"><img alt="Discord" src="{{ url_for('static', filename='images/discord.png') }}"> Join us on Discord!</a>
+                    <a title="Join us on Discord!" href="{{ url_for('redirects.discord') }}" id="join-discord" target="_blank"><img alt="Discord" src="{{ url_for('static', filename='images/discord.png') }}"> Join us on Discord!</a>
                 </li>
                 <li>
                     <a title="E-mail Us!" href="mailto:admin@isharmud.com" id="email-us" target="_blank">✉️ E-mail us!</a>
@@ -78,7 +78,7 @@
     {%- if current_season is defined and current_season.expires is defined and current_season.expiration_date is defined %}
             <ul>
                 <li title="Season {{ current_season.season_id }} ends in {{ current_season.expires }}">
-                    <a href="{{ url_for('season') }}" {%- if page == 'season' %} id="active-nav"{% endif%}>Season {{ current_season.season_id }}</a>
+                    <a href="{{ url_for('season.index') }}" {%- if page == 'season' %} id="active-nav"{% endif%}>Season {{ current_season.season_id }}</a>
                     ends in {{ current_season.expires }}
                 </li>
                 <li title="Ends {{ current_season.expiration_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}">

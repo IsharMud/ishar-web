@@ -2,7 +2,7 @@
 {% extends "layout.html.j2" %}
 {% block meta_title %}News / Administration Portal{% endblock meta_title %}
 {% block meta_description %}Administration portal to post news updates to the front page{% endblock %}
-{% block meta_url %}{{ url_for('admin_news', _external=True) }}{% endblock meta_url %}">
+{% block meta_url %}{{ url_for('admin.news', _external=True) }}{% endblock meta_url %}">
 {% block title %}News / Administration Portal{% endblock %}
 {% block header %}News{% endblock %}
 {%- macro render_field(field) %}
@@ -26,7 +26,7 @@
 {%- endmacro %}
 {%- block content %}
     {%- if news_add_form is defined %}
-                <form autocomplete="off" method="post" action="{{ url_for('admin_news') }}" id="news-add-form">
+                <form autocomplete="off" method="post" action="{{ url_for('admin.news') }}" id="news-add-form">
                     <table>
                         {{ render_field(news_add_form.subject, autocomplete='off') }}
                         {{ render_field(news_add_form.body, autocomplete='off') }}

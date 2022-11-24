@@ -2,9 +2,9 @@
 {% extends "layout.html.j2" %}
 {% block meta_title %}Edit Account: {{ edit_account.account_name | title | safe }} / Administration Portal{% endblock meta_title %}
 {% block meta_description %}Administration portal to edit a user account{% endblock %}
-{% block meta_url %}{{ url_for('admin_edit_account', edit_account_id=edit_account.account_id, _external=True) }}{% endblock meta_url %}">
+{% block meta_url %}{{ url_for('admin.edit_account', edit_account_id=edit_account.account_id, _external=True) }}{% endblock meta_url %}">
 {% block title %}Edit Account: {{ edit_account.account_name | title | safe }} / Administration Portal{% endblock %}
-{% block header %}Edit Account: <a href="{{ url_for('admin_account', manage_account_id=edit_account.account_id) }}">{{ edit_account.account_name | title | safe }}</a>{% endblock %}
+{% block header %}Edit Account: <a href="{{ url_for('admin.manage_account', manage_account_id=edit_account.account_id) }}">{{ edit_account.account_name | title | safe }}</a>{% endblock %}
 {%- macro render_field(field) %}
                     <tr>
                         <td class="admin-{{ field.name | safe }}">
@@ -26,7 +26,7 @@
 {%- endmacro %}
 {%- block content %}
     {%- if edit_account is defined and edit_account_form is defined %}
-                <form autocomplete="off" method="post" action="{{ url_for('admin_edit_account', edit_account_id=edit_account.account_id) }}" id="account-edit-form">
+                <form autocomplete="off" method="post" action="{{ url_for('admin.edit_account', edit_account_id=edit_account.account_id) }}" id="account-edit-form">
                     <table>
                         <tr>
                             <td>

@@ -471,7 +471,7 @@ class Player(Base):
     @cached_property
     def player_link(self):
         """Player link"""
-        player_url = url_for('show_player', player_name=self.name, _anchor='player')
+        player_url = url_for('players.view', player_name=self.name, _anchor='player')
         return f'<a href="{player_url}">{self.name}</a>'
 
     @cached_property

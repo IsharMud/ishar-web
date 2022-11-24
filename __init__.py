@@ -3,22 +3,32 @@ ishar_web
 https://isharmud.com/
 https://github.com/IsharMud/ishar-web
 """
-from datetime import datetime
-from functools import wraps
-import glob
 import os
 from urllib.parse import urlparse
-from flask import Flask, abort, flash, redirect, render_template, request, session, url_for
-from flask_login import current_user, fresh_login_required, login_required, login_user, logout_user, LoginManager
+from flask import Flask, flash, render_template, request
+from flask_login import LoginManager
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 from database import db_session
-from models import Account, Challenge, News, Player, Season
-from mud_secret import PODIR, IMM_LEVELS
-import forms
-import helptab
-import mud_clients
+from models import Account, Challenge, News, Season
+
+from admin import admin
+from challenges import challenges
+from faqs import faqs
+from get_started import get_started
+from help_page import help_page
+from history import history
+from leaders import leaders
+from mud_clients import mud_clients
+from patches import patches
+from players import players
+from portal import portal
+from redirects import redirects
+from season import season
+from support import support
+from wizlist import wizlist
+from world import world
 
 # Sentry
 sentry_sdk.init(
@@ -32,13 +42,31 @@ sentry_sdk.init(
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
 
+# Flask Blueprints/pages
+app.register_blueprint(admin)
+app.register_blueprint(challenges)
+app.register_blueprint(faqs)
+app.register_blueprint(get_started)
+app.register_blueprint(help_page)
+app.register_blueprint(history)
+app.register_blueprint(leaders)
+app.register_blueprint(mud_clients)
+app.register_blueprint(patches)
+app.register_blueprint(players)
+app.register_blueprint(portal)
+app.register_blueprint(redirects)
+app.register_blueprint(season)
+app.register_blueprint(support)
+app.register_blueprint(wizlist)
+app.register_blueprint(world)
+
 # Flask-Login
 login_manager = LoginManager(app)
 login_manager.login_message_category = 'error'
-login_manager.login_view = 'login'
+login_manager.login_view = 'portal.login'
 login_manager.needs_refresh_message = 'To protect your account, please log in again.'
 login_manager.needs_refresh_message_category = 'error'
-login_manager.refresh_view = 'login'
+login_manager.refresh_view = 'portal.login'
 login_manager.session_protection = 'strong'
 
 
@@ -54,17 +82,6 @@ def load_user(email):
             'ip_address': request.remote_addr
         })
     return user_account
-
-
-def god_required(func):
-    """Decorator to allow access only to Gods"""
-    @wraps(func)
-    def decorated_function(*args, **kwargs):
-        if not current_user.is_god:
-            flash('Sorry, but you are not godly enough!', 'error')
-            abort(401)
-        return func(*args, **kwargs)
-    return decorated_function
 
 
 @app.context_processor
@@ -118,467 +135,12 @@ def internal_server_error(message):
     return error(title='Internal Server Error', message=message, code=500)
 
 
+@app.route('/welcome/', methods=['GET'])
 @app.route('/welcome', methods=['GET'])
 @app.route('/', methods=['GET'])
 def welcome():
     """Main welcome page/index, includes the most recent news"""
     return render_template('welcome.html.j2', news=News.query.order_by(-News.created_at).first())
-
-
-@app.route('/background', methods=['GET'])
-@app.route('/history', methods=['GET'])
-def history():
-    """History page, mostly copied from original ishar.com"""
-    return render_template('history.html.j2')
-
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    """Log-in form page and processing"""
-
-    # Get log in form object and check if submitted
-    login_form = forms.LoginForm()
-    if login_form.validate_on_submit():
-
-        # Find the user by e-mail address from the log-in form
-        find = Account.query.filter_by(email=login_form.email.data).first()
-
-        # If we find the user email and match the password, it is a successful log in
-        if find is not None and find.check_password(login_form.password.data):
-            flash('You have logged in!', 'success')
-            login_user(find, remember=login_form.remember.data)
-
-        # There must have been invalid credentials
-        else:
-            flash('Sorry, but please enter a valid e-mail address and password.', 'error')
-
-    # Redirect authenticated users to the portal
-    if current_user.is_authenticated:
-        return redirect(session['next'] or url_for('portal'))
-
-    # Show the log-in form
-    return render_template('login.html.j2', login_form=login_form), 401
-
-
-@app.route('/season', methods=['GET'])
-def season():
-    """Information about the current season"""
-    return render_template('season.html.j2')
-
-
-@app.route('/password', methods=['GET', 'POST'])
-@fresh_login_required
-def change_password():
-    """Allow users to change their password"""
-
-    # Get change password form object and check if submitted
-    change_password_form = forms.ChangePasswordForm()
-    if change_password_form.validate_on_submit():
-
-        # Proceed if the user entered their current password correctly
-        if current_user.check_password(change_password_form.current_password.data):
-            if current_user.change_password(change_password_form.confirm_new_password.data):
-                flash('Your password has been changed!', 'success')
-            else:
-                flash('Sorry, but your password could not be changed.', 'error')
-
-        # Otherwise, tell them to enter their current password correctly
-        else:
-            flash('Please enter your current password correctly!', 'error')
-
-    # Show the change password form
-    return render_template('change_password.html.j2', change_password_form=change_password_form)
-
-
-@app.route('/player/<string:player_name>', methods=['GET', 'POST'])
-@login_required
-def show_player(player_name=None):
-    """Player page to show detailed information about a player
-        along with player name searching"""
-
-    # Get player search form object and check if submitted
-    player = None
-    player_search_form = forms.PlayerSearchForm()
-    if player_search_form.validate_on_submit():
-
-        # Perform a MySQL "LIKE" search query on the name,
-        #   followed by a wildcard (%) to try to find the player
-        player = Player.query.filter(Player.name.like(player_search_form.player_search_name.data + '%')).first()
-        if player:
-            who = player.name
-        else:
-            who = player_search_form.player_search_name.data
-
-        return redirect(url_for('show_player', player_name=who, _anchor='player'))
-
-    # Find the player, in the database, by exact name
-    if player_name:
-        player = Player.query.filter_by(name=player_name).first()
-
-    # If our search returned something, we found a player
-    if player:
-        code = 200
-    else:
-        code = 404
-        flash('Sorry, but that player was not found!', 'error')
-
-    return render_template('player.html.j2', player=player, player_search_form=player_search_form), code
-
-
-@app.route('/portal', methods=['GET'])
-@login_required
-def portal():
-    """Main portal page for players logging in"""
-    return render_template('portal.html.j2')
-
-
-@app.route('/challenges', methods=['GET'])
-def challenges():
-    """Sort and list active challenges, along with their tiers and winners"""
-    find = Challenge.query.filter_by(is_active=1).order_by(Challenge.adj_level, Challenge.adj_people).all()
-    return render_template('challenges.html.j2', challenges=find)
-
-
-@app.route('/leaderboard', methods=['GET'])
-@app.route('/leaders', methods=['GET'])
-def leaders():
-    """Sort and list the best players"""
-    leader_players = Player.query.filter(Player.true_level < min(IMM_LEVELS)).order_by(
-        -Player.remorts,
-        -Player.total_renown,
-        -Player.quests_completed,
-        -Player.challenges_completed,
-        Player.deaths
-    ).all()
-    return render_template('leaders.html.j2', leader_players=leader_players)
-
-
-@app.route('/wiz_list', methods=['GET'])
-@app.route('/wizlist', methods=['GET'])
-def wizlist():
-    """Wizlist showing Immortals through Gods"""
-    immortals = Player.query.filter(Player.true_level >= min(IMM_LEVELS)).order_by(-Player.true_level).all()
-    return render_template('wizlist.html.j2', immortals=immortals)
-
-
-@app.route('/account', methods=['GET'])
-@login_required
-def manage_account():
-    """Allow users to view/manage their accounts"""
-    return render_template('account.html.j2')
-
-
-@app.route('/admin', methods=['GET', 'POST'])
-@fresh_login_required
-@god_required
-def admin_portal():
-    """Administration portal main page for Gods"""
-    return render_template('admin/portal.html.j2')
-
-
-@app.route('/admin/news', methods=['GET', 'POST'])
-@fresh_login_required
-@god_required
-def admin_news():
-    """Administration portal to allow Gods to post news
-        /admin/news"""
-
-    # Get news add form and check if submitted
-    news_add_form = forms.NewsAddForm()
-    if news_add_form.validate_on_submit():
-
-        # Create the new news post database entry
-        new_news = News(
-            account_id=current_user.account_id,
-            created_at=datetime.utcnow(),
-            subject=news_add_form.subject.data,
-            body=news_add_form.body.data
-        )
-        db_session.add(new_news)
-        db_session.commit()
-        if new_news.news_id:
-            flash('Your message has been posted!', 'success')
-        else:
-            flash('Sorry, but please try again!', 'error')
-
-    # Show the form to add news in the administration portal
-    return render_template('admin/news.html.j2', news_add_form=news_add_form)
-
-
-@app.route('/admin/account/<int:manage_account_id>', methods=['GET'])
-@fresh_login_required
-@god_required
-def admin_account(manage_account_id=None):
-    """Administration portal to allow Gods to view accounts
-        /admin/account"""
-    return render_template('admin/account.html.j2',
-                           manage_account=Account.query.filter_by(account_id=manage_account_id).first()
-                           )
-
-
-@app.route('/admin/account/edit/<int:edit_account_id>', methods=['GET', 'POST'])
-@fresh_login_required
-@god_required
-def admin_edit_account(edit_account_id=None):
-    """Administration portal to allow Gods to edit accounts
-        /admin/account/edit"""
-    edit_account = Account.query.filter_by(account_id=edit_account_id).first()
-
-    # Get edit account form and check if submitted
-    edit_account_form = forms.EditAccountForm()
-    if edit_account_form.validate_on_submit():
-        edit_account.account_name = edit_account_form.account_name.data
-        edit_account.email = edit_account_form.email.data
-        edit_account.seasonal_points = edit_account_form.seasonal_points.data
-        if edit_account_form.password.data != '' and edit_account_form.confirm_password.data != '':
-            edit_account.change_password(edit_account_form.confirm_password.data)
-            if edit_account.change_password(edit_account_form.confirm_password.data):
-                flash('The account password was reset.', 'success')
-                sentry_sdk.capture_message('Admin Password Reset: '
-                                           f'{current_user} reset {edit_account}', level='warning')
-            else:
-                flash('The account password could not be reset.', 'error')
-                sentry_sdk.capture_message('Admin Password Reset Fail: '
-                                           f'{current_user} failed to reset {edit_account}', level='error')
-
-        db_session.commit()
-        flash('The account was updated successfully.', 'success')
-        sentry_sdk.capture_message(f'Admin Edit Account: {current_user} edited {edit_account}')
-
-    return render_template('admin/edit_account.html.j2',
-                           edit_account=edit_account,
-                           edit_account_form=edit_account_form
-                           )
-
-
-@app.route('/admin/accounts', methods=['GET'])
-@fresh_login_required
-@god_required
-def admin_accounts():
-    """Administration portal to allow Gods to view accounts
-        /admin/accounts"""
-    return render_template('admin/accounts.html.j2', accounts=Account.query.order_by(Account.account_id).all())
-
-
-@app.route('/admin/player/edit/<int:edit_player_id>', methods=['GET', 'POST'])
-@fresh_login_required
-@god_required
-def admin_edit_player(edit_player_id=None):
-    """Administration portal to allow Gods to edit player characters
-        /admin/player/edit"""
-    edit_player = Player.query.filter_by(id=edit_player_id).first()
-
-    # Get edit player form and check if submitted
-    edit_player_form = forms.EditPlayerForm()
-    if edit_player_form.validate_on_submit():
-        edit_player.name = edit_player_form.name.data
-        edit_player.align = edit_player_form.align.data
-        edit_player.karma = edit_player_form.karma.data
-        edit_player.renown = edit_player_form.renown.data
-        db_session.commit()
-        flash('The player was updated successfully.', 'success')
-        sentry_sdk.capture_message(f'Admin Edit Player: {current_user} edited {edit_player}')
-
-    return render_template('admin/edit_player.html.j2',
-                           edit_player=edit_player,
-                           edit_player_form=edit_player_form
-                           )
-
-
-@app.route('/admin/season', methods=['GET'])
-@fresh_login_required
-@god_required
-def admin_season():
-    """Administration portal to allow Gods to view/manage seasons
-        /admin/season"""
-    return render_template('admin/season.html.j2',
-                           seasons=Season.query.order_by(-Season.is_active, -Season.season_id).all()
-                           )
-
-
-@app.route('/admin/season/cycle', methods=['GET', 'POST'])
-@fresh_login_required
-@god_required
-def admin_season_cycle():
-    """Administration portal to allow Gods to cycle seasons, while wiping players
-        /admin/season/cycle"""
-
-    # Get season cycle form, and check if submitted
-    season_cycle_form = forms.SeasonCycleForm()
-    if season_cycle_form.validate_on_submit():
-
-        # Expire any existing active seasons
-        for active_season in Season.query.filter_by(is_active=1).all():
-            active_season.is_active = 0
-            active_season.expiration_date = datetime.utcnow()
-            flash(f'Season {active_season.season_id} expired.', 'success')
-            sentry_sdk.capture_message(f'Season Expired: {active_season}')
-
-        # Create the new season database entry
-        new_season = Season(
-            is_active=1,
-            effective_date=season_cycle_form.effective_date.data,
-            expiration_date=season_cycle_form.expiration_date.data
-        )
-        db_session.add(new_season)
-
-        # Loop through all accounts - to apply essence, and delete mortal players
-        total_rewarded_essence = total_players_deleted = 0
-        for account in Account.query.filter().all():
-            if account.seasonal_earned > 0:
-                calculated_essence = account.seasonal_points + account.seasonal_earned
-                flash(f'Account "{account.account_name}" ({account.account_id}) '
-                      f'now has {calculated_essence} essence. '
-                      f'({account.seasonal_points} existing + '
-                      f'{account.seasonal_earned} earned)', 'success')
-                account.seasonal_points = calculated_essence
-                total_rewarded_essence += calculated_essence
-            else:
-                flash(f'Account "{account.account_name}"'
-                      f'({account.account_id}) earned no essence', 'warning')
-
-            for delete_player in account.players:
-                if not delete_player.is_immortal:
-                    delete_path = PODIR + '/' + delete_player.name
-                    if os.path.exists(delete_path):
-                        os.remove(delete_path)
-                        flash(f'Deleted <code>{delete_path}</code>.', 'success')
-                    db_session.query(Player).filter_by(id=delete_player.id).delete()
-                    flash(f'Deleted Player: {delete_player.name} ({delete_player.id}).', 'success')
-                    total_players_deleted += 1
-                else:
-                    flash(f'Skipping immortal {delete_player.name}.', 'info')
-
-        db_session.commit()
-        flash('All essence has been rewarded.', 'success')
-        flash(f'Total Rewarded Essence: {total_rewarded_essence} essence', 'info')
-        sentry_sdk.capture_message(f'Essence Rewarded: {total_rewarded_essence} essence')
-
-        if new_season.season_id:
-            flash(f'Season {new_season.season_id} created.', 'success')
-            sentry_sdk.capture_message(f'Season Created: {new_season}')
-
-        if not Player.query.filter(Player.true_level < min(IMM_LEVELS)).all():
-            flash('All mortal players have been deleted.', 'success')
-            flash(f'Total Players Deleted: {total_players_deleted}', 'info')
-            sentry_sdk.capture_message('Player Wipe: {total_players_deleted} mortals deleted', level='warning')
-
-    # Show the form to cycle a season in the administration portal
-    return render_template('admin/season_cycle.html.j2', season_cycle_form=season_cycle_form)
-
-
-@app.route('/logout', methods=['GET'])
-def logout():
-    """Allow users to log out (/logout)"""
-    logout_user()
-    flash('You have logged out!', 'success')
-    sentry_sdk.set_user(None)
-    return redirect(url_for('welcome'))
-
-
-@app.route('/mud_clients', methods=['GET'])
-@app.route('/clients', methods=['GET'])
-def clients():
-    """Page showing a dynamic list of various MUD clients for different platforms
-        /clients (or /mud_clients)"""
-    return render_template('clients.html.j2', clients=mud_clients.clients)
-
-
-@app.route('/connect', methods=['GET'])
-def connect():
-    """Redirect /connect GET requests to mudslinger.net web client"""
-    return redirect('https://mudslinger.net/play/?host=isharmud.com&port=23')
-
-
-@app.route('/discord', methods=['GET'])
-def discord():
-    """Redirect /discord GET requests to the Discord invitation link"""
-    return redirect('https://discord.gg/VBmMXUpeve')
-
-
-@app.route('/latest_patch', methods=['GET'])
-def latest_patch():
-    """Redirect /latest_patch latest found static patch .pdf file"""
-    return redirect('/' + max(glob.glob('static/patches/*.pdf'), key=os.path.getmtime))
-
-
-@app.route('/patches/', methods=['GET'])
-@app.route('/patches', methods=['GET'])
-def patches():
-    """Page showing a dynamic list of patches (/patches)"""
-    return render_template('patches.html.j2', patches=sorted(os.listdir('static/patches'), reverse=True))
-
-
-@app.route('/questions', methods=['GET'])
-@app.route('/faqs', methods=['GET'])
-@app.route('/faq', methods=['GET'])
-def faq():
-    """A few frequently asked questions (/faq, /faqs, or /questions)"""
-    from faqs import ALL_FAQS
-    return render_template('faq.html.j2', faqs=ALL_FAQS)
-
-
-@app.route('/gettingstarted', methods=['GET'])
-@app.route('/getting_started', methods=['GET'])
-@app.route('/getstarted', methods=['GET'])
-@app.route('/get_started', methods=['GET'])
-def get_started():
-    """Get Started page partly copied from the old website"""
-    return render_template('get_started.html.j2')
-
-
-@app.route('/donate', methods=['GET'])
-@app.route('/support', methods=['GET'])
-def support():
-    """Support page"""
-    return render_template('support.html.j2')
-
-
-@app.route('/areas/<string:area>', methods=['GET'])
-@app.route('/areas', methods=['GET'])
-@app.route('/world/<string:area>', methods=['GET'])
-@app.route('/world', methods=['GET'])
-def world(area=None):
-    """World page that uses the game's existing helptab file
-        to display information about each in-game area"""
-
-    # Get all areas from the helptab file, and try to find an area based on any user input
-    areas = helptab.get_help_areas()
-    code = 200
-
-    if area:
-        if area in areas.keys():
-            areas = areas[area]
-        else:
-            area = None
-            code = 404
-            flash('Sorry, but please choose a valid area!', 'error')
-
-    return render_template('world.html.j2', areas=areas, area=area), code
-
-
-@app.route('/help/<string:topic>', methods=['GET'])
-@app.route('/help/<string:topic>/', methods=['GET'])
-@app.route('/help/', methods=['GET'])
-@app.route('/help', methods=['GET'])
-def help_page(topic=None):
-    """Help page that uses the game's existing helptab file
-        to display information about each topic"""
-
-    # Get all topics from the helptab file
-    topics = helptab.get_helptab()
-    code = 200
-
-    # Try to find a topic based on any user input
-    if topic:
-        if topic in topics.keys():
-            topic = topics[topic]
-        else:
-            topic = None
-            code = 404
-            flash('Sorry, but please choose a valid topic!', 'error')
-
-    return render_template('helptab.html.j2', topic=topic, topics=topics), code
 
 
 @app.route('/debug-sentry', methods=['GET'])

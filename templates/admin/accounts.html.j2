@@ -2,7 +2,7 @@
 {% extends "layout.html.j2" %}
 {% block meta_title %}Accounts / Administration Portal{% endblock meta_title %}
 {% block meta_description %}Administration portal page to view accounts{% endblock %}
-{% block meta_url %}{{ url_for('admin_accounts', _external=True) }}{% endblock meta_url %}">
+{% block meta_url %}{{ url_for('admin.accounts', _external=True) }}{% endblock meta_url %}">
 {% block title %}Accounts / Administration Portal{% endblock %}
 {% block header %}Accounts{% endblock %}
 {%- block content %}
@@ -37,8 +37,8 @@
                             <a href="#acct-{{ account.account_id }}">{{ account.account_id }}</a>
                         </td>
                         <td title="Name: {{ account.account_name | title | safe }}">
-                            <a href="{{ url_for('admin_account', manage_account_id=account.account_id) }}">{{ account.account_name | title | safe }}</a>
-                            <a title="Edit {{ account.account_name | title | safe }} (ID: {{ account.account_id }})" href="{{ url_for('admin_edit_account', edit_account_id=account.account_id) }}">✏️</a>
+                            <a href="{{ url_for('admin.manage_account', manage_account_id=account.account_id) }}">{{ account.account_name | title | safe }}</a>
+                            <a title="Edit {{ account.account_name | title | safe }} (ID: {{ account.account_id }})" href="{{ url_for('admin.edit_account', edit_account_id=account.account_id) }}">✏️</a>
                         </td>
                         <td title="Players: {{ account.players | length }}">
                             {{ account.players | length }}

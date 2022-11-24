@@ -2,7 +2,7 @@
 {% extends "layout.html.j2" %}
 {% block meta_title %}Seasons / Administration Portal{% endblock meta_title %}
 {% block meta_description %}Administration portal page to manage seasons{% endblock %}
-{% block meta_url %}{{ url_for('admin_season', _external=True) }}{% endblock meta_url %}">
+{% block meta_url %}{{ url_for('admin.season', _external=True) }}{% endblock meta_url %}">
 {% block title %}Seasons / Administration Portal{% endblock %}
 {% block header %}Seasons{% endblock %}
 {%- block content %}
@@ -45,7 +45,7 @@
             <br>
             <ul>
                 <li>
-                    <a href="{{ url_for('admin_season_cycle') }}">Cycle Seasons (Player Wipe!)</a>
+                    <a href="{{ url_for('admin.season_cycle') }}">Cycle Seasons (Player Wipe!)</a>
                 </li>
             </ul>
 {%- endblock %}

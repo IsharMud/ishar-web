@@ -8,7 +8,7 @@
 {%- endif %}
 {% block meta_title %}Challenges{% endblock meta_title %}
 {% block meta_description %}Challenges, winners, and rewards currently available.{% endblock %}
-{% block meta_url %}{{ url_for('challenges', _external=True) }}{% endblock meta_url %}">
+{% block meta_url %}{{ url_for('challenges.index', _external=True) }}{% endblock meta_url %}">
 {% block title %}{{ challenges_title }}{% endblock %}
 {% block header %}{{ challenges_title }}{% endblock %}
 {%- macro display_challenge(challenge) -%}
@@ -36,7 +36,7 @@
             {%- if challenge_winners %}
                     <td title="Completed by: {{ challenge.winner_desc }}">
                 {%- for challenge_winner in challenge_winners %}
-                        <a href="{{ url_for('show_player', player_name=challenge_winner, _anchor='player') }}" title="Player: {{ challenge_winner }}">{{ challenge_winner | title | safe }}</a>
+                        <a href="{{ url_for('players.view', player_name=challenge_winner, _anchor='player') }}" title="Player: {{ challenge_winner }}">{{ challenge_winner | title | safe }}</a>
                     {%- if not loop.last %},{%- endif %}
                 {%- endfor %}
                     </td>

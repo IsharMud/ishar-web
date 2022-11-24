@@ -2,7 +2,7 @@
 {% extends "layout.html.j2" %}
 {% block meta_title %}Administration Portal{% endblock meta_title %}
 {% block meta_description %}Administration portal for Gods of Ishar MUD{% endblock %}
-{% block meta_url %}{{ url_for('admin_portal', _external=True) }}{% endblock meta_url %}">
+{% block meta_url %}{{ url_for('admin.index', _external=True) }}{% endblock meta_url %}">
 {% block title %}Administration Portal{% endblock %}
 {% block header %}Administration{% endblock %}
 {%- block content %}
@@ -11,13 +11,13 @@
             </p>
             <ul>
                 <li title="Accounts">
-                    <a href="{{ url_for('admin_accounts') }}">Accounts</a>
+                    <a href="{{ url_for('admin.accounts') }}">Accounts</a>
                 </li>
                 <li title="News">
-                    <a href="{{ url_for('admin_news') }}">News</a>
+                    <a href="{{ url_for('admin.news') }}">News</a>
                 </li>
                 <li title="Seasons">
-                    <a href="{{ url_for('admin_season') }}">Seasons</a>
+                    <a href="{{ url_for('admin.season') }}">Seasons</a>
                 </li>
             </ul>
 {%- endblock %}

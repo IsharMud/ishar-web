@@ -2,7 +2,7 @@
 {% extends "layout.html.j2" %}
 {% block meta_title %}Account ({{ current_user.account_name | title | safe }}){% endblock meta_title %}
 {% block meta_description %}Your Ishar MUD Account{% endblock%}
-{% block meta_url %}{{ url_for('manage_account', _external=True) }}{% endblock meta_url %}">
+{% block meta_url %}{{ url_for('portal.account', _external=True) }}{% endblock meta_url %}">
 {% block title %}Account ({{ current_user.account_name | title | safe }}){% endblock %}
 {% block header %}Account ({{ current_user.account_name | title | safe }}){% endblock %}
 {%- block content %}
@@ -22,10 +22,10 @@
             </h4>
             <ul id="account-manage">
                 <li title="Change your password">
-                    <a href="{{ url_for('change_password') }}">Change your password</a>
+                    <a href="{{ url_for('portal.change_password') }}">Change your password</a>
                 </li>
                 <li title="View your players">
-                    <a href="{{ url_for('portal') }}">View your players</a>
+                    <a href="{{ url_for('portal.index') }}">View your players</a>
                 </li>
             </ul>
     {%- if current_user.seasonal_points is defined and current_user.seasonal_earned is defined %}

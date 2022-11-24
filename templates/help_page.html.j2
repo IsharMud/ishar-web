@@ -5,7 +5,7 @@
 {%- endif %}
 {%- block meta_title -%}Help{%- if topic_alias -%}: {{ topic_alias }}{%- endif -%}{%- endblock meta_title -%}
 {% block meta_description %}Help pages for Ishar MUD{% endblock %}
-{% block meta_url %}{{ url_for('help_page', topic=topic, _external=True) }}{% endblock meta_url %}
+{% block meta_url %}{{ url_for('help_page.index', topic=topic, _external=True) }}{% endblock meta_url %}
 {% block header -%}Help{%- if topic_alias -%}: {{ topic_alias }}{%- endif -%}{%- endblock header -%}
 {%- block title -%}Help{%- if topic_alias -%}: {{ topic_alias }}{%- endif -%}{%- endblock title -%}
 {%- block content %}
@@ -66,7 +66,7 @@
                     <ul>
                 {%- for related_topic in topic['related'] %}
                         <li>
-                            <a href="{{ url_for('help_page', topic=related_topic) }}">{{ related_topic }}</a>
+                            <a href="{{ url_for('help_page.index', topic=related_topic) }}">{{ related_topic }}</a>
                         </li>
                 {%- endfor %}
                     </ul>
@@ -80,7 +80,7 @@
         {%- for list_topic in topics %}
                 {%- set list_topic_parse = list_topic | replace('32 ', '')  %}
                 <li title="Topic: {{ list_topic_parse }}">
-                    <a href="{{ url_for('help_page', topic=list_topic_parse) }}">
+                    <a href="{{ url_for('help_page.index', topic=list_topic_parse) }}">
                         {{ list_topic_parse }}
                     </a>
                 </li>

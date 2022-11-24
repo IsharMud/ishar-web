@@ -2,7 +2,7 @@
 {% extends "layout.html.j2" %}
 {% block meta_title %}Player Log In{% endblock meta_title %}
 {% block meta_description %}Player Log In to Ishar MUD to view the player portal, player profiles, and more{% endblock %}
-{% block meta_url %}{{ url_for('login', _external=True) }}{% endblock meta_url %}">
+{% block meta_url %}{{ url_for('portal.login', _external=True) }}{% endblock meta_url %}">
 {% block title %}Player Log In{% endblock %}
 {% block header %}Player Log In{% endblock %}
 {%- macro render_field(field) %}
