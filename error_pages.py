@@ -1,6 +1,6 @@
 """Errors"""
 from flask import Blueprint, render_template
-import sentry_sdk
+from sentry import sentry_sdk
 
 error_pages = Blueprint('error_pages', __name__)
 

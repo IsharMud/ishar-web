@@ -4,12 +4,11 @@ from datetime import datetime
 from functools import wraps
 from flask import abort, Blueprint, flash, render_template
 from flask_login import current_user, fresh_login_required
-import sentry_sdk
 from mud_secret import PODIR, IMM_LEVELS
 from database import db_session
 from forms import EditAccountForm, EditPlayerForm, NewsAddForm, SeasonCycleForm
 from models import Account, News, Player, Season
-
+from sentry import sentry_sdk
 
 def god_required(func):
     """Decorator to allow access only to Gods"""

@@ -7,12 +7,10 @@ import os
 from urllib.parse import urlparse
 from flask import Flask, render_template, request
 from flask_login import LoginManager
-import sentry_sdk
-from sentry_sdk.integrations.flask import FlaskIntegration
-from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 from database import db_session
 from models import Account, News, Season
 import error_pages
+from sentry import sentry_sdk
 
 from admin import admin
 from challenges import challenges
@@ -30,19 +28,6 @@ from season import season
 from support import support
 from wizlist import wizlist
 from world import world
-
-
-# Sentry
-sentry_sdk.init(
-    environment=os.getenv('USER'),
-    traces_sample_rate=1.0,
-    integrations=[FlaskIntegration(), SqlalchemyIntegration()],
-    send_default_pii=True,
-    _experiments={
-        "profiles_sample_rate": 1.0,
-    }
-)
-
 
 # Flask
 app = Flask(__name__)
