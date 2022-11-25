@@ -11,65 +11,69 @@
 {% block meta_url %}{{ url_for('challenges.index', _external=True) }}{% endblock meta_url %}">
 {% block title %}{{ challenges_title }}{% endblock %}
 {% block header %}{{ challenges_title }}{% endblock %}
-{%- macro display_challenge(challenge) -%}
-    {%- set tiers   = { 9: 'SS', 8: 'SS', 7: 'SS', 6: 'S', 5: 'A', 4: 'B', 3: 'C', 2: 'D', 1: 'F' } -%}
-    {%- set challenge_tier      = tiers[challenge.adj_tier] + '(' + tiers[challenge.orig_tier] + ')' %}
-    {%- set challenge_people    = challenge.adj_people %}
-    {%- set challenge_level     = challenge.adj_level %}
+{%- macro display_challenge(challenge) %}
+    {%- set tiers = { 9: 'SS', 8: 'SS', 7: 'SS', 6: 'S', 5: 'A', 4: 'B', 3: 'C', 2: 'D', 1: 'F' } -%}
+    {%- set challenge_tier = tiers[challenge.adj_tier] + '(' + tiers[challenge.orig_tier] + ')' %}
     {%- if challenge.is_completed %}
+        {%- set challenge_name = 'gridjs.html(`<span class="challenge-completed">' + challenge.mob_name + '</span>`)' %}
         {%- set challenge_winners   = challenge.winner_desc.replace(' ', '').split(',') %}
-                    <td title="{{ challenge.mob_name }} (Completed)" class="challenge-completed">
     {%- else %}
-                    <td title="{{ challenge.mob_name }}">
+        {%- set challenge_name = '"' + challenge.mob_name + '"' %}
     {%- endif %}
-                        {{ challenge.mob_name }}
-                    </td>
-                    <td title="People: {{ challenge_people }}">
-                        {{ challenge_people }}
-                    </td>
-                    <td title="Level: {{ challenge_level }}">
-                        {{ challenge_level }}
-                    </td>
-                    <td title="Reward: {{ challenge_tier }}">
-                        {{ challenge_tier }}
-                    </td>
-            {%- if challenge_winners %}
-                    <td title="Completed by: {{ challenge.winner_desc }}">
-                {%- for challenge_winner in challenge_winners %}
-                        <a href="{{ url_for('players.view', player_name=challenge_winner, _anchor='player') }}" title="Player: {{ challenge_winner }}">{{ challenge_winner | title | safe }}</a>
-                    {%- if not loop.last %},{%- endif %}
-                {%- endfor %}
-                    </td>
-            {%- else %}
-                    <td title="Not Completed">
-                    </td>
-            {%- endif %}
-{%- endmacro -%}
+                            name:       {{ challenge_name }},
+                            people:     {{ challenge.adj_people }},
+                            level:      {{ challenge.adj_level }},
+                            reward:     "{{ challenge_tier }}",
+                            completed:  {% if not challenge.is_completed %}""{%- else %}gridjs.html(`{%- for challenge_winner in challenge_winners -%}
+                                        <a href="{{ url_for('players.view', player_name=challenge_winner, _anchor='player') }}">{{ challenge_winner | title | safe }}</a>
+                                        {%- if not loop.last %}, {% endif %}
+                                    {%- endfor %}`)
+                                        {%- endif %}
+{%- endmacro %}
+{%- block scripts %}
+        <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
+        <script>
+            function showChallenges(where) {
+                new gridjs.Grid({
+                    columns: [
+                        {
+                            id:     'name',
+                            name:   'Find and Kill',
+                        },
+                        {
+                            id:     'people',
+                            name:   'People'
+                        },
+                        {
+                            id:     'level',
+                            name:   'Level'
+                        },
+                        {
+                            id:     'reward',
+                            name:   'Reward'
+                        },
+                        {
+                            id:     'completed',
+                            name:   'Completed'
+                        }
+                    ],
+                    data: [
+                      {%- for challenge in challenges %}
+                        {
+                            {{ display_challenge(challenge) }}
+                        }{% if not loop.last %},{% endif %}
+                      {%- endfor %}
+                    ],
+                    search: true,
+                    sort: true,
+                    pagination: false
+                }).render(where);
+            };
+        </script>
+{%- endblock scripts %}
 {%- block content %}
-    {%- if challenges is defined and challenges is iterable and challenges | length > 0 %}
-            <table id="challenges">
-                <tr>
-                    <th title="Find and Kill">
-                        Find and Kill
-                    </th>
-                    <th title="People">
-                        People
-                    </th>
-                    <th title="Level">
-                        Level
-                    </th>
-                    <th title="Reward">
-                        Reward
-                    </th>
-                    <th title="Completed">
-                        Completed
-                    </th>
-                </tr>
-        {%- for challenge in challenges %}
-                <tr>
-                    {{ display_challenge(challenge) }}
-                </tr>
-        {%- endfor %}
-            </table>
-    {%- endif %}
+                <div id="challenges"></div>
+                <script>
+                    showChallenges(document.getElementById('challenges'));
+                </script>
 {%- endblock %}
