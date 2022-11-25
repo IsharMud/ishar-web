@@ -30,6 +30,7 @@ from support import support
 from wizlist import wizlist
 from world import world
 
+
 # Sentry
 sentry_sdk.init(
     environment=os.getenv('USER'),
@@ -41,9 +42,11 @@ sentry_sdk.init(
     }
 )
 
+
 # Flask
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
+
 
 # Flask Blueprints/pages
 app.register_blueprint(admin)
@@ -62,6 +65,7 @@ app.register_blueprint(season)
 app.register_blueprint(support)
 app.register_blueprint(wizlist)
 app.register_blueprint(world)
+
 
 # Flask-Login
 login_manager = LoginManager(app)
