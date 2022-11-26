@@ -17,14 +17,14 @@ def index():
     player_classes = PlayerClass().query.filter(PlayerClass.class_description!='').all()
     classes = []
     for player_class in player_classes:
-        classes.append(f'{player_class.class_name.title()} - {player_class.class_description}')
+        classes.append(f'{player_class.class_name.title()} -- {player_class.class_description}')
 
     # Fetch, and format, playable player races and descriptions for FAQs
     player_races = PlayerRace().query.filter(PlayerRace.race_description!='').all()
     races = []
     for player_race in player_races:
         race_name = player_race.race_name.replace('_', '-').title()
-        races.append(f'{race_name} - {player_race.race_description}')
+        races.append(f'{race_name} -- {player_race.race_description}')
 
 
     all_faqs = {
