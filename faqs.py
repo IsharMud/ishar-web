@@ -1,5 +1,6 @@
 """Frequently Asked Questions"""
 from flask import Blueprint, render_template, url_for
+from models import PlayerClass, PlayerRace
 
 faqs = Blueprint('faqs', __name__)
 
@@ -12,6 +13,20 @@ faqs = Blueprint('faqs', __name__)
 def index():
     """A few frequently asked questions (/faq, /faqs, or /questions)"""
 
+    # Fetch, and format, playable player classes and descriptions for FAQs
+    player_classes = PlayerClass().query.filter(PlayerClass.class_description!='').all()
+    classes = []
+    for player_class in player_classes:
+        classes.append(f'{player_class.class_name.title()} - {player_class.class_description}')
+
+    # Fetch, and format, playable player races and descriptions for FAQs
+    player_races = PlayerRace().query.filter(PlayerRace.race_description!='').all()
+    races = []
+    for player_race in player_races:
+        race_name = player_race.race_name.replace('_', '-').title()
+        races.append(f'{race_name} - {player_race.race_description}')
+
+
     all_faqs = {
 
         'Is Ishar MUD free?': [
@@ -22,29 +37,16 @@ def index():
 
         'Are there player classes?': [
             '<strong>Yes</strong>! '
-            'There are <strong>five (5)</strong> classes available to choose from, '
+            f'There are <strong>{len(classes)}</strong> classes available to choose from, '
             'when you create a player character:',
-            [
-                'Warrior -- For those who seek to master the art of war.',
-                'Rogue -- Sly and cunning, skilled in all things sublime.',
-                'Cleric -- The followers of the spirits, both good and evil.',
-                'Magician -- Practitioners of the mystic arts, masters of magic.',
-                'Necromancer -- Practitioners of necromancy, masters of the undead.',
-            ]
+            classes
         ],
 
         'Are there player races?': [
             '<strong>Yes</strong>! '
-            'There are <strong>six (6)</strong> races available to choose from, '
+            f'There are <strong>{len(races)}</strong> races available to choose from, '
             'when you create a player character:',
-            [
-                'Human -- The dominant race around Mareldja, the home city.',
-                'Elf -- Tall, pointy-eared types.',
-                'Dwarf -- Short and hairy.',
-                'Hobbit -- Small, magically inclined creatures of the forest.',
-                'Gnome -- Small, compactly built mountain and forest dwellers.',
-                'Half-Elven -- Crossbreed, of Human and Elven descent.'
-            ]
+            races
         ],
 
         'Is there role-playing?': [
