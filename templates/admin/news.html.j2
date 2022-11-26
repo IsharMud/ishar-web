@@ -3,8 +3,8 @@
 {% block meta_title %}News / Administration Portal{% endblock meta_title %}
 {% block meta_description %}Administration portal to post news updates to the front page{% endblock meta_description %}
 {% block meta_url %}{{ url_for('admin.news', _external=True) }}{% endblock meta_url %}
-{% block title %}News / Administration Portal{% endblock %}
-{% block header %}News{% endblock %}
+{% block title %}News / Administration Portal{% endblock title %}
+{% block header %}News{% endblock header %}
 {%- macro render_field(field) %}
                     <tr>
                         <td class="admin-{{ field.name | safe }}">
@@ -24,8 +24,67 @@
                         </td>
                     </tr>
 {%- endmacro %}
+{%- block scripts %}
+    {%- if all_news and all_news is iterable and all_news | length > 0 %}
+        <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
+        <script>
+            function showNews(where) {
+                new gridjs.Grid({
+                    columns: [
+                        {
+                            id:     'news_id',
+                            name:   'ID'
+                        },
+                        {
+                            id:     'subject',
+                            name:   'Subject'
+                        },
+                        {
+                            id:     'body',
+                            name:   'Body'
+                        },
+                        {
+                            id:     'author',
+                            name:   'Author'
+                        },
+                        {
+                            id:     'created',
+                            name:   'Created',
+                            sort:   {
+                                        compare: (a, b) => {
+                                            if ( (b > a) || (isNaN(a)) ) {
+                                                return -1;
+                                            } else if ( (a > b) || (isNaN(b)) ) {
+                                                return 1;
+                                            } else {
+                                                return 0;
+                                            };
+                                        }
+                                    }
+                        }
+                    ],
+                    data: [
+                      {%- for news in all_news %}
+                        {
+                            news_id:    gridjs.html(`<a href="{{ url_for('admin.edit_news', edit_news_id=news.news_id) }}">{{ news.news_id }}</a>`),
+                            subject:    "{{ news.subject | truncate(50) | safe }}",
+                            body:       "{{ news.body | truncate(50) | safe }}",
+                            author:     "{{ news.account.account_name | title | safe }}",
+                            created:    "{{ news.created_at }} ({{ news.created_at.strftime('%A, %B %d, %Y') }})"
+                        }{% if not loop.last %},{% endif %}
+                      {%- endfor %}
+                    ],
+                    search: true,
+                    sort: true,
+                    pagination: true
+                }).render(where);
+            };
+        </script>
+    {%- endif %}
+{%- endblock scripts %}
 {%- block content %}
     {%- if news_add_form is defined %}
+                <h3 title="Post">Post</h3>
                 <form autocomplete="off" method="post" action="{{ url_for('admin.news') }}" id="news-add-form">
                     <table>
                         {{ render_field(news_add_form.subject, autocomplete='off') }}
@@ -35,4 +94,11 @@
                     </table>
                 </form>
     {%- endif %}
-{%- endblock %}
+    {%- if all_news and all_news is iterable and all_news | length > 0 %}
+                <hr>
+                <div id="all-news"></div>
+                <script>
+                    showNews(document.getElementById('all-news'));
+                </script>
+    {%- endif %}
+{%- endblock content %}

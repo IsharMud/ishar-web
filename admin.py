@@ -57,9 +57,39 @@ def news():
         else:
             flash('Sorry, but please try again!', 'error')
 
-    # Show the form to add news in the administration portal
-    return render_template('admin/news.html.j2', news_add_form=news_add_form)
+    # Include all news posts
+    all_news = News.query.order_by(-News.created_at).all()
 
+    # Show the form to add news in the administration portal
+    return render_template('admin/news.html.j2', all_news=all_news, news_add_form=news_add_form)
+
+
+@admin.route('/news/edit/<int:edit_news_id>/', methods=['GET', 'POST'])
+@admin.route('/news/edit/<int:edit_news_id>', methods=['GET', 'POST'])
+@fresh_login_required
+@god_required
+def edit_news(edit_news_id=None):
+    """Administration portal to allow Gods to edit news posts
+        /admin/news/edit"""
+    news_post = News.query.filter_by(news_id=edit_news_id).first()
+
+    if not news_post:
+        flash('Invalid news post.', 'error')
+        abort(400)
+
+    # Get news form, and check if submitted
+    edit_news_form = NewsAddForm()
+    if edit_news_form.validate_on_submit():
+        news_post.subject = edit_news_form.subject.data
+        news_post.body = edit_news_form.body.data
+        db_session.commit()
+        flash('The news post was updated successfully.', 'success')
+        sentry_sdk.capture_message(f'Admin Edit News: {current_user} edited {news_post}')
+
+    return render_template('admin/edit_news.html.j2',
+                           edit_news=news_post,
+                           edit_news_form=edit_news_form
+                           )
 
 @admin.route('/account/<int:manage_account_id>', methods=['GET'])
 @fresh_login_required
@@ -194,42 +224,62 @@ def season_cycle():
         )
         db_session.add(new_season)
 
-        # Loop through all accounts - to apply essence, and delete mortal players
+        # Loop through all accounts
         total_rewarded_essence = total_players_deleted = 0
         for account in Account.query.filter().all():
+
+            # Apply any essence earned
             if account.seasonal_earned > 0:
+
+                # Add existing essence plus essence earned
                 calculated_essence = account.seasonal_points + account.seasonal_earned
                 flash(f'Account "{account.account_name}" ({account.account_id}) '
                       f'now has {calculated_essence} essence. '
                       f'({account.seasonal_points} existing + '
                       f'{account.seasonal_earned} earned)', 'success')
+
+                # Update account essence balance in the database, and total
                 account.seasonal_points = calculated_essence
                 total_rewarded_essence += calculated_essence
+
+            # Mention accounts that earned no essence
             else:
                 flash(f'Account "{account.account_name}"'
                       f'({account.account_id}) earned no essence', 'warning')
 
+            # Loop through each player in each account
             for delete_player in account.players:
-                if not delete_player.is_immortal:
+
+                # Do not remove immortal players
+                if delete_player.is_immortal:
+                    flash(f'Skipping immortal {delete_player.name}.', 'info')
+
+                # Remve mortal players
+                else:
+
+                    # Physically delete the Podir file for any mortal players
                     delete_path = PODIR + '/' + delete_player.name
                     if os.path.exists(delete_path):
                         os.remove(delete_path)
                         flash(f'Deleted <code>{delete_path}</code>.', 'success')
+
+                    # Delete mortal players from the database
                     db_session.query(Player).filter_by(id=delete_player.id).delete()
                     flash(f'Deleted Player: {delete_player.name} ({delete_player.id}).', 'success')
                     total_players_deleted += 1
-                else:
-                    flash(f'Skipping immortal {delete_player.name}.', 'info')
 
+        # Commit the changes to the database
         db_session.commit()
         flash('All essence has been rewarded.', 'success')
         flash(f'Total Rewarded Essence: {total_rewarded_essence} essence', 'info')
         sentry_sdk.capture_message(f'Essence Rewarded: {total_rewarded_essence} essence')
 
+        # Make sure a season was created
         if new_season.season_id:
             flash(f'Season {new_season.season_id} created.', 'success')
             sentry_sdk.capture_message(f'Season Created: {new_season}')
 
+        # Make sure that only immortals remain
         if not Player.query.filter(Player.true_level < min(IMM_LEVELS)).all():
             flash('All mortal players have been deleted.', 'success')
             flash(f'Total Players Deleted: {total_players_deleted}', 'info')
