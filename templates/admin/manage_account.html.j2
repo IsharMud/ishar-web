@@ -3,11 +3,100 @@
 {% block meta_title %}Accounts / Administration Portal{% endblock meta_title %}
 {% block meta_description %}Administration portal page to view accounts{% endblock %}
 {% block meta_url %}{{ url_for('admin.manage_account', manage_account_id=manage_account.account_id | default(''), _external=True) }}{% endblock meta_url %}">
-{% block title %}Manage Account ({{ manage_account.account_name | title | safe }}) / Administration Portal{% endblock %}
-{% block header -%}
+{%- block title %}
+Manage Account ({{ manage_account.account_name | title | safe }}) / Administration Portal
+{%- endblock title %}
+{%- block header -%}
                 Manage Account: {{ manage_account.account_name | title | safe }}
                 <a href="{{ url_for('admin.edit_account', edit_account_id=manage_account.account_id) }}">✏️</a>
-{%- endblock %}
+{%- endblock header %}
+{%- macro display_deaths(player) -%}
+    {%- if player.player_type != 'Classic' -%}
+        gridjs.html(`<span class="{{ player.player_css }}">{{ player.player_type }}</span>`)
+    {%- else -%}
+        {{ player.deaths }}
+    {%- endif -%}
+{%- endmacro -%}
+{%- macro display_name(player) -%}
+    {%- if player.player_type != 'Classic' -%}
+        gridjs.html(`<a href="{{url_for('admin.edit_player', edit_player_id=player.id) }}">{{ player.name | title | safe }}</a>`)
+    {%- else -%}
+        {{ player.name | title | safe }}
+    {%- endif -%}
+{%- endmacro -%}
+{%- block scripts %}
+    {%- if manage_account.players is defined and manage_account.players is iterable and manage_account.players | length > 0 %}
+        <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
+        <script>
+            function showPlayers(where) {
+                new gridjs.Grid({
+                    columns: [
+                        {
+                            id:      'name',
+                            name:    'Player',
+                        },
+                        {
+                            id:     'level',
+                            name:   'Level'
+                        },
+                        {
+                            id:     'remorts',
+                            name:   'Remorts'
+                        },
+                        {
+                            id:     'renown',
+                            name:   'Renown'
+                        },
+                        {
+                            id:     'total_renown',
+                            name:   'Total Renown'
+                        },
+                        {
+                            id:     'quests',
+                            name:   'Quests'
+                        },
+                        {
+                            id:     'challenges',
+                            name:   'Challenges'
+                        },
+                        {
+                            id:     'deaths',
+                            name:   'Deaths',
+                            sort:   {
+                                        compare: (a, b) => {
+                                            if ( (b > a) || (isNaN(a)) ) {
+                                                return -1;
+                                            } else if ( (a > b) || (isNaN(b)) ) {
+                                                return 1;
+                                            } else {
+                                                return 0;
+                                            };
+                                        }
+                                    }
+                        }
+                    ],
+                    data: [
+                      {%- for player in manage_account.players %}
+                        {
+                            name:           {{ display_name(player) }},
+                            level:          {{ player.level }},
+                            remorts:        {{ player.remorts }},
+                            renown:         {{ player.renown }},
+                            total_renown:   {{ player.total_renown }},
+                            quests:         {{ player.quests_completed }},
+                            challenges:     {{ player.challenges_completed }},
+                            deaths:         {{ display_deaths(player) }}
+                        }{% if not loop.last %},{% endif %}
+                      {%- endfor %}
+                    ],
+                    search: true,
+                    sort: true,
+                    pagination: true,
+                }).render(where);
+            };
+        </script>
+    {%- endif %}
+{%- endblock scripts %}
 {%- block content %}
     {%- if manage_account is defined %}
             <ul id="account-details" title="Account Created: {{ manage_account.created_at.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }} ({{ manage_account.created }} ago)">
@@ -81,56 +170,14 @@
                 </li>
         {%- endif %}
             </ul>
-        {%- if manage_account.players is defined and manage_account.players is iterable and manage_account.players | length > 0 %}
             <h4>
                 Players ({{ manage_account.players | length }})
             </h4>
-            <table id="players">
-                    <tr>
-                        <th>
-                            Name
-                        </th>
-                        <th>
-                            Level
-                        </th>
-                        <th>
-                            Remorts
-                        </th>
-                        <th>
-                            Renown
-                        </th>
-                        <th>
-                            Deaths
-                        </th>
-                    </tr>
-            {%- for player in manage_account.players %}
-                    <tr>
-                        <td title="{{ player.name | title | safe }} (Born {{ player.birth_dt.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }})">
-                            {{ player.player_title }}
-                        </td>
-                        <td title="Level: {{ player.level }}">
-                            {{ player.level }}
-                        </td>
-                        <td title="Remorts: {{ player.remorts }}">
-                            {{ player.remorts }}
-                        </td>
-                        <td title="Renown: {{ player.renown }}">
-                            {{ player.renown }}
-                        </td>
-                {%- if player.player_type != 'Classic' %}
-                        <td class="non-classic" title="Type: {{ player.player_type }}">
-                            <span class="{{ player.player_css }}">
-                                {{ player.player_type }}
-                            </span>
-                        </td>
-                {%- else %}
-                        <td title="Deaths: {{ player.deaths }}">
-                            {{ player.deaths }}
-                        </td>
-                {%- endif %}
-                    </tr>
-            {%- endfor %}
-                </table>
+        {%- if manage_account.players is defined and manage_account.players is iterable and manage_account.players | length > 0 %}
+            <div id="players"></div>
+            <script>
+                showPlayers(document.getElementById('players'));
+            </script>            
         {%- else %}
                 <h3 title="No players yet!">
                     No players yet!

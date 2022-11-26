@@ -10,6 +10,7 @@ from forms import EditAccountForm, EditPlayerForm, NewsAddForm, SeasonCycleForm
 from models import Account, News, Player, Season
 from sentry import sentry_sdk
 
+
 def god_required(func):
     """Decorator to allow access only to Gods"""
     @wraps(func)
@@ -66,11 +67,16 @@ def news():
 def manage_account(manage_account_id=None):
     """Administration portal to allow Gods to view accounts
         /admin/account"""
-    return render_template('admin/manage_account.html.j2',
-                           manage_account=Account.query.filter_by(account_id=manage_account_id).first()
-                           )
+    account = Account.query.filter_by(account_id=manage_account_id).first()
+
+    if not account:
+        flash('Invalid account.', 'error')
+        abort(400)
+
+    return render_template('admin/manage_account.html.j2', manage_account=account)
 
 
+@admin.route('/account/edit/<int:edit_account_id>/', methods=['GET', 'POST'])
 @admin.route('/account/edit/<int:edit_account_id>', methods=['GET', 'POST'])
 @fresh_login_required
 @god_required
@@ -78,6 +84,10 @@ def edit_account(edit_account_id=None):
     """Administration portal to allow Gods to edit accounts
         /admin/account/edit"""
     account = Account.query.filter_by(account_id=edit_account_id).first()
+
+    if not account:
+        flash('Invalid account.', 'error')
+        abort(400)
 
     # Get edit account form and check if submitted
     edit_account_form = EditAccountForm()
@@ -115,6 +125,7 @@ def accounts():
     return render_template('admin/accounts.html.j2', accounts=Account.query.order_by(Account.account_id).all())
 
 
+@admin.route('/player/edit/<int:edit_player_id>/', methods=['GET', 'POST'])
 @admin.route('/player/edit/<int:edit_player_id>', methods=['GET', 'POST'])
 @fresh_login_required
 @god_required
@@ -123,13 +134,19 @@ def edit_player(edit_player_id=None):
         /admin/player/edit"""
     player = Player.query.filter_by(id=edit_player_id).first()
 
+    if not player:
+        flash('Invalid player.', 'error')
+        abort(400)
+
     # Get edit player form and check if submitted
     edit_player_form = EditPlayerForm()
     if edit_player_form.validate_on_submit():
         player.name = edit_player_form.name.data
+        player.money = edit_player_form.money.data
         player.align = edit_player_form.align.data
         player.karma = edit_player_form.karma.data
         player.renown = edit_player_form.renown.data
+        player.is_deleted = edit_player_form.is_deleted.data
         db_session.commit()
         flash('The player was updated successfully.', 'success')
         sentry_sdk.capture_message(f'Admin Edit Player: {current_user} edited {player}')

@@ -4,9 +4,9 @@ from dateutil.relativedelta import relativedelta
 from flask_wtf import FlaskForm
 from wtforms import BooleanField, DateTimeLocalField, EmailField, IntegerField, \
     PasswordField, StringField, SubmitField, TextAreaField
-from wtforms.validators import DataRequired, Email, EqualTo, Length
+from wtforms.validators import DataRequired, Email, EqualTo, Length, NumberRange
 from wtforms_validators import Alpha
-
+from mud_secret import ALIGNMENTS
 
 class ChangePasswordForm(FlaskForm):
     """Change Password form class"""
@@ -52,10 +52,8 @@ class EditAccountForm(FlaskForm):
     seasonal_points = IntegerField('Seasonal Points')
     password = PasswordField('Password')
     confirm_password = PasswordField('Confirm Password',
-                                     validators=[
-                                         EqualTo('password', message='Please make sure that the passwords match!')
-                                     ]
-                                     )
+                            validators=[EqualTo('password', message='Please make sure that the passwords match!')]
+                        )
     submit = SubmitField('Edit Account')
 
 
@@ -68,13 +66,11 @@ class EditPlayerForm(FlaskForm):
                            Alpha(message='Please only use letters in the player name!')
                        ]
                        )
-    title = StringField('Title', validators=[DataRequired(), Length(min=2, max=32)])
-    money = IntegerField('Karma', validators=[DataRequired()])
-    align = IntegerField('Align', validators=[DataRequired()])
-    karma = IntegerField('Karma', validators=[DataRequired()])
-    sex = IntegerField('Sex (Gender)', validators=[DataRequired()])
-    renown = IntegerField('Renown', validators=[DataRequired()])
-    is_deleted = BooleanField('Is Deleted?', validators=[DataRequired()])
+    money = IntegerField('Money', validators=[NumberRange(min=0, max=100000)])
+    align = IntegerField('Align', validators=[NumberRange(min=min(min(ALIGNMENTS.values())), max=max(max(ALIGNMENTS.values())))])
+    karma = IntegerField('Karma', validators=[NumberRange(min=-100000, max=100000)])
+    renown = IntegerField('Renown', validators=[NumberRange(min=0)])
+    is_deleted = BooleanField('Is Deleted?')
     submit = SubmitField('Edit Player')
 
 
@@ -114,7 +110,7 @@ class SeasonCycleForm(FlaskForm):
                                         )
     expiration_date = DateTimeLocalField('Expiration Date',
                                          format='%Y-%m-%dT%H:%M',
-                                         default=datetime.now() + relativedelta(months=+4),
+                                         default=datetime.utcnow() + relativedelta(months=+4),
                                          validators=[DataRequired()]
                                          )
     confirm_wipe = BooleanField('Are you sure you want to DELETE all mortal players?',

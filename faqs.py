@@ -81,4 +81,4 @@ def index():
         ]
     }
 
-    return render_template('faq.html.j2', faqs=all_faqs)
+    return render_template('faqs.html.j2', faqs=all_faqs)
