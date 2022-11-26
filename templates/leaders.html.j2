@@ -1,10 +1,10 @@
 {%- set page = 'leaders' -%}
 {% extends "layout.html.j2" %}
 {% block meta_title %}Leaders{% endblock meta_title %}
-{% block meta_description %}Leader board of top players of the game and their achievements{% endblock %}
-{% block meta_url %}{{ url_for('leaders.index', _external=True) }}{% endblock meta_url %}">
-{% block title %}Leaders{% endblock %}
-{% block header %}Leaders{% endblock %}
+{% block meta_description %}Leader board of top players of the game and their achievements{% endblock meta_description %}
+{% block meta_url %}{{ url_for('leaders.index', _external=True) }}{% endblock meta_url %}
+{% block title %}Leaders{% endblock title %}
+{% block header %}Leaders{% endblock header %}
 {%- macro display_deaths(player) -%}
     {%- if player.player_type != 'Classic' -%}
         gridjs.html(`<span class="{{ player.player_css }}">{{ player.player_type }}</span>`)

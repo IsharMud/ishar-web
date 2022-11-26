@@ -1,10 +1,10 @@
 {%- set page = 'support' -%}
 {% extends "layout.html.j2" %}
 {% block meta_title %}Support{% endblock meta_title %}
-{% block meta_description %}Support Ishar MUD with a contribution as a way to say thank you{% endblock %}
-{% block meta_url %}{{ url_for('support.index', _external=True) }}{% endblock meta_url %}">
-{% block title %}Support{% endblock %}
-{% block header %}Support Ishar MUD{% endblock %}
+{% block meta_description %}Support Ishar MUD with a contribution as a way to say thank you{% endblock meta_description %}
+{% block meta_url %}{{ url_for('support.index', _external=True) }}{% endblock meta_url %}
+{% block title %}Support{% endblock title %}
+{% block header %}Support Ishar MUD{% endblock header %}
 {%- block content %}
                 <p>
                     While you are more than welcome to offer support, Ishar MUD is free to use, play, and enjoy!
@@ -22,4 +22,4 @@
                         <img src="{{ url_for('static', filename='images/buy-me-a-coffee.png') }}" alt="Buy Me A Coffee">
                     </a>
                 </p>
-{%- endblock %}
+{%- endblock content %}

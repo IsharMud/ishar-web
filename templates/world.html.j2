@@ -6,9 +6,9 @@
         : {{ area }}
     {%- endif -%}
 {%- endblock meta_title -%}
-{% block meta_description %}The World of Ishar is vast and very detailed with many areas{% endblock %}
-{% block meta_url %}{{ url_for('world.index', area=area, _external=True) }}{% endblock meta_url %}">
-{% block header %}World{% endblock %}
+{% block meta_description %}The World of Ishar is vast and very detailed with many areas{% endblock meta_description %}
+{% block meta_url %}{{ url_for('world.index', area=area, _external=True) }}{% endblock meta_url %}
+{% block header %}World{% endblock header %}
 {%- block title -%}
     World
     {%- if area is defined and area != None and areas is defined and areas != None -%}
@@ -50,4 +50,4 @@
                 </ul>
         {%- endif %}
     {%- endif %}
-{%- endblock %}
+{%- endblock content %}

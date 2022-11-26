@@ -7,10 +7,10 @@
     {%- set challenges_title        = challenges_pre + ' (' + challenges_completed | string + '/' + challenges_total | string + ')'  %}
 {%- endif %}
 {% block meta_title %}Challenges{% endblock meta_title %}
-{% block meta_description %}Challenges, winners, and rewards currently available.{% endblock %}
-{% block meta_url %}{{ url_for('challenges.index', _external=True) }}{% endblock meta_url %}">
-{% block title %}{{ challenges_title }}{% endblock %}
-{% block header %}{{ challenges_title }}{% endblock %}
+{% block meta_description %}Challenges, winners, and rewards currently available{% endblock meta_description %}
+{% block meta_url %}{{ url_for('challenges.index', _external=True) }}{% endblock meta_url %}
+{% block title %}{{ challenges_title }}{% endblock title %}
+{% block header %}{{ challenges_title }}{% endblock header %}
 {%- macro display_challenge(challenge) %}
     {%- set tiers = { 9: 'SS', 8: 'SS', 7: 'SS', 6: 'S', 5: 'A', 4: 'B', 3: 'C', 2: 'D', 1: 'F' } -%}
     {%- set challenge_tier = tiers[challenge.adj_tier] + '(' + tiers[challenge.orig_tier] + ')' %}
@@ -76,4 +76,4 @@
                 <script>
                     showChallenges(document.getElementById('challenges'));
                 </script>
-{%- endblock %}
+{%- endblock content %}

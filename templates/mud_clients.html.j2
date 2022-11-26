@@ -1,10 +1,10 @@
 {%- set page = 'mud_clients' -%}
 {% extends "layout.html.j2" %}
 {% block meta_title %}MUD Clients{% endblock meta_title %}
-{% block meta_description %}MUD Clients that are freely available to use and try to play Ishar MUD{% endblock %}
-{% block meta_url %}{{ url_for('mud_clients.index', _external=True) }}{% endblock meta_url %}">
-{% block title %}MUD Clients{% endblock %}
-{% block header %}MUD Clients{% endblock %}
+{% block meta_description %}MUD Clients that are freely available to use and try to play Ishar MUD{% endblock meta_description %}
+{% block meta_url %}{{ url_for('mud_clients.index', _external=True) }}{% endblock meta_url %}
+{% block title %}MUD Clients{% endblock title %}
+{% block header %}MUD Clients{% endblock header %}
 {%- block content %}
                 <p>
                     While you can certainly enjoy the game via
@@ -46,4 +46,4 @@
                     Do not be afraid to try a few, as they all have different strengths and weaknesses.
                 </p>
                 {%- endif %}
-{%- endblock %}
+{%- endblock content %}

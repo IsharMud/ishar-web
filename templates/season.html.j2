@@ -1,10 +1,10 @@
 {%- set page = 'season' -%}
 {% extends "layout.html.j2" %}
 {% block meta_title %}Season {{ current_season.season_id }}{% endblock meta_title %}
-{% block meta_description %}Information about season {{ current_season.season_id }} of Ishar MUD{% endblock %}
-{% block meta_url %}{{ url_for('season.index', _external=True) }}{% endblock meta_url %}">
-{% block title %}Season {{ current_season.season_id }}{% endblock %}
-{% block header %}Season {{ current_season.season_id }}{% endblock %}
+{% block meta_description %}Information about season {{ current_season.season_id }} of Ishar MUD{% endblock meta_description %}
+{% block meta_url %}{{ url_for('season.index', _external=True) }}{% endblock meta_url %}
+{% block title %}Season {{ current_season.season_id }}{% endblock title %}
+{% block header %}Season {{ current_season.season_id }}{% endblock header %}
 {%- block content %}
     {%- if current_season is defined %}
             <ul id="season-details">
@@ -72,4 +72,4 @@
             </ul>
         {%- endif %}
     {%- endif %}
-{%- endblock %}
+{%- endblock content %}

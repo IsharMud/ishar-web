@@ -1,10 +1,10 @@
 {%- set page = 'faqs' -%}
 {% extends "layout.html.j2" %}
 {% block meta_title %}Frequently Asked Questions{% endblock meta_title %}
-{% block meta_description %}Frequently Asked Questions by new players of the game{% endblock %}
-{% block meta_url %}{{ url_for('faqs.index', _external=True) }}{% endblock meta_url %}">
-{% block title %}Frequently Asked Questions{% endblock %}
-{% block header %}Frequently Asked Questions{% endblock %}
+{% block meta_description %}Frequently Asked Questions by new players of the game{% endblock meta_description %}
+{% block meta_url %}{{ url_for('faqs.index', _external=True) }}{% endblock meta_url %}
+{% block title %}Frequently Asked Questions{% endblock title %}
+{% block header %}Frequently Asked Questions{% endblock header %}
 {%- block content %}
                 <p>
                     Here are a few common questions that are asked about Ishar MUD.
@@ -51,4 +51,4 @@
                     by e-mailing <a href="mailto:admin@isharmud.com" target="_blank">admin@isharmud.com</a>.
                 </p>
     {%- endif %}
-{%- endblock %}
+{%- endblock content %}

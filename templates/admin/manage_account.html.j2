@@ -1,8 +1,14 @@
 {%- set page = 'admin' -%}
 {% extends "layout.html.j2" %}
-{% block meta_title %}Accounts / Administration Portal{% endblock meta_title %}
-{% block meta_description %}Administration portal page to view accounts{% endblock %}
-{% block meta_url %}{{ url_for('admin.manage_account', manage_account_id=manage_account.account_id | default(''), _external=True) }}{% endblock meta_url %}">
+{%- block meta_title %}
+Accounts / Administration Portal
+{%- endblock meta_title %}
+{%- block meta_description %}
+Administration portal page to view accounts
+{%- endblock meta_description %}
+{%- block meta_url %}
+{{- url_for('admin.manage_account', manage_account_id=manage_account.account_id | default(''), _external=True) -}}
+{%- endblock meta_url %}
 {%- block title %}
 Manage Account ({{ manage_account.account_name | title | safe }}) / Administration Portal
 {%- endblock title %}
@@ -184,4 +190,4 @@ Manage Account ({{ manage_account.account_name | title | safe }}) / Administrati
                 </h3>
         {%- endif %}
     {%- endif %}
-{%- endblock %}
+{%- endblock content %}

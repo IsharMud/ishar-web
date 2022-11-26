@@ -47,21 +47,23 @@
         Player Not Found
     {%- endif -%}
 {%- endblock meta_description -%}
-{% block meta_url %}{{ url_for('players.view', player_name=player.name, _external=True) }}{% endblock meta_url %}">
+{%- block meta_url -%}
+{{- url_for('players.view', player_name=player.name, _external=True) -}}
+{%- endblock meta_url -%}
 {%- block title %}
     {%- if player -%}
         Player: {{ player.name }}{% if player.player_type == 'Dead' %} ☠️{%- endif %}
     {%- else -%}
         Player Not Found
     {%- endif -%}
-{%- endblock %}
+{%- endblock title %}
 {%- block header -%}
     {%- if player -%}
         Player: <span class="{{ player.player_css }}">{{ player.name }}</span>
     {%- else -%}
         Player Not Found
     {%- endif %}
-{%- endblock %}
+{%- endblock header %}
 {%- block content %}
     {%- if player_search_form is defined %}
             <form method="post" id="player-search-form">
@@ -228,4 +230,4 @@
             </ul>
         {%- endif %}
     {%- endif %}
-{%- endblock %}
+{%- endblock content %}

@@ -1,10 +1,10 @@
 {%- set page = 'admin' -%}
 {% extends "layout.html.j2" %}
 {% block meta_title %}Seasons / Administration Portal{% endblock meta_title %}
-{% block meta_description %}Administration portal page to manage seasons{% endblock %}
-{% block meta_url %}{{ url_for('admin.season', _external=True) }}{% endblock meta_url %}">
-{% block title %}Seasons / Administration Portal{% endblock %}
-{% block header %}Seasons{% endblock %}
+{% block meta_description %}Administration portal page to manage seasons{% endblock meta_description %}
+{% block meta_url %}{{ url_for('admin.season', _external=True) }}{% endblock meta_url %}
+{% block title %}Seasons / Administration Portal{% endblock title %}
+{% block header %}Seasons{% endblock header %}
 {%- block content %}
             <table>
     {%- if seasons is defined and seasons is iterable and seasons | length > 0 %}
@@ -48,4 +48,4 @@
                     <a href="{{ url_for('admin.season_cycle') }}">Cycle Seasons (Player Wipe!)</a>
                 </li>
             </ul>
-{%- endblock %}
+{%- endblock content %}

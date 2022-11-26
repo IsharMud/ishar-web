@@ -4,7 +4,7 @@
     {%- set topic_alias = topic['aliases'][0] | replace('32 ', '') %}
 {%- endif %}
 {%- block meta_title -%}Help{%- if topic_alias -%}: {{ topic_alias }}{%- endif -%}{%- endblock meta_title -%}
-{% block meta_description %}Help pages for Ishar MUD{% endblock %}
+{% block meta_description %}Help pages for Ishar MUD{% endblock meta_description %}
 {% block meta_url %}{{ url_for('help_page.index', topic=topic, _external=True) }}{% endblock meta_url %}
 {% block header -%}Help{%- if topic_alias -%}: {{ topic_alias }}{%- endif -%}{%- endblock header -%}
 {%- block title -%}Help{%- if topic_alias -%}: {{ topic_alias }}{%- endif -%}{%- endblock title -%}
@@ -87,4 +87,4 @@
         {%- endfor %}
             </ul>
     {%- endif %}
-{%- endblock %}
+{%- endblock content %}

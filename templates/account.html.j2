@@ -1,10 +1,10 @@
 {%- set page = 'account' -%}
 {% extends "layout.html.j2" %}
 {% block meta_title %}Account ({{ current_user.account_name | title | safe }}){% endblock meta_title %}
-{% block meta_description %}Your Ishar MUD Account{% endblock%}
-{% block meta_url %}{{ url_for('portal.account', _external=True) }}{% endblock meta_url %}">
-{% block title %}Account ({{ current_user.account_name | title | safe }}){% endblock %}
-{% block header %}Account ({{ current_user.account_name | title | safe }}){% endblock %}
+{% block meta_description %}Your Ishar MUD Account{% endblock meta_description %}
+{% block meta_url %}{{ url_for('portal.account', _external=True) }}{% endblock meta_url %}
+{% block title %}Account ({{ current_user.account_name | title | safe }}){% endblock title %}
+{% block header %}Account ({{ current_user.account_name | title | safe }}){% endblock header %}
 {%- block content %}
             <h4 title="Created">
                 Created
@@ -72,4 +72,4 @@
                 </li>
     {%- endif %}
             </ul>
-{%- endblock %}
+{%- endblock content %}

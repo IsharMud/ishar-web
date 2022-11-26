@@ -1,10 +1,10 @@
 {%- set page = 'portal' -%}
 {% extends "layout.html.j2" %}
 {% block meta_title %}Player Log In{% endblock meta_title %}
-{% block meta_description %}Player Log In to Ishar MUD to view the player portal, player profiles, and more{% endblock %}
-{% block meta_url %}{{ url_for('portal.login', _external=True) }}{% endblock meta_url %}">
-{% block title %}Player Log In{% endblock %}
-{% block header %}Player Log In{% endblock %}
+{% block meta_description %}Player Log In to Ishar MUD to view the player portal, player profiles, and more{% endblock meta_description %}
+{% block meta_url %}{{ url_for('portal.login', _external=True) }}{% endblock meta_url %}
+{% block title %}Player Log In{% endblock title %}
+{% block header %}Player Log In{% endblock header %}
 {%- macro render_field(field) %}
                     <tr>
                         <td>
@@ -36,4 +36,4 @@
                     </table>
                 </form>
     {%- endif %}
-{%- endblock %}
+{%- endblock content %}
