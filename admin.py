@@ -1,7 +1,6 @@
 """Admin"""
 import os
 from datetime import datetime
-from functools import wraps
 from flask import abort, Blueprint, flash, render_template, url_for
 from flask_login import current_user, fresh_login_required
 from mud_secret import PODIR, IMM_LEVELS
@@ -11,22 +10,19 @@ from models import Account, News, Player, Season
 from sentry import sentry_sdk
 
 
-def god_required(func):
-    """Decorator to allow access only to Gods"""
-    @wraps(func)
-    def decorated_function(*args, **kwargs):
-        if not current_user.is_god:
-            flash('Sorry, but you are not godly enough!', 'error')
-            abort(401)
-        return func(*args, **kwargs)
-    return decorated_function
-
-
 admin = Blueprint('admin', __name__, url_prefix='/admin')
 
-@admin.route('/', methods=['GET', 'POST'])
+
+@admin.before_request
 @fresh_login_required
-@god_required
+def before_request():
+    """Only Gods can access /admin"""
+    if not current_user.is_god:
+        flash('Sorry, but you are not godly enough!', 'error')
+        abort(401)
+
+
+@admin.route('/', methods=['GET', 'POST'])
 def index():
     """Administration portal main page for Gods"""
     return render_template('admin/portal.html.j2')
@@ -34,8 +30,6 @@ def index():
 
 @admin.route('/news/', methods=['GET', 'POST'])
 @admin.route('/news', methods=['GET', 'POST'])
-@fresh_login_required
-@god_required
 def news():
     """Administration portal to allow Gods to post news
         /admin/news"""
@@ -68,8 +62,6 @@ def news():
 
 @admin.route('/news/edit/<int:edit_news_id>/', methods=['GET', 'POST'])
 @admin.route('/news/edit/<int:edit_news_id>', methods=['GET', 'POST'])
-@fresh_login_required
-@god_required
 def edit_news(edit_news_id=None):
     """Administration portal to allow Gods to edit news posts
         /admin/news/edit"""
@@ -96,8 +88,6 @@ def edit_news(edit_news_id=None):
 
 @admin.route('/news/delete/<int:delete_news_id>/', methods=['GET'])
 @admin.route('/news/delete/<int:delete_news_id>', methods=['GET'])
-@fresh_login_required
-@god_required
 def delete_news(delete_news_id=None):
     """Administration portal to allow Gods to edit news posts
         /admin/news/edit"""
@@ -119,9 +109,8 @@ def delete_news(delete_news_id=None):
                            )
 
 
+@admin.route('/account/<int:manage_account_id>/', methods=['GET'])
 @admin.route('/account/<int:manage_account_id>', methods=['GET'])
-@fresh_login_required
-@god_required
 def manage_account(manage_account_id=None):
     """Administration portal to allow Gods to view accounts
         /admin/account"""
@@ -136,8 +125,6 @@ def manage_account(manage_account_id=None):
 
 @admin.route('/account/edit/<int:edit_account_id>/', methods=['GET', 'POST'])
 @admin.route('/account/edit/<int:edit_account_id>', methods=['GET', 'POST'])
-@fresh_login_required
-@god_required
 def edit_account(edit_account_id=None):
     """Administration portal to allow Gods to edit accounts
         /admin/account/edit"""
@@ -174,9 +161,8 @@ def edit_account(edit_account_id=None):
                            )
 
 
+@admin.route('/accounts/', methods=['GET'])
 @admin.route('/accounts', methods=['GET'])
-@fresh_login_required
-@god_required
 def accounts():
     """Administration portal to allow Gods to view accounts
         /admin/accounts"""
@@ -185,8 +171,6 @@ def accounts():
 
 @admin.route('/player/edit/<int:edit_player_id>/', methods=['GET', 'POST'])
 @admin.route('/player/edit/<int:edit_player_id>', methods=['GET', 'POST'])
-@fresh_login_required
-@god_required
 def edit_player(edit_player_id=None):
     """Administration portal to allow Gods to edit player characters
         /admin/player/edit"""
@@ -217,8 +201,6 @@ def edit_player(edit_player_id=None):
 
 @admin.route('/season/', methods=['GET'])
 @admin.route('/season', methods=['GET'])
-@fresh_login_required
-@god_required
 def season():
     """Administration portal to allow Gods to view/manage seasons
         /admin/season"""
@@ -229,8 +211,6 @@ def season():
 
 @admin.route('/season/cycle/', methods=['GET', 'POST'])
 @admin.route('/season/cycle', methods=['GET', 'POST'])
-@fresh_login_required
-@god_required
 def season_cycle():
     """Administration portal to allow Gods to cycle seasons, while wiping players
         /admin/season/cycle"""
