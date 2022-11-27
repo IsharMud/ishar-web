@@ -47,7 +47,7 @@
                         </tr>
                         {{ render_field(edit_news_form.subject, value=edit_news.subject, autocomplete='off') }}
                         {{ render_field(edit_news_form.body, autocomplete='off') }}
-                        {{ render_field(edit_news_form.csrf_token) }}
+                        {{ edit_news_form.csrf_token }}
                         {{ render_field(edit_news_form.submit) }}
                     </table>
                     <script>document.getElementById('body').innerHTML = "{{ edit_news.body }}";</script>
