@@ -57,11 +57,11 @@ def news():
         else:
             flash('Sorry, but please try again!', 'error')
 
-    # Include all news posts
-    all_news = News.query.order_by(-News.created_at).all()
-
     # Show the form to add news in the administration portal
-    return render_template('admin/news.html.j2', all_news=all_news, news_add_form=news_add_form)
+    return render_template('admin/news.html.j2',
+                           all_news=News.query.order_by(-News.created_at).all(),
+                           news_add_form=news_add_form
+                           )
 
 
 @admin.route('/news/edit/<int:edit_news_id>/', methods=['GET', 'POST'])

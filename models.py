@@ -70,7 +70,7 @@ class Account(Base, UserMixin):
 
     @cached_property
     def created(self):
-        """timedelta since account created"""
+        """Timedelta since account created"""
         return datetime.datetime.utcnow() - self.created_at
 
     @cached_property
@@ -116,10 +116,8 @@ class AccountsUpgrade(Base):
     """Account upgrade associated with account, and the level of upgrade"""
     __tablename__ = 'accounts_account_upgrades'
 
-    account_upgrades_id = Column(ForeignKey('account_upgrades.id', ondelete='CASCADE', onupdate='CASCADE'),
-                                 nullable=False, index=True, primary_key=True)
-    account_id = Column(ForeignKey('accounts.account_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False,
-                        index=True, primary_key=True)
+    account_upgrades_id = Column(ForeignKey('account_upgrades.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True, primary_key=True)
+    account_id = Column(ForeignKey('accounts.account_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True, primary_key=True)
     amount = Column(MEDIUMINT(4), nullable=False)
 
     account = relationship('Account', backref='upgrades')
@@ -168,8 +166,7 @@ class News(Base):
     __tablename__ = 'news'
 
     news_id = Column(INTEGER(11), primary_key=True)
-    account_id = Column(ForeignKey('accounts.account_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False,
-                        index=True)
+    account_id = Column(ForeignKey('accounts.account_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
     created_at = Column(TIMESTAMP, nullable=False, server_default=FetchedValue())
     subject = Column(String(64), nullable=False, server_default=FetchedValue())
     body = Column(Text, nullable=False)
@@ -223,16 +220,12 @@ class Quest(Base):
 
 
 class PlayerQuest(Base):
-    """
-    Player Quest database class
-    Quest associated with players completion
-    """
+    """Player Quest database class
+    Quest associated with players completion"""
     __tablename__ = 'player_quests'
 
-    quest_id = Column(ForeignKey('quests.quest_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True,
-                      primary_key=True)
-    player_id = Column(ForeignKey('players.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True,
-                       primary_key=True)
+    quest_id = Column(ForeignKey('quests.quest_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True, primary_key=True)
+    player_id = Column(ForeignKey('players.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True, primary_key=True)
     value = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
 
     quest = relationship('Quest')
@@ -244,10 +237,8 @@ class PlayerQuest(Base):
 
 
 class RemortUpgrade(Base):
-    """
-    Remort Upgrades database class
-    Remort upgrade available to players, as well as the renown cost and max value
-    """
+    """Remort Upgrades database class
+    Remort upgrade available to players, as well as the renown cost and max value"""
     __tablename__ = 'remort_upgrades'
 
     upgrade_id = Column(INTEGER(11), primary_key=True)
@@ -266,10 +257,8 @@ class PlayerRemortUpgrade(Base):
     """Remort upgrade associated with player, and the level of upgrade"""
     __tablename__ = 'player_remort_upgrades'
 
-    upgrade_id = Column(ForeignKey('remort_upgrades.upgrade_id', ondelete='CASCADE', onupdate='CASCADE'),
-                        nullable=False, index=True, primary_key=True)
-    player_id = Column(ForeignKey('players.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True,
-                       primary_key=True)
+    upgrade_id = Column(ForeignKey('remort_upgrades.upgrade_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True, primary_key=True)
+    player_id = Column(ForeignKey('players.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True, primary_key=True)
     value = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
 
     player = relationship('Player', backref='remort_upgrades')
@@ -313,8 +302,7 @@ class Player(Base):
     __tablename__ = 'players'
 
     id = Column(INTEGER(11), primary_key=True)
-    account_id = Column(ForeignKey('accounts.account_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False,
-                        index=True)
+    account_id = Column(ForeignKey('accounts.account_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
     name = Column(String(15), nullable=False, unique=True, server_default=FetchedValue())
     create_ident = Column(String(10), nullable=False, server_default=FetchedValue())
     last_isp = Column(String(30), nullable=False, server_default=FetchedValue())
@@ -340,8 +328,7 @@ class Player(Base):
     color_scheme = Column(SMALLINT(6))
     sex = Column(TINYINT(3), nullable=False)
     race_id = Column(ForeignKey('races.race_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
-    class_id = Column(ForeignKey('classes.class_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False,
-                      index=True)
+    class_id = Column(ForeignKey('classes.class_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
     level = Column(INTEGER(11), nullable=False)
     weight = Column(SMALLINT(6), nullable=False)
     height = Column(SMALLINT(6), nullable=False)
@@ -483,8 +470,7 @@ class Player(Base):
     def player_type(self):
         """Player type - returns string, one of:
             an immortal description (one of mud_secret.IMM_LEVELS), or
-            Dead, Survival, or Classic
-        """
+            Dead, Survival, or Classic"""
         if self.is_immortal:
             return IMM_LEVELS[self.true_level]
         if self.is_deleted == 1:
