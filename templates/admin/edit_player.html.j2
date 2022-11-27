@@ -1,20 +1,10 @@
 {%- set page = 'admin' -%}
 {% extends "layout.html.j2" %}
-{%- block meta_title %}
-Edit Player: {{ edit_player.name | title | safe }} / Administration Portal
-{%- endblock meta_title %}
-{%- block meta_description %}
-Administration portal to edit a player character
-{%- endblock meta_description %}
-{%- block meta_url -%}
-{{- url_for('admin.edit_player', edit_player_id=edit_player.id, _external=True) -}}
-{%- endblock meta_url %}
-{%- block title -%}
-Edit Player: {{ edit_player.name | title | safe }} / Administration Portal
-{%- endblock title -%}
-{%- block header -%}
-Edit Player: <span class="{{ edit_player.player_css }}">{{ edit_player.name }}</span>
-{%- endblock header -%}
+{%- block meta_title %}Edit Player: {{ edit_player.name | title | safe }} / Administration Portal{%- endblock meta_title %}
+{%- block meta_description %}Administration portal to edit a player character{%- endblock meta_description %}
+{%- block meta_url -%}{{- url_for('admin.edit_player', edit_player_id=edit_player.id, _external=True) -}}{%- endblock meta_url %}
+{%- block title -%}Edit Player: {{ edit_player.name | title | safe }} / Administration Portal{%- endblock title -%}
+{%- block header -%}Edit Player: <span class="{{ edit_player.player_css }}">{{ edit_player.name }}</span>{%- endblock header -%}
 {%- macro render_field(field) %}
                     <tr>
                         <td class="admin-{{ field.name | safe }}">
