@@ -91,6 +91,7 @@ def edit_news(edit_news_id=None):
                            edit_news_form=edit_news_form
                            )
 
+
 @admin.route('/account/<int:manage_account_id>', methods=['GET'])
 @fresh_login_required
 @god_required
@@ -187,6 +188,7 @@ def edit_player(edit_player_id=None):
                            )
 
 
+@admin.route('/season/', methods=['GET'])
 @admin.route('/season', methods=['GET'])
 @fresh_login_required
 @god_required
@@ -198,6 +200,7 @@ def season():
                            )
 
 
+@admin.route('/season/cycle/', methods=['GET', 'POST'])
 @admin.route('/season/cycle', methods=['GET', 'POST'])
 @fresh_login_required
 @god_required
