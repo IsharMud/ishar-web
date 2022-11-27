@@ -2,7 +2,7 @@
 import os
 from datetime import datetime
 from functools import wraps
-from flask import abort, Blueprint, flash, render_template
+from flask import abort, Blueprint, flash, render_template, url_for
 from flask_login import current_user, fresh_login_required
 from mud_secret import PODIR, IMM_LEVELS
 from database import db_session
@@ -32,6 +32,7 @@ def index():
     return render_template('admin/portal.html.j2')
 
 
+@admin.route('/news/', methods=['GET', 'POST'])
 @admin.route('/news', methods=['GET', 'POST'])
 @fresh_login_required
 @god_required
@@ -53,7 +54,8 @@ def news():
         db_session.add(new_news)
         db_session.commit()
         if new_news.news_id:
-            flash('Your message has been posted!', 'success')
+            edit_url = '<a href="' + url_for('admin.edit_news', edit_news_id=new_news.news_id) + '">edit it here</a>'
+            flash(f'Your message has been posted! You can {edit_url}.', 'success')
         else:
             flash('Sorry, but please try again!', 'error')
 
@@ -89,6 +91,31 @@ def edit_news(edit_news_id=None):
     return render_template('admin/edit_news.html.j2',
                            edit_news=news_post,
                            edit_news_form=edit_news_form
+                           )
+
+
+@admin.route('/news/delete/<int:delete_news_id>/', methods=['GET'])
+@admin.route('/news/delete/<int:delete_news_id>', methods=['GET'])
+@fresh_login_required
+@god_required
+def delete_news(delete_news_id=None):
+    """Administration portal to allow Gods to edit news posts
+        /admin/news/edit"""
+    news_post = News.query.filter_by(news_id=delete_news_id).first()
+
+    if not news_post:
+        flash('Invalid news post.', 'error')
+        abort(400)
+
+    News.query.filter_by(news_id=news_post.news_id).delete()
+    db_session.commit()
+    flash('The news post was deleted successfully.', 'success')
+    sentry_sdk.capture_message(f'Admin Delete News: {current_user} deleted {news_post}')
+
+    # Show the form to add news in the administration portal
+    return render_template('admin/news.html.j2',
+                           all_news=News.query.order_by(-News.created_at).all(),
+                           news_add_form=NewsAddForm()
                            )
 
 

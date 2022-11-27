@@ -49,7 +49,7 @@
                         {{ edit_news_form.csrf_token }}
                         {{ render_field(edit_news_form.submit) }}
                     </table>
-                    <script>document.getElementById('body').innerHTML = "{{ edit_news.body }}";</script>
+                    <script>document.getElementById('body').innerHTML = {{ edit_news.body | tojson }};</script>
                 </form>
     {%- endif %}
 {%- endblock content %}

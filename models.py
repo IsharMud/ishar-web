@@ -174,8 +174,7 @@ class News(Base):
     account = relationship('Account')
 
     def __repr__(self):
-        return f'<News> "{self.subject}" ({self.news_id}) / ' \
-               f'by "{self.account.account_name}" / at "{self.created_at}"'
+        return f'<News> "{self.subject}" ({self.news_id}) at "{self.created_at}"'
 
 
 class PlayerClass(Base):
