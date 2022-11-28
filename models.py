@@ -186,6 +186,11 @@ class PlayerClass(Base):
     class_display = Column(String(32))
     class_description = Column(String(64))
 
+    @cached_property
+    def class_display_name(self):
+        """Human-readable display name for a player class"""
+        return self.class_name.replace('_', '-').title()
+
     def __repr__(self):
         return f'<PlayerClass> "{self.class_name}" ({self.class_id})'
 
@@ -197,6 +202,11 @@ class PlayerRace(Base):
     race_id = Column(TINYINT(3), primary_key=True)
     race_name = Column(String(15), nullable=False, unique=True)
     race_description = Column(String(64))
+
+    @cached_property
+    def race_display_name(self):
+        """Human-readable display name for a player race"""
+        return self.race_name.replace('_', '-').title()
 
     def __repr__(self):
         return f'<PlayerRace> "{self.race_name}" ({self.race_id})'

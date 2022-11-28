@@ -14,18 +14,10 @@ def index():
     """A few frequently asked questions (/faq, /faqs, or /questions)"""
 
     # Fetch, and format, playable player classes and descriptions for FAQs
-    player_classes = PlayerClass().query.filter(PlayerClass.class_description!='').all()
-    classes = []
-    for player_class in player_classes:
-        classes.append(f'{player_class.class_name.title()} -- {player_class.class_description}')
+    player_classes = [f"{player_class.class_display_name} -- {player_class.class_description}" for player_class in PlayerClass().query.filter(PlayerClass.class_description!='').all()]
 
     # Fetch, and format, playable player races and descriptions for FAQs
-    player_races = PlayerRace().query.filter(PlayerRace.race_description!='').all()
-    races = []
-    for player_race in player_races:
-        race_name = player_race.race_name.replace('_', '-').title()
-        races.append(f'{race_name} -- {player_race.race_description}')
-
+    player_races = [f"{player_race.race_display_name} -- {player_race.race_description}" for player_race in PlayerRace().query.filter(PlayerRace.race_description!='').all()]
 
     all_faqs = {
 
@@ -37,16 +29,16 @@ def index():
 
         'Are there player classes?': [
             '<strong>Yes</strong>! '
-            f'There are <strong>{len(classes)}</strong> classes available to choose from, '
+            f'There are <strong>{len(player_classes)}</strong> classes available to choose from, '
             'when you create a player character:',
-            classes
+            player_classes
         ],
 
         'Are there player races?': [
             '<strong>Yes</strong>! '
-            f'There are <strong>{len(races)}</strong> races available to choose from, '
+            f'There are <strong>{len(player_races)}</strong> races available to choose from, '
             'when you create a player character:',
-            races
+            player_races
         ],
 
         'Is there role-playing?': [
