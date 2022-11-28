@@ -2,7 +2,7 @@
 import datetime
 from functools import cached_property
 from flask import url_for
-from flask_login import UserMixin
+from flask_login import current_user, UserMixin
 from passlib.hash import md5_crypt
 from sqlalchemy import Column, ForeignKey, String, TIMESTAMP, Text
 from sqlalchemy.dialects.mysql import INTEGER, MEDIUMINT, SMALLINT, TINYINT
@@ -389,6 +389,7 @@ class Player(Base):
 
     player_class = relationship('PlayerClass')
     player_race = relationship('PlayerRace')
+#    player_quest = relationship('PlayerQuest')
 
     @cached_property
     def birth_dt(self):
@@ -463,6 +464,49 @@ class Player(Base):
     def player_css(self):
         """Player CSS class"""
         return f'{self.player_type}'.lower() + '-player'
+
+    @property
+    def player_stats(self):
+        """Player stats"""
+        stats = {}
+
+        # Immortals, players below level 5, and players with less than one (1) hour of play time have no stats
+        # However, Gods can always access player stats
+        if not current_user.is_god:
+            if self.is_immortal or self.online < 3600 and not current_user.is_god:
+                return stats
+            if self.true_level < 5 and self.remorts == 0:
+                return stats
+
+        # Get the players player class, since each player class has a different primary (first) stat, and stat order
+        player_class = self.player_class.class_name
+        if  player_class == 'WARRIOR':
+            stats_order = [ 'Strength', 'Agility', 'Endurance', 'Willpower', 'Focus', 'Perception' ]
+        elif player_class == 'ROGUE':
+            stats_order = [ 'Agility', 'Perception', 'Strength', 'Focus', 'Endurance', 'Willpower' ]
+        elif player_class == 'CLERIC':
+            stats_order = [ 'Willpower', 'Strength', 'Perception', 'Endurance', 'Focus', 'Agility' ]
+        elif player_class == 'MAGICIAN':
+            stats_order = [ 'Perception', 'Focus', 'Agility', 'Willpower', 'Endurance', 'Strength' ]
+        elif player_class == 'NECROMANCER':
+            stats_order = [ 'Focus', 'Willpower', 'Perception', 'Agility', 'Strength', 'Endurance' ]
+        else:
+            return stats
+
+        # Get the players stats, and return them in the right order
+        players_stats = {
+                    'Agility':      self.curr_agility,
+                    'Endurance':    self.curr_endurance,
+                    'Focus':        self.curr_focus,
+                    'Perception':   self.curr_perception,
+                    'Strength':     self.curr_strength,
+                    'Willpower':    self.curr_willpower
+                }
+        for stat_order in stats_order:
+            stats[stat_order] = players_stats[stat_order]
+
+        return stats
+
 
     @cached_property
     def player_link(self):

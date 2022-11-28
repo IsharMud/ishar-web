@@ -84,7 +84,7 @@
         {%- if not player.is_immortal %}
             <ul id="player-details">
                 <li title="Name: {{ player.name | title | safe }} / Class: {{ player.player_class.class_display_name }} / Race: {{ player.player_race.race_display_name }}">
-                    {{ player.name | title | safe }} {{ player_phrase }} a {{ player.player_class.class_display }} of {{ player.player_race.race_name | replace('_', '-') | lower | safe }} origin.
+                    {{ player.name | title | safe }} {{ player_phrase }} a {{ player.player_class.class_display }} of {{ player.player_race.race_display_name | lower }} origin.
                 </li>
                 <li title="Level: {{ player.level }} {%- if player.remorts > 0 %} / Remorts: {{ player.remorts }}{% endif %}">
                     {{ player_gender | title }} {{ player_phrase }} level {{ player.level }}
@@ -132,7 +132,7 @@
             {%- endif %}
                 </li>
             </ul>
-            {%- if player.player_type != 'Dead' and player.quests | selectattr('value', 'equalto', 1) | list | length > 0 %}
+            {%- if player.player_type != 'Dead' and player.quests_completed | selectattr('value', 'equalto', 1) | list | length > 0 %}
             <h3 title="Quests">
                 Quests
             </h3>
@@ -159,43 +159,22 @@
                 {%- endfor %}
             </ol>
             {%- endif %}
-            {%- if player.true_level >= 5 or player.online >= 3600 or player.player_type == 'Dead' %}
+            {%- if player.player_stats %}
             <h3 title="Statistics">
                 Statistics
             </h3>
-                {%- if player.player_class.class_name == 'WARRIOR' %}
-                    {%- set stat_order  = [ 'Strength', 'Agility', 'Endurance', 'Willpower', 'Focus', 'Perception' ] %}
-                {%- elif player.player_class.class_name == 'ROGUE' %}
-                    {%- set stat_order  = [ 'Agility', 'Perception', 'Strength', 'Focus', 'Endurance', 'Willpower' ] %}
-                {%- elif player.player_class.class_name == 'CLERIC' %}
-                    {%- set stat_order  = [ 'Willpower', 'Strength', 'Perception', 'Endurance', 'Focus', 'Agility' ] %}
-                {%- elif player.player_class.class_name == 'MAGICIAN' %}
-                    {%- set stat_order  = [ 'Perception', 'Focus', 'Agility', 'Willpower', 'Endurance', 'Strength' ] %}
-                {%- elif player.player_class.class_name == 'NECROMANCER' %}
-                    {%- set stat_order  = [ 'Focus', 'Willpower', 'Perception', 'Agility', 'Strength', 'Endurance' ] %}
-                {%- else %}
-                    {%- set stat_order  = [ 'Agility', 'Endurance', 'Focus', 'Perception', 'Strength', 'Willpower' ] %}
-                {%- endif %}
-                {%- set player_stats = {
-                    'Agility':      player.curr_agility,
-                    'Endurance':    player.curr_endurance,
-                    'Focus':        player.curr_focus,
-                    'Perception':   player.curr_perception,
-                    'Strength':     player.curr_strength,
-                    'Willpower':    player.curr_willpower
-                } -%}
             <table id="player-statistics">
                 <tr>
-                {%- for stat in stat_order %}
-                    <th title="{{ stat }}: {{ player_stats[stat] }}">
-                        {{ stat }}
+                {%- for stat_name, stat_value in player.player_stats.items() %}
+                    <th title="{{ stat_name }}: {{ stat_value }}">
+                        {{ stat_name }}
                     </th>
                 {%- endfor %}
                 </tr>
                 <tr>
-                {%- for stat in stat_order %}
-                    <td title="{{ stat }}: {{ player_stats[stat] }}" {%- if loop.first %} id="primary-stat"{% endif %}>
-                        {{ player_stats[stat] }}
+                {%- for stat_name, stat_value in player.player_stats.items() %}
+                    <td title="{{ stat_name }}: {{ stat_value }}" {%- if loop.first %} id="primary-stat"{% endif %}>
+                        {{ stat_value }}
                     </td>
                 {%- endfor %}
                 </tr>
