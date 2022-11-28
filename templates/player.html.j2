@@ -121,7 +121,7 @@
                         </li>
                     </ul>
             {%- elif player.player_type == 'Survival' %}
-                    {{ player.name | title | safe }} {{ player_phrase }} a <span class="{{ player.player_css }}">{{ player.player_type }}</span> player.
+                    {{ player.name | title | safe }} {{ player_phrase }} a <span class="{{ player.player_css }}">{{ player.player_type }}</span> player!
             {%- else %}
                 {%- if player.deaths > 0 %}
                     {{ player_gender | title }} {{ player_phrase_owns }} died {{ player.deaths }}
