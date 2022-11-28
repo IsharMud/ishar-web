@@ -466,16 +466,19 @@ class Player(Base):
         """Player CSS class"""
         return f'{self.player_type}'.lower() + '-player'
 
-    @property
+    @cached_property
     def player_stats(self):
         """Player stats"""
         stats = {}
 
-        # Immortals, players below level 5, and players with less than one (1) hour of play time have no stats
-        # However, Gods can always access player stats
+        # Gods can always see player stats
         if not current_user.is_god:
-            if self.is_immortal or self.online < 3600 and not current_user.is_god:
+
+            # Immortals and players with less than one (1) hour of play time show no stats
+            if self.is_immortal or self.online < 3600:
                 return stats
+
+            # Mortal players below level 5, who have never remorted, also have no visible stats
             if self.true_level < 5 and self.remorts == 0:
                 return stats
 
@@ -494,7 +497,7 @@ class Player(Base):
         else:
             return stats
 
-        # Get the players stats, and return them in the right order
+        # Get the players stats
         players_stats = {
                     'Agility':      self.curr_agility,
                     'Endurance':    self.curr_endurance,
@@ -503,11 +506,12 @@ class Player(Base):
                     'Strength':     self.curr_strength,
                     'Willpower':    self.curr_willpower
                 }
+
+        # Put the players stats in the appropriate order based on their class
         for stat_order in stats_order:
             stats[stat_order] = players_stats[stat_order]
 
         return stats
-
 
     @cached_property
     def player_link(self):
