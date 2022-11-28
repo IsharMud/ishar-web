@@ -132,7 +132,7 @@
             {%- endif %}
                 </li>
             </ul>
-            {%- if player.player_type != 'Dead' and player.quests_completed | selectattr('value', 'equalto', 1) | list | length > 0 %}
+            {%- if player.player_type != 'Dead' and player.quests and player.quests | selectattr('value', 'equalto', 1) | list | length > 0 %}
             <h3 title="Quests">
                 Quests
             </h3>

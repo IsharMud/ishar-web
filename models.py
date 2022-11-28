@@ -238,6 +238,7 @@ class PlayerQuest(Base):
     value = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
 
     quest = relationship('Quest')
+    player = relationship('Player', backref='quests')
 
     def __repr__(self):
         return f'<PlayerQuest> "{self.quest.name}" ({self.quest_id}) @ ' \
