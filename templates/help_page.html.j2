@@ -15,7 +15,7 @@
                 <li class="nested-list">
                     <li>Syntax:</li>
                     <ul>
-                        <li><code>{{ topic['syntax'] }}</code></li>
+                        <li><code>{{ topic['syntax']  | safe | replace('>', '&gt;') | replace('<', '&lt;') }}</code></li>
                     </ul>
                 </li>
             {%- endif %}
@@ -23,7 +23,7 @@
                 <li class="nested-list">
                     <li>Minimum:</li>
                     <ul>
-                        <li><code>{{ topic['minimum'] }}</code></li>
+                        <li><code>{{ topic['minimum'] | safe | replace('>', '&gt;') | replace('<', '&lt;')}}</code></li>
                     </ul>
                 </li>
             {%- endif %}
@@ -31,7 +31,7 @@
                 <li class="nested-list">
                     <li>Player Class:</li>
                     <ul>
-                        <li><code>{{ topic['player_class'] }}</code></li>
+                        <li><code>{{ topic['player_class']  | safe | replace('>', '&gt;') | replace('<', '&lt;') }}</code></li>
                     </ul>
                 </li>
             {%- endif %}
@@ -39,7 +39,7 @@
                 <li class="nested-list">
                     <li>Player Level:</li>
                     <ul>
-                        <li><code>{{ topic['player_level'] }}</code></li>
+                        <li><code>{{ topic['player_level'] | safe | replace('>', '&gt;') | replace('<', '&lt;') }}</code></li>
                     </ul>
                 </li>
             {%- endif %}
@@ -48,7 +48,7 @@
                 <li class="nested-list">
                     <li>Save:</li>
                     <ul>
-                        <li><code>{{ topic['save'] }}</code></li>
+                        <li><code>{{ topic['save']  | safe | replace('>', '&gt;') | replace('<', '&lt;') }}</code></li>
                     </ul>
                 </li>
             {%- endif %}
