@@ -65,8 +65,9 @@
                 </li>
                     <ul>
                 {%- for related_topic in topic['related'] %}
+                    {%- set related_topic_name = related_topic | trim %}
                         <li>
-                            <a href="{{ url_for('help_page.index', topic=related_topic) }}">{{ related_topic }}</a>
+                            <a href="{{ url_for('help_page.index', topic=related_topic_name) }}">{{ related_topic_name }}</a>
                         </li>
                 {%- endfor %}
                     </ul>
