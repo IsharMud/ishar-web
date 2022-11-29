@@ -37,9 +37,12 @@ def login():
         else:
             flash('Sorry, but please enter a valid e-mail address and password.', 'error')
 
-    # Redirect authenticated users to the portal
+    # Redirect authenticated users to their requested page, or the portal
     if current_user.is_authenticated:
-        return redirect(session['next'] or url_for('portal.index'))
+        try:
+            return redirect(session['next'])
+        except KeyError:
+            return url_for('portal.index')
 
     # Show the log-in form
     return render_template('login.html.j2', login_form=login_form), 401
