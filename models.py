@@ -199,6 +199,21 @@ class PlayerClass(Base):
         """Human-readable display name for a player class"""
         return self.class_name.replace('_', '-').title()
 
+    @cached_property
+    def stats_order(self):
+        """Order which stats should be in, based upon player class"""
+        if  self.class_name == 'WARRIOR':
+            return [ 'Strength', 'Agility', 'Endurance', 'Willpower', 'Focus', 'Perception' ]
+        if self.class_name == 'ROGUE':
+            return [ 'Agility', 'Perception', 'Strength', 'Focus', 'Endurance', 'Willpower' ]
+        if self.class_name == 'CLERIC':
+            return [ 'Willpower', 'Strength', 'Perception', 'Endurance', 'Focus', 'Agility' ]
+        if self.class_name == 'MAGICIAN':
+            return [ 'Perception', 'Focus', 'Agility', 'Willpower', 'Endurance', 'Strength' ]
+        if self.class_name == 'NECROMANCER':
+            return [ 'Focus', 'Willpower', 'Perception', 'Agility', 'Strength', 'Endurance' ]
+        return ['Agility', 'Endurance', 'Focus', 'Perception', 'Strength', 'Willpower']
+
     def __repr__(self):
         return f'<PlayerClass> "{self.class_name}" ({self.class_id})'
 
@@ -218,40 +233,6 @@ class PlayerRace(Base):
 
     def __repr__(self):
         return f'<PlayerRace> "{self.race_name}" ({self.race_id})'
-
-
-class Quest(Base):
-    """Quest that can be achieved, and its rewards"""
-    __tablename__ = 'quests'
-
-    quest_id = Column(INTEGER(11), primary_key=True)
-    name = Column(String(25), nullable=False, unique=True, server_default=FetchedValue())
-    display_name = Column(String(30), nullable=False)
-    is_major = Column(TINYINT(1), nullable=False, server_default=FetchedValue())
-    xp_reward = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
-    completion_message = Column(String(80), nullable=False)
-
-    def __repr__(self):
-        return f'<Quest> "{self.name}" ({self.quest_id}) / ' \
-               f'"{self.display_name}" / XP: {self.xp_reward}'
-
-
-class PlayerQuest(Base):
-    """Player Quest database class
-    Quest associated with players completion"""
-    __tablename__ = 'player_quests'
-
-    quest_id = Column(ForeignKey('quests.quest_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True, primary_key=True)
-    player_id = Column(ForeignKey('players.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True, primary_key=True)
-    value = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
-
-    quest = relationship('Quest')
-    player = relationship('Player', backref='quests')
-
-    def __repr__(self):
-        return f'<PlayerQuest> "{self.quest.name}" ({self.quest_id}) @ ' \
-               f'<Player> "{self.player.name}" ({self.player_id}) ' \
-               f'/ Value: {self.value}'
 
 
 class RemortUpgrade(Base):
@@ -481,41 +462,26 @@ class Player(Base):
         # Gods can always see player stats
         if not current_user.is_god:
 
-            # Immortals and players with less than one (1) hour of play time show no stats
-            if self.is_immortal or self.online < 3600:
+            # Return empty dictionary, meaning no visible stats, for:
+            #   Immortals, and
+            #   mortals below level five (5) with less than one (1) hour play-time
+            if self.is_immortal:
                 return stats
-
-            # Mortal players below level 5, who have never remorted, also have no visible stats
-            if self.true_level < 5 and self.remorts == 0:
+            if self.true_level < 5 and self.online < 3600:
                 return stats
-
-        # Get the players player class, since each player class has a different primary (first) stat, and stat order
-        player_class = self.player_class.class_name
-        if  player_class == 'WARRIOR':
-            stats_order = [ 'Strength', 'Agility', 'Endurance', 'Willpower', 'Focus', 'Perception' ]
-        elif player_class == 'ROGUE':
-            stats_order = [ 'Agility', 'Perception', 'Strength', 'Focus', 'Endurance', 'Willpower' ]
-        elif player_class == 'CLERIC':
-            stats_order = [ 'Willpower', 'Strength', 'Perception', 'Endurance', 'Focus', 'Agility' ]
-        elif player_class == 'MAGICIAN':
-            stats_order = [ 'Perception', 'Focus', 'Agility', 'Willpower', 'Endurance', 'Strength' ]
-        elif player_class == 'NECROMANCER':
-            stats_order = [ 'Focus', 'Willpower', 'Perception', 'Agility', 'Strength', 'Endurance' ]
-        else:
-            return stats
 
         # Get the players stats
         players_stats = {
-                    'Agility':      self.curr_agility,
-                    'Endurance':    self.curr_endurance,
-                    'Focus':        self.curr_focus,
-                    'Perception':   self.curr_perception,
-                    'Strength':     self.curr_strength,
-                    'Willpower':    self.curr_willpower
+                    'Agility': self.curr_agility,
+                    'Endurance': self.curr_endurance,
+                    'Focus': self.curr_focus,
+                    'Perception': self.curr_perception,
+                    'Strength': self.curr_strength,
+                    'Willpower': self.curr_willpower
                 }
 
-        # Put the players stats in the appropriate order based on their class
-        for stat_order in stats_order:
+        # Put the players stats in the appropriate order based on their class, and return them
+        for stat_order in self.player_class.stats_order:
             stats[stat_order] = players_stats[stat_order]
 
         return stats
