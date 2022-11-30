@@ -34,7 +34,7 @@
                             </td>
                             <td>
                                 <a href="{{ url_for('admin.manage_account', manage_account_id=edit_player.account_id) }}">
-                                    {{ edit_player.account.account_name | title | safe }} (ID: {{ edit_player.account_id }})
+                                    {{ edit_player.account.display_name | safe }} (ID: {{ edit_player.account_id }})
                                 </a>
                             </td>
                         </tr>

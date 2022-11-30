@@ -243,7 +243,7 @@ def season_cycle():
 
                 # Add existing essence plus essence earned
                 calculated_essence = account.seasonal_points + account.seasonal_earned
-                flash(f'Account "{account.account_name}" ({account.account_id}) '
+                flash(f'Account "{account.display_name}" ({account.account_id}) '
                       f'now has {calculated_essence} essence. '
                       f'({account.seasonal_points} existing + '
                       f'{account.seasonal_earned} earned)', 'success')
@@ -254,7 +254,7 @@ def season_cycle():
 
             # Mention accounts that earned no essence
             else:
-                flash(f'Account "{account.account_name}"'
+                flash(f'Account "{account.display_name}"'
                       f'({account.account_id}) earned no essence', 'warning')
 
             # Loop through each player in each account

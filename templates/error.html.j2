@@ -11,9 +11,9 @@
             function sentryReport() {
                 Sentry.init({ dsn: "{{ sentry_dsn }}" });
                 Sentry.showReportDialog({
-        {%- if current_user and current_user.is_authenticated and current_user.account_name %}
+        {%- if current_user and current_user.is_authenticated and current_user.display_name %}
                     user:       {
-                        name:   "{{ current_user.account_name | title | safe }}",
+                        name:   "{{ current_user.display_name | safe }}",
                         email:  "{{ current_user.email }}"
                     },
         {%- endif %}

@@ -22,8 +22,8 @@
                 <p class="news-body" title="{{ news.body | striptags | safe }}">
                     {{ news.body | safe }}
                 </p>
-                <p class="news-creation" title="Posted {{ news.created_at.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }} by {{ news.account.account_name | title | safe }}">
-                    ~ {{ news.account.account_name | title | safe }} @ {{ news.created_at.strftime('%A, %B %d, %Y') }}
+                <p class="news-creation" title="Posted {{ news.created_at.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }} by {{ news.account.display_name | safe }}">
+                    ~ {{ news.account.display_name | safe }} @ {{ news.created_at.strftime('%A, %B %d, %Y') }}
                 </p>
     {%- endif %}
 {%- endblock content %}

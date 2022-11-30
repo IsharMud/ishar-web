@@ -5,7 +5,7 @@
 {% block meta_url %}{{ url_for('portal.index', _external=True) }}{% endblock meta_url %}
 {% block title %}Portal{% endblock title %}
 {%- block header %}
-Welcome{% if current_user.account_name is defined %}, {{ current_user.account_name | title | safe }}{% endif %}!
+Welcome{% if current_user.display_name %}, {{ current_user.display_name | safe }}{% endif %}!
 {%- endblock header %}
 {%- macro display_deaths(player) -%}
     {%- if player.player_type != 'Classic' -%}

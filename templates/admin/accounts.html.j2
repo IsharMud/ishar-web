@@ -7,7 +7,7 @@
 {% block header %}Accounts{% endblock header %}
 {%- macro display_account(account) %}
                             account_id:     {{ account.account_id }},
-                            name:           gridjs.html(`<a href="{{ url_for('admin.manage_account', manage_account_id=account.account_id) }}">{{ account.account_name | title | safe }}</a> <a title="Edit {{ account.account_name | title | safe }} (ID: {{ account.account_id }})" href="{{ url_for('admin.edit_account', edit_account_id=account.account_id) }}">✏️</a>`),
+                            name:           gridjs.html(`<a href="{{ url_for('admin.manage_account', manage_account_id=account.account_id) }}">{{ account.display_name | safe }}</a> <a title="Edit {{ account.display_name | safe }} (ID: {{ account.account_id }})" href="{{ url_for('admin.edit_account', edit_account_id=account.account_id) }}">✏️</a>`),
                             players:        {{ account.players | length }},
                             essence:        {{ account.seasonal_points }},
                             essence_earned: {{ account.seasonal_earned }}

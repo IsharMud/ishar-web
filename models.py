@@ -46,6 +46,11 @@ class Account(Base, UserMixin):
         """Method to check an account password"""
         return md5_crypt.verify(password, self.password)
 
+    @cached_property
+    def display_name(self):
+        """Format the account name to display"""
+        return self.account_name.replace('"', '').replace("'", '').title()
+
     def get_id(self):
         """flask-login account ID"""
         return self.email
@@ -88,6 +93,9 @@ class Account(Base, UserMixin):
             if player.seasonal_earned > earned:
                 earned = player.seasonal_earned
         return earned
+
+    def __str__(self):
+        return f'<Account> "{self.display_name}" (ID: {self.account_id})'
 
     def __repr__(self):
         return f'<Account> "{self.account_name}" (ID: {self.account_id})'

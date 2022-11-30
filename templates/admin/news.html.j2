@@ -62,7 +62,7 @@
                             news_id:    gridjs.html(`<a href="{{ url_for('admin.edit_news', edit_news_id=news.news_id) }}">{{ news.news_id }}</a>`),
                             subject:    "{{ news.subject | truncate(50) | safe }}",
                             body:       "{{ news.body | truncate(50) | safe }}",
-                            author:     "{{ news.account.account_name | title | safe }}",
+                            author:     "{{ news.account.display_name | safe }}",
                             created:    "{{ news.created_at }} ({{ news.created_at.strftime('%A, %B %d, %Y') }})",
                             delete:     gridjs.html(`<a href="{{ url_for('admin.delete_news', delete_news_id=news.news_id) }}" onclick="return confirm('Are you sure you want to delete this news post?');">❌</a>`)
                         }{% if not loop.last %},{% endif %}
