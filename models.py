@@ -398,7 +398,6 @@ class Player(Base):
 
     player_class = relationship('PlayerClass')
     player_race = relationship('PlayerRace')
-#    player_quest = relationship('PlayerQuest')
 
     @cached_property
     def birth_dt(self):
