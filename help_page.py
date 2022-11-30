@@ -19,7 +19,7 @@ def get_helptab():
 
     help_topics = get_all_help().split('\n#\n')
     topics = {}
-#    names = re.compile(r'[0-9]{0,2} [a-zA-Z]+')
+#    names = re.compile(r'[0-9]{2} [a-zA-Z]+')
     names = re.compile(r'32 [a-zA-Z]+')
 
     for help_topic in help_topics:
@@ -107,7 +107,7 @@ def index(topic=None):
 
     # Try to find a topic based on any user input
     if topic:
-        if topic in topics.keys():
+        if topic in topics:
             topic = topics[topic]
         else:
             topic = None
