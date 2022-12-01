@@ -1,14 +1,44 @@
 {%- set page = 'help' -%}
 {% extends "layout.html.j2" %}
 {%- if topic is defined and topic is iterable and topic['aliases'] is defined %}
-    {%- set topic_alias = topic['aliases'][0] | replace('32 ', '') | trim %}
+    {%- set topic_alias = topic['aliases'][0] | safe | trim %}
 {%- endif %}
 {%- block meta_title -%}Help{%- if topic_alias -%}: {{ topic_alias }}{%- endif -%}{%- endblock meta_title -%}
 {% block meta_description %}Help pages for Ishar MUD{% endblock meta_description %}
 {% block meta_url %}{{ url_for('help_page.index', topic=topic_alias, _external=True) }}{% endblock meta_url %}
 {% block header -%}Help{%- if topic_alias -%}: {{ topic_alias }}{%- endif -%}{%- endblock header -%}
 {%- block title -%}Help{%- if topic_alias -%}: {{ topic_alias }}{%- endif -%}{%- endblock title -%}
+{%- macro render_field(field) -%}
+                    {{ field(**kwargs) | safe }}
+    {%- if field.errors %}
+                <ul class="field-errors">
+        {%- for error in field.errors %}
+                    <li>
+                        {{ error }}
+                    </li>
+        {%- endfor %}
+                </ul>
+    {%- endif %}
+{%- endmacro -%}
 {%- block content %}
+    {%- if help_search_form is defined %}
+            <p>
+                <form method="post" action="{{ url_for('help_page.index') }}" id="help-search-form">
+                    {{ render_field(help_search_form.help_search_name, maxlength=32) }}
+                    {{ help_search_form.csrf_token }}
+                    {{ render_field(help_search_form.submit) }}
+                </form>
+            </p>
+    {%- endif %}
+    {%- if maybe_topics is defined %}
+            <ul>
+        {%- for maybe_topic in maybe_topics %}
+                <li>
+                    <a href="{{ url_for('help_page.single', topic=maybe_topic) }}">{{ maybe_topic }}</a>
+                </li>
+        {%- endfor %}
+            </ul>
+    {%- endif %}
     {%- if topic %}
             <ul>
             {%- if topic['syntax'] %}

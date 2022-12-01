@@ -5,7 +5,7 @@ from flask_wtf import FlaskForm
 from wtforms import BooleanField, DateTimeLocalField, EmailField, IntegerField, \
     PasswordField, StringField, SubmitField, TextAreaField
 from wtforms.validators import DataRequired, Email, EqualTo, Length, NumberRange
-from wtforms_validators import Alpha
+from wtforms_validators import Alpha, AlphaSpace
 from mud_secret import ALIGNMENTS
 
 class ChangePasswordForm(FlaskForm):
@@ -74,6 +74,18 @@ class EditPlayerForm(FlaskForm):
     submit = SubmitField('Edit Player')
 
 
+class HelpSearchForm(FlaskForm):
+    """Help search form class to search help topic names"""
+    help_search_name = StringField('Topic',
+                                     validators=[
+                                         DataRequired(),
+                                         Length(min=2, max=32),
+                                         AlphaSpace(message='Topic names may only contain between 2-32 letters!')
+                                     ]
+                                    )
+    submit = SubmitField('Search')
+
+
 class LoginForm(FlaskForm):
     """Log In form class"""
     email = EmailField('E-mail Address', validators=[DataRequired(), Email()])
@@ -97,7 +109,7 @@ class PlayerSearchForm(FlaskForm):
                                          Length(min=3, max=25),
                                          Alpha(message='Player names may only contain letters!')
                                      ]
-                                     )
+                                    )
     submit = SubmitField('Search')
 
 

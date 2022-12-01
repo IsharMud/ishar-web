@@ -1,7 +1,9 @@
 """Help page"""
 import re
-from flask import Blueprint, flash, render_template
+from flask import Blueprint, flash, redirect, render_template, url_for
+from forms import HelpSearchForm
 from mud_secret import HELPTAB, IMM_LEVELS
+
 
 def get_all_help(helptab_file=HELPTAB):
     """Read/process the 'helptab' file used by the MUD"""
@@ -100,20 +102,54 @@ def get_helptab(regex=re.compile(r'32 [a-zA-Z]+')):
 help_page = Blueprint('help_page', __name__)
 
 
-@help_page.route('/help/', methods=['GET'])
-@help_page.route('/help', methods=['GET'])
+@help_page.route('/help/', methods=['GET', 'POST'])
+@help_page.route('/help', methods=['GET', 'POST'])
 def index():
-    """Help page that uses the existing game helptab file to list all help topics"""
+    """Main help page"""
 
-    # Get and return all topics from the helptab file
+    # Get all topics from the helptab file
+    code = 200
+    topic = None
     topics = get_helptab()
-    return render_template('help_page.html.j2', topic=None, topics=topics)
+
+    # Get help search form and check if submitted
+    help_search_form = HelpSearchForm()
+    if help_search_form.validate_on_submit():
+
+        # Lower-case the search string
+        search_string = help_search_form.help_search_name.data.lower()
+
+        # Use direct match on a topic name
+        if search_string in topics:
+            return redirect(url_for('help_page.single', topic=search_string))
+
+        # Loop through all available topics...
+        for tvals in topics.values():
+
+            # Use direct match on topic alias
+            if tvals['aliases'] and search_string in tvals['aliases']:
+                return redirect(url_for('help_page.single', topic=tvals['aliases'][0]))
+
+            # Loop through each topics aliases...
+            for topic_alias in tvals['aliases']:
+
+                # Use the first alias which starts with, contains, or ends with, the search string
+                if topic_alias.startswith(search_string) or search_string in topic_alias or topic_alias.endswith(search_string):
+                    return redirect(url_for('help_page.single', topic=tvals['aliases'][0]))
+
+        # If the search made it this far, nothing was found...
+        code = 404
+        flash('Sorry, but no topics were found!', 'error')
+
+    return render_template('help_page.html.j2', topic=topic, topics=topics,
+                            help_search_form=help_search_form
+                          ), code
 
 
 @help_page.route('/help/<string:topic>', methods=['GET'])
 @help_page.route('/help/<string:topic>/', methods=['GET'])
 def single(topic=None):
-    """Help page that uses the existing game helptab file to display a single help topic"""
+    """Help topic page"""
 
     topics = get_helptab()
     code = 404
@@ -126,7 +162,7 @@ def single(topic=None):
         ret = None
         flash('Sorry, but that topic was not found!', 'error')
 
-    return render_template('help_page.html.j2', topic=ret, topics=topics), code
+    return render_template('help_page.html.j2', topic=ret, topics=topics, help_search_form=HelpSearchForm()), code
 
 
 @help_page.route('/areas/', methods=['GET'])
@@ -135,4 +171,5 @@ def single(topic=None):
 @help_page.route('/world', methods=['GET'])
 def world():
     """World page"""
+    # Return only the areas from the helptab file
     return render_template('world.html.j2', areas=get_helptab(regex=re.compile(r'32 Area [a-zA-Z]+')))
