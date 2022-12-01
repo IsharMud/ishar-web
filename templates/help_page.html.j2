@@ -58,6 +58,21 @@
                 {{ topic['text'] | safe | replace('>', '&gt;') | replace('<', '&lt;') }}
             </pre>
 
+            {%- if topic['aliases'] and topic['aliases'] is iterable and topic['aliases'] | length > 0 %}
+            <ul>
+                <li class="nested-list">
+                    <i>Aliases:</i>
+                </li>
+                    <ul>
+                {%- for topic_alias in topic['aliases'] %}
+                        <li>
+                            <a href="{{ url_for('help_page.single', topic=topic_alias) }}">{{ topic_alias }}</a>
+                        </li>
+                {%- endfor %}
+                    </ul>
+            </ul>
+            {%- endif %}
+
             {%- if topic['see_also'] and topic['see_also'] is iterable and topic['see_also'] | length > 0 %}
             <ul>
                 <li class="nested-list">
@@ -66,7 +81,7 @@
                     <ul>
                 {%- for related_topic in topic['see_also'] %}
                         <li>
-                            <a href="{{ url_for('help_page.index', topic=related_topic) }}">{{ related_topic }}</a>
+                            <a href="{{ url_for('help_page.single', topic=related_topic) }}">{{ related_topic }}</a>
                         </li>
                 {%- endfor %}
                     </ul>
@@ -78,14 +93,9 @@
     {%- if topics and topics is iterable and topics | length > 0 %}
             <ul id="world-list">
         {%- for list_topic in topics %}
-            {%- set list_topic_parse = list_topic | replace('32 ', '')  | trim %}
-            {%- if list_topic_parse != '' %}
-                <li title="Topic: {{ list_topic_parse }}">
-                    <a href="{{ url_for('help_page.index', topic=list_topic_parse) }}">
-                        {{ list_topic_parse | lower }}
-                    </a>
-                </li>
-            {%- endif %}
+            <li title="Topic: {{ list_topic }}">
+                <a href="{{ url_for('help_page.single', topic=list_topic) }}">{{ list_topic }}</a>
+            </li>
         {%- endfor %}
             </ul>
     {%- endif %}

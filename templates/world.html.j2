@@ -12,8 +12,8 @@
                 setting the scene for many of the adventures to be had here.
             </p>
             <p>
-                From the shattered ruins of <a href="{{ url_for('help_page.index', topic='Area Torm Sarvek') }}" title="Area: Torm Sarvek">Torm Sarvek</a>
-                to the splendor of <a href="{{ url_for('help_page.index', topic='Area Mareldja') }}" title="Area: Mareldja">Mareldja</a>,
+                From the shattered ruins of <a href="{{ url_for('help_page.single', topic='area torm sarvek') }}" title="Area: Torm Sarvek">Torm Sarvek</a>
+                to the splendor of <a href="{{ url_for('help_page.single', topic='area mareldja') }}" title="Area: Mareldja">Mareldja</a>,
                 the darkness of Hedros, the dense Talrynian Forest, all of these lands and more are open to you.
             </p>
             <p>
@@ -24,7 +24,7 @@
             <ul id="world-list">
         {%- for area in areas %}
                 <li title="{{ area }}">
-                    <a href="{{ url_for('help_page.index', topic=area) }}">{{ area }}</a>
+                    <a href="{{ url_for('help_page.single', topic=area) }}">{{ area }}</a>
                 </li>
         {%- endfor %}
             </ul>

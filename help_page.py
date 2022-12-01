@@ -14,14 +14,11 @@ def get_all_help(helptab_file=HELPTAB):
     return all_help
 
 
-def get_helptab(areas=False, topic=None):
+def get_helptab(regex=re.compile(r'32 [a-zA-Z]+')):
     """Find help in helptab"""
 
     help_topics = get_all_help().split('\n#\n')
     topics = {}
-    names = re.compile(r'32 [a-zA-Z]+')
-    if areas:
-        names = re.compile(r'32 Area [a-zA-Z]+')
 
     for help_topic in help_topics:
 
@@ -56,8 +53,8 @@ def get_helptab(areas=False, topic=None):
                 if line_no == 1 and stripped.isdigit():
                     this_topic['level'] = int(stripped)
 
-                elif names.match(line):
-                    this_topic['aliases'].append(stripped)
+                elif regex.match(line):
+                    this_topic['aliases'].append(stripped.lower().replace('32 ', ''))
 
             elif not in_header:
 
@@ -66,7 +63,7 @@ def get_helptab(areas=False, topic=None):
                     see_also = stripped.lower().replace('see also: ', '')
                     see_also = see_also.split(',')
                     for also in see_also:
-                        see_topic = also.strip()
+                        see_topic = also.replace('.', '').strip()
                         if see_topic:
                             this_topic['see_also'].append(see_topic)
 
@@ -103,30 +100,33 @@ def get_helptab(areas=False, topic=None):
 help_page = Blueprint('help_page', __name__)
 
 
-@help_page.route('/help/<string:topic>', methods=['GET'])
-@help_page.route('/help/<string:topic>/', methods=['GET'])
 @help_page.route('/help/', methods=['GET'])
 @help_page.route('/help', methods=['GET'])
-def index(topic=None):
-    """Help page that uses the game's existing helptab file
-        to display information about each topic"""
+def index():
+    """Help page that uses the existing game helptab file to list all help topics"""
 
-    # Get all topics from the helptab file
+    # Get and return all topics from the helptab file
     topics = get_helptab()
-    code = 200
+    return render_template('help_page.html.j2', topic=None, topics=topics)
 
-    # Try to find a topic based on any user input
-    if topic:
-        if topic in topics:
-            topic = topics[topic]
-        else:
-            for jawn in topics:
-                print(jawn)
 
-            topic = None
-            code = 404
+@help_page.route('/help/<string:topic>', methods=['GET'])
+@help_page.route('/help/<string:topic>/', methods=['GET'])
+def single(topic=None):
+    """Help page that uses the existing game helptab file to display a single help topic"""
 
-    return render_template('help_page.html.j2', topic=topic, topics=topics), code
+    topics = get_helptab()
+    code = 404
+    for tvals in topics.values():
+        if tvals['aliases'] and topic in tvals['aliases']:
+            ret = tvals
+            code = 200
+
+    if code == 404:
+        ret = None
+        flash('Sorry, but that topic was not found!', 'error')
+
+    return render_template('help_page.html.j2', topic=ret, topics=topics), code
 
 
 @help_page.route('/areas/', methods=['GET'])
@@ -135,4 +135,4 @@ def index(topic=None):
 @help_page.route('/world', methods=['GET'])
 def world():
     """World page"""
-    return render_template('world.html.j2', areas=get_helptab(areas=True))
+    return render_template('world.html.j2', areas=get_helptab(regex=re.compile(r'32 Area [a-zA-Z]+')))
