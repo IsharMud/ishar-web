@@ -1,7 +1,7 @@
 """Help page"""
 import re
 from flask import Blueprint, flash, render_template
-from mud_secret import HELPTAB
+from mud_secret import HELPTAB, IMM_LEVELS
 
 def get_all_help(helptab_file=HELPTAB):
     """Read/process the 'helptab' file used by the MUD"""
@@ -14,24 +14,27 @@ def get_all_help(helptab_file=HELPTAB):
     return all_help
 
 
-def get_helptab():
+def get_helptab(areas=False, topic=None):
     """Find help in helptab"""
 
     help_topics = get_all_help().split('\n#\n')
     topics = {}
-#    names = re.compile(r'[0-9]{2} [a-zA-Z]+')
     names = re.compile(r'32 [a-zA-Z]+')
+    if areas:
+        names = re.compile(r'32 Area [a-zA-Z]+')
 
     for help_topic in help_topics:
 
         lines = help_topic.split('\n')
         line_no = 0
         in_header = True
+        in_related = False
 
         this_topic = {
             'level':    int(),
             'aliases':  [],
-            'text':     ''
+            'text':     '',
+            'see_also': []
         }
 
         for line in lines:
@@ -40,11 +43,12 @@ def get_helptab():
             line_no += 1
 
             # End of the header
-            if line == '*':
+            if stripped == '*':
                 in_header = False
                 continue
 
-            if stripped.startswith('%% '):
+            if stripped.startswith('%% ') or stripped == '#':
+                in_related = False
                 break
 
             if in_header:
@@ -57,41 +61,47 @@ def get_helptab():
 
             elif not in_header:
 
-                if line.startswith('Syntax : '):
-                    syntax = stripped.replace('Syntax : ', '')
+                if in_related or stripped.lower().startswith('see also: '):
+                    in_related = True
+                    see_also = stripped.lower().replace('see also: ', '')
+                    see_also = see_also.split(',')
+                    for also in see_also:
+                        see_topic = also.strip()
+                        if see_topic:
+                            this_topic['see_also'].append(see_topic)
+
+                elif line.lower().startswith('syntax : '):
+                    syntax = stripped.lower().replace('syntax : ', '')
                     this_topic['syntax'] = syntax
 
-                elif line.startswith('Minimum: '):
-                    minimum = stripped.replace('Minimum: ', '')
+                elif line.lower().startswith('minimum: '):
+                    minimum = stripped.lower().replace('minimum: ', '')
                     this_topic['minimum'] = minimum
 
-                elif line.startswith('Class  : '):
-                    player_class = stripped.replace('Class  : ', '')
+                elif line.lower().startswith('class  : '):
+                    player_class = stripped.lower().replace('class  : ', '')
                     this_topic['player_class'] = player_class
 
-                elif line.startswith('Level  : '):
-                    player_level = stripped.replace('Level  : ', '')
+                elif line.lower().startswith('level  : '):
+                    player_level = stripped.lower().replace('level  : ', '')
                     this_topic['player_level'] = player_level
 
-                elif line.startswith('Save   : '):
-                    save = stripped.replace('Save   : ', '')
+                elif line.lower().startswith('save   : '):
+                    save = stripped.lower().replace('save   : ', '')
                     this_topic['save'] = save
-
-                elif stripped.startswith('See also: '):
-                    similar = stripped.replace('See also: ', '')
-                    this_topic['related'] = similar.split(',')
 
                 else:
                     this_topic['text'] += line + "\n"
 
-        if this_topic['aliases'] and this_topic['level'] < 20:
-            topic_name = this_topic['aliases'][0].replace('32 ', '')
+        if this_topic['aliases'] and this_topic['level'] < min(IMM_LEVELS):
+            topic_name = this_topic['aliases'][0].replace('32 ', '').lower()
             topics[topic_name] = this_topic
 
     return topics
 
 
 help_page = Blueprint('help_page', __name__)
+
 
 @help_page.route('/help/<string:topic>', methods=['GET'])
 @help_page.route('/help/<string:topic>/', methods=['GET'])
@@ -110,8 +120,19 @@ def index(topic=None):
         if topic in topics:
             topic = topics[topic]
         else:
+            for jawn in topics:
+                print(jawn)
+
             topic = None
             code = 404
-            flash('Sorry, but please choose a valid topic!', 'error')
 
     return render_template('help_page.html.j2', topic=topic, topics=topics), code
+
+
+@help_page.route('/areas/', methods=['GET'])
+@help_page.route('/areas', methods=['GET'])
+@help_page.route('/world/', methods=['GET'])
+@help_page.route('/world', methods=['GET'])
+def world():
+    """World page"""
+    return render_template('world.html.j2', areas=get_helptab(areas=True))

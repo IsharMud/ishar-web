@@ -27,7 +27,7 @@ from redirects import redirects
 from season import season
 from support import support
 from wizlist import wizlist
-from world import world
+
 
 # Flask
 app = Flask(__name__)
@@ -82,7 +82,6 @@ app.register_blueprint(redirects)
 app.register_blueprint(season)
 app.register_blueprint(support)
 app.register_blueprint(wizlist)
-app.register_blueprint(world)
 
 
 @app.context_processor

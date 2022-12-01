@@ -5,11 +5,14 @@
                 <li title="Frequently Asked Questions">
                    <a href="{{ url_for('faqs.index') }}" {%- if page == 'faqs' %} id="active-nav"{% endif %}>FAQs</a>
                 </li>
+                <li title="Help">
+                    <a href="{{ url_for('help_page.index') }}" {%- if page == 'help' %} id="active-nav"{% endif%}>Help</a>
+                </li>
                 <li title="Patches">
                     <a href="{{ url_for('patches.index') }}" {%- if page == 'patches' %} id="active-nav"{% endif%}>Patches</a>
                 </li>
                 <li title="World">
-                    <a href="{{ url_for('world.index') }}" {%- if page == 'world' %} id="active-nav"{% endif%}>World</a>
+                    <a href="{{ url_for('help_page.world') }}" {%- if page == 'world' %} id="active-nav"{% endif%}>World</a>
                 </li>
                 <li title="Portal">
                     <a href ="{{ url_for('portal.index') }}" {%- if page == 'portal' %} id="active-nav"{% endif%}>Portal</a>
