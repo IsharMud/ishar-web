@@ -30,15 +30,6 @@
                 </form>
             </p>
     {%- endif %}
-    {%- if maybe_topics is defined %}
-            <ul>
-        {%- for maybe_topic in maybe_topics %}
-                <li>
-                    <a href="{{ url_for('help_page.single', topic=maybe_topic) }}">{{ maybe_topic }}</a>
-                </li>
-        {%- endfor %}
-            </ul>
-    {%- endif %}
     {%- if topic %}
             <ul>
             {%- if topic['syntax'] %}
