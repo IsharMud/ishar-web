@@ -1,5 +1,4 @@
 """Help page"""
-import re
 from flask import abort, Blueprint, flash, redirect, render_template, url_for
 from mud_secret import HELPTAB, IMM_LEVELS
 
@@ -108,9 +107,9 @@ help_page = Blueprint('help_page', __name__)
 @help_page.route('/help/<string:topic>', methods=['GET'])
 def single(topic=None):
     """Display a single help topic"""
-    topics = get_help_topics()
 
-    # Display exact topic name matches
+    # Get all topics, and display exact topic name matches
+    topics = get_help_topics()
     if topic in topics:
         return render_template('help_page.html.j2', topic=topics[topic], topics=topics)
 
