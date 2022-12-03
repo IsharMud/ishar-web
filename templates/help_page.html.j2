@@ -1,13 +1,13 @@
 {%- set page = 'help' -%}
 {% extends "layout.html.j2" %}
-{%- if topic is defined and topic is iterable and topic['name'] is defined %}
-    {%- set topic_name = topic['name'] | safe | trim %}
+{%- if topic is defined and topic is iterable and topic['aliases'] is defined %}
+    {%- set topic_alias = topic['aliases'][0] | safe | trim %}
 {%- endif %}
-{%- block meta_title -%}Help{%- if topic_name -%}: {{ topic_name }}{%- endif -%}{%- endblock meta_title -%}
+{%- block meta_title -%}Help{%- if topic_alias -%}: {{ topic_alias }}{%- endif -%}{%- endblock meta_title -%}
 {% block meta_description %}Help pages for Ishar MUD{% endblock meta_description %}
-{% block meta_url %}{{ url_for('help_page.single', topic=topic_name, _external=True) }}{% endblock meta_url %}
-{% block header -%}Help{%- if topic_name -%}: {{ topic_name }}{%- endif -%}{%- endblock header -%}
-{%- block title -%}Help{%- if topic_name -%}: {{ topic_name }}{%- endif -%}{%- endblock title -%}
+{% block meta_url %}{{ url_for('help_page.index', topic=topic_alias, _external=True) }}{% endblock meta_url %}
+{% block header -%}Help{%- if topic_alias -%}: {{ topic_alias }}{%- endif -%}{%- endblock header -%}
+{%- block title -%}Help{%- if topic_alias -%}: {{ topic_alias }}{%- endif -%}{%- endblock title -%}
 {%- macro render_field(field) -%}
                     {{ field(**kwargs) | safe }}
     {%- if field.errors %}
@@ -36,7 +36,7 @@
                 <li class="nested-list">
                     <li>Syntax:</li>
                     <ul>
-                        <li><code>{{ topic['syntax']  | safe }}</code></li>
+                        <li><code>{{ topic['syntax']  | safe | replace('>', '&gt;') | replace('<', '&lt;') }}</code></li>
                     </ul>
                 </li>
             {%- endif %}
@@ -44,7 +44,7 @@
                 <li class="nested-list">
                     <li>Minimum:</li>
                     <ul>
-                        <li><code>{{ topic['minimum'] | safe }}</code></li>
+                        <li><code>{{ topic['minimum'] | safe | replace('>', '&gt;') | replace('<', '&lt;')}}</code></li>
                     </ul>
                 </li>
             {%- endif %}
@@ -52,7 +52,7 @@
                 <li class="nested-list">
                     <li>Player Class:</li>
                     <ul>
-                        <li><code>{{ topic['player_class']  | safe }}</code></li>
+                        <li><code>{{ topic['player_class']  | safe | replace('>', '&gt;') | replace('<', '&lt;') }}</code></li>
                     </ul>
                 </li>
             {%- endif %}
@@ -60,7 +60,7 @@
                 <li class="nested-list">
                     <li>Player Level:</li>
                     <ul>
-                        <li><code>{{ topic['player_level'] | safe }}</code></li>
+                        <li><code>{{ topic['player_level'] | safe | replace('>', '&gt;') | replace('<', '&lt;') }}</code></li>
                     </ul>
                 </li>
             {%- endif %}
@@ -69,14 +69,16 @@
                 <li class="nested-list">
                     <li>Save:</li>
                     <ul>
-                        <li><code>{{ topic['save']  | safe }}</code></li>
+                        <li><code>{{ topic['save']  | safe | replace('>', '&gt;') | replace('<', '&lt;') }}</code></li>
                     </ul>
                 </li>
             {%- endif %}
             </ul>
+
             <pre>
-                {{- topic['body_text'] | safe -}}
+                {{ topic['text'] | safe | replace('>', '&gt;') | replace('<', '&lt;') }}
             </pre>
+
             {%- if topic['aliases'] and topic['aliases'] is iterable and topic['aliases'] | length > 0 %}
             <ul>
                 <li class="nested-list">
@@ -91,6 +93,7 @@
                     </ul>
             </ul>
             {%- endif %}
+
             {%- if topic['see_also'] and topic['see_also'] is iterable and topic['see_also'] | length > 0 %}
             <ul>
                 <li class="nested-list">
