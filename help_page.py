@@ -1,5 +1,6 @@
 """Help page"""
-from flask import abort, Blueprint, flash, redirect, render_template, url_for
+from flask import abort, Blueprint, flash, redirect, render_template, request, url_for
+from forms import HelpSearchForm
 from mud_secret import HELPTAB, IMM_LEVELS
 
 
@@ -23,7 +24,7 @@ def get_help_chunks(help_file=HELPTAB):
 
 
 def get_help_topics():
-    """Parse the MUD 'helptab' file chunked list into topics"""
+    """Parse the MUD 'helptab' file chunked list into dictionry of topics"""
     # Get helptab file list of chunks
     help_chunks = get_help_chunks()
     help_topics = {}
@@ -100,7 +101,51 @@ def parse_help_header(header=None):
     return help_header
 
 
+def search_help_topics(search=None):
+    """Search all help topics for a specific topic name or alias"""
+
+    # Loop through each topic to find any matches in the names or aliases
+    all_topics = get_help_topics()
+    topics = []
+    search = search.lower()
+    for tname, tvals in all_topics.items():
+        if search in tname.lower():
+            topics.append(tname)
+        else:
+            for topic_alias in tvals['aliases']:
+                if search in topic_alias.lower():
+                    topics.append(topic_alias)
+    return topics
+
+
 help_page = Blueprint('help_page', __name__)
+
+
+@help_page.route('/help/', methods=['GET'])
+@help_page.route('/help', methods=['GET'])
+def index():
+    """Main help page lists help topics"""
+
+    # Find all topics, by default
+    code = 200
+    topics = get_help_topics()
+
+    # Handle searches
+    if request.args.get('search'):
+
+        # Try to find matching help topics
+        topics = search_help_topics(request.args.get('search'))
+
+        # If there was only one match, redirect to it
+        if len(topics) == 1:
+            return redirect(url_for('help_page.single', topic=topics[0], _anchor='content'))
+
+        # Return an error if the search had no results
+        if not topics:
+            flash('Sorry, but no topics could be found!', 'error')
+            code = 404
+
+    return render_template('help_page.html.j2', topic=None, topics=topics, help_search_form=HelpSearchForm()), code
 
 
 @help_page.route('/help/<string:topic>/', methods=['GET'])
@@ -111,24 +156,17 @@ def single(topic=None):
     # Get all topics, and display exact topic name matches
     topics = get_help_topics()
     if topic in topics:
-        return render_template('help_page.html.j2', topic=topics[topic], topics=topics)
+        return render_template('help_page.html.j2', topic=topics[topic], topics=topics, help_search_form=HelpSearchForm())
 
     # Loop through each topics aliases to find a match,
-    #   and redirect to the primary name if there is one
+    #   and redirect to the primary name, if there is one
     for tvals in topics.values():
         if topic in tvals['aliases']:
-            return redirect(url_for('help_page.single', topic=tvals['name']))
+            return redirect(url_for('help_page.single', topic=tvals['name'], _anchor='content'))
 
     # Otherwise, the topic could not be found
     flash('Sorry, but no topics could be found!', 'error')
     abort(404)
-
-
-@help_page.route('/help/', methods=['GET', 'POST'])
-@help_page.route('/help', methods=['GET', 'POST'])
-def index():
-    """Main help page lists all help topics"""
-    return render_template('help_page.html.j2', topic=None, topics=get_help_topics())
 
 
 @help_page.route('/areas/', methods=['GET'])
@@ -138,4 +176,4 @@ def index():
 def world():
     """World page"""
     # Return only the areas from the helptab file
-    return render_template('world.html.j2', areas=None)
+    return render_template('world.html.j2', areas=search_help_topics(search='area '))
