@@ -1,168 +1,135 @@
 """Help page"""
 import re
-from flask import Blueprint, flash, redirect, render_template, url_for
-from forms import HelpSearchForm
+from flask import abort, Blueprint, flash, redirect, render_template, url_for
 from mud_secret import HELPTAB, IMM_LEVELS
 
 
-def get_all_help(helptab_file=HELPTAB):
-    """Read/process the 'helptab' file used by the MUD"""
-    all_help = None
+def get_help_chunks(help_file=HELPTAB):
+    """Parse the MUD 'helptab' file into chunks, by '#' character, to roughly separate topics"""
+    # Open the 'helptab' file (read-only)
+    try:
+        with open(file=help_file, mode='r', encoding='utf-8') as help_fh:
 
-    with open(file=helptab_file, mode='r', encoding='utf-8') as helptab_fh:
-        all_help = helptab_fh.read()
-    helptab_fh.close()
+            # Split the contents of the file into a list,
+            #   where each item is separated by "\n#\n" - hash (#) on a line by itself
+            #   and return "chunks" except the first (instructions/example)
+            return help_fh.read().split('\n#\n')[1:]
 
-    return all_help
+    # Catch/return any exception, and close the 'helptab' file
+    except Exception as err:
+        return err
+
+    finally:
+        help_fh.close()
 
 
-def get_helptab(regex=re.compile(r'32 [a-zA-Z]+')):
-    """Find help in helptab"""
+def get_help_topics():
+    """Parse the MUD 'helptab' file chunked list into topics"""
+    # Get helptab file list of chunks
+    help_chunks = get_help_chunks()
+    help_topics = {}
 
-    help_topics = get_all_help().split('\n#\n')
-    topics = {}
+    # Loop through each chunk from the list
+    for help_chunk in help_chunks:
 
-    for help_topic in help_topics:
+        # Parse the chunk from the list
+        parsed_chunk = parse_help_chunk(help_chunk)
 
-        lines = help_topic.split('\n')
-        line_no = 0
-        in_header = True
-        in_related = False
+        # If the chunk was parsed, and named,
+        #   add it to a dictionary of topics to return
+        if parsed_chunk and 'name' in parsed_chunk:
+            parsed_name = parsed_chunk['name']
+            help_topics[parsed_name] = parsed_chunk
 
-        this_topic = {
-            'level':    int(),
-            'aliases':  [],
-            'text':     '',
-            'see_also': []
-        }
+    # Return a dictionary of topics, parsed from the list of chunks
+    return help_topics
 
-        for line in lines:
 
-            stripped = line.strip()
-            line_no += 1
+def parse_help_chunk(help_chunk=None):
+    """Parse a single chunk from the MUD 'helptab' file"""
 
-            # End of the header
-            if stripped == '*':
-                in_header = False
-                continue
+    # Split the chunk in half on the separator, between its header and body text:
+    #   "\n*\n" - asterisk (*), on a line by itself
+    halves = help_chunk.split('\n*\n')
+    help_topic = {}
 
-            if stripped.startswith('%% ') or stripped == '#':
-                in_related = False
-                break
+    # Proceed if there are two halves
+    if len(halves) == 2:
 
-            if in_header:
+        # Parse the help topic header, which is everything before '*'
+        help_header = parse_help_header(header=halves[0])
 
-                if line_no == 1 and stripped.isdigit():
-                    this_topic['level'] = int(stripped)
+        # Proceed if mortals should be able to reach the topic,
+        #   and it starts with "32 "
+        if help_header and 'name' in help_header:
+            help_topic['name'] = help_header['name']
+            help_topic['aliases'] = help_header['aliases']
 
-                elif regex.match(line):
-                    this_topic['aliases'].append(stripped.lower().replace('32 ', ''))
+            # Topic body text is everything after the header and '*'
+            help_topic['body_text'] = halves[1].replace('>', '&gt;').replace('<', '&lt;').replace('"', '&quot;')
+            help_topic['body_lines'] = help_topic['body_text'].split('\n')
 
-            elif not in_header:
+    # Return the help topic dictionary
+    return help_topic
 
-                if in_related or stripped.lower().startswith('see also: '):
-                    in_related = True
-                    see_also = stripped.lower().replace('see also: ', '')
-                    see_also = see_also.split(',')
-                    for also in see_also:
-                        see_topic = also.replace('.', '').strip()
-                        if see_topic:
-                            this_topic['see_also'].append(see_topic)
 
-                elif line.lower().startswith('syntax : '):
-                    syntax = stripped.lower().replace('syntax : ', '')
-                    this_topic['syntax'] = syntax
+def parse_help_header(header=None):
+    """Parse the header from a single topic chunk from the MUD 'helptab' file"""
 
-                elif line.lower().startswith('minimum: '):
-                    minimum = stripped.lower().replace('minimum: ', '')
-                    this_topic['minimum'] = minimum
+    # The 'level' of the help topic is a number alone, on the first line of the header
+    help_header = {}
+    header_lines = header.split('\n')
+    help_header['level'] = int(header_lines[0].strip())
 
-                elif line.lower().startswith('class  : '):
-                    player_class = stripped.lower().replace('class  : ', '')
-                    this_topic['player_class'] = player_class
+    # Name the topic if mortals should be able reach it, and it starts with "32 "
+    if help_header['level'] < min(IMM_LEVELS) and header_lines[1].startswith('32 '):
+        help_header['name'] = header_lines[1].replace('32 ', '').strip()
+        help_header['aliases'] = []
 
-                elif line.lower().startswith('level  : '):
-                    player_level = stripped.lower().replace('level  : ', '')
-                    this_topic['player_level'] = player_level
+        # Loop through each line of the header
+        for header_line in header_lines:
 
-                elif line.lower().startswith('save   : '):
-                    save = stripped.lower().replace('save   : ', '')
-                    this_topic['save'] = save
+            # Any lines starting with '32 ' are potential names/aliases
+            if header_line.startswith('32 '):
 
-                else:
-                    this_topic['text'] += line + "\n"
+                # Set any aliases, which are not the primary name
+                header_line_clean = header_line.replace('32 ', '').strip()
+                if header_line_clean != help_header['name']:
+                    help_header['aliases'].append(header_line_clean)
 
-        if this_topic['aliases'] and this_topic['level'] < min(IMM_LEVELS):
-            topic_name = this_topic['aliases'][0].replace('32 ', '').lower()
-            topics[topic_name] = this_topic
-
-    return topics
+    # Return the help topic header
+    return help_header
 
 
 help_page = Blueprint('help_page', __name__)
 
 
+@help_page.route('/help/<string:topic>/', methods=['GET'])
+@help_page.route('/help/<string:topic>', methods=['GET'])
+def single(topic=None):
+    """Display a single help topic"""
+    topics = get_help_topics()
+
+    # Display exact topic name matches
+    if topic in topics:
+        return render_template('help_page.html.j2', topic=topics[topic], topics=topics)
+
+    # Loop through each topics aliases to find a match,
+    #   and redirect to the primary name if there is one
+    for tvals in topics.values():
+        if topic in tvals['aliases']:
+            return redirect(url_for('help_page.single', topic=tvals['name']))
+
+    # Otherwise, the topic could not be found
+    flash('Sorry, but no topics could be found!', 'error')
+    abort(404)
+
+
 @help_page.route('/help/', methods=['GET', 'POST'])
 @help_page.route('/help', methods=['GET', 'POST'])
 def index():
-    """Main help page"""
-
-    # Get all topics from the helptab file
-    code = 200
-    topic = None
-    topics = get_helptab()
-
-    # Get help search form and check if submitted
-    help_search_form = HelpSearchForm()
-    if help_search_form.validate_on_submit():
-
-        # Lower-case the search string
-        search_string = help_search_form.help_search_name.data.lower()
-
-        # Use direct match on a topic name
-        if search_string in topics:
-            return redirect(url_for('help_page.single', topic=search_string))
-
-        # Loop through all available topics...
-        for tvals in topics.values():
-
-            # Use direct match on topic alias
-            if tvals['aliases'] and search_string in tvals['aliases']:
-                return redirect(url_for('help_page.single', topic=tvals['aliases'][0]))
-
-            # Loop through each topics aliases...
-            for topic_alias in tvals['aliases']:
-
-                # Use the first alias which starts with, contains, or ends with, the search string
-                if topic_alias.startswith(search_string) or search_string in topic_alias or topic_alias.endswith(search_string):
-                    return redirect(url_for('help_page.single', topic=tvals['aliases'][0]))
-
-        # If the search made it this far, nothing was found...
-        code = 404
-        flash('Sorry, but no topics were found!', 'error')
-
-    return render_template('help_page.html.j2', topic=topic, topics=topics,
-                            help_search_form=help_search_form
-                          ), code
-
-
-@help_page.route('/help/<string:topic>', methods=['GET'])
-@help_page.route('/help/<string:topic>/', methods=['GET'])
-def single(topic=None):
-    """Help topic page"""
-
-    topics = get_helptab()
-    code = 404
-    for tvals in topics.values():
-        if tvals['aliases'] and topic in tvals['aliases']:
-            ret = tvals
-            code = 200
-
-    if code == 404:
-        ret = None
-        flash('Sorry, but that topic was not found!', 'error')
-
-    return render_template('help_page.html.j2', topic=ret, topics=topics, help_search_form=HelpSearchForm()), code
+    """Main help page lists all help topics"""
+    return render_template('help_page.html.j2', topic=None, topics=get_help_topics())
 
 
 @help_page.route('/areas/', methods=['GET'])
@@ -172,4 +139,4 @@ def single(topic=None):
 def world():
     """World page"""
     # Return only the areas from the helptab file
-    return render_template('world.html.j2', areas=get_helptab(regex=re.compile(r'32 Area [a-zA-Z]+')))
+    return render_template('world.html.j2', areas=None)
