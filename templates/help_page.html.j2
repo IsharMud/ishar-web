@@ -23,10 +23,9 @@
 {%- block content %}
     {%- if help_search_form is defined %}
             <p>
-                <form method="post" action="{{ url_for('help_page.index') }}" id="help-search-form">
-                    {{ render_field(help_search_form.help_search_name, maxlength=32) }}
-                    {{ help_search_form.csrf_token }}
-                    {{ render_field(help_search_form.submit) }}
+                <form method="get" action="{{ url_for('help_page.index', _anchor='content') }}" id="help-search-form">
+                    {{ render_field(help_search_form.search, maxlength=32) }}
+                    <input type="submit" value="Search">
                 </form>
             </p>
     {%- endif %}
@@ -87,7 +86,7 @@
                     <ul>
                 {%- for topic_alias in topic['aliases'] %}
                         <li>
-                            <a href="{{ url_for('help_page.single', topic=topic_alias) }}">{{ topic_alias }}</a>
+                            <a href="{{ url_for('help_page.single', topic=topic_alias, _anchor='content') }}">{{ topic_alias }}</a>
                         </li>
                 {%- endfor %}
                     </ul>
@@ -102,7 +101,7 @@
                     <ul>
                 {%- for related_topic in topic['see_also'] %}
                         <li>
-                            <a href="{{ url_for('help_page.single', topic=related_topic) }}">{{ related_topic }}</a>
+                            <a href="{{ url_for('help_page.single', topic=related_topic, _anchor='content') }}">{{ related_topic }}</a>
                         </li>
                 {%- endfor %}
                     </ul>
@@ -115,7 +114,7 @@
             <ul id="world-list">
         {%- for list_topic in topics %}
             <li title="Topic: {{ list_topic }}">
-                <a href="{{ url_for('help_page.single', topic=list_topic) }}">{{ list_topic }}</a>
+                <a href="{{ url_for('help_page.single', topic=list_topic, _anchor='content') }}">{{ list_topic }}</a>
             </li>
         {%- endfor %}
             </ul>

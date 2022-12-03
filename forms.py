@@ -76,13 +76,13 @@ class EditPlayerForm(FlaskForm):
 
 class HelpSearchForm(FlaskForm):
     """Help search form class to search help topic names"""
-    help_search_name = StringField('Topic',
-                                     validators=[
-                                         DataRequired(),
-                                         Length(min=2, max=32),
-                                         AlphaSpace(message='Topic names may only contain between 2-32 letters!')
-                                     ]
-                                    )
+    search = StringField('Topic',
+                            validators=[
+                                DataRequired(),
+                                Length(min=2, max=32),
+                                AlphaSpace(message='Topic names may only contain between 2-32 letters!')
+                            ]
+                        )
     submit = SubmitField('Search')
 
 
