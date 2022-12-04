@@ -138,7 +138,7 @@ def index():
 
         # If there was only one match, redirect to it
         if len(topics) == 1:
-            return redirect(url_for('help_page.single', topic=topics[0], _anchor='content'))
+            return redirect(url_for('help_page.single', topic=topics[0]))
 
         # Return an error if the search had no results
         if not topics:
@@ -162,7 +162,7 @@ def single(topic=None):
     #   and redirect to the primary name, if there is one
     for tvals in topics.values():
         if topic in tvals['aliases']:
-            return redirect(url_for('help_page.single', topic=tvals['name'], _anchor='content'))
+            return redirect(url_for('help_page.single', topic=tvals['name']))
 
     # Otherwise, the topic could not be found
     flash('Sorry, but no topics could be found!', 'error')
