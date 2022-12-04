@@ -1,9 +1,11 @@
 """Parse the MUD 'helptab' file"""
 from mud_secret import HELPTAB, IMM_LEVELS
+from sentry import sentry_sdk
 
 
 def get_help_chunks(help_file=HELPTAB):
     """Parse the MUD 'helptab' file into chunks, by '#' character, to roughly separate topics"""
+
     # Open the 'helptab' file (read-only)
     try:
         with open(file=help_file, mode='r', encoding='utf-8') as help_fh:
@@ -13,10 +15,13 @@ def get_help_chunks(help_file=HELPTAB):
             #   and return "chunks" except the first (instructions/example)
             return help_fh.read().split('\n#\n')[1:]
 
-    # Catch/return any exception, and close the 'helptab' file
-    except Exception as err:
-        return err
+    # Catch/return exceptions or errors on accessing the 'helptab' file,
+    #   and report to Sentry
+    except (FileNotFoundError, PermissionError, Exception) as err:
+        sentry_sdk.capture_exception(err)
+        return []
 
+    # Close the 'helptab' file
     finally:
         help_fh.close()
 

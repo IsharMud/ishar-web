@@ -19,8 +19,7 @@ def index():
     return render_template('help_page.html.j2',
                             topic=None,
                             topics=get_help_topics(),
-                            help_search_form=HelpSearchForm()
-                        )
+                            help_search_form=HelpSearchForm())
 
 
 @help_page.route('/help/<string:topic>/', methods=['GET'])
@@ -37,8 +36,7 @@ def single(topic=None):
         return render_template('help_page.html.j2',
                                 topic=all_topics[topic],
                                 topics=all_topics,
-                                help_search_form=search_form
-                            )
+                                help_search_form=search_form)
 
     # Try to find matching help topics, and redirect to single match by name
     #   which would then be handled by the render_template above

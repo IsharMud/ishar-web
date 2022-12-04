@@ -33,7 +33,7 @@ from wizlist import wizlist
 app = Flask(__name__)
 app.config.from_pyfile('config.py')
 
-# Error handling
+# Error pages/handlers
 app.register_blueprint(error_pages.error_pages)
 app.register_error_handler(400, error_pages.bad_request)
 app.register_error_handler(401, error_pages.not_authorized)
@@ -50,7 +50,6 @@ login_manager.needs_refresh_message = 'To protect your account, please log in ag
 login_manager.needs_refresh_message_category = 'error'
 login_manager.refresh_view = 'portal.login'
 login_manager.session_protection = 'strong'
-
 
 @login_manager.user_loader
 def load_user(email):

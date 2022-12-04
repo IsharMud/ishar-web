@@ -16,14 +16,12 @@ def bad_request(message):
 
 
 def not_authorized(message):
-    """401 error (with Sentry)"""
-    sentry_sdk.capture_message(message, level='error')
+    """401 error"""
     return error(title='Not Authorized', message=message, code=401)
 
 
 def forbidden(message):
-    """403 error (with Sentry)"""
-    sentry_sdk.capture_message(message, level='error')
+    """403 error"""
     return error(title='Forbidden', message=message, code=403)
 
 
