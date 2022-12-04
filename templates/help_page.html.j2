@@ -114,12 +114,7 @@
             <br><hr><br>
     {%- endif %}
     {%- if topics and topics is iterable and topics | length > 0 %}
-        {%- if topics | length > 25 %}
-            {%- set list_css = 'help-topic-list-many' %}
-        {%- else %}
-            {%- set list_css = 'help-topic-list' %}
-        {%- endif %}
-            <ul id="{{ list_css }}">
+            <ul id="help-topic-list">
         {%- for list_topic in topics %}
                 <li title="Topic: {{ list_topic }}">
                     <a href="{{ url_for('help_page.single', topic=list_topic) }}">{{ list_topic }}</a>
