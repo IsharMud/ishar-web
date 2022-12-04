@@ -1,7 +1,8 @@
 """Help (and World) pages"""
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from forms import HelpSearchForm
-import helptab
+from helptab import get_help_topics, search_help_topics
+
 
 help_page = Blueprint('help_page', __name__)
 
@@ -17,7 +18,7 @@ def index():
 
     return render_template('help_page.html.j2',
                             topic=None,
-                            topics=helptab.get_help_topics(),
+                            topics=get_help_topics(),
                             help_search_form=HelpSearchForm()
                         )
 
@@ -28,7 +29,7 @@ def single(topic=None):
     """Display a single help topic, or search results"""
 
     # Get all topics and the search form
-    all_topics = helptab.get_help_topics()
+    all_topics = get_help_topics()
     search_form = HelpSearchForm()
 
     # Return the topic, and its full contents, if there is an exact name match
@@ -41,7 +42,7 @@ def single(topic=None):
 
     # Try to find matching help topics, and redirect to single match by name
     #   which would then be handled by the render_template above
-    search_topics = helptab.search_help_topics(all_topics=all_topics, search=topic)
+    search_topics = search_help_topics(all_topics=all_topics, search=topic)
     if len(search_topics) == 1:
         found_topic = next(iter(search_topics.values()))
         return redirect(url_for('help_page.single', topic=found_topic['name']))
@@ -68,4 +69,4 @@ def single(topic=None):
 def world():
     """World page"""
     # Return only the areas from the helptab file
-    return render_template('world.html.j2', areas=helptab.search_help_topics(search='area '))
+    return render_template('world.html.j2', areas=search_help_topics(search='area '))
