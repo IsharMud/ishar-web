@@ -56,8 +56,7 @@ def single(topic=None):
     return render_template('help_page.html.j2',
                             topic=None,
                             topics=search_topics,
-                            help_search_form=search_form
-                        ), code
+                            help_search_form=search_form), code
 
 
 @help_page.route('/areas/', methods=['GET'])
