@@ -1,5 +1,5 @@
 """Help page"""
-from flask import abort, Blueprint, flash, redirect, render_template, request, url_for
+from flask import Blueprint, flash, redirect, render_template, request, url_for
 from forms import HelpSearchForm
 from mud_secret import HELPTAB, IMM_LEVELS
 
@@ -35,8 +35,7 @@ def get_help_topics():
         # Parse the chunk from the list
         parsed_chunk = parse_help_chunk(help_chunk)
 
-        # If the chunk was parsed, and named,
-        #   add it to a dictionary of topics to return
+        # If the chunk was parsed, and named, add it to a dictionary of topics to return
         if parsed_chunk and 'name' in parsed_chunk:
             parsed_name = parsed_chunk['name']
             help_topics[parsed_name] = parsed_chunk
@@ -104,18 +103,26 @@ def parse_help_header(header=None):
 def search_help_topics(search=None):
     """Search all help topics for a specific topic name or alias"""
 
-    # Loop through each topic to find any matches in the names or aliases
+    # Get all help topics
     all_topics = get_help_topics()
-    topics = []
-    search = search.lower()
-    for tname, tvals in all_topics.items():
-        if search in tname.lower():
-            topics.append(tname)
-        else:
-            for topic_alias in tvals['aliases']:
-                if search in topic_alias.lower():
-                    topics.append(topic_alias)
-    return topics
+
+    # If there is no search, return all help topics
+    if search is None:
+        help_topics = all_topics
+
+    # Loop through each topic to find any matches in the names or aliases
+    else:
+        help_topics = {}
+        search = search.lower()
+        for tname, tvals in all_topics.items():
+            if search in tname.lower():
+                help_topics[tname] = tvals
+            else:
+                for topic_alias in tvals['aliases']:
+                    if search in topic_alias.lower():
+                        help_topics[topic_alias] = tvals
+
+    return help_topics
 
 
 help_page = Blueprint('help_page', __name__)
@@ -125,27 +132,26 @@ help_page = Blueprint('help_page', __name__)
 @help_page.route('/help', methods=['GET'])
 def index():
     """Main help page lists help topics"""
-
-    # Find all topics, by default
     code = 200
-    topics = get_help_topics()
+    help_topics = {}
 
     # Handle searches
     if request.args.get('search'):
 
         # Try to find matching help topics
-        topics = search_help_topics(request.args.get('search'))
+        help_topics = search_help_topics(search=request.args.get('search'))
 
-        # If there was only one match, redirect to it
-        if len(topics) == 1:
-            return redirect(url_for('help_page.single', topic=topics[0]))
+        # If there was only one match, redirect to it by name
+        if len(help_topics) == 1:
+            found_topic = next(iter(help_topics.values()))
+            return redirect(url_for('help_page.single', topic=found_topic['name']))
 
-        # Return an error if the search had no results
-        if not topics:
-            flash('Sorry, but no topics could be found!', 'error')
-            code = 404
+    if not help_topics:
+        code = 404
+        flash('Sorry, no topics could be found!', 'error')
+        help_topics = get_help_topics()
 
-    return render_template('help_page.html.j2', topic=None, topics=topics, help_search_form=HelpSearchForm()), code
+    return render_template('help_page.html.j2', topic=None, topics=help_topics, help_search_form=HelpSearchForm()), code
 
 
 @help_page.route('/help/<string:topic>/', methods=['GET'])
@@ -153,20 +159,31 @@ def index():
 def single(topic=None):
     """Display a single help topic"""
 
-    # Get all topics, and display exact topic name matches
-    topics = get_help_topics()
-    if topic in topics:
-        return render_template('help_page.html.j2', topic=topics[topic], topics=topics, help_search_form=HelpSearchForm())
+    code = 200
+    all_topics = get_help_topics()
+    search_form = HelpSearchForm()
 
-    # Loop through each topics aliases to find a match,
-    #   and redirect to the primary name, if there is one
-    for tvals in topics.values():
-        if topic in tvals['aliases']:
-            return redirect(url_for('help_page.single', topic=tvals['name']))
+    # Return the topic if there is an exact match
+    if topic in all_topics:
+        return render_template('help_page.html.j2',
+                                    topic=all_topics[topic],
+                                    topics=all_topics,
+                                    help_search_form=search_form
+                                )
 
-    # Otherwise, the topic could not be found
-    flash('Sorry, but no topics could be found!', 'error')
-    abort(404)
+    # Otherwise, try to find matching help topics,
+    #   and if there is only one match, redirect to it by name
+    search_topics = search_help_topics(topic)
+    if len(search_topics) == 1:
+        found_topic = next(iter(search_topics.values()))
+        return redirect(url_for('help_page.single', topic=found_topic['name']))
+
+    if not search_topics:
+        code = 404
+        flash('Sorry, no topics could be found!', 'error')
+        search_topics = all_topics
+
+    return render_template('help_page.html.j2', topic=None, topics=search_topics, help_search_form=search_form), code
 
 
 @help_page.route('/areas/', methods=['GET'])
