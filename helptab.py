@@ -1,5 +1,4 @@
 """Parse the MUD 'helptab' file"""
-
 from mud_secret import HELPTAB, IMM_LEVELS
 
 
@@ -24,6 +23,7 @@ def get_help_chunks(help_file=HELPTAB):
 
 def get_help_topics():
     """Parse the MUD 'helptab' file chunked list into dictionry of topics"""
+
     # Get helptab file list of chunks
     help_chunks = get_help_chunks()
     help_topics = {}
@@ -44,7 +44,7 @@ def get_help_topics():
 
 
 def parse_help_chunk(help_chunk=None):
-    """Parse a single chunk from the MUD 'helptab' file"""
+    """Parse a single chunk from the MUD 'helptab' file into a help topic"""
 
     # Split the chunk in half on the separator, between its header and body text:
     #   "\n*\n" - asterisk (*), on a line by itself

@@ -1,8 +1,7 @@
-"""Help page"""
+"""Help (and World) pages"""
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from forms import HelpSearchForm
 import helptab
-
 
 help_page = Blueprint('help_page', __name__)
 
