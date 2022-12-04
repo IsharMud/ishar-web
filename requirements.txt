@@ -26,11 +26,11 @@ Jinja2==3.1.2
 lazy-object-proxy==1.8.0
 MarkupSafe==2.1.1
 mccabe==0.7.0
-multidict==6.0.2
+multidict==6.0.3
 passlib==1.7.4
 platformdirs==2.5.4
 pydantic==1.10.2
-pylint==2.15.6
+pylint==2.15.7
 PyMySQL==1.0.2
 python-dateutil==2.8.2
 sentry-sdk==1.11.1
@@ -47,5 +47,5 @@ wrapt==1.14.1
 WTForms==3.0.1
 wtforms-html5==0.6.1
 wtforms-validators==1.0.0
-yarl==1.8.1
+yarl==1.8.2
 zipp==3.11.0
