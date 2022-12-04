@@ -100,11 +100,12 @@ def parse_help_header(header=None):
     return help_header
 
 
-def search_help_topics(search=None):
+def search_help_topics(all_topics=None, search=None):
     """Search all help topics for a specific topic name or alias"""
 
-    # Get all help topics
-    all_topics = get_help_topics()
+    # Get all help topics, if necessary
+    if not all_topics:
+        all_topics = get_help_topics()
 
     # If there is no search, return all help topics
     if search is None:
@@ -164,7 +165,7 @@ def index():
 @help_page.route('/help/<string:topic>/', methods=['GET'])
 @help_page.route('/help/<string:topic>', methods=['GET'])
 def single(topic=None):
-    """Display a single help topic, or list of search results"""
+    """Display a single help topic, or search results"""
 
     # Get all topics and the search form
     all_topics = get_help_topics()
@@ -180,7 +181,7 @@ def single(topic=None):
 
     # Try to find matching help topics, and redirect to single match by name
     #   which would then be handled by the render_template above
-    search_topics = search_help_topics(topic)
+    search_topics = search_help_topics(all_topics=all_topics, search=topic)
     if len(search_topics) == 1:
         found_topic = next(iter(search_topics.values()))
         return redirect(url_for('help_page.single', topic=found_topic['name']))
