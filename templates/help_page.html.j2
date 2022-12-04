@@ -12,7 +12,7 @@
         {{- topic_name }}</a>
     {%- endif -%}
 {%- endblock header -%}
-{%- block title -%}Help{%- if topic_name -%}: {{ topic_name }}{%- endif -%}{%- endblock title -%}
+{%- block title %}Help{% if topic_name %}: {{ topic_name }}{% endif %}{% endblock title -%}
 {%- macro render_field(field) -%}
                     {{ field(**kwargs) | safe }}
     {%- if field.errors %}
@@ -31,7 +31,8 @@
                 <form method="get" action="{{ url_for('help_page.index') }}" id="help-search-form">
                     {{ render_field(help_search_form.search, maxlength=32) }}
                     <input type="submit" value="Search">
-                    (<i>such as &quot;<a href="{{ url_for('help_page.single', topic='spell') }}">spell</a>&quot;</i>)
+                    (<i>such as &quot;<a href="{{ url_for('help_page.single', topic='spell') }}">spell</a>&quot; or
+                    &quot;<a href="{{ url_for('help_page.single', topic='MUD Basics') }}">MUD Basics</a>&quot;</i>)
                 </form>
             </p>
     {%- endif %}
@@ -113,7 +114,12 @@
             <br><hr><br>
     {%- endif %}
     {%- if topics and topics is iterable and topics | length > 0 %}
-            <ul id="world-list">
+        {%- if topics | length > 25 %}
+            {%- set list_css = 'help-topic-list-many' %}
+        {%- else %}
+            {%- set list_css = 'help-topic-list' %}
+        {%- endif %}
+            <ul id="{{ list_css }}">
         {%- for list_topic in topics %}
                 <li title="Topic: {{ list_topic }}">
                     <a href="{{ url_for('help_page.single', topic=list_topic) }}">{{ list_topic }}</a>

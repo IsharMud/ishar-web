@@ -207,7 +207,12 @@ textarea {
 #player-details,
 #player-time,
 #season-details,
-#world-list
+#world-list,
+#help-topic-list 
 {
     column-count:       2;
+}
+
+#help-topic-list-many {
+    column-count:       3;
 }
