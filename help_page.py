@@ -148,60 +148,56 @@ help_page = Blueprint('help_page', __name__)
 @help_page.route('/help/', methods=['GET'])
 @help_page.route('/help', methods=['GET'])
 def index():
-    """Main help page lists help topics and handles searches"""
-    code = 200
-    help_topics = {}
+    """Main help page lists help topics"""
 
-    # Handle searches
+    # Redirect form searches to /help/<search>
     if request.args.get('search'):
+        return single(topic=request.args.get('search'))
 
-        # Try to find matching help topics
-        help_topics = search_help_topics(search=request.args.get('search'))
-
-        # If there was only one match, redirect to it by name
-        if len(help_topics) == 1:
-            found_topic = next(iter(help_topics.values()))
-            return redirect(url_for('help_page.single', topic=found_topic['name']))
-
-        # If there were no matches, respond with an error saying so
-        if not help_topics:
-            code = 404
-            flash('Sorry, but no topics could be found!', 'error')
-
-    # Return all topics, if there are none
-    if not help_topics:
-        help_topics = get_help_topics()
-
-    return render_template('help_page.html.j2', topic=None, topics=help_topics, help_search_form=HelpSearchForm()), code
+    return render_template('help_page.html.j2',
+                            topic=None,
+                            topics=get_help_topics(),
+                            help_search_form=HelpSearchForm()
+                        )
 
 
 @help_page.route('/help/<string:topic>/', methods=['GET'])
 @help_page.route('/help/<string:topic>', methods=['GET'])
 def single(topic=None):
-    """Display a single help topic"""
+    """Display a single help topic, or list of search results"""
 
     # Get all topics and the search form
     all_topics = get_help_topics()
     search_form = HelpSearchForm()
 
-    # Return the topic if there is an exact match
+    # Return the topic, and its full contents, if there is an exact name match
     if topic in all_topics:
         return render_template('help_page.html.j2',
-                                    topic=all_topics[topic],
-                                    topics=all_topics,
-                                    help_search_form=search_form
-                                )
+                                topic=all_topics[topic],
+                                topics=all_topics,
+                                help_search_form=search_form
+                            )
 
-    # Otherwise, try to find matching help topics,
-    #   and if there is only one match, redirect to it by name
+    # Try to find matching help topics, and redirect to single match by name
+    #   which would then be handled by the render_template above
     search_topics = search_help_topics(topic)
     if len(search_topics) == 1:
         found_topic = next(iter(search_topics.values()))
         return redirect(url_for('help_page.single', topic=found_topic['name']))
 
-    # Otherwise, redirect to search results
-    search_url = url_for('help_page.index') + f'?search={topic}'
-    return redirect(search_url)
+    # Respond with a 200 showing any results,
+    # unless there were no results: then, show error with all help topics
+    code = 200
+    if not search_topics:
+        code = 404
+        flash('Sorry, but no topics could be found!', 'error')
+        search_topics = all_topics
+
+    return render_template('help_page.html.j2',
+                            topic=None,
+                            topics=search_topics,
+                            help_search_form=search_form
+                        ), code
 
 
 @help_page.route('/areas/', methods=['GET'])
