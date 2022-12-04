@@ -4,9 +4,12 @@
     {%- set topic_name = topic['name'] | safe | trim %}
 {%- endif %}
 {%- block meta_title -%}Help{%- if topic_name -%}: {{ topic_name }}{%- endif -%}{%- endblock meta_title -%}
-{% block meta_description %}Help pages for Ishar MUD{% endblock meta_description %}
-{% block meta_url %}{{ url_for('help_page.single', topic=topic_name, _external=True) }}{% endblock meta_url %}
-{% block header -%}Help{%- if topic_name -%}: {{ topic_name }}{%- endif -%}{%- endblock header -%}
+{%- block meta_description %}Help pages for Ishar MUD{%- endblock meta_description %}
+{%- block meta_url %}{{ url_for('help_page.single', topic=topic_name, _external=True) }}{%- endblock meta_url %}
+{%- block header -%}
+Help
+    {%- if topic_name %} : <a href="{{ url_for('help_page.single', topic=topic_name) }}">{{ topic_name }}{%- endif -%}
+{%- endblock header -%}
 {%- block title -%}Help{%- if topic_name -%}: {{ topic_name }}{%- endif -%}{%- endblock title -%}
 {%- macro render_field(field) -%}
                     {{ field(**kwargs) | safe }}
@@ -26,6 +29,7 @@
                 <form method="get" action="{{ url_for('help_page.index') }}" id="help-search-form">
                     {{ render_field(help_search_form.search, maxlength=32) }}
                     <input type="submit" value="Search">
+                    (<i>such as <a href="{{ url_for('help_page.single', topic='spell') }}">spell</a></i>)
                 </form>
             </p>
     {%- endif %}
@@ -109,9 +113,9 @@
     {%- if topics and topics is iterable and topics | length > 0 %}
             <ul id="world-list">
         {%- for list_topic in topics %}
-            <li title="Topic: {{ list_topic }}">
-                <a href="{{ url_for('help_page.single', topic=list_topic) }}">{{ list_topic }}</a>
-            </li>
+                <li title="Topic: {{ list_topic }}">
+                    <a href="{{ url_for('help_page.single', topic=list_topic) }}">{{ list_topic }}</a>
+                </li>
         {%- endfor %}
             </ul>
     {%- endif %}
