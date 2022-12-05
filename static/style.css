@@ -13,7 +13,7 @@ h1 {
     visibility:             hidden;
 }
 
-h2, h3, h4, h5, strong, code, th, label, button, input, textarea {
+h2, h3, h4, h5, strong, th, label, button, input, textarea {
     color:                  #fa7;
 }
  

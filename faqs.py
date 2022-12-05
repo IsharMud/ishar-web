@@ -28,15 +28,15 @@ def index():
         ],
 
         'Are there player classes?': [
-            '<strong>Yes</strong>! '
-            f'There are <strong>{len(player_classes)}</strong> classes available to choose from, '
+            '<a href="' + url_for('help_page.single', topic='Classes') + '">Yes! '
+            f'There are {len(player_classes)} classes</a> available to choose from, '
             'when you create a player character:',
             player_classes
         ],
 
         'Are there player races?': [
-            '<strong>Yes</strong>! '
-            f'There are <strong>{len(player_races)}</strong> races available to choose from, '
+            '<a href="' + url_for('help_page.single', topic='Races') + '">Yes! '
+            f'There are {len(player_races)} races</a> available to choose from, '
             'when you create a player character:',
             player_races
         ],
@@ -56,7 +56,8 @@ def index():
         ],
 
         'Is death permanent?': [
-            '<strong>You can choose</strong> whether to play in "Survival" (aka "perma-death") '
+            '<strong>You can choose</strong> whether to play in "Survival" '
+            '(aka &quot;<a href="' + url_for('help_page.single', topic='Permadeath') + '">perma-death</a>&quot;) '
             'or "Classic" mode, each time you create a player character.',
             'While survival mode gains experience faster, classic mode subtracts experience '
             "upon death, but allows you to retrieve your character's corpse."
@@ -64,12 +65,13 @@ def index():
 
         'Can I have multiple characters or multi-play?': [
             'You can have up to <strong>ten (10) player characters</strong> per account!',
-            'You may actively <strong>multi-play three (3) player characters</strong> at once.',
+            '<a href="' + url_for('help_page.single', topic='Mutliplay') + '">'
+            'You may actively multi-play three (3) player characters</strong> at once.</a>',
             'Only one account is allowed per person!'
         ],
 
         'Is there player-killing (PK) or player-versus-player (PvP) combat?': [
-            '<strong>Yes and no</strong>... '
+            '<a href="' + url_for('help_page.single', topic='Player Killing') + '">Yes and no.</a>',
             "While player-versus-player combat (or PK'ing) is possible, "
             'it is very rare, and not a requirement of the game.'
         ]

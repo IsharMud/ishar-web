@@ -90,9 +90,10 @@ taller than you.
                 <p>
                     You do not need to use the full names of most commands.  As you are learning
                     new commands, try to learn the short version.  Instead of typing "north",
-                    you can just hit "n" and &lt;Enter&gt;.  "Look" can be shortened to "l", "say" to
-                    single quote, etc.  To find the short form of any command, look for Minimum
-                    in the help for that command, available at any time with "help &lt;command&gt;".
+                    you can just hit "n" and the Enter key.  "Look" can be shortened to
+                    "l", "say" to single quote ('), etc.  To find the short form of any command,
+                    look for <code>Minimum</code> in the help for that command,
+                    available at any time with &quot;help &lt;command&gt;&quot;.
                 </p>
 
                 <p>
@@ -105,17 +106,19 @@ taller than you.
                     The first hour you are in the game is the hardest.  It takes a little while
                     to get used to the command syntax and get a feel for moving around in the
                     world and interacting with everything in it.  Don't be afraid of typing
-                    "help", which offers a list of commands, or "help &lt;command&gt;", which will
+                    &quot;<a href="{{ url_for('help_page.single', topic='Help' )}}">help help</a>&quot;,
+                    which offers a list of commands, or &quot;help &lt;command&gt;&quot;, which will
                     offer detailed information about any command.
                 </p>
 
                 <p>
-                    You'll quickly run into other players who talk to you; see "help communication"
+                    You'll quickly run into other players who talk to you; see
+                    &quot;<a href="{{ url_for('help_page.single', topic='Communication' )}}">help communication</a>&quot;
                     on how to reply.
                 </p>
 
                 <p>
-                    Once you make it past the first few hours and want to advance your standing
-                    in the game, see "help levelling".
+                    Once you make it past the first few hours and want to advance your standing in the game, see
+                    &quot;<a href="{{ url_for('help_page.single', topic='Levelling' )}}">help levelling</a>&quot;.
                 </p>
 {%- endblock %}
