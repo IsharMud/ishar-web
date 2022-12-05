@@ -4,6 +4,7 @@ from models import PlayerClass, PlayerRace
 
 faqs = Blueprint('faqs', __name__)
 
+
 @faqs.route('/questions/', methods=['GET'])
 @faqs.route('/faqs/', methods=['GET'])
 @faqs.route('/faq/', methods=['GET'])
@@ -13,17 +14,21 @@ faqs = Blueprint('faqs', __name__)
 def index():
     """A few frequently asked questions (/faq, /faqs, or /questions)"""
 
-    # Fetch, and format, playable player classes and descriptions for FAQs
-    player_classes = [f"{player_class.class_display_name} -- {player_class.class_description}" for player_class in PlayerClass().query.filter(PlayerClass.class_description!='').all()]
+    # Fetch, and format, links to each of the playable player classes with descriptions
+    player_classes = [f"<a href=\"{url_for('help_page.single', topic=player_class.class_display_name)}\">"
+        f"{player_class.class_display_name}</a> -- {player_class.class_description}" for player_class in PlayerClass(
+        ).query.filter(PlayerClass.class_description != '').all()]
 
-    # Fetch, and format, playable player races and descriptions for FAQs
-    player_races = [f"{player_race.race_display_name} -- {player_race.race_description}" for player_race in PlayerRace().query.filter(PlayerRace.race_description!='').all()]
+    # Fetch, and format, playable player races and descriptions
+    player_races = [f"{player_race.race_display_name} -- {player_race.race_description}" for player_race in PlayerRace(
+        ).query.filter(PlayerRace.race_description != '').all()]
 
     all_faqs = {
 
         'Is Ishar MUD free?': [
             '<strong>Yes</strong>! While you are more than welcome to '
-            '<a href="' + url_for('support.index') + '" title="Support">offer support</a>, '
+            '<a href="' + url_for('support.index') +
+            '" title="Support">offer support</a>, '
             'Ishar MUD is free to use, play, and enjoy.'
         ],
 
@@ -49,10 +54,12 @@ def index():
         'What about my equipment when I log out?': [
             "When you sign out or log off, your character's equipment, gear, "
             'and inventory is simply <strong>preserved until the end of the season</strong>.',
-            'The <a href="' + url_for('season.index') + '" title="Season">season</a> '
+            'The <a href="' + url_for('season.index') +
+            '" title="Season">season</a> '
             'currently changes every four (4) months.',
             'You can find more information about seasons at the '
-            '<a href="' + url_for('patches.index') + '" title="Patches">patches</a> page.'
+            '<a href="' + url_for('patches.index') +
+            '" title="Patches">patches</a> page.'
         ],
 
         'Is death permanent?': [
