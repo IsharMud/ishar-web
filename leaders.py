@@ -15,7 +15,9 @@ leaders = Blueprint('leaders', __name__)
 @leaders.route('/leaders', methods=['GET'])
 def index():
     """Sort and list the best players"""
-    leader_players = Player.query.filter(Player.true_level < min(IMM_LEVELS)).order_by(
+    leader_players = Player.query.filter(
+        Player.true_level < min(IMM_LEVELS)
+    ).order_by(
         -Player.remorts,
         -Player.total_renown,
         -Player.quests_completed,
