@@ -38,47 +38,20 @@
     {%- endif %}
     {%- if topic %}
             <ul>
-            {%- if topic['syntax'] %}
+        {%- for i in ['syntax', 'level', 'minimum', 'class', 'topic', 'save'] %}
+            {%- if topic[i] %}
                 <li class="nested-list">
-                    <li>Syntax:</li>
+                    <li>
+                        <strong>{{ i | title }}</strong>
+                    </li>
                     <ul>
-                        <li><code>{{ topic['syntax']  | safe }}</code></li>
+                        <li>
+                            <code>{{ topic[i] | safe }}</code>
+                        </li>
                     </ul>
                 </li>
             {%- endif %}
-            {%- if topic['minimum'] %}
-                <li class="nested-list">
-                    <li>Minimum:</li>
-                    <ul>
-                        <li><code>{{ topic['minimum'] | safe }}</code></li>
-                    </ul>
-                </li>
-            {%- endif %}
-            {%- if topic['player_class'] %}
-                <li class="nested-list">
-                    <li>Player Class:</li>
-                    <ul>
-                        <li><code>{{ topic['player_class']  | safe }}</code></li>
-                    </ul>
-                </li>
-            {%- endif %}
-            {%- if topic['player_level'] %}
-                <li class="nested-list">
-                    <li>Player Level:</li>
-                    <ul>
-                        <li><code>{{ topic['player_level'] | safe }}</code></li>
-                    </ul>
-                </li>
-            {%- endif %}
-
-            {%- if topic['save'] %}
-                <li class="nested-list">
-                    <li>Save:</li>
-                    <ul>
-                        <li><code>{{ topic['save']  | safe }}</code></li>
-                    </ul>
-                </li>
-            {%- endif %}
+        {%- endfor %}
             </ul>
             <pre>
                 {{- topic['body_text'] | safe -}}
