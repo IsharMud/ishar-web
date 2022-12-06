@@ -75,6 +75,14 @@
         </script>
 {%- endblock scripts %}
 {%- block content %}
+                <ul id="leader-head">
+                    <li title="Classic">
+                        <a href="{{ url_for('leaders.classic') }}">Classic</a>
+                    </li>
+                    <li title="Survival">
+                        <a href="{{ url_for('leaders.survival') }}">Survival</a>
+                    </li>
+                </ul>
                 <div id="leaders"></div>
                 <script>
                     showLeaders(document.getElementById('leaders'));
