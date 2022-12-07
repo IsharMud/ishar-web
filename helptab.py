@@ -1,18 +1,24 @@
 """Parse the MUD 'helptab' file"""
 import re
 from flask import url_for
+from models import PlayerClass
 from mud_secret import HELPTAB, IMM_LEVELS
 from sentry import sentry_sdk
 
+# Retrieve playable player class names
+player_classes = [player_class.class_display_name for player_class in PlayerClass().query.filter(PlayerClass.class_description != '').all()]
+
 # Compile a few regular expressions for use later
 #   to parse out specific items from help topic chunks
-see_also_regex = re.compile(r'^ *(see also|also see|also see help on|see help on|related) *\:*', re.IGNORECASE)
+see_also_regex = re.compile(r'^ *(see also|also see|also see help on|see help on|related) *\: *', re.IGNORECASE)
 regexes = {
     'syntax':   re.compile(r'^ *(Syntax|syntax) *\: *(.+)$'),
     'minimum':  re.compile(r'^ *(Minimum|minimum|Min|min) *\: *(.+)$'),
     'level':    re.compile(r'^ *(Level|level) *\: *(.+)$'),
-    'class':    re.compile(r'^ *(Class|Classes) *\: *(.+)$'),
-    'save':     re.compile(r'^ *(Saves?) *\: *(.+)$')
+    'class':    re.compile(r'^ *(Class|Classes) *\: *([\w| |\/]+)$'),
+    'save':     re.compile(r'^ *(Saves?) *\: *(.+)$'),
+    'stats':    re.compile(r'^ *(Stats?) *\: *(.+)$'),
+    'topic':    re.compile(r'^ *(Topic) *\: *(.+)$')
 }
 
 def get_help_chunks(help_file=HELPTAB):
@@ -74,8 +80,7 @@ def parse_help_chunk(help_chunk=None):
         # Parse the help topic header, which is everything before '*'
         help_header = parse_help_header(header=halves[0])
 
-        # Proceed if mortals should be able to reach the topic,
-        #   and it starts with "32 "
+        # Proceed if the help header is valid
         if help_header and 'name' in help_header:
             help_content = halves[1].replace('>', '&gt;').replace('<', '&lt;').replace('"', '&quot;')
             help_topic = parse_help_content(content=help_content)
@@ -87,13 +92,44 @@ def parse_help_chunk(help_chunk=None):
 
 
 def parse_help_body(line=None):
-    """Parse the body from a single topic chunk from the MUD 'helptab' file
-        for specific item regular expression values"""
-    for iname, regex in regexes.items():
+    """Parse a single line from a single topic chunk from the MUD 'helptab' file,
+        using regular expressions to find specific items (such as Class, Syntax, etc.)"""
+
+    # Loop through each item regular expression, looking for matches on items
+    for item_name, regex in regexes.items():
         find = regex.findall(line)
         if find:
-            return {iname: find[0][1]}
+            ret = {}
+            item_value = find[0][1]
+
+            # Handle class matches with a separate function
+            if item_name == 'class':
+                item_value = parse_help_class(class_line=item_value)
+
+            # Return the dictionary for any matches
+            ret[item_name] = item_value
+            return ret
+
+    # Simply return the line that we received, if there was no match
     return line
+
+
+def parse_help_class(class_line=None, playable_classes=player_classes):
+    """Parse a single class line from a single topic chunk from the MUD 'helptab' file,
+        and link the Player Class to the help topic page"""
+
+    topic_classes = class_line.split('/')
+    num_topic_classes = len(topic_classes)
+    string_out = str()
+    i = 0
+    for topic_class in topic_classes:
+        i += 1
+        clean_topic_class = topic_class.strip()
+        if clean_topic_class in playable_classes:
+            string_out += f"<a href=\"{url_for('help_page.single', topic=clean_topic_class)}\">{clean_topic_class}</a>"
+            if i != num_topic_classes:
+                string_out += ', '
+    return string_out
 
 
 def parse_help_content(content=None):

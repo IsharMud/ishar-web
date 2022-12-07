@@ -44,30 +44,23 @@
             </div>
     {%- endif %}
     {%- if topic %}
+            <br><hr>
             <ul class="help-topic-list">
-        {%- for i in ['syntax', 'level', 'minimum', 'class', 'topic', 'save'] %}
+        {%- for i in ['syntax', 'level', 'minimum', 'class', 'topic', 'save', 'stats'] %}
             {%- if topic[i] %}
-                <li class="nested-list">
-                    <ul>
-                        <li>
-                            <strong>{{ i | title }}</strong>
-                        </li>
-                        <li class="nested-list">
-                            <ul>
-                                <li>
-                                    <code>{{ topic[i] | safe }}</code>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
+                <li>
+                    <strong>{{ i | title}}</strong>:
+                    <code>{{ topic[i] | safe }}</code>
                 </li>
             {%- endif %}
         {%- endfor %}
             </ul>
-            <pre>{{ topic['body_text'] | safe }}</pre>
-            <br><hr><br>
+            <div>
+                <pre>{{ topic['body_text'] | safe }}</pre>
+            </div>
     {%- endif %}
     {%- if topics and topics is iterable and topics | length > 0 %}
+            <hr>
             <ul class="help-topic-list">
         {%- for list_topic in topics %}
                 <li title="Topic: {{ list_topic }}">
