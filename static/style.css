@@ -208,7 +208,7 @@ textarea {
 #player-time,
 #season-details,
 #world-list,
-#help-topic-list,
+.help-topic-list,
 #leader-head
 {
     column-count:       2;

@@ -44,20 +44,22 @@
             </div>
     {%- endif %}
     {%- if topic %}
-            <ul>
+            <ul class="help-topic-list">
         {%- for i in ['syntax', 'level', 'minimum', 'class', 'topic', 'save'] %}
             {%- if topic[i] %}
                 <li class="nested-list">
-                    <li>
-                        <strong>{{ i | title }}</strong>
-                    </li>
-                    <li class="nested-list">
-                        <ul>
-                            <li>
-                                <code>{{ topic[i] | safe }}</code>
-                            </li>
-                        </ul>
-                    </li>
+                    <ul>
+                        <li>
+                            <strong>{{ i | title }}</strong>
+                        </li>
+                        <li class="nested-list">
+                            <ul>
+                                <li>
+                                    <code>{{ topic[i] | safe }}</code>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
                 </li>
             {%- endif %}
         {%- endfor %}
@@ -66,7 +68,7 @@
             <br><hr><br>
     {%- endif %}
     {%- if topics and topics is iterable and topics | length > 0 %}
-            <ul id="help-topic-list">
+            <ul class="help-topic-list">
         {%- for list_topic in topics %}
                 <li title="Topic: {{ list_topic }}">
                     <a href="{{ url_for('help_page.single', topic=list_topic) }}">{{ list_topic }}</a>
