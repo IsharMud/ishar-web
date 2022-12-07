@@ -70,10 +70,13 @@ def parse_help_chunk(help_chunk=None):
             help_topic['aliases'] = help_header['aliases']
 
             # Topic body text is everything after the header and '*'
-            help_topic['body_text'] = halves[1].replace('>', '&gt;').replace('<', '&lt;').replace('"', '&quot;')
+            help_content = halves[1].replace('>', '&gt;').replace('<', '&lt;').replace('"', '&quot;')
+            help_topic['body_text'] = re.sub(r"\`help\s(\w*)\'", r'<a href="/help/\1">help \1</a>', help_content, re.MULTILINE)
+
             for i in ['syntax', 'level', 'minimum', 'class', 'topic', 'save']:
-                help_topic[i] = parse_help_body(help_topic['body_text'], i)
-            help_topic['see_also'] = parse_help_see_also(help_topic['body_text'])
+                help_topic[i] = parse_help_body(help_content, i)
+
+            help_topic['see_also'] = parse_help_see_also(help_content)
 
     # Return the help topic dictionary
     return help_topic
