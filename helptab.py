@@ -123,7 +123,7 @@ def parse_help_chunk(help_chunk=None):
                             help_topic[item_name] = item_value
 
             # Replace "`help command'" in the body text with link to that help command
-            help_topic['body_text'] = re.sub(r"\`help *(\w*)\'", r'<a href="/help/\1">help \1</a>', help_topic['body_text'], re.MULTILINE)
+            help_topic['body_text'] = re.sub(r"\`help (\w+)\'", r'<a href="/help/\1">help \1</a>', help_topic['body_text'], re.MULTILINE)
 
     # Return the help topic dictionary
     return help_topic
