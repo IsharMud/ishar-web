@@ -1,8 +1,18 @@
 """Parse the MUD 'helptab' file"""
 import re
+from flask import url_for
 from mud_secret import HELPTAB, IMM_LEVELS
 from sentry import sentry_sdk
 
+regexes = {
+    'syntax':   re.compile(r'^ *(Syntax|syntax) *\: *(.+)$'),
+    'minimum':  re.compile(r'^ *(Minimum|minimum|Min|min) *\: *(.+)$'),
+    'level':    re.compile(r'^ *(Level|level) *\: *(.+)$'),
+    'class':    re.compile(r'^ *(Class|Classes) *\: *(.+)$'),
+    'save':     re.compile(r'^ *(Saves?) *\: *(.+)$')
+}
+
+see_also_regex = re.compile(r'^ *(see also|also see|also see help on|see help on|related) *\:*', re.IGNORECASE)
 
 def get_help_chunks(help_file=HELPTAB):
     """Parse the MUD 'helptab' file into chunks, by '#' character, to roughly separate topics"""
@@ -38,7 +48,7 @@ def get_help_topics():
     for help_chunk in help_chunks:
 
         # Parse the chunk from the list
-        parsed_chunk = parse_help_chunk(help_chunk)
+        parsed_chunk = parse_help_chunk(help_chunk=help_chunk)
 
         # If the chunk was parsed, and named, add it to a dictionary of topics to return
         if parsed_chunk and 'name' in parsed_chunk:
@@ -68,21 +78,64 @@ def parse_help_chunk(help_chunk=None):
         if help_header and 'name' in help_header:
             help_topic['name'] = help_header['name']
             help_topic['aliases'] = help_header['aliases']
+            help_topic['body_text'] = str()
 
             # Topic body text is everything after the header and '*',
             #   but replace < and > and " with HTML-safe versions
             help_content = halves[1].replace('>', '&gt;').replace('<', '&lt;').replace('"', '&quot;')
 
+            # Loop through each line of the help chunk body text
+            is_see_also = False
+            for line in help_content.split('\n'):
+
+                if see_also_regex.match(line):
+                    help_topic['body_text'] += 'See Also: '
+                    is_see_also = True
+
+                if is_see_also:
+                    rmbegin = line.split(':')
+                    related_topics = rmbegin[-1].strip().split(',')
+
+                    # Append each related topic to our list to return
+                    i = 0
+                    num_related = len(related_topics)
+                    for related_topic in related_topics:
+                        i += 1
+                        if related_topic and related_topic.strip() != '':
+                            related_link = f"<a href=\"{url_for('help_page.single', topic=related_topic.strip())}\">{related_topic.strip()}</a>"
+                            help_topic['body_text'] += related_link
+                            if i != num_related:
+                                help_topic['body_text'] += ', '
+                            else:
+                                is_see_also = False
+
+                else:
+                    # Parse the body line
+                    parsed_line = parse_help_body(line=line)
+
+                    # Append strings to the body text
+                    if isinstance(parsed_line, str):
+                        help_topic['body_text'] += f'{line}\n'
+
+                    # Set dictionary values from regex matches
+                    if isinstance(parsed_line, dict):
+                        for item_name, item_value in parsed_line.items():
+                            help_topic[item_name] = item_value
+
             # Replace "`help command'" in the body text with link to that help command
-            help_topic['body_text'] = re.sub(r"\`help\s(\w*)\'", r'<a href="/help/\1">help \1</a>', help_content, re.MULTILINE)
-
-            for i in ['syntax', 'level', 'minimum', 'class', 'topic', 'save']:
-                help_topic[i] = parse_help_body(help_content, i)
-
-            help_topic['see_also'] = parse_help_see_also(help_content)
+            help_topic['body_text'] = re.sub(r"\`help *(\w*)\'", r'<a href="/help/\1">help \1</a>', help_topic['body_text'], re.MULTILINE)
 
     # Return the help topic dictionary
     return help_topic
+
+
+def parse_help_body(line=None):
+    """Parse the body from a single topic chunk from the MUD 'helptab' file"""
+    for iname, regex in regexes.items():
+        find = regex.findall(line)
+        if find:
+            return {iname: find[0][1]}
+    return line
 
 
 def parse_help_header(header=None):
@@ -111,57 +164,6 @@ def parse_help_header(header=None):
 
     # Return the help topic header
     return help_header
-
-
-def parse_help_body(body=None, search=None):
-    """Parse the body from a single topic chunk from the MUD 'helptab' file"""
-
-    # Split the body into lines and loop through each line
-    lines = body.split('\n')
-    for line in lines:
-
-        # Get the value after the colon (:) for any lines that matched the search
-        if re.search(r'^(\s*)(' + search + r')(\s*):(\s*)', line.strip().lower()):
-            value = line.split(':')
-            return value[-1].strip()
-
-    # No matches returns None
-    return None
-
-
-def parse_help_see_also(body=None):
-    """Parse the body from a single topic chunk from the MUD 'helptab' file,
-        looking for related topics"""
-
-    # Start an empty list of related help topics,
-    #   split the body into lines, and keep no lines by default
-    see_also = []
-    lines = body.split('\n')
-    keep = False
-
-    # Loop through each line of the topic chunk body
-    for line in lines:
-
-        # Keep anything after a phrase that seems like it indicates related topics:
-        #   such as "see also", "also see", "also see help on", "related" etc.
-        if re.search(r'^(\s*)(see also|also see|also see help on|related)(\s*):(\s*)', line.strip().lower()):
-            keep = True
-
-        if keep:
-            # Remove anything before the colon (:) and get each topic
-            rmbegin = line.split(':')
-            related_topics = rmbegin[-1].strip().split(',')
-
-            # Append each related topic to our list to return
-            for related_topic in related_topics:
-                if related_topic and related_topic.strip() != '':
-                    see_also.append(related_topic.strip())
-
-        # This only really works because "See also" is always the end of every help topic chunk...
-        # If the "See also:" stuff was in the middle of the help topic chunk, keep would remain True...
-
-    # Return the list of related topics
-    return see_also
 
 
 def search_help_topics(all_topics=None, search=None):

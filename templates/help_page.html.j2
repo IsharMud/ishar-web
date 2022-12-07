@@ -63,38 +63,6 @@
         {%- endfor %}
             </ul>
             <pre>{{ topic['body_text'] | safe }}</pre>
-            {%- if topic['aliases'] and topic['aliases'] is iterable and topic['aliases'] | length > 0 %}
-            <ul>
-                <li class="nested-list">
-                    <i>Aliases:</i>
-                </li>
-                <li class="nested-list">
-                    <ul>
-                {%- for topic_alias in topic['aliases'] %}
-                        <li>
-                            <a href="{{ url_for('help_page.single', topic=topic_alias) }}">{{ topic_alias }}</a>
-                        </li>
-                {%- endfor %}
-                    </ul>
-                </li>
-            </ul>
-            {%- endif %}
-            {%- if topic['see_also'] and topic['see_also'] is iterable and topic['see_also'] | length > 0 %}
-            <ul>
-                <li class="nested-list">
-                    <i>See Also:</i>
-                </li>
-                <li class="nested-list">
-                    <ul>
-                {%- for related_topic in topic['see_also'] %}
-                        <li>
-                            <a href="{{ url_for('help_page.single', topic=related_topic) }}">{{ related_topic }}</a>
-                        </li>
-                {%- endfor %}
-                    </ul>
-                </li>
-            </ul>
-            {%- endif %}
             <br><hr><br>
     {%- endif %}
     {%- if topics and topics is iterable and topics | length > 0 %}
