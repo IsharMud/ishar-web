@@ -71,6 +71,8 @@ def parse_help_chunk(help_chunk=None):
 
             # Topic body text is everything after the header and '*'
             help_content = halves[1].replace('>', '&gt;').replace('<', '&lt;').replace('"', '&quot;')
+
+            # Replace "`help command'" in the body text with link to the help page topic
             help_topic['body_text'] = re.sub(r"\`help\s(\w*)\'", r'<a href="/help/\1">help \1</a>', help_content, re.MULTILINE)
 
             for i in ['syntax', 'level', 'minimum', 'class', 'topic', 'save']:
