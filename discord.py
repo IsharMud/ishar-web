@@ -67,7 +67,7 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
         topic_body = found_topic['body_text'].replace('&gt;', '>').replace('&lt;', '<').replace('&quot;', '"')
         how_many_lines = 400
         if len(topic_body) > how_many_lines:
-            body_begin = f'<||{topic_body}||>'
+            body_begin = f'```{topic_body}```'
         else:
             body_begin = topic_body
         out += body_begin
