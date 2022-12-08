@@ -98,24 +98,37 @@ async def spell(ctx: interactions.CommandContext, search: str):
     # Prepend "Spell " to the search, and
     #   try to find any spell help topics containing the search term
     search = f'Spell {search}'
-    search_spells = search_help_topics(all_topics=None, search=search)
+    search_spell_results = search_help_topics(all_topics=None, search=search)
+
+    print(f'search_spell_results: {search_spell_results}')
+    for search_spell_result in search_spell_results:
+        if not search_spell_result['name'].startswith('Spell '):
+            print('Should remove:', search_spell_result['name'])
+        else:
+            print(f'OK search_spell_result: {search_spell_result}')
+
+    # Proceed if there were search results
+    if search_spell_results:
+
+        # Count the number of results
+        num_results = len(search_spell_results)
+
+        # Get single spell search result, if there is only one
+        if num_results == 1:
+            found_spell = next(iter(search_spell_results.values()))
+            out = get_single_help(topic=found_spell)
+
+        # Link search results, if there are multiple results
+        elif num_results > 1:
+            spell_search_url = f'<https://isharmud.com/help/{search}>'.replace(' ', '%20')
+            out = f'Spell Results: {spell_search_url} ({num_results} spells)'
 
     # Say so, only to that user, if there were no results
-    if not search_spells:
+    else:
         out = 'Sorry, but no such spell could be found!'
         ephemeral = True
 
-    # Get single spell search result, if there is only one
-    elif len(search_spells) == 1:
-        found_spell = next(iter(search_spells.values()))
-        out = get_single_help(topic=found_spell)
-
-    # Link search results, if there are multiple results
-    elif len(search_spells) > 1:
-        spell_search_url = f'<https://isharmud.com/help/{search}>'.replace(' ', '%20')
-        out = f'Spell Results: {spell_search_url} ({len(search_spells)} spells)'
-
-    # Send the help search response
+    # Send the spell search response
     await ctx.send(out, ephemeral=ephemeral)
     db_session.close()
 
