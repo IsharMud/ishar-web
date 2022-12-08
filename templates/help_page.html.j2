@@ -56,7 +56,7 @@
         {%- endfor %}
             </ul>
             <div>
-                <pre>{{ topic['body_text'] | safe }}</pre>
+                <pre>{{ topic['body_html'] | safe }}</pre>
             </div>
     {%- endif %}
     {%- if topics and topics is iterable and topics | length > 0 %}
