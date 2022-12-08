@@ -2,6 +2,7 @@
 import interactions
 import discord_secret
 from database import db_session
+from helptab import search_help_topics
 from models import Challenge, Player, Season
 
 bot = interactions.Client(token=discord_secret.TOKEN, default_scope=discord_secret.GUILD)
@@ -25,6 +26,22 @@ async def deadhead(ctx: interactions.CommandContext):
     deadman = Player.query.filter_by(is_deleted=0, game_type=0).order_by(-Player.deaths).first()
     await ctx.send(f'The player who has died most is: {deadman.name} - {deadman.deaths} times!')
     db_session.close()
+
+
+@bot.command()
+async def mudhelp(ctx: interactions.CommandContext, search=None):
+    """Search for MUD help"""
+    search_topics = search_help_topics(all_topics=None, search=search)
+    if not search_topics:
+        await ctx.send('Sorry, but there were no search results.')
+    elif len(search_topics) == 1:
+        found_topic = next(iter(search_topics.values()))
+        topic_name = found_topic['name']
+        topic_url = f"https://isharmud.com/help/{topic_name}".replace(' ', '%20')
+        await ctx.send(f'{topic_name}: {topic_url}')
+    elif len(search_topics) > 1:
+        topic_url = f"https://isharmud.com/help/{search}".replace(' ', '%20')
+        await ctx.send(f'{topic_name}: {topic_url}')
 
 
 @bot.command()
