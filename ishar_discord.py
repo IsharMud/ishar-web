@@ -3,7 +3,7 @@ import re
 import interactions
 import discord_secret
 from database import db_session
-from helptab import search_help_topics, search_help_spells
+from helptab import search_help_topics
 from models import Challenge, Player, Season
 
 
@@ -95,8 +95,10 @@ async def spell(ctx: interactions.CommandContext, search: str):
     """Search for MUD help topics"""
     ephemeral = False
 
-    # Try to find any spell help topics containing the search term
-    search_spells = search_help_spells(all_topics=None, spell=search)
+    # Prepend "Spell " to the search, and
+    #   try to find any spell help topics containing the search term
+    search = f'Spell {search}'
+    search_spells = search_help_topics(all_topics=None, search=search)
 
     # Say so, only to that user, if there were no results
     if not search_spells:
@@ -110,7 +112,7 @@ async def spell(ctx: interactions.CommandContext, search: str):
 
     # Link search results, if there are multiple results
     elif len(search_spells) > 1:
-        spell_search_url = f'<https://isharmud.com/help/Spell%20{spell}>'.replace(' ', '%20')
+        spell_search_url = f'<https://isharmud.com/help/{search}>'.replace(' ', '%20')
         out = f'Spell Results: {spell_search_url} ({len(search_spells)} spells)'
 
     # Send the help search response
