@@ -53,7 +53,7 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
 
         # Show the topic name and link
         topic_name = found_topic['name']
-        topic_url = f'https://isharmud.com/help/{topic_name}'.replace(' ', '%20')
+        topic_url = f'<https://isharmud.com/help/{topic_name}>'.replace(' ', '%20')
         out = f'{topic_name}: {topic_url}\n'
 
         # Show any specific items within the help topic
