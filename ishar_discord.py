@@ -92,41 +92,29 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
     ]
 )
 async def spell(ctx: interactions.CommandContext, search: str):
-    """Search for MUD help topics"""
-    ephemeral = False
+    """Search for a single MUD spell in help topics"""
 
     # Try to find any help topics containing the search term
     search_results = search_help_topics(all_topics=None, search=search)
+    print('Search Results:', search_results)
 
     # Narrow down the results to any topic named starting with "Spell "
     search_spell_results = {}
     for name, topic in search_results.items():
-        if topic['name'].startswith('Spell '):
+        print('Topic Name: ', name)
+        if name.startswith('Spell '):
+            print('OK:', name)
             search_spell_results[name] = topic
 
-    # Proceed if there were search results
-    if search_spell_results:
+    # Get single spell search result, if there is only one
+    if search_spell_results and len(search_spell_results) == 1:
+        found_spell = next(iter(search_spell_results.values()))
+        await ctx.send(get_single_help(topic=found_spell))
 
-        # Count the number of results
-        num_results = len(search_spell_results)
-
-        # Get single spell search result, if there is only one
-        if num_results == 1:
-            found_spell = next(iter(search_spell_results.values()))
-            out = get_single_help(topic=found_spell)
-
-        # Link search results, if there are multiple results
-        elif num_results > 1:
-            spell_search_url = f'<https://isharmud.com/help/{search}>'.replace(' ', '%20')
-            out = f'Spell Results: {spell_search_url} ({num_results} spells)'
-
-    # Say so, only to that user, if there were no results
+    # Say so, only to that user, if there was not a single result
     else:
-        out = 'Sorry, but no such spell could be found!'
-        ephemeral = True
+        await ctx.send('Sorry, but no such spell could be found!', ephemeral=True)
 
-    # Send the spell search response
-    await ctx.send(out, ephemeral=ephemeral)
     db_session.close()
 
 
