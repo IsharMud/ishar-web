@@ -87,6 +87,9 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
         if len(out) > 2000:
             out = get_single_help(topic=found_topic, want_body=False)
             attachment = make_attachment(topic=found_topic)
+            msg_req = interactions.MessageRequest()
+            msg_req.create_message(payload=out, channel_id=ctx.channel_id, files=attachment)
+            print(msg_req)
 
     # Link search results to user, if there are multiple results
     elif len(search_topics) > 1:
@@ -97,6 +100,7 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
     if attachment:
         print(attachment)
         print(ctx.channel)
+        print(ctx.channel_id)
         await ctx.send(out, ephemeral=ephemeral)
     else:
         await ctx.send(out, ephemeral=ephemeral)
