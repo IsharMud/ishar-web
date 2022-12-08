@@ -1,6 +1,5 @@
 """Parse the MUD 'helptab' file"""
 import re
-from flask import url_for
 from models import PlayerClass
 from mud_secret import HELPTAB, IMM_LEVELS
 from sentry import sentry_sdk
@@ -126,7 +125,7 @@ def parse_help_class(class_line=None, playable_classes=player_classes):
         i += 1
         clean_topic_class = topic_class.strip()
         if clean_topic_class in playable_classes:
-            string_out += f"<a href=\"{url_for('help_page.single', topic=clean_topic_class)}\">{clean_topic_class}</a>"
+            string_out += f'<a href="/help/{clean_topic_class}">{clean_topic_class}</a>'
             if i != num_topic_classes:
                 string_out += ', '
     return string_out
@@ -159,7 +158,7 @@ def parse_help_content(content=None):
             for related_topic in related_topics:
                 i += 1
                 if related_topic and related_topic.strip() != '':
-                    related_link = f"<a href=\"{url_for('help_page.single', topic=related_topic.strip())}\">{related_topic.strip()}</a>"
+                    related_link = f'<a href="/help/{related_topic.strip()}">{related_topic.strip()}</a>'
                     help_topic['body_text'] += related_link
                     if i != num_related:
                         help_topic['body_text'] += ', '

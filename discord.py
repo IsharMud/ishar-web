@@ -37,10 +37,10 @@ async def mudhelp(ctx: interactions.CommandContext, search=None):
     elif len(search_topics) == 1:
         found_topic = next(iter(search_topics.values()))
         topic_name = found_topic['name']
-        topic_url = f"https://isharmud.com/help/{topic_name}".replace(' ', '%20')
+        topic_url = f"isharmud.com/help/{topic_name}".replace(' ', '%20')
         await ctx.send(f'{topic_name}: {topic_url}')
     elif len(search_topics) > 1:
-        topic_url = f"https://isharmud.com/help/{search}".replace(' ', '%20')
+        topic_url = f"isharmud.com/help/{search}".replace(' ', '%20')
         await ctx.send(f'{topic_name}: {topic_url}')
 
 
