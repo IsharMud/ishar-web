@@ -44,12 +44,17 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
     if not search_topics:
         out = 'Sorry, but there were no search results.'
 
-    # Link single search result, if there is only one
+    # Link single search result, and if there is only one
     elif len(search_topics) == 1:
         found_topic = next(iter(search_topics.values()))
         topic_name = found_topic['name']
+        topic_syntax = found_topic['syntax']
+        topic_body = found_topic['body_text']
+        body_begin = topic_body[0:100]
         topic_url = f'https://isharmud.com/help/{topic_name}'.replace(' ', '%20')
-        out = f'{topic_name}: {topic_url}'
+        out = f'{topic_name}: {topic_url}\n'
+        out += f'> {topic_syntax}\n'
+        out += f'> {body_begin}'
 
     # Link search results, if there are multiple results
     elif len(search_topics) > 1:
