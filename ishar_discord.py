@@ -82,7 +82,6 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
 
     # Send the help search response
     await ctx.send(out, ephemeral=ephemeral)
-
     db_session.close()
 
 
@@ -107,8 +106,14 @@ async def spell(ctx: interactions.CommandContext, search: str):
     # Get single spell search result, if there is only one
     if search_spell_results and len(search_spell_results) == 1:
         found_spell = next(iter(search_spell_results.values()))
-        ephemeral = False
-        out = get_single_help(topic=found_spell)
+        single = get_single_help(topic=found_spell)
+        if len(single) < 2000:
+            ephemeral = False
+            out = single
+        else:
+            ephemeral = True
+            out = f'Sorry, but that output is too long ({len(single)}) for Discord - but we are working on finding a fix!'
+
 
     # Handle multiple spell results
     elif len(search_spell_results) > 1:
@@ -130,8 +135,6 @@ async def spell(ctx: interactions.CommandContext, search: str):
 
     # Send the spell search response
     await ctx.send(out, ephemeral=ephemeral)
-
-
     db_session.close()
 
 
