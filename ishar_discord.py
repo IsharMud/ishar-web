@@ -5,8 +5,29 @@ import interactions
 import discord
 import discord_secret
 from database import db_session
-from helptab import search_help_topics
+from helptab import search_help_topics, search_help_spells
 from models import Challenge, Player, Season
+
+
+def get_single_help(topic=None):
+    """Return extended output for a single help topic"""
+    # Get the single topic name and link
+    topic_url = f"<https://isharmud.com/help/{topic['name']}>".replace(' ', '%20')
+    out = f"{topic['name']}: {topic_url}\n"
+
+    # Get any specific items within the help topic
+    for item_type in ['syntax', 'minimum', 'class', 'level']:
+        if item_type in topic:
+            topic[item_type] = re.sub('<[^<]+?>', '', topic[item_type]).replace('&gt;', '>').replace('&lt;', '<').replace('&quot;', '"')
+            if topic[item_type].strip() != '':
+                out += f'> {item_type.title()}: {topic[item_type].strip()}\n'
+
+    # Return the help topic without HTML in the pre-formatted body text
+    topic_body = re.sub('<[^<]+?>', '', topic['body_text'])
+    topic_body = topic_body.replace('&gt;', '>').replace('&lt;', '<').replace('&quot;', '"')
+    out += f'```{topic_body}```'
+    return out
+
 
 # Connect/authenticate the IsharMUD Discord bot
 bot = interactions.Client(token=discord_secret.TOKEN, default_scope=discord_secret.GUILD)
@@ -50,25 +71,10 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
         out = 'Sorry, but there were no search results.'
         ephemeral = True
 
-    # Show single search result, if there is only one
+    # Get single search result, if there is only one
     elif len(search_topics) == 1:
         found_topic = next(iter(search_topics.values()))
-
-        # Get the single topic name and link
-        topic_url = f"<https://isharmud.com/help/{found_topic['name']}>".replace(' ', '%20')
-        out = f"{found_topic['name']}: {topic_url}\n"
-
-        # Get any specific items within the help topic
-        for item_type in ['syntax', 'minimum', 'class', 'level']:
-            if item_type in found_topic:
-                found_topic[item_type] = re.sub('<[^<]+?>', '', found_topic[item_type]).replace('&gt;', '>').replace('&lt;', '<').replace('&quot;', '"')
-                if found_topic[item_type].strip() != '':
-                    out += f'> {item_type.title()}: {found_topic[item_type].strip()}\n'
-
-        # Get the pre-formatted body text without HTML
-        topic_body = re.sub('<[^<]+?>', '', found_topic['body_text'])
-        topic_body = topic_body.replace('&gt;', '>').replace('&lt;', '<').replace('&quot;', '"')
-        out += f'```{topic_body}```'
+        out = get_single_help(topic=found_topic)
 
     # Link search results, if there are multiple results
     elif len(search_topics) > 1:
@@ -78,6 +84,39 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
     # Send the help search response
     await ctx.send(out, ephemeral=ephemeral)
 
+    db_session.close()
+
+
+@bot.command(name='spell', description='Find Ishar MUD spell help',
+    options = [
+        interactions.Option(name='search', description='name of a spell to search for',
+            type=interactions.OptionType.STRING, required=True)
+    ]
+)
+async def spell(ctx: interactions.CommandContext, search: str):
+    """Search for MUD help topics"""
+    ephemeral = False
+
+    # Try to find any spell help topics containing the search term
+    search_spells = search_help_spells(all_topics=None, spell=search)
+
+    # Say so, only to that user, if there were no results
+    if not search_spells:
+        out = 'Sorry, but no such spell could be found!'
+        ephemeral = True
+
+    # Get single spell search result, if there is only one
+    elif len(search_spells) == 1:
+        found_spell = next(iter(search_spells.values()))
+        out = get_single_help(topic=found_spell)
+
+    # Link search results, if there are multiple results
+    elif len(search_spells) > 1:
+        spell_search_url = f'<https://isharmud.com/help/Spell%20{spell}>'.replace(' ', '%20')
+        out = f'Spell Results: {spell_search_url} ({len(search_spells)} spells)'
+
+    # Send the help search response
+    await ctx.send(out, ephemeral=ephemeral)
     db_session.close()
 
 

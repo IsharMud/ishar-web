@@ -219,6 +219,12 @@ def parse_help_header(header=None):
     return help_header
 
 
+def search_help_spells(all_topics=None, spell=None)
+    """Search all topics for a specific topic name or alias,
+        that is prepended by 'spell ' to make Discord spell searching simpler"""
+    return search_help_topics(all_topics=all_topics, search=f'spell {spell}')
+
+
 def search_help_topics(all_topics=None, search=None):
     """Search all help topics for a specific topic name or alias"""
 
