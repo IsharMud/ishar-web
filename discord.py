@@ -28,6 +28,23 @@ async def deadhead(ctx: interactions.CommandContext):
     db_session.close()
 
 
+@bot.command(
+    name="say_something",
+    description="say something!",
+    options = [
+        interactions.Option(
+            name="text",
+            description="What you want to say",
+            type=interactions.OptionType.STRING,
+            required=True,
+        )
+    ]
+)
+async def my_first_command(ctx: interactions.CommandContext, text: str):
+    """This is my first command"""
+    await ctx.send(f"You said '{text}'!")
+
+
 @bot.command()
 async def mudhelp(ctx: interactions.CommandContext, search=None):
     """Search for MUD help"""
