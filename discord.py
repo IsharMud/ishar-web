@@ -1,6 +1,8 @@
 """IsharMUD Discord bot"""
+import os
 import re
 import interactions
+import discord
 import discord_secret
 from database import db_session
 from helptab import search_help_topics
@@ -38,6 +40,7 @@ async def deadhead(ctx: interactions.CommandContext):
 async def mudhelp(ctx: interactions.CommandContext, search: str):
     """Search for MUD help"""
     ephemeral = False
+    attach_file = None
 
     # Try to find any help topics containing the search term
     search_topics = search_help_topics(all_topics=None, search=search)
@@ -51,25 +54,35 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
     elif len(search_topics) == 1:
         found_topic = next(iter(search_topics.values()))
 
-        # Show the topic name and link
+        # Get the single topic name and link
         topic_name = found_topic['name']
         topic_url = f'<https://isharmud.com/help/{topic_name}>'.replace(' ', '%20')
         out = f'{topic_name}: {topic_url}\n'
 
-        # Show any specific items within the help topic
-        for item_type in ['syntax', 'minimum', 'level', 'class']:
+        # Get any specific items within the help topic
+        for item_type in ['syntax', 'minimum', 'class', 'level']:
             if item_type in found_topic:
                 found_topic[item_type] = re.sub('<[^<]+?>', '', found_topic[item_type]).replace('&gt;', '>').replace('&lt;', '<').replace('&quot;', '"')
                 if found_topic[item_type].strip() != '':
                     out += f'> {item_type.title()}: {found_topic[item_type].strip()}\n'
 
-        # Show the preformatted body text without HTML
+        # Get the pre-formatted body text without HTML
         topic_body = re.sub('<[^<]+?>', '', found_topic['body_text'])
         topic_body_clean = topic_body.replace('&gt;', '>').replace('&lt;', '<').replace('&quot;', '"')
-        how_many_chars = 400
-        if len(topic_body_clean) > how_many_chars:
-            topic_body_clean = topic_body_clean[0:how_many_chars] + '...'
-        out += f'```{topic_body_clean}```'
+        out += topic_body_clean
+
+        # Set the topic file directory and file name
+        topic_file_dir = '/tmp'
+        topic_file_short_name = topic_name.replace(' ', '_') + '.txt'
+        topic_file_name = f'{topic_file_dir}/{topic_file_short_name}'
+
+        with open(topic_file_name, encoding='utf-8', mode='w') as topic_file_write:
+            topic_file_write.write(out)
+
+        with open(topic_file_name, encoding='utf-8', mode='r') as topic_file_read:
+            attach_file = discord.File(topic_file_read, topic_file_short_name)
+
+        os.remove(topic_file_name)
 
     # Link search results, if there are multiple results
     elif len(search_topics) > 1:
@@ -77,7 +90,7 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
         out = f'Search Results: {search_url}'
 
     # Send the help search response
-    await ctx.send(out, ephemeral=ephemeral)
+    await ctx.send(out, ephemeral=ephemeral, file=attach_file)
 
     db_session.close()
 
