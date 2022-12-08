@@ -4,6 +4,7 @@ from models import PlayerClass
 from mud_secret import HELPTAB, IMM_LEVELS
 from sentry import sentry_sdk
 
+
 # Retrieve playable player class names
 player_classes = [player_class.class_display_name for player_class in PlayerClass().query.filter(PlayerClass.class_description != '').all()]
 

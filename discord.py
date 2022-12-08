@@ -1,4 +1,5 @@
 """IsharMUD Discord bot"""
+import re
 import interactions
 import discord_secret
 from database import db_session
@@ -48,13 +49,20 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
     elif len(search_topics) == 1:
         found_topic = next(iter(search_topics.values()))
         topic_name = found_topic['name']
-        topic_syntax = found_topic['syntax']
-        topic_body = found_topic['body_text'].replace('&gt;', '>').replace('&lt;', '<').replace('&quot;', '"')
-        body_begin = topic_body[0:100] + '...'
+        found_topic['syntax'] = found_topic['syntax'].replace('&gt;', '>').replace('&lt;', '<').replace('&quot;', '"')
+        found_topic['class'] = re.sub('<[^<]+?>', '', found_topic['player_class']).replace('&gt;', '>').replace('&lt;', '<').replace('&quot;', '"')
+        found_topic['level'] = re.sub('<[^<]+?>', '', found_topic['level']).replace('&gt;', '>').replace('&lt;', '<').replace('&quot;', '"')
         topic_url = f'https://isharmud.com/help/{topic_name}'.replace(' ', '%20')
         out = f'{topic_name}: {topic_url}\n'
-        out += f'> {topic_syntax}\n'
-        out += f'> {body_begin}'
+
+        # Show the topic name and link, append any item values, and the beginning of the topic
+        for item_type in ['syntax', 'minimum', 'level', 'class']:
+            if found_topic[item_type] and found_topic[item_type] != '':
+                out += f'> {item_type.title()}: {found_topic[item_type]}\n'
+
+        topic_body = found_topic['body_text'].replace('&gt;', '>').replace('&lt;', '<').replace('&quot;', '"')
+        body_begin = topic_body[0:100] + '...'
+        out += body_begin
 
     # Link search results, if there are multiple results
     elif len(search_topics) > 1:
