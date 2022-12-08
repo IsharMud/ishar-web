@@ -68,19 +68,18 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
         # Get the pre-formatted body text without HTML
         topic_body = re.sub('<[^<]+?>', '', found_topic['body_text'])
         topic_body = topic_body.replace('&gt;', '>').replace('&lt;', '<').replace('&quot;', '"')
-        out += topic_body
 
         # Set the topic file directory and file name
         topic_file_short_name = found_topic['name'].replace(' ', '_') + '.txt'
-        topic_file_name = f'/tmp/{topic_file_short_name}'
+        topic_file_name = f'/tmp/ishar_mudhelp_{topic_file_short_name}'
 
+        # Write the help topic body to the temporary file
         with open(topic_file_name, encoding='utf-8', mode='w') as topic_file_write:
-            topic_file_write.write(out)
+            topic_file_write.write(topic_body)
 
+        # Read the temporary help topic file into Discord, to send
         with open(topic_file_name, encoding='utf-8', mode='r') as topic_file_read:
             attach_file = discord.File(topic_file_read, topic_file_short_name)
-
-        os.remove(topic_file_name)
 
     # Link search results, if there are multiple results
     elif len(search_topics) > 1:
@@ -88,7 +87,11 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
         out = f'Search Results: {search_url}'
 
     # Send the help search response
-    await ctx.send(out, ephemeral=ephemeral, file=attach_file)
+    if attach_file:
+        await ctx.send(file=attach_file, content=out)
+        os.remove(topic_file_name)
+    else:
+        await ctx.send(out, ephemeral=ephemeral)
 
     db_session.close()
 
