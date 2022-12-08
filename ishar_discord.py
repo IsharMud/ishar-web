@@ -96,14 +96,11 @@ async def spell(ctx: interactions.CommandContext, search: str):
 
     # Try to find any help topics containing the search term
     search_results = search_help_topics(all_topics=None, search=search)
-    print('Search Results:', search_results)
 
     # Narrow down the results to any topic named starting with "Spell "
     search_spell_results = {}
     for name, topic in search_results.items():
-        print('Topic Name: ', name)
         if name.startswith('Spell '):
-            print('OK:', name)
             search_spell_results[name] = topic
 
     # Get single spell search result, if there is only one
@@ -111,9 +108,14 @@ async def spell(ctx: interactions.CommandContext, search: str):
         found_spell = next(iter(search_spell_results.values()))
         await ctx.send(get_single_help(topic=found_spell))
 
-    # Tell only that user how many results there were, if multiple
+    # Handle multiple spell results
     elif len(search_spell_results) > 1:
-        await ctx.send(f'Sorry, but there were {len(search_spell_results)} results. Please try to be more specific.', ephemeral=True)
+
+        # List them if there were only a few, otherwise, tell them to be more specific
+        if len(search_spell_results <= 5):
+            await ctx.send(f'{len(search_spell_results)} results: {search_spell_results}', ephemeral=True)
+        else:
+            await ctx.send(f'Sorry, but there were {len(search_spell_results)} results! Please try to be more specific.', ephemeral=True)
 
     # Say so, only to that user, if there was not a single result
     else:
