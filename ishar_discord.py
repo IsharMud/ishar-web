@@ -1,8 +1,6 @@
 """IsharMUD Discord bot"""
 import re
-from io import StringIO
 import interactions
-import discord
 import discord_secret
 from database import db_session
 from helptab import search_help_topics, search_help_spells
