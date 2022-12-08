@@ -131,7 +131,6 @@ def parse_help_class(class_line=None, playable_classes=player_classes):
                 string_out += ', '
         else:
             string_out = class_line
-    print(string_out)
     return string_out
 
 
