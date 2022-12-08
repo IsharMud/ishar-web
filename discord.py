@@ -71,8 +71,23 @@ async def season(ctx: interactions.CommandContext):
 @bot.command()
 async def faq(ctx: interactions.CommandContext):
     """Link to the Frequently Asked Questions page"""
-    current_season = Season.query.filter_by(is_active=1).order_by(-Season.season_id).first()
-    await ctx.send(f'It is currently Season {current_season.season_id} which ends in {current_season.expires}!')
+    await ctx.send('https://isharmud.com/faq')
+
+@bot.command()
+async def faqs(ctx: interactions.CommandContext):
+    """Link to the Frequently Asked Questions page"""
+    await ctx.send('https://isharmud.com/faq')
+
+
+@bot.command()
+async def get_started(ctx: interactions.CommandContext):
+    """Link to the Getting Started page"""
+    await ctx.send('https://isharmud.com/get_started')
+
+@bot.command()
+async def getstarted(ctx: interactions.CommandContext):
+    """Link to the Getting Started page"""
+    await ctx.send('https://isharmud.com/get_started')
 
 
 bot.start()
