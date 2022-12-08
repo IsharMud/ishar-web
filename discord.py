@@ -37,13 +37,15 @@ async def deadhead(ctx: interactions.CommandContext):
 )
 async def mudhelp(ctx: interactions.CommandContext, search: str):
     """Search for MUD help"""
+    ephemeral = False
 
     # Try to find any help topics containing the search term
     search_topics = search_help_topics(all_topics=None, search=search)
 
-    # Say so if there were no results
+    # Say so, only to that user, if there were no results
     if not search_topics:
         out = 'Sorry, but there were no search results.'
+        ephemeral = True
 
     # Link single search result, and if there is only one
     elif len(search_topics) == 1:
@@ -72,7 +74,8 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
         out = f'Search Results: {search_url}'
 
     # Send the help search response
-    await ctx.send(out)
+    await ctx.send(out, ephemeral=ephemeral)
+
     db_session.close()
 
 
