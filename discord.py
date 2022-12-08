@@ -63,14 +63,10 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
                 if found_topic[item_type].strip() != '':
                     out += f'> {item_type.title()}: {found_topic[item_type].strip()}\n'
 
-        # Show the first 100 lines of the help topic body text
-        topic_body = found_topic['body_text'].replace('&gt;', '>').replace('&lt;', '<').replace('&quot;', '"')
-        how_many_lines = 400
-        if len(topic_body) > how_many_lines:
-            body_begin = f'```{topic_body}```'
-        else:
-            body_begin = topic_body
-        out += body_begin
+        # Show the preformatted body text without HTML
+        topic_body = re.sub('<[^<]+?>', '', found_topic['body_text'])
+        topic_body_clean = topic_body.replace('&gt;', '>').replace('&lt;', '<').replace('&quot;', '"')
+        out += f'```{topic_body_clean}```'
 
     # Link search results, if there are multiple results
     elif len(search_topics) > 1:
