@@ -76,7 +76,7 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
 
     # Link search results, if there are multiple results
     elif len(search_topics) > 1:
-        search_url = f'<https://isharmud.com/help/{search}>'.replace(' ', '%20')
+        search_url = f'<https://isharmud.com/help/Spell {search}>'.replace(' ', '%20')
         out = f'Search Results: {search_url} ({len(search_topics)} topics)'
 
     # Send the help search response
@@ -95,19 +95,14 @@ async def spell(ctx: interactions.CommandContext, search: str):
     """Search for MUD help topics"""
     ephemeral = False
 
-    # Prepend "Spell " to the search, and
-    #   try to find any spell help topics containing the search term
-    search = f'Spell {search}'
-    search_spell_results = search_help_topics(all_topics=None, search=search)
+    # Try to find any help topics containing the search term
+    search_results = search_help_topics(all_topics=None, search=search)
 
-    print(f'search_spell_results: {search_spell_results}')
-    for k, v in search_spell_results.items():
-        print('k', k)
-        print('v', v)
-        if not v['name'].startswith('Spell '):
-            print('Should remove:', k)
-        else:
-            print(f'OK search_spell_result: {k}')
+    # Narrow down the results to any topic named starting with "Spell "
+    search_spell_results = {}
+    for name, topic in search_results.items():
+        if topic['name'].startswith('Spell '):
+            search_spell_results[name] = topic
 
     # Proceed if there were search results
     if search_spell_results:
