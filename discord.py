@@ -40,8 +40,8 @@ async def mudhelp(ctx: interactions.CommandContext, search=None):
         topic_url = f"isharmud.com/help/{topic_name}".replace(' ', '%20')
         await ctx.send(f'{topic_name}: {topic_url}')
     elif len(search_topics) > 1:
-        topic_url = f"isharmud.com/help/{search}".replace(' ', '%20')
-        await ctx.send(f'{topic_name}: {topic_url}')
+        search_url = f"isharmud.com/help/{search}".replace(' ', '%20')
+        await ctx.send(f'{search_url}')
 
 
 @bot.command()
