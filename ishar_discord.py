@@ -55,9 +55,8 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
         found_topic = next(iter(search_topics.values()))
 
         # Get the single topic name and link
-        topic_name = found_topic['name']
-        topic_url = f'<https://isharmud.com/help/{topic_name}>'.replace(' ', '%20')
-        out = f'{topic_name}: {topic_url}\n'
+        topic_url = f"<https://isharmud.com/help/{found_topic['name']}>".replace(' ', '%20')
+        out = f"{found_topic['name']}: {topic_url}\n"
 
         # Get any specific items within the help topic
         for item_type in ['syntax', 'minimum', 'class', 'level']:
@@ -68,13 +67,12 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
 
         # Get the pre-formatted body text without HTML
         topic_body = re.sub('<[^<]+?>', '', found_topic['body_text'])
-        topic_body_clean = topic_body.replace('&gt;', '>').replace('&lt;', '<').replace('&quot;', '"')
-        out += topic_body_clean
+        topic_body = topic_body.replace('&gt;', '>').replace('&lt;', '<').replace('&quot;', '"')
+        out += topic_body
 
         # Set the topic file directory and file name
-        topic_file_dir = '/tmp'
-        topic_file_short_name = topic_name.replace(' ', '_') + '.txt'
-        topic_file_name = f'{topic_file_dir}/{topic_file_short_name}'
+        topic_file_short_name = found_topic['name'].replace(' ', '_') + '.txt'
+        topic_file_name = f'/tmp/{topic_file_short_name}'
 
         with open(topic_file_name, encoding='utf-8', mode='w') as topic_file_write:
             topic_file_write.write(out)
