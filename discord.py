@@ -66,6 +66,9 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
         # Show the preformatted body text without HTML
         topic_body = re.sub('<[^<]+?>', '', found_topic['body_text'])
         topic_body_clean = topic_body.replace('&gt;', '>').replace('&lt;', '<').replace('&quot;', '"')
+        how_many_chars = 400
+        if topic_body_clean > how_many_chars:
+            topic_body_clean = topic_body_clean[0:how_many_chars] + '...'
         out += f'```{topic_body_clean}```'
 
     # Link search results, if there are multiple results
