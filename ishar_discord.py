@@ -27,12 +27,16 @@ def get_single_help(topic=None, want_body=True):
 def make_attachment(topic=None):
     """Create a Discord file to attach for larger help topics"""
 
-    topic_file_short = 'mudhelp_' + topic['name'].replace(' ', '_') + '.txt'
-    topic_file = f'/var/www/isharmud.com/ishar-web/static/{topic_file_short}'
-    with open(file=topic_file, encoding='utf-8', mode='w+') as topic_fh:
-        topic_fh.write(topic['body_text'])
-        topic_fh.close()
-    return interactions.File(topic_file, description=topic_file_short)
+    try:
+        topic_file_short = 'mudhelp_' + topic['name'].replace(' ', '_') + '.txt'
+        topic_file = f'/var/www/isharmud.com/ishar-web/static/{topic_file_short}'
+        with open(file=topic_file, encoding='utf-8', mode='w+') as topic_fw:
+            topic_fw.write(topic['body_text'])
+        topic_fr = open(file=topic_file, encoding='utf-8', mode='r')
+        return interactions.File(topic_fr, description=topic_file_short)
+    finally:
+        topic_fw.close()
+        topic_fr.close()
 
 
 # Connect/authenticate the IsharMUD Discord bot
