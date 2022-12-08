@@ -49,8 +49,8 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
         found_topic = next(iter(search_topics.values()))
         topic_name = found_topic['name']
         topic_syntax = found_topic['syntax']
-        topic_body = found_topic['body_text']
-        body_begin = topic_body[0:100]
+        topic_body = found_topic['body_text'].replace('&gt;', '>').replace('&lt;', '<').replace('&quot;', '"')
+        body_begin = topic_body[0:100] + '...'
         topic_url = f'https://isharmud.com/help/{topic_name}'.replace(' ', '%20')
         out = f'{topic_name}: {topic_url}\n'
         out += f'> {topic_syntax}\n'
