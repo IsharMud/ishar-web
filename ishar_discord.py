@@ -32,11 +32,9 @@ def make_attachment(topic=None):
         topic_file = f'/var/www/isharmud.com/ishar-web/static/{topic_file_short}'
         with open(file=topic_file, encoding='utf-8', mode='w+') as topic_fw:
             topic_fw.write(topic['body_text'])
-        topic_fr = open(file=topic_file, encoding='utf-8', mode='r')
-        return interactions.File(topic_fr, description=topic_file_short)
+        return interactions.File(topic_file)
     finally:
         topic_fw.close()
-        topic_fr.close()
 
 
 # Connect/authenticate the IsharMUD Discord bot
