@@ -95,7 +95,9 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
 
     # Send the help search response
     if attachment:
-        await ctx.send(out, ephemeral=ephemeral, attachments=[attachment])
+        print(attachment)
+        print(ctx.channel)
+        await ctx.send(out, ephemeral=ephemeral)
     else:
         await ctx.send(out, ephemeral=ephemeral)
     db_session.close()
