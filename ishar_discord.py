@@ -59,26 +59,30 @@ async def deadhead(ctx: interactions.CommandContext):
 )
 async def mudhelp(ctx: interactions.CommandContext, search: str):
     """Search for MUD help topics"""
-    ephemeral = False
 
     # Try to find any help topics containing the search term
+    ephemeral = True
     search_topics = search_help_topics(all_topics=None, search=search)
 
-    # Say so, only to that user, if there were no results
+    # Tell user if there were no results
     if not search_topics:
         out = 'Sorry, but there were no search results.'
-        ephemeral = True
 
     # Get single search result, if there is only one
     elif len(search_topics) == 1:
         found_topic = next(iter(search_topics.values()))
         out = get_single_help(topic=found_topic)
 
-    # Link search results, if there are multiple results
+        # Show the entire channel the single result, if possible
+        if len(out) < 2000:
+            ephemeral = False
+        else:
+            out = f'Sorry, but that output is too long ({len(out)}) for Discord - but we are working on finding a fix!'
+
+    # Link search results to user, if there are multiple results
     elif len(search_topics) > 1:
         search_url = f'<https://isharmud.com/help/{search}>'.replace(' ', '%20')
         out = f'Search Results: {search_url} ({len(search_topics)} topics)'
-        ephemeral = True
 
     # Send the help search response
     await ctx.send(out, ephemeral=ephemeral)
@@ -95,6 +99,7 @@ async def spell(ctx: interactions.CommandContext, search: str):
     """Search for a single MUD spell in help topics"""
 
     # Try to find any help topics containing the search term
+    ephemeral = True
     search_results = search_help_topics(all_topics=None, search=search)
 
     # Narrow down the results to any topic named starting with "Spell "
@@ -106,31 +111,26 @@ async def spell(ctx: interactions.CommandContext, search: str):
     # Get single spell search result, if there is only one
     if search_spell_results and len(search_spell_results) == 1:
         found_spell = next(iter(search_spell_results.values()))
-        single = get_single_help(topic=found_spell)
-        if len(single) < 2000:
-            ephemeral = False
-            out = single
-        else:
-            ephemeral = True
-            out = f'Sorry, but that output is too long ({len(single)}) for Discord - but we are working on finding a fix!'
+        out = get_single_help(topic=found_spell)
 
+        # Show the entire channel the single result, if possible
+        if len(out) < 2000:
+            ephemeral = False
+        else:
+            out = f'Sorry, but that output is too long ({len(out)}) for Discord - but we are working on finding a fix!'
 
     # Handle multiple spell results
     elif len(search_spell_results) > 1:
 
-        # List spell names if there were only a few,
+        # Show user the matching spell names, if there were 10 or less
+        #   Otherwise tell them to be more specific
         if len(search_spell_results) <= 10:
-            ephemeral = True
             out = f'Found {len(search_spell_results)} spells: {", ".join(search_spell_results.keys())}'
-
-        # Otherwise, tell the user to be more specific
         else:
-            ephemeral = True
             out = f'Sorry, but there were {len(search_spell_results)} results! Please try to be more specific.'
 
-    # Say so, only to that user, if there was not a single result
+    # Tell user if there was not a single result
     else:
-        ephemeral = True
         out = 'Sorry, but no such spell could be found!'
 
     # Send the spell search response
