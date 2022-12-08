@@ -42,17 +42,25 @@ async def deadhead(ctx: interactions.CommandContext):
 )
 async def mudhelp(ctx: interactions.CommandContext, search: str):
     """Search for MUD help"""
+
+    # Try to find any help topics containing the search term
     search_topics = search_help_topics(all_topics=None, search=search)
+
+    # Say so if there were no results
     if not search_topics:
         await ctx.send('Sorry, but there were no search results.')
+
+    # Link single search result, if there is only one
     elif len(search_topics) == 1:
         found_topic = next(iter(search_topics.values()))
         topic_name = found_topic['name']
-        topic_url = f"isharmud.com/help/{topic_name}".replace(' ', '%20')
+        topic_url = f"https://isharmud.com/help/{topic_name}".replace(' ', '%20')
         await ctx.send(f'{topic_name}: {topic_url}')
+
+    # Link search results, if there are multiple results
     elif len(search_topics) > 1:
-        search_url = f"isharmud.com/help/{search}".replace(' ', '%20')
-        await ctx.send(f'{search_url}')
+        search_url = f"<https://isharmud.com/help/{search}>".replace(' ', '%20')
+        await ctx.send(f'Search Results: {search_url}')
 
 
 @bot.command()
