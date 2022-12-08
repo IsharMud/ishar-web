@@ -1,12 +1,20 @@
 """IsharMUD Discord bot"""
-import os
 import re
+from io import StringIO
 import interactions
 import discord
 import discord_secret
 from database import db_session
 from helptab import search_help_topics
 from models import Challenge, Player, Season
+
+def topic_body_file(topic_name=None, topic_body=None):
+    """Create a file attachment of the help topic body text for Discord upload"""
+
+    # Set the topic file name and return buffered help body text as attachment
+    topic_name = topic_name.replace(' ', '_') + '.txt'
+    return discord.File(StringIO(topic_body), filename=topic_name)
+
 
 bot = interactions.Client(token=discord_secret.TOKEN, default_scope=discord_secret.GUILD)
 
@@ -68,18 +76,7 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
         # Get the pre-formatted body text without HTML
         topic_body = re.sub('<[^<]+?>', '', found_topic['body_text'])
         topic_body = topic_body.replace('&gt;', '>').replace('&lt;', '<').replace('&quot;', '"')
-
-        # Set the topic file directory and file name
-        topic_file_short_name = found_topic['name'].replace(' ', '_') + '.txt'
-        topic_file_name = f'/tmp/ishar_mudhelp_{topic_file_short_name}'
-
-        # Write the help topic body to the temporary file
-        with open(topic_file_name, encoding='utf-8', mode='w') as topic_file_write:
-            topic_file_write.write(topic_body)
-
-        # Read the temporary help topic file into Discord, to send
-        with open(topic_file_name, encoding='utf-8', mode='r') as topic_file_read:
-            attach_file = discord.File(topic_file_read, topic_file_short_name)
+        attach_file = topic_body_file(topic_name=found_topic['name'], topic_body=topic_body)
 
     # Link search results, if there are multiple results
     elif len(search_topics) > 1:
@@ -88,8 +85,7 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
 
     # Send the help search response
     if attach_file:
-        await ctx.send(embeds=attach_file, content=out)
-        os.remove(topic_file_name)
+        await ctx.send(file=attach_file)
     else:
         await ctx.send(out, ephemeral=ephemeral)
 
