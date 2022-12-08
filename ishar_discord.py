@@ -6,7 +6,7 @@ from helptab import search_help_topics
 from models import Challenge, Player, Season
 
 
-def get_single_help(topic=None, want_body=True):
+def get_single_help(topic=None):
     """Return extended output for a single help topic"""
     # Get the single topic name and link
     topic_url = f"<https://isharmud.com/help/{topic['name']}>".replace(' ', '%20')
@@ -19,7 +19,7 @@ def get_single_help(topic=None, want_body=True):
                 out += f'> {item_type.title()}: {topic[item_type].strip()}\n'
 
     # Return the help topic without HTML in the pre-formatted body text
-    if want_body:
+    if len(out) < 1500:
         out += f"```{topic['body_text']}```"
     return out
 
@@ -71,35 +71,13 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
         found_topic = next(iter(search_topics.values()))
         out = get_single_help(topic=found_topic)
 
-        # Show the entire channel the single result, if possible
-        if len(out) > 2000:
-            out = get_single_help(topic=found_topic, want_body=False)
-
-            try:
-                topic_file_short = 'mudhelp_' + found_topic['name'].replace(' ', '_') + '.txt'
-                topic_file = f'/var/www/isharmud.com/ishar-web/static/{topic_file_short}'
-                with open(file=topic_file, encoding='utf-8', mode='w+') as topic_fw:
-                    topic_fw.write(found_topic['body_text'])
-            finally:
-                topic_fw.close()
-
-            sent = True
-            msg = interactions.MessageRequest()
-            await msg.create_message(
-                    payload=out,
-                    channel_id=ctx.channel_id,
-                    files=[interactions.File(topic_file)]
-                )
-            await ctx.send(msg)
-
     # Link search results to user, if there are multiple results
     elif len(search_topics) > 1:
         search_url = f'<https://isharmud.com/help/{search}>'.replace(' ', '%20')
         out = f'Search Results: {search_url} ({len(search_topics)} topics)'
 
     # Send the help search response
-    if not sent:
-        await ctx.send(out, ephemeral=ephemeral)
+    await ctx.send(out, ephemeral=ephemeral)
     db_session.close()
 
 
@@ -126,12 +104,7 @@ async def spell(ctx: interactions.CommandContext, search: str):
     if search_spell_results and len(search_spell_results) == 1:
         found_spell = next(iter(search_spell_results.values()))
         out = get_single_help(topic=found_spell)
-
-        # Show the entire channel the single result, if possible
-        if len(out) < 2000:
-            ephemeral = False
-        else:
-            out = f'Sorry, but that output is too long ({len(out)}) for Discord - but we are working on finding a fix!'
+        ephemeral = False
 
     # Handle multiple spell results
     elif len(search_spell_results) > 1:
