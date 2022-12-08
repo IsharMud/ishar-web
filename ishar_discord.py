@@ -90,7 +90,7 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
             out = get_single_help(topic=found_topic, want_body=False)
             attachment = make_attachment(topic=found_topic)
             msg_req = interactions.MessageRequest()
-            await msg_req.create_message(payload=out, channel_id=ctx.channel_id, files=attachment)
+            await msg_req.create_message(payload=out, channel_id=ctx.channel_id, files=[attachment])
 
     # Link search results to user, if there are multiple results
     elif len(search_topics) > 1:
