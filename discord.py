@@ -66,7 +66,7 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
         # Show the first 100 lines of the help topic body text
         topic_body = found_topic['body_text'].replace('&gt;', '>').replace('&lt;', '<').replace('&quot;', '"')
         if len(topic_body) > 100:
-            body_begin = topic_body[0:100] + '...'
+            body_begin = topic_body[0:500] + '...'
         else:
             body_begin = topic_body
         out += body_begin
