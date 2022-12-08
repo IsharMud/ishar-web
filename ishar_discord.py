@@ -84,13 +84,13 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
                 topic_fw.close()
 
             sent = True
-            await ctx.send(
-                interactions.MessageRequest().create_message(
+            msg = interactions.MessageRequest()
+            await msg.create_message(
                     payload=out,
                     channel_id=ctx.channel_id,
                     files=[interactions.File(topic_file)]
                 )
-            )
+            await ctx.send(msg)
 
     # Link search results to user, if there are multiple results
     elif len(search_topics) > 1:
