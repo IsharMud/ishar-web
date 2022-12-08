@@ -48,18 +48,20 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
     # Link single search result, and if there is only one
     elif len(search_topics) == 1:
         found_topic = next(iter(search_topics.values()))
+
+        # Show the topic name and link
         topic_name = found_topic['name']
-        found_topic['syntax'] = found_topic['syntax'].replace('&gt;', '>').replace('&lt;', '<').replace('&quot;', '"')
-        found_topic['class'] = re.sub('<[^<]+?>', '', found_topic['class']).replace('&gt;', '>').replace('&lt;', '<').replace('&quot;', '"')
-        found_topic['level'] = re.sub('<[^<]+?>', '', found_topic['level']).replace('&gt;', '>').replace('&lt;', '<').replace('&quot;', '"')
         topic_url = f'https://isharmud.com/help/{topic_name}'.replace(' ', '%20')
         out = f'{topic_name}: {topic_url}\n'
 
-        # Show the topic name and link, append any item values, and the beginning of the topic
+        # Show any specific items within the help topic
         for item_type in ['syntax', 'minimum', 'level', 'class']:
-            if found_topic[item_type] and found_topic[item_type] != '':
-                out += f'> {item_type.title()}: {found_topic[item_type]}\n'
+            if item_type in found_topic:
+                found_topic[item_type] = re.sub('<[^<]+?>', '', found_topic[item_type]).replace('&gt;', '>').replace('&lt;', '<').replace('&quot;', '"')
+                if found_topic[item_type].strip() != '':
+                    out += f'> {item_type.title()}: {found_topic[item_type].strip()}\n'
 
+        # Show the first 100 lines of the help topic body text
         topic_body = found_topic['body_text'].replace('&gt;', '>').replace('&lt;', '<').replace('&quot;', '"')
         body_begin = topic_body[0:100] + '...'
         out += body_begin
