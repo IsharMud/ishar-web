@@ -88,7 +88,7 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
 
     # Send the help search response
     if attach_file:
-        await ctx.send(file=attach_file, content=out)
+        await ctx.send(embed=attach_file, content=out)
         os.remove(topic_file_name)
     else:
         await ctx.send(out, ephemeral=ephemeral)
