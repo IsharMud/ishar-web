@@ -28,16 +28,10 @@ async def deadhead(ctx: interactions.CommandContext):
     db_session.close()
 
 
-@bot.command(
-    name="mudhelp",
-    description="Find help topics for Ishar MUD",
+@bot.command(name='mudhelp', description='Find Ishar MUD help topic',
     options = [
-        interactions.Option(
-            name="search",
-            description="title of a help topic to search for",
-            type=interactions.OptionType.STRING,
-            required=True
-        )
+        interactions.Option(name='search', description='title of a help topic to search for',
+            type=interactions.OptionType.STRING, required=True)
     ]
 )
 async def mudhelp(ctx: interactions.CommandContext, search: str):
@@ -48,19 +42,22 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
 
     # Say so if there were no results
     if not search_topics:
-        await ctx.send('Sorry, but there were no search results.')
+        out = 'Sorry, but there were no search results.'
 
     # Link single search result, if there is only one
     elif len(search_topics) == 1:
         found_topic = next(iter(search_topics.values()))
         topic_name = found_topic['name']
-        topic_url = f"https://isharmud.com/help/{topic_name}".replace(' ', '%20')
-        await ctx.send(f'{topic_name}: {topic_url}')
+        topic_url = f'https://isharmud.com/help/{topic_name}'.replace(' ', '%20')
+        out = f'{topic_name}: {topic_url}'
 
     # Link search results, if there are multiple results
     elif len(search_topics) > 1:
-        search_url = f"<https://isharmud.com/help/{search}>".replace(' ', '%20')
-        await ctx.send(f'Search Results: {search_url}')
+        search_url = f'<https://isharmud.com/help/{search}>'.replace(' ', '%20')
+        out = f'Search Results: {search_url}'
+
+    # Send the help search response
+    await ctx.send(out)
 
 
 @bot.command()
@@ -69,6 +66,13 @@ async def season(ctx: interactions.CommandContext):
     current_season = Season.query.filter_by(is_active=1).order_by(-Season.season_id).first()
     await ctx.send(f'It is currently Season {current_season.season_id} which ends in {current_season.expires}!')
     db_session.close()
+
+
+@bot.command()
+async def faq(ctx: interactions.CommandContext):
+    """Link to the Frequently Asked Questions page"""
+    current_season = Season.query.filter_by(is_active=1).order_by(-Season.season_id).first()
+    await ctx.send(f'It is currently Season {current_season.season_id} which ends in {current_season.expires}!')
 
 
 bot.start()
