@@ -1,5 +1,4 @@
 """IsharMUD Discord bot"""
-import re
 import interactions
 import discord_secret
 from database import db_session
@@ -7,7 +6,7 @@ from helptab import search_help_topics
 from models import Challenge, Player, Season
 
 
-def get_single_help(topic=None):
+def get_single_help(topic=None, want_body=True):
     """Return extended output for a single help topic"""
     # Get the single topic name and link
     topic_url = f"<https://isharmud.com/help/{topic['name']}>".replace(' ', '%20')
@@ -16,15 +15,24 @@ def get_single_help(topic=None):
     # Get any specific items within the help topic
     for item_type in ['syntax', 'minimum', 'class', 'level']:
         if item_type in topic:
-            topic[item_type] = re.sub('<[^<]+?>', '', topic[item_type]).replace('&gt;', '>').replace('&lt;', '<').replace('&quot;', '"')
             if topic[item_type].strip() != '':
                 out += f'> {item_type.title()}: {topic[item_type].strip()}\n'
 
     # Return the help topic without HTML in the pre-formatted body text
-    topic_body = re.sub('<[^<]+?>', '', topic['body_text'])
-    topic_body = topic_body.replace('&gt;', '>').replace('&lt;', '<').replace('&quot;', '"')
-    out += f'```{topic_body}```'
+    if want_body:
+        out += f"```{topic['body_text']}```"
     return out
+
+
+def make_attachment(topic=None):
+    """Create a Discord file to attach for larger help topics"""
+
+    topic_file_short = 'mudhelp_' + topic['name'].replace(' ', '_') + '.txt'
+    topic_file = f'/var/www/isharmud.com/ishar-web/static/{topic_file_short}'
+    with open(file=topic_file, encoding='utf-8', mode='w+') as topic_fh:
+        topic_fh.write(topic['body_text'])
+        topic_fh.close()
+    return interactions.File(topic_file, description=topic_file_short)
 
 
 # Connect/authenticate the IsharMUD Discord bot
@@ -61,23 +69,24 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
     """Search for MUD help topics"""
 
     # Try to find any help topics containing the search term
+    attachment = None
     ephemeral = True
     search_topics = search_help_topics(all_topics=None, search=search)
 
     # Tell user if there were no results
     if not search_topics:
-        out = 'Sorry, but there were no search results.'
+        out = 'Sorry, but no such help topics could be found!'
 
-    # Get single search result, if there is only one
+    # Handle single search result, if there is only one
     elif len(search_topics) == 1:
+        ephemeral = False
         found_topic = next(iter(search_topics.values()))
         out = get_single_help(topic=found_topic)
 
         # Show the entire channel the single result, if possible
-        if len(out) < 2000:
-            ephemeral = False
-        else:
-            out = f'Sorry, but that output is too long ({len(out)}) for Discord - but we are working on finding a fix!'
+        if len(out) > 2000:
+            out = get_single_help(topic=found_topic, want_body=False)
+            attachment = make_attachment(topic=found_topic)
 
     # Link search results to user, if there are multiple results
     elif len(search_topics) > 1:
@@ -85,7 +94,10 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
         out = f'Search Results: {search_url} ({len(search_topics)} topics)'
 
     # Send the help search response
-    await ctx.send(out, ephemeral=ephemeral)
+    if attachment:
+        await ctx.send(out, ephemeral=ephemeral, attachments=[attachment])
+    else:
+        await ctx.send(out, ephemeral=ephemeral)
     db_session.close()
 
 
@@ -96,7 +108,7 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
     ]
 )
 async def spell(ctx: interactions.CommandContext, search: str):
-    """Search for a single MUD spell in help topics"""
+    """Search for spells in MUD help topics"""
 
     # Try to find any help topics containing the search term
     ephemeral = True
