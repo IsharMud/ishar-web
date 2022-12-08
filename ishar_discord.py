@@ -101,11 +101,13 @@ async def spell(ctx: interactions.CommandContext, search: str):
     search_spell_results = search_help_topics(all_topics=None, search=search)
 
     print(f'search_spell_results: {search_spell_results}')
-    for search_spell_result in search_spell_results:
-        if not search_spell_result['name'].startswith('Spell '):
-            print('Should remove:', search_spell_result['name'])
+    for k, v in search_spell_results.items():
+        print('k', k)
+        print('v', v)
+        if not v['name'].startswith('Spell '):
+            print('Should remove:', k)
         else:
-            print(f'OK search_spell_result: {search_spell_result}')
+            print(f'OK search_spell_result: {k}')
 
     # Proceed if there were search results
     if search_spell_results:
