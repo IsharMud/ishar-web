@@ -8,14 +8,7 @@ from database import db_session
 from helptab import search_help_topics
 from models import Challenge, Player, Season
 
-def topic_body_file(topic_name=None, topic_body=None):
-    """Create a file attachment of the help topic body text for Discord upload"""
-
-    # Set the topic file name and return buffered help body text as attachment
-    topic_name = topic_name.replace(' ', '_') + '.txt'
-    return discord.File(StringIO(topic_body), filename=topic_name)
-
-
+# Connect/authenticate the IsharMUD Discord bot
 bot = interactions.Client(token=discord_secret.TOKEN, default_scope=discord_secret.GUILD)
 
 
@@ -46,9 +39,8 @@ async def deadhead(ctx: interactions.CommandContext):
     ]
 )
 async def mudhelp(ctx: interactions.CommandContext, search: str):
-    """Search for MUD help"""
+    """Search for MUD help topics"""
     ephemeral = False
-    attach_file = None
 
     # Try to find any help topics containing the search term
     search_topics = search_help_topics(all_topics=None, search=search)
@@ -58,7 +50,7 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
         out = 'Sorry, but there were no search results.'
         ephemeral = True
 
-    # Link single search result, and if there is only one
+    # Show single search result, if there is only one
     elif len(search_topics) == 1:
         found_topic = next(iter(search_topics.values()))
 
@@ -76,18 +68,15 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
         # Get the pre-formatted body text without HTML
         topic_body = re.sub('<[^<]+?>', '', found_topic['body_text'])
         topic_body = topic_body.replace('&gt;', '>').replace('&lt;', '<').replace('&quot;', '"')
-        attach_file = topic_body_file(topic_name=found_topic['name'], topic_body=topic_body)
+        out += f'```{topic_body}```'
 
     # Link search results, if there are multiple results
     elif len(search_topics) > 1:
         search_url = f'<https://isharmud.com/help/{search}>'.replace(' ', '%20')
-        out = f'Search Results: {search_url}'
+        out = f'Search Results: {search_url} ({len(search_topics)} topics)'
 
     # Send the help search response
-    if attach_file:
-        await ctx.send(file=attach_file)
-    else:
-        await ctx.send(out, ephemeral=ephemeral)
+    await ctx.send(out, ephemeral=ephemeral)
 
     db_session.close()
 
