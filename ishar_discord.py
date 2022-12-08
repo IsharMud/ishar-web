@@ -78,6 +78,7 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
     elif len(search_topics) > 1:
         search_url = f'<https://isharmud.com/help/Spell {search}>'.replace(' ', '%20')
         out = f'Search Results: {search_url} ({len(search_topics)} topics)'
+        ephemeral = True
 
     # Send the help search response
     await ctx.send(out, ephemeral=ephemeral)
@@ -106,20 +107,30 @@ async def spell(ctx: interactions.CommandContext, search: str):
     # Get single spell search result, if there is only one
     if search_spell_results and len(search_spell_results) == 1:
         found_spell = next(iter(search_spell_results.values()))
-        await ctx.send(get_single_help(topic=found_spell))
+        ephemeral = False
+        out = get_single_help(topic=found_spell)
 
     # Handle multiple spell results
     elif len(search_spell_results) > 1:
 
-        # List spell names if there were only a few, otherwise, tell user to be more specific
+        # List spell names if there were only a few,
         if len(search_spell_results) <= 10:
-            await ctx.send(f'{len(search_spell_results)} spells: {search_spell_results.keys()}', ephemeral=True)
+            ephemeral = True
+            out = f'Found {len(search_spell_results)} spells: {", ".join(search_spell_results.keys())}'
+
+        # Otherwise, tell the user to be more specific
         else:
-            await ctx.send(f'Sorry, but there were {len(search_spell_results)} results! Please try to be more specific.', ephemeral=True)
+            ephemeral = True
+            out = f'Sorry, but there were {len(search_spell_results)} results! Please try to be more specific.'
 
     # Say so, only to that user, if there was not a single result
     else:
-        await ctx.send('Sorry, but no such spell could be found!', ephemeral=True)
+        ephemeral = True
+        out = 'Sorry, but no such spell could be found!'
+
+    # Send the spell search response
+    await ctx.send(out, ephemeral=ephemeral)
+
 
     db_session.close()
 
