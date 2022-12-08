@@ -50,7 +50,7 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
         found_topic = next(iter(search_topics.values()))
         topic_name = found_topic['name']
         found_topic['syntax'] = found_topic['syntax'].replace('&gt;', '>').replace('&lt;', '<').replace('&quot;', '"')
-        found_topic['class'] = re.sub('<[^<]+?>', '', found_topic['player_class']).replace('&gt;', '>').replace('&lt;', '<').replace('&quot;', '"')
+        found_topic['class'] = re.sub('<[^<]+?>', '', found_topic['class']).replace('&gt;', '>').replace('&lt;', '<').replace('&quot;', '"')
         found_topic['level'] = re.sub('<[^<]+?>', '', found_topic['level']).replace('&gt;', '>').replace('&lt;', '<').replace('&quot;', '"')
         topic_url = f'https://isharmud.com/help/{topic_name}'.replace(' ', '%20')
         out = f'{topic_name}: {topic_url}\n'
@@ -71,6 +71,7 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
 
     # Send the help search response
     await ctx.send(out)
+    db_session.close()
 
 
 @bot.command()
