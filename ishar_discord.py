@@ -111,6 +111,10 @@ async def spell(ctx: interactions.CommandContext, search: str):
         found_spell = next(iter(search_spell_results.values()))
         await ctx.send(get_single_help(topic=found_spell))
 
+    # Tell only that user how many results there were, if multiple
+    elif len(search_spell_results) > 1:
+        await ctx.send(f'Sorry, but there were {len(search_spell_results)} results. Please try to be more specific.', ephemeral=True)
+
     # Say so, only to that user, if there was not a single result
     else:
         await ctx.send('Sorry, but no such spell could be found!', ephemeral=True)
