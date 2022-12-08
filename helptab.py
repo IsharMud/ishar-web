@@ -143,6 +143,7 @@ def parse_help_content(content=None):
     is_see_also = False
     help_topic = {}
     help_topic['body_text'] = str()
+    help_topic['see_also'] = []
     for line in content.split('\n'):
 
         if see_also_regex.match(line):
@@ -161,6 +162,7 @@ def parse_help_content(content=None):
                 if related_topic and related_topic.strip() != '':
                     related_link = f'<a href="/help/{related_topic.strip()}">{related_topic.strip()}</a>'
                     help_topic['body_text'] += related_link
+                    help_topic['see_also'].append(related_topic.strip())
                     if i != num_related:
                         help_topic['body_text'] += ', '
                     else:
