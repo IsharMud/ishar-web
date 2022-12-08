@@ -76,7 +76,7 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
 
     # Link search results, if there are multiple results
     elif len(search_topics) > 1:
-        search_url = f'<https://isharmud.com/help/Spell {search}>'.replace(' ', '%20')
+        search_url = f'<https://isharmud.com/help/{search}>'.replace(' ', '%20')
         out = f'Search Results: {search_url} ({len(search_topics)} topics)'
         ephemeral = True
 
