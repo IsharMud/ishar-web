@@ -29,24 +29,18 @@ async def deadhead(ctx: interactions.CommandContext):
 
 
 @bot.command(
-    name="say_something",
-    description="say something!",
+    name="mudhelp",
+    description="Find help topics for Ishar MUD",
     options = [
         interactions.Option(
-            name="text",
-            description="What you want to say",
+            name="search",
+            description="title of a help topic to search for",
             type=interactions.OptionType.STRING,
-            required=True,
+            required=True
         )
     ]
 )
-async def my_first_command(ctx: interactions.CommandContext, text: str):
-    """This is my first command"""
-    await ctx.send(f"You said '{text}'!")
-
-
-@bot.command()
-async def mudhelp(ctx: interactions.CommandContext, search=None):
+async def mudhelp(ctx: interactions.CommandContext, search: str):
     """Search for MUD help"""
     search_topics = search_help_topics(all_topics=None, search=search)
     if not search_topics:
