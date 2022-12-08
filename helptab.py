@@ -15,7 +15,7 @@ regexes = {
     'syntax':   re.compile(r'^ *(Syntax|syntax) *\: *(.+)$'),
     'minimum':  re.compile(r'^ *(Minimum|minimum|Min|min) *\: *(.+)$'),
     'level':    re.compile(r'^ *(Level|level) *\: *(.+)$'),
-    'class':    re.compile(r'^ *(Class|Classes) *\: *([\w| |\/]+)$'),
+    'class':    re.compile(r'^ *(Class|Classes) *\: *(.+)$'),
     'save':     re.compile(r'^ *(Saves?) *\: *(.+)$'),
     'stats':    re.compile(r'^ *(Stats?) *\: *(.+)$'),
     'topic':    re.compile(r'^ *(Topic) *\: *(.+)$')
@@ -129,6 +129,9 @@ def parse_help_class(class_line=None, playable_classes=player_classes):
             string_out += f'<a href="/help/{clean_topic_class}">{clean_topic_class}</a>'
             if i != num_topic_classes:
                 string_out += ', '
+        else:
+            string_out = class_line
+    print(string_out)
     return string_out
 
 
