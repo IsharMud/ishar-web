@@ -112,7 +112,7 @@ async def spell(ctx: interactions.CommandContext, search: str):
     elif len(search_spell_results) > 1:
 
         # List them if there were only a few, otherwise, tell them to be more specific
-        if len(search_spell_results <= 5):
+        if len(search_spell_results) <= 5:
             await ctx.send(f'{len(search_spell_results)} results: {search_spell_results}', ephemeral=True)
         else:
             await ctx.send(f'Sorry, but there were {len(search_spell_results)} results! Please try to be more specific.', ephemeral=True)
