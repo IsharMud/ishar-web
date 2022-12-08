@@ -1,4 +1,4 @@
-"""IsharMUD Discord bot"""
+"""Ishar MUD Discord bot"""
 import interactions
 import discord_secret
 from database import db_session
@@ -24,20 +24,7 @@ def get_single_help(topic=None, want_body=True):
     return out
 
 
-def make_attachment(topic=None):
-    """Create a Discord file to attach for larger help topics"""
-
-    try:
-        topic_file_short = 'mudhelp_' + topic['name'].replace(' ', '_') + '.txt'
-        topic_file = f'/var/www/isharmud.com/ishar-web/static/{topic_file_short}'
-        with open(file=topic_file, encoding='utf-8', mode='w+') as topic_fw:
-            topic_fw.write(topic['body_text'])
-        return interactions.File(topic_file)
-    finally:
-        topic_fw.close()
-
-
-# Connect/authenticate the IsharMUD Discord bot
+# Connect/authenticate Ishar MUD Discord bot
 bot = interactions.Client(token=discord_secret.TOKEN, default_scope=discord_secret.GUILD)
 
 
@@ -71,7 +58,6 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
     """Search for MUD help topics"""
 
     # Try to find any help topics containing the search term
-    attachment = None
     ephemeral = True
     search_topics = search_help_topics(all_topics=None, search=search)
 
@@ -88,9 +74,23 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
         # Show the entire channel the single result, if possible
         if len(out) > 2000:
             out = get_single_help(topic=found_topic, want_body=False)
-            attachment = make_attachment(topic=found_topic)
-            msg_req = interactions.MessageRequest()
-            msg_req.create_message(payload=out, channel_id=ctx.channel_id, files=[attachment])
+
+            try:
+                topic_file_short = 'mudhelp_' + found_topic['name'].replace(' ', '_') + '.txt'
+                topic_file = f'/var/www/isharmud.com/ishar-web/static/{topic_file_short}'
+                with open(file=topic_file, encoding='utf-8', mode='w+') as topic_fw:
+                    topic_fw.write(found_topic['body_text'])
+            finally:
+                topic_fw.close()
+
+            sent = True
+            await ctx.send(
+                interactions.MessageRequest().create_message(
+                    payload=out,
+                    channel_id=ctx.channel_id,
+                    files=[interactions.File(topic_file)]
+                )
+            )
 
     # Link search results to user, if there are multiple results
     elif len(search_topics) > 1:
@@ -98,12 +98,7 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
         out = f'Search Results: {search_url} ({len(search_topics)} topics)'
 
     # Send the help search response
-    if attachment and msg_req:
-        print(attachment)
-        print(ctx.channel)
-        print(ctx.channel_id)
-        await ctx.send(msg_req)
-    else:
+    if not sent:
         await ctx.send(out, ephemeral=ephemeral)
     db_session.close()
 
