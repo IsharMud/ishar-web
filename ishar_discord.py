@@ -173,7 +173,7 @@ async def getstarted(ctx: interactions.CommandContext):
 
 def sigterm_handler(num, frame):
     """Try to exit gracefully on SIGTERM"""
-    logging.info('Caught SIGTERM: %i / %s', num, frame) 
+    logging.info('Caught SIGTERM: %i / %s', num, frame)
     sys.exit(0)
 
 
