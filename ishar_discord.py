@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 """Ishar MUD Discord bot"""
 import logging
+import signal
 import sys
 import interactions
 import discord_secret
@@ -170,9 +171,16 @@ async def getstarted(ctx: interactions.CommandContext):
     await ctx.send('https://isharmud.com/get_started')
 
 
+def sigterm_handler(sig, frame):
+    """Try to exit gracefully on SIGTERM"""
+    logging.info('Caught SIGTERM! / %s / %s', sig, frame)
+    sys.exit(0)
+
+
 # Run the bot
 try:
     logging.info('Starting...')
+    signal.signal(signal.SIGTERM, sigterm_handler)
     bot.start()
 
 except Exception as err:
