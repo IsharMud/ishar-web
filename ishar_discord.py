@@ -176,13 +176,12 @@ except Exception as serr:
 
 
 # Run the bot
-if __name__ == '__main__':
-    try:
-        logging.info('Starting...')
-        bot.start()
+try:
+    logging.info('Starting...')
+    bot.start()
 
-    except Exception as err:
-        logging.exception(err)
+except Exception as err:
+    logging.exception(err)
 
-    finally:
-        logging.info('Exiting...')
+finally:
+    logging.info('Exiting...')
