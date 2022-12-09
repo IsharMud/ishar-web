@@ -1,11 +1,5 @@
 name: 'Dependency Review'
-on:
-  push:
-    branches: [ 'main' ]
-  pull_request:
-    branches: [ 'main' ]
-    paths:
-      - '**.py'
+on: [pull_request]
 
 permissions:
   contents: read
