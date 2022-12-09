@@ -171,9 +171,9 @@ async def getstarted(ctx: interactions.CommandContext):
     await ctx.send('https://isharmud.com/get_started')
 
 
-def sigterm_handler():
+def sigterm_handler(num, frame):
     """Try to exit gracefully on SIGTERM"""
-    logging.info('Caught SIGTERM! Trying to exit gracefully...')
+    logging.info('Caught SIGTERM: %i / %s', num, frame) 
     sys.exit(0)
 
 
