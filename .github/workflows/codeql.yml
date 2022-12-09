@@ -3,6 +3,7 @@ on:
   push:
     branches: ['main']
     paths: ['**.py']
+    types: ['opened']
   pull_request:
     branches: ['main']
     paths: ['**.py']

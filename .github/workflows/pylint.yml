@@ -1,6 +1,8 @@
 name: 'Pylint'
 on:
   pull_request:
+    branches: ['main']
+    paths: ['**.py']
     types: ['opened']
   push:
     branches: ['main']
