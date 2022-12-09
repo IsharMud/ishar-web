@@ -43,6 +43,7 @@ def get_single_help(topic=None):
 @bot.command()
 async def challenges(ctx: interactions.CommandContext):
     """Show the current in-game Ishar MUD challenges"""
+    logging.info('%s (%i) / %s / challenges', ctx.channel, ctx.channel_id, ctx.user)
     completed = 0
     all_challenges = Challenge.query.filter_by(is_active=1).all()
     for challenge in all_challenges:
@@ -55,8 +56,9 @@ async def challenges(ctx: interactions.CommandContext):
 @bot.command()
 async def deadhead(ctx: interactions.CommandContext):
     """Show the player with the most in-game deaths"""
+    logging.info('%s (%i) / %s / deadhead', ctx.channel, ctx.channel_id, ctx.user)
     deadman = Player.query.filter_by(is_deleted=0, game_type=0).order_by(-Player.deaths).first()
-    await ctx.send(f'The player who has died most is: {deadman.name} - {deadman.deaths} times!')
+    await ctx.send(f'The player who has died most is: {deadman.name} - {deadman.deaths} times! ☠️')
     db_session.close()
 
 
@@ -65,6 +67,7 @@ async def deadhead(ctx: interactions.CommandContext):
         type=interactions.OptionType.STRING, required=True)])
 async def mudhelp(ctx: interactions.CommandContext, search: str):
     """Search for MUD help topics"""
+    logging.info('%s (%i) / %s / mudhelp: "%s"', ctx.channel, ctx.channel_id, ctx.user, search)
 
     # Try to find any help topics containing the search term
     ephemeral = True
@@ -95,6 +98,7 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
         type=interactions.OptionType.STRING, required=True)])
 async def spell(ctx: interactions.CommandContext, search: str):
     """Search for spells in MUD help topics"""
+    logging.info('%s (%i) / %s / spell: "%s"', ctx.channel, ctx.channel_id, ctx.user, search)
 
     # Try to find any help topics containing the search term
     ephemeral = True
@@ -134,6 +138,7 @@ async def spell(ctx: interactions.CommandContext, search: str):
 @bot.command()
 async def season(ctx: interactions.CommandContext):
     """Show the current Ishar MUD season"""
+    logging.info('%s (%i) / %s / season', ctx.channel, ctx.channel_id, ctx.user)
     current_season = Season.query.filter_by(is_active=1).order_by(-Season.season_id).first()
     await ctx.send(f'It is currently Season {current_season.season_id} which ends in {current_season.expires}!')
     db_session.close()
@@ -142,22 +147,26 @@ async def season(ctx: interactions.CommandContext):
 @bot.command()
 async def faq(ctx: interactions.CommandContext):
     """Link to the Frequently Asked Questions page"""
+    logging.info('%s (%i) / %s / faq', ctx.channel, ctx.channel_id, ctx.user)
     await ctx.send('https://isharmud.com/faq')
 
 @bot.command()
 async def faqs(ctx: interactions.CommandContext):
     """Link to the Frequently Asked Questions page"""
+    logging.info('%s (%i) / %s / faqs', ctx.channel, ctx.channel_id, ctx.user)
     await ctx.send('https://isharmud.com/faq')
 
 
 @bot.command()
 async def get_started(ctx: interactions.CommandContext):
     """Link to the Getting Started page"""
+    logging.info('%s (%i) / %s / get_started', ctx.channel, ctx.channel_id, ctx.user)
     await ctx.send('https://isharmud.com/get_started')
 
 @bot.command()
 async def getstarted(ctx: interactions.CommandContext):
     """Link to the Getting Started page"""
+    logging.info('%s (%i) / %s / getstarted', ctx.channel, ctx.channel_id, ctx.user)
     await ctx.send('https://isharmud.com/get_started')
 
 
