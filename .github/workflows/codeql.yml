@@ -7,6 +7,8 @@ on:
   push:
     branches:
       - 'main'
+    paths:
+      - '**.py'
   schedule:
     - cron: '43 17 * * 1'
 
