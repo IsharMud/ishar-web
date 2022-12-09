@@ -27,9 +27,6 @@ jobs:
         python -m pip install --upgrade pip
         pip install pylint
         pip install -r requirements.txt
-      with:
-        python-version: ${{ matrix.python-version }}
-        cache: 'pip'
     - name: Run pylint
       run: |
         pylint --min-public-methods=1 --disable=C0301,E0401 --ignore helptab.py --fail-under=9.0 $(git ls-files '*.py')
