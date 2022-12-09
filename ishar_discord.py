@@ -19,9 +19,11 @@ def get_single_help(topic=None):
                 out += f'> {item_type.title()}: {topic[item_type].strip()}\n'
 
     # Return the help topic without HTML in the pre-formatted body text
-    if len(out) < 1500:
-        out += f"```{topic['body_text']}```"
-    return out
+    if len(out):
+        out_wbody = f"{out}```{topic['body_text']}```"
+    if len(out_wbody) > 2000:
+        return out
+    return out_wbody
 
 
 # Connect/authenticate Ishar MUD Discord bot
