@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 """Ishar MUD Discord bot"""
 import logging
-import signal
 import sys
 import interactions
 import discord_secret
@@ -15,14 +14,8 @@ logging.basicConfig(level=logging.INFO,
     datefmt = '%Y-%m-%d %H:%M:%S %Z'
 )
 
-
 # Connect/authenticate Ishar MUD Discord bot
 bot = interactions.Client(token=discord_secret.TOKEN, default_scope=discord_secret.GUILD)
-
-
-def sigterm_handler(_signo, _stack_frame):
-    """Try to handle SIGTERM gracefully"""
-    sys.exit(0)
 
 
 def get_single_help(topic=None):
@@ -168,13 +161,6 @@ async def getstarted(ctx: interactions.CommandContext):
     await ctx.send('https://isharmud.com/get_started')
 
 
-try:
-    if sys.argv[1] == 'handle_signal':
-        signal.signal(signal.SIGTERM, sigterm_handler)
-except Exception as serr:
-    logging.exception(serr)
-
-
 # Run the bot
 try:
     logging.info('Starting...')
@@ -182,6 +168,8 @@ try:
 
 except Exception as err:
     logging.exception(err)
+    sys.exit(1)
 
 finally:
     logging.info('Exiting...')
+    sys.exit(0)
