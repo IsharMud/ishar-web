@@ -168,8 +168,11 @@ async def getstarted(ctx: interactions.CommandContext):
     await ctx.send('https://isharmud.com/get_started')
 
 
-if sys.argv[1] == 'handle_signal':
-    signal.signal(signal.SIGTERM, sigterm_handler)
+try:
+    if sys.argv[1] == 'handle_signal':
+        signal.signal(signal.SIGTERM, sigterm_handler)
+except Exception as serr:
+    logging.exception(serr)
 
 
 # Run the bot
