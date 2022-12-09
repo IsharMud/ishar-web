@@ -1,14 +1,10 @@
-name: Pylint
-
+name: 'Pylint'
 on:
   pull_request:
-    types:
-      - 'opened'
+    types: ['opened']
   push:
-    branches:
-      - 'main'
-    paths:
-      - '**.py'
+    branches: ['main']
+    paths: ['**.py']
 
 jobs:
   build:
