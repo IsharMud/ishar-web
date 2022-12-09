@@ -1,13 +1,33 @@
+#!/usr/bin/python3
 """Ishar MUD Discord bot"""
+import logging
+import signal
+import sys
 import interactions
 import discord_secret
 from database import db_session
 from helptab import search_help_topics
 from models import Challenge, Player, Season
 
+# Logging configuration
+logging.basicConfig(level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(message)s',
+    datefmt = '%Y-%m-%d %H:%M:%S %Z'
+)
+
+
+# Connect/authenticate Ishar MUD Discord bot
+bot = interactions.Client(token=discord_secret.TOKEN, default_scope=discord_secret.GUILD)
+
+
+def sigterm_handler(_signo, _stack_frame):
+    """Try to handle SIGTERM gracefully"""
+    sys.exit(0)
+
 
 def get_single_help(topic=None):
     """Return extended output for a single help topic"""
+
     # Get the single topic name and link
     topic_url = f"<https://isharmud.com/help/{topic['name']}>".replace(' ', '%20')
     out = f"{topic['name']}: {topic_url}\n"
@@ -19,16 +39,12 @@ def get_single_help(topic=None):
                 out += f'> {item_type.title()}: {topic[item_type].strip()}\n'
 
     # Only return the name/link and specific items, if the body is too big
-    #   Otherwise, return the whole body
     out_wbody = f"{out}```{topic['body_text']}```"
     if len(out_wbody) > 2000:
         return out
 
+    # Otherwise, return the whole body
     return out_wbody
-
-
-# Connect/authenticate Ishar MUD Discord bot
-bot = interactions.Client(token=discord_secret.TOKEN, default_scope=discord_secret.GUILD)
 
 
 @bot.command()
@@ -52,11 +68,8 @@ async def deadhead(ctx: interactions.CommandContext):
 
 
 @bot.command(name='mudhelp', description='Find Ishar MUD help topic',
-    options = [
-        interactions.Option(name='search', description='title of a help topic to search for',
-            type=interactions.OptionType.STRING, required=True)
-    ]
-)
+    options = [interactions.Option(name='search', description='title of a help topic to search for',
+        type=interactions.OptionType.STRING, required=True)])
 async def mudhelp(ctx: interactions.CommandContext, search: str):
     """Search for MUD help topics"""
 
@@ -85,11 +98,8 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
 
 
 @bot.command(name='spell', description='Find Ishar MUD spell help',
-    options = [
-        interactions.Option(name='search', description='name of a spell to search for',
-            type=interactions.OptionType.STRING, required=True)
-    ]
-)
+    options = [interactions.Option(name='search', description='name of a spell to search for',
+        type=interactions.OptionType.STRING, required=True)])
 async def spell(ctx: interactions.CommandContext, search: str):
     """Search for spells in MUD help topics"""
 
@@ -158,4 +168,18 @@ async def getstarted(ctx: interactions.CommandContext):
     await ctx.send('https://isharmud.com/get_started')
 
 
-bot.start()
+if sys.argv[1] == 'handle_signal':
+    signal.signal(signal.SIGTERM, sigterm_handler)
+
+
+# Run the bot
+if __name__ == '__main__':
+    try:
+        logging.info('Starting...')
+        bot.start()
+
+    except Exception as err:
+        logging.exception(err)
+
+    finally:
+        logging.info('Exiting...')
