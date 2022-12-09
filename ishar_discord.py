@@ -18,11 +18,12 @@ def get_single_help(topic=None):
             if topic[item_type].strip() != '':
                 out += f'> {item_type.title()}: {topic[item_type].strip()}\n'
 
-    # Return the help topic without HTML in the pre-formatted body text
-    if len(out):
-        out_wbody = f"{out}```{topic['body_text']}```"
+    # Only return the name/link and specific items, if the body is too big
+    #   Otherwise, return the whole body
+    out_wbody = f"{out}```{topic['body_text']}```"
     if len(out_wbody) > 2000:
         return out
+
     return out_wbody
 
 
