@@ -14,13 +14,19 @@ def index():
 
     # Redirect form searches to /help/<search>
     if request.args.get('search'):
-        return redirect(url_for('help_page.single', topic=request.args.get('search')))
+        return redirect(
+            url_for(
+                'help_page.single',
+                topic=request.args.get('search')
+            )
+        )
 
-    return render_template('help_page.html.j2',
-                           topic=None,
-                           topics=get_help_topics(),
-                           help_search_form=HelpSearchForm()
-                           )
+    return render_template(
+        'help_page.html.j2',
+        topic=None,
+        topics=get_help_topics(),
+        help_search_form=HelpSearchForm()
+    )
 
 
 @help_page.route('/help/<string:topic>/', methods=['GET'])
