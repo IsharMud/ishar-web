@@ -1,82 +1,38 @@
 """Portal, and pages for logged-in users"""
-from flask import Blueprint, flash, redirect, render_template, session, url_for
-from flask_login import current_user, fresh_login_required, login_required, \
-    login_user, logout_user
+from flask import abort, Blueprint, flash, render_template
+from flask_login import current_user, login_required
 
-from forms import ChangePasswordForm, LoginForm
-from models import Account
-from sentry import sentry_sdk
+from forms import ChangePasswordForm
 
 portal = Blueprint('portal', __name__)
 
 
+@portal.before_request
+@login_required
+def before_request():
+    """Only logged-in users"""
+    if not current_user.is_authenticated:
+        abort(401)
+
+
 @portal.route('/portal/', methods=['GET'])
 @portal.route('/portal', methods=['GET'])
-@login_required
 def index():
-    """Main portal page for players logging in"""
+    """Main portal page for logged-in players"""
     return render_template('portal.html.j2')
-
-
-@portal.route('/login/', methods=['GET', 'POST'])
-@portal.route('/login', methods=['GET', 'POST'])
-def login():
-    """Log-in form page and processing"""
-
-    # Get log in form object and check if submitted
-    login_form = LoginForm()
-    if login_form.validate_on_submit():
-
-        # Find the user by e-mail address from the log-in form
-        find = Account.query.filter_by(email=login_form.email.data).first()
-
-        # If we find the user email and match the password,
-        #   it is a successful log in
-        if find is not None and find.check_password(login_form.password.data):
-            flash('You have logged in!', 'success')
-            login_user(find, remember=login_form.remember.data)
-
-        # There must have been invalid credentials
-        else:
-            flash(
-                'Sorry, but please enter a valid e-mail address and password.',
-                'error'
-            )
-
-    # Redirect authenticated users to their requested page, or the portal
-    if current_user.is_authenticated:
-        try:
-            return redirect(session['next'])
-        except KeyError:
-            return url_for('portal.index')
-
-    # Show the log-in form
-    return render_template('login.html.j2', login_form=login_form), 401
 
 
 @portal.route('/essence/', methods=['GET'])
 @portal.route('/essence', methods=['GET'])
 @portal.route('/account/', methods=['GET'])
 @portal.route('/account', methods=['GET'])
-@login_required
 def account():
     """Allow users to view/manage their accounts"""
     return render_template('account.html.j2')
 
 
-@portal.route('/logout/', methods=['GET'])
-@portal.route('/logout', methods=['GET'])
-def logout():
-    """Allow users to log out (/logout)"""
-    logout_user()
-    flash('You have logged out!', 'success')
-    sentry_sdk.set_user(None)
-    return redirect(url_for('welcome'))
-
-
 @portal.route('/password/', methods=['GET', 'POST'])
 @portal.route('/password', methods=['GET', 'POST'])
-@fresh_login_required
 def change_password():
     """Allow users to change their password"""
 
@@ -85,10 +41,10 @@ def change_password():
     if change_password_form.validate_on_submit():
 
         # Proceed if the user entered their current password correctly
-        existing_password = change_password_form.current_password.data
-        new_password = change_password_form.confirm_new_password.data
-        if current_user.check_password(existing_password):
-            if current_user.change_password(new_password):
+        verify_existing = change_password_form.current_password.data
+        new_choice = change_password_form.confirm_new_password.data
+        if current_user.check_password(verify_existing):
+            if current_user.change_password(new_choice):
                 flash(
                     'Your password has been changed!',
                     'success'

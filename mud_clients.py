@@ -42,4 +42,7 @@ def index():
         }
     }
 
-    return render_template('mud_clients.html.j2', mud_clients=all_clients)
+    return render_template(
+        'mud_clients.html.j2',
+        mud_clients=all_clients
+    )

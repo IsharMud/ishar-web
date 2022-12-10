@@ -35,7 +35,7 @@
 <a href="{{ url_for('leaders.index') }}" {%- if page == 'leaders' %} id="active-nav"{% endif%}>Leaders</a>
 </li>
 <li title="Log out">
-<a href="{{ url_for('portal.logout') }}">Log out ({{ current_user.display_name | safe }})</a>
+<a href="{{ url_for('login.logout') }}">Log out ({{ current_user.display_name | safe }})</a>
                 </li>
             </ul>
 {%- endif %}

@@ -20,8 +20,10 @@ def latest():
 @patches.route('/patches', methods=['GET'])
 def index():
     """Page showing a dynamic list of patches (/patches)"""
-    return render_template('patches.html.j2',
-                           patches=sorted(os.listdir('static/patches'),
-                                          reverse=True
-                                          )
-                           )
+    return render_template(
+        'patches.html.j2',
+        patches=sorted(
+            os.listdir('static/patches'),
+            reverse=True
+        )
+    )

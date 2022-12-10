@@ -28,6 +28,6 @@
                     {{ message | default('Hmmm... The page you are looking for can not be found.') }}
                 </p>
                 <p>
-                    You may want to return to the <a href="{{ url_for('welcome') }}">front page</a>{%- if sentry_event_id %} or <a href="#" onclick="sentryReport();">send a report</a>{%- endif %}.
+                    You may want to return to the <a href="{{ url_for('welcome.index') }}">front page</a>{%- if sentry_event_id %} or <a href="#" onclick="sentryReport();">send a report</a>{%- endif %}.
                 </p>
 {%- endblock content %}

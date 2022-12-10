@@ -53,13 +53,14 @@ class Account(Base, UserMixin):
 
     players = relationship('Player', backref='account')
 
-    def change_password(self, new_password):
+    def change_password(self, new_password=None):
         """Method to change an account password"""
         self.password = md5_crypt.hash(new_password)
-        db_session.commit()
-        return True
+        if db_session.commit():
+            return True
+        return False
 
-    def check_password(self, password):
+    def check_password(self, password=None):
         """Method to check an account password"""
         return md5_crypt.verify(password, self.password)
 

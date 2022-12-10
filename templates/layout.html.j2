@@ -18,7 +18,7 @@
         <meta property="og:site_name" content="Ishar MUD">
         <meta property="og:title" content="{% block meta_title %}Welcome{% endblock meta_title %} - Ishar MUD">
         <meta property="og:description" content="Ishar MUD: {% block meta_description %}a free online text-adventure RPG{% endblock %}">
-        <meta property="og:url" content="{% block meta_url %}{{ url_for('welcome', _external=True) }}{% endblock meta_url %}">
+        <meta property="og:url" content="{% block meta_url %}{{ url_for('welcome.index', _external=True) }}{% endblock meta_url %}">
         <meta property="og:image" content="{% block meta_image %}{{ url_for('static', filename='images/cropped_ishar_logo_dark.png', _external=True) }}{% endblock meta_image %}">
         <title>{% block title %}Welcome{% endblock %} - Ishar MUD</title>
         <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
@@ -32,7 +32,7 @@
     </head>
     <body>
         <header>
-            <a href="{{ url_for('welcome') }}" title="Ishar MUD">
+            <a href="{{ url_for('welcome.index') }}" title="Ishar MUD">
                 <h1>
                     Ishar MUD
                 </h1>

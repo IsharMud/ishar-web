@@ -105,9 +105,11 @@ def delete_news(delete_news_id=None):
                                f'{current_user} deleted {news_post}')
 
     # Show the form to add news in the administration portal
-    return render_template('admin/news.html.j2',
-                           all_news=News.query.order_by(-News.created_at).all(),
-                           news_add_form=NewsAddForm())
+    return render_template(
+        'admin/news.html.j2',
+        all_news=News.query.order_by(-News.created_at).all(),
+        news_add_form=NewsAddForm()
+    )
 
 
 @admin.route('/account/<int:manage_account_id>/', methods=['GET'])
@@ -121,8 +123,10 @@ def manage_account(manage_account_id=None):
         flash('Invalid account.', 'error')
         abort(400)
 
-    return render_template('admin/manage_account.html.j2',
-                           manage_account=account)
+    return render_template(
+        'admin/manage_account.html.j2',
+        manage_account=account
+    )
 
 
 @admin.route('/account/edit/<int:edit_account_id>/', methods=['GET', 'POST'])
@@ -130,8 +134,13 @@ def manage_account(manage_account_id=None):
 def edit_account(edit_account_id=None):
     """Administration portal to allow Gods to edit accounts
         /admin/account/edit"""
-    account = Account.query.filter_by(account_id=edit_account_id).first()
 
+    # Find the account based on the ID in the URL
+    account = Account.query.filter_by(
+        account_id=edit_account_id
+    ).first()
+
+    # 400 if bad account
     if not account:
         flash('Invalid account.', 'error')
         abort(400)
@@ -139,30 +148,48 @@ def edit_account(edit_account_id=None):
     # Get edit account form and check if submitted
     edit_account_form = EditAccountForm()
     if edit_account_form.validate_on_submit():
+
+        # Update database with submitted form values
         account.account_name = edit_account_form.account_name.data
         account.email = edit_account_form.email.data
         account.seasonal_points = edit_account_form.seasonal_points.data
+
+        # Process administrative password reset
         if edit_account_form.confirm_password.data:
-            account.change_password(edit_account_form.confirm_password.data)
-            if account.change_password(edit_account_form.confirm_password.data):
-                flash('The account password was reset.', 'success')
-                sentry_sdk.capture_message('Admin Password Reset: '
-                                           f'{current_user} reset {account}')
+            if account.change_password(
+                new_password=edit_account_form.confirm_password.data
+            ):
+                flash(
+                    f'The account ({account.name}) password was reset.',
+                    'success'
+                )
+                sentry_sdk.capture_message(
+                    'Admin Password Reset: '
+                    f'{current_user} reset {account}'
+                )
             else:
-                flash('The account password could not be reset.', 'error')
-                sentry_sdk.capture_message('Admin Password Reset Fail: '
-                                           f'{current_user} failed to reset '
-                                           f'{account}',
-                                           level='error')
+                flash(
+                    'The account password could not be reset.',
+                    'error'
+                )
+                sentry_sdk.capture_message(
+                    'Admin Password Reset Fail: '
+                    f'{current_user} failed to reset {account}',
+                    level='error'
+                )
 
         db_session.commit()
         flash('The account was updated successfully.', 'success')
-        sentry_sdk.capture_message('Admin Edit Account: '
-                                   f'{current_user} edited {account}')
+        sentry_sdk.capture_message(
+            'Admin Edit Account: '
+            f'{current_user} edited {account}'
+        )
 
-    return render_template('admin/edit_account.html.j2',
-                           edit_account=account,
-                           edit_account_form=edit_account_form)
+    return render_template(
+        'admin/edit_account.html.j2',
+        edit_account=account,
+        edit_account_form=edit_account_form
+    )
 
 
 @admin.route('/accounts/', methods=['GET'])
@@ -170,10 +197,12 @@ def edit_account(edit_account_id=None):
 def accounts():
     """Administration portal to allow Gods to view accounts
         /admin/accounts"""
-    return render_template('admin/accounts.html.j2',
-                           accounts=Account.query.order_by(
-                               Account.account_id
-                           ).all())
+    return render_template(
+        'admin/accounts.html.j2',
+        accounts=Account.query.order_by(
+            Account.account_id
+        ).all()
+    )
 
 
 @admin.route('/player/edit/<int:edit_player_id>/', methods=['GET', 'POST'])
@@ -198,12 +227,16 @@ def edit_player(edit_player_id=None):
         player.is_deleted = edit_player_form.is_deleted.data
         db_session.commit()
         flash('The player was updated successfully.', 'success')
-        sentry_sdk.capture_message('Admin Edit Player: '
-                                   f'{current_user} edited {player}')
+        sentry_sdk.capture_message(
+            'Admin Edit Player: '
+            f'{current_user} edited {player}'
+        )
 
-    return render_template('admin/edit_player.html.j2',
-                           edit_player=player,
-                           edit_player_form=edit_player_form)
+    return render_template(
+        'admin/edit_player.html.j2',
+        edit_player=player,
+        edit_player_form=edit_player_form
+    )
 
 
 @admin.route('/season/', methods=['GET'])
@@ -211,11 +244,13 @@ def edit_player(edit_player_id=None):
 def season():
     """Administration portal to allow Gods to view/manage seasons
         /admin/season"""
-    return render_template('admin/season.html.j2',
-                           seasons=Season.query.order_by(
-                               -Season.is_active,
-                               -Season.season_id
-                            ).all())
+    return render_template(
+        'admin/season.html.j2',
+        seasons=Season.query.order_by(
+            -Season.is_active,
+            -Season.season_id
+        ).all()
+    )
 
 
 @admin.route('/season/cycle/', methods=['GET', 'POST'])
@@ -251,12 +286,16 @@ def season_cycle():
             if account.seasonal_earned > 0:
 
                 # Add existing essence plus essence earned
-                calculated_essence = f'{account.seasonal_points} '\
+                calculated_essence = f'{account.seasonal_points} ' \
                                      f'{account.seasonal_earned}'
-                flash(f'Account "{account.display_name}" ({account.account_id})'
-                      f' now has {calculated_essence} essence. '
-                      f'({account.seasonal_points} existing + '
-                      f'{account.seasonal_earned} earned)', 'success')
+                flash(
+                    f'Account "{account.display_name}" '
+                    f'({account.account_id}) '
+                    f'now has {calculated_essence} essence. '
+                    f'({account.seasonal_points} existing + '
+                    f'{account.seasonal_earned} earned)',
+                    'success'
+                )
 
                 # Update account essence balance in the database, and total
                 account.seasonal_points = calculated_essence
@@ -264,24 +303,26 @@ def season_cycle():
 
             # Mention accounts that earned no essence
             else:
-                flash(f'Account "{account.display_name}"'
-                      f'({account.account_id}) earned no essence', 'warning')
+                flash(
+                    f'Account "{account.display_name}"'
+                    f'({account.account_id}) earned no essence',
+                    'warning'
+                )
 
             # Loop through each player in each account
             for delete_player in account.players:
 
                 # Do not remove immortal players
-                if delete_player.is_immortal:
-                    flash(f'Skipping immortal {delete_player.name}.', 'info')
-
-                # Remove mortal players
-                else:
+                if not delete_player.is_immortal:
 
                     # Physically delete the Podir file for any mortal players
                     delete_path = PODIR + '/' + delete_player.name
                     if os.path.exists(delete_path):
                         os.remove(delete_path)
-                        flash(f'Deleted <code>{delete_path}</code>.', 'success')
+                        flash(
+                            f'Deleted <code>{delete_path}</code>.',
+                            'success'
+                        )
 
                     # Delete mortal players from the database
                     do_delete = db_session.query(Player).filter_by(
@@ -292,11 +333,17 @@ def season_cycle():
                               f'({delete_player.id}).', 'success')
                         total_players_deleted += 1
                     else:
-                        flash(f'Delete Player Failed: {delete_player.name} '
-                              f'({delete_player.id}).', 'error')
-                        sentry_sdk.capture_message('Delete Player Failed: '
-                                                   f'{delete_player.name} '
-                                                   f'({delete_player.id})')
+                        flash(
+                            f'Delete Player Fail: {delete_player.name} '
+                            f'({delete_player.id}).',
+                            'error'
+                        )
+                        sentry_sdk.capture_message(
+                            'Delete Player Fail: '
+                            f'{delete_player.name} '
+                            f'({delete_player.id})',
+                            level='error'
+                        )
 
         # Commit the changes to the database
         db_session.commit()

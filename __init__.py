@@ -6,10 +6,9 @@ https://github.com/IsharMud/ishar-web
 import os
 from urllib.parse import urlparse
 
-from flask import Flask, render_template, request
-from flask_login import LoginManager
+from flask import Flask
+from login import login, login_manager
 
-import error_pages
 from admin import admin
 from challenges import challenges
 from database import db_session
@@ -18,7 +17,7 @@ from get_started import get_started
 from help_page import help_page
 from history import history
 from leaders import leaders
-from models import Account, News, Season
+from models import Season
 from mud_clients import mud_clients
 from patches import patches
 from players import players
@@ -28,6 +27,8 @@ from season import season
 from sentry import sentry_sdk
 from support import support
 from wizlist import wizlist
+from welcome import welcome
+import error_pages
 
 # Flask
 app = Flask(__name__)
@@ -41,31 +42,8 @@ app.register_error_handler(403, error_pages.forbidden)
 app.register_error_handler(404, error_pages.page_not_found)
 app.register_error_handler(500, error_pages.internal_server_error)
 
-# Flask-Login
-login_manager = LoginManager(app)
-login_manager.login_message_category = 'error'
-login_manager.login_view = 'portal.login'
-login_manager.needs_refresh_message = 'Please log in again, for your security.'
-login_manager.needs_refresh_message_category = 'error'
-login_manager.refresh_view = 'portal.login'
-login_manager.session_protection = 'strong'
-
-
-@login_manager.user_loader
-def load_user(email):
-    """Use Account database object for flask-login, via unique e-mail address"""
-    user_account = Account.query.filter_by(email=email).first()
-    if user_account:
-        sentry_sdk.set_user({
-            'id': user_account.account_id,
-            'username': user_account.account_name,
-            'email': user_account.email,
-            'ip_address': request.remote_addr
-        })
-    return user_account
-
-
-# Flask Blueprints/pages
+# Flask-Login/Blueprints/pages
+login_manager.init_app(app)
 app.register_blueprint(admin)
 app.register_blueprint(challenges)
 app.register_blueprint(faqs)
@@ -73,6 +51,7 @@ app.register_blueprint(get_started)
 app.register_blueprint(help_page)
 app.register_blueprint(history)
 app.register_blueprint(leaders)
+app.register_blueprint(login)
 app.register_blueprint(mud_clients)
 app.register_blueprint(patches)
 app.register_blueprint(players)
@@ -80,6 +59,7 @@ app.register_blueprint(portal)
 app.register_blueprint(redirects)
 app.register_blueprint(season)
 app.register_blueprint(support)
+app.register_blueprint(welcome)
 app.register_blueprint(wizlist)
 
 
@@ -98,16 +78,6 @@ def injects():
         sentry_user=sentry_uri.username,
         sentry_event_id=sentry_sdk.last_event_id()
     )
-
-
-@app.route('/welcome/', methods=['GET'])
-@app.route('/welcome', methods=['GET'])
-@app.route('/', methods=['GET'])
-def welcome():
-    """Main welcome page/index, includes the most recent news"""
-    return render_template('welcome.html.j2',
-                           news=News.query.order_by(-News.created_at).first()
-                           )
 
 
 @app.teardown_appcontext
