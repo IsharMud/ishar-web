@@ -1,6 +1,7 @@
 """Portal, and pages for logged-in users"""
 from flask import Blueprint, flash, redirect, render_template, session, url_for
-from flask_login import current_user, fresh_login_required, login_required, login_user, logout_user
+from flask_login import current_user, fresh_login_required, login_required, \
+    login_user, logout_user
 
 from forms import ChangePasswordForm, LoginForm
 from models import Account
@@ -29,14 +30,18 @@ def login():
         # Find the user by e-mail address from the log-in form
         find = Account.query.filter_by(email=login_form.email.data).first()
 
-        # If we find the user email and match the password, it is a successful log in
+        # If we find the user email and match the password,
+        #   it is a successful log in
         if find is not None and find.check_password(login_form.password.data):
             flash('You have logged in!', 'success')
             login_user(find, remember=login_form.remember.data)
 
         # There must have been invalid credentials
         else:
-            flash('Sorry, but please enter a valid e-mail address and password.', 'error')
+            flash(
+                'Sorry, but please enter a valid e-mail address and password.',
+                'error'
+            )
 
     # Redirect authenticated users to their requested page, or the portal
     if current_user.is_authenticated:
@@ -80,15 +85,29 @@ def change_password():
     if change_password_form.validate_on_submit():
 
         # Proceed if the user entered their current password correctly
-        if current_user.check_password(change_password_form.current_password.data):
-            if current_user.change_password(change_password_form.confirm_new_password.data):
-                flash('Your password has been changed!', 'success')
+        existing_password = change_password_form.current_password.data
+        new_password = change_password_form.confirm_new_password.data
+        if current_user.check_password(existing_password):
+            if current_user.change_password(new_password):
+                flash(
+                    'Your password has been changed!',
+                    'success'
+                )
             else:
-                flash('Sorry, but your password could not be changed.', 'error')
+                flash(
+                    'Sorry, but your password could not be changed.',
+                    'error'
+                )
 
         # Otherwise, tell them to enter their current password correctly
         else:
-            flash('Please enter your current password correctly!', 'error')
+            flash(
+                'Please enter your current password correctly!',
+                'error'
+            )
 
     # Show the change password form
-    return render_template('change_password.html.j2', change_password_form=change_password_form)
+    return render_template(
+        'change_password.html.j2',
+        change_password_form=change_password_form
+    )

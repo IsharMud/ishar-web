@@ -6,7 +6,10 @@ from sentry import sentry_sdk
 error_pages = Blueprint('error_pages', __name__)
 
 
-def error(title='Unknown Error', message='Sorry, but there was an unknown error.', code=500):
+def error(
+        title='Unknown Error',
+        message='Sorry, but there was an unknown error.',
+        code=500):
     """Error template"""
     return render_template('error.html.j2', title=title, message=message), code
 

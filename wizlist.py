@@ -13,5 +13,11 @@ wizlist = Blueprint('wizlist', __name__)
 @wizlist.route('/wizlist', methods=['GET'])
 def index():
     """Wizlist showing Immortals through Gods"""
-    immortals = Player.query.filter(Player.true_level >= min(IMM_LEVELS)).order_by(-Player.true_level).all()
-    return render_template('wizlist.html.j2', immortals=immortals)
+    return render_template(
+        'wizlist.html.j2',
+        immortals=Player.query.filter(
+            Player.true_level >= min(IMM_LEVELS)
+        ).order_by(
+            -Player.true_level
+        ).all()
+    )

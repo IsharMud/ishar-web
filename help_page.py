@@ -68,4 +68,9 @@ def single(topic=None):
 def world():
     """World page"""
     # Return only the areas from the helptab file
-    return render_template('world.html.j2', areas=search_help_topics(search='area '))
+    return render_template(
+        'world.html.j2',
+        areas=search_help_topics(
+            search='area '
+        )
+    )

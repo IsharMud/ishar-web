@@ -19,10 +19,25 @@ class Account(Base, UserMixin):
     """Account used to log in to the website and MUD in-game"""
     __tablename__ = 'accounts'
 
-    account_id = Column(INTEGER(11), primary_key=True)
-    created_at = Column(TIMESTAMP, nullable=False, server_default=FetchedValue())
-    seasonal_points = Column(MEDIUMINT(4), nullable=False, server_default=FetchedValue())
-    email = Column(String(30), nullable=False, unique=True)
+    account_id = Column(
+        INTEGER(11),
+        primary_key=True
+    )
+    created_at = Column(
+        TIMESTAMP,
+        nullable=False,
+        server_default=FetchedValue()
+    )
+    seasonal_points = Column(
+        MEDIUMINT(4),
+        nullable=False,
+        server_default=FetchedValue()
+    )
+    email = Column(
+        String(30),
+        nullable=False,
+        unique=True
+    )
     password = Column(String(36), nullable=False)
     create_isp = Column(String(25), nullable=False)
     last_isp = Column(String(25), nullable=False)
@@ -30,7 +45,11 @@ class Account(Base, UserMixin):
     last_ident = Column(String(25), nullable=False)
     create_haddr = Column(INTEGER(11), nullable=False)
     last_haddr = Column(INTEGER(11), nullable=False)
-    account_name = Column(String(25), nullable=False, unique=True)
+    account_name = Column(
+        String(25),
+        nullable=False,
+        unique=True
+    )
 
     players = relationship('Player', backref='account')
 
@@ -103,13 +122,38 @@ class AccountUpgrade(Base):
     """Account upgrades that are available to accounts"""
     __tablename__ = 'account_upgrades'
 
-    id = Column(TINYINT(4), primary_key=True)
-    cost = Column(MEDIUMINT(4), nullable=False)
-    description = Column(String(200), nullable=False)
-    name = Column(String(30), nullable=False, unique=True)
-    max_value = Column(MEDIUMINT(4), nullable=False, server_default=FetchedValue())
-    scale = Column(TINYINT(4), nullable=False, server_default=FetchedValue())
-    is_disabled = Column(TINYINT(1), nullable=False, server_default=FetchedValue())
+    id = Column(
+        TINYINT(4),
+        primary_key=True
+    )
+    cost = Column(
+        MEDIUMINT(4),
+        nullable=False
+    )
+    description = Column(
+        String(200),
+        nullable=False
+    )
+    name = Column(
+        String(30),
+        nullable=False,
+        unique=True
+    )
+    max_value = Column(
+        MEDIUMINT(4),
+        nullable=False,
+        server_default=FetchedValue()
+    )
+    scale = Column(
+        TINYINT(4),
+        nullable=False,
+        server_default=FetchedValue()
+    )
+    is_disabled = Column(
+        TINYINT(1),
+        nullable=False,
+        server_default=FetchedValue()
+    )
 
     accounts_upgrade = relationship('AccountsUpgrade', backref='upgrade')
 
@@ -168,9 +212,15 @@ class Challenge(Base):
     adj_people = Column(TINYINT(4), nullable=False)
     adj_tier = Column(TINYINT(4), nullable=False)
     challenge_desc = Column(String(80), nullable=False)
-    winner_desc = Column(String(80), nullable=False, server_default=FetchedValue())
+    winner_desc = Column(
+        String(80),
+        nullable=False, server_default=FetchedValue()
+    )
     mob_name = Column(String(30), nullable=False)
-    is_active = Column(TINYINT(1), nullable=False, server_default=FetchedValue())
+    is_active = Column(
+        TINYINT(1),
+        nullable=False, server_default=FetchedValue()
+    )
 
     @cached_property
     def is_completed(self):
@@ -199,22 +249,38 @@ class News(Base):
         nullable=False,
         index=True
     )
-    created_at = Column(TIMESTAMP, nullable=False, server_default=FetchedValue())
-    subject = Column(String(64), nullable=False, server_default=FetchedValue())
+    created_at = Column(
+        TIMESTAMP,
+        nullable=False,
+        server_default=FetchedValue()
+    )
+    subject = Column(
+        String(64),
+        nullable=False,
+        server_default=FetchedValue()
+    )
     body = Column(Text, nullable=False)
 
     account = relationship('Account')
 
     def __repr__(self):
-        return f'<News> "{self.subject}" ({self.news_id}) at "{self.created_at}"'
+        return f'<News> "{self.subject}" ({self.news_id}) @ "{self.created_at}"'
 
 
 class PlayerClass(Base):
     """Playable character class such as warrior, rogue, or casters..."""
     __tablename__ = 'classes'
 
-    class_id = Column(TINYINT(3), primary_key=True)
-    class_name = Column(String(15), nullable=False, unique=True, server_default=FetchedValue())
+    class_id = Column(
+        TINYINT(3),
+        primary_key=True
+    )
+    class_name = Column(
+        String(15),
+        nullable=False,
+        unique=True,
+        server_default=FetchedValue()
+    )
     class_display = Column(String(32))
     class_description = Column(String(64))
 
@@ -227,16 +293,22 @@ class PlayerClass(Base):
     def stats_order(self):
         """Order which stats should be in, based upon player class"""
         if self.class_name == 'WARRIOR':
-            return ['Strength', 'Agility', 'Endurance', 'Willpower', 'Focus', 'Perception']
+            return ['Strength', 'Agility', 'Endurance',
+                    'Willpower', 'Focus', 'Perception']
         if self.class_name == 'ROGUE':
-            return ['Agility', 'Perception', 'Strength', 'Focus', 'Endurance', 'Willpower']
+            return ['Agility', 'Perception', 'Strength',
+                    'Focus', 'Endurance', 'Willpower']
         if self.class_name == 'CLERIC':
-            return ['Willpower', 'Strength', 'Perception', 'Endurance', 'Focus', 'Agility']
+            return ['Willpower', 'Strength', 'Perception',
+                    'Endurance', 'Focus', 'Agility']
         if self.class_name == 'MAGICIAN':
-            return ['Perception', 'Focus', 'Agility', 'Willpower', 'Endurance', 'Strength']
+            return ['Perception', 'Focus', 'Agility',
+                    'Willpower', 'Endurance', 'Strength']
         if self.class_name == 'NECROMANCER':
-            return ['Focus', 'Willpower', 'Perception', 'Agility', 'Strength', 'Endurance']
-        return ['Agility', 'Endurance', 'Focus', 'Perception', 'Strength', 'Willpower']
+            return ['Focus', 'Willpower', 'Perception',
+                    'Agility', 'Strength', 'Endurance']
+        return ['Agility', 'Endurance', 'Focus',
+                'Perception', 'Strength', 'Willpower']
 
     def __repr__(self):
         return f'<PlayerClass> "{self.class_name}" ({self.class_id})'
@@ -246,8 +318,15 @@ class PlayerRace(Base):
     """Playable character race, such as elf, gnome, human, etc."""
     __tablename__ = 'races'
 
-    race_id = Column(TINYINT(3), primary_key=True)
-    race_name = Column(String(15), nullable=False, unique=True)
+    race_id = Column(
+        TINYINT(3),
+        primary_key=True
+    )
+    race_name = Column(
+        String(15),
+        nullable=False,
+        unique=True
+    )
     race_description = Column(String(64))
 
     @cached_property
@@ -261,15 +340,27 @@ class PlayerRace(Base):
 
 class RemortUpgrade(Base):
     """Remort Upgrades database class
-    Remort upgrade available to players, as well as the renown cost and max value"""
+        Remort upgrade available to players,
+        as well as the renown cost and max value"""
     __tablename__ = 'remort_upgrades'
 
-    upgrade_id = Column(INTEGER(11), primary_key=True)
-    name = Column(String(20), nullable=False, unique=True, server_default=FetchedValue())
+    upgrade_id = Column(
+        INTEGER(11),
+        primary_key=True
+    )
+    name = Column(
+        String(20),
+        nullable=False,
+        unique=True,
+        server_default=FetchedValue()
+    )
     renown_cost = Column(SMALLINT(6), nullable=False)
     max_value = Column(SMALLINT(6), nullable=False)
 
-    remort_upgrades = relationship('PlayerRemortUpgrade', backref='remort_upgrade')
+    remort_upgrades = relationship(
+        'PlayerRemortUpgrade',
+        backref='remort_upgrade'
+    )
 
     def __repr__(self):
         return f'<RemortUpgrade> "{self.name}" ({self.upgrade_id}) / ' \
@@ -300,7 +391,11 @@ class PlayerRemortUpgrade(Base):
         index=True,
         primary_key=True
     )
-    value = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
+    value = Column(
+        INTEGER(11),
+        nullable=False,
+        server_default=FetchedValue()
+    )
 
     player = relationship('Player', backref='remort_upgrades')
 
@@ -314,20 +409,36 @@ class Season(Base):
     """In-game cyclical season detail and dates"""
     __tablename__ = 'seasons'
 
-    season_id = Column(INTEGER(11), primary_key=True)
-    is_active = Column(TINYINT(4), nullable=False)
-    effective_date = Column(TIMESTAMP, nullable=False, server_default=FetchedValue())
-    expiration_date = Column(TIMESTAMP, nullable=False, server_default=FetchedValue())
+    season_id = Column(
+        INTEGER(11),
+        primary_key=True
+    )
+    is_active = Column(
+        TINYINT(4),
+        nullable=False
+    )
+    effective_date = Column(
+        TIMESTAMP,
+        nullable=False, server_default=FetchedValue()
+    )
+    expiration_date = Column(
+        TIMESTAMP,
+        nullable=False, server_default=FetchedValue()
+    )
 
     @property
     def effective(self):
         """Stringified approximate timedelta since season started"""
-        return delta.stringify(datetime.datetime.utcnow() - self.effective_date)
+        return delta.stringify(
+            datetime.datetime.utcnow() - self.effective_date
+        )
 
     @property
     def expires(self):
         """Stringified approximate timedelta until season ends"""
-        return delta.stringify(self.expiration_date - datetime.datetime.utcnow())
+        return delta.stringify(
+            self.expiration_date - datetime.datetime.utcnow()
+        )
 
     def __repr__(self):
         return f'<Season> ID {self.season_id} / Active: {self.is_active} / ' \
@@ -352,18 +463,42 @@ class Player(Base):
         nullable=False,
         index=True
     )
-    name = Column(String(15), nullable=False, unique=True, server_default=FetchedValue())
-    create_ident = Column(String(10), nullable=False, server_default=FetchedValue())
-    last_isp = Column(String(30), nullable=False, server_default=FetchedValue())
+    name = Column(
+        String(15),
+        nullable=False,
+        unique=True,
+        server_default=FetchedValue()
+    )
+    create_ident = Column(
+        String(10),
+        nullable=False, server_default=FetchedValue()
+    )
+    last_isp = Column(
+        String(30),
+        nullable=False, server_default=FetchedValue()
+    )
     description = Column(String(240))
-    title = Column(String(45), nullable=False, server_default=FetchedValue())
-    poofin = Column(String(80), nullable=False, server_default=FetchedValue())
-    poofout = Column(String(80), nullable=False, server_default=FetchedValue())
+    title = Column(
+        String(45),
+        nullable=False, server_default=FetchedValue()
+    )
+    poofin = Column(
+        String(80),
+        nullable=False, server_default=FetchedValue()
+    )
+    poofout = Column(
+        String(80),
+        nullable=False, server_default=FetchedValue()
+    )
     bankacc = Column(INTEGER(11), nullable=False)
     logon_delay = Column(SMALLINT(6), nullable=False)
     true_level = Column(INTEGER(11), nullable=False)
     renown = Column(INTEGER(11), nullable=False)
-    prompt = Column(String(42), nullable=False, server_default=FetchedValue())
+    prompt = Column(
+        String(42),
+        nullable=False,
+        server_default=FetchedValue()
+    )
     remorts = Column(INTEGER(11), nullable=False)
     favors = Column(INTEGER(11), nullable=False)
     birth = Column(INTEGER(11), nullable=False)
@@ -402,14 +537,29 @@ class Player(Base):
     karma = Column(SMALLINT(6), nullable=False)
     experience_points = Column(INTEGER(11), nullable=False)
     money = Column(INTEGER(11), nullable=False)
-    fg_color = Column(SMALLINT(6), nullable=False, server_default=FetchedValue())
-    bg_color = Column(SMALLINT(6), nullable=False, server_default=FetchedValue())
+    fg_color = Column(
+        SMALLINT(6),
+        nullable=False,
+        server_default=FetchedValue()
+    )
+    bg_color = Column(
+        SMALLINT(6),
+        nullable=False,
+        server_default=FetchedValue()
+    )
     login_failures = Column(SMALLINT(6), nullable=False)
     create_haddr = Column(INTEGER(11), nullable=False)
-    auto_level = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
+    auto_level = Column(
+        INTEGER(11),
+        nullable=False,
+        server_default=FetchedValue()
+    )
     login_fail_haddr = Column(INTEGER(11))
     last_haddr = Column(INTEGER(11))
-    last_ident = Column(String(10), server_default=FetchedValue())
+    last_ident = Column(
+        String(10),
+        server_default=FetchedValue()
+    )
     load_room_next = Column(INTEGER(11))
     load_room_next_expires = Column(INTEGER(11))
     aggro_until = Column(INTEGER(11))
@@ -436,12 +586,36 @@ class Player(Base):
     curr_perception = Column(TINYINT(4), nullable=False)
     curr_focus = Column(TINYINT(4), nullable=False)
     curr_willpower = Column(TINYINT(4), nullable=False)
-    is_deleted = Column(TINYINT(4), nullable=False, server_default=FetchedValue())
-    deaths = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
-    total_renown = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
-    quests_completed = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
-    challenges_completed = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
-    game_type = Column(TINYINT(4), nullable=False, server_default=FetchedValue())
+    is_deleted = Column(
+        TINYINT(4),
+        nullable=False,
+        server_default=FetchedValue()
+    )
+    deaths = Column(
+        INTEGER(11),
+        nullable=False,
+        server_default=FetchedValue()
+    )
+    total_renown = Column(
+        INTEGER(11),
+        nullable=False,
+        server_default=FetchedValue()
+    )
+    quests_completed = Column(
+        INTEGER(11),
+        nullable=False,
+        server_default=FetchedValue()
+    )
+    challenges_completed = Column(
+        INTEGER(11),
+        nullable=False,
+        server_default=FetchedValue()
+    )
+    game_type = Column(
+        TINYINT(4),
+        nullable=False,
+        server_default=FetchedValue()
+    )
 
     player_class = relationship('PlayerClass')
     player_race = relationship('PlayerRace')
@@ -529,8 +703,8 @@ class Player(Base):
         if not current_user.is_god:
 
             # Return empty dictionary, meaning no visible stats, for:
-            #   Immortals, and
-            #   mortals below level five (5) with less than one (1) hour play-time
+            #   Immortals, and mortals below level five (5),
+            #   with less than one (1) hour play-time
             if self.is_immortal:
                 return stats
             if self.true_level < 5 and self.online < 3600:
@@ -546,17 +720,17 @@ class Player(Base):
             'Willpower': self.curr_willpower
         }
 
-        # Put the players stats in the appropriate order based on their class, and return them
+        # Put the players stats in the appropriate order,
+        #   based on their class, and return them
         for stat_order in self.player_class.stats_order:
             stats[stat_order] = players_stats[stat_order]
-
         return stats
 
     @cached_property
     def player_link(self):
         """Player link"""
-        player_url = url_for('players.view', player_name=self.name, _anchor='player')
-        return f'<a href="{player_url}">{self.name}</a>'
+        url = url_for('players.view', player_name=self.name, _anchor='player')
+        return f'<a href="{url}">{self.name}</a>'
 
     @cached_property
     def player_title(self):

@@ -6,12 +6,20 @@ from models import PlayerClass
 from sentry import sentry_sdk
 
 # Retrieve playable player class names
-player_classes = [player_class.class_display_name for player_class in
-                  PlayerClass().query.filter(PlayerClass.class_description != '').all()]
+player_classes = [
+    player_class.class_display_name
+    for player_class in
+    PlayerClass().query.filter(
+        PlayerClass.class_description != ''
+    ).all()
+]
 
 # Compile a few regular expressions for use later
 #   to parse out specific items from help topic chunks
-see_also_regex = re.compile(r'^ *(see also|also see|also see help on|see help on|related) *\: *', re.IGNORECASE)
+see_also_regex = re.compile(
+    r'^ *(see also|also see|also see help on|see help on|related) *\: *',
+    re.IGNORECASE
+)
 regexes = {
     'syntax': re.compile(r'^ *(Syntax|syntax) *\: *(.+)$'),
     'minimum': re.compile(r'^ *(Minimum|minimum|Min|min) *\: *(.+)$'),
@@ -24,14 +32,16 @@ regexes = {
 
 
 def get_help_chunks(help_file=HELPTAB):
-    """Parse the MUD 'helptab' file into chunks, by '#' character, to roughly separate topics"""
+    """Parse the MUD 'helptab' file into chunks,
+        by '#' character, to roughly separate topics"""
 
     # Open the 'helptab' file (read-only)
     try:
         with open(file=help_file, mode='r', encoding='utf-8') as help_fh:
 
             # Split the contents of the file into a list,
-            #   where each item is separated by "\n#\n" - hash (#) on a line by itself
+            #   where each item is separated by "\n#\n":
+            #   hash (#) on a line by itself
             #   and return "chunks" except the first (instructions/example)
             return help_fh.read().split('\n#\n')[1:]
 
@@ -47,7 +57,7 @@ def get_help_chunks(help_file=HELPTAB):
 
 
 def get_help_topics():
-    """Parse the MUD 'helptab' file chunked list into dictionry of topics"""
+    """Parse the MUD 'helptab' file chunked list into dictionary of topics"""
 
     # Get helptab file list of chunks
     help_chunks = get_help_chunks()
@@ -59,7 +69,8 @@ def get_help_topics():
         # Parse the chunk from the list
         parsed_chunk = parse_help_chunk(help_chunk=help_chunk)
 
-        # If the chunk was parsed, and named, add it to a dictionary of topics to return
+        # If the chunk was parsed, and named,
+        #   add it to a dictionary of topics to return
         if parsed_chunk and 'name' in parsed_chunk:
             parsed_name = parsed_chunk['name']
             help_topics[parsed_name] = parsed_chunk
@@ -71,7 +82,8 @@ def get_help_topics():
 def parse_help_chunk(help_chunk=None):
     """Parse a single chunk from the MUD 'helptab' file into a help topic"""
 
-    # Split the chunk in half on the separator, between its header and body text:
+    # Split the chunk in half on the separator,
+    #   between its header and body text:
     #   "\n*\n" - asterisk (*), on a line by itself
     halves = help_chunk.split('\n*\n')
     help_topic = {}
@@ -94,8 +106,9 @@ def parse_help_chunk(help_chunk=None):
 
 
 def parse_help_body(line=None):
-    """Parse a single line from a single topic chunk from the MUD 'helptab' file,
-        using regular expressions to find specific items (such as Class, Syntax, etc.)"""
+    """Parse a single line from a single topic chunk of the MUD 'helptab' file,
+        using regular expressions to find specific items
+            (such as Class, Syntax, etc.)"""
 
     # Loop through each item regular expression, looking for matches on items
     line = line.replace('>', '&gt;').replace('<', '&lt;').replace('"', '&quot;')
@@ -118,8 +131,8 @@ def parse_help_body(line=None):
 
 
 def parse_help_class(class_line=None, playable_classes=player_classes):
-    """Parse a single class line from a single topic chunk from the MUD 'helptab' file,
-        and link the Player Class to the help topic page"""
+    """Parse a single class line from a single topic chunk
+        from the MUD 'helptab' file, and link the Player Class help page"""
 
     topic_classes = class_line.split('/')
     num_topic_classes = len(topic_classes)
@@ -127,9 +140,9 @@ def parse_help_class(class_line=None, playable_classes=player_classes):
     i = 0
     for topic_class in topic_classes:
         i += 1
-        clean_topic_class = topic_class.strip()
-        if clean_topic_class in playable_classes:
-            string_out += f'<a href="/help/{clean_topic_class}">{clean_topic_class}</a>'
+        topic_class = topic_class.strip()
+        if topic_class in playable_classes:
+            string_out += f'<a href="/help/{topic_class}">{topic_class}</a>'
             if i != num_topic_classes:
                 string_out += ', '
         else:
@@ -138,8 +151,8 @@ def parse_help_class(class_line=None, playable_classes=player_classes):
 
 
 def parse_help_content(content=None):
-    """Parse the body content from a single topic chunk from the MUD 'helptab' file
-        to return a help topic dictionary"""
+    """Parse the body content from a single topic chunk
+        from the MUD 'helptab' file to return a help topic dictionary"""
 
     # Topic body text is everything after the header and '*',
     #   but replace < and > and " with HTML-safe versions
@@ -149,7 +162,7 @@ def parse_help_content(content=None):
     help_topic = {'body_html': str(), 'body_text': str(), 'see_also': []}
     for line in content.split('\n'):
 
-        # Split up, append, and try to link related "See Also" topics appropriately
+        # Split up, append, and try to link related topics appropriately
         if see_also_regex.match(line):
             help_topic['body_html'] += 'See Also: '
             help_topic['body_text'] += 'See Also: '
@@ -165,7 +178,8 @@ def parse_help_content(content=None):
             for related_topic in related_topics:
                 i += 1
                 if related_topic and related_topic.strip() != '':
-                    related_link = f'<a href="/help/{related_topic.strip()}">{related_topic.strip()}</a>'
+                    related_link = f'<a href="/help/{related_topic.strip()}">' \
+                        f'{related_topic.strip()}</a>'
                     help_topic['body_html'] += related_link
                     help_topic['body_text'] += related_topic.strip()
                     help_topic['see_also'].append(related_topic.strip())
@@ -191,10 +205,14 @@ def parse_help_content(content=None):
                 for item_name, item_value in parsed_line.items():
                     help_topic[item_name] = item_value
 
-    # Replace "`help command'" in the body html text with link to that help command
+    # Replace "`help command'" in the body html with link to that help command
     cmd_pattern = r"`help ([\w| ]+)'"
-    help_topic['body_html'] = re.sub(cmd_pattern, r'`<a href="/help/\1">help \1</a>`', help_topic['body_html'],
-                                     re.MULTILINE)
+    help_topic['body_html'] = re.sub(
+        cmd_pattern,
+        r'`<a href="/help/\1">help \1</a>`',
+        help_topic['body_html'],
+        re.MULTILINE
+    )
 
     # Return the help topic
     return help_topic
@@ -203,18 +221,18 @@ def parse_help_content(content=None):
 def parse_help_header(header=None):
     """Parse the header from a single topic chunk from the MUD 'helptab' file"""
 
-    # The 'for_level' of the help topic is a number alone, on the first line of the header
+    # The level that the help topic is for, is a number alone,
+    #   on the first line of the header
     help_header = {}
-    header_lines = header.split('\n')
-    help_header['for_level'] = int(header_lines[0].strip())
+    lines = header.split('\n')
 
-    # Name the topic if mortals should be able to reach it, and it starts with "32 "
-    if help_header['for_level'] < min(IMM_LEVELS) and header_lines[1].startswith('32 '):
-        help_header['name'] = header_lines[1].replace('32 ', '').strip()
+    # Name the topic if mortals should reach it, and it starts with "32 "
+    if int(lines[0].strip()) < min(IMM_LEVELS) and lines[1].startswith('32 '):
+        help_header['name'] = lines[1].replace('32 ', '').strip()
         help_header['aliases'] = []
 
         # Loop through each line of the header
-        for header_line in header_lines:
+        for header_line in lines:
 
             # Any lines starting with '32 ' are potential names/aliases
             if header_line.startswith('32 '):

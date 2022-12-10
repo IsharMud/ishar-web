@@ -22,13 +22,19 @@ def view(player_name=None):
 
         # Perform a MySQL "LIKE" search query on the name,
         #   followed by a wildcard (%) to try to find the player
-        player = Player.query.filter(Player.name.like(player_search_form.player_search_name.data + '%')).first()
+        player = Player.query.filter(
+            Player.name.like(
+                player_search_form.player_search_name.data + '%'
+            )
+        ).first()
         if player:
             who = player.name
         else:
             who = player_search_form.player_search_name.data
 
-        return redirect(url_for('players.view', player_name=who, _anchor='player'))
+        return redirect(
+            url_for('players.view', player_name=who, _anchor='player')
+        )
 
     # Find the player, in the database, by exact name
     if player_name:
@@ -41,4 +47,8 @@ def view(player_name=None):
         code = 404
         flash('Sorry, but that player was not found!', 'error')
 
-    return render_template('player.html.j2', player=player, player_search_form=player_search_form), code
+    return render_template(
+        'player.html.j2',
+        player=player,
+        player_search_form=player_search_form
+    ), code

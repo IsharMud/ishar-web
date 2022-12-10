@@ -15,18 +15,27 @@ def stringify(delta=None):
 
     # Days require no math
     if delta.days:
-        ret = {'value': delta.days, 'interval': 'day'}
+        value = delta.days
+        interval = 'day'
 
     # Calculate hours
     elif delta.seconds >= 3600:
-        ret = {'value': delta.seconds / 3600, 'interval': 'hour'}
+        value = delta.seconds / 3600
+        interval = 'hour'
 
     # Calculate minutes
     elif delta.seconds >= 60:
-        ret = {'value': delta.seconds / 60, 'interval': 'minute'}
+        value = delta.seconds / 60
+        interval = 'minute'
 
     # Seconds require no math
     else:
-        ret = {'value': delta.seconds, 'interval': 'second'}
+        value = delta.seconds
+        interval = 'second'
 
-    return pluralize(timing=ret)
+    return pluralize(
+        timing={
+            'value': value,
+            'interval': interval
+        }
+    )

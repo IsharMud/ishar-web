@@ -14,13 +14,17 @@ from sentry import sentry_sdk
 
 
 # Logging configuration
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s [%(levelname)s] %(message)s',
-                    datefmt='%Y-%m-%d %H:%M:%S %Z'
-                    )
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S %Z'
+)
 
 # Connect/authenticate Ishar MUD Discord bot
-bot = interactions.Client(token=discord_secret.TOKEN, default_scope=discord_secret.GUILD)
+bot = interactions.Client(
+    token=discord_secret.TOKEN,
+    default_scope=discord_secret.GUILD
+)
 
 
 # Method to get the details of a single help topic
@@ -28,8 +32,8 @@ def get_single_help(topic=None):
     """Return extended output for a single help topic"""
 
     # Get the single topic name and link
-    topic_url = f"<https://isharmud.com/help/{topic['name']}>".replace(' ', '%20')
-    out = f"{topic['name']}: {topic_url}\n"
+    url = f"<https://isharmud.com/help/{topic['name']}>".replace(' ', '%20')
+    out = f"{topic['name']}: {url}\n"
 
     # Get any specific items within the help topic
     for item_type in ['syntax', 'minimum', 'class', 'level']:
@@ -50,13 +54,15 @@ def get_single_help(topic=None):
 @bot.command()
 async def challenges(ctx: interactions.CommandContext):
     """Show the current in-game Ishar MUD challenges"""
-    logging.info('%s (%i) / %s / challenges', ctx.channel, ctx.channel_id, ctx.user)
+    logging.info('%s (%i) / %s / challenges',
+                 ctx.channel, ctx.channel_id, ctx.user)
     completed = 0
     all_challenges = Challenge.query.filter_by(is_active=1).all()
     for challenge in all_challenges:
         if challenge.winner_desc != '':
             completed = completed + 1
-    await ctx.send(f'There are currently {completed} completed / {len(all_challenges)} total challenges!')
+    total = len(all_challenges)
+    await ctx.send(f'Challenges: {completed} completed / {total} total!')
     db_session.close()
 
 
@@ -64,9 +70,13 @@ async def challenges(ctx: interactions.CommandContext):
 @bot.command()
 async def deadhead(ctx: interactions.CommandContext):
     """Show the player with the most in-game deaths"""
-    logging.info('%s (%i) / %s / deadhead', ctx.channel, ctx.channel_id, ctx.user)
-    deadman = Player.query.filter_by(is_deleted=0, game_type=0).order_by(-Player.deaths).first()
-    await ctx.send(f'The player who has died most is: {deadman.name} - {deadman.deaths} times! ☠️')
+    logging.info('%s (%i) / %s / deadhead',
+                 ctx.channel, ctx.channel_id, ctx.user)
+    deadman = Player.query.filter_by(
+        is_deleted=0, game_type=0).order_by(-Player.deaths).first()
+    out = 'The player who has died most is: '
+    out += f'{deadman.name} - {deadman.deaths} times! ☠️'
+    await ctx.send(out)
     db_session.close()
 
 
@@ -85,7 +95,8 @@ async def deadhead(ctx: interactions.CommandContext):
 )
 async def mudhelp(ctx: interactions.CommandContext, search: str):
     """Search for MUD help topics"""
-    logging.info('%s (%i) / %s / mudhelp: "%s"', ctx.channel, ctx.channel_id, ctx.user, search)
+    logging.info('%s (%i) / %s / mudhelp: "%s"',
+                 ctx.channel, ctx.channel_id, ctx.user, search)
 
     # Try to find any help topics containing the search term
     ephemeral = True
@@ -97,15 +108,16 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
     if search_topics:
 
         # Handle single search result, if there is only one
-        if len(search_topics) == 1:
+        num_results = len(search_topics)
+        if num_results == 1:
             ephemeral = False
             found_topic = next(iter(search_topics.values()))
             out = get_single_help(topic=found_topic)
 
         # Link search results to user, if there are multiple results
-        elif len(search_topics) > 1:
-            search_url = f'<https://isharmud.com/help/{search}>'.replace(' ', '%20')
-            out = f'Search Results: {search_url} ({len(search_topics)} topics)'
+        elif num_results > 1:
+            url = f'<https://isharmud.com/help/{search}>'.replace(' ', '%20')
+            out = f'Search Results: {url} ({num_results} topics)'
 
     # Send the help search response
     await ctx.send(out, ephemeral=ephemeral)
@@ -127,7 +139,8 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
 )
 async def spell(ctx: interactions.CommandContext, search: str):
     """Search for spells in MUD help topics"""
-    logging.info('%s (%i) / %s / spell: "%s"', ctx.channel, ctx.channel_id, ctx.user, search)
+    logging.info('%s (%i) / %s / spell: "%s"',
+                 ctx.channel, ctx.channel_id, ctx.user, search)
 
     # Try to find any help topics containing the search term
     ephemeral = True
@@ -139,26 +152,27 @@ async def spell(ctx: interactions.CommandContext, search: str):
         if name.startswith('Spell '):
             search_spell_results[name] = topic
 
-    # Get single spell search result, if there is only one
-    if search_spell_results and len(search_spell_results) == 1:
-        found_spell = next(iter(search_spell_results.values()))
-        out = get_single_help(topic=found_spell)
-        ephemeral = False
+    # By default, tell user if there were no results
+    out = 'Sorry, but no such spell(s) could be found!'
 
-    # Handle multiple spell results
-    elif len(search_spell_results) > 1:
+    if search_spell_results:
+
+        # Handle single search result, if there is only one
+        num_results = len(search_spell_results)
+        if num_results == 1:
+            ephemeral = False
+            found_spell = next(iter(search_spell_results.values()))
+            out = get_single_help(topic=found_spell)
 
         # Show user the matching spell names, if there were 10 or less
-        if len(search_spell_results) <= 10:
-            out = f'Found {len(search_spell_results)} spells: {", ".join(search_spell_results.keys())}'
+        elif num_results <= 10:
+            out = f'Found {num_results} spells: '
+            out += ", ".join(search_spell_results.keys())
 
         # Otherwise, tell them to be more specific
         else:
-            out = f'Sorry, but there were {len(search_spell_results)} results! Please try to be more specific.'
-
-    # Tell user if there was not a single result
-    else:
-        out = 'Sorry, but no such spell could be found!'
+            out = f'Sorry, but there were {num_results} results! '
+            out += 'Please try to be more specific.'
 
     # Send the spell search response
     await ctx.send(out, ephemeral=ephemeral)
@@ -169,9 +183,13 @@ async def spell(ctx: interactions.CommandContext, search: str):
 @bot.command()
 async def season(ctx: interactions.CommandContext):
     """Show the current Ishar MUD season"""
-    logging.info('%s (%i) / %s / season', ctx.channel, ctx.channel_id, ctx.user)
-    current_season = Season.query.filter_by(is_active=1).order_by(-Season.season_id).first()
-    await ctx.send(f'It is currently Season {current_season.season_id} which ends in {current_season.expires}!')
+    logging.info('%s (%i) / %s / season',
+                 ctx.channel, ctx.channel_id, ctx.user)
+    current = Season.query.filter_by(
+        is_active=1).order_by(-Season.season_id).first()
+    out = f'It is currently Season {current.season_id}'
+    out += f', which ends in {current.expires}!'
+    await ctx.send(out)
     db_session.close()
 
 
@@ -195,7 +213,8 @@ async def faqs(ctx: interactions.CommandContext):
 @bot.command()
 async def get_started(ctx: interactions.CommandContext):
     """Link to the Getting Started page"""
-    logging.info('%s (%i) / %s / get_started', ctx.channel, ctx.channel_id, ctx.user)
+    logging.info('%s (%i) / %s / get_started',
+                 ctx.channel, ctx.channel_id, ctx.user)
     await ctx.send('https://isharmud.com/get_started')
 
 
@@ -203,7 +222,8 @@ async def get_started(ctx: interactions.CommandContext):
 @bot.command()
 async def getstarted(ctx: interactions.CommandContext):
     """Link to the Getting Started page"""
-    logging.info('%s (%i) / %s / getstarted', ctx.channel, ctx.channel_id, ctx.user)
+    logging.info('%s (%i) / %s / getstarted',
+                 ctx.channel, ctx.channel_id, ctx.user)
     await ctx.send('https://isharmud.com/get_started')
 
 

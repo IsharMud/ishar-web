@@ -49,16 +49,17 @@ def news():
         db_session.add(new_news)
         db_session.commit()
         if new_news.news_id:
-            edit_url = '<a href="' + url_for('admin.edit_news', edit_news_id=new_news.news_id) + '">edit it here</a>'
-            flash(f'Your message has been posted! You can {edit_url}.', 'success')
+            edit_url = url_for('admin.edit_news', edit_news_id=new_news.news_id)
+            flash('Your message has been posted! '
+                  f'You can <a href="{edit_url}">edit it here</a>.',
+                  'success')
         else:
             flash('Sorry, but please try again!', 'error')
 
     # Show the form to add news in the administration portal
     return render_template('admin/news.html.j2',
                            all_news=News.query.order_by(-News.created_at).all(),
-                           news_add_form=news_add_form
-                           )
+                           news_add_form=news_add_form)
 
 
 @admin.route('/news/edit/<int:edit_news_id>/', methods=['GET', 'POST'])
@@ -79,12 +80,11 @@ def edit_news(edit_news_id=None):
         news_post.body = edit_news_form.body.data
         db_session.commit()
         flash('The news post was updated successfully.', 'success')
-        sentry_sdk.capture_message(f'Admin Edit News: {current_user} edited {news_post}')
+        sentry_sdk.capture_message('Admin Edit News: '
+                                   f'{current_user} edited {news_post}')
 
     return render_template('admin/edit_news.html.j2',
-                           edit_news=news_post,
-                           edit_news_form=edit_news_form
-                           )
+                           edit_news=news_post, edit_news_form=edit_news_form)
 
 
 @admin.route('/news/delete/<int:delete_news_id>/', methods=['GET'])
@@ -101,13 +101,13 @@ def delete_news(delete_news_id=None):
     News.query.filter_by(news_id=news_post.news_id).delete()
     db_session.commit()
     flash('The news post was deleted successfully.', 'success')
-    sentry_sdk.capture_message(f'Admin Delete News: {current_user} deleted {news_post}')
+    sentry_sdk.capture_message('Admin Delete News: '
+                               f'{current_user} deleted {news_post}')
 
     # Show the form to add news in the administration portal
     return render_template('admin/news.html.j2',
                            all_news=News.query.order_by(-News.created_at).all(),
-                           news_add_form=NewsAddForm()
-                           )
+                           news_add_form=NewsAddForm())
 
 
 @admin.route('/account/<int:manage_account_id>/', methods=['GET'])
@@ -121,7 +121,8 @@ def manage_account(manage_account_id=None):
         flash('Invalid account.', 'error')
         abort(400)
 
-    return render_template('admin/manage_account.html.j2', manage_account=account)
+    return render_template('admin/manage_account.html.j2',
+                           manage_account=account)
 
 
 @admin.route('/account/edit/<int:edit_account_id>/', methods=['GET', 'POST'])
@@ -141,25 +142,27 @@ def edit_account(edit_account_id=None):
         account.account_name = edit_account_form.account_name.data
         account.email = edit_account_form.email.data
         account.seasonal_points = edit_account_form.seasonal_points.data
-        if edit_account_form.password.data != '' and edit_account_form.confirm_password.data != '':
+        if edit_account_form.confirm_password.data:
             account.change_password(edit_account_form.confirm_password.data)
             if account.change_password(edit_account_form.confirm_password.data):
                 flash('The account password was reset.', 'success')
                 sentry_sdk.capture_message('Admin Password Reset: '
-                                           f'{current_user} reset {account}', level='warning')
+                                           f'{current_user} reset {account}')
             else:
                 flash('The account password could not be reset.', 'error')
                 sentry_sdk.capture_message('Admin Password Reset Fail: '
-                                           f'{current_user} failed to reset {account}', level='error')
+                                           f'{current_user} failed to reset '
+                                           f'{account}',
+                                           level='error')
 
         db_session.commit()
         flash('The account was updated successfully.', 'success')
-        sentry_sdk.capture_message(f'Admin Edit Account: {current_user} edited {account}')
+        sentry_sdk.capture_message('Admin Edit Account: '
+                                   f'{current_user} edited {account}')
 
     return render_template('admin/edit_account.html.j2',
                            edit_account=account,
-                           edit_account_form=edit_account_form
-                           )
+                           edit_account_form=edit_account_form)
 
 
 @admin.route('/accounts/', methods=['GET'])
@@ -167,7 +170,10 @@ def edit_account(edit_account_id=None):
 def accounts():
     """Administration portal to allow Gods to view accounts
         /admin/accounts"""
-    return render_template('admin/accounts.html.j2', accounts=Account.query.order_by(Account.account_id).all())
+    return render_template('admin/accounts.html.j2',
+                           accounts=Account.query.order_by(
+                               Account.account_id
+                           ).all())
 
 
 @admin.route('/player/edit/<int:edit_player_id>/', methods=['GET', 'POST'])
@@ -192,12 +198,12 @@ def edit_player(edit_player_id=None):
         player.is_deleted = edit_player_form.is_deleted.data
         db_session.commit()
         flash('The player was updated successfully.', 'success')
-        sentry_sdk.capture_message(f'Admin Edit Player: {current_user} edited {player}')
+        sentry_sdk.capture_message('Admin Edit Player: '
+                                   f'{current_user} edited {player}')
 
     return render_template('admin/edit_player.html.j2',
                            edit_player=player,
-                           edit_player_form=edit_player_form
-                           )
+                           edit_player_form=edit_player_form)
 
 
 @admin.route('/season/', methods=['GET'])
@@ -206,15 +212,17 @@ def season():
     """Administration portal to allow Gods to view/manage seasons
         /admin/season"""
     return render_template('admin/season.html.j2',
-                           seasons=Season.query.order_by(-Season.is_active, -Season.season_id).all()
-                           )
+                           seasons=Season.query.order_by(
+                               -Season.is_active,
+                               -Season.season_id
+                            ).all())
 
 
 @admin.route('/season/cycle/', methods=['GET', 'POST'])
 @admin.route('/season/cycle', methods=['GET', 'POST'])
 def season_cycle():
-    """Administration portal to allow Gods to cycle seasons, while wiping players
-        /admin/season/cycle"""
+    """Administration portal to allow Gods to cycle seasons,
+        while wiping players - /admin/season/cycle"""
 
     # Get season cycle form, and check if submitted
     season_cycle_form = SeasonCycleForm()
@@ -243,9 +251,10 @@ def season_cycle():
             if account.seasonal_earned > 0:
 
                 # Add existing essence plus essence earned
-                calculated_essence = account.seasonal_points + account.seasonal_earned
-                flash(f'Account "{account.display_name}" ({account.account_id}) '
-                      f'now has {calculated_essence} essence. '
+                calculated_essence = f'{account.seasonal_points} '\
+                                     f'{account.seasonal_earned}'
+                flash(f'Account "{account.display_name}" ({account.account_id})'
+                      f' now has {calculated_essence} essence. '
                       f'({account.seasonal_points} existing + '
                       f'{account.seasonal_earned} earned)', 'success')
 
@@ -275,15 +284,27 @@ def season_cycle():
                         flash(f'Deleted <code>{delete_path}</code>.', 'success')
 
                     # Delete mortal players from the database
-                    db_session.query(Player).filter_by(id=delete_player.id).delete()
-                    flash(f'Deleted Player: {delete_player.name} ({delete_player.id}).', 'success')
-                    total_players_deleted += 1
+                    do_delete = db_session.query(Player).filter_by(
+                                    id=delete_player.id
+                                ).delete()
+                    if do_delete:
+                        flash(f'Deleted Player: {delete_player.name} '
+                              f'({delete_player.id}).', 'success')
+                        total_players_deleted += 1
+                    else:
+                        flash(f'Delete Player Failed: {delete_player.name} '
+                              f'({delete_player.id}).', 'error')
+                        sentry_sdk.capture_message('Delete Player Failed: '
+                                                   f'{delete_player.name} '
+                                                   f'({delete_player.id})')
 
         # Commit the changes to the database
         db_session.commit()
         flash('All essence has been rewarded.', 'success')
-        flash(f'Total Rewarded Essence: {total_rewarded_essence} essence', 'info')
-        sentry_sdk.capture_message(f'Essence Rewarded: {total_rewarded_essence} essence')
+        flash(f'Total Rewarded Essence: {total_rewarded_essence} essence',
+              'info')
+        sentry_sdk.capture_message('Essence Rewarded: ',
+                                   f'{total_rewarded_essence} essence')
 
         # Make sure a season was created
         if new_season.season_id:
@@ -294,7 +315,9 @@ def season_cycle():
         if not Player.query.filter(Player.true_level < min(IMM_LEVELS)).all():
             flash('All mortal players have been deleted.', 'success')
             flash(f'Total Players Deleted: {total_players_deleted}', 'info')
-            sentry_sdk.capture_message('Player Wipe: {total_players_deleted} mortals deleted', level='warning')
+            sentry_sdk.capture_message('Player Wipe: {total_players_deleted} '
+                                       'mortals deleted')
 
     # Show the form to cycle a season in the administration portal
-    return render_template('admin/season_cycle.html.j2', season_cycle_form=season_cycle_form)
+    return render_template('admin/season_cycle.html.j2',
+                           season_cycle_form=season_cycle_form)

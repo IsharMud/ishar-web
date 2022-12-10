@@ -45,7 +45,7 @@ app.register_error_handler(500, error_pages.internal_server_error)
 login_manager = LoginManager(app)
 login_manager.login_message_category = 'error'
 login_manager.login_view = 'portal.login'
-login_manager.needs_refresh_message = 'To protect your account, please log in again.'
+login_manager.needs_refresh_message = 'Please log in again, for your security.'
 login_manager.needs_refresh_message_category = 'error'
 login_manager.refresh_view = 'portal.login'
 login_manager.session_protection = 'strong'
@@ -89,7 +89,11 @@ def injects():
     sentry_dsn = os.getenv('SENTRY_DSN')
     sentry_uri = urlparse(sentry_dsn)
     return dict(
-        current_season=Season.query.filter_by(is_active=1).order_by(-Season.season_id).first(),
+        current_season=Season.query.filter_by(
+                            is_active=1
+                        ).order_by(
+                            -Season.season_id
+                        ).first(),
         sentry_dsn=sentry_dsn,
         sentry_user=sentry_uri.username,
         sentry_event_id=sentry_sdk.last_event_id()
@@ -101,7 +105,9 @@ def injects():
 @app.route('/', methods=['GET'])
 def welcome():
     """Main welcome page/index, includes the most recent news"""
-    return render_template('welcome.html.j2', news=News.query.order_by(-News.created_at).first())
+    return render_template('welcome.html.j2',
+                           news=News.query.order_by(-News.created_at).first()
+                           )
 
 
 @app.teardown_appcontext
