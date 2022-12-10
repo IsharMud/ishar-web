@@ -1,9 +1,11 @@
 """Leaders"""
 from flask import Blueprint, render_template
-from mud_secret import IMM_LEVELS
+
 from models import Player
+from mud_secret import IMM_LEVELS
 
 leaders = Blueprint('leaders', __name__)
+
 
 @leaders.route('/leaderboard/all/', methods=['GET'])
 @leaders.route('/leaders/all/', methods=['GET'])

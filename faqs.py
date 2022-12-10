@@ -1,5 +1,6 @@
 """Frequently Asked Questions"""
 from flask import Blueprint, render_template, url_for
+
 from models import PlayerClass, PlayerRace
 
 faqs = Blueprint('faqs', __name__)
@@ -15,13 +16,17 @@ def index():
     """A few frequently asked questions (/faq, /faqs, or /questions)"""
 
     # Fetch, and format, links to each of the playable player classes with descriptions
-    player_classes = [f"<a href=\"{url_for('help_page.single', topic=player_class.class_display_name)}\">"
-        f"{player_class.class_display_name}</a> -- {player_class.class_description}" for player_class in PlayerClass(
-        ).query.filter(PlayerClass.class_description != '').all()]
+    player_classes = [
+        f"<a href=\"{url_for('help_page.single', topic=player_class.class_display_name)}\">"
+        f"{player_class.class_display_name}</a> -- {player_class.class_description}"
+        for player_class in PlayerClass().query.filter(PlayerClass.class_description != '').all()
+    ]
 
     # Fetch, and format, playable player races and descriptions
-    player_races = [f"{player_race.race_display_name} -- {player_race.race_description}" for player_race in PlayerRace(
-        ).query.filter(PlayerRace.race_description != '').all()]
+    player_races = [
+        f"{player_race.race_display_name} -- {player_race.race_description}"
+        for player_race in PlayerRace().query.filter(PlayerRace.race_description != '').all()
+    ]
 
     all_faqs = {
 
@@ -34,7 +39,7 @@ def index():
 
         'Are there player classes?': [
             '<a href="' + url_for('help_page.single', topic='Classes') + '">Yes! '
-            f'There are {len(player_classes)} classes</a> available to choose from, '
+            f'There are {len(player_classes)} classes</a> available to choose from, ',
             'when you create a player character:',
             player_classes
         ],

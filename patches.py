@@ -1,9 +1,11 @@
 """Patches Pages"""
 import glob
 import os
+
 from flask import Blueprint, redirect, render_template
 
 patches = Blueprint('patches', __name__)
+
 
 @patches.route('/latest_patch/', methods=['GET'])
 @patches.route('/latest_patch', methods=['GET'])

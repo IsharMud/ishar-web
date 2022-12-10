@@ -1,8 +1,8 @@
 """Help (and World) pages"""
 from flask import Blueprint, flash, redirect, render_template, request, url_for
+
 from forms import HelpSearchForm
 from helptab import get_help_topics, search_help_topics
-
 
 help_page = Blueprint('help_page', __name__)
 
@@ -17,9 +17,10 @@ def index():
         return redirect(url_for('help_page.single', topic=request.args.get('search')))
 
     return render_template('help_page.html.j2',
-                            topic=None,
-                            topics=get_help_topics(),
-                            help_search_form=HelpSearchForm())
+                           topic=None,
+                           topics=get_help_topics(),
+                           help_search_form=HelpSearchForm()
+                           )
 
 
 @help_page.route('/help/<string:topic>/', methods=['GET'])
@@ -34,9 +35,10 @@ def single(topic=None):
     # Return the topic, and its full contents, if there is an exact name match
     if topic in all_topics:
         return render_template('help_page.html.j2',
-                                topic=all_topics[topic],
-                                topics=all_topics,
-                                help_search_form=search_form)
+                               topic=all_topics[topic],
+                               topics=all_topics,
+                               help_search_form=search_form
+                               )
 
     # Try to find matching help topics, and redirect to single match by name
     #   which would then be handled by the render_template above
@@ -54,9 +56,9 @@ def single(topic=None):
         search_topics = all_topics
 
     return render_template('help_page.html.j2',
-                            topic=None,
-                            topics=search_topics,
-                            help_search_form=search_form), code
+                           topic=None,
+                           topics=search_topics,
+                           help_search_form=search_form), code
 
 
 @help_page.route('/areas/', methods=['GET'])

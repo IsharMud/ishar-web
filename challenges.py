@@ -1,8 +1,10 @@
 """Challenges"""
 from flask import Blueprint, render_template
+
 from models import Challenge
 
 challenges = Blueprint('challenges', __name__)
+
 
 @challenges.route('/challenges/', methods=['GET'])
 @challenges.route('/challenges', methods=['GET'])

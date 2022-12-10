@@ -1,25 +1,27 @@
 """Parse the MUD 'helptab' file"""
 import re
+
 from models import PlayerClass
 from mud_secret import HELPTAB, IMM_LEVELS
 from sentry import sentry_sdk
 
-
 # Retrieve playable player class names
-player_classes = [player_class.class_display_name for player_class in PlayerClass().query.filter(PlayerClass.class_description != '').all()]
+player_classes = [player_class.class_display_name for player_class in
+                  PlayerClass().query.filter(PlayerClass.class_description != '').all()]
 
 # Compile a few regular expressions for use later
 #   to parse out specific items from help topic chunks
 see_also_regex = re.compile(r'^ *(see also|also see|also see help on|see help on|related) *\: *', re.IGNORECASE)
 regexes = {
-    'syntax':   re.compile(r'^ *(Syntax|syntax) *\: *(.+)$'),
-    'minimum':  re.compile(r'^ *(Minimum|minimum|Min|min) *\: *(.+)$'),
-    'level':    re.compile(r'^ *(Level|level) *\: *(.+)$'),
-    'class':    re.compile(r'^ *(Class|Classes) *\: *(.+)$'),
-    'save':     re.compile(r'^ *(Saves?) *\: *(.+)$'),
-    'stats':    re.compile(r'^ *(Stats?) *\: *(.+)$'),
-    'topic':    re.compile(r'^ *(Topic) *\: *(.+)$')
+    'syntax': re.compile(r'^ *(Syntax|syntax) *\: *(.+)$'),
+    'minimum': re.compile(r'^ *(Minimum|minimum|Min|min) *\: *(.+)$'),
+    'level': re.compile(r'^ *(Level|level) *\: *(.+)$'),
+    'class': re.compile(r'^ *(Class|Classes) *\: *(.+)$'),
+    'save': re.compile(r'^ *(Saves?) *\: *(.+)$'),
+    'stats': re.compile(r'^ *(Stats?) *\: *(.+)$'),
+    'topic': re.compile(r'^ *(Topic) *\: *(.+)$')
 }
+
 
 def get_help_chunks(help_file=HELPTAB):
     """Parse the MUD 'helptab' file into chunks, by '#' character, to roughly separate topics"""
@@ -144,10 +146,7 @@ def parse_help_content(content=None):
 
     # Loop through each line of the help chunk body text
     is_see_also = False
-    help_topic = {}
-    help_topic['body_html'] = str()
-    help_topic['body_text'] = str()
-    help_topic['see_also'] = []
+    help_topic = {'body_html': str(), 'body_text': str(), 'see_also': []}
     for line in content.split('\n'):
 
         # Split up, append, and try to link related "See Also" topics appropriately
@@ -194,7 +193,8 @@ def parse_help_content(content=None):
 
     # Replace "`help command'" in the body html text with link to that help command
     cmd_pattern = r"`help ([\w| ]+)'"
-    help_topic['body_html'] = re.sub(cmd_pattern, r'`<a href="/help/\1">help \1</a>`', help_topic['body_html'], re.MULTILINE)
+    help_topic['body_html'] = re.sub(cmd_pattern, r'`<a href="/help/\1">help \1</a>`', help_topic['body_html'],
+                                     re.MULTILINE)
 
     # Return the help topic
     return help_topic
@@ -208,7 +208,7 @@ def parse_help_header(header=None):
     header_lines = header.split('\n')
     help_header['for_level'] = int(header_lines[0].strip())
 
-    # Name the topic if mortals should be able reach it, and it starts with "32 "
+    # Name the topic if mortals should be able to reach it, and it starts with "32 "
     if help_header['for_level'] < min(IMM_LEVELS) and header_lines[1].startswith('32 '):
         help_header['name'] = header_lines[1].replace('32 ', '').strip()
         help_header['aliases'] = []
@@ -247,7 +247,7 @@ def search_help_topics(all_topics=None, search=None):
 
             # Return exact name matches immediately
             if search == tname.lower():
-                return { tname: tvals }
+                return {tname: tvals}
 
             # Add partial name matches
             if search in tname.lower():
@@ -261,7 +261,7 @@ def search_help_topics(all_topics=None, search=None):
 
                     # Return exact alias matches immediately
                     if search == topic_alias.lower():
-                        return { topic_alias: tvals }
+                        return {topic_alias: tvals}
 
                     # Add partial alias matches
                     if search in topic_alias.lower():

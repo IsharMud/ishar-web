@@ -3,7 +3,9 @@
 import logging
 import signal
 import sys
+
 import interactions
+
 import discord_secret
 from database import db_session
 from helptab import search_help_topics
@@ -11,14 +13,15 @@ from models import Challenge, Player, Season
 
 # Logging configuration
 logging.basicConfig(level=logging.INFO,
-    format='%(asctime)s [%(levelname)s] %(message)s',
-    datefmt = '%Y-%m-%d %H:%M:%S %Z'
-)
+                    format='%(asctime)s [%(levelname)s] %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S %Z'
+                    )
 
 # Connect/authenticate Ishar MUD Discord bot
 bot = interactions.Client(token=discord_secret.TOKEN, default_scope=discord_secret.GUILD)
 
 
+# Method to get the details of a single help topic
 def get_single_help(topic=None):
     """Return extended output for a single help topic"""
 
@@ -41,6 +44,7 @@ def get_single_help(topic=None):
     return out_wbody
 
 
+# /challenges
 @bot.command()
 async def challenges(ctx: interactions.CommandContext):
     """Show the current in-game Ishar MUD challenges"""
@@ -54,6 +58,7 @@ async def challenges(ctx: interactions.CommandContext):
     db_session.close()
 
 
+# /deadhead
 @bot.command()
 async def deadhead(ctx: interactions.CommandContext):
     """Show the player with the most in-game deaths"""
@@ -63,9 +68,19 @@ async def deadhead(ctx: interactions.CommandContext):
     db_session.close()
 
 
-@bot.command(name='mudhelp', description='Find Ishar MUD help topic',
-    options = [interactions.Option(name='search', description='title of a help topic to search for',
-        type=interactions.OptionType.STRING, required=True)])
+# /mudhelp <search>
+@bot.command(
+    name='mudhelp',
+    description='Find Ishar MUD help topic',
+    options=[
+        interactions.Option(
+            name='search',
+            description='title of a help topic to search for',
+            type=interactions.OptionType.STRING,
+            required=True
+        )
+    ]
+)
 async def mudhelp(ctx: interactions.CommandContext, search: str):
     """Search for MUD help topics"""
     logging.info('%s (%i) / %s / mudhelp: "%s"', ctx.channel, ctx.channel_id, ctx.user, search)
@@ -74,29 +89,40 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
     ephemeral = True
     search_topics = search_help_topics(all_topics=None, search=search)
 
-    # Tell user if there were no results
-    if not search_topics:
-        out = 'Sorry, but no such help topics could be found!'
+    # By default, tell user if there were no results
+    out = 'Sorry, but no such help topics could be found!'
 
-    # Handle single search result, if there is only one
-    elif len(search_topics) == 1:
-        ephemeral = False
-        found_topic = next(iter(search_topics.values()))
-        out = get_single_help(topic=found_topic)
+    if search_topics:
 
-    # Link search results to user, if there are multiple results
-    elif len(search_topics) > 1:
-        search_url = f'<https://isharmud.com/help/{search}>'.replace(' ', '%20')
-        out = f'Search Results: {search_url} ({len(search_topics)} topics)'
+        # Handle single search result, if there is only one
+        if len(search_topics) == 1:
+            ephemeral = False
+            found_topic = next(iter(search_topics.values()))
+            out = get_single_help(topic=found_topic)
+
+        # Link search results to user, if there are multiple results
+        elif len(search_topics) > 1:
+            search_url = f'<https://isharmud.com/help/{search}>'.replace(' ', '%20')
+            out = f'Search Results: {search_url} ({len(search_topics)} topics)'
 
     # Send the help search response
     await ctx.send(out, ephemeral=ephemeral)
     db_session.close()
 
 
-@bot.command(name='spell', description='Find Ishar MUD spell help',
-    options = [interactions.Option(name='search', description='name of a spell to search for',
-        type=interactions.OptionType.STRING, required=True)])
+# /spell <search>
+@bot.command(
+    name='spell',
+    description='Find Ishar MUD spell help',
+    options=[
+        interactions.Option(
+            name='search',
+            description='name of a spell to search for',
+            type=interactions.OptionType.STRING,
+            required=True
+        )
+    ]
+)
 async def spell(ctx: interactions.CommandContext, search: str):
     """Search for spells in MUD help topics"""
     logging.info('%s (%i) / %s / spell: "%s"', ctx.channel, ctx.channel_id, ctx.user, search)
@@ -121,9 +147,10 @@ async def spell(ctx: interactions.CommandContext, search: str):
     elif len(search_spell_results) > 1:
 
         # Show user the matching spell names, if there were 10 or less
-        #   Otherwise tell them to be more specific
         if len(search_spell_results) <= 10:
             out = f'Found {len(search_spell_results)} spells: {", ".join(search_spell_results.keys())}'
+
+        # Otherwise, tell them to be more specific
         else:
             out = f'Sorry, but there were {len(search_spell_results)} results! Please try to be more specific.'
 
@@ -136,6 +163,7 @@ async def spell(ctx: interactions.CommandContext, search: str):
     db_session.close()
 
 
+# /season
 @bot.command()
 async def season(ctx: interactions.CommandContext):
     """Show the current Ishar MUD season"""
@@ -145,12 +173,15 @@ async def season(ctx: interactions.CommandContext):
     db_session.close()
 
 
+# /faq
 @bot.command()
 async def faq(ctx: interactions.CommandContext):
     """Link to the Frequently Asked Questions page"""
     logging.info('%s (%i) / %s / faq', ctx.channel, ctx.channel_id, ctx.user)
     await ctx.send('https://isharmud.com/faq')
 
+
+# /faqs
 @bot.command()
 async def faqs(ctx: interactions.CommandContext):
     """Link to the Frequently Asked Questions page"""
@@ -158,12 +189,15 @@ async def faqs(ctx: interactions.CommandContext):
     await ctx.send('https://isharmud.com/faq')
 
 
+# /get_started
 @bot.command()
 async def get_started(ctx: interactions.CommandContext):
     """Link to the Getting Started page"""
     logging.info('%s (%i) / %s / get_started', ctx.channel, ctx.channel_id, ctx.user)
     await ctx.send('https://isharmud.com/get_started')
 
+
+# /getstarted
 @bot.command()
 async def getstarted(ctx: interactions.CommandContext):
     """Link to the Getting Started page"""
@@ -171,6 +205,7 @@ async def getstarted(ctx: interactions.CommandContext):
     await ctx.send('https://isharmud.com/get_started')
 
 
+# Handle SIGTERM
 def sigterm_handler(num, frame):
     """Try to exit gracefully on SIGTERM"""
     logging.info('Caught SIGTERM: %i / %s', num, frame)
@@ -183,10 +218,11 @@ try:
     signal.signal(signal.SIGTERM, sigterm_handler)
     bot.start()
 
+# Catch exceptions/errors, and exit with an error code (1)
 except Exception as err:
     logging.exception(err)
     sys.exit(1)
 
+# Say goodbye
 finally:
     logging.info('Exiting...')
-    sys.exit(0)

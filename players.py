@@ -1,10 +1,12 @@
 """Player page"""
 from flask import Blueprint, flash, redirect, render_template, url_for
 from flask_login import login_required
+
 from forms import PlayerSearchForm
 from models import Player
 
 players = Blueprint('players', __name__)
+
 
 @players.route('/player/<string:player_name>/', methods=['GET', 'POST'])
 @players.route('/player/<string:player_name>', methods=['GET', 'POST'])

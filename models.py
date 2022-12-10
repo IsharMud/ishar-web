@@ -1,16 +1,18 @@
 """Database classes/models"""
 import datetime
 from functools import cached_property
+
 from flask import url_for
 from flask_login import current_user, UserMixin
 from passlib.hash import md5_crypt
 from sqlalchemy import Column, ForeignKey, String, TIMESTAMP, Text
 from sqlalchemy.dialects.mysql import INTEGER, MEDIUMINT, SMALLINT, TINYINT
-from sqlalchemy.schema import FetchedValue
 from sqlalchemy.orm import relationship
-from mud_secret import ALIGNMENTS, IMM_LEVELS
-from database import Base, db_session
+from sqlalchemy.schema import FetchedValue
+
 import delta
+from database import Base, db_session
+from mud_secret import ALIGNMENTS, IMM_LEVELS
 
 
 class Account(Base, UserMixin):
@@ -124,8 +126,26 @@ class AccountsUpgrade(Base):
     """Account upgrade associated with account, and the level of upgrade"""
     __tablename__ = 'accounts_account_upgrades'
 
-    account_upgrades_id = Column(ForeignKey('account_upgrades.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True, primary_key=True)
-    account_id = Column(ForeignKey('accounts.account_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True, primary_key=True)
+    account_upgrades_id = Column(
+        ForeignKey(
+            'account_upgrades.id',
+            ondelete='CASCADE',
+            onupdate='CASCADE'
+        ),
+        nullable=False,
+        index=True,
+        primary_key=True
+    )
+    account_id = Column(
+        ForeignKey(
+            'accounts.account_id',
+            ondelete='CASCADE',
+            onupdate='CASCADE'
+        ),
+        nullable=False,
+        index=True,
+        primary_key=True
+    )
     amount = Column(MEDIUMINT(4), nullable=False)
 
     account = relationship('Account', backref='upgrades')
@@ -174,7 +194,15 @@ class News(Base):
     __tablename__ = 'news'
 
     news_id = Column(INTEGER(11), primary_key=True)
-    account_id = Column(ForeignKey('accounts.account_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
+    account_id = Column(
+        ForeignKey(
+            'accounts.account_id',
+            ondelete='CASCADE',
+            onupdate='CASCADE'
+        ),
+        nullable=False,
+        index=True
+    )
     created_at = Column(TIMESTAMP, nullable=False, server_default=FetchedValue())
     subject = Column(String(64), nullable=False, server_default=FetchedValue())
     body = Column(Text, nullable=False)
@@ -202,16 +230,16 @@ class PlayerClass(Base):
     @cached_property
     def stats_order(self):
         """Order which stats should be in, based upon player class"""
-        if  self.class_name == 'WARRIOR':
-            return [ 'Strength', 'Agility', 'Endurance', 'Willpower', 'Focus', 'Perception' ]
+        if self.class_name == 'WARRIOR':
+            return ['Strength', 'Agility', 'Endurance', 'Willpower', 'Focus', 'Perception']
         if self.class_name == 'ROGUE':
-            return [ 'Agility', 'Perception', 'Strength', 'Focus', 'Endurance', 'Willpower' ]
+            return ['Agility', 'Perception', 'Strength', 'Focus', 'Endurance', 'Willpower']
         if self.class_name == 'CLERIC':
-            return [ 'Willpower', 'Strength', 'Perception', 'Endurance', 'Focus', 'Agility' ]
+            return ['Willpower', 'Strength', 'Perception', 'Endurance', 'Focus', 'Agility']
         if self.class_name == 'MAGICIAN':
-            return [ 'Perception', 'Focus', 'Agility', 'Willpower', 'Endurance', 'Strength' ]
+            return ['Perception', 'Focus', 'Agility', 'Willpower', 'Endurance', 'Strength']
         if self.class_name == 'NECROMANCER':
-            return [ 'Focus', 'Willpower', 'Perception', 'Agility', 'Strength', 'Endurance' ]
+            return ['Focus', 'Willpower', 'Perception', 'Agility', 'Strength', 'Endurance']
         return ['Agility', 'Endurance', 'Focus', 'Perception', 'Strength', 'Willpower']
 
     def __repr__(self):
@@ -256,8 +284,26 @@ class PlayerRemortUpgrade(Base):
     """Remort upgrade associated with player, and the level of upgrade"""
     __tablename__ = 'player_remort_upgrades'
 
-    upgrade_id = Column(ForeignKey('remort_upgrades.upgrade_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True, primary_key=True)
-    player_id = Column(ForeignKey('players.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True, primary_key=True)
+    upgrade_id = Column(
+        ForeignKey(
+            'remort_upgrades.upgrade_id',
+            ondelete='CASCADE',
+            onupdate='CASCADE'
+        ),
+        nullable=False,
+        index=True,
+        primary_key=True
+    )
+    player_id = Column(
+        ForeignKey(
+            'players.id',
+            ondelete='CASCADE',
+            onupdate='CASCADE'
+        ),
+        nullable=False,
+        index=True,
+        primary_key=True
+    )
     value = Column(INTEGER(11), nullable=False, server_default=FetchedValue())
 
     player = relationship('Player', backref='remort_upgrades')
@@ -301,7 +347,15 @@ class Player(Base):
     __tablename__ = 'players'
 
     id = Column(INTEGER(11), primary_key=True)
-    account_id = Column(ForeignKey('accounts.account_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
+    account_id = Column(
+        ForeignKey(
+            'accounts.account_id',
+            ondelete='CASCADE',
+            onupdate='CASCADE'
+        ),
+        nullable=False,
+        index=True
+    )
     name = Column(String(15), nullable=False, unique=True, server_default=FetchedValue())
     create_ident = Column(String(10), nullable=False, server_default=FetchedValue())
     last_isp = Column(String(30), nullable=False, server_default=FetchedValue())
@@ -326,8 +380,24 @@ class Player(Base):
     invstart_level = Column(INTEGER(11))
     color_scheme = Column(SMALLINT(6))
     sex = Column(TINYINT(3), nullable=False)
-    race_id = Column(ForeignKey('races.race_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
-    class_id = Column(ForeignKey('classes.class_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
+    race_id = Column(
+        ForeignKey(
+            'races.race_id',
+            ondelete='CASCADE',
+            onupdate='CASCADE'
+        ),
+        nullable=False,
+        index=True
+    )
+    class_id = Column(
+        ForeignKey(
+            'classes.class_id',
+            ondelete='CASCADE',
+            onupdate='CASCADE'
+        ),
+        nullable=False,
+        index=True
+    )
     level = Column(INTEGER(11), nullable=False)
     weight = Column(SMALLINT(6), nullable=False)
     height = Column(SMALLINT(6), nullable=False)
@@ -445,7 +515,7 @@ class Player(Base):
     def player_alignment(self):
         """Player alignment"""
         for text, (low, high) in ALIGNMENTS.items():
-            if self.align >= low and self.align <= high:
+            if low <= self.align <= high:
                 return text
         return 'Unknown'
 
@@ -472,13 +542,13 @@ class Player(Base):
 
         # Get the players stats
         players_stats = {
-                    'Agility': self.curr_agility,
-                    'Endurance': self.curr_endurance,
-                    'Focus': self.curr_focus,
-                    'Perception': self.curr_perception,
-                    'Strength': self.curr_strength,
-                    'Willpower': self.curr_willpower
-                }
+            'Agility': self.curr_agility,
+            'Endurance': self.curr_endurance,
+            'Focus': self.curr_focus,
+            'Perception': self.curr_perception,
+            'Strength': self.curr_strength,
+            'Willpower': self.curr_willpower
+        }
 
         # Put the players stats in the appropriate order based on their class, and return them
         for stat_order in self.player_class.stats_order:

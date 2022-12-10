@@ -5,29 +5,29 @@ https://github.com/IsharMud/ishar-web
 """
 import os
 from urllib.parse import urlparse
+
 from flask import Flask, render_template, request
 from flask_login import LoginManager
-from database import db_session
-from models import Account, News, Season
-import error_pages
-from sentry import sentry_sdk
 
+import error_pages
 from admin import admin
 from challenges import challenges
+from database import db_session
 from faqs import faqs
 from get_started import get_started
 from help_page import help_page
 from history import history
 from leaders import leaders
+from models import Account, News, Season
 from mud_clients import mud_clients
 from patches import patches
 from players import players
 from portal import portal
 from redirects import redirects
 from season import season
+from sentry import sentry_sdk
 from support import support
 from wizlist import wizlist
-
 
 # Flask
 app = Flask(__name__)
@@ -41,7 +41,6 @@ app.register_error_handler(403, error_pages.forbidden)
 app.register_error_handler(404, error_pages.page_not_found)
 app.register_error_handler(500, error_pages.internal_server_error)
 
-
 # Flask-Login
 login_manager = LoginManager(app)
 login_manager.login_message_category = 'error'
@@ -50,6 +49,7 @@ login_manager.needs_refresh_message = 'To protect your account, please log in ag
 login_manager.needs_refresh_message_category = 'error'
 login_manager.refresh_view = 'portal.login'
 login_manager.session_protection = 'strong'
+
 
 @login_manager.user_loader
 def load_user(email):

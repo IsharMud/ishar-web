@@ -3,6 +3,7 @@ from flask import Blueprint, redirect
 
 redirects = Blueprint('redirects', __name__)
 
+
 @redirects.route('/connect/', methods=['GET'])
 @redirects.route('/connect', methods=['GET'])
 def connect():

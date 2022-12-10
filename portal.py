@@ -1,6 +1,7 @@
-"""Portal, and pages for logged in users"""
+"""Portal, and pages for logged-in users"""
 from flask import Blueprint, flash, redirect, render_template, session, url_for
 from flask_login import current_user, fresh_login_required, login_required, login_user, logout_user
+
 from forms import ChangePasswordForm, LoginForm
 from models import Account
 from sentry import sentry_sdk

@@ -1,9 +1,11 @@
 """Frequently Asked Questions"""
 from flask import Blueprint, render_template
-from mud_secret import IMM_LEVELS
+
 from models import Player
+from mud_secret import IMM_LEVELS
 
 wizlist = Blueprint('wizlist', __name__)
+
 
 @wizlist.route('/wiz_list/', methods=['GET'])
 @wizlist.route('/wizlist/', methods=['GET'])
