@@ -10,6 +10,8 @@ import discord_secret
 from database import db_session
 from helptab import search_help_topics
 from models import Challenge, Player, Season
+from sentry import sentry_sdk
+
 
 # Logging configuration
 logging.basicConfig(level=logging.INFO,
@@ -221,6 +223,7 @@ try:
 # Catch exceptions/errors, and exit with an error code (1)
 except Exception as err:
     logging.exception(err)
+    sentry_sdk.capture_exception(err)
     sys.exit(1)
 
 # Say goodbye

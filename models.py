@@ -10,9 +10,9 @@ from sqlalchemy.dialects.mysql import INTEGER, MEDIUMINT, SMALLINT, TINYINT
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import FetchedValue
 
+from mud_secret import ALIGNMENTS, IMM_LEVELS
 import delta
 from database import Base, db_session
-from mud_secret import ALIGNMENTS, IMM_LEVELS
 
 
 class Account(Base, UserMixin):
@@ -36,13 +36,9 @@ class Account(Base, UserMixin):
 
     def change_password(self, new_password):
         """Method to change an account password"""
-        try:
-            self.password = md5_crypt.hash(new_password)
-            db_session.commit()
-            return True
-        except Exception as err:
-            print(err)
-        return False
+        self.password = md5_crypt.hash(new_password)
+        db_session.commit()
+        return True
 
     def check_password(self, password):
         """Method to check an account password"""

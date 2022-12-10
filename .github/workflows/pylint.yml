@@ -27,5 +27,4 @@ jobs:
           pip install -r requirements.txt
       - name: Run pylint
         run: |
-          pylint --min-public-methods=1 --disable=C0301,E0401 --ignore helptab.py --fail-under=9.0 $(git ls-files '*.py')
-          pylint --disable=C,E,R,W --fail-under=10.0 $(git ls-files '*.py')
+          pylint --min-public-methods=1 --disable=C0301,E0401,W0703 --fail-under=10.0 $(git ls-files '*.py')
