@@ -2,7 +2,7 @@
 from flask import Blueprint, redirect, render_template
 
 from mud_secret import IMM_LEVELS
-from models import News, Player
+from models import Challenge, News, Player
 
 # Flask Blueprint
 welcome = Blueprint('welcome', __name__)
@@ -15,6 +15,19 @@ welcome = Blueprint('welcome', __name__)
 def history():
     """History/background page, mostly copied from original ishar.com"""
     return render_template('history.html.j2')
+
+
+@welcome.route('/challenges/', methods=['GET'])
+@welcome.route('/challenges', methods=['GET'])
+def challenges():
+    """Sort and list active challenges, along with their tiers and winners"""
+    return render_template(
+        'challenges.html.j2',
+        challenges=Challenge.query.filter_by(is_active=1).order_by(
+            Challenge.adj_level,
+            Challenge.adj_people
+        ).all()
+    )
 
 
 @welcome.route('/connect/', methods=['GET'])

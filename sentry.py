@@ -11,7 +11,12 @@ if os.getenv('SENTRY_DSN') and os.getenv('USER'):
         environment=os.getenv('SENTRY_ENV') or os.getenv('USER'),
         release=os.getenv('SENTRY_RELEASE') or os.getenv('USER'),
         traces_sample_rate=1.0,
-        integrations=[FlaskIntegration(), SqlalchemyIntegration()],
+        integrations=[
+            FlaskIntegration(),
+            SqlalchemyIntegration()
+        ],
         send_default_pii=True,
-        _experiments={'profiles_sample_rate': 1.0}
+        _experiments={
+            'profiles_sample_rate': 1.0
+        }
     )

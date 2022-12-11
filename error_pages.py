@@ -3,6 +3,8 @@ from flask import Blueprint, render_template
 
 from sentry import sentry_sdk
 
+
+# Flask Blueprint
 error_pages = Blueprint('error_pages', __name__)
 
 

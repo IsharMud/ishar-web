@@ -33,6 +33,7 @@ def stringify(delta=None):
         value = delta.seconds
         interval = 'second'
 
+    # Make the output plural, if necessary
     return pluralize(
         timing={
             'value': value,

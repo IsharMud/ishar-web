@@ -5,6 +5,7 @@ from flask_login import current_user, login_required
 from forms import ChangePasswordForm, PlayerSearchForm
 from models import Player
 
+# Flask Blueprint
 portal = Blueprint('portal', __name__)
 
 

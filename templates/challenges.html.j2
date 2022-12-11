@@ -8,7 +8,7 @@
 {%- endif %}
 {% block meta_title %}Challenges{% endblock meta_title %}
 {% block meta_description %}Challenges, winners, and rewards currently available{% endblock meta_description %}
-{% block meta_url %}{{ url_for('challenges.index', _external=True) }}{% endblock meta_url %}
+{% block meta_url %}{{ url_for('welcome.challenges', _external=True) }}{% endblock meta_url %}
 {% block title %}{{ challenges_title }}{% endblock title %}
 {% block header %}{{ challenges_title }}{% endblock header %}
 {%- macro display_challenge(challenge) %}

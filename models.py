@@ -51,7 +51,10 @@ class Account(Base, UserMixin):
         unique=True
     )
 
-    players = relationship('Player', backref='account')
+    players = relationship(
+        'Player',
+        backref='account'
+    )
 
     def change_password(self, new_password=None):
         """Method to change an account password"""
@@ -70,7 +73,7 @@ class Account(Base, UserMixin):
         return self.account_name.replace('"', '').replace("'", '').title()
 
     def get_id(self):
-        """flask-login account ID"""
+        """Flask-login account ID"""
         return self.email
 
     @property
@@ -156,7 +159,10 @@ class AccountUpgrade(Base):
         server_default=FetchedValue()
     )
 
-    accounts_upgrade = relationship('AccountsUpgrade', backref='upgrade')
+    accounts_upgrade = relationship(
+        'AccountsUpgrade',
+        backref='upgrade'
+    )
 
     def __repr__(self):
         return f'<AccountUpgrade> "{self.name}" ({self.id}) / ' \
@@ -189,7 +195,10 @@ class AccountsUpgrade(Base):
     )
     amount = Column(MEDIUMINT(4), nullable=False)
 
-    account = relationship('Account', backref='upgrades')
+    account = relationship(
+        'Account',
+        backref='upgrades'
+    )
 
     def __repr__(self):
         return f'<AccountsUpgrade> "{self.upgrade.name}" ' \
@@ -200,7 +209,7 @@ class AccountsUpgrade(Base):
 
 
 class Challenge(Base):
-    """Challenge along with the in-game mobile ("mob")/target number (mob_vnum),
+    """Challenge along with the in-game mobile ("mob") number (mob_vnum),
         as well as level/group requirements, and tier"""
     __tablename__ = 'challenges'
 
@@ -215,12 +224,14 @@ class Challenge(Base):
     challenge_desc = Column(String(80), nullable=False)
     winner_desc = Column(
         String(80),
-        nullable=False, server_default=FetchedValue()
+        nullable=False,
+        server_default=FetchedValue()
     )
     mob_name = Column(String(30), nullable=False)
     is_active = Column(
         TINYINT(1),
-        nullable=False, server_default=FetchedValue()
+        nullable=False,
+        server_default=FetchedValue()
     )
 
     @cached_property
@@ -240,7 +251,10 @@ class News(Base):
     """News post for the main/welcome page"""
     __tablename__ = 'news'
 
-    news_id = Column(INTEGER(11), primary_key=True)
+    news_id = Column(
+        INTEGER(11),
+        primary_key=True
+    )
     account_id = Column(
         ForeignKey(
             'accounts.account_id',
@@ -398,7 +412,10 @@ class PlayerRemortUpgrade(Base):
         server_default=FetchedValue()
     )
 
-    player = relationship('Player', backref='remort_upgrades')
+    player = relationship(
+        'Player',
+        backref='remort_upgrades'
+    )
 
     def __repr__(self):
         return f'<PlayerRemortUpgrade> "{self.remort_upgrade.name}" ' \
@@ -420,11 +437,13 @@ class Season(Base):
     )
     effective_date = Column(
         TIMESTAMP,
-        nullable=False, server_default=FetchedValue()
+        nullable=False,
+        server_default=FetchedValue()
     )
     expiration_date = Column(
         TIMESTAMP,
-        nullable=False, server_default=FetchedValue()
+        nullable=False,
+        server_default=FetchedValue()
     )
 
     @property
@@ -448,10 +467,8 @@ class Season(Base):
 
 
 class Player(Base):
-    """
-    Player database class
-    An in-game player, which belongs to an account
-    """
+    """Player database class
+        An in-game player, which belongs to an account"""
     __tablename__ = 'players'
 
     id = Column(INTEGER(11), primary_key=True)
@@ -472,24 +489,29 @@ class Player(Base):
     )
     create_ident = Column(
         String(10),
-        nullable=False, server_default=FetchedValue()
+        nullable=False,
+        server_default=FetchedValue()
     )
     last_isp = Column(
         String(30),
-        nullable=False, server_default=FetchedValue()
+        nullable=False,
+        server_default=FetchedValue()
     )
     description = Column(String(240))
     title = Column(
         String(45),
-        nullable=False, server_default=FetchedValue()
+        nullable=False,
+        server_default=FetchedValue()
     )
     poofin = Column(
         String(80),
-        nullable=False, server_default=FetchedValue()
+        nullable=False,
+        server_default=FetchedValue()
     )
     poofout = Column(
         String(80),
-        nullable=False, server_default=FetchedValue()
+        nullable=False,
+        server_default=FetchedValue()
     )
     bankacc = Column(INTEGER(11), nullable=False)
     logon_delay = Column(SMALLINT(6), nullable=False)
@@ -768,7 +790,8 @@ class Player(Base):
         if self.is_survival:
             divisor = 20
 
-        # Start with two (2) points for existing, with renown/remort equation
+        # Start with two (2) points for existing,
+        #   with renown/remort equation
         earned = int(self.total_renown / divisor) + 2
         if self.remorts > 0:
             earned += int(self.remorts / 5) * 3 + 1

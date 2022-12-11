@@ -104,7 +104,6 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
 
     # By default, tell user if there were no results
     out = 'Sorry, but no such help topics could be found!'
-
     if search_topics:
 
         # Handle single search result, if there is only one
@@ -144,7 +143,10 @@ async def spell(ctx: interactions.CommandContext, search: str):
 
     # Try to find any help topics containing the search term
     ephemeral = True
-    search_results = search_help_topics(all_topics=None, search=search)
+    search_results = search_help_topics(
+        all_topics=None,
+        search=search
+    )
 
     # Narrow down the results to any topic named starting with "Spell "
     search_spell_results = {}
@@ -205,7 +207,10 @@ async def faq(ctx: interactions.CommandContext):
 @bot.command()
 async def faqs(ctx: interactions.CommandContext):
     """Link to the Frequently Asked Questions page"""
-    logging.info('%s (%i) / %s / faqs', ctx.channel, ctx.channel_id, ctx.user)
+    logging.info(
+        '%s (%i) / %s / faqs',
+        ctx.channel, ctx.channel_id, ctx.user
+    )
     await ctx.send('https://isharmud.com/faq')
 
 
@@ -213,8 +218,10 @@ async def faqs(ctx: interactions.CommandContext):
 @bot.command()
 async def get_started(ctx: interactions.CommandContext):
     """Link to the Getting Started page"""
-    logging.info('%s (%i) / %s / get_started',
-                 ctx.channel, ctx.channel_id, ctx.user)
+    logging.info(
+        '%s (%i) / %s / get_started',
+        ctx.channel, ctx.channel_id, ctx.user
+    )
     await ctx.send('https://isharmud.com/get_started')
 
 
