@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 """Ishar MUD Discord bot"""
 import logging
+import re
 import signal
 import sys
 
@@ -12,6 +13,9 @@ from helptab import search_help_topics
 from models import Challenge, Player, Season
 from sentry import sentry_sdk
 
+# Create/compile a regular expression to only match letters,
+#   for command arguments
+letters_only = re.compile(r'^[a-zA-Z]+$')
 
 # Logging configuration
 logging.basicConfig(
@@ -50,19 +54,78 @@ def get_single_help(topic=None):
     return out_wbody
 
 
-# /challenges
-@bot.command()
-async def challenges(ctx: interactions.CommandContext):
-    """Show the current in-game Ishar MUD challenges"""
-    logging.info('%s (%i) / %s / challenges',
-                 ctx.channel, ctx.channel_id, ctx.user)
-    completed = 0
-    all_challenges = Challenge.query.filter_by(is_active=1).all()
-    for challenge in all_challenges:
-        if challenge.winner_desc != '':
-            completed = completed + 1
-    total = len(all_challenges)
-    await ctx.send(f'Challenges: {completed} completed / {total} total!')
+# /challenges <search?>
+@bot.command(
+    name='challenges',
+    description='Find Ishar MUD challenge(s)',
+    options=[
+        interactions.Option(
+            name='search',
+            description='name of a mob to search challenges',
+            type=interactions.OptionType.STRING,
+            required=False
+        )
+    ]
+)
+async def challenges(
+    ctx: interactions.CommandContext,
+    search: str
+):
+    """Show the current active Ishar MUD challenges"""
+    ephemeral = True
+    out = None
+    logging.info(
+        '%s (%i) / %s / challenges',
+        ctx.channel, ctx.channel_id, ctx.user
+    )
+
+    # Process mob search
+    if search:
+        if not letters_only.match(search):
+            out = 'Sorry, but please stick to letters!'
+
+        else:
+            find = Challenge.query.filter_by(
+                is_active=1
+            ).mob_name.like(
+                f'%{search}%'
+            ).all()
+
+    # List number of total/completed challenges,
+    #   if there is no search argument
+    else:
+        find = Challenge.query.filter_by(
+            is_active=1
+        ).all()
+
+    if not out:
+
+        num_results = len(find)
+        if find:
+
+            # Handle single search result, if there is only one
+            if num_results == 1:
+                ephemeral = False
+                out = f'Challenge: {find[0].mob_name}'
+
+            # Show user the matching challenges, if there were 10 or less
+            elif num_results <= 10:
+                out = f'Found {num_results} challenges: '
+                out += ", ".join(find.keys())
+
+            # Otherwise, tell them to be more specific
+            else:
+                out = f'Sorry, but there were {num_results} results! '
+                out += 'Please try to be more specific.'
+
+        else:
+            out = 'Sorry, but no challenges could be found!'
+
+    # Send the challenges response
+    await ctx.send(
+        out,
+        ephemeral=ephemeral
+    )
     db_session.close()
 
 
@@ -70,10 +133,17 @@ async def challenges(ctx: interactions.CommandContext):
 @bot.command()
 async def deadhead(ctx: interactions.CommandContext):
     """Show the player with the most in-game deaths"""
-    logging.info('%s (%i) / %s / deadhead',
-                 ctx.channel, ctx.channel_id, ctx.user)
+    logging.info(
+        '%s (%i) / %s / deadhead',
+        ctx.channel, ctx.channel_id, ctx.user
+    )
+
+    # Find player with the most deaths
     deadman = Player.query.filter_by(
-        is_deleted=0, game_type=0).order_by(-Player.deaths).first()
+        is_deleted=0, game_type=0
+    ).order_by(-Player.deaths).first()
+
+    # Show the name and death count of the player with the most deaths
     out = 'The player who has died most is: '
     out += f'{deadman.name} - {deadman.deaths} times! ☠️'
     await ctx.send(out)
@@ -93,22 +163,38 @@ async def deadhead(ctx: interactions.CommandContext):
         )
     ]
 )
-async def mudhelp(ctx: interactions.CommandContext, search: str):
+async def mudhelp(
+    ctx: interactions.CommandContext,
+    search: str
+):
     """Search for MUD help topics"""
-    logging.info('%s (%i) / %s / mudhelp: "%s"',
-                 ctx.channel, ctx.channel_id, ctx.user, search)
+    ephemeral = True
+    logging.info(
+        '%s (%i) / %s / mudhelp: "%s"',
+        ctx.channel, ctx.channel_id, ctx.user, search
+    )
+
+    # Make sure that the search term is only letters
+    if not letters_only.match(search):
+        out = 'Sorry, but please limit your search to letters!'
+        search_topics = {}
 
     # Try to find any help topics containing the search term
-    ephemeral = True
-    search_topics = search_help_topics(all_topics=None, search=search)
+    else:
+        out = 'Sorry, but no such help topics could be found!'
+        search_topics = search_help_topics(
+            all_topics=None,
+            search=search
+        )
 
     # By default, tell user if there were no results
-    out = 'Sorry, but no such help topics could be found!'
     if search_topics:
 
         # Handle single search result, if there is only one
         num_results = len(search_topics)
         if num_results == 1:
+
+            # Send the details of the single help topic to the channel
             ephemeral = False
             found_topic = next(iter(search_topics.values()))
             out = get_single_help(topic=found_topic)
@@ -119,7 +205,10 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
             out = f'Search Results: {url} ({num_results} topics)'
 
     # Send the help search response
-    await ctx.send(out, ephemeral=ephemeral)
+    await ctx.send(
+        out,
+        ephemeral=ephemeral
+    )
     db_session.close()
 
 
@@ -136,17 +225,29 @@ async def mudhelp(ctx: interactions.CommandContext, search: str):
         )
     ]
 )
-async def spell(ctx: interactions.CommandContext, search: str):
+async def spell(
+    ctx: interactions.CommandContext,
+    search: str
+):
     """Search for spells in MUD help topics"""
-    logging.info('%s (%i) / %s / spell: "%s"',
-                 ctx.channel, ctx.channel_id, ctx.user, search)
+    logging.info(
+        '%s (%i) / %s / spell: "%s"',
+        ctx.channel, ctx.channel_id, ctx.user, search
+    )
 
     # Try to find any help topics containing the search term
     ephemeral = True
-    search_results = search_help_topics(
-        all_topics=None,
-        search=search
-    )
+    # Make sure that the search term is only letters
+
+    if not letters_only.match(search):
+        out = 'Sorry, but please limit your search to letters!'
+        search_results = {}
+
+    else:
+        search_results = search_help_topics(
+            all_topics=None,
+            search=search
+        )
 
     # Narrow down the results to any topic named starting with "Spell "
     search_spell_results = {}
@@ -177,7 +278,10 @@ async def spell(ctx: interactions.CommandContext, search: str):
             out += 'Please try to be more specific.'
 
     # Send the spell search response
-    await ctx.send(out, ephemeral=ephemeral)
+    await ctx.send(
+        out,
+        ephemeral=ephemeral
+    )
     db_session.close()
 
 
@@ -185,10 +289,17 @@ async def spell(ctx: interactions.CommandContext, search: str):
 @bot.command()
 async def season(ctx: interactions.CommandContext):
     """Show the current Ishar MUD season"""
-    logging.info('%s (%i) / %s / season',
-                 ctx.channel, ctx.channel_id, ctx.user)
+    logging.info(
+        '%s (%i) / %s / season',
+        ctx.channel, ctx.channel_id, ctx.user
+    )
+
+    # Get the current active season
     current = Season.query.filter_by(
-        is_active=1).order_by(-Season.season_id).first()
+        is_active=1
+    ).order_by(-Season.season_id).first()
+
+    # Show the current active season ID, and end date
     out = f'It is currently Season {current.season_id}'
     out += f', which ends in {current.expires}!'
     await ctx.send(out)
@@ -199,7 +310,10 @@ async def season(ctx: interactions.CommandContext):
 @bot.command()
 async def faq(ctx: interactions.CommandContext):
     """Link to the Frequently Asked Questions page"""
-    logging.info('%s (%i) / %s / faq', ctx.channel, ctx.channel_id, ctx.user)
+    logging.info(
+        '%s (%i) / %s / faq',
+        ctx.channel, ctx.channel_id, ctx.user
+    )
     await ctx.send('https://isharmud.com/faq')
 
 
@@ -229,25 +343,39 @@ async def get_started(ctx: interactions.CommandContext):
 @bot.command()
 async def getstarted(ctx: interactions.CommandContext):
     """Link to the Getting Started page"""
-    logging.info('%s (%i) / %s / getstarted',
-                 ctx.channel, ctx.channel_id, ctx.user)
+    logging.info(
+        '%s (%i) / %s / getstarted',
+        ctx.channel, ctx.channel_id, ctx.user
+    )
     await ctx.send('https://isharmud.com/get_started')
 
 
 # Handle SIGTERM
 def sigterm_handler(num, frame):
     """Try to exit gracefully on SIGTERM"""
-    logging.info('Caught SIGTERM: %i / %s', num, frame)
+    logging.info(
+        'Caught SIGTERM: %i / %s',
+        num, frame
+    )
     sys.exit(0)
 
 
-# Run the bot
+# Main execution of the bot
 try:
     logging.info('Starting...')
-    signal.signal(signal.SIGTERM, sigterm_handler)
+
+    # Catch SIGTERM to shut down gracefully
+    signal.signal(
+        signal.SIGTERM,
+        sigterm_handler
+    )
+
+    # Start the bot
     bot.start()
 
-# Catch exceptions/errors, and exit with an error code (1)
+# Catch/log exceptions/errors,
+#   send any errors to Sentry,
+#   and exit with an error code (1)
 except Exception as err:
     logging.exception(err)
     sentry_sdk.capture_exception(err)
