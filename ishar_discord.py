@@ -92,6 +92,7 @@ async def challenges(
                     f'%{search}%'
                 )
             ).all()
+
     # List number of total/completed challenges,
     #   if there is no search argument
     else:
