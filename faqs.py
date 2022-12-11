@@ -38,7 +38,7 @@ def index():
 
         'Is Ishar MUD free?': [
             '<strong>Yes</strong>! While you are more than welcome to <a href="'
-            f"{url_for('support.index')}"
+            f"{url_for('welcome.support')}"
             '" title="Support">offer support</a>, '
             'Ishar MUD is free to use, play, and enjoy.'
         ],
@@ -69,7 +69,7 @@ def index():
             "When you sign out or log off, your character's equipment, gear, "
             'and inventory is simply <strong>preserved until the end of the '
             'season</strong>.', 'The <a href="'
-            f"{url_for('season.index')}"
+            f"{url_for('welcome.season')}"
             '" title="Season">season</a> currently changes every four (4) '
             'months. You can find more information about seasons at the '
             '<a href="'

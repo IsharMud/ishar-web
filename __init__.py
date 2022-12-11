@@ -7,28 +7,21 @@ import os
 from urllib.parse import urlparse
 
 from flask import Flask
+from sentry import sentry_sdk
 from login import login, login_manager
 
 from admin import admin
 from challenges import challenges
 from database import db_session
 from faqs import faqs
-from get_started import get_started
 from help_page import help_page
-from history import history
 from leaders import leaders
-from models import Season
 from mud_clients import mud_clients
 from patches import patches
-from players import players
 from portal import portal
-from redirects import redirects
-from season import season
-from sentry import sentry_sdk
-from support import support
-from wizlist import wizlist
 from welcome import welcome
 import error_pages
+from models import Season
 
 # Flask
 app = Flask(__name__)
@@ -42,25 +35,20 @@ app.register_error_handler(403, error_pages.forbidden)
 app.register_error_handler(404, error_pages.page_not_found)
 app.register_error_handler(500, error_pages.internal_server_error)
 
-# Flask-Login/Blueprints/pages
+# Flask-Login
 login_manager.init_app(app)
+
+# Flask Blueprints/pages
 app.register_blueprint(admin)
 app.register_blueprint(challenges)
 app.register_blueprint(faqs)
-app.register_blueprint(get_started)
 app.register_blueprint(help_page)
-app.register_blueprint(history)
 app.register_blueprint(leaders)
 app.register_blueprint(login)
 app.register_blueprint(mud_clients)
 app.register_blueprint(patches)
-app.register_blueprint(players)
 app.register_blueprint(portal)
-app.register_blueprint(redirects)
-app.register_blueprint(season)
-app.register_blueprint(support)
 app.register_blueprint(welcome)
-app.register_blueprint(wizlist)
 
 
 @app.context_processor

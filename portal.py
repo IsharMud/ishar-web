@@ -1,8 +1,9 @@
 """Portal, and pages for logged-in users"""
-from flask import abort, Blueprint, flash, render_template
+from flask import abort, Blueprint, flash, redirect, render_template, url_for
 from flask_login import current_user, login_required
 
-from forms import ChangePasswordForm
+from forms import ChangePasswordForm, PlayerSearchForm
+from models import Player
 
 portal = Blueprint('portal', __name__)
 
@@ -41,9 +42,9 @@ def change_password():
     if change_password_form.validate_on_submit():
 
         # Proceed if the user entered their current password correctly
-        verify_existing = change_password_form.current_password.data
+        verify = change_password_form.current_password.data
         new_choice = change_password_form.confirm_new_password.data
-        if current_user.check_password(verify_existing):
+        if current_user.check_password(verify):
             if current_user.change_password(new_choice):
                 flash(
                     'Your password has been changed!',
@@ -67,3 +68,57 @@ def change_password():
         'change_password.html.j2',
         change_password_form=change_password_form
     )
+
+
+@portal.route('/player/<string:player_name>/', methods=['GET', 'POST'])
+@portal.route('/player/<string:player_name>', methods=['GET', 'POST'])
+def player(player_name=None):
+    """Player page to show detailed information about a player
+        along with player name searching"""
+
+    # Get player search form object and check if submitted
+    find = None
+    player_search_form = PlayerSearchForm()
+    if player_search_form.validate_on_submit():
+
+        # Perform a MySQL "LIKE" search query on the name,
+        #   followed by a wildcard (%) to try to find the player
+        find = Player.query.filter(
+            Player.name.like(
+                player_search_form.player_search_name.data + '%'
+            )
+        ).first()
+        if find:
+            who = find.name
+        else:
+            who = player_search_form.player_search_name.data
+
+        return redirect(
+            url_for(
+                'portal.player',
+                player_name=who,
+                _anchor='player'
+            )
+        )
+
+    # Find the player, in the database, by exact name
+    if player_name:
+        find = Player.query.filter_by(
+            name=player_name
+        ).first()
+
+    # If our search returned something, we found a player
+    if find:
+        code = 200
+    else:
+        code = 404
+        flash(
+            'Sorry, but that player was not found!',
+            'error'
+        )
+
+    return render_template(
+        'player.html.j2',
+        player=find,
+        player_search_form=player_search_form
+    ), code

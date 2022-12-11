@@ -25,7 +25,7 @@
                             level:      {{ challenge.adj_level }},
                             reward:     "{{ challenge_tier }}",
                             completed:  {% if not challenge.is_completed %}""{%- else %}gridjs.html(`{%- for challenge_winner in challenge_winners -%}
-                                        <a href="{{ url_for('players.view', player_name=challenge_winner, _anchor='player') }}">{{ challenge_winner | title | safe }}</a>
+                                        <a href="{{ url_for('portal.player', player_name=challenge_winner, _anchor='player') }}">{{ challenge_winner | title | safe }}</a>
                                         {%- if not loop.last %}, {% endif %}
                                     {%- endfor %}`)
                                         {%- endif %}

@@ -730,7 +730,11 @@ class Player(Base):
     @cached_property
     def player_link(self):
         """Player link"""
-        url = url_for('players.view', player_name=self.name, _anchor='player')
+        url = url_for(
+            'portal.player',
+            player_name=self.name,
+            _anchor='player'
+        )
         return f'<a href="{url}">{self.name}</a>'
 
     @cached_property

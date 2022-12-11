@@ -2,7 +2,7 @@
 {% extends "layout.html.j2" %}
 {% block meta_title %}Get Started{% endblock meta_title %}
 {% block meta_description %}Get Started with these tips and background information about the game{% endblock meta_description %}
-{% block meta_url %}{{ url_for('get_started.index', _external=True) }}{% endblock meta_url %}
+{% block meta_url %}{{ url_for('welcome.getstarted', _external=True) }}{% endblock meta_url %}
 {% block title %}Get Started{% endblock title %}
 {% block header %}Get Started{% endblock header %}
 {%- block content %}
@@ -32,7 +32,7 @@
                 </p>
 
                 <p>
-                    Playing Ishar starts by <a href="{{ url_for('redirects.connect') }}" target="_blank">connecting to the game</a>
+                    Playing Ishar starts by <a href="{{ url_for('welcome.connect') }}" target="_blank">connecting to the game</a>
                     and typing "new" at the login prompt.  The game walks you through the few steps of creating a new
                     character, then drops you into the virtual world with a few meager possessions and the lowest standing
                     in the game, level 1.

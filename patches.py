@@ -11,9 +11,12 @@ patches = Blueprint('patches', __name__)
 @patches.route('/latest_patch', methods=['GET'])
 def latest():
     """Redirect /latest_patch to latest found static patch .pdf file"""
-    return redirect('/' + max(glob.glob('static/patches/*.pdf'),
-                              key=os.path.getmtime)
-                    )
+    return redirect(
+        '/' + max(
+                glob.glob('static/patches/*.pdf'),
+                key=os.path.getmtime
+            )
+    )
 
 
 @patches.route('/patches/', methods=['GET'])

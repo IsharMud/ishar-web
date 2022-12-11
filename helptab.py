@@ -111,7 +111,6 @@ def parse_help_body(line=None):
             (such as Class, Syntax, etc.)"""
 
     # Loop through each item regular expression, looking for matches on items
-    line = line.replace('>', '&gt;').replace('<', '&lt;').replace('"', '&quot;')
     for item_name, regex in regexes.items():
         find = regex.findall(line)
         if find:
@@ -159,7 +158,11 @@ def parse_help_content(content=None):
 
     # Loop through each line of the help chunk body text
     is_see_also = False
-    help_topic = {'body_html': str(), 'body_text': str(), 'see_also': []}
+    help_topic = {
+        'body_html': str(),
+        'body_text': str(),
+        'see_also': []
+    }
     for line in content.split('\n'):
 
         # Split up, append, and try to link related topics appropriately

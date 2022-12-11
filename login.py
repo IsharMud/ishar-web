@@ -31,6 +31,7 @@ def load_user(email):
     return user_account
 
 
+# Flask Blueprint
 login = Blueprint('login', __name__)
 
 

@@ -1,8 +1,27 @@
 """Help (and World) pages"""
 from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask_wtf import FlaskForm
+from wtforms import StringField, SubmitField
+from wtforms.validators import DataRequired, Length
+from wtforms_validators import AlphaSpace
 
-from forms import HelpSearchForm
 from helptab import get_help_topics, search_help_topics
+
+
+class HelpSearchForm(FlaskForm):
+    """Help search form class to search help topics"""
+    search = StringField(
+        'Topic',
+        validators=[
+            DataRequired(),
+            Length(min=2, max=32),
+            AlphaSpace(
+                message='Topic names may only contain between 2-32 letters!'
+            )
+        ]
+    )
+    submit = SubmitField('Search')
+
 
 help_page = Blueprint('help_page', __name__)
 
@@ -40,18 +59,24 @@ def single(topic=None):
 
     # Return the topic, and its full contents, if there is an exact name match
     if topic in all_topics:
-        return render_template('help_page.html.j2',
-                               topic=all_topics[topic],
-                               topics=all_topics,
-                               help_search_form=search_form
-                               )
+        return render_template(
+            'help_page.html.j2',
+            topic=all_topics[topic],
+            topics=all_topics,
+            help_search_form=search_form
+        )
 
     # Try to find matching help topics, and redirect to single match by name
     #   which would then be handled by the render_template above
     search_topics = search_help_topics(all_topics=all_topics, search=topic)
     if len(search_topics) == 1:
         found_topic = next(iter(search_topics.values()))
-        return redirect(url_for('help_page.single', topic=found_topic['name']))
+        return redirect(
+            url_for(
+                'help_page.single',
+                topic=found_topic['name']
+            )
+        )
 
     # Respond with a 200 showing any results,
     # unless there were no results: then, show error with all help topics
@@ -61,10 +86,12 @@ def single(topic=None):
         flash('Sorry, but no topics could be found!', 'error')
         search_topics = all_topics
 
-    return render_template('help_page.html.j2',
-                           topic=None,
-                           topics=search_topics,
-                           help_search_form=search_form), code
+    return render_template(
+        'help_page.html.j2',
+        topic=None,
+        topics=search_topics,
+        help_search_form=search_form
+    ), code
 
 
 @help_page.route('/areas/', methods=['GET'])
@@ -77,6 +104,6 @@ def world():
     return render_template(
         'world.html.j2',
         areas=search_help_topics(
-            search='area '
+            search='Area '
         )
     )
