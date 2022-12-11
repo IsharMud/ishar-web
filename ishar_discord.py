@@ -87,10 +87,11 @@ async def challenges(
         else:
             find = Challenge.query.filter_by(
                 is_active=1
-            ).mob_name.like(
-                f'%{search}%'
+            ).filter(
+                Challenge.mob_name.like(
+                    f'%{search}%'
+                )
             ).all()
-
     # List number of total/completed challenges,
     #   if there is no search argument
     else:
