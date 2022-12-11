@@ -69,7 +69,7 @@ def get_single_help(topic=None):
 )
 async def challenges(
     ctx: interactions.CommandContext,
-    search: str
+    search: str = None
 ):
     """Show the current active Ishar MUD challenges"""
     ephemeral = True
@@ -81,6 +81,7 @@ async def challenges(
 
     # Process mob search
     if search:
+
         if not letters_only.match(search):
             out = 'Sorry, but please stick to letters!'
 
