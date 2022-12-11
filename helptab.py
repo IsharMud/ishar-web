@@ -111,6 +111,7 @@ def parse_help_body(line=None):
             (such as Class, Syntax, etc.)"""
 
     # Loop through each item regular expression, looking for matches on items
+    line = line.replace('>', '&gt;').replace('<', '&lt;')
     for item_name, regex in regexes.items():
         find = regex.findall(line)
         if find:
