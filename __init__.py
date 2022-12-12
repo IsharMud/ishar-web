@@ -6,7 +6,7 @@ https://github.com/IsharMud/ishar-web
 import os
 from urllib.parse import urlparse
 
-from flask import Flask
+from flask import Blueprint, Flask
 from sentry import sentry_sdk
 from login import login, login_manager
 
@@ -22,6 +22,7 @@ from portal import portal
 from welcome import welcome
 import error_pages
 from models import Season
+
 
 # Flask
 app = Flask(__name__)
@@ -58,10 +59,10 @@ def injects():
     sentry_uri = urlparse(sentry_dsn)
     return dict(
         current_season=Season.query.filter_by(
-                            is_active=1
-                        ).order_by(
-                            -Season.season_id
-                        ).first(),
+            is_active=1
+        ).order_by(
+            -Season.season_id
+        ).first(),
         sentry_dsn=sentry_dsn,
         sentry_user=sentry_uri.username,
         sentry_event_id=sentry_sdk.last_event_id()
@@ -70,9 +71,12 @@ def injects():
 
 @app.teardown_appcontext
 def shutdown_session(exception=None):
-    """Remove database session at request teardown and capture any exceptions"""
+    """Remove database session at request teardown,
+        and capture any exceptions"""
     if exception:
-        sentry_sdk.capture_exception(exception)
+        sentry_sdk.capture_exception(
+            error=exception
+        )
     db_session.remove()
 
 

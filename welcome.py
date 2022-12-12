@@ -39,6 +39,8 @@ def connect():
     )
 
 
+@welcome.route('/discord/invitation/', methods=['GET'])
+@welcome.route('/discord/invitation', methods=['GET'])
 @welcome.route('/discord/invite/', methods=['GET'])
 @welcome.route('/discord/invite', methods=['GET'])
 @welcome.route('/discord/', methods=['GET'])

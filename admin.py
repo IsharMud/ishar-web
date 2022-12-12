@@ -13,7 +13,11 @@ from sentry import sentry_sdk
 
 
 # Flask Blueprint
-admin = Blueprint('admin', __name__, url_prefix='/admin')
+admin = Blueprint(
+    'admin',
+    __name__,
+    url_prefix='/admin'
+)
 
 
 @admin.before_request

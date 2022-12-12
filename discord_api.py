@@ -1,14 +1,10 @@
 """Discord API bot interactions"""
 import logging
-import requests
 from flask import abort, Blueprint, jsonify, request
 from nacl.signing import VerifyKey
 from nacl.exceptions import BadSignatureError
 
-from database import db_session
 import discord_secret
-from models import Season
-from sentry import sentry_sdk
 
 
 # Logging configuration
@@ -23,96 +19,72 @@ logging.basicConfig(
 discord_api = Blueprint(
     'discord_api',
     __name__,
+    url_prefix='/discord/api'
 )
 
 
 @discord_api.before_request
 def before_request():
-    """Only accept JSON"""
+    """Validate Discord bot API requests"""
+
+    # Fail, with 400, on non-POST requests
+    if not request.method == 'POST':
+        abort(400, 'Invalid request method')
+
+    # Fail, with 400, on non-JSON requests
     if not request.is_json:
-        abort(400, 'Invalid request type')
+        abort(400, 'Invalid request body')
 
-    """Validate Discord request signature"""
-    verify_key = VerifyKey(bytes.fromhex(
-            discord_secret.PUBLIC_KEY
-        )
-    )
-    signature = request.headers['X-Signature-Ed25519']
-    timestamp = request.headers['X-Signature-Timestamp']
-    body = request.data.decode('utf-8')
-
+    # Check request header signature
     try:
-        verify_key.verify(
-            f'{timestamp}{body}'.encode(),
-            bytes.fromhex(signature)
+        VerifyKey(
+            bytes.fromhex(
+                discord_secret.PUBLIC_KEY
+            )
+        ).verify(
+            request.headers['X-Signature-Timestamp'] +
+            request.data.decode('utf-8')
+            .encode(),
+            bytes.fromhex(
+                request.headers['X-Signature-Ed25519']
+            )
         )
+
+    # Fail, with 401, on bad request header signature
     except BadSignatureError:
         abort(401, 'Invalid request signature')
 
 
+# Set Discord API URL and headers,
+#   to register commands (WIP/TODO)
 base_url = 'https://discord.com/api/v10/' \
       f'applications/{discord_secret.APPLICATION_ID}/' \
       f'guilds/{discord_secret.GUILD}/commands'
-headers = { 'Authorization': f'Bearer {discord_secret.TOKEN}' }
-
-season_cmd = {
-    'name': 'season',
-    'type': 1,
-    'description': 'Show the current Ishar MUD season',
+headers = {
+    'Authorization': f'Bearer {discord_secret.TOKEN}'
 }
-r = requests.post(
-    url=f"{base_url}/{season_cmd['name']}",
-    headers=headers,
-    json=season_cmd
-)
-print(r.content)
 
 
+# Respond to HTTPS JSON requests from Discord
 @discord_api.route('/discord/api/interactions/', methods=['POST'])
 @discord_api.route('/discord/api/interactions', methods=['POST'])
 def interactions():
     """Pong"""
-    print(request.json)
-    print('---')
 
+    # Reply to "ping" requests from Discord
     if request.json['type'] == 1:
-        return respond(
-            response={
-                'type': 1
-            }
-        )
-
-    return respond()
-
-
-def respond(response=None, text=None):
-    """Create and return a JSON response,
-        for the Discord API HTTPS request"""
-
-    if response:
-        logging.info(
-            'Response:\n%s',
-            response
-        )
         return jsonify(
-            response
+            {'type': 1}
         )
 
-    if not text:
-        text = 'Sorry, but IsharMUD Discord bot is under construction!'
-
-
-    logging.info(
-        'Text:\n%s',
-        text
-    )
+    # Otherwise, reply saying "under construction"
     return jsonify(
         {
             'type': 4,
             'data':
             {
                 'tts': False,
-                'content': text,
+                'content': 'Sorry, but IsharMUD bot is under construction!',
                 'ephemeral': True,
                 'embeds': [],
                 'allowed_mentions':
