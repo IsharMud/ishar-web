@@ -102,6 +102,10 @@ td {
     padding-bottom:         1rem;
 }
 
+hr {
+    border:                 0.1vh dashed #d6d6d7;
+}
+
 footer {
     font-size:              0.8rem;
 }

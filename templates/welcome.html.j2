@@ -6,14 +6,14 @@
 {% block header %}Welcome{% endblock header %}
 {%- block content %}
                 <p>
-                    Ishar is an online text-adventure RPG (commonly called a multi-user dungeon, or MUD) set in a
-                    large, unique world of fantasy and magic.  Players do battle with fearsome
-                    foes (and sometimes each other) to win great wealth and wrest rare prizes
-                    from the treasure hoards or bloody corpses of their enemies.
+                    Ishar is an online text-adventure RPG
+                    (commonly called a multi-user dungeon, or MUD) set in a
+                    large, unique world of fantasy and magic.
                 </p>
                 <p>
-                    Play the game for free by connecting via any <a href="{{ url_for('mud_clients.index') }}">MUD client</a>
-                    by connecting to <code>isharmud.com</code> on port number <code>23</code> or <code>9999</code>.
+                    Players do battle with fearsome foes (and sometimes each other)
+                    to win great wealth and wrest rare prizes from
+                    the treasure hoards or bloody corpses of their enemies.
                 </p>
     {%- if news %}
                 <h3 class="news-subject" title="{{ news.subject | safe }}">
@@ -25,5 +25,35 @@
                 <p class="news-creation" title="Posted {{ news.created_at.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }} by {{ news.account.display_name | safe }}">
                     ~ {{ news.account.display_name | safe }} @ {{ news.created_at.strftime('%A, %B %d, %Y') }}
                 </p>
+                <hr>
     {%- endif %}
+                <p>
+                    Play the game for free by connecting with any
+                    <a href="{{ url_for('mud_clients.index') }}">MUD client</a> to:
+                </p>
+                    <ul>
+                        <li>
+                            <strong>Host</strong>
+                        </li>
+                        <li class="nested-list">
+                            <ul>
+                                <li>
+                                    <code>isharmud.com</code>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>Port(s)</strong>
+                        </li>
+                        <li class="nested-list">
+                            <ul>
+                                <li>
+                                    <code>23</code>
+                                </li>
+                                <li>
+                                    <code>9999</code>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
 {%- endblock content %}
