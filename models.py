@@ -241,10 +241,20 @@ class Challenge(Base):
             return True
         return False
 
+    @cached_property
+    def display_tier(self):
+        """Display challenge tier"""
+        tiers = {
+            1: 'F', 2: 'D', 3: 'C',
+            4: 'B', 5: 'A', 6: 'S',
+            7: 'SS', 8: 'SS', 9: 'SS'
+        }
+        return f'{tiers[self.adj_tier]} ({tiers[self.orig_tier]})'
+
     def __repr__(self):
         return f'<Challenge> "{self.mob_name}" ({self.challenge_id}) / ' \
-               f'Active: {self.is_active} / Reward: "{self.reward_tier}" ' \
-               f'({self.adj_tier}) / winner_desc: "{self.winner_desc}"'
+               f'Active: {self.is_active} / Tier: "{self.display_tier}" / ' \
+               f'winner_desc: "{self.winner_desc}"'
 
 
 class News(Base):

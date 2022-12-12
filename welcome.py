@@ -37,13 +37,6 @@ def connect():
     return redirect('https://mudslinger.net/play/?host=isharmud.com&port=23')
 
 
-@welcome.route('/discord/', methods=['GET'])
-@welcome.route('/discord', methods=['GET'])
-def discord():
-    """Redirect /discord GET requests to the Discord invite"""
-    return redirect('https://discord.gg/VBmMXUpeve')
-
-
 @welcome.route('/start/', methods=['GET'])
 @welcome.route('/start', methods=['GET'])
 @welcome.route('/getting_started/', methods=['GET'])

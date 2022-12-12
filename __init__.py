@@ -12,6 +12,7 @@ from login import login, login_manager
 
 from admin import admin
 from database import db_session
+from discord_page import discord
 from faqs import faqs
 from help_page import help_page
 from leaders import leaders
@@ -39,6 +40,7 @@ login_manager.init_app(app)
 
 # Flask Blueprints/pages
 app.register_blueprint(admin)
+app.register_blueprint(discord)
 app.register_blueprint(faqs)
 app.register_blueprint(help_page)
 app.register_blueprint(leaders)

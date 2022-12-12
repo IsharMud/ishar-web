@@ -13,9 +13,10 @@ from helptab import search_help_topics
 from models import Challenge, Player, Season
 from sentry import sentry_sdk
 
+
 # Create/compile a regular expression to only match letters,
 #   for command arguments
-letters_only = re.compile(r'^[a-zA-Z]+$')
+regex = re.compile(r'^[a-z A-Z]+$')
 
 # Logging configuration
 logging.basicConfig(
@@ -43,7 +44,8 @@ def get_single_help(topic=None):
     for item_type in ['syntax', 'minimum', 'class', 'level']:
         if item_type in topic:
             if topic[item_type].strip() != '':
-                out += f'> {item_type.title()}: {topic[item_type].strip()}\n'
+                out += f'> {item_type.title()}: '
+                out += f'{topic[item_type].strip()}\n'
 
     # Only return the name/link and specific items, if the body is too big
     out_wbody = f"{out}```{topic['body_text']}```"
@@ -79,10 +81,11 @@ async def challenges(
         ctx.channel, ctx.channel_id, ctx.user
     )
 
-    # Process mob search
+    # Handle search (for challenge mob name)
     if search:
 
-        if not letters_only.match(search):
+        # Make sure that the search term is only letters
+        if not regex.match(search):
             out = 'Sorry, but please stick to letters!'
 
         else:
@@ -94,35 +97,34 @@ async def challenges(
                 )
             ).all()
 
-    # List number of total/completed challenges,
-    #   if there is no search argument
-    else:
-        find = Challenge.query.filter_by(
-            is_active=1
-        ).all()
-
+    completed = 0
     if not out:
+        out = 'Sorry, but no challenges could be found!'
 
-        num_results = len(find)
+        # Find all challenges by default
+        find = Challenge.query.filter_by(is_active=1).all()
+
         if find:
 
-            # Handle single search result, if there is only one
-            if num_results == 1:
-                ephemeral = False
-                out = f'Challenge: {find[0].mob_name}'
+            out = '**Challenges**\n'
+            for challenge in find:
 
-            # Show user the matching challenges, if there were 10 or less
-            elif num_results <= 10:
-                out = f'Found {num_results} challenges: '
-                out += ", ".join(find.keys())
+                # Strikethrough, and count, completed mobs 
+                if challenge.is_completed:
+                    completed += 1
+                    mob_name = f'~~{mob_name}~~'
 
-            # Otherwise, tell them to be more specific
-            else:
-                out = f'Sorry, but there were {num_results} results! '
-                out += 'Please try to be more specific.'
+                out = f'{mob_name} / '
+                out += f'{challenge.adj_people} people / '
+                out += f'Level: {challenge.adj_level} / '
+                out += f'Tier: {challenge.display_tier} '
 
-        else:
-            out = 'Sorry, but no challenges could be found!'
+                if challenge.is_completed:
+                    out += f'Completed by: {challenge.winner_desc} '
+
+                out += '\n'
+
+            out += f'*{completed}* completed out of *{len(find)}* found!\n'
 
     # Send the challenges response
     await ctx.send(
@@ -178,7 +180,7 @@ async def mudhelp(
     )
 
     # Make sure that the search term is only letters
-    if not letters_only.match(search):
+    if not regex.match(search):
         out = 'Sorry, but please limit your search to letters!'
         search_topics = {}
 
@@ -233,19 +235,18 @@ async def spell(
     search: str
 ):
     """Search for spells in MUD help topics"""
+    ephemeral = True
     logging.info(
         '%s (%i) / %s / spell: "%s"',
         ctx.channel, ctx.channel_id, ctx.user, search
     )
 
-    # Try to find any help topics containing the search term
-    ephemeral = True
     # Make sure that the search term is only letters
-
-    if not letters_only.match(search):
+    if not regex.match(search):
         out = 'Sorry, but please limit your search to letters!'
         search_results = {}
 
+    # Try to find any help topics containing the search term
     else:
         search_results = search_help_topics(
             all_topics=None,
