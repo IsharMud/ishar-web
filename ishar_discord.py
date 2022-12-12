@@ -108,7 +108,7 @@ async def challenges(
             find = Challenge.query.filter_by(is_active=1).all()
 
         out = '**Challenges**\n'
-        i = 0
+        i = completed = 0
         for challenge in find:
 
             # Strikethrough, and count, completed mobs
