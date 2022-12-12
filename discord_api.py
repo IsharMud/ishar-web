@@ -31,10 +31,10 @@ def before_request():
         abort(401, 'Invalid request signature')
 
 
+@discord_api.route('/discord/api/interactions/', methods=['POST'])
 @discord_api.route('/discord/api/interactions', methods=['POST'])
 def pong():
-    """My command"""
-
+    """Pong"""
     if request.json['type'] == 1:
         return jsonify(
             {
