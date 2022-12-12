@@ -5,22 +5,8 @@ from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired, Length
 from wtforms_validators import AlphaSpace
 
+from forms import HelpSearchForm
 from helptab import get_help_topics, search_help_topics
-
-
-class HelpSearchForm(FlaskForm):
-    """Help search form class to search help topics"""
-    search = StringField(
-        'Topic',
-        validators=[
-            DataRequired(),
-            Length(min=2, max=32),
-            AlphaSpace(
-                message='Topic names may only contain between 2-32 letters!'
-            )
-        ]
-    )
-    submit = SubmitField('Search')
 
 
 help_page = Blueprint('help_page', __name__)
