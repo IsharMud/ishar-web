@@ -9,7 +9,6 @@ import discord_secret
 discord_api = Blueprint(
     'discord_api',
     __name__,
-    url_prefix='/discord/api'
 )
 
 
@@ -32,7 +31,7 @@ def before_request():
         abort(401, 'Invalid request signature')
 
 
-@discord_api.route('/interactions', methods=['POST'])
+@discord_api.route('/discord/api/interactions', methods=['POST'])
 def pong():
     """My command"""
 

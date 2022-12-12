@@ -69,7 +69,7 @@
                     <a href="{{ url_for('welcome.support') }}" {%- if page == 'support' %} id="active-nav"{% endif %}>❤️ Support Ishar MUD</a>
                 </li>
                 <li>
-                    <a title="Join us on Discord!" href="{{ url_for('discord.invite') }}" id="join-discord" target="_blank"><img alt="Discord" src="{{ url_for('static', filename='images/discord.png') }}"> Join us on Discord!</a>
+                    <a title="Join us on Discord!" href="{{ url_for('welcome.discord_invite') }}" id="join-discord" target="_blank"><img alt="Discord" src="{{ url_for('static', filename='images/discord.png') }}"> Join us on Discord!</a>
                 </li>
                 <li>
                     <a title="E-mail Us!" href="mailto:admin@isharmud.com" id="email-us" target="_blank">✉️ E-mail us!</a>
