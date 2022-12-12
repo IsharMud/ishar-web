@@ -97,37 +97,37 @@ async def challenges(
                 )
             ).all()
 
-    completed = 0
+            if not find:
+                out = 'Sorry, but no challenges could be found!'
+
     if not out:
 
         # Find all active challenges by default
-        out = 'Sorry, but no challenges could be found!'
         if not find:
             find = Challenge.query.filter_by(is_active=1).all()
 
-        if find:
-            out = '**Challenges**\n'
-            i = 0
-            for challenge in find:
+        out = '**Challenges**\n'
+        i = 0
+        for challenge in find:
 
-                # Strikethrough, and count, completed mobs
-                i += 1
-                mob_name = challenge.mob_name
-                if challenge.is_completed:
-                    completed += 1
-                    mob_name = f'~~{challenge.mob_name}~~'
+            # Strikethrough, and count, completed mobs
+            i += 1
+            mob_name = challenge.mob_name
+            if challenge.is_completed:
+                completed += 1
+                mob_name = f'~~{challenge.mob_name}~~'
 
-                out += f'{i}: {mob_name} / '
-                out += f'{challenge.adj_people} people / '
-                out += f'Level: {challenge.adj_level} / '
-                out += f'Tier: {challenge.display_tier} '
+            out += f'{i}: {mob_name} / '
+            out += f'{challenge.adj_people} people / '
+            out += f'Level: {challenge.adj_level} / '
+            out += f'Tier: {challenge.display_tier} '
 
-                if challenge.is_completed:
-                    out += f' / Completed by: {challenge.winner_desc}'
+            if challenge.is_completed:
+                out += f' / Completed by: {challenge.winner_desc}'
 
-                out += '\n'
+            out += '\n'
 
-            out += f'*{completed}* completed out of *{len(find)}* found!\n'
+        out += f'*{completed}* completed out of *{len(find)}* found!\n'
 
     # Send the challenges response
     await ctx.send(
