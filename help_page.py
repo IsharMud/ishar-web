@@ -1,9 +1,5 @@
 """Help (and World) pages"""
 from flask import Blueprint, flash, redirect, render_template, request, url_for
-from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField
-from wtforms.validators import DataRequired, Length
-from wtforms_validators import AlphaSpace
 
 from forms import HelpSearchForm
 from helptab import get_help_topics, search_help_topics
