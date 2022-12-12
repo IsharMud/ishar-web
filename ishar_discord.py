@@ -109,10 +109,11 @@ async def challenges(
             out = '**Challenges**\n'
             for challenge in find:
 
-                # Strikethrough, and count, completed mobs 
+                # Strikethrough, and count, completed mobs
+                mob_name = challenge.mob_name
                 if challenge.is_completed:
                     completed += 1
-                    mob_name = f'~~{mob_name}~~'
+                    mob_name = f'~~{challenge.mob_name}~~'
 
                 out = f'{mob_name} / '
                 out += f'{challenge.adj_people} people / '
@@ -120,7 +121,7 @@ async def challenges(
                 out += f'Tier: {challenge.display_tier} '
 
                 if challenge.is_completed:
-                    out += f'Completed by: {challenge.winner_desc} '
+                    out += f'Completed by: {challenge.winner_desc}'
 
                 out += '\n'
 
