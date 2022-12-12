@@ -48,7 +48,8 @@ def pong():
             'data':
             {
                 'tts': False,
-                'content': 'Congrats on sending your command!',
+                'content': 'Sorry, but Ishar MUD Bot is under construction!',
+                'ephemeral': True,
                 'embeds': [],
                 'allowed_mentions':
                 {
