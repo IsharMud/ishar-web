@@ -6,7 +6,7 @@ https://github.com/IsharMud/ishar-web
 import os
 from urllib.parse import urlparse
 
-from flask import Blueprint, Flask
+from flask import Flask
 from sentry import sentry_sdk
 from login import login, login_manager
 
