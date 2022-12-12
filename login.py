@@ -3,9 +3,9 @@ from flask import Blueprint, flash, redirect, render_template, request, \
     session, url_for
 from flask_login import current_user, login_user, logout_user, LoginManager
 
-from .forms import LoginForm
-from .models import Account
-from .sentry import sentry_sdk
+from forms import LoginForm
+from models import Account
+from sentry import sentry_sdk
 
 
 # Flask-Login

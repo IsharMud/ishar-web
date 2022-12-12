@@ -1,8 +1,8 @@
 """Portal, and pages for logged-in users"""
 from flask import Blueprint, redirect, render_template
 
-from .mud_secret import IMM_LEVELS
-from .models import Challenge, News, Player
+from mud_secret import IMM_LEVELS
+from models import Challenge, News, Player
 
 # Flask Blueprint
 welcome = Blueprint('welcome', __name__)

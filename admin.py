@@ -5,12 +5,11 @@ from datetime import datetime
 from flask import abort, Blueprint, flash, render_template, url_for
 from flask_login import current_user, fresh_login_required
 
-from .mud_secret import PODIR, IMM_LEVELS
-from .database import db_session
-from .forms import EditAccountForm, EditPlayerForm, NewsAddForm, \
-    PatchAddForm, SeasonCycleForm
-from .models import Account, News, Player, Season
-from .sentry import sentry_sdk
+from mud_secret import PODIR, IMM_LEVELS
+from database import db_session
+from forms import EditAccountForm, EditPlayerForm, NewsAddForm, SeasonCycleForm
+from models import Account, News, Player, Season
+from sentry import sentry_sdk
 
 
 # Flask Blueprint
@@ -28,15 +27,6 @@ def before_request():
     if not current_user.is_god:
         flash('Sorry, but you are not godly enough!', 'error')
         abort(401)
-
-
-def is_pdf(filename=None):
-    """Check if file is a PDF, based on the file name"""
-    ext = filename.rsplit('.', 1)[1].lower()
-    print('ext:', ext)
-    if ext == 'pdf':
-        return True
-    return False
 
 
 @admin.route('/', methods=['GET', 'POST'])
@@ -423,28 +413,4 @@ def season_cycle():
     return render_template(
         'admin/season_cycle.html.j2',
         season_cycle_form=season_cycle_form
-    )
-
-
-@admin.route('/patches/', methods=['GET', 'POST'])
-@admin.route('/patches', methods=['GET', 'POST'])
-def patches():
-    """Administration portal to allow Gods to upload patch PDFs
-        /admin/patches"""
-
-    # Get patch add form and check if submitted
-    patch_add_form = PatchAddForm()
-    if patch_add_form.validate_on_submit():
-
-        # WIP: Validate & upload file,
-        #   probably split /admin/ into multiple files...
-        #       (news, account, etc.)
-
-        flash('Sorry, but this form is still being built!', 'error')
-
-    # Show the form to add patches in the administration portal
-    return render_template(
-        'admin/patches.html.j2',
-        all_patches=None,
-        patch_add_form=patch_add_form
     )

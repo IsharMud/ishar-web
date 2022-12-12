@@ -1,9 +1,9 @@
 """Parse the MUD 'helptab' file"""
 import re
 
-from .mud_secret import HELPTAB, IMM_LEVELS
-from .models import PlayerClass
-from .sentry import sentry_sdk
+from mud_secret import HELPTAB, IMM_LEVELS
+from models import PlayerClass
+from sentry import sentry_sdk
 
 # Retrieve playable player class names
 player_classes = [

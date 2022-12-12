@@ -4,7 +4,7 @@ from flask import abort, Blueprint, jsonify, request
 from nacl.signing import VerifyKey
 from nacl.exceptions import BadSignatureError
 
-from .discord_secret import APPLICATION_ID, PUBLIC_KEY, GUILD, TOKEN
+import discord_secret
 
 
 # Logging configuration
@@ -38,7 +38,9 @@ def before_request():
     # Check request header signature
     try:
         VerifyKey(
-            bytes.fromhex(PUBLIC_KEY)
+            bytes.fromhex(
+                discord_secret.PUBLIC_KEY
+            )
         ).verify(
             request.headers['X-Signature-Timestamp'] +
             request.data.decode('utf-8')
@@ -56,10 +58,10 @@ def before_request():
 # Set Discord API URL and headers,
 #   to register commands (WIP/TODO)
 base_url = 'https://discord.com/api/v10/' \
-      f'applications/{APPLICATION_ID}/' \
-      f'guilds/{GUILD}/commands'
+      f'applications/{discord_secret.APPLICATION_ID}/' \
+      f'guilds/{discord_secret.GUILD}/commands'
 headers = {
-    'Authorization': f'Bearer {TOKEN}'
+    'Authorization': f'Bearer {discord_secret.TOKEN}'
 }
 
 

@@ -3,11 +3,11 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
 
-from .database_secret import URL, ECHO
+import database_secret
 
 engine = create_engine(
-    url=URL,
-    echo=ECHO,
+    url=database_secret.URL,
+    echo=database_secret.ECHO,
     pool_pre_ping=True
 )
 

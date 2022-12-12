@@ -5,23 +5,23 @@ https://github.com/IsharMud/ishar-web
 """
 import os
 from urllib.parse import urlparse
+
 from flask import Flask
+from sentry import sentry_sdk
+from login import login, login_manager
 
-from .sentry import sentry_sdk
-from .error_pages import error_pages
-from .login import login, login_manager
-
-from .admin import admin
-from .database import db_session
-from .discord_api import discord_api
-from .faqs import faqs
-from .help_page import help_page
-from .leaders import leaders
-from .mud_clients import mud_clients
-from .patches import patches
-from .portal import portal
-from .welcome import welcome
-from .models import Season
+from admin import admin
+from database import db_session
+from discord_api import discord_api
+from faqs import faqs
+from help_page import help_page
+from leaders import leaders
+from mud_clients import mud_clients
+from patches import patches
+from portal import portal
+from welcome import welcome
+import error_pages
+from models import Season
 
 
 # Flask
@@ -29,7 +29,12 @@ app = Flask(__name__)
 app.config.from_pyfile('config.py')
 
 # Error pages/handlers
-app.register_blueprint(error_pages)
+app.register_blueprint(error_pages.error_pages)
+app.register_error_handler(400, error_pages.bad_request)
+app.register_error_handler(401, error_pages.not_authorized)
+app.register_error_handler(403, error_pages.forbidden)
+app.register_error_handler(404, error_pages.page_not_found)
+app.register_error_handler(500, error_pages.internal_server_error)
 
 # Flask-Login
 login_manager.init_app(app)

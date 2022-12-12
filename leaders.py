@@ -1,9 +1,8 @@
 """Leaders"""
 from flask import Blueprint, render_template
 
-from .mud_secret import IMM_LEVELS
-from .models import Player
-
+from mud_secret import IMM_LEVELS
+from models import Player
 
 # Flask Blueprint
 leaders = Blueprint('leaders', __name__)

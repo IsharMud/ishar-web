@@ -1,7 +1,6 @@
 """MUD Clients"""
 from flask import Blueprint, render_template
 
-
 # Flask Blueprint
 mud_clients = Blueprint('mud_clients', __name__)
 

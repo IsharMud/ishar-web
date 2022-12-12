@@ -4,7 +4,6 @@ import os
 
 from flask import Blueprint, redirect, render_template
 
-
 # Flask Blueprint
 patches = Blueprint('patches', __name__)
 

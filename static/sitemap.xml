@@ -13,7 +13,11 @@
         <priority>0.80</priority>
     </url>
     <url>
-        <loc>https://isharmud.com/patches</loc>
+        <loc>https://isharmud.com/history</loc>
+        <priority>0.80</priority>
+    </url>
+    <url>
+        <loc>https://isharmud.com/latest_patch</loc>
         <priority>0.80</priority>
     </url>
     <url>
@@ -22,10 +26,6 @@
     </url>
     <url>
         <loc>https://isharmud.com/support</loc>
-        <priority>0.80</priority>
-    </url>
-    <url>
-        <loc>https://isharmud.com/help</loc>
         <priority>0.80</priority>
     </url>
     <url>
