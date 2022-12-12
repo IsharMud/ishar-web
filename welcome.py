@@ -34,7 +34,20 @@ def challenges():
 @welcome.route('/connect', methods=['GET'])
 def connect():
     """Redirect /connect GET requests to mudslinger.net web client"""
-    return redirect('https://mudslinger.net/play/?host=isharmud.com&port=23')
+    return redirect(
+        'https://mudslinger.net/play/?host=isharmud.com&port=23'
+    )
+
+
+@welcome.route('/discord/invite/', methods=['GET'])
+@welcome.route('/discord/invite', methods=['GET'])
+@welcome.route('/discord/', methods=['GET'])
+@welcome.route('/discord', methods=['GET'])
+def discord_invite():
+    """Redirect /discord GET requests to the Discord invite"""
+    return redirect(
+        'https://discord.gg/VBmMXUpeve'
+    )
 
 
 @welcome.route('/start/', methods=['GET'])
