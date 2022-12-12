@@ -93,35 +93,37 @@ async def challenges(
                 is_active=1
             ).filter(
                 Challenge.mob_name.like(
-                    f'%{search}%'
+                    '%' + search + '%'
                 )
             ).all()
 
     completed = 0
     if not out:
-        out = 'Sorry, but no challenges could be found!'
 
-        # Find all challenges by default
-        find = Challenge.query.filter_by(is_active=1).all()
+        # Find all active challenges by default
+        out = 'Sorry, but no challenges could be found!'
+        if not find:
+            find = Challenge.query.filter_by(is_active=1).all()
 
         if find:
-
             out = '**Challenges**\n'
+            i = 0
             for challenge in find:
 
                 # Strikethrough, and count, completed mobs
+                i += 1
                 mob_name = challenge.mob_name
                 if challenge.is_completed:
                     completed += 1
                     mob_name = f'~~{challenge.mob_name}~~'
 
-                out += f'{mob_name} / '
+                out += f'{i}: {mob_name} / '
                 out += f'{challenge.adj_people} people / '
                 out += f'Level: {challenge.adj_level} / '
                 out += f'Tier: {challenge.display_tier} '
 
                 if challenge.is_completed:
-                    out += f'Completed by: {challenge.winner_desc}'
+                    out += f' / Completed by: {challenge.winner_desc}'
 
                 out += '\n'
 
