@@ -75,6 +75,7 @@ async def challenges(
 ):
     """Show the current active Ishar MUD challenges"""
     ephemeral = True
+    find = None
     out = None
     logging.info(
         '%s (%i) / %s / challenges',
