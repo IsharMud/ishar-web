@@ -115,7 +115,7 @@ async def challenges(
                     completed += 1
                     mob_name = f'~~{challenge.mob_name}~~'
 
-                out = f'{mob_name} / '
+                out += f'{mob_name} / '
                 out += f'{challenge.adj_people} people / '
                 out += f'Level: {challenge.adj_level} / '
                 out += f'Tier: {challenge.display_tier} '
