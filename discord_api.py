@@ -63,7 +63,7 @@ season_cmd = {
 r = requests.post(
     url=f"{base_url}/{season_cmd['name']}",
     headers=headers,
-    json=jsonify(season_cmd)
+    json=season_cmd
 )
 print(r.content)
 
