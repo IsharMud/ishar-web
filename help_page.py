@@ -1,10 +1,11 @@
 """Help (and World) pages"""
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 
-from forms import HelpSearchForm
-from helptab import get_help_topics, search_help_topics
+from .forms import HelpSearchForm
+from .helptab import get_help_topics, search_help_topics
 
 
+# Flask Blueprint
 help_page = Blueprint('help_page', __name__)
 
 

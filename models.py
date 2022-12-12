@@ -10,9 +10,9 @@ from sqlalchemy.dialects.mysql import INTEGER, MEDIUMINT, SMALLINT, TINYINT
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import FetchedValue
 
-from mud_secret import ALIGNMENTS, IMM_LEVELS
-import delta
-from database import Base, db_session
+from .mud_secret import ALIGNMENTS, IMM_LEVELS
+from .database import Base, db_session
+from .delta import stringify
 
 
 class Account(Base, UserMixin):
@@ -102,7 +102,7 @@ class Account(Base, UserMixin):
     @cached_property
     def created_ago(self):
         """Stringified approximate timedelta since account created"""
-        return delta.stringify(self.created) + ' ago'
+        return stringify(self.created) + ' ago'
 
     @property
     def seasonal_earned(self):
@@ -459,14 +459,14 @@ class Season(Base):
     @property
     def effective(self):
         """Stringified approximate timedelta since season started"""
-        return delta.stringify(
+        return stringify(
             datetime.datetime.utcnow() - self.effective_date
         )
 
     @property
     def expires(self):
         """Stringified approximate timedelta until season ends"""
-        return delta.stringify(
+        return stringify(
             self.expiration_date - datetime.datetime.utcnow()
         )
 
@@ -661,7 +661,7 @@ class Player(Base):
     @cached_property
     def birth_ago(self):
         """Stringified approximate timedelta since player birth"""
-        return delta.stringify(datetime.datetime.utcnow() - self.birth_dt)
+        return stringify(datetime.datetime.utcnow() - self.birth_dt)
 
     @cached_property
     def logon_dt(self):
@@ -671,7 +671,7 @@ class Player(Base):
     @cached_property
     def logon_ago(self):
         """Stringified approximate timedelta since player log on"""
-        return delta.stringify(datetime.datetime.utcnow() - self.logon_dt)
+        return stringify(datetime.datetime.utcnow() - self.logon_dt)
 
     @cached_property
     def logout_dt(self):
@@ -681,7 +681,7 @@ class Player(Base):
     @cached_property
     def logout_ago(self):
         """Stringified approximate timedelta since player log out"""
-        return delta.stringify(datetime.datetime.utcnow() - self.logout_dt)
+        return stringify(datetime.datetime.utcnow() - self.logout_dt)
 
     @cached_property
     def online_delta(self):
@@ -691,7 +691,7 @@ class Player(Base):
     @cached_property
     def online_time(self):
         """Stringified approximate timedelta of player total online time"""
-        return delta.stringify(self.online_delta)
+        return stringify(self.online_delta)
 
     @cached_property
     def is_god(self):

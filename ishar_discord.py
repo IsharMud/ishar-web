@@ -7,11 +7,11 @@ import sys
 
 import interactions
 
-import discord_secret
-from database import db_session
-from helptab import search_help_topics
-from models import Challenge, Player, Season
-from sentry import sentry_sdk
+from .discord_secret import GUILD, TOKEN
+from .database import db_session
+from .helptab import search_help_topics
+from .models import Challenge, Player, Season
+from .sentry import sentry_sdk
 
 
 # Create/compile a regular expression to only match letters,
@@ -27,8 +27,8 @@ logging.basicConfig(
 
 # Connect/authenticate Ishar MUD Discord bot
 bot = interactions.Client(
-    token=discord_secret.TOKEN,
-    default_scope=discord_secret.GUILD
+    token=TOKEN,
+    default_scope=GUILD
 )
 
 

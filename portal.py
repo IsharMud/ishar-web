@@ -2,8 +2,8 @@
 from flask import abort, Blueprint, flash, redirect, render_template, url_for
 from flask_login import current_user, login_required
 
-from forms import ChangePasswordForm, PlayerSearchForm
-from models import Player
+from .forms import ChangePasswordForm, PlayerSearchForm
+from .models import Player
 
 # Flask Blueprint
 portal = Blueprint('portal', __name__)
