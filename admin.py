@@ -2,13 +2,16 @@
 import os
 from datetime import datetime
 
-from flask import abort, Blueprint, flash, render_template, url_for
+from flask import abort, Blueprint, flash, render_template, request, url_for
 from flask_login import current_user, fresh_login_required
+from werkzeug.utils import secure_filename
 
-from mud_secret import PODIR, IMM_LEVELS
+from mud_secret import IMM_LEVELS, PATCH_DIR, PODIR
 from database import db_session
-from forms import EditAccountForm, EditPlayerForm, NewsAddForm, SeasonCycleForm
+from forms import EditAccountForm, EditPlayerForm, NewsAddForm, PatchAddForm, \
+    SeasonCycleForm
 from models import Account, News, Player, Season
+from patches import get_patch_pdfs
 from sentry import sentry_sdk
 
 
@@ -67,7 +70,7 @@ def news():
         else:
             flash('Sorry, but please try again!', 'error')
 
-    # Show the form to add news in the administration portal
+    # Show the form to manage news in the administration portal
     return render_template(
         'admin/news.html.j2',
         all_news=News.query.order_by(-News.created_at).all(),
@@ -108,8 +111,8 @@ def edit_news(edit_news_id=None):
 @admin.route('/news/delete/<int:delete_news_id>/', methods=['GET'])
 @admin.route('/news/delete/<int:delete_news_id>', methods=['GET'])
 def delete_news(delete_news_id=None):
-    """Administration portal to allow Gods to edit news posts
-        /admin/news/edit"""
+    """Administration portal to allow Gods to delete news posts
+        /admin/news/delete"""
     news_post = News.query.filter_by(news_id=delete_news_id).first()
 
     if not news_post:
@@ -124,7 +127,7 @@ def delete_news(delete_news_id=None):
         f'{current_user} deleted {news_post}'
     )
 
-    # Show the form to add news in the administration portal
+    # Show the form to manage news in the administration portal
     return render_template(
         'admin/news.html.j2',
         all_news=News.query.order_by(-News.created_at).all(),
@@ -273,6 +276,105 @@ def season():
             -Season.is_active,
             -Season.season_id
         ).all()
+    )
+
+
+@admin.route('/patches/', methods=['GET', 'POST'])
+@admin.route('/patches', methods=['GET', 'POST'])
+def patches():
+    """Administration portal to allow Gods to manage patch PDFs
+        /admin/patches"""
+
+    # Get patch add form and check if submitted
+    patch_add_form = PatchAddForm()
+    if patch_add_form.validate_on_submit():
+
+        # Get the name in the format we want, and title-case it
+        patch_name = secure_filename(patch_add_form.name.data.title())
+        if patch_name.endswith('.Pdf'):
+            patch_name = patch_name.replace('.Pdf', '')
+        patch_name_pdf = f'{patch_name}.pdf'
+        patch_file = patch_add_form.file.data
+        upload_file = f'{PATCH_DIR}/{patch_name_pdf}'
+
+        if request.files and patch_name and patch_file:
+            print(f'patch_name_pdf: {patch_name_pdf}')
+            print(f'patch_file: {patch_file}')
+            print(f'patch_file.name: {patch_file.name}')
+            print(f'patch_file.filename: {patch_file.filename}')
+            print(f'patch_add_form.file.data.filename: {patch_add_form.file.data.filename}')
+            print(f'patch_add_form.file.data.content_type: {patch_add_form.file.data.content_type}')
+
+        # Limit upload file size
+        if patch_file.content_length > 10485760:
+            flash(
+                'Sorry, but please stick to files under ten (10) megabytes!',
+                'error'
+            )
+
+        # Limit to PDF files only
+        if not patch_file.content_type == 'application/pdf':
+            flash(
+                'Sorry, but please stick to PDF files only!',
+                'error'
+            )
+
+        # Make sure the name is not in use
+        elif os.path.exists(upload_file):
+            flash(
+                f'Sorry, but that patch file name ({patch_name}) exists!',
+                'error'
+            )
+
+        # Proceed in possibly uploading the file, if it is a PDF
+        else:
+            patch_file.save(dst=upload_file)
+            patch_url = url_for(
+                'static',
+                filename=f'patches/{patch_name_pdf}',
+                _external=True
+            )
+            patch_link = f'<a href="{patch_url}" target="_blank" ' \
+                            f'title="{patch_name}">{patch_url}</a>'
+            flash(
+                f'Uploaded: <code>{patch_link}</code>',
+                'success'
+            )
+
+    # Show the form to manage patches in the administration portal
+    return render_template(
+        'admin/patches.html.j2',
+        all_patches=get_patch_pdfs(),
+        patch_add_form=patch_add_form
+    )
+
+
+@admin.route('/patches/delete/<string:delete_patch_name>/', methods=['GET'])
+@admin.route('/patches/delete/<string:delete_patch_name>', methods=['GET'])
+def delete_patch(delete_patch_name=None):
+    """Administration portal to allow Gods to delete patch files
+        /admin/patches/delete"""
+
+    # Fail if the request is to delete something not in the patch PDF list
+    patch_names = [patch['name'] for patch in get_patch_pdfs()]
+    if delete_patch_name not in patch_names:
+        flash('Invalid patch file.', 'error')
+        abort(400)
+
+    # Delete the patch file PDF
+    delete_path = f'{PATCH_DIR}/{delete_patch_name}'
+    if os.path.exists(delete_path):
+        os.remove(delete_path)
+        flash(
+            f'Deleted <code>{delete_patch_name}</code>.',
+            'success'
+        )
+
+    # Show the form to manage patches in the administration portal
+    return render_template(
+        'admin/patches.html.j2',
+        all_patches=get_patch_pdfs(),
+        patch_add_form=PatchAddForm()
     )
 
 

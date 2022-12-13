@@ -3,6 +3,8 @@ from flask import Blueprint, render_template, url_for
 
 from models import PlayerClass, PlayerRace
 
+
+# Flask Blueprint
 faqs = Blueprint('faqs', __name__)
 
 

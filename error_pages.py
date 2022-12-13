@@ -21,30 +21,56 @@ def error(
     ), code
 
 
+@error_pages.app_errorhandler(400)
 def bad_request(message):
     """400 error"""
-    return error(title='Bad Request', message=message, code=400)
+    return error(
+        title='Bad Request',
+        message=message, code=400
+    )
 
 
+@error_pages.app_errorhandler(401)
 def not_authorized(message):
     """401 error"""
-    return error(title='Not Authorized', message=message, code=401)
+    return error(title='Not Authorized',
+        message=message,
+        code=401
+    )
 
 
+@error_pages.app_errorhandler(403)
 def forbidden(message):
     """403 error"""
-    return error(title='Forbidden', message=message, code=403)
+    return error(
+        title='Forbidden',
+        message=message,
+        code=403
+    )
 
 
+@error_pages.app_errorhandler(404)
 def page_not_found(message):
     """404 error"""
-    return error(title='Page Not Found', message=message, code=404)
+    return error(
+        title='Page Not Found',
+        message=message,
+        code=404
+    )
 
 
+@error_pages.app_errorhandler(500)
 def internal_server_error(message):
     """500 error (with Sentry)"""
-    sentry_sdk.capture_message(message, level='error')
-    return error(title='Internal Server Error', message=message, code=500)
+    sentry_sdk.capture_message(
+        error=message,
+        level='error'
+    )
+    return error(
+        title='Internal Server Error',
+        message=message,
+        code=500
+    )
 
 
 @error_pages.route('/debug-sentry', methods=['GET'])

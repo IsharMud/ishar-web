@@ -5,6 +5,7 @@ from forms import HelpSearchForm
 from helptab import get_help_topics, search_help_topics
 
 
+# Flask Blueprint
 help_page = Blueprint('help_page', __name__)
 
 

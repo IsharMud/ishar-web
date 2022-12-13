@@ -15,11 +15,23 @@
                 </p>
                 <ul id="patches-list">
         {%- for patch in patches %}
-            {%- set patch_name  = patch.rstrip('.pdf') | replace('_', ' ') | replace('-', ' ') | title | safe %}
-                    <li class="patch-item" title="{{ patch_name }}">
+            {%- set friendly_name  = patch.name.rstrip('.pdf') | replace('_', ' ') | replace('-', ' ') | safe %}
+                    <li class="patch-item" title="{{ friendly_name }}">
                         <h3>
-                            <a href="{{ url_for('static', filename='patches/' + patch) }}" target="_blank">{{ patch_name }}</a>
+                            <a href="{{ url_for('static', filename='patches/' + patch.name) }}" target="_blank">{{ friendly_name }}</a>
                         </h3>
+                    </li>
+                    <li class="nested-list">
+                        <ul>
+                            <li title="Created: {{ patch.created.strftime('%A, %B %d, %Y') }}">
+                                <i>{{ patch.created.strftime('%A, %B %d, %Y') }}</i>
+                            </li>
+            {%- if patch.created != patch.modified %}
+                            <li title="Modified: {{ patch.modified.strftime('%A, %B %d, %Y') }}">
+                                <i>Modified: {{ patch.modified.strftime('%A, %B %d, %Y') }}</i>
+                            </li>
+            {%- endif %}
+                        </ul>
                     </li>
         {%- endfor %}
                 </ul>

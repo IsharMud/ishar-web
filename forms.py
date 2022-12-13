@@ -3,6 +3,7 @@ from datetime import datetime
 
 from dateutil.relativedelta import relativedelta
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileField, FileRequired
 from wtforms import BooleanField, DateTimeLocalField, EmailField, \
     IntegerField, PasswordField, StringField, SubmitField, TextAreaField
 from wtforms.validators import DataRequired, Email, EqualTo, Length, NumberRange
@@ -183,6 +184,25 @@ class PlayerSearchForm(FlaskForm):
         ]
     )
     submit = SubmitField('Search')
+
+
+class PatchAddForm(FlaskForm):
+    """Patch Add form class"""
+    name = StringField(
+        'Name',
+        default='Patch_X.Y',
+        validators=[
+            DataRequired(),
+            Length(min=5, max=32),
+        ]
+    )
+    file = FileField(
+        'File',
+        validators=[
+            FileRequired()
+        ]
+    )
+    submit = SubmitField('Upload')
 
 
 class SeasonCycleForm(FlaskForm):

@@ -10,14 +10,10 @@
                 Welcome to the Ishar MUD web administration portal!
             </p>
             <ul>
-                <li title="Accounts">
-                    <a href="{{ url_for('admin.accounts') }}">Accounts</a>
+    {%- for admin_page in ['accounts', 'news', 'patches', 'season' ] %}
+                <li title="{{ admin_page | title }}">
+                    <a href="{{ url_for('admin.' + admin_page) }}">{{ admin_page | title }}</a>
                 </li>
-                <li title="News">
-                    <a href="{{ url_for('admin.news') }}">News</a>
-                </li>
-                <li title="Seasons">
-                    <a href="{{ url_for('admin.season') }}">Seasons</a>
-                </li>
+    {%- endfor %}
             </ul>
 {%- endblock content %}

@@ -5,6 +5,7 @@ from mud_secret import HELPTAB, IMM_LEVELS
 from models import PlayerClass
 from sentry import sentry_sdk
 
+
 # Retrieve playable player class names
 player_classes = [
     player_class.class_display_name
