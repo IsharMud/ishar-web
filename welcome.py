@@ -39,7 +39,7 @@ def challenges():
 @welcome.route('/events/', methods=['GET'])
 @welcome.route('/events', methods=['GET'])
 def global_events():
-    """List active global bonus XP events"""
+    """List active global events"""
     return render_template(
         'global_events.html.j2'
     )
