@@ -13,7 +13,7 @@
 {% block header %}{{ events_title }}{% endblock header %}
 {%- block content %}
     {%- if global_events %}
-                <ol>
+                <ul>
         {%- for global_event in global_events %}
                     <li title="Name: {{ global_event.name }}">
                         <h3>
@@ -33,7 +33,7 @@
                         </ul>
                     </li>
         {%- endfor %}
-                </ol>
+                </ul>
     {%- else %}
                 <h3>
                     Sorry
