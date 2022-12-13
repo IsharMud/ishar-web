@@ -63,7 +63,7 @@ def page_not_found(message):
 def internal_server_error(message):
     """500 error (with Sentry)"""
     sentry_sdk.capture_message(
-        error=message,
+        message,
         level='error'
     )
     return error(

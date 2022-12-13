@@ -69,9 +69,7 @@ def shutdown_session(exception=None):
     """Remove database session at request teardown,
         and capture any exceptions"""
     if exception:
-        sentry_sdk.capture_exception(
-            error=exception
-        )
+        sentry_sdk.capture_exception(exception)
     db_session.remove()
 
 
