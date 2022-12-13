@@ -5,6 +5,7 @@ from flask_login import current_user, login_required
 from forms import ChangePasswordForm, PlayerSearchForm
 from models import Player
 
+
 # Flask Blueprint
 portal = Blueprint('portal', __name__)
 
@@ -33,6 +34,10 @@ def account():
     return render_template('account.html.j2')
 
 
+@portal.route('/change_password/', methods=['GET', 'POST'])
+@portal.route('/change_password', methods=['GET', 'POST'])
+@portal.route('/changepassword/', methods=['GET', 'POST'])
+@portal.route('/changepassword', methods=['GET', 'POST'])
 @portal.route('/password/', methods=['GET', 'POST'])
 @portal.route('/password', methods=['GET', 'POST'])
 def change_password():

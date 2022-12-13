@@ -39,15 +39,11 @@ def get_patch_pdfs(patch_directory=PATCH_DIR):
 
             # Patch PDF file base name
             #   (such as "Patch_#.#.pdf")
-            'name': os.path.basename(
-                p=pdf
-            ),
+            'name': os.path.basename(pdf),
 
             # File modified time (mtime) datetime object
             'modified': date.fromtimestamp(
-                os.path.getmtime(
-                    filename=pdf
-                )
+                os.path.getmtime(pdf)
             ),
 
             # Human-readable file size
@@ -65,19 +61,26 @@ def get_patch_pdfs(patch_directory=PATCH_DIR):
 patches = Blueprint('patches', __name__)
 
 
+@patches.route('/patches/latest/', methods=['GET'])
+@patches.route('/patches/latest', methods=['GET'])
+@patches.route('/patch/latest/', methods=['GET'])
+@patches.route('/patch/latest', methods=['GET'])
+@patches.route('/latestpatch/', methods=['GET'])
+@patches.route('/latestpatch', methods=['GET'])
 @patches.route('/latest_patch/', methods=['GET'])
 @patches.route('/latest_patch', methods=['GET'])
 def latest():
-    """Redirect /latest_patch to latest found static patch .pdf file"""
-    latest_pdf = get_patch_pdfs()[0]
+    """Redirect to most recent found static patch .pdf file"""
     return redirect(
         url_for(
             'static',
-            filename=f'patches/{latest_pdf.name}'
+            filename=f"patches/{get_patch_pdfs()[0]['name']}"
         )
     )
 
 
+@patches.route('/patches/all/', methods=['GET'])
+@patches.route('/patches/all', methods=['GET'])
 @patches.route('/patches/', methods=['GET'])
 @patches.route('/patches', methods=['GET'])
 def index():
