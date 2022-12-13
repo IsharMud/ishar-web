@@ -13,6 +13,7 @@ def get_patch_pdfs(patch_directory=PATCH_DIR):
         glob.glob(
             f'{patch_directory}/*.pdf'
         ),
+        key=os.path.getmtime,
         reverse=True
     )
 
