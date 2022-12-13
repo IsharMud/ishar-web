@@ -8,9 +8,8 @@ from mud_secret import PATCH_DIR
 
 
 def sizeof_fmt(num=None, suffix='B'):
-    """Format file size to human-readable"""
-    units = ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']
-    for unit in units:
+    """Convert bytes to human-readable file size"""
+    for unit in ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']:
         if abs(num) < 1024.0:
             return f'{num:3.1f}{unit}{suffix}'
         num /= 1024.0
@@ -21,7 +20,7 @@ def get_patch_pdfs(patch_directory=PATCH_DIR):
     """Find and return all PDF file information from the patch directory"""
 
     # Find all .pdf files in the patch directory,
-    #   and reverse sort them by mtime
+    #   and sort by most recent modified time first
     pdfs = sorted(
         glob.glob(
             f'{patch_directory}/*.pdf'
@@ -30,24 +29,32 @@ def get_patch_pdfs(patch_directory=PATCH_DIR):
         reverse=True
     )
 
-    # Loop through each pdf file that was found,
+    # Loop through each file that was found,
     #   creating a list containing a dictionary for each file
     ret = []
     for pdf in pdfs:
 
-        # Include the PDF file base name, modified time (mtime) datetime object,
-        #   and human-readable file size
+        # Append a dictionary to the list to return
         ret.append({
+
+            # Patch PDF file base name
+            #   (such as "Patch_#.#.pdf")
             'name': os.path.basename(
                 p=pdf
             ),
+
+            # File modified time (mtime) datetime object
             'modified': date.fromtimestamp(
                 os.path.getmtime(
                     filename=pdf
                 )
             ),
+
+            # Human-readable file size
+            #   (such as 1.2MiB or 11.5KiB)
             'size': sizeof_fmt(
-                num=os.path.getsize(pdf))
+                num=os.path.getsize(pdf)
+            )
         })
 
     # Return the list of dictionaries

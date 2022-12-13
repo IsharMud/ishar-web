@@ -30,11 +30,6 @@ app.config.from_pyfile('config.py')
 
 # Error pages/handlers
 app.register_blueprint(error_pages.error_pages)
-app.register_error_handler(400, error_pages.bad_request)
-app.register_error_handler(401, error_pages.not_authorized)
-app.register_error_handler(403, error_pages.forbidden)
-app.register_error_handler(404, error_pages.page_not_found)
-app.register_error_handler(500, error_pages.internal_server_error)
 
 # Flask-Login
 login_manager.init_app(app)
