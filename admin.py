@@ -2,7 +2,7 @@
 import os
 from datetime import datetime
 
-from flask import abort, Blueprint, flash, render_template, request, url_for
+from flask import abort, Blueprint, flash, render_template, url_for
 from flask_login import current_user, fresh_login_required
 from werkzeug.utils import secure_filename
 
@@ -294,35 +294,29 @@ def patches():
         if patch_name.endswith('.Pdf'):
             patch_name = patch_name.replace('.Pdf', '')
         patch_name_pdf = f'{patch_name}.pdf'
+
+        # Get the uploaded file, and set upload path
         patch_file = patch_add_form.file.data
         upload_file = f'{PATCH_DIR}/{patch_name_pdf}'
 
-        if request.files and patch_name and patch_file:
-            print(f'patch_name_pdf: {patch_name_pdf}')
-            print(f'patch_file: {patch_file}')
-            print(f'patch_file.name: {patch_file.name}')
-            print(f'patch_file.filename: {patch_file.filename}')
-            print(f'patch_add_form.file.data.filename: {patch_add_form.file.data.filename}')
-            print(f'patch_add_form.file.data.content_type: {patch_add_form.file.data.content_type}')
-
-        # Limit upload file size
-        if patch_file.content_length > 10485760:
+        # Limit upload file size to 25MB
+        if patch_file.content_length > 26214400:
             flash(
-                'Sorry, but please stick to files under ten (10) megabytes!',
+                'Sorry, but please reduce upload to 25 megabytes or less!',
                 'error'
             )
 
         # Limit to PDF files only
         if not patch_file.content_type == 'application/pdf':
             flash(
-                'Sorry, but please stick to PDF files only!',
+                'Sorry, but only PDF files are supported!',
                 'error'
             )
 
-        # Make sure the name is not in use
+        # Make sure the file does not already exist
         elif os.path.exists(upload_file):
             flash(
-                f'Sorry, but that patch file name ({patch_name}) exists!',
+                f'Sorry, but that patch file exists ({patch_name})!',
                 'error'
             )
 

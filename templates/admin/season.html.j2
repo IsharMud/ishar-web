@@ -26,11 +26,11 @@
                     <td title="ID: {{ season.season_id }}">
                         {{ season.season_id }}
                     </td>
-                    <td title="Effective: {{ season.effective_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}">
-                        {{ season.effective_date }}
+                    <td title="Effective: {{ season.effective_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }} ({{ season.effective_date }})">
+                        {{ season.effective_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}
                     </td>
-                    <td title="Expiration: {{ season.expiration_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}">
-                        {{ season.expiration_date }}
+                    <td title="Expiration: {{ season.expiration_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }} ({{ season.expiration_date }})">
+                        {{ season.expiration_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}
                     </td>
                 </tr>
         {%- endfor %}

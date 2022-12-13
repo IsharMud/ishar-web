@@ -23,8 +23,13 @@
                     </li>
                     <li class="nested-list">
                         <ul>
-                            <li title="{{ patch.modified.strftime('%A, %B %d, %Y') }}">
-                                <i>{{ patch.modified.strftime('%A, %B %d, %Y') }}</i>
+                            <li>
+                                <strong>Date</strong>:
+                                {{ patch.modified.strftime('%A, %B %d, %Y') }}
+                            </li>
+                            <li>
+                                <strong>Size</strong>:
+                                {{ patch.size }}
                             </li>
                         </ul>
                     </li>

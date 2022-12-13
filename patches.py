@@ -7,8 +7,21 @@ from flask import Blueprint, redirect, render_template, url_for
 from mud_secret import PATCH_DIR
 
 
+def sizeof_fmt(num=None, suffix='B'):
+    """Format file size to human-readable"""
+    units = ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi', 'Ei', 'Zi']
+    for unit in units:
+        if abs(num) < 1024.0:
+            return f'{num:3.1f}{unit}{suffix}'
+        num /= 1024.0
+    return f'{num:.1f}Yi{suffix}'
+
+
 def get_patch_pdfs(patch_directory=PATCH_DIR):
-    """Return all patch PDF information"""
+    """Find and return all PDF file information from the patch directory"""
+
+    # Find all .pdf files in the patch directory,
+    #   and reverse sort them by mtime
     pdfs = sorted(
         glob.glob(
             f'{patch_directory}/*.pdf'
@@ -17,14 +30,28 @@ def get_patch_pdfs(patch_directory=PATCH_DIR):
         reverse=True
     )
 
-    all_patches = []
-    for patch in pdfs:
-        all_patches.append({
-            'name': os.path.basename(patch),
-            'modified': date.fromtimestamp(os.path.getmtime(patch)),
-            'size': os.path.getsize(patch)
+    # Loop through each pdf file that was found,
+    #   creating a list containing a dictionary for each file
+    ret = []
+    for pdf in pdfs:
+
+        # Include the PDF file base name, modified time (mtime) datetime object,
+        #   and human-readable file size
+        ret.append({
+            'name': os.path.basename(
+                p=pdf
+            ),
+            'modified': date.fromtimestamp(
+                os.path.getmtime(
+                    filename=pdf
+                )
+            ),
+            'size': sizeof_fmt(
+                num=os.path.getsize(pdf))
         })
-    return all_patches
+
+    # Return the list of dictionaries
+    return ret
 
 
 # Flask Blueprint
