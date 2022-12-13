@@ -10,7 +10,7 @@ import interactions
 import discord_secret
 from database import db_session
 from helptab import search_help_topics
-from models import Challenge, Player, Season
+from models import Challenge, GlobalEvent, Player, Season
 from sentry import sentry_sdk
 
 
@@ -155,6 +155,32 @@ async def deadhead(ctx: interactions.CommandContext):
     # Show the name and death count of the player with the most deaths
     out = 'The player who has died most is: '
     out += f'{deadman.name} - {deadman.deaths} times! ☠️'
+    await ctx.send(out)
+    db_session.close()
+
+
+# /events
+@bot.command()
+async def events(ctx: interactions.CommandContext):
+    """Show any global events"""
+    logging.info(
+        '%s (%i) / %s / events',
+        ctx.channel, ctx.channel_id, ctx.user
+    )
+
+    # Find all global events
+    global_events = GlobalEvent.query.all()
+
+    # By default, assume there are none
+    out = 'Unfortunately, there are no bonus XP events right now.'
+
+    # Show any global events, and when they end
+    if global_events:
+        out = f'There are ({len(global_events)}) active bonus XP events:\n'
+        for global_event in global_events:
+            out += f"{global_event['name']} ends in {global_event['end']}\n"
+
+    # Send the global events response
     await ctx.send(out)
     db_session.close()
 
