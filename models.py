@@ -258,7 +258,7 @@ class Challenge(Base):
 
 
 class GlobalEvent(Base):
-    """Global event type, start time, and end time - for bonus XP"""
+    """Global event type, start time, and end time"""
     __tablename__ = 'global_event'
 
     event_type = Column(
