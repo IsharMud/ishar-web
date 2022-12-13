@@ -21,7 +21,7 @@ from patches import patches
 from portal import portal
 from welcome import welcome
 import error_pages
-from models import Season
+from models import GlobalEvent, Season
 
 
 # Flask
@@ -58,6 +58,7 @@ def injects():
         ).order_by(
             -Season.season_id
         ).first(),
+        global_events=GlobalEvent.query.all(),
         sentry_dsn=sentry_dsn,
         sentry_user=sentry_uri.username,
         sentry_event_id=sentry_sdk.last_event_id()

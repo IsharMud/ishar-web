@@ -257,6 +257,60 @@ class Challenge(Base):
                f'winner_desc: "{self.winner_desc}"'
 
 
+class GlobalEvent(Base):
+    """Global event type, start time, and end time - for bonus XP"""
+    __tablename__ = 'global_event'
+
+    event_type = Column(
+        TINYINT(4),
+        primary_key=True,
+        unique=True
+    )
+    start_time = Column(
+        TIMESTAMP,
+        nullable=False,
+        server_default=FetchedValue()
+    )
+    end_time = Column(
+        TIMESTAMP,
+        nullable=False,
+        server_default=FetchedValue()
+    )
+
+    @cached_property
+    def name(self):
+        """Text describing the event type"""
+        event_types = {
+            0: 'Bonus Experience',
+            1: 'Not Implemented',
+            2: 'Challenge Experience',
+            3: 'Challenges Cycled',
+            4: 'Winter Fest',
+            5: 'Crash Experience'
+        }
+        return event_types[self.event_type]
+
+    @property
+    def start(self):
+        """Stringified approximate timedelta until/since event start"""
+        return delta.stringify(
+            datetime.datetime.utcnow() - self.start_time
+        )
+
+    @property
+    def end(self):
+        """Stringified approximate timedelta until/since event end"""
+        return delta.stringify(
+            self.end_time - datetime.datetime.utcnow()
+        )
+
+    def __repr__(self):
+        return '<GlobalEvent> / ' \
+               f'Type: "{self.event_type}" / Name: "{self.name}" / ' \
+               f'Start: "{self.start_time}" ("{self.start}") / ' \
+               f'End: "{self.end_time}" ("{self.end}")'
+
+
 class News(Base):
     """News post for the main/welcome page"""
     __tablename__ = 'news'

@@ -1,0 +1,48 @@
+{%- set page = 'global_events' %}
+{% extends "layout.html.j2" %}
+{%- set events_pre  = 'Global Events' -%}
+{%- if global_events %}
+    {%- set events_title = events_pre + ' (' + global_events | length | string + ')'  %}
+{%- else %}
+    {%- set events_title = events_pre %}
+{%- endif %}
+{% block meta_title %}{{ events_title }}{% endblock meta_title %}
+{% block meta_description %}Global events currently active{% endblock meta_description %}
+{% block meta_url %}{{ url_for('welcome.global_events', _external=True) }}{% endblock meta_url %}
+{% block title %}{{ events_title }}{% endblock title %}
+{% block header %}{{ events_title }}{% endblock header %}
+{%- block content %}
+    {%- if global_events %}
+                <ol>
+        {%- for global_event in global_events %}
+                    <li title="Name: {{ global_event.name }}">
+                        <h3>
+                            {{ global_event.name }}
+                        </h3>
+                    </li>
+                    <li class="nested-list">
+                        <ul>
+                            <li title="Started: {{ global_event.start_time.strftime('%A, %B %d, %Y @ %H:%M:%S') }} ({{ global_event.start }} ago)">
+                                <strong>Started</strong>:
+                                {{ global_event.start }} ago
+                            </li>
+                            <li title="Ends: {{ global_event.end_time.strftime('%A, %B %d, %Y @ %H:%M:%S') }} (in {{ global_event.end }})">
+                                <strong>Ends</strong>:
+                                in {{ global_event.end }}
+                            </li>
+                        </ul>
+                    </li>
+        {%- endfor %}
+                </ol>
+    {%- else %}
+                <h3>
+                    Sorry
+                </h3>
+                <p>
+                    Unfortunately, there are no active bonus XP global events right now.
+                </p>
+                <p>
+                    Please check back later, or maybe try out <a href="{{ url_for('welcome.challenges') }}">some challenges</a>!
+                </p>
+    {%- endif %}
+{%- endblock content %}

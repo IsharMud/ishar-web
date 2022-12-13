@@ -3,7 +3,7 @@
 
 def pluralize(timing=None):
     """Append "s" and stringifies time-deltas, if not singular"""
-    if timing['value'] != 1:
+    if round(timing['value']) != 1:
         timing['interval'] += 's'
 
     # Round the number in the output string

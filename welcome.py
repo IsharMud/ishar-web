@@ -23,10 +23,25 @@ def challenges():
     """Sort and list active challenges, along with their tiers and winners"""
     return render_template(
         'challenges.html.j2',
-        challenges=Challenge.query.filter_by(is_active=1).order_by(
+        challenges=Challenge.query.filter_by(
+            is_active=1
+        ).order_by(
             Challenge.adj_level,
             Challenge.adj_people
         ).all()
+    )
+
+
+@welcome.route('/global_events/', methods=['GET'])
+@welcome.route('/global_events', methods=['GET'])
+@welcome.route('/globalevents/', methods=['GET'])
+@welcome.route('/globalevents', methods=['GET'])
+@welcome.route('/events/', methods=['GET'])
+@welcome.route('/events', methods=['GET'])
+def global_events():
+    """List active global bonus XP events"""
+    return render_template(
+        'global_events.html.j2'
     )
 
 
