@@ -172,11 +172,11 @@ async def events(ctx: interactions.CommandContext):
     global_events = GlobalEvent.query.all()
 
     # By default, assume there are none
-    out = 'Unfortunately, there are no bonus XP events right now.'
+    out = 'Unfortunately, there are no active events right now.'
 
     # Show any global events, and when they end
     if global_events:
-        out = f'There are ({len(global_events)}) active bonus XP events:\n'
+        out = f'There are ({len(global_events)}) active events:\n'
         for global_event in global_events:
             out += f'{global_event.name} ends in {global_event.end}\n'
 
