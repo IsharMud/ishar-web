@@ -178,7 +178,7 @@ async def events(ctx: interactions.CommandContext):
     if global_events:
         out = f'There are ({len(global_events)}) active bonus XP events:\n'
         for global_event in global_events:
-            out += f"{global_event['name']} ends in {global_event['end']}\n"
+            out += f'{global_event.name} ends in {global_event.end}\n'
 
     # Send the global events response
     await ctx.send(out)
