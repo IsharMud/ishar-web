@@ -176,7 +176,7 @@ async def events(ctx: interactions.CommandContext):
 
     # Show any global events, and when they end
     if global_events:
-        out = f'There are ({len(global_events)}) active events:\n'
+        out = f'Global Events ({len(global_events)}):\n'
         for global_event in global_events:
             out += f'{global_event.name} ends in {global_event.end}\n'
 
