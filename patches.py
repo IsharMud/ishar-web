@@ -20,7 +20,6 @@ def get_patch_pdfs(patch_directory=PATCH_DIR):
     for patch in pdfs:
         all_patches.append({
             'name': os.path.basename(patch),
-            'created': date.fromtimestamp(os.path.getctime(patch)),
             'modified': date.fromtimestamp(os.path.getmtime(patch)),
             'size': os.path.getsize(patch)
         })

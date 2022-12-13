@@ -36,10 +36,6 @@
                             name:   'Patch Name'
                         },
                         {
-                            id:     'created',
-                            name:   'Created'
-                        },
-                        {
                             id:     'modified',
                             name:   'Modified'
                         },
@@ -56,7 +52,6 @@
                       {%- for patch in all_patches %}
                         {
                             name:       gridjs.html(`<a href="{{ url_for('static', filename='patches/'+patch.name) }}" target="_blank">{{ patch.name }}</a>`),
-                            created:    "{{ patch.created.strftime('%A, %B %d, %Y @ %H:%M:%S') }}",
                             modified:   "{{ patch.modified.strftime('%A, %B %d, %Y @ %H:%M:%S') }}",
                             size:       "{{ patch.size }} bytes",
                             delete: gridjs.html(`<a href="{{ url_for('admin.delete_patch', delete_patch_name=patch.name) }}" onclick="return confirm('Are you sure you want to delete this patch file?');">❌</a>`)

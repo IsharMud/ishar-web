@@ -23,14 +23,9 @@
                     </li>
                     <li class="nested-list">
                         <ul>
-                            <li title="Created: {{ patch.created.strftime('%A, %B %d, %Y') }}">
-                                <i>{{ patch.created.strftime('%A, %B %d, %Y') }}</i>
+                            <li title="{{ patch.modified.strftime('%A, %B %d, %Y') }}">
+                                <i>{{ patch.modified.strftime('%A, %B %d, %Y') }}</i>
                             </li>
-            {%- if patch.created != patch.modified %}
-                            <li title="Modified: {{ patch.modified.strftime('%A, %B %d, %Y') }}">
-                                <i>Modified: {{ patch.modified.strftime('%A, %B %d, %Y') }}</i>
-                            </li>
-            {%- endif %}
                         </ul>
                     </li>
         {%- endfor %}
