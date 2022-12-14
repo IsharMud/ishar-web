@@ -58,7 +58,7 @@ def injects():
         ).order_by(
             -Season.season_id
         ).first(),
-        global_events=GlobalEvent.query.all(),
+        global_event_count=GlobalEvent.query.count(),
         sentry_dsn=sentry_dsn,
         sentry_user=sentry_uri.username,
         sentry_event_id=sentry_sdk.last_event_id()

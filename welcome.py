@@ -2,7 +2,7 @@
 from flask import Blueprint, redirect, render_template
 
 from mud_secret import IMM_LEVELS
-from models import Challenge, News, Player
+from models import Challenge, GlobalEvent, News, Player
 
 # Flask Blueprint
 welcome = Blueprint('welcome', __name__)
@@ -40,9 +40,16 @@ def challenges():
 @welcome.route('/events', methods=['GET'])
 def global_events():
     """List active global events"""
+
+    # Respond with 204 if there are no events
+    code = 200
+    events = GlobalEvent.query.all()
+    if not global_events:
+        code = 204
     return render_template(
-        'global_events.html.j2'
-    )
+        'global_events.html.j2',
+        global_events=events
+    ), code
 
 
 @welcome.route('/connect/', methods=['GET'])
