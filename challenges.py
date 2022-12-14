@@ -5,13 +5,16 @@ from models import Challenge
 
 
 # Flask Blueprint
-challenges = Blueprint('challenges', __name__)
+challenges = Blueprint(
+    'challenges',
+    __name__,
+    url_prefix='/challenges'
+)
 
 
-@challenges.route('/challenges/all/', methods=['GET'])
-@challenges.route('/challenges/all', methods=['GET'])
-@challenges.route('/challenges/', methods=['GET'])
-@challenges.route('/challenges', methods=['GET'])
+@challenges.route('/all/', methods=['GET'])
+@challenges.route('/all', methods=['GET'])
+@challenges.route('/', methods=['GET'])
 def index():
     """Sort and list aLL active challenges,
         along with their tiers and winners"""
@@ -26,12 +29,12 @@ def index():
     )
 
 
-@challenges.route('/challenges/done/', methods=['GET'])
-@challenges.route('/challenges/done', methods=['GET'])
-@challenges.route('/challenges/complete/', methods=['GET'])
-@challenges.route('/challenges/complete', methods=['GET'])
-@challenges.route('/challenges/completed/', methods=['GET'])
-@challenges.route('/challenges/completed', methods=['GET'])
+@challenges.route('/done/', methods=['GET'])
+@challenges.route('/done', methods=['GET'])
+@challenges.route('/complete/', methods=['GET'])
+@challenges.route('/complete', methods=['GET'])
+@challenges.route('/completed/', methods=['GET'])
+@challenges.route('/completed', methods=['GET'])
 def complete():
     """Sort and list completed challenges,
         along with their tiers and winners"""
@@ -48,10 +51,10 @@ def complete():
     )
 
 
-@challenges.route('/challenges/todo/', methods=['GET'])
-@challenges.route('/challenges/todo', methods=['GET'])
-@challenges.route('/challenges/incomplete/', methods=['GET'])
-@challenges.route('/challenges/incomplete', methods=['GET'])
+@challenges.route('/todo/', methods=['GET'])
+@challenges.route('/todo', methods=['GET'])
+@challenges.route('/incomplete/', methods=['GET'])
+@challenges.route('/incomplete', methods=['GET'])
 def incomplete():
     """Sort and list incomplete challenges,
         along with their tiers and winners"""

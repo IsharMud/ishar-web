@@ -4,6 +4,7 @@ from flask import Blueprint, redirect, render_template
 from mud_secret import IMM_LEVELS
 from models import GlobalEvent, News, Player
 
+
 # Flask Blueprint
 welcome = Blueprint('welcome', __name__)
 
