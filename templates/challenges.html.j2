@@ -2,15 +2,15 @@
 {% extends "layout.html.j2" %}
 {%- set challenges_pre  = 'Challenges' -%}
 {%- if challenges is defined and challenges is iterable and challenges | length > 0 %}
-    {%- set challenges_completed    = challenges | selectattr('winner_desc', '!=', '') | list | length %}
-    {%- set challenges_total        = challenges | list | length %}
-    {%- set challenges_title        = challenges_pre + ' (' + challenges_completed | string + '/' + challenges_total | string + ')'  %}
+    {%- set challenges_completed = challenges | selectattr('winner_desc', '!=', '') | list | length %}
+    {%- set challenges_total = challenges | list | length %}
+    {%- set challenges_title = challenges_pre + ' (' + challenges_completed | string + '/' + challenges_total | string + ')'  %}
 {%- endif %}
 {% block meta_title %}Challenges{% endblock meta_title %}
 {% block meta_description %}Challenges, winners, and rewards currently available{% endblock meta_description %}
-{% block meta_url %}{{ url_for('welcome.challenges', _external=True) }}{% endblock meta_url %}
+{% block meta_url %}{{ url_for('challenges.index', _external=True) }}{% endblock meta_url %}
 {% block title %}{{ challenges_title }}{% endblock title %}
-{% block header %}{{ challenges_title }}{% endblock header %}
+{% block header %}<a href="{{ url_for('challenges.index') }}">{{ challenges_title }}</a>{% endblock header %}
 {%- macro display_challenge(challenge) %}
     {%- if challenge.is_completed %}
         {%- set challenge_name = 'gridjs.html(`<span class="challenge-completed">' + challenge.mob_name + '</span>`)' %}
@@ -72,6 +72,8 @@
 {%- block content %}
                 <div id="challenges"></div>
                 <script>
-                    showChallenges(document.getElementById('challenges'));
+                    showChallenges(
+                        document.getElementById('challenges')
+                    );
                 </script>
 {%- endblock content %}

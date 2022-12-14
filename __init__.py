@@ -11,6 +11,7 @@ from sentry import sentry_sdk
 from login import login, login_manager
 
 from admin import admin
+from challenges import challenges
 from database import db_session
 from discord_api import discord_api
 from faqs import faqs
@@ -36,6 +37,7 @@ login_manager.init_app(app)
 
 # Flask Blueprints/pages
 app.register_blueprint(admin)
+app.register_blueprint(challenges)
 app.register_blueprint(discord_api)
 app.register_blueprint(faqs)
 app.register_blueprint(help_page)

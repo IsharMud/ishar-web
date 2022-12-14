@@ -1,4 +1,4 @@
-"""Portal, and pages for logged-in users"""
+"""Log-in page/form and Flask-Login """
 from flask import Blueprint, flash, redirect, render_template, request, \
     session, url_for
 from flask_login import current_user, login_user, logout_user, LoginManager
