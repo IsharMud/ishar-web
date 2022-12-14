@@ -277,37 +277,38 @@ class GlobalEvent(Base):
         nullable=False,
         server_default=FetchedValue()
     )
-
-    @cached_property
-    def name(self):
-        """Text describing the event type"""
-        event_types = {
-            0: 'Bonus Experience',
-            1: 'Not Implemented',
-            2: 'Challenge Experience',
-            3: 'Challenges Cycled',
-            4: 'Winter Fest',
-            5: 'Crash Experience'
-        }
-        return event_types[self.event_type]
+    event_name = Column(String(20), nullable=False)
+    event_desc = Column(String(40), nullable=False)
+    xp_bonus = Column(
+        TINYINT(4),
+        nullable=False,
+        server_default=FetchedValue()
+    )
+    shop_bonus = Column(TINYINT(4), nullable=False)
+    celestial_luck = Column(
+        TINYINT(1),
+        nullable=False,
+        server_default=FetchedValue()
+    )
 
     @property
     def start(self):
-        """Stringified approximate timedelta until/since event start"""
+        """Stringified approximate timedelta since event start"""
         return delta.stringify(
             datetime.datetime.utcnow() - self.start_time
         )
 
     @property
     def end(self):
-        """Stringified approximate timedelta until/since event end"""
+        """Stringified approximate timedelta until event end"""
         return delta.stringify(
             self.end_time - datetime.datetime.utcnow()
         )
 
     def __repr__(self):
         return '<GlobalEvent> / ' \
-               f'Type: "{self.event_type}" / Name: "{self.name}" / ' \
+               f'Type: "{self.event_type}" / Name: "{self.event_name}" / ' \
+               f'Desc: "{self.event_desc}" / ' \
                f'Start: "{self.start_time}" ("{self.start}") / ' \
                f'End: "{self.end_time}" ("{self.end}")'
 

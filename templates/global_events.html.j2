@@ -15,20 +15,73 @@
     {%- if global_events %}
                 <ul>
         {%- for global_event in global_events %}
-                    <li title="Name: {{ global_event.name }}">
+                    <li title="Name: {{ global_event.event_name }}">
                         <h3>
-                            {{ global_event.name }}
+                            {{ global_event.event_name }}
                         </h3>
                     </li>
                     <li class="nested-list">
                         <ul>
+            {%- if global_event.event_desc and global_event.event_desc != '' %}
+                            <li title="Description: {{ global_event.event_desc }}">
+                                <h4>{{ global_event.event_desc }}</h4>
+                            </li>
+            {%- endif %}
+            {%- if global_event.xp_bonus and global_event.xp_bonus != '' and global_event.xp_bonus != 0 %}
+                            <li title="XP Bonus: {{ global_event.xp_bonus | string }}">
+                                <strong>
+                                    XP Bonus
+                                </strong>
+                                <ul>
+                                    <li>
+                                        {{ global_event.xp_bonus | string }}
+                                    </li>
+                                </ul>
+                            </li>
+            {%- endif %}
+            {%- if global_event.shop_bonus and global_event.shop_bonus != '' and global_event.shop_bonus != 0 %}
+                            <li title="Shop Bonus: {{ global_event.shop_bonus | string }}">
+                                <strong>
+                                    Shop Bonus
+                                </strong>
+                                <ul>
+                                    <li>
+                                        {{ global_event.shop_bonus | string }}
+                                    </li>
+                                </ul>
+                            </li>
+            {%- endif %}
+            {%- if global_event.celestial_luck and global_event.celestial_luck != '' and global_event.celestial_luck != 0 %}
+                            <li title="Celestial Luck: {{ global_event.celestial_luck | string }}">
+                                <strong>
+                                    Celestial Luck
+                                </strong>
+                                <ul>
+                                    <li>
+                                        {{ global_event.celestial_luck | string }}
+                                    </li>
+                                </ul>
+                            </li>
+            {%- endif %}
                             <li title="Started: {{ global_event.start_time.strftime('%A, %B %d, %Y @ %H:%M:%S') }} ({{ global_event.start }} ago)">
-                                <strong>Started</strong>:
-                                {{ global_event.start }} ago
+                                <strong>
+                                    Started
+                                </strong>
+                                <ul>
+                                    <li>
+                                        {{ global_event.start }} ago
+                                    </li>
+                                </ul>
                             </li>
                             <li title="Ends: {{ global_event.end_time.strftime('%A, %B %d, %Y @ %H:%M:%S') }} (in {{ global_event.end }})">
-                                <strong>Ends</strong>:
-                                in {{ global_event.end }}
+                                <strong>
+                                    Ends
+                                </strong>
+                                <ul>
+                                    <li>
+                                        in {{ global_event.end }}
+                                    </li>
+                                </ul>
                             </li>
                         </ul>
                     </li>
