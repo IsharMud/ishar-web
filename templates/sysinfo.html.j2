@@ -5,19 +5,17 @@
 {% block title %}System Information{% endblock title %}
 {% block header %}System Information{% endblock header %}
 {%- block content %}
-    {%- if process %}
-        <h3>Process</h3>
-        <ul>
-            <li>
-                {{ process }}
-            </li>
-        </ul>
-    {%- endif %}
     {%- if uptime %}
         <h3>Uptime</h3>
         <ul>
             <li>
                 {{ uptime }}
+            </li>
+        </ul>
+    {%- elif %}
+        <ul>
+            <li>
+                <i>No system information could be found!</i>
             </li>
         </ul>
     {%- endif %}

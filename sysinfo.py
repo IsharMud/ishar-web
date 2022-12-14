@@ -52,6 +52,5 @@ def index():
         )
     return render_template(
         'sysinfo.html.j2',
-        process=process,
         uptime=uptime
     )
