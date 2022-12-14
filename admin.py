@@ -497,8 +497,8 @@ def season_cycle():
 @admin.route('/events/', methods=['GET', 'POST'])
 @admin.route('/events', methods=['GET', 'POST'])
 def global_events():
-    """Administration portal to allow Gods to post news
-        /admin/news"""
+    """Administration portal to allow Gods to add global events
+        /admin/events"""
 
     # Get event add form and check if submitted
     event_add_form = EventAddForm()
@@ -527,7 +527,7 @@ def global_events():
             'success'
         )
 
-    # Show the form to manage news in the administration portal
+    # Show the form to manage global events in the administration portal
     return render_template(
         'admin/global_events.html.j2',
         all_events=GlobalEvent.query.all(),
@@ -554,7 +554,7 @@ def delete_global_event(delete_event_type=None):
     db_session.commit()
     flash('The global event was deleted.', 'success')
 
-    # Show the form to manage global events in the administration portal
+    # Show the form to add global events in the administration portal
     return render_template(
         'admin/global_events.html.j2',
         all_events=GlobalEvent.query.all(),
@@ -565,8 +565,8 @@ def delete_global_event(delete_event_type=None):
 @admin.route('/events/edit/<int:edit_event_type>/', methods=['GET', 'POST'])
 @admin.route('/events/edit/<int:edit_event_type>', methods=['GET', 'POST'])
 def edit_global_event(edit_event_type=None):
-    """Administration portal to allow Gods to delete global events
-        /admin/events/delete"""
+    """Administration portal to allow Gods to edit global events
+        /admin/events/edit"""
     event = GlobalEvent.query.filter_by(
         event_type=edit_event_type
     ).first()
