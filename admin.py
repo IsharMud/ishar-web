@@ -522,7 +522,7 @@ def global_events():
             edit_event_type=new_global_event.event_type
         )
         flash(
-            'The global event was added! ' \
+            'The global event was added! '
             f'You can <a href="{edit_url}">edit it here</a>.',
             'success'
         )
