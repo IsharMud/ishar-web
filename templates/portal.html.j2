@@ -15,7 +15,7 @@ Welcome{% if current_user.display_name %}, {{ current_user.display_name | safe }
     {%- endif -%}
 {%- endmacro -%}
 {%- block scripts %}
-    {%- if current_user.players is defined and current_user.players is iterable and current_user.players | length > 0 %}
+    {%- if current_user.players and current_user.players is iterable and current_user.players | length > 0 %}
         <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
         <script>
             function showPlayers(where) {
@@ -84,7 +84,7 @@ Welcome{% if current_user.display_name %}, {{ current_user.display_name | safe }
     {%- endif %}
 {%- endblock scripts %}
 {%- block content %}
-    {%- if current_user.players is defined and current_user.players is iterable and current_user.players | length > 0 %}
+    {%- if current_user.players and current_user.players is iterable and current_user.players | length > 0 %}
                 <h3 title="You have {{ current_user.players | length }} character{% if current_user.players | length != 1 %}s{% endif %}">
                     You have {{ current_user.players | length }} character{% if current_user.players | length != 1 %}s{% endif %}:
                 </h3>
@@ -96,5 +96,10 @@ Welcome{% if current_user.display_name %}, {{ current_user.display_name | safe }
                 <h3 title="You have not created any players yet!">
                     You have not created any players yet!
                 </h3>
+    {%- endif %}
+    {%- if current_user.seasonal_points > 0 %}
+                <h4>
+                    You have {{ current_user.seasonal_points }} <a title="essence" href="{{ url_for('portal.account', _anchor='essence-balance') }}">essence</a>.
+                </h4>
     {%- endif %}
 {%- endblock content %}
