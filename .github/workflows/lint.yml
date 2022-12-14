@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-focal
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: [ '3.8' ]
