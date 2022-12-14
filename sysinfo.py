@@ -23,7 +23,7 @@ def get_proc(process_name='ishar'):
 
 
 # Flask Blueprint
-sysinfo = Blueprint('sys', __name__)
+sysinfo = Blueprint('sysinfo', __name__)
 
 
 @sysinfo.route('/online/', methods=['GET'])
@@ -51,7 +51,7 @@ def index():
             )
         )
     return render_template(
-        'sys.html.j2',
+        'sysinfo.html.j2',
         process=process,
         uptime=uptime
     )
