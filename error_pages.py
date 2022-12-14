@@ -33,7 +33,8 @@ def bad_request(message):
 @error_pages.app_errorhandler(401)
 def not_authorized(message):
     """401 error"""
-    return error(title='Not Authorized',
+    return error(
+        title='Not Authorized',
         message=message,
         code=401
     )

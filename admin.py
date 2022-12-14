@@ -6,7 +6,7 @@ from flask import abort, Blueprint, flash, render_template, url_for
 from flask_login import current_user, fresh_login_required
 from werkzeug.utils import secure_filename
 
-from mud_secret import IMM_LEVELS, PATCH_DIR, PODIR
+from mud_secret import IMM_LEVELS, PATCH_DIR
 from database import db_session
 from forms import EditAccountForm, EditPlayerForm, NewsAddForm, PatchAddForm, \
     SeasonCycleForm
@@ -329,7 +329,7 @@ def patches():
                 _external=True
             )
             patch_link = f'<a href="{patch_url}" target="_blank" ' \
-                            f'title="{patch_name}">{patch_url}</a>'
+                         f'title="{patch_name}">{patch_url}</a>'
             flash(
                 f'Uploaded: <code>{patch_link}</code>',
                 'success'
@@ -436,44 +436,26 @@ def season_cycle():
             # Loop through each player in each account
             for delete_player in account.players:
 
-                # Do not remove immortal players
+                # Delete mortal players,
+                #   including their Podir directory and from the database
                 if not delete_player.is_immortal:
-
-                    # Physically delete the Podir file for any mortal players
-                    delete_path = PODIR + '/' + delete_player.name
-                    if os.path.exists(delete_path):
-                        os.remove(delete_path)
-                        flash(
-                            f'Deleted <code>{delete_path}</code>.',
-                            'success'
-                        )
-
-                    # Delete mortal players from the database
-                    do_delete = db_session.query(Player).filter_by(
-                                    id=delete_player.id
-                                ).delete()
-                    if do_delete:
-                        flash(
-                            f'Deleted Player: {delete_player.name} '
-                            f'({delete_player.id}).',
-                            'success'
-                        )
+                    if delete_player.wipe():
                         total_players_deleted += 1
+                        flash(
+                            f'Player {delete_player.name} wiped.',
+                            'success'
+                        )
                     else:
                         flash(
-                            f'Delete Player Fail: {delete_player.name} '
-                            f'({delete_player.id}).',
+                            f'Player {delete_player.name} could not be wiped!',
                             'error'
                         )
                         sentry_sdk.capture_message(
-                            'Delete Player Fail: '
-                            f'{delete_player.name} '
-                            f'({delete_player.id})',
+                            'Player Wipe Fail: '
+                            f'{current_user} failed to reset {delete_player}',
                             level='error'
                         )
 
-        # Commit the changes to the database
-        db_session.commit()
         flash('All essence has been rewarded.', 'success')
         flash(
             f'Total Rewarded Essence: {total_rewarded_essence} essence',

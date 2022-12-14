@@ -110,6 +110,7 @@ def index():
         ).first()
     )
 
+
 @welcome.route('/wiz_list/', methods=['GET'])
 @welcome.route('/wizlist/', methods=['GET'])
 @welcome.route('/wiz_list', methods=['GET'])

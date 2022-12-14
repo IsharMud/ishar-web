@@ -17,9 +17,10 @@ login_manager.needs_refresh_message_category = 'error'
 login_manager.refresh_view = 'login.index'
 login_manager.session_protection = 'strong'
 
+
 @login_manager.user_loader
 def load_user(email):
-    """Use Account database object for flask-login, via unique e-mail address"""
+    """Use Account database table for flask-login, via unique e-mail address"""
     user_account = Account.query.filter_by(email=email).first()
     if user_account:
         sentry_sdk.set_user({

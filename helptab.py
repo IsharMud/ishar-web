@@ -183,7 +183,7 @@ def parse_help_content(content=None):
             for related_topic in related_topics:
                 i += 1
                 if related_topic and related_topic.strip() != '':
-                    related_link = f'<a href="/help/{related_topic.strip()}">' \
+                    related_link = f'<a href="/help/{related_topic.strip()}">'\
                         f'{related_topic.strip()}</a>'
                     help_topic['body_html'] += related_link
                     help_topic['body_text'] += related_topic.strip()
@@ -224,7 +224,7 @@ def parse_help_content(content=None):
 
 
 def parse_help_header(header=None):
-    """Parse the header from a single topic chunk from the MUD 'helptab' file"""
+    """Parse the header of a single topic chunk from the MUD 'helptab' file"""
 
     # The level that the help topic is for, is a number alone,
     #   on the first line of the header

@@ -40,7 +40,8 @@ def index():
             'alclient': 'https://www.ashavar.com/client/',
             'yTin': 'http://ytin.sourceforge.net/',
             'Gosclient': 'http://gosclient.altervista.org/eng/',
-            'MUSHclient': 'https://www.gammon.com.au/downloads/dlmushclient.htm'
+            'MUSHclient':
+                'https://www.gammon.com.au/downloads/dlmushclient.htm'
         }
     }
 

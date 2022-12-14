@@ -17,7 +17,7 @@ faqs = Blueprint('faqs', __name__)
 def index():
     """A few frequently asked questions (/faq, /faqs, or /questions)"""
 
-    # Fetch, and format, links to each of the playable classes with descriptions
+    # Fetch/format, links to each playable class with descriptions
     player_classes = [
         f'<a href="'
         f"{url_for('help_page.single', topic=player_class.class_display_name)}"
@@ -39,7 +39,7 @@ def index():
     all_faqs = {
 
         'Is Ishar MUD free?': [
-            '<strong>Yes</strong>! While you are more than welcome to <a href="'
+            '<strong>Yes</strong>! While you are welcome to <a href="'
             f"{url_for('welcome.support')}"
             '" title="Support">offer support</a>, '
             'Ishar MUD is free to use, play, and enjoy.'

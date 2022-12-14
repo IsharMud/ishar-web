@@ -6,7 +6,8 @@ from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired
 from wtforms import BooleanField, DateTimeLocalField, EmailField, \
     IntegerField, PasswordField, StringField, SubmitField, TextAreaField
-from wtforms.validators import DataRequired, Email, EqualTo, Length, NumberRange
+from wtforms.validators import DataRequired, Email, EqualTo, Length, \
+    NumberRange
 from wtforms_validators import Alpha, AlphaSpace
 
 from mud_secret import ALIGNMENTS
@@ -105,7 +106,7 @@ class EditPlayerForm(FlaskForm):
     karma = IntegerField(
         'Karma',
         validators=[
-            NumberRange(min=-100000,max=100000)
+            NumberRange(min=-100000, max=100000)
         ]
     )
     renown = IntegerField(

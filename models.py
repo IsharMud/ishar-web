@@ -1,5 +1,6 @@
 """Database classes/models"""
 import datetime
+import os
 from functools import cached_property
 
 from flask import url_for
@@ -10,7 +11,7 @@ from sqlalchemy.dialects.mysql import INTEGER, MEDIUMINT, SMALLINT, TINYINT
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import FetchedValue
 
-from mud_secret import ALIGNMENTS, IMM_LEVELS
+from mud_secret import ALIGNMENTS, IMM_LEVELS, PODIR
 import delta
 from database import Base, db_session
 
@@ -343,7 +344,8 @@ class News(Base):
     account = relationship('Account')
 
     def __repr__(self):
-        return f'<News> "{self.subject}" ({self.news_id}) @ "{self.created_at}"'
+        return f'<News> "{self.subject}" ({self.news_id}) @ ' \
+               f'"{self.created_at}"'
 
 
 class PlayerClass(Base):
@@ -841,6 +843,11 @@ class Player(Base):
             return 'Survival'
         return 'Classic'
 
+    @cached_property
+    def podir(self):
+        """Player Podir"""
+        return f'{PODIR}/{self.name}'
+
     @property
     def seasonal_earned(self):
         """Amount of essence earned for the player"""
@@ -860,3 +867,21 @@ class Player(Base):
         if self.remorts > 0:
             earned += int(self.remorts / 5) * 3 + 1
         return earned
+
+    def wipe(self):
+        """Delete a player Podir, and from the database,
+            for use during player-wipe/season cycle"""
+
+        # Immortals are skipped
+        if self.is_immortal:
+            return None
+
+        # Delete mortal players from the database
+        Player.query().filter_by(id=self.id).delete()
+        if db_session.commit():
+
+            # Delete the player Podir file
+            if os.remove(self.podir):
+                return True
+
+        return False
