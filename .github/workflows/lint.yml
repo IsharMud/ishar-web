@@ -1,4 +1,4 @@
-name: 'Pylint'
+name: 'PyLint & Flake8'
 on:
   pull_request:
     branches: [ 'main' ]

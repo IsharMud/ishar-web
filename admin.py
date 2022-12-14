@@ -32,7 +32,7 @@ def before_request():
         abort(401)
 
 
-@admin.route('/', methods=['GET', 'POST'])
+@admin.route('/', methods=['GET'])
 def index():
     """Administration portal main page for Gods"""
     return render_template('admin/portal.html.j2')
@@ -320,7 +320,7 @@ def patches():
                 'error'
             )
 
-        # Proceed in possibly uploading the file, if it is a PDF
+        # Proceed in possibly uploading the file
         else:
             patch_file.save(dst=upload_file)
             patch_url = url_for(
