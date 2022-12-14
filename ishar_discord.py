@@ -177,8 +177,9 @@ async def events(ctx: interactions.CommandContext):
     # Show any global events, and when they end
     if global_events:
         out = f'Global Events ({len(global_events)}):\n'
-        for global_event in global_events:
-            out += f'{global_event.name} ends in {global_event.end}\n'
+        for event in global_events:
+            out += f'{event.event_name} - {event.event_desc} / ' \
+                   f'(ends in {event.end})\n'
 
     # Send the global events response
     await ctx.send(out)
