@@ -22,6 +22,17 @@ def get_proc(process_name='ishar'):
     return None
 
 
+def get_uptime(process=get_proc()):
+    """Get uptime of the 'ishar' MUD process"""
+    if process:
+        return delta.stringify(
+            datetime.utcnow() - datetime.fromtimestamp(
+                process.info['create_time']
+            )
+        )
+    return None
+
+
 # Flask Blueprint
 sysinfo = Blueprint('sysinfo', __name__)
 
@@ -42,15 +53,7 @@ sysinfo = Blueprint('sysinfo', __name__)
 @sysinfo.route('/sysinfo', methods=['GET'])
 def index():
     """System information"""
-    process = get_proc()
-    uptime = None
-    if process:
-        uptime = delta.stringify(
-            datetime.utcnow() - datetime.fromtimestamp(
-                process.info['create_time']
-            )
-        )
     return render_template(
         'sysinfo.html.j2',
-        uptime=uptime
+        uptime=get_uptime()
     )

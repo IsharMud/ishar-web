@@ -12,6 +12,7 @@ from database import db_session
 from helptab import search_help_topics
 from models import Challenge, GlobalEvent, Player, Season
 from sentry import sentry_sdk
+from sysinfo import get_uptime
 
 
 # Create/compile a regular expression to only match letters,
@@ -322,6 +323,28 @@ async def spell(
         ephemeral=ephemeral
     )
     db_session.close()
+
+
+# /uptime
+@bot.command()
+async def uptime(ctx: interactions.CommandContext):
+    """Show the MUD process uptime"""
+    ephemeral = True
+    logging.info(
+        '%s (%i) / %s / uptime',
+        ctx.channel, ctx.channel_id, ctx.user
+    )
+
+    # Find/show the MUD process uptime
+    out = 'Sorry, but no system information could be found.'
+    utime = get_uptime()
+    if utime:
+        ephemeral = False
+        out = f'Uptime: {utime}'
+    await ctx.send(
+        out,
+        ephemeral=ephemeral
+    )
 
 
 # /season
