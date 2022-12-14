@@ -72,8 +72,8 @@
                       {%- for event in all_events %}
                         {
                             event_type: gridjs.html(`<a href="{{ url_for('admin.edit_global_event', edit_event_type=event.event_type) }}">{{ event.event_type }}</a>`),
-                            start_time:     "{{ event.start_time.strftime('%A, %B %d, %Y @ %H:%M%:%S %Z') }}",
-                            end_time:       "{{ event.end_time.strftime('%A, %B %d, %Y @ %H:%M%:%S %Z') }}",
+                            start_time:     "{{ event.start_time.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}",
+                            end_time:       "{{ event.end_time.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}",
                             event_name:     "{{ event.event_name | safe }}",
                             event_desc:     "{{ event.event_desc | truncate(50) | safe }}",
                             xp_bonus:       {{ event.xp_bonus }},
