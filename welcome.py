@@ -77,8 +77,8 @@ def season():
 
 
 @welcome.route('/donate/', methods=['GET'])
-@welcome.route('/support/', methods=['GET'])
 @welcome.route('/donate', methods=['GET'])
+@welcome.route('/support/', methods=['GET'])
 @welcome.route('/support', methods=['GET'])
 def support():
     """Support page"""
