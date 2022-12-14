@@ -16,9 +16,9 @@ def get_proc(process_name='ishar'):
 
     # Return the process with the correct name owned by the same user
     for proc in psutil.process_iter(attrs=pid_attrs):
-        if proc.info['name'] == process_name and \
-            proc.info['username'] == os.getenv('USER'):
-            return proc
+        if proc.info['name'] == process_name:
+            if proc.info['username'] == os.getenv('USER'):
+                return proc
     return None
 
 
