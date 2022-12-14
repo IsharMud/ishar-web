@@ -13,7 +13,8 @@ challenges = Blueprint('challenges', __name__)
 @challenges.route('/challenges/', methods=['GET'])
 @challenges.route('/challenges', methods=['GET'])
 def index():
-    """Sort and list active challenges, along with their tiers and winners"""
+    """Sort and list aLL active challenges,
+        along with their tiers and winners"""
     return render_template(
         'challenges.html.j2',
         challenges=Challenge.query.filter_by(
@@ -32,15 +33,17 @@ def index():
 @challenges.route('/challenges/completed/', methods=['GET'])
 @challenges.route('/challenges/completed', methods=['GET'])
 def complete():
-    """Sort and list completed challenges, along with their tiers and winners"""
+    """Sort and list completed challenges,
+        along with their tiers and winners"""
     return render_template(
         'challenges.html.j2',
         challenges=Challenge.query.filter_by(
-            is_active=1).filter(
-                Challenge.winner_desc != ''
-            ).order_by(
-                Challenge.adj_level,
-                Challenge.adj_people
+            is_active=1
+        ).filter(
+            Challenge.winner_desc != ''
+        ).order_by(
+            Challenge.adj_level,
+            Challenge.adj_people
         ).all()
     )
 
@@ -50,14 +53,16 @@ def complete():
 @challenges.route('/challenges/incomplete/', methods=['GET'])
 @challenges.route('/challenges/incomplete', methods=['GET'])
 def incomplete():
-    """Sort and list completed challenges, along with their tiers and winners"""
+    """Sort and list incomplete challenges,
+        along with their tiers and winners"""
     return render_template(
         'challenges.html.j2',
         challenges=Challenge.query.filter_by(
-            is_active=1).filter(
-                Challenge.winner_desc != ''
-            ).order_by(
-                Challenge.adj_level,
-                Challenge.adj_people
+            is_active=1
+        ).filter(
+            Challenge.winner_desc == ''
+        ).order_by(
+            Challenge.adj_level,
+            Challenge.adj_people
         ).all()
     )
