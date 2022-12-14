@@ -1,0 +1,121 @@
+{%- set page = 'admin' -%}
+{% extends "layout.html.j2" %}
+{% block meta_title %}Global Events / Administration Portal{% endblock meta_title %}
+{% block meta_description %}Administration portal to manage global events{% endblock meta_description %}
+{% block meta_url %}{{ url_for('admin.global_events', _external=True) }}{% endblock meta_url %}
+{% block title %}Global Events / Administration Portal{% endblock title %}
+{% block header %}Global Events{% endblock header %}
+{%- macro render_field(field) %}
+                    <tr>
+                        <td class="admin-{{ field.name | safe }}">
+                            {{ field.label | safe }}
+                        </td>
+                        <td class="admin-{{ field.name | safe }}">
+                            {{ field(**kwargs) | safe }}
+    {%- if field.errors %}
+                            <ul class="flash-error">
+        {%- for error in field.errors %}
+                                <li>
+                                    {{ error }}
+                                </li>
+        {%- endfor %}
+                            </ul>
+    {%- endif %}
+                        </td>
+                    </tr>
+{%- endmacro %}
+{%- block scripts %}
+    {%- if all_events and all_events is iterable and all_events | length > 0 %}
+        <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
+        <script>
+            function showGlobalEvents(where) {
+                new gridjs.Grid({
+                    columns: [
+                        {
+                            id:     'event_type',
+                            name:   'Type'
+                        },
+                        {
+                            id:     'start_time',
+                            name:   'Start'
+                        },
+                        {
+                            id:     'end_time',
+                            name:   'End'
+                        },
+                        {
+                            id:     'event_name',
+                            name:   'Name'
+                        },
+                        {
+                            id:     'event_desc',
+                            name:   'Description'
+                        },
+                        {
+                            id:     'xp_bonus',
+                            name:   'XP Bonus'
+                        },
+                        {
+                            id:     'shop_bonus',
+                            name:   'Shop Bonus'
+                        },
+                        {
+                            id:     'celestial_luck',
+                            name:   'Celestial Luck'
+                        },
+                        {
+                            id:     'delete',
+                            name:   'Delete'
+                        }
+                    ],
+                    data: [
+                      {%- for event in all_events %}
+                        {
+                            event_type: gridjs.html(`<a href="{{ url_for('admin.edit_global_event', edit_event_type=event.event_type) }}">{{ event.event_type }}</a>`),
+                            start_time:     "{{ event.start_time.strftime('%A, %B %d, %Y @ %H:%M%:%S %Z') }}",
+                            end_time:       "{{ event.end_time.strftime('%A, %B %d, %Y @ %H:%M%:%S %Z') }}",
+                            event_name:     "{{ event.event_name | safe }}",
+                            event_desc:     "{{ event.event_desc | truncate(50) | safe }}",
+                            xp_bonus:       {{ event.xp_bonus }},
+                            shop_bonus:     {{ event.shop_bonus }},
+                            celestial_luck: {{ event.celestial_luck }},
+                            delete:         gridjs.html(`<a href="{{ url_for('admin.delete_global_event', delete_event_type=event.event_type) }}" onclick="return confirm('Are you sure you want to delete this global event?');">❌</a>`)
+                        }{% if not loop.last %},{% endif %}
+                      {%- endfor %}
+                    ],
+                    search: true,
+                    sort: true,
+                    pagination: true
+                }).render(where);
+            };
+        </script>
+    {%- endif %}
+{%- endblock scripts %}
+{%- block content %}
+    {%- if event_add_form is defined %}
+                <h3 title="Add">Add</h3>
+                <form autocomplete="off" method="post" action="{{ url_for('admin.global_events') }}" id="event-add-form">
+                    <table>
+                        {{ render_field(event_add_form.event_type, autocomplete='off') }}
+                        {{ render_field(event_add_form.start_time, autocomplete='off') }}
+                        {{ render_field(event_add_form.end_time, autocomplete='off') }}
+                        {{ render_field(event_add_form.event_name, autocomplete='off') }}
+                        {{ render_field(event_add_form.event_desc, autocomplete='off') }}
+                        {{ render_field(event_add_form.xp_bonus, autocomplete='off') }}
+                        {{ render_field(event_add_form.shop_bonus, autocomplete='off') }}
+                        {{ render_field(event_add_form.celestial_luck, autocomplete='off') }}
+                        {{ event_add_form.csrf_token }}
+                        {{ render_field(event_add_form.submit) }}
+                    </table>
+                </form>
+    {%- endif %}
+    {%- if all_events and all_events is iterable and all_events | length > 0 %}
+                <hr>
+                <div id="all-global-events"></div>
+                <script>
+                    showGlobalEvents(
+                        document.getElementById('all-global-events')
+                    );
+                </script>
+    {%- endif %}
+{%- endblock content %}

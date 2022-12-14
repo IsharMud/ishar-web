@@ -119,6 +119,54 @@ class EditPlayerForm(FlaskForm):
     submit = SubmitField('Edit Player')
 
 
+class EventAddForm(FlaskForm):
+    """Event Add Form form class"""
+    event_type = IntegerField(
+        'Type',
+        validators=[
+            NumberRange(min=0)
+        ]
+    )
+    start_time = DateTimeLocalField(
+        'Start',
+        format='%Y-%m-%dT%H:%M',
+        default=datetime.utcnow(),
+    )
+    end_time = DateTimeLocalField(
+        'End',
+        format='%Y-%m-%dT%H:%M',
+        default=datetime.utcnow() + relativedelta(days=+1),
+    )
+    event_name = StringField(
+        'Name',
+        validators=[
+            DataRequired(),
+        ]
+    )
+    event_desc = StringField(
+        'Description'
+    )
+    xp_bonus = IntegerField(
+        'XP Bonus',
+        validators=[
+            NumberRange(min=0)
+        ]
+    )
+    shop_bonus = IntegerField(
+        'Shop Bonus',
+        validators=[
+            NumberRange(min=0)
+        ]
+    )
+    celestial_luck = IntegerField(
+        'Celestial Luck',
+        validators=[
+            NumberRange(min=0)
+        ]
+    )
+    submit = SubmitField('Save')
+
+
 class HelpSearchForm(FlaskForm):
     """Help search form class to search help topic names"""
     search = StringField(

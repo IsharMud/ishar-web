@@ -8,9 +8,9 @@ from werkzeug.utils import secure_filename
 
 from mud_secret import IMM_LEVELS, PATCH_DIR
 from database import db_session
-from forms import EditAccountForm, EditPlayerForm, NewsAddForm, PatchAddForm, \
-    SeasonCycleForm
-from models import Account, News, Player, Season
+from forms import EditAccountForm, EditPlayerForm, EventAddForm, \
+    NewsAddForm, PatchAddForm, SeasonCycleForm
+from models import Account, GlobalEvent, News, Player, Season
 from patches import get_patch_pdfs
 from sentry import sentry_sdk
 
@@ -491,4 +491,106 @@ def season_cycle():
     return render_template(
         'admin/season_cycle.html.j2',
         season_cycle_form=season_cycle_form
+    )
+
+
+@admin.route('/events/', methods=['GET', 'POST'])
+@admin.route('/events', methods=['GET', 'POST'])
+def global_events():
+    """Administration portal to allow Gods to post news
+        /admin/news"""
+
+    # Get event add form and check if submitted
+    event_add_form = EventAddForm()
+    if event_add_form.validate_on_submit():
+
+        # Create the new global event database entry
+        new_global_event = GlobalEvent(
+            event_type=event_add_form.event_type.data,
+            start_time=event_add_form.start_time.data,
+            end_time=event_add_form.end_time.data,
+            event_name=event_add_form.event_name.data,
+            event_desc=event_add_form.event_desc.data,
+            xp_bonus=event_add_form.xp_bonus.data,
+            shop_bonus=event_add_form.shop_bonus.data,
+            celestial_luck=event_add_form.celestial_luck.data
+        )
+        db_session.add(new_global_event)
+        db_session.commit()
+        edit_url = url_for(
+            'admin.edit_global_event',
+            edit_event_type=new_global_event.event_type
+        )
+        flash(
+            'The global event was added! ' \
+            f'You can <a href="{edit_url}">edit it here</a>.',
+            'success'
+        )
+
+    # Show the form to manage news in the administration portal
+    return render_template(
+        'admin/global_events.html.j2',
+        all_events=GlobalEvent.query.all(),
+        event_add_form=event_add_form
+    )
+
+
+@admin.route('/events/delete/<int:delete_event_type>/', methods=['GET'])
+@admin.route('/events/delete/<int:delete_event_type>', methods=['GET'])
+def delete_global_event(delete_event_type=None):
+    """Administration portal to allow Gods to delete global events
+        /admin/events/delete"""
+    event = GlobalEvent.query.filter_by(
+        event_type=delete_event_type
+    ).first()
+
+    if not event:
+        flash('Invalid global event.', 'error')
+        abort(400)
+
+    GlobalEvent.query.filter_by(
+        event_type=event.event_type
+    ).delete()
+    db_session.commit()
+    flash('The global event was deleted.', 'success')
+
+    # Show the form to manage global events in the administration portal
+    return render_template(
+        'admin/global_events.html.j2',
+        all_events=GlobalEvent.query.all(),
+        event_add_form=EventAddForm()
+    )
+
+
+@admin.route('/events/edit/<int:edit_event_type>/', methods=['GET', 'POST'])
+@admin.route('/events/edit/<int:edit_event_type>', methods=['GET', 'POST'])
+def edit_global_event(edit_event_type=None):
+    """Administration portal to allow Gods to delete global events
+        /admin/events/delete"""
+    event = GlobalEvent.query.filter_by(
+        event_type=edit_event_type
+    ).first()
+
+    if not event:
+        flash('Invalid global event.', 'error')
+        abort(400)
+
+    # Get event form, and check if submitted
+    edit_event_form = EventAddForm()
+    if edit_event_form.validate_on_submit():
+        event.event_type = edit_event_form.event_type.data
+        event.start_time = edit_event_form.start_time.data
+        event.end_time = edit_event_form.end_time.data
+        event.event_name = edit_event_form.event_name.data
+        event.event_desc = edit_event_form.event_desc.data
+        event.xp_bonus = edit_event_form.xp_bonus.data
+        event.shop_bonus = edit_event_form.shop_bonus.data
+        event.celestial_luck = edit_event_form.celestial_luck.data
+        db_session.commit()
+        flash('The global event was saved.', 'success')
+
+    return render_template(
+        'admin/edit_event.html.j2',
+        edit_event=event,
+        edit_event_form=edit_event_form
     )
