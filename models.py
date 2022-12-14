@@ -305,9 +305,31 @@ class GlobalEvent(Base):
             self.end_time - datetime.datetime.utcnow()
         )
 
+    @cached_property
+    def display_name(self):
+        """Formatted name of the event"""
+        return self.event_name.replace('_', ' ').title()
+
+    @cached_property
+    def display_string(self):
+        """Formatted full display string for the event,
+            with display name, and any event_desc from database"""
+        out = self.display_name
+        if self.event_desc and self.event_desc != '':
+            out += f' -- {self.event_desc}'
+        return out
+
+    @cached_property
+    def is_luck(self):
+        """Boolean based upon celestial_luck from database"""
+        if self.celestial_luck == 1:
+            return True
+        return False
+
     def __repr__(self):
         return '<GlobalEvent> / ' \
-               f'Type: "{self.event_type}" / Name: "{self.event_name}" / ' \
+               f'Type: "{self.event_type}" / ' \
+               f'Name: "{self.event_name}" ("{self.display_name}") / ' \
                f'Desc: "{self.event_desc}" / ' \
                f'Start: "{self.start_time}" ("{self.start}") / ' \
                f'End: "{self.end_time}" ("{self.end}")'

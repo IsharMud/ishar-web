@@ -178,8 +178,7 @@ async def events(ctx: interactions.CommandContext):
     if global_events:
         out = f'Global Events ({len(global_events)}):\n'
         for event in global_events:
-            out += f'{event.event_name} - {event.event_desc} / ' \
-                   f'(ends in {event.end})\n'
+            out += f'{event.display_string} (ends in {event.end})\n'
 
     # Send the global events response
     await ctx.send(out)

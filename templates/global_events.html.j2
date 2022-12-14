@@ -15,12 +15,9 @@
     {%- if global_events %}
                 <ul>
         {%- for global_event in global_events %}
-                    <li title="Name: {{ global_event.event_name | replace('_', ' ') }} / Description: {{ global_event.event_desc }}">
+                    <li title="{{ global_event.display_string }}">
                         <h3>
-                            {{ global_event.event_name | replace('_', ' ') }}
-             {%- if global_event.event_desc and global_event.event_desc != '' %}
-                            -- {{ global_event.event_desc }}
-             {%- endif %}
+                            {{ global_event.display_string }}
                         </h3>
                     </li>
                     <li class="nested-list">
@@ -53,7 +50,7 @@
                                     <li>in {{ global_event.end }}</li>
                                 </ul>
                             </li>
-            {%- if global_event.celestial_luck and global_event.celestial_luck != '' and global_event.celestial_luck != 0 %}
+            {%- if global_event.is_luck %}
                             <li title="Shavar and Chenchir shine brightly! (+50%/+25% gold/moves)">
                                 <strong>Shavar and Chenchir shine brightly!</strong>
                                 <ul>
