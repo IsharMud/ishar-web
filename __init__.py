@@ -20,6 +20,7 @@ from leaders import leaders
 from mud_clients import mud_clients
 from patches import patches
 from portal import portal
+from sysinfo import sysinfo
 from welcome import welcome
 import error_pages
 from models import GlobalEvent, Season
@@ -46,6 +47,7 @@ app.register_blueprint(login)
 app.register_blueprint(mud_clients)
 app.register_blueprint(patches)
 app.register_blueprint(portal)
+app.register_blueprint(sysinfo)
 app.register_blueprint(welcome)
 
 

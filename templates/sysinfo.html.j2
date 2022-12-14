@@ -1,0 +1,24 @@
+{% extends "layout.html.j2" %}
+{% block meta_title %}System Information{% endblock meta_title %}
+{% block meta_description %}System information about the Ishar MUD server and process{% endblock meta_description %}
+{% block meta_url %}{{ url_for('welcome.wizlist', _external=True) }}{% endblock meta_url %}
+{% block title %}System Information{% endblock title %}
+{% block header %}System Information{% endblock header %}
+{%- block content %}
+    {%- if process %}
+        <h3>Process</h3>
+        <ul>
+            <li>
+                {{ process }}
+            </li>
+        </ul>
+    {%- endif %}
+    {%- if uptime %}
+        <h3>Uptime</h3>
+        <ul>
+            <li>
+                {{ uptime }}
+            </li>
+        </ul>
+    {%- endif %}
+{%- endblock content %}
