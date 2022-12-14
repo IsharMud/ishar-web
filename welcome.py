@@ -44,7 +44,7 @@ def global_events():
     # Respond with 204 if there are no events
     code = 200
     events = GlobalEvent.query.all()
-    if not global_events:
+    if not events:
         code = 204
     return render_template(
         'global_events.html.j2',
