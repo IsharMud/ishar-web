@@ -163,6 +163,7 @@ async def deadhead(ctx: interactions.CommandContext):
 @bot.command()
 async def events(ctx: interactions.CommandContext):
     """Show any global events"""
+    ephemeral = True
     logging.info(
         '%s (%i) / %s / events',
         ctx.channel, ctx.channel_id, ctx.user
@@ -176,12 +177,16 @@ async def events(ctx: interactions.CommandContext):
 
     # Show any global events, and when they end
     if global_events:
+        ephemeral = False
         out = f'Global Events ({len(global_events)}):\n'
         for event in global_events:
             out += f'{event.display_string} (ends in {event.end})\n'
 
     # Send the global events response
-    await ctx.send(out)
+    await ctx.send(
+        out,
+        ephemeral=ephemeral
+    )
     db_session.close()
 
 
