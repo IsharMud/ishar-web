@@ -24,44 +24,39 @@
                         </h3>
                     </li>
             {%- if global_event.xp_bonus and global_event.xp_bonus != '' and global_event.xp_bonus != 0 %}
-                    <li title="XP Bonus: {{ global_event.xp_bonus | string }}">
+                    <li title="XP Bonus: {{ global_event.xp_bonus / 1 }}">
                         <strong>XP Bonus</strong>:
                         <ul>
-                            <li>
-                                {{ global_event.xp_bonus | string }}
-                            </li>
+                            <li>{{ global_event.xp_bonus / 1 }}%</li>
                         </ul>
                     </li>
             {%- endif %}
             {%- if global_event.shop_bonus and global_event.shop_bonus != '' and global_event.shop_bonus != 0 %}
-                    <li title="Shop Bonus: {{ global_event.shop_bonus | string }}">
+                    <li title="Shop Bonus: {{ 100 / global_event.shop_bonus }}">
                         <strong>Shop Bonus</strong>:
                         <ul>
-                            <li>
-                                {{ global_event.shop_bonus | string }}
-                            </li>
+                            <li>{{ 100 / global_event.shop_bonus }}% off</li>
                         </ul>
                     </li>
             {%- endif %}
                     <li title="Started: {{ global_event.start_time.strftime('%A, %B %d, %Y @ %H:%M:%S') }} ({{ global_event.start }} ago)">
                         <strong>Started</strong>:
                         <ul>
-                            <li>
-                                {{ global_event.start }} ago
-                            </li>
+                            <li>{{ global_event.start }} ago</li>
                         </ul>
                     </li>
                     <li title="Ends: {{ global_event.end_time.strftime('%A, %B %d, %Y @ %H:%M:%S') }} (in {{ global_event.end }})">
                         <strong>Ends</strong>:
                         <ul>
-                            <li>
-                                in {{ global_event.end }}
-                            </li>
+                            <li>in {{ global_event.end }}</li>
                         </ul>
                     </li>
             {%- if global_event.celestial_luck and global_event.celestial_luck != '' and global_event.celestial_luck != 0 %}
                     <li title="Shavar and Chenchir shine brightly! (+50%/+25% gold/moves)">
-                        Shavar and Chenchir shine brightly! (+50%/+25% gold/moves)
+                        <strong>Shavar and Chenchir shine brightly!</strong>
+                        <ul>
+                            <li>+50%/+25% gold/moves</li>
+                        </ul>
                     </li>
             {%- endif %}
         {%- endfor %}
