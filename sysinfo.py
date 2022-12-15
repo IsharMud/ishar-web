@@ -54,9 +54,9 @@ sysinfo = Blueprint('sysinfo', __name__)
 def index():
     """System information"""
     proc = get_proc()
-    system_info = None
+    ret = None
     if proc and proc.info:
-        system_info = {
+        ret = {
             'cpu_percent':  proc.cpu_percent(),
             'cpu_times':    proc.cpu_times(),
             'ctx_switches': proc.num_ctx_switches(),
@@ -70,5 +70,5 @@ def index():
 
     return render_template(
         'sysinfo.html.j2',
-        system_info=system_info
+        sysinfo=ret
     )
