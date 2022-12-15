@@ -61,7 +61,7 @@ def index():
     )
     return render_template(
         'sysinfo.html.j2',
-        cpu_percent=proc.cpu_times(),
+        cpu_percent=proc.cpu_percent(),
         cpu_times=proc.cpu_times(),
         ctx_switches=proc.num_ctx_switches(),
         memory=proc.memory_info(),
