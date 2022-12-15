@@ -11,8 +11,8 @@ from sqlalchemy.dialects.mysql import INTEGER, MEDIUMINT, SMALLINT, TINYINT
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import FetchedValue
 
-from delta import stringify
 from mud_secret import ALIGNMENTS, IMM_LEVELS, PODIR
+from delta import stringify
 from database import Base, db_session
 
 
