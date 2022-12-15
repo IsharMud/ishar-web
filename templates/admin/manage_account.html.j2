@@ -14,13 +14,6 @@
         {{ player.deaths }}
     {%- endif -%}
 {%- endmacro -%}
-{%- macro display_name(player) -%}
-    {%- if player.player_type != 'Classic' -%}
-        gridjs.html(`<a href="{{url_for('admin.edit_player', edit_player_id=player.id) }}">{{ player.name | title | safe }}</a>`)
-    {%- else -%}
-        {{ player.name | title | safe }}
-    {%- endif -%}
-{%- endmacro -%}
 {%- block scripts %}
     {%- if manage_account.players is defined and manage_account.players is iterable and manage_account.players | length > 0 %}
         <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
@@ -75,7 +68,7 @@
                     data: [
                       {%- for player in manage_account.players %}
                         {
-                            name:           {{ display_name(player) }},
+                            name:           gridjs.html(`<span class="{{ player.player_css }}">{{ player.player_type }}</span>`),
                             level:          {{ player.level }},
                             remorts:        {{ player.remorts }},
                             renown:         {{ player.renown }},
