@@ -5,11 +5,11 @@ import os
 import psutil
 from flask import Blueprint, render_template
 
-import delta
+from delta import stringify
 
 
 def get_proc(process_name='ishar'):
-    """Get information about the 'ishar' MUD process"""
+    """Get information about the (usually 'ishar') MUD process"""
 
     # Loop through each process, getting its name, username, and create time
     pid_attrs = ['pid', 'name', 'username', 'create_time']
@@ -23,9 +23,9 @@ def get_proc(process_name='ishar'):
 
 
 def get_uptime(process=get_proc()):
-    """Get uptime of the 'ishar' MUD process"""
+    """Format uptime of the MUD process"""
     if process:
-        return delta.stringify(
+        return stringify(
             datetime.utcnow() - datetime.fromtimestamp(
                 process.info['create_time']
             )
@@ -61,11 +61,7 @@ def index():
             'cpu_times':    proc.cpu_times(),
             'ctx_switches': proc.num_ctx_switches(),
             'memory':       proc.memory_info(),
-            'uptime':       delta.stringify(
-                datetime.utcnow() - datetime.fromtimestamp(
-                    proc.info['create_time']
-                )
-            )
+            'uptime':       get_uptime(process=proc)
         }
 
     return render_template(
