@@ -5,18 +5,56 @@
 {% block title %}System Information{% endblock title %}
 {% block header %}System Information{% endblock header %}
 {%- block content %}
-    {%- if uptime %}
-        <h3>Uptime</h3>
         <ul>
             <li>
-                {{ uptime }}
+                <strong>cpu_percent</strong>:
             </li>
-        </ul>
-    {%- else %}
-        <ul>
+            <li class="nested-list">
+                <ul>
+                    <li>
+                        {{ cpu_percent }}
+                    </li>
+                </ul>
+            </li>
             <li>
-                <i>No system information could be found!</i>
+                <strong>cpu_times</strong>:
+            </li>
+            <li class="nested-list">
+                <ul>
+                    <li>
+                        {{ cpu_times }}
+                    </li>
+                </li>
+            </li>
+            <li>
+                <strong>ctx_switches</strong>:
+            </li>
+            <li class="nested-list">
+                <ul>
+                    <li>
+                        {{ ctx_switches }}
+                    </li>
+                </li>
+            </li>
+            <li>
+                <strong>memory</strong>:
+            </li>
+            <li class="nested-list">
+                <ul>
+                    <li>
+                        {{ memory }}
+                    </li>
+                </li>
+            </li>
+            <li>
+                <strong>uptime</strong>:
+            </li>
+            <li class="nested-list">
+                <ul>
+                    <li>
+                        {{ uptime }}
+                    </li>
+                </li>
             </li>
         </ul>
-    {%- endif %}
 {%- endblock content %}

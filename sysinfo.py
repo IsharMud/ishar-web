@@ -53,7 +53,22 @@ sysinfo = Blueprint('sysinfo', __name__)
 @sysinfo.route('/sysinfo', methods=['GET'])
 def index():
     """System information"""
+    proc = get_proc()
+    cpu_percent = proc.cpu_percent()
+    cpu_times = proc.cpu_times()
+    ctx_switches = proc.num_ctx_switches()
+    memory = proc.memory_info()
+    uptime = delta.stringify(
+        datetime.utcnow() - datetime.fromtimestamp(
+            proc.info['create_time']
+        )
+    )
     return render_template(
         'sysinfo.html.j2',
-        uptime=get_uptime()
+        cpu_percent=cpu_percent,
+        cpu_times=cpu_times,
+        ctx_switches=ctx_switches,
+        memory=memory,
+        uptime=uptime
     )
+
