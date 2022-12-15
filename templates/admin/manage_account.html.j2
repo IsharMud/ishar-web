@@ -68,7 +68,7 @@
                     data: [
                       {%- for player in manage_account.players %}
                         {
-                            name:           gridjs.html(`<span class="{{ player.player_css }}">{{ player.display_name }}</span>`),
+                            name:           gridjs.html(`<span class="{{ player.player_css }}">{{ player.name }}</span>`),
                             level:          {{ player.level }},
                             remorts:        {{ player.remorts }},
                             renown:         {{ player.renown }},
