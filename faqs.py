@@ -49,7 +49,7 @@ def index():
             '<a href="'
             f"{url_for('help_page.single', topic='Classes')}"
             '" title="Classes">Yes! There are '
-            f'{len(player_classes)} classes</a> available'
+            f'{len(player_classes)} classes</a> available '
             'to choose from, when you create a player character:',
             player_classes
         ],
