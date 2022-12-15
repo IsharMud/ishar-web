@@ -5,56 +5,30 @@
 {% block title %}System Information{% endblock title %}
 {% block header %}System Information{% endblock header %}
 {%- block content %}
-        <ul>
-            <li>
-                <strong>cpu_percent</strong>:
-            </li>
-            <li class="nested-list">
+    {%- if sysinfo %}
+                <p>
+                    Here is some basic system information about the Ishar MUD server process.
+                </p>
                 <ul>
+                {%- for infokey, infoval in system_info.items() %}
                     <li>
-                        {{ cpu_percent }}
+                        <strong>{{ infokey }}</strong>:
+                    </li>
+                    <li class="nested-list">
+                        <ul>
+                            <li>
+                                {{ infoval }}
+                            </li>
+                        </ul>
                     </li>
                 </ul>
-            </li>
-            <li>
-                <strong>cpu_times</strong>:
-            </li>
-            <li class="nested-list">
-                <ul>
-                    <li>
-                        {{ cpu_times }}
-                    </li>
-                </ul>
-            </li>
-            <li>
-                <strong>ctx_switches</strong>:
-            </li>
-            <li class="nested-list">
-                <ul>
-                    <li>
-                        {{ ctx_switches }}
-                    </li>
-                </ul>
-            </li>
-            <li>
-                <strong>memory</strong>:
-            </li>
-            <li class="nested-list">
-                <ul>
-                    <li>
-                        {{ memory }}
-                    </li>
-                </ul>
-            </li>
-            <li>
-                <strong>uptime</strong>:
-            </li>
-            <li class="nested-list">
-                <ul>
-                    <li>
-                        {{ uptime }}
-                    </li>
-                </ul>
-            </li>
-        </ul>
+    {%- else %}
+                <h3>
+                    Sorry
+                </h3>
+                <p>
+                    Unfortunately, no active Ishar MUD process could be found for this environment.
+                </p>
+
+    {%- endif %}
 {%- endblock content %}

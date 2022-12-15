@@ -54,16 +54,21 @@ sysinfo = Blueprint('sysinfo', __name__)
 def index():
     """System information"""
     proc = get_proc()
-    uptime = delta.stringify(
-        datetime.utcnow() - datetime.fromtimestamp(
-            proc.info['create_time']
-        )
-    )
+    system_info = None
+    if proc and proc.info:
+        system_info = {
+            'cpu_percent':  proc.cpu_percent(),
+            'cpu_times':    proc.cpu_times(),
+            'ctx_switches': proc.num_ctx_switches(),
+            'memory':       proc.memory_info(),
+            'uptime':       delta.stringify(
+                datetime.utcnow() - datetime.fromtimestamp(
+                    proc.info['create_time']
+                )
+            )
+        }
+
     return render_template(
         'sysinfo.html.j2',
-        cpu_percent=proc.cpu_percent(),
-        cpu_times=proc.cpu_times(),
-        ctx_switches=proc.num_ctx_switches(),
-        memory=proc.memory_info(),
-        uptime=uptime
+        system_info=system_info
     )
