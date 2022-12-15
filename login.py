@@ -82,7 +82,7 @@ def index():
 
     # Show the log-in form with 401 response
     return render_template(
-        'login.html.j2',
+        'portal/login.html.j2',
         login_form=login_form
     ), 401
 

@@ -1,5 +1,5 @@
 {%- set page = 'patches' -%}
-{% extends "layout.html.j2" %}
+{% extends "base/layout.html.j2" %}
 {% block meta_title %}Patches{% endblock meta_title %}
 {% block meta_description %}The latest patches to Ishar MUD{% endblock meta_description %}
 {% block meta_url %}{{ url_for('patches.index', _external=True) }}{% endblock meta_url %}

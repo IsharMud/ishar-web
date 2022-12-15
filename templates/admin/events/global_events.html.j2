@@ -1,5 +1,5 @@
 {%- set page = 'admin' -%}
-{% extends "layout.html.j2" %}
+{% extends "base/layout.html.j2" %}
 {% block meta_title %}Global Events / Administration Portal{% endblock meta_title %}
 {% block meta_description %}Administration portal to manage global events{% endblock meta_description %}
 {% block meta_url %}{{ url_for('admin.global_events', _external=True) }}{% endblock meta_url %}

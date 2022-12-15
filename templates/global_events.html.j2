@@ -1,5 +1,5 @@
 {%- set page = 'global_events' %}
-{% extends "layout.html.j2" %}
+{% extends "base/layout.html.j2" %}
 {%- set events_pre  = 'Global Events' -%}
 {%- if global_events %}
     {%- set events_title = events_pre + ' (' + global_events | length | string + ')'  %}

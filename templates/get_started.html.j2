@@ -1,5 +1,5 @@
 {%- set page = 'get_started' -%}
-{% extends "layout.html.j2" %}
+{% extends "base/layout.html.j2" %}
 {% block meta_title %}Get Started{% endblock meta_title %}
 {% block meta_description %}Get Started with these tips and background information about the game{% endblock meta_description %}
 {% block meta_url %}{{ url_for('welcome.getstarted', _external=True) }}{% endblock meta_url %}

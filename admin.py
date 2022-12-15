@@ -72,7 +72,7 @@ def news():
 
     # Show the form to manage news in the administration portal
     return render_template(
-        'admin/news.html.j2',
+        'admin/news/news.html.j2',
         all_news=News.query.order_by(-News.created_at).all(),
         news_add_form=news_add_form
     )
@@ -102,7 +102,7 @@ def edit_news(edit_news_id=None):
         )
 
     return render_template(
-        'admin/edit_news.html.j2',
+        'admin/news/edit_news.html.j2',
         edit_news=news_post,
         edit_news_form=edit_news_form
     )
@@ -129,7 +129,7 @@ def delete_news(delete_news_id=None):
 
     # Show the form to manage news in the administration portal
     return render_template(
-        'admin/news.html.j2',
+        'admin/news/news.html.j2',
         all_news=News.query.order_by(-News.created_at).all(),
         news_add_form=NewsAddForm()
     )
@@ -147,7 +147,7 @@ def manage_account(manage_account_id=None):
         abort(400)
 
     return render_template(
-        'admin/manage_account.html.j2',
+        'admin/account/manage_account.html.j2',
         manage_account=account
     )
 
@@ -209,7 +209,7 @@ def edit_account(edit_account_id=None):
         )
 
     return render_template(
-        'admin/edit_account.html.j2',
+        'admin/account/edit_account.html.j2',
         edit_account=account,
         edit_account_form=edit_account_form
     )
@@ -221,7 +221,7 @@ def accounts():
     """Administration portal to allow Gods to view accounts
         /admin/accounts"""
     return render_template(
-        'admin/accounts.html.j2',
+        'admin/account/accounts.html.j2',
         accounts=Account.query.order_by(
             Account.account_id
         ).all()
@@ -259,7 +259,7 @@ def edit_player(edit_player_id=None):
         )
 
     return render_template(
-        'admin/edit_player.html.j2',
+        'admin/account/edit_player.html.j2',
         edit_player=player,
         edit_player_form=edit_player_form
     )
@@ -271,7 +271,7 @@ def season():
     """Administration portal to allow Gods to view/manage seasons
         /admin/season"""
     return render_template(
-        'admin/season.html.j2',
+        'admin/season/season.html.j2',
         seasons=Season.query.order_by(
             -Season.is_active,
             -Season.season_id
@@ -489,7 +489,7 @@ def season_cycle():
 
     # Show the form to cycle a season in the administration portal
     return render_template(
-        'admin/season_cycle.html.j2',
+        'admin/season/season_cycle.html.j2',
         season_cycle_form=season_cycle_form
     )
 
@@ -529,7 +529,7 @@ def global_events():
 
     # Show the form to manage global events in the administration portal
     return render_template(
-        'admin/global_events.html.j2',
+        'admin/events/global_events.html.j2',
         all_events=GlobalEvent.query.all(),
         event_add_form=event_add_form
     )
@@ -556,7 +556,7 @@ def delete_global_event(delete_event_type=None):
 
     # Show the form to add global events in the administration portal
     return render_template(
-        'admin/global_events.html.j2',
+        'admin/events/global_events.html.j2',
         all_events=GlobalEvent.query.all(),
         event_add_form=EventAddForm()
     )
@@ -590,7 +590,7 @@ def edit_global_event(edit_event_type=None):
         flash('The global event was saved.', 'success')
 
     return render_template(
-        'admin/edit_event.html.j2',
+        'admin/events/edit_event.html.j2',
         edit_event=event,
         edit_event_form=edit_event_form
     )

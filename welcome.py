@@ -91,7 +91,7 @@ def support():
 def index():
     """Main welcome page/index, includes the most recent news"""
     return render_template(
-        'welcome.html.j2',
+        'base/welcome.html.j2',
         news=News.query.order_by(
             -News.created_at
         ).first()

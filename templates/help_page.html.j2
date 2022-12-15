@@ -1,5 +1,5 @@
 {%- set page = 'help' -%}
-{% extends "layout.html.j2" %}
+{% extends "base/layout.html.j2" %}
 {%- if topic is defined and topic is iterable and topic['name'] is defined %}
     {%- set topic_name = topic['name'] | safe | trim %}
 {%- endif %}

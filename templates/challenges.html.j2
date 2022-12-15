@@ -1,5 +1,5 @@
 {%- set page = 'challenges' -%}
-{% extends "layout.html.j2" %}
+{% extends "base/layout.html.j2" %}
 {%- set challenges_pre  = 'Challenges' -%}
 {%- if challenges is defined and challenges is iterable and challenges | length > 0 %}
     {%- set challenges_completed = challenges | selectattr('winner_desc', '!=', '') | list | length %}

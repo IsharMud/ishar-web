@@ -15,7 +15,7 @@ def error(
 ):
     """Error template"""
     return render_template(
-        'error.html.j2',
+        'base/error.html.j2',
         title=title,
         message=message
     ), code

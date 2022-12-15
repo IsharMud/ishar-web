@@ -1,5 +1,5 @@
 {%- set page = 'portal' -%}
-{% extends "layout.html.j2" %}
+{% extends "base/layout.html.j2" %}
 {%- macro render_field(field) -%}
                     {{ field(**kwargs) | safe }}
     {%- if field.errors %}

@@ -1,5 +1,5 @@
 {%- set page = 'admin' -%}
-{% extends "layout.html.j2" %}
+{% extends "base/layout.html.j2" %}
 {%- block meta_title %}Edit Event: {{ edit_event.display_name | safe }} / Administration Portal{%- endblock meta_title %}
 {%- block meta_description %}Administration portal to edit a global event{%- endblock meta_description %}
 {%- block meta_url %}{{ url_for('admin.edit_global_event', edit_event_type=edit_event.event_type, _external=True) }}{%- endblock meta_url %}
