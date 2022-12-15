@@ -12,12 +12,14 @@
         {%- for infokey, infoval in sysinfo.items() %}
                 <ul>
                     <li>
-                        <strong>{{ infokey }}</strong>:
+                        <strong>{{ infokey | title }}</strong>:
                     </li>
                     <li class="nested-list">
                         <ul>
                             <li>
-                                {{ infoval }}
+                                <code>
+                                    {{ infoval }}
+                                </code>
                             </li>
                         </ul>
                     </li>
