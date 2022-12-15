@@ -10,7 +10,7 @@
                     Here is some basic system information about the Ishar MUD server process.
                 </p>
                 <ul>
-                {%- for infokey, infoval in system_info.items() %}
+        {%- for infokey, infoval in system_info.items() %}
                     <li>
                         <strong>{{ infokey }}</strong>:
                     </li>
@@ -22,6 +22,7 @@
                         </ul>
                     </li>
                 </ul>
+        {%- endfor %}
     {%- else %}
                 <h3>
                     Sorry
@@ -29,6 +30,5 @@
                 <p>
                     Unfortunately, no active Ishar MUD process could be found for this environment.
                 </p>
-
     {%- endif %}
 {%- endblock content %}
