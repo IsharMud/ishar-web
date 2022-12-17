@@ -32,8 +32,8 @@
                     <a href="{{ url_for('challenges.index') }}" {%- if page == 'challenges' %} id="active-nav"{% endif%}>Challenges</a>
                 </li>
                 <li title="Events">
-                    <a href="{{ url_for('welcome.global_events') }}" {%- if page == 'global_events' %} id="active-nav"{% endif%}>Events</a>
-                    {%- if global_event_count and global_event_count > 0 %} ({{ global_event_count | string }}){%- endif %}
+                    <a href="{{ url_for('welcome.global_events') }}" {%- if page == 'global_events' %} id="active-nav"{% endif %}>Events
+                    {%- if global_event_count and global_event_count > 0 %} ({{ global_event_count | string }}){%- endif %}</a>
                 </li>
                 <li title="Leaders">
                     <a href="{{ url_for('leaders.index') }}" {%- if page == 'leaders' %} id="active-nav"{% endif%}>Leaders</a>

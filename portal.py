@@ -91,7 +91,7 @@ def player(player_name=None):
         #   followed by a wildcard (%) to try to find the player
         find = Player.query.filter(
             Player.name.like(
-                player_search_form.player_search_name.data + '%'
+                f'{player_search_form.player_search_name.data}%'
             )
         ).first()
         if find:
