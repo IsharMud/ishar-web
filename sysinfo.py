@@ -5,8 +5,6 @@ import os
 import psutil
 from flask import Blueprint, render_template
 
-from delta import stringify
-
 
 def get_proc(process_name='ishar'):
     """Get information about the (usually 'ishar') MUD process"""
@@ -25,10 +23,8 @@ def get_proc(process_name='ishar'):
 def get_uptime(process=get_proc()):
     """Format uptime of the MUD process"""
     if process:
-        return stringify(
-            datetime.utcnow() - datetime.fromtimestamp(
-                process.info['create_time']
-            )
+        return datetime.utcnow() - datetime.fromtimestamp(
+            process.info['create_time']
         )
     return None
 
