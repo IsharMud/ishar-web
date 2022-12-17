@@ -94,7 +94,7 @@ def index():
             'per account!', 'You may actively <a href="'
             f"{url_for('help_page.single', topic='Mutliplay')}"
             '" title="Multiplay">multi-play</a> three (3) characters '
-            'at once.</a>', 'Only one account is allowed per person!'
+            'at once.', 'Only one account is allowed per person!'
         ],
 
         'Is there player-killing (PK) or player-versus-player (PvP) combat?': [
