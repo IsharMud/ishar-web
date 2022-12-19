@@ -1,5 +1,5 @@
 """Database classes/models"""
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import cached_property
 
 from flask import url_for
@@ -756,7 +756,7 @@ class Player(Base):
     @cached_property
     def online_delta(self):
         """Timedelta of player total online time"""
-        return datetime.timedelta(seconds=self.online)
+        return timedelta(seconds=self.online)
 
     @cached_property
     def online_time(self):
