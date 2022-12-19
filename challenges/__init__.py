@@ -5,7 +5,7 @@ from models import Challenge
 
 
 # Flask Blueprint
-challenges = Blueprint(
+challenges_bp = Blueprint(
     'challenges',
     __name__,
     url_prefix='/challenges',
@@ -13,9 +13,9 @@ challenges = Blueprint(
 )
 
 
-@challenges.route('/all/', methods=['GET'])
-@challenges.route('/all', methods=['GET'])
-@challenges.route('/', methods=['GET'])
+@challenges_bp.route('/all/', methods=['GET'])
+@challenges_bp.route('/all', methods=['GET'])
+@challenges_bp.route('/', methods=['GET'])
 def index():
     """Sort and list aLL active challenges,
         along with their tiers and winners"""
@@ -30,12 +30,12 @@ def index():
     )
 
 
-@challenges.route('/done/', methods=['GET'])
-@challenges.route('/done', methods=['GET'])
-@challenges.route('/complete/', methods=['GET'])
-@challenges.route('/complete', methods=['GET'])
-@challenges.route('/completed/', methods=['GET'])
-@challenges.route('/completed', methods=['GET'])
+@challenges_bp.route('/done/', methods=['GET'])
+@challenges_bp.route('/done', methods=['GET'])
+@challenges_bp.route('/complete/', methods=['GET'])
+@challenges_bp.route('/complete', methods=['GET'])
+@challenges_bp.route('/completed/', methods=['GET'])
+@challenges_bp.route('/completed', methods=['GET'])
 def complete():
     """Sort and list completed challenges,
         along with their tiers and winners"""
@@ -52,10 +52,10 @@ def complete():
     )
 
 
-@challenges.route('/todo/', methods=['GET'])
-@challenges.route('/todo', methods=['GET'])
-@challenges.route('/incomplete/', methods=['GET'])
-@challenges.route('/incomplete', methods=['GET'])
+@challenges_bp.route('/todo/', methods=['GET'])
+@challenges_bp.route('/todo', methods=['GET'])
+@challenges_bp.route('/incomplete/', methods=['GET'])
+@challenges_bp.route('/incomplete', methods=['GET'])
 def incomplete():
     """Sort and list incomplete challenges,
         along with their tiers and winners"""

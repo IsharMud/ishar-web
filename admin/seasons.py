@@ -12,15 +12,15 @@ from sentry import sentry_sdk
 
 
 # Flask Blueprint
-seasons = Blueprint(
-    'seasons',
+admin_seasons_bp = Blueprint(
+    'admin_seasons',
     __name__,
-    url_prefix='/seasons',
+    url_prefix='/admin/seasons',
     template_folder='templates/seasons'
 )
 
 
-@seasons.route('/', methods=['GET'])
+@admin_seasons_bp.route('/', methods=['GET'])
 def index():
     """Administration portal to allow Gods to view/manage seasons
         /admin/seasons"""
@@ -33,8 +33,8 @@ def index():
     )
 
 
-@seasons.route('/cycle/', methods=['GET', 'POST'])
-@seasons.route('/cycle', methods=['GET', 'POST'])
+@admin_seasons_bp.route('/cycle/', methods=['GET', 'POST'])
+@admin_seasons_bp.route('/cycle', methods=['GET', 'POST'])
 def cycle():
     """Administration portal to allow Gods to cycle seasons,
         while wiping players - /admin/seasons/cycle"""
@@ -58,79 +58,68 @@ def cycle():
         )
         db_session.add(new_season)
 
-        # Loop through all accounts
-        total_ess = total_fdelete = total_pdelete = total_immskip = 0
+        # Prepare to count player wipe statistics
+        wipe_totals = {
+            'accounts': 0,
+            'essence': 0,
+            'immortals': 0,
+            'players': 0,
+            'podirs': 0
+        }
+
+        # Loop through each account
         for account in Account.query.filter().all():
+            wipe_totals['accounts'] += 1
 
             # Apply any essence earned
             if account.seasonal_earned > 0:
-
-                # Add existing essence plus essence earned
+                wipe_totals['essence'] += account.seasonal_earned
                 calc = account.seasonal_points + account.seasonal_earned
+                account.seasonal_points = calc
                 flash(
-                    f'Account "{account.display_name}" '
-                    f'({account.account_id}) '
+                    f'Account "{account.display_name}" ({account.account_id}) '
                     f'now has {calc} essence. '
                     f'({account.seasonal_points} existing + '
-                    f'{account.seasonal_earned} earned)',
-                    'success'
-                )
-
-                # Update account essence balance in the database,
-                #   along with running total
-                account.seasonal_points = calc
-                total_ess += calc
-
-            # Mention accounts that earned no essence
-            else:
-                flash(
-                    f'Account "{account.display_name}" ({account.account_id})'
-                    ' earned no essence', 'info'
-                )
+                    f'{account.seasonal_earned} earned)', 'success')
 
             # Loop through each player in each account
             for delete_player in account.players:
 
                 # Skip immortal players
                 if delete_player.is_immortal:
-                    flash(f'Immortal: {delete_player.display_name}', 'info')
-                    total_immskip += 1
+                    wipe_totals['immortals'] += 1
+                    flash(f'Immortal: {delete_player.name}', 'info')
                     continue
 
                 # Delete player from the database
+                wipe_totals['players'] += 1
                 Player.query.filter_by(id=delete_player.id).delete()
 
                 # Check that player Podir file exists on disk, and remove
                 if os.path.isfile(delete_player.podir):
+                    wipe_totals['podirs'] += 1
                     os.remove(delete_player.podir)
-                    total_fdelete += 1
                     flash(
-                        f'Deleted Podir: <code>{delete_player.podir}</code>!',
-                        'success'
-                    )
+                        f'Deleted: <code>{delete_player.podir}</code>',
+                        'success')
 
-                # Warn if no Podir file exists for the player
-                else:
-                    flash(
-                        f'Missing Podir: <code>{delete_player.podir}</code>',
-                        'warn'
-                    )
-                total_pdelete += 1
-
+        # Write database changes
         db_session.commit()
-        flash(f'All ({total_ess}) essence has been rewarded.', 'success')
-        sentry_sdk.capture_message(f'Essence Rewarded: {total_ess} essence')
 
-        # Make sure a season was created
+        # Display statistics
+        for wipe_type, wipe_count in wipe_totals.items():
+            flash(f'Total {wipe_type.title()}: {wipe_count}', 'info')
+
+        # Check that the new season got an ID, meaning it was created
         if new_season.season_id:
-            flash(f'Season {new_season.season_id} created.', 'success')
+            flash(f'Season {new_season.season_id} created', 'success')
             sentry_sdk.capture_message(f'Season Created: {new_season}')
 
-        # Make sure that only immortals remain
-        flash(f'A total of {total_pdelete} mortals were wiped.', 'success')
-        flash(f'A total of {total_immskip} immortals skipped.', 'info')
+        # Check that only immortals remain
         if not Player.query.filter(Player.true_level < min(IMM_LEVELS)).all():
-            flash('Only immortals remain.', 'success')
+            flash('Player wipe complete! Only immortals remain.', 'success')
+        else:
+            flash('Something went wrong! More than immortals remain.', 'error')
 
     # Show the form to cycle a season in the administration portal
     return render_template(

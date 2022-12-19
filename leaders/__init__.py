@@ -6,13 +6,13 @@ from models import Player
 
 
 # Flask Blueprints
-leaders = Blueprint(
+leaders_bp = Blueprint(
     'leaders',
     __name__,
     url_prefix='/leaders',
     template_folder='templates'
 )
-leaderboard = Blueprint(
+leaderboard_bp = Blueprint(
     'leaderboard',
     __name__,
     url_prefix='/leaderboard',
@@ -20,8 +20,8 @@ leaderboard = Blueprint(
 )
 
 
-@leaders.route('/', methods=['GET'])
-@leaderboard.route('/', methods=['GET'])
+@leaders_bp.route('/', methods=['GET'])
+@leaderboard_bp.route('/', methods=['GET'])
 def index():
     """Sort and list the best players"""
     return render_template(
@@ -37,10 +37,10 @@ def index():
         ).all()
     )
 
-@leaders.route('/classic/', methods=['GET'])
-@leaders.route('/classic', methods=['GET'])
-@leaderboard.route('/classic/', methods=['GET'])
-@leaderboard.route('/classic', methods=['GET'])
+@leaders_bp.route('/classic/', methods=['GET'])
+@leaders_bp.route('/classic', methods=['GET'])
+@leaderboard_bp.route('/classic/', methods=['GET'])
+@leaderboard_bp.route('/classic', methods=['GET'])
 def classic():
     """Sort and list the best classic players"""
     return render_template(
@@ -57,10 +57,10 @@ def classic():
     )
 
 
-@leaders.route('/survival/', methods=['GET'])
-@leaders.route('/survival', methods=['GET'])
-@leaderboard.route('/survival/', methods=['GET'])
-@leaderboard.route('/survival', methods=['GET'])
+@leaders_bp.route('/survival/', methods=['GET'])
+@leaders_bp.route('/survival', methods=['GET'])
+@leaderboard_bp.route('/survival/', methods=['GET'])
+@leaderboard_bp.route('/survival', methods=['GET'])
 def survival():
     """Sort and list the best survival players"""
     return render_template(

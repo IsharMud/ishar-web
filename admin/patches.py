@@ -10,15 +10,15 @@ from patches.util import get_patch_pdfs
 
 
 # Flask Blueprint
-patches = Blueprint(
-    'patches',
+admin_patches_bp = Blueprint(
+    'admin_patches',
     __name__,
-    url_prefix='/patches',
+    url_prefix='/admin/patches',
     template_folder='templates/patches'
 )
 
 
-@patches.route('/', methods=['GET', 'POST'])
+@admin_patches_bp.route('/', methods=['GET', 'POST'])
 def index():
     """Administration portal to allow Gods to manage patch PDFs
         /admin/patches"""
@@ -63,14 +63,14 @@ def index():
 
     # Show the form to manage patches in the administration portal
     return render_template(
-        'patches/patches.html.j2',
+        'manage_patches.html.j2',
         all_patches=get_patch_pdfs(),
         patch_add_form=patch_add_form
     )
 
 
-@patches.route('/delete/<string:delete_patch_name>/', methods=['GET'])
-@patches.route('/delete/<string:delete_patch_name>', methods=['GET'])
+@admin_patches_bp.route('/delete/<string:delete_patch_name>/', methods=['GET'])
+@admin_patches_bp.route('/delete/<string:delete_patch_name>', methods=['GET'])
 def delete(delete_patch_name=None):
     """Administration portal to allow Gods to delete patch files
         /admin/patches/delete"""

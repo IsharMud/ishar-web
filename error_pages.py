@@ -5,7 +5,7 @@ from sentry import sentry_sdk
 
 
 # Flask Blueprint
-error_pages = Blueprint('error_pages', __name__)
+error_pages_bp = Blueprint('error_pages', __name__)
 
 
 def error(
@@ -21,7 +21,7 @@ def error(
     ), code
 
 
-@error_pages.app_errorhandler(400)
+@error_pages_bp.app_errorhandler(400)
 def bad_request(message):
     """400 error"""
     return error(
@@ -30,7 +30,7 @@ def bad_request(message):
     )
 
 
-@error_pages.app_errorhandler(401)
+@error_pages_bp.app_errorhandler(401)
 def not_authorized(message):
     """401 error"""
     return error(
@@ -40,7 +40,7 @@ def not_authorized(message):
     )
 
 
-@error_pages.app_errorhandler(403)
+@error_pages_bp.app_errorhandler(403)
 def forbidden(message):
     """403 error"""
     return error(
@@ -50,7 +50,7 @@ def forbidden(message):
     )
 
 
-@error_pages.app_errorhandler(404)
+@error_pages_bp.app_errorhandler(404)
 def page_not_found(message):
     """404 error"""
     return error(
@@ -60,7 +60,7 @@ def page_not_found(message):
     )
 
 
-@error_pages.app_errorhandler(500)
+@error_pages_bp.app_errorhandler(500)
 def internal_server_error(message):
     """500 error (with Sentry)"""
     sentry_sdk.capture_message(
@@ -74,7 +74,7 @@ def internal_server_error(message):
     )
 
 
-@error_pages.route('/debug-sentry', methods=['GET'])
+@error_pages_bp.route('/debug-sentry', methods=['GET'])
 def trigger_error():
     """Trigger error for Sentry"""
     return 1 / 0

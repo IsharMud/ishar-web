@@ -5,15 +5,15 @@ from models import PlayerClass, PlayerRace
 
 
 # Flask Blueprint
-faqs = Blueprint('faqs', __name__)
+faqs_bp = Blueprint('faqs', __name__)
 
 
-@faqs.route('/questions/', methods=['GET'])
-@faqs.route('/faqs/', methods=['GET'])
-@faqs.route('/faq/', methods=['GET'])
-@faqs.route('/questions', methods=['GET'])
-@faqs.route('/faqs', methods=['GET'])
-@faqs.route('/faq', methods=['GET'])
+@faqs_bp.route('/questions/', methods=['GET'])
+@faqs_bp.route('/faqs/', methods=['GET'])
+@faqs_bp.route('/faq/', methods=['GET'])
+@faqs_bp.route('/questions', methods=['GET'])
+@faqs_bp.route('/faqs', methods=['GET'])
+@faqs_bp.route('/faq', methods=['GET'])
 def index():
     """A few frequently asked questions (/faq, /faqs, or /questions)"""
 

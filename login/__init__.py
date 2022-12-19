@@ -33,7 +33,7 @@ def load_user(email):
 
 
 # Flask Blueprint
-login = Blueprint(
+login_bp = Blueprint(
     'login',
     __name__,
     url_prefix='/',
@@ -41,8 +41,8 @@ login = Blueprint(
 )
 
 
-@login.route('/login/', methods=['GET', 'POST'])
-@login.route('/login', methods=['GET', 'POST'])
+@login_bp.route('/login/', methods=['GET', 'POST'])
+@login_bp.route('/login', methods=['GET', 'POST'])
 def player_login():
     """Log-in form page and processing"""
 
@@ -90,8 +90,8 @@ def player_login():
     ), 401
 
 
-@login.route('/logout/', methods=['GET'])
-@login.route('/logout', methods=['GET'])
+@login_bp.route('/logout/', methods=['GET'])
+@login_bp.route('/logout', methods=['GET'])
 def player_logout():
     """Allow users to log out (/logout)"""
     logout_user()
@@ -101,5 +101,5 @@ def player_logout():
     )
     sentry_sdk.set_user(None)
     return redirect(
-        url_for('welcome.index')
+        url_for('welcome_bp.index')
     )

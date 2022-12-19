@@ -3,11 +3,11 @@ from flask import Blueprint, render_template
 
 
 # Flask Blueprint
-mud_clients = Blueprint('mud_clients', __name__)
+mud_clients_bp = Blueprint('mud_clients', __name__)
 
 
-@mud_clients.route('/mud_clients', methods=['GET'])
-@mud_clients.route('/clients', methods=['GET'])
+@mud_clients_bp.route('/mud_clients', methods=['GET'])
+@mud_clients_bp.route('/clients', methods=['GET'])
 def index():
     """A few popular MUD clients (/clients, or /mud_clients)"""
 

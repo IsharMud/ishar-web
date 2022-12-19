@@ -5,23 +5,22 @@ https://github.com/IsharMud/ishar-web
 """
 import os
 from urllib.parse import urlparse
-
 from flask import Flask
-from login import login, login_manager
+
+from error_pages import error_pages_bp
+from login import login_bp, login_manager
 from sentry import sentry_sdk
 from database import db_session
-from admin import admin
-from challenges import challenges
-from faqs import faqs
-from help_page import help_page
-from leaders import leaders, leaderboard
-from mud_clients import mud_clients
-from patches import patches
-from portal import portal
-from sysinfo import sysinfo
-from welcome import welcome
-
-from error_pages import error_pages
+from admin import admin_bp
+from challenges import challenges_bp
+from faqs import faqs_bp
+from help_page import help_page_bp
+from leaders import leaders_bp, leaderboard_bp
+from mud_clients import mud_clients_bp
+from patches import patches_bp
+from portal import portal_bp
+from sysinfo import sysinfo_bp
+from welcome import welcome_bp
 from models import GlobalEvent, Season
 
 
@@ -30,24 +29,24 @@ app = Flask(__name__)
 app.config.from_pyfile('config.py')
 
 # Error pages/handlers
-app.register_blueprint(error_pages)
+app.register_blueprint(error_pages_bp)
 
 # Flask-Login
 login_manager.init_app(app)
 
 # Flask Blueprints/pages
-app.register_blueprint(admin)
-app.register_blueprint(challenges)
-app.register_blueprint(faqs)
-app.register_blueprint(help_page)
-app.register_blueprint(leaders)
-app.register_blueprint(leaderboard)
-app.register_blueprint(login)
-app.register_blueprint(mud_clients)
-app.register_blueprint(patches)
-app.register_blueprint(portal)
-app.register_blueprint(sysinfo)
-app.register_blueprint(welcome)
+app.register_blueprint(admin_bp)
+app.register_blueprint(challenges_bp)
+app.register_blueprint(faqs_bp)
+app.register_blueprint(help_page_bp)
+app.register_blueprint(leaders_bp)
+app.register_blueprint(leaderboard_bp)
+app.register_blueprint(login_bp)
+app.register_blueprint(mud_clients_bp)
+app.register_blueprint(patches_bp)
+app.register_blueprint(portal_bp)
+app.register_blueprint(sysinfo_bp)
+app.register_blueprint(welcome_bp)
 
 
 @app.context_processor
@@ -56,9 +55,7 @@ def injects():
     sentry_dsn = os.getenv('SENTRY_DSN')
     sentry_uri = urlparse(sentry_dsn)
     return dict(
-        current_season=Season.query.filter_by(
-            is_active=1
-        ).order_by(
+        current_season=Season.query.filter_by(is_active=1).order_by(
             -Season.season_id
         ).first(),
         global_event_count=GlobalEvent.query.count(),

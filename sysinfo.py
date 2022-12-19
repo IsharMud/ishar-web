@@ -30,23 +30,23 @@ def get_uptime(process=get_proc()):
 
 
 # Flask Blueprint
-sysinfo = Blueprint('sysinfo', __name__)
+sysinfo_bp = Blueprint('sysinfo', __name__)
 
 
-@sysinfo.route('/online/', methods=['GET'])
-@sysinfo.route('/online', methods=['GET'])
-@sysinfo.route('/uptime/', methods=['GET'])
-@sysinfo.route('/uptime', methods=['GET'])
-@sysinfo.route('/systeminfo/', methods=['GET'])
-@sysinfo.route('/systeminfo', methods=['GET'])
-@sysinfo.route('/system_info/', methods=['GET'])
-@sysinfo.route('/system_info', methods=['GET'])
-@sysinfo.route('/sys/', methods=['GET'])
-@sysinfo.route('/sys', methods=['GET'])
-@sysinfo.route('/sys_info/', methods=['GET'])
-@sysinfo.route('/sys_info', methods=['GET'])
-@sysinfo.route('/sysinfo/', methods=['GET'])
-@sysinfo.route('/sysinfo', methods=['GET'])
+@sysinfo_bp.route('/online/', methods=['GET'])
+@sysinfo_bp.route('/online', methods=['GET'])
+@sysinfo_bp.route('/uptime/', methods=['GET'])
+@sysinfo_bp.route('/uptime', methods=['GET'])
+@sysinfo_bp.route('/systeminfo/', methods=['GET'])
+@sysinfo_bp.route('/systeminfo', methods=['GET'])
+@sysinfo_bp.route('/system_info/', methods=['GET'])
+@sysinfo_bp.route('/system_info', methods=['GET'])
+@sysinfo_bp.route('/sys/', methods=['GET'])
+@sysinfo_bp.route('/sys', methods=['GET'])
+@sysinfo_bp.route('/sys_info/', methods=['GET'])
+@sysinfo_bp.route('/sys_info', methods=['GET'])
+@sysinfo_bp.route('/sysinfo/', methods=['GET'])
+@sysinfo_bp.route('/sysinfo', methods=['GET'])
 def index():
     """System information"""
     proc = get_proc()

@@ -2,28 +2,28 @@
 from flask import abort, Blueprint, flash, render_template
 from flask_login import current_user, fresh_login_required
 
-from admin.accounts import accounts
-from admin.events import events
-from admin.news import news
-from admin.patches import patches
-from admin.seasons import seasons
+from admin.accounts import admin_accounts_bp
+from admin.events import admin_events_bp
+from admin.news import admin_news_bp
+from admin.patches import admin_patches_bp
+from admin.seasons import admin_seasons_bp
 
 
 # Flask Blueprints
-admin = Blueprint(
+admin_bp = Blueprint(
     'admin',
     __name__,
     url_prefix='/admin',
     template_folder='templates'
 )
-admin.register_blueprint(accounts)
-admin.register_blueprint(events)
-admin.register_blueprint(news)
-admin.register_blueprint(patches)
-admin.register_blueprint(seasons)
+admin_bp.register_blueprint(admin_accounts_bp)
+admin_bp.register_blueprint(admin_events_bp)
+admin_bp.register_blueprint(admin_news_bp)
+admin_bp.register_blueprint(admin_patches_bp)
+admin_bp.register_blueprint(admin_seasons_bp)
 
 
-@admin.before_request
+@admin_bp.before_request
 @fresh_login_required
 def before_request():
     """Only Gods can access /admin"""
@@ -32,7 +32,7 @@ def before_request():
         abort(401)
 
 
-@admin.route('/', methods=['GET'])
+@admin_bp.route('/', methods=['GET'])
 def index():
     """Administration portal main page for Gods"""
     return render_template('portal.html.j2')

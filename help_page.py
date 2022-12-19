@@ -6,11 +6,11 @@ from helptab import get_help_topics, search_help_topics
 
 
 # Flask Blueprint
-help_page = Blueprint('help_page', __name__)
+help_page_bp = Blueprint('help_page', __name__)
 
 
-@help_page.route('/help/', methods=['GET'])
-@help_page.route('/help', methods=['GET'])
+@help_page_bp.route('/help/', methods=['GET'])
+@help_page_bp.route('/help', methods=['GET'])
 def index():
     """Main help page lists help topics"""
 
@@ -31,8 +31,8 @@ def index():
     )
 
 
-@help_page.route('/help/<string:topic>/', methods=['GET'])
-@help_page.route('/help/<string:topic>', methods=['GET'])
+@help_page_bp.route('/help/<string:topic>/', methods=['GET'])
+@help_page_bp.route('/help/<string:topic>', methods=['GET'])
 def single(topic=None):
     """Display a single help topic, or search results"""
 
@@ -77,10 +77,10 @@ def single(topic=None):
     ), code
 
 
-@help_page.route('/areas/', methods=['GET'])
-@help_page.route('/areas', methods=['GET'])
-@help_page.route('/world/', methods=['GET'])
-@help_page.route('/world', methods=['GET'])
+@help_page_bp.route('/areas/', methods=['GET'])
+@help_page_bp.route('/areas', methods=['GET'])
+@help_page_bp.route('/world/', methods=['GET'])
+@help_page_bp.route('/world', methods=['GET'])
 def world():
     """World page"""
     # Return only the areas from the helptab file

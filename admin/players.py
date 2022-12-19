@@ -9,16 +9,16 @@ from sentry import sentry_sdk
 
 
 # Flask Blueprint
-players = Blueprint(
-    'players',
+admin_players_bp = Blueprint(
+    'admin_players',
     __name__,
-    url_prefix='/players',
+    url_prefix='/admin/players',
     template_folder='templates/accounts'
 )
 
 
-@players.route('/edit/<int:edit_player_id>/', methods=['GET', 'POST'])
-@players.route('/edit/<int:edit_player_id>', methods=['GET', 'POST'])
+@admin_players_bp.route('/edit/<int:edit_player_id>/', methods=['GET', 'POST'])
+@admin_players_bp.route('/edit/<int:edit_player_id>', methods=['GET', 'POST'])
 def edit(edit_player_id=None):
     """Administration portal to allow Gods to edit player characters
         /admin/accounts/players/edit"""
