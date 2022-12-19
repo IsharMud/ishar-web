@@ -1,5 +1,5 @@
 """Database classes/models"""
-import datetime
+from datetime import datetime
 from functools import cached_property
 
 from flask import url_for
@@ -97,7 +97,7 @@ class Account(Base, UserMixin):
     @cached_property
     def created(self):
         """Timedelta since account created"""
-        return datetime.datetime.utcnow() - self.created_at
+        return datetime.utcnow() - self.created_at
 
     @cached_property
     def created_ago(self):
@@ -293,16 +293,12 @@ class GlobalEvent(Base):
     @property
     def start(self):
         """Stringified approximate timedelta since event start"""
-        return stringify(
-            datetime.datetime.utcnow() - self.start_time
-        )
+        return stringify(datetime.utcnow() - self.start_time)
 
     @property
     def end(self):
         """Stringified approximate timedelta until event end"""
-        return stringify(
-            self.end_time - datetime.datetime.utcnow()
-        )
+        return stringify(self.end_time - datetime.utcnow())
 
     @cached_property
     def display_name(self):
@@ -537,16 +533,12 @@ class Season(Base):
     @property
     def effective(self):
         """Stringified approximate timedelta since season started"""
-        return stringify(
-            datetime.datetime.utcnow() - self.effective_date
-        )
+        return stringify(datetime.utcnow() - self.effective_date)
 
     @property
     def expires(self):
         """Stringified approximate timedelta until season ends"""
-        return stringify(
-            self.expiration_date - datetime.datetime.utcnow()
-        )
+        return stringify(self.expiration_date - datetime.utcnow())
 
     def __repr__(self):
         return f'<Season> ID {self.season_id} / Active: {self.is_active} / ' \
@@ -734,32 +726,32 @@ class Player(Base):
     @cached_property
     def birth_dt(self):
         """Datetime of player birth"""
-        return datetime.datetime.fromtimestamp(self.birth)
+        return datetime.fromtimestamp(self.birth)
 
     @cached_property
     def birth_ago(self):
         """Stringified approximate timedelta since player birth"""
-        return stringify(datetime.datetime.utcnow() - self.birth_dt)
+        return stringify(datetime.utcnow() - self.birth_dt)
 
     @cached_property
     def logon_dt(self):
         """Datetime of last player log on"""
-        return datetime.datetime.fromtimestamp(self.logon)
+        return datetime.fromtimestamp(self.logon)
 
     @cached_property
     def logon_ago(self):
         """Stringified approximate timedelta since player log on"""
-        return stringify(datetime.datetime.utcnow() - self.logon_dt)
+        return stringify(datetime.utcnow() - self.logon_dt)
 
     @cached_property
     def logout_dt(self):
         """Datetime of last player log out"""
-        return datetime.datetime.fromtimestamp(self.logout)
+        return datetime.fromtimestamp(self.logout)
 
     @cached_property
     def logout_ago(self):
         """Stringified approximate timedelta since player log out"""
-        return stringify(datetime.datetime.utcnow() - self.logout_dt)
+        return stringify(datetime.utcnow() - self.logout_dt)
 
     @cached_property
     def online_delta(self):

@@ -5,6 +5,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 
 import database_secret
 
+
 engine = create_engine(
     url=database_secret.URL,
     echo=database_secret.ECHO,
