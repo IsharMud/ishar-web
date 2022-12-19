@@ -6,8 +6,18 @@ from models import Player
 
 
 # Flask Blueprints
-leaders = Blueprint('leaders', __name__, url_prefix='/leaders')
-leaderboard = Blueprint('leaderboard', __name__, url_prefix='/leaderboard')
+leaders = Blueprint(
+    'leaders',
+    __name__,
+    url_prefix='/leaders',
+    template_folder='templates'
+)
+leaderboard = Blueprint(
+    'leaderboard',
+    __name__,
+    url_prefix='/leaderboard',
+    template_folder='templates'
+)
 
 
 @leaders.route('/', methods=['GET'])

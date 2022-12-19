@@ -8,7 +8,8 @@ from models import Challenge
 challenges = Blueprint(
     'challenges',
     __name__,
-    url_prefix='/challenges'
+    url_prefix='/challenges',
+    template_folder='templates'
 )
 
 

@@ -4,7 +4,7 @@ from flask import Blueprint, redirect, render_template, url_for
 from patches.util import get_patch_pdfs
 
 # Flask Blueprint
-patches = Blueprint('patches', __name__)
+patches = Blueprint('patches', __name__, template_folder='templates')
 
 
 @patches.route('/patches/latest/', methods=['GET'])
