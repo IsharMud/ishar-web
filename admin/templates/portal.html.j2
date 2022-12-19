@@ -2,7 +2,7 @@
 {% extends "base/layout.html.j2" %}
 {% block meta_title %}Administration Portal{% endblock meta_title %}
 {% block meta_description %}Administration portal for Gods of Ishar MUD{% endblock meta_description %}
-{% block meta_url %}{{ url_for('admin.index', _external=True) }}{% endblock meta_url %}
+{% block meta_url %}{{ url_for('.index', _external=True) }}{% endblock meta_url %}
 {% block title %}Administration Portal{% endblock title %}
 {% block header %}Administration{% endblock header %}
 {%- block content %}
@@ -11,19 +11,19 @@
             </p>
             <ul>
                 <li title="Accounts">
-                    <a href="{{ url_for('admin.accounts') }}">Accounts</a>
+                    <a href="{{ url_for('.accounts.index') }}">Accounts</a>
                 </li>
                 <li title="Global Events">
-                    <a href="{{ url_for('admin.global_events') }}">Global Events</a>
+                    <a href="{{ url_for('.events.index') }}">Global Events</a>
                 </li>
                 <li title="News">
-                    <a href="{{ url_for('admin.news') }}">News</a>
+                    <a href="{{ url_for('.news.index') }}">News</a>
                 </li>
                 <li title="Patches">
-                    <a href="{{ url_for('admin.patches') }}">Patches</a>
+                    <a href="{{ url_for('.patches.index') }}">Patches</a>
                 </li>
-                <li title="Season">
-                    <a href="{{ url_for('admin.season') }}">Season</a>
+                <li title="Seasons">
+                    <a href="{{ url_for('.seasons.index') }}">Seasons</a>
                 </li>
             </ul>
 {%- endblock content %}

@@ -1,10 +1,10 @@
 {%- set page = 'challenges' -%}
 {% extends "base/layout.html.j2" %}
-{%- set challenges_pre  = 'Challenges' -%}
+{%- set challenges_title  = 'Challenges' -%}
 {%- if challenges is defined and challenges is iterable and challenges | length > 0 %}
     {%- set challenges_completed = challenges | selectattr('winner_desc', '!=', '') | list | length %}
     {%- set challenges_total = challenges | list | length %}
-    {%- set challenges_title = challenges_pre + ' (' + challenges_completed | string + '/' + challenges_total | string + ')'  %}
+    {%- set challenges_title = challenges_title + ' (' + challenges_completed | string + '/' + challenges_total | string + ')'  %}
 {%- endif %}
 {% block meta_title %}Challenges{% endblock meta_title %}
 {% block meta_description %}Challenges, winners, and rewards currently available{% endblock meta_description %}
@@ -62,8 +62,8 @@
                         }{% if not loop.last %},{% endif %}
                       {%- endfor %}
                     ],
-                    search: true,
-                    sort: true,
+                    search:     true,
+                    sort:       true,
                     pagination: false
                 }).render(where);
             };

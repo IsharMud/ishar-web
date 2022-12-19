@@ -1,9 +1,8 @@
 {%- set page = 'global_events' %}
 {% extends "base/layout.html.j2" %}
-{%- set events_pre  = 'Global Events' -%}
-{%- set events_title = events_pre %}
+{%- set events_title = 'Global Events' %}
 {%- if global_events %}
-    {%- set events_title = events_pre + ' (' + global_events | length | string + ')' %}
+    {%- set events_title = events_title + ' (' + global_events | length | string + ')' %}
 {%- endif %}
 {% block meta_title %}{{ events_title }}{% endblock meta_title %}
 {% block meta_description %}Global events currently active{% endblock meta_description %}

@@ -2,7 +2,7 @@
 {% extends "base/layout.html.j2" %}
 {%- block meta_title %}Edit News: {{ edit_news.subject | title | safe }} / Administration Portal{%- endblock meta_title %}
 {%- block meta_description %}Administration portal to edit a news post{%- endblock meta_description %}
-{%- block meta_url %}{{ url_for('admin.edit_news', edit_news_id=edit_news.news_id, _external=True) }}{%- endblock meta_url %}
+{%- block meta_url %}{{ url_for('.edit', edit_news_id=edit_news.news_id, _external=True) }}{%- endblock meta_url %}
 {%- block title %}Edit News: {{ edit_news.subject | title | safe }} / Administration Portal{%- endblock title %}
 {%- block header %}Edit News: {{ edit_news.subject | title | safe }}{%- endblock header %}
 {%- macro render_field(field) %}
@@ -26,7 +26,7 @@
 {%- endmacro %}
 {%- block content %}
     {%- if edit_news is defined and edit_news_form is defined %}
-                <form autocomplete="off" method="post" action="{{ url_for('admin.edit_news', edit_news_id=edit_news.news_id) }}" id="news-edit-form">
+                <form autocomplete="off" method="post" action="{{ url_for('.edit', edit_news_id=edit_news.news_id) }}" id="news-edit-form">
                     <table>
                         <tr>
                             <td>
@@ -49,7 +49,9 @@
                         {{ edit_news_form.csrf_token }}
                         {{ render_field(edit_news_form.submit) }}
                     </table>
-                    <script>document.getElementById('body').innerHTML = {{ edit_news.body | tojson }};</script>
+                    <script>
+                        document.getElementById('body').innerHTML = {{ edit_news.body | tojson }};
+                    </script>
                 </form>
     {%- endif %}
 {%- endblock content %}

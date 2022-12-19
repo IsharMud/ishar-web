@@ -25,7 +25,7 @@ def history():
 @welcome.route('/events/', methods=['GET'])
 @welcome.route('/events', methods=['GET'])
 def global_events():
-    """List any active global events"""
+    """List any global events"""
     return render_template(
         'global_events.html.j2',
         global_events=GlobalEvent.query.all()

@@ -27,39 +27,39 @@ Welcome{% if current_user.display_name %}, {{ current_user.display_name | safe }
                             formatter:  (cell) => gridjs.html(`<a href="/player/${cell}#player">${cell}</a>`)
                         },
                         {
-                            id:     'level',
-                            name:   'Level'
+                            id:         'level',
+                            name:       'Level'
                         },
                         {
-                            id:     'remorts',
-                            name:   'Remorts'
+                            id:         'remorts',
+                            name:       'Remorts'
                         },
                         {
-                            id:     'renown',
-                            name:   'Renown'
+                            id:         'renown',
+                            name:       'Renown'
                         },
                         {
-                            id:     'quests',
-                            name:   'Quests'
+                            id:         'quests',
+                            name:       'Quests'
                         },
                         {
-                            id:     'challenges',
-                            name:   'Challenges'
+                            id:         'challenges',
+                            name:       'Challenges'
                         },
                         {
-                            id:     'deaths',
-                            name:   'Deaths',
-                            sort:   {
-                                        compare: (a, b) => {
-                                            if ( (b > a) || (isNaN(a)) ) {
-                                                return -1;
-                                            } else if ( (a > b) || (isNaN(b)) ) {
-                                                return 1;
-                                            } else {
-                                                return 0;
-                                            };
+                            id:         'deaths',
+                            name:       'Deaths',
+                            sort:       {
+                                            compare: (a, b) => {
+                                                if ( (b > a) || (isNaN(a)) ) {
+                                                    return -1;
+                                                } else if ( (a > b) || (isNaN(b)) ) {
+                                                    return 1;
+                                                } else {
+                                                    return 0;
+                                                };
+                                            }
                                         }
-                                    }
                         }
                     ],
                     data: [
@@ -75,8 +75,8 @@ Welcome{% if current_user.display_name %}, {{ current_user.display_name | safe }
                         }{% if not loop.last %},{% endif %}
                       {%- endfor %}
                     ],
-                    search: false,
-                    sort: true,
+                    search:     false,
+                    sort:       true,
                     pagination: false,
                 }).render(where);
             };
@@ -99,7 +99,8 @@ Welcome{% if current_user.display_name %}, {{ current_user.display_name | safe }
     {%- endif %}
     {%- if current_user.seasonal_points > 0 %}
                 <h4>
-                    You have {{ current_user.seasonal_points }} <a title="essence" href="{{ url_for('portal.account', _anchor='essence-balance') }}">essence</a>.
+                    You have {{ current_user.seasonal_points }}
+                    <a title="essence" href="{{ url_for('portal.account', _anchor='essence-balance') }}">essence</a>.
                 </h4>
     {%- endif %}
 {%- endblock content %}

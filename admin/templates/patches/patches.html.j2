@@ -2,7 +2,7 @@
 {% extends "base/layout.html.j2" %}
 {% block meta_title %}Patches / Administration Portal{% endblock meta_title %}
 {% block meta_description %}Administration portal to upload patch notes{% endblock meta_description %}
-{% block meta_url %}{{ url_for('admin.patches', _external=True) }}{% endblock meta_url %}
+{% block meta_url %}{{ url_for('.index', _external=True) }}{% endblock meta_url %}
 {% block title %}Patches / Administration Portal{% endblock title %}
 {% block header %}Patches{% endblock header %}
 {%- macro render_field(field) %}
@@ -54,7 +54,7 @@
                             name:       gridjs.html(`<a href="{{ url_for('static', filename='patches/'+patch.name) }}" target="_blank">{{ patch.name }}</a>`),
                             modified:   "{{ patch.modified.strftime('%A, %B %d, %Y') }}",
                             size:       "{{ patch.size }}",
-                            delete: gridjs.html(`<a href="{{ url_for('admin.delete_patch', delete_patch_name=patch.name) }}" onclick="return confirm('Are you sure you want to delete this patch file?');">❌</a>`)
+                            delete: gridjs.html(`<a href="{{ url_for('.delete', delete_patch_name=patch.name) }}" onclick="return confirm('Are you sure you want to delete this patch file?');">❌</a>`)
                         }{% if not loop.last %},{% endif %}
                       {%- endfor %}
                     ],
@@ -69,7 +69,7 @@
 {%- block content %}
     {%- if patch_add_form is defined %}
                 <h3 title="Add">Add</h3>
-                <form autocomplete="off" method="post" enctype="multipart/form-data" action="{{ url_for('admin.patches') }}" id="patches-add-form">
+                <form autocomplete="off" method="post" enctype="multipart/form-data" action="{{ url_for('.index') }}" id="patches-add-form">
                     <table>
                         {{ render_field(patch_add_form.name, autocomplete='off') }}
                         {{ render_field(patch_add_form.file, autocomplete='off') }}

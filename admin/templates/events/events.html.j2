@@ -2,7 +2,7 @@
 {% extends "base/layout.html.j2" %}
 {% block meta_title %}Global Events / Administration Portal{% endblock meta_title %}
 {% block meta_description %}Administration portal to manage global events{% endblock meta_description %}
-{% block meta_url %}{{ url_for('admin.global_events', _external=True) }}{% endblock meta_url %}
+{% block meta_url %}{{ url_for('.index', _external=True) }}{% endblock meta_url %}
 {% block title %}Global Events / Administration Portal{% endblock title %}
 {% block header %}Global Events{% endblock header %}
 {%- macro render_field(field) %}
@@ -71,7 +71,7 @@
                     data: [
                       {%- for event in all_events %}
                         {
-                            event_type: gridjs.html(`<a href="{{ url_for('admin.edit_global_event', edit_event_type=event.event_type) }}">{{ event.event_type }}</a>`),
+                            event_type: gridjs.html(`<a href="{{ url_for('.edit', edit_event_type=event.event_type) }}">{{ event.event_type }}</a>`),
                             start_time:     "{{ event.start_time.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}",
                             end_time:       "{{ event.end_time.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}",
                             event_name:     "{{ event.event_name | safe }}",
@@ -79,7 +79,7 @@
                             xp_bonus:       {{ event.xp_bonus }},
                             shop_bonus:     {{ event.shop_bonus }},
                             celestial_luck: {{ event.celestial_luck }},
-                            delete:         gridjs.html(`<a href="{{ url_for('admin.delete_global_event', delete_event_type=event.event_type) }}" onclick="return confirm('Are you sure you want to delete this global event?');">❌</a>`)
+                            delete:         gridjs.html(`<a href="{{ url_for('.delete', delete_event_type=event.event_type) }}" onclick="return confirm('Are you sure you want to delete this global event?');">❌</a>`)
                         }{% if not loop.last %},{% endif %}
                       {%- endfor %}
                     ],
@@ -94,7 +94,7 @@
 {%- block content %}
     {%- if event_add_form is defined %}
                 <h3 title="Add">Add</h3>
-                <form autocomplete="off" method="post" action="{{ url_for('admin.global_events') }}" id="event-add-form">
+                <form autocomplete="off" method="post" action="{{ url_for('.index') }}" id="event-add-form">
                     <table>
                         {{ render_field(event_add_form.event_type, autocomplete='off') }}
                         {{ render_field(event_add_form.start_time, autocomplete='off') }}

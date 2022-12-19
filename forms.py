@@ -129,12 +129,10 @@ class EventAddForm(FlaskForm):
     )
     start_time = DateTimeLocalField(
         'Start',
-        format='%Y-%m-%dT%H:%M',
         default=datetime.utcnow(),
     )
     end_time = DateTimeLocalField(
         'End',
-        format='%Y-%m-%dT%H:%M',
         default=datetime.utcnow() + relativedelta(days=+1),
     )
     event_name = StringField(

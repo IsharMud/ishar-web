@@ -2,7 +2,7 @@
 {% extends "base/layout.html.j2" %}
 {%- block meta_title %}Edit Event: {{ edit_event.display_name | safe }} / Administration Portal{%- endblock meta_title %}
 {%- block meta_description %}Administration portal to edit a global event{%- endblock meta_description %}
-{%- block meta_url %}{{ url_for('admin.edit_global_event', edit_event_type=edit_event.event_type, _external=True) }}{%- endblock meta_url %}
+{%- block meta_url %}{{ url_for('.edit', edit_event_type=edit_event.event_type, _external=True) }}{%- endblock meta_url %}
 {%- block title %}Edit Event: {{ edit_event.display_name | safe }} / Administration Portal{%- endblock title %}
 {%- block header %}Edit Event: {{ edit_event.display_name | safe }}{%- endblock header %}
 {%- macro render_field(field) %}
@@ -26,7 +26,7 @@
 {%- endmacro %}
 {%- block content %}
     {%- if edit_event and edit_event_form %}
-                <form autocomplete="off" method="post" action="{{ url_for('admin.edit_global_event', edit_event_type=edit_event.event_type) }}" id="event-edit-form">
+                <form autocomplete="off" method="post" action="{{ url_for('.edit', edit_event_type=edit_event.event_type) }}" id="event-edit-form">
                     <table>
                         {{ render_field(edit_event_form.event_type, value=edit_event.event_type, autocomplete='off') }}
                         {{ render_field(edit_event_form.start_time, value=edit_event.start_time, autocomplete='off') }}

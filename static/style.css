@@ -190,7 +190,9 @@ textarea {
     color:              #4cbb17;
 }
 
-.flash-warn {
+.flash-warn,
+.flash-warning
+{
     color:              #f80;
 }
 

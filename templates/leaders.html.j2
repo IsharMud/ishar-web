@@ -24,35 +24,35 @@
                             formatter:  (cell) => gridjs.html(`<a href="/player/${cell}#player">${cell}</a>`)
                         },
                         {
-                            id:     'remorts',
-                            name:   'Remorts'
+                            id:         'remorts',
+                            name:       'Remorts'
                         },
                         {
-                            id:     'renown',
-                            name:   'Renown'
+                            id:         'renown',
+                            name:       'Renown'
                         },
                         {
-                            id:     'quests',
-                            name:   'Quests'
+                            id:         'quests',
+                            name:       'Quests'
                         },
                         {
-                            id:     'challenges',
-                            name:   'Challenges'
+                            id:         'challenges',
+                            name:       'Challenges'
                         },
                         {
-                            id:     'deaths',
-                            name:   'Deaths',
-                            sort:   {
-                                        compare: (a, b) => {
-                                            if ( (b > a) || (isNaN(a)) ) {
-                                                return -1;
-                                            } else if ( (a > b) || (isNaN(b)) ) {
-                                                return 1;
-                                            } else {
-                                                return 0;
-                                            };
+                            id:         'deaths',
+                            name:       'Deaths',
+                            sort:       {
+                                            compare: (a, b) => {
+                                                if ( (b > a) || (isNaN(a)) ) {
+                                                    return -1;
+                                                } else if ( (a > b) || (isNaN(b)) ) {
+                                                    return 1;
+                                                } else {
+                                                    return 0;
+                                                };
+                                            }
                                         }
-                                    }
                         }
                     ],
                     data: [
@@ -85,6 +85,8 @@
                 </ul>
                 <div id="leaders"></div>
                 <script>
-                    showLeaders(document.getElementById('leaders'));
+                    showLeaders(
+                        document.getElementById('leaders')
+                    );
                 </script>
 {%- endblock content %}

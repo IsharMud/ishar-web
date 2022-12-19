@@ -1,6 +1,5 @@
 """Database classes/models"""
 import datetime
-import os
 from functools import cached_property
 
 from flask import url_for
@@ -890,21 +889,3 @@ class Player(Base):
         if self.remorts > 0:
             earned += int(self.remorts / 5) * 3 + 1
         return earned
-
-    def wipe(self):
-        """Delete a player Podir, and from the database,
-            for use during player-wipe/season cycle"""
-
-        # Immortals are skipped
-        if self.is_immortal:
-            return None
-
-        # Delete mortal players from the database
-        Player.query().filter_by(id=self.id).delete()
-        if db_session.commit():
-
-            # Delete the player Podir file
-            if os.remove(self.podir):
-                return True
-
-        return False
