@@ -14,7 +14,7 @@ from sentry import sentry_sdk
 admin_news_bp = Blueprint(
     'admin_news',
     __name__,
-    url_prefix='/admin/news',
+    url_prefix='news',
     template_folder='templates/news'
 )
 

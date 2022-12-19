@@ -13,7 +13,7 @@ from patches.util import get_patch_pdfs
 admin_patches_bp = Blueprint(
     'admin_patches',
     __name__,
-    url_prefix='/admin/patches',
+    url_prefix='patches',
     template_folder='templates/patches'
 )
 

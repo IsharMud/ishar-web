@@ -15,7 +15,7 @@ from sentry import sentry_sdk
 admin_seasons_bp = Blueprint(
     'admin_seasons',
     __name__,
-    url_prefix='/admin/seasons',
+    url_prefix='seasons',
     template_folder='templates/seasons'
 )
 

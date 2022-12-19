@@ -12,7 +12,7 @@ from sentry import sentry_sdk
 admin_players_bp = Blueprint(
     'admin_players',
     __name__,
-    url_prefix='/admin/players',
+    url_prefix='players',
     template_folder='templates/accounts'
 )
 

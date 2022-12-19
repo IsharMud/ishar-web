@@ -33,7 +33,7 @@
                                 Account
                             </td>
                             <td>
-                                <a href="{{ url_for('admin.accounts.manage', manage_account_id=edit_player.account_id) }}">
+                                <a href="{{ url_for('admin.admin_accounts.manage', manage_account_id=edit_player.account_id) }}">
                                     {{ edit_player.account.display_name | safe }} (ID: {{ edit_player.account_id }})
                                 </a>
                             </td>
