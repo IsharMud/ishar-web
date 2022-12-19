@@ -101,5 +101,5 @@ def player_logout():
     )
     sentry_sdk.set_user(None)
     return redirect(
-        url_for('welcome_bp.index')
+        url_for('welcome.index')
     )
