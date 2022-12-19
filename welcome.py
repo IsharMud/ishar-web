@@ -77,7 +77,5 @@ def wizlist():
         'wizlist.html.j2',
         immortals=Player.query.filter(
             Player.true_level >= min(IMM_LEVELS)
-        ).order_by(
-            -Player.true_level
-        ).all()
+        ).order_by(-Player.true_level).all()
     )
