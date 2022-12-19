@@ -2,7 +2,7 @@
 {% extends "base/layout.html.j2" %}
 {% block meta_title %}Get Started{% endblock meta_title %}
 {% block meta_description %}Get Started with these tips and background information about the game{% endblock meta_description %}
-{% block meta_url %}{{ url_for('welcome.getstarted', _external=True) }}{% endblock meta_url %}
+{% block meta_url %}{{ url_for('help.getstarted', _external=True) }}{% endblock meta_url %}
 {% block title %}Get Started{% endblock title %}
 {% block header %}Get Started{% endblock header %}
 {%- block content %}
@@ -106,19 +106,19 @@ taller than you.
                     The first hour you are in the game is the hardest.  It takes a little while
                     to get used to the command syntax and get a feel for moving around in the
                     world and interacting with everything in it.  Don't be afraid of typing
-                    &quot;<a href="{{ url_for('help_page.single', topic='Help' )}}"><code>help help</code></a>&quot;,
+                    &quot;<a href="{{ url_for('help.help_page.single', topic='Help' )}}"><code>help help</code></a>&quot;,
                     which offers a list of commands, or &quot;<code>help &lt;command&gt;&quot;</code>, which will
                     offer detailed information about any command.
                 </p>
 
                 <p>
                     You will quickly run into other players who talk to you; see
-                    &quot;<a href="{{ url_for('help_page.single', topic='Communication' )}}"><code>help communication</code></a>&quot;
+                    &quot;<a href="{{ url_for('help.help_page.single', topic='Communication' )}}"><code>help communication</code></a>&quot;
                     on how to reply.
                 </p>
 
                 <p>
                     Once you make it past the first few hours and want to advance your standing in the game, see
-                    &quot;<a href="{{ url_for('help_page.single', topic='Levelling' )}}"><code>help levelling</code></a>&quot;.
+                    &quot;<a href="{{ url_for('help.help_page.single', topic='Levelling' )}}"><code>help levelling</code></a>&quot;.
                 </p>
 {%- endblock %}

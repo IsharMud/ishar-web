@@ -120,7 +120,7 @@ class EditPlayerForm(FlaskForm):
 
 
 class EventAddForm(FlaskForm):
-    """Event Add Form form class"""
+    """Event Add form class"""
     event_type = IntegerField(
         'Type',
         validators=[

@@ -9,15 +9,6 @@ from models import GlobalEvent, News, Player
 welcome_bp = Blueprint('welcome', __name__)
 
 
-@welcome_bp.route('/background/', methods=['GET'])
-@welcome_bp.route('/history/', methods=['GET'])
-@welcome_bp.route('/background', methods=['GET'])
-@welcome_bp.route('/history', methods=['GET'])
-def history():
-    """History/background page, mostly copied from original ishar.com"""
-    return render_template('history.html.j2')
-
-
 @welcome_bp.route('/global_events/', methods=['GET'])
 @welcome_bp.route('/global_events', methods=['GET'])
 @welcome_bp.route('/globalevents/', methods=['GET'])
@@ -27,8 +18,7 @@ def history():
 def global_events():
     """List any global events"""
     return render_template(
-        'global_events.html.j2',
-        global_events=GlobalEvent.query.all()
+        'global_events.html.j2', global_events=GlobalEvent.query.all()
     )
 
 
@@ -36,9 +26,7 @@ def global_events():
 @welcome_bp.route('/connect', methods=['GET'])
 def connect():
     """Redirect /connect GET requests to mudslinger.net web client"""
-    return redirect(
-        'https://mudslinger.net/play/?host=isharmud.com&port=23'
-    )
+    return redirect('https://mudslinger.net/play/?host=isharmud.com&port=23')
 
 
 @welcome_bp.route('/discord/invitation/', methods=['GET'])
@@ -49,24 +37,7 @@ def connect():
 @welcome_bp.route('/discord', methods=['GET'])
 def discord_invite():
     """Redirect /discord GET requests to the Discord invite"""
-    return redirect(
-        'https://discord.gg/VBmMXUpeve'
-    )
-
-
-@welcome_bp.route('/start/', methods=['GET'])
-@welcome_bp.route('/start', methods=['GET'])
-@welcome_bp.route('/getting_started/', methods=['GET'])
-@welcome_bp.route('/getting_started', methods=['GET'])
-@welcome_bp.route('/gettingstarted/', methods=['GET'])
-@welcome_bp.route('/gettingstarted', methods=['GET'])
-@welcome_bp.route('/get_started/', methods=['GET'])
-@welcome_bp.route('/get_started', methods=['GET'])
-@welcome_bp.route('/getstarted/', methods=['GET'])
-@welcome_bp.route('/getstarted', methods=['GET'])
-def getstarted():
-    """Get Started page"""
-    return render_template('get_started.html.j2')
+    return redirect('https://discord.gg/VBmMXUpeve')
 
 
 @welcome_bp.route('/season/', methods=['GET'])
@@ -92,9 +63,7 @@ def index():
     """Main welcome page/index, includes the most recent news"""
     return render_template(
         'base/welcome.html.j2',
-        news=News.query.order_by(
-            -News.created_at
-        ).first()
+        news=News.query.order_by(-News.created_at).first()
     )
 
 

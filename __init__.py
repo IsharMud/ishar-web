@@ -13,10 +13,9 @@ from sentry import sentry_sdk
 from database import db_session
 from admin import admin_bp
 from challenges import challenges_bp
-from faqs import faqs_bp
-from help_page import help_page_bp
+from help import help_bp
 from leaders import leaders_bp, leaderboard_bp
-from mud_clients import mud_clients_bp
+from help.mud_clients import mud_clients_bp
 from patches import patches_bp
 from portal import portal_bp
 from sysinfo import sysinfo_bp
@@ -37,8 +36,7 @@ login_manager.init_app(app)
 # Flask Blueprints/pages
 app.register_blueprint(admin_bp)
 app.register_blueprint(challenges_bp)
-app.register_blueprint(faqs_bp)
-app.register_blueprint(help_page_bp)
+app.register_blueprint(help_bp)
 app.register_blueprint(leaders_bp)
 app.register_blueprint(leaderboard_bp)
 app.register_blueprint(login_bp)

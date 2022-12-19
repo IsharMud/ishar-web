@@ -10,7 +10,6 @@ mud_clients_bp = Blueprint('mud_clients', __name__)
 @mud_clients_bp.route('/clients', methods=['GET'])
 def index():
     """A few popular MUD clients (/clients, or /mud_clients)"""
-
     all_clients = {
 
         'Cross-Platform': {
@@ -45,7 +44,4 @@ def index():
         }
     }
 
-    return render_template(
-        'mud_clients.html.j2',
-        mud_clients=all_clients
-    )
+    return render_template('mud_clients.html.j2', mud_clients=all_clients)

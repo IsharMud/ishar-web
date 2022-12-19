@@ -2,7 +2,7 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 
 from forms import HelpSearchForm
-from helptab import get_help_topics, search_help_topics
+from help.helptab import get_help_topics, search_help_topics
 
 
 # Flask Blueprint
@@ -17,10 +17,7 @@ def index():
     # Redirect form searches to /help/<search>
     if request.args.get('search'):
         return redirect(
-            url_for(
-                'help_page.single',
-                topic=request.args.get('search')
-            )
+            url_for('help_page.single', topic=request.args.get('search'))
         )
 
     return render_template(
@@ -55,10 +52,7 @@ def single(topic=None):
     if len(search_topics) == 1:
         found_topic = next(iter(search_topics.values()))
         return redirect(
-            url_for(
-                'help_page.single',
-                topic=found_topic['name']
-            )
+            url_for('help_page.single', topic=found_topic['name'])
         )
 
     # Respond with a 200 showing any results,
@@ -75,18 +69,3 @@ def single(topic=None):
         topics=search_topics,
         help_search_form=search_form
     ), code
-
-
-@help_page_bp.route('/areas/', methods=['GET'])
-@help_page_bp.route('/areas', methods=['GET'])
-@help_page_bp.route('/world/', methods=['GET'])
-@help_page_bp.route('/world', methods=['GET'])
-def world():
-    """World page"""
-    # Return only the areas from the helptab file
-    return render_template(
-        'world.html.j2',
-        areas=search_help_topics(
-            search='Area '
-        )
-    )

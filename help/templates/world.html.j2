@@ -2,7 +2,7 @@
 {% extends "base/layout.html.j2" %}
 {%- block meta_title -%}World{%- endblock meta_title -%}
 {% block meta_description %}The World of Ishar is vast and very detailed with many areas{% endblock meta_description %}
-{% block meta_url %}{{ url_for('help_page.world', _external=True) }}{% endblock meta_url %}
+{% block meta_url %}{{ url_for('help.world.index', _external=True) }}{% endblock meta_url %}
 {% block header %}World{% endblock header %}
 {%- block title -%}World{%- endblock title -%}
 {%- block content %}
@@ -12,8 +12,8 @@
                 setting the scene for many of the adventures to be had here.
             </p>
             <p>
-                From the shattered ruins of <a href="{{ url_for('help_page.single', topic='Area Torm Sarvek') }}" title="Help: Area Torm Sarvek">Torm Sarvek</a>
-                to the splendor of <a href="{{ url_for('help_page.single', topic='Area Mareldja') }}" title="Help: Area Mareldja">Mareldja</a>,
+                From the shattered ruins of <a href="{{ url_for('help.help_page.single', topic='Area Torm Sarvek') }}" title="Help: Area Torm Sarvek">Torm Sarvek</a>
+                to the splendor of <a href="{{ url_for('help.help_page.single', topic='Area Mareldja') }}" title="Help: Area Mareldja">Mareldja</a>,
                 the darkness of Hedros, the dense Talrynian Forest, all of these lands and more are open to you.
             </p>
             <p>
@@ -24,7 +24,7 @@
             <ul id="world-list">
         {%- for area in areas %}
                 <li title="{{ area }}">
-                    <a href="{{ url_for('help_page.single', topic=area) }}">{{ area }}</a>
+                    <a href="{{ url_for('help.help_page.single', topic=area) }}">{{ area }}</a>
                 </li>
         {%- endfor %}
             </ul>

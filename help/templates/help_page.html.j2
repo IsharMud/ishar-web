@@ -5,10 +5,10 @@
 {%- endif %}
 {%- block meta_title -%}Help{%- if topic_name -%}: {{ topic_name }}{%- endif -%}{%- endblock meta_title -%}
 {%- block meta_description %}Help pages for Ishar MUD{%- endblock meta_description %}
-{%- block meta_url %}{{ url_for('help_page.single', topic=topic_name, _external=True) }}{%- endblock meta_url %}
+{%- block meta_url %}{{ url_for('help.help_page.single', topic=topic_name, _external=True) }}{%- endblock meta_url %}
 {%- block header -%}
-<a href="{{ url_for('help_page.index') }}">Help</a>
-    {%- if topic_name %} : <a href="{{ url_for('help_page.single', topic=topic_name) }}">
+<a href="{{ url_for('help.help_page.index') }}">Help</a>
+    {%- if topic_name %} : <a href="{{ url_for('help.help_page.single', topic=topic_name) }}">
         {{- topic_name }}</a>
     {%- endif -%}
 {%- endblock header -%}
@@ -29,17 +29,17 @@
     {%- if current_user.is_anonymous %}
             <p>
                 If you are new here, you may want to download one of many
-                <a href="{{ url_for('mud_clients.index') }}" title="MUD clients">MUD clients</a>,
-                and see our <a href="{{ url_for('welcome.getstarted') }}" title="getting started guide">getting started guide</a>.
+                <a href="{{ url_for('help.mud_clients.index') }}" title="MUD clients">MUD clients</a>,
+                and see our <a href="{{ url_for('help.getstarted') }}" title="getting started guide">getting started guide</a>.
             </p>
     {%- endif %}
     {%- if help_search_form is defined %}
             <div>
-                <form method="get" action="{{ url_for('help_page.index') }}" id="help-search-form">
+                <form method="get" action="{{ url_for('help.help_page.index') }}" id="help-search-form">
                     {{ render_field(help_search_form.search, maxlength=32) }}
                     <input type="submit" value="Search">
-                    (<i>such as &quot;<a href="{{ url_for('help_page.single', topic='spell') }}">spell</a>&quot; or
-                    &quot;<a href="{{ url_for('help_page.single', topic='MUD Basics') }}">MUD Basics</a>&quot;</i>)
+                    (<i>such as &quot;<a href="{{ url_for('help.help_page.single', topic='spell') }}">spell</a>&quot; or
+                    &quot;<a href="{{ url_for('help.help_page.single', topic='MUD Basics') }}">MUD Basics</a>&quot;</i>)
                 </form>
             </div>
     {%- endif %}
@@ -64,7 +64,7 @@
             <ul class="help-topic-list">
         {%- for list_topic in topics %}
                 <li title="Topic: {{ list_topic }}">
-                    <a href="{{ url_for('help_page.single', topic=list_topic) }}">{{ list_topic }}</a>
+                    <a href="{{ url_for('help.help_page.single', topic=list_topic) }}">{{ list_topic }}</a>
                 </li>
         {%- endfor %}
             </ul>

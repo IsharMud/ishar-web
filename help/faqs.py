@@ -5,7 +5,9 @@ from models import PlayerClass, PlayerRace
 
 
 # Flask Blueprint
-faqs_bp = Blueprint('faqs', __name__)
+faqs_bp = Blueprint(
+    'faqs', __name__, url_prefix='/', template_folder='templates'
+)
 
 
 @faqs_bp.route('/questions/', methods=['GET'])
@@ -20,7 +22,7 @@ def index():
     # Fetch/format, links to each playable class with descriptions
     player_classes = [
         f'<a href="'
-        f"{url_for('help_page.single', topic=player_class.class_display_name)}"
+        f"{url_for('help.help_page.single', topic=player_class.class_display_name)}"
         f'">{player_class.class_display_name}</a> -- '
         f'{player_class.class_description}'
         for player_class in PlayerClass().query.filter(
@@ -47,7 +49,7 @@ def index():
 
         'Are there player classes?': [
             '<a href="'
-            f"{url_for('help_page.single', topic='Classes')}"
+            f"{url_for('help.help_page.single', topic='Classes')}"
             '" title="Classes">Yes! There are '
             f'{len(player_classes)} classes</a> available '
             'to choose from, when you create a player character:',
@@ -56,7 +58,7 @@ def index():
 
         'Are there player races?': [
             '<a href="'
-            f"{url_for('help_page.single', topic='Races')}"
+            f"{url_for('help.help_page.single', topic='Races')}"
             '">Yes! There are '
             f'{len(player_races)} races</a> available '
             'to choose from, when you create a player character:',
@@ -82,7 +84,7 @@ def index():
         'Is death permanent?': [
             '<strong>You can choose</strong> whether to play in "Survival" '
             '(aka &quot;<a href="'
-            f"{url_for('help_page.single', topic='Permadeath')}"
+            f"{url_for('help.help_page.single', topic='Permadeath')}"
             '" title="Permadeath">perma-death</a>&quot;) or "Classic" mode, '
             'each time you create a player character.', 'While survival mode '
             'gains experience faster, classic mode subtracts experience upon '
@@ -92,14 +94,14 @@ def index():
         'Can I have multiple characters or multi-play?': [
             'You can have up to <strong>ten (10) player characters</strong> '
             'per account!', 'You may actively <a href="'
-            f"{url_for('help_page.single', topic='Mutliplay')}"
+            f"{url_for('help.help_page.single', topic='Mutliplay')}"
             '" title="Multiplay">multi-play</a> three (3) characters '
             'at once.', 'Only one account is allowed per person!'
         ],
 
         'Is there player-killing (PK) or player-versus-player (PvP) combat?': [
             '<a href="'
-            f"{url_for('help_page.single', topic='Player Killing')}"
+            f"{url_for('help.help_page.single', topic='Player Killing')}"
             '" title="Player Killing">Yes and no</a>.',
             "While player-versus-player combat (or PK'ing) is possible, "
             'it is very rare, and not a requirement of the game.'

@@ -37,6 +37,7 @@ def index():
         ).all()
     )
 
+
 @leaders_bp.route('/classic/', methods=['GET'])
 @leaders_bp.route('/classic', methods=['GET'])
 @leaderboard_bp.route('/classic/', methods=['GET'])
