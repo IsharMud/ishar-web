@@ -21,7 +21,7 @@ from portal import portal
 from sysinfo import sysinfo
 from welcome import welcome
 
-import error_pages
+from error_pages import error_pages
 from models import GlobalEvent, Season
 
 
@@ -30,7 +30,7 @@ app = Flask(__name__)
 app.config.from_pyfile('config.py')
 
 # Error pages/handlers
-app.register_blueprint(error_pages.error_pages)
+app.register_blueprint(error_pages)
 
 # Flask-Login
 login_manager.init_app(app)
