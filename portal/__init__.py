@@ -7,7 +7,12 @@ from models import Player
 
 
 # Flask Blueprint
-portal = Blueprint('portal', __name__)
+portal = Blueprint(
+    'portal',
+    __name__,
+    url_prefix='/',
+    template_folder='templates'
+)
 
 
 @portal.before_request
@@ -20,9 +25,9 @@ def before_request():
 
 @portal.route('/portal/', methods=['GET'])
 @portal.route('/portal', methods=['GET'])
-def index():
+def player_portal():
     """Main portal page for logged-in players"""
-    return render_template('portal/portal.html.j2')
+    return render_template('player_portal.html.j2')
 
 
 @portal.route('/essence/', methods=['GET'])
@@ -31,7 +36,7 @@ def index():
 @portal.route('/account', methods=['GET'])
 def account():
     """Allow users to view/manage their accounts"""
-    return render_template('portal/account.html.j2')
+    return render_template('account.html.j2')
 
 
 @portal.route('/change_password/', methods=['GET', 'POST'])
@@ -71,7 +76,7 @@ def change_password():
 
     # Show the change password form
     return render_template(
-        'portal/change_password.html.j2',
+        'change_password.html.j2',
         change_password_form=change_password_form
     )
 
@@ -101,7 +106,7 @@ def player(player_name=None):
 
         return redirect(
             url_for(
-                'portal.player',
+                '.player',
                 player_name=who,
                 _anchor='player'
             )
@@ -124,7 +129,7 @@ def player(player_name=None):
         )
 
     return render_template(
-        'portal/player.html.j2',
+        'player.html.j2',
         player=find,
         player_search_form=player_search_form
     ), code

@@ -10,18 +10,18 @@ from flask import Flask
 from sentry import sentry_sdk
 from login import login, login_manager
 
+from database import db_session
 from admin import admin
 from challenges import challenges
-from database import db_session
-from discord_api import discord_api
 from faqs import faqs
 from help_page import help_page
-from leaders import leaders
+from leaders import leaders, leaderboard
 from mud_clients import mud_clients
 from patches import patches
 from portal import portal
 from sysinfo import sysinfo
 from welcome import welcome
+
 import error_pages
 from models import GlobalEvent, Season
 
@@ -39,10 +39,10 @@ login_manager.init_app(app)
 # Flask Blueprints/pages
 app.register_blueprint(admin)
 app.register_blueprint(challenges)
-app.register_blueprint(discord_api)
 app.register_blueprint(faqs)
 app.register_blueprint(help_page)
 app.register_blueprint(leaders)
+app.register_blueprint(leaderboard)
 app.register_blueprint(login)
 app.register_blueprint(mud_clients)
 app.register_blueprint(patches)

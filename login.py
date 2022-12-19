@@ -77,12 +77,12 @@ def index():
             )
         except KeyError:
             return redirect(
-                url_for('portal.index')
+                url_for('portal.player_portal')
             )
 
     # Show the log-in form with 401 response
     return render_template(
-        'portal/login.html.j2',
+        'base/login.html.j2',
         login_form=login_form
     ), 401
 

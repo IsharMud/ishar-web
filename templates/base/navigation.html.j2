@@ -15,7 +15,7 @@
                     <a href="{{ url_for('help_page.world') }}" {%- if page == 'world' %} id="active-nav"{% endif%}>World</a>
                 </li>
                 <li title="Portal">
-                    <a href ="{{ url_for('portal.index') }}" {%- if page == 'portal' %} id="active-nav"{% endif%}>Portal</a>
+                    <a href ="{{ url_for('portal.player_portal') }}" {%- if page == 'portal' %} id="active-nav"{% endif%}>Portal</a>
                 </li>
             </ul>
 {%- if current_user and current_user.is_authenticated and current_user.display_name %}

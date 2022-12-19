@@ -5,18 +5,13 @@ from mud_secret import IMM_LEVELS
 from models import Player
 
 
-# Flask Blueprint
-leaders = Blueprint('leaders', __name__)
+# Flask Blueprints
+leaders = Blueprint('leaders', __name__, url_prefix='/leaders')
+leaderboard = Blueprint('leaderboard', __name__, url_prefix='/leaderboard')
 
 
-@leaders.route('/leaderboard/all/', methods=['GET'])
-@leaders.route('/leaders/all/', methods=['GET'])
-@leaders.route('/leaderboard/all', methods=['GET'])
-@leaders.route('/leaders/all', methods=['GET'])
-@leaders.route('/leaderboard/', methods=['GET'])
-@leaders.route('/leaders/', methods=['GET'])
-@leaders.route('/leaderboard', methods=['GET'])
-@leaders.route('/leaders', methods=['GET'])
+@leaders.route('/', methods=['GET'])
+@leaderboard.route('/', methods=['GET'])
 def index():
     """Sort and list the best players"""
     return render_template(
@@ -32,11 +27,10 @@ def index():
         ).all()
     )
 
-
-@leaders.route('/leaderboard/classic/', methods=['GET'])
-@leaders.route('/leaders/classic/', methods=['GET'])
-@leaders.route('/leaderboard/classic', methods=['GET'])
-@leaders.route('/leaders/classic', methods=['GET'])
+@leaders.route('/classic/', methods=['GET'])
+@leaders.route('/classic', methods=['GET'])
+@leaderboard.route('/classic/', methods=['GET'])
+@leaderboard.route('/classic', methods=['GET'])
 def classic():
     """Sort and list the best classic players"""
     return render_template(
@@ -53,10 +47,10 @@ def classic():
     )
 
 
-@leaders.route('/leaderboard/survival/', methods=['GET'])
-@leaders.route('/leaders/survival/', methods=['GET'])
-@leaders.route('/leaderboard/survival', methods=['GET'])
-@leaders.route('/leaders/survival', methods=['GET'])
+@leaders.route('/survival/', methods=['GET'])
+@leaders.route('/survival', methods=['GET'])
+@leaderboard.route('/survival/', methods=['GET'])
+@leaderboard.route('/survival', methods=['GET'])
 def survival():
     """Sort and list the best survival players"""
     return render_template(

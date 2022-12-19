@@ -6,7 +6,7 @@ from werkzeug.utils import secure_filename
 
 from mud_secret import PATCH_DIR
 from forms import PatchAddForm
-from patches import get_patch_pdfs
+from patches.util import get_patch_pdfs
 
 
 # Flask Blueprint
