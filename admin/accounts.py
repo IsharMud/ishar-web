@@ -9,17 +9,17 @@ from sentry import sentry_sdk
 
 
 # Flask Blueprints
-from admin.players import admin_players
-admin_accounts = Blueprint(
+from admin.players import players
+accounts = Blueprint(
     'accounts',
     __name__,
     url_prefix='/accounts',
     template_folder='templates/accounts'
 )
-admin_accounts.register_blueprint(admin_players)
+accounts.register_blueprint(players)
 
 
-@admin_accounts.route('/', methods=['GET'])
+@accounts.route('/', methods=['GET'])
 def index():
     """Administration portal to allow Gods to view accounts
         /admin/accounts"""
@@ -29,8 +29,8 @@ def index():
     )
 
 
-@admin_accounts.route('/manage/<int:manage_account_id>/', methods=['GET'])
-@admin_accounts.route('/manage/<int:manage_account_id>', methods=['GET'])
+@accounts.route('/manage/<int:manage_account_id>/', methods=['GET'])
+@accounts.route('/manage/<int:manage_account_id>', methods=['GET'])
 def manage(manage_account_id=None):
     """Administration portal to allow Gods to view accounts
         /admin/account"""
@@ -47,8 +47,8 @@ def manage(manage_account_id=None):
     )
 
 
-@admin_accounts.route('/edit/<int:edit_account_id>/', methods=['GET', 'POST'])
-@admin_accounts.route('/edit/<int:edit_account_id>', methods=['GET', 'POST'])
+@accounts.route('/edit/<int:edit_account_id>/', methods=['GET', 'POST'])
+@accounts.route('/edit/<int:edit_account_id>', methods=['GET', 'POST'])
 def edit(edit_account_id=None):
     """Administration portal to allow Gods to edit accounts
         /admin/accounts/edit"""

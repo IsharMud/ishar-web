@@ -11,7 +11,7 @@ from sentry import sentry_sdk
 
 
 # Flask Blueprint
-admin_news = Blueprint(
+news = Blueprint(
     'news',
     __name__,
     url_prefix='/news',
@@ -19,7 +19,7 @@ admin_news = Blueprint(
 )
 
 
-@admin_news.route('/', methods=['GET', 'POST'])
+@news.route('/', methods=['GET', 'POST'])
 def index():
     """Administration portal to allow Gods to post news
         /admin/news"""
@@ -58,8 +58,8 @@ def index():
     )
 
 
-@admin_news.route('/edit/<int:edit_news_id>/', methods=['GET', 'POST'])
-@admin_news.route('/edit/<int:edit_news_id>', methods=['GET', 'POST'])
+@news.route('/edit/<int:edit_news_id>/', methods=['GET', 'POST'])
+@news.route('/edit/<int:edit_news_id>', methods=['GET', 'POST'])
 def edit(edit_news_id=None):
     """Administration portal to allow Gods to edit news posts
         /admin/news/edit"""
@@ -87,8 +87,8 @@ def edit(edit_news_id=None):
     )
 
 
-@admin_news.route('/delete/<int:delete_news_id>/', methods=['GET'])
-@admin_news.route('/delete/<int:delete_news_id>', methods=['GET'])
+@news.route('/delete/<int:delete_news_id>/', methods=['GET'])
+@news.route('/delete/<int:delete_news_id>', methods=['GET'])
 def delete(delete_news_id=None):
     """Administration portal to allow Gods to delete news posts
         /admin/news/delete"""

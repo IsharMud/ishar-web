@@ -12,7 +12,7 @@ from sentry import sentry_sdk
 
 
 # Flask Blueprint
-admin_seasons = Blueprint(
+seasons = Blueprint(
     'seasons',
     __name__,
     url_prefix='/seasons',
@@ -20,7 +20,7 @@ admin_seasons = Blueprint(
 )
 
 
-@admin_seasons.route('/', methods=['GET'])
+@seasons.route('/', methods=['GET'])
 def index():
     """Administration portal to allow Gods to view/manage seasons
         /admin/seasons"""
@@ -33,8 +33,8 @@ def index():
     )
 
 
-@admin_seasons.route('/cycle/', methods=['GET', 'POST'])
-@admin_seasons.route('/cycle', methods=['GET', 'POST'])
+@seasons.route('/cycle/', methods=['GET', 'POST'])
+@seasons.route('/cycle', methods=['GET', 'POST'])
 def cycle():
     """Administration portal to allow Gods to cycle seasons,
         while wiping players - /admin/seasons/cycle"""
@@ -93,7 +93,7 @@ def cycle():
 
                 # Skip immortal players
                 if delete_player.is_immortal:
-                    flash(f'Skipping Immortal: {delete_player.name}', 'info')
+                    flash(f'Immortal: {delete_player.display_name}', 'info')
                     total_immskip += 1
                     continue
 

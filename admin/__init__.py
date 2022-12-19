@@ -2,11 +2,11 @@
 from flask import abort, Blueprint, flash, render_template
 from flask_login import current_user, fresh_login_required
 
-from admin.accounts import admin_accounts
-from admin.events import admin_events
-from admin.news import admin_news
-from admin.patches import admin_patches
-from admin.seasons import admin_seasons
+from admin.accounts import accounts
+from admin.events import events
+from admin.news import news
+from admin.patches import patches
+from admin.seasons import seasons
 
 
 # Flask Blueprints
@@ -16,11 +16,11 @@ admin = Blueprint(
     url_prefix='/admin',
     template_folder='templates'
 )
-admin.register_blueprint(admin_accounts)
-admin.register_blueprint(admin_events)
-admin.register_blueprint(admin_news)
-admin.register_blueprint(admin_patches)
-admin.register_blueprint(admin_seasons)
+admin.register_blueprint(accounts)
+admin.register_blueprint(events)
+admin.register_blueprint(news)
+admin.register_blueprint(patches)
+admin.register_blueprint(seasons)
 
 
 @admin.before_request

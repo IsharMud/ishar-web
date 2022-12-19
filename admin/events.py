@@ -7,7 +7,7 @@ from models import GlobalEvent
 
 
 # Flask Blueprint
-admin_events = Blueprint(
+events = Blueprint(
     'events',
     __name__,
     url_prefix='/events',
@@ -15,7 +15,7 @@ admin_events = Blueprint(
 )
 
 
-@admin_events.route('/', methods=['GET', 'POST'])
+@events.route('/', methods=['GET', 'POST'])
 def index():
     """Administration portal to allow Gods to add global events
         /admin/events"""
@@ -55,8 +55,8 @@ def index():
     )
 
 
-@admin_events.route('/edit/<int:edit_event_type>/', methods=['GET', 'POST'])
-@admin_events.route('/edit/<int:edit_event_type>', methods=['GET', 'POST'])
+@events.route('/edit/<int:edit_event_type>/', methods=['GET', 'POST'])
+@events.route('/edit/<int:edit_event_type>', methods=['GET', 'POST'])
 def edit(edit_event_type=None):
     """Administration portal to allow Gods to edit global events
         /admin/events/edit"""
@@ -86,8 +86,8 @@ def edit(edit_event_type=None):
     )
 
 
-@admin_events.route('/delete/<int:delete_event_type>/', methods=['GET'])
-@admin_events.route('/delete/<int:delete_event_type>', methods=['GET'])
+@events.route('/delete/<int:delete_event_type>/', methods=['GET'])
+@events.route('/delete/<int:delete_event_type>', methods=['GET'])
 def delete(delete_event_type=None):
     """Administration portal to allow Gods to delete global events
         /admin/events/delete"""
