@@ -9,7 +9,7 @@ import interactions
 
 import discord_secret
 from database import db_session
-from helptab import search_help_topics
+from help.helptab import search_help_topics
 from models import Challenge, GlobalEvent, Player, Season
 from sentry import sentry_sdk
 from sysinfo import get_uptime
