@@ -15,25 +15,14 @@ def change_password():
 
         # Proceed if the user entered their current password correctly
         verify = change_password_form.current_password.data
-        new_choice = change_password_form.confirm_new_password.data
+        new_password = change_password_form.confirm_new_password.data
         if current_user.check_password(verify):
-            if current_user.change_password(new_choice):
-                flash(
-                    'Your password has been changed!',
-                    'success'
-                )
-            else:
-                flash(
-                    'Sorry, but your password could not be changed.',
-                    'error'
-                )
+            current_user.change_password(new_password)
+            flash('Your password has been changed!', 'success')
 
         # Otherwise, tell them to enter their current password correctly
         else:
-            flash(
-                'Please enter your current password correctly!',
-                'error'
-            )
+            flash('Please enter your current password correctly!', 'error')
 
     # Show the change password form
     return render_template(
