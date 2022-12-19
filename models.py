@@ -833,7 +833,7 @@ class Player(Base):
     def player_link(self):
         """Player link"""
         url = url_for(
-            'portal.player',
+            'portal.view_player',
             player_name=self.name,
             _anchor='player'
         )

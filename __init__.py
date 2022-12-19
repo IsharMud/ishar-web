@@ -7,9 +7,8 @@ import os
 from urllib.parse import urlparse
 
 from flask import Flask
-from sentry import sentry_sdk
 from login import login, login_manager
-
+from sentry import sentry_sdk
 from database import db_session
 from admin import admin
 from challenges import challenges

@@ -49,7 +49,7 @@
     {%- endif -%}
 {%- endblock meta_description -%}
 {%- block meta_url -%}
-{{- url_for('portal.player', player_name=player.name, _external=True) -}}
+{{- url_for('.view_player', player_name=player.name, _external=True) -}}
 {%- endblock meta_url -%}
 {%- block title %}
     {%- if player -%}

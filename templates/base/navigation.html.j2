@@ -23,7 +23,7 @@
     {%- if current_user.is_god %}
                 <li title="Admin">
                     <a href="{{ url_for('admin.index') }}" {%- if page == 'admin' %} id="active-nav"{% endif%}>Admin</a>
-            </li>
+                </li>
     {%- endif %}
                 <li title="Account">
                     <a href="{{ url_for('portal.account') }}" {%- if page == 'account' %} id="active-nav"{% endif%}>Account</a>
@@ -39,7 +39,7 @@
                     <a href="{{ url_for('leaders.index') }}" {%- if page == 'leaders' %} id="active-nav"{% endif%}>Leaders</a>
                 </li>
                 <li title="Log out">
-                    <a href="{{ url_for('login.logout') }}">Log out ({{ current_user.display_name | safe }})</a>
+                    <a href="{{ url_for('login.player_logout') }}">Log out ({{ current_user.display_name | safe }})</a>
                 </li>
             </ul>
 {%- endif %}

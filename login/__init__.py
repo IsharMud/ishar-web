@@ -11,10 +11,10 @@ from sentry import sentry_sdk
 # Flask-Login
 login_manager = LoginManager()
 login_manager.login_message_category = 'error'
-login_manager.login_view = 'login.index'
+login_manager.login_view = 'login.player_login'
 login_manager.needs_refresh_message = 'Please log in again, for your security.'
 login_manager.needs_refresh_message_category = 'error'
-login_manager.refresh_view = 'login.index'
+login_manager.refresh_view = 'login.player_login'
 login_manager.session_protection = 'strong'
 
 
@@ -33,12 +33,17 @@ def load_user(email):
 
 
 # Flask Blueprint
-login = Blueprint('login', __name__)
+login = Blueprint(
+    'login',
+    __name__,
+    url_prefix='/',
+    template_folder='templates'
+)
 
 
 @login.route('/login/', methods=['GET', 'POST'])
 @login.route('/login', methods=['GET', 'POST'])
-def index():
+def player_login():
     """Log-in form page and processing"""
 
     # Get log in form object and check if submitted
@@ -46,9 +51,7 @@ def index():
     if login_form.validate_on_submit():
 
         # Find the user by e-mail address from the log-in form
-        find = Account.query.filter_by(
-            email=login_form.email.data
-        ).first()
+        find = Account.query.filter_by(email=login_form.email.data).first()
 
         # If we find the user email and match the password,
         #   it is a successful log in
@@ -77,19 +80,19 @@ def index():
             )
         except KeyError:
             return redirect(
-                url_for('portal.player_portal')
+                url_for('portal.index')
             )
 
     # Show the log-in form with 401 response
     return render_template(
-        'base/login.html.j2',
+        'login.html.j2',
         login_form=login_form
     ), 401
 
 
 @login.route('/logout/', methods=['GET'])
 @login.route('/logout', methods=['GET'])
-def logout():
+def player_logout():
     """Allow users to log out (/logout)"""
     logout_user()
     flash(
