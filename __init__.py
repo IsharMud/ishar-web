@@ -15,7 +15,6 @@ from admin import admin_bp
 from challenges import challenges_bp
 from help import help_bp
 from leaders import leaders_bp, leaderboard_bp
-from help.mud_clients import mud_clients_bp
 from patches import patches_bp
 from portal import portal_bp
 from sysinfo import sysinfo_bp
@@ -40,7 +39,6 @@ app.register_blueprint(help_bp)
 app.register_blueprint(leaders_bp)
 app.register_blueprint(leaderboard_bp)
 app.register_blueprint(login_bp)
-app.register_blueprint(mud_clients_bp)
 app.register_blueprint(patches_bp)
 app.register_blueprint(portal_bp)
 app.register_blueprint(sysinfo_bp)

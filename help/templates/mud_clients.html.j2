@@ -2,7 +2,7 @@
 {% extends "base/layout.html.j2" %}
 {% block meta_title %}MUD Clients{% endblock meta_title %}
 {% block meta_description %}MUD Clients that are freely available to use and try to play Ishar MUD{% endblock meta_description %}
-{% block meta_url %}{{ url_for('mud_clients.index', _external=True) }}{% endblock meta_url %}
+{% block meta_url %}{{ url_for('help.mud_clients.index', _external=True) }}{% endblock meta_url %}
 {% block title %}MUD Clients{% endblock title %}
 {% block header %}MUD Clients{% endblock header %}
 {%- block content %}
@@ -39,7 +39,7 @@
                 <p>
                     After you download a client, tell it to connect to
                     <code>isharmud.com</code> on port number <code>23</code> or <code>9999</code> to join the game.
-                    See our <a href="{{ url_for('welcome.getstarted') }}" title="getting started guide">getting started guide</a>.
+                    See our <a href="{{ url_for('help.getstarted') }}" title="getting started guide">getting started guide</a>.
                 </p>
                 <p>
                     Everything listed here can be used at no cost.
