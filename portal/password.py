@@ -1,5 +1,5 @@
 
-"""Portal, and pages for logged-in users"""
+"""Change Password"""
 from flask import flash, render_template
 from flask_login import current_user
 

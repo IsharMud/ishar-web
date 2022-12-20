@@ -1,5 +1,3 @@
-
-
 """Patches utilities"""
 import glob
 import os

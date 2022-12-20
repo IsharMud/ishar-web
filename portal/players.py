@@ -1,4 +1,4 @@
-"""Portal, and pages for logged-in users"""
+"""View Player Profile"""
 from flask import flash, redirect, render_template, url_for
 
 from forms import PlayerSearchForm
