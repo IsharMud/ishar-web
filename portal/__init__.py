@@ -62,7 +62,7 @@ portal_bp.add_url_rule(
 # View player
 portal_bp.add_url_rule(
     '/player/<string:player_name>/', 'view_player', view_player,
-    methods=['GET'])
+    methods=['GET', 'POST'])
 portal_bp.add_url_rule(
     '/player/<string:player_name>', 'view_player', view_player,
-    methods=['GET'])
+    methods=['GET', 'POST'])
