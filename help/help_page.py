@@ -17,7 +17,7 @@ def index():
     # Redirect form searches to /help/<search>
     if request.args.get('search'):
         return redirect(
-            url_for('help_page.single', topic=request.args.get('search'))
+            url_for('help.help_page.single', topic=request.args.get('search'))
         )
 
     return render_template(
@@ -52,7 +52,7 @@ def single(topic=None):
     if len(search_topics) == 1:
         found_topic = next(iter(search_topics.values()))
         return redirect(
-            url_for('help_page.single', topic=found_topic['name'])
+            url_for('help.help_page.single', topic=found_topic['name'])
         )
 
     # Respond with a 200 showing any results,
