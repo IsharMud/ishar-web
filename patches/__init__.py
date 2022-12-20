@@ -36,6 +36,5 @@ def index():
     """Page showing a dynamic list of patches (/patches)"""
     return render_template(
         'patches.html.j2',
-        all_patches=get_patch_pdfs(),
         patches=get_patch_pdfs()
     )
