@@ -4,6 +4,9 @@ from flask import Blueprint, render_template
 from mud_secret import IMM_LEVELS
 from models import Player
 
+from leaders.classic import classic
+from leaders.survival import survival
+
 
 # Flask Blueprints
 leaders_bp = Blueprint(
@@ -20,59 +23,32 @@ leaderboard_bp = Blueprint(
 )
 
 
+@leaders_bp.route('/all/', methods=['GET'])
+@leaders_bp.route('/all', methods=['GET'])
 @leaders_bp.route('/', methods=['GET'])
+@leaderboard_bp.route('/all/', methods=['GET'])
+@leaderboard_bp.route('/all', methods=['GET'])
 @leaderboard_bp.route('/', methods=['GET'])
 def index():
     """Sort and list the best players"""
     return render_template(
         'leaders.html.j2',
-        leader_players=Player.query.filter(
-            Player.true_level < min(IMM_LEVELS)
-        ).order_by(
-            -Player.remorts,
-            -Player.total_renown,
-            -Player.quests_completed,
-            -Player.challenges_completed,
-            Player.deaths
+        leader_players=Player.query.filter(Player.true_level < min(IMM_LEVELS))
+        .order_by(
+            -Player.remorts, -Player.total_renown, -Player.quests_completed,
+            -Player.challenges_completed, Player.deaths
         ).all()
     )
 
 
-@leaders_bp.route('/classic/', methods=['GET'])
-@leaders_bp.route('/classic', methods=['GET'])
-@leaderboard_bp.route('/classic/', methods=['GET'])
-@leaderboard_bp.route('/classic', methods=['GET'])
-def classic():
-    """Sort and list the best classic players"""
-    return render_template(
-        'leaders.html.j2',
-        leader_players=Player.query.filter_by(game_type=0).filter(
-            Player.true_level < min(IMM_LEVELS)
-        ).order_by(
-            -Player.remorts,
-            -Player.total_renown,
-            -Player.quests_completed,
-            -Player.challenges_completed,
-            Player.deaths
-        ).all()
-    )
+# Classic
+leaders_bp.add_url_rule('/classic/', 'classic', classic, methods=['GET'])
+leaders_bp.add_url_rule('/classic', 'classic', classic, methods=['GET'])
+leaderboard_bp.add_url_rule('/classic/', 'classic', classic, methods=['GET'])
+leaderboard_bp.add_url_rule('/classic', 'classic', classic, methods=['GET'])
 
-
-@leaders_bp.route('/survival/', methods=['GET'])
-@leaders_bp.route('/survival', methods=['GET'])
-@leaderboard_bp.route('/survival/', methods=['GET'])
-@leaderboard_bp.route('/survival', methods=['GET'])
-def survival():
-    """Sort and list the best survival players"""
-    return render_template(
-        'leaders.html.j2',
-        leader_players=Player.query.filter_by(game_type=1).filter(
-            Player.true_level < min(IMM_LEVELS)
-        ).order_by(
-            -Player.remorts,
-            -Player.total_renown,
-            -Player.quests_completed,
-            -Player.challenges_completed,
-            Player.deaths
-        ).all()
-    )
+# Survival
+leaders_bp.add_url_rule('/survival/', 'survival', survival, methods=['GET'])
+leaders_bp.add_url_rule('/survival', 'survival', survival, methods=['GET'])
+leaderboard_bp.add_url_rule('/survival/', 'survival', survival, methods=['GET'])
+leaderboard_bp.add_url_rule('/survival', 'survival', survival, methods=['GET'])
