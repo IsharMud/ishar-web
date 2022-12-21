@@ -1,10 +1,10 @@
 #!/usr/bin/python3
 """Ishar MUD Discord bot"""
+from datetime import datetime
 import logging
 import re
 import signal
 import sys
-
 import interactions
 
 import discord_secret
@@ -325,6 +325,20 @@ async def spell(
     db_session.close()
 
 
+# /mudtime
+@bot.command()
+async def mudtime(ctx: interactions.CommandContext):
+    """Show the MUD server time"""
+    logging.info(
+        '%s (%i) / %s / mudtime',
+        ctx.channel, ctx.channel_id, ctx.user)
+
+    # Find/show the server time
+    now = datetime.utcnow().strftime('%A, %B %d, %Y @ %H:%M:%S %Z')
+    await ctx.send(f'The current Ishar MUD server time is: {now}')
+    db_session.close()
+
+
 # /uptime
 @bot.command()
 async def uptime(ctx: interactions.CommandContext):
@@ -345,6 +359,7 @@ async def uptime(ctx: interactions.CommandContext):
         out,
         ephemeral=ephemeral
     )
+    db_session.close()
 
 
 # /season
@@ -377,6 +392,7 @@ async def faq(ctx: interactions.CommandContext):
         ctx.channel, ctx.channel_id, ctx.user
     )
     await ctx.send('https://isharmud.com/faq')
+    db_session.close()
 
 
 # /faqs
@@ -388,6 +404,7 @@ async def faqs(ctx: interactions.CommandContext):
         ctx.channel, ctx.channel_id, ctx.user
     )
     await ctx.send('https://isharmud.com/faq')
+    db_session.close()
 
 
 # /get_started
@@ -399,6 +416,7 @@ async def get_started(ctx: interactions.CommandContext):
         ctx.channel, ctx.channel_id, ctx.user
     )
     await ctx.send('https://isharmud.com/get_started')
+    db_session.close()
 
 
 # /getstarted
@@ -410,6 +428,7 @@ async def getstarted(ctx: interactions.CommandContext):
         ctx.channel, ctx.channel_id, ctx.user
     )
     await ctx.send('https://isharmud.com/get_started')
+    db_session.close()
 
 
 # Handle SIGTERM
@@ -419,6 +438,7 @@ def sigterm_handler(num, frame):
         'Caught SIGTERM: %i / %s',
         num, frame
     )
+    db_session.close()
     sys.exit(0)
 
 
@@ -445,4 +465,5 @@ except Exception as err:
 
 # Say goodbye
 finally:
+    db_session.close()
     logging.info('Exiting...')
