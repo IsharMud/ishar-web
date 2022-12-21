@@ -1,7 +1,7 @@
 """Patches"""
 from flask import Blueprint, redirect, render_template, url_for
 
-from patches.util import get_patch_pdfs
+from patches.util import get_patch_pdfs, get_patch_pdf
 
 
 # Flask Blueprint
@@ -37,4 +37,14 @@ def index():
     return render_template(
         'patches.html.j2',
         patches=get_patch_pdfs()
+    )
+
+
+@patches_bp.route('/patches/text/', methods=['GET'])
+@patches_bp.route('/patches/text', methods=['GET'])
+def text():
+    """Page showing text of the latest patch PDF (/patches/text)"""
+    return render_template(
+        'pdf.html.j2',
+        pdf=get_patch_pdf()
     )

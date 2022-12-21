@@ -2,6 +2,7 @@
 import glob
 import os
 from datetime import date
+from PyPDF2 import PdfFileReader
 
 from mud_secret import PATCH_DIR
 
@@ -54,3 +55,31 @@ def get_patch_pdfs(patch_directory=PATCH_DIR):
 
     # Return the list of dictionaries
     return ret
+
+
+def get_patch_pdf(patch_name=get_patch_pdfs()[0]['name']):
+    """Get patch PDF information and text"""
+    count = 0
+    text = str()
+
+    # Open the PDF patch file
+    with open(file=f'{PATCH_DIR}/{patch_name}', mode='rb') as pdf_fh:
+
+        # Parse the PDF, then get the number of pages and metadata
+        pdf = PdfFileReader(pdf_fh)
+        page_count = len(pdf.pages)
+        meta = pdf.metadata
+
+        # Loop through each page of the PDF extracting the text
+        for page in pdf.pages:
+            count += 1
+            text += f'\nPage {count} of {page_count}\n'
+            text += page.extract_text()
+
+    # Return the PDF name, metadata, page count, and text
+    return {
+        'name': patch_name,
+        'meta': meta,
+        'page_count': page_count,
+        'text': text
+    }
