@@ -334,7 +334,7 @@ async def mudtime(ctx: interactions.CommandContext):
         ctx.channel, ctx.channel_id, ctx.user)
 
     # Find/show the server time
-    now = datetime.utcnow().strftime('%A, %B %d, %Y @ %H:%M:%S %Z')
+    now = datetime.utcnow().strftime('%A, %B %d, %Y @ %H:%M:%S (%I:%M:%S %p)')
     await ctx.send(f'The current Ishar MUD server time is: {now}')
     db_session.close()
 
