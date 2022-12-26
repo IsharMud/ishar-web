@@ -11,9 +11,9 @@ def get_proc(process_name='ishar'):
 
     # Loop through each process, getting its name, username, and create time
     pid_attrs = ['pid', 'name', 'username', 'create_time']
-
-    # Return the process with the correct name owned by the same user
     for proc in psutil.process_iter(attrs=pid_attrs):
+
+        # Return the process with the correct name owned by the same user
         if proc.info['name'] == process_name:
             if proc.info['username'] == os.getenv('USER'):
                 return proc
