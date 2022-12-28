@@ -95,7 +95,7 @@ def index():
     ret = None
     if proc and proc.info:
         ret = {
-            'connection':   len(get_connections(process=proc)),
+            'connections':   len(get_connections(process=proc)),
             'cpu_percent':  proc.cpu_percent(),
             'cpu_times':    proc.cpu_times(),
             'ctx_switches': proc.num_ctx_switches(),
