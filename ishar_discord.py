@@ -341,7 +341,7 @@ async def mudtime(ctx: interactions.CommandContext):
 
 # /connections
 @bot.command()
-async def uptconnectionsime(ctx: interactions.CommandContext):
+async def connections(ctx: interactions.CommandContext):
     """Show the MUD process connections"""
     ephemeral = True
     logging.info(
