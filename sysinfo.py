@@ -29,10 +29,45 @@ def get_uptime(process=get_proc()):
     return None
 
 
+def get_connections(process=get_proc()):
+    """Create dictionary of unique IP addresses connected to the MUD,
+        and the count of times """
+
+    # Only continue if the process exists
+    if process:
+
+        # Loop through each connection
+        ips = {}
+        for conn in process.connections(kind='inet'):
+
+            # Only process established connections to port 9999
+            if conn.status and conn.status == 'ESTABLISHED':
+                if conn.laddr and conn.raddr and conn.laddr.port and \
+                 conn.laddr.port == 9999 and conn.raddr.ip:
+
+                    # Increment existing, or set new IP addresses
+                    if conn.raddr.ip in ips:
+                        ips[conn.raddr.ip] += 1
+                    else:
+                        ips[conn.raddr.ip] = 1
+
+        # Return the dictionary of IP addresses and their count
+        return ips
+
+    # Return nothing if no process
+    return None
+
+
 # Flask Blueprint
 sysinfo_bp = Blueprint('sysinfo', __name__)
 
 
+@sysinfo_bp.route('/connections/', methods=['GET'])
+@sysinfo_bp.route('/connections', methods=['GET'])
+@sysinfo_bp.route('/conns/', methods=['GET'])
+@sysinfo_bp.route('/conns', methods=['GET'])
+@sysinfo_bp.route('/who/', methods=['GET'])
+@sysinfo_bp.route('/who', methods=['GET'])
 @sysinfo_bp.route('/online/', methods=['GET'])
 @sysinfo_bp.route('/online', methods=['GET'])
 @sysinfo_bp.route('/uptime/', methods=['GET'])
@@ -62,5 +97,6 @@ def index():
 
     return render_template(
         'sysinfo.html.j2',
+        connections=get_connections(process=proc),
         sysinfo=ret
     )

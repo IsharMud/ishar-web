@@ -63,7 +63,9 @@ def index():
     """Main welcome page/index, includes the most recent news"""
     return render_template(
         'base/welcome.html.j2',
-        news=News.query.order_by(-News.created_at).first()
+        news=News.query.order_by(
+            -News.created_at
+        ).first()
     )
 
 
@@ -77,5 +79,7 @@ def wizlist():
         'wizlist.html.j2',
         immortals=Player.query.filter(
             Player.true_level >= min(IMM_LEVELS)
-        ).order_by(-Player.true_level).all()
+        ).order_by(
+            -Player.true_level
+        ).all()
     )
