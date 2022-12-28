@@ -5,6 +5,8 @@ import os
 import psutil
 from flask import Blueprint, render_template
 
+from sentry import sentry_sdk
+
 
 def get_proc(process_name='ishar'):
     """Get information about the (usually 'ishar') MUD process"""
@@ -38,11 +40,12 @@ def get_connections(process=get_proc()):
 
         # Loop through each connection
         ips = {}
-        for conn in process.connections(kind='inet'):
+        try:
+            conns = process.connections(kind='inet')
+            for conn in conns:
 
-            # Only process established connections to port 9999
-            if conn.status and conn.status == 'ESTABLISHED':
-                if conn.laddr and conn.raddr and conn.laddr.port and \
+                # Only process established connections to port 9999
+                if conn.status == 'ESTABLISHED' and \
                  conn.laddr.port == 9999 and conn.raddr.ip:
 
                     # Increment existing, or set new IP addresses
@@ -51,8 +54,11 @@ def get_connections(process=get_proc()):
                     else:
                         ips[conn.raddr.ip] = 1
 
-        # Return the dictionary of IP addresses and their count
-        return ips
+            # Return the dictionary of IP addresses and their count
+            return ips
+
+        except (PermissionError, psutil.AccessDenied) as cerr:
+            sentry_sdk.capture_exception(cerr)
 
     # Return nothing if no process
     return None

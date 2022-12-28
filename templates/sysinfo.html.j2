@@ -6,9 +6,9 @@
 {% block header %}System Information{% endblock header %}
 {%- block content %}
     {%- if connections and connections is iterable and connections | length > 1 %}
-        {%- for ip, count in connections.items() %}
-            {{ ip }}: {{ count }}
-        {%- endfor %}
+        <p>
+            There are currently <strong>{{ connections | length }}</strong> unique connections.
+        </p>
     {%- endif %}
     {%- if sysinfo %}
                 <p>
