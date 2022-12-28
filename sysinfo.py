@@ -36,33 +36,29 @@ def get_connections(process=get_proc()):
         and the count of times """
 
     # Only continue if the process exists
+    ips = {}
     if process:
 
         # Loop through each connection
-        ips = {}
         try:
-            conns = process.connections(kind='inet')
-            for conn in conns:
+            for conn in process.connections(kind='inet'):
 
                 # Only process established connections to port 9999
                 if conn.status == 'ESTABLISHED' and \
                  conn.laddr.port == 9999 and conn.raddr.ip:
 
-                    # Increment existing, or set new IP addresses
+                    # Increment existing, or set fresh count
                     if conn.raddr.ip in ips:
                         ips[conn.raddr.ip] += 1
                     else:
                         ips[conn.raddr.ip] = 1
 
-            # Return the dictionary of IP addresses and their count
-            return ips
-
         except (PermissionError, psutil.AccessDenied) as cerr:
-            print(cerr)
+            ips = {}
             sentry_sdk.capture_exception(cerr)
 
-    # Return nothing if no process
-    return None
+    # Return the dictionary of IP addresses and their count
+    return ips
 
 
 # Flask Blueprint
