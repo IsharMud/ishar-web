@@ -58,6 +58,7 @@ def get_connections(process=get_proc()):
             return ips
 
         except (PermissionError, psutil.AccessDenied) as cerr:
+            print(cerr)
             sentry_sdk.capture_exception(cerr)
 
     # Return nothing if no process
@@ -94,6 +95,7 @@ def index():
     ret = None
     if proc and proc.info:
         ret = {
+            'connection':   len(get_connections(process=proc)),
             'cpu_percent':  proc.cpu_percent(),
             'cpu_times':    proc.cpu_times(),
             'ctx_switches': proc.num_ctx_switches(),
@@ -103,6 +105,5 @@ def index():
 
     return render_template(
         'sysinfo.html.j2',
-        connections=get_connections(process=proc),
         sysinfo=ret
     )
