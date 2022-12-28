@@ -12,7 +12,7 @@ from database import db_session
 from help.helptab import search_help_topics
 from models import Challenge, GlobalEvent, Player, Season
 from sentry import sentry_sdk
-from sysinfo import get_uptime
+from sysinfo import get_connections, get_uptime
 
 
 # Create/compile a regular expression to only match letters,
@@ -336,6 +336,29 @@ async def mudtime(ctx: interactions.CommandContext):
     # Find/show the server time
     now = datetime.utcnow().strftime('%A, %B %d, %Y @ %H:%M:%S (%I:%M:%S %p)')
     await ctx.send(f'The current Ishar MUD server time is: {now}')
+    db_session.close()
+
+
+# /connections
+@bot.command()
+async def uptconnectionsime(ctx: interactions.CommandContext):
+    """Show the MUD process connections"""
+    ephemeral = True
+    logging.info(
+        '%s (%i) / %s / connections',
+        ctx.channel, ctx.channel_id, ctx.user
+    )
+
+    # Find/show the MUD process connections
+    out = 'Sorry, but no connection information could be found.'
+    conns = get_connections()
+    if conns:
+        ephemeral = False
+        out = f'There are {len(conns)} unique connections to the MUD'
+    await ctx.send(
+        out,
+        ephemeral=ephemeral
+    )
     db_session.close()
 
 
