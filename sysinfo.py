@@ -54,7 +54,6 @@ def get_connections(process=get_proc()):
                         ips[conn.raddr.ip] = 1
 
         except (PermissionError, psutil.AccessDenied) as cerr:
-            ips = {}
             sentry_sdk.capture_exception(cerr)
 
     # Return the dictionary of IP addresses and their count
