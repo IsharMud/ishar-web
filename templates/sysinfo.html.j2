@@ -10,7 +10,6 @@
                     Here is some basic system information about the Ishar MUD server process.
                 </p>
         {%- for infokey, infoval in sysinfo.items() %}
-            {%- if infokey and infoval %}
                 <ul>
                     <li>
                         <strong>{{ infokey | title }}</strong>:
@@ -25,7 +24,6 @@
                         </ul>
                     </li>
                 </ul>
-            {%- endif %}
         {%- endfor %}
     {%- else %}
                 <h3>
