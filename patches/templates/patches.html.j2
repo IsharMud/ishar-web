@@ -11,7 +11,7 @@
                 </p>
     {%- if patches is defined and patches is iterable and patches | length > 0 %}
                 <p>
-                     These are the latest patch notes for Ishar MUD:
+                    <a href="{{ url_for('patches.latest') }}">These are the latest patch notes for Ishar MUD.</a>
                 </p>
                 <ul id="patches-list">
         {%- for patch in patches %}

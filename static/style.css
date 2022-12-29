@@ -16,7 +16,7 @@ h1 {
 h2, h3, h4, h5, strong, th, label, button, input, textarea {
     color:                  #fa7;
 }
- 
+
 button, input, textarea {
     background-color:       #323639;
     border:                 1px solid #d6d6d7;
@@ -126,6 +126,11 @@ pre {
 textarea {
     height:                 10vh;
     width:                  60vw;
+}
+
+embed {
+    height:                 90vh;
+    width:                  90vh;
 }
 
 .faq-answers,

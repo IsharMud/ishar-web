@@ -13,18 +13,19 @@ patches_bp = Blueprint(
 )
 
 
-@patches_bp.route('/patches/latest/', methods=['GET'])
-@patches_bp.route('/patches/latest', methods=['GET'])
 @patches_bp.route('/patch/latest/', methods=['GET'])
 @patches_bp.route('/patch/latest', methods=['GET'])
 @patches_bp.route('/latestpatch/', methods=['GET'])
 @patches_bp.route('/latestpatch', methods=['GET'])
 @patches_bp.route('/latest_patch/', methods=['GET'])
 @patches_bp.route('/latest_patch', methods=['GET'])
+@patches_bp.route('/patches/latest/', methods=['GET'])
+@patches_bp.route('/patches/latest', methods=['GET'])
 def latest():
-    """Redirect to most recent found static patch .pdf file"""
-    return redirect(
-        url_for('static', filename=f"patches/{get_patch_pdfs()[0]['name']}")
+    """Embed most recent found static patch .pdf file"""
+    return render_template(
+        'latest.html.j2',
+        pdf=get_patch_pdfs()[0]
     )
 
 
