@@ -58,9 +58,10 @@
                         }{% if not loop.last %},{% endif %}
                       {%- endfor %}
                     ],
-                    search: true,
-                    sort: true,
-                    pagination: true
+                    search:     true,
+                    sort:       true,
+                    pagination: true,
+                    width:      '50%'
                 }).render(where);
             };
         </script>
@@ -75,7 +76,7 @@
                         {{ render_field(patch_add_form.file, autocomplete='off') }}
                         <tr>
                             <td colspan="2">
-                                <i>Note: Please stick to less than 25MiB in size.</i>
+                                <i>Note: Please stick to less than 50MiB in size.</i>
                             </td>
                         </tr>
                         {{ patch_add_form.csrf_token }}

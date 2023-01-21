@@ -77,9 +77,10 @@
                         }{% if not loop.last %},{% endif %}
                       {%- endfor %}
                     ],
-                    search: true,
-                    sort: true,
+                    search:     true,
+                    sort:       true,
                     pagination: true,
+                    width:      '50%'
                 }).render(where);
             };
         </script>

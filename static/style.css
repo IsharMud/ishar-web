@@ -68,10 +68,6 @@ nav ul li, footer ul li {
     padding-right:          0.5rem;
 }
 
-.gridjs, .gridjs-container, .gridjs gridjs-container {
-    width:                  50vw;
-}
-
 table {
     border-collapse:        collapse;
 }
