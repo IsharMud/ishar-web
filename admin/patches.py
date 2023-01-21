@@ -37,9 +37,9 @@ def index():
         patch_file = patch_add_form.file.data
         upload_file = f'{PATCH_DIR}/{patch_name_pdf}'
 
-        # Limit upload file size to 25MB
-        if patch_file.content_length > 26214400:
-            flash('Sorry, stick to 25 megabytes or less!', 'error')
+        # Limit upload file size to 50MB
+        if patch_file.content_length > 52428800:
+            flash('Sorry, stick to 50 megabytes or less!', 'error')
 
         # Limit to PDF files only
         if not patch_file.content_type == 'application/pdf':

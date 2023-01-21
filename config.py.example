@@ -3,7 +3,7 @@ TESTING = False
 DEBUG = False
 FLASK_ENV = 'production'
 SECRET_KEY = 'SECRET'
-MAX_CONTENT_LENGTH = 10485760
+MAX_CONTENT_LENGTH = 52428800
 UPLOAD_FOLDER = '/var/www/isharmud.com/ishar-web/static/patches'
 
 REMEMBER_COOKIE_DOMAIN = '.isharmud.com'
