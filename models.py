@@ -33,8 +33,6 @@ class Account(Base, UserMixin):
     account_name = Column(String(25), nullable=False, unique=True)
     account_gift = Column(TIMESTAMP, nullable=False, server_default=text("'0000-00-00 00:00:00'"))
 
-    players = relationship('Player', secondary='player_accounts')
-
     def change_password(self, new_password=None):
         """Method to change an account password"""
         self.password = md5_crypt.hash(new_password)
@@ -288,8 +286,7 @@ class Player(Base):
     logon = Column(TIMESTAMP, nullable=False, server_default=text("'0000-00-00 00:00:00'"))
     logout = Column(TIMESTAMP, nullable=False, server_default=text("'0000-00-00 00:00:00'"))
 
-#    account = relationship('Account', primaryjoin='Player.account_id == Account.account_id', backref='players')
-    account = relationship('Account', secondary='player_accounts')
+    account = relationship('Account', primaryjoin='Player.account_id == Account.account_id', backref='players')
 
     @cached_property
     def birth_ago(self):
@@ -542,13 +539,6 @@ class Season(Base):
         return f'<Season> ID {self.season_id} / Active: {self.is_active} / ' \
                f'Effective: {self.effective_date} ("{self.effective}") - ' \
                f'Expires: {self.expiration_date} ("{self.expires}")'
-
-
-t_player_accounts = Table(
-    'player_accounts', metadata,
-    Column('account_id', ForeignKey('accounts.account_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True),
-    Column('player_id', ForeignKey('players.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
-)
 
 
 t_player_common = Table(
