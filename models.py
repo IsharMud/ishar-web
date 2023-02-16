@@ -429,9 +429,6 @@ class Player(Base):
         return earned
 
 
-    account = relationship('Account', primaryjoin='Player.account_id == Account.account_id', backref='players')
-
-
 class PlayerClass(Base):
     __tablename__ = 'classes'
 
