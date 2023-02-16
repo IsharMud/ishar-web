@@ -111,8 +111,6 @@ class AccountUpgrade(Base):
     scale = Column(TINYINT(4), nullable=False, server_default=text("1"))
     is_disabled = Column(TINYINT(1), nullable=False, server_default=text("0"))
 
-#    accounts_upgrade = relationship('AccountsUpgrade', backref='upgrade')
-
     def __repr__(self):
         return f'<AccountUpgrade> "{self.name}" ({self.id}) / ' \
                f'Cost: {self.cost} / Max Value: {self.max_value}'
@@ -126,8 +124,8 @@ class AccountsUpgrade(Base):
     account_id = Column(ForeignKey('accounts.account_id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True)
     amount = Column(MEDIUMINT(4), nullable=False)
 
-    account = relationship('Account', primaryjoin='AccountsUpgrade.account_id == Account.account_id', backref='upgrades')
-    upgrade = relationship('AccountUpgrade', primaryjoin='AccountsUpgrade.account_upgrades_id == AccountUpgrade.id')
+    account = relationship('Account')
+    upgrade = relationship('AccountUpgrade')
 
     def __repr__(self):
         return f'<AccountsUpgrade> "{self.upgrade.name}" ' \
@@ -155,7 +153,7 @@ class Challenge(Base):
     @cached_property
     def is_completed(self):
         """Boolean whether challenge is completed"""
-        if self.winner_desc != '':
+        if self.winner_desc != '' and self.winner_desc != "'--'":
             return True
         return False
 
@@ -236,7 +234,7 @@ class News(Base):
     subject = Column(String(64), nullable=False, server_default=text("''"))
     body = Column(Text, nullable=False)
 
-    account = relationship('Account', primaryjoin='News.account_id == Account.account_id')
+    account = relationship('Account')
 
     def __repr__(self):
         return f'<News> "{self.subject}" ({self.news_id}) @ ' \
@@ -286,7 +284,7 @@ class Player(Base):
     logon = Column(TIMESTAMP, nullable=False, server_default=text("'0000-00-00 00:00:00'"))
     logout = Column(TIMESTAMP, nullable=False, server_default=text("'0000-00-00 00:00:00'"))
 
-    account = relationship('Account', primaryjoin='Player.account_id == Account.account_id', backref='players')
+    account = relationship('Account', backref='players')
 
     @cached_property
     def birth_ago(self):
@@ -350,16 +348,20 @@ class Player(Base):
     @cached_property
     def player_stats(self):
         """Player stats"""
+
+        # Start with an empty dictionary for the players stats
         stats = {}
 
-        # Gods can always see player stats
+        # Gods can always see player's stats
         if not current_user.is_god:
 
-            # Return empty dictionary, meaning no visible stats, for:
-            #   Immortals, and mortals below level five (5),
-            #   with less than one (1) hour play-time
+            # Return the empty dictionary, meaning no visible stats, for:
+
+            #   - Immortal players, and...
             if self.is_immortal:
                 return stats
+
+            #   - Mortal players below level five (5), with less than one (1) hour of play-time
             if self.true_level < 5 and self.online < 3600:
                 return stats
 
@@ -434,6 +436,8 @@ class PlayerClass(Base):
     class_display = Column(String(32))
     class_description = Column(String(64))
 
+    player_class = relationship('Player', secondary='player_common', backref='player_class')
+
     @cached_property
     def class_display_name(self):
         """Human-readable display name for a player class"""
@@ -443,22 +447,17 @@ class PlayerClass(Base):
     def stats_order(self):
         """Order which stats should be in, based upon player class"""
         if self.class_name == 'WARRIOR':
-            return ['Strength', 'Agility', 'Endurance',
-                    'Willpower', 'Focus', 'Perception']
+            return ['Strength', 'Agility', 'Endurance', 'Willpower', 'Focus', 'Perception']
         if self.class_name == 'ROGUE':
-            return ['Agility', 'Perception', 'Strength',
-                    'Focus', 'Endurance', 'Willpower']
+            return ['Agility', 'Perception', 'Strength', 'Focus', 'Endurance', 'Willpower']
         if self.class_name == 'CLERIC':
-            return ['Willpower', 'Strength', 'Perception',
-                    'Endurance', 'Focus', 'Agility']
+            return ['Willpower', 'Strength', 'Perception', 'Endurance', 'Focus', 'Agility']
         if self.class_name == 'MAGICIAN':
-            return ['Perception', 'Focus', 'Agility',
-                    'Willpower', 'Endurance', 'Strength']
+            return ['Perception', 'Focus', 'Agility', 'Willpower', 'Endurance', 'Strength']
         if self.class_name == 'NECROMANCER':
-            return ['Focus', 'Willpower', 'Perception',
-                    'Agility', 'Strength', 'Endurance']
-        return ['Agility', 'Endurance', 'Focus',
-                'Perception', 'Strength', 'Willpower']
+            return ['Focus', 'Willpower', 'Perception', 'Agility', 'Strength', 'Endurance']
+        # Alphabetic as a last resort
+        return ['Agility', 'Endurance', 'Focus', 'Perception', 'Strength', 'Willpower']
 
     def __repr__(self):
         return f'<PlayerClass> "{self.class_name}" ({self.class_id})'
@@ -470,6 +469,8 @@ class PlayerRace(Base):
     race_id = Column(TINYINT(3), primary_key=True)
     race_name = Column(String(15), nullable=False, unique=True)
     race_description = Column(String(64))
+
+    player_race = relationship('Player', secondary='player_common', backref='player_race')
 
     @cached_property
     def race_display_name(self):
@@ -488,8 +489,8 @@ class PlayerRemortUpgrade(Base):
     value = Column(INTEGER(11), nullable=False)
     essence_perk = Column(TINYINT(1), nullable=False, server_default=text("0"))
 
-    player = relationship('Player', primaryjoin='PlayerRemortUpgrade.player_id == Player.id', backref='remort_upgrades')
-    remort_upgrade = relationship('RemortUpgrade', primaryjoin='PlayerRemortUpgrade.upgrade_id == RemortUpgrade.upgrade_id')
+    player = relationship('Player', backref='remort_upgrades')
+    remort_upgrade = relationship('RemortUpgrade')
 
 
     def __repr__(self):

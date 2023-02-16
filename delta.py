@@ -13,10 +13,28 @@ def pluralize(timing=None):
 def stringify(delta=None):
     """Stringify time deltas"""
 
-    # Days require no math
+    # Process days
     if delta.days:
-        value = delta.days
-        interval = 'day'
+
+        # Calculate years
+        if delta.days >= 365:
+            value = delta.days / 365
+            interval = 'year'
+
+        # Calculate months
+        elif delta.days >= 30:
+            value = delta.days / 30
+            interval = 'month'
+
+        # Calculate weeks
+        elif delta.days >= 7:
+            value = delta.days / 7
+            interval = 'week'
+
+        # Days require no math
+        else:
+            value = delta.days
+            interval = 'day'
 
     # Calculate hours
     elif delta.seconds >= 3600:
