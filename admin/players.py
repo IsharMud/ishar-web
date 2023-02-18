@@ -32,9 +32,9 @@ def edit(edit_player_id=None):
     edit_player_form = EditPlayerForm()
     if edit_player_form.validate_on_submit():
         player.name = edit_player_form.name.data
-        player.money = edit_player_form.money.data
-        player.align = edit_player_form.align.data
-        player.karma = edit_player_form.karma.data
+        player.common[0].alignment = edit_player_form.alignment.data
+        player.common[0].gold = edit_player_form.gold.data
+        player.common[0].karma = edit_player_form.karma.data
         player.renown = edit_player_form.renown.data
         player.is_deleted = edit_player_form.is_deleted.data
         db_session.commit()

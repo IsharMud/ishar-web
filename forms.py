@@ -88,19 +88,19 @@ class EditPlayerForm(FlaskForm):
             )
         ]
     )
-    money = IntegerField(
-        'Money',
-        validators=[
-            NumberRange(min=0, max=100000)
-        ]
-    )
-    align = IntegerField(
-        'Align',
+    alignment = IntegerField(
+        'Alignment',
         validators=[
             NumberRange(
                 min=min(min(ALIGNMENTS.values())),
                 max=max(max(ALIGNMENTS.values()))
             )
+        ]
+    )
+    gold = IntegerField(
+        'Gold',
+        validators=[
+            NumberRange(min=0, max=100000)
         ]
     )
     karma = IntegerField(

@@ -39,10 +39,10 @@
                             </td>
                         </tr>
                         {{ render_field(edit_player_form.name, value=edit_player.name, autocomplete='off') }}
-                        {{ render_field(edit_player_form.money, value=edit_player.money, autocomplete='off') }}
-                        {{ render_field(edit_player_form.align, value=edit_player.align, autocomplete='off') }}
-                        {{ render_field(edit_player_form.karma, value=edit_player.karma, autocomplete='off') }}
-                        {{ render_field(edit_player_form.renown, value=edit_player.renown, autocomplete='off') }}
+                        {{ render_field(edit_player_form.alignment, value=edit_player.common[0].alignment, autocomplete='off') }}
+                        {{ render_field(edit_player_form.gold, value=edit_player.common[0].gold, autocomplete='off') }}
+                        {{ render_field(edit_player_form.karma, value=edit_player.common[0].karma, autocomplete='off') }}
+                        {{ render_field(edit_player_form.renown, value=edit_player.common[0].renown, autocomplete='off') }}
         {%- set checked = False %}
         {%- if edit_player.is_deleted == 1 %}{% set checked = True %}{%- endif %}
                         {{ render_field(edit_player_form.is_deleted, checked=checked, autocomplete='off') }}
