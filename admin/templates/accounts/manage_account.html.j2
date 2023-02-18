@@ -67,7 +67,7 @@
                       {%- for player in manage_account.players %}
                         {
                             name:           gridjs.html(`<a href="{{ url_for('.admin_players.edit', edit_player_id=player.id) }}">{{ player.name }}</a>`),
-                            level:          {{ player.level }},
+                            level:          {{ player.common[0].level }},
                             remorts:        {{ player.remorts }},
                             renown:         {{ player.renown }},
                             total_renown:   {{ player.total_renown }},

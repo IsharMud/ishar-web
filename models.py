@@ -6,13 +6,13 @@ from flask import url_for
 from flask_login import current_user, UserMixin
 from passlib.hash import md5_crypt
 
-from sqlalchemy import Column, ForeignKey, String, TIMESTAMP, Table, Text, text
+from sqlalchemy import Column, ForeignKey, String, TIMESTAMP, Text, text
 from sqlalchemy.dialects.mysql import INTEGER, MEDIUMINT, SMALLINT, TINYINT
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import backref, relationship
 
 from mud_secret import ALIGNMENTS, IMM_LEVELS, PODIR
 from delta import stringify
-from database import Base, db_session, metadata
+from database import Base, db_session
 
 
 class Account(Base, UserMixin):
@@ -32,6 +32,8 @@ class Account(Base, UserMixin):
     last_haddr = Column(INTEGER(11), nullable=False)
     account_name = Column(String(25), nullable=False, unique=True)
     account_gift = Column(TIMESTAMP, nullable=False, server_default=text("'0000-00-00 00:00:00'"))
+
+    players = relationship('Player')
 
     def change_password(self, new_password=None):
         """Method to change an account password"""
@@ -100,7 +102,7 @@ class Account(Base, UserMixin):
 
 
 class AccountUpgrade(Base):
-    """Account upgrades that are available to accounts"""
+    """Upgrades that are available to accounts"""
     __tablename__ = 'account_upgrades'
 
     id = Column(TINYINT(4), primary_key=True)
@@ -135,6 +137,7 @@ class AccountsUpgrade(Base):
 
 
 class Challenge(Base):
+    """Challenge mobiles available for players to kill in-game for rewards"""
     __tablename__ = 'challenges'
 
     challenge_id = Column(SMALLINT(4), primary_key=True)
@@ -174,6 +177,7 @@ class Challenge(Base):
 
 
 class GlobalEvent(Base):
+    """Global events within the game, which provide bonuses"""
     __tablename__ = 'global_event'
 
     event_type = Column(TINYINT(4), primary_key=True, unique=True)
@@ -226,6 +230,7 @@ class GlobalEvent(Base):
 
 
 class News(Base):
+    """News posts for the front page of the website"""
     __tablename__ = 'news'
 
     news_id = Column(INTEGER(11), primary_key=True)
@@ -241,7 +246,103 @@ class News(Base):
                f'"{self.created_at}"'
 
 
+class PlayerClass(Base):
+    """Classes available when creating a player character:
+        such as Cleric, Magician, Warrior, etc."""
+    __tablename__ = 'classes'
+
+    class_id = Column(TINYINT(3), primary_key=True)
+    class_name = Column(String(15), nullable=False, unique=True, server_default=text("'NO_CLASS'"))
+    class_display = Column(String(32))
+    class_description = Column(String(64))
+
+    @cached_property
+    def class_display_name(self):
+        """Human-readable display name for a player class"""
+        return self.class_name.replace('_', '-').title()
+
+    @cached_property
+    def stats_order(self):
+        """Order which stats should be in, based upon player class"""
+        if self.class_name == 'WARRIOR':
+            return ['Strength', 'Agility', 'Endurance', 'Willpower', 'Focus', 'Perception']
+        if self.class_name == 'ROGUE':
+            return ['Agility', 'Perception', 'Strength', 'Focus', 'Endurance', 'Willpower']
+        if self.class_name == 'CLERIC':
+            return ['Willpower', 'Strength', 'Perception', 'Endurance', 'Focus', 'Agility']
+        if self.class_name == 'MAGICIAN':
+            return ['Perception', 'Focus', 'Agility', 'Willpower', 'Endurance', 'Strength']
+        if self.class_name == 'NECROMANCER':
+            return ['Focus', 'Willpower', 'Perception', 'Agility', 'Strength', 'Endurance']
+        # Alphabetic as a last resort
+        return ['Agility', 'Endurance', 'Focus', 'Perception', 'Strength', 'Willpower']
+
+    def __repr__(self):
+        return f'<PlayerClass> "{self.class_name}" ({self.class_id})'
+
+
+class PlayerRace(Base):
+    """Races available when creating a player character:
+        such as Elf, Gnome, Human, etc."""
+    __tablename__ = 'races'
+
+    race_id = Column(TINYINT(3), primary_key=True)
+    race_name = Column(String(15), nullable=False, unique=True)
+    race_description = Column(String(64))
+
+    @cached_property
+    def race_display_name(self):
+        """Human-readable display name for a player race"""
+        return self.race_name.replace('_', '-').title()
+
+    def __repr__(self):
+        return f'<PlayerRace> "{self.race_name}" ({self.race_id})'
+
+
+class PlayerCommon(Base):
+    """Common data of players that is shared with in-game 'mobiles'"""
+    __tablename__ = 'player_common'
+
+    player_id = Column(ForeignKey('players.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True)
+    class_id = Column(ForeignKey('classes.class_id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True)
+    race_id = Column(ForeignKey('races.race_id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True)
+    sex = Column(TINYINT(4), nullable=False, server_default=text("0"))
+    level = Column(TINYINT(3), nullable=False)
+    weight = Column(SMALLINT(5), nullable=False)
+    height =Column(SMALLINT(5), nullable=False)
+    comm_points = Column(SMALLINT(6), nullable=False)
+    alignment = Column(SMALLINT(6), nullable=False)
+    strength = Column(TINYINT(3), nullable=False)
+    agility = Column(TINYINT(3), nullable=False)
+    endurance = Column(TINYINT(3), nullable=False)
+    perception = Column(TINYINT(3), nullable=False)
+    focus = Column(TINYINT(3), nullable=False)
+    willpower = Column(TINYINT(3), nullable=False)
+    init_strength = Column(TINYINT(3), nullable=False)
+    init_agility = Column(TINYINT(3), nullable=False)
+    init_endurance = Column(TINYINT(3), nullable=False)
+    init_perception = Column(TINYINT(3), nullable=False)
+    init_focus = Column(TINYINT(3), nullable=False)
+    init_willpower = Column(TINYINT(3), nullable=False)
+    perm_hit_pts = Column(SMALLINT(6), nullable=False)
+    perm_move_pts = Column(SMALLINT(6), nullable=False)
+    perm_spell_pts = Column(SMALLINT(6), nullable=False)
+    perm_favor_pts = Column(SMALLINT(6), nullable=False)
+    curr_hit_pts = Column(SMALLINT(6), nullable=False)
+    curr_move_pts = Column(SMALLINT(6), nullable=False)
+    curr_spell_pts = Column(SMALLINT(6), nullable=False)
+    curr_favor_pts = Column(SMALLINT(6), nullable=False)
+    experience = Column(INTEGER(11), nullable=False)
+    gold = Column(MEDIUMINT(9), nullable=False)
+    karma = Column(MEDIUMINT(9), nullable=False)
+
+    player = relationship('Player', backref=backref('common', cascade='all, delete-orphan'))
+    player_class = relationship('PlayerClass')
+    player_race = relationship('PlayerRace')
+
+
 class Player(Base):
+    """Player characters"""
     __tablename__ = 'players'
 
     id = Column(INTEGER(11), primary_key=True)
@@ -283,8 +384,6 @@ class Player(Base):
     birth = Column(TIMESTAMP, nullable=False, server_default=text("'0000-00-00 00:00:00'"))
     logon = Column(TIMESTAMP, nullable=False, server_default=text("'0000-00-00 00:00:00'"))
     logout = Column(TIMESTAMP, nullable=False, server_default=text("'0000-00-00 00:00:00'"))
-
-    account = relationship('Account', backref='players')
 
     @cached_property
     def birth_ago(self):
@@ -336,7 +435,7 @@ class Player(Base):
     def player_alignment(self):
         """Player alignment"""
         for text, (low, high) in ALIGNMENTS.items():
-            if low <= self.align <= high:
+            if low <= self.common[0].alignment <= high:
                 return text
         return 'Unknown'
 
@@ -367,14 +466,14 @@ class Player(Base):
 
         # Get the players stats
         players_stats = {
-            'Agility': self.curr_agility, 'Endurance': self.curr_endurance,
-            'Focus': self.curr_focus, 'Perception': self.curr_perception,
-            'Strength': self.curr_strength, 'Willpower': self.curr_willpower
+            'Agility': self.common[0].agility, 'Endurance': self.common[0].endurance,
+            'Focus': self.common[0].focus, 'Perception': self.common[0].perception,
+            'Strength': self.common[0].strength, 'Willpower': self.common[0].willpower
         }
 
         # Put the players stats in the appropriate order,
         #   based on their class, and return them
-        for stat_order in self.player_class.stats_order:
+        for stat_order in self.common[0].player_class.stats_order:
             stats[stat_order] = players_stats[stat_order]
         return stats
 
@@ -428,60 +527,8 @@ class Player(Base):
         return earned
 
 
-class PlayerClass(Base):
-    __tablename__ = 'classes'
-
-    class_id = Column(TINYINT(3), primary_key=True)
-    class_name = Column(String(15), nullable=False, unique=True, server_default=text("'NO_CLASS'"))
-    class_display = Column(String(32))
-    class_description = Column(String(64))
-
-    player_class = relationship('Player', secondary='player_common', backref='player_class')
-
-    @cached_property
-    def class_display_name(self):
-        """Human-readable display name for a player class"""
-        return self.class_name.replace('_', '-').title()
-
-    @cached_property
-    def stats_order(self):
-        """Order which stats should be in, based upon player class"""
-        if self.class_name == 'WARRIOR':
-            return ['Strength', 'Agility', 'Endurance', 'Willpower', 'Focus', 'Perception']
-        if self.class_name == 'ROGUE':
-            return ['Agility', 'Perception', 'Strength', 'Focus', 'Endurance', 'Willpower']
-        if self.class_name == 'CLERIC':
-            return ['Willpower', 'Strength', 'Perception', 'Endurance', 'Focus', 'Agility']
-        if self.class_name == 'MAGICIAN':
-            return ['Perception', 'Focus', 'Agility', 'Willpower', 'Endurance', 'Strength']
-        if self.class_name == 'NECROMANCER':
-            return ['Focus', 'Willpower', 'Perception', 'Agility', 'Strength', 'Endurance']
-        # Alphabetic as a last resort
-        return ['Agility', 'Endurance', 'Focus', 'Perception', 'Strength', 'Willpower']
-
-    def __repr__(self):
-        return f'<PlayerClass> "{self.class_name}" ({self.class_id})'
-
-
-class PlayerRace(Base):
-    __tablename__ = 'races'
-
-    race_id = Column(TINYINT(3), primary_key=True)
-    race_name = Column(String(15), nullable=False, unique=True)
-    race_description = Column(String(64))
-
-    player_race = relationship('Player', secondary='player_common', backref='player_race')
-
-    @cached_property
-    def race_display_name(self):
-        """Human-readable display name for a player race"""
-        return self.race_name.replace('_', '-').title()
-
-    def __repr__(self):
-        return f'<PlayerRace> "{self.race_name}" ({self.race_id})'
-
-
 class PlayerRemortUpgrade(Base):
+    """Remort upgrades that player characters have"""
     __tablename__ = 'player_remort_upgrades'
 
     upgrade_id = Column(ForeignKey('remort_upgrades.upgrade_id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True)
@@ -500,6 +547,7 @@ class PlayerRemortUpgrade(Base):
 
 
 class RemortUpgrade(Base):
+    """Remort upgrades that are available to player characters"""
     __tablename__ = 'remort_upgrades'
 
     upgrade_id = Column(INTEGER(11), primary_key=True)
@@ -519,6 +567,7 @@ class RemortUpgrade(Base):
 
 
 class Season(Base):
+    """Details of the start and end times of in-game cyclical seasons"""
     __tablename__ = 'seasons'
 
     season_id = Column(INTEGER(11), primary_key=True)
@@ -540,40 +589,3 @@ class Season(Base):
         return f'<Season> ID {self.season_id} / Active: {self.is_active} / ' \
                f'Effective: {self.effective_date} ("{self.effective}") - ' \
                f'Expires: {self.expiration_date} ("{self.expires}")'
-
-
-t_player_common = Table(
-    'player_common', metadata,
-    Column('player_id', ForeignKey('players.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True),
-    Column('class_id', ForeignKey('classes.class_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True),
-    Column('race_id', ForeignKey('races.race_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True),
-    Column('sex', TINYINT(4), nullable=False, server_default=text("0")),
-    Column('level', TINYINT(3), nullable=False),
-    Column('weight', SMALLINT(5), nullable=False),
-    Column('height', SMALLINT(5), nullable=False),
-    Column('comm_points', SMALLINT(6), nullable=False),
-    Column('alignment', SMALLINT(6), nullable=False),
-    Column('strength', TINYINT(3), nullable=False),
-    Column('agility', TINYINT(3), nullable=False),
-    Column('endurance', TINYINT(3), nullable=False),
-    Column('perception', TINYINT(3), nullable=False),
-    Column('focus', TINYINT(3), nullable=False),
-    Column('willpower', TINYINT(3), nullable=False),
-    Column('init_strength', TINYINT(3), nullable=False),
-    Column('init_agility', TINYINT(3), nullable=False),
-    Column('init_endurance', TINYINT(3), nullable=False),
-    Column('init_perception', TINYINT(3), nullable=False),
-    Column('init_focus', TINYINT(3), nullable=False),
-    Column('init_willpower', TINYINT(3), nullable=False),
-    Column('perm_hit_pts', SMALLINT(6), nullable=False),
-    Column('perm_move_pts', SMALLINT(6), nullable=False),
-    Column('perm_spell_pts', SMALLINT(6), nullable=False),
-    Column('perm_favor_pts', SMALLINT(6), nullable=False),
-    Column('curr_hit_pts', SMALLINT(6), nullable=False),
-    Column('curr_move_pts', SMALLINT(6), nullable=False),
-    Column('curr_spell_pts', SMALLINT(6), nullable=False),
-    Column('curr_favor_pts', SMALLINT(6), nullable=False),
-    Column('experience', INTEGER(11), nullable=False),
-    Column('gold', MEDIUMINT(9), nullable=False),
-    Column('karma', MEDIUMINT(9), nullable=False)
-)
