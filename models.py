@@ -124,7 +124,7 @@ class AccountsUpgrade(Base):
     account_id = Column(ForeignKey('accounts.account_id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True)
     amount = Column(MEDIUMINT(4), nullable=False)
 
-    account = relationship('Account')
+    account = relationship('Account', backref='upgrades')
     upgrade = relationship('AccountUpgrade')
 
     def __repr__(self):
