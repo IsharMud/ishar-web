@@ -134,6 +134,7 @@ class QuestEditorForm(FlaskForm):
     class_restrict = IntegerField('Class Restriction', validators=[DataRequired(), NumberRange(min=0, max=9)])
     quest_intro = StringField('Quest Introduction', validators=[DataRequired(), Length(max=1600)])
     prerequisites = SelectMultipleField('Quest Prerequisites', choices=[], coerce=int)
+    submit              = SubmitField('Search')
 
 class QuestStepEditorForm(FlaskForm):
     """Quest Step form class"""
