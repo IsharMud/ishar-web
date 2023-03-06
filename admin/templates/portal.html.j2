@@ -1,0 +1,29 @@
+{%- set page = 'admin' -%}
+{% extends "base/layout.html.j2" %}
+{% block meta_title %}Administration Portal{% endblock meta_title %}
+{% block meta_description %}Administration portal for Gods of Ishar MUD{% endblock meta_description %}
+{% block meta_url %}{{ url_for('.index', _external=True) }}{% endblock meta_url %}
+{% block title %}Administration Portal{% endblock title %}
+{% block header %}Administration{% endblock header %}
+{%- block content %}
+            <p>
+                Welcome to the Ishar MUD web administration portal!
+            </p>
+            <ul>
+                <li title="Accounts">
+                    <a href="{{ url_for('.admin_accounts.index') }}">Accounts</a>
+                </li>
+                <li title="Global Events">
+                    <a href="{{ url_for('.admin_events.index') }}">Global Events</a>
+                </li>
+                <li title="News">
+                    <a href="{{ url_for('.admin_news.index') }}">News</a>
+                </li>
+                <li title="Patches">
+                    <a href="{{ url_for('.admin_patches.index') }}">Patches</a>
+                </li>
+                <li title="Seasons">
+                    <a href="{{ url_for('.admin_seasons.index') }}">Seasons</a>
+                </li>
+            </ul>
+{%- endblock content %}

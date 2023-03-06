@@ -1,9 +1,13 @@
 [uwsgi]
-die-on-term     = yes
+die-on-term     = true
 wsgi-file       = __init__.py
-socket          = /run/uwsgi/isharmud.com/socket
+socket          = /var/www/isharmud.com/socket
 chmod-socket    = 775
 callable        = app
 virtualenv      = /var/www/isharmud.com/ishar-web/.venv
-enable-threads  = yes
-logger          = syslog
+enable-threads  = true
+processes       = 2
+threads         = 2
+vacuum          = true
+chdir           = /var/www/isharmud.com/ishar-web
+logto           = /var/log/uwsgi/isharmud.com/uwsgi.log

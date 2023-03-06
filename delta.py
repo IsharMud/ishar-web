@@ -1,28 +1,60 @@
 """Time delta handling"""
 
-def pluralish(timing=None):
-    """Append "s" to stringified timedeltas, if not singular"""
-    if timing['value'] != 1:
+
+def pluralize(timing=None):
+    """Append "s" and stringifies time-deltas, if not singular"""
+    if round(timing['value']) != 1:
         timing['interval'] += 's'
-    return f"{timing['value']} {timing['interval']}"
+
+    # Round the number in the output string
+    return f"{round(timing['value'])} {timing['interval']}"
+
 
 def stringify(delta=None):
     """Stringify time deltas"""
-    delta_seconds   = delta.total_seconds()
-    if delta_seconds < 60:
-        ret = {'value': delta_seconds, 'interval': 'second'}
-    elif delta_seconds >= 60 and delta_seconds < 3600:
-        ret = {'value': int(delta_seconds / 60), 'interval': 'minute'}
-    elif delta_seconds >= 3600 and delta.days < 1:
-        ret = {'value': int(delta_seconds / 3600), 'interval': 'hour'}
-    elif delta.days >= 1 and delta.days < 7:
-        ret = {'value': delta.days, 'interval': 'day'}
-    elif delta.days >= 7 and delta.days < 30:
-        ret = {'value': int(delta.days / 7), 'interval': 'week'}
-    elif delta.days >= 30 and delta.days < 365:
-        ret = {'value': int(delta.days / 30), 'interval': 'month'}
-    elif delta.days >= 365:
-        ret = {'value': int(delta.days / 365), 'interval': 'year'}
+
+    # Process days
+    if delta.days:
+
+        # Calculate years
+        if delta.days >= 365:
+            value = delta.days / 365
+            interval = 'year'
+
+        # Calculate months
+        elif delta.days >= 30:
+            value = delta.days / 30
+            interval = 'month'
+
+        # Calculate weeks
+        elif delta.days >= 7:
+            value = delta.days / 7
+            interval = 'week'
+
+        # Days require no math
+        else:
+            value = delta.days
+            interval = 'day'
+
+    # Calculate hours
+    elif delta.seconds >= 3600:
+        value = delta.seconds / 3600
+        interval = 'hour'
+
+    # Calculate minutes
+    elif delta.seconds >= 60:
+        value = delta.seconds / 60
+        interval = 'minute'
+
+    # Seconds require no math
     else:
-        return str(delta)
-    return pluralish(timing=ret)
+        value = delta.seconds
+        interval = 'second'
+
+    # Make the output plural, if necessary
+    return pluralize(
+        timing={
+            'value': value,
+            'interval': interval
+        }
+    )

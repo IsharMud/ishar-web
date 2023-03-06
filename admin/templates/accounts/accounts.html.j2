@@ -1,0 +1,69 @@
+{%- set page = 'admin' -%}
+{% extends "base/layout.html.j2" %}
+{% block meta_title %}Accounts / Administration Portal{% endblock meta_title %}
+{% block meta_description %}Administration portal page to view accounts{% endblock meta_description %}
+{% block meta_url %}{{ url_for('.index', _external=True) }}{% endblock meta_url %}
+{% block title %}Accounts / Administration Portal{% endblock title %}
+{% block header %}Accounts{% endblock header %}
+{%- macro display_account(account) %}
+                            account_id:     {{ account.account_id }},
+                            name:           gridjs.html(`<a href="{{ url_for('.manage', manage_account_id=account.account_id) }}">{{ account.display_name | safe }}</a> <a title="Edit {{ account.display_name | safe }} (ID: {{ account.account_id }})" href="{{ url_for('.edit', edit_account_id=account.account_id) }}">✏️</a>`),
+                            players:        {{ account.players | length }},
+                            essence:        {{ account.seasonal_points }},
+                            essence_earned: {{ account.seasonal_earned }}
+{%- endmacro %}
+{%- block scripts %}
+        <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
+        <script>
+            function showAccounts(where) {
+                new gridjs.Grid({
+                    columns: [
+                        {
+                            id:     'account_id',
+                            name:   'ID',
+                        },
+                        {
+                            id:     'name',
+                            name:   'Name'
+                        },
+                        {
+                            id:     'players',
+                            name:   'Players'
+                        },
+                        {
+                            id:     'essence',
+                            name:   'Essence'
+                        },
+                        {
+                            id:     'essence_earned',
+                            name:   'Essence Earned'
+                        }
+                    ],
+                    data: [
+        {%- for account in accounts %}
+                        {
+                        {{- display_account(account) }}
+                        }{% if not loop.last %},{% endif %}
+        {%- endfor %}
+                    ],
+                    search:     true,
+                    sort:       true,
+                    pagination: true,
+                    width:      '50%'
+                }).render(where);
+            };
+        </script>
+{%- endblock scripts %}
+{%- block content %}
+    {%- if accounts is defined and accounts is iterable and accounts | length > 0 %}
+                <h3>
+                    {{ accounts | list | length }} accounts
+                </h3>
+                <div id="accounts"></div>
+                <script>
+                    showAccounts(
+                        document.getElementById('accounts')
+                    );
+                </script>
+    {%- endif %}
+{%- endblock content %}

@@ -1,0 +1,107 @@
+{%- set page = 'portal' -%}
+{% extends "base/layout.html.j2" %}
+{% block meta_title %}Portal{% endblock meta_title %}
+{% block meta_description %}Portal for players to see information about their account and characters{% endblock meta_description %}
+{% block meta_url %}{{ url_for('.player_portal', _external=True) }}{% endblock meta_url %}
+{% block title %}Portal{% endblock title %}
+{%- block header %}
+Welcome{% if current_user.display_name %}, {{ current_user.display_name | safe }}{% endif %}!
+{%- endblock header %}
+{%- macro display_deaths(player) -%}
+    {%- if player.player_type != 'Classic' -%}
+        gridjs.html(`<span class="{{ player.player_css }}">{{ player.player_type }}</span>`)
+    {%- else -%}
+        {{ player.deaths }}
+    {%- endif -%}
+{%- endmacro -%}
+{%- block scripts %}
+    {%- if current_user.players and current_user.players is iterable and current_user.players | length > 0 %}
+        <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
+        <script>
+            function showPlayers(where) {
+                new gridjs.Grid({
+                    columns: [
+                        {
+                            id:         'name',
+                            name:       'Player',
+                            formatter:  (cell) => gridjs.html(`<a href="/player/${cell}#player">${cell}</a>`)
+                        },
+                        {
+                            id:         'level',
+                            name:       'Level'
+                        },
+                        {
+                            id:         'remorts',
+                            name:       'Remorts'
+                        },
+                        {
+                            id:         'renown',
+                            name:       'Renown'
+                        },
+                        {
+                            id:         'quests',
+                            name:       'Quests'
+                        },
+                        {
+                            id:         'challenges',
+                            name:       'Challenges'
+                        },
+                        {
+                            id:         'deaths',
+                            name:       'Deaths',
+                            sort:       {
+                                            compare: (a, b) => {
+                                                if ( (b > a) || (isNaN(a)) ) {
+                                                    return -1;
+                                                } else if ( (a > b) || (isNaN(b)) ) {
+                                                    return 1;
+                                                } else {
+                                                    return 0;
+                                                };
+                                            }
+                                        }
+                        }
+                    ],
+                    data: [
+                      {%- for player in current_user.players %}
+                        {
+                            name:       "{{ player.name }}",
+                            level:      {{ player.common[0].level }},
+                            remorts:    {{ player.remorts }},
+                            renown:     {{ player.total_renown }},
+                            quests:     {{ player.quests_completed }},
+                            challenges: {{ player.challenges_completed }},
+                            deaths:     {{ display_deaths(player) }}
+                        }{% if not loop.last %},{% endif %}
+                      {%- endfor %}
+                    ],
+                    search:     false,
+                    sort:       true,
+                    pagination: false,
+                    width:      '50%'
+                }).render(where);
+            };
+        </script>
+    {%- endif %}
+{%- endblock scripts %}
+{%- block content %}
+    {%- if current_user.players and current_user.players is iterable and current_user.players | length > 0 %}
+                <h3 title="You have {{ current_user.players | length }} character{% if current_user.players | length != 1 %}s{% endif %}">
+                    You have {{ current_user.players | length }} character{% if current_user.players | length != 1 %}s{% endif %}:
+                </h3>
+                <div id="players"></div>
+                <script>
+                    showPlayers(document.getElementById('players'));
+                </script>
+    {%- else %}
+                <h3 title="You have not created any players yet!">
+                    You have not created any players yet!
+                </h3>
+    {%- endif %}
+    {%- if current_user.seasonal_points > 0 %}
+                <h4>
+                    You have {{ current_user.seasonal_points }}
+                    <a title="essence" href="{{ url_for('.account', _anchor='essence-balance') }}">essence</a>.
+                </h4>
+    {%- endif %}
+{%- endblock content %}

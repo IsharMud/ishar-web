@@ -1,0 +1,45 @@
+            <ul>
+                <li title="Connect to Ishar MUD">
+                    <a href="{{ url_for('welcome.connect') }}" target="_blank">Connect</a>
+                </li>
+                <li title="Frequently Asked Questions">
+                   <a href="{{ url_for('help.faqs.index') }}" {%- if page == 'faqs' %} id="active-nav"{% endif %}>FAQs</a>
+                </li>
+                <li title="Help">
+                    <a href="{{ url_for('help.help_page.index') }}" {%- if page == 'help' %} id="active-nav"{% endif%}>Help</a>
+                </li>
+                <li title="Patches">
+                    <a href="{{ url_for('patches.index') }}" {%- if page == 'patches' %} id="active-nav"{% endif%}>Patches</a>
+                </li>
+                <li title="World">
+                    <a href="{{ url_for('help.world.index') }}" {%- if page == 'world' %} id="active-nav"{% endif%}>World</a>
+                </li>
+                <li title="Portal">
+                    <a href ="{{ url_for('portal.player_portal') }}" {%- if page == 'portal' %} id="active-nav"{% endif%}>Portal</a>
+                </li>
+            </ul>
+{%- if current_user and current_user.is_authenticated and current_user.display_name %}
+            <ul>
+    {%- if current_user.is_god %}
+                <li title="Admin">
+                    <a href="{{ url_for('admin.index') }}" {%- if page == 'admin' %} id="active-nav"{% endif%}>Admin</a>
+                </li>
+    {%- endif %}
+                <li title="Account">
+                    <a href="{{ url_for('portal.account') }}" {%- if page == 'account' %} id="active-nav"{% endif%}>Account</a>
+                </li>
+                <li title="Challenges">
+                    <a href="{{ url_for('challenges.index') }}" {%- if page == 'challenges' %} id="active-nav"{% endif%}>Challenges</a>
+                </li>
+                <li title="Events">
+                    <a href="{{ url_for('welcome.global_events') }}" {%- if page == 'global_events' %} id="active-nav"{% endif %}>Events
+                    {%- if global_event_count and global_event_count > 0 %} ({{ global_event_count | string }}){%- endif %}</a>
+                </li>
+                <li title="Leaders">
+                    <a href="{{ url_for('leaders.index') }}" {%- if page == 'leaders' %} id="active-nav"{% endif%}>Leaders</a>
+                </li>
+                <li title="Log out">
+                    <a href="{{ url_for('login.player_logout') }}">Log out ({{ current_user.display_name | safe }})</a>
+                </li>
+            </ul>
+{%- endif %}

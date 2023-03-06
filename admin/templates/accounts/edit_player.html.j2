@@ -1,0 +1,54 @@
+{%- set page = 'admin' -%}
+{% extends "base/layout.html.j2" %}
+{%- block meta_title %}Edit Player: {{ edit_player.name | title | safe }} / Administration Portal{%- endblock meta_title %}
+{%- block meta_description %}Administration portal to edit a player character{%- endblock meta_description %}
+{%- block meta_url -%}{{- url_for('.edit', edit_player_id=edit_player.id, _external=True) -}}{%- endblock meta_url %}
+{%- block title -%}Edit Player: {{ edit_player.name | title | safe }} / Administration Portal{%- endblock title -%}
+{%- block header -%}Edit Player: <span class="{{ edit_player.player_css }}">{{ edit_player.name }}</span>{%- endblock header -%}
+{%- macro render_field(field) %}
+                    <tr>
+                        <td class="admin-{{ field.name | safe }}">
+                            {{ field.label | safe }}
+                        </td>
+                        <td class="admin-{{ field.name | safe }}">
+                            {{ field(**kwargs) | safe }}
+    {%- if field.errors %}
+                            <ul class="flash-error">
+        {%- for error in field.errors %}
+                                <li>
+                                    {{ error }}
+                                </li>
+        {%- endfor %}
+                            </ul>
+    {%- endif %}
+                        </td>
+                    </tr>
+{%- endmacro %}
+{%- block content %}
+    {%- if edit_player is defined and edit_player_form is defined %}
+                <form autocomplete="off" method="post" action="{{ url_for('.edit', edit_player_id=edit_player.id) }}" id="player-edit-form">
+                    <table>
+                        <tr>
+                            <td>
+                                Account
+                            </td>
+                            <td>
+                                <a href="{{ url_for('admin.admin_accounts.manage', manage_account_id=edit_player.account_id) }}">
+                                    {{ edit_player.account.display_name | safe }} (ID: {{ edit_player.account_id }})
+                                </a>
+                            </td>
+                        </tr>
+                        {{ render_field(edit_player_form.name, value=edit_player.name, autocomplete='off') }}
+                        {{ render_field(edit_player_form.alignment, value=edit_player.common[0].alignment, autocomplete='off') }}
+                        {{ render_field(edit_player_form.gold, value=edit_player.common[0].gold, autocomplete='off') }}
+                        {{ render_field(edit_player_form.karma, value=edit_player.common[0].karma, autocomplete='off') }}
+                        {{ render_field(edit_player_form.renown, value=edit_player.renown, autocomplete='off') }}
+        {%- set checked = False %}
+        {%- if edit_player.is_deleted == 1 %}{% set checked = True %}{%- endif %}
+                        {{ render_field(edit_player_form.is_deleted, checked=checked, autocomplete='off') }}
+                        {{ edit_player_form.csrf_token }}
+                        {{ render_field(edit_player_form.submit) }}
+                    </table>
+                </form>
+    {%- endif %}
+{%- endblock content %}

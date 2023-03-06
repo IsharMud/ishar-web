@@ -1,10 +1,10 @@
 {%- set page = 'season' -%}
-{% extends "layout.html.j2" %}
+{% extends "base/layout.html.j2" %}
 {% block meta_title %}Season {{ current_season.season_id }}{% endblock meta_title %}
-{% block meta_description %}Information about season {{ current_season.season_id }} of Ishar MUD{% endblock %}
-{% block meta_url %}{{ url_for('season', _external=True) }}{% endblock meta_url %}">
-{% block title %}Season {{ current_season.season_id }}{% endblock %}
-{% block header %}Season {{ current_season.season_id }}{% endblock %}
+{% block meta_description %}Information about season {{ current_season.season_id }} of Ishar MUD{% endblock meta_description %}
+{% block meta_url %}{{ url_for('welcome.season', _external=True) }}{% endblock meta_url %}
+{% block title %}Season {{ current_season.season_id }}{% endblock title %}
+{% block header %}Season {{ current_season.season_id }}{% endblock header %}
 {%- block content %}
     {%- if current_season is defined %}
             <ul id="season-details">
@@ -39,7 +39,7 @@
                 Essence
             </h3>
             <p>
-                &quot;<a title="Essence" href="{{ url_for('manage_account') }}#essence-balance">Essence</a>&quot;
+                &quot;<a title="Essence" href="{{ url_for('portal.account', _anchor='essence-balance') }}">Essence</a>&quot;
                 are the rewards points that you earn during the season!
 
             </p>
@@ -72,4 +72,4 @@
             </ul>
         {%- endif %}
     {%- endif %}
-{%- endblock %}
+{%- endblock content %}

@@ -1,0 +1,51 @@
+{%- set page = 'admin' -%}
+{% extends "base/layout.html.j2" %}
+{% block meta_title %}Seasons / Administration Portal{% endblock meta_title %}
+{% block meta_description %}Administration portal page to manage seasons{% endblock meta_description %}
+{% block meta_url %}{{ url_for('.index', _external=True) }}{% endblock meta_url %}
+{% block title %}Seasons / Administration Portal{% endblock title %}
+{% block header %}Seasons{% endblock header %}
+{%- block content %}
+            <table>
+    {%- if seasons is defined and seasons is iterable and seasons | length > 0 %}
+        {%- for season in seasons %}
+            {%- if loop.index0 % 10 == 0 %}
+                    <tr>
+                        <th title="Season ID">
+                            Season ID
+                        </th>
+                        <th title="Effective Date">
+                            Effective Date
+                        </th>
+                        <th title="Expiration Date">
+                            Expiration Date
+                        </th>
+                    </tr>
+            {%- endif %}
+                <tr {%- if season.is_active == 1 %} class="active-season"{% endif %}>
+                    <td title="ID: {{ season.season_id }}">
+                        {{ season.season_id }}
+                    </td>
+                    <td title="Effective: {{ season.effective_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }} ({{ season.effective_date }})">
+                        {{ season.effective_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}
+                    </td>
+                    <td title="Expiration: {{ season.expiration_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }} ({{ season.expiration_date }})">
+                        {{ season.expiration_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}
+                    </td>
+                </tr>
+        {%- endfor %}
+    {%- else %}
+                <tr>
+                    <th title="Unfortunately, no seasons could be found.">
+                        <i>Unfortunately, no seasons could be found.</i>
+                    </th>
+                </tr>
+    {%- endif %}
+            </table>
+            <br>
+            <ul>
+                <li>
+                    <a href="{{ url_for('.cycle') }}">Cycle Seasons (Player Wipe!)</a>
+                </li>
+            </ul>
+{%- endblock content %}

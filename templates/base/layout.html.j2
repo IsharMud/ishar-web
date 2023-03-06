@@ -1,0 +1,97 @@
+{%- macro display_essence(essence) -%}
+    {%- if essence > 0 -%}
+        <strong>{{ essence }} essence</strong>
+    {%- else -%}
+        <span class="flash-error">{{ essence }} essence</span>
+    {%- endif -%}
+{%- endmacro -%}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+    {%- block head %}
+        <meta charset="UTF-8">
+        <meta name="author" content="Ishar MUD">
+        <meta name="description" content="Ishar MUD">
+        <meta name="keywords" content="Ishar MUD, Ishar, IsharMUD, MUD, Multi User Dungeon, Multi-User Dungeon, Game">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta property="og:type" content="website">
+        <meta property="og:site_name" content="Ishar MUD">
+        <meta property="og:title" content="{% block meta_title %}Welcome{% endblock meta_title %} - Ishar MUD">
+        <meta property="og:description" content="Ishar MUD: {% block meta_description %}a free online text-adventure RPG{% endblock %}">
+        <meta property="og:url" content="{% block meta_url %}{{ url_for('welcome.index', _external=True) }}{% endblock meta_url %}">
+        <meta property="og:image" content="{% block meta_image %}{{ url_for('static', filename='images/cropped_ishar_logo_dark.png', _external=True) }}{% endblock meta_image %}">
+        <title>{% block title %}Welcome{% endblock %} - Ishar MUD</title>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+        <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
+        {%- if sentry_user %}
+        <script src="https://js.sentry-cdn.com/{{ sentry_user }}.min.js" crossorigin="anonymous"></script>
+        <script
+            src="https://browser.sentry-cdn.com/7.31.0/bundle.tracing.min.js"
+            integrity="sha384-g/zdHeV5+PqD7HmWeWVuK9wYkqRN+1NlqveOyyditZgHVahR/Et3SFTLepAHqQyo"
+            crossorigin="anonymous"
+        ></script>
+        {%- endif %}
+    {%- endblock head %}
+    {%- block scripts %}
+    {%- endblock scripts %}
+    </head>
+    <body>
+        <header>
+            <a href="{{ url_for('welcome.index') }}" title="Ishar MUD">
+                <h1>
+                    Ishar MUD
+                </h1>
+                <img id="logo" alt="Ishar MUD" src="{{ url_for('static', filename='images/header_alpha.png' )}}">
+            </a>
+        </header>
+        <nav>
+{%- block navigation %}
+{% include('base/navigation.html.j2') %}
+{%- endblock navigation %}
+        </nav>
+        <div id="content">
+            <h2>
+                {% block header %}{% endblock header %}
+            </h2>
+{%- with messages = get_flashed_messages(with_categories=True) %}
+    {%- if messages %}
+            <ul id="flashes">
+        {%- for category, message in messages %}
+                <li class="flash-{{ category }}">
+                    {{ message }}
+                </li>
+        {%- endfor %}
+            </ul>
+    {%- endif %}
+{%- endwith %}
+{%- block content %}
+{%- endblock content %}
+        </div>
+        <footer>
+{%- block footer %}
+            <ul>
+                <li>
+                    <a href="{{ url_for('welcome.support') }}" {%- if page == 'support' %} id="active-nav"{% endif %}>❤️ Support Ishar MUD</a>
+                </li>
+                <li>
+                    <a title="Join us on Discord!" href="{{ url_for('welcome.discord_invite') }}" id="join-discord" target="_blank"><img alt="Discord" src="{{ url_for('static', filename='images/discord.png') }}"> Join us on Discord!</a>
+                </li>
+                <li>
+                    <a title="E-mail Us!" href="mailto:admin@isharmud.com" id="email-us" target="_blank">✉️ E-mail us!</a>
+                </li>
+            </ul>
+{%- if current_season is defined and current_season.expires is defined and current_season.expiration_date is defined %}
+            <ul>
+                <li title="Season {{ current_season.season_id }} ends in {{ current_season.expires }}">
+                    <a href="{{ url_for('welcome.season') }}" {%- if page == 'season' %} id="active-nav"{% endif %}>Season {{ current_season.season_id }}</a>
+                    ends in {{ current_season.expires }}
+                </li>
+                <li title="Ends {{ current_season.expiration_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}">
+                    {{ current_season.expiration_date.strftime('%A, %B %d, %Y') }}
+                </li>
+            </ul>
+    {%- endif %}
+{%- endblock footer %}
+        </footer>
+    </body>
+</html>

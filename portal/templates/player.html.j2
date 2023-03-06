@@ -1,0 +1,201 @@
+{%- set page = 'portal' -%}
+{% extends "base/layout.html.j2" %}
+{%- macro render_field(field) -%}
+                    {{ field(**kwargs) | safe }}
+    {%- if field.errors %}
+                <ul class="field-errors">
+        {%- for error in field.errors %}
+                    <li>
+                        {{ error }}
+                    </li>
+        {%- endfor %}
+                </ul>
+    {%- endif %}
+{%- endmacro -%}
+{%- if player %}
+    {%- set player_phrase = 'is' %}
+    {%- set player_phrase_own = 'are' %}
+    {%- set player_phrase_owns = 'has' %}
+    {%- if player.common[0].sex == 1 %}
+        {%- set player_gender = 'he' %}
+        {%- set player_gender_own = 'his' %}
+    {%- elif player.common[0].sex == 2 %}
+        {%- set player_gender = 'she' %}
+        {%- set player_gender_own = 'her' %}
+    {%- else %}
+        {%- set player_gender = 'they' %}
+        {%- set player_gender_own = 'their' %}
+        {%- set player_phrase = 'are' %}
+        {%- set player_phrase_owns = 'have' %}
+    {%- endif %}
+    {%- if player.player_type == 'Dead' %}
+        {%- set player_phrase = 'was' %}
+        {%- set player_phrase_own = 'were' %}
+        {%- set player_phrase_owns = 'had' %}
+    {%- endif %}
+{%- endif %}
+{%- block meta_title -%}
+    {%- if player -%}
+        Player: {{ player.name }}{% if player.player_type == 'Dead' %} ☠️{%- endif %}
+    {%- else -%}
+        Player Not Found
+    {%- endif -%}
+{%- endblock meta_title -%}
+{%- block meta_description %}
+    {%- if player -%}
+        Player: {{ player.name }}{% if player.player_type == 'Dead' %} ☠️{%- endif %}
+    {%- else -%}
+        Player Not Found
+    {%- endif -%}
+{%- endblock meta_description -%}
+{%- block meta_url -%}
+{{- url_for('.view_player', player_name=player.name, _external=True) -}}
+{%- endblock meta_url -%}
+{%- block title %}
+    {%- if player -%}
+        Player: {{ player.name }}{% if player.player_type == 'Dead' %} ☠️{%- endif %}
+    {%- else -%}
+        Player Not Found
+    {%- endif -%}
+{%- endblock title %}
+{%- block header -%}
+    {%- if player -%}
+        Player: <span class="{{ player.player_css }}">{{ player.name }}</span>
+    {%- else -%}
+        Player Not Found
+    {%- endif %}
+{%- endblock header %}
+{%- block content %}
+    {%- if player_search_form is defined %}
+            <form method="post" id="player-search-form">
+                {{ render_field(player_search_form.player_search_name) }}
+                {{ player_search_form.csrf_token }}
+                {{ render_field(player_search_form.submit) }}
+            </form>
+    {%- endif %}
+    {%- if player %}
+            <h3 id="player" title="{{ player.player_title | striptags | safe }}">
+                {{ player.player_title }}
+            </h3>
+        {%- if player.description is defined and player.description | replace('\n', ' ') | striptags | trim | safe  != '' %}
+            <p id="player-description">
+                {{ player.description | replace('\n', ' ') | striptags | trim | safe }}
+            </p>
+        {%- endif %}
+        {%- if not player.is_immortal %}
+            <ul id="player-details">
+                <li title="Name: {{ player.name | title | safe }} / Class: {{ player.common[0].player_class.class_display_name }} / Race: {{ player.common[0].player_race.race_display_name }}">
+                    {{ player.name | title | safe }} {{ player_phrase }} a {{ player.common[0].player_class.class_display }} of {{ player.common[0].player_race.race_display_name | lower }} origin.
+                </li>
+                <li title="Level: {{ player.common[0].level }} {%- if player.remorts > 0 %} / Remorts: {{ player.remorts }}{% endif %}">
+                    {{ player_gender | title }} {{ player_phrase }} level {{ player.common[0].level }}
+            {%- if player.remorts > 0 %}
+                    and {{ player_phrase_owns }} remorted {{ player.remorts }} time{%- if player.remorts != 1 %}s{% endif %}
+            {%- endif %}.
+                </li>
+            {%- if player.total_renown > 0 %}
+                <li title="Total Renown: {{ player.total_renown }}">
+                    {{ player_gender | title }} {{ player_phrase_owns }} accumulated {{ player.total_renown }} renown.
+                </li>
+            {%- endif %}
+            {%- if player.quests_completed > 0 %}
+                <li title="Quests Completed: {{ player.quests_completed }}">
+                    {{ player_gender | title }} {{ player_phrase_owns }} completed {{ player.quests_completed }} quest
+                    {%- if player.quests_completed != 1 %}s{% endif %}.
+                </li>
+            {%- endif %}
+            {%- if player.challenges_completed > 0 %}
+                <li title="Challenges Completed: {{ player.challenges_completed }}">
+                    {{ player_gender | title }} {{ player_phrase_owns }} completed {{ player.challenges_completed }} challenge
+                    {%- if player.challenges_completed != 1 %}s{% endif %}.
+                </li>
+            {%- endif %}
+                <li title="Alignment: {{ player.player_alignment }} ({{ player.common[0].alignment }})">
+                    {{ player_gender_own | title }} alignment {{ player_phrase }} {{ player.player_alignment }}.
+                </li>
+                <li title="{%- if player.player_type == 'Classic' %}Deaths: {{ player.deaths }}{% elif player.player_type == 'Dead' %}{{ player.name | title | safe }} is DEAD!{% else %}{{ player.name | title | safe }} is a {{ player.player_type }} player!{% endif %}">
+            {%- if player.player_type == 'Dead' %}
+                    {{ player.name | title | safe }} is <span class="flash-error">DEAD</span>!
+                    <ul>
+                        <li title="{{ player.name | title | safe }} died too often. {{ player_gender | title }} can not be resurrected!">
+                            {{ player.name | title | safe }} died too often. {{ player_gender | title }} can not be resurrected!
+                        </li>
+                    </ul>
+            {%- elif player.player_type == 'Survival' %}
+                    {{ player.name | title | safe }} {{ player_phrase }} a <span class="{{ player.player_css }}">{{ player.player_type }}</span> player!
+            {%- else %}
+                {%- if player.deaths > 0 %}
+                    {{ player_gender | title }} {{ player_phrase_owns }} died {{ player.deaths }}
+                    time{% if player.deaths != 1 %}s{% endif %}.
+                {%- else %}
+                    {{ player_gender | title }} has never died!
+                {%- endif %}
+            {%- endif %}
+                </li>
+            </ul>
+            {%- if player.remort_upgrades is defined and player.remort_upgrades is iterable and player.remort_upgrades | selectattr('value', '>', 0) | list | length > 0 %}
+            <h3 title="Remort Upgrades">
+                Remort Upgrades
+            </h3>
+            <ol id="player-remort-upgrades">
+                {%- for remort_upgrade in player.remort_upgrades | selectattr('value', '>', 0) %}
+                <li title="{{ remort_upgrade.remort_upgrade.name | replace('_', ' ') | title | safe }} {%- if remort_upgrade.value > 1 %} (x{{ remort_upgrade.value }}){% endif %}">
+                    {{ remort_upgrade.remort_upgrade.name | replace('_', ' ') | title | safe }}
+                    {%- if remort_upgrade.value > 1 %}
+                        (x{{ remort_upgrade.value }})
+                    {%- endif %}
+                    </li>
+                {%- endfor %}
+            </ol>
+            {%- endif %}
+            {%- if player.player_stats %}
+            <h3 title="Statistics">
+                Statistics
+            </h3>
+            <table id="player-statistics">
+                <tr>
+                {%- for stat_name, stat_value in player.player_stats.items() %}
+                    <th title="{{ stat_name }}: {{ stat_value }}">
+                        {{ stat_name }}
+                    </th>
+                {%- endfor %}
+                </tr>
+                <tr>
+                {%- for stat_name, stat_value in player.player_stats.items() %}
+                    <td title="{{ stat_name }}: {{ stat_value }}" {%- if loop.first %} id="primary-stat"{% endif %}>
+                        {{ stat_value }}
+                    </td>
+                {%- endfor %}
+                </tr>
+            </table>
+            {%- endif %}
+            <h3 title="Time">
+                Time
+            </h3>
+            <ul id="player-time">
+                <li title="Birth: {{ player.birth_ago }} ({{ player.birth.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }})">
+                    {{ player_gender | title }} was born {{ player.birth_ago }} ago,
+                    on {{ player.birth.strftime('%A, %B %d, %Y') }}.
+                </li>
+                <li title="Logged On: {{ player.logon_ago }} ago ({{ player.logon.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }})">
+                    {{ player_gender | title }} last logged in {{ player.logon_ago }} ago,
+                    on {{ player.logon.strftime('%A, %B %d, %Y') }}.
+                </li>
+                <li title="Logged Out: {{ player.logout_ago }} ago ({{ player.logout.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }})">
+                    {{ player_gender | title }} last logged out {{ player.logout_ago}} ago,
+                    on {{ player.logout.strftime('%A, %B %d, %Y') }}.
+                </li>
+                <li title="Played For: {{ player.online_delta | string }}">
+                    {{ player_gender | title }} {{ player_phrase_owns }} played for {{ player.online_time }}.
+                </li>
+            </ul>
+        {%- else %}
+            <ul>
+                <li>
+                    {{ player.name | title | safe }} {{ player_phrase }} a {%- if player.player_type[0] | lower in ['a', 'e', 'i', 'o', 'u', 'y' ] %}n{% endif %}
+                    <span class="{{ player.player_css }}">{{ player.player_type }}</span> character!
+                </li>
+            </ul>
+        {%- endif %}
+    {%- endif %}
+{%- endblock content %}

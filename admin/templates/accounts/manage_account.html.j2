@@ -1,0 +1,176 @@
+{%- set page = 'admin' -%}
+{% extends "base/layout.html.j2" %}
+{%- block meta_title %}Accounts / Administration Portal{%- endblock meta_title %}
+{%- block meta_description %}Administration portal page to view accounts{%- endblock meta_description %}
+{% block meta_url %}{{ url_for('.manage', manage_account_id=manage_account.account_id | default(''), _external=True) }}{% endblock meta_url %}
+{%- block title %}Manage Account ({{ manage_account.display_name | safe }}) / Administration Portal{%- endblock title %}
+{%- block header %}Manage Account: {{ manage_account.display_name | safe }} <a href="{{ url_for('.edit', edit_account_id=manage_account.account_id) }}">✏️</a>{%- endblock header %}
+{%- macro display_deaths(player) -%}
+    {%- if player.player_type != 'Classic' -%}
+        gridjs.html(`<span class="{{ player.player_css }}">{{ player.player_type }}</span>`)
+    {%- else -%}
+        {{ player.deaths }}
+    {%- endif -%}
+{%- endmacro -%}
+{%- block scripts %}
+    {%- if manage_account.players is defined and manage_account.players is iterable and manage_account.players | length > 0 %}
+        <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
+        <script>
+            function showPlayers(where) {
+                new gridjs.Grid({
+                    columns: [
+                        {
+                            id:      'name',
+                            name:    'Player',
+                        },
+                        {
+                            id:     'level',
+                            name:   'Level'
+                        },
+                        {
+                            id:     'remorts',
+                            name:   'Remorts'
+                        },
+                        {
+                            id:     'renown',
+                            name:   'Renown'
+                        },
+                        {
+                            id:     'total_renown',
+                            name:   'Total Renown'
+                        },
+                        {
+                            id:     'quests',
+                            name:   'Quests'
+                        },
+                        {
+                            id:     'challenges',
+                            name:   'Challenges'
+                        },
+                        {
+                            id:     'deaths',
+                            name:   'Deaths',
+                            sort:   {
+                                        compare: (a, b) => {
+                                            if ( (b > a) || (isNaN(a)) ) {
+                                                return -1;
+                                            } else if ( (a > b) || (isNaN(b)) ) {
+                                                return 1;
+                                            } else {
+                                                return 0;
+                                            };
+                                        }
+                                    }
+                        }
+                    ],
+                    data: [
+                      {%- for player in manage_account.players %}
+                        {
+                            name:           gridjs.html(`<a href="{{ url_for('.admin_players.edit', edit_player_id=player.id) }}">{{ player.name }}</a>`),
+                            level:          {{ player.common[0].level }},
+                            remorts:        {{ player.remorts }},
+                            renown:         {{ player.renown }},
+                            total_renown:   {{ player.total_renown }},
+                            quests:         {{ player.quests_completed }},
+                            challenges:     {{ player.challenges_completed }},
+                            deaths:         {{ display_deaths(player) }}
+                        }{% if not loop.last %},{% endif %}
+                      {%- endfor %}
+                    ],
+                    search:     true,
+                    sort:       true,
+                    pagination: true,
+                    width:      '50%'
+                }).render(where);
+            };
+        </script>
+    {%- endif %}
+{%- endblock scripts %}
+{%- block content %}
+    {%- if manage_account is defined %}
+            <ul id="account-details" title="Account Created: {{ manage_account.created_at.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }} ({{ manage_account.created }} ago)">
+                <li>
+                    Account Created
+                </li>
+                <li class="nested-list">
+                    <ul>
+                        <li>
+                            {{ manage_account.created_at.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}
+                        </li>
+                        <li>
+                            {{ manage_account.created_ago }}
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+            <ul title="E-mail Address: {{ manage_account.email }}">
+                <li>
+                    E-mail Address
+                </li>
+                <li class="nested-list">
+                    <ul>
+                        <li>
+                            <a href="mailto:{{ manage_account.email }}" target="_blank">{{ manage_account.email }}</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+            <h4>
+                Essence
+            </h4>
+        {%- if manage_account is defined and manage_account.seasonal_points is defined and manage_account.seasonal_earned is defined %}
+            <ul id="essence-balance">
+                <li title="Essence Current Balance: {{ manage_account.seasonal_points }}">
+                    Current Balance
+                </li>
+                <li class="nested-list">
+                    <ul>
+                        <li>
+                            {{ display_essence(manage_account.seasonal_points) }}
+                        </li>
+                    </ul>
+                </li>
+                <li title="Essence earned this season: {{ manage_account.seasonal_earned }}">
+                    Essence earned this season
+                </li>
+                <li class="nested-list">
+                    <ul>
+                        <li>
+                            {{ display_essence(manage_account.seasonal_earned) }}
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        {%- endif %}
+            <h4 title="Upgrades">
+                Upgrades
+            </h4>
+            <ul id="essence-upgrades">
+        {%- if manage_account.upgrades is defined and manage_account.upgrades is iterable and manage_account.upgrades | selectattr('amount', '>', 0) | list | length > 0 %}
+            {%- for upgraded in manage_account.upgrades | selectattr('amount', '>', 0) %}
+                <li title="{{ upgraded.upgrade.name }}{% if upgraded.amount > 1 %} (x{{ upgraded.amount}}){% endif %}">
+                    {{ upgraded.upgrade.name }}
+                    {%- if upgraded.amount > 1 %} (x{{ upgraded.amount}}){% endif %}
+                </li>
+            {%- endfor %}
+        {%- else %}
+                <li title="No account upgrades.">
+                    <i>No account upgrades.</i>
+                </li>
+        {%- endif %}
+            </ul>
+            <h4>
+                Players ({{ manage_account.players | length }})
+            </h4>
+        {%- if manage_account.players is defined and manage_account.players is iterable and manage_account.players | length > 0 %}
+            <div id="players"></div>
+            <script>
+                showPlayers(document.getElementById('players'));
+            </script>            
+        {%- else %}
+                <h3 title="No players yet!">
+                    No players yet!
+                </h3>
+        {%- endif %}
+    {%- endif %}
+{%- endblock content %}
