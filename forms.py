@@ -4,10 +4,9 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired
-from wtforms import BooleanField, DateTimeLocalField, EmailField, \
-    IntegerField, PasswordField, StringField, SubmitField, TextAreaField, SelectMultipleField, SelectField
-from wtforms.validators import DataRequired, Email, EqualTo, Length, \
-    NumberRange
+from wtforms import BooleanField, DateTimeLocalField, EmailField, IntegerField,\
+    PasswordField, StringField, SubmitField, TextAreaField, SelectMultipleField, SelectField
+from wtforms.validators import DataRequired, Email, EqualTo, Length, NumberRange
 from wtforms_validators import Alpha, AlphaSpace
 
 from mud_secret import ALIGNMENTS
@@ -278,37 +277,120 @@ class SeasonCycleForm(FlaskForm):
     )
     submit = SubmitField('Cycle Seasons')
 
-class QuestEditorForm(FlaskForm):
-    """Quest Editor form class"""
-    name = StringField('Name', validators=[DataRequired(), Length(max=25)])
-    display_name = StringField('Display Name', validators=[DataRequired(), Length(max=30)])
-    min_level = IntegerField('Minimum Level', validators=[DataRequired(), NumberRange(min=1, max=20)])
-    repeatable = BooleanField('Repeatable', default=False)
-    description = StringField('Description', validators=[DataRequired(), Length(max=512)])
-    class_restrict = IntegerField('Class Restriction', validators=[DataRequired(), NumberRange(min=0, max=9)])
-    quest_intro = StringField('Quest Introduction', validators=[DataRequired(), Length(max=1600)])
-    prerequisites = SelectMultipleField('Quest Prerequisites', choices=[], coerce=int)
-    submit              = SubmitField('Search')
 
-class QuestStepEditorForm(FlaskForm):
+class QuestForm(FlaskForm):
+    """Quest form class"""
+    name = StringField(
+        'Name',
+        validators=[
+            DataRequired(),
+            Length(min=1, max=25)
+        ]
+    )
+    display_name = StringField(
+        'Display Name',
+        validators=[
+            DataRequired(),
+            Length(min=1, max=30)
+        ]
+    )
+    min_level = IntegerField(
+        'Minimum Level',
+        validators=[
+            DataRequired(),
+            NumberRange(min=1, max=20)
+        ]
+    )
+    repeatable = BooleanField('Repeatable')
+    description = StringField(
+        'Description',
+        validators=[
+            DataRequired(),
+            Length(max=512)
+        ]
+    )
+    class_restrict = IntegerField(
+        'Class Restriction',
+        validators=[
+            DataRequired(),
+            NumberRange(min=0, max=9)
+        ]
+    )
+    quest_intro = StringField(
+        'Quest Introduction',
+        validators=[
+            DataRequired(),
+            Length(max=1600)
+        ]
+    )
+    prerequisites = SelectMultipleField(
+        'Quest Prerequisites',
+        choices=[],
+        coerce=int
+    )
+    submit = SubmitField('Save Quest')
+
+
+class QuestStepForm(FlaskForm):
     """Quest Step form class"""
-    step_type = SelectField('Step Type', choices=[(0, 'Object'), (1, 'Kill'), (2, 'Room')], validators=[DataRequired()])
-    target = IntegerField('Target', validators=[DataRequired()])
-    num_required = IntegerField('Number Required', validators=[DataRequired()])
+    step_type = SelectField(
+        'Step Type',
+        choices=[
+            (0, 'Object'),
+            (1, 'Kill'),
+            (2, 'Room')
+        ],
+        coerce=int,
+        validators=[
+            DataRequired()
+        ]
+    )
+    target = IntegerField(
+        'Target',
+        validators=[
+            DataRequired()
+        ]
+    )
+    num_required = IntegerField(
+        'Number Required',
+        validators=[
+            DataRequired()
+        ]
+    )
     time_limit = IntegerField('Time Limit')
-    mystify = BooleanField('Mystify', default=False)
-    mystify_text = StringField('Mystify Text', validators=[DataRequired()])
+    mystify = BooleanField('Mystify')
+    mystify_text = StringField(
+        'Mystify Text',
+        validators=[
+            DataRequired()
+        ]
+    )
+    submit = SubmitField('Save Step')
 
-class QuestRewardEditorForm(FlaskForm):
+
+class QuestRewardForm(FlaskForm):
     """Quest Reward form class"""
-    reward_num = IntegerField('Reward Number', validators=[DataRequired()])
-    reward_type = SelectField('Reward Type', choices=[
-        (0, 'Object_always'),
-        (1, 'Object_Choice'),
-        (2, 'Money'),
-        (3, 'Alignment'),
-        (4, 'Skill'),
-        (5, 'Renown'),
-        (6, 'Experience'),
-        (7, 'Quest')
-    ], validators=[DataRequired()])
+    reward_num = IntegerField(
+        'Reward Number',
+        validators=[
+            DataRequired()
+        ]
+    )
+    reward_type = SelectField(
+        'Reward Type',
+        choices=[
+            (0, 'Object_always'),
+            (1, 'Object_Choice'),
+            (2, 'Money'),
+            (3, 'Alignment'),
+            (4, 'Skill'),
+            (5, 'Renown'),
+            (6, 'Experience'),
+            (7, 'Quest')
+        ],
+        coerce=int,
+        validators=[
+            DataRequired()
+        ]
+    )
+    submit = SubmitField('Save Reward')
