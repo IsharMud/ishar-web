@@ -4,7 +4,7 @@
 {% block meta_description %}Administration portal to manage global events{% endblock meta_description %}
 {% block meta_url %}{{ url_for('.index', _external=True) }}{% endblock meta_url %}
 {% block title %}Global Events / Administration Portal{% endblock title %}
-{% block header %}Global Events{% endblock header %}
+{% block header %}<a href="{{ url_for('.index') }}">Global Events</a>{% endblock header %}
 {%- macro render_field(field) %}
                     <tr>
                         <td class="admin-{{ field.name | safe }}">
@@ -97,14 +97,14 @@
                 <h3 title="Add">Add</h3>
                 <form autocomplete="off" method="post" action="{{ url_for('.index') }}" id="event-add-form">
                     <table>
-                        {{ render_field(event_add_form.event_type, autocomplete='off') }}
-                        {{ render_field(event_add_form.start_time, autocomplete='off') }}
-                        {{ render_field(event_add_form.end_time, autocomplete='off') }}
-                        {{ render_field(event_add_form.event_name, autocomplete='off') }}
-                        {{ render_field(event_add_form.event_desc, autocomplete='off') }}
-                        {{ render_field(event_add_form.xp_bonus, autocomplete='off') }}
-                        {{ render_field(event_add_form.shop_bonus, autocomplete='off') }}
-                        {{ render_field(event_add_form.celestial_luck, autocomplete='off') }}
+                        {{ render_field(event_add_form.event_type) }}
+                        {{ render_field(event_add_form.start_time) }}
+                        {{ render_field(event_add_form.end_time) }}
+                        {{ render_field(event_add_form.event_name) }}
+                        {{ render_field(event_add_form.event_desc) }}
+                        {{ render_field(event_add_form.xp_bonus) }}
+                        {{ render_field(event_add_form.shop_bonus) }}
+                        {{ render_field(event_add_form.celestial_luck) }}
                         {{ event_add_form.csrf_token }}
                         {{ render_field(event_add_form.submit) }}
                     </table>

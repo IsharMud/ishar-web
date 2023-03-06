@@ -6,6 +6,7 @@ from admin.accounts import admin_accounts_bp
 from admin.events import admin_events_bp
 from admin.news import admin_news_bp
 from admin.patches import admin_patches_bp
+from admin.quests import admin_quests_bp
 from admin.seasons import admin_seasons_bp
 
 
@@ -17,6 +18,7 @@ admin_bp.register_blueprint(admin_accounts_bp)
 admin_bp.register_blueprint(admin_events_bp)
 admin_bp.register_blueprint(admin_news_bp)
 admin_bp.register_blueprint(admin_patches_bp)
+admin_bp.register_blueprint(admin_quests_bp)
 admin_bp.register_blueprint(admin_seasons_bp)
 
 

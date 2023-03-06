@@ -6,13 +6,13 @@ from flask import url_for
 from flask_login import current_user, UserMixin
 from passlib.hash import md5_crypt
 
-from sqlalchemy import Column, ForeignKey, String, TIMESTAMP, Text, text
+from sqlalchemy import Column, ForeignKey, Index, String, Table, TIMESTAMP, Text, text
 from sqlalchemy.dialects.mysql import INTEGER, MEDIUMINT, SMALLINT, TINYINT
 from sqlalchemy.orm import backref, relationship
 
 from mud_secret import ALIGNMENTS, IMM_LEVELS, PODIR
 from delta import stringify
-from database import Base, db_session
+from database import Base, db_session, metadata
 
 
 class Account(Base, UserMixin):
@@ -434,9 +434,9 @@ class Player(Base):
     @cached_property
     def player_alignment(self):
         """Player alignment"""
-        for text, (low, high) in ALIGNMENTS.items():
+        for align_text, (low, high) in ALIGNMENTS.items():
             if low <= self.common[0].alignment <= high:
-                return text
+                return align_text
         return 'Unknown'
 
     @cached_property
@@ -545,6 +545,111 @@ class PlayerRemortUpgrade(Base):
                f'({self.upgrade_id}) @ <Player> "{self.player.name}" ' \
                f'({self.player_id}) / Value: {self.value}'
 
+
+# Associate quests with pre-reqs
+t_quest_prereqs = Table(
+    'quest_prereqs', metadata,
+    Column('quest_id', ForeignKey('quests.quest_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True),
+    Column('required_quest', ForeignKey('quests.quest_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
+)
+
+
+class PlayerQuest(Base):
+    """Associate players with quests"""
+    __tablename__ = 'player_quests'
+    __table_args__ = (
+        Index('quest_id', 'quest_id', 'player_id', unique=True),
+    )
+
+    quest_id = Column(ForeignKey('quests.quest_id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False)
+    player_id = Column(ForeignKey('players.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True)
+    status = Column(TINYINT(11), nullable=False)
+    last_completed_at = Column(TIMESTAMP, nullable=False, server_default=text("current_timestamp() ON UPDATE current_timestamp()"))
+    num_completed = Column(TINYINT(4), nullable=False, server_default=text("0"))
+
+    player = relationship('Player')
+    quest = relationship('Quest')
+
+    def __repr__(self):
+        return f'<PlayerQuest> Player: {self.player}) / Quest: {self.quest}'
+
+
+class PlayerQuestStep(Base):
+    """Steps of a players quest"""
+    __tablename__ = 'player_quest_steps'
+
+    player_id = Column(ForeignKey('players.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False)
+    step_id = Column(ForeignKey('quest_steps.step_id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True)
+    num_collected = Column(TINYINT(1), nullable=False)
+
+    player = relationship('Player')
+    step = relationship('QuestStep')
+
+    def __repr__(self):
+        return f'<PlayerQuestStep> Player: {self.player}) / ' \
+               f'Step: {self.step}'
+
+
+class Quest(Base):
+    """Quest available to players"""
+    __tablename__ = 'quests'
+
+    quest_id = Column(INTEGER(11), primary_key=True)
+    name = Column(String(25), nullable=False, unique=True, server_default=text("''"))
+    display_name = Column(String(30), nullable=False)
+    completion_message = Column(String(80), nullable=False)
+    min_level = Column(TINYINT(4), nullable=False, server_default=text("1"))
+    max_level = Column(TINYINT(4), nullable=False, server_default=text("20"))
+    repeatable = Column(TINYINT(1), nullable=False, server_default=text("0"))
+    description = Column(String(512), nullable=False, server_default=text("'No description available.'"))
+    prerequisite = Column(INTEGER(11), nullable=False, server_default=text("-1"))
+    class_restrict = Column(TINYINT(4), nullable=False, server_default=text("-1"))
+    quest_intro = Column(String(1600), nullable=False, server_default=text("''"))
+
+    parents = relationship(
+        'Quest',
+        secondary='quest_prereqs',
+        primaryjoin='Quest.quest_id == quest_prereqs.c.quest_id',
+        secondaryjoin='Quest.quest_id == quest_prereqs.c.required_quest'
+    )
+
+    def __repr__(self):
+        return f'<Quest> "{self.name}" ({self.quest_id}) / ' \
+               f'Level: Min {self.min_level} - Max {self.max_level}'
+
+
+class QuestReward(Base):
+    """Rewards for completion of a quest"""
+    __tablename__ = 'quest_rewards'
+
+    reward_num = Column(INTEGER(11), primary_key=True, nullable=False)
+    reward_type = Column(TINYINT(2), nullable=False)
+    quest_id = Column(ForeignKey('quests.quest_id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True)
+
+    quest = relationship('Quest')
+
+    def __repr__(self):
+        return f'<QuestReward> "{self.reward_num}" ({self.reward_type}) / ' \
+               f'{self.quest} ({self.quest_id})'
+
+class QuestStep(Base):
+    """Steps of a quest"""
+    __tablename__ = 'quest_steps'
+
+    step_id = Column(TINYINT(4), primary_key=True)
+    step_type = Column(TINYINT(4), nullable=False)
+    target = Column(INTEGER(11), nullable=False)
+    num_required = Column(INTEGER(11), nullable=False)
+    quest_id = Column(ForeignKey('quests.quest_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
+    time_limit = Column(INTEGER(11), nullable=False, server_default=text("-1"))
+    mystify = Column(TINYINT(1), nullable=False, server_default=text("0"))
+    mystify_text = Column(String(80), nullable=False, server_default=text("''"))
+
+    quest = relationship('Quest')
+
+    def __repr__(self):
+        return f'<QuestStep> "{self.step_type}" ({self.step_id}) / ' \
+               f'{self.quest} ({self.quest_id})'
 
 class RemortUpgrade(Base):
     """Remort upgrades that are available to player characters"""
