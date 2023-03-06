@@ -4,7 +4,7 @@
 {% block meta_description %}Administration portal to manage quests{% endblock meta_description %}
 {% block meta_url %}{{ url_for('.index', _external=True) }}{% endblock meta_url %}
 {% block title %}Quests / Administration Portal{% endblock title %}
-{% block header %}Quests{% endblock header %}
+{% block header %}<a href="{{ url_for('.index') }}">Quests</a>{% endblock header %}
 {%- macro render_field(field) %}
                     <tr>
                         <td class="admin-{{ field.name | safe }}">
@@ -44,8 +44,20 @@
                             name:   'Display Name'
                         },
                         {
-                            id:     'description',
-                            name:   'Description'
+                            id:     'repeatable',
+                            name:   'Repeatable'
+                        },
+                        {
+                            id:     'min_level',
+                            name:   'Minimum Level'
+                        },
+                        {
+                            id:     'max_level',
+                            name:   'Maximum Level'
+                        },
+                        {
+                            id:     'class_restrict',
+                            name:   'Class Restrict'
                         },
                         {
                             id:     'delete',
@@ -58,7 +70,10 @@
                             quest_id:       gridjs.html(`<a href="{{ url_for('.edit', edit_quest_id=quest.quest_id) }}">{{ quest.quest_id }}</a>`),
                             name:           "{{ quest.name | safe }}",
                             display_name:   "{{ quest.display_name | safe }}",
-                            description:    {{ quest.description | safe | truncate(50) | trim | tojson }},
+                            repeatable:     {{ quest.repeatable }},
+                            min_level:      {{ quest.min_level }},
+                            max_level:      {{ quest.max_level }},
+                            class_restrict: {{ quest.class_restrict }},
                             delete:         gridjs.html(`<a href="{{ url_for('.delete', delete_quest_id=quest.quest_id) }}" onclick="return confirm('Are you sure you want to delete this quest?');">❌</a>`)
                         }{% if not loop.last %},{% endif %}
                       {%- endfor %}
@@ -73,30 +88,29 @@
     {%- endif %}
 {%- endblock scripts %}
 {%- block content %}
+    {%- if all_quests and all_quests is iterable and all_quests | length > 0 %}
+                <div id="all-quests"></div>
+                <script>showQuests(document.getElementById('all-quests'));</script>
+                <hr>
+    {%- endif %}
     {%- if quest_form is defined %}
                 <h3 title="Add">Add</h3>
                 <form autocomplete="off" method="post" action="{{ url_for('.index') }}" id="quest-add-form">
                     <table>
-                        {{ render_field(quest_form.name) }}
-                        {{ render_field(quest_form.display_name) }}
+                        {{ render_field(quest_form.name, placeholder='QUEST_NAME') }}
+                        {{ render_field(quest_form.display_name, placeholder='The Ultimate Challenge') }}
+                        {{ render_field(quest_form.completion_message, placeholder='You have cleared the ultimate challenge!') }}
                         {{ render_field(quest_form.min_level) }}
+                        {{ render_field(quest_form.max_level) }}
                         {{ render_field(quest_form.repeatable) }}
-                        {{ render_field(quest_form.description) }}
+                        {{ render_field(quest_form.description, placeholder='No description available.') }}
                         {{ render_field(quest_form.class_restrict) }}
-                        {{ render_field(quest_form.quest_intro) }}
+                        {%- set quest_intro_placeholder = '"Ah, @n!"\n"How wonderful to see you again - and it appears you have grown substantially in power since last we spoke!"' %}
+                        {{ render_field(quest_form.quest_intro, placeholder=quest_intro_placeholder) }}
                         {{ render_field(quest_form.prerequisites) }}
                         {{ quest_form.csrf_token }}
                         {{ render_field(quest_form.submit) }}
                     </table>
                 </form>
-    {%- endif %}
-    {%- if all_quests and all_quests is iterable and all_quests | length > 0 %}
-                <hr>
-                <div id="all-quests"></div>
-                <script>
-                    showQuests(
-                        document.getElementById('all-quests')
-                    );
-                </script>
     {%- endif %}
 {%- endblock content %}

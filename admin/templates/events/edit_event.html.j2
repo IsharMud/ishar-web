@@ -4,7 +4,7 @@
 {%- block meta_description %}Administration portal to edit a global event{%- endblock meta_description %}
 {%- block meta_url %}{{ url_for('.edit', edit_event_type=edit_event.event_type, _external=True) }}{%- endblock meta_url %}
 {%- block title %}Edit Event: {{ edit_event.display_name | safe }} / Administration Portal{%- endblock title %}
-{%- block header %}Edit Event: {{ edit_event.display_name | safe }}{%- endblock header %}
+{%- block header %}<a href="{{ url_for('.index') }}">Edit Event</a>: {{ edit_event.display_name | safe }}{%- endblock header %}
 {%- macro render_field(field) %}
                     <tr>
                         <td class="admin-{{ field.name | safe }}">
@@ -28,14 +28,14 @@
     {%- if edit_event and edit_event_form %}
                 <form autocomplete="off" method="post" action="{{ url_for('.edit', edit_event_type=edit_event.event_type) }}" id="event-edit-form">
                     <table>
-                        {{ render_field(edit_event_form.event_type, value=edit_event.event_type, autocomplete='off') }}
-                        {{ render_field(edit_event_form.start_time, value=edit_event.start_time, autocomplete='off') }}
-                        {{ render_field(edit_event_form.end_time, value=edit_event.end_time, autocomplete='off') }}
-                        {{ render_field(edit_event_form.event_name, value=edit_event.event_name, autocomplete='off') }}
-                        {{ render_field(edit_event_form.event_desc, value=edit_event.event_desc, autocomplete='off') }}
-                        {{ render_field(edit_event_form.xp_bonus, value=edit_event.xp_bonus, autocomplete='off') }}
-                        {{ render_field(edit_event_form.shop_bonus, value=edit_event.shop_bonus, autocomplete='off') }}
-                        {{ render_field(edit_event_form.celestial_luck, value=edit_event.celestial_luck, autocomplete='off') }}
+                        {{ render_field(edit_event_form.event_type, value=edit_event.event_type) }}
+                        {{ render_field(edit_event_form.start_time, value=edit_event.start_time) }}
+                        {{ render_field(edit_event_form.end_time, value=edit_event.end_time) }}
+                        {{ render_field(edit_event_form.event_name, value=edit_event.event_name) }}
+                        {{ render_field(edit_event_form.event_desc, value=edit_event.event_desc) }}
+                        {{ render_field(edit_event_form.xp_bonus, value=edit_event.xp_bonus) }}
+                        {{ render_field(edit_event_form.shop_bonus, value=edit_event.shop_bonus) }}
+                        {{ render_field(edit_event_form.celestial_luck, value=edit_event.celestial_luck) }}
                         {{ edit_event_form.csrf_token }}
                         {{ render_field(edit_event_form.submit) }}
                     </table>

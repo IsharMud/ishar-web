@@ -4,7 +4,7 @@
 {% block meta_description %}Administration portal page to view accounts{% endblock meta_description %}
 {% block meta_url %}{{ url_for('.index', _external=True) }}{% endblock meta_url %}
 {% block title %}Accounts / Administration Portal{% endblock title %}
-{% block header %}Accounts{% endblock header %}
+{% block header %}<a href="{{ url_for('.index') }}">Accounts</a>{% endblock header %}
 {%- macro display_account(account) %}
                             account_id:     {{ account.account_id }},
                             name:           gridjs.html(`<a href="{{ url_for('.manage', manage_account_id=account.account_id) }}">{{ account.display_name | safe }}</a> <a title="Edit {{ account.display_name | safe }} (ID: {{ account.account_id }})" href="{{ url_for('.edit', edit_account_id=account.account_id) }}">✏️</a>`),

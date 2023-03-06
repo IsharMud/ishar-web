@@ -91,8 +91,8 @@ class EditPlayerForm(FlaskForm):
         'Alignment',
         validators=[
             NumberRange(
-                min=min(min(ALIGNMENTS.values())),
-                max=max(max(ALIGNMENTS.values()))
+                min=min(ALIGNMENTS.values()),
+                max=max(ALIGNMENTS.values())
             )
         ]
     )
@@ -236,7 +236,6 @@ class PatchAddForm(FlaskForm):
     """Patch Add form class"""
     name = StringField(
         'Name',
-        default='Patch_X.Y',
         validators=[
             DataRequired(),
             Length(min=5, max=32),
@@ -294,33 +293,49 @@ class QuestForm(FlaskForm):
             Length(min=1, max=30)
         ]
     )
+    completion_message = TextAreaField(
+        'Completion Message',
+        validators=[
+            Length(max=80)
+        ]
+    )
     min_level = IntegerField(
         'Minimum Level',
+        default=1,
+        validators=[
+            DataRequired(),
+            NumberRange(min=1, max=20)
+        ]
+    )
+    max_level = IntegerField(
+        'Maximum Level',
+        default=20,
         validators=[
             DataRequired(),
             NumberRange(min=1, max=20)
         ]
     )
     repeatable = BooleanField('Repeatable')
-    description = StringField(
-        'Description',
-        validators=[
-            DataRequired(),
-            Length(max=512)
-        ]
+    description = TextAreaField(
+         'Description',
+         validators=[
+             DataRequired(),
+             Length(min=1, max=512)
+         ]
     )
     class_restrict = IntegerField(
         'Class Restriction',
+        default=-1,
         validators=[
             DataRequired(),
-            NumberRange(min=0, max=9)
+            NumberRange(min=-1, max=9)
         ]
     )
-    quest_intro = StringField(
+    quest_intro = TextAreaField(
         'Quest Introduction',
         validators=[
             DataRequired(),
-            Length(max=1600)
+            Length(min=1, max=1600)
         ]
     )
     prerequisites = SelectMultipleField(

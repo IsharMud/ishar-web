@@ -131,7 +131,7 @@ def parse_help_body(line=None):
     return line
 
 
-def parse_help_class(class_line=None, playable_classes=playable_classes):
+def parse_help_class(class_line=None, player_classes=playable_classes):
     """Parse a single class line from a single topic chunk
         from the MUD 'helptab' file, and link the Player Class help page"""
 

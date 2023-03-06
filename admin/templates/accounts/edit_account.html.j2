@@ -4,7 +4,7 @@
 {%- block meta_description %}Administration portal to edit a user account{%- endblock meta_description %}
 {%- block meta_url %}{{ url_for('.edit', edit_account_id=edit_account.account_id, _external=True) }}{%- endblock meta_url %}
 {%- block title %}Edit Account: {{ edit_account.display_name | safe }} / Administration Portal{%- endblock title %}
-{%- block header %}Edit Account: <a href="{{ url_for('.manage', manage_account_id=edit_account.account_id) }}">{{- edit_account.display_name | safe -}}</a>{%- endblock header %}
+{%- block header %}<a href="{{ url_for('.index') }}">Edit Account</a>: <a href="{{ url_for('.manage', manage_account_id=edit_account.account_id) }}">{{- edit_account.display_name | safe -}}</a>{%- endblock header %}
 {%- macro render_field(field) %}
                     <tr>
                         <td class="admin-{{ field.name | safe }}">
@@ -48,11 +48,11 @@
         {%- endif %}
                             </td>
                         </tr>
-                        {{ render_field(edit_account_form.account_name, value=edit_account.account_name, autocomplete='off') }}
-                        {{ render_field(edit_account_form.email, value=edit_account.email, autocomplete='off') }}
-                        {{ render_field(edit_account_form.seasonal_points, value=edit_account.seasonal_points, autocomplete='off') }}
-                        {{ render_field(edit_account_form.password, value='', autocomplete='off') }}
-                        {{ render_field(edit_account_form.confirm_password, value='', autocomplete='off') }}
+                        {{ render_field(edit_account_form.account_name, value=edit_account.account_name) }}
+                        {{ render_field(edit_account_form.email, value=edit_account.email) }}
+                        {{ render_field(edit_account_form.seasonal_points, value=edit_account.seasonal_points) }}
+                        {{ render_field(edit_account_form.password, value='') }}
+                        {{ render_field(edit_account_form.confirm_password, value='') }}
                         {{ edit_account_form.csrf_token }}
                         {{ render_field(edit_account_form.submit) }}
                     </table>

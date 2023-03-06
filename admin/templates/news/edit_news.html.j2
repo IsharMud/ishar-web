@@ -4,7 +4,7 @@
 {%- block meta_description %}Administration portal to edit a news post{%- endblock meta_description %}
 {%- block meta_url %}{{ url_for('.edit', edit_news_id=edit_news.news_id, _external=True) }}{%- endblock meta_url %}
 {%- block title %}Edit News: {{ edit_news.subject | title | safe }} / Administration Portal{%- endblock title %}
-{%- block header %}Edit News: {{ edit_news.subject | title | safe }}{%- endblock header %}
+{%- block header %}<a href="{{ url_for('.index') }}">Edit News</a>: {{ edit_news.subject | title | safe }}{%- endblock header %}
 {%- macro render_field(field) %}
                     <tr>
                         <td class="admin-{{ field.name | safe }}">
@@ -44,8 +44,8 @@
                                 {{ edit_news.created_at.strftime('%A, %B %d, %Y') }} ({{ edit_news.created_at }})
                             </td>
                         </tr>
-                        {{ render_field(edit_news_form.subject, value=edit_news.subject, autocomplete='off') }}
-                        {{ render_field(edit_news_form.body, autocomplete='off') }}
+                        {{ render_field(edit_news_form.subject, value=edit_news.subject) }}
+                        {{ render_field(edit_news_form.body) }}
                         {{ edit_news_form.csrf_token }}
                         {{ render_field(edit_news_form.submit) }}
                     </table>

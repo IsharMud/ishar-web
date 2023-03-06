@@ -434,9 +434,9 @@ class Player(Base):
     @cached_property
     def player_alignment(self):
         """Player alignment"""
-        for text, (low, high) in ALIGNMENTS.items():
+        for align_text, (low, high) in ALIGNMENTS.items():
             if low <= self.common[0].alignment <= high:
-                return text
+                return align_text
         return 'Unknown'
 
     @cached_property
