@@ -142,7 +142,7 @@ def parse_help_class(class_line=None, player_classes=playable_classes):
     for topic_class in topic_classes:
         i += 1
         topic_class = topic_class.strip()
-        if topic_class in playable_classes:
+        if topic_class in player_classes:
             string_out += f'<a href="/help/{topic_class}">{topic_class}</a>'
             if i != num_topic_classes:
                 string_out += ', '
