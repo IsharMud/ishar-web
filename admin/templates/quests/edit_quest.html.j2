@@ -33,7 +33,11 @@
                         {{ render_field(edit_quest_form.completion_message) }}
                         {{ render_field(edit_quest_form.min_level, value=edit_quest.min_level) }}
                         {{ render_field(edit_quest_form.max_level, value=edit_quest.max_level) }}
-                        {{ render_field(edit_quest_form.repeatable, value=edit_quest.repeatable) }}
+        {%- set repeatable_checked = False %}
+        {%- if edit_quest.repeatable == 1 %}
+            {% set repeatable_checked = True %}
+        {%- endif %}
+                        {{ render_field(edit_quest_form.repeatable, checked=repeatable_checked) }}
                         {{ render_field(edit_quest_form.description) }}
                         {{ render_field(edit_quest_form.class_restrict, value=edit_quest.class_restrict) }}
                         {{ render_field(edit_quest_form.quest_intro) }}
