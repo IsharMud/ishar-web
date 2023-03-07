@@ -92,11 +92,8 @@ class Account(Base, UserMixin):
                 earned = player.seasonal_earned
         return earned
 
-    def __str__(self):
-        return f'<Account> "{self.display_name}" (ID: {self.account_id})'
-
     def __repr__(self):
-        return f'<Account> "{self.account_name}" (ID: {self.account_id})'
+        return f'<Account> "{self.account_name}" ({self.account_id})'
 
 
 class AccountUpgrade(Base):
@@ -279,22 +276,43 @@ class PlayerClass(Base):
         return f'<PlayerClass> "{self.class_name}" ({self.class_id})'
 
 
-class PlayerRace(Base):
-    """Races available when creating a player character:
-        such as Elf, Gnome, Human, etc."""
+class Race(Base):
+    """Races available in-game, such as Elf, Gnome, Human, etc...
+        also includes enemy/mobile races"""
     __tablename__ = 'races'
 
-    race_id = Column(TINYINT(3), primary_key=True)
-    race_name = Column(String(15), nullable=False, unique=True)
-    race_description = Column(String(64))
-
-    @cached_property
-    def race_display_name(self):
-        """Human-readable display name for a player race"""
-        return self.race_name.replace('_', '-').title()
+    symbol = Column(String(100), server_default=text("''"))
+    display_name = Column(String(25), server_default=text("''"))
+    folk_name = Column(String(25), server_default=text("''"))
+    default_movement = Column(String(10), server_default=text("''"))
+    description = Column(String(80), server_default=text("''"))
+    default_height = Column(SMALLINT(6), server_default=text("0"))
+    default_weight = Column(SMALLINT(6), server_default=text("0"))
+    bonus_fortitude = Column(SMALLINT(6), server_default=text("0"))
+    bonus_reflex = Column(SMALLINT(6), server_default=text("0"))
+    bonus_resilience = Column(SMALLINT(6), server_default=text("0"))
+    listen_sound = Column(String(80), server_default=text("''"))
+    height_bonus = Column(SMALLINT(6), server_default=text("0"))
+    weight_bonus = Column(SMALLINT(6), server_default=text("0"))
+    short_description = Column(String(80), server_default=text("''"))
+    long_description = Column(String(512), server_default=text("''"))
+    attack_noun = Column(String(25), server_default=text("''"))
+    attack_type = Column(SMALLINT(6), server_default=text("0"))
+    vulnerabilities = Column(Text, server_default=text("''"))
+    susceptibilities = Column(Text, server_default=text("''"))
+    resistances = Column(Text, server_default=text("''"))
+    immunities = Column(Text, server_default=text("''"))
+    additional_str = Column(SMALLINT(6), server_default=text("0"))
+    additional_agi = Column(SMALLINT(6), server_default=text("0"))
+    additional_end = Column(SMALLINT(6), server_default=text("0"))
+    additional_per = Column(SMALLINT(6), server_default=text("0"))
+    additional_foc = Column(SMALLINT(6), server_default=text("0"))
+    additional_wil = Column(SMALLINT(6), server_default=text("0"))
+    race_id = Column(INTEGER(11), primary_key=True)
+    is_playable = Column(TINYINT(1), server_default=text("0"))
 
     def __repr__(self):
-        return f'<PlayerRace> "{self.race_name}" ({self.race_id})'
+        return f'<Race> "{self.symbol}" ({self.race_id}'
 
 
 class PlayerCommon(Base):
@@ -336,7 +354,7 @@ class PlayerCommon(Base):
 
     player = relationship('Player', backref=backref('common', cascade='all, delete-orphan'))
     player_class = relationship('PlayerClass')
-    player_race = relationship('PlayerRace')
+    race = relationship('Race')
 
 
 class Player(Base):

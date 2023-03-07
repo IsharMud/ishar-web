@@ -1,7 +1,7 @@
 """Frequently Asked Questions"""
 from flask import Blueprint, render_template, url_for
 
-from models import PlayerClass, PlayerRace
+from models import PlayerClass, Race
 
 
 # Flask Blueprint
@@ -32,10 +32,8 @@ def index():
 
     # Fetch, and format, playable player races and descriptions
     player_races = [
-        f"{player_race.race_display_name} -- {player_race.race_description}"
-        for player_race in PlayerRace().query.filter(
-            PlayerRace.race_description != ''
-        ).all()
+        f"{player_race.display_name} -- {player_race.short_description}".replace('\\n', '')
+        for player_race in Race().query.filter(Race.is_playable==1).all()
     ]
 
     all_faqs = {
