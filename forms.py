@@ -5,7 +5,7 @@ from dateutil.relativedelta import relativedelta
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired
 from wtforms import BooleanField, DateTimeLocalField, EmailField, IntegerField,\
-    PasswordField, StringField, SubmitField, TextAreaField, SelectMultipleField, SelectField
+    PasswordField, SelectField, StringField, SubmitField, TextAreaField
 from wtforms.validators import DataRequired, Email, EqualTo, Length, NumberRange
 from wtforms_validators import Alpha, AlphaSpace
 
@@ -323,12 +323,15 @@ class QuestForm(FlaskForm):
              Length(min=1, max=512)
          ]
     )
-    class_restrict = IntegerField(
+    class_restrict = SelectField(
         'Class Restriction',
+        choices=[
+            (-1, 'None')
+        ],
+        coerce=int,
         default=-1,
         validators=[
             DataRequired(),
-            NumberRange(min=-1, max=9)
         ]
     )
     quest_intro = TextAreaField(
@@ -338,10 +341,16 @@ class QuestForm(FlaskForm):
             Length(min=1, max=1600)
         ]
     )
-    prerequisites = SelectMultipleField(
-        'Quest Prerequisites',
-        choices=[],
-        coerce=int
+    prerequisite = SelectField(
+        'Quest Prerequisite',
+        choices=[
+            (-1, 'None')
+        ],
+        coerce=int,
+        default=-1,
+        validators=[
+            DataRequired(),
+        ]
     )
     submit = SubmitField('Save Quest')
 

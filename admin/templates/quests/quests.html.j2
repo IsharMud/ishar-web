@@ -57,7 +57,7 @@
                         },
                         {
                             id:     'class_restrict',
-                            name:   'Class Restrict'
+                            name:   'Class'
                         },
                         {
                             id:     'delete',
@@ -73,7 +73,7 @@
                             repeatable:     {{ quest.repeatable }},
                             min_level:      {{ quest.min_level }},
                             max_level:      {{ quest.max_level }},
-                            class_restrict: {{ quest.class_restrict }},
+                            class_restrict: "{{ quest.class_restrict_display_name }}",
                             delete:         gridjs.html(`<a href="{{ url_for('.delete', delete_quest_id=quest.quest_id) }}" onclick="return confirm('Are you sure you want to delete this quest?');">❌</a>`)
                         }{% if not loop.last %},{% endif %}
                       {%- endfor %}
@@ -107,7 +107,7 @@
                         {{ render_field(quest_form.class_restrict) }}
                         {%- set quest_intro_placeholder = '"Ah, @n!"\n"How wonderful to see you again - and it appears you have grown substantially in power since last we spoke!"' %}
                         {{ render_field(quest_form.quest_intro, placeholder=quest_intro_placeholder) }}
-                        {{ render_field(quest_form.prerequisites) }}
+                        {{ render_field(quest_form.prerequisite) }}
                         {{ quest_form.csrf_token }}
                         {{ render_field(quest_form.submit) }}
                     </table>

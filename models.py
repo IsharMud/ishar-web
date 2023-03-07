@@ -539,7 +539,6 @@ class PlayerRemortUpgrade(Base):
     player = relationship('Player', backref='remort_upgrades')
     remort_upgrade = relationship('RemortUpgrade')
 
-
     def __repr__(self):
         return f'<PlayerRemortUpgrade> "{self.remort_upgrade.name}" ' \
                f'({self.upgrade_id}) @ <Player> "{self.player.name}" ' \
@@ -603,7 +602,8 @@ class Quest(Base):
     repeatable = Column(TINYINT(1), nullable=False, server_default=text("0"))
     description = Column(String(512), nullable=False, server_default=text("'No description available.'"))
     prerequisite = Column(INTEGER(11), nullable=False, server_default=text("-1"))
-    class_restrict = Column(TINYINT(4), nullable=False, server_default=text("-1"))
+#    class_restrict = Column(TINYINT(4), nullable=False, server_default=text("-1"))
+    class_restrict = Column(ForeignKey('classes.class_id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True)
     quest_intro = Column(String(1600), nullable=False, server_default=text("''"))
 
     parents = relationship(
@@ -612,6 +612,11 @@ class Quest(Base):
         primaryjoin='Quest.quest_id == quest_prereqs.c.quest_id',
         secondaryjoin='Quest.quest_id == quest_prereqs.c.required_quest'
     )
+    restricted_class = relationship('PlayerClass')
+
+    @property
+    def class_restrict_display_name(self):
+        return self.restricted_class.class_display_name
 
     def __repr__(self):
         return f'<Quest> "{self.name}" ({self.quest_id}) / ' \
@@ -650,6 +655,7 @@ class QuestStep(Base):
     def __repr__(self):
         return f'<QuestStep> "{self.step_type}" ({self.step_id}) / ' \
                f'{self.quest} ({self.quest_id})'
+
 
 class RemortUpgrade(Base):
     """Remort upgrades that are available to player characters"""
