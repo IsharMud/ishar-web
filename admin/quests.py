@@ -3,7 +3,7 @@ from flask import abort, Blueprint, flash, render_template, url_for
 
 from database import db_session
 from forms import QuestForm
-from models import Quest
+from models import PlayerClass, Quest
 
 
 # Flask Blueprint
@@ -20,22 +20,31 @@ def index():
     """Administration portal to allow Gods to manage quests
         /admin/quests"""
 
-    # Get quest form and check if submitted
-    quest_add_form = QuestForm()
-    if quest_add_form.validate_on_submit():
+    # Get quest form
+    add_quest_form = QuestForm()
+
+    # Retrieve playable player class names for form choices
+    playable_classes = PlayerClass().query.filter(PlayerClass.class_description != '').all()
+    for playable_class in playable_classes:
+        add_quest_form.class_restrict.choices.append(
+            (playable_class.class_id, playable_class.class_display_name)
+        )
+
+    # Check if quest add form submitted
+    if add_quest_form.validate_on_submit():
 
         # Create the new quest database entry
         new_quest = Quest(
-            name=quest_add_form.name.data,
-            display_name=quest_add_form.display_name.data,
-            completion_message=quest_add_form.completion_message.data,
-            min_level=quest_add_form.min_level.data,
-            max_level=quest_add_form.max_level.data,
-            repeatable=quest_add_form.repeatable.data,
-            description=quest_add_form.description.data,
-#            prerequisite=quest_add_form.prerequisites.data,
-#            class_restrict=quest_add_form.class_restrict.data,
-            quest_intro=quest_add_form.quest_intro.data
+            name=add_quest_form.name.data,
+            display_name=add_quest_form.display_name.data,
+            completion_message=add_quest_form.completion_message.data,
+            min_level=add_quest_form.min_level.data,
+            max_level=add_quest_form.max_level.data,
+            repeatable=add_quest_form.repeatable.data,
+            description=add_quest_form.description.data,
+            prerequisite=add_quest_form.prerequisite.data,
+            class_restrict=add_quest_form.class_restrict.data,
+            quest_intro=add_quest_form.quest_intro.data
         )
         db_session.add(new_quest)
         db_session.commit()
@@ -46,7 +55,7 @@ def index():
     return render_template(
         'quests.html.j2',
         all_quests=Quest.query.order_by(-Quest.quest_id).all(),
-        quest_form=quest_add_form
+        quest_form=add_quest_form
     )
 
 
@@ -62,6 +71,15 @@ def edit(edit_quest_id=None):
 
     # Get quest form, and check if submitted
     edit_quest_form = QuestForm()
+
+    # Retrieve playable player class names for form choices
+    playable_classes = PlayerClass().query.filter(PlayerClass.class_description != '').all()
+    for playable_class in playable_classes:
+        edit_quest_form.class_restrict.choices.append(
+            (playable_class.class_id, playable_class.class_display_name)
+        )
+    edit_quest_form.class_restrict.default = edit_quest.class_restrict
+
     if edit_quest_form.validate_on_submit():
         edit_quest.name = edit_quest_form.name.data
         edit_quest.display_name = edit_quest_form.display_name.data
@@ -72,7 +90,7 @@ def edit(edit_quest_id=None):
         edit_quest.description = edit_quest_form.description.data
         edit_quest.class_restrict = edit_quest_form.class_restrict.data
         edit_quest.quest_intro = edit_quest_form.quest_intro.data
-        edit_quest.prerequisites = edit_quest_form.prerequisites.data
+        edit_quest.prerequisite = edit_quest_form.prerequisite.data
         db_session.commit()
         flash('The quest was saved.', 'success')
 

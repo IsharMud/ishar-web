@@ -39,16 +39,18 @@
         {%- endif %}
                         {{ render_field(edit_quest_form.repeatable, checked=repeatable_checked) }}
                         {{ render_field(edit_quest_form.description) }}
-                        {{ render_field(edit_quest_form.class_restrict, value=edit_quest.class_restrict) }}
+                        {{ render_field(edit_quest_form.class_restrict) }}
                         {{ render_field(edit_quest_form.quest_intro) }}
-                        {{ render_field(edit_quest_form.prerequisites, value=edit_quest.prerequisites) }}
+                        {{ render_field(edit_quest_form.prerequisite) }}
                         {{ edit_quest_form.csrf_token }}
                         {{ render_field(edit_quest_form.submit) }}
                     </table>
                     <script>
                         document.getElementById('completion_message').innerHTML = {{ edit_quest.completion_message | tojson }};
                         document.getElementById('description').innerHTML = {{ edit_quest.description | tojson }};
+                        document.getElementById('class_restrict').value = {{ edit_quest.class_restrict }};
                         document.getElementById('quest_intro').innerHTML = {{ edit_quest.quest_intro | tojson }};
+                        document.getElementById('prerequisite').value = {{ edit_quest.prerequisite }};
                     </script>
                 </form>
     {%- endif %}
