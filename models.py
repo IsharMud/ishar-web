@@ -279,24 +279,6 @@ class PlayerClass(Base):
         return f'<PlayerClass> "{self.class_name}" ({self.class_id})'
 
 
-class PlayerRace(Base):
-    """Races available when creating a player character:
-        such as Elf, Gnome, Human, etc."""
-    __tablename__ = 'races'
-
-    race_id = Column(TINYINT(3), primary_key=True)
-    race_name = Column(String(15), nullable=False, unique=True)
-    race_description = Column(String(64))
-
-    @cached_property
-    def race_display_name(self):
-        """Human-readable display name for a player race"""
-        return self.race_name.replace('_', '-').title()
-
-    def __repr__(self):
-        return f'<PlayerRace> "{self.race_name}" ({self.race_id})'
-
-
 class PlayerCommon(Base):
     """Common data of players that is shared with in-game 'mobiles'"""
     __tablename__ = 'player_common'
@@ -336,7 +318,7 @@ class PlayerCommon(Base):
 
     player = relationship('Player', backref=backref('common', cascade='all, delete-orphan'))
     player_class = relationship('PlayerClass')
-    player_race = relationship('PlayerRace')
+    race = relationship('Race')
 
 
 class Player(Base):
@@ -655,6 +637,55 @@ class QuestStep(Base):
     def __repr__(self):
         return f'<QuestStep> "{self.step_type}" ({self.step_id}) / ' \
                f'{self.quest} ({self.quest_id})'
+
+
+class Race(Base):
+    """Races available when creating a player character:
+        such as Elf, Gnome, Human, etc., and their attributes"""
+    __tablename__ = 'races'
+
+    race_id = Column(INTEGER(11), primary_key=True)
+    symbol = Column(String(100), server_default=text("''"))
+    display_name = Column(String(25), server_default=text("''"))
+    folk_name = Column(String(25), server_default=text("''"))
+    default_movement = Column(String(10), server_default=text("''"))
+    description = Column(String(80), server_default=text("''"))
+    default_height = Column(SMALLINT(6), server_default=text("0"))
+    default_weight = Column(SMALLINT(6), server_default=text("0"))
+    bonus_fortitude = Column(SMALLINT(6), server_default=text("0"))
+    bonus_reflex = Column(SMALLINT(6), server_default=text("0"))
+    bonus_resilience = Column(SMALLINT(6), server_default=text("0"))
+    listen_sound = Column(String(80), server_default=text("''"))
+    height_bonus = Column(SMALLINT(6), server_default=text("0"))
+    weight_bonus = Column(SMALLINT(6), server_default=text("0"))
+    short_description = Column(String(80), server_default=text("''"))
+    long_description = Column(String(512), server_default=text("''"))
+    attack_noun = Column(String(25), server_default=text("''"))
+    attack_type = Column(SMALLINT(6), server_default=text("0"))
+    vulnerabilities = Column(Text, server_default=text("''"))
+    susceptibilities = Column(Text, server_default=text("''"))
+    resistances = Column(Text, server_default=text("''"))
+    immunities = Column(Text, server_default=text("''"))
+    additional_str = Column(SMALLINT(6), server_default=text("0"))
+    additional_agi = Column(SMALLINT(6), server_default=text("0"))
+    additional_end = Column(SMALLINT(6), server_default=text("0"))
+    additional_per = Column(SMALLINT(6), server_default=text("0"))
+    additional_foc = Column(SMALLINT(6), server_default=text("0"))
+    additional_wil = Column(SMALLINT(6), server_default=text("0"))
+    is_playable = Column(TINYINT(1), server_default=text("0"))
+    is_humanoid = Column(TINYINT(1), nullable=False, server_default=text("1"))
+    is_invertebrae = Column(TINYINT(1), nullable=False, server_default=text("0"))
+    is_flying = Column(TINYINT(1), nullable=False, server_default=text("0"))
+    is_swimming = Column(TINYINT(1), nullable=False, server_default=text("0"))
+    darkvision = Column(TINYINT(4), nullable=False, server_default=text("0"))
+    see_invis = Column(TINYINT(1), nullable=False, server_default=text("0"))
+    is_walking = Column(TINYINT(1), nullable=False, server_default=text("1"))
+    endure_heat = Column(TINYINT(1), nullable=False, server_default=text("0"))
+    endure_cold = Column(TINYINT(1), nullable=False, server_default=text("0"))
+    is_undead = Column(TINYINT(1), nullable=False, server_default=text("0"))
+
+    def __repr__(self):
+        return f'<Race> "{self.display_name}" ("{self.symbol}") {self.race_id}'
 
 
 class RemortUpgrade(Base):

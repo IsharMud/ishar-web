@@ -1,7 +1,7 @@
 """Frequently Asked Questions"""
 from flask import Blueprint, render_template, url_for
 
-from models import PlayerClass, PlayerRace
+from models import PlayerClass, Race
 
 
 # Flask Blueprint
@@ -31,11 +31,9 @@ def index():
     ]
 
     # Fetch, and format, playable player races and descriptions
-    player_races = [
-        f"{player_race.race_display_name} -- {player_race.race_description}"
-        for player_race in PlayerRace().query.filter(
-            PlayerRace.race_description != ''
-        ).all()
+    races = [
+        f"{race.display_name} -- {race.description}"
+        for race in Race().query.filter(Race.is_playable != 0).all()
     ]
 
     all_faqs = {
@@ -60,9 +58,9 @@ def index():
             '<a href="'
             f"{url_for('help.help_page.single', topic='Races')}"
             '">Yes! There are '
-            f'{len(player_races)} races</a> available '
+            f'{len(races)} races</a> available '
             'to choose from, when you create a player character:',
-            player_races
+            races
         ],
 
         'Is there role-playing?': [

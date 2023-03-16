@@ -84,8 +84,8 @@
         {%- endif %}
         {%- if not player.is_immortal %}
             <ul id="player-details">
-                <li title="Name: {{ player.name | title | safe }} / Class: {{ player.common[0].player_class.class_display_name }} / Race: {{ player.common[0].player_race.race_display_name }}">
-                    {{ player.name | title | safe }} {{ player_phrase }} a {{ player.common[0].player_class.class_display }} of {{ player.common[0].player_race.race_display_name | lower }} origin.
+                <li title="Name: {{ player.name | title | safe }} / Class: {{ player.common[0].player_class.class_display_name }} / Race: {{ player.common[0].race.display_name }}">
+                    {{ player.name | title | safe }} {{ player_phrase }} a {{ player.common[0].player_class.class_display }} of {{ player.common[0].race.folk_name | lower }} origin.
                 </li>
                 <li title="Level: {{ player.common[0].level }} {%- if player.remorts > 0 %} / Remorts: {{ player.remorts }}{% endif %}">
                     {{ player_gender | title }} {{ player_phrase }} level {{ player.common[0].level }}
