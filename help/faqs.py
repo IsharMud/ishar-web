@@ -31,9 +31,9 @@ def index():
     ]
 
     # Fetch, and format, playable player races and descriptions
-    player_races = [
-        f"{player_race.display_name} -- {player_race.short_description}".replace('\\n', '')
-        for player_race in Race().query.filter(Race.is_playable==1).all()
+    races = [
+        f"{race.display_name} -- {race.description}"
+        for race in Race().query.filter(Race.is_playable != 0).all()
     ]
 
     all_faqs = {
@@ -58,9 +58,9 @@ def index():
             '<a href="'
             f"{url_for('help.help_page.single', topic='Races')}"
             '">Yes! There are '
-            f'{len(player_races)} races</a> available '
+            f'{len(races)} races</a> available '
             'to choose from, when you create a player character:',
-            player_races
+            races
         ],
 
         'Is there role-playing?': [

@@ -276,45 +276,6 @@ class PlayerClass(Base):
         return f'<PlayerClass> "{self.class_name}" ({self.class_id})'
 
 
-class Race(Base):
-    """Races available in-game, such as Elf, Gnome, Human, etc...
-        also includes enemy/mobile races"""
-    __tablename__ = 'races'
-
-    symbol = Column(String(100), server_default=text("''"))
-    display_name = Column(String(25), server_default=text("''"))
-    folk_name = Column(String(25), server_default=text("''"))
-    default_movement = Column(String(10), server_default=text("''"))
-    description = Column(String(80), server_default=text("''"))
-    default_height = Column(SMALLINT(6), server_default=text("0"))
-    default_weight = Column(SMALLINT(6), server_default=text("0"))
-    bonus_fortitude = Column(SMALLINT(6), server_default=text("0"))
-    bonus_reflex = Column(SMALLINT(6), server_default=text("0"))
-    bonus_resilience = Column(SMALLINT(6), server_default=text("0"))
-    listen_sound = Column(String(80), server_default=text("''"))
-    height_bonus = Column(SMALLINT(6), server_default=text("0"))
-    weight_bonus = Column(SMALLINT(6), server_default=text("0"))
-    short_description = Column(String(80), server_default=text("''"))
-    long_description = Column(String(512), server_default=text("''"))
-    attack_noun = Column(String(25), server_default=text("''"))
-    attack_type = Column(SMALLINT(6), server_default=text("0"))
-    vulnerabilities = Column(Text, server_default=text("''"))
-    susceptibilities = Column(Text, server_default=text("''"))
-    resistances = Column(Text, server_default=text("''"))
-    immunities = Column(Text, server_default=text("''"))
-    additional_str = Column(SMALLINT(6), server_default=text("0"))
-    additional_agi = Column(SMALLINT(6), server_default=text("0"))
-    additional_end = Column(SMALLINT(6), server_default=text("0"))
-    additional_per = Column(SMALLINT(6), server_default=text("0"))
-    additional_foc = Column(SMALLINT(6), server_default=text("0"))
-    additional_wil = Column(SMALLINT(6), server_default=text("0"))
-    race_id = Column(INTEGER(11), primary_key=True)
-    is_playable = Column(TINYINT(1), server_default=text("0"))
-
-    def __repr__(self):
-        return f'<Race> "{self.symbol}" ({self.race_id}'
-
-
 class PlayerCommon(Base):
     """Common data of players that is shared with in-game 'mobiles'"""
     __tablename__ = 'player_common'
@@ -673,6 +634,55 @@ class QuestStep(Base):
     def __repr__(self):
         return f'<QuestStep> "{self.step_type}" ({self.step_id}) / ' \
                f'{self.quest} ({self.quest_id})'
+
+
+class Race(Base):
+    """Races available when creating a player character:
+        such as Elf, Gnome, Human, etc., and their attributes"""
+    __tablename__ = 'races'
+
+    race_id = Column(INTEGER(11), primary_key=True)
+    symbol = Column(String(100), server_default=text("''"))
+    display_name = Column(String(25), server_default=text("''"))
+    folk_name = Column(String(25), server_default=text("''"))
+    default_movement = Column(String(10), server_default=text("''"))
+    description = Column(String(80), server_default=text("''"))
+    default_height = Column(SMALLINT(6), server_default=text("0"))
+    default_weight = Column(SMALLINT(6), server_default=text("0"))
+    bonus_fortitude = Column(SMALLINT(6), server_default=text("0"))
+    bonus_reflex = Column(SMALLINT(6), server_default=text("0"))
+    bonus_resilience = Column(SMALLINT(6), server_default=text("0"))
+    listen_sound = Column(String(80), server_default=text("''"))
+    height_bonus = Column(SMALLINT(6), server_default=text("0"))
+    weight_bonus = Column(SMALLINT(6), server_default=text("0"))
+    short_description = Column(String(80), server_default=text("''"))
+    long_description = Column(String(512), server_default=text("''"))
+    attack_noun = Column(String(25), server_default=text("''"))
+    attack_type = Column(SMALLINT(6), server_default=text("0"))
+    vulnerabilities = Column(Text, server_default=text("''"))
+    susceptibilities = Column(Text, server_default=text("''"))
+    resistances = Column(Text, server_default=text("''"))
+    immunities = Column(Text, server_default=text("''"))
+    additional_str = Column(SMALLINT(6), server_default=text("0"))
+    additional_agi = Column(SMALLINT(6), server_default=text("0"))
+    additional_end = Column(SMALLINT(6), server_default=text("0"))
+    additional_per = Column(SMALLINT(6), server_default=text("0"))
+    additional_foc = Column(SMALLINT(6), server_default=text("0"))
+    additional_wil = Column(SMALLINT(6), server_default=text("0"))
+    is_playable = Column(TINYINT(1), server_default=text("0"))
+    is_humanoid = Column(TINYINT(1), nullable=False, server_default=text("1"))
+    is_invertebrae = Column(TINYINT(1), nullable=False, server_default=text("0"))
+    is_flying = Column(TINYINT(1), nullable=False, server_default=text("0"))
+    is_swimming = Column(TINYINT(1), nullable=False, server_default=text("0"))
+    darkvision = Column(TINYINT(4), nullable=False, server_default=text("0"))
+    see_invis = Column(TINYINT(1), nullable=False, server_default=text("0"))
+    is_walking = Column(TINYINT(1), nullable=False, server_default=text("1"))
+    endure_heat = Column(TINYINT(1), nullable=False, server_default=text("0"))
+    endure_cold = Column(TINYINT(1), nullable=False, server_default=text("0"))
+    is_undead = Column(TINYINT(1), nullable=False, server_default=text("0"))
+
+    def __repr__(self):
+        return f'<Race> "{self.display_name}" ("{self.symbol}") {self.race_id}'
 
 
 class RemortUpgrade(Base):
