@@ -1,5 +1,5 @@
 """Patches"""
-from flask import Blueprint, redirect, render_template, url_for
+from flask import Blueprint, render_template
 
 from patches.util import get_patch_pdfs, get_patch_pdf
 
