@@ -50,15 +50,15 @@ def injects():
     """Add context processor for certain variables on all pages"""
     sentry_dsn = os.getenv('SENTRY_DSN')
     sentry_uri = urlparse(sentry_dsn)
-    return dict(
-        current_season=Season.query.filter_by(is_active=1).order_by(
+    return {
+        'current_season': Season.query.filter_by(is_active=1).order_by(
             -Season.season_id
         ).first(),
-        global_event_count=GlobalEvent.query.count(),
-        sentry_dsn=sentry_dsn,
-        sentry_user=sentry_uri.username,
-        sentry_event_id=sentry_sdk.last_event_id()
-    )
+        'global_event_count': GlobalEvent.query.count(),
+        'sentry_dsn': sentry_dsn,
+        'sentry_user': sentry_uri.username,
+        'sentry_event_id': sentry_sdk.last_event_id()
+    }
 
 
 @app.teardown_appcontext
