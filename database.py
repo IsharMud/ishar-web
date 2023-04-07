@@ -3,12 +3,12 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import scoped_session, sessionmaker
 
-import database_secret
+from config import SQLALCHEMY_ECHO, SQLALCHEMY_URL
 
 
 engine = create_engine(
-    url=database_secret.URL,
-    echo=database_secret.ECHO,
+    url=SQLALCHEMY_URL,
+    echo=SQLALCHEMY_ECHO,
     pool_pre_ping=True
 )
 

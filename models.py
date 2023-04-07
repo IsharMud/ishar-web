@@ -6,11 +6,12 @@ from flask import url_for
 from flask_login import current_user, UserMixin
 from passlib.hash import md5_crypt
 
-from sqlalchemy import Column, ForeignKey, Index, String, Table, TIMESTAMP, Text, text
+from sqlalchemy import Column, ForeignKey, Index, String, Table, TIMESTAMP, \
+    Text, text
 from sqlalchemy.dialects.mysql import INTEGER, MEDIUMINT, SMALLINT, TINYINT
 from sqlalchemy.orm import backref, relationship
 
-from mud_secret import ALIGNMENTS, IMM_LEVELS, PODIR
+from config import ALIGNMENTS, IMM_LEVELS, MUD_PODIR
 from delta import stringify
 from database import Base, db_session, metadata
 
@@ -68,6 +69,46 @@ class Account(Base, UserMixin):
         """Boolean whether user is a God"""
         for player in self.players:
             if player.is_god:
+                return True
+        return False
+
+    @cached_property
+    def is_artisan(self):
+        """Boolean whether user is an Artisan (or above)"""
+        for player in self.players:
+            if player.is_artisan:
+                return True
+        return False
+
+    @cached_property
+    def is_consort(self):
+        """Boolean whether user is a Consort (or above)"""
+        for player in self.players:
+            if player.is_consort:
+                return True
+        return False
+
+    @cached_property
+    def is_eternal(self):
+        """Boolean whether user is an Eternal (or above)"""
+        for player in self.players:
+            if player.is_eternal:
+                return True
+        return False
+
+    @cached_property
+    def is_forger(self):
+        """Boolean whether user is a Forger (or above)"""
+        for player in self.players:
+            if player.is_forger:
+                return True
+        return False
+
+    @cached_property
+    def is_immortal(self):
+        """Boolean whether user is immortal (or above, but not consort)"""
+        for player in self.players:
+            if player.is_immortal:
                 return True
         return False
 
@@ -401,15 +442,47 @@ class Player(Base):
     @cached_property
     def is_god(self):
         """Boolean whether player is a God"""
-        if self.true_level >= max(IMM_LEVELS):
-            return True
-        return False
+        return self.is_immortal_type(immortal_type='God')
+
+    @cached_property
+    def is_artisan(self):
+        """Boolean whether player is an Artisan (or above)"""
+        return self.is_immortal_type('Artisan')
+
+    @cached_property
+    def is_consort(self):
+        """Boolean whether player is a Consort (or above)"""
+        return self.is_immortal_type(immortal_type='Consort')
+
+    @cached_property
+    def is_eternal(self):
+        """Boolean whether player is an Eternal (or above)"""
+        return self.is_immortal_type('Eternal')
+
+    @cached_property
+    def is_forger(self):
+        """Boolean whether player is a Forger (or above)"""
+        return self.is_immortal_type('Forger')
 
     @cached_property
     def is_immortal(self):
-        """Boolean whether player is an immortal"""
+        """Boolean whether player is immortal (or above, but not consort)"""
+        return self.is_immortal_type(immortal_type='Immortal')
+
+    @cached_property
+    def immortal_type(self):
+        """Immortal type"""
+        if self.true_level in IMM_LEVELS.keys():
+            return IMM_LEVELS[self.true_level]
+        return None
+
+    def is_immortal_type(self, immortal_type='Immortal'):
+        """Boolean whether player is a specific immortal type (or above)"""
+        IMM_TYPES = {imm_type: level for level, imm_type in IMM_LEVELS.items()}
         if self.true_level >= min(IMM_LEVELS):
-            return True
+            if self.immortal_type in IMM_TYPES.keys():
+                if self.true_level >= IMM_TYPES[immortal_type]:
+                    return True
         return False
 
     @cached_property
@@ -448,7 +521,8 @@ class Player(Base):
             if self.is_immortal:
                 return stats
 
-            #   - Mortal players below level five (5), with less than one (1) hour of play-time
+            #   - Mortal players below level five (5),
+            #       with less than one (1) hour of play-time
             if self.true_level < 5 and self.online < 3600:
                 return stats
 
@@ -485,9 +559,12 @@ class Player(Base):
 
     @cached_property
     def player_type(self):
-        """Player type - returns string, one of:
-            an immortal description (one of mud_secret.IMM_LEVELS), or
-            Dead, Survival, or Classic"""
+        """
+        Player type (string), returns one of:
+            - An immortal type
+                * one of config.IMM_LEVELS dictionary values
+            - Dead, Survival, or Classic
+        """
         if self.is_immortal:
             return IMM_LEVELS[self.true_level]
         if self.is_deleted == 1:
@@ -498,8 +575,8 @@ class Player(Base):
 
     @cached_property
     def podir(self):
-        """Player Podir"""
-        return (f'{PODIR}/{self.name}')
+        """Player podir"""
+        return (f'{MUD_PODIR}/{self.name}')
 
     @property
     def seasonal_earned(self):

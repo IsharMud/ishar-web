@@ -1,6 +1,6 @@
 """Admin Players"""
 from flask import abort, Blueprint, flash, render_template
-from flask_login import current_user
+from flask_login import current_user, fresh_login_required
 
 from database import db_session
 from forms import EditPlayerForm
@@ -15,6 +15,15 @@ admin_players_bp = Blueprint(
     url_prefix='players',
     template_folder='templates/accounts'
 )
+
+
+@admin_players_bp.before_request
+@fresh_login_required
+def before_request():
+    """Only Gods can access /admin/players"""
+    if not current_user.is_god:
+        flash('Sorry, but you are not godly enough (Gods only)!', 'error')
+        abort(401)
 
 
 @admin_players_bp.route('/edit/<int:edit_player_id>/', methods=['GET', 'POST'])

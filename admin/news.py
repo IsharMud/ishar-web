@@ -2,7 +2,7 @@
 from datetime import datetime
 
 from flask import abort, Blueprint, flash, render_template, url_for
-from flask_login import current_user
+from flask_login import current_user, fresh_login_required
 
 from database import db_session
 from forms import NewsAddForm
@@ -17,6 +17,15 @@ admin_news_bp = Blueprint(
     url_prefix='news',
     template_folder='templates/news'
 )
+
+
+@admin_news_bp.before_request
+@fresh_login_required
+def before_request():
+    """Only Gods can access /admin/news"""
+    if not current_user.is_god:
+        flash('Sorry, but you are not godly enough (Gods only)!', 'error')
+        abort(401)
 
 
 @admin_news_bp.route('/', methods=['GET', 'POST'])

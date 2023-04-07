@@ -9,7 +9,7 @@ from wtforms import BooleanField, DateTimeLocalField, EmailField, IntegerField,\
 from wtforms.validators import DataRequired, Email, EqualTo, Length, NumberRange
 from wtforms_validators import Alpha, AlphaSpace
 
-from mud_secret import ALIGNMENTS
+from config import ALIGNMENTS
 
 
 class ChangePasswordForm(FlaskForm):

@@ -1,7 +1,7 @@
 """Leaders"""
 from flask import Blueprint, render_template
 
-from mud_secret import IMM_LEVELS
+from config import IMM_LEVELS
 from models import Player
 
 from leaders.classic import classic
@@ -33,7 +33,8 @@ def index():
     """Sort and list the best players"""
     return render_template(
         'leaders.html.j2',
-        leader_players=Player.query.filter(Player.true_level < min(IMM_LEVELS))
+        leader_players=Player.query.filter(
+            Player.true_level < min(IMM_LEVELS))
         .order_by(
             -Player.remorts, -Player.total_renown, -Player.quests_completed,
             -Player.challenges_completed, Player.deaths

@@ -1,7 +1,7 @@
 """Main page and pages accessible to all"""
 from flask import Blueprint, redirect, render_template
 
-from mud_secret import IMM_LEVELS
+from config import IMM_LEVELS
 from models import GlobalEvent, News, Player
 
 

@@ -4,7 +4,7 @@ import os
 from datetime import date
 from PyPDF2 import PdfFileReader
 
-from mud_secret import PATCH_DIR
+from config import PATCH_DIR
 
 
 def sizeof_fmt(num=None, suffix='B'):

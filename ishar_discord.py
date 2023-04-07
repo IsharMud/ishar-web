@@ -7,7 +7,7 @@ import signal
 import sys
 import interactions
 
-import discord_secret
+from config import DISCORD
 from database import db_session
 from help.helptab import search_help_topics
 from models import Challenge, GlobalEvent, Player, Season
@@ -28,8 +28,8 @@ logging.basicConfig(
 
 # Connect/authenticate Ishar MUD Discord bot
 bot = interactions.Client(
-    token=discord_secret.TOKEN,
-    default_scope=discord_secret.GUILD
+    token=DISCORD['TOKEN'],
+    default_scope=DISCORD['GUILD']
 )
 
 

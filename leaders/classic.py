@@ -1,7 +1,7 @@
 """Classic Leaders"""
 from flask import render_template
 
-from mud_secret import IMM_LEVELS
+from config import IMM_LEVELS
 from models import Player
 
 

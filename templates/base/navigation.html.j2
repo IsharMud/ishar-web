@@ -20,7 +20,7 @@
             </ul>
 {%- if current_user and current_user.is_authenticated and current_user.display_name %}
             <ul>
-    {%- if current_user.is_god %}
+    {%- if current_user.is_eternal %}
                 <li title="Admin">
                     <a href="{{ url_for('admin.index') }}" {%- if page == 'admin' %} id="active-nav"{% endif%}>Admin</a>
                 </li>

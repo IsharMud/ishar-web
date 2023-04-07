@@ -1,5 +1,6 @@
 """Admin Events"""
 from flask import abort, Blueprint, flash, render_template, url_for
+from flask_login import current_user, fresh_login_required
 
 from database import db_session
 from forms import EventAddForm
@@ -13,6 +14,15 @@ admin_events_bp = Blueprint(
     url_prefix='events',
     template_folder='templates/events'
 )
+
+
+@admin_events_bp.before_request
+@fresh_login_required
+def before_request():
+    """Only Gods can access /admin/events"""
+    if not current_user.is_god:
+        flash('Sorry, but you are not godly enough (Gods only)!', 'error')
+        abort(401)
 
 
 @admin_events_bp.route('/', methods=['GET', 'POST'])

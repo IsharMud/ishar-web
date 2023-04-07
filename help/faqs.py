@@ -80,10 +80,9 @@ def index():
         ],
 
         'Is death permanent?': [
-            '<strong>You can choose</strong> whether to play in "Survival" '
-            '(aka &quot;<a href="'
-            f"{url_for('help.help_page.single', topic='Permadeath')}"
-            '" title="Permadeath">perma-death</a>&quot;) or "Classic" mode, '
+            '<strong>You can choose</strong> your <a href="'
+            f"{url_for('help.help_page.single', topic='Game Types')}"
+            '" title="game type">game type</a> ("Survival" or "Classic" mode) '
             'each time you create a player character.', 'While survival mode '
             'gains experience faster, classic mode subtracts experience upon '
             "death, but allows you to retrieve your character's corpse."

@@ -25,9 +25,12 @@ admin_bp.register_blueprint(admin_seasons_bp)
 @admin_bp.before_request
 @fresh_login_required
 def before_request():
-    """Only Gods can access /admin"""
-    if not current_user.is_god:
-        flash('Sorry, but you are not godly enough!', 'error')
+    """Only Eternals and above can access /admin"""
+    if not current_user.is_eternal:
+        flash(
+            'Sorry, but you are not godly enough (Eternals and above only)!',
+            'error'
+        )
         abort(401)
 
 

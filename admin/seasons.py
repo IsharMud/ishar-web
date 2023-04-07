@@ -2,9 +2,10 @@
 import os
 from datetime import datetime
 
-from flask import Blueprint, flash, render_template
+from flask import abort, Blueprint, flash, render_template
+from flask_login import current_user, fresh_login_required
 
-from mud_secret import IMM_LEVELS
+from config import IMM_LEVELS
 from database import db_session
 from forms import SeasonCycleForm
 from models import Account, Player, Season
@@ -18,6 +19,15 @@ admin_seasons_bp = Blueprint(
     url_prefix='seasons',
     template_folder='templates/seasons'
 )
+
+
+@admin_seasons_bp.before_request
+@fresh_login_required
+def before_request():
+    """Only Gods can access /admin/seasons"""
+    if not current_user.is_god:
+        flash('Sorry, but you are not godly enough (Gods only)!', 'error')
+        abort(401)
 
 
 @admin_seasons_bp.route('/', methods=['GET'])

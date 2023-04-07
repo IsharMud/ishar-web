@@ -2,9 +2,10 @@
 import os
 
 from flask import abort, Blueprint, flash, render_template, url_for
+from flask_login import current_user, fresh_login_required
 from werkzeug.utils import secure_filename
 
-from mud_secret import PATCH_DIR
+from config import PATCH_DIR
 from forms import PatchAddForm
 from patches.util import get_patch_pdfs
 
@@ -16,6 +17,15 @@ admin_patches_bp = Blueprint(
     url_prefix='patches',
     template_folder='templates/patches'
 )
+
+
+@admin_patches_bp.before_request
+@fresh_login_required
+def before_request():
+    """Only Gods can access /admin/patches"""
+    if not current_user.is_god:
+        flash('Sorry, but you are not godly enough (Gods only)!', 'error')
+        abort(401)
 
 
 @admin_patches_bp.route('/', methods=['GET', 'POST'])

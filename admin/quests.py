@@ -1,5 +1,6 @@
 """Admin Quests"""
 from flask import abort, Blueprint, flash, render_template, url_for
+from flask_login import current_user, fresh_login_required
 
 from database import db_session
 from forms import QuestForm
@@ -15,6 +16,18 @@ admin_quests_bp = Blueprint(
 )
 
 
+@admin_quests_bp.before_request
+@fresh_login_required
+def before_request():
+    """Only Eternals and above can access /admin/quests"""
+    if not current_user.is_eternal:
+        flash(
+            'Sorry, but you are not godly enough (Eternals and above only)!',
+            'error'
+        )
+        abort(401)
+
+
 @admin_quests_bp.route('/', methods=['GET', 'POST'])
 def index():
     """Administration portal to allow Gods to manage quests
@@ -24,7 +37,9 @@ def index():
     add_quest_form = QuestForm()
 
     # Retrieve playable player class names for form choices
-    playable_classes = PlayerClass().query.filter(PlayerClass.class_description != '').all()
+    playable_classes = PlayerClass().query.filter(
+        PlayerClass.class_description != ''
+    ).all()
     for playable_class in playable_classes:
         add_quest_form.class_restrict.choices.append(
             (playable_class.class_id, playable_class.class_display_name)
@@ -48,8 +63,12 @@ def index():
         )
         db_session.add(new_quest)
         db_session.commit()
-        edit_url = url_for('.edit', edit_quest_id=new_quest.quest_id)
-        flash(f'The quest was added! You can <a href="{edit_url}">edit it here</a>.', 'success')
+        flash(
+            'The quest was added! You can <a href="'
+            f"{url_for('.edit', edit_quest_id=new_quest.quest_id)}"
+            '">edit it here</a>.',
+            'success'
+        )
 
     # Show the form to manage quests in the administration portal
     return render_template(
