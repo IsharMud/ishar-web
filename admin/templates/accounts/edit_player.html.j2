@@ -2,9 +2,9 @@
 {% extends "base/layout.html.j2" %}
 {%- block meta_title %}Edit Player: {{ edit_player.name | title | safe }} / Administration Portal{%- endblock meta_title %}
 {%- block meta_description %}Administration portal to edit a player character{%- endblock meta_description %}
-{%- block meta_url -%}{{- url_for('.edit', edit_player_id=edit_player.id, _external=True) -}}{%- endblock meta_url %}
+{%- block meta_url -%}{{ url_for('.edit', edit_player_id=edit_player.id, _external=True) -}}{%- endblock meta_url %}
 {%- block title -%}Edit Player: {{ edit_player.name | title | safe }} / Administration Portal{%- endblock title -%}
-{%- block header -%}<a href="{{ url_for('..index') }}">Edit Player</a>: <span class="{{ edit_player.player_css }}">{{ edit_player.name }}</span>{%- endblock header -%}
+{%- block header -%}<a href="{{ url_for('.edit', edit_player_id=edit_player.id) }}">Edit Player</a>: <span class="{{ edit_player.player_css }}">{{ edit_player.name }}</span>{%- endblock header -%}
 {%- macro render_field(field) %}
                     <tr>
                         <td class="admin-{{ field.name | safe }}">
@@ -39,9 +39,9 @@
                             </td>
                         </tr>
                         {{ render_field(edit_player_form.name, value=edit_player.name) }}
-                        {{ render_field(edit_player_form.alignment, value=edit_player.common.alignment) }}
-                        {{ render_field(edit_player_form.gold, value=edit_player.common.gold) }}
-                        {{ render_field(edit_player_form.karma, value=edit_player.common.karma) }}
+                        {{ render_field(edit_player_form.alignment, value=edit_player.common[0].alignment) }}
+                        {{ render_field(edit_player_form.gold, value=edit_player.common[0].gold) }}
+                        {{ render_field(edit_player_form.karma, value=edit_player.common[0].karma) }}
                         {{ render_field(edit_player_form.renown, value=edit_player.renown) }}
         {%- set checked = False %}
         {%- if edit_player.is_deleted == 1 %}{% set checked = True %}{%- endif %}
