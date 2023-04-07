@@ -523,7 +523,7 @@ class Player(Base):
 
     def __repr__(self):
         return (f'<Player> "{self.name}" ({self.id}) / '
-                f'Type: {self.player_type}" / True Level: {self.true_level}')
+                f'Type: {self.player_type} / True Level: {self.true_level}')
 
 
 class PlayerRemortUpgrade(Base):
