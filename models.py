@@ -479,7 +479,7 @@ class Player(Base):
     def is_immortal_type(self, immortal_type='Immortal'):
         """Boolean whether player is a specific immortal type (or above)"""
         IMM_TYPES = {imm_type: level for level, imm_type in IMM_LEVELS.items()}
-        if self.true_level >= min(IMM_LEVELS):
+        if self.immortal_type:
             if self.immortal_type in IMM_TYPES.keys():
                 if self.true_level >= IMM_TYPES[immortal_type]:
                     return True
@@ -565,8 +565,8 @@ class Player(Base):
                 * one of config.IMM_LEVELS dictionary values
             - Dead, Survival, or Classic
         """
-        if self.is_immortal:
-            return IMM_LEVELS[self.true_level]
+        if self.immortal_type:
+            return self.immortal_type
         if self.is_deleted == 1:
             return 'Dead'
         if self.is_survival:
