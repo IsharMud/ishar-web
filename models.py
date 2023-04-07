@@ -93,7 +93,7 @@ class Account(Base, UserMixin):
         return earned
 
     def __repr__(self):
-        return f'<Account> "{self.account_name}" ({self.account_id})'
+        return (f'<Account> "{self.account_name}" ({self.account_id})')
 
 
 class AccountUpgrade(Base):
@@ -109,8 +109,8 @@ class AccountUpgrade(Base):
     is_disabled = Column(TINYINT(1), nullable=False, server_default=text("0"))
 
     def __repr__(self):
-        return f'<AccountUpgrade> "{self.name}" ({self.id}) / ' \
-               f'Cost: {self.cost} / Max Value: {self.max_value}'
+        return (f'<AccountUpgrade> "{self.name}" ({self.id}) / '
+                f'Cost: {self.cost} / Max: {self.max_value}')
 
 
 class AccountsUpgrade(Base):
@@ -125,10 +125,8 @@ class AccountsUpgrade(Base):
     upgrade = relationship('AccountUpgrade')
 
     def __repr__(self):
-        return f'<AccountsUpgrade> "{self.upgrade.name}" ' \
-               f'({self.account_upgrades_id}) @ ' \
-               f'<Account> "{self.account.account_name}" ({self.account_id})' \
-               f' / Amount: {self.amount}'
+        return (f'<AccountsUpgrade> {self.upgrade} : {self.amount} @'
+                f'{self.account}')
 
 
 class Challenge(Base):
@@ -163,12 +161,12 @@ class Challenge(Base):
             4: 'B', 5: 'A', 6: 'S',
             7: 'SS', 8: 'SS', 9: 'SS'
         }
-        return f'{tiers[self.adj_tier]} ({tiers[self.orig_tier]})'
+        return (f'{tiers[self.adj_tier]} ({tiers[self.orig_tier]})')
 
     def __repr__(self):
-        return f'<Challenge> "{self.mob_name}" ({self.challenge_id}) / ' \
-               f'Active: {self.is_active} / Tier: "{self.display_tier}" / ' \
-               f'winner_desc: "{self.winner_desc}"'
+        return (f'<Challenge> "{self.mob_name}" ({self.challenge_id}) / '
+                f'Active: {self.is_active} / Tier: "{self.display_tier}" / '
+                f'Winner: "{self.winner_desc}"')
 
 
 class GlobalEvent(Base):
@@ -216,12 +214,12 @@ class GlobalEvent(Base):
         return False
 
     def __repr__(self):
-        return '<GlobalEvent> / ' \
-               f'Type: "{self.event_type}" / ' \
-               f'Name: "{self.event_name}" ("{self.display_name}") / ' \
-               f'Desc: "{self.event_desc}" / ' \
-               f'Start: "{self.start_time}" ("{self.start}") / ' \
-               f'End: "{self.end_time}" ("{self.end}")'
+        return ('<GlobalEvent> / '
+                f'Type: "{self.event_type}" / '
+                f'Name: "{self.event_name}" ("{self.display_name}") / '
+                f'Desc: "{self.event_desc}" / '
+                f'Start: "{self.start_time}" ("{self.start}") / '
+                f'End: "{self.end_time}" ("{self.end}")')
 
 
 class News(Base):
@@ -237,8 +235,8 @@ class News(Base):
     account = relationship('Account')
 
     def __repr__(self):
-        return f'<News> "{self.subject}" ({self.news_id}) @ ' \
-               f'"{self.created_at}"'
+        return (f'<News> "{self.subject}" ({self.news_id}) @ '
+                f'{self.created_at} by {self.account}')
 
 
 class PlayerClass(Base):
@@ -273,7 +271,7 @@ class PlayerClass(Base):
         return ['Agility', 'Endurance', 'Focus', 'Perception', 'Strength', 'Willpower']
 
     def __repr__(self):
-        return f'<PlayerClass> "{self.class_name}" ({self.class_id})'
+        return (f'<PlayerClass> "{self.class_name}" ({self.class_id})')
 
 
 class PlayerCommon(Base):
@@ -313,9 +311,20 @@ class PlayerCommon(Base):
     gold = Column(MEDIUMINT(9), nullable=False)
     karma = Column(MEDIUMINT(9), nullable=False)
 
-    player = relationship('Player', backref=backref('common', cascade='all, delete-orphan'))
+    player = relationship(
+        'Player',
+        backref=backref(
+            'common',
+            cascade='all, delete-orphan',
+            uselist=False
+        )
+    )
     player_class = relationship('PlayerClass')
     race = relationship('Race')
+
+    def __repr__(self):
+        return (f'<PlayerCommon> {self.player} / {self.player_class} / '
+                f'{self.race}')
 
 
 class Player(Base):
@@ -414,14 +423,14 @@ class Player(Base):
     def player_alignment(self):
         """Player alignment"""
         for align_text, (low, high) in ALIGNMENTS.items():
-            if low <= self.common[0].alignment <= high:
+            if low <= self.common.alignment <= high:
                 return align_text
         return 'Unknown'
 
     @cached_property
     def player_css(self):
         """Player CSS class"""
-        return f'{self.player_type}'.lower() + '-player'
+        return (f'{self.player_type.lower()}-player')
 
     @cached_property
     def player_stats(self):
@@ -445,22 +454,29 @@ class Player(Base):
 
         # Get the players stats
         players_stats = {
-            'Agility': self.common[0].agility, 'Endurance': self.common[0].endurance,
-            'Focus': self.common[0].focus, 'Perception': self.common[0].perception,
-            'Strength': self.common[0].strength, 'Willpower': self.common[0].willpower
+            'Agility': self.common.agility,
+            'Endurance': self.common.endurance,
+            'Focus': self.common.focus,
+            'Perception': self.common.perception,
+            'Strength': self.common.strength,
+            'Willpower': self.common.willpower
         }
 
         # Put the players stats in the appropriate order,
         #   based on their class, and return them
-        for stat_order in self.common[0].player_class.stats_order:
+        for stat_order in self.common.player_class.stats_order:
             stats[stat_order] = players_stats[stat_order]
         return stats
 
     @cached_property
     def player_link(self):
         """Player link"""
-        url = url_for('portal.view_player', player_name=self.name, _anchor='player')
-        return f'<a href="{url}">{self.name}</a>'
+        url = url_for(
+            'portal.view_player',
+            player_name=self.name,
+            _anchor='player'
+        )
+        return (f'<a href="{url}">{self.name}</a>')
 
     @cached_property
     def player_title(self):
@@ -483,7 +499,7 @@ class Player(Base):
     @cached_property
     def podir(self):
         """Player Podir"""
-        return f'{PODIR}/{self.name}'
+        return (f'{PODIR}/{self.name}')
 
     @property
     def seasonal_earned(self):
@@ -505,6 +521,10 @@ class Player(Base):
             earned += int(self.remorts / 5) * 3 + 1
         return earned
 
+    def __repr__(self):
+        return (f'<Player> "{self.name}" ({self.id}) / '
+                f'Type: {self.player_type}" / True Level: {self.true_level}')
+
 
 class PlayerRemortUpgrade(Base):
     """Remort upgrades that player characters have"""
@@ -519,9 +539,9 @@ class PlayerRemortUpgrade(Base):
     remort_upgrade = relationship('RemortUpgrade')
 
     def __repr__(self):
-        return f'<PlayerRemortUpgrade> "{self.remort_upgrade.name}" ' \
-               f'({self.upgrade_id}) @ <Player> "{self.player.name}" ' \
-               f'({self.player_id}) / Value: {self.value}'
+        return (f'<PlayerRemortUpgrade> "{self.remort_upgrade}" '
+                f'({self.upgrade_id}) : {self.value} ({self.essence_perk}) @ '
+                f'{self.player}')
 
 
 # Associate quests with pre-reqs
@@ -549,7 +569,7 @@ class PlayerQuest(Base):
     quest = relationship('Quest')
 
     def __repr__(self):
-        return f'<PlayerQuest> Player: {self.player}) / Quest: {self.quest}'
+        return (f'<PlayerQuest> {self.player} @ {self.quest}')
 
 
 class PlayerQuestStep(Base):
@@ -564,8 +584,7 @@ class PlayerQuestStep(Base):
     step = relationship('QuestStep')
 
     def __repr__(self):
-        return f'<PlayerQuestStep> Player: {self.player}) / ' \
-               f'Step: {self.step}'
+        return (f'<PlayerQuestStep> {self.player} @ {self.step}')
 
 
 class Quest(Base):
@@ -591,15 +610,13 @@ class Quest(Base):
         primaryjoin='Quest.quest_id == quest_prereqs.c.quest_id',
         secondaryjoin='Quest.quest_id == quest_prereqs.c.required_quest'
     )
+
     restricted_class = relationship('PlayerClass')
 
-    @property
-    def class_restrict_display_name(self):
-        return self.restricted_class.class_display_name
-
     def __repr__(self):
-        return f'<Quest> "{self.name}" ({self.quest_id}) / ' \
-               f'Level: Min {self.min_level} - Max {self.max_level}'
+        return (f'<Quest> "{self.name}" ({self.quest_id}) / '
+                f'Levels: {self.min_level} - {self.max_level} / '
+                f'Parents: {self.parents} / Class: {self.restricted_class}')
 
 
 class QuestReward(Base):
@@ -613,8 +630,9 @@ class QuestReward(Base):
     quest = relationship('Quest')
 
     def __repr__(self):
-        return f'<QuestReward> "{self.reward_num}" ({self.reward_type}) / ' \
-               f'{self.quest} ({self.quest_id})'
+        return (f'<QuestReward> "{self.reward_num}" ({self.reward_type}) @ '
+                f'{self.quest}')
+
 
 class QuestStep(Base):
     """Steps of a quest"""
@@ -632,8 +650,8 @@ class QuestStep(Base):
     quest = relationship('Quest')
 
     def __repr__(self):
-        return f'<QuestStep> "{self.step_type}" ({self.step_id}) / ' \
-               f'{self.quest} ({self.quest_id})'
+        return (f'<QuestStep> "{self.step_type}" ({self.step_id}) @ '
+                f'{self.quest})')
 
 
 class Race(Base):
@@ -682,7 +700,8 @@ class Race(Base):
     is_undead = Column(TINYINT(1), nullable=False, server_default=text("0"))
 
     def __repr__(self):
-        return f'<Race> "{self.display_name}" ("{self.symbol}") {self.race_id}'
+        return (f'<Race> "{self.display_name}" ({self.symbol} : '
+                f'({self.race_id})')
 
 
 class RemortUpgrade(Base):
@@ -701,8 +720,7 @@ class RemortUpgrade(Base):
     survival_renown_cost = Column(TINYINT(4), nullable=False)
 
     def __repr__(self):
-        return f'<RemortUpgrade> "{self.name}" ({self.upgrade_id}) / ' \
-               f'Cost: {self.renown_cost} / Max: {self.max_value}'
+        return (f'<RemortUpgrade> "{self.display_name}" ({self.upgrade_id})')
 
 
 class Season(Base):
@@ -725,6 +743,6 @@ class Season(Base):
         return stringify(self.expiration_date - datetime.utcnow())
 
     def __repr__(self):
-        return f'<Season> ID {self.season_id} / Active: {self.is_active} / ' \
-               f'Effective: {self.effective_date} ("{self.effective}") - ' \
-               f'Expires: {self.expiration_date} ("{self.expires}")'
+        return (f'<Season> {self.season_id} / Active: {self.is_active} / '
+                f'{self.effective_date} ({self.effective}) - '
+                f'{self.expiration_date} ({self.expires})')

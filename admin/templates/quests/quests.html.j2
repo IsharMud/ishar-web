@@ -73,7 +73,7 @@
                             repeatable:     {{ quest.repeatable }},
                             min_level:      {{ quest.min_level }},
                             max_level:      {{ quest.max_level }},
-                            class_restrict: "{{ quest.class_restrict_display_name }}",
+                            class_restrict: "{{ quest.restricted_class.class_display_name }}",
                             delete:         gridjs.html(`<a href="{{ url_for('.delete', delete_quest_id=quest.quest_id) }}" onclick="return confirm('Are you sure you want to delete this quest?');">❌</a>`)
                         }{% if not loop.last %},{% endif %}
                       {%- endfor %}

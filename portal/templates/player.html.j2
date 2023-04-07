@@ -16,10 +16,10 @@
     {%- set player_phrase = 'is' %}
     {%- set player_phrase_own = 'are' %}
     {%- set player_phrase_owns = 'has' %}
-    {%- if player.common[0].sex == 1 %}
+    {%- if player.common.sex == 1 %}
         {%- set player_gender = 'he' %}
         {%- set player_gender_own = 'his' %}
-    {%- elif player.common[0].sex == 2 %}
+    {%- elif player.common.sex == 2 %}
         {%- set player_gender = 'she' %}
         {%- set player_gender_own = 'her' %}
     {%- else %}
@@ -84,11 +84,11 @@
         {%- endif %}
         {%- if not player.is_immortal %}
             <ul id="player-details">
-                <li title="Name: {{ player.name | title | safe }} / Class: {{ player.common[0].player_class.class_display_name }} / Race: {{ player.common[0].race.display_name }}">
-                    {{ player.name | title | safe }} {{ player_phrase }} a {{ player.common[0].player_class.class_display }} of {{ player.common[0].race.folk_name | lower }} origin.
+                <li title="Name: {{ player.name | title | safe }} / Class: {{ player.common.player_class.class_display_name }} / Race: {{ player.common.race.display_name }}">
+                    {{ player.name | title | safe }} {{ player_phrase }} a {{ player.common.player_class.class_display }} of {{ player.common.race.folk_name | lower }} origin.
                 </li>
-                <li title="Level: {{ player.common[0].level }} {%- if player.remorts > 0 %} / Remorts: {{ player.remorts }}{% endif %}">
-                    {{ player_gender | title }} {{ player_phrase }} level {{ player.common[0].level }}
+                <li title="Level: {{ player.common.level }} {%- if player.remorts > 0 %} / Remorts: {{ player.remorts }}{% endif %}">
+                    {{ player_gender | title }} {{ player_phrase }} level {{ player.common.level }}
             {%- if player.remorts > 0 %}
                     and {{ player_phrase_owns }} remorted {{ player.remorts }} time{%- if player.remorts != 1 %}s{% endif %}
             {%- endif %}.
@@ -110,7 +110,7 @@
                     {%- if player.challenges_completed != 1 %}s{% endif %}.
                 </li>
             {%- endif %}
-                <li title="Alignment: {{ player.player_alignment }} ({{ player.common[0].alignment }})">
+                <li title="Alignment: {{ player.player_alignment }} ({{ player.common.alignment }})">
                     {{ player_gender_own | title }} alignment {{ player_phrase }} {{ player.player_alignment }}.
                 </li>
                 <li title="{%- if player.player_type == 'Classic' %}Deaths: {{ player.deaths }}{% elif player.player_type == 'Dead' %}{{ player.name | title | safe }} is DEAD!{% else %}{{ player.name | title | safe }} is a {{ player.player_type }} player!{% endif %}">

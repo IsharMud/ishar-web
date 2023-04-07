@@ -39,9 +39,9 @@
                             </td>
                         </tr>
                         {{ render_field(edit_player_form.name, value=edit_player.name) }}
-                        {{ render_field(edit_player_form.alignment, value=edit_player.common[0].alignment) }}
-                        {{ render_field(edit_player_form.gold, value=edit_player.common[0].gold) }}
-                        {{ render_field(edit_player_form.karma, value=edit_player.common[0].karma) }}
+                        {{ render_field(edit_player_form.alignment, value=edit_player.common.alignment) }}
+                        {{ render_field(edit_player_form.gold, value=edit_player.common.gold) }}
+                        {{ render_field(edit_player_form.karma, value=edit_player.common.karma) }}
                         {{ render_field(edit_player_form.renown, value=edit_player.renown) }}
         {%- set checked = False %}
         {%- if edit_player.is_deleted == 1 %}{% set checked = True %}{%- endif %}
