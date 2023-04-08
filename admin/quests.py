@@ -4,7 +4,7 @@ from flask_login import current_user, fresh_login_required
 
 from database import db_session
 from forms import QuestForm
-from models import PlayerClass, Quest
+from models import Class, Quest
 
 
 # Flask Blueprint
@@ -37,8 +37,8 @@ def index():
     add_quest_form = QuestForm()
 
     # Retrieve playable player class names for form choices
-    playable_classes = PlayerClass().query.filter(
-        PlayerClass.class_description != ''
+    playable_classes = Class().query.filter(
+        Class.class_description != ''
     ).all()
     for playable_class in playable_classes:
         add_quest_form.class_restrict.choices.append(
@@ -92,10 +92,10 @@ def edit(edit_quest_id=None):
     edit_quest_form = QuestForm()
 
     # Retrieve playable player class names for form choices
-    playable_classes = PlayerClass().query.filter(PlayerClass.class_description != '').all()
-    for playable_class in playable_classes:
+    player_classes = Class().query.filter(Class.class_description != '').all()
+    for player_class in player_classes:
         edit_quest_form.class_restrict.choices.append(
-            (playable_class.class_id, playable_class.class_display_name)
+            (player_class.class_id, player_class.class_display_name)
         )
     edit_quest_form.class_restrict.default = edit_quest.class_restrict
 
@@ -132,7 +132,11 @@ def delete(delete_quest_id=None):
 
     Quest.query.filter_by(quest_id=delete_quest.quest_id).delete()
     db_session.commit()
-    flash(f'The quest ({delete_quest.name} [ID: {delete_quest.quest_id}]) was deleted.', 'success')
+    flash(
+        f'The quest ({delete_quest.name} [ID: {delete_quest.quest_id}]) '
+        'was deleted.',
+        'success'
+    )
 
     # Show the form to manage quests in the administration portal
     return index()

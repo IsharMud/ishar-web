@@ -21,8 +21,14 @@ class Account(Base, UserMixin):
     __tablename__ = 'accounts'
 
     account_id = Column(INTEGER(11), primary_key=True)
-    created_at = Column(TIMESTAMP, nullable=False, server_default=text("current_timestamp()"))
-    seasonal_points = Column(MEDIUMINT(4), nullable=False, server_default=text("0"))
+    created_at = Column(
+        TIMESTAMP,
+        nullable=False,
+        server_default=text("current_timestamp()")
+    )
+    seasonal_points = Column(
+        MEDIUMINT(4), nullable=False, server_default=text("0")
+    )
     email = Column(String(30), nullable=False, unique=True)
     password = Column(String(36), nullable=False)
     create_isp = Column(String(25), nullable=False)
@@ -32,7 +38,11 @@ class Account(Base, UserMixin):
     create_haddr = Column(INTEGER(11), nullable=False)
     last_haddr = Column(INTEGER(11), nullable=False)
     account_name = Column(String(25), nullable=False, unique=True)
-    account_gift = Column(TIMESTAMP, nullable=False, server_default=text("'0000-00-00 00:00:00'"))
+    account_gift = Column(
+        TIMESTAMP,
+        nullable=False,
+        server_default=text("'0000-00-00 00:00:00'")
+    )
 
     def change_password(self, new_password=None):
         """Method to change an account password"""
@@ -158,15 +168,33 @@ class AccountsUpgrade(Base):
     """Account upgrade associated with account, and the level of upgrade"""
     __tablename__ = 'accounts_account_upgrades'
 
-    account_upgrades_id = Column(ForeignKey('account_upgrades.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True)
-    account_id = Column(ForeignKey('accounts.account_id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True)
+    account_upgrades_id = Column(
+        ForeignKey(
+            'account_upgrades.id',
+            ondelete='CASCADE',
+            onupdate='CASCADE'
+        ),
+        primary_key=True,
+        nullable=False,
+        index=True
+    )
+    account_id = Column(
+        ForeignKey(
+            'accounts.account_id',
+            ondelete='CASCADE',
+            onupdate='CASCADE'
+        ),
+        primary_key=True,
+        nullable=False,
+        index=True
+    )
     amount = Column(MEDIUMINT(4), nullable=False)
 
     account = relationship('Account', backref='upgrades')
     upgrade = relationship('AccountUpgrade')
 
     def __repr__(self):
-        return (f'<AccountsUpgrade> {self.upgrade} : {self.amount} @'
+        return (f'<AccountsUpgrade> {self.upgrade} : {self.amount} @ '
                 f'{self.account}')
 
 
@@ -183,7 +211,11 @@ class Challenge(Base):
     adj_people = Column(TINYINT(4), nullable=False)
     adj_tier = Column(TINYINT(4), nullable=False)
     challenge_desc = Column(String(80), nullable=False)
-    winner_desc = Column(String(80), nullable=False, server_default=text("'--'"))
+    winner_desc = Column(
+        String(80),
+        nullable=False,
+        server_default=text("'--'")
+    )
     mob_name = Column(String(30), nullable=False)
     is_active = Column(TINYINT(1), nullable=False, server_default=text("0"))
 
@@ -215,13 +247,26 @@ class GlobalEvent(Base):
     __tablename__ = 'global_event'
 
     event_type = Column(TINYINT(4), primary_key=True, unique=True)
-    start_time = Column(TIMESTAMP, nullable=False, server_default=text("current_timestamp() ON UPDATE current_timestamp()"))
-    end_time = Column(TIMESTAMP, nullable=False, server_default=text("'0000-00-00 00:00:00'"))
+    start_time = Column(
+        TIMESTAMP,
+        nullable=False,
+        server_default=text(
+            "current_timestamp() ON UPDATE current_timestamp()"
+        )
+    )
+    end_time = Column(
+        TIMESTAMP, nullable=False,
+        server_default=text("'0000-00-00 00:00:00'")
+    )
     event_name = Column(String(20), nullable=False)
     event_desc = Column(String(40), nullable=False)
     xp_bonus = Column(TINYINT(4), nullable=False, server_default=text("0"))
     shop_bonus = Column(TINYINT(4), nullable=False, server_default=text("0"))
-    celestial_luck = Column(TINYINT(1), nullable=False, server_default=text("0"))
+    celestial_luck = Column(
+        TINYINT(1),
+        nullable=False,
+        server_default=text("0")
+    )
 
     @property
     def start(self):
@@ -268,8 +313,18 @@ class News(Base):
     __tablename__ = 'news'
 
     news_id = Column(INTEGER(11), primary_key=True)
-    account_id = Column(ForeignKey('accounts.account_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
-    created_at = Column(TIMESTAMP, nullable=False, server_default=text("current_timestamp() ON UPDATE current_timestamp()"))
+    account_id = Column(
+        ForeignKey(
+            'accounts.account_id', ondelete='CASCADE', onupdate='CASCADE'
+        ), nullable=False, index=True
+    )
+    created_at = Column(
+        TIMESTAMP,
+        nullable=False,
+        server_default=text(
+            "current_timestamp() ON UPDATE current_timestamp()"
+        )
+    )
     subject = Column(String(64), nullable=False, server_default=text("''"))
     body = Column(Text, nullable=False)
 
@@ -280,13 +335,18 @@ class News(Base):
                 f'{self.created_at} by {self.account}')
 
 
-class PlayerClass(Base):
+class Class(Base):
     """Classes available when creating a player character:
         such as Cleric, Magician, Warrior, etc."""
     __tablename__ = 'classes'
 
     class_id = Column(TINYINT(3), primary_key=True)
-    class_name = Column(String(15), nullable=False, unique=True, server_default=text("'NO_CLASS'"))
+    class_name = Column(
+        String(15),
+        nullable=False,
+        unique=True,
+        server_default=text("'NO_CLASS'")
+    )
     class_display = Column(String(32))
     class_description = Column(String(64))
 
@@ -298,34 +358,63 @@ class PlayerClass(Base):
     @cached_property
     def stats_order(self):
         """Order which stats should be in, based upon player class"""
+
         if self.class_name == 'WARRIOR':
-            return ['Strength', 'Agility', 'Endurance', 'Willpower', 'Focus', 'Perception']
+            return ['Strength', 'Agility', 'Endurance',
+                    'Willpower', 'Focus', 'Perception']
         if self.class_name == 'ROGUE':
-            return ['Agility', 'Perception', 'Strength', 'Focus', 'Endurance', 'Willpower']
+            return ['Agility', 'Perception', 'Strength',
+                    'Focus', 'Endurance', 'Willpower']
         if self.class_name == 'CLERIC':
-            return ['Willpower', 'Strength', 'Perception', 'Endurance', 'Focus', 'Agility']
+            return ['Willpower', 'Strength', 'Perception',
+                    'Endurance', 'Focus', 'Agility']
         if self.class_name == 'MAGICIAN':
-            return ['Perception', 'Focus', 'Agility', 'Willpower', 'Endurance', 'Strength']
+            return ['Perception', 'Focus', 'Agility',
+                    'Willpower', 'Endurance', 'Strength']
         if self.class_name == 'NECROMANCER':
-            return ['Focus', 'Willpower', 'Perception', 'Agility', 'Strength', 'Endurance']
-        # Alphabetic as a last resort
-        return ['Agility', 'Endurance', 'Focus', 'Perception', 'Strength', 'Willpower']
+            return ['Focus', 'Willpower', 'Perception',
+                    'Agility', 'Strength', 'Endurance']
+
+        # Alphabetic as last resort
+        return ['Agility', 'Endurance', 'Focus',
+                'Perception', 'Strength', 'Willpower']
 
     def __repr__(self):
-        return (f'<PlayerClass> "{self.class_name}" ({self.class_id})')
+        return (f'<Class> "{self.class_name}" ({self.class_id})')
 
 
 class PlayerCommon(Base):
     """Common data of players that is shared with in-game 'mobiles'"""
     __tablename__ = 'player_common'
 
-    player_id = Column(ForeignKey('players.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True)
-    class_id = Column(ForeignKey('classes.class_id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True)
-    race_id = Column(ForeignKey('races.race_id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True)
+    player_id = Column(
+        ForeignKey(
+            'players.id', ondelete='CASCADE', onupdate='CASCADE'
+        ),
+        primary_key=True,
+        nullable=False,
+        index=True
+    )
+    class_id = Column(
+        ForeignKey(
+            'classes.class_id', ondelete='CASCADE', onupdate='CASCADE'
+        ),
+        primary_key=True,
+        nullable=False,
+        index=True
+    )
+    race_id = Column(
+        ForeignKey(
+            'races.race_id', ondelete='CASCADE', onupdate='CASCADE'
+        ),
+        primary_key=True,
+        nullable=False,
+        index=True
+    )
     sex = Column(TINYINT(4), nullable=False, server_default=text("0"))
     level = Column(TINYINT(3), nullable=False)
     weight = Column(SMALLINT(5), nullable=False)
-    height =Column(SMALLINT(5), nullable=False)
+    height = Column(SMALLINT(5), nullable=False)
     comm_points = Column(SMALLINT(6), nullable=False)
     alignment = Column(SMALLINT(6), nullable=False)
     strength = Column(TINYINT(3), nullable=False)
@@ -360,12 +449,12 @@ class PlayerCommon(Base):
             uselist=False
         )
     )
-    player_class = relationship('PlayerClass')
-    race = relationship('Race')
+    player_class = relationship('Class')
+    player_race = relationship('Race')
 
     def __repr__(self):
         return (f'<PlayerCommon> {self.player} / {self.player_class} / '
-                f'{self.race}')
+                f'{self.player_race}')
 
 
 class Player(Base):
@@ -373,9 +462,24 @@ class Player(Base):
     __tablename__ = 'players'
 
     id = Column(INTEGER(11), primary_key=True)
-    account_id = Column(ForeignKey('accounts.account_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
-    name = Column(String(15), nullable=False, unique=True, server_default=text("''"))
-    create_ident = Column(String(10), nullable=False, server_default=text("''"))
+    account_id = Column(
+        ForeignKey(
+            'accounts.account_id', ondelete='CASCADE', onupdate='CASCADE'
+        ),
+        nullable=False,
+        index=True
+    )
+    name = Column(
+        String(15),
+        nullable=False,
+        unique=True,
+        server_default=text("''")
+    )
+    create_ident = Column(
+        String(10),
+        nullable=False,
+        server_default=text("''")
+    )
     last_isp = Column(String(30), nullable=False, server_default=text("''"))
     description = Column(String(240))
     title = Column(String(45), nullable=False, server_default=text("''"))
@@ -402,15 +506,37 @@ class Player(Base):
     inn_limit = Column(SMALLINT(6), nullable=False)
     held_xp = Column(INTEGER(11))
     last_isp_change = Column(INTEGER(11))
-    is_deleted = Column(TINYINT(4), nullable=False, server_default=text("0"))
-    deaths = Column(SMALLINT(5), nullable=False, server_default=text("0"))
-    total_renown = Column(SMALLINT(5), nullable=False, server_default=text("0"))
-    quests_completed = Column(SMALLINT(5), nullable=False, server_default=text("0"))
-    challenges_completed = Column(SMALLINT(5), nullable=False, server_default=text("0"))
+    is_deleted = Column(
+        TINYINT(4),
+        nullable=False,
+        server_default=text("0")
+    )
+    deaths = Column(
+        SMALLINT(5),
+        nullable=False,
+        server_default=text("0")
+    )
+    total_renown = Column(
+        SMALLINT(5), nullable=False, server_default=text("0")
+    )
+    quests_completed = Column(
+        SMALLINT(5), nullable=False, server_default=text("0")
+    )
+    challenges_completed = Column(
+        SMALLINT(5), nullable=False, server_default=text("0")
+    )
     game_type = Column(TINYINT(4), nullable=False, server_default=text("0"))
-    birth = Column(TIMESTAMP, nullable=False, server_default=text("'0000-00-00 00:00:00'"))
-    logon = Column(TIMESTAMP, nullable=False, server_default=text("'0000-00-00 00:00:00'"))
-    logout = Column(TIMESTAMP, nullable=False, server_default=text("'0000-00-00 00:00:00'"))
+    birth = Column(
+        TIMESTAMP,
+        nullable=False,
+        server_default=text("'0000-00-00 00:00:00'")
+    )
+    logon = Column(
+        TIMESTAMP, nullable=False, server_default=text("'0000-00-00 00:00:00'")
+    )
+    logout = Column(
+        TIMESTAMP, nullable=False, server_default=text("'0000-00-00 00:00:00'")
+    )
 
     account = relationship('Account', backref='players')
 
@@ -447,7 +573,7 @@ class Player(Base):
     @cached_property
     def is_artisan(self):
         """Boolean whether player is an Artisan (or above)"""
-        return self.is_immortal_type('Artisan')
+        return self.is_immortal_type(immortal_type='Artisan')
 
     @cached_property
     def is_consort(self):
@@ -457,12 +583,12 @@ class Player(Base):
     @cached_property
     def is_eternal(self):
         """Boolean whether player is an Eternal (or above)"""
-        return self.is_immortal_type('Eternal')
+        return self.is_immortal_type(immortal_type='Eternal')
 
     @cached_property
     def is_forger(self):
         """Boolean whether player is a Forger (or above)"""
-        return self.is_immortal_type('Forger')
+        return self.is_immortal_type(immortal_type='Forger')
 
     @cached_property
     def is_immortal(self):
@@ -517,11 +643,11 @@ class Player(Base):
 
             # Return the empty dictionary, meaning no visible stats, for:
 
-            #   - Immortal players, and...
+            # - Immortal players, and...
             if self.is_immortal:
                 return stats
 
-            #   - Mortal players below level five (5),
+            # - Mortal players below level five (5),
             #       with less than one (1) hour of play-time
             if self.true_level < 5 and self.online < 3600:
                 return stats
@@ -607,10 +733,26 @@ class PlayerRemortUpgrade(Base):
     """Remort upgrades that player characters have"""
     __tablename__ = 'player_remort_upgrades'
 
-    upgrade_id = Column(ForeignKey('remort_upgrades.upgrade_id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True)
-    player_id = Column(ForeignKey('players.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True)
+    upgrade_id = Column(
+        ForeignKey(
+            'remort_upgrades.upgrade_id',
+            ondelete='CASCADE',
+            onupdate='CASCADE'
+        ),
+        primary_key=True,
+        nullable=False,
+        index=True
+    )
+    player_id = Column(
+        ForeignKey('players.id', ondelete='CASCADE', onupdate='CASCADE'),
+        primary_key=True,
+        nullable=False,
+        index=True
+    )
     value = Column(INTEGER(11), nullable=False)
-    essence_perk = Column(TINYINT(1), nullable=False, server_default=text("0"))
+    essence_perk = Column(
+        TINYINT(1), nullable=False, server_default=text("0")
+    )
 
     player = relationship('Player', backref='remort_upgrades')
     remort_upgrade = relationship('RemortUpgrade')
@@ -624,8 +766,16 @@ class PlayerRemortUpgrade(Base):
 # Associate quests with pre-reqs
 t_quest_prereqs = Table(
     'quest_prereqs', metadata,
-    Column('quest_id', ForeignKey('quests.quest_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True),
-    Column('required_quest', ForeignKey('quests.quest_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
+    Column(
+        'quest_id',
+        ForeignKey('quests.quest_id', ondelete='CASCADE', onupdate='CASCADE'),
+        nullable=False, index=True
+    ),
+    Column(
+        'required_quest',
+        ForeignKey('quests.quest_id', ondelete='CASCADE', onupdate='CASCADE'),
+        nullable=False, index=True
+    )
 )
 
 
@@ -636,11 +786,34 @@ class PlayerQuest(Base):
         Index('quest_id', 'quest_id', 'player_id', unique=True),
     )
 
-    quest_id = Column(ForeignKey('quests.quest_id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False)
-    player_id = Column(ForeignKey('players.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True)
+    quest_id = Column(
+        ForeignKey(
+            'quests.quest_id', ondelete='CASCADE', onupdate='CASCADE'
+        ),
+        primary_key=True,
+        nullable=False
+    )
+    player_id = Column(
+        ForeignKey(
+            'players.id', ondelete='CASCADE', onupdate='CASCADE'
+        ),
+        primary_key=True,
+        nullable=False,
+        index=True
+    )
     status = Column(TINYINT(11), nullable=False)
-    last_completed_at = Column(TIMESTAMP, nullable=False, server_default=text("current_timestamp() ON UPDATE current_timestamp()"))
-    num_completed = Column(TINYINT(4), nullable=False, server_default=text("0"))
+    last_completed_at = Column(
+        TIMESTAMP,
+        nullable=False,
+        server_default=text(
+            "current_timestamp() ON UPDATE current_timestamp()"
+        )
+    )
+    num_completed = Column(
+        TINYINT(4),
+        nullable=False,
+        server_default=text("0")
+    )
 
     player = relationship('Player')
     quest = relationship('Quest')
@@ -653,8 +826,21 @@ class PlayerQuestStep(Base):
     """Steps of a players quest"""
     __tablename__ = 'player_quest_steps'
 
-    player_id = Column(ForeignKey('players.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False)
-    step_id = Column(ForeignKey('quest_steps.step_id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True)
+    player_id = Column(
+        ForeignKey(
+            'players.id', ondelete='CASCADE', onupdate='CASCADE'
+        ),
+        primary_key=True,
+        nullable=False
+    )
+    step_id = Column(
+        ForeignKey(
+            'quest_steps.step_id', ondelete='CASCADE', onupdate='CASCADE'
+        ),
+        primary_key=True,
+        nullable=False,
+        index=True
+    )
     num_collected = Column(TINYINT(1), nullable=False)
 
     player = relationship('Player')
@@ -669,17 +855,41 @@ class Quest(Base):
     __tablename__ = 'quests'
 
     quest_id = Column(INTEGER(11), primary_key=True)
-    name = Column(String(25), nullable=False, unique=True, server_default=text("''"))
+    name = Column(
+        String(25),
+        nullable=False,
+        unique=True,
+        server_default=text("''")
+    )
     display_name = Column(String(30), nullable=False)
     completion_message = Column(String(80), nullable=False)
     min_level = Column(TINYINT(4), nullable=False, server_default=text("1"))
     max_level = Column(TINYINT(4), nullable=False, server_default=text("20"))
     repeatable = Column(TINYINT(1), nullable=False, server_default=text("0"))
-    description = Column(String(512), nullable=False, server_default=text("'No description available.'"))
-    prerequisite = Column(INTEGER(11), nullable=False, server_default=text("-1"))
-#    class_restrict = Column(TINYINT(4), nullable=False, server_default=text("-1"))
-    class_restrict = Column(ForeignKey('classes.class_id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True)
-    quest_intro = Column(String(1600), nullable=False, server_default=text("''"))
+    description = Column(
+        String(512),
+        nullable=False,
+        server_default=text("'No description available.'")
+    )
+    prerequisite = Column(
+        INTEGER(11), nullable=False, server_default=text("-1")
+    )
+    # class_restrict = Column(
+    #     TINYINT(4),
+    #     nullable=False,
+    #     server_default=text("-1")
+    # )
+    class_restrict = Column(
+        ForeignKey(
+            'classes.class_id', ondelete='CASCADE', onupdate='CASCADE'
+        ),
+        primary_key=True,
+        nullable=False,
+        index=True
+    )
+    quest_intro = Column(
+        String(1600), nullable=False, server_default=text("''")
+    )
 
     parents = relationship(
         'Quest',
@@ -688,7 +898,7 @@ class Quest(Base):
         secondaryjoin='Quest.quest_id == quest_prereqs.c.required_quest'
     )
 
-    restricted_class = relationship('PlayerClass')
+    restricted_class = relationship('Class')
 
     def __repr__(self):
         return (f'<Quest> "{self.name}" ({self.quest_id}) / '
@@ -702,7 +912,12 @@ class QuestReward(Base):
 
     reward_num = Column(INTEGER(11), primary_key=True, nullable=False)
     reward_type = Column(TINYINT(2), nullable=False)
-    quest_id = Column(ForeignKey('quests.quest_id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True)
+    quest_id = Column(
+        ForeignKey('quests.quest_id', ondelete='CASCADE', onupdate='CASCADE'),
+        primary_key=True,
+        nullable=False,
+        index=True
+    )
 
     quest = relationship('Quest')
 
@@ -719,10 +934,18 @@ class QuestStep(Base):
     step_type = Column(TINYINT(4), nullable=False)
     target = Column(INTEGER(11), nullable=False)
     num_required = Column(INTEGER(11), nullable=False)
-    quest_id = Column(ForeignKey('quests.quest_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
+    quest_id = Column(
+        ForeignKey(
+            'quests.quest_id', ondelete='CASCADE', onupdate='CASCADE'
+        ),
+        nullable=False,
+        index=True
+    )
     time_limit = Column(INTEGER(11), nullable=False, server_default=text("-1"))
     mystify = Column(TINYINT(1), nullable=False, server_default=text("0"))
-    mystify_text = Column(String(80), nullable=False, server_default=text("''"))
+    mystify_text = Column(
+        String(80), nullable=False, server_default=text("''")
+    )
 
     quest = relationship('Quest')
 
@@ -766,7 +989,9 @@ class Race(Base):
     additional_wil = Column(SMALLINT(6), server_default=text("0"))
     is_playable = Column(TINYINT(1), server_default=text("0"))
     is_humanoid = Column(TINYINT(1), nullable=False, server_default=text("1"))
-    is_invertebrae = Column(TINYINT(1), nullable=False, server_default=text("0"))
+    is_invertebrae = Column(
+        TINYINT(1), nullable=False, server_default=text("0")
+    )
     is_flying = Column(TINYINT(1), nullable=False, server_default=text("0"))
     is_swimming = Column(TINYINT(1), nullable=False, server_default=text("0"))
     darkvision = Column(TINYINT(4), nullable=False, server_default=text("0"))
@@ -786,7 +1011,9 @@ class RemortUpgrade(Base):
     __tablename__ = 'remort_upgrades'
 
     upgrade_id = Column(INTEGER(11), primary_key=True)
-    name = Column(String(20), nullable=False, unique=True, server_default=text("''"))
+    name = Column(
+        String(20), nullable=False, unique=True, server_default=text("''")
+    )
     renown_cost = Column(SMALLINT(6), nullable=False)
     max_value = Column(SMALLINT(6), nullable=False)
     scale = Column(TINYINT(4), nullable=False, server_default=text("10"))
@@ -806,8 +1033,20 @@ class Season(Base):
 
     season_id = Column(INTEGER(11), primary_key=True)
     is_active = Column(TINYINT(4), nullable=False)
-    effective_date = Column(TIMESTAMP, nullable=False, server_default=text("current_timestamp() ON UPDATE current_timestamp()"))
-    expiration_date = Column(TIMESTAMP, nullable=False, server_default=text("'0000-00-00 00:00:00'"))
+    effective_date = Column(
+        TIMESTAMP,
+        nullable=False,
+        server_default=text(
+            "current_timestamp() ON UPDATE current_timestamp()"
+        )
+    )
+    expiration_date = Column(
+        TIMESTAMP,
+        nullable=False,
+        server_default=text(
+            "'0000-00-00 00:00:00'"
+        )
+    )
 
     @property
     def effective(self):

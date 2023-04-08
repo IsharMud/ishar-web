@@ -34,10 +34,13 @@ def index():
     return render_template(
         'leaders.html.j2',
         leader_players=Player.query.filter(
-            Player.true_level < min(IMM_LEVELS))
-        .order_by(
-            -Player.remorts, -Player.total_renown, -Player.quests_completed,
-            -Player.challenges_completed, Player.deaths
+            Player.true_level < min(IMM_LEVELS)
+        ).order_by(
+            -Player.remorts,
+            -Player.total_renown,
+            -Player.quests_completed,
+            -Player.challenges_completed,
+            Player.deaths
         ).all()
     )
 

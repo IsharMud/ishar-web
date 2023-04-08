@@ -2,16 +2,16 @@
 import re
 
 from config import HELPTAB, IMM_LEVELS
-from models import PlayerClass
+from models import Class
 from sentry import sentry_sdk
 
 
 # Retrieve playable player class names
-playable_classes = [
+player_classes = [
     playable_class.class_display_name
     for playable_class in
-    PlayerClass().query.filter(
-        PlayerClass.class_description != ''
+    Class().query.filter(
+        Class.class_description != ''
     ).all()
 ]
 
@@ -131,7 +131,7 @@ def parse_help_body(line=None):
     return line
 
 
-def parse_help_class(class_line=None, player_classes=playable_classes):
+def parse_help_class(class_line=None, player_classes=player_classes):
     """Parse a single class line from a single topic chunk
         from the MUD 'helptab' file, and link the Player Class help page"""
 

@@ -1,7 +1,7 @@
 """Frequently Asked Questions"""
 from flask import Blueprint, render_template, url_for
 
-from models import PlayerClass, Race
+from models import Class, Race
 
 
 # Flask Blueprint
@@ -22,18 +22,18 @@ def index():
     # Fetch/format, links to each playable class with descriptions
     player_classes = [
         f'<a href="'
-        f"{url_for('help.help_page.single', topic=player_class.class_display_name)}"
-        f'">{player_class.class_display_name}</a> -- '
-        f'{player_class.class_description}'
-        for player_class in PlayerClass().query.filter(
-            PlayerClass.class_description != ''
+        f"{url_for('help.help_page.single', topic=pclass.class_display_name)}"
+        f'">{pclass.class_display_name}</a> -- '
+        f'{pclass.class_description}'
+        for pclass in Class().query.filter(
+            Class.class_description != ''
         ).all()
     ]
 
     # Fetch, and format, playable player races and descriptions
-    races = [
-        f"{race.display_name} -- {race.description}"
-        for race in Race().query.filter(Race.is_playable != 0).all()
+    player_races = [
+        f"{player_race.display_name} -- {player_race.description}"
+        for player_race in Race().query.filter(Race.is_playable != 0).all()
     ]
 
     all_faqs = {
@@ -58,9 +58,9 @@ def index():
             '<a href="'
             f"{url_for('help.help_page.single', topic='Races')}"
             '">Yes! There are '
-            f'{len(races)} races</a> available '
+            f'{len(player_races)} races</a> available '
             'to choose from, when you create a player character:',
-            races
+            player_races
         ],
 
         'Is there role-playing?': [
@@ -80,9 +80,10 @@ def index():
         ],
 
         'Is death permanent?': [
-            '<strong>You can choose</strong> your <a href="'
-            f"{url_for('help.help_page.single', topic='Game Types')}"
-            '" title="game type">game type</a> ("Survival" or "Classic" mode) '
+            '<strong>You can choose</strong> whether to play in "Survival" '
+            '(aka &quot;<a href="'
+            f"{url_for('help.help_page.single', topic='Permadeath')}"
+            '" title="Permadeath">perma-death</a>&quot;) or "Classic" mode, '
             'each time you create a player character.', 'While survival mode '
             'gains experience faster, classic mode subtracts experience upon '
             "death, but allows you to retrieve your character's corpse."
