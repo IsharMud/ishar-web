@@ -847,7 +847,8 @@ class PlayerQuestStep(Base):
     step = relationship('QuestStep')
 
     def __repr__(self):
-        return (f'<PlayerQuestStep> {self.player} @ {self.step}')
+        return (f'<PlayerQuestStep> {self.player} @ {self.step} : '
+                f'{self.num_collected}')
 
 
 class Quest(Base):
