@@ -12,20 +12,16 @@ from sqlalchemy.orm import relationship
 from delta import stringify
 from database import Base, db_session
 
+from models.player import Player
+
 
 class Account(Base, UserMixin):
     """Account used to log in to the website and MUD in-game"""
     __tablename__ = 'accounts'
 
     account_id = Column(INTEGER(11), primary_key=True)
-    created_at = Column(
-        TIMESTAMP,
-        nullable=False,
-        server_default=text("current_timestamp()")
-    )
-    seasonal_points = Column(
-        MEDIUMINT(4), nullable=False, server_default=text("0")
-    )
+    created_at = Column(TIMESTAMP, nullable=False, server_default=text("current_timestamp()"))
+    seasonal_points = Column(MEDIUMINT(4), nullable=False, server_default=text("0"))
     email = Column(String(30), nullable=False, unique=True)
     password = Column(String(36), nullable=False)
     create_isp = Column(String(25), nullable=False)
@@ -35,13 +31,9 @@ class Account(Base, UserMixin):
     create_haddr = Column(INTEGER(11), nullable=False)
     last_haddr = Column(INTEGER(11), nullable=False)
     account_name = Column(String(25), nullable=False, unique=True)
-    account_gift = Column(
-        TIMESTAMP,
-        nullable=False,
-        server_default=text("'0000-00-00 00:00:00'")
-    )
+    account_gift = Column(TIMESTAMP, nullable=False, server_default=text("'0000-00-00 00:00:00'"))
 
-    players = relationship('Player', back_populates='account')
+    players = relationship("Player", back_populates="account")
 
     def change_password(self, new_password=None):
         """Method to change an account password"""

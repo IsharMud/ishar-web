@@ -13,30 +13,17 @@ from config import ALIGNMENTS, IMM_LEVELS, MUD_PODIR
 from delta import stringify
 from database import Base
 
+from models.account import Account
+
 
 class Player(Base):
     """Player characters"""
     __tablename__ = 'players'
 
     id = Column(INTEGER(11), primary_key=True)
-    account_id = Column(
-        ForeignKey(
-            'accounts.account_id', ondelete='CASCADE', onupdate='CASCADE'
-        ),
-        nullable=False,
-        index=True
-    )
-    name = Column(
-        String(15),
-        nullable=False,
-        unique=True,
-        server_default=text("''")
-    )
-    create_ident = Column(
-        String(10),
-        nullable=False,
-        server_default=text("''")
-    )
+    account_id = Column(ForeignKey('accounts.account_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
+    name = Column(String(15), nullable=False, unique=True, server_default=text("''"))
+    create_ident = Column( String(10), nullable=False, server_default=text("''"))
     last_isp = Column(String(30), nullable=False, server_default=text("''"))
     description = Column(String(240))
     title = Column(String(45), nullable=False, server_default=text("''"))
@@ -63,39 +50,17 @@ class Player(Base):
     inn_limit = Column(SMALLINT(6), nullable=False)
     held_xp = Column(INTEGER(11))
     last_isp_change = Column(INTEGER(11))
-    is_deleted = Column(
-        TINYINT(4),
-        nullable=False,
-        server_default=text("0")
-    )
-    deaths = Column(
-        SMALLINT(5),
-        nullable=False,
-        server_default=text("0")
-    )
-    total_renown = Column(
-        SMALLINT(5), nullable=False, server_default=text("0")
-    )
-    quests_completed = Column(
-        SMALLINT(5), nullable=False, server_default=text("0")
-    )
-    challenges_completed = Column(
-        SMALLINT(5), nullable=False, server_default=text("0")
-    )
+    is_deleted = Column(TINYINT(4), nullable=False, server_default=text("0"))
+    deaths = Column(SMALLINT(5), nullable=False, server_default=text("0"))
+    total_renown = Column(SMALLINT(5), nullable=False, server_default=text("0"))
+    quests_completed = Column(SMALLINT(5), nullable=False, server_default=text("0"))
+    challenges_completed = Column(SMALLINT(5), nullable=False, server_default=text("0"))
     game_type = Column(TINYINT(4), nullable=False, server_default=text("0"))
-    birth = Column(
-        TIMESTAMP,
-        nullable=False,
-        server_default=text("'0000-00-00 00:00:00'")
-    )
-    logon = Column(
-        TIMESTAMP, nullable=False, server_default=text("'0000-00-00 00:00:00'")
-    )
-    logout = Column(
-        TIMESTAMP, nullable=False, server_default=text("'0000-00-00 00:00:00'")
-    )
+    birth = Column(TIMESTAMP, nullable=False, server_default=text("'0000-00-00 00:00:00'"))
+    logon = Column(TIMESTAMP, nullable=False, server_default=text("'0000-00-00 00:00:00'"))
+    logout = Column(TIMESTAMP, nullable=False, server_default=text("'0000-00-00 00:00:00'"))
 
-    account = relationship('Account', back_populates='players')
+    account = relationship("Account", back_populates="players")
 
     @cached_property
     def birth_ago(self):
