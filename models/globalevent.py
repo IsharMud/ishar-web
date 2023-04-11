@@ -14,26 +14,13 @@ class GlobalEvent(Base):
     __tablename__ = 'global_event'
 
     event_type = Column(TINYINT(4), primary_key=True, unique=True)
-    start_time = Column(
-        TIMESTAMP,
-        nullable=False,
-        server_default=text(
-            "current_timestamp() ON UPDATE current_timestamp()"
-        )
-    )
-    end_time = Column(
-        TIMESTAMP, nullable=False,
-        server_default=text("'0000-00-00 00:00:00'")
-    )
+    start_time = Column(TIMESTAMP, nullable=False, server_default=text("current_timestamp() ON UPDATE current_timestamp()"))
+    end_time = Column(TIMESTAMP, nullable=False, server_default=text("'0000-00-00 00:00:00'"))
     event_name = Column(String(20), nullable=False)
     event_desc = Column(String(40), nullable=False)
     xp_bonus = Column(TINYINT(4), nullable=False, server_default=text("0"))
     shop_bonus = Column(TINYINT(4), nullable=False, server_default=text("0"))
-    celestial_luck = Column(
-        TINYINT(1),
-        nullable=False,
-        server_default=text("0")
-    )
+    celestial_luck = Column(TINYINT(1), nullable=False, server_default=text("0"))
 
     @property
     def start(self):

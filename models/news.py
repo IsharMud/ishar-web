@@ -12,18 +12,8 @@ class News(Base):
     __tablename__ = 'news'
 
     news_id = Column(INTEGER(11), primary_key=True)
-    account_id = Column(
-        ForeignKey(
-            'accounts.account_id', ondelete='CASCADE', onupdate='CASCADE'
-        ), nullable=False, index=True
-    )
-    created_at = Column(
-        TIMESTAMP,
-        nullable=False,
-        server_default=text(
-            "current_timestamp() ON UPDATE current_timestamp()"
-        )
-    )
+    account_id = Column(ForeignKey('accounts.account_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
+    created_at = Column(TIMESTAMP, nullable=False, server_default=text("current_timestamp() ON UPDATE current_timestamp()"))
     subject = Column(String(64), nullable=False, server_default=text("''"))
     body = Column(Text, nullable=False)
 

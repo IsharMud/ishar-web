@@ -14,20 +14,8 @@ class Season(Base):
 
     season_id = Column(INTEGER(11), primary_key=True)
     is_active = Column(TINYINT(4), nullable=False)
-    effective_date = Column(
-        TIMESTAMP,
-        nullable=False,
-        server_default=text(
-            "current_timestamp() ON UPDATE current_timestamp()"
-        )
-    )
-    expiration_date = Column(
-        TIMESTAMP,
-        nullable=False,
-        server_default=text(
-            "'0000-00-00 00:00:00'"
-        )
-    )
+    effective_date = Column(TIMESTAMP, nullable=False, server_default=text("current_timestamp() ON UPDATE current_timestamp()"))
+    expiration_date = Column(TIMESTAMP, nullable=False, server_default=text("'0000-00-00 00:00:00'"))
 
     @property
     def effective(self):
