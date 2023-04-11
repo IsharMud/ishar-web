@@ -5,8 +5,8 @@ from flask import abort, Blueprint, flash, render_template, url_for
 from flask_login import current_user, fresh_login_required
 
 from database import db_session
-from forms import NewsAddForm
-from models import News
+from models.forms import NewsAddForm
+from models.news import News
 from sentry import sentry_sdk
 
 

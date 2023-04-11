@@ -4,9 +4,11 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired
-from wtforms import BooleanField, DateTimeLocalField, EmailField, IntegerField,\
-    PasswordField, SelectField, StringField, SubmitField, TextAreaField
-from wtforms.validators import DataRequired, Email, EqualTo, Length, NumberRange
+from wtforms import BooleanField, DateTimeLocalField, EmailField, \
+    IntegerField, PasswordField, SelectField, StringField, SubmitField, \
+    TextAreaField
+from wtforms.validators import DataRequired, Email, EqualTo, Length, \
+    NumberRange
 from wtforms_validators import Alpha, AlphaSpace
 
 from config import ALIGNMENTS

@@ -1,8 +1,8 @@
 """View Player Profile"""
 from flask import flash, redirect, render_template, url_for
 
-from forms import PlayerSearchForm
-from models import Player
+from models.forms import PlayerSearchForm
+from models.player import Player
 
 
 def view_player(player_name=None):

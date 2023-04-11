@@ -3,8 +3,9 @@ from flask import abort, Blueprint, flash, render_template, url_for
 from flask_login import current_user, fresh_login_required
 
 from database import db_session
-from forms import QuestForm
-from models import Class, Quest
+from models.forms import QuestForm
+from models.player.common import Class
+from models.quest import Quest
 
 
 # Flask Blueprint

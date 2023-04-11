@@ -2,7 +2,7 @@
 from flask import render_template
 
 from config import IMM_LEVELS
-from models import Player
+from models.player import Player
 
 
 def classic():

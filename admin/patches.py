@@ -6,7 +6,7 @@ from flask_login import current_user, fresh_login_required
 from werkzeug.utils import secure_filename
 
 from config import PATCH_DIR
-from forms import PatchAddForm
+from models.forms import PatchAddForm
 from patches.util import get_patch_pdfs
 
 

@@ -1,7 +1,7 @@
 """Challenges"""
 from flask import Blueprint, render_template
 
-from models import Challenge
+from models.challenge import Challenge
 
 
 # Flask Blueprint

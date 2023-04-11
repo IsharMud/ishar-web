@@ -1,7 +1,7 @@
 """Help (and World) pages"""
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 
-from forms import HelpSearchForm
+from models.forms import HelpSearchForm
 from help.helptab import get_help_topics, search_help_topics
 
 

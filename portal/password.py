@@ -3,7 +3,7 @@
 from flask import flash, render_template
 from flask_login import current_user
 
-from forms import ChangePasswordForm
+from models.forms import ChangePasswordForm
 
 
 def change_password():

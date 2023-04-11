@@ -1,16 +1,23 @@
 #!/usr/bin/python3
 """Ishar MUD Discord bot"""
 from datetime import datetime
+
 import logging
 import re
 import signal
 import sys
+
 import interactions
 
 from config import DISCORD
 from database import db_session
 from help.helptab import search_help_topics
-from models import Challenge, GlobalEvent, Player, Season
+
+from models.challenge import Challenge
+from models.globalevent import GlobalEvent
+from models.player import Player
+from models.season import Season
+
 from sentry import sentry_sdk
 from sysinfo import get_connections, get_uptime
 

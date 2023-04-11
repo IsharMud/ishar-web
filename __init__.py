@@ -5,6 +5,7 @@ https://github.com/IsharMud/ishar-web
 """
 import os
 from urllib.parse import urlparse
+
 from flask import Flask
 
 from error_pages import error_pages_bp
@@ -19,7 +20,9 @@ from patches import patches_bp
 from portal import portal_bp
 from sysinfo import sysinfo_bp
 from welcome import welcome_bp
-from models import GlobalEvent, Season
+
+from models.globalevent import GlobalEvent
+from models.season import Season
 
 
 # Flask
@@ -51,7 +54,9 @@ def injects():
     sentry_dsn = os.getenv('SENTRY_DSN')
     sentry_uri = urlparse(sentry_dsn)
     return {
-        'current_season': Season.query.filter_by(is_active=1).order_by(
+        'current_season': Season.query.filter_by(
+            is_active=1
+        ).order_by(
             -Season.season_id
         ).first(),
         'global_event_count': GlobalEvent.query.count(),

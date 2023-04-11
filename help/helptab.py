@@ -2,15 +2,14 @@
 import re
 
 from config import HELPTAB, IMM_LEVELS
-from models import Class
+from models.player.common import Class
 from sentry import sentry_sdk
 
 
 # Retrieve playable player class names
 player_classes = [
     playable_class.class_display_name
-    for playable_class in
-    Class().query.filter(
+    for playable_class in Class().query.filter(
         Class.class_description != ''
     ).all()
 ]

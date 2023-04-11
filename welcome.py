@@ -2,7 +2,9 @@
 from flask import Blueprint, redirect, render_template
 
 from config import IMM_LEVELS
-from models import GlobalEvent, News, Player
+from models.globalevent import GlobalEvent
+from models.news import News
+from models.player import Player
 
 
 # Flask Blueprint

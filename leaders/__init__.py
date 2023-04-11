@@ -2,7 +2,7 @@
 from flask import Blueprint, render_template
 
 from config import IMM_LEVELS
-from models import Player
+from models.player import Player
 
 from leaders.classic import classic
 from leaders.survival import survival
