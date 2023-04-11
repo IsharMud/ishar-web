@@ -13,8 +13,6 @@ from config import ALIGNMENTS, IMM_LEVELS, MUD_PODIR
 from delta import stringify
 from database import Base
 
-from models.account import Account
-
 
 class Player(Base):
     """Player characters"""

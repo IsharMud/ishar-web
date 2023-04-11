@@ -12,8 +12,6 @@ from sqlalchemy.orm import relationship
 from delta import stringify
 from database import Base, db_session
 
-from models.player import Player
-
 
 class Account(Base, UserMixin):
     """Account used to log in to the website and MUD in-game"""
