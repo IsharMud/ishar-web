@@ -7,6 +7,7 @@ from passlib.hash import md5_crypt
 
 from sqlalchemy import Column, String, TIMESTAMP, text
 from sqlalchemy.dialects.mysql import INTEGER, MEDIUMINT
+from sqlalchemy.orm import relationship
 
 from delta import stringify
 from database import Base, db_session
@@ -39,6 +40,8 @@ class Account(Base, UserMixin):
         nullable=False,
         server_default=text("'0000-00-00 00:00:00'")
     )
+
+    players = relationship('Player', back_populates='account')
 
     def change_password(self, new_password=None):
         """Method to change an account password"""
