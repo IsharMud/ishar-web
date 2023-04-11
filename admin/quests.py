@@ -4,7 +4,7 @@ from flask_login import current_user, fresh_login_required
 
 from database import db_session
 from models.forms import QuestForm
-from models.player.common import Class
+from models.player.common import PlayerClass
 from models.quest import Quest
 
 
@@ -38,8 +38,8 @@ def index():
     add_quest_form = QuestForm()
 
     # Retrieve playable player class names for form choices
-    playable_classes = Class().query.filter(
-        Class.class_description != ''
+    playable_classes = PlayerClass().query.filter(
+        PlayerClass.class_description != ''
     ).all()
     for playable_class in playable_classes:
         add_quest_form.class_restrict.choices.append(
@@ -93,7 +93,9 @@ def edit(edit_quest_id=None):
     edit_quest_form = QuestForm()
 
     # Retrieve playable player class names for form choices
-    player_classes = Class().query.filter(Class.class_description != '').all()
+    player_classes = PlayerClass().query.filter(
+        PlayerClass.class_description != ''
+    ).all()
     for player_class in player_classes:
         edit_quest_form.class_restrict.choices.append(
             (player_class.class_id, player_class.class_display_name)

@@ -1,7 +1,7 @@
 """Frequently Asked Questions"""
 from flask import Blueprint, render_template, url_for
 
-from models.player.common import Class, Race
+from models.player.common import PlayerClass, Race
 
 
 # Flask Blueprint
@@ -25,8 +25,8 @@ def index():
         f"{url_for('help.help_page.single', topic=pclass.class_display_name)}"
         f'">{pclass.class_display_name}</a> -- '
         f'{pclass.class_description}'
-        for pclass in Class().query.filter(
-            Class.class_description != ''
+        for pclass in PlayerClass().query.filter(
+            PlayerClass.class_description != ''
         ).all()
     ]
 

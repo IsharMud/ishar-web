@@ -8,7 +8,7 @@ from sqlalchemy.orm import backref, relationship
 from database import Base  # , metadata
 
 
-class Class(Base):
+class PlayerClass(Base):
     """Classes available when creating a player character:
         such as Cleric, Magician, Warrior, etc."""
     __tablename__ = 'classes'
@@ -158,7 +158,7 @@ class PlayerCommon(Base):
         'Player',
         backref=backref('common', cascade='all, delete-orphan', uselist=False)
     )
-    player_class = relationship('Class')
+    player_class = relationship('PlayerClass')
     player_race = relationship('Race')
 
     def __repr__(self):
