@@ -111,7 +111,7 @@ class Quest(Base):
         String(1600), nullable=False, server_default=text("''")
     )
 
-    restricted_class = relationship('Class')
+    restricted_class = relationship('PlayerClass')
 
     parents = relationship(
         'Quest', secondary='quest_prereqs',
