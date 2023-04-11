@@ -21,7 +21,7 @@ class Player(Base):
     id = Column(INTEGER(11), primary_key=True)
     account_id = Column(ForeignKey('accounts.account_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
     name = Column(String(15), nullable=False, unique=True, server_default=text("''"))
-    create_ident = Column( String(10), nullable=False, server_default=text("''"))
+    create_ident = Column(String(10), nullable=False, server_default=text("''"))
     last_isp = Column(String(30), nullable=False, server_default=text("''"))
     description = Column(String(240))
     title = Column(String(45), nullable=False, server_default=text("''"))

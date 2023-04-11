@@ -15,7 +15,7 @@ from help.helptab import search_help_topics
 
 from models.challenge import Challenge
 from models.globalevent import GlobalEvent
-from models.player import Player
+# from models.player import Player
 from models.season import Season
 
 from sentry import sentry_sdk
@@ -156,9 +156,12 @@ async def deadhead(ctx: interactions.CommandContext):
     )
 
     # Find player with the most deaths
-    deadman = Player.query.filter_by(
+    deadman = ''
+    deadman.name = 'WIP'
+    deadman.deaths = 0
+    """Player.query.filter_by(
         is_deleted=0, game_type=0
-    ).order_by(-Player.deaths).first()
+    ).order_by(-Player.deaths).first()"""
 
     # Show the name and death count of the player with the most deaths
     out = 'The player who has died most is: '
