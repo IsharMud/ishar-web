@@ -5,6 +5,7 @@ from flask_login import current_user, fresh_login_required
 from database import db_session
 from models.forms import EditAccountForm
 from models.account import Account
+from models.account.upgrade import AccountsUpgrade
 from sentry import sentry_sdk
 
 

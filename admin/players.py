@@ -5,6 +5,7 @@ from flask_login import current_user, fresh_login_required
 from database import db_session
 from models.forms import EditPlayerForm
 from models.player import Player
+from models.player.upgrade import PlayerRemortUpgrade
 from sentry import sentry_sdk
 
 
