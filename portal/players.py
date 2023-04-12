@@ -3,6 +3,7 @@ from flask import flash, redirect, render_template, url_for
 
 from models.forms import PlayerSearchForm
 from models.player import Player
+from models.player.upgrade import PlayerRemortUpgrade
 
 
 def view_player(player_name=None):
