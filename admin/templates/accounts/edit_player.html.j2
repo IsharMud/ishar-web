@@ -4,7 +4,7 @@
 {%- block meta_description %}Administration portal to edit a player character{%- endblock meta_description %}
 {%- block meta_url -%}{{ url_for('.edit', edit_player_id=edit_player.id, _external=True) -}}{%- endblock meta_url %}
 {%- block title -%}Edit Player: {{ edit_player.name | title | safe }} / Administration Portal{%- endblock title -%}
-{%- block header -%}<a href="{{ url_for('.edit', edit_player_id=edit_player.id) }}">Edit Player</a> / <span class="{{ edit_player.player_css }}">{{ edit_player.name }}</span>{%- endblock header -%}
+{%- block header -%}<a href="{{ url_for('.index') }}">Accounts</a> / <a href="{{ url_for('.edit', edit_player_id=edit_player.id) }}">Edit Player</a> / <span class="{{ edit_player.player_css }}">{{ edit_player.name }}</span>{%- endblock header -%}
 {%- macro render_field(field) %}
                     <tr>
                         <td class="admin-{{ field.name | safe }}">
