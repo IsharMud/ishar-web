@@ -8,6 +8,10 @@ body {
     width:                  25vw;
 }
 
+#logo:hover {
+    filter:                 contrast(50%);
+}
+
 h1 {
     display:                none;
     visibility:             hidden;
