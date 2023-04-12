@@ -3,6 +3,7 @@ import re
 
 from config import HELPTAB, IMM_LEVELS
 from models.account import Account
+from models.account.upgrade import AccountsUpgrade
 from models.player.common import PlayerClass
 from sentry import sentry_sdk
 
