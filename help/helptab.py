@@ -7,12 +7,12 @@ from sentry import sentry_sdk
 
 
 # Retrieve playable player class names
-player_classes = [
-    playable_class.class_display_name
-    for playable_class in PlayerClass().query.filter(
-        PlayerClass.class_description != ''
-    ).all()
-]
+player_classes = []
+playable_classes = PlayerClass().query.filter(
+    PlayerClass.class_description != ''
+).all()
+for playable_class in playable_classes:
+    player_classes.append(playable_class.class_display_name)
 
 # Compile a few regular expressions for use later
 #   to parse out specific items from help topic chunks
