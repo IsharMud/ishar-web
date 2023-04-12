@@ -10,26 +10,10 @@ class PlayerRemortUpgrade(Base):
     """Remort upgrades that player characters have"""
     __tablename__ = 'player_remort_upgrades'
 
-    upgrade_id = Column(
-        ForeignKey(
-            'remort_upgrades.upgrade_id',
-            ondelete='CASCADE',
-            onupdate='CASCADE'
-        ),
-        primary_key=True,
-        nullable=False,
-        index=True
-    )
-    player_id = Column(
-        ForeignKey('players.id', ondelete='CASCADE', onupdate='CASCADE'),
-        primary_key=True,
-        nullable=False,
-        index=True
-    )
+    upgrade_id = Column(ForeignKey('remort_upgrades.upgrade_id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True)
+    player_id = Column(ForeignKey('players.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True)
     value = Column(INTEGER(11), nullable=False)
-    essence_perk = Column(
-        TINYINT(1), nullable=False, server_default=text("0")
-    )
+    essence_perk = Column(TINYINT(1), nullable=False, server_default=text("0"))
 
     player = relationship('Player', backref='remort_upgrades')
     remort_upgrade = relationship('RemortUpgrade')
@@ -45,9 +29,7 @@ class RemortUpgrade(Base):
     __tablename__ = 'remort_upgrades'
 
     upgrade_id = Column(INTEGER(11), primary_key=True)
-    name = Column(
-        String(20), nullable=False, unique=True, server_default=text("''")
-    )
+    name = Column(String(20), nullable=False, unique=True, server_default=text("''"))
     renown_cost = Column(SMALLINT(6), nullable=False)
     max_value = Column(SMALLINT(6), nullable=False)
     scale = Column(TINYINT(4), nullable=False, server_default=text("10"))

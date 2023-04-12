@@ -27,26 +27,8 @@ class AccountsUpgrade(Base):
     """Account upgrade associated with account, and the level of upgrade"""
     __tablename__ = 'accounts_account_upgrades'
 
-    account_upgrades_id = Column(
-        ForeignKey(
-            'account_upgrades.id',
-            ondelete='CASCADE',
-            onupdate='CASCADE'
-        ),
-        primary_key=True,
-        nullable=False,
-        index=True
-    )
-    account_id = Column(
-        ForeignKey(
-            'accounts.account_id',
-            ondelete='CASCADE',
-            onupdate='CASCADE'
-        ),
-        primary_key=True,
-        nullable=False,
-        index=True
-    )
+    account_upgrades_id = Column(ForeignKey('account_upgrades.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True)
+    account_id = Column(ForeignKey('accounts.account_id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True)
     amount = Column(MEDIUMINT(4), nullable=False)
 
     account = relationship('Account', back_populates='upgrades')
