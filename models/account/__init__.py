@@ -32,6 +32,7 @@ class Account(Base, UserMixin):
     account_gift = Column(TIMESTAMP, nullable=False, server_default=text("'0000-00-00 00:00:00'"))
 
     players = relationship('Player', back_populates='account')
+    upgrades = relationship('AccountsUpgrade', back_populates='account')
 
     def change_password(self, new_password=None):
         """Method to change an account password"""

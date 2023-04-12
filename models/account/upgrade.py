@@ -49,7 +49,7 @@ class AccountsUpgrade(Base):
     )
     amount = Column(MEDIUMINT(4), nullable=False)
 
-    account = relationship('Account', backref='upgrades')
+    account = relationship('Account', back_populates='upgrades')
     upgrade = relationship('AccountUpgrade')
 
     def __repr__(self):
