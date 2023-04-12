@@ -58,7 +58,7 @@ class Player(Base):
     logon = Column(TIMESTAMP, nullable=False, server_default=text("'0000-00-00 00:00:00'"))
     logout = Column(TIMESTAMP, nullable=False, server_default=text("'0000-00-00 00:00:00'"))
 
-    account = relationship('Account', backref='players')
+    account = relationship('Account', back_populates='players')
 
     @cached_property
     def birth_ago(self):
