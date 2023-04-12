@@ -1,6 +1,4 @@
 """Database classes/models"""
-from functools import cached_property
-
 from sqlalchemy import Column, ForeignKey, String, Text, text  # , Table
 from sqlalchemy.dialects.mysql import INTEGER, MEDIUMINT, SMALLINT, TINYINT
 from sqlalchemy.orm import backref, relationship
@@ -14,43 +12,32 @@ class PlayerClass(Base):
     __tablename__ = 'classes'
 
     class_id = Column(TINYINT(3), primary_key=True)
-    class_name = Column(
-        String(15),
-        nullable=False,
-        unique=True,
-        server_default=text("'NO_CLASS'")
-    )
+    class_name = Column(String(15), nullable=False, unique=True, server_default=text("'NO_CLASS'"))
     class_display = Column(String(32))
     class_description = Column(String(64))
 
-    @cached_property
+    @property
     def class_display_name(self):
         """Human-readable display name for a player class"""
         return self.class_name.replace('_', '-').title()
 
-    @cached_property
+    @property
     def stats_order(self):
         """Order which stats should be in, based upon player class"""
 
         if self.class_name == 'WARRIOR':
-            return ['Strength', 'Agility', 'Endurance',
-                    'Willpower', 'Focus', 'Perception']
+            return ['Strength', 'Agility', 'Endurance', 'Willpower', 'Focus', 'Perception']
         if self.class_name == 'ROGUE':
-            return ['Agility', 'Perception', 'Strength',
-                    'Focus', 'Endurance', 'Willpower']
+            return ['Agility', 'Perception', 'Strength', 'Focus', 'Endurance', 'Willpower']
         if self.class_name == 'CLERIC':
-            return ['Willpower', 'Strength', 'Perception',
-                    'Endurance', 'Focus', 'Agility']
+            return ['Willpower', 'Strength', 'Perception', 'Endurance', 'Focus', 'Agility']
         if self.class_name == 'MAGICIAN':
-            return ['Perception', 'Focus', 'Agility',
-                    'Willpower', 'Endurance', 'Strength']
+            return ['Perception', 'Focus', 'Agility', 'Willpower', 'Endurance', 'Strength']
         if self.class_name == 'NECROMANCER':
-            return ['Focus', 'Willpower', 'Perception',
-                    'Agility', 'Strength', 'Endurance']
+            return ['Focus', 'Willpower', 'Perception', 'Agility', 'Strength', 'Endurance']
 
         # Alphabetic as last resort
-        return ['Agility', 'Endurance', 'Focus',
-                'Perception', 'Strength', 'Willpower']
+        return ['Agility', 'Endurance', 'Focus', 'Perception', 'Strength', 'Willpower']
 
     def __repr__(self):
         return (f'<Class> "{self.class_name}" ({self.class_id})')
@@ -91,9 +78,7 @@ class Race(Base):
     additional_wil = Column(SMALLINT(6), server_default=text("0"))
     is_playable = Column(TINYINT(1), server_default=text("0"))
     is_humanoid = Column(TINYINT(1), nullable=False, server_default=text("1"))
-    is_invertebrae = Column(
-        TINYINT(1), nullable=False, server_default=text("0")
-    )
+    is_invertebrae = Column(TINYINT(1), nullable=False, server_default=text("0"))
     is_flying = Column(TINYINT(1), nullable=False, server_default=text("0"))
     is_swimming = Column(TINYINT(1), nullable=False, server_default=text("0"))
     darkvision = Column(TINYINT(4), nullable=False, server_default=text("0"))
@@ -112,18 +97,9 @@ class PlayerCommon(Base):
     """Common data of players that is shared with in-game 'mobiles'"""
     __tablename__ = 'player_common'
 
-    player_id = Column(
-        ForeignKey('players.id', ondelete='CASCADE', onupdate='CASCADE'),
-        primary_key=True, nullable=False, index=True
-    )
-    class_id = Column(
-        ForeignKey('classes.class_id', ondelete='CASCADE', onupdate='CASCADE'),
-        primary_key=True, nullable=False, index=True
-    )
-    race_id = Column(
-        ForeignKey('races.race_id', ondelete='CASCADE', onupdate='CASCADE'),
-        primary_key=True, nullable=False, index=True
-    )
+    player_id = Column(ForeignKey('players.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True)
+    class_id = Column(ForeignKey('classes.class_id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True)
+    race_id = Column(ForeignKey('races.race_id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True)
     sex = Column(TINYINT(4), nullable=False, server_default=text("0"))
     level = Column(TINYINT(3), nullable=False)
     weight = Column(SMALLINT(5), nullable=False)
@@ -155,8 +131,7 @@ class PlayerCommon(Base):
     karma = Column(MEDIUMINT(9), nullable=False)
 
     player = relationship(
-        'Player',
-        backref=backref('common', cascade='all, delete-orphan', uselist=False)
+        'Player', backref=backref('common', uselist=False)
     )
     player_class = relationship('PlayerClass')
     player_race = relationship('Race')
@@ -168,17 +143,9 @@ class PlayerCommon(Base):
 
 # t_player_common = Table(
 #     'player_common', metadata,
-#     Column(
-#         'player_id',
-#         ForeignKey('players.id', ondelete='CASCADE', onupdate='CASCADE'),
-#         nullable=False, unique=True
-#     ),
+#     Column('player_id', ForeignKey('players.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, unique=True),
 #     Column('class_id', TINYINT(4), nullable=False),
-#     Column(
-#         'race_id',
-#         ForeignKey('races.race_id', ondelete='CASCADE', onupdate='CASCADE'),
-#         nullable=False, index=True
-#     ),
+#     Column('race_id', ForeignKey('races.race_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True),
 #     Column('sex', TINYINT(4), nullable=False, server_default=text("0")),
 #     Column('level', TINYINT(3), nullable=False),
 #     Column('weight', SMALLINT(5), nullable=False),

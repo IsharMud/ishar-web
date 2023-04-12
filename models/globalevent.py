@@ -1,6 +1,5 @@
 """Database classes/models"""
 from datetime import datetime
-from functools import cached_property
 
 from sqlalchemy import Column, String, TIMESTAMP, text
 from sqlalchemy.dialects.mysql import TINYINT
@@ -32,12 +31,12 @@ class GlobalEvent(Base):
         """Stringified approximate timedelta until event end"""
         return stringify(self.end_time - datetime.utcnow())
 
-    @cached_property
+    @property
     def display_name(self):
         """Formatted name of the event"""
         return self.event_name.replace('_', ' ').title()
 
-    @cached_property
+    @property
     def display_string(self):
         """Formatted full display string for the event,
             with display name, and any event_desc from database"""
@@ -46,7 +45,7 @@ class GlobalEvent(Base):
             out += f' -- {self.event_desc}'
         return out
 
-    @cached_property
+    @property
     def is_luck(self):
         """Boolean based upon celestial_luck from database"""
         if self.celestial_luck == 1:

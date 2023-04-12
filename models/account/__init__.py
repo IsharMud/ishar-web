@@ -1,6 +1,5 @@
 """Database classes/models"""
 from datetime import datetime
-from functools import cached_property
 
 from flask_login import UserMixin
 from passlib.hash import md5_crypt
@@ -45,7 +44,7 @@ class Account(Base, UserMixin):
         """Method to check an account password"""
         return md5_crypt.verify(password, self.password)
 
-    @cached_property
+    @property
     def display_name(self):
         """Format the account name to display"""
         return self.account_name.replace('"', '').replace("'", '').title()
@@ -64,7 +63,7 @@ class Account(Base, UserMixin):
         """Boolean whether user is authenticated"""
         return isinstance(self.account_id, int)
 
-    @cached_property
+    @property
     def is_god(self):
         """Boolean whether user is a God"""
         for player in self.players:
@@ -72,7 +71,7 @@ class Account(Base, UserMixin):
                 return True
         return False
 
-    @cached_property
+    @property
     def is_artisan(self):
         """Boolean whether user is an Artisan (or above)"""
         for player in self.players:
@@ -80,7 +79,7 @@ class Account(Base, UserMixin):
                 return True
         return False
 
-    @cached_property
+    @property
     def is_consort(self):
         """Boolean whether user is a Consort (or above)"""
         for player in self.players:
@@ -88,7 +87,7 @@ class Account(Base, UserMixin):
                 return True
         return False
 
-    @cached_property
+    @property
     def is_eternal(self):
         """Boolean whether user is an Eternal (or above)"""
         for player in self.players:
@@ -96,7 +95,7 @@ class Account(Base, UserMixin):
                 return True
         return False
 
-    @cached_property
+    @property
     def is_forger(self):
         """Boolean whether user is a Forger (or above)"""
         for player in self.players:
@@ -104,7 +103,7 @@ class Account(Base, UserMixin):
                 return True
         return False
 
-    @cached_property
+    @property
     def is_immortal(self):
         """Boolean whether user is immortal (or above, but not consort)"""
         for player in self.players:
@@ -112,12 +111,12 @@ class Account(Base, UserMixin):
                 return True
         return False
 
-    @cached_property
+    @property
     def created(self):
         """Timedelta since account created"""
         return datetime.utcnow() - self.created_at
 
-    @cached_property
+    @property
     def created_ago(self):
         """Stringified approximate timedelta since account created"""
         return stringify(self.created) + ' ago'

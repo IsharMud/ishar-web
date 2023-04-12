@@ -1,6 +1,4 @@
 """Database classes/models"""
-from functools import cached_property
-
 from sqlalchemy import Column, String, text
 from sqlalchemy.dialects.mysql import INTEGER, SMALLINT, TINYINT
 
@@ -20,22 +18,18 @@ class Challenge(Base):
     adj_people = Column(TINYINT(4), nullable=False)
     adj_tier = Column(TINYINT(4), nullable=False)
     challenge_desc = Column(String(80), nullable=False)
-    winner_desc = Column(
-        String(80),
-        nullable=False,
-        server_default=text("'--'")
-    )
+    winner_desc = Column(String(80), nullable=False, server_default=text("'--'"))
     mob_name = Column(String(30), nullable=False)
     is_active = Column(TINYINT(1), nullable=False, server_default=text("0"))
 
-    @cached_property
+    @property
     def is_completed(self):
         """Boolean whether challenge is completed"""
         if self.winner_desc != '' and self.winner_desc != "'--'":
             return True
         return False
 
-    @cached_property
+    @property
     def display_tier(self):
         """Display challenge tier"""
         tiers = {

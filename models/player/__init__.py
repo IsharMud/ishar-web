@@ -1,6 +1,5 @@
 """Database classes/models"""
 from datetime import datetime, timedelta
-from functools import cached_property
 
 from flask import url_for
 from flask_login import current_user
@@ -60,62 +59,62 @@ class Player(Base):
 
     account = relationship('Account', back_populates='players')
 
-    @cached_property
+    @property
     def birth_ago(self):
         """Stringified approximate timedelta since player birth"""
         return stringify(datetime.utcnow() - self.birth)
 
-    @cached_property
+    @property
     def logon_ago(self):
         """Stringified approximate timedelta since player log on"""
         return stringify(datetime.utcnow() - self.logon)
 
-    @cached_property
+    @property
     def logout_ago(self):
         """Stringified approximate timedelta since player log out"""
         return stringify(datetime.utcnow() - self.logout)
 
-    @cached_property
+    @property
     def online_delta(self):
         """Timedelta of player total online time"""
         return timedelta(seconds=self.online)
 
-    @cached_property
+    @property
     def online_time(self):
         """Stringified approximate timedelta of player total online time"""
         return stringify(self.online_delta)
 
-    @cached_property
+    @property
     def is_god(self):
         """Boolean whether player is a God"""
         return self.is_immortal_type(immortal_type='God')
 
-    @cached_property
+    @property
     def is_artisan(self):
         """Boolean whether player is an Artisan (or above)"""
         return self.is_immortal_type(immortal_type='Artisan')
 
-    @cached_property
+    @property
     def is_consort(self):
         """Boolean whether player is a Consort (or above)"""
         return self.is_immortal_type(immortal_type='Consort')
 
-    @cached_property
+    @property
     def is_eternal(self):
         """Boolean whether player is an Eternal (or above)"""
         return self.is_immortal_type(immortal_type='Eternal')
 
-    @cached_property
+    @property
     def is_forger(self):
         """Boolean whether player is a Forger (or above)"""
         return self.is_immortal_type(immortal_type='Forger')
 
-    @cached_property
+    @property
     def is_immortal(self):
         """Boolean whether player is immortal (or above, but not consort)"""
         return self.is_immortal_type(immortal_type='Immortal')
 
-    @cached_property
+    @property
     def immortal_type(self):
         """Immortal type"""
         if self.true_level in IMM_LEVELS.keys():
@@ -131,14 +130,14 @@ class Player(Base):
                     return True
         return False
 
-    @cached_property
+    @property
     def is_survival(self):
         """Boolean whether player is Survival (permdeath)"""
         if self.game_type == 1:
             return True
         return False
 
-    @cached_property
+    @property
     def player_alignment(self):
         """Player alignment"""
         for align_text, (low, high) in ALIGNMENTS.items():
@@ -146,12 +145,12 @@ class Player(Base):
                 return align_text
         return 'Unknown'
 
-    @cached_property
+    @property
     def player_css(self):
         """Player CSS class"""
         return (f'{self.player_type.lower()}-player')
 
-    @cached_property
+    @property
     def player_stats(self):
         """Player stats"""
 
@@ -188,7 +187,7 @@ class Player(Base):
             stats[stat_order] = players_stats[stat_order]
         return stats
 
-    @cached_property
+    @property
     def player_link(self):
         """Player link"""
         url = url_for(
@@ -198,12 +197,12 @@ class Player(Base):
         )
         return (f'<a href="{url}">{self.name}</a>')
 
-    @cached_property
+    @property
     def player_title(self):
         """Player title"""
         return self.title.replace('%s', self.player_link)
 
-    @cached_property
+    @property
     def player_type(self):
         """
         Player type (string), returns one of:
@@ -219,7 +218,7 @@ class Player(Base):
             return 'Survival'
         return 'Classic'
 
-    @cached_property
+    @property
     def podir(self):
         """Player podir"""
         return (f'{MUD_PODIR}/{self.name}')
