@@ -8,11 +8,14 @@ import signal
 import sys
 
 import interactions
-import models
 
 from config import DISCORD
 from database import db_session
 from help.helptab import search_help_topics
+from models.challenge import Challenge
+from models.globalevent import GlobalEvent
+from models.player import Player
+from models.season import Season
 from sentry import sentry_sdk
 from sysinfo import get_connections, get_uptime
 
@@ -93,12 +96,10 @@ async def challenges(
             out = 'Sorry, but please stick to letters!'
 
         else:
-            find = models.Challenge.query.filter_by(
+            find = Challenge.query.filter_by(
                 is_active=1
             ).filter(
-                models.Challenge.mob_name.like(
-                    '%' + search + '%'
-                )
+                Challenge.mob_name.like(f"%{search}%")
             ).all()
 
             if not find:
@@ -108,7 +109,7 @@ async def challenges(
 
         # Find all active challenges by default
         if not find:
-            find = models.Challenge.query.filter_by(is_active=1).all()
+            find = Challenge.query.filter_by(is_active=1).all()
 
         out = '**Challenges**\n'
         i = completed = 0
@@ -151,12 +152,10 @@ async def deadhead(ctx: interactions.CommandContext):
     )
 
     # Find player with the most deaths
-    deadman = ''
-    deadman.name = 'WIP'
-    deadman.deaths = 0
-    """Player.query.filter_by(
-        is_deleted=0, game_type=0
-    ).order_by(-Player.deaths).first()"""
+    deadman = Player.query.filter_by(
+        is_deleted=0,
+        game_type=0
+    ).order_by(-Player.deaths).first()
 
     # Show the name and death count of the player with the most deaths
     out = 'The player who has died most is: '
@@ -176,7 +175,7 @@ async def events(ctx: interactions.CommandContext):
     )
 
     # Find all global events
-    global_events = models.GlobalEvent.query.all()
+    global_events = GlobalEvent.query.all()
 
     # By default, assume there are none
     out = 'Unfortunately, there are no active events right now.'
@@ -400,9 +399,9 @@ async def season(ctx: interactions.CommandContext):
     )
 
     # Get the current active season
-    current = models.Season.query.filter_by(
+    current = Season.query.filter_by(
         is_active=1
-    ).order_by(-models.Season.season_id).first()
+    ).order_by(-Season.season_id).first()
 
     # Show the current active season ID, and end date
     out = f'It is currently Season {current.season_id}'
