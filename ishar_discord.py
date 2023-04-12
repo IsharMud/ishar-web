@@ -13,10 +13,7 @@ from config import DISCORD
 from database import db_session
 from help.helptab import search_help_topics
 
-from models.challenge import Challenge
-from models.globalevent import GlobalEvent
-# from models.player import Player
-from models.season import Season
+import models
 
 from sentry import sentry_sdk
 from sysinfo import get_connections, get_uptime
@@ -98,10 +95,10 @@ async def challenges(
             out = 'Sorry, but please stick to letters!'
 
         else:
-            find = Challenge.query.filter_by(
+            find = models.Challenge.query.filter_by(
                 is_active=1
             ).filter(
-                Challenge.mob_name.like(
+                models.Challenge.mob_name.like(
                     '%' + search + '%'
                 )
             ).all()
@@ -113,7 +110,7 @@ async def challenges(
 
         # Find all active challenges by default
         if not find:
-            find = Challenge.query.filter_by(is_active=1).all()
+            find = models.Challenge.query.filter_by(is_active=1).all()
 
         out = '**Challenges**\n'
         i = completed = 0
@@ -181,7 +178,7 @@ async def events(ctx: interactions.CommandContext):
     )
 
     # Find all global events
-    global_events = GlobalEvent.query.all()
+    global_events = models.GlobalEvent.query.all()
 
     # By default, assume there are none
     out = 'Unfortunately, there are no active events right now.'
@@ -405,9 +402,9 @@ async def season(ctx: interactions.CommandContext):
     )
 
     # Get the current active season
-    current = Season.query.filter_by(
+    current = models.Season.query.filter_by(
         is_active=1
-    ).order_by(-Season.season_id).first()
+    ).order_by(-models.Season.season_id).first()
 
     # Show the current active season ID, and end date
     out = f'It is currently Season {current.season_id}'
