@@ -8,13 +8,11 @@ import signal
 import sys
 
 import interactions
+import models
 
 from config import DISCORD
 from database import db_session
 from help.helptab import search_help_topics
-
-import models
-
 from sentry import sentry_sdk
 from sysinfo import get_connections, get_uptime
 
