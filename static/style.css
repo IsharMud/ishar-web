@@ -9,7 +9,7 @@ body {
 }
 
 #logo:hover {
-    filter:                 contrast(50%);
+    filter:                 contrast(150%);
 }
 
 h1 {
