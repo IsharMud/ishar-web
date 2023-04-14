@@ -3,7 +3,6 @@ ishar_web
 https://isharmud.com/
 https://github.com/IsharMud/ishar-web
 """
-import os
 from urllib.parse import urlparse
 
 from flask import Flask
@@ -51,7 +50,7 @@ app.register_blueprint(welcome_bp)
 @app.context_processor
 def injects():
     """Add context processor for certain variables on all pages"""
-    sentry_dsn = os.getenv('SENTRY_DSN')
+    sentry_dsn = app.config['SENTRY_DSN']
     sentry_uri = urlparse(sentry_dsn)
     return {
         'current_season': Season.query.filter_by(

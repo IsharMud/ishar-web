@@ -6,6 +6,8 @@ SECRET_KEY = 'SECRET'
 MAX_CONTENT_LENGTH = 52428800
 UPLOAD_FOLDER = '/var/www/isharmud.com/ishar-web/static/patches'
 
+SENTRY_DSN = 'https://abcdef123456@o7654321.ingest.sentry.io/1234567'
+
 SQLALCHEMY_ECHO = False
 SQLALCHEMY_URL = 'mysql+pymysql://username:password@127.0.0.1/ishar'
 
