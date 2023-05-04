@@ -2,7 +2,7 @@
 from sqlalchemy import Column, String, text
 from sqlalchemy.dialects.mysql import INTEGER, SMALLINT, TINYINT
 
-from database import Base
+from database import Base, metadata
 
 
 class Challenge(Base):

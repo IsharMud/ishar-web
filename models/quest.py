@@ -4,6 +4,7 @@ from sqlalchemy.dialects.mysql import INTEGER, TINYINT
 from sqlalchemy.orm import relationship
 
 from database import Base, metadata
+from models.player.common import PlayerClass
 
 
 class PlayerQuest(Base):
@@ -77,7 +78,8 @@ class Quest(Base):
     restricted_class = relationship('PlayerClass')
 
     parents = relationship(
-        'Quest', secondary='quest_prereqs',
+        'Quest',
+        secondary='quest_prereqs',
         primaryjoin='Quest.quest_id == quest_prereqs.c.quest_id',
         secondaryjoin='Quest.quest_id == quest_prereqs.c.required_quest'
     )

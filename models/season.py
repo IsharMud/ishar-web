@@ -5,7 +5,7 @@ from sqlalchemy import Column, TIMESTAMP, text
 from sqlalchemy.dialects.mysql import INTEGER, TINYINT
 
 from delta import stringify
-from database import Base
+from database import Base, metadata
 
 
 class Season(Base):

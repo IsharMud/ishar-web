@@ -3,7 +3,7 @@ from sqlalchemy import Column, ForeignKey, String, text
 from sqlalchemy.dialects.mysql import MEDIUMINT, TINYINT
 from sqlalchemy.orm import relationship
 
-from database import Base
+from database import Base, metadata
 
 
 class AccountUpgrade(Base):
@@ -31,8 +31,18 @@ class AccountsUpgrade(Base):
     account_id = Column(ForeignKey('accounts.account_id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True)
     amount = Column(MEDIUMINT(4), nullable=False)
 
-    account = relationship('Account', back_populates='upgrades')
-    upgrade = relationship('AccountUpgrade')
+    account = relationship(
+        'Account',
+        back_populates='upgrades',
+        single_parent=True,
+        uselist=False
+    )
+
+    upgrade = relationship(
+        'AccountUpgrade',
+        single_parent=True,
+        uselist=False,
+    )
 
     def __repr__(self):
         return (f'<AccountsUpgrade> {self.upgrade} : {self.amount} @ '

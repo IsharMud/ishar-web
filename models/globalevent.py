@@ -5,7 +5,7 @@ from sqlalchemy import Column, String, TIMESTAMP, text
 from sqlalchemy.dialects.mysql import TINYINT
 
 from delta import stringify
-from database import Base
+from database import Base, metadata
 
 
 class GlobalEvent(Base):

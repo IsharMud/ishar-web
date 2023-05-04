@@ -3,7 +3,7 @@ from sqlalchemy import Column, ForeignKey, String, Text, text  # , Table
 from sqlalchemy.dialects.mysql import INTEGER, MEDIUMINT, SMALLINT, TINYINT
 from sqlalchemy.orm import backref, relationship
 
-from database import Base  # , metadata
+from database import Base, metadata
 
 
 class PlayerClass(Base):

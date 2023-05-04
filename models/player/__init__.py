@@ -10,7 +10,7 @@ from sqlalchemy.orm import relationship
 
 from config import ALIGNMENTS, IMM_LEVELS, MUD_PODIR
 from delta import stringify
-from database import Base
+from database import Base, metadata
 
 
 class Player(Base):
@@ -57,7 +57,12 @@ class Player(Base):
     logon = Column(TIMESTAMP, nullable=False, server_default=text("'0000-00-00 00:00:00'"))
     logout = Column(TIMESTAMP, nullable=False, server_default=text("'0000-00-00 00:00:00'"))
 
-    account = relationship('Account', back_populates='players')
+    account = relationship(
+        'Account',
+        back_populates='players',
+        single_parent=True,
+        uselist=False
+    )
 
     @property
     def birth_ago(self):

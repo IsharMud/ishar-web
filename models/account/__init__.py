@@ -10,6 +10,8 @@ from sqlalchemy.orm import relationship
 
 from delta import stringify
 from database import Base, db_session
+from models.player import Player
+from models.account.upgrade import AccountsUpgrade
 
 
 class Account(Base, UserMixin):
@@ -30,8 +32,19 @@ class Account(Base, UserMixin):
     account_name = Column(String(25), nullable=False, unique=True)
     account_gift = Column(TIMESTAMP, nullable=False, server_default=text("'0000-00-00 00:00:00'"))
 
-    players = relationship('Player', back_populates='account')
-    upgrades = relationship('AccountsUpgrade', back_populates='account')
+    players = relationship(
+        'Player',
+        back_populates='account',
+        single_parent=True,
+        uselist=True
+    )
+
+    upgrades = relationship(
+        'AccountsUpgrade',
+        back_populates='account',
+        single_parent=True,
+        uselist=True
+    )
 
     def change_password(self, new_password=None):
         """Method to change an account password"""

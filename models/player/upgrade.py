@@ -4,6 +4,7 @@ from sqlalchemy.dialects.mysql import INTEGER, SMALLINT, TINYINT
 from sqlalchemy.orm import relationship
 
 from database import Base
+from models.player import Player
 
 
 class PlayerRemortUpgrade(Base):
