@@ -12,6 +12,7 @@ import interactions
 from config import DISCORD
 from database import db_session
 from help.helptab import search_help_topics
+from models.account import Account
 from models.challenge import Challenge
 from models.globalevent import GlobalEvent
 from models.player import Player
