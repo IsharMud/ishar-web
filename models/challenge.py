@@ -18,7 +18,8 @@ class Challenge(Base):
     adj_people = Column(TINYINT(4), nullable=False)
     adj_tier = Column(TINYINT(4), nullable=False)
     challenge_desc = Column(String(80), nullable=False)
-    winner_desc = Column(String(80), nullable=False, server_default=text("'--'"))
+    winner_desc = Column(String(80), nullable=False,
+                         server_default=text("'--'"))
     mob_name = Column(String(30), nullable=False)
     is_active = Column(TINYINT(1), nullable=False, server_default=text("0"))
 
@@ -37,7 +38,9 @@ class Challenge(Base):
             4: 'B', 5: 'A', 6: 'S',
             7: 'SS', 8: 'SS', 9: 'SS'
         }
-        return (f'{tiers[self.adj_tier]} ({tiers[self.orig_tier]})')
+        if tiers.get(self.adj_tier) and tiers.get(self.orig_tier):
+            return f'{tiers[self.adj_tier]} ({tiers[self.orig_tier]})'
+        return f'{self.adj_tier} ({self.orig_tier})'
 
     def __repr__(self):
         return (f'<Challenge> "{self.mob_name}" ({self.challenge_id}) / '
