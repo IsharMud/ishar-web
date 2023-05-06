@@ -10,8 +10,7 @@ from sqlalchemy.orm import relationship
 
 from delta import stringify
 from database import Base, db_session
-from models.player import Player
-from models.account.upgrade import AccountsUpgrade
+from .upgrade import AccountsUpgrade
 
 
 class Account(Base, UserMixin):

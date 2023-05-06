@@ -9,7 +9,9 @@ def classic():
     """Sort and list the best classic players"""
     return render_template(
         'leaders.html.j2',
-        leader_players=Player.query.filter_by(game_type=0).filter(
+        leader_players=Player.query.filter_by(
+            game_type=0
+        ).filter(
             Player.true_level < min(IMM_LEVELS)
         ).order_by(
             -Player.remorts,

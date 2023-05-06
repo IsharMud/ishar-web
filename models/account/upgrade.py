@@ -41,7 +41,7 @@ class AccountsUpgrade(Base):
     upgrade = relationship(
         'AccountUpgrade',
         single_parent=True,
-        uselist=False,
+        uselist=False
     )
 
     def __repr__(self):

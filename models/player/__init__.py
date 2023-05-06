@@ -11,6 +11,8 @@ from sqlalchemy.orm import relationship
 from config import ALIGNMENTS, IMM_LEVELS, MUD_PODIR
 from delta import stringify
 from database import Base, metadata
+from .quest import PlayerQuest
+from .upgrade import PlayerRemortUpgrade
 
 
 class Player(Base):
@@ -62,6 +64,24 @@ class Player(Base):
         back_populates='players',
         single_parent=True,
         uselist=False
+    )
+
+    common = relationship(
+        'PlayerCommon',
+        single_parent=True,
+        uselist=False
+    )
+
+    quests = relationship(
+        'PlayerQuest',
+        single_parent=True,
+        uselist=True
+    )
+
+    remort_upgrades = relationship(
+        'PlayerRemortUpgrade',
+        single_parent=True,
+        uselist=True
     )
 
     @property
@@ -250,4 +270,4 @@ class Player(Base):
 
     def __repr__(self):
         return (f'<Player> "{self.name}" ({self.id}) / '
-                f'Type: {self.player_type} / True Level: {self.true_level}')
+                f'{self.player_type} [{self.true_level}]')

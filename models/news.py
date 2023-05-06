@@ -4,7 +4,7 @@ from sqlalchemy import Column, ForeignKey, String, TIMESTAMP, Text, text
 from sqlalchemy.dialects.mysql import INTEGER
 from sqlalchemy.orm import relationship
 
-from database import Base
+from database import Base, metadata
 
 
 class News(Base):
@@ -17,7 +17,11 @@ class News(Base):
     subject = Column(String(64), nullable=False, server_default=text("''"))
     body = Column(Text, nullable=False)
 
-    account = relationship('Account')
+    account = relationship(
+        'Account',
+        single_parent=True,
+        uselist=False
+    )
 
     def __repr__(self):
         return (f'<News> "{self.subject}" ({self.news_id}) @ '

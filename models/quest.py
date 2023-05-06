@@ -1,22 +1,9 @@
 """Database classes/models"""
-from sqlalchemy import Column, ForeignKey, String, Table, TIMESTAMP, text
+from sqlalchemy import Column, ForeignKey, String, Table, text
 from sqlalchemy.dialects.mysql import INTEGER, TINYINT
 from sqlalchemy.orm import relationship
 
 from database import Base, metadata
-from models.player.common import PlayerClass
-
-
-class PlayerQuest(Base):
-    __tablename__ = 'player_quests'
-
-    quest_id = Column(ForeignKey('quests.quest_id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False)
-    player_id = Column(INTEGER(11), primary_key=True, nullable=False, index=True)
-    status = Column(TINYINT(11), nullable=False)
-    last_completed_at = Column(TIMESTAMP, nullable=False, server_default=text("current_timestamp() ON UPDATE current_timestamp()"))
-    num_completed = Column(TINYINT(4), nullable=False, server_default=text("0"))
-
-    quest = relationship('Quest')
 
 
 t_quest_prereqs = Table(
@@ -33,7 +20,16 @@ class QuestReward(Base):
     reward_type = Column(TINYINT(2), nullable=False)
     quest_id = Column(ForeignKey('quests.quest_id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True)
 
-    quest = relationship('Quest')
+    quest = relationship(
+        'Quest',
+        single_parent=True,
+        uselist=False,
+        back_populates='rewards'
+    )
+
+    def __repr__(self):
+        return (f'<QuestReward> {self.reward_num} ({self.reward_type}) @ '
+                f'{self.quest}')
 
 
 class QuestStep(Base):
@@ -48,15 +44,17 @@ class QuestStep(Base):
     mystify = Column(TINYINT(1), nullable=False, server_default=text("0"))
     mystify_text = Column(String(80), nullable=False, server_default=text("''"))
 
-    quest = relationship('Quest')
+    quest = relationship(
+        'Quest',
+        single_parent=True,
+        uselist=False,
+        back_populates='steps'
+    )
 
-
-class PlayerQuestStep(Base):
-    __tablename__ = 'player_quest_steps'
-
-    player_id = Column(INTEGER(11), primary_key=True, nullable=False)
-    step_id = Column(TINYINT(4), primary_key=True, nullable=False, index=True)
-    num_collected = Column(TINYINT(1), nullable=False)
+    def __repr__(self):
+        return (f'<QuestStep> {self.step_id} ({self.step_type}) / '
+                f'Target: {self.target} [{self.num_required}] @ '
+                f'{self.quest}')
 
 
 class Quest(Base):
@@ -75,11 +73,36 @@ class Quest(Base):
     class_restrict = Column(ForeignKey('classes.class_id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True)
     quest_intro = Column(String(1600), nullable=False, server_default=text("''"))
 
-    restricted_class = relationship('PlayerClass')
-
     parents = relationship(
         'Quest',
         secondary='quest_prereqs',
         primaryjoin='Quest.quest_id == quest_prereqs.c.quest_id',
         secondaryjoin='Quest.quest_id == quest_prereqs.c.required_quest'
     )
+
+    restricted_class = relationship(
+        'Class',
+        single_parent=True,
+        uselist=False
+    )
+
+    rewards = relationship(
+        'QuestReward',
+        single_parent=True,
+        uselist=True,
+        back_populates='quest'
+    )
+
+    steps = relationship(
+        'QuestStep',
+        back_populates='quest',
+        single_parent=True,
+        uselist=True
+    )
+
+    def __repr__(self):
+        return (f'<Quest> {self.name} ({self.quest_id}) / '
+                f'Levels: {self.min_level} - {self.max_level} / '
+                f'Parents: {len(self.parents)} / '
+                f'Steps: {len(self.steps)} / '
+                f'Class: {self.restricted_class}')

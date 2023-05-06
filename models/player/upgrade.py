@@ -3,8 +3,7 @@ from sqlalchemy import Column, ForeignKey, String, text
 from sqlalchemy.dialects.mysql import INTEGER, SMALLINT, TINYINT
 from sqlalchemy.orm import relationship
 
-from database import Base
-from models.player import Player
+from database import Base, metadata
 
 
 class PlayerRemortUpgrade(Base):
@@ -16,8 +15,19 @@ class PlayerRemortUpgrade(Base):
     value = Column(INTEGER(11), nullable=False)
     essence_perk = Column(TINYINT(1), nullable=False, server_default=text("0"))
 
-    player = relationship('Player', backref='remort_upgrades')
-    remort_upgrade = relationship('RemortUpgrade')
+    player = relationship(
+        'Player',
+        back_populates='remort_upgrades',
+        single_parent=True,
+        uselist=False
+    )
+
+    remort_upgrade = relationship(
+        'RemortUpgrade',
+        back_populates='remort_upgrades',
+        single_parent=True,
+        uselist=False
+    )
 
     def __repr__(self):
         return (f'<PlayerRemortUpgrade> "{self.remort_upgrade}" '
@@ -39,6 +49,13 @@ class RemortUpgrade(Base):
     bonus = Column(TINYINT(4), nullable=False, server_default=text("0"))
     survival_scale = Column(TINYINT(4), nullable=False)
     survival_renown_cost = Column(TINYINT(4), nullable=False)
+
+    remort_upgrades = relationship(
+        'PlayerRemortUpgrade',
+        back_populates='remort_upgrade',
+        single_parent=True,
+        uselist=True
+    )
 
     def __repr__(self):
         return (f'<RemortUpgrade> "{self.display_name}" ({self.upgrade_id})')

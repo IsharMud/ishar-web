@@ -1,12 +1,12 @@
 """Database classes/models"""
 from sqlalchemy import Column, ForeignKey, String, Text, text  # , Table
 from sqlalchemy.dialects.mysql import INTEGER, MEDIUMINT, SMALLINT, TINYINT
-from sqlalchemy.orm import backref, relationship
+from sqlalchemy.orm import relationship
 
 from database import Base, metadata
 
 
-class PlayerClass(Base):
+class Class(Base):
     """Classes available when creating a player character:
         such as Cleric, Magician, Warrior, etc."""
     __tablename__ = 'classes'
@@ -131,10 +131,23 @@ class PlayerCommon(Base):
     karma = Column(MEDIUMINT(9), nullable=False)
 
     player = relationship(
-        'Player', backref=backref('common', uselist=False)
+        'Player',
+        back_populates='common',
+        single_parent=True,
+        uselist=False
     )
-    player_class = relationship('PlayerClass')
-    player_race = relationship('Race')
+
+    player_class = relationship(
+        'Class',
+        single_parent=True,
+        uselist=False
+    )
+
+    player_race = relationship(
+        'Race',
+        single_parent=True,
+        uselist=False
+    )
 
     def __repr__(self):
         return (f'<PlayerCommon> {self.player} / {self.player_class} / '
