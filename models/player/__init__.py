@@ -13,6 +13,7 @@ from delta import stringify
 from database import Base, metadata
 from .quest import PlayerQuest
 from .upgrade import PlayerRemortUpgrade
+from ..account import Account
 
 
 class Player(Base):
