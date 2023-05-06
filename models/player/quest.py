@@ -1,10 +1,10 @@
 """Database classes/models"""
-from sqlalchemy import Column, ForeignKey, String, Table, TIMESTAMP, text
-from sqlalchemy.dialects.mysql import INTEGER, TINYINT
+from sqlalchemy import Column, ForeignKey, TIMESTAMP, text
+from sqlalchemy.dialects.mysql import TINYINT
 from sqlalchemy.orm import relationship
 
 from database import Base, metadata
-from . import Player
+from ..quest import Quest
 
 
 class PlayerQuest(Base):
