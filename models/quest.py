@@ -98,7 +98,7 @@ class Quest(Base):
         'QuestStep',
         uselist=True,
         single_parent=True,
-        back_populates='quest',
+        back_populates='quest'
     )
 
     def __repr__(self):
