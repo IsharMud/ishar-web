@@ -4,7 +4,10 @@
 {% block meta_description %}Administration portal page to manage seasons{% endblock meta_description %}
 {% block meta_url %}{{ url_for('.index', _external=True) }}{% endblock meta_url %}
 {% block title %}Seasons / Administration Portal{% endblock title %}
-{% block header %}<a href="{{ url_for('.index') }}">Seasons</a>{% endblock header %}
+{%- block header %}
+<a href="{{ url_for('admin.index') }}">Administration</a> /
+<a href="{{ url_for('.index') }}">Seasons</a>
+{%- endblock header %}
 {%- block content %}
             <table>
     {%- if seasons is defined and seasons is iterable and seasons | length > 0 %}

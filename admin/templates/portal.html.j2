@@ -4,7 +4,8 @@
 {% block meta_description %}Administration portal for Gods of Ishar MUD{% endblock meta_description %}
 {% block meta_url %}{{ url_for('.index', _external=True) }}{% endblock meta_url %}
 {% block title %}Administration Portal{% endblock title %}
-{% block header %}<a href="{{ url_for('.index') }}">Administration</a>{% endblock header %}
+{% block header %}
+<a href="{{ url_for('.index') }}">Administration</a>{% endblock header %}
 {%- block content %}
             <p>
                 Welcome to the Ishar MUD web administration portal!

@@ -4,7 +4,11 @@
 {%- block meta_description %}Administration portal page to view accounts{%- endblock meta_description %}
 {% block meta_url %}{{ url_for('.manage', manage_account_id=manage_account.account_id | default(''), _external=True) }}{% endblock meta_url %}
 {%- block title %}Manage Account ({{ manage_account.display_name | safe }}) / Administration Portal{%- endblock title %}
-{%- block header %}<a href="{{ url_for('.index') }}">Accounts</a> / {{ manage_account.display_name | safe }} <a href="{{ url_for('.edit', edit_account_id=manage_account.account_id) }}">✏️</a>{%- endblock header %}
+{%- block header %}
+<a href="{{ url_for('admin.index') }}">Administration</a> /
+<a href="{{ url_for('.index') }}">Accounts</a> /
+{{ manage_account.display_name | safe }} <a href="{{ url_for('.edit', edit_account_id=manage_account.account_id) }}">✏️</a>
+{%- endblock header %}
 {%- macro display_deaths(player) -%}
     {%- if player.player_type != 'Classic' -%}
         gridjs.html(`<span class="{{ player.player_css }}">{{ player.player_type }}</span>`)

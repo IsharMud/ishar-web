@@ -4,7 +4,11 @@
 {% block meta_description %}Administration portal page to cycle seasons{% endblock meta_description %}
 {% block meta_url %}{{ url_for('.cycle', _external=True) }}{% endblock meta_url %}
 {% block title %}Cycle Seasons / Administration Portal{% endblock title %}
-{% block header %}<a href="{{ url_for('.index') }}">Cycle Seasons</a>{% endblock header %}
+{%- block header %}
+<a href="{{ url_for('admin.index') }}">Administration</a> /
+<a href="{{ url_for('.index') }}">Seasons</a> /
+<a href="{{ url_for('.cycle') }}">Cycle</a>
+{%- endblock header %}
 {%- macro render_field(field) %}
                     <p class="admin-{{ field.name | safe }}">
                         {{ field.label | safe }}
