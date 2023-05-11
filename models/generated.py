@@ -1,5 +1,5 @@
 # coding: utf-8
-from sqlalchemy import Column, ForeignKey, String, TIMESTAMP, Table, Text, text
+from sqlalchemy import Column, Float, ForeignKey, Index, String, TIMESTAMP, Table, Text, text
 from sqlalchemy.dialects.mysql import INTEGER, MEDIUMINT, SMALLINT, TINYINT
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
@@ -13,8 +13,8 @@ class AccountUpgrade(Base):
 
     id = Column(TINYINT(4), primary_key=True)
     cost = Column(MEDIUMINT(4), nullable=False)
-    description = Column(String(200), nullable=False)
-    name = Column(String(30), nullable=False, unique=True)
+    description = Column(String(400), nullable=False)
+    name = Column(String(80), nullable=False, unique=True)
     max_value = Column(MEDIUMINT(4), nullable=False, server_default=text("1"))
     scale = Column(TINYINT(4), nullable=False, server_default=text("1"))
     is_disabled = Column(TINYINT(1), nullable=False, server_default=text("0"))
@@ -36,6 +36,8 @@ class Account(Base):
     last_haddr = Column(INTEGER(11), nullable=False)
     account_name = Column(String(25), nullable=False, unique=True)
     account_gift = Column(TIMESTAMP, nullable=False, server_default=text("'0000-00-00 00:00:00'"))
+    banned_until = Column(TIMESTAMP)
+    bugs_reported = Column(INTEGER(11), nullable=False, server_default=text("0"))
 
 
 class AffectFlag(Base):
@@ -93,6 +95,15 @@ class ConfigurationOption(Base):
     is_display = Column(TINYINT(1), nullable=False, server_default=text("0"))
 
 
+class Force(Base):
+    __tablename__ = 'forces'
+
+    id = Column(INTEGER(11), primary_key=True)
+    force_name = Column(String(255), unique=True)
+
+    spells = relationship('SpellInfo', secondary='spell_forces')
+
+
 class GlobalEvent(Base):
     __tablename__ = 'global_event'
 
@@ -127,14 +138,16 @@ class Quest(Base):
     quest_id = Column(INTEGER(11), primary_key=True)
     name = Column(String(25), nullable=False, unique=True, server_default=text("''"))
     display_name = Column(String(30), nullable=False)
-    completion_message = Column(String(80), nullable=False)
+    completion_message = Column(String(700), nullable=False)
     min_level = Column(TINYINT(4), nullable=False, server_default=text("1"))
     max_level = Column(TINYINT(4), nullable=False, server_default=text("20"))
     repeatable = Column(TINYINT(1), nullable=False, server_default=text("0"))
     description = Column(String(512), nullable=False, server_default=text("'No description available.'"))
     prerequisite = Column(INTEGER(11), nullable=False, server_default=text("-1"))
     class_restrict = Column(TINYINT(4), nullable=False, server_default=text("-1"))
-    quest_intro = Column(String(1600), nullable=False, server_default=text("''"))
+    quest_intro = Column(String(2000), nullable=False, server_default=text("''"))
+    quest_source = Column(INTEGER(10))
+    quest_return = Column(INTEGER(10))
 
     parents = relationship(
         'Quest',
@@ -210,12 +223,84 @@ class Season(Base):
     is_active = Column(TINYINT(4), nullable=False)
     effective_date = Column(TIMESTAMP, nullable=False, server_default=text("current_timestamp() ON UPDATE current_timestamp()"))
     expiration_date = Column(TIMESTAMP, nullable=False, server_default=text("'0000-00-00 00:00:00'"))
+    average_essence_gain = Column(Float, nullable=False, server_default=text("0"))
+    average_remorts = Column(Float, nullable=False, server_default=text("0"))
+    max_essence_gain = Column(INTEGER(11), nullable=False, server_default=text("0"))
+    max_remorts = Column(INTEGER(11), nullable=False, server_default=text("0"))
+    season_leader_account = Column(INTEGER(11), nullable=False, server_default=text("0"))
+    seasonal_leader_name = Column(Text, nullable=False, server_default=text("'Tyler'"))
 
 
 class Skill(Base):
     __tablename__ = 'skills'
 
     skill_id = Column(INTEGER(11), primary_key=True)
+
+
+class SpellFlag(Base):
+    __tablename__ = 'spell_flags'
+
+    id = Column(INTEGER(11), primary_key=True)
+    name = Column(String(50), nullable=False)
+    description = Column(String(255))
+
+    spells = relationship('SpellInfo', secondary='spells_spell_flags')
+
+
+class SpellInfo(Base):
+    __tablename__ = 'spell_info'
+
+    id = Column(INTEGER(11), primary_key=True)
+    enum_symbol = Column(String(255), nullable=False)
+    func_name = Column(String(255))
+    skill_name = Column(Text)
+    min_posn = Column(INTEGER(11))
+    min_use = Column(INTEGER(11))
+    spell_breakpoint = Column(INTEGER(11))
+    held_cost = Column(INTEGER(11))
+    wearoff_msg = Column(Text)
+    chant_text = Column(Text)
+    difficulty = Column(INTEGER(11))
+    rate = Column(INTEGER(11))
+    notice_chance = Column(INTEGER(11))
+    appearance = Column(Text)
+    component_type = Column(INTEGER(11))
+    component_value = Column(INTEGER(11))
+    scale = Column(INTEGER(11))
+    mod_stat_1 = Column(INTEGER(11))
+    mod_stat_2 = Column(INTEGER(11))
+    is_spell = Column(TINYINT(1))
+    is_skill = Column(TINYINT(1))
+    is_type = Column(TINYINT(1))
+    decide_func = Column(Text, nullable=False)
+
+
+t_spell_info_bck = Table(
+    'spell_info_bck', metadata,
+    Column('id', INTEGER(11), nullable=False),
+    Column('enum_symbol', String(255), nullable=False),
+    Column('func_name', String(255)),
+    Column('skill_name', Text),
+    Column('min_posn', INTEGER(11)),
+    Column('min_use', INTEGER(11)),
+    Column('spell_breakpoint', INTEGER(11)),
+    Column('held_cost', INTEGER(11)),
+    Column('wearoff_msg', Text),
+    Column('chant_text', Text),
+    Column('difficulty', INTEGER(11)),
+    Column('rate', INTEGER(11)),
+    Column('notice_chance', INTEGER(11)),
+    Column('appearance', Text),
+    Column('component_type', INTEGER(11)),
+    Column('component_value', INTEGER(11)),
+    Column('scale', INTEGER(11)),
+    Column('mod_stat_1', INTEGER(11)),
+    Column('mod_stat_2', INTEGER(11)),
+    Column('is_spell', TINYINT(1)),
+    Column('is_skill', TINYINT(1)),
+    Column('is_type', TINYINT(1)),
+    Column('decide_func', Text, nullable=False)
+)
 
 
 class AccountsAccountUpgrade(Base):
@@ -323,6 +408,7 @@ class QuestReward(Base):
     reward_num = Column(INTEGER(11), primary_key=True, nullable=False)
     reward_type = Column(TINYINT(2), nullable=False)
     quest_id = Column(ForeignKey('quests.quest_id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True)
+    class_restrict = Column(TINYINT(4), nullable=False, server_default=text("-1"))
 
     quest = relationship('Quest')
 
@@ -340,6 +426,53 @@ class QuestStep(Base):
     mystify_text = Column(String(80), nullable=False, server_default=text("''"))
 
     quest = relationship('Quest')
+
+
+t_races_skills = Table(
+    'races_skills', metadata,
+    Column('race_id', ForeignKey('races.race_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True),
+    Column('skill_id', ForeignKey('spell_info.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True),
+    Column('level', TINYINT(4), nullable=False)
+)
+
+
+t_racial_affinities = Table(
+    'racial_affinities', metadata,
+    Column('race_id', ForeignKey('races.race_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True),
+    Column('force_id', ForeignKey('forces.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True),
+    Column('affinity_type', TINYINT(4), nullable=False)
+)
+
+
+t_spell_forces = Table(
+    'spell_forces', metadata,
+    Column('spell_id', ForeignKey('spell_info.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True),
+    Column('force_id', ForeignKey('forces.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True),
+    Index('spell_id_2', 'spell_id', 'force_id', unique=True)
+)
+
+
+t_spells_spell_flags = Table(
+    'spells_spell_flags', metadata,
+    Column('spell_id', ForeignKey('spell_info.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False),
+    Column('flag_id', ForeignKey('spell_flags.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True)
+)
+
+
+class KillMemory(Base):
+    __tablename__ = 'kill_memory'
+    __table_args__ = (
+        Index('player_id', 'player_id', 'kill_memory_set', unique=True),
+    )
+
+    id = Column(INTEGER(11), primary_key=True)
+    player_id = Column(ForeignKey('players.id', ondelete='CASCADE', onupdate='CASCADE'))
+    kill_memory_set = Column(INTEGER(11))
+    scratch = Column(SMALLINT(6))
+    nonzero = Column(SMALLINT(6))
+    total = Column(INTEGER(11))
+
+    player = relationship('Player')
 
 
 class PlayerAffectFlag(Base):
@@ -456,8 +589,20 @@ class PlayerRemortUpgrade(Base):
 class PlayerSkill(Base):
     __tablename__ = 'player_skills'
 
-    skill_id = Column(INTEGER(11), primary_key=True, nullable=False)
+    skill_id = Column(ForeignKey('spell_info.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False)
     player_id = Column(ForeignKey('players.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True)
     skill_level = Column(TINYINT(11), nullable=False)
 
     player = relationship('Player')
+    skill = relationship('SpellInfo')
+
+
+class KillMemoryBucket(Base):
+    __tablename__ = 'kill_memory_buckets'
+
+    id = Column(INTEGER(11), primary_key=True)
+    kill_memory_id = Column(ForeignKey('kill_memory.id', ondelete='CASCADE', onupdate='CASCADE'), index=True)
+    bucket_index = Column(SMALLINT(6))
+    value = Column(SMALLINT(6))
+
+    kill_memory = relationship('KillMemory')

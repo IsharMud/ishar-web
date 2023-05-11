@@ -13,8 +13,8 @@ class AccountUpgrade(Base):
 
     id = Column(TINYINT(4), primary_key=True)
     cost = Column(MEDIUMINT(4), nullable=False)
-    description = Column(String(200), nullable=False)
-    name = Column(String(30), nullable=False, unique=True)
+    description = Column(String(400), nullable=False)
+    name = Column(String(80), nullable=False, unique=True)
     max_value = Column(MEDIUMINT(4), nullable=False, server_default=text("1"))
     scale = Column(TINYINT(4), nullable=False, server_default=text("1"))
     is_disabled = Column(TINYINT(1), nullable=False, server_default=text("0"))
@@ -36,6 +36,8 @@ class Account(Base):
     last_haddr = Column(INTEGER(11), nullable=False)
     account_name = Column(String(25), nullable=False, unique=True)
     account_gift = Column(TIMESTAMP, nullable=False, server_default=text("'0000-00-00 00:00:00'"))
+    banned_until = Column(TIMESTAMP)
+    bugs_reported = Column(INTEGER(11), nullable=False, server_default=text("0"))
 
     players = relationship('Player', secondary='player_accounts')
 
@@ -101,6 +103,8 @@ class Force(Base):
     id = Column(INTEGER(11), primary_key=True)
     force_name = Column(String(255), unique=True)
 
+    spells = relationship('SpellInfo', secondary='spell_forces')
+
 
 class GlobalEvent(Base):
     __tablename__ = 'global_event'
@@ -148,14 +152,16 @@ class Quest(Base):
     quest_id = Column(INTEGER(11), primary_key=True)
     name = Column(String(25), nullable=False, unique=True, server_default=text("''"))
     display_name = Column(String(30), nullable=False)
-    completion_message = Column(String(80), nullable=False)
+    completion_message = Column(String(700), nullable=False)
     min_level = Column(TINYINT(4), nullable=False, server_default=text("1"))
     max_level = Column(TINYINT(4), nullable=False, server_default=text("20"))
     repeatable = Column(TINYINT(1), nullable=False, server_default=text("0"))
     description = Column(String(512), nullable=False, server_default=text("'No description available.'"))
     prerequisite = Column(INTEGER(11), nullable=False, server_default=text("-1"))
     class_restrict = Column(TINYINT(4), nullable=False, server_default=text("-1"))
-    quest_intro = Column(String(1600), nullable=False, server_default=text("''"))
+    quest_intro = Column(String(2000), nullable=False, server_default=text("''"))
+    quest_source = Column(INTEGER(10))
+    quest_return = Column(INTEGER(10))
 
     parents = relationship(
         'Quest',
@@ -209,14 +215,6 @@ class Race(Base):
     is_undead = Column(TINYINT(1), nullable=False, server_default=text("0"))
 
 
-t_racial_affinities = Table(
-    'racial_affinities', metadata,
-    Column('race_id', INTEGER(11), nullable=False),
-    Column('damage_type', INTEGER(11), nullable=False),
-    Column('affinity_type', TINYINT(4), nullable=False)
-)
-
-
 class RemortUpgrade(Base):
     __tablename__ = 'remort_upgrades'
 
@@ -266,9 +264,8 @@ class SpellInfo(Base):
     skill_name = Column(Text)
     min_posn = Column(INTEGER(11))
     min_use = Column(INTEGER(11))
-    spbrk = Column(INTEGER(11))
+    spell_breakpoint = Column(INTEGER(11))
     held_cost = Column(INTEGER(11))
-    flags = Column(Text)
     wearoff_msg = Column(Text)
     chant_text = Column(Text)
     difficulty = Column(INTEGER(11))
@@ -283,6 +280,7 @@ class SpellInfo(Base):
     is_spell = Column(TINYINT(1))
     is_skill = Column(TINYINT(1))
     is_type = Column(TINYINT(1))
+    decide_func = Column(Text, nullable=False)
 
 
 class AccountsAccountUpgrade(Base):
@@ -378,6 +376,7 @@ class QuestReward(Base):
     reward_num = Column(INTEGER(11), primary_key=True, nullable=False)
     reward_type = Column(TINYINT(2), nullable=False)
     quest_id = Column(ForeignKey('quests.quest_id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True)
+    class_restrict = Column(TINYINT(4), nullable=False, server_default=text("-1"))
 
     quest = relationship('Quest')
 
@@ -397,15 +396,28 @@ class QuestStep(Base):
     quest = relationship('Quest')
 
 
-class SpellForce(Base):
-    __tablename__ = 'spell_forces'
+t_races_skills = Table(
+    'races_skills', metadata,
+    Column('race_id', ForeignKey('races.race_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True),
+    Column('skill_id', ForeignKey('spell_info.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True),
+    Column('level', TINYINT(4), nullable=False)
+)
 
-    id = Column(INTEGER(11), primary_key=True)
-    spell_id = Column(ForeignKey('spell_info.id'), index=True)
-    force_id = Column(ForeignKey('forces.id'), index=True)
 
-    force = relationship('Force')
-    spell = relationship('SpellInfo')
+t_racial_affinities = Table(
+    'racial_affinities', metadata,
+    Column('race_id', ForeignKey('races.race_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True),
+    Column('force_id', ForeignKey('forces.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True),
+    Column('affinity_type', TINYINT(4), nullable=False)
+)
+
+
+t_spell_forces = Table(
+    'spell_forces', metadata,
+    Column('spell_id', ForeignKey('spell_info.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True),
+    Column('force_id', ForeignKey('forces.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True),
+    Index('spell_id_2', 'spell_id', 'force_id', unique=True)
+)
 
 
 t_spells_spell_flags = Table(
@@ -413,6 +425,22 @@ t_spells_spell_flags = Table(
     Column('spell_id', ForeignKey('spell_info.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False),
     Column('flag_id', ForeignKey('spell_flags.id', ondelete='CASCADE', onupdate='CASCADE'), primary_key=True, nullable=False, index=True)
 )
+
+
+class KillMemory(Base):
+    __tablename__ = 'kill_memory'
+    __table_args__ = (
+        Index('player_id', 'player_id', 'kill_memory_set', unique=True),
+    )
+
+    id = Column(INTEGER(11), primary_key=True)
+    player_id = Column(ForeignKey('players.id', ondelete='CASCADE', onupdate='CASCADE'))
+    kill_memory_set = Column(INTEGER(11))
+    scratch = Column(SMALLINT(6))
+    nonzero = Column(SMALLINT(6))
+    total = Column(INTEGER(11))
+
+    player = relationship('Player')
 
 
 t_player_accounts = Table(
@@ -453,7 +481,7 @@ class PlayerBoard(Base):
 
 t_player_common = Table(
     'player_common', metadata,
-    Column('player_id', ForeignKey('players.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True),
+    Column('player_id', ForeignKey('players.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, unique=True),
     Column('class_id', ForeignKey('classes.class_id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True),
     Column('race_id', TINYINT(3), nullable=False),
     Column('sex', TINYINT(4), nullable=False, server_default=text("0")),
@@ -510,14 +538,12 @@ class PlayerConfigurationOption(Base):
     player = relationship('Player')
 
 
-class PlayerKillBucket(Base):
-    __tablename__ = 'player_kill_buckets'
-
-    player_id = Column(ForeignKey('players.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False, index=True)
-    bucket_id = Column(INTEGER(11), primary_key=True)
-    bucket_data = Column(INTEGER(11), nullable=False)
-
-    player = relationship('Player')
+t_player_heirlooms = Table(
+    'player_heirlooms', metadata,
+    Column('player_id', ForeignKey('players.id', ondelete='CASCADE', onupdate='CASCADE'), nullable=False),
+    Column('obj_vnum', INTEGER(10), nullable=False),
+    Index('player_id', 'player_id', 'obj_vnum', unique=True)
+)
 
 
 class PlayerPlayerFlag(Base):
@@ -578,3 +604,14 @@ class PlayerSkill(Base):
     skill_level = Column(TINYINT(11), nullable=False)
 
     player = relationship('Player')
+
+
+class KillMemoryBucket(Base):
+    __tablename__ = 'kill_memory_buckets'
+
+    id = Column(INTEGER(11), primary_key=True)
+    kill_memory_id = Column(ForeignKey('kill_memory.id', ondelete='CASCADE', onupdate='CASCADE'), index=True)
+    bucket_index = Column(SMALLINT(6))
+    value = Column(SMALLINT(6))
+
+    kill_memory = relationship('KillMemory')
