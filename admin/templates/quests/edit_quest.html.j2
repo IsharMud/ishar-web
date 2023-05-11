@@ -58,42 +58,51 @@
                     </script>
                 </form>
     {%- endif %}
-    <h4>Rewards</h4>
+                <h4>
+                    Rewards
+                </h4>
     {%- if edit_quest.rewards %}
-    <ol>
+                <ol>
         {%- for quest_reward in edit_quest.rewards %}
-        <li>
-            {{ quest_reward }}
-        </li>
+                    <li>
+                        {{ quest_reward }}
+                    </li>
         {%- endfor %}
-    </ol>
+                </ol>
     {%- else %}
-    <ul>
-        <li>
-            <i>None</i>
-        </li>
-        <li>
-            <a href="#add-quest-reward" id="add-quest-reward">Add Quest Reward</a>
-        </li>
-    </ul>
+                <ul>
+                    <li>
+                        <i>None</i>
+                    </li>
+                </ul>
     {%- endif %}
-    <h4>Steps</h4>
+                <ul>
+                    <li>
+                        <a href="#add-quest-reward" id="add-quest-reward">Add Quest Reward</a>
+                    </li>
+                </ul>
+
+                <h4>
+                    Steps
+                </h4>
     {%- if edit_quest.steps %}
-    <ol>
+                <ol>
         {%- for quest_step in edit_quest.steps %}
-        <li>
-            {{ quest_step }}
-        </li>
+                    <li>
+                        {{ quest_step }}
+                    </li>
         {%- endfor %}
-    </ol>
+                </ol>
     {%- else %}
-    <ul>
-        <li>
-            <i>None</i>
-        </li>
-        <li>
-            <a href="#add-quest-step" id="add-quest-step">Add Quest Step</a>
-        </li>
-    </ul>
+                <ul>
+                    <li>
+                        <i>None</i>
+                    </li>
+                </ul>
     {%- endif %}
+                <ul>
+                    <li>
+                        <a href="#add-quest-step" id="add-quest-step">Add Quest Step</a>
+                    </li>
+                </ul>
 {%- endblock content %}
