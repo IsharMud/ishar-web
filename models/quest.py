@@ -4,6 +4,7 @@ from sqlalchemy.dialects.mysql import INTEGER, TINYINT
 from sqlalchemy.orm import relationship
 
 from database import Base, metadata
+from models.player.common import Class
 
 
 t_quest_prereqs = Table(
@@ -82,22 +83,22 @@ class Quest(Base):
 
     restricted_class = relationship(
         'Class',
-        single_parent=True,
-        uselist=False
+        uselist=False,
+        single_parent=True
     )
 
     rewards = relationship(
         'QuestReward',
-        single_parent=True,
         uselist=True,
+        single_parent=True,
         back_populates='quest'
     )
 
     steps = relationship(
         'QuestStep',
-        back_populates='quest',
+        uselist=True,
         single_parent=True,
-        uselist=True
+        back_populates='quest',
     )
 
     def __repr__(self):

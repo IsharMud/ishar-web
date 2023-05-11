@@ -1,7 +1,8 @@
 """Frequently Asked Questions"""
 from flask import Blueprint, render_template, url_for
 
-from models.player.common import Class, Race
+from models.player.common import Class
+from models.race import Race
 
 
 # Flask Blueprint
