@@ -52,7 +52,7 @@ class PlayerQuestStep(Base):
     step = relationship(
         'QuestStep',
         single_parent=True,
-        uselist=False,
+        uselist=False
     )
 
     def __repr__(self):
