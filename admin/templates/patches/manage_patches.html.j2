@@ -4,7 +4,10 @@
 {% block meta_description %}Administration portal to upload patch notes{% endblock meta_description %}
 {% block meta_url %}{{ url_for('.index', _external=True) }}{% endblock meta_url %}
 {% block title %}Patches / Administration Portal{% endblock title %}
-{% block header %}<a href="{{ url_for('.index') }}">Patches</a>{% endblock header %}
+{%- block header %}
+<a href="{{ url_for('admin.index') }}">Administration</a> /
+<a href="{{ url_for('.index') }}">Patches</a>
+{%- endblock header %}
 {%- macro render_field(field) %}
                     <tr>
                         <td class="admin-{{ field.name | safe }}">
