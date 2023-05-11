@@ -59,6 +59,10 @@
                             name:   'Maximum Level'
                         },
                         {
+                            id:     'steps',
+                            name:   'Steps (#)'
+                        },
+                        {
                             id:     'class_restrict',
                             name:   'Class'
                         },
@@ -76,6 +80,7 @@
                             repeatable:     {{ quest.repeatable }},
                             min_level:      {{ quest.min_level }},
                             max_level:      {{ quest.max_level }},
+                            steps:          {{ quest.steps | length }},
                             class_restrict: "{{ quest.restricted_class.class_display_name }}",
                             delete:         gridjs.html(`<a href="{{ url_for('.delete', delete_quest_id=quest.quest_id) }}" onclick="return confirm('Are you sure you want to delete this quest?');">❌</a>`)
                         }{% if not loop.last %},{% endif %}
@@ -93,7 +98,9 @@
 {%- block content %}
     {%- if all_quests and all_quests is iterable and all_quests | length > 0 %}
                 <div id="all-quests"></div>
-                <script>showQuests(document.getElementById('all-quests'));</script>
+                <script>
+                    showQuests(document.getElementById('all-quests'));
+                </script>
                 <hr>
     {%- endif %}
     {%- if quest_form is defined %}
