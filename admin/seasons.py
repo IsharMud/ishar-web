@@ -7,7 +7,7 @@ from flask_login import current_user, fresh_login_required
 
 from config import IMM_LEVELS
 from database import db_session
-from models.forms import SeasonCycleForm
+from forms import SeasonCycleForm
 from models.account import Account
 from models.player import Player
 from models.season import Season

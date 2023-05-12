@@ -1,7 +1,7 @@
 """View Player Profile"""
 from flask import flash, redirect, render_template, url_for
 
-from models.forms import PlayerSearchForm
+from forms import PlayerSearchForm
 from models.player import Player
 
 

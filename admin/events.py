@@ -3,7 +3,7 @@ from flask import abort, Blueprint, flash, render_template, url_for
 from flask_login import current_user, fresh_login_required
 
 from database import db_session
-from models.forms import EventAddForm
+from forms import EventAddForm
 from models.globalevent import GlobalEvent
 
 
