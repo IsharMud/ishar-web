@@ -159,7 +159,10 @@ async def deadhead(ctx: interactions.CommandContext):
 
     # Show the name and death count of the player with the most deaths
     out = 'The player who has died most is: '
-    out += f'{deadman.name} - {deadman.deaths} times! ☠️'
+    out += (
+        f'{deadman.name} - {deadman.deaths} times! ☠️ '
+        f'<https://isharmud.com/player/{deadman.name}>'
+    )
     await ctx.send(out)
     db_session.close()
 
