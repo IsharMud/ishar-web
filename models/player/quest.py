@@ -4,6 +4,7 @@ from sqlalchemy.dialects.mysql import TINYINT
 from sqlalchemy.orm import relationship
 
 from database import Base, metadata
+from models.quest import Quest
 
 
 class PlayerQuest(Base):
