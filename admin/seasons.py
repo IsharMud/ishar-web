@@ -46,7 +46,6 @@ def index():
 
 
 @admin_seasons_bp.route('/cycle/', methods=['GET', 'POST'])
-@admin_seasons_bp.route('/cycle', methods=['GET', 'POST'])
 def cycle():
     """Administration portal to allow Gods to cycle seasons,
         while wiping players - /admin/seasons/cycle"""

@@ -9,9 +9,7 @@ world_bp = Blueprint('world', __name__)
 
 
 @world_bp.route('/areas/', methods=['GET'])
-@world_bp.route('/areas', methods=['GET'])
 @world_bp.route('/world/', methods=['GET'])
-@world_bp.route('/world', methods=['GET'])
 def index():
     """World page"""
     # Return only the areas from the helptab file
