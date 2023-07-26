@@ -5,7 +5,11 @@ from models.challenge import Challenge
 
 
 # Flask Blueprint
-challenges_bp = Blueprint('challenges', __name__, url_prefix='/challenges')
+challenges_bp = Blueprint(
+    'challenges', __name__,
+    url_prefix='/challenges',
+    template_folder='templates'
+)
 
 
 @challenges_bp.route('/all/', methods=['GET'])
