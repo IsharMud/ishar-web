@@ -12,7 +12,7 @@ from admin.seasons import admin_seasons_bp
 
 # Flask Blueprints
 admin_bp = Blueprint(
-    'admin', __name__, url_prefix='admin', template_folder='templates'
+    'admin', __name__, url_prefix='/admin', template_folder='templates'
 )
 admin_bp.register_blueprint(admin_accounts_bp)
 admin_bp.register_blueprint(admin_events_bp)

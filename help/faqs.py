@@ -14,8 +14,11 @@ faqs_bp = Blueprint(
 @faqs_bp.route('/questions/', methods=['GET'])
 @faqs_bp.route('/faqs/', methods=['GET'])
 @faqs_bp.route('/faq/', methods=['GET'])
+@faqs_bp.route('/questions', methods=['GET'])
+@faqs_bp.route('/faqs', methods=['GET'])
+@faqs_bp.route('/faq', methods=['GET'])
 def index():
-    """A few frequently asked questions"""
+    """A few frequently asked questions (/faq, /faqs, or /questions)"""
 
     # Fetch/format, links to each playable class with descriptions
     player_classes = [

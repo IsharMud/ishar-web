@@ -8,12 +8,13 @@ from models.challenge import Challenge
 challenges_bp = Blueprint(
     'challenges',
     __name__,
-    url_prefix='challenges',
+    url_prefix='/challenges',
     template_folder='templates'
 )
 
 
 @challenges_bp.route('/all/', methods=['GET'])
+@challenges_bp.route('/all', methods=['GET'])
 @challenges_bp.route('/', methods=['GET'])
 def index():
     """Sort and list aLL active challenges,
@@ -30,8 +31,11 @@ def index():
 
 
 @challenges_bp.route('/done/', methods=['GET'])
+@challenges_bp.route('/done', methods=['GET'])
 @challenges_bp.route('/complete/', methods=['GET'])
+@challenges_bp.route('/complete', methods=['GET'])
 @challenges_bp.route('/completed/', methods=['GET'])
+@challenges_bp.route('/completed', methods=['GET'])
 def complete():
     """Sort and list completed challenges,
         along with their tiers and winners"""
@@ -49,7 +53,9 @@ def complete():
 
 
 @challenges_bp.route('/todo/', methods=['GET'])
+@challenges_bp.route('/todo', methods=['GET'])
 @challenges_bp.route('/incomplete/', methods=['GET'])
+@challenges_bp.route('/incomplete', methods=['GET'])
 def incomplete():
     """Sort and list incomplete challenges,
         along with their tiers and winners"""

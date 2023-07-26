@@ -12,20 +12,22 @@ from leaders.survival import survival
 leaders_bp = Blueprint(
     'leaders',
     __name__,
-    url_prefix='leaders',
+    url_prefix='/leaders',
     template_folder='templates'
 )
 leaderboard_bp = Blueprint(
     'leaderboard',
     __name__,
-    url_prefix='leaderboard',
+    url_prefix='/leaderboard',
     template_folder='templates'
 )
 
 
 @leaders_bp.route('/all/', methods=['GET'])
+@leaders_bp.route('/all', methods=['GET'])
 @leaders_bp.route('/', methods=['GET'])
 @leaderboard_bp.route('/all/', methods=['GET'])
+@leaderboard_bp.route('/all', methods=['GET'])
 @leaderboard_bp.route('/', methods=['GET'])
 def index():
     """Sort and list the best players"""
@@ -45,8 +47,12 @@ def index():
 
 # Classic
 leaders_bp.add_url_rule('/classic/', 'classic', classic, methods=['GET'])
+leaders_bp.add_url_rule('/classic', 'classic', classic, methods=['GET'])
 leaderboard_bp.add_url_rule('/classic/', 'classic', classic, methods=['GET'])
+leaderboard_bp.add_url_rule('/classic', 'classic', classic, methods=['GET'])
 
 # Survival
 leaders_bp.add_url_rule('/survival/', 'survival', survival, methods=['GET'])
+leaders_bp.add_url_rule('/survival', 'survival', survival, methods=['GET'])
 leaderboard_bp.add_url_rule('/survival/', 'survival', survival, methods=['GET'])
+leaderboard_bp.add_url_rule('/survival', 'survival', survival, methods=['GET'])
