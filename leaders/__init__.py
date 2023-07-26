@@ -9,18 +9,8 @@ from leaders.survival import survival
 
 
 # Flask Blueprints
-leaders_bp = Blueprint(
-    'leaders',
-    __name__,
-    url_prefix='leaders',
-    template_folder='templates'
-)
-leaderboard_bp = Blueprint(
-    'leaderboard',
-    __name__,
-    url_prefix='leaderboard',
-    template_folder='templates'
-)
+leaders_bp = Blueprint('leaders', __name__, url_prefix='/leaders')
+leaderboard_bp = Blueprint('leaderboard', __name__, url_prefix='/leaderboard')
 
 
 @leaders_bp.route('/all/', methods=['GET'])

@@ -13,7 +13,7 @@ from admin.players import admin_players_bp
 admin_accounts_bp = Blueprint(
     'admin_accounts',
     __name__,
-    url_prefix='accounts',
+    url_prefix='/accounts',
     template_folder='templates/accounts'
 )
 admin_accounts_bp.register_blueprint(admin_players_bp)

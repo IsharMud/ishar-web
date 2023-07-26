@@ -11,7 +11,7 @@ from models.globalevent import GlobalEvent
 admin_events_bp = Blueprint(
     'admin_events',
     __name__,
-    url_prefix='events',
+    url_prefix='/events',
     template_folder='templates/events'
 )
 

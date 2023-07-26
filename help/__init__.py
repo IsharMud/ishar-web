@@ -8,9 +8,7 @@ from help.world import world_bp
 
 
 # Flask Blueprints
-help_bp = Blueprint(
-    'help', __name__, url_prefix='/', template_folder='templates'
-)
+help_bp = Blueprint('help', __name__, url_prefix='/')
 help_bp.register_blueprint(faqs_bp)
 help_bp.register_blueprint(help_page_bp)
 help_bp.register_blueprint(mud_clients_bp)

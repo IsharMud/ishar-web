@@ -6,7 +6,7 @@ from help.helptab import get_help_topics, search_help_topics
 
 
 # Flask Blueprint
-help_page_bp = Blueprint('help_page', __name__, url_prefix='help')
+help_page_bp = Blueprint('help_page', __name__, url_prefix='/help')
 
 
 @help_page_bp.route('/', methods=['GET'])

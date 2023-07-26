@@ -12,7 +12,7 @@ from models.quest import Quest
 admin_quests_bp = Blueprint(
     'admin_quests',
     __name__,
-    url_prefix='quests',
+    url_prefix='/quests',
     template_folder='templates/quests'
 )
 
