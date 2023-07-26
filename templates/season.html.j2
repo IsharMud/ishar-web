@@ -47,15 +47,15 @@
                 Essence is preserved across seasons, and can be spent at any time
                 by typing <code>shop</code> after logging in.
             </p>
-    {%- if current_user.seasonal_points is defined and current_user.seasonal_earned is defined %}
+    {%- if current_user.current_essence is defined and current_user.seasonal_earned is defined %}
             <ul id="essence-balance">
-                <li title="You currently have: {{ current_user.seasonal_points }} essence.">
+                <li title="You currently have: {{ current_user.current_essence }} essence.">
                     You currently have:
                 </li>
                 <li class="nested-list">
                     <ul>
                         <li>
-                            {{ display_essence(current_user.seasonal_points) }}
+                            {{ display_essence(current_user.current_essence) }}
                         </li>
                     </ul>
                 </li>

@@ -28,18 +28,18 @@
                     <a href="{{ url_for('.player_portal') }}">View your players</a>
                 </li>
             </ul>
-    {%- if current_user.seasonal_points is defined and current_user.seasonal_earned is defined %}
+    {%- if current_user.current_essence is defined and current_user.seasonal_earned is defined %}
             <h4 title="Essence">
                 Essence
             </h4>
             <ul id="essence-balance">
-                <li title="You currently have: {{ current_user.seasonal_points }} essence.">
+                <li title="You currently have: {{ current_user.current_essence }} essence.">
                     You currently have:
                 </li>
                 <li class="nested-list">
                     <ul>
                         <li>
-                            {{ display_essence(current_user.seasonal_points) }}
+                            {{ display_essence(current_user.current_essence) }}
                         </li>
                     </ul>
                 </li>

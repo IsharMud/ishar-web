@@ -25,7 +25,7 @@ class Account(Base):
 
     account_id = Column(INTEGER(11), primary_key=True)
     created_at = Column(TIMESTAMP, nullable=False, server_default=text("current_timestamp()"))
-    seasonal_points = Column(MEDIUMINT(4), nullable=False, server_default=text("0"))
+    current_essence = Column(MEDIUMINT(4), nullable=False, server_default=text("0"))
     email = Column(String(30), nullable=False, unique=True)
     password = Column(String(36), nullable=False)
     create_isp = Column(String(25), nullable=False)
