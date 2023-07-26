@@ -2,7 +2,8 @@
 import glob
 import os
 from datetime import date
-from PyPDF2 import PdfFileReader
+
+from pypdf import PdfReader
 
 from config import PATCH_DIR
 
@@ -66,9 +67,8 @@ def get_patch_pdf(patch_name=get_patch_pdfs()[0]['name']):
     with open(file=f'{PATCH_DIR}/{patch_name}', mode='rb') as pdf_fh:
 
         # Parse the PDF, then get the number of pages and metadata
-        pdf = PdfFileReader(pdf_fh)
+        pdf = PdfReader(pdf_fh)
         page_count = len(pdf.pages)
-        meta = pdf.metadata
 
         # Loop through each page of the PDF extracting the text
         for page in pdf.pages:
@@ -79,7 +79,7 @@ def get_patch_pdf(patch_name=get_patch_pdfs()[0]['name']):
     # Return the PDF name, metadata, page count, and text
     return {
         'name': patch_name,
-        'meta': meta,
+        'meta': pdf.metadata,
         'page_count': page_count,
         'text': text
     }
