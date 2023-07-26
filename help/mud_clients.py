@@ -6,8 +6,10 @@ from flask import Blueprint, render_template
 mud_clients_bp = Blueprint('mud_clients', __name__)
 
 
-@mud_clients_bp.route('/mud_clients', methods=['GET'])
-@mud_clients_bp.route('/clients', methods=['GET'])
+@mud_clients_bp.route('/mud-clients/', methods=['GET'])
+@mud_clients_bp.route('/mud_clients/', methods=['GET'])
+@mud_clients_bp.route('/mudclients/', methods=['GET'])
+@mud_clients_bp.route('/clients/', methods=['GET'])
 def index():
     """A few popular MUD clients (/clients, or /mud_clients)"""
     all_clients = {

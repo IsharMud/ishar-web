@@ -6,11 +6,10 @@ from help.helptab import get_help_topics, search_help_topics
 
 
 # Flask Blueprint
-help_page_bp = Blueprint('help_page', __name__)
+help_page_bp = Blueprint('help_page', __name__, url_prefix='help')
 
 
-@help_page_bp.route('/help/', methods=['GET'])
-@help_page_bp.route('/help', methods=['GET'])
+@help_page_bp.route('/', methods=['GET'])
 def index():
     """Main help page lists help topics"""
 
@@ -28,8 +27,7 @@ def index():
     )
 
 
-@help_page_bp.route('/help/<string:topic>/', methods=['GET'])
-@help_page_bp.route('/help/<string:topic>', methods=['GET'])
+@help_page_bp.route('/<string:topic>/', methods=['GET'])
 def single(topic=None):
     """Display a single help topic, or search results"""
 

@@ -42,7 +42,6 @@ login_bp = Blueprint(
 
 
 @login_bp.route('/login/', methods=['GET', 'POST'])
-@login_bp.route('/login', methods=['GET', 'POST'])
 def player_login():
     """Log-in form page and processing"""
 
@@ -91,7 +90,6 @@ def player_login():
 
 
 @login_bp.route('/logout/', methods=['GET'])
-@login_bp.route('/logout', methods=['GET'])
 def player_logout():
     """Allow users to log out (/logout)"""
     logout_user()
