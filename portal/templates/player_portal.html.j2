@@ -98,9 +98,9 @@ Welcome{% if current_user.display_name %}, {{ current_user.display_name | safe }
                     You have not created any players yet!
                 </h3>
     {%- endif %}
-    {%- if current_user.seasonal_points > 0 %}
+    {%- if current_user.current_essence > 0 %}
                 <h4>
-                    You have {{ current_user.seasonal_points }}
+                    You have {{ current_user.current_essence }}
                     <a title="essence" href="{{ url_for('.account', _anchor='essence-balance') }}">essence</a>.
                 </h4>
     {%- endif %}

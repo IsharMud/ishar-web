@@ -12,7 +12,7 @@
                             account_id:     {{ account.account_id }},
                             name:           gridjs.html(`<a href="{{ url_for('.manage', manage_account_id=account.account_id) }}">{{ account.display_name | safe }}</a> <a title="Edit {{ account.display_name | safe }} (ID: {{ account.account_id }})" href="{{ url_for('.edit', edit_account_id=account.account_id) }}">✏️</a>`),
                             players:        {{ account.players | length }},
-                            essence:        {{ account.seasonal_points }},
+                            essence:        {{ account.current_essence }},
                             essence_earned: {{ account.seasonal_earned }}
 {%- endmacro %}
 {%- block scripts %}

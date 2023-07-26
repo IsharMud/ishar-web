@@ -86,12 +86,12 @@ def cycle():
             # Apply any essence earned
             if account.seasonal_earned > 0:
                 wipe_totals['essence'] += account.seasonal_earned
-                calc = account.seasonal_points + account.seasonal_earned
-                account.seasonal_points = calc
+                calc = account.current_essence + account.seasonal_earned
+                account.current_essence = calc
                 flash(
                     f'Account "{account.display_name}" ({account.account_id}) '
                     f'now has {calc} essence. '
-                    f'({account.seasonal_points} existing + '
+                    f'({account.current_essence} existing + '
                     f'{account.seasonal_earned} earned)', 'success')
 
             # Loop through each player in each account

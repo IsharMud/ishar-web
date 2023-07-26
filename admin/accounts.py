@@ -77,7 +77,7 @@ def edit(edit_account_id=None):
         # Update database with submitted form values
         account.account_name = edit_account_form.account_name.data
         account.email = edit_account_form.email.data
-        account.seasonal_points = edit_account_form.seasonal_points.data
+        account.current_essence = edit_account_form.current_essence.data
 
         # Process administrative password reset
         if edit_account_form.confirm_password.data:

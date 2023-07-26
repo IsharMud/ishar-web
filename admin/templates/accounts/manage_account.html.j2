@@ -122,15 +122,15 @@
             <h4>
                 Essence
             </h4>
-        {%- if manage_account is defined and manage_account.seasonal_points is defined and manage_account.seasonal_earned is defined %}
+        {%- if manage_account is defined and manage_account.current_essence is defined and manage_account.seasonal_earned is defined %}
             <ul id="essence-balance">
-                <li title="Essence Current Balance: {{ manage_account.seasonal_points }}">
+                <li title="Essence Current Balance: {{ manage_account.current_essence }}">
                     Current Balance
                 </li>
                 <li class="nested-list">
                     <ul>
                         <li>
-                            {{ display_essence(manage_account.seasonal_points) }}
+                            {{ display_essence(manage_account.current_essence) }}
                         </li>
                     </ul>
                 </li>

@@ -63,7 +63,7 @@ class EditAccountForm(FlaskForm):
             Email()
         ]
     )
-    seasonal_points = IntegerField('Seasonal Points')
+    current_essence = IntegerField('Seasonal Points')
     password = PasswordField('Password')
     confirm_password = PasswordField(
         'Confirm Password',
