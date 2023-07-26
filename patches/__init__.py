@@ -5,7 +5,9 @@ from patches.util import get_patch_pdfs, get_patch_pdf
 
 
 # Flask Blueprint
-patches_bp = Blueprint('patches', __name__, url_prefix='/patches')
+patches_bp = Blueprint(
+    'patches', __name__, url_prefix='/patches', template_folder='templates'
+)
 
 
 @patches_bp.route('/latest/', methods=['GET'])
