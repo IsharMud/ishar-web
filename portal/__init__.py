@@ -7,7 +7,7 @@ from portal.players import view_player
 
 
 # Flask Blueprint
-portal_bp = Blueprint('portal', __name__)
+portal_bp = Blueprint('portal', __name__, template_folder='templates')
 
 
 @portal_bp.before_request

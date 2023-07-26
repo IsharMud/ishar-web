@@ -6,7 +6,7 @@ from models.race import Race
 
 
 # Flask Blueprint
-faqs_bp = Blueprint('faqs', __name__, url_prefix='/')
+faqs_bp = Blueprint('faqs', __name__, template_folder='templates')
 
 
 @faqs_bp.route('/questions/', methods=['GET'])

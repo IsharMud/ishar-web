@@ -33,7 +33,7 @@ def load_user(email):
 
 
 # Flask Blueprint
-login_bp = Blueprint('login', __name__)
+login_bp = Blueprint('login', __name__, template_folder='templates')
 
 
 @login_bp.route('/login/', methods=['GET', 'POST'])
