@@ -69,6 +69,7 @@ def get_patch_pdf(patch_name=get_patch_pdfs()[0]['name']):
         # Parse the PDF, then get the number of pages and metadata
         pdf = PdfReader(pdf_fh)
         page_count = len(pdf.pages)
+        meta = pdf.metadata
 
         # Loop through each page of the PDF extracting the text
         for page in pdf.pages:
@@ -79,7 +80,7 @@ def get_patch_pdf(patch_name=get_patch_pdfs()[0]['name']):
     # Return the PDF name, metadata, page count, and text
     return {
         'name': patch_name,
-        'meta': pdf.metadata,
+        'meta': meta,
         'page_count': page_count,
         'text': text
     }
