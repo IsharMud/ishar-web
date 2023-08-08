@@ -408,9 +408,9 @@ async def season(ctx: interactions.CommandContext):
 
     # Show the current active season ID, and end date
     dt_fmt = '%A, %B %d, %Y @ %H:%M:%S (%I:%M:%S %p)'
-    expiration_date = current.expiration_date.strftime(dtfmt)
+    expiration = current.expiration_date.strftime(dt_fmt)
     out = f'It is currently Season {current.season_id}'
-    out += f', which ends in {current.expires} on {expiration_date}!'
+    out += f', which ends in {current.expires} on {expiration}!'
     await ctx.send(out)
     db_session.close()
 
