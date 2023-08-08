@@ -407,8 +407,10 @@ async def season(ctx: interactions.CommandContext):
     ).order_by(-Season.season_id).first()
 
     # Show the current active season ID, and end date
+    dt_fmt = '%A, %B %d, %Y @ %H:%M:%S (%I:%M:%S %p)'
+    expiration_date = current.expiration_date.strftime(dtfmt)
     out = f'It is currently Season {current.season_id}'
-    out += f', which ends in {current.expires}!'
+    out += f', which ends in {current.expires} on {expiration_date}!'
     await ctx.send(out)
     db_session.close()
 
