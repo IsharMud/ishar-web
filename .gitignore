@@ -8,3 +8,4 @@ settings.py
 *_secret.py
 venv/
 old/
+/static/

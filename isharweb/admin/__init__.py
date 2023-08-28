@@ -16,4 +16,5 @@ admin.site.register(Player, PlayerAdmin)
 
 admin.site.register(Quest, QuestAdmin)
 
+# Disable "groups" in /admin/
 admin.site.unregister(Group)

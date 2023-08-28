@@ -1,1 +1,35 @@
-Hello there!
+<html>
+    <head>
+        <title>
+            django.isharmud.com
+        </title>
+    </head>
+    <body>
+        <header>
+            <h1>
+                <a href="{% url 'index' %}">django.isharmud.com</a>
+            </h1>
+        </header>
+        <main>
+            <h2>
+                Hello there{% if user.is_authenticated %}, {{ user.account_name }}{% endif %}!
+            </h2>
+            <nav>
+                <ul>
+                    <li>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'logout' %}">Log out</a>
+                    {% else %}
+                        <a href="{% url 'login' %}">Log in</a>
+                    {% endif %}
+                    </li>
+                </ul>
+            </nav>
+            <p>
+                <code>
+                    {% now "DATETIME_FORMAT" %}
+                </code>
+            </p>
+        </main>
+    </body>
+</html>
