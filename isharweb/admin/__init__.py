@@ -3,6 +3,7 @@ from django.contrib.auth.admin import Group
 
 from .account import AccountAdmin
 from .account.upgrade import AccountUpgradeAdmin
+from .challenge import ChallengeAdmin
 from .force import ForceAdmin
 from .news import NewsAdmin
 from .player import ClassAdmin, PlayerAdmin
@@ -12,6 +13,7 @@ from .spell import SpellInfoAdmin
 
 from ..models.account import Account
 from ..models.account.upgrade import AccountUpgrade
+from ..models.challenge import Challenge
 from ..models.force import Force
 from ..models.news import News
 from ..models.player import Player, Class
@@ -22,6 +24,7 @@ from ..models.spell import SpellInfo
 
 admin.site.register(Account, AccountAdmin)
 admin.site.register(AccountUpgrade, AccountUpgradeAdmin)
+admin.site.register(Challenge, ChallengeAdmin)
 admin.site.register(Class, ClassAdmin)
 admin.site.register(Force, ForceAdmin)
 admin.site.register(News, NewsAdmin)
