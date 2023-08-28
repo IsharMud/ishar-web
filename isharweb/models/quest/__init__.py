@@ -22,6 +22,7 @@ class Quest(models.Model):
         verbose_name="Display Name"
     )
     completion_message = models.CharField(
+        blank=True,
         max_length=700,
         help_text="Message sent to the player upon completion of the quest.",
         verbose_name="Completion Message"
