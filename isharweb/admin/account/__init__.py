@@ -29,6 +29,8 @@ class AccountAdmin(BaseUserAdmin):
     )
     filter_horizontal = []
     filter_vertical = []
+    inlines = []
+
     list_display = (
         model.USERNAME_FIELD,
         "_is_god", "_is_forger", "_is_eternal", "_is_artisan", "_is_immortal"

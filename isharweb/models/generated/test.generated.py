@@ -24,29 +24,6 @@ class AccountUpgrades(models.Model):
         db_table = 'account_upgrades'
 
 
-class Accounts(models.Model):
-    account_id = models.AutoField(primary_key=True)
-    created_at = models.DateTimeField()
-    current_essence = models.PositiveIntegerField()
-    email = models.CharField(unique=True, max_length=30)
-    password = models.CharField(max_length=36)
-    create_isp = models.CharField(max_length=25)
-    last_isp = models.CharField(max_length=25)
-    create_ident = models.CharField(max_length=25)
-    last_ident = models.CharField(max_length=25)
-    create_haddr = models.IntegerField()
-    last_haddr = models.IntegerField()
-    account_name = models.CharField(unique=True, max_length=25)
-    account_gift = models.DateTimeField()
-    banned_until = models.DateTimeField(blank=True, null=True)
-    bugs_reported = models.IntegerField()
-    earned_essence = models.IntegerField()
-
-    class Meta:
-        managed = False
-        db_table = 'accounts'
-
-
 class AccountsAccountUpgrades(models.Model):
     account_upgrades = models.OneToOneField(AccountUpgrades, models.DO_NOTHING, primary_key=True)  # The composite primary key (account_upgrades_id, account_id) found, that is not supported. The first column is selected.
     account = models.ForeignKey(Accounts, models.DO_NOTHING)
@@ -106,15 +83,7 @@ class Challenges(models.Model):
         db_table = 'challenges'
 
 
-class Classes(models.Model):
-    class_id = models.AutoField(primary_key=True)
-    class_name = models.CharField(unique=True, max_length=15)
-    class_display = models.CharField(max_length=32, blank=True, null=True)
-    class_description = models.CharField(max_length=64, blank=True, null=True)
 
-    class Meta:
-        managed = False
-        db_table = 'classes'
 
 
 class Conditions(models.Model):

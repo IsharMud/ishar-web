@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.db import models
 from django.conf import settings
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 from ..account import Account
 
@@ -12,9 +13,9 @@ class Player(models.Model):
     account = models.ForeignKey(
         to=Account,
         on_delete=models.CASCADE,
-        related_name='players',
-        related_query_name='player',
-        help_text='Account that owns the player character.',
+        related_name="players",
+        related_query_name="player",
+        help_text="Account that owns the player character.",
         verbose_name="Account"
     )
     name = models.CharField(
@@ -34,9 +35,7 @@ class Player(models.Model):
         verbose_name="Create IDENT"
     )
     description = models.CharField(
-        max_length=240,
-        blank=True,
-        null=True,
+        max_length=240, blank=True, null=True,
         help_text="User-written in-game player description.",
         verbose_name="Description"
     )
@@ -65,6 +64,10 @@ class Player(models.Model):
     )
     true_level = models.PositiveIntegerField(
         help_text="True level of the player character.",
+        validators=[
+            MinValueValidator(limit_value=1),
+            MaxValueValidator(limit_value=max(settings.IMMORTAL_LEVELS))
+        ],
         verbose_name="True Level"
     )
     renown = models.PositiveIntegerField(
@@ -379,10 +382,10 @@ class Player(models.Model):
         if self.immortal_type:
             return self.immortal_type
         if self.is_deleted == 1:
-            return 'Dead'
+            return "Dead"
         if self.is_survival:
-            return 'Survival'
-        return 'Classic'
+            return "Survival"
+        return "Classic"
 
     @property
     @admin.display(boolean=False, description="Type")
@@ -400,7 +403,10 @@ class Player(models.Model):
         return f'{settings.MUD_PODIR}/{self.name}'
 
     @property
-    @admin.display(boolean=False, description="Seasonal Earned", ordering="seasonal_earned")
+    @admin.display(
+        boolean=False, description="Seasonal Earned",
+        ordering="seasonal_earned"
+    )
     def seasonal_earned(self) -> int:
         """
         Amount of essence earned for the player.
@@ -442,7 +448,7 @@ class Class(models.Model):
     )
     class_display = models.CharField(
         max_length=32, blank=True, null=True,
-        help_text="Display name? of the player class.",
+        help_text="Display phrase of the player class.",
         verbose_name="Class Display"
     )
     class_description = models.CharField(
@@ -454,6 +460,14 @@ class Class(models.Model):
     class Meta:
         managed = False
         db_table = 'classes'
-        ordering = ["class_name", "class_name", "class_description", "class_id"]
+        ordering = [
+            "class_name", "class_name", "class_description", "class_id"
+        ]
         verbose_name = "Class"
         verbose_name_plural = "Classes"
+
+    def __repr__(self) -> str:
+        return f'Class: "{self.__str__()}" ({self.class_id})'
+
+    def __str__(self) -> str:
+        return self.class_name

@@ -1,4 +1,6 @@
 from django.db import models
+from django.conf import settings
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 
 class Quest(models.Model):
@@ -29,10 +31,18 @@ class Quest(models.Model):
     )
     min_level = models.IntegerField(
         help_text="Minimum level of a player that may partake in the quest.",
+        validators=[
+            MinValueValidator(limit_value=1),
+            MaxValueValidator(limit_value=max(settings.IMMORTAL_LEVELS))
+        ],
         verbose_name="Minimum Level"
     )
     max_level = models.IntegerField(
         help_text="Maximum level of a player that may partake in the quest.",
+        validators=[
+            MinValueValidator(limit_value=1),
+            MaxValueValidator(limit_value=max(settings.IMMORTAL_LEVELS))
+        ],
         verbose_name="Maximum Level"
     )
     repeatable = models.IntegerField(
@@ -61,13 +71,13 @@ class Quest(models.Model):
     quest_source = models.PositiveIntegerField(
         blank=True,
         null=True,
-        help_text="Quest source.",
+        help_text="Source for the quest.",
         verbose_name="Quest Source"
     )
     quest_return = models.PositiveIntegerField(
         blank=True,
         null=True,
-        help_text="Quest return.",
+        help_text="Return for the quest.",
         verbose_name="Quest Return"
     )
 
