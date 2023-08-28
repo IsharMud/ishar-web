@@ -1,13 +1,35 @@
 from django.contrib.admin import ModelAdmin, TabularInline
 
+from ..models.quest.reward import QuestReward
 from ..models.quest.step import QuestStep
 
 
-class QuestStepAdmin(TabularInline):
+class QuestRewardAdminInline(TabularInline):
+    """
+    Ishar quest reward administration.
+    """
+    extra = 1
+    fieldsets = (
+        (None, {"fields": ["reward_num"]}),
+        ("Type", {"fields": ["reward_type"]}),
+        ("Quest", {"fields": ["quest"]}),
+        ("Classes", {"fields": ["class_restrict"]})
+    )
+    filter_horizontal = []
+    filter_vertical = []
+    list_display = ["reward_num", "reward_type", "quest", "class_restrict"]
+    list_filter = ["reward_type", "class_restrict", "quest"]
+    model = QuestReward
+    ordering = ["reward_num"]
+    search_fields = ["quest", "reward_type"]
+    readonly_fields = []
+
+
+class QuestStepAdminInline(TabularInline):
     """
     Ishar quest step administration.
     """
-    model = QuestStep
+    extra = 1
     fieldsets = (
         (None, {"fields": ["step_id", "step_type", "quest"]}),
         ("Details", {"fields": ["target", "num_required", "time_limit"]}),
@@ -17,9 +39,10 @@ class QuestStepAdmin(TabularInline):
     filter_vertical = []
     list_display = ["step_id", "step_type", "quest"]
     list_filter = ["step_type", "num_required", "mystify", "quest"]
+    model = QuestStep
     ordering = ["step_id"]
     search_fields = ["step_id", "step_type", "target", "mystify_text"]
-    readonly_fields = ["step_id"]
+    readonly_fields = []
 
 
 class QuestAdmin(ModelAdmin):
@@ -40,7 +63,7 @@ class QuestAdmin(ModelAdmin):
     )
     filter_horizontal = []
     filter_vertical = []
-    inlines = [QuestStepAdmin]
+    inlines = [QuestRewardAdminInline, QuestStepAdminInline]
     list_display = ["display_name", "_is_repeatable", "min_level", "max_level"]
     list_filter = ["repeatable", "min_level", "max_level"]
     ordering = ["quest_id"]

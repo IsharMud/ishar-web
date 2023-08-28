@@ -25,7 +25,7 @@ class QuestReward(models.Model):
         verbose_name="Quest"
     )
     class_restrict = models.IntegerField(
-        choices=[(-1, "None"), "TODO..."],
+        choices=[(-1, "None")],
         help_text="Player class to which the reward is restricted.",
         verbose_name="Class Restrict"
     )
