@@ -12,10 +12,10 @@ class AccountManager(BaseUserManager):
             account name, and password.
         """
         if not email:
-            raise ValueError('E-mail address is required.')
+            raise ValueError("E-mail address is required.")
 
         if not account_name:
-            raise ValueError('Account name is required.')
+            raise ValueError("Account name is required.")
 
         user = self.model(
             email=self.normalize_email(email),

@@ -27,7 +27,7 @@ class QuestRewardAdminInline(TabularInline):
 
 class QuestStepAdminInline(TabularInline):
     """
-    Ishar quest step administration.
+    Ishar quest step administration inline.
     """
     extra = 1
     fieldsets = (
@@ -43,6 +43,24 @@ class QuestStepAdminInline(TabularInline):
     ordering = ["step_id"]
     search_fields = ["step_id", "step_type", "target", "mystify_text"]
     readonly_fields = []
+
+
+class QuestStepAdmin(ModelAdmin):
+    """
+    Ishar quest step administration inline.
+    """
+    fieldsets = (
+        (None, {"fields": ["step_id", "step_type", "quest"]}),
+        ("Details", {"fields": ["target", "num_required", "time_limit"]}),
+        ("Mystify", {"fields": ["mystify", "mystify_text"]})
+    )
+    filter_horizontal = []
+    filter_vertical = []
+    list_display = ["step_id", "step_type", "quest"]
+    list_filter = ["step_type", "num_required", "mystify", "quest"]
+    model = QuestStep
+    readonly_fields = ["step_id"]
+    search_fields = ["step_id", "step_type", "target", "mystify_text"]
 
 
 class QuestAdmin(ModelAdmin):
@@ -66,6 +84,8 @@ class QuestAdmin(ModelAdmin):
     inlines = [QuestRewardAdminInline, QuestStepAdminInline]
     list_display = ["display_name", "_is_repeatable", "min_level", "max_level"]
     list_filter = ["repeatable", "min_level", "max_level"]
-    ordering = ["quest_id"]
-    search_fields = ["quest_id", "display_name", "name"]
     readonly_fields = ["quest_id"]
+    search_fields = (
+        "quest_id", "display_name", "name", "description", "completion_message",
+        "quest_intro",
+    )

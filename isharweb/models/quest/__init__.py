@@ -73,7 +73,10 @@ class Quest(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'quests'
+        db_table = "quests"
+        ordering = ["display_name", "name", "quest_id"]
+        verbose_name = "Quest"
+        verbose_name_plural = "Quests"
 
     def __repr__(self) -> str:
         return f'Quest: "{self.__str__()}" ({self.quest_id})'

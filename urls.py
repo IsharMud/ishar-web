@@ -1,5 +1,5 @@
 """
-URL configuration for isharmud.com project.
+isharmud.com URL configuration.
 """
 from django.contrib import admin
 from django.urls import include, path

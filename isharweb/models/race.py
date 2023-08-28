@@ -151,30 +151,37 @@ class Race(models.Model):
     )
     is_playable = models.IntegerField(
         blank=True, null=True,
+        choices=[(0, False), (1, True)],
         help_text="Is the race playable by regular player characters?",
         verbose_name="Is Playable?"
     )
     is_humanoid = models.IntegerField(
+        choices=[(0, False), (1, True)],
         help_text="Is the race humanoid?",
         verbose_name="Is Humanoid?"
     )
     is_invertebrae = models.IntegerField(
+        choices=[(0, False), (1, True)],
         help_text="Is the race an invertebrate?",
         verbose_name="Is Invertebrae?"
     )
     is_flying = models.IntegerField(
+        choices=[(0, False), (1, True)],
         help_text="Does the race fly?",
         verbose_name="Is Flying?"
     )
     is_swimming = models.IntegerField(
+        choices=[(0, False), (1, True)],
         help_text="Does the race swim?",
         verbose_name="Is Swimming?"
     )
     darkvision = models.IntegerField(
+        choices=[(0, False), (1, True)],
         help_text="Does the race have darkvision?",
         verbose_name="Darkvision?"
     )
     see_invis = models.IntegerField(
+        choices=[(0, False), (1, True)],
         help_text="Can the race see invisibility?",
         verbose_name="See Invisibility?"
     )
@@ -183,14 +190,17 @@ class Race(models.Model):
         verbose_name="Is Walking?"
     )
     endure_heat = models.IntegerField(
+        choices=[(0, False), (1, True)],
         help_text="Can the race endure heat?",
         verbose_name="Endure Heat?"
     )
     endure_cold = models.IntegerField(
+        choices=[(0, False), (1, True)],
         help_text="Can the race endure heat?",
         verbose_name="Endure Heat?"
     )
     is_undead = models.IntegerField(
+        choices=[(0, False), (1, True)],
         help_text="Is the race undead?",
         verbose_name="Is Undead?"
     )
@@ -198,6 +208,9 @@ class Race(models.Model):
     class Meta:
         managed = False
         db_table = 'races'
+        ordering = ["display_name", "symbol", "race_id"]
+        verbose_name = "Race"
+        verbose_name_plural = "Races"
 
     def __repr__(self):
         return f"Race: {repr(self.__str__())} ({self.race_id})"

@@ -37,6 +37,9 @@ class QuestReward(models.Model):
         managed = False
         db_table = 'quest_rewards'
         unique_together = (('reward_num', 'quest'),)
+        ordering = ["quest", "reward_type", "class_restrict", "reward_num"]
+        verbose_name = "Quest Reward"
+        verbose_name_plural = "Quest Rewards"
 
     def __repr__(self) -> str:
         return f'Quest Reward: "{self.__str__()}"'

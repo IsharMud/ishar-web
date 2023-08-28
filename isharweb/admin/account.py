@@ -1,4 +1,5 @@
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin, AdminPasswordChangeForm
+from django.contrib.auth import get_user_model
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
 
 class AccountAdmin(BaseUserAdmin):
@@ -8,13 +9,15 @@ class AccountAdmin(BaseUserAdmin):
 
     def has_add_permission(self, request, obj=None):
         """
-        Remove ability to add users in /admin/.
+        Remove ability to add accounts in /admin/.
         """
         return False
 
-    change_password_form = AdminPasswordChangeForm
+    model = get_user_model()
     fieldsets = (
-        (None, {"fields": ["account_id", "account_name", "email"]}),
+        (None, {"fields": [
+            "account_id", model.USERNAME_FIELD, model.EMAIL_FIELD
+        ]}),
         ("Points", {"fields": [
             "account_gift", "bugs_reported", "current_essence", "earned_essence"
         ]}),
@@ -27,13 +30,13 @@ class AccountAdmin(BaseUserAdmin):
     filter_horizontal = []
     filter_vertical = []
     list_display = (
-        "account_name", "email",
+        model.USERNAME_FIELD,
         "_is_god", "_is_forger", "_is_eternal", "_is_artisan", "_is_immortal"
     )
     list_filter = []
-    ordering = ["account_id"]
+    ordering = [model.USERNAME_FIELD, "account_id"]
     search_fields = [
-        "account_name", "email",
+        model.USERNAME_FIELD, model.EMAIL_FIELD,
         "create_isp", "create_ident", "last_ident", "last_isp"
     ]
     readonly_fields = [

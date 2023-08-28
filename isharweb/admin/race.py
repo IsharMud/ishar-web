@@ -6,36 +6,34 @@ class RaceAdmin(ModelAdmin):
     Ishar race administration.
     """
     fieldsets = (
-        (None, {"fields": [
-                    'id',
-                    'account',
-                    'name',
-                    'description',
-                    'bankacc',
-                    'true_level',
-                    'renown',
-                    'remorts',
-                    'favors',
-                    'online',
-                    'is_deleted',
-                    'deaths',
-                    'total_renown',
-                    'quests_completed',
-                    'challenges_completed',
-                    'game_type',
-                ]
-            }
-        ),
-        ("Rooms", {"fields": ["bound_room", "load_room", "inn_limit"]}),
-        ("Dates", {"fields": ["birth", "logon", "logout"]})
+        (None, {"fields": ("race_id", "symbol", "display_name", "folk_name")}),
+        ("Descriptions", {"fields": ("short_description", "long_description")}),
+        ("Defaults", {"fields": (
+            "default_movement", "default_height", "default_weight"
+        )}),
+        ("Bonus", {"fields": (
+            "bonus_fortitude", "bonus_reflex", "bonus_resilience",
+            "listen_sound", "height_bonus", "weight_bonus"
+        )}),
+        ("Settings", {"fields": (
+            "attack_noun", "attack_type", "vulnerabilities", "susceptibilities",
+            "resistances", "immunities"
+        )}),
+        ("Additional Statistics", {"fields": (
+            "additional_str", "additional_agi", "additional_end",
+            "additional_per", "additional_foc", "additional_wil"
+        )}),
+        ("Booleans", {"fields": (
+            "is_humanoid", "is_invertebrae", "is_flying", "is_swimming",
+            "darkvision", "see_invis", "is_walking",
+            "endure_heat", "endure_cold", "is_undead", "is_playable"
+        )}),
     )
     filter_horizontal = []
     filter_vertical = []
-    list_display = [
-        "name", "account", "player_type", "level", "renown",
-        "_is_deleted", "_is_god", "_is_immortal", "_is_survival"
-    ]
-    list_filter = ["game_type", "is_deleted", "true_level", "account"]
-    ordering = ["id"]
-    readonly_fields = ["id", "account", "birth", "logon", "logout"]
-    search_fields = ["name"]
+    list_display = (
+        "display_name", "symbol", "_is_playable", "short_description"
+    )
+    list_filter = ["is_playable"]
+    readonly_fields = ["race_id"]
+    search_fields = [""]

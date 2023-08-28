@@ -1,7 +1,6 @@
 from django.contrib.auth.backends import ModelBackend
 
 from isharweb.models.account import Account
-from isharweb.models.quest import Quest
 
 
 class IsharUserAuthBackend(ModelBackend):

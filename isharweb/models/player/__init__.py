@@ -201,7 +201,8 @@ class Player(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'players'
+        db_table = "players"
+        ordering = ["name", "id"]
 
     def __repr__(self) -> str:
         return f'Player: "{self.__str__()}" ({self.id}) [{self.player_type}]'
@@ -308,6 +309,7 @@ class Player(models.Model):
     is_survival = property(_is_survival)
 
     @property
+    @admin.display(boolean=False, description="Level", ordering='true_level')
     def level(self) -> int:
         return self.true_level
 
@@ -317,6 +319,15 @@ class Player(models.Model):
         Player CSS class.
         """
         return f'{self.player_type.lower()}-player'
+
+    @property
+    def player_link(self) -> str:
+        """
+        Player link.
+        """
+        url = 'TODO'
+        # TODO
+        return f'<a href="{url}">{self.name}</a>'
 
     @property
     def player_stats(self) -> dict:
@@ -351,24 +362,16 @@ class Player(models.Model):
         return stats
 
     @property
-    def player_link(self) -> str:
-        """
-        Player link.
-        """
-        url = 'TODO'
-        # TODO
-        return f'<a href="{url}">{self.name}</a>'
-
-    @property
+    @admin.display(description="Title")
     def player_title(self) -> str:
         """
         Player title.
         """
         return self.title.replace('%s', self.player_link)
 
-    def _player_type(self) -> str:
+    def get_player_type(self) -> str:
         """
-        Player type (string), returns one of:
+        Get the type pf player (string), returns one of:
             - An immortal type
                 * one of settings.IMMORTAL_LEVELS dictionary values
             - Dead, Survival, or Classic
@@ -381,7 +384,13 @@ class Player(models.Model):
             return 'Survival'
         return 'Classic'
 
-    player_type = property(_player_type)
+    @property
+    @admin.display(boolean=False, description="Type")
+    def player_type(self) -> str:
+        """
+        Player type.
+        """
+        return self.get_player_type()
 
     @property
     def podir(self) -> str:
@@ -391,7 +400,7 @@ class Player(models.Model):
         return f'{settings.MUD_PODIR}/{self.name}'
 
     @property
-    @admin.display(description="Seasonal Earned")
+    @admin.display(boolean=False, description="Seasonal Earned", ordering="seasonal_earned")
     def seasonal_earned(self) -> int:
         """
         Amount of essence earned for the player.
@@ -412,3 +421,39 @@ class Player(models.Model):
         if self.remorts > 0:
             earned += int(self.remorts / 5) * 3 + 1
         return earned
+
+
+class Class(models.Model):
+    """
+    Player class.
+    """
+    class_id = models.AutoField(
+        primary_key=True,
+        help_text=(
+            "Auto-generated permanent identification number "
+            "of the player class."
+        ),
+        verbose_name="Class ID"
+    )
+    class_name = models.CharField(
+        unique=True, max_length=15,
+        help_text="Name of the player class.",
+        verbose_name="Class Name"
+    )
+    class_display = models.CharField(
+        max_length=32, blank=True, null=True,
+        help_text="Display name? of the player class.",
+        verbose_name="Class Display"
+    )
+    class_description = models.CharField(
+        max_length=64, blank=True, null=True,
+        help_text="Description of the player class.",
+        verbose_name="Class Description"
+    )
+
+    class Meta:
+        managed = False
+        db_table = 'classes'
+        ordering = ["class_name", "class_name", "class_description", "class_id"]
+        verbose_name = "Class"
+        verbose_name_plural = "Classes"

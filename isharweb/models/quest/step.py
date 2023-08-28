@@ -53,12 +53,13 @@ class QuestStep(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'quest_steps'
+        db_table = "quest_steps"
+        ordering = ["quest", "step_id"]
+        verbose_name = "Quest Step"
+        verbose_name_plural = "Quest Steps"
 
     def __repr__(self) -> str:
-        return f'Quest Step: "{self.__str__()}"'
+        return f"Quest Step: {repr(self.__str__())}"
 
     def __str__(self) -> str:
-        return (
-            f"Step ID {self.step_id} ({self.step_type} @ {self.target}) : {self.quest}"
-        )
+        return f""

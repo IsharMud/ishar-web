@@ -101,6 +101,7 @@ class Account(AbstractBaseUser, PermissionsMixin):
     class Meta:
         managed = False
         db_table = "accounts"
+        ordering = ["account_name", "account_id"]
 
     def __repr__(self) -> str:
         return f'Account: "{self.account_name}" ({self.account_id})'

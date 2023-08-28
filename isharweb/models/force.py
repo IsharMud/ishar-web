@@ -16,7 +16,10 @@ class Force(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'forces'
+        db_table = "forces"
+        ordering = ["force_name"]
+        verbose_name = "Force"
+        verbose_name_plural = "Forces"
 
     def __repr__(self):
         return f"Force: {repr(self.__str__())}"

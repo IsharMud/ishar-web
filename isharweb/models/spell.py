@@ -28,6 +28,7 @@ class SpellFlag(models.Model):
     class Meta:
         managed = False
         db_table = 'spell_flags'
+        verbose_name = "Spell Flag"
 
     def __repr__(self):
         return f"Spell Flag: {repr(self.name)} ({self.id})"
@@ -154,13 +155,14 @@ class SpellInfo(models.Model):
     class Meta:
         managed = False
         db_table = "spell_info"
-        verbose_name = "Spell Info"
+        ordering = ["skill_name", "enum_symbol"]
+        verbose_name = "Spell"
 
     def __repr__(self):
         return f"Spell Info: {repr(self.__str__())}"
 
     def __str__(self):
-        return self.enum_symbol
+        return self.skill_name or self.enum_symbol
 
     def _is_skill(self):
         """
@@ -198,21 +200,20 @@ class SpellForce(models.Model):
         to=SpellInfo,
         on_delete=models.DO_NOTHING,
         primary_key=True,
+        help_text="Spell related to a force.",
+        verbose_name="Spell"
     )
     force = models.ForeignKey(
         to=Force,
         on_delete=models.DO_NOTHING,
         help_text="Force related to the spell.",
-        verbose_name="Force."
+        verbose_name="Force"
     )
-
-    # The composite primary key (spell_id, force_id) found,
-    #   that is not supported. The first column is selected.
 
     class Meta:
         managed = False
         db_table = 'spell_forces'
-        unique_together = (('spell', 'force'), ('spell', 'force'),)
+        verbose_name = "Spell Force"
 
     def __repr__(self):
         return f"Spell Force: {self.spell} @ {self.force}"
@@ -222,6 +223,9 @@ class SpellForce(models.Model):
 
 
 class SpellSpellFlag(models.Model):
+    """
+    Spell association to a spell flag.
+    """
     spell = models.OneToOneField(
         to=SpellInfo,
         on_delete=models.CASCADE,
@@ -243,9 +247,10 @@ class SpellSpellFlag(models.Model):
         managed = False
         db_table = 'spells_spell_flags'
         unique_together = (('spell', 'flag'),)
+        verbose_name = "Spell's Flag"
 
     def __repr__(self):
-        return f"Spell Spell Flag: {self.spell} @ {self.flag}"
+        return f"Spell's Flag: {self.spell} @ {self.flag}"
 
     def __str__(self):
         return self.__repr__()
