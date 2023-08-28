@@ -35,6 +35,7 @@ class Quest(models.Model):
         verbose_name="Maximum Level"
     )
     repeatable = models.IntegerField(
+        choices=[(0, False), (1, True)],
         help_text="Is the quest repeatable?",
         verbose_name="Repeatable"
     )
@@ -44,7 +45,7 @@ class Quest(models.Model):
         verbose_name="Description"
     )
     prerequisite = models.IntegerField(
-        help_text="Prerequisite quest ID number before this quest can be done.",
+        help_text="Prerequisite.",
         verbose_name="Prerequisite"
     )
     class_restrict = models.IntegerField(
@@ -69,6 +70,16 @@ class Quest(models.Model):
         verbose_name="Quest Return"
     )
 
+    class Meta:
+        managed = False
+        db_table = 'quests'
+
+    def __repr__(self) -> str:
+        return f'Quest: "{self.__str__()}" ({self.quest_id})'
+
+    def __str__(self) -> str:
+        return self.display_name or self.name or self.quest_id
+
     def _is_repeatable(self):
         """
         Boolean whether the quest is repeatable.
@@ -79,13 +90,3 @@ class Quest(models.Model):
 
     _is_repeatable.boolean = True
     is_repeatable = property(_is_repeatable)
-
-    def __repr__(self) -> str:
-        return f'Quest: "{self.display_name}" ({self.quest_id})'
-
-    def __str(self) -> str:
-        return self.display_name
-
-    class Meta:
-        managed = False
-        db_table = 'quests'

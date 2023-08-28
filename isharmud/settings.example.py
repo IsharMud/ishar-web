@@ -161,4 +161,4 @@ USE_THOUSAND_SEPARATOR = True
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGIN_URL = '/admin/login/'
+LOGIN_URL = "/admin/login/"

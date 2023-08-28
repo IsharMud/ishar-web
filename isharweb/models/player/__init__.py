@@ -199,6 +199,16 @@ class Player(models.Model):
         verbose_name="Log Out"
     )
 
+    class Meta:
+        managed = False
+        db_table = 'players'
+
+    def __repr__(self) -> str:
+        return f'Player: "{self.__str__()}" ({self.id}) [{self.player_type}]'
+
+    def __str__(self) -> str:
+        return self.name
+
     def _is_deleted(self) -> bool:
         """
         Boolean whether player character is deleted.
@@ -402,13 +412,3 @@ class Player(models.Model):
         if self.remorts > 0:
             earned += int(self.remorts / 5) * 3 + 1
         return earned
-
-    def __repr__(self) -> str:
-        return f'Player: "{self.name}" ({self.id}) [{self.player_type}]'
-
-    def __str(self) -> str:
-        return self.name
-
-    class Meta:
-        managed = False
-        db_table = 'players'

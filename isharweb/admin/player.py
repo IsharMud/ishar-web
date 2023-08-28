@@ -39,10 +39,10 @@ class PlayerAdmin(ModelAdmin):
     filter_horizontal = []
     filter_vertical = []
     list_display = [
-        "name", "player_type", "level", "renown", "_is_deleted", "_is_god",
-        "_is_immortal", "_is_survival"
+        "name", "account", "player_type", "level", "renown",
+        "_is_deleted", "_is_god", "_is_immortal", "_is_survival"
     ]
-    list_filter = []
+    list_filter = ["game_type", "is_deleted", "true_level", "account"]
     ordering = ["id"]
     readonly_fields = ["id", "account", "birth", "logon", "logout"]
     search_fields = ["name"]
