@@ -208,7 +208,7 @@ class Race(models.Model):
     class Meta:
         managed = False
         db_table = 'races'
-        ordering = ["display_name", "symbol", "race_id"]
+        ordering = ["-is_playable", "display_name", "symbol", "race_id"]
         verbose_name = "Race"
         verbose_name_plural = "Races"
 
