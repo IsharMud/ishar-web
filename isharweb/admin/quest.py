@@ -20,7 +20,6 @@ class QuestRewardAdminInline(TabularInline):
     list_display = ["reward_num", "reward_type", "quest", "class_restrict"]
     list_filter = ["reward_type", "class_restrict", "quest"]
     model = QuestReward
-    ordering = ["reward_num"]
     search_fields = ["quest", "reward_type"]
     readonly_fields = []
 
@@ -40,7 +39,6 @@ class QuestStepAdminInline(TabularInline):
     list_display = ["step_id", "step_type", "quest"]
     list_filter = ["step_type", "num_required", "mystify", "quest"]
     model = QuestStep
-    ordering = ["step_id"]
     search_fields = ["step_id", "step_type", "target", "mystify_text"]
     readonly_fields = []
 

@@ -205,7 +205,9 @@ class Player(models.Model):
     class Meta:
         managed = False
         db_table = "players"
-        ordering = ["name", "id"]
+        ordering = ["-true_level", "id"]
+        verbose_name = "Player"
+        verbose_name_plural = "Players"
 
     def __repr__(self) -> str:
         return f'Player: "{self.__str__()}" ({self.id}) [{self.player_type}]'

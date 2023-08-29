@@ -18,14 +18,14 @@ class AccountAdmin(BaseUserAdmin):
         (None, {"fields": [
             "account_id", model.USERNAME_FIELD, model.EMAIL_FIELD
         ]}),
-        ("Points", {"fields": [
+        ("Points", {"fields": (
             "account_gift", "bugs_reported", "current_essence", "earned_essence"
-        ]}),
-        ("Banned", {"fields": ["banned_until"]}),
-        ("Last", {"fields": ["last_ident", "last_isp", "last_haddr"]}),
-        ("Created", {"fields": [
+        )}),
+        ("Banned", {"fields": ("banned_until",)}),
+        ("Last", {"fields": ("last_ident", "last_isp", "last_haddr")}),
+        ("Created", {"fields": (
             "created_at", "create_ident", "create_isp", "create_haddr"
-        ]})
+        )})
     )
     filter_horizontal = []
     filter_vertical = []
@@ -36,7 +36,7 @@ class AccountAdmin(BaseUserAdmin):
         "_is_god", "_is_forger", "_is_eternal", "_is_artisan", "_is_immortal"
     )
     list_filter = []
-    ordering = [model.USERNAME_FIELD, "account_id"]
+    ordering = ["account_id"]
     search_fields = [
         model.USERNAME_FIELD, model.EMAIL_FIELD,
         "create_isp", "create_ident", "last_ident", "last_isp"
