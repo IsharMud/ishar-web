@@ -1,3 +1,4 @@
+from django.contrib import admin
 from django.db import models
 
 from .force import Force
@@ -218,6 +219,7 @@ class Race(models.Model):
     def __str__(self):
         return self.display_name
 
+    @admin.display(boolean=True, description="Playable", ordering="is_playable")
     def _is_playable(self) -> bool:
         """
         Boolean whether race can be chosen by player characters.
@@ -225,8 +227,6 @@ class Race(models.Model):
         if self.is_playable == 1:
             return True
         return False
-
-    _is_playable.boolean = True
 
 
 class RaceSkill(models.Model):
