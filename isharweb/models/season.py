@@ -65,7 +65,7 @@ class Season(models.Model):
     class Meta:
         managed = False
         db_table = 'seasons'
-        ordering = ["-season_id"]
+        ordering = ("-is_active", "-season_id")
         verbose_name = "Season"
         verbose_name_plural = "Seasons"
 

@@ -461,10 +461,8 @@ class Class(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'classes'
-        ordering = (
-            "class_display", "class_name", "class_description", "class_id"
-        )
+        db_table = "classes"
+        ordering = ("class_name",)
         verbose_name = "Class"
         verbose_name_plural = "Classes"
 
@@ -475,7 +473,7 @@ class Class(models.Model):
         return self.class_name
 
     @admin.display(
-        boolean=True, description="Playable?", ordering="class_display"
+        boolean=True, description="Playable", ordering="class_display"
     )
     def _is_playable(self) -> bool:
         """

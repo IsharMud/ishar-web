@@ -20,8 +20,7 @@ class SeasonAdmin(ModelAdmin):
             "season_leader_account", "seasonal_leader_name"
         )})
     )
-    filter_horizontal = ()
-    filter_vertical = ()
+    filter_horizontal = filter_vertical = ()
     list_display = (
         "season_id", "_is_active", "effective_date", "expiration_date"
     )

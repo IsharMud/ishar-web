@@ -6,7 +6,7 @@ class RaceAdmin(ModelAdmin):
     Ishar race administration.
     """
     fieldsets = (
-        (None, {"fields": ("race_id", "symbol", "display_name", "folk_name")}),
+        (None, {"fields": ("race_id", "display_name", "symbol", "folk_name")}),
         ("Descriptions", {"fields": ("short_description", "long_description")}),
         ("Defaults", {"fields": (
             "default_movement", "default_height", "default_weight"
@@ -29,11 +29,13 @@ class RaceAdmin(ModelAdmin):
             "endure_heat", "endure_cold", "is_undead", "is_playable"
         )}),
     )
-    filter_horizontal = []
-    filter_vertical = []
+    filter_horizontal = filter_vertical = ()
     list_display = (
         "display_name", "symbol", "_is_playable", "short_description"
     )
-    list_filter = ["is_playable"]
-    readonly_fields = ["race_id"]
-    search_fields = [""]
+    list_filter = ("is_playable",)
+    readonly_fields = ("race_id",)
+    search_fields = (
+        "display_name", "symbol", "folk_name", "attach_noun",
+        "short_description", "long_description"
+    )

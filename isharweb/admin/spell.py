@@ -25,6 +25,7 @@ class SpellInfoAdmin(ModelAdmin):
     inlines = ()
     list_display = ("skill_name", "_is_spell", "_is_skill", "_is_type")
     list_filter = ("is_spell", "is_skill", "is_type", "skill_name")
+    model = SpellInfo
     search_fields = (
         "enum_symbol", "func_name", "skill_name",
         "wearoff_msg", "chant_text", "appearance", "decide_func"

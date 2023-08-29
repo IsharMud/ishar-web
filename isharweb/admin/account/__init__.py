@@ -14,10 +14,11 @@ class AccountAdmin(BaseUserAdmin):
         return False
 
     model = get_user_model()
+
     fieldsets = (
-        (None, {"fields": [
+        (None, {"fields": (
             "account_id", model.USERNAME_FIELD, model.EMAIL_FIELD
-        ]}),
+         )}),
         ("Points", {"fields": (
             "account_gift", "bugs_reported", "current_essence", "earned_essence"
         )}),
@@ -27,21 +28,19 @@ class AccountAdmin(BaseUserAdmin):
             "created_at", "create_ident", "create_isp", "create_haddr"
         )})
     )
-    filter_horizontal = []
-    filter_vertical = []
-    inlines = []
+    filter_horizontal = filter_vertical = inlines = ()
 
     list_display = (
         model.USERNAME_FIELD,
         "_is_god", "_is_forger", "_is_eternal", "_is_artisan", "_is_immortal"
     )
     list_filter = []
-    ordering = ["account_id"]
-    search_fields = [
+    ordering = ("account_id",)
+    search_fields = (
         model.USERNAME_FIELD, model.EMAIL_FIELD,
         "create_isp", "create_ident", "last_ident", "last_isp"
-    ]
-    readonly_fields = [
+    )
+    readonly_fields = (
         "account_id", "last_ident", "last_isp", "last_haddr",
         "created_at", "create_isp", "create_ident", "create_haddr"
-    ]
+    )

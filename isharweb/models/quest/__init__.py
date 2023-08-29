@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.contrib import admin
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 
@@ -84,7 +85,7 @@ class Quest(models.Model):
     class Meta:
         managed = False
         db_table = "quests"
-        ordering = ["display_name", "name", "quest_id"]
+        ordering = ["-repeatable", "display_name", "quest_id"]
         verbose_name = "Quest"
         verbose_name_plural = "Quests"
 
@@ -94,6 +95,9 @@ class Quest(models.Model):
     def __str__(self) -> str:
         return self.display_name or self.name or self.quest_id
 
+    @admin.display(
+        boolean=True, description="Repeatable", ordering="repeatable"
+    )
     def _is_repeatable(self):
         """
         Boolean whether the quest is repeatable.
@@ -101,6 +105,3 @@ class Quest(models.Model):
         if self.repeatable == 1:
             return True
         return False
-
-    _is_repeatable.boolean = True
-    is_repeatable = property(_is_repeatable)

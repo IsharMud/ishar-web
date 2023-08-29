@@ -5,19 +5,14 @@ class ClassAdmin(ModelAdmin):
     """
     Ishar class administration.
     """
-    fieldsets = (
-        (None, {"fields": (
-            "class_id", "class_name", "class_display", "class_description"
-        )}),
+    fieldsets = ((None, {"fields": (
+        "class_id", "class_name", "class_display", "class_description"
+    )}),)
+    filter_horizontal = filter_vertical = list_filter = ()
+    readonly_fields = ("class_id",)
+    list_display = search_fields = (
+        "class_name", "class_display", "class_description"
     )
-    filter_horizontal = []
-    filter_vertical = []
-    list_display = (
-        "class_name", "_is_playable", "class_display", "class_description"
-    )
-    list_filter = []
-    readonly_fields = ["class_id"]
-    search_fields = ["class_name", "class_display", "class_description"]
 
 
 class PlayerAdmin(ModelAdmin):
@@ -35,20 +30,19 @@ class PlayerAdmin(ModelAdmin):
         (None, {"fields": (
             "id", "account", "name", "description", "true_level", "online"
         )}),
-        ("Survival", {"fields":("game_type", "is_deleted")}),
+        ("Survival", {"fields": ("game_type", "is_deleted")}),
         ("Points", {"fields": ("bankacc", "renown", "remorts", "favors")}),
         ("Totals", {"fields": (
             "deaths", "total_renown", "quests_completed", "challenges_completed"
         )}),
-        ("Rooms", {"fields": ["bound_room", "load_room", "inn_limit"]}),
-        ("Dates", {"fields": ["birth", "logon", "logout"]})
+        ("Rooms", {"fields": ("bound_room", "load_room", "inn_limit")}),
+        ("Dates", {"fields": ("birth", "logon", "logout")})
     )
-    filter_horizontal = []
-    filter_vertical = []
-    list_display = [
+    filter_horizontal = filter_vertical = ()
+    list_display = (
         "name", "account", "player_type", "level", "renown",
         "_is_deleted", "_is_god", "_is_immortal", "_is_survival"
-    ]
-    list_filter = ["game_type", "is_deleted", "true_level", "account"]
-    readonly_fields = ["id", "account", "birth", "logon", "logout"]
-    search_fields = ["name"]
+    )
+    list_filter = ("game_type", "is_deleted", "true_level", "account")
+    readonly_fields = ("id", "account", "birth", "logon", "logout")
+    search_fields = ("name",)

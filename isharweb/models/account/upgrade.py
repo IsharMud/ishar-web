@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.contrib import admin
 
 class AccountUpgrade(models.Model):
     """
@@ -49,7 +49,7 @@ class AccountUpgrade(models.Model):
     class Meta:
         managed = False
         db_table = "account_upgrades"
-        ordering = ["name", "description", "id"]
+        ordering = ["is_disabled", "name"]
         verbose_name = "Account Upgrade"
         verbose_name_plural = "Account Upgrades"
 
@@ -59,6 +59,7 @@ class AccountUpgrade(models.Model):
     def __str__(self) -> str:
         return self.name or self.id
 
+    @admin.display(boolean=True, description="Disabled", ordering="is_disabled")
     def _is_disabled(self) -> bool:
         """
         Boolean whether account upgrade is disabled.
@@ -66,5 +67,3 @@ class AccountUpgrade(models.Model):
         if self.is_disabled == 1:
             return True
         return False
-
-    _is_disabled.boolean = True

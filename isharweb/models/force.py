@@ -17,7 +17,7 @@ class Force(models.Model):
     class Meta:
         managed = False
         db_table = "forces"
-        ordering = ["force_name"]
+        ordering = ("force_name",)
         verbose_name = "Force"
         verbose_name_plural = "Forces"
 

@@ -12,8 +12,7 @@ class ChallengeAdmin(ModelAdmin):
         ("Original", {"fields": ("orig_level", "orig_people", "orig_tier")}),
         ("Adjusted", {"fields": ("adj_level", "adj_people", "adj_tier")}),
     )
-    filter_horizontal = ()
-    filter_vertical = ()
+    filter_horizontal = filter_vertical = ()
     list_display = ("challenge_desc", "_is_active", "_is_completed")
     list_filter = ("is_active",)
     readonly_fields = ("challenge_id",)

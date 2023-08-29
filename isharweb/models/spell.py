@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib import admin
 
 from .force import Force
 
@@ -156,7 +157,9 @@ class SpellInfo(models.Model):
     class Meta:
         managed = False
         db_table = "spell_info"
-        ordering = ["skill_name", "enum_symbol"]
+        ordering = (
+            "-is_spell", "-is_skill", "-is_type", "skill_name", "enum_symbol"
+        )
         verbose_name = "Spell"
         verbose_name_plural = "Spells"
 
@@ -166,6 +169,7 @@ class SpellInfo(models.Model):
     def __str__(self):
         return self.skill_name or self.enum_symbol
 
+    @admin.display(boolean=True, description="Skill", ordering="is_skill")
     def _is_skill(self):
         """
         Boolean whether a skill.
@@ -174,8 +178,7 @@ class SpellInfo(models.Model):
             return True
         return False
 
-    _is_skill.boolean = True
-
+    @admin.display(boolean=True, description="Spell", ordering="is_spell")
     def _is_spell(self):
         """
         Boolean whether a spell.
@@ -184,8 +187,7 @@ class SpellInfo(models.Model):
             return True
         return False
 
-    _is_spell.boolean = True
-
+    @admin.display(boolean=True, description="Type", ordering="is_type")
     def _is_type(self):
         """
         Boolean whether a type.
@@ -193,8 +195,6 @@ class SpellInfo(models.Model):
         if self.is_type == 1:
             return True
         return False
-
-    _is_type.boolean = True
 
 
 class SpellForce(models.Model):
@@ -249,9 +249,9 @@ class SpellSpellFlag(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'spells_spell_flags'
-        ordering = ["spell", "flag"]
-        unique_together = (('spell', 'flag'),)
+        db_table = "spells_spell_flags"
+        ordering = ("spell", "flag")
+        unique_together = (("spell", "flag"),)
         verbose_name = "Spell's Flag"
         verbose_name_plural = "Spell's Flags"
 
