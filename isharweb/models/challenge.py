@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib import admin
 
 
 class Challenge(models.Model):
@@ -72,6 +73,9 @@ class Challenge(models.Model):
     def __str__(self):
         return self.challenge_desc or self.mob_name or self.challenge_id
 
+    @admin.display(
+        boolean=True, description="Active?", ordering="is_active"
+    )
     def _is_active(self):
         """
         Boolean whether challenge is active.
@@ -80,8 +84,9 @@ class Challenge(models.Model):
             return True
         return False
 
-    _is_active.boolean = True
-
+    @admin.display(
+        boolean=True, description="Completed?", ordering="-winner_desc"
+    )
     def _is_completed(self):
         """
         Boolean whether challenge is completed.
@@ -89,6 +94,3 @@ class Challenge(models.Model):
         if self.winner_desc != '' and self.winner_desc != "'--'":
             return True
         return False
-
-    _is_completed.boolean = True
-    is_completed = property(_is_completed)

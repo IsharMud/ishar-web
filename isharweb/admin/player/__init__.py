@@ -12,7 +12,9 @@ class ClassAdmin(ModelAdmin):
     )
     filter_horizontal = []
     filter_vertical = []
-    list_display = ("class_name", "class_display", "class_description")
+    list_display = (
+        "class_name", "_is_playable", "class_display", "class_description"
+    )
     list_filter = []
     readonly_fields = ["class_id"]
     search_fields = ["class_name", "class_display", "class_description"]
