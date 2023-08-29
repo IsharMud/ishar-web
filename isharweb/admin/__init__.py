@@ -9,6 +9,7 @@ from .news import NewsAdmin
 from .player import ClassAdmin, PlayerAdmin
 from .quest import QuestAdmin, QuestStepAdmin
 from .race import RaceAdmin
+from .season import SeasonAdmin
 from .spell import SpellInfoAdmin
 
 from ..models.account import Account
@@ -19,6 +20,7 @@ from ..models.news import News
 from ..models.player import Player, Class
 from ..models.quest import Quest
 from ..models.race import Race
+from ..models.season import Season
 from ..models.spell import SpellInfo
 
 
@@ -31,6 +33,7 @@ admin.site.register(News, NewsAdmin)
 admin.site.register(Player, PlayerAdmin)
 admin.site.register(Quest, QuestAdmin)
 admin.site.register(Race, RaceAdmin)
+admin.site.register(Season, SeasonAdmin)
 admin.site.register(SpellInfo, SpellInfoAdmin)
 
 # Disable "groups" in /admin/

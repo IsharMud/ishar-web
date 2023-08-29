@@ -28,10 +28,11 @@ class SpellFlag(models.Model):
     class Meta:
         managed = False
         db_table = 'spell_flags'
+        ordering = ["name", "description", "-id"]
         verbose_name = "Spell Flag"
 
     def __repr__(self):
-        return f"Spell Flag: {repr(self.name)} ({self.id})"
+        return f"Spell Flag: {repr(self.__str__())} ({self.id})"
 
     def __str__(self):
         return self.name
@@ -157,6 +158,7 @@ class SpellInfo(models.Model):
         db_table = "spell_info"
         ordering = ["skill_name", "enum_symbol"]
         verbose_name = "Spell"
+        verbose_name_plural = "Spells"
 
     def __repr__(self):
         return f"Spell Info: {repr(self.__str__())}"
@@ -212,8 +214,10 @@ class SpellForce(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'spell_forces'
+        db_table = "spell_forces"
+        ordering = ["spell", "force"]
         verbose_name = "Spell Force"
+        verbose_name_plural = "Spell Forces"
 
     def __repr__(self):
         return f"Spell Force: {self.spell} @ {self.force}"
@@ -246,8 +250,10 @@ class SpellSpellFlag(models.Model):
     class Meta:
         managed = False
         db_table = 'spells_spell_flags'
+        ordering = ["spell", "flag"]
         unique_together = (('spell', 'flag'),)
         verbose_name = "Spell's Flag"
+        verbose_name_plural = "Spell's Flags"
 
     def __repr__(self):
         return f"Spell's Flag: {self.spell} @ {self.flag}"
