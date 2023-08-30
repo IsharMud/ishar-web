@@ -59,7 +59,9 @@ class AccountUpgrade(models.Model):
     def __str__(self) -> str:
         return self.name or self.id
 
-    @admin.display(boolean=True, description="Disabled", ordering="is_disabled")
+    @admin.display(
+        boolean=True, description="Disabled?", ordering="is_disabled"
+    )
     def _is_disabled(self) -> bool:
         """
         Boolean whether account upgrade is disabled.

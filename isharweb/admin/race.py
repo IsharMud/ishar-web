@@ -31,7 +31,8 @@ class RaceAdmin(ModelAdmin):
     )
     filter_horizontal = filter_vertical = ()
     list_display = (
-        "display_name", "symbol", "_is_playable", "short_description"
+        "display_name", "symbol", "_is_playable", "folk_name",
+        "short_description"
     )
     list_filter = ("is_playable",)
     readonly_fields = ("race_id",)

@@ -7,7 +7,8 @@ class NewsAdmin(ModelAdmin):
     """
     fieldsets = (
         (None, {"fields": ("news_id",)}),
-        ("Content", {"fields": ("subject", "body", "created_at", "account")}),
+        ("Content", {"fields": ("subject", "body")}),
+        ("Authorship", {"fields": ("created_at", "account")}),
     )
     filter_horizontal = filter_vertical = ()
     list_display = ("subject", "created_at", "account")

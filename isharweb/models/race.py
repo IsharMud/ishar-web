@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.db import models
 
 from .force import Force
-from .spell import SpellInfo
+from .spell import Spell
 
 
 class Race(models.Model):
@@ -187,6 +187,7 @@ class Race(models.Model):
         verbose_name="See Invisibility?"
     )
     is_walking = models.IntegerField(
+        choices=[(0, False), (1, True)],
         help_text="Does the race walk?",
         verbose_name="Is Walking?"
     )
@@ -219,7 +220,9 @@ class Race(models.Model):
     def __str__(self):
         return self.display_name
 
-    @admin.display(boolean=True, description="Playable", ordering="is_playable")
+    @admin.display(
+        boolean=True, description="Playable?", ordering="is_playable"
+    )
     def _is_playable(self) -> bool:
         """
         Boolean whether race can be chosen by player characters.
@@ -235,7 +238,7 @@ class RaceSkill(models.Model):
         on_delete=models.CASCADE
     )
     skill = models.ForeignKey(
-        to=SpellInfo,
+        to=Spell,
         on_delete=models.CASCADE
     )
     level = models.IntegerField()

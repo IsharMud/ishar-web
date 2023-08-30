@@ -22,7 +22,7 @@ class PlayerAdmin(ModelAdmin):
 
     def has_add_permission(self, request, obj=None):
         """
-        Remove ability to add players in /admin/.
+        Disable adding players in /admin/.
         """
         return False
 
@@ -41,7 +41,7 @@ class PlayerAdmin(ModelAdmin):
     filter_horizontal = filter_vertical = ()
     list_display = (
         "name", "account", "player_type", "level", "renown",
-        "_is_deleted", "_is_god", "_is_immortal", "_is_survival"
+        "_is_deleted", "is_god", "is_immortal", "is_survival"
     )
     list_filter = ("game_type", "is_deleted", "true_level", "account")
     readonly_fields = ("id", "account", "birth", "logon", "logout")

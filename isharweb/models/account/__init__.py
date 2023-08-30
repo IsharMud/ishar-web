@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 
 from django.db import models
+from django.contrib import admin
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.utils import timezone
 
@@ -8,6 +9,7 @@ from passlib.hash import md5_crypt
 
 from .manager import AccountManager
 from ..unsigned import UnsignedAutoField
+from ...util import dec2ip
 
 
 class Account(AbstractBaseUser, PermissionsMixin):
@@ -101,15 +103,37 @@ class Account(AbstractBaseUser, PermissionsMixin):
     class Meta:
         managed = False
         db_table = "accounts"
-        ordering = ["account_name", "account_id"]
+        ordering = ("account_id",)
+        verbose_name = "Account"
+        verbose_name_plural = "Accounts"
 
     def __repr__(self) -> str:
-        return f'Account: "{self.account_name}" ({self.account_id})'
+        return (
+            __class__.__name__ +
+            f" : {repr(self.__str__())} ({self.account_id})"
+        )
 
     def __str__(self) -> str:
         return self.account_name
 
-    def _is_active(self) -> bool:
+    @admin.display(description="Create IP", ordering="create_haddr")
+    def _create_haddr(self):
+        """
+        IP address that created the account.
+        """
+        return dec2ip(self.create_haddr)
+
+    @property
+    @admin.display(description="Last IP", ordering="last_haddr")
+    def _last_haddr(self):
+        """
+        Last IP address that logged in to the account.
+        """
+        return dec2ip(self.last_haddr)
+
+    @property
+    @admin.display(boolean=True, description="Active?")
+    def is_active(self) -> bool:
         """
         Boolean whether account is active.
         """
@@ -118,10 +142,8 @@ class Account(AbstractBaseUser, PermissionsMixin):
                 return False
         return True
 
-    _is_active.boolean = True
-    is_active = property(_is_active)
-
-    def _is_artisan(self) -> bool:
+    @admin.display(boolean=True, description="Artisan?")
+    def is_artisan(self) -> bool:
         """
         Boolean whether any Artisan (or above) players.
         """
@@ -130,10 +152,8 @@ class Account(AbstractBaseUser, PermissionsMixin):
                 return True
         return False
 
-    _is_artisan.boolean = True
-    is_artisan = property(_is_artisan)
-
-    def _is_consort(self) -> bool:
+    @admin.display(boolean=True, description="Consort?")
+    def is_consort(self) -> bool:
         """
         Boolean whether any Consort (or above) players.
         """
@@ -142,10 +162,8 @@ class Account(AbstractBaseUser, PermissionsMixin):
                 return True
         return False
 
-    _is_consort.boolean = True
-    is_consort = property(_is_consort)
-
-    def _is_eternal(self) -> bool:
+    @admin.display(boolean=True, description="Eternal?")
+    def is_eternal(self) -> bool:
         """
         Boolean whether any Eternal (or above) players.
         """
@@ -154,10 +172,8 @@ class Account(AbstractBaseUser, PermissionsMixin):
                 return True
         return False
 
-    _is_eternal.boolean = True
-    is_eternal = property(_is_eternal)
-
-    def _is_forger(self) -> bool:
+    @admin.display(boolean=True, description="Forger?")
+    def is_forger(self) -> bool:
         """
         Boolean whether any Forger (or above) players.
         """
@@ -166,10 +182,8 @@ class Account(AbstractBaseUser, PermissionsMixin):
                 return True
         return False
 
-    _is_forger.boolean = True
-    is_forger = property(_is_forger)
-
-    def _is_god(self) -> bool:
+    @admin.display(boolean=True, description="God?")
+    def is_god(self) -> bool:
         """
         Boolean whether any God players.
         """
@@ -178,13 +192,8 @@ class Account(AbstractBaseUser, PermissionsMixin):
                 return True
         return False
 
-    _is_god.boolean = True
-    is_god = property(_is_god)
-
-    _is_admin = _is_superuser = _is_god
-    is_admin = is_superuser = is_god
-
-    def _is_immortal(self) -> bool:
+    @admin.display(boolean=True, description="Immortal?")
+    def is_immortal(self) -> bool:
         """
         Boolean whether any immortal (or above, but not consort) players.
         """
@@ -193,15 +202,13 @@ class Account(AbstractBaseUser, PermissionsMixin):
                 return True
         return False
 
-    _is_immortal.boolean = True
-    is_immortal = property(_is_immortal)
-
-    _is_staff = _is_immortal
+    # Admin, staff, and superuser properties for Django
+    is_admin = is_superuser = is_god
     is_staff = is_immortal
 
     def check_password(self, raw_password: str = None) -> bool:
         """
-        Method to check an account password.
+        Method to check account password.
         """
         return md5_crypt.verify(secret=raw_password, hash=self.password)
 
@@ -213,10 +220,10 @@ class Account(AbstractBaseUser, PermissionsMixin):
         return timezone.now() - self.created_at
 
     def has_perms(self, perm_list, obj=None):
-        return True
+        return self.is_admin
 
     def has_module_perms(self, app_label):
-        return True
+        return self.is_admin
 
     @property
     def seasonal_earned(self) -> int:
@@ -226,14 +233,14 @@ class Account(AbstractBaseUser, PermissionsMixin):
         # Start at zero (0), and return the points from
         #   the player within the account that has the highest amount.
         earned = 0
-        for player in self.players:
+        for player in self.players.all():
             if player.seasonal_earned > earned:
                 earned = player.seasonal_earned
         return earned
 
     def set_password(self, raw_password: str = None) -> bool:
         """
-        Method to change an account password.
+        Method to set account password.
         """
         self.password = md5_crypt.hash(secret=raw_password)
         if self.save():

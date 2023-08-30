@@ -28,7 +28,7 @@ class News(models.Model):
         verbose_name="Subject"
     )
     body = models.TextField(
-        help_text="Body of then news post.",
+        help_text="Body of the news post.",
         verbose_name="Body"
     )
 

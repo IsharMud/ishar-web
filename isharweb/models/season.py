@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib import admin
 
 
 class Season(models.Model):
@@ -75,6 +76,7 @@ class Season(models.Model):
     def __str__(self):
         return f"Season {self.season_id}"
 
+    @admin.display(boolean=True, description="Active?", ordering="is_active")
     def _is_active(self) -> bool:
         """
         Boolean whether the season is active.
@@ -82,5 +84,3 @@ class Season(models.Model):
         if self.is_active == 1:
             return True
         return False
-
-    _is_active.boolean = True

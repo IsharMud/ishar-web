@@ -4,6 +4,7 @@ from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 from ..account import Account
+from ...util import dec2ip
 
 
 class Player(models.Model):
@@ -164,9 +165,9 @@ class Player(models.Model):
         verbose_name="Last ISP Change"
     )
     is_deleted = models.PositiveIntegerField(
+        choices=[(0, False), (1, True)],
         help_text="Is the player character deleted?",
-        verbose_name="Is Deleted",
-        choices=[(0, False), (1, True)]
+        verbose_name="Is Deleted?"
     )
     deaths = models.PositiveSmallIntegerField(
         help_text="Number of times that the player has died.",
@@ -205,16 +206,19 @@ class Player(models.Model):
     class Meta:
         managed = False
         db_table = "players"
-        ordering = ["-true_level", "id"]
+        ordering = ("-true_level", "id")
         verbose_name = "Player"
         verbose_name_plural = "Players"
 
     def __repr__(self) -> str:
-        return f'Player: "{self.__str__()}" ({self.id}) [{self.player_type}]'
+        return (
+            f"Player: {repr(self.__str__())} ({self.id}) [{self.player_type}]'"
+        )
 
     def __str__(self) -> str:
         return self.name
 
+    @admin.display(boolean=True, description="Deleted?", ordering="is_deleted")
     def _is_deleted(self) -> bool:
         """
         Boolean whether player character is deleted.
@@ -223,63 +227,73 @@ class Player(models.Model):
             return True
         return False
 
-    _is_deleted.boolean = True
+    @admin.display(description="Create IP", ordering="create_haddr")
+    def _create_haddr(self):
+        """
+        IP address that created the account.
+        """
+        return dec2ip(self.create_haddr)
 
-    def _is_god(self) -> bool:
+    @admin.display(description="Login Fail IP", ordering="login_fail_haddr")
+    def _login_fail_haddr(self):
+        """
+        Last IP address that failed to log in to the account.
+        """
+        return dec2ip(self.login_fail_haddr)
+
+    @admin.display(description="Last IP", ordering="last_haddr")
+    def _last_haddr(self):
+        """
+        Last IP address that logged in to the account.
+        """
+        return dec2ip(self.last_haddr)
+
+    @admin.display(boolean=True, description="God?", ordering="-true_level")
+    def is_god(self) -> bool:
         """
         Boolean whether player is a God.
         """
-        return self.is_immortal_type(immortal_type='God')
+        return self.is_immortal_type(immortal_type="God")
 
-    _is_god.boolean = True
-    is_god = property(_is_god)
-
-    def _is_artisan(self) -> bool:
+    @admin.display(boolean=True, description="Artisan?", ordering="-true_level")
+    def is_artisan(self) -> bool:
         """
         Boolean whether player is an Artisan (or above).
         """
-        return self.is_immortal_type(immortal_type='Artisan')
+        return self.is_immortal_type(immortal_type="Artisan")
 
-    _is_artisan.boolean = True
-    is_artisan = property(_is_artisan)
-
-    def _is_consort(self) -> bool:
+    @admin.display(boolean=True, description="Consort?", ordering="-true_level")
+    def is_consort(self) -> bool:
         """
         Boolean whether player is a Consort (or above).
         """
-        return self.is_immortal_type(immortal_type='Consort')
+        return self.is_immortal_type(immortal_type="Consort")
 
-    _is_consort.boolean = True
-    is_consort = property(_is_consort)
-
-    def _is_eternal(self) -> bool:
+    @admin.display(boolean=True, description="Eternal?", ordering="-true_level")
+    def is_eternal(self) -> bool:
         """
         Boolean whether player is an Eternal (or above).
         """
-        return self.is_immortal_type(immortal_type='Eternal')
+        return self.is_immortal_type(immortal_type="Eternal")
 
-    _is_eternal.boolean = True
-    is_eternal = property(_is_eternal)
-
-    def _is_forger(self) -> bool:
+    @admin.display(boolean=True, description="Forger?", ordering="-true_level")
+    def is_forger(self) -> bool:
         """
         Boolean whether player is a Forger (or above).
         """
-        return self.is_immortal_type(immortal_type='Forger')
+        return self.is_immortal_type(immortal_type="Forger")
 
-    _is_forger.boolean = True
-    is_forger = property(_is_forger)
-
-    def _is_immortal(self) -> bool:
+    @admin.display(boolean=True, description="Immortal?", ordering="-true_level")
+    def is_immortal(self) -> bool:
         """
         Boolean whether player is immortal (or above, but not consort).
         """
-        return self.is_immortal_type(immortal_type='Immortal')
-
-    _is_immortal.boolean = True
-    is_immortal = property(_is_immortal)
+        return self.is_immortal_type(immortal_type="Immortal")
 
     @property
+    @admin.display(
+        boolean=True, description="Immortal Type", ordering="-true_level"
+    )
     def immortal_type(self) -> (str, None):
         """
         Immortal type.
@@ -288,11 +302,13 @@ class Player(models.Model):
             return settings.IMMORTAL_LEVELS[self.true_level]
         return None
 
-    def is_immortal_type(self, immortal_type: str = 'Immortal') -> bool:
+    @admin.display(boolean=True, description="Immortal Type")
+    def is_immortal_type(self, immortal_type: str = "Immortal") -> bool:
         """
         Boolean whether player is a specific immortal type (or above).
         """
-        # TODO; fix this
+        # TODO:
+        #   Fix this:
         imm_types = {imm_type: level for level, imm_type in settings.IMMORTAL_LEVELS.items()}
         if self.immortal_type:
             if self.immortal_type in imm_types:
@@ -300,18 +316,14 @@ class Player(models.Model):
                     return True
         return False
 
-    is_immortal_type.boolean = True
-
-    def _is_survival(self) -> bool:
+    @admin.display(boolean=True, description="Survival?", ordering='-game_type')
+    def is_survival(self) -> bool:
         """
         Boolean whether player is Survival ("perm-death").
         """
         if self.game_type == 1:
             return True
         return False
-
-    _is_survival.boolean = True
-    is_survival = property(_is_survival)
 
     @property
     @admin.display(boolean=False, description="Level", ordering='true_level')
@@ -349,6 +361,8 @@ class Player(models.Model):
         #   with less than one (1) hour of play-time
         if self.true_level < 5 and self.online < 3600:
             return stats
+
+        # TODO: PlayerCommon
 
         # Otherwise, get the players actual stats
         players_stats = {
@@ -475,7 +489,7 @@ class Class(models.Model):
     @admin.display(
         boolean=True, description="Playable", ordering="class_display"
     )
-    def _is_playable(self) -> bool:
+    def is_playable(self) -> bool:
         """
         Boolean whether the class is playable.
         """

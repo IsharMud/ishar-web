@@ -8,14 +8,10 @@ class QuestStep(models.Model):
     step_id = models.AutoField(
         primary_key=True,
         help_text="Quest step identification number",
-        verbose_name="Quest ID"
+        verbose_name="Quest Step ID"
     )
     step_type = models.IntegerField(
-        choices=[
-            (0, 'Object'),
-            (1, 'Kill'),
-            (2, 'Room')
-        ],
+        choices=[(0, 'Object'), (1, 'Kill'), (2, 'Room')],
         help_text="Quest step type.",
         verbose_name="Step Type",
     )
@@ -54,12 +50,15 @@ class QuestStep(models.Model):
     class Meta:
         managed = False
         db_table = "quest_steps"
-        ordering = ["quest", "step_id"]
+        ordering = ("quest", "step_id")
         verbose_name = "Quest Step"
         verbose_name_plural = "Quest Steps"
 
     def __repr__(self) -> str:
-        return f"Quest Step: {repr(self.__str__())}"
+        return self.__str__()
 
     def __str__(self) -> str:
-        return f""
+        return (
+            f"Quest Step: {self.step_id} ({self.get_step_type_display()}) @ "
+            f"{self.quest}"
+        )

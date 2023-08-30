@@ -4,6 +4,9 @@ from . import Quest
 
 
 class QuestReward(models.Model):
+    """
+    Quest Reward.
+    """
     reward_num = models.IntegerField(
         primary_key=True,
         help_text="Reward number.",
@@ -20,12 +23,14 @@ class QuestReward(models.Model):
     )
     quest = models.ForeignKey(
         to=Quest,
-        on_delete=models.CASCADE,
         help_text="Quest to which the reward is for.",
+        on_delete=models.DO_NOTHING,
+        related_name='rewards',
+        related_query_name='reward',
         verbose_name="Quest"
     )
     class_restrict = models.IntegerField(
-        choices=[(-1, "None")],
+        choices=[(-1, "None")],  # TODO: Fill this in. (Automatically?)
         help_text="Player class to which the reward is restricted.",
         verbose_name="Class Restrict"
     )
@@ -35,14 +40,16 @@ class QuestReward(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'quest_rewards'
-        unique_together = (('reward_num', 'quest'),)
-        ordering = ["quest", "reward_type", "class_restrict", "reward_num"]
+        db_table = "quest_rewards"
+        ordering = ("quest", "reward_type", "class_restrict", "reward_num")
+        unique_together = (("reward_num", "quest"),)
         verbose_name = "Quest Reward"
         verbose_name_plural = "Quest Rewards"
 
     def __repr__(self) -> str:
-        return f'Quest Reward: "{self.__str__()}"'
+        return self.__str__()
 
     def __str__(self) -> str:
-        return f"{self.reward_num} ({self.reward_type}) : {self.quest}"
+        return (
+            f"Quest Reward: {self.get_reward_type_display()} @ {self.quest}"
+        )

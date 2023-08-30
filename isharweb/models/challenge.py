@@ -73,7 +73,7 @@ class Challenge(models.Model):
     def __str__(self):
         return self.challenge_desc or self.mob_name or self.challenge_id
 
-    @admin.display(boolean=True, description="Active", ordering="is_active")
+    @admin.display(boolean=True, description="Active?", ordering="is_active")
     def _is_active(self):
         """
         Boolean whether challenge is active.
@@ -83,7 +83,7 @@ class Challenge(models.Model):
         return False
 
     @admin.display(
-        boolean=True, description="Completed", ordering="-winner_desc"
+        boolean=True, description="Completed?", ordering="winner_desc"
     )
     def _is_completed(self):
         """

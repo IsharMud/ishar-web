@@ -52,7 +52,7 @@ class Quest(models.Model):
         verbose_name="Repeatable"
     )
     description = models.CharField(
-        max_length=512,
+        blank=True, max_length=512, null=True,
         help_text="Description of the quest.",
         verbose_name="Description"
     )
@@ -61,17 +61,17 @@ class Quest(models.Model):
         verbose_name="Prerequisite"
     )
     class_restrict = models.IntegerField(
+        choices=[(-1, "None")],  # TODO: Fill this in. (Automatically?)
         help_text="Player class ID number to which the quest is restricted.",
         verbose_name="Class Restrict"
     )
     quest_intro = models.CharField(
-        max_length=2000,
+        blank=True, max_length=2000,
         help_text="Introduction text for the quest.",
         verbose_name="Quest Intro"
     )
     quest_source = models.PositiveIntegerField(
-        blank=True,
-        null=True,
+        blank=True, null=True,
         help_text="Source for the quest.",
         verbose_name="Quest Source"
     )

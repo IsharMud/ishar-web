@@ -6,7 +6,7 @@ from .force import Force
 
 class SpellFlag(models.Model):
     """
-    Flag for a spell.
+    Spell Flag.
     """
     id = models.IntegerField(
         primary_key=True,
@@ -28,9 +28,10 @@ class SpellFlag(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'spell_flags'
-        ordering = ["name", "description", "-id"]
+        db_table = "spell_flags"
+        ordering = ("name",)
         verbose_name = "Spell Flag"
+        verbose_name_plural = "Spell Flags"
 
     def __repr__(self):
         return f"Spell Flag: {repr(self.__str__())} ({self.id})"
@@ -39,7 +40,10 @@ class SpellFlag(models.Model):
         return self.name
 
 
-class SpellInfo(models.Model):
+class Spell(models.Model):
+    """
+    Spell.
+    """
     enum_symbol = models.CharField(
         max_length=255,
         help_text="Internal ENUM symbol of the skill.",
@@ -164,12 +168,12 @@ class SpellInfo(models.Model):
         verbose_name_plural = "Spells"
 
     def __repr__(self):
-        return f"Spell Info: {repr(self.__str__())}"
+        return f"Spell: {repr(self.__str__())}"
 
     def __str__(self):
         return self.skill_name or self.enum_symbol
 
-    @admin.display(boolean=True, description="Skill", ordering="is_skill")
+    @admin.display(boolean=True, description="Skill?", ordering="is_skill")
     def _is_skill(self):
         """
         Boolean whether a skill.
@@ -178,7 +182,7 @@ class SpellInfo(models.Model):
             return True
         return False
 
-    @admin.display(boolean=True, description="Spell", ordering="is_spell")
+    @admin.display(boolean=True, description="Spell?", ordering="is_spell")
     def _is_spell(self):
         """
         Boolean whether a spell.
@@ -187,7 +191,7 @@ class SpellInfo(models.Model):
             return True
         return False
 
-    @admin.display(boolean=True, description="Type", ordering="is_type")
+    @admin.display(boolean=True, description="Type?", ordering="is_type")
     def _is_type(self):
         """
         Boolean whether a type.
@@ -199,7 +203,7 @@ class SpellInfo(models.Model):
 
 class SpellForce(models.Model):
     spell = models.OneToOneField(
-        to=SpellInfo,
+        to=Spell,
         on_delete=models.DO_NOTHING,
         primary_key=True,
         help_text="Spell related to a force.",
@@ -215,7 +219,7 @@ class SpellForce(models.Model):
     class Meta:
         managed = False
         db_table = "spell_forces"
-        ordering = ["spell", "force"]
+        ordering = ("spell", "force")
         verbose_name = "Spell Force"
         verbose_name_plural = "Spell Forces"
 
@@ -231,15 +235,15 @@ class SpellSpellFlag(models.Model):
     Spell association to a spell flag.
     """
     spell = models.OneToOneField(
-        to=SpellInfo,
-        on_delete=models.CASCADE,
+        to=Spell,
+        on_delete=models.DO_NOTHING,
         primary_key=True,
-        help_text="Spell affected by a flag.",
+        help_text="Spell affected by the flag.",
         verbose_name="Spell"
     )
     flag = models.ForeignKey(
         to=SpellFlag,
-        on_delete=models.CASCADE,
+        on_delete=models.DO_NOTHING,
         help_text="Flag affecting the spell.",
         verbose_name="Flag"
     )
