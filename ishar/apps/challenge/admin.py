@@ -9,7 +9,7 @@ class ChallengeAdmin(admin.ModelAdmin):
     Ishar challenge administration.
     """
     fieldsets = (
-        (None, {"fields": ("challenge_id",)}),
+        (None, {"fields": ("challenge_id", "is_active")}),
         ("Details", {"fields": ("challenge_desc", "winner_desc")}),
         ("Target", {"fields": ("mob_vnum", "mob_name")}),
         ("Original", {"fields": ("orig_level", "orig_people", "orig_tier")}),
