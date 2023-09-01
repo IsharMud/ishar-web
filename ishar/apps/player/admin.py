@@ -32,9 +32,9 @@ class PlayerAdmin(admin.ModelAdmin):
 
     fieldsets = (
         (None, {"fields": (
-            "id", "account", "name", "description", "true_level", "online"
+            "id", "account", "name", "description",
+            "true_level", "game_type", "is_deleted", "online"
         )}),
-        ("Survival", {"fields": ("game_type", "is_deleted")}),
         ("Points", {"fields": ("bankacc", "renown", "remorts", "favors")}),
         ("Totals", {"fields": (
             "deaths", "total_renown", "quests_completed", "challenges_completed"
@@ -45,8 +45,8 @@ class PlayerAdmin(admin.ModelAdmin):
     filter_horizontal = filter_vertical = ()
     list_display = (
         "name", "account", "player_type", "level", "renown",
-        "_is_deleted", "is_god", "is_immortal", "is_survival"
+        "is_deleted", "is_god", "is_immortal", "is_survival"
     )
     list_filter = ("game_type", "is_deleted", "true_level", "account")
-    readonly_fields = ("id", "account", "birth", "logon", "logout")
-    search_fields = ("name","account__account_name")
+    readonly_fields = ("id", "birth", "logon", "logout")
+    search_fields = ("name", "account__account_name")

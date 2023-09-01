@@ -165,8 +165,10 @@ class Player(models.Model):
         help_text="Last Internet Service Provider (ISP) change.",
         verbose_name="Last ISP Change"
     )
-    is_deleted = models.PositiveIntegerField(
-        choices=[(0, False), (1, True)],
+    is_deleted = models.BooleanField(
+        blank=False,
+        default=0,
+        null=False,
         help_text="Is the player character deleted?",
         verbose_name="Is Deleted?"
     )
