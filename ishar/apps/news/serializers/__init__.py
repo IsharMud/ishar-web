@@ -1,9 +1,9 @@
-from rest_framework import serializers
+from rest_framework.serializers import ModelSerializer
 
 from ..models import News
 
 
-class NewsSerializer(serializers.HyperlinkedModelSerializer):
+class NewsSerializer(ModelSerializer):
     class Meta:
         model = News
         fields = "__all__"

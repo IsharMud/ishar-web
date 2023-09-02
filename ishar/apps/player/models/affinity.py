@@ -1,3 +1,6 @@
+from django.db import models
+
+
 class RacialAffinity(models.Model):
     """
     Racial Affinity.

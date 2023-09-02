@@ -73,7 +73,7 @@ class SpellAdmin(admin.ModelAdmin):
     )
     filter_horizontal = filter_vertical = readonly_fields = ()
     inlines = (SpellsFlagsAdminInline, SpellsForcesAdminInline)
-    list_display = ("skill_name", "_is_spell", "_is_skill", "_is_type")
+    list_display = ("skill_name", "is_spell", "is_skill", "is_type")
     list_filter = ("is_spell", "is_skill", "is_type")
     model = Spell
     search_fields = (

@@ -1,14 +1,14 @@
 from django.contrib import admin
 
-from .models import Race  # , RacialAffinity, RaceSkill
+from ..models.remort import RemortUpgrade
 
 
-@admin.register(Race)
-class RaceAdmin(admin.ModelAdmin):
+@admin.register(RemortUpgrade)
+class RemortUpgradeAdmin(admin.ModelAdmin):
     """
-    Ishar race administration.
+    Ishar remort upgrades administration.
     """
-    model = Race
+    model = RemortUpgrade
     fieldsets = (
         (None, {"fields": ("race_id", "display_name", "symbol", "folk_name")}),
         ("Descriptions", {"fields": ("short_description", "long_description")}),

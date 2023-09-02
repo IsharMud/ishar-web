@@ -1,11 +1,11 @@
 from django.contrib import admin
-from django.contrib.auth import get_user_model
 from django.db import models
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 
-from ..account.models import Account
-from ishar.util.ip import dec2ip
+
+from ...account.models import Account
+from ....util.ip import dec2ip
 
 
 class Player(models.Model):
@@ -221,15 +221,6 @@ class Player(models.Model):
     def __str__(self) -> str:
         return self.name
 
-    @admin.display(boolean=True, description="Deleted?", ordering="is_deleted")
-    def _is_deleted(self) -> bool:
-        """
-        Boolean whether player character is deleted.
-        """
-        if self.is_deleted and self.is_deleted == 1:
-            return True
-        return False
-
     @admin.display(description="Create IP", ordering="create_haddr")
     def _create_haddr(self):
         """
@@ -334,22 +325,6 @@ class Player(models.Model):
         return self.true_level
 
     @property
-    def player_css(self) -> str:
-        """
-        Player CSS class.
-        """
-        return f'{self.player_type.lower()}-player'
-
-    @property
-    def player_link(self) -> str:
-        """
-        Player link.
-        """
-        url = 'TODO'
-        # TODO
-        return f'<a href="{url}">{self.name}</a>'
-
-    @property
     def player_stats(self) -> dict:
         """
         Player stats.
@@ -382,14 +357,6 @@ class Player(models.Model):
         for stat_order in self.common.player_class.stats_order:
             stats[stat_order] = players_stats[stat_order]
         return stats
-
-    @property
-    @admin.display(description="Title")
-    def player_title(self) -> str:
-        """
-        Player title.
-        """
-        return self.title.replace('%s', self.player_link)
 
     def get_player_type(self) -> str:
         """
@@ -446,57 +413,3 @@ class Player(models.Model):
         if self.remorts > 0:
             earned += int(self.remorts / 5) * 3 + 1
         return earned
-
-
-class PlayerClass(models.Model):
-    """
-    Player Class.
-    """
-    class_id = models.AutoField(
-        primary_key=True,
-        help_text=(
-            "Auto-generated permanent identification number "
-            "of the player class."
-        ),
-        verbose_name="Class ID"
-    )
-    class_name = models.CharField(
-        unique=True, max_length=15,
-        help_text="Name of the player class.",
-        verbose_name="Class Name"
-    )
-    class_display = models.CharField(
-        max_length=32, blank=True, null=True,
-        help_text="Display phrase of the player class.",
-        verbose_name="Class Display"
-    )
-    class_description = models.CharField(
-        max_length=64, blank=True, null=True,
-        help_text="Description of the player class.",
-        verbose_name="Class Description"
-    )
-
-    class Meta:
-        managed = False
-        db_table = "classes"
-        default_related_name = "class"
-        ordering = ("class_name",)
-        verbose_name = "Class"
-        verbose_name_plural = "Classes"
-
-    def __repr__(self) -> str:
-        return f'Class: "{self.__str__()}" ({self.class_id})'
-
-    def __str__(self) -> str:
-        return self.class_name
-
-    @admin.display(
-        boolean=True, description="Playable", ordering="class_display"
-    )
-    def is_playable(self) -> bool:
-        """
-        Boolean whether the class is playable.
-        """
-        if self.class_display and self.class_description:
-            return True
-        return False

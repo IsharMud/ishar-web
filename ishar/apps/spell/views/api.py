@@ -4,7 +4,7 @@ from ..models import Force, Spell, SpellFlag
 from ..serializers import ForceSerializer, SpellSerializer, SpellFlagSerializer
 
 
-class ForceAPIViewSet(viewsets.ModelViewSet):
+class ForceViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows forces to be viewed or edited.
     """
@@ -14,7 +14,7 @@ class ForceAPIViewSet(viewsets.ModelViewSet):
     queryset = model.objects.all()
 
 
-class SpellAPIViewSet(viewsets.ModelViewSet):
+class SpellViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows spells to be viewed or edited.
     """
@@ -24,11 +24,11 @@ class SpellAPIViewSet(viewsets.ModelViewSet):
     queryset = model.objects.all()
 
 
-class SpellFlagAPIViewSet(viewsets.ModelViewSet):
+class SpellFlagViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows spell flags to be viewed or edited.
     """
-    model = Spell
+    model = SpellFlag
     serializer_class = SpellFlagSerializer
     permission_classes = [permissions.IsAdminUser]
     queryset = model.objects.all()

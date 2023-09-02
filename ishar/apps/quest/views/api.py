@@ -9,7 +9,7 @@ from ..serializers import (
 )
 
 
-class QuestAPIViewSet(viewsets.ModelViewSet):
+class QuestViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows quests to be viewed or edited.
     """
@@ -20,18 +20,18 @@ class QuestAPIViewSet(viewsets.ModelViewSet):
     serializer_class = QuestSerializer
 
 
-class QuestRewardAPIViewSet(viewsets.ModelViewSet):
+class QuestRewardViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows quest rewards to be viewed or edited.
     """
     filter_backends = [DjangoFilterBackend]
     model = QuestReward
-    queryset = model.objects.all()
     permission_classes = [permissions.IsAdminUser]
+    queryset = model.objects.all()
     serializer_class = QuestRewardSerializer
 
 
-class QuestStepAPIViewSet(viewsets.ModelViewSet):
+class QuestStepViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows quest steps to be viewed or edited.
     """

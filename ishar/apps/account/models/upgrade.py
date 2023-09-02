@@ -33,8 +33,7 @@ class AccountUpgrade(models.Model):
         help_text="Scale of the account upgrade.",
         verbose_name="Scale"
     )
-    is_disabled = models.IntegerField(
-        choices=[(0, False), (1, True)],
+    is_disabled = models.BooleanField(
         help_text="Is the account upgrade disabled?",
         verbose_name="Is Disabled?"
     )
@@ -60,14 +59,3 @@ class AccountUpgrade(models.Model):
 
     def __str__(self) -> str:
         return self.name or self.id
-
-    @admin.display(
-        boolean=True, description="Disabled?", ordering="is_disabled"
-    )
-    def _is_disabled(self) -> bool:
-        """
-        Boolean whether account upgrade is disabled.
-        """
-        if self.is_disabled == 1:
-            return True
-        return False

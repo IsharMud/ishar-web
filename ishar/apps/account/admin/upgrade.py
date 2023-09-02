@@ -14,9 +14,8 @@ class AccountUpgradeAdmin(admin.ModelAdmin):
             "amount", "cost", "increment", "max_value", "scale"
         )})
     )
-    filter_horizontal = []
-    filter_vertical = []
-    list_display = ["name", "description", "_is_disabled"]
-    list_filter = ["is_disabled"]
-    search_fields = ["name", "description"]
-    readonly_fields = ["id"]
+    filter_horizontal = filter_vertical = ()
+    list_display = ("name", "is_disabled", "description")
+    list_filter = ("is_disabled",)
+    search_fields = ("name", "description")
+    readonly_fields = ("id",)

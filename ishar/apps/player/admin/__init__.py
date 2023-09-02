@@ -1,21 +1,8 @@
 from django.contrib import admin
 
-from .models import PlayerClass, Player
-
-
-@admin.register(PlayerClass)
-class PlayerClassAdmin(admin.ModelAdmin):
-    """
-    Ishar class administration.
-    """
-    fieldsets = ((None, {"fields": (
-        "class_id", "class_name", "class_display", "class_description"
-    )}),)
-    filter_horizontal = filter_vertical = list_filter = ()
-    readonly_fields = ("class_id",)
-    list_display = search_fields = (
-        "class_name", "class_display", "class_description"
-    )
+from .classes import PlayerClassAdmin
+from .race import RaceAdmin
+from ..models import Player
 
 
 @admin.register(Player)

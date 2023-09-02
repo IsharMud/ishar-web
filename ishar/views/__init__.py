@@ -8,5 +8,5 @@ class WelcomeView(TemplateView):
     """
     Main isharmud.com welcome view.
     """
-    template_name = 'welcome.html.djt'
+    template_name = "welcome.html.djt"
 

@@ -5,21 +5,22 @@ from ..models.upgrade import AccountUpgrade
 from ..serializers import AccountSerializer, AccountUpgradeSerializer
 
 
-class AccountAPIViewSet(viewsets.ModelViewSet):
+class AccountViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    API endpoint that allows accounts to be viewed or edited.
+    Read-only API endpoint that allows accounts to be viewed.
     """
+    lookup_field = "account_name"
     model = Account
-    serializer_class = AccountSerializer
     permission_classes = [permissions.IsAdminUser]
     queryset = model.objects.all()
+    serializer_class = AccountSerializer
 
 
-class AccountUpgradeAPIViewSet(viewsets.ModelViewSet):
+class AccountUpgradeViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows account upgrades to be viewed or edited.
     """
     model = AccountUpgrade
-    serializer_class = AccountUpgradeSerializer
     permission_classes = [permissions.IsAdminUser]
     queryset = model.objects.all()
+    serializer_class = AccountUpgradeSerializer

@@ -20,7 +20,6 @@ class Force(models.Model):
         db_table = "forces"
         ordering = ("force_name",)
         verbose_name = "Force"
-        verbose_name_plural = "Forces"
 
     def __repr__(self):
         return f"{self.__class__.__name__}: {repr(self.__str__())}"
@@ -52,11 +51,10 @@ class SpellFlag(models.Model):
     )
 
     class Meta:
-        managed = False
         db_table = "spell_flags"
+        managed = False
         ordering = ("name",)
         verbose_name = "Flag"
-        verbose_name_plural = "Flags"
 
     def __repr__(self):
         return f"Spell Flag: {repr(self.__str__())} ({self.id})"
@@ -159,21 +157,15 @@ class Spell(models.Model):
         help_text="Mod stat 1.",
         verbose_name="Mod Stat 1"
     )
-    is_spell = models.IntegerField(
-        blank=True, null=True,
-        choices=[(0, False), (1, True)],
+    is_spell = models.BooleanField(
         help_text="Is this a spell?",
         verbose_name="Is Spell?"
     )
-    is_skill = models.IntegerField(
-        blank=True, null=True,
-        choices = [(0, False), (1, True)],
+    is_skill = models.BooleanField(
         help_text="Is this a skill?",
         verbose_name="Is Skill?"
     )
-    is_type = models.IntegerField(
-        blank=True, null=True,
-        choices=[(0, False), (1, True)],
+    is_type = models.BooleanField(
         help_text="Is this a type?",
         verbose_name="Is Type?"
     )
@@ -184,46 +176,18 @@ class Spell(models.Model):
     )
 
     class Meta:
-        managed = False
         db_table = "spell_info"
         ordering = (
             "-is_spell", "-is_skill", "-is_type", "skill_name", "enum_symbol"
         )
+        managed = False
         verbose_name = "Spell"
-        verbose_name_plural = "Spells"
 
     def __repr__(self):
-        return f"Spell: {repr(self.__str__())}"
+        return f"{self.__class__.__name__}: {repr(self.__str__())}"
 
     def __str__(self):
         return self.skill_name or self.enum_symbol
-
-    @admin.display(boolean=True, description="Skill?", ordering="is_skill")
-    def _is_skill(self):
-        """
-        Boolean whether a skill.
-        """
-        if self.is_skill == 1:
-            return True
-        return False
-
-    @admin.display(boolean=True, description="Spell?", ordering="is_spell")
-    def _is_spell(self):
-        """
-        Boolean whether a spell.
-        """
-        if self.is_spell == 1:
-            return True
-        return False
-
-    @admin.display(boolean=True, description="Type?", ordering="is_type")
-    def _is_type(self):
-        """
-        Boolean whether a type.
-        """
-        if self.is_type == 1:
-            return True
-        return False
 
 
 class SpellForce(models.Model):

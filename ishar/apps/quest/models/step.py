@@ -36,8 +36,7 @@ class QuestStep(models.Model):
         help_text="Time limit for the quest step.",
         verbose_name="Time Limit"
     )
-    mystify = models.IntegerField(
-        choices=[(0, False), (1, True)],
+    mystify = models.BooleanField(
         help_text="Mystify Quest Step.",
         verbose_name="Mystify"
     )

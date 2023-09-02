@@ -1,5 +1,5 @@
-from django.contrib import admin
 from django.db import models
+
 
 class Race(models.Model):
     """
@@ -197,7 +197,6 @@ class Race(models.Model):
         default_related_name = "race"
         ordering = ("-is_playable", "display_name")
         verbose_name = "Race"
-        verbose_name_plural = "Races"
 
     def __repr__(self):
         return (
