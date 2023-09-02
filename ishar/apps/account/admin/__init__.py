@@ -19,6 +19,7 @@ class AccountAdmin(BaseUserAdmin):
 
     model = get_user_model()
 
+    date_hierarchy = "created_at"
     fieldsets = (
         (
             None, {

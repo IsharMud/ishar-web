@@ -8,6 +8,7 @@ class NewsAdmin(admin.ModelAdmin):
     """
     Ishar news administration.
     """
+    date_hierarchy = "created_at"
     fieldsets = (
         (None, {"fields": ("news_id",)}),
         ("Content", {"fields": ("subject", "body")}),

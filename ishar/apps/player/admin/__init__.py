@@ -18,6 +18,7 @@ class PlayerAdmin(admin.ModelAdmin):
         """
         return False
 
+    date_hierarchy = "birth"
     fieldsets = (
         (None, {"fields": (
             "id", "account", "name", "description",

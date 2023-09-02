@@ -8,6 +8,7 @@ class SeasonAdmin(admin.ModelAdmin):
     """
     Ishar season administration.
     """
+    date_hierarchy = "effective_date"
     fieldsets = (
         (None, {"fields": ("season_id", "is_active")}),
         ("Dates", {"fields": (

@@ -27,12 +27,12 @@ class QuestReward(models.Model):
     )
     quest = models.ForeignKey(
         to=Quest,
+        db_column="quest_id",
         help_text="Quest which the reward is for.",
         on_delete=models.CASCADE,
         related_name="rewards",
         related_query_name="reward",
-        verbose_name="Quest",
-        db_column="quest_id"
+        verbose_name="Quest"
     )
     class_restrict = models.IntegerField(
         choices=get_class_options(),
@@ -47,7 +47,7 @@ class QuestReward(models.Model):
         managed = False
         db_table = "quest_rewards"
         default_related_name = "reward"
-        ordering = ("-class_restrict", "quest", "reward_type")
+        ordering = ("quest", "reward_type", "class_restrict")
         unique_together = (("reward_num", "quest"),)
         verbose_name = "Reward"
 

@@ -14,11 +14,17 @@ class QuestStepAdmin(admin.ModelAdmin):
         ("Mystify", {"fields": ("mystify", "mystify_text")})
     )
     filter_horizontal = filter_vertical = ()
-    list_display = ("step_id", "step_type", "quest")
-    list_filter = ("step_type", "num_required", "mystify", "quest")
+    list_display = ("step_id", "step_type", "quest", "mystify")
+    list_filter = (
+        "step_type", "num_required", "mystify",
+        "quest__class_restrict", "quest",
+    )
     model = QuestStep
     readonly_fields = ("step_id",)
-    search_fields = ("step_id", "step_type", "target", "mystify_text")
+    search_fields = (
+        "step_id", "step_type", "target", "mystify_text",
+        "quest__name", "quest__display_name", "quest__class_restrict"
+    )
 
 
 class QuestStepAdminInline(admin.TabularInline):

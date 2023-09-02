@@ -104,8 +104,7 @@ class Quest(models.Model):
         """
         return self.steps.count()
 
-    @property
-    @admin.display(description="# Steps")
+    @admin.display(description="# Steps", ordering="")
     def step_count(self) -> int:
         """
         Number of steps within the quest.
