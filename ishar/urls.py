@@ -5,7 +5,7 @@ from django.contrib import admin
 from django.urls import include, path
 from rest_framework import routers
 
-from .apps.account.views.api import AccountAPIViewSet, AccountUpgradeAPIVIewSet
+from .apps.account.views.api import AccountAPIViewSet, AccountUpgradeAPIViewSet
 from .apps.challenge.views.api import ChallengeAPIViewSet
 from .apps.player.views.api import PlayerAPIViewSet, PlayerClassAPIViewSet
 from .apps.news.views.api import NewsAPIViewSet
@@ -23,7 +23,7 @@ admin.site.site_header = "IsharMUD Administration"
 # Django Rest Framework ("DRF") API router URLs
 api_router = routers.DefaultRouter()
 api_router.register(r"accounts", AccountAPIViewSet, "account")
-api_router.register(r"account_upgrades", AccountUpgradeAPIVIewSet, "account_upgrade")
+api_router.register(r"account_upgrades", AccountUpgradeAPIViewSet, "account_upgrade")
 api_router.register(r"challenges", ChallengeAPIViewSet, "challenge")
 api_router.register(r"classes", PlayerClassAPIViewSet, "class")
 api_router.register(r"forces", ForceAPIViewSet, "force")

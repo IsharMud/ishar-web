@@ -15,9 +15,9 @@ class AccountAPIViewSet(viewsets.ModelViewSet):
     queryset = model.objects.all()
 
 
-class AccountUpgradeAPIVIewSet(viewsets.ModelViewSet):
+class AccountUpgradeAPIViewSet(viewsets.ModelViewSet):
     """
-    API endpoint that allows accounts to be viewed or edited.
+    API endpoint that allows account upgrades to be viewed or edited.
     """
     model = AccountUpgrade
     serializer_class = AccountUpgradeSerializer
