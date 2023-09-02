@@ -103,6 +103,7 @@ class Account(AbstractBaseUser, PermissionsMixin):
     class Meta:
         managed = False
         db_table = "accounts"
+        default_related_name = "account"
         ordering = ("account_id",)
         verbose_name = "Account"
         verbose_name_plural = "Accounts"

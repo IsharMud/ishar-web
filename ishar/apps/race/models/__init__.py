@@ -1,9 +1,6 @@
 from django.contrib import admin
 from django.db import models
 
-from ..spell.models import Force, Spell
-
-
 class Race(models.Model):
     """
     Race.
@@ -149,130 +146,64 @@ class Race(models.Model):
         help_text="Additional willpower of the race.",
         verbose_name="Additional Willpower"
     )
-    is_playable = models.IntegerField(
-        blank=True, null=True,
-        choices=[(0, False), (1, True)],
+    is_playable = models.BooleanField(
         help_text="Is the race playable by regular player characters?",
         verbose_name="Is Playable?"
     )
-    is_humanoid = models.IntegerField(
-        choices=[(0, False), (1, True)],
+    is_humanoid = models.BooleanField(
         help_text="Is the race humanoid?",
         verbose_name="Is Humanoid?"
     )
-    is_invertebrae = models.IntegerField(
-        choices=[(0, False), (1, True)],
+    is_invertebrae = models.BooleanField(
         help_text="Is the race an invertebrate?",
         verbose_name="Is Invertebrae?"
     )
-    is_flying = models.IntegerField(
-        choices=[(0, False), (1, True)],
+    is_flying = models.BooleanField(
         help_text="Does the race fly?",
         verbose_name="Is Flying?"
     )
-    is_swimming = models.IntegerField(
-        choices=[(0, False), (1, True)],
+    is_swimming = models.BooleanField(
         help_text="Does the race swim?",
         verbose_name="Is Swimming?"
     )
-    darkvision = models.IntegerField(
-        choices=[(0, False), (1, True)],
+    darkvision = models.BooleanField(
         help_text="Does the race have darkvision?",
         verbose_name="Darkvision?"
     )
-    see_invis = models.IntegerField(
-        choices=[(0, False), (1, True)],
+    see_invis = models.BooleanField(
         help_text="Can the race see invisibility?",
         verbose_name="See Invisibility?"
     )
-    is_walking = models.IntegerField(
-        choices=[(0, False), (1, True)],
+    is_walking = models.BooleanField(
         help_text="Does the race walk?",
         verbose_name="Is Walking?"
     )
-    endure_heat = models.IntegerField(
-        choices=[(0, False), (1, True)],
+    endure_heat = models.BooleanField(
         help_text="Can the race endure heat?",
         verbose_name="Endure Heat?"
     )
-    endure_cold = models.IntegerField(
-        choices=[(0, False), (1, True)],
-        help_text="Can the race endure heat?",
-        verbose_name="Endure Heat?"
+    endure_cold = models.BooleanField(
+        help_text="Can the race endure cold?",
+        verbose_name="Endure Cold?"
     )
-    is_undead = models.IntegerField(
-        choices=[(0, False), (1, True)],
+    is_undead = models.BooleanField(
         help_text="Is the race undead?",
         verbose_name="Is Undead?"
     )
 
     class Meta:
         managed = False
-        db_table = 'races'
-        ordering = ["-is_playable", "display_name", "symbol", "race_id"]
+        db_table = "races"
+        default_related_name = "race"
+        ordering = ("-is_playable", "display_name")
         verbose_name = "Race"
         verbose_name_plural = "Races"
 
     def __repr__(self):
-        return f"Race: {repr(self.__str__())} ({self.race_id})"
+        return (
+            f"{self.__class__.__name__}: "
+            f"{repr(self.__str__())} ({self.race_id})"
+        )
 
     def __str__(self):
         return self.display_name
-
-    @admin.display(
-        boolean=True, description="Playable?", ordering="is_playable"
-    )
-    def _is_playable(self) -> bool:
-        """
-        Boolean whether race can be chosen by player characters.
-        """
-        if self.is_playable == 1:
-            return True
-        return False
-
-
-class RaceSkill(models.Model):
-    race = models.ForeignKey(
-        to=Race,
-        on_delete=models.CASCADE
-    )
-    skill = models.ForeignKey(
-        to=Spell,
-        on_delete=models.CASCADE
-    )
-    level = models.IntegerField()
-
-    class Meta:
-        managed = False
-        db_table = 'races_skills'
-
-
-class RacialAffinity(models.Model):
-    """
-    Racial Affinity.
-    """
-    race = models.ForeignKey(
-        to=Race,
-        on_delete=models.CASCADE,
-        help_text="Race of the racial affinity.",
-        related_name="affinities",
-        related_query_name="affinity",
-        verbose_name="Affinity Type"
-    )
-    force = models.ForeignKey(
-        to=Force,
-        on_delete=models.CASCADE,
-        help_text="Force of the racial affinity.",
-        verbose_name="Force"
-    )
-    affinity_type = models.IntegerField(
-        help_text="Type of racial affinity.",
-        verbose_name="Affinity Type"
-    )
-
-    class Meta:
-        managed = False
-        db_table = 'racial_affinities'
-        ordering = ("affinity_type",)
-        verbose_name = "Racial Affinity"
-        verbose_name_plural = "Racial Affinities"

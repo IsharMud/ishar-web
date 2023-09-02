@@ -25,7 +25,7 @@ class SeasonAdmin(admin.ModelAdmin):
     )
     filter_horizontal = filter_vertical = ()
     list_display = (
-        "season_id", "_is_active", "effective_date", "expiration_date"
+        "season_id", "is_active", "effective_date", "expiration_date"
     )
     list_filter = ("is_active",)
     readonly_fields = ("season_id",)

@@ -11,8 +11,7 @@ class Season(models.Model):
         help_text="Auto-generated permanent season (identification) number.",
         verbose_name="Season ID"
     )
-    is_active = models.IntegerField(
-        choices=[(0, False), (1, True)],
+    is_active = models.BooleanField(
         help_text="Is the season active?",
         verbose_name="Is Active?"
     )
@@ -65,22 +64,13 @@ class Season(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'seasons'
+        db_table = "seasons"
+        default_related_name = "season"
         ordering = ("-is_active", "-season_id")
         verbose_name = "Season"
-        verbose_name_plural = "Seasons"
 
     def __repr__(self):
         return self.__str__()
 
     def __str__(self):
         return f"Season {self.season_id}"
-
-    @admin.display(boolean=True, description="Active?", ordering="is_active")
-    def _is_active(self) -> bool:
-        """
-        Boolean whether the season is active.
-        """
-        if self.is_active == 1:
-            return True
-        return False

@@ -1,4 +1,5 @@
-from rest_framework import viewsets, permissions
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import permissions, viewsets
 
 from ..models import Quest
 from ..models.reward import QuestReward
@@ -12,27 +13,30 @@ class QuestAPIViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows quests to be viewed or edited.
     """
+    filter_backends = [DjangoFilterBackend]
     model = Quest
-    serializer_class = QuestSerializer
     permission_classes = [permissions.IsAdminUser]
-    queryset = Quest.objects.all()
+    queryset = model.objects.all()
+    serializer_class = QuestSerializer
 
 
 class QuestRewardAPIViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows quest rewards to be viewed or edited.
     """
+    filter_backends = [DjangoFilterBackend]
     model = QuestReward
-    serializer_class = QuestRewardSerializer
+    queryset = model.objects.all()
     permission_classes = [permissions.IsAdminUser]
-    queryset = QuestReward.objects.all()
+    serializer_class = QuestRewardSerializer
 
 
 class QuestStepAPIViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows quest steps to be viewed or edited.
     """
+    filter_backends = [DjangoFilterBackend]
     model = QuestStep
-    serializer_class = QuestStepSerializer
     permission_classes = [permissions.IsAdminUser]
-    queryset = QuestStep.objects.all()
+    queryset = model.objects.all()
+    serializer_class = QuestStepSerializer

@@ -11,13 +11,13 @@ class QuestSerializer(serializers.HyperlinkedModelSerializer):
         fields = "__all__"
 
 
-class QuestRewardSerializer(serializers.HyperlinkedModelSerializer):
+class QuestRewardSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuestReward
         fields = "__all__"
 
 
-class QuestStepSerializer(serializers.HyperlinkedModelSerializer):
+class QuestStepSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuestStep
         fields = "__all__"

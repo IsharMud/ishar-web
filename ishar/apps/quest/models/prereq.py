@@ -25,6 +25,7 @@ class QuestPrereq(models.Model):
     class Meta:
         managed = False
         db_table = "quest_prereqs"
+        default_related_name = "prereq"
         ordering = ["quest", "required_quest"]
         verbose_name = "Quest Prerequisite"
         verbose_name_plural = "Quest Prerequisites"

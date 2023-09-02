@@ -8,6 +8,7 @@ class RaceAdmin(admin.ModelAdmin):
     """
     Ishar race administration.
     """
+    model = Race
     fieldsets = (
         (None, {"fields": ("race_id", "display_name", "symbol", "folk_name")}),
         ("Descriptions", {"fields": ("short_description", "long_description")}),
@@ -18,10 +19,9 @@ class RaceAdmin(admin.ModelAdmin):
             "bonus_fortitude", "bonus_reflex", "bonus_resilience",
             "listen_sound", "height_bonus", "weight_bonus"
         )}),
-        ("Settings", {"fields": (
-            "attack_noun", "attack_type", "vulnerabilities", "susceptibilities",
-            "resistances", "immunities"
-        )}),
+        ("Attacks", {"fields": ("attack_noun", "attack_type")}),
+        ("Weaknesses", {"fields": ("vulnerabilities", "susceptibilities")}),
+        ("Protections", {"fields": ("resistances", "immunities")}),
         ("Additional Statistics", {"fields": (
             "additional_str", "additional_agi", "additional_end",
             "additional_per", "additional_foc", "additional_wil"
@@ -34,7 +34,7 @@ class RaceAdmin(admin.ModelAdmin):
     )
     filter_horizontal = filter_vertical = ()
     list_display = (
-        "display_name", "symbol", "_is_playable", "folk_name",
+        "display_name", "symbol", "is_playable", "folk_name",
         "short_description"
     )
     list_filter = ("is_playable",)

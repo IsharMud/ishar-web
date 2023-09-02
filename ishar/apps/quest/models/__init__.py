@@ -48,10 +48,9 @@ class Quest(models.Model):
         ],
         verbose_name="Maximum Level"
     )
-    repeatable = models.IntegerField(
-        choices=[(0, False), (1, True)],
+    repeatable = models.BooleanField(
         help_text="Is the quest repeatable?",
-        verbose_name="Repeatable"
+        verbose_name="Repeatable?"
     )
     description = models.CharField(
         blank=True, max_length=512, null=True,
@@ -85,28 +84,17 @@ class Quest(models.Model):
     )
 
     class Meta:
-        managed = False
         db_table = "quests"
+        default_related_name = "quest"
+        managed = False
         ordering = ("-repeatable", "-class_restrict", "display_name")
         verbose_name = "Quest"
-        verbose_name_plural = "Quests"
 
     def __repr__(self) -> str:
         return f'Quest: "{self.__str__()}" ({self.quest_id})'
 
     def __str__(self) -> str:
         return self.display_name or self.name or self.quest_id
-
-    @admin.display(
-        boolean=True, description="Repeatable", ordering="repeatable"
-    )
-    def _is_repeatable(self) -> bool:
-        """
-        Boolean whether the quest is repeatable.
-        """
-        if self.repeatable == 1:
-            return True
-        return False
 
     @property
     @admin.display(description="# Pre-Requisites")

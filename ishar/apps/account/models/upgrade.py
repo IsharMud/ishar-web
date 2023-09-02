@@ -50,6 +50,7 @@ class AccountUpgrade(models.Model):
     class Meta:
         managed = False
         db_table = "account_upgrades"
+        default_related_name = "upgrade"
         ordering = ("is_disabled", "name")
         verbose_name = "Upgrade"
         verbose_name_plural = "Upgrades"

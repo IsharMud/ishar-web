@@ -15,8 +15,8 @@ class Player(models.Model):
     account = models.ForeignKey(
         to=Account,
         on_delete=models.CASCADE,
-        related_name="players",
         related_query_name="player",
+        related_name="players",
         help_text="Account that owns the player character.",
         verbose_name="Account"
     )
@@ -209,9 +209,9 @@ class Player(models.Model):
     class Meta:
         managed = False
         db_table = "players"
+        default_related_name = "player"
         ordering = ("-true_level", "id")
         verbose_name = "Player"
-        verbose_name_plural = "Players"
 
     def __repr__(self) -> str:
         return (
@@ -479,6 +479,7 @@ class PlayerClass(models.Model):
     class Meta:
         managed = False
         db_table = "classes"
+        default_related_name = "class"
         ordering = ("class_name",)
         verbose_name = "Class"
         verbose_name_plural = "Classes"

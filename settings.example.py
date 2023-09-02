@@ -91,7 +91,18 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'isharweb.apps.IsharWebConfig',
+    "django_filters",
+    "rest_framework",
+    "rest_framework.authtoken",
+    "ishar",
+    "ishar.apps.account",
+    "ishar.apps.challenge",
+    "ishar.apps.news",
+    "ishar.apps.player",
+    "ishar.apps.quest",
+    "ishar.apps.race",
+    "ishar.apps.season",
+    "ishar.apps.spell",
 ]
 
 MIDDLEWARE = [
@@ -104,7 +115,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'isharmud.urls'
+ROOT_URLCONF = 'ishar.urls'
 
 TEMPLATES = [
     {
@@ -122,8 +133,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'isharmud.wsgi.application'
-
+WSGI_APPLICATION = 'wsgi.application'
 
 # Database
 DATABASES = {
@@ -144,7 +154,6 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'}
 ]
-
 
 # Internationalization
 LANGUAGE_CODE = 'en-us'

@@ -8,9 +8,11 @@ class QuestReward(models.Model):
     """
     Quest Reward.
     """
-    # id = None
+    #
+    # TODO: Work out a fix here...
+    #
     reward_num = models.IntegerField(
-        primary_key=True,   # TODO: Work out a fix here...
+        primary_key=True,
         help_text="Reward number.",
         verbose_name="Reward Number"
     )
@@ -44,10 +46,10 @@ class QuestReward(models.Model):
     class Meta:
         managed = False
         db_table = "quest_rewards"
+        default_related_name = "reward"
         ordering = ("-class_restrict", "quest", "reward_type")
         unique_together = (("reward_num", "quest"),)
         verbose_name = "Reward"
-        verbose_name_plural = "Rewards"
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}: {repr(self.__str__())}"

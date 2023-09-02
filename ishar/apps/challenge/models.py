@@ -54,8 +54,7 @@ class Challenge(models.Model):
         help_text="Name of the mobile target of the challenge.",
         verbose_name="Mobile Name"
     )
-    is_active = models.IntegerField(
-        choices=[(0, False), (1, True)],
+    is_active = models.BooleanField(
         help_text="Is the challenge currently active?",
         verbose_name="Is Active?"
     )
@@ -63,9 +62,9 @@ class Challenge(models.Model):
     class Meta:
         managed = False
         db_table = "challenges"
+        default_related_name = "challenge"
         ordering = ("-is_active", "-winner_desc", "challenge_desc")
         verbose_name = "Challenge"
-        verbose_name_plural = "Challenges"
 
     def __repr__(self):
         return (
@@ -75,15 +74,6 @@ class Challenge(models.Model):
 
     def __str__(self):
         return self.challenge_desc or self.mob_name or self.challenge_id
-
-    @admin.display(boolean=True, description="Active?", ordering="is_active")
-    def _is_active(self):
-        """
-        Boolean whether challenge is active.
-        """
-        if self.is_active == 1:
-            return True
-        return False
 
     @admin.display(
         boolean=True, description="Completed?", ordering="winner_desc"

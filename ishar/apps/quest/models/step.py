@@ -24,6 +24,7 @@ class QuestStep(models.Model):
         verbose_name="Number Required"
     )
     quest = models.ForeignKey(
+        null=False,
         to=Quest,
         on_delete=models.CASCADE,
         related_name='steps',
@@ -50,6 +51,7 @@ class QuestStep(models.Model):
     class Meta:
         managed = False
         db_table = "quest_steps"
+        default_related_name = "step"
         ordering = ("quest", "step_id")
         verbose_name = "Step"
         verbose_name_plural = "Steps"

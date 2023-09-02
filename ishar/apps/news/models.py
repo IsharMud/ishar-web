@@ -35,6 +35,7 @@ class News(models.Model):
     class Meta:
         managed = False
         db_table = "news"
+        default_related_name = "news"
         ordering = ("-created_at", "-news_id", "account")
         verbose_name = "News"
         verbose_name_plural = "News"

@@ -26,9 +26,9 @@ class QuestAdmin(ModelAdmin):
     )
     filter_horizontal = filter_vertical = ()
     inlines = (QuestRewardAdminInline, QuestStepAdminInline)
-    list_display = ("display_name", "_is_repeatable", "min_level", "max_level")
+    list_display = ("display_name", "repeatable", "min_level", "max_level")
     list_filter = ("repeatable", "min_level", "max_level")
-    readonly_fields = ("quest_id",)
+    readonly_fields = ("quest_id", "prerequisite")
     search_fields = (
         "quest_id", "display_name", "name", "description",
         "completion_message", "quest_intro",
