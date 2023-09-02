@@ -2,6 +2,7 @@ from django.contrib import admin
 
 from .classes import PlayerClassAdmin
 from .race import RaceAdmin
+from .remort import RemortUpgradeAdmin
 from ..models import Player
 
 

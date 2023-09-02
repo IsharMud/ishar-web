@@ -20,7 +20,7 @@ class RemortUpgrade(models.Model):
         verbose_name="Name"
     )
     renown_cost = models.PositiveSmallIntegerField(
-        help_text="Cost (in renown) of the remort upgrade.",
+        help_text="Renown cost of the remort upgrade.",
         verbose_name="Renown Cost"
     )
     max_value = models.PositiveSmallIntegerField(
@@ -36,7 +36,7 @@ class RemortUpgrade(models.Model):
         max_length=30,
         verbose_name="Display Name"
     )
-    can_buy = models.IntegerField(
+    can_buy = models.BooleanField(
         help_text="Whether the remort upgrade can be bought.",
         verbose_name="Can Buy?"
     )
@@ -49,9 +49,7 @@ class RemortUpgrade(models.Model):
         verbose_name="Survival Scale"
     )
     survival_renown_cost = models.IntegerField(
-        help_text=(
-            "Cost (in renown) of the remort upgrade, for survival players."
-        ),
+        help_text="Renown cost of the remort upgrade, for survival players.",
         verbose_name="Survival Renown Cost"
     )
 
