@@ -56,7 +56,7 @@ class RemortUpgrade(models.Model):
     class Meta:
         db_table = "remort_upgrades"
         managed = False
-        ordering = ("can_buy", "display_name",)
+        ordering = ("-can_buy", "display_name",)
         verbose_name = "Remort Upgrade"
 
     def __repr__(self):
