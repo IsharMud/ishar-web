@@ -2,7 +2,7 @@
 Ishar MUD API configuration.
 """
 
-from rest_framework import routers
+from rest_framework import permissions, routers
 
 from .apps.account.views.api import AccountViewSet, AccountUpgradeViewSet
 from .apps.challenge.views.api import ChallengeViewSet
@@ -20,6 +20,7 @@ class IsharMUDAPIView(routers.APIRootView):
     Ishar MUD API view.
     """
     name = "Ishar MUD API"
+    permission_classes = [permissions.IsAdminUser]
     pass
 
 
