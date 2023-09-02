@@ -40,6 +40,6 @@ class RaceAdmin(admin.ModelAdmin):
     list_filter = ("is_playable",)
     readonly_fields = ("race_id",)
     search_fields = (
-        "display_name", "symbol", "folk_name", "attach_noun",
+        "display_name", "symbol", "folk_name", "attack_noun",
         "short_description", "long_description"
     )

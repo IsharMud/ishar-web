@@ -10,36 +10,15 @@ class RemortUpgradeAdmin(admin.ModelAdmin):
     """
     model = RemortUpgrade
     fieldsets = (
-        (None, {"fields": ("race_id", "display_name", "symbol", "folk_name")}),
-        ("Descriptions", {"fields": ("short_description", "long_description")}),
-        ("Defaults", {"fields": (
-            "default_movement", "default_height", "default_weight"
-        )}),
-        ("Bonus", {"fields": (
-            "bonus_fortitude", "bonus_reflex", "bonus_resilience",
-            "listen_sound", "height_bonus", "weight_bonus"
-        )}),
-        ("Attacks", {"fields": ("attack_noun", "attack_type")}),
-        ("Weaknesses", {"fields": ("vulnerabilities", "susceptibilities")}),
-        ("Protections", {"fields": ("resistances", "immunities")}),
-        ("Additional Statistics", {"fields": (
-            "additional_str", "additional_agi", "additional_end",
-            "additional_per", "additional_foc", "additional_wil"
-        )}),
-        ("Booleans", {"fields": (
-            "is_humanoid", "is_invertebrae", "is_flying", "is_swimming",
-            "darkvision", "see_invis", "is_walking",
-            "endure_heat", "endure_cold", "is_undead", "is_playable"
-        )}),
+        (None, {"fields": ("upgrade_id", "name", "display_name")}),
+        ("Availability", {"fields": ("can_buy", "bonus", "max_value")}),
+        ("Amounts", {"fields": ("renown_cost", "scale")}),
+        ("Survival Amounts", {"fields": (
+            "survival_renown_cost", "survival_scale")
+        }),
     )
     filter_horizontal = filter_vertical = ()
-    list_display = (
-        "display_name", "symbol", "is_playable", "folk_name",
-        "short_description"
-    )
-    list_filter = ("is_playable",)
-    readonly_fields = ("race_id",)
-    search_fields = (
-        "display_name", "symbol", "folk_name", "attach_noun",
-        "short_description", "long_description"
-    )
+    list_display = ("display_name", "can_buy", "bonus")
+    list_filter = ("can_buy", "bonus")
+    readonly_fields = ("upgrade_id",)
+    search_fields = ("name", "display_name")
