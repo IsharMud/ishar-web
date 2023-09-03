@@ -1,0 +1,63 @@
+{%- set page = 'patches' -%}
+{% extends "base/layout.html.j2" %}
+{% block meta_title %}Latest Patch PDF Text{% endblock meta_title %}
+{% block meta_description %}The latest patch PDF text for Ishar MUD{% endblock meta_description %}
+{% block meta_url %}{% url "text" %}{% endblock meta_url %}
+{% block title %}Latest Patch{% endblock title %}
+{% block header %}Latest Patch{% endblock header %}
+{%- block content %}
+    {%- if pdf %}
+                <h3 title="{{ pdf.name }}">
+                    {{ pdf.name }}
+                </h3>
+        {%- if pdf.meta.subject %}
+                <ul title="Subject: {{ pdf.meta.subject }}">
+                    <li>
+                        Subject
+                    </li>
+                    <li class="nested-list">
+                        <ul>
+                            <li>
+                                {{ pdf.meta.subject }}
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+        {%- endif %}
+        {%- if pdf.meta.title %}
+                <ul title="Title: {{ pdf.meta.title }}">
+                    <li>
+                        Title
+                    </li>
+                    <li class="nested-list">
+                        <ul>
+                            <li>
+                                {{ pdf.meta.title }}
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+        {%- endif %}
+        {%- if pdf.meta.title %}
+                <ul title="Total Pages: {{ pdf.page_count }}">
+                    <li>
+                        Total Pages
+                    </li>
+                    <li class="nested-list">
+                        <ul>
+                            <li>
+                                {{ pdf.page_count }}
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+        {%- endif %}
+        {%- if pdf.text %}
+                <pre>{{ pdf.text }}</pre>
+        {%- else %}
+                <i>No PDF text found.</i>
+        {%- endif %}
+    {%- else %}
+                <i>No PDF patch found.</i>
+    {%- endif %}
+{%- endblock content %}

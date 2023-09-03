@@ -1,0 +1,75 @@
+{% set page = 'season' %}
+{% extends "base/layout.html.j2" %}
+{% block meta_title %}Season {{ season.season_id }}{% endblock meta_title %}
+{% block meta_description %}Information about season {{ season.season_id }} of Ishar MUD{% endblock meta_description %}
+{% block meta_url %}{%  url "season" %}{% endblock meta_url %}
+{% block title %}Season {{ season.season_id }}{% endblock title %}
+{% block header %}Season {{ season.season_id }}{% endblock header %}
+{% block content %}
+    {% if current_season is defined %}
+            <ul id="season-details">
+                <li title="Season {{ season.season_id }} began {{ season.effective }} ago on {{ season.effective_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}">
+                    <strong>
+                        Started
+                    </strong>
+                    <ul>
+                        <li>
+                            {{ season.effective_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}
+                        </li>
+                        <li>
+                            {{ season.effective }} ago
+                        </li>
+                    </ul>
+                </li>
+                <li title="Season {{ season.season_id }} ends in {{ season.expires }} on {{ season.expiration_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}">
+                    <strong>
+                        Ends
+                    </strong>
+                    <ul>
+                        <li>
+                            {{ season.expiration_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}
+                        </li>
+                        <li>
+                            in {{ season.expires }}
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+            <h3>
+                Essence
+            </h3>
+            <p>
+                &quot;<a title="Essence" href="{% url "portal" %}">Essence</a>&quot;
+                are the rewards points that you earn during the season!
+
+            </p>
+            <p>
+                Essence is preserved across seasons, and can be spent at any time
+                by typing <code>shop</code> after logging in.
+            </p>
+    {% if current_user.current_essence is defined and current_user.seasonal_earned is defined %}
+            <ul id="essence-balance">
+                <li title="You currently have: {{ current_user.current_essence }} essence.">
+                    You currently have:
+                </li>
+                <li class="nested-list">
+                    <ul>
+                        <li>
+                            {{ display_essence(current_user.current_essence) }}
+                        </li>
+                    </ul>
+                </li>
+                <li title="This season, you have earned: {{ current_user.seasonal_earned }} essence.">
+                    This season, you have earned:
+                </li>
+                <li class="nested-list">
+                    <ul>
+                        <li>
+                            {{ display_essence(current_user.seasonal_earned) }}
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        {% endif %}
+    {% endif %}
+{% endblock content %}

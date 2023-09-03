@@ -1,0 +1,32 @@
+{% set page = 'world' %}
+{% extends "layout.html.djt" %}
+{% block meta_title %}World{% endblock meta_title %}
+{% block meta_description %}The World of Ishar is vast and very detailed with many areas{% endblock meta_description %}
+{% block meta_url %}{% url "help.world" %}{% endblock meta_url %}
+{% block header %}World{% endblock header %}
+{% block title %}World{% endblock title %}
+{% block content %}
+            <p>
+                Ishar is a cohesive world with a living history.
+                The vast world areas of Ishar have been written to include a detailed past that intrudes on the present,
+                setting the scene for many of the adventures to be had here.
+            </p>
+            <p>
+                From the shattered ruins of <a href="{% url "help.help_page.single" topic="Area Torm Sarvek" %}" title="Help: Area Torm Sarvek">Torm Sarvek</a>
+                to the splendor of <a href="{% url "help.help_page.single" topic="Area Mareldja" %}" title="Help: Area Mareldja">Mareldja</a>,
+                the darkness of Hedros, the dense Talrynian Forest, all of these lands and more are open to you.
+            </p>
+            <p>
+                Whether treading across the barren wasteland of the Tundra or voyaging for the great Ocean, you will
+                never forget the sense of wonder and discovery to be experienced here.
+            </p>
+    {% if areas and areas is iterable and areas | length > 0 %}
+            <ul id="world-list">
+        {% for area in areas %}
+                <li title="{{ area }}">
+                    <a href="{% url "help.help_page.single" topic=area %}">{{ area }}</a>
+                </li>
+        {% endfor %}
+            </ul>
+    {% endif %}
+{% endblock content %}

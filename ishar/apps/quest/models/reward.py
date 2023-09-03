@@ -10,7 +10,7 @@ class QuestReward(models.Model):
     """
     #
     # TODO: Work out a fix here...
-    #
+    #   https://github.com/IsharMud/ishar-web/issues/12
     reward_num = models.IntegerField(
         primary_key=True,
         help_text="Reward number.",
@@ -48,7 +48,6 @@ class QuestReward(models.Model):
         db_table = "quest_rewards"
         default_related_name = "reward"
         ordering = ("quest", "reward_type", "class_restrict")
-        unique_together = (("reward_num", "quest"),)
         verbose_name = "Reward"
 
     def __repr__(self) -> str:

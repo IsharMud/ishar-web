@@ -221,6 +221,12 @@ class Account(AbstractBaseUser, PermissionsMixin):
         """
         return timezone.now() - self.created_at
 
+    def get_username(self) -> str:
+        """
+        Return account username.
+        """
+        return self.account_name
+
     def has_perms(self, perm_list, obj=None):
         return self.is_admin
 

@@ -20,10 +20,11 @@ ALLOWED_HOSTS = ['isharmud.com', '127.0.0.1', 'localhost']
 
 # SECURITY WARNING: do not share your Discord secrets
 DISCORD = {
-    'APPLICATION_ID': 'SECRET',
-    'GUILD': 'SECRET',
-    'PUBLIC_KEY': 'SECRET',
-    'TOKEN': 'SECRET.SECRET.SECRET'
+    "APPLICATION_ID": "EXAMPLE",
+    "GUILD": "EXAMPLE",
+    "PUBLIC_KEY": "EXAMPLE",
+    "TOKEN": "SECRET.SECRET.SECRET",
+    "URL": "https://discord.com/invite/EXAMPLE"
 }
 
 # SECURITY WARNING: do not share your Sentry secret(s)
@@ -31,12 +32,9 @@ SENTRY_DSN = 'https://SECRET@SECRET.ingest.sentry.io/SECRET'
 
 # MUD home and lib directory, for "helptab" file reading and player "Podir"s
 MUD_HOME = Path('/home/isharmud/isharmud')
-MUD_LIB = Path(MUD_HOME,'lib')
+MUD_LIB = Path(MUD_HOME, 'lib')
 HELPTAB = Path(MUD_LIB, 'Misc/helptab')
 MUD_PODIR = Path(MUD_LIB, 'Podir')
-
-# Patch PDF folder
-PATCH_DIR = '/var/www/isharmud.com/static/patches'
 
 # Player karma alignment ranges
 ALIGNMENTS = {
@@ -115,12 +113,14 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'ishar.urls'
+ROOT_URLCONF = "urls"
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            Path(BASE_DIR, 'ishar/templates/base')
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -165,9 +165,18 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_ROOT = Path(BASE_DIR, STATIC_URL)
 
+# Patch PDF folder
+PATCH_DIR = Path(STATIC_ROOT, 'patches')
+
 USE_THOUSAND_SEPARATOR = True
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_URL = "/admin/login/"
+CONNECT_HOST = ALLOWED_HOSTS[0]
+CONNECT_PORT = "23"
+CONNECT_URL = (
+    "https://mudslinger.net/play/?host=" +
+    ALLOWED_HOSTS[0] + "&port=" + CONNECT_PORT
+)

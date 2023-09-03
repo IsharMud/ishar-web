@@ -301,7 +301,7 @@ class Player(models.Model):
         """
         Boolean whether player is a specific immortal type (or above).
         """
-        # TODO:
+        # TODO: https://github.com/IsharMud/ishar-web/issues/13
         #   Fix this:
         imm_types = {imm_type: level for level, imm_type in settings.IMMORTAL_LEVELS.items()}
         if self.immortal_type:
