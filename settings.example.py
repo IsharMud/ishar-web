@@ -76,7 +76,12 @@ CSRF_COOKIE_SAMESITE = 'Strict'
 CSRF_COOKIE_SECURE = True
 
 # E-mail
+ADMINS = MANAGERS = (
+    ("Example", "example@example.com"),
+)
+DEFAULT_FROM_EMAIL = "django@" + ALLOWED_HOSTS[0]
 EMAIL_SUBJECT_PREFIX = "[Django: " + ALLOWED_HOSTS[0] + "] "
+SERVER_EMAIL = "admin@" + ALLOWED_HOSTS[0]
 
 # Session cookie
 SESSION_COOKIE_DOMAIN = ALLOWED_HOSTS[0]
