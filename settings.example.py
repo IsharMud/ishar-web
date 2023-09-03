@@ -69,13 +69,16 @@ AUTHENTICATION_BACKENDS = (
     ('django.contrib.auth.backends.ModelBackend'),
 )
 
-# CSRF cookie settings
+# CSRF cookie
 CSRF_COOKIE_DOMAIN = ALLOWED_HOSTS[0]
 CSRF_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SAMESITE = 'Strict'
 CSRF_COOKIE_SECURE = True
 
-# Session cookie settings
+# E-mail
+EMAIL_SUBJECT_PREFIX = "[Django: " + ALLOWED_HOSTS[0] + "] "
+
+# Session cookie
 SESSION_COOKIE_DOMAIN = ALLOWED_HOSTS[0]
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Strict'
