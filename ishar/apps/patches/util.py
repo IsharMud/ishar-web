@@ -1,10 +1,10 @@
 """
 isharmud.com patches utilities.
 """
-import glob
-import os
-
 from datetime import date
+from glob import glob
+from os import path
+
 from django.conf import settings
 from pypdf import PdfReader
 
@@ -24,10 +24,8 @@ def get_patch_pdfs(patch_directory=settings.PATCH_DIR):
     # Find all .pdf files in the patch directory,
     #   and sort by most recent modified time first
     pdfs = sorted(
-        glob.glob(
-            f'{patch_directory}/*.pdf'
-        ),
-        key=os.path.getmtime,
+        glob(f'{patch_directory}/*.pdf'),
+        key=path.getmtime,
         reverse=True
     )
 
@@ -37,23 +35,20 @@ def get_patch_pdfs(patch_directory=settings.PATCH_DIR):
     for pdf in pdfs:
 
         # Append a dictionary to the list to return
-        ret.append({
+        ret.append(
+            {
+                # Patch PDF file base name
+                #   (such as "Patch_#.#.pdf")
+                'name': path.basename(pdf),
 
-            # Patch PDF file base name
-            #   (such as "Patch_#.#.pdf")
-            'name': os.path.basename(pdf),
+                # File modified time (mtime) datetime object
+                'modified': date.fromtimestamp(path.getmtime(pdf)),
 
-            # File modified time (mtime) datetime object
-            'modified': date.fromtimestamp(
-                os.path.getmtime(pdf)
-            ),
-
-            # Human-readable file size
-            #   (such as 1.2MiB or 11.5KiB)
-            'size': sizeof_fmt(
-                num=os.path.getsize(pdf)
-            )
-        })
+                # Human-readable file size
+                #   (such as 1.2MiB or 11.5KiB)
+                'size': sizeof_fmt(num=path.getsize(pdf))
+            }
+        )
 
     # Return the list of dictionaries
     return ret

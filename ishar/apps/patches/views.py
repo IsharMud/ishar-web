@@ -10,9 +10,13 @@ class PatchView(TemplateView):
 
 class LatestPatchView(TemplateView):
     template_name = "latest.html.djt"
-    extra_context = {"pdf": get_patch_pdfs()[0]}
+    pdfs = get_patch_pdfs()
+    if pdfs and pdfs[0]:
+        extra_context = {"pdf": pdfs[0]}
 
 
 class TextPatchView(TemplateView):
     template_name = "pdf.html.djt"
-    extra_context = {"pdf": get_patch_pdf()}
+    pdf = get_patch_pdf()
+    if pdf:
+        extra_context = {"pdf": pdf}

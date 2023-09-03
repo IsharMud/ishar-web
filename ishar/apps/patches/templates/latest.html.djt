@@ -1,0 +1,31 @@
+{% extends "layout.html.djt" %}
+{% load static %}
+{% block meta_title %}Latest Patch{% endblock meta_title %}
+{% block meta_description %}The latest patch for Ishar MUD{% endblock meta_description %}
+{% block meta_url %}{% url "latest" %}{% endblock meta_url %}
+{% block title %}Latest Patch{% endblock title %}
+{% block header %}Latest Patch{% endblock header %}
+{% block content %}
+    {% if pdf %}
+        {% with "patches/"|add:pdf.name as patch_pdf %}
+                <ul id="patches-list">
+                    <li class="patch-item" title="{{ pdf.name }}">
+                        <h3>
+                            <a href="{% static patch_pdf %}" target="_blank">{{ pdf.name }}</a>
+                        </h3>
+                    </li>
+                    <li class="nested-list">
+                        <ul>
+                            <li>
+                                <strong>Date</strong>: {{ pdf.modified }}
+                            </li>
+                            <li>
+                                <strong>Size</strong>: {{ pdf.size }}
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            <embed src="{% static patch_pdf %}#toolbar=0&navpanes=0&scrollbar=1">
+        {% endwith %}
+    {% endif %}
+{% endblock content %}

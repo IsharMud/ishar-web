@@ -5,11 +5,11 @@ from .views import (
     ConnectRedirectView, HistoryView, StartView, SupportView, WelcomeView
 )
 from .views.clients import ClientsView
-from .views.events import EventsView
+# from .views.events import EventsView
 
 from .views.faq import FAQView
 
-from .apps.help.views import HelpView, WorldView
+from .apps.help.views import WorldView
 
 
 urlpatterns = [
@@ -38,7 +38,7 @@ urlpatterns = [
     # path("events/", EventsView.as_view(), name="events"),
 
     path("help/", include("ishar.apps.help.urls"), name="help"),
-    path("patches/", include("ishar.apps.patches.urls"), name="patches",),
+    path("patches/", include("ishar.apps.patches.urls"), name="patches"),
     path("portal", WelcomeView.as_view(), name="portal"),
     path("season/", include("ishar.apps.season.urls"), name="season"),
     path("support/", SupportView.as_view(), name="support"),
