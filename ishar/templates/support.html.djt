@@ -1,5 +1,5 @@
-{% set page = 'support' %}
-{% extends "base/layout.html.j2" %}
+{% extends "layout.html.djt" %}
+{% load static %}
 {% block meta_title %}Support{% endblock meta_title %}
 {% block meta_description %}Support Ishar MUD with a contribution as a way to say thank you{% endblock meta_description %}
 {% block meta_url %}{% url "support" %}{% endblock meta_url %}
