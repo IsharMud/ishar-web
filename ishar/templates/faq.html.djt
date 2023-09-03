@@ -10,7 +10,7 @@
                 </p>
                 <p>
                     You may also want to visit the
-                    <a href="{% url "help_page" topic='MUD Basics' %}">MUD Basics help page</a>
+                    <a href="{% url "help_page" help_topic='MUD Basics' %}">MUD Basics help page</a>
                     or our <a href="{% url "start" %}">getting started guide</a>.
                 </p>
     {% if faqs is defined and faqs is iterable %}

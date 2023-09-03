@@ -1,4 +1,3 @@
-{% set page = 'help' %}
 {% extends "layout.html.djt" %}
 {% if topic is defined and topic is iterable and topic['name'] is defined %}
     {% set topic_name = topic['name'] | safe | trim %}
@@ -8,7 +7,7 @@
 {% block meta_url %}{{ url_for('help.help_page.single', topic=topic_name, _external=True) }}{% endblock meta_url %}
 {% block header %}
 <a href="{% url "help.help_page.index')" %}">Help</a>
-    {% if topic_name %} : <a href="{{ url_for('help.help_page.single', topic=topic_name) }}">
+    {% if topic_name %} : <a href="{{ url_for('help_page.single', topic=topic_name) }}">
         {{- topic_name }}</a>
     {% endif %}
 {% endblock header %}
@@ -29,7 +28,7 @@
     {% if user.is_anonymous %}
             <p>
                 If you are new here, you may want to download one of many
-                <a href="{% url "help.mud_clients')" %}" title="MUD clients">MUD clients</a>,
+                <a href="{% url "mud_clients')" %}" title="MUD clients">MUD clients</a>,
                 and see our <a href="{% url "help.getstarted')" %}" title="getting started guide">getting started guide</a>.
             </p>
     {% endif %}

@@ -9,8 +9,16 @@ class ConnectRedirectView(RedirectView):
     url = settings.CONNECT_URL
 
 
+class HistoryView(TemplateView):
+    template_name = "history.html.djt"
+
+
 class PortalView(TemplateView):
     template_name = "portal.html.djt"
+
+
+class StartView(TemplateView):
+    template_name = "start.html.djt"
 
 
 class SupportView(TemplateView):

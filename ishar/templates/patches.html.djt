@@ -1,5 +1,5 @@
-{% set page = 'patches' %}
-{% extends "base/layout.html.j2" %}
+{% extends "layout.html.djt" %}
+{% load static %}
 {% block meta_title %}Patches{% endblock meta_title %}
 {% block meta_description %}The latest patches to Ishar MUD{% endblock meta_description %}
 {% block meta_url %}{% url "patches" %}{% endblock meta_url %}
@@ -9,15 +9,17 @@
                 <p>
                     Ishar MUD is under regular development, and constantly being improved!
                 </p>
-    {% if patches is defined and patches is iterable and patches | length > 0 %}
+    {% if patches %}
                 <p>
-                    <a href="{% url ".patches.latest" %}">These are the latest patch notes for Ishar MUD.</a>
+                    <a href="{% url "latest" %}">These are the latest patch notes for Ishar MUD.</a>
                 </p>
                 <ul id="patches-list">
         {% for patch in patches %}
                     <li class="patch-item" title="{{ patch.name }}">
                         <h3>
-                            <a href="{% static "patches/" + patch.name %}" target="_blank">{{ patch.name }}</a>
+            {% with "patches/"|add:patch.name as patch_pdf %}
+                            <a href="{% static patch_pdf %}" target="_blank">{{ patch.name }}</a>
+            {% endwith %}
                         </h3>
                     </li>
                     <li class="nested-list">
