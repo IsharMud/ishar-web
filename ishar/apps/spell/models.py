@@ -154,8 +154,8 @@ class Spell(models.Model):
     )
     mod_stat_2 = models.IntegerField(
         blank=True, null=True,
-        help_text="Mod stat 1.",
-        verbose_name="Mod Stat 1"
+        help_text="Mod stat 2.",
+        verbose_name="Mod Stat 2"
     )
     is_spell = models.BooleanField(
         help_text="Is this a spell?",
