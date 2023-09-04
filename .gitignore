@@ -6,6 +6,7 @@ __pycache__
 config.py
 settings.py
 *_secret.py
-venv/
-old/
+/media/
+/old/
 /static/
+/venv/
