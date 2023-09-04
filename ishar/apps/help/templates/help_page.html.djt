@@ -1,69 +1,53 @@
 {% extends "layout.html.djt" %}
-{% if topic is defined and topic is iterable and topic['name'] is defined %}
-    {% set topic_name = topic['name'] | safe | trim %}
-{% endif %}
-{% block meta_title %}Help{% if topic_name %}: {{ topic_name }}{% endif %}{% endblock meta_title %}
+{% block meta_title %}Help: {{ topic }}{% endblock meta_title %}
 {% block meta_description %}Help pages for Ishar MUD{% endblock meta_description %}
-{% block meta_url %}{{ url_for('help.help_page.single', topic=topic_name, _external=True) }}{% endblock meta_url %}
+{% block meta_url %}{% url "help_page" help_topic=help_topic %}{% endblock meta_url %}
 {% block header %}
-<a href="{% url "help.help_page.index')" %}">Help</a>
-    {% if topic_name %} : <a href="{{ url_for('help_page.single', topic=topic_name) }}">
-        {{- topic_name }}</a>
-    {% endif %}
+<a href="{% url "help" %}">Help</a>
+<a href="{% url "help_page" help_topic=help_topic %}">{{ help_topic }}</a>
 {% endblock header %}
-{% block title %}Help{% if topic_name %}: {{ topic_name }}{% endif %}{% endblock title %}
-{% macro render_field(field) %}
-                    {{ field(**kwargs) | safe }}
-    {% if field.errors %}
-                <ul class="field-errors">
-        {% for error in field.errors %}
-                    <li>
-                        {{ error }}
-                    </li>
-        {% endfor %}
-                </ul>
-    {% endif %}
-{% endmacro %}
+{% block title %}Help: {{ topic }}{% endblock title %}
 {% block content %}
-    {% if user.is_anonymous %}
+    {% if current_user.is_anonymous %}
             <p>
                 If you are new here, you may want to download one of many
-                <a href="{% url "mud_clients')" %}" title="MUD clients">MUD clients</a>,
-                and see our <a href="{% url "help.getstarted')" %}" title="getting started guide">getting started guide</a>.
+                <a href="{% url "mud_clients" %}" title="MUD clients">MUD clients</a>,
+                and see our <a href="{% url "getstarted" %}" title="getting started guide">getting started guide</a>.
             </p>
     {% endif %}
-    {% if help_search_form is defined %}
             <div>
-                <form method="get" action="{% url "help.help_page.index')" %}" id="help-search-form">
-                    {{ render_field(help_search_form.search, maxlength=32) }}
+                <form method="get" action="{% url "help" %}" id="help-search-form">
+                    Search field
                     <input type="submit" value="Search">
-                    (<i>such as &quot;<a href="{% url "help.help_page.single', topic='spell')" %}">spell</a>&quot; or
-                    &quot;<a href="{% url "help.help_page.single', topic='MUD Basics')" %}">MUD Basics</a>&quot;</i>)
+                    (<i>such as &quot;<a href="{% url "help_page" help_topic='spell' %}">spell</a>&quot; or
+                    &quot;<a href="{% url "help_page" help_topic='MUD Basics' %}">MUD Basics</a>&quot;</i>)
                 </form>
             </div>
-    {% endif %}
-    {% if topic %}
+    {% if help_topic %}
             <br><hr>
             <ul class="help-topic-list">
-        {% for i in ['syntax', 'level', 'minimum', 'class', 'topic', 'save', 'stats'] %}
-            {% if topic[i] %}
+        {% for help_property in help_properties.items %}
+            {% if help_property %}
+                {{ help_property }}
+                {% if help_property in help_topic %}
                 <li>
-                    <strong>{{ i | title }}</strong>:
-                    <code>{{ topic[i] }}</code>
+                    <strong>{{ help_property | title }}</strong>:
+                    <code>{{ help_topic.help_property }}</code>
                 </li>
-            {% endif %}
-        {% endfor %}
+                {% endif %}
             </ul>
             <div>
-                <pre>{{ topic['body_html'] | safe }}</pre>
+                <pre>{{ help_topic.body_html }}</pre>
             </div>
+            {% endif %}
+        {% endfor %}
     {% endif %}
-    {% if topics and topics is iterable and topics | length > 0 %}
+    {% if help_topics and help_topics is iterable %}
             <hr>
             <ul class="help-topic-list">
-        {% for list_topic in topics %}
+        {% for list_topic in help_topics %}
                 <li title="Topic: {{ list_topic }}">
-                    <a href="{{ url_for('help.help_page.single', topic=list_topic) }}">{{ list_topic }}</a>
+                    <a href="{% url "help_page" help_topic=list_topic %}">{{ list_topic }}</a>
                 </li>
         {% endfor %}
             </ul>

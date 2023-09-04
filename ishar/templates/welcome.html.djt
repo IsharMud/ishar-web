@@ -1,4 +1,4 @@
-{% extends "base/layout.html.djt" %}
+{% extends "layout.html.djt" %}
 {% block meta_title %}Welcome{% endblock meta_title %}
 {% block meta_description %}Welcome to Ishar MUD{% endblock meta_description %}
 {% block meta_url %}TODO{% endblock meta_url %}
@@ -16,14 +16,14 @@
                     the treasure hoards or bloody corpses of their enemies.
                 </p>
     {% if news %}
-                <h3 class="news-subject" title="{{ news.subject | safe }}">
-                    {{ news.subject | safe }}
+                <h3 class="news-subject">
+                    {{ news.subject }}
                 </h3>
-                <p class="news-body" title="{{ news.body | striptags | safe }}">
-                    {{ news.body | safe }}
+                <p class="news-body">
+                    {{ news.body }}
                 </p>
-                <p class="news-creation" title="Posted {{ news.created_at }} by {{ news.account.display_name | safe }}">
-                    ~ {{ news.account.display_name | safe }} @ {{ news.created_at }}
+                <p class="news-creation">
+                    ~ {{ news.account.account_name }} @ {{ news.created_at }}
                 </p>
                 <hr>
     {% endif %}

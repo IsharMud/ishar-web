@@ -2,13 +2,9 @@ from django.urls import include, path
 
 from .api import api_router
 from .views import (
-    ConnectRedirectView, HistoryView, StartView, SupportView, WelcomeView
+    ClientsView, FAQView, HistoryView, StartView, SupportView, WelcomeView
 )
-from .views.clients import ClientsView
 # from .views.events import EventsView
-
-from .views.faq import FAQView
-
 from .apps.help.views import WorldView
 
 
@@ -24,8 +20,6 @@ urlpatterns = [
 
     path("background/", HistoryView.as_view(), name="background"),
     path("history/", HistoryView.as_view(), name="history"),
-
-    path("connect/", ConnectRedirectView.as_view(), name="connect"),
 
     path("faq/", FAQView.as_view(), name="faq"),
     path("faqs/", FAQView.as_view(), name="faqs"),

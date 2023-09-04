@@ -4,9 +4,21 @@ from django.views.generic.base import RedirectView, TemplateView
 from ishar.apps.news.models import News
 
 
+class ClientsView(TemplateView):
+    template_name = "clients.html.djt"
+
+
 class ConnectRedirectView(RedirectView):
     permanent = True
     url = settings.CONNECT_URL
+
+
+class EventsView(TemplateView):
+    template_name = "events.html.djt"
+
+
+class FAQView(TemplateView):
+    template_name = "faq.html.djt"
 
 
 class HistoryView(TemplateView):
@@ -27,4 +39,4 @@ class SupportView(TemplateView):
 
 class WelcomeView(TemplateView):
     template_name = "welcome.html.djt"
-    extra_context = {"news": News.objects.all()}
+    extra_context = {"news": News.objects.first()}
