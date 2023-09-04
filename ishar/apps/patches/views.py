@@ -5,4 +5,5 @@ from .models import Patch
 
 class PatchView(TemplateView):
     template_name = "patches.html.djt"
-    extra_context = {"patches": Patch.objects.all()}
+    patches = Patch.objects.all()
+    extra_context = {"patches": patches}
