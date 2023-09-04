@@ -1,5 +1,4 @@
 from django.db import models
-from django.conf import settings
 from django.utils import timezone
 
 from ..account.models import Account
@@ -33,8 +32,6 @@ class Patch(models.Model):
     )
     patch_file = models.FileField(
         max_length=100,
-        name="",
-        upload_to=settings.PATCH_DIR,
         help_text="PDF file of the patch.",
         verbose_name="Patch File"
     )

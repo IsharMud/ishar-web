@@ -165,17 +165,18 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # Internationalization
-LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
+LANGUAGE_CODE = "en-us"
+TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
-STATIC_URL = 'static/'
+# Static files (CSS, JavaScript, images)
+STATIC_URL = "static/"
 STATIC_ROOT = Path(BASE_DIR, STATIC_URL)
 
-# Patch PDF folder
-PATCH_DIR = Path(STATIC_ROOT, 'patches')
+# Media
+MEDIA_URL = "media/"
+MEDIA_ROOT = Path(BASE_DIR, MEDIA_URL)
 
 USE_THOUSAND_SEPARATOR = True
 
