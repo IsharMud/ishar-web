@@ -106,11 +106,11 @@
                     <a title="E-mail Us!" href="mailto:admin@isharmud.com" id="email-us" target="_blank">✉️ E-mail us!</a>
                 </li>
             </ul>
-{% if current_season is defined and current_season.expires is defined and current_season.expiration_date is defined %}
+    {% if current_season %}
             <ul>
-                <li title="Season {{ current_season.season_id }} ends in {{ current_season.expires }}">
-                    <a href="{% url "season" %}"{% if page == 'season' %} id="active-nav"{% endif %}>Season {{ season.season_id }}</a>
-                    ends in {{ current_season.expires }}
+                <li title="Season {{ current_season.season_id }} ends in {{ current_season.expiration_date | timeuntil }}">
+                    <a href="{% url "season" %}">Season {{ current_season.season_id }}</a>
+                    ends in {{ current_season.expiration_date | timeuntil }}
                 </li>
                 <li title="Ends {{ current_season.expiration_date }}">
                     {{ current_season.expiration_date }}
