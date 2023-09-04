@@ -15,7 +15,9 @@ class PatchAdmin(admin.ModelAdmin):
         ("Authorship", {"fields": ("patch_date", "account")}),
     )
     filter_horizontal = filter_vertical = ()
-    list_display = ("patch_name", "patch_file", "is_visible", "account")
+    list_display = (
+        "patch_name", "patch_file", "patch_date", "is_visible", "account"
+    )
     list_filter = ("is_visible", "account")
     readonly_fields = ("patch_id", "account")
     search_fields = ("patch_name", "account", "patch_date", "is_visible")

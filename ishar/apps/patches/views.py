@@ -1,9 +1,13 @@
-from django.views.generic.base import TemplateView
+from django.views.generic import ListView
 
 from .models import Patch
 
 
-class PatchView(TemplateView):
+class PatchAllView(ListView):
+    context_object_name = "patches"
+    model = Patch
     template_name = "patches.html.djt"
-    patches = Patch.objects.all()
-    extra_context = {"patches": patches}
+
+
+class PatchListView(PatchAllView):
+    paginate_by = 3
