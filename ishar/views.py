@@ -1,3 +1,6 @@
+"""
+isharmud.com base views.
+"""
 from django.conf import settings
 from django.views.generic.base import RedirectView, TemplateView
 

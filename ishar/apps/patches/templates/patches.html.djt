@@ -10,27 +10,22 @@
                     Ishar MUD is under regular development, and constantly being improved!
                 </p>
     {% if patches %}
-                <p>
-                    <a href="{% url "latest" %}">These are the latest patch notes for Ishar MUD.</a>
-                </p>
                 <ul id="patches-list">
         {% for patch in patches %}
-                    <li class="patch-item" title="{{ patch.name }}">
+                    <li class="patch-item" title="{{ patch.patch_name }}">
                         <h3>
-            {% with "patches/"|add:patch.name as patch_pdf %}
-                            <a href="{% static patch_pdf %}" target="_blank">{{ patch.name }}</a>
-            {% endwith %}
+                            <a href="{{ patch.patch_file.url }}" target="_blank">{{ patch.patch_name }}</a>
                         </h3>
                     </li>
                     <li class="nested-list">
                         <ul>
                             <li>
                                 <strong>Date</strong>:
-                                {{ patch.modified }}
+                                {{ patch.patch_date }}
                             </li>
                             <li>
                                 <strong>Size</strong>:
-                                {{ patch.size }}
+                                {{ patch.patch_file.size | filesizeformat }}
                             </li>
                         </ul>
                     </li>

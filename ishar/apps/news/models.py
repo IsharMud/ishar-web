@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 from ..account.models import Account
 
@@ -19,6 +20,7 @@ class News(models.Model):
         verbose_name="Account"
     )
     created_at = models.DateTimeField(
+        default=timezone.now,
         help_text="Date and time when the news post was created.",
         verbose_name="Created At"
     )
@@ -36,7 +38,7 @@ class News(models.Model):
         managed = False
         db_table = "news"
         default_related_name = "news"
-        ordering = ("-created_at", "-news_id", "account")
+        ordering = ("-created_at", "-news_id")
         verbose_name = "News"
         verbose_name_plural = "News"
 

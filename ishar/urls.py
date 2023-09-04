@@ -1,3 +1,6 @@
+"""
+isharmud.com URL configuration.
+"""
 from django.urls import include, path
 
 from .api import api_router
