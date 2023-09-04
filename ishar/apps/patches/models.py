@@ -1,3 +1,4 @@
+from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.utils import timezone
 
@@ -33,7 +34,8 @@ class Patch(models.Model):
     patch_file = models.FileField(
         max_length=100,
         help_text="PDF file of the patch.",
-        verbose_name="Patch File"
+        verbose_name="Patch File",
+        validators=[FileExtensionValidator(allowed_extensions=['pdf'])]
     )
     is_visible = models.BooleanField(
         default=True,
