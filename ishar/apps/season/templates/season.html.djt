@@ -1,36 +1,35 @@
-{% set page = 'season' %}
-{% extends "base/layout.html.j2" %}
+{% extends "layout.html.djt" %}
 {% block meta_title %}Season {{ season.season_id }}{% endblock meta_title %}
 {% block meta_description %}Information about season {{ season.season_id }} of Ishar MUD{% endblock meta_description %}
-{% block meta_url %}{%  url "season" %}{% endblock meta_url %}
+{% block meta_url %}{% url "season" %}{% endblock meta_url %}
 {% block title %}Season {{ season.season_id }}{% endblock title %}
 {% block header %}Season {{ season.season_id }}{% endblock header %}
 {% block content %}
-    {% if current_season is defined %}
+    {% if season %}
             <ul id="season-details">
-                <li title="Season {{ season.season_id }} began {{ season.effective }} ago on {{ season.effective_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}">
+                <li title="Season {{ season.season_id }} began {{ season.effective_date }} ago on {{ season.effective_date }}">
                     <strong>
                         Started
                     </strong>
                     <ul>
                         <li>
-                            {{ season.effective_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}
+                            {{ season.effective_date }}
                         </li>
                         <li>
-                            {{ season.effective }} ago
+                            {{ season.effective_date | timesince }} ago
                         </li>
                     </ul>
                 </li>
-                <li title="Season {{ season.season_id }} ends in {{ season.expires }} on {{ season.expiration_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}">
+                <li title="Season {{ season.season_id }} ends in {{ season.expiration_date | timeuntil }} on {{ season.expiration_date }}">
                     <strong>
                         Ends
                     </strong>
                     <ul>
                         <li>
-                            {{ season.expiration_date.strftime('%A, %B %d, %Y @ %H:%M:%S %Z') }}
+                            {{ season.expiration_date }}
                         </li>
                         <li>
-                            in {{ season.expires }}
+                            in {{ season.expiration_date | timeuntil }}
                         </li>
                     </ul>
                 </li>
@@ -47,7 +46,7 @@
                 Essence is preserved across seasons, and can be spent at any time
                 by typing <code>shop</code> after logging in.
             </p>
-    {% if current_user.current_essence is defined and current_user.seasonal_earned is defined %}
+    {% if current_user.current_essence and current_user.seasonal_earned %}
             <ul id="essence-balance">
                 <li title="You currently have: {{ current_user.current_essence }} essence.">
                     You currently have:
@@ -55,7 +54,7 @@
                 <li class="nested-list">
                     <ul>
                         <li>
-                            {{ display_essence(current_user.current_essence) }}
+                            {{ current_user.current_essence }}
                         </li>
                     </ul>
                 </li>
@@ -65,7 +64,7 @@
                 <li class="nested-list">
                     <ul>
                         <li>
-                            {{ display_essence(current_user.seasonal_earned) }}
+                            {{ current_user.seasonal_earned }}
                         </li>
                     </ul>
                 </li>
