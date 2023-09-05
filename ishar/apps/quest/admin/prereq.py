@@ -13,9 +13,7 @@ class QuestPrereqAdmin(admin.ModelAdmin):
     )
     filter_horizontal = filter_vertical = ()
     list_display = search_fields = ("quest", "required_quest")
-    list_filter = readonly_fields = (
-        ("quest", admin.RelatedOnlyFieldListFilter),
-    )
+    list_filter = (("quest", admin.RelatedOnlyFieldListFilter),)
     model = QuestPrereq
 
 
@@ -25,5 +23,4 @@ class QuestPrereqAdminInline(admin.TabularInline):
     """
     extra = 1
     fk_name = "quest"
-    # fields = ("required_quest")
     model = QuestPrereq

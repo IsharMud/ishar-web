@@ -30,6 +30,4 @@ class QuestRewardAdminInline(admin.TabularInline):
     """
     Ishar quest reward administration inline.
     """
-    extra = 1
-    # fields = ("reward_type", "reward_num", "quest", "class_restrict")
     model = QuestReward
