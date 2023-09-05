@@ -32,14 +32,4 @@ class QuestStepAdminInline(admin.TabularInline):
     Ishar quest step administration inline.
     """
     extra = 1
-    fieldsets = (
-        (None, {"fields": ("step_id", "step_type", "quest")}),
-        ("Details", {"fields": ("target", "num_required", "time_limit")}),
-        ("Mystify", {"fields": ("mystify", "mystify_text")})
-    )
-    filter_horizontal = filter_vertical = ()
-    list_display = ("step_id", "step_type", "quest")
-    list_filter = ("step_type", "num_required", "mystify", "quest")
     model = QuestStep
-    readonly_fields = ("step_id",)
-    search_fields = ("step_id", "step_type", "target", "mystify_text")
