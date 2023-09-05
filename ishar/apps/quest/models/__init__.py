@@ -49,7 +49,7 @@ class Quest(models.Model):
             MinValueValidator(limit_value=1),
             MaxValueValidator(limit_value=max(settings.IMMORTAL_LEVELS))
         ],
-        verbose_name="Maximum Level"
+        verbose_name="Maximum Level (Deprecated)"
     )
     repeatable = models.BooleanField(
         help_text="Is the quest repeatable?",
@@ -61,9 +61,11 @@ class Quest(models.Model):
         verbose_name="Description"
     )
     deprecated_prerequisite = models.IntegerField(
+        default="-1",
+        editable=False,
         db_column="prerequisite",
-        help_text="Prerequisite of the quest.",
-        verbose_name="Prerequisite"
+        help_text="(Deprecated) Prerequisite of the quest.",
+        verbose_name="Prerequisite (Deprecated)"
     )
     class_restrict = models.IntegerField(
         choices=get_class_options(),
