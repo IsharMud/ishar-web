@@ -1,11 +1,13 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import permissions, viewsets
 
-from ..models import Quest
-from ..models.reward import QuestReward
-from ..models.step import QuestStep
-from ..serializers import (
-    QuestSerializer, QuestRewardSerializer, QuestStepSerializer
+from .models import Quest
+from .models.prereq import QuestPrereq
+from .models.reward import QuestReward
+from .models.step import QuestStep
+from .serializers import (
+    QuestSerializer,
+    QuestPrereqSerializer, QuestRewardSerializer, QuestStepSerializer
 )
 
 
@@ -18,6 +20,17 @@ class QuestViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAdminUser]
     queryset = model.objects.all()
     serializer_class = QuestSerializer
+
+
+class QuestPrereqViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows quest prerequisites to be viewed or edited.
+    """
+    filter_backends = [DjangoFilterBackend]
+    model = QuestPrereq
+    permission_classes = [permissions.IsAdminUser]
+    queryset = model.objects.all()
+    serializer_class = QuestPrereqSerializer
 
 
 class QuestRewardViewSet(viewsets.ModelViewSet):

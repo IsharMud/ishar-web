@@ -40,8 +40,11 @@ class Quest(models.Model):
         ],
         verbose_name="Minimum Level"
     )
-    max_level = models.IntegerField(
-        help_text="Maximum level of a player that may partake in the quest.",
+    deprecated_max_level = models.IntegerField(
+        default=20,
+        editable=False,
+        db_column="max_level",
+        help_text="(Deprecated) Maximum level of player that may do the quest.",
         validators=[
             MinValueValidator(limit_value=1),
             MaxValueValidator(limit_value=max(settings.IMMORTAL_LEVELS))
@@ -57,7 +60,8 @@ class Quest(models.Model):
         help_text="Description of the quest.",
         verbose_name="Description"
     )
-    prerequisite = models.IntegerField(
+    deprecated_prerequisite = models.IntegerField(
+        db_column="prerequisite",
         help_text="Prerequisite of the quest.",
         verbose_name="Prerequisite"
     )
@@ -95,26 +99,3 @@ class Quest(models.Model):
 
     def __str__(self) -> str:
         return self.display_name or self.name or self.quest_id
-
-    @property
-    @admin.display(description="# Pre-Requisites")
-    def prereq_count(self) -> int:
-        """
-        Number of prerequisites within the quest.
-        """
-        return self.steps.count()
-
-    @admin.display(description="# Steps", ordering="")
-    def step_count(self) -> int:
-        """
-        Number of steps within the quest.
-        """
-        return self.steps.count()
-
-    @property
-    @admin.display(description="Levels")
-    def for_levels(self) -> str:
-        """
-        String of the level range of the quest.
-        """
-        return f"{self.min_level} - {self.max_level}"

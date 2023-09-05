@@ -10,8 +10,8 @@ from .apps.news.views import NewsViewSet
 from .apps.patches.views import PatchViewSet
 from .apps.player.views import PlayerViewSet, PlayerClassViewSet, RaceViewSet, \
     RemortUpgradeViewSet
-from .apps.quest.views.api import QuestViewSet, QuestRewardViewSet, \
-    QuestStepViewSet
+from .apps.quest.views import QuestViewSet, QuestPrereqViewSet, \
+    QuestRewardViewSet, QuestStepViewSet
 from .apps.season.views import SeasonViewSet
 from .apps.spell.views import ForceViewSet, SpellViewSet, SpellFlagViewSet
 
@@ -42,6 +42,7 @@ api_router.register(r"news", NewsViewSet, "news")
 api_router.register(r"patches", PatchViewSet, "patch")
 api_router.register(r"players", PlayerViewSet, "player")
 api_router.register(r"quests", QuestViewSet, "quest")
+api_router.register(r"quest_prereqs", QuestPrereqViewSet, "quest_prereq")
 api_router.register(r"quest_rewards", QuestRewardViewSet, "quest_reward")
 api_router.register(r"quest_steps", QuestStepViewSet, "quest_step")
 api_router.register(r"races", RaceViewSet, "race")
