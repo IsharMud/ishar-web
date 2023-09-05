@@ -5,47 +5,42 @@ from ...apps.player.models import Player
 
 
 class LeadersView(ListView):
+    """
+    Leaders view.
+    """
+    model = Player
     template_name = "leaders.html.djt"
     context_object_name = "leader_players"
 
-    def get_queryset(self):
-
-        return Player.objects.all()
-#            true_level__lt=min(settings.IMMORTAL_LEVELS)
-#        ).order_by(
-#            "-remorts",
-#            "-total_renown",
-#            "-quests_completed",
-#            "-challenges_completed",
-#            "deaths"
-#        ).all()
+    queryset = model.objects.filter(
+        true_level__lt=min(settings.IMMORTAL_LEVELS)
+    ).order_by(
+        "-remorts", "-total_renown", "-quests_completed",
+        "-challenges_completed", "deaths"
+    )
 
 
 class ClassicLeadersView(LeadersView):
-
-    def get_queryset(self):
-        return Player.objects.filter(
-            true_level__lt=min(settings.IMMORTAL_LEVELS),
-            game_type__exact=1
-        ).order_by(
-            "-remorts",
-            "-total_renown",
-            "-quests_completed",
-            "-challenges_completed",
-            "deaths"
-        ).all()
+    """
+    Classic players leaders view.
+    """
+    model = Player
+    queryset = model.objects.filter(
+        true_level__lt=min(settings.IMMORTAL_LEVELS), game_type__exact=0
+    ).order_by(
+        "-remorts", "-total_renown", "-quests_completed",
+        "-challenges_completed", "deaths"
+    )
 
 
 class SurvivalLeadersView(LeadersView):
-
-    def get_queryset(self):
-        return Player.objects.filter(
-            true_level__lt=min(settings.IMMORTAL_LEVELS),
-            game_type__exact=1
-        ).order_by(
-            "-remorts",
-            "-total_renown",
-            "-quests_completed",
-            "-challenges_completed",
-            "deaths"
-        ).all()
+    """
+    Survival players leaders view.
+    """
+    model = Player
+    queryset = model.objects.filter(
+        true_level__lt=min(settings.IMMORTAL_LEVELS), game_type__exact=1
+    ).order_by(
+        "-remorts", "-total_renown", "-quests_completed",
+        "-challenges_completed", "deaths"
+    )
