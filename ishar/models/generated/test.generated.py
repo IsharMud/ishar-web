@@ -24,6 +24,29 @@ class AccountUpgrades(models.Model):
         db_table = 'account_upgrades'
 
 
+class Accounts(models.Model):
+    account_id = models.AutoField(primary_key=True)
+    created_at = models.DateTimeField()
+    current_essence = models.PositiveIntegerField()
+    email = models.CharField(unique=True, max_length=30)
+    password = models.CharField(max_length=36)
+    create_isp = models.CharField(max_length=25)
+    last_isp = models.CharField(max_length=25)
+    create_ident = models.CharField(max_length=25)
+    last_ident = models.CharField(max_length=25)
+    create_haddr = models.IntegerField()
+    last_haddr = models.IntegerField()
+    account_name = models.CharField(unique=True, max_length=25)
+    account_gift = models.DateTimeField()
+    banned_until = models.DateTimeField(blank=True, null=True)
+    bugs_reported = models.IntegerField()
+    earned_essence = models.IntegerField()
+
+    class Meta:
+        managed = False
+        db_table = 'accounts'
+
+
 class AccountsAccountUpgrades(models.Model):
     account_upgrades = models.OneToOneField(AccountUpgrades, models.DO_NOTHING, primary_key=True)  # The composite primary key (account_upgrades_id, account_id) found, that is not supported. The first column is selected.
     account = models.ForeignKey(Accounts, models.DO_NOTHING)
@@ -55,6 +78,46 @@ class AffectFlags(models.Model):
         db_table = 'affect_flags'
 
 
+class AuthGroup(models.Model):
+    name = models.CharField(unique=True, max_length=150)
+
+    class Meta:
+        managed = False
+        db_table = 'auth_group'
+
+
+class AuthGroupPermissions(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    group = models.ForeignKey(AuthGroup, models.DO_NOTHING)
+    permission = models.ForeignKey('AuthPermission', models.DO_NOTHING)
+
+    class Meta:
+        managed = False
+        db_table = 'auth_group_permissions'
+        unique_together = (('group', 'permission'),)
+
+
+class AuthPermission(models.Model):
+    name = models.CharField(max_length=255)
+    content_type = models.ForeignKey('DjangoContentType', models.DO_NOTHING)
+    codename = models.CharField(max_length=100)
+
+    class Meta:
+        managed = False
+        db_table = 'auth_permission'
+        unique_together = (('content_type', 'codename'),)
+
+
+class AuthtokenToken(models.Model):
+    key = models.CharField(primary_key=True, max_length=40)
+    created = models.DateTimeField()
+    user = models.OneToOneField(Accounts, models.DO_NOTHING)
+
+    class Meta:
+        managed = False
+        db_table = 'authtoken_token'
+
+
 class Boards(models.Model):
     board_id = models.PositiveIntegerField(primary_key=True)
     board_name = models.CharField(max_length=15)
@@ -83,7 +146,15 @@ class Challenges(models.Model):
         db_table = 'challenges'
 
 
+class Classes(models.Model):
+    class_id = models.AutoField(primary_key=True)
+    class_name = models.CharField(unique=True, max_length=15)
+    class_display = models.CharField(max_length=32, blank=True, null=True)
+    class_description = models.CharField(max_length=64, blank=True, null=True)
 
+    class Meta:
+        managed = False
+        db_table = 'classes'
 
 
 class Conditions(models.Model):
@@ -103,6 +174,51 @@ class ConfigurationOptions(models.Model):
     class Meta:
         managed = False
         db_table = 'configuration_options'
+
+
+class DjangoAdminLog(models.Model):
+    action_time = models.DateTimeField()
+    object_id = models.TextField(blank=True, null=True)
+    object_repr = models.CharField(max_length=200)
+    action_flag = models.PositiveSmallIntegerField()
+    change_message = models.TextField()
+    content_type = models.ForeignKey('DjangoContentType', models.DO_NOTHING, blank=True, null=True)
+    user = models.ForeignKey(Accounts, models.DO_NOTHING)
+
+    class Meta:
+        managed = False
+        db_table = 'django_admin_log'
+
+
+class DjangoContentType(models.Model):
+    app_label = models.CharField(max_length=100)
+    model = models.CharField(max_length=100)
+
+    class Meta:
+        managed = False
+        db_table = 'django_content_type'
+        unique_together = (('app_label', 'model'),)
+
+
+class DjangoMigrations(models.Model):
+    id = models.BigAutoField(primary_key=True)
+    app = models.CharField(max_length=255)
+    name = models.CharField(max_length=255)
+    applied = models.DateTimeField()
+
+    class Meta:
+        managed = False
+        db_table = 'django_migrations'
+
+
+class DjangoSession(models.Model):
+    session_key = models.CharField(primary_key=True, max_length=40)
+    session_data = models.TextField()
+    expire_date = models.DateTimeField()
+
+    class Meta:
+        managed = False
+        db_table = 'django_session'
 
 
 class Forces(models.Model):
@@ -185,13 +301,17 @@ class Objects(models.Model):
         db_table = 'objects'
 
 
-class PlayerAccounts(models.Model):
+class Patches(models.Model):
+    patch_id = models.AutoField(primary_key=True)
     account = models.ForeignKey(Accounts, models.DO_NOTHING)
-    player = models.ForeignKey('Players', models.DO_NOTHING)
+    patch_date = models.DateTimeField()
+    patch_name = models.CharField(unique=True, max_length=64)
+    patch_file = models.CharField(max_length=100)
+    is_visible = models.PositiveIntegerField()
 
     class Meta:
         managed = False
-        db_table = 'player_accounts'
+        db_table = 'patches'
 
 
 class PlayerAffectFlags(models.Model):
@@ -416,15 +536,15 @@ class QuestPrereqs(models.Model):
 
 
 class QuestRewards(models.Model):
-    reward_num = models.IntegerField(primary_key=True)  # The composite primary key (reward_num, quest_id) found, that is not supported. The first column is selected.
+    reward_num = models.IntegerField()
     reward_type = models.IntegerField()
     quest = models.ForeignKey('Quests', models.DO_NOTHING)
     class_restrict = models.IntegerField()
+    quest_reward_id = models.AutoField(primary_key=True)
 
     class Meta:
         managed = False
         db_table = 'quest_rewards'
-        unique_together = (('reward_num', 'quest'),)
 
 
 class QuestSteps(models.Model):
@@ -559,18 +679,11 @@ class Seasons(models.Model):
     seasonal_leader_name = models.TextField()
     max_renown = models.IntegerField()
     avg_renown = models.FloatField()
+    total_remorts = models.IntegerField()
 
     class Meta:
         managed = False
         db_table = 'seasons'
-
-
-class Skills(models.Model):
-    skill_id = models.PositiveIntegerField(primary_key=True)
-
-    class Meta:
-        managed = False
-        db_table = 'skills'
 
 
 class SpellFlags(models.Model):
