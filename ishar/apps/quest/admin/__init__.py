@@ -15,11 +15,12 @@ class QuestAdmin(ModelAdmin):
     """
 
     fieldsets = (
-        (None, {"fields": (
-            "name", "display_name", "repeatable", "deprecated_prerequisite"
-        )}),
-        ("Classes", {"fields": ("class_restrict",)}),
-        ("Levels", {"fields": ("min_level", "deprecated_max_level")}),
+        (None, {"fields": ("name", "display_name", "repeatable")}),
+        ("Deprecated", {
+            "classes": ("collapse",),
+            "fields": ("deprecated_max_level", "deprecated_prerequisite")
+        }),
+        ("Players", {"fields": ("min_level", "class_restrict",)}),
         ("Messages", {"fields": (
             "description", "quest_intro", "completion_message"
         )}),
