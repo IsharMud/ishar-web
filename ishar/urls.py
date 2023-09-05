@@ -5,7 +5,8 @@ from django.urls import include, path
 
 from .api import api_router
 from .views import (
-    ClientsView, FAQView, HistoryView, StartView, SupportView, WelcomeView
+    ClientsView, FAQView, HistoryView, StartView, SupportView,
+    WelcomeView
 )
 # from .views.events import EventsView
 from .apps.help.views import WorldView
@@ -35,6 +36,9 @@ urlpatterns = [
     # path("events/", EventsView.as_view(), name="events"),
 
     path("help/", include("ishar.apps.help.urls"), name="help"),
+
+    path("leaders/", include("ishar.apps.leaders.urls"), name="leaders"),
+
     path("patches/", include("ishar.apps.patches.urls"), name="patches"),
     path("portal", WelcomeView.as_view(), name="portal"),
     path("season/", include("ishar.apps.season.urls"), name="season"),

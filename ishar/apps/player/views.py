@@ -1,3 +1,5 @@
+from django.conf import settings
+from django.views.generic.base import TemplateView
 from rest_framework import viewsets, permissions
 
 from .models import Player
@@ -8,6 +10,21 @@ from .serializers import (
     PlayerSerializer, PlayerClassSerializer, RaceSerializer,
     RemortUpgradeSerializer
 )
+
+
+class LeadersView(TemplateView):
+    template_name = "leaders.html.djt"
+    extra_context = {
+        "leader_players": Player.objects.filter(
+            true_level__gt=min(settings.IMMORTAL_LEVELS)
+        ).order_by(
+            "-remorts",
+            "-total_renown",
+            "-quests_completed",
+            "-challenges_completed",
+            "deaths"
+        ).all()
+    }
 
 
 class PlayerViewSet(viewsets.ReadOnlyModelViewSet):

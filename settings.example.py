@@ -103,10 +103,12 @@ INSTALLED_APPS = [
     "ishar",
     "ishar.apps.account",
     "ishar.apps.challenge",
+    "ishar.apps.help",
+    "ishar.apps.leaders",
     "ishar.apps.news",
+    "ishar.apps.patches",
     "ishar.apps.player",
     "ishar.apps.quest",
-    "ishar.apps.race",
     "ishar.apps.season",
     "ishar.apps.spell",
 ]

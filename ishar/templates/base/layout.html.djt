@@ -17,14 +17,6 @@
         <title>{% block title %}Welcome{% endblock title %} - Ishar MUD</title>
         <link rel="stylesheet" type="text/css" href="{% static "style.css" %}">
         <link rel="shortcut icon" href="{% static "images/favicon.ico" %}" type="image/x-icon">
-        {% if sentry_user %}
-        <script src="https://js.sentry-cdn.com/{{ sentry_user }}.min.js" crossorigin="anonymous"></script>
-        <script
-            src="https://browser.sentry-cdn.com/7.31.0/bundle.tracing.min.js"
-            integrity="sha384-g/zdHeV5+PqD7HmWeWVuK9wYkqRN+1NlqveOyyditZgHVahR/Et3SFTLepAHqQyo"
-            crossorigin="anonymous"
-        ></script>
-        {% endif %}
     {% endblock head %}
     {% block scripts %}
     {% endblock scripts %}
@@ -77,7 +69,7 @@
                     <a href="{% url "portal" %}"{% if page == 'global_events' %} id="active-nav"{% endif %}>Events {% if global_event_count and global_event_count > 0 %} ({{ global_event_count }}){% endif %}</a>
                 </li>
                 <li title="Leaders">
-                    <a href="{% url "portal" %}"{% if page == 'leaders' %} id="active-nav"{% endif %}>Leaders</a>
+                    <a href="{% url "leaders" %}"{% if page == 'leaders' %} id="active-nav"{% endif %}>Leaders</a>
                 </li>
                 <li title="Log out">
                     <a href="{% url "admin:logout" %}">Log out ({{ user.get_username }})</a>
