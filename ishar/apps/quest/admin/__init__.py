@@ -25,7 +25,7 @@ class QuestAdmin(ModelAdmin):
         ("Mobiles", {"fields": ("quest_source", "quest_return")})
     )
     filter_horizontal = filter_vertical = ()
-    inlines = (QuestRewardAdminInline, QuestStepAdminInline)
+    inlines = (QuestStepAdminInline, QuestRewardAdminInline)
     list_display = (
         "display_name", "repeatable", "class_restrict",
         "for_levels", "step_count"

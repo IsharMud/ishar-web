@@ -13,10 +13,6 @@ class QuestReward(models.Model):
         help_text="Auto-generated, permanent quest reward ID number.",
         verbose_name="Quest Reward ID"
     )
-    reward_num = models.IntegerField(
-        help_text="Amount/value/target number of the reward.",
-        verbose_name="Reward Number"
-    )
     reward_type = models.IntegerField(
         choices=[
             (0, "Object_always"), (1, "Object_Choice"), (2, "Money"),
@@ -25,6 +21,10 @@ class QuestReward(models.Model):
         ],
         help_text="Reward type.",
         verbose_name="Reward Type"
+    )
+    reward_num = models.IntegerField(
+        help_text="Amount/value/target number of the reward.",
+        verbose_name="Reward Number"
     )
     quest = models.ForeignKey(
         to=Quest,
