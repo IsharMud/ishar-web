@@ -13,7 +13,9 @@ class QuestPrereqAdmin(admin.ModelAdmin):
     )
     filter_horizontal = filter_vertical = ()
     list_display = search_fields = ("quest", "required_quest")
-    list_filter = readonly_fields = ("quest",)
+    list_filter = readonly_fields = (
+        ("quest", admin.RelatedOnlyFieldListFilter),
+    )
     model = QuestPrereq
 
 
