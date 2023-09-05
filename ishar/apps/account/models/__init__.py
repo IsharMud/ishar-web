@@ -233,13 +233,6 @@ class Account(AbstractBaseUser, PermissionsMixin):
     def has_module_perms(self, app_label):
         return self.is_admin
 
-    @admin.display(description="# Players")
-    def player_count(self) -> int:
-        """
-        Number of players within the account.
-        """
-        return self.players.count()
-
     @property
     def seasonal_earned(self) -> int:
         """
@@ -261,3 +254,4 @@ class Account(AbstractBaseUser, PermissionsMixin):
         if self.save():
             return True
         return False
+

@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.db.models import Count
 
 from .upgrade import AccountUpgradeAdmin
 
@@ -18,6 +19,15 @@ class AccountAdmin(BaseUserAdmin):
         return False
 
     model = get_user_model()
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        qs = qs.annotate(player_count=Count("player")).order_by("player_count")
+        return qs
+
+    def player_count(self, obj):
+        return obj.player_count
+    player_count.admin_order_field = "player_count"
 
     date_hierarchy = "created_at"
     fieldsets = (
@@ -66,6 +76,5 @@ class AccountAdmin(BaseUserAdmin):
     )
     readonly_fields = (
         "account_id", "last_ident", "last_isp", "_last_haddr",
-        "created_at", "create_isp", "create_ident", "_create_haddr",
-        "player_count"
+        "created_at", "create_isp", "create_ident", "_create_haddr"
     )
