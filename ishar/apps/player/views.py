@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.views.generic.base import TemplateView
 from rest_framework import viewsets, permissions
 
@@ -12,19 +11,21 @@ from .serializers import (
 )
 
 
-class LeadersView(TemplateView):
-    template_name = "leaders.html.djt"
-    extra_context = {
-        "leader_players": Player.objects.filter(
-            true_level__gt=min(settings.IMMORTAL_LEVELS)
-        ).order_by(
-            "-remorts",
-            "-total_renown",
-            "-quests_completed",
-            "-challenges_completed",
-            "deaths"
-        ).all()
-    }
+class PlayerView(TemplateView):
+    """
+    Player view.
+    """
+    template_name = "player.html.djt"
+
+
+class PlayerPageView(PlayerView):
+    """
+    Player page view.
+    """
+    def __init__(self, player_name=None):
+        player = Player.objects.filter(name__exact=player_name).first()
+        self.extra_context["player"] = player
+        super.__init__()
 
 
 class PlayerViewSet(viewsets.ReadOnlyModelViewSet):

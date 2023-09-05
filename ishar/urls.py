@@ -40,6 +40,7 @@ urlpatterns = [
     path("leaders/", include("ishar.apps.leaders.urls"), name="leaders"),
 
     path("patches/", include("ishar.apps.patches.urls"), name="patches"),
+    path("player/", include("ishar.apps.player.urls"), name="player"),
     path("portal", WelcomeView.as_view(), name="portal"),
     path("season/", include("ishar.apps.season.urls"), name="season"),
     path("support/", SupportView.as_view(), name="support"),
