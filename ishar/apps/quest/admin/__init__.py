@@ -36,3 +36,8 @@ class QuestAdmin(ModelAdmin):
         "quest_id", "display_name", "name", "description",
         "completion_message", "quest_intro",
     )
+
+    def save_model(self, request, obj, form, change):
+        if obj and not change:
+            obj.prerequisite = '-1'
+        super().save_model(request, obj, form, change)

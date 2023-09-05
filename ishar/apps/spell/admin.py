@@ -25,9 +25,6 @@ class SpellsFlagsAdminInline(admin.TabularInline):
     Ishar spell's flags inline administration.
     """
     extra = 1
-    fieldsets = ((None, {"fields": ("spell", "flag",)}),)
-    filter_horizontal = filter_vertical = list_filter = readonly_fields = ()
-    list_display = search_fields = ("spell", "flag")
     model = SpellSpellFlag
 
 
@@ -36,22 +33,19 @@ class SpellsForcesAdminInline(admin.TabularInline):
     Ishar spell's forces inline administration.
     """
     extra = 1
-    # fieldsets = ((None, {"fields": ("spell", "force",)}),)
-    # filter_horizontal = filter_vertical = list_filter = readonly_fields = ()
-    # list_display = search_fields = ("spell", "force")
     model = SpellForce
 
 
-# @admin.register(SpellFlag)
+@admin.register(SpellFlag)
 class SpellFlagAdmin(admin.ModelAdmin):
     """
     Ishar spell flag administration.
     """
     fieldsets = ((None, {"fields": ("id", "name", "description")}),)
-    filter_horizontal = filter_vertical = list_filter = readonly_fields = ()
-    inlines = (SpellsFlagsAdminInline,)
+    filter_horizontal = filter_vertical = list_filter = ()
     list_display = search_fields = ("name", "description")
     model = SpellFlag
+    readonly_fields = ("id",)
 
 
 @admin.register(Spell)

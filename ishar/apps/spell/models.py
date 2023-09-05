@@ -31,7 +31,7 @@ class SpellFlag(models.Model):
     """
     Spell Flag.
     """
-    id = models.IntegerField(
+    id = models.AutoField(
         primary_key=True,
         help_text=(
             "Auto-generated permanent identification number for a spell flag."
