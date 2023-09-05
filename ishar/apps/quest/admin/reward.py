@@ -30,4 +30,5 @@ class QuestRewardAdminInline(admin.TabularInline):
     """
     Ishar quest reward administration inline.
     """
+    extra = 3
     model = QuestReward

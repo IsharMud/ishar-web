@@ -21,6 +21,5 @@ class QuestPrereqAdminInline(admin.TabularInline):
     """
     Ishar quest prerequisite administration inline.
     """
-    extra = 1
     fk_name = "quest"
     model = QuestPrereq
