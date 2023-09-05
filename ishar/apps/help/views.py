@@ -1,6 +1,6 @@
 from django.views.generic.base import TemplateView
 
-from ..util.helptab import get_help_topics, search_help_topics
+from .util.helptab import get_help_topics, search_help_topics
 
 
 HELP_PROPERTIES = [

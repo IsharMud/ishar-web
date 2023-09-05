@@ -1,7 +1,7 @@
 from rest_framework import viewsets, permissions
 
-from ..models import Force, Spell, SpellFlag
-from ..serializers import ForceSerializer, SpellSerializer, SpellFlagSerializer
+from .models import Force, Spell, SpellFlag
+from .serializers import ForceSerializer, SpellSerializer, SpellFlagSerializer
 
 
 class ForceViewSet(viewsets.ModelViewSet):

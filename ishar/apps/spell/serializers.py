@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 
-from ..models import Force, Spell, SpellFlag
+from .models import Force, Spell, SpellFlag
 
 
 class ForceSerializer(ModelSerializer):

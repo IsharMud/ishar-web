@@ -1,9 +1,9 @@
 from rest_framework.serializers import ModelSerializer
 
-from ..models import Season
+from .models import Patch
 
 
-class SeasonSerializer(ModelSerializer):
+class PatchSerializer(ModelSerializer):
     class Meta:
-        model = Season
+        model = Patch
         fields = "__all__"

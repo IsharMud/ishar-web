@@ -1,7 +1,7 @@
 from rest_framework import viewsets, permissions
 
-from ..models import Challenge
-from ..serializers import ChallengeSerializer
+from .models import Challenge
+from .serializers import ChallengeSerializer
 
 
 class ChallengeViewSet(viewsets.ModelViewSet):

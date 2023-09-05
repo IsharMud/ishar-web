@@ -1,8 +1,8 @@
 from rest_framework import viewsets, permissions
 
-from ..models import Account
-from ..models.upgrade import AccountUpgrade
-from ..serializers import AccountSerializer, AccountUpgradeSerializer
+from .models import Account
+from .models.upgrade import AccountUpgrade
+from .serializers import AccountSerializer, AccountUpgradeSerializer
 
 
 class AccountViewSet(viewsets.ReadOnlyModelViewSet):

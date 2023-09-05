@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 
-from ..models import Challenge
+from .models import Challenge
 
 
 class ChallengeSerializer(ModelSerializer):

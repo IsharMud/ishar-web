@@ -16,7 +16,7 @@ class NewsAdmin(admin.ModelAdmin):
     )
     filter_horizontal = filter_vertical = ()
     list_display = ("subject", "created_at", "account")
-    list_filter = ("account",)
+    list_filter = (("account", admin.RelatedOnlyFieldListFilter),)
     readonly_fields = ("news_id", "account")
     search_fields = ("subject", "body", "account")
 

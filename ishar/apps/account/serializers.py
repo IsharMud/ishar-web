@@ -1,7 +1,7 @@
 from rest_framework.serializers import ModelSerializer
 
-from ..models import Account
-from ..models.upgrade import AccountUpgrade
+from .models import Account
+from .models.upgrade import AccountUpgrade
 
 
 class AccountSerializer(ModelSerializer):

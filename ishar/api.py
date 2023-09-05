@@ -4,15 +4,16 @@ Ishar MUD API configuration.
 
 from rest_framework import permissions, routers
 
-from .apps.account.views.api import AccountViewSet, AccountUpgradeViewSet
-from .apps.challenge.views.api import ChallengeViewSet
-from .apps.player.views.api import PlayerViewSet, PlayerClassViewSet, \
-    RaceViewSet, RemortUpgradeViewSet
-from .apps.news.views.api import NewsViewSet
+from .apps.account.views import AccountViewSet, AccountUpgradeViewSet
+from .apps.challenge.views import ChallengeViewSet
+from .apps.news.views import NewsViewSet
+from .apps.patches.views import PatchViewSet
+from .apps.player.views import PlayerViewSet, PlayerClassViewSet, RaceViewSet, \
+    RemortUpgradeViewSet
 from .apps.quest.views.api import QuestViewSet, QuestRewardViewSet, \
     QuestStepViewSet
-from .apps.season.views.api import SeasonViewSet
-from .apps.spell.views.api import ForceViewSet, SpellViewSet, SpellFlagViewSet
+from .apps.season.views import SeasonViewSet
+from .apps.spell.views import ForceViewSet, SpellViewSet, SpellFlagViewSet
 
 
 class IsharMUDAPIView(routers.APIRootView):
@@ -38,6 +39,7 @@ api_router.register(r"challenges", ChallengeViewSet, "challenge")
 api_router.register(r"classes", PlayerClassViewSet, "class")
 api_router.register(r"forces", ForceViewSet, "force")
 api_router.register(r"news", NewsViewSet, "news")
+api_router.register(r"patches", PatchViewSet, "patch")
 api_router.register(r"players", PlayerViewSet, "player")
 api_router.register(r"quests", QuestViewSet, "quest")
 api_router.register(r"quest_rewards", QuestRewardViewSet, "quest_reward")

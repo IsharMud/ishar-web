@@ -1,10 +1,10 @@
 from rest_framework import viewsets, permissions
 
-from ..models import Player
-from ..models.classes import PlayerClass
-from ..models.race import Race
-from ..models.remort import RemortUpgrade
-from ..serializers import (
+from .models import Player
+from .models.classes import PlayerClass
+from .models.race import Race
+from .models.remort import RemortUpgrade
+from .serializers import (
     PlayerSerializer, PlayerClassSerializer, RaceSerializer,
     RemortUpgradeSerializer
 )
