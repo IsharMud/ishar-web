@@ -17,7 +17,7 @@ class QuestStepAdmin(admin.ModelAdmin):
     list_display = ("step_id", "step_type", "quest", "mystify")
     list_filter = (
         "step_type", "num_required", "mystify",
-        "quest__class_restrict", "quest",
+        "quest__class_restrict", ("quest", admin.RelatedOnlyFieldListFilter),
     )
     model = QuestStep
     readonly_fields = ("step_id",)

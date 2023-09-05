@@ -36,6 +36,9 @@ class PlayerAdmin(admin.ModelAdmin):
         "name", "account", "player_type", "level", "renown", "is_deleted",
         "is_god", "is_immortal", "is_survival"
     )
-    list_filter = ("game_type", "is_deleted", "true_level", "account")
+    list_filter = (
+        "game_type", "is_deleted", "true_level",
+        ("account", admin.RelatedOnlyFieldListFilter)
+    )
     readonly_fields = ("id", "birth", "logon", "logout")
     search_fields = ("name", "account__account_name")

@@ -17,7 +17,10 @@ class QuestRewardAdmin(admin.ModelAdmin):
     )
     filter_horizontal = filter_vertical = ()
     list_display = ("quest_reward_id", "reward_type", "quest", "class_restrict")
-    list_filter = ("reward_type", "class_restrict", "quest")
+    list_filter = (
+        "reward_type", "class_restrict",
+        ("quest", admin.RelatedOnlyFieldListFilter)
+    )
     model = QuestReward
     readonly_fields = ("quest_reward_id",)
     search_fields = ("reward_num", "reward_type", "quest", "class_restrict")
