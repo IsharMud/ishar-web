@@ -9,15 +9,17 @@ class QuestRewardAdmin(admin.ModelAdmin):
     Ishar quest reward administration.
     """
     fieldsets = (
+        (None, {"fields": ("quest_reward_id",)}),
         ("Type", {"fields": ("reward_type",)}),
-        ("Amount", {"fields": ("reward_num",)}),
+        ("Number", {"fields": ("reward_num",)}),
         ("Quest", {"fields": ("quest",)}),
-        ("Classes", {"fields": ("class_restrict",)})
+        ("Class", {"fields": ("class_restrict",)})
     )
-    filter_horizontal = filter_vertical = readonly_fields = ()
-    list_display = ("reward_num", "reward_type", "quest", "class_restrict")
+    filter_horizontal = filter_vertical = ()
+    list_display = ("quest_reward_id", "reward_type", "quest", "class_restrict")
     list_filter = ("reward_type", "class_restrict", "quest")
     model = QuestReward
+    readonly_fields = ("quest_reward_id",)
     search_fields = ("reward_num", "reward_type", "quest", "class_restrict")
 
 

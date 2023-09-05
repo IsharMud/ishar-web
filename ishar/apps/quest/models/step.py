@@ -56,10 +56,13 @@ class QuestStep(models.Model):
         verbose_name_plural = "Steps"
 
     def __repr__(self) -> str:
-        return self.__str__()
+        return (
+            f"{self.__class__.__name__} [{self.step_id}]: "
+            f"{repr(self.__str__())}"
+        )
 
     def __str__(self) -> str:
         return (
-            f"Quest Step: {self.step_id} ({self.get_step_type_display()}) @ "
-            f"{self.quest}"
+            f"({self.get_step_type_display()}) {self.target} "
+            f"x{self.num_required} @ {self.quest}"
         )

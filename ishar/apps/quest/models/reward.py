@@ -8,12 +8,13 @@ class QuestReward(models.Model):
     """
     Quest Reward.
     """
-    #
-    # TODO: Work out a fix here...
-    #   https://github.com/IsharMud/ishar-web/issues/12
-    reward_num = models.IntegerField(
+    quest_reward_id = models.AutoField(
         primary_key=True,
-        help_text="Reward number.",
+        help_text="Auto-generated, permanent quest reward ID number.",
+        verbose_name="Quest Reward ID"
+    )
+    reward_num = models.IntegerField(
+        help_text="Amount/value/target number of the reward.",
         verbose_name="Reward Number"
     )
     reward_type = models.IntegerField(
@@ -47,11 +48,17 @@ class QuestReward(models.Model):
         managed = False
         db_table = "quest_rewards"
         default_related_name = "reward"
-        ordering = ("quest", "reward_type", "class_restrict")
+        ordering = ("quest_reward_id",)
         verbose_name = "Reward"
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}: {repr(self.__str__())}"
+        return (
+            f"{self.__class__.__name__} [{self.quest_reward_id}]: "
+            f"{repr(self.__str__())}"
+        )
 
     def __str__(self) -> str:
-        return self.get_reward_type_display()
+        return (
+            f"({self.get_reward_type_display()}) {self.reward_num} "
+            f"@ {self.quest}"
+        )
