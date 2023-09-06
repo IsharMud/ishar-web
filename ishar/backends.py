@@ -3,7 +3,7 @@ isharmud.com authentication backend.
 """
 from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import ModelBackend
-from django.core.validators import validate_email
+from django.shortcuts import get_object_or_404
 
 
 class IsharUserAuthBackend(ModelBackend):
@@ -15,12 +15,9 @@ class IsharUserAuthBackend(ModelBackend):
 
     def authenticate(self, request, username=None, password=None, **kwargs):
         """
-        Authenticate against MD5Crypt hash from the database for the user.
+        Authenticate against MD5Crypt hash from the database for the username.
         """
-        if validate_email(username):
-            user = self.model.objects.get(email=username)
-        else:
-            user = self.model.objects.get(account_name=username)
+        user = get_object_or_404(self.model, account_name=username)
         if user and user.check_password(raw_password=password):
             return user
         return None
