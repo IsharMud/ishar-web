@@ -11,7 +11,7 @@ from .serializers import (
 )
 
 
-class QuestViewSet(viewsets.ModelViewSet):
+class QuestsViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows quests to be viewed or edited.
     """
@@ -22,7 +22,7 @@ class QuestViewSet(viewsets.ModelViewSet):
     serializer_class = QuestSerializer
 
 
-class QuestPrereqViewSet(viewsets.ModelViewSet):
+class QuestPrereqsViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows quest prerequisites to be viewed or edited.
     """
@@ -33,7 +33,7 @@ class QuestPrereqViewSet(viewsets.ModelViewSet):
     serializer_class = QuestPrereqSerializer
 
 
-class QuestRewardViewSet(viewsets.ModelViewSet):
+class QuestRewardsViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows quest rewards to be viewed or edited.
     """
@@ -44,7 +44,7 @@ class QuestRewardViewSet(viewsets.ModelViewSet):
     serializer_class = QuestRewardSerializer
 
 
-class QuestStepViewSet(viewsets.ModelViewSet):
+class QuestStepsViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows quest steps to be viewed or edited.
     """

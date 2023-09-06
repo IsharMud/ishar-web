@@ -2,7 +2,7 @@ from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.utils import timezone
 
-from ..account.models import Account
+from ..accounts.models import Account
 
 
 class Patch(models.Model):

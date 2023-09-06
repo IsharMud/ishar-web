@@ -3,11 +3,11 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.db.models import Count
 
-from .upgrade import AccountUpgradeAdmin
+from .upgrade import AccountUpgradesAdmin
 
 
 @admin.register(get_user_model())
-class AccountAdmin(BaseUserAdmin):
+class AccountsAdmin(BaseUserAdmin):
     """
     Ishar account administration.
     """

@@ -4,7 +4,7 @@ from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 
-from ...account.models import Account
+from ...accounts.models import Account
 from ....util.ip import dec2ip
 
 

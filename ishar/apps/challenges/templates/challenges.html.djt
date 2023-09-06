@@ -1,0 +1,15 @@
+{% extends "layout.html.djt" %}
+{% block meta_title %}Challenges{% endblock meta_title %}
+{% block meta_description %}Challenges, winners, and rewards currently available{% endblock meta_description %}
+{% block meta_url %}{% url "challenges" %}{% endblock meta_url %}
+{% block title %}Challenges{% endblock title %}
+{% block header %}<a href="{% url "challenges" %}">{{ challenges_title }}</a>{% endblock header %}
+{% block scripts %}
+    {% if challenges %}
+        {% challenges | json_script:"challenge-data" %}
+        <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
+    {% endif %}
+{% endblock scripts %}
+{% block content %}
+                <div id="challenges"></div>
+{% endblock content %}

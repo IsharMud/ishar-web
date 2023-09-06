@@ -4,7 +4,7 @@ from .models import Challenge
 
 
 @admin.register(Challenge)
-class ChallengeAdmin(admin.ModelAdmin):
+class ChallengesAdmin(admin.ModelAdmin):
     """
     Ishar challenge administration.
     """

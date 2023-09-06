@@ -1,15 +1,15 @@
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
 
-from .prereq import QuestPrereqAdminInline
-from .reward import QuestRewardAdminInline
-from .step import QuestStepAdminInline
+from .prereq import QuestPrereqsAdminInline
+from .reward import QuestRewardsAdminInline
+from .step import QuestStepsAdminInline
 
 from ..models import Quest
 
 
 @admin.register(Quest)
-class QuestAdmin(ModelAdmin):
+class QuestsAdmin(ModelAdmin):
     """
     Ishar quest administration.
     """
@@ -28,7 +28,7 @@ class QuestAdmin(ModelAdmin):
     )
     filter_horizontal = filter_vertical = ()
     inlines = (
-        QuestPrereqAdminInline, QuestStepAdminInline, QuestRewardAdminInline
+        QuestPrereqsAdminInline, QuestStepsAdminInline, QuestRewardsAdminInline
     )
     list_display = ("display_name", "repeatable", "class_restrict", "min_level")
     list_filter = ("repeatable", "class_restrict", "min_level")

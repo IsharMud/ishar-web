@@ -1,22 +1,22 @@
+from django.contrib.auth import get_user_model
 from rest_framework import viewsets, permissions
 
-from .models import Account
 from .models.upgrade import AccountUpgrade
 from .serializers import AccountSerializer, AccountUpgradeSerializer
 
 
-class AccountViewSet(viewsets.ReadOnlyModelViewSet):
+class AccountsViewSet(viewsets.ReadOnlyModelViewSet):
     """
     Read-only API endpoint that allows accounts to be viewed.
     """
-    lookup_field = "account_name"
-    model = Account
+    model = get_user_model()
+    lookup_field = model.USERNAME_FIELD
     permission_classes = [permissions.IsAdminUser]
     queryset = model.objects.all()
     serializer_class = AccountSerializer
 
 
-class AccountUpgradeViewSet(viewsets.ModelViewSet):
+class AccountUpgradesViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows account upgrades to be viewed or edited.
     """

@@ -13,7 +13,7 @@ class Challenge(models.Model):
     )
     mob_vnum = models.IntegerField(
         help_text="VNUM of the mobile target of the challenge.",
-        verbose_name="Mobile VUM"
+        verbose_name="Mobile VNUM"
     )
     orig_level = models.IntegerField(
         help_text="Original level of the challenge.",
@@ -65,6 +65,7 @@ class Challenge(models.Model):
         default_related_name = "challenge"
         ordering = ("-is_active", "-winner_desc", "challenge_desc")
         verbose_name = "Challenge"
+        verbose_name_plural = "Challenges"
 
     def __repr__(self):
         return (

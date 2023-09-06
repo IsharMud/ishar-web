@@ -4,7 +4,7 @@ from ..models.reward import QuestReward
 
 
 @admin.register(QuestReward)
-class QuestRewardAdmin(admin.ModelAdmin):
+class QuestRewardsAdmin(admin.ModelAdmin):
     """
     Ishar quest reward administration.
     """
@@ -26,7 +26,7 @@ class QuestRewardAdmin(admin.ModelAdmin):
     search_fields = ("reward_num", "reward_type", "quest", "class_restrict")
 
 
-class QuestRewardAdminInline(admin.TabularInline):
+class QuestRewardsAdminInline(admin.TabularInline):
     """
     Ishar quest reward administration inline.
     """

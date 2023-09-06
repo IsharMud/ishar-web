@@ -4,7 +4,7 @@ from ..models.upgrade import AccountUpgrade
 
 
 @admin.register(AccountUpgrade)
-class AccountUpgradeAdmin(admin.ModelAdmin):
+class AccountUpgradesAdmin(admin.ModelAdmin):
     """
     Ishar account upgrade administration.
     """

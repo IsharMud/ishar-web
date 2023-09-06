@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils import timezone
 
-from ..account.models import Account
+from ..accounts.models import Account
 
 
 class News(models.Model):

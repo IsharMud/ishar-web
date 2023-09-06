@@ -4,7 +4,7 @@ from ..models.prereq import QuestPrereq
 
 
 @admin.register(QuestPrereq)
-class QuestPrereqAdmin(admin.ModelAdmin):
+class QuestPrereqsAdmin(admin.ModelAdmin):
     """
     Ishar quest prerequisite administration.
     """
@@ -17,7 +17,7 @@ class QuestPrereqAdmin(admin.ModelAdmin):
     model = QuestPrereq
 
 
-class QuestPrereqAdminInline(admin.TabularInline):
+class QuestPrereqsAdminInline(admin.TabularInline):
     """
     Ishar quest prerequisite administration inline.
     """

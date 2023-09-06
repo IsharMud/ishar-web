@@ -4,7 +4,7 @@ from ..models.step import QuestStep
 
 
 @admin.register(QuestStep)
-class QuestStepAdmin(admin.ModelAdmin):
+class QuestStepsAdmin(admin.ModelAdmin):
     """
     Ishar quest step administration.
     """
@@ -27,7 +27,7 @@ class QuestStepAdmin(admin.ModelAdmin):
     )
 
 
-class QuestStepAdminInline(admin.TabularInline):
+class QuestStepsAdminInline(admin.TabularInline):
     """
     Ishar quest step administration inline.
     """
