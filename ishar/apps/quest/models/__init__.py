@@ -1,6 +1,5 @@
 from django.db import models
 from django.conf import settings
-from django.contrib import admin
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 from ishar.util.player import get_class_options
@@ -100,4 +99,4 @@ class Quest(models.Model):
         return f'Quest: "{self.__str__()}" ({self.quest_id})'
 
     def __str__(self) -> str:
-        return self.display_name or self.name or self.quest_id
+        return self.display_name or self.name

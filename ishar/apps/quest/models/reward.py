@@ -48,7 +48,7 @@ class QuestReward(models.Model):
         managed = False
         db_table = "quest_rewards"
         default_related_name = "reward"
-        ordering = ("quest_reward_id",)
+        ordering = ("quest", "quest_reward_id")
         verbose_name = "Reward"
 
     def __repr__(self) -> str:
