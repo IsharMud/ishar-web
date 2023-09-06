@@ -64,7 +64,7 @@ IMMORTAL_LEVELS = {
 }
 
 # Authentication using MySQL database user accounts
-AUTH_USER_MODEL = 'isharweb.Account'
+AUTH_USER_MODEL = 'accounts.Account'
 AUTHENTICATION_BACKENDS = (
     ('django.contrib.auth.backends.ModelBackend'),
 )
@@ -101,7 +101,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
     "ishar",
-    "ishar.apps.account",
+    "ishar.apps.accounts",
     "ishar.apps.challenges",
     "ishar.apps.help",
     "ishar.apps.leaders",
