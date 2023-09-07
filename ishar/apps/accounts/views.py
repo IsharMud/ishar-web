@@ -12,7 +12,7 @@ class AccountsViewSet(viewsets.ReadOnlyModelViewSet):
     Read-only API endpoint that allows accounts to be viewed.
     """
     model = get_user_model()
-    lookup_field = model.USERNAME_FIELD
+    lookup_field = "account_id"
     permission_classes = [permissions.IsAdminUser]
     queryset = model.objects.all()
     serializer_class = AccountSerializer

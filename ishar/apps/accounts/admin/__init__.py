@@ -34,7 +34,7 @@ class AccountsAdmin(BaseUserAdmin):
         (
             None, {
                 "fields": (
-                    "account_id", model.USERNAME_FIELD
+                    "account_id", "account_name", model.EMAIL_FIELD,
                 )
             }
         ),
@@ -64,13 +64,13 @@ class AccountsAdmin(BaseUserAdmin):
         )
     )
     list_display = (
-        model.USERNAME_FIELD, "player_count", "is_god", "is_immortal",
-        "current_essence"
+        "account_name", model.EMAIL_FIELD, "player_count", "current_essence",
+        "is_god", "is_eternal", "is_immortal"
     )
     list_filter = ()
     ordering = ("account_id",)
     search_fields = (
-        model.USERNAME_FIELD,
+        "account_name", model.EMAIL_FIELD,
         "create_isp", "create_ident", "last_ident", "last_isp",
         "_create_haddr", "_login_fail_haddr", "_last_haddr"
     )
