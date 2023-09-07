@@ -1,6 +1,8 @@
 """
 isharmud.com context processors for Django templates.
 """
+from django.utils import timezone
+
 from ishar.apps.events.models import GlobalEvent
 from ishar.apps.season.models import Season
 
@@ -16,4 +18,10 @@ def global_event_count(request):
     """
     Number of current global events within the MUD.
     """
-    return {"global_event_count": GlobalEvent.objects.filter(is_active=1).first()}
+    now = timezone.now()
+    return {
+        "global_event_count": GlobalEvent.objects.filter(
+            start_time__lt=now,
+            end_time__gt=now
+        ).count()
+    }

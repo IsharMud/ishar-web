@@ -6,7 +6,7 @@
 {% block header %}<a href="{% url "challenges" %}">{{ challenges_title }}</a>{% endblock header %}
 {% block scripts %}
     {% if challenges %}
-        {% challenges | json_script:"challenge-data" %}
+        {{ challenges | json_script:"challenge-data" }}
         <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
     {% endif %}
 {% endblock scripts %}

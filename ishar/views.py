@@ -16,10 +16,6 @@ class ConnectRedirectView(RedirectView):
     url = settings.CONNECT_URL
 
 
-class EventsView(TemplateView):
-    template_name = "events.html.djt"
-
-
 class FAQView(TemplateView):
     template_name = "faq.html.djt"
 
