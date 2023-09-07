@@ -6,14 +6,23 @@
 {% block header %}Welcome{% endblock header %}
 {% block content %}
                 <p>
-                    Ishar is an online text-adventure RPG
-                    (commonly called a multi-user dungeon, or MUD) set in a
-                    large, unique world of fantasy and magic.
+                    Dive into the immersive realms of <strong>Ishar</strong>, a high medieval fantasy MUD offering not just a game, but a spiritual journey of continuous growth and rejuvenation.
+                    Experience the profound influence of the deity <strong>Varenya</strong>, who guides the ever-evolving seasons and remorting system, crafting a fresh canvas of unparalleled opportunities for players to carve their destiny anew with each cycle.
+                    </p>
+                <p>
+                    Here in Ishar, adventures abound with a vast range of experiences waiting for you: from delving into dark catacombs, exploring angel and daemon-infested snowy forests, to conquering new territories amidst treacherous swamps.
+                    Players can anticipate a story-rich backdrop where each class offers a distinctive play-style, including the <strong>Warrior, Rogue, Magician, Necromancer, Cleric, and the promising new Shaman class in development</strong>.
                 </p>
                 <p>
-                    Players do battle with fearsome foes (and sometimes each other)
-                    to win great wealth and wrest rare prizes from
-                    the treasure hoards or bloody corpses of their enemies.
+                    Join a vibrant and supportive community that thrives both in-game and through an active Discord channel.
+                    Engage in hack-n-slash adventures peppered with strategic boss battles, where quality writing and immersive zone development are at the forefront, offering a rich sensory experience.
+                </p>
+                <p>
+                    With the seasonal system acting as a catalyst, Ishar is in a state of continuous evolution, introducing new mechanics and content regularly, ensuring a stimulating and fluid gameplay experience.
+                    Witness a world that reshapes itself, offering new challenges, treasures, and opportunities to forge your legend.
+                </p>
+                <p>
+                    Embrace Ishar, where every life is a fresh start on the path to greatness, a chance to intertwine your story with the tapestry of its rich lore, and truly make your mark in a world guided by divine intervention and boundless opportunities.
                 </p>
     {% if news %}
                 <h3 class="news-subject">
