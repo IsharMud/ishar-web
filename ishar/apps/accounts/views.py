@@ -1,4 +1,6 @@
 from django.contrib.auth import get_user_model
+from django.contrib.auth.views import LoginView
+
 from rest_framework import viewsets, permissions
 
 from .models.upgrade import AccountUpgrade
@@ -24,3 +26,8 @@ class AccountUpgradesViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAdminUser]
     queryset = model.objects.all()
     serializer_class = AccountUpgradeSerializer
+
+
+class IsharLoginView(LoginView):
+    template_name = "login.html.djt"
+

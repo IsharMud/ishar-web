@@ -34,42 +34,42 @@
 {% block navigation %}
             <ul>
                 <li title="Connect to Ishar MUD">
-                    <a href="{%  url 'connect' %}" target="_blank">Connect</a>
+                    <a href="{% url "connect" %}" target="_blank">Connect</a>
                 </li>
                 <li title="Frequently Asked Questions">
-                   <a href="{% url 'faqs' %}"{% if page == 'faqs' %} id="active-nav"{% endif %}>FAQs</a>
+                   <a href="{% url "faqs" %}">FAQs</a>
                 </li>
                 <li title="Help">
-                    <a href="{% url 'help' %}"{% if page == 'help' %} id="active-nav"{% endif %}>Help</a>
+                    <a href="{% url "help" %}">Help</a>
                 </li>
                 <li title="Patches">
-                    <a href="{% url 'patches' %}"{% if page == 'patches' %} id="active-nav"{% endif %}>Patches</a>
+                    <a href="{% url "patches" %}">Patches</a>
                 </li>
                 <li title="World">
-                    <a href="{% url 'world' %}"{% if page == 'world' %} id="active-nav"{% endif %}>World</a>
+                    <a href="{% url "world" %}">World</a>
                 </li>
                 <li title="Portal">
-                    <a href="{%  url 'portal' %}"{% if page == 'portal' %} id="active-nav"{% endif %}>Portal</a>
+                    <a href="{% url "portal" %}">Portal</a>
                 </li>
             </ul>
 {% if user and user.is_authenticated %}
             <ul>
     {% if user.is_eternal %}
                 <li title="Admin">
-                    <a href="{%  url 'admin:login' %}"{% if page == 'admin' %} id="active-nav"{% endif%}>Admin</a>
+                    <a href="{% url "admin:index" %}">Admin</a>
                 </li>
     {% endif %}
                 <li title="Account">
-                    <a href="{% url "portal" %}"{% if page == 'account' %} id="active-nav"{% endif%}>Account</a>
+                    <a href="{% url "portal" %}">Account</a>
                 </li>
                 <li title="Challenges">
-                    <a href="{% url "portal" %}"{% if page == 'challenges' %} id="active-nav"{% endif%}>Challenges</a>
+                    <a href="{% url "challenges" %}">Challenges</a>
                 </li>
                 <li title="Events">
-                    <a href="{% url "portal" %}"{% if page == 'global_events' %} id="active-nav"{% endif %}>Events {% if global_event_count and global_event_count > 0 %} ({{ global_event_count }}){% endif %}</a>
+                    <a href="{% url "events" %}">Events {% if global_event_count and global_event_count > 0 %} ({{ global_event_count }}){% endif %}</a>
                 </li>
                 <li title="Leaders">
-                    <a href="{% url "leaders" %}"{% if page == 'leaders' %} id="active-nav"{% endif %}>Leaders</a>
+                    <a href="{% url "leaders" %}">Leaders</a>
                 </li>
                 <li title="Log out">
                     <a href="{% url "admin:logout" %}">Log out ({{ user.get_username }})</a>

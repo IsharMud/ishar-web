@@ -94,11 +94,9 @@ class Account(AbstractBaseUser, PermissionsMixin):
         verbose_name="Earned Essence"
     )
 
+    EMAIL_FIELD = USERNAME_FIELD = "email"
     last_login = None
     objects = AccountManager()
-
-    EMAIL_FIELD = "email"
-    USERNAME_FIELD = "account_name"
 
     class Meta:
         managed = False
@@ -111,11 +109,11 @@ class Account(AbstractBaseUser, PermissionsMixin):
     def __repr__(self) -> str:
         return (
             __class__.__name__ +
-            f" : {repr(self.__str__())} ({self.account_id})"
+            f" : {repr(self.__str__())} [{self.account_id}]"
         )
 
     def __str__(self) -> str:
-        return self.account_name
+        return f"{self.account_name} ({self.email})"
 
     @admin.display(description="Create IP", ordering="create_haddr")
     def _create_haddr(self):

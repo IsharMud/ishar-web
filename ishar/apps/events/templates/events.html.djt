@@ -1,46 +1,46 @@
 {% extends "layout.html.djt" %}
 {% block meta_title %}Global Events{% endblock meta_title %}
 {% block meta_description %}Global events currently active{% endblock meta_description %}
-{% block meta_url %}{{ url_for('welcome.global_events', _external=True) }}{% endblock meta_url %}
+{% block meta_url %}{% url "events" %}{% endblock meta_url %}
 {% block title %}Global Events{% endblock title %}
 {% block header %}Global Events{% endblock header %}
 {% block content %}
     {% if global_events %}
                 <ul>
         {% for global_event in global_events %}
-                    <li title="{{ global_event.display_string }}">
+                    <li title="{{ global_event.event_desc }}">
                         <h3>
-                            {{ global_event.display_string }}
+                            {{ global_event.event_desc }}
                         </h3>
                     </li>
                     <li class="nested-list">
                         <ul>
             {% if global_event.xp_bonus and global_event.xp_bonus != '' and global_event.xp_bonus != 0 %}
-                            <li title="XP Bonus: {{ global_event.xp_bonus / 1 }}">
+                            <li title="XP Bonus: {% widthratio global_event.xp_bonus 1 1 %}%">
                                 <strong>XP Bonus</strong>:
                                 <ul>
-                                    <li>{{ global_event.xp_bonus / 1 }}%</li>
+                                    <li>{% widthratio global_event.xp_bonus 1 1 %}%</li>
                                 </ul>
                             </li>
             {% endif %}
             {% if global_event.shop_bonus and global_event.shop_bonus != '' and global_event.shop_bonus != 0 %}
-                            <li title="Shop Bonus: {{ 100 / global_event.shop_bonus }}">
+                            <li title="Shop Bonus: {% widthratio 100 global_event.shop_bonus 1 %}%">
                                 <strong>Shop Bonus</strong>:
                                 <ul>
-                                    <li>{{ 100 / global_event.shop_bonus }}% off</li>
+                                    <li>{% widthratio 100 global_event.shop_bonus 1 %}% off</li>
                                 </ul>
                             </li>
-            {% endif %}
-                            <li title="Started: {{ global_event.start_time }} ({{ global_event.start }} ago)">
+             {% endif %}
+                            <li title="Started: {{ global_event.start_time }} ({{ global_event.start_time | timesince }} ago)">
                                 <strong>Started</strong>:
                                 <ul>
-                                    <li>{{ global_event.start }} ago</li>
+                                    <li>{{ global_event.start_time | timesince }} ago</li>
                                 </ul>
                             </li>
-                            <li title="Ends: {{ global_event.end_time }} (in {{ global_event.end }})">
+                            <li title="Ends: {{ global_event.end_time }} (in {{ global_event.end_time | timeuntil }})">
                                 <strong>Ends</strong>:
                                 <ul>
-                                    <li>in {{ global_event.end }}</li>
+                                    <li>in {{ global_event.end_time | timeuntil }}</li>
                                 </ul>
                             </li>
             {% if global_event.is_luck %}
@@ -65,7 +65,7 @@
                 </p>
                 <p>
                     Please check back later, or maybe try out
-                    <a href="{% url "challenges.incomplete" %}">some challenges</a>!
+                    <a href="{% url "challenges" %}">some challenges</a>!
                 </p>
     {% endif %}
 {% endblock content %}

@@ -5,10 +5,10 @@ from django.urls import include, path
 
 from .api import api_router
 from .views import (
-    ClientsView, FAQView, HistoryView, StartView, SupportView,
-    WelcomeView
+    ClientsView, FAQView, HistoryView, StartView, SupportView, WelcomeView
 )
 # from .views.events import EventsView
+from .apps.accounts.views import IsharLoginView
 from .apps.help.views import WorldView
 
 
@@ -18,9 +18,13 @@ urlpatterns = [
     # path("account/", include("ishar.apps.account.urls"), name="account"),
     path("api/", include(api_router.urls), name="api"),
 
+    path("challenges/", include("ishar.apps.challenges.urls"), name="challenges"),
+
     path("clients/", ClientsView.as_view(), name="clients"),
     path("mudclients/", ClientsView.as_view(), name="mudclients"),
     path("mud_clients/", ClientsView.as_view(), name="mud_clients"),
+
+    path("events/", include("ishar.apps.events.urls"), name="events"),
 
     path("background/", HistoryView.as_view(), name="background"),
     path("history/", HistoryView.as_view(), name="history"),
@@ -38,6 +42,8 @@ urlpatterns = [
     path("help/", include("ishar.apps.help.urls"), name="help"),
 
     path("leaders/", include("ishar.apps.leaders.urls"), name="leaders"),
+
+    path("login/", IsharLoginView.as_view(), name="login"),
 
     path("patches/", include("ishar.apps.patches.urls"), name="patches"),
     path("player/", include("ishar.apps.player.urls"), name="player"),

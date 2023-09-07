@@ -103,6 +103,7 @@ INSTALLED_APPS = [
     "ishar",
     "ishar.apps.accounts",
     "ishar.apps.challenges",
+    "ishar.apps.events",
     "ishar.apps.help",
     "ishar.apps.leaders",
     "ishar.apps.news",
