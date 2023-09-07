@@ -15,7 +15,7 @@ class QuestsAdmin(ModelAdmin):
     """
 
     fieldsets = (
-        (None, {"fields": ("quest_id", name", "display_name", "repeatable")}),
+        (None, {"fields": ("quest_id", "name", "display_name", "repeatable")}),
         ("Deprecated", {
             "classes": ("collapse",),
             "fields": ("deprecated_max_level", "deprecated_prerequisite")
