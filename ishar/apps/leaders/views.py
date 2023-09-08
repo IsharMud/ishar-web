@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.views.generic.list import ListView
 
-from ...apps.player.models import Player
+from ...apps.players.models import Player
 
 
 MINIMUM_IMMORTAL = min(settings.IMMORTAL_LEVELS)

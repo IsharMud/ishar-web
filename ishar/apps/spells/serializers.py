@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 
-from .models import Force, Spell, SpellFlag
+from .models import Force, Spell, SpellFlag, SpellSpellFlag
 
 
 class ForceSerializer(ModelSerializer):
@@ -18,4 +18,10 @@ class SpellSerializer(ModelSerializer):
 class SpellFlagSerializer(ModelSerializer):
     class Meta:
         model = SpellFlag
+        fields = "__all__"
+
+
+class SpellSpellFlagSerializer(ModelSerializer):
+    class Meta:
+        model = SpellSpellFlag
         fields = "__all__"

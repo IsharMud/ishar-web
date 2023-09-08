@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from django.contrib.auth.views import LoginView
+from django.contrib.auth.views import LoginView, LogoutView, TemplateView
 
 from rest_framework import viewsets, permissions
 
@@ -30,4 +30,12 @@ class AccountUpgradesViewSet(viewsets.ModelViewSet):
 
 class IsharLoginView(LoginView):
     template_name = "login.html.djt"
+
+
+class IsharLogoutView(LogoutView):
+    template_name = "logout.html.djt"
+
+
+class PortalView(LoginView):
+    template_name = "portal.html.djt"
 

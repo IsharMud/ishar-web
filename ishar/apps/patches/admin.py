@@ -29,3 +29,15 @@ class PatchAdmin(admin.ModelAdmin):
         if not change:
             obj.account = request.user
         super().save_model(request, obj, form, change)
+
+    def has_add_permission(self, request, obj=None):
+        return request.user.is_god()
+
+    def has_change_permission(self, request, obj=None):
+        return request.user.is_god()
+
+    def has_view_permission(self, request, obj=None):
+        return request.user.is_eternal()
+
+    def has_delete_permission(self, request, obj=None):
+        return request.user.is_god()

@@ -72,7 +72,7 @@
                     <a href="{% url "leaders" %}">Leaders</a>
                 </li>
                 <li title="Log out">
-                    <a href="{% url "admin:logout" %}">Log out ({{ user.get_username }})</a>
+                    <a href="{% url "logout" %}">Log out ({{ user.get_username }})</a>
                 </li>
             </ul>
 {% endif %}

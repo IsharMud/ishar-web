@@ -1,0 +1,40 @@
+{% extends "layout.html.djt" %}
+{% block meta_title %}Portal{% endblock meta_title %}
+{% block meta_description %}Portal for players to see information about their account and characters.{% endblock meta_description %}
+{% block meta_url %}{% url "portal" %}{% endblock meta_url %}
+{% block title %}Portal{% endblock title %}
+{% block header %}{% if user.is_authenticated %}Welcome {{ user }}!{% else %}Log In{% endif%}{% endblock header %}
+{% block scripts %}
+    {% if players_json %}
+        {{ user.players.all | json_script:"players" }}
+    {% endif %}
+    <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
+{% endblock scripts %}
+{% block content %}
+    {% if user.is_authenticated %}
+        {% if user.players and user.players.count > 0 %}
+                <h3 title="You have {{ user.players.count }} character{{ user.players.count | pluralize }}.">
+                    You have {{ user.players.count }} character{{ user.players.count | pluralize }}:
+                </h3>
+                <ol>
+            {% for player in user.players.all %}
+                    <li>{{ player }}</li>
+            {% endfor %}
+                </ol>
+        {% else %}
+            You have not made any characters yet.
+        {% endif %}
+        {% if user.current_essence and user.current_essence > 0 %}
+                <h4>
+                    You have {{ user.current_essence }} essence</a>.
+                </h4>
+        {% endif %}
+    {% elif form %}
+        <h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ form }}
+            <button type="submit">Log In</button>
+        </form>
+    {% endif %}
+{% endblock content %}

@@ -68,12 +68,12 @@ class Spell(models.Model):
     """
     enum_symbol = models.CharField(
         max_length=255,
-        help_text="Internal ENUM symbol of the skill.",
+        help_text="Internal ENUM symbol of the spell.",
         verbose_name="ENUM Symbol"
     )
     func_name = models.CharField(
         max_length=255, blank=True, null=True,
-        help_text="Internal function name for the skill.",
+        help_text="Internal function name for the spell.",
         verbose_name="Function Name"
     )
     skill_name = models.TextField(
@@ -83,77 +83,77 @@ class Spell(models.Model):
     )
     min_posn = models.IntegerField(
         blank=True, null=True,
-        help_text="Minimum posn.",
+        help_text="Minimum posn of the spell.",
         verbose_name="Minimum posn"
     )
     min_use = models.IntegerField(
         blank=True, null=True,
-        help_text="Minimum use.",
+        help_text="Minimum use of the spell.",
         verbose_name="Minimum use"
     )
     spell_breakpoint = models.IntegerField(
         blank=True, null=True,
-        help_text="Breakpoint of the spell",
+        help_text="Breakpoint of the spell.",
         verbose_name="Spell Breakpoint"
     )
     held_cost = models.IntegerField(
         blank=True, null=True,
-        help_text="Held cost of the skill",
+        help_text="Held cost of the spell.",
         verbose_name="Held Cost"
     )
     wearoff_msg = models.TextField(
         blank=True, null=True,
-        help_text="Wear-off message shown to the user when the skill fades.",
+        help_text="Wear-off message shown to the user when the spell fades.",
         verbose_name="Wear-Off Message"
     )
     chant_text = models.TextField(
         blank=True, null=True,
-        help_text="Text chanted to implement the skill.",
+        help_text="Text chanted to implement the spell.",
         verbose_name="Chant Text"
     )
     difficulty = models.IntegerField(
         blank=True, null=True,
-        help_text="Difficulty of the skill.",
+        help_text="Difficulty of the spell.",
         verbose_name="Difficulty"
     )
     rate = models.IntegerField(
         blank=True, null=True,
-        help_text="Rate of the skill.",
+        help_text="Rate of the spell.",
         verbose_name="Rate"
     )
     notice_chance = models.IntegerField(
         blank=True, null=True,
-        help_text="Scale.",
-        verbose_name="Scale"
+        help_text="Notice chance of the spell.",
+        verbose_name="Notice Chance"
     )
     appearance = models.TextField(
         blank=True, null=True,
-        help_text="Appearance.",
+        help_text="Appearance of the spell.",
         verbose_name="Appearance"
     )
     component_type = models.IntegerField(
         blank=True, null=True,
-        help_text="Component type.",
+        help_text="Component type of the spell.",
         verbose_name="Component Type"
     )
     component_value = models.IntegerField(
         blank=True, null=True,
-        help_text="Component value.",
+        help_text="Component value of the spell.",
         verbose_name="Component Value"
     )
     scale = models.IntegerField(
         blank=True, null=True,
-        help_text="Scale.",
+        help_text="Scale of the spell.",
         verbose_name="Scale"
     )
     mod_stat_1 = models.IntegerField(
         blank=True, null=True,
-        help_text="Mod stat 1.",
+        help_text="Mod stat 1 of the spell.",
         verbose_name="Mod Stat 1"
     )
     mod_stat_2 = models.IntegerField(
         blank=True, null=True,
-        help_text="Mod stat 2.",
+        help_text="Mod stat 2 of the spell.",
         verbose_name="Mod Stat 2"
     )
     is_spell = models.BooleanField(
@@ -170,7 +170,7 @@ class Spell(models.Model):
     )
     decide_func = models.TextField(
         blank=True, null=True,
-        help_text="Internal function for decision-making.",
+        help_text="Internal function for decision-making for the spell.",
         verbose_name="Decide Function"
     )
 
@@ -181,6 +181,7 @@ class Spell(models.Model):
         )
         managed = False
         verbose_name = "Spell"
+        verbose_name_plural = "Spells"
 
     def __repr__(self):
         return f"{self.__class__.__name__}: {repr(self.__str__())}"
@@ -190,10 +191,17 @@ class Spell(models.Model):
 
 
 class SpellForce(models.Model):
-    spell = models.OneToOneField(
+    id = models.AutoField(
+        blank=False,
+        editable=False,
+        null=False,
+        help_text="Auto-generated ID number of the spell-force relation.",
+        primary_key=True,
+        verbose_name="ID"
+    )
+    spell = models.ForeignKey(
         to=Spell,
         on_delete=models.DO_NOTHING,
-        primary_key=True,
         help_text="Spell related to a force.",
         verbose_name="Spell"
     )
@@ -212,7 +220,7 @@ class SpellForce(models.Model):
         verbose_name_plural = "Spell Forces"
 
     def __repr__(self):
-        return f"Spell Force: {self.spell} @ {self.force}"
+        return f"{self.__class__.__name__}: {repr(self.spell)} @ {self.force}"
 
     def __str__(self):
         return self.__repr__()
@@ -222,27 +230,32 @@ class SpellSpellFlag(models.Model):
     """
     Spell association to a spell flag.
     """
-    spell = models.OneToOneField(
+    id = models.AutoField(
+        blank=False,
+        editable=False,
+        null=False,
+        help_text="Auto-generated ID number of the spell-flag relation.",
+        primary_key=True,
+        verbose_name="ID"
+    )
+    spell = models.ForeignKey(
         to=Spell,
         on_delete=models.DO_NOTHING,
-        primary_key=True,
+        db_column="spell_id",
         help_text="Spell affected by the flag.",
         verbose_name="Spell"
     )
     flag = models.ForeignKey(
         to=SpellFlag,
         on_delete=models.DO_NOTHING,
+        db_column="flag_id",
         help_text="Flag affecting the spell.",
         verbose_name="Flag"
     )
 
-    # The composite primary key (spell_id, flag_id) found,
-    #   that is not supported. The first column is selected.
-
     class Meta:
         managed = False
         db_table = "spells_spell_flags"
-        ordering = ("spell", "flag")
         unique_together = (("spell", "flag"),)
         verbose_name = "Spell's Flag"
         verbose_name_plural = "Spell's Flags"

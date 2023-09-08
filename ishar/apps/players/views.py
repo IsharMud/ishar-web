@@ -1,8 +1,7 @@
 from django.views.generic.base import TemplateView
 from rest_framework import viewsets, permissions
 
-from .models import Player
-from .models.classes import PlayerClass
+from .models import Player, PlayerClass
 from .models.race import Race
 from .models.remort import RemortUpgrade
 from .serializers import (

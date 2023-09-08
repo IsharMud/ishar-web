@@ -37,5 +37,15 @@ class SupportView(TemplateView):
 
 
 class WelcomeView(TemplateView):
+    """
+    Main page.
+    """
     template_name = "welcome.html.djt"
-    extra_context = {"news": News.objects.first()}
+
+    def get_context_data(self, **kwargs):
+        """
+        Add news to the main page.
+        """
+        context = super().get_context_data(**kwargs)
+        context["news"] = News.objects.first()
+        return context

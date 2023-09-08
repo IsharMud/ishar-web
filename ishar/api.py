@@ -9,12 +9,13 @@ from .apps.challenges.views import ChallengesViewSet
 from .apps.events.views import GlobalEventsViewSet
 from .apps.news.views import NewsViewSet
 from .apps.patches.views import PatchViewSet
-from .apps.player.views import PlayerViewSet, PlayerClassViewSet, RaceViewSet, \
+from .apps.players.views import PlayerViewSet, PlayerClassViewSet, RaceViewSet, \
     RemortUpgradeViewSet
 from .apps.quests.views import QuestsViewSet, QuestPrereqsViewSet, \
     QuestRewardsViewSet, QuestStepsViewSet
-from .apps.season.views import SeasonViewSet
-from .apps.spell.views import ForceViewSet, SpellViewSet, SpellFlagViewSet
+from .apps.seasons.views import SeasonViewSet
+from .apps.spells.views import ForcesViewSet, SpellsViewSet, \
+    SpellFlagsViewSet, SpellsFlagsViewSet
 
 
 class IsharMUDAPIView(routers.APIRootView):
@@ -39,7 +40,7 @@ api_router.register(r"account_upgrades", AccountUpgradesViewSet, "account_upgrad
 api_router.register(r"challenges", ChallengesViewSet, "challenge")
 api_router.register(r"classes", PlayerClassViewSet, "class")
 api_router.register(r"events", GlobalEventsViewSet, "event")
-api_router.register(r"forces", ForceViewSet, "force")
+api_router.register(r"forces", ForcesViewSet, "force")
 api_router.register(r"news", NewsViewSet, "news")
 api_router.register(r"patches", PatchViewSet, "patch")
 api_router.register(r"players", PlayerViewSet, "player")
@@ -50,5 +51,6 @@ api_router.register(r"quest_steps", QuestStepsViewSet, "quest_step")
 api_router.register(r"races", RaceViewSet, "race")
 api_router.register("remort_upgrades", RemortUpgradeViewSet, "remort_upgrade")
 api_router.register(r"seasons", SeasonViewSet, "season")
-api_router.register(r"spells", SpellViewSet, "spell")
-api_router.register(r"spell_flags", SpellFlagViewSet, "spell_flag")
+api_router.register(r"spells", SpellsViewSet, "spell")
+api_router.register(r"spell_flags", SpellFlagsViewSet, "spell_flag")
+api_router.register(r"spells_flags", SpellsFlagsViewSet, "spells_flag")

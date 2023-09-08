@@ -1,4 +1,4 @@
-from ishar.apps.player.models.classes import PlayerClass
+from ishar.apps.players.models import PlayerClass
 
 
 def get_classes(playable=True):

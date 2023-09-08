@@ -1,23 +1,40 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.admin import UserAdmin
 from django.db.models import Count
 
 from .upgrade import AccountUpgradesAdmin
+from ...players.models import Player
 
 
-@admin.register(get_user_model())
-class AccountsAdmin(BaseUserAdmin):
-    """
-    Ishar account administration.
-    """
+class AccountPlayersInlineAdmin(admin.TabularInline):
+    model = Player
+    fields = (
+        "name", "game_type", "is_deleted", "true_level", "remorts",
+        "renown", "total_renown"
+    )
 
-    def has_add_permission(self, request, obj=None):
+    def has_add_permission(self, request, obj):
         """
-        Disabling adding accounts in /admin/.
+        Disabling adding players in /admin/accounts/ inline.
         """
         return False
 
+    def has_view_or_change_permission(self, request, obj=None):
+        return request.user.is_god
+
+    def has_delete_permission(self, request, obj=None):
+        """
+        Disabling deleting players in /admin/accounts/ inline.
+        """
+        return False
+
+
+@admin.register(get_user_model())
+class AccountsAdmin(UserAdmin):
+    """
+    Ishar account administration.
+    """
     model = get_user_model()
 
     def get_queryset(self, request):
@@ -63,6 +80,7 @@ class AccountsAdmin(BaseUserAdmin):
             }
         )
     )
+    inlines = (AccountPlayersInlineAdmin,)
     list_display = (
         "account_name", model.EMAIL_FIELD, "player_count", "current_essence",
         "is_god", "is_eternal", "is_immortal"
@@ -78,3 +96,18 @@ class AccountsAdmin(BaseUserAdmin):
         "account_id", "last_ident", "last_isp", "_last_haddr",
         "created_at", "create_isp", "create_ident", "_create_haddr"
     )
+
+    def has_add_permission(self, request, obj=None):
+        """
+        Disabling adding accounts in /admin/.
+        """
+        return False
+
+    def has_view_or_change_permission(self, request, obj=None):
+        return request.user.is_god()
+
+    def has_delete_permission(self, request, obj=None):
+        """
+        Disable deleting accounts in /admin/.
+        """
+        return False

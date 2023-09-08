@@ -15,9 +15,7 @@ class ChallengesView(ListView):
     model = Challenge
     queryset = model.objects.filter(
         is_active__exact=1
-    ).order_by(
-        "-is_active", "-winner_desc", "challenge_desc"
-    ).all()
+    )
     template_name = "challenges.html.djt"
 
     def get_context_data(self, *args, **kwargs):
@@ -28,6 +26,29 @@ class ChallengesView(ListView):
             super().get_context_data(*args, **kwargs),
             obj=self.context_object_name
         )
+
+
+class CompleteChallengesView(ChallengesView):
+    """
+    Complete challenges view.
+    """
+    model = Challenge
+    queryset = model.objects.filter(
+        is_active__exact=1
+    ).exclude(
+        winner_desc__exact=""
+    )
+
+
+class IncompleteChallengesView(ChallengesView):
+    """
+    Complete challenges view.
+    """
+    model = Challenge
+    queryset = model.objects.filter(
+        is_active__exact=1,
+        winner_desc__exact=""
+    )
 
 
 class ChallengesViewSet(viewsets.ModelViewSet):

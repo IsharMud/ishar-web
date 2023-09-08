@@ -226,10 +226,10 @@ class Account(AbstractBaseUser, PermissionsMixin):
         return self.account_name
 
     def has_perms(self, perm_list, obj=None):
-        return self.is_admin
+        return self.is_god
 
     def has_module_perms(self, app_label):
-        return self.is_admin
+        return self.is_god
 
     @property
     def seasonal_earned(self) -> int:

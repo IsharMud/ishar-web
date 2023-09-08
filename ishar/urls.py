@@ -4,19 +4,17 @@ isharmud.com URL configuration.
 from django.urls import include, path
 
 from .api import api_router
-from .views import (
-    ClientsView, FAQView, HistoryView, StartView, SupportView, WelcomeView
-)
-# from .views.events import EventsView
-from .apps.accounts.views import IsharLoginView
+from .views import ClientsView, FAQView, HistoryView, StartView, SupportView, \
+    WelcomeView
 from .apps.help.views import WorldView
 
 
 urlpatterns = [
     path("", WelcomeView.as_view(), name="index"),
 
-    # path("account/", include("ishar.apps.account.urls"), name="account"),
     path("api/", include(api_router.urls), name="api"),
+
+    path("areas/", WorldView.as_view(), name="areas"),
 
     path("challenges/", include("ishar.apps.challenges.urls"), name="challenges"),
 
@@ -35,22 +33,15 @@ urlpatterns = [
 
     path("getstarted/", StartView.as_view(), name="getstarted"),
     path("get_started/", StartView.as_view(), name="get_started"),
-    path("start/", StartView.as_view(), name="start"),
-
-    # path("events/", EventsView.as_view(), name="events"),
 
     path("help/", include("ishar.apps.help.urls"), name="help"),
-
     path("leaders/", include("ishar.apps.leaders.urls"), name="leaders"),
-
-    path("login/", IsharLoginView.as_view(), name="login"),
-
     path("patches/", include("ishar.apps.patches.urls"), name="patches"),
-    path("player/", include("ishar.apps.player.urls"), name="player"),
-    path("portal", WelcomeView.as_view(), name="portal"),
-    path("season/", include("ishar.apps.season.urls"), name="season"),
-    path("support/", SupportView.as_view(), name="support"),
+    path("player/", include("ishar.apps.players.urls"), name="player"),
+    path("portal/", include("ishar.apps.accounts.urls"), name="portal"),
+    path("season/", include("ishar.apps.seasons.urls"), name="season"),
 
-    path("areas/", WorldView.as_view(), name="areas"),
+    path("start/", StartView.as_view(), name="start"),
+    path("support/", SupportView.as_view(), name="support"),
     path("world/", WorldView.as_view(), name="world"),
 ]

@@ -22,3 +22,15 @@ class RemortUpgradeAdmin(admin.ModelAdmin):
     list_filter = ("can_buy", "bonus")
     readonly_fields = ("upgrade_id",)
     search_fields = ("name", "display_name")
+
+    def has_add_permission(self, request, obj=None):
+        return request.user.is_god()
+
+    def has_change_permission(self, request, obj=None):
+        return request.user.is_god()
+
+    def has_view_permission(self, request, obj=None):
+        return request.user.is_eternal()
+
+    def has_delete_permission(self, request, obj=None):
+        return request.user.is_god()

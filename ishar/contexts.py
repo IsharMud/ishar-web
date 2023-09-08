@@ -4,7 +4,7 @@ isharmud.com context processors for Django templates.
 from django.utils import timezone
 
 from ishar.apps.events.models import GlobalEvent
-from ishar.apps.season.models import Season
+from ishar.apps.seasons.models import Season
 
 
 def current_season(request):

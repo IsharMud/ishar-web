@@ -108,10 +108,10 @@ INSTALLED_APPS = [
     "ishar.apps.leaders",
     "ishar.apps.news",
     "ishar.apps.patches",
-    "ishar.apps.player",
+    "ishar.apps.players",
     "ishar.apps.quests",
-    "ishar.apps.season",
-    "ishar.apps.spell",
+    "ishar.apps.seasons",
+    "ishar.apps.spells",
 ]
 
 MIDDLEWARE = [

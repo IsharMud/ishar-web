@@ -4,7 +4,7 @@ Parse the MUD 'helptab' file
 import re
 
 from django.conf import settings
-from ishar.apps.player.models.classes import PlayerClass
+from ishar.apps.players.models import PlayerClass
 
 
 # Retrieve playable player class names

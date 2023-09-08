@@ -1,17 +1,20 @@
-from django.views.generic.base import TemplateView
+from django.views.generic import DetailView
+from django.shortcuts import get_object_or_404
+
 from rest_framework import viewsets, permissions
 
 from .models import Season
 from .serializers import SeasonSerializer
 
 
-class SeasonView(TemplateView):
-    """
-    Season view.
-    """
+class SeasonView(DetailView):
+    context_object_name = "publisher"
+    model = Season
     template_name = "season.html.djt"
-    current_season = Season.objects.first()
-    extra_context = {"season": current_season}
+
+    def get_queryset(self):
+        season = get_object_or_404(Season, season_id=self.kwargs["season_id"])
+        return season
 
 
 class SeasonViewSet(viewsets.ModelViewSet):
