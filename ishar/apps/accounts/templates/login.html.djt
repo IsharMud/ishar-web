@@ -1,9 +1,16 @@
 {% extends "layout.html.djt" %}
-{% block meta_title %}Account Log In{% endblock meta_title %}
-{% block meta_description %}Account Log In to Ishar MUD to view the portal, player profiles, leaderboard, and more{% endblock meta_description %}
+{% block meta_title %}Log In{% endblock meta_title %}
+{% block meta_description %}Log In{% endblock meta_description %}
 {% block meta_url %}{% url "login" %}{% endblock meta_url %}
-{% block title %}Account Log In{% endblock title %}
-{% block header %}Account Log In{% endblock header %}
+{% block title %}Log In{% endblock title %}
+{% block header %}Log In{% endblock header %}
+{% block scripts %}{% endblock scripts %}
 {% block content %}
-{{ form }}
+    {% if form %}
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Log In</button>
+        </form>
+    {% endif %}
 {% endblock content %}

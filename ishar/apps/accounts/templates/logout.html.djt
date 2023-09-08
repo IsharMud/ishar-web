@@ -1,9 +1,9 @@
 {% extends "layout.html.djt" %}
-{% block meta_title %}Account Log Out{% endblock meta_title %}
-{% block meta_description %}Account Log Out{% endblock meta_description %}
+{% block meta_title %}Log Out{% endblock meta_title %}
+{% block meta_description %}Log Out{% endblock meta_description %}
 {% block meta_url %}{% url "logout" %}{% endblock meta_url %}
-{% block title %}Account Log Out{% endblock title %}
-{% block header %}Account Log Out{% endblock header %}
+{% block title %}Log Out{% endblock title %}
+{% block header %}Log Out{% endblock header %}
 {% block content %}
 You have been logged out.
 {% endblock content %}

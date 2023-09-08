@@ -11,10 +11,8 @@ class SeasonView(DetailView):
     context_object_name = "publisher"
     model = Season
     template_name = "season.html.djt"
-
-    def get_queryset(self):
-        season = get_object_or_404(Season, season_id=self.kwargs["season_id"])
-        return season
+    slug_field = "season_id"
+    slug_url_kwarg = "season_id"
 
 
 class SeasonViewSet(viewsets.ModelViewSet):
