@@ -1,4 +1,5 @@
 {% extends "layout.html.djt" %}
+{% load humanize %}
 {% block meta_title %}Global Events{% endblock meta_title %}
 {% block meta_description %}Global events currently active{% endblock meta_description %}
 {% block meta_url %}{% url "events" %}{% endblock meta_url %}
@@ -31,16 +32,16 @@
                                 </ul>
                             </li>
              {% endif %}
-                            <li title="Started: {{ global_event.start_time }} ({{ global_event.start_time | timesince }} ago)">
+                            <li title="Started: {{ global_event.start_time }} ({{ global_event.start_time | naturaltime }})">
                                 <strong>Started</strong>:
                                 <ul>
-                                    <li>{{ global_event.start_time | timesince }} ago</li>
+                                    <li>{{ global_event.start_time | naturaltime }}</li>
                                 </ul>
                             </li>
-                            <li title="Ends: {{ global_event.end_time }} (in {{ global_event.end_time | timeuntil }})">
+                            <li title="Ends: {{ global_event.end_time }} ({{ global_event.end_time | naturaltime }})">
                                 <strong>Ends</strong>:
                                 <ul>
-                                    <li>in {{ global_event.end_time | timeuntil }}</li>
+                                    <li>{{ global_event.end_time | naturaltime }}</li>
                                 </ul>
                             </li>
             {% if global_event.is_luck %}

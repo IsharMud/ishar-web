@@ -35,7 +35,6 @@ class QuestRewardsAdmin(admin.ModelAdmin):
         return request.user.is_eternal()
 
 
-
 class QuestRewardsAdminInline(admin.TabularInline):
     """
     Ishar quest reward administration inline.

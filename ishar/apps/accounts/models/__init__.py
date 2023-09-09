@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from django.db import models
 from django.contrib import admin
@@ -115,6 +115,7 @@ class Account(AbstractBaseUser, PermissionsMixin):
     def __str__(self) -> str:
         return f"{self.account_name} ({self.email})"
 
+    @property
     @admin.display(description="Create IP", ordering="create_haddr")
     def _create_haddr(self):
         """
@@ -122,6 +123,7 @@ class Account(AbstractBaseUser, PermissionsMixin):
         """
         return dec2ip(self.create_haddr)
 
+    @property
     @admin.display(description="Last IP", ordering="last_haddr")
     def _last_haddr(self):
         """
@@ -146,7 +148,7 @@ class Account(AbstractBaseUser, PermissionsMixin):
         Boolean whether any Artisan (or above) players.
         """
         for player in self.players.all():
-            if player.is_artisan:
+            if player.is_artisan():
                 return True
         return False
 
@@ -156,7 +158,7 @@ class Account(AbstractBaseUser, PermissionsMixin):
         Boolean whether any Consort (or above) players.
         """
         for player in self.players.all():
-            if player.is_consort:
+            if player.is_consort():
                 return True
         return False
 
@@ -166,7 +168,7 @@ class Account(AbstractBaseUser, PermissionsMixin):
         Boolean whether any Eternal (or above) players.
         """
         for player in self.players.all():
-            if player.is_eternal:
+            if player.is_eternal():
                 return True
         return False
 
@@ -176,7 +178,7 @@ class Account(AbstractBaseUser, PermissionsMixin):
         Boolean whether any Forger (or above) players.
         """
         for player in self.players.all():
-            if player.is_forger:
+            if player.is_forger():
                 return True
         return False
 
@@ -186,7 +188,7 @@ class Account(AbstractBaseUser, PermissionsMixin):
         Boolean whether any God players.
         """
         for player in self.players.all():
-            if player.is_god:
+            if player.is_god():
                 return True
         return False
 
@@ -196,28 +198,21 @@ class Account(AbstractBaseUser, PermissionsMixin):
         Boolean whether any immortal (or above, but not consort) players.
         """
         for player in self.players.all():
-            if player.is_immortal:
+            if player.is_immortal():
                 return True
         return False
 
-    # "God"s are administrators and superusers for Django Admin
+    # "God"s are administrators/superusers for Django Admin
     is_admin = is_superuser = is_god
 
-    # "Immortal"s can log in to Django Admin
-    is_staff = is_immortal
+    # "Eternal"s and above can log in to Django Admin
+    is_staff = is_eternal
 
     def check_password(self, raw_password: str = None) -> bool:
         """
         Method to check account password.
         """
         return md5_crypt.verify(secret=raw_password, hash=self.password)
-
-    @property
-    def created_ago(self) -> timedelta:
-        """
-        Timedelta since account created.
-        """
-        return timezone.now() - self.created_at
 
     def get_username(self) -> str:
         """
@@ -226,10 +221,10 @@ class Account(AbstractBaseUser, PermissionsMixin):
         return self.account_name
 
     def has_perms(self, perm_list, obj=None):
-        return self.is_god
+        return self.is_god()
 
     def has_module_perms(self, app_label):
-        return self.is_god
+        return self.is_god()
 
     @property
     def seasonal_earned(self) -> int:
@@ -252,4 +247,3 @@ class Account(AbstractBaseUser, PermissionsMixin):
         if self.save():
             return True
         return False
-

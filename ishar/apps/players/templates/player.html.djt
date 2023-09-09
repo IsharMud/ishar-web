@@ -1,4 +1,5 @@
 {% extends "layout.html.djt" %}
+{% load humanize %}
 {% block meta_title %}
     {% if player %}
         Player: {{ player.name }}{% if player.player_type == 'Dead' %} ☠️{% endif %}
@@ -129,16 +130,16 @@
                 Time
             </h3>
             <ul id="player-time">
-                <li title="Birth: {{ player.birth | timesince }} ago ({{ player.birth }})">
-                    {{ player.gender | title }} was born {{ player.birth | timesince }} ago,
+                <li title="Birth: {{ player.birth | naturaltime }}, ({{ player.birth }})">
+                    {{ player.gender | title }} was born {{ player.birth | naturaltime }},
                     on {{ player.birth }}.
                 </li>
-                <li title="Logged On: {{ player.logon | timesince }} ago ({{ player.logon }})">
-                    {{ player.gender | title }} last logged in {{ player.logon | timesince }} ago,
+                <li title="Logged On: {{ player.logon | naturaltime }}, ({{ player.logon }})">
+                    {{ player.gender | title }} last logged in {{ player.logon | naturaltime }},
                     on {{ player.logon }}.
                 </li>
-                <li title="Logged Out: {{ player.logout | timesince }} ago ({{ player.logout }})">
-                    {{ player.gender | title }} last logged out {{ player.logout | timesince }} ago,
+                <li title="Logged Out: {{ player.logout | naturaltime }}, ({{ player.logout }})">
+                    {{ player.gender | title }} last logged out {{ player.logout | naturaltime }},
                     on {{ player.logout }}.
                 </li>
                 <li title="Played For: {{ player.online }}">

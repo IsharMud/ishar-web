@@ -3,6 +3,30 @@ from django.contrib import admin
 from .models import Challenge
 
 
+class ChallengeCompletedListFilter(admin.SimpleListFilter):
+    title = "Completed"
+    parameter_name = "is_completed"
+
+    def lookups(self, request, model_admin):
+        return (
+            (1, "Yes"),
+            (0, "No")
+        )
+
+    def queryset(self, request, queryset):
+        """
+        Determine whether a challenge is complete based on whether
+            the "winner_desc" column is empty or not.
+        """
+        qs = queryset
+        if self.value():
+            if self.value() == "1":
+                qs = qs.exclude(winner_desc="")
+            if self.value() == "0":
+                qs = qs.filter(winner_desc="")
+        return qs
+
+
 @admin.register(Challenge)
 class ChallengesAdmin(admin.ModelAdmin):
     """
@@ -16,8 +40,8 @@ class ChallengesAdmin(admin.ModelAdmin):
         ("Adjusted", {"fields": ("adj_level", "adj_people", "adj_tier")}),
     )
     filter_horizontal = filter_vertical = ()
-    list_display = ("challenge_desc", "is_active", "_is_completed")
-    list_filter = ("is_active",)
+    list_display = ("challenge_desc", "is_active", "is_completed")
+    list_filter = ("is_active", ChallengeCompletedListFilter)
     readonly_fields = ("challenge_id",)
     search_fields = ("challenge_desc", "winner_desc", "mob_vnum", "mob_name")
 

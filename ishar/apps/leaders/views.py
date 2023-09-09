@@ -4,7 +4,7 @@ from django.views.generic.list import ListView
 from ...apps.players.models import Player
 
 
-MINIMUM_IMMORTAL = min(settings.IMMORTAL_LEVELS)
+MINIMUM_IMMORTAL = min(settings.IMMORTAL_LEVELS)[0]
 
 
 class LeadersView(ListView):

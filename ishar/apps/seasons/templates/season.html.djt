@@ -7,7 +7,7 @@
 {% block content %}
     {% if season %}
             <ul id="season-details">
-                <li title="Season {{ season.season_id }} began {{ season.effective_date }} ago on {{ season.effective_date }}">
+                <li title="Season {{ season.season_id }} began {{ season.effective_date | naturaltime }} on {{ season.effective_date }}">
                     <strong>
                         Started
                     </strong>
@@ -16,11 +16,11 @@
                             {{ season.effective_date }}
                         </li>
                         <li>
-                            {{ season.effective_date | timesince }} ago
+                            {{ season.effective_date | naturaltime }}
                         </li>
                     </ul>
                 </li>
-                <li title="Season {{ season.season_id }} ends in {{ season.expiration_date | timeuntil }} on {{ season.expiration_date }}">
+                <li title="Season {{ season.season_id }} ends {{ season.expiration_date | naturaltime }} on {{ season.expiration_date }}">
                     <strong>
                         Ends
                     </strong>
@@ -29,7 +29,7 @@
                             {{ season.expiration_date }}
                         </li>
                         <li>
-                            in {{ season.expiration_date | timeuntil }}
+                            {{ season.expiration_date | naturaltime }}
                         </li>
                     </ul>
                 </li>

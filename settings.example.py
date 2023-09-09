@@ -53,15 +53,15 @@ GAME_TYPES = [
     (1, "Survival")
 ]
 
-# Player immortal levels
-IMMORTAL_LEVELS = {
-    26: "God",
-    25: "Forger",
-    24: "Eternal",
-    23: "Artisan",
-    22: "Immortal",
-    21: "Consort"
-}
+# Player immortal levels/types
+IMMORTAL_LEVELS = (
+    (26, "God"),
+    (25, "Forger"),
+    (24, "Eternal"),
+    (23, "Artisan"),
+    (22, "Immortal"),
+    (21, "Consort"),
+)
 
 # Authentication using MySQL database user accounts
 AUTH_USER_MODEL = "accounts.Account"
@@ -85,6 +85,7 @@ INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
+    "django.contrib.humanize",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",

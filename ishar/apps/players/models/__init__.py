@@ -6,6 +6,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 
 from ...accounts.models import Account
 from ....util.ip import dec2ip
+from ....util.level import get_immortal_level, get_immortal_type
 
 
 class Player(models.Model):
@@ -68,7 +69,7 @@ class Player(models.Model):
         help_text="True level of the player character.",
         validators=[
             MinValueValidator(limit_value=1),
-            MaxValueValidator(limit_value=max(settings.IMMORTAL_LEVELS))
+            MaxValueValidator(limit_value=max(settings.IMMORTAL_LEVELS)[0])
         ],
         verbose_name="True Level"
     )
@@ -221,6 +222,7 @@ class Player(models.Model):
     def __str__(self) -> str:
         return self.name
 
+    @property
     @admin.display(description="Create IP", ordering="create_haddr")
     def _create_haddr(self):
         """
@@ -228,6 +230,7 @@ class Player(models.Model):
         """
         return dec2ip(self.create_haddr)
 
+    @property
     @admin.display(description="Login Fail IP", ordering="login_fail_haddr")
     def _login_fail_haddr(self):
         """
@@ -235,6 +238,7 @@ class Player(models.Model):
         """
         return dec2ip(self.login_fail_haddr)
 
+    @property
     @admin.display(description="Last IP", ordering="last_haddr")
     def _last_haddr(self):
         """
@@ -242,72 +246,47 @@ class Player(models.Model):
         """
         return dec2ip(self.last_haddr)
 
-    @admin.display(boolean=True, description="God?", ordering="-true_level")
-    def is_god(self) -> bool:
-        """
-        Boolean whether player is a God.
-        """
-        return self.is_immortal_type(immortal_type="God")
-
-    @admin.display(boolean=True, description="Artisan?", ordering="-true_level")
-    def is_artisan(self) -> bool:
-        """
-        Boolean whether player is an Artisan (or above).
-        """
-        return self.is_immortal_type(immortal_type="Artisan")
-
     @admin.display(boolean=True, description="Consort?", ordering="-true_level")
     def is_consort(self) -> bool:
         """
-        Boolean whether player is a Consort (or above).
+        Boolean whether player is consort, or above.
         """
         return self.is_immortal_type(immortal_type="Consort")
 
     @admin.display(boolean=True, description="Eternal?", ordering="-true_level")
     def is_eternal(self) -> bool:
         """
-        Boolean whether player is an Eternal (or above).
+        Boolean whether player is eternal, or above.
         """
         return self.is_immortal_type(immortal_type="Eternal")
 
-    @admin.display(boolean=True, description="Forger?", ordering="-true_level")
+    @admin.display(boolean=True, description="Forger??", ordering="-true_level")
     def is_forger(self) -> bool:
         """
-        Boolean whether player is a Forger (or above).
+        Boolean whether player is consort, or above.
         """
         return self.is_immortal_type(immortal_type="Forger")
+
+    @admin.display(boolean=True, description="God?", ordering="-true_level")
+    def is_god(self) -> bool:
+        """
+        Boolean whether player is a "God".
+        """
+        return self.is_immortal_type(immortal_type="God")
 
     @admin.display(boolean=True, description="Immortal?", ordering="-true_level")
     def is_immortal(self) -> bool:
         """
-        Boolean whether player is immortal (or above, but not consort).
+        Boolean whether player is immortal, or above, but not consort.
         """
         return self.is_immortal_type(immortal_type="Immortal")
 
-    @property
-    @admin.display(
-        boolean=True, description="Immortal Type", ordering="-true_level"
-    )
-    def immortal_type(self) -> (str, None):
+    def is_immortal_type(self, immortal_type="Immortal") -> bool:
         """
-        Immortal type.
+        Boolean whether player is an immortal of a certain type, or above.
         """
-        if self.true_level in settings.IMMORTAL_LEVELS:
-            return settings.IMMORTAL_LEVELS[self.true_level]
-        return None
-
-    @admin.display(boolean=True, description="Immortal Type")
-    def is_immortal_type(self, immortal_type: str = "Immortal") -> bool:
-        """
-        Boolean whether player is a specific immortal type (or above).
-        """
-        # TODO: https://github.com/IsharMud/ishar-web/issues/13
-        #   Fix this:
-        imm_types = {imm_type: level for level, imm_type in settings.IMMORTAL_LEVELS.items()}
-        if self.immortal_type:
-            if self.immortal_type in imm_types:
-                if self.true_level >= imm_types[immortal_type]:
-                    return True
+        if self.true_level >= get_immortal_level(immortal_type=immortal_type):
+            return True
         return False
 
     @admin.display(boolean=True, description="Survival?", ordering='-game_type')
@@ -330,8 +309,10 @@ class Player(models.Model):
         Player stats.
         """
 
-        # Start with empty, immortals have no stats
+        # Start with empty dictionary.
         stats = {}
+
+        # Immortals have no stats.
         if self.is_immortal:
             return stats
 
@@ -358,19 +339,33 @@ class Player(models.Model):
             stats[stat_order] = players_stats[stat_order]
         return stats
 
+    @property
+    def immortal_type(self) -> (str, None):
+        """
+        Type of immortal.
+        Returns one of settings.IMMORTAL_LEVELS tuple text values,
+            from settings.IMMORTAL_LEVELS, or None.
+        """
+        return get_immortal_type(level=self.true_level)
+
     def get_player_type(self) -> str:
         """
         Get the type pf player (string), returns one of:
-            - An immortal type
-                * one of settings.IMMORTAL_LEVELS dictionary values
-            - Dead, Survival, or Classic
+            - An immortal type:
+                * One of settings.IMMORTAL_LEVELS tuple text values.
+            - Dead
+            - Survival
+            - Classic
         """
-        if self.immortal_type:
+        if self.is_immortal:
             return self.immortal_type
+
         if self.is_deleted == 1:
             return "Dead"
+
         if self.is_survival:
             return "Survival"
+
         return "Classic"
 
     @property
@@ -389,10 +384,7 @@ class Player(models.Model):
         return f'{settings.MUD_PODIR}/{self.name}'
 
     @property
-    @admin.display(
-        boolean=False, description="Seasonal Earned",
-        ordering="seasonal_earned"
-    )
+    @admin.display(description="Seasonal Earned", ordering="seasonal_earned")
     def seasonal_earned(self) -> int:
         """
         Amount of essence earned for the player.
@@ -415,31 +407,30 @@ class Player(models.Model):
         return earned
 
 
-class PlayerClass(models.Model):
+class Class(models.Model):
     """
-    Player Class.
+    Character/Mobile Class.
     """
     class_id = models.AutoField(
         primary_key=True,
         help_text=(
-            "Auto-generated permanent identification number "
-            "of the player class."
+            "Auto-generated permanent identification number of the class."
         ),
         verbose_name="Class ID"
     )
     class_name = models.CharField(
         unique=True, max_length=15,
-        help_text="Name of the player class.",
+        help_text="Name of the class.",
         verbose_name="Class Name"
     )
     class_display = models.CharField(
         max_length=32, blank=True, null=True,
-        help_text="Display phrase of the player class.",
+        help_text="Display phrase of the class.",
         verbose_name="Class Display"
     )
     class_description = models.CharField(
         max_length=64, blank=True, null=True,
-        help_text="Description of the player class.",
+        help_text="Description of the class.",
         verbose_name="Class Description"
     )
 
@@ -457,6 +448,7 @@ class PlayerClass(models.Model):
     def __str__(self) -> str:
         return self.class_name
 
+    @property
     @admin.display(
         boolean=True, description="Playable", ordering="class_display"
     )
@@ -467,4 +459,3 @@ class PlayerClass(models.Model):
         if self.class_display and self.class_description:
             return True
         return False
-

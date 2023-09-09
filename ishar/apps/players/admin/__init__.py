@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from .race import RaceAdmin
 from .remort import RemortUpgradeAdmin
-from ..models import Player, PlayerClass
+from ..models import Player, Class
 
 
 @admin.register(Player)
@@ -55,8 +55,8 @@ class PlayerAdmin(admin.ModelAdmin):
         return request.user.is_god()
 
 
-@admin.register(PlayerClass)
-class PlayerClassAdmin(admin.ModelAdmin):
+@admin.register(Class)
+class ClassAdmin(admin.ModelAdmin):
     """
     Ishar class administration.
     """
@@ -68,6 +68,10 @@ class PlayerClassAdmin(admin.ModelAdmin):
     list_display = search_fields = (
         "class_name", "class_display", "class_description"
     )
+
+    def player_count(self, obj):
+        return obj.player_count
+    player_count.admin_order_field = "player_count"
 
     def has_add_permission(self, request, obj=None):
         """

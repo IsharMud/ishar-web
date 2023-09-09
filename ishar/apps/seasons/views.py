@@ -8,7 +8,7 @@ from .serializers import SeasonSerializer
 
 
 class SeasonView(DetailView):
-    context_object_name = "publisher"
+    context_object_name = "season"
     model = Season
     template_name = "season.html.djt"
     slug_field = "season_id"

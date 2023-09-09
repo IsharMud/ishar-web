@@ -56,7 +56,7 @@ class Challenge(models.Model):
     )
     is_active = models.BooleanField(
         help_text="Is the challenge currently active?",
-        verbose_name="Is Active?"
+        verbose_name="Active?"
     )
 
     class Meta:
@@ -76,13 +76,12 @@ class Challenge(models.Model):
     def __str__(self):
         return self.challenge_desc or self.mob_name or self.challenge_id
 
-    @admin.display(
-        boolean=True, description="Completed?", ordering="winner_desc"
-    )
-    def _is_completed(self):
+    @admin.display(boolean=True, description="Complete?", ordering="winner_desc")
+    def is_completed(self):
         """
-        Boolean whether challenge is completed.
+        Boolean whether challenge has a winner description,
+            meaning that the challenge must have been completed.
         """
-        if self.winner_desc != '' and self.winner_desc != "'--'":
+        if self.winner_desc:
             return True
         return False

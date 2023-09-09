@@ -1,13 +1,22 @@
 from django.views.generic.base import TemplateView
 from rest_framework import viewsets, permissions
 
-from .models import Player, PlayerClass
+from .models import Player, Class
 from .models.race import Race
 from .models.remort import RemortUpgrade
 from .serializers import (
-    PlayerSerializer, PlayerClassSerializer, RaceSerializer,
-    RemortUpgradeSerializer
+    PlayerSerializer, ClassSerializer, RaceSerializer, RemortUpgradeSerializer
 )
+
+
+class ClassViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows classes to be viewed or edited.
+    """
+    model = Class
+    permission_classes = [permissions.IsAdminUser]
+    queryset = model.objects.all()
+    serializer_class = ClassSerializer
 
 
 class PlayerView(TemplateView):
@@ -21,7 +30,7 @@ class PlayerPageView(PlayerView):
     """
     Player page view.
     """
-    def __init__(self, player_name=None):
+    def request(self, player_name=None):
         player = Player.objects.filter(name__exact=player_name).first()
         self.extra_context["player"] = player
         super.__init__()
@@ -36,16 +45,6 @@ class PlayerViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [permissions.IsAdminUser]
     queryset = model.objects.all()
     serializer_class = PlayerSerializer
-
-
-class PlayerClassViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows classes to be viewed or edited.
-    """
-    model = PlayerClass
-    permission_classes = [permissions.IsAdminUser]
-    queryset = model.objects.all()
-    serializer_class = PlayerClassSerializer
 
 
 class RaceViewSet(viewsets.ModelViewSet):

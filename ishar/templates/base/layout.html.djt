@@ -1,3 +1,4 @@
+{% load humanize %}
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
@@ -100,9 +101,9 @@
             </ul>
     {% if current_season %}
             <ul>
-                <li title="Season {{ current_season.season_id }} ends in {{ current_season.expiration_date | timeuntil }}">
+                <li title="Season {{ current_season.season_id }} ends {{ current_season.expiration_date | naturaltime }}">
                     <a href="{% url "season" %}">Season {{ current_season.season_id }}</a>
-                    ends in {{ current_season.expiration_date | timeuntil }}
+                    ends {{ current_season.expiration_date | naturaltime }}
                 </li>
                 <li title="Ends {{ current_season.expiration_date }}">
                     {{ current_season.expiration_date }}

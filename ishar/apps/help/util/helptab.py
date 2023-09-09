@@ -4,12 +4,12 @@ Parse the MUD 'helptab' file
 import re
 
 from django.conf import settings
-from ishar.apps.players.models import PlayerClass
+from ishar.apps.players.models import Class
 
 
 # Retrieve playable player class names
 player_classes = []
-playable_classes = PlayerClass.objects.exclude(class_description="").all()
+playable_classes = Class.objects.exclude(class_description="").all()
 for playable_class in playable_classes:
     player_classes.append(playable_class.class_display)
 
@@ -236,7 +236,7 @@ def parse_help_header(header=None):
     lines = header.split('\n')
 
     # Name the topic if mortals should reach it, and it starts with "32 "
-    if int(lines[0].strip()) < min(settings.IMMORTAL_LEVELS) and lines[1].startswith('32 '):
+    if int(lines[0].strip()) < min(settings.IMMORTAL_LEVELS)[0] and lines[1].startswith('32 '):
         help_header['name'] = lines[1].replace('32 ', '').strip()
         help_header['aliases'] = []
 

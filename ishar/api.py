@@ -9,7 +9,7 @@ from .apps.challenges.views import ChallengesViewSet
 from .apps.events.views import GlobalEventsViewSet
 from .apps.news.views import NewsViewSet
 from .apps.patches.views import PatchViewSet
-from .apps.players.views import PlayerViewSet, PlayerClassViewSet, RaceViewSet, \
+from .apps.players.views import PlayerViewSet, ClassViewSet, RaceViewSet, \
     RemortUpgradeViewSet
 from .apps.quests.views import QuestsViewSet, QuestPrereqsViewSet, \
     QuestRewardsViewSet, QuestStepsViewSet
@@ -38,7 +38,7 @@ api_router = IsharMUDAPIRouter()
 api_router.register(r"accounts", AccountsViewSet, "account")
 api_router.register(r"account_upgrades", AccountUpgradesViewSet, "account_upgrade")
 api_router.register(r"challenges", ChallengesViewSet, "challenge")
-api_router.register(r"classes", PlayerClassViewSet, "class")
+api_router.register(r"classes", ClassViewSet, "class")
 api_router.register(r"events", GlobalEventsViewSet, "event")
 api_router.register(r"forces", ForcesViewSet, "force")
 api_router.register(r"news", NewsViewSet, "news")

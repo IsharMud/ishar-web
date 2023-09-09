@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 
-from .models import Player, PlayerClass
+from .models import Player, Class
 from .models.race import Race
 from .models.remort import RemortUpgrade
 
@@ -11,9 +11,9 @@ class PlayerSerializer(ModelSerializer):
         fields = "__all__"
 
 
-class PlayerClassSerializer(ModelSerializer):
+class ClassSerializer(ModelSerializer):
     class Meta:
-        model = PlayerClass
+        model = Class
         fields = "__all__"
 
 

@@ -1,4 +1,6 @@
-from ishar.apps.players.models import PlayerClass
+from django.conf import settings
+
+from ishar.apps.players.models import Class
 
 
 def get_classes(playable=True):
@@ -6,7 +8,7 @@ def get_classes(playable=True):
     Get classes (only playable, by default).
     """
     out = []
-    query = PlayerClass.objects
+    query = Class.objects
     if playable:
         query = query.exclude(class_description__isnull=True)
     for _class in query.all():
@@ -15,6 +17,9 @@ def get_classes(playable=True):
 
 
 def get_class_options(*args, **kwargs):
-    ret = get_classes()
+    """
+    Get playable classes, and append a "-1" option for "None".
+    """
+    ret = get_classes(playable=True)
     ret.append((-1, "None"))
     return ret

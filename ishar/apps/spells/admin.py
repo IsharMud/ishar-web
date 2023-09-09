@@ -25,7 +25,6 @@ class ForceAdmin(admin.ModelAdmin):
         return request.user.is_eternal()
 
 
-
 class SpellsFlagsAdminInline(admin.StackedInline):
     """
     Ishar spell's flags inline administration.
@@ -72,7 +71,6 @@ class SpellFlagAdmin(admin.ModelAdmin):
     Ishar spell flag administration.
     """
     fieldsets = ((None, {"fields": ("name", "description")}),)
-    filter_horizontal = filter_vertical = list_filter = ()
     list_display = search_fields = ("name", "description")
     model = SpellFlag
 
