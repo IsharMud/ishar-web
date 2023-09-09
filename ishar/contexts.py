@@ -1,27 +1,19 @@
 """
 isharmud.com context processors for Django templates.
 """
-from django.utils import timezone
-
-from ishar.apps.events.models import GlobalEvent
-from ishar.apps.seasons.models import Season
+from .apps.seasons.util import get_current_season
+from .apps.events.util import get_global_event_count
 
 
 def current_season(request):
     """
-    Current Ishar MUD season.
+    Context processor for current Ishar MUD season.
     """
-    return {"current_season": Season.objects.filter(is_active=1).first()}
+    return {"current_season": get_current_season()}
 
 
 def global_event_count(request):
     """
-    Number of current global events within the MUD.
+    Context processor for number of current global events within the MUD.
     """
-    now = timezone.now()
-    return {
-        "global_event_count": GlobalEvent.objects.filter(
-            start_time__lt=now,
-            end_time__gt=now
-        ).count()
-    }
+    return {"global_event_count": get_global_event_count()}

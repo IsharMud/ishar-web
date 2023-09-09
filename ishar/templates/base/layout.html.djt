@@ -102,7 +102,7 @@
     {% if current_season %}
             <ul>
                 <li title="Season {{ current_season.season_id }} ends {{ current_season.expiration_date | naturaltime }}">
-                    <a href="{% url "season" %}">Season {{ current_season.season_id }}</a>
+                    <a href="{% url "current_season" %}">Season {{ current_season.season_id }}</a>
                     ends {{ current_season.expiration_date | naturaltime }}
                 </li>
                 <li title="Ends {{ current_season.expiration_date }}">

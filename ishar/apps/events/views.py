@@ -1,3 +1,4 @@
+from django.utils import timezone
 from django.views.generic.list import ListView
 from rest_framework import viewsets, permissions
 
@@ -11,7 +12,10 @@ class GlobalEventsView(ListView):
     """
     context_object_name = "global_events"
     model = GlobalEvent
-    queryset = model.objects.all()
+    queryset = model.objects.filter(
+        start_time__lt=timezone.now(),
+        end_time__gt=timezone.now()
+    )
     template_name = "events.html.djt"
 
 

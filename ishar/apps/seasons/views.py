@@ -1,10 +1,10 @@
-from django.views.generic import DetailView
-from django.shortcuts import get_object_or_404
+from django.views.generic import DetailView, TemplateView
 
 from rest_framework import viewsets, permissions
 
 from .models import Season
 from .serializers import SeasonSerializer
+from .util import get_current_season
 
 
 class SeasonView(DetailView):
@@ -13,6 +13,11 @@ class SeasonView(DetailView):
     template_name = "season.html.djt"
     slug_field = "season_id"
     slug_url_kwarg = "season_id"
+
+
+class CurrentSeasonView(TemplateView):
+    template_name = "season.html.djt"
+    extra_context = {"season": get_current_season()}
 
 
 class SeasonViewSet(viewsets.ModelViewSet):
