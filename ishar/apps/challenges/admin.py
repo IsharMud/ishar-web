@@ -40,7 +40,7 @@ class ChallengesAdmin(admin.ModelAdmin):
         ("Adjusted", {"fields": ("adj_level", "adj_people", "adj_tier")}),
     )
     filter_horizontal = filter_vertical = ()
-    list_display = ("challenge_desc", "is_active", "is_completed")
+    list_display = ("challenge_desc", "mob_name", "is_active", "is_completed")
     list_filter = ("is_active", ChallengeCompletedListFilter)
     readonly_fields = ("challenge_id",)
     search_fields = ("challenge_desc", "winner_desc", "mob_vnum", "mob_name")
