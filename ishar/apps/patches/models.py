@@ -44,7 +44,7 @@ class Patch(models.Model):
     )
 
     class Meta:
-        managed = False
+        managed = True
         db_table = "patches"
         ordering = ("-patch_date",)
         verbose_name = "Patch"
