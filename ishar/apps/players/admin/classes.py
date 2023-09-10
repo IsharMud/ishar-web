@@ -38,9 +38,10 @@ class ClassAdmin(admin.ModelAdmin):
     )
     list_filter = (PlayableClassListFilter,)
     readonly_fields = ("class_id", "is_playable")
-    list_display = search_fields = (
-        "class_name", "class_display", "class_description"
+    list_display = (
+        "class_name", "is_playable", "class_display", "class_description"
     )
+    search_fields = ("class_name", "class_display", "class_description")
 
     def has_add_permission(self, request, obj=None):
         return request.user.is_god()
