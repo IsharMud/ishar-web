@@ -1,8 +1,9 @@
 from django.contrib import admin
 
+from .classes import ClassAdmin
 from .race import RaceAdmin
 from .remort import RemortUpgradeAdmin
-from ..models import Player, Class
+from ..models import Player
 
 
 @admin.register(Player)
@@ -53,40 +54,3 @@ class PlayerAdmin(admin.ModelAdmin):
 
     def has_view_permission(self, request, obj=None):
         return request.user.is_god()
-
-
-@admin.register(Class)
-class ClassAdmin(admin.ModelAdmin):
-    """
-    Ishar class administration.
-    """
-    fieldsets = ((None, {"fields": (
-        "class_id", "class_name", "class_display", "class_description"
-    )}),)
-    filter_horizontal = filter_vertical = list_filter = ()
-    readonly_fields = ("class_id",)
-    list_display = search_fields = (
-        "class_name", "class_display", "class_description"
-    )
-
-    def player_count(self, obj):
-        return obj.player_count
-    player_count.admin_order_field = "player_count"
-
-    def has_add_permission(self, request, obj=None):
-        """
-        Disabling adding players in /admin/.
-        """
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return request.user.is_god()
-
-    def has_view_permission(self, request, obj=None):
-        return request.user.is_eternal()
-
-    def has_delete_permission(self, request, obj=None):
-        """
-        Disable deleting players in /admin/.
-        """
-        return False

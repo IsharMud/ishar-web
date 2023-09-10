@@ -33,7 +33,7 @@ class ChallengesAdmin(admin.ModelAdmin):
     Ishar challenge administration.
     """
     fieldsets = (
-        (None, {"fields": ("challenge_id", "is_active")}),
+        (None, {"fields": ("challenge_id", "is_active", "is_completed")}),
         ("Details", {"fields": ("challenge_desc", "winner_desc")}),
         ("Target", {"fields": ("mob_vnum", "mob_name")}),
         ("Original", {"fields": ("orig_level", "orig_people", "orig_tier")}),
@@ -42,7 +42,7 @@ class ChallengesAdmin(admin.ModelAdmin):
     filter_horizontal = filter_vertical = ()
     list_display = ("challenge_desc", "mob_name", "is_active", "is_completed")
     list_filter = ("is_active", ChallengeCompletedListFilter)
-    readonly_fields = ("challenge_id",)
+    readonly_fields = ("challenge_id", "is_completed")
     search_fields = ("challenge_desc", "winner_desc", "mob_vnum", "mob_name")
 
     def has_add_permission(self, request, obj=None):

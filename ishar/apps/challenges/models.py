@@ -46,7 +46,10 @@ class Challenge(models.Model):
     )
     winner_desc = models.CharField(
         max_length=80,
-        help_text="Description of the winner(s) of the challenge.",
+        help_text=(
+            "Description of the winner(s) of the challenge. "
+            "Blank indicates that the challenge is not complete."
+        ),
         verbose_name="Winner Description"
     )
     mob_name = models.CharField(
