@@ -1,7 +1,26 @@
+from django.conf import settings
 from django.contrib import admin
 from django.utils.safestring import mark_safe
 
 from .models import Player, RemortUpgrade
+
+
+class ImmortalTypeListFilter(admin.SimpleListFilter):
+    """
+    Determine whether a player is certain type of immortal,
+        based on their "true_level" column value.
+    """
+    title = "Immortal Type"
+    parameter_name = "immortal_type"
+
+    def lookups(self, request, model_admin):
+        return settings.IMMORTAL_LEVELS
+
+    def queryset(self, request, queryset):
+        qs = queryset
+        if self.value():
+            qs = qs.filter(true_level=self.value())
+        return qs
 
 
 @admin.register(Player)
@@ -28,8 +47,8 @@ class PlayerAdmin(admin.ModelAdmin):
         "level", "renown"
     )
     list_filter = (
-        "game_type", "is_deleted",
-        ("account", admin.RelatedOnlyFieldListFilter), "true_level"
+        "game_type", "is_deleted", ImmortalTypeListFilter,
+        ("account", admin.RelatedOnlyFieldListFilter), "true_level",
     )
     readonly_fields = ("id", "birth", "logon", "logout", "player_type")
     search_fields = ("name", "account__account_name")
