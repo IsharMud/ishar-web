@@ -215,7 +215,7 @@ class SpellForce(models.Model):
     class Meta:
         managed = False
         db_table = "spell_forces"
-        ordering = ("spell", "force")
+        ordering = ("id", "spell", "force")
         verbose_name = "Spell Force"
         verbose_name_plural = "Spell Forces"
 
@@ -256,6 +256,7 @@ class SpellSpellFlag(models.Model):
     class Meta:
         managed = False
         db_table = "spells_spell_flags"
+        ordering = ("id", "spell", "flag")
         unique_together = (("spell", "flag"),)
         verbose_name = "Spell's Flag"
         verbose_name_plural = "Spell's Flags"

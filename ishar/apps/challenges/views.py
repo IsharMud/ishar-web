@@ -4,8 +4,6 @@ from rest_framework import viewsets, permissions
 from .models import Challenge
 from .serializers import ChallengesSerializer
 
-# from ...util.context import json_context
-
 
 class ChallengesView(ListView):
     """
@@ -17,15 +15,6 @@ class ChallengesView(ListView):
         is_active__exact=1
     )
     template_name = "challenges.html.djt"
-
-    # def get_context_data(self, *args, **kwargs):
-    #     """
-    #     Include context information about challenges.
-    #     """
-    #     return json_context(
-    #         super().get_context_data(*args, **kwargs),
-    #         obj=self.context_object_name
-    #     )
 
 
 class CompleteChallengesView(ChallengesView):

@@ -65,7 +65,9 @@ IMMORTAL_LEVELS = (
 
 # Authentication using MySQL database user accounts
 AUTH_USER_MODEL = "accounts.Account"
-AUTHENTICATION_BACKENDS = (("ishar.backends.IsharUserAuthBackend"),)
+AUTHENTICATION_BACKENDS = (
+    ('ishar.apps.accounts.backends.IsharUserAuthBackend'),
+)
 
 # CSRF/session cookies
 CSRF_COOKIE_DOMAIN = SESSION_COOKIE_DOMAIN = ALLOWED_HOSTS[0]
@@ -95,6 +97,7 @@ INSTALLED_APPS = [
     "ishar",
     "ishar.apps.accounts",
     "ishar.apps.challenges",
+    "ishar.apps.classes",
     "ishar.apps.events",
     "ishar.apps.help",
     "ishar.apps.leaders",
@@ -102,6 +105,7 @@ INSTALLED_APPS = [
     "ishar.apps.patches",
     "ishar.apps.players",
     "ishar.apps.quests",
+    "ishar.apps.races",
     "ishar.apps.seasons",
     "ishar.apps.spells",
 ]

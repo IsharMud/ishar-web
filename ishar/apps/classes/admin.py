@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from ..models.classes import Class
+from .models import Class
 
 
 class PlayableClassListFilter(admin.SimpleListFilter):
@@ -28,7 +28,7 @@ class PlayableClassListFilter(admin.SimpleListFilter):
 
 
 @admin.register(Class)
-class ClassAdmin(admin.ModelAdmin):
+class ClassesAdmin(admin.ModelAdmin):
     """
     Ishar class administration.
     """

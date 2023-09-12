@@ -1,10 +1,10 @@
 from django.contrib import admin
 
-from ..models.race import Race
+from .models import Race, RacialAffinity
 
 
 @admin.register(Race)
-class RaceAdmin(admin.ModelAdmin):
+class RacesAdmin(admin.ModelAdmin):
     """
     Ishar race administration.
     """
@@ -43,6 +43,32 @@ class RaceAdmin(admin.ModelAdmin):
         "display_name", "symbol", "folk_name", "attack_noun",
         "short_description", "long_description"
     )
+
+    def has_add_permission(self, request, obj=None):
+        return request.user.is_god()
+
+    def has_change_permission(self, request, obj=None):
+        return request.user.is_god()
+
+    def has_view_permission(self, request, obj=None):
+        return request.user.is_eternal()
+
+    def has_delete_permission(self, request, obj=None):
+        return request.user.is_god()
+
+
+@admin.register(RacialAffinity)
+class RacialAffinitiesAdmin(admin.ModelAdmin):
+    """
+    Ishar race administration.
+    """
+    model = Race
+    fieldsets = ((None, {"fields": ("race", "force", "affinity_type")}),)
+    filter_horizontal = filter_vertical = ()
+    list_display = ("race", "force", "affinity_type")
+    list_filter = ("force", "affinity_type")
+    readonly_fields = ()
+    search_fields = ("race", "force", "affinity_type")
 
     def has_add_permission(self, request, obj=None):
         return request.user.is_god()

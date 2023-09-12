@@ -69,7 +69,7 @@ class Account(AbstractBaseUser, PermissionsMixin):
         help_text="Last HADDR to log in to the account.",
         verbose_name="Last HADDR"
     )
-    account_name = models.CharField(
+    account_name = models.SlugField(
         unique=True,
         max_length=25,
         help_text="User-chosen account name for logging in.",
@@ -113,7 +113,7 @@ class Account(AbstractBaseUser, PermissionsMixin):
         )
 
     def __str__(self) -> str:
-        return f"{self.account_name} ({self.email})"
+        return self.get_username()
 
     @property
     @admin.display(description="Create IP", ordering="create_haddr")

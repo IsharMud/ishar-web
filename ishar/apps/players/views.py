@@ -1,40 +1,28 @@
+from django.views.generic import DetailView
 from django.views.generic.base import TemplateView
 from rest_framework import viewsets, permissions
 
-from .models import Player
-from .models.classes import Class
-from .models.race import Race
-from .models.remort import RemortUpgrade
-from .serializers import (
-    PlayerSerializer, ClassSerializer, RaceSerializer, RemortUpgradeSerializer
-)
+from .models import Player, RemortUpgrade
+from .serializers import PlayerSerializer, RemortUpgradeSerializer
 
 
-class ClassViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows classes to be viewed or edited.
-    """
-    model = Class
-    permission_classes = [permissions.IsAdminUser]
-    queryset = model.objects.all()
-    serializer_class = ClassSerializer
-
-
-class PlayerView(TemplateView):
+class PlayerView(DetailView):
     """
     Player view.
     """
+    context_object_name = "player"
+    model = Player
+    slug_field = "name"
+    slug_url_kwarg = "name"
+    query_pk_and_slug = "name"
     template_name = "player.html.djt"
 
-
-class PlayerPageView(PlayerView):
+class PlayerSearchView(TemplateView):
     """
-    Player page view.
+    Player search view.
     """
-    def request(self, player_name=None):
-        player = Player.objects.filter(name__exact=player_name).first()
-        self.extra_context["player"] = player
-        super.__init__()
+    template_name = "player.html.djt"
+    model = Player
 
 
 class PlayerViewSet(viewsets.ReadOnlyModelViewSet):
@@ -48,17 +36,7 @@ class PlayerViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = PlayerSerializer
 
 
-class RaceViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows races to be viewed or edited.
-    """
-    model = Race
-    permission_classes = [permissions.IsAdminUser]
-    queryset = model.objects.all()
-    serializer_class = RaceSerializer
-
-
-class RemortUpgradeViewSet(viewsets.ModelViewSet):
+class RemortUpgradesViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows remort upgrades to be viewed or edited.
     """

@@ -3,8 +3,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
 from django.db.models import Count
 
-from .upgrade import AccountUpgradesAdmin
-from ...players.models import Player
+from .models.upgrade import AccountUpgrade
+from ..players.models import Player
 
 
 class AccountPlayersInlineAdmin(admin.TabularInline):
@@ -111,3 +111,32 @@ class AccountsAdmin(UserAdmin):
         Disable deleting accounts in /admin/.
         """
         return False
+
+
+@admin.register(AccountUpgrade)
+class AccountUpgradesAdmin(admin.ModelAdmin):
+    """
+    Ishar account upgrade administration.
+    """
+    fieldsets = (
+        (None, {"fields": ("id", "name", "description", "is_disabled")}),
+        ("Values", {"fields": (
+            "amount", "cost", "increment", "max_value", "scale"
+        )})
+    )
+    list_display = ("name", "is_disabled", "description")
+    list_filter = ("is_disabled",)
+    search_fields = ("name", "description")
+    readonly_fields = ("id",)
+
+    def has_add_permission(self, request, obj=None):
+        return request.user.is_god()
+
+    def has_change_permission(self, request, obj=None):
+        return request.user.is_god()
+
+    def has_view_permission(self, request, obj=None):
+        return request.user.is_eternal()
+
+    def has_delete_permission(self, request, obj=None):
+        return request.user.is_god()

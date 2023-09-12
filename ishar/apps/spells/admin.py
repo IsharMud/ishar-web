@@ -92,11 +92,15 @@ class SpellsFlagsAdmin(admin.ModelAdmin):
     """
     Ishar spell flag administration.
     """
-    fieldsets = ((None, {"fields": ("id", "spell", "flag")}),)
-    list_display = search_fields = ("id", "spell", "flag")
-    list_filter = ("flag",)
-    readonly_fields = ("id",)
     model = SpellSpellFlag
+    fieldsets = ((None, {"fields": ("id", "spell", "flag")}),)
+    list_display = ("spell", "flag")
+    list_filter = (
+        ("spell", admin.RelatedOnlyFieldListFilter),
+        ("flag", admin.RelatedOnlyFieldListFilter)
+    )
+    readonly_fields = ("id",)
+    search_fields = ("id", "spell", "flag")
 
     def has_add_permission(self, request, obj=None):
         return request.user.is_eternal()

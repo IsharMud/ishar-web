@@ -3,10 +3,9 @@ from django.db import models
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 
-
-from ...accounts.models import Account
-from ....util.ip import dec2ip
-from ....util.level import get_immortal_level, get_immortal_type
+from ..accounts.models import Account
+from ...util.ip import dec2ip
+from ...util.level import get_immortal_level, get_immortal_type
 
 
 class Player(models.Model):
@@ -21,7 +20,7 @@ class Player(models.Model):
         help_text="Account that owns the player character.",
         verbose_name="Account"
     )
-    name = models.CharField(
+    name = models.SlugField(
         unique=True,
         max_length=15,
         help_text="Name of the player character.",
@@ -260,7 +259,7 @@ class Player(models.Model):
         """
         return self.is_immortal_type(immortal_type="Eternal")
 
-    @admin.display(boolean=True, description="Forger??", ordering="-true_level")
+    @admin.display(boolean=True, description="Forger?", ordering="-true_level")
     def is_forger(self) -> bool:
         """
         Boolean whether player is consort, or above.
@@ -298,7 +297,6 @@ class Player(models.Model):
             return True
         return False
 
-    @property
     @admin.display(boolean=False, description="Level", ordering='true_level')
     def level(self) -> int:
         return self.true_level
@@ -339,8 +337,7 @@ class Player(models.Model):
             stats[stat_order] = players_stats[stat_order]
         return stats
 
-    @property
-    def immortal_type(self) -> (str, None):
+    def get_immortal_type(self) -> (str, None):
         """
         Type of immortal.
         Returns one of settings.IMMORTAL_LEVELS tuple text values,
@@ -348,27 +345,86 @@ class Player(models.Model):
         """
         return get_immortal_type(level=self.true_level)
 
-    def get_player_type(self) -> str:
+    def get_player_phrase(self) -> str:
+        """
+        Player phrase.
+        """
+        if self.is_deleted is True:
+            return "was"
+        return "is"
+
+    def get_player_phrase_own(self) -> str:
+        """
+        Player phrase for ownership.
+        """
+        if self.is_deleted is True:
+            return "were"
+        return "are"
+
+    def get_player_phrase_owns(self) -> str:
+        """
+        Player phrase for plural ownership.
+        """
+        if self.is_deleted is True:
+            return "had"
+        return "has"
+
+    def get_player_gender(self) -> str:
+            """
+            Player gender.
+            """
+            if self.common.sex == 1:
+                return "he"
+
+            if self.common.sex == 2:
+                return "she"
+
+            return "they"
+
+    def get_player_gender_own(self) -> str:
+        """
+        Player gender ownership.
+        """
+        if self.sex == 1:
+            return "his"
+
+        if self.sex == 2:
+            return "her"
+
+        return "their"
+
+    def get_player_gender_owns(self) -> str:
+        """
+        Player gender ownership plural.
+        """
+        if self.sex == 1:
+            return "his"
+
+        if self.sex == 2:
+            return "hers"
+
+        return "have"
+
+    def get_player_type(self):
         """
         Get the type pf player (string), returns one of:
+            - Dead
             - An immortal type:
                 * One of settings.IMMORTAL_LEVELS tuple text values.
-            - Dead
             - Survival
             - Classic
         """
-        if self.is_immortal:
-            return self.immortal_type
-
         if self.is_deleted == 1:
             return "Dead"
 
-        if self.is_survival:
+        if self.true_level >= min(settings.IMMORTAL_LEVELS)[0]:
+            return get_immortal_type(level=self.true_level)
+
+        if self.is_survival() is True:
             return "Survival"
 
         return "Classic"
 
-    @property
     @admin.display(boolean=False, description="Type")
     def player_type(self) -> str:
         """
@@ -396,7 +452,7 @@ class Player(models.Model):
 
         # Survival players earn less essence from renown
         divisor = 10
-        if self.is_survival:
+        if self.is_survival() is True:
             divisor = 20
 
         # Start with two (2) points for existing,
@@ -405,3 +461,68 @@ class Player(models.Model):
         if self.remorts > 0:
             earned += int(self.remorts / 5) * 3 + 1
         return earned
+
+
+class RemortUpgrade(models.Model):
+    """
+    Remort Upgrade.
+    """
+    upgrade_id = models.PositiveIntegerField(
+        help_text=(
+            "Auto-generated, permanent identification number of the "
+            "remort upgrade."
+        ),
+        primary_key=True,
+        verbose_name="Upgrade ID"
+    )
+    name = models.CharField(
+        help_text="Name of the remort upgrade.",
+        max_length=20,
+        unique=True,
+        verbose_name="Name"
+    )
+    renown_cost = models.PositiveSmallIntegerField(
+        help_text="Renown cost of the remort upgrade.",
+        verbose_name="Renown Cost"
+    )
+    max_value = models.PositiveSmallIntegerField(
+        help_text="Maximum value of the remort upgrade.",
+        verbose_name="Maximum Value"
+    )
+    scale = models.IntegerField(
+        help_text="Scale of the remort upgrade.",
+        verbose_name="Scale"
+    )
+    display_name = models.CharField(
+        help_text="Display name of the remort upgrade.",
+        max_length=30,
+        verbose_name="Display Name"
+    )
+    can_buy = models.BooleanField(
+        help_text="Whether the remort upgrade can be bought.",
+        verbose_name="Can Buy?"
+    )
+    bonus = models.IntegerField(
+        help_text="Bonus of the remort upgrade.",
+        verbose_name="Bonus"
+    )
+    survival_scale = models.IntegerField(
+        help_text="Scale of the remort upgrade, for survival players.",
+        verbose_name="Survival Scale"
+    )
+    survival_renown_cost = models.IntegerField(
+        help_text="Renown cost of the remort upgrade, for survival players.",
+        verbose_name="Survival Renown Cost"
+    )
+
+    class Meta:
+        db_table = "remort_upgrades"
+        managed = False
+        ordering = ("-can_buy", "display_name",)
+        verbose_name = "Remort Upgrade"
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}: {repr(self.__str__())}"
+
+    def __str__(self):
+        return self.display_name
