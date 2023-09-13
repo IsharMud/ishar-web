@@ -45,12 +45,3 @@ class QuestsAdmin(ModelAdmin):
             obj.deprecated_prerequisite = '-1'
             obj.deprecated_max_level = '20'
         super().save_model(request, obj, form, change)
-
-    def has_add_permission(self, request, obj=None):
-        return request.user.is_immortal()
-
-    def has_delete_permission(self, request, obj=None):
-        return request.user.is_immortal()
-
-    def has_view_or_change_permission(self, request, obj=None):
-        return request.user.is_immortal()

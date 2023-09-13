@@ -42,15 +42,3 @@ class ClassesAdmin(admin.ModelAdmin):
         "class_name", "is_playable", "class_display", "class_description"
     )
     search_fields = ("class_name", "class_display", "class_description")
-
-    def has_add_permission(self, request, obj=None):
-        return request.user.is_god()
-
-    def has_change_permission(self, request, obj=None):
-        return request.user.is_god()
-
-    def has_delete_permission(self, request, obj=None):
-        return request.user.is_god()
-
-    def has_view_permission(self, request, obj=None):
-        return request.user.is_immortal()

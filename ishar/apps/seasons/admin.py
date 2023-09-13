@@ -33,15 +33,3 @@ class SeasonsAdmin(admin.ModelAdmin):
     search_fields = (
         "seasonal_leader_name", "effective_date", "expiration_date"
     )
-
-    def has_add_permission(self, request, obj=None):
-        return request.user.is_god()
-
-    def has_change_permission(self, request, obj=None):
-        return request.user.is_god()
-
-    def has_delete_permission(self, request, obj=None):
-        return request.user.is_god()
-
-    def has_view_permission(self, request, obj=None):
-        return request.user.is_immortal()

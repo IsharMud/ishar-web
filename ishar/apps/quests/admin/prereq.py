@@ -16,15 +16,6 @@ class QuestPrereqsAdmin(admin.ModelAdmin):
     list_filter = (("quest", admin.RelatedOnlyFieldListFilter),)
     model = QuestPrereq
 
-    def has_add_permission(self, request, obj=None):
-        return request.user.is_immortal()
-
-    def has_delete_permission(self, request, obj=None):
-        return request.user.is_immortal()
-
-    def has_view_or_change_permission(self, request, obj=None):
-        return request.user.is_immortal()
-
 
 class QuestPrereqsAdminInline(admin.TabularInline):
     """
@@ -32,12 +23,3 @@ class QuestPrereqsAdminInline(admin.TabularInline):
     """
     fk_name = "quest"
     model = QuestPrereq
-
-    def has_add_permission(self, request, obj=None):
-        return request.user.is_immortal()
-
-    def has_delete_permission(self, request, obj=None):
-        return request.user.is_immortal()
-
-    def has_view_or_change_permission(self, request, obj=None):
-        return request.user.is_immortal()

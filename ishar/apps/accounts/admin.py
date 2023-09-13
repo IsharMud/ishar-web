@@ -20,9 +20,6 @@ class AccountPlayersInlineAdmin(admin.TabularInline):
         """
         return False
 
-    def has_view_or_change_permission(self, request, obj=None):
-        return request.user.is_god()
-
     def has_delete_permission(self, request, obj=None):
         """
         Disabling deleting players in /admin/accounts/ inline.
@@ -103,17 +100,11 @@ class AccountsAdmin(UserAdmin):
         """
         return False
 
-    def has_change_permission(self, request, obj=None):
-        return request.user.is_god()
-
     def has_delete_permission(self, request, obj=None):
         """
         Disable deleting accounts in /admin/.
         """
         return False
-
-    def has_view_permission(self, request, obj=None):
-        return request.user.is_eternal()
 
 
 @admin.register(AccountUpgrade)
@@ -131,15 +122,3 @@ class AccountUpgradesAdmin(admin.ModelAdmin):
     list_filter = ("is_disabled",)
     search_fields = ("name", "description")
     readonly_fields = ("id",)
-
-    def has_add_permission(self, request, obj=None):
-        return request.user.is_eternal()
-
-    def has_change_permission(self, request, obj=None):
-        return request.user.is_eternal()
-
-    def has_delete_permission(self, request, obj=None):
-        return request.user.is_eternal()
-
-    def has_view_permission(self, request, obj=None):
-        return request.user.is_immortal()

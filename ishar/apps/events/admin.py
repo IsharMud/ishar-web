@@ -21,15 +21,3 @@ class GlobalEventsAdmin(admin.ModelAdmin):
     ordering = ("-end_time",)
     readonly_fields = ("event_type",)
     search_fields = ("event_name", "event_desc", "start_time", "end_time")
-
-    def has_add_permission(self, request, obj=None):
-        return request.user.is_god()
-
-    def has_change_permission(self, request, obj=None):
-        return request.user.is_god()
-
-    def has_delete_permission(self, request, obj=None):
-        return request.user.is_god()
-
-    def has_view_permission(self, request, obj=None):
-        return request.user.is_immortal()

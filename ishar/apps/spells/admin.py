@@ -12,15 +12,6 @@ class ForceAdmin(admin.ModelAdmin):
     filter_horizontal = filter_vertical = list_filter = readonly_fields = ()
     list_display = search_fields = ("force_name",)
 
-    def has_add_permission(self, request, obj=None):
-        return request.user.is_immortal()
-
-    def has_delete_permission(self, request, obj=None):
-        return request.user.is_immortal()
-
-    def has_view_or_change_permission(self, request, obj=None):
-        return request.user.is_immortal()
-
 
 class SpellsFlagsAdminInline(admin.StackedInline):
     """
@@ -29,15 +20,6 @@ class SpellsFlagsAdminInline(admin.StackedInline):
     extra = 1
     model = SpellSpellFlag
 
-    def has_add_permission(self, request, obj=None):
-        return request.user.is_immortal()
-
-    def has_delete_permission(self, request, obj=None):
-        return request.user.is_immortal()
-
-    def has_view_or_change_permission(self, request, obj=None):
-        return request.user.is_immortal()
-
 
 class SpellsForcesAdminInline(admin.StackedInline):
     """
@@ -45,15 +27,6 @@ class SpellsForcesAdminInline(admin.StackedInline):
     """
     extra = 1
     model = SpellForce
-
-    def has_add_permission(self, request, obj=None):
-        return request.user.is_immortal()
-
-    def has_delete_permission(self, request, obj=None):
-        return request.user.is_immortal()
-
-    def has_view_or_change_permission(self, request, obj=None):
-        return request.user.is_immortal()
 
 
 @admin.register(SpellFlag)
@@ -64,15 +37,6 @@ class SpellFlagAdmin(admin.ModelAdmin):
     fieldsets = ((None, {"fields": ("name", "description")}),)
     list_display = search_fields = ("name", "description")
     model = SpellFlag
-
-    def has_add_permission(self, request, obj=None):
-        return request.user.is_immortal()
-
-    def has_delete_permission(self, request, obj=None):
-        return request.user.is_immortal()
-
-    def has_view_or_change_permission(self, request, obj=None):
-        return request.user.is_immortal()
 
 
 @admin.register(SpellSpellFlag)
@@ -89,15 +53,6 @@ class SpellsFlagsAdmin(admin.ModelAdmin):
     )
     readonly_fields = ("id",)
     search_fields = ("id", "spell", "flag")
-
-    def has_add_permission(self, request, obj=None):
-        return request.user.is_immortal()
-
-    def has_delete_permission(self, request, obj=None):
-        return request.user.is_immortal()
-
-    def has_view_or_change_permission(self, request, obj=None):
-        return request.user.is_immortal()
 
 
 @admin.register(Spell)
@@ -126,12 +81,3 @@ class SpellAdmin(admin.ModelAdmin):
         "enum_symbol", "func_name", "skill_name",
         "wearoff_msg", "chant_text", "appearance", "decide_func"
     )
-
-    def has_add_permission(self, request, obj=None):
-        return request.user.is_immortal()
-
-    def has_delete_permission(self, request, obj=None):
-        return request.user.is_immortal()
-
-    def has_view_or_change_permission(self, request, obj=None):
-        return request.user.is_immortal()
