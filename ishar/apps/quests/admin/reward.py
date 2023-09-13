@@ -26,13 +26,13 @@ class QuestRewardsAdmin(admin.ModelAdmin):
     search_fields = ("reward_num", "reward_type", "quest", "class_restrict")
 
     def has_add_permission(self, request, obj=None):
-        return request.user.is_eternal()
-
-    def has_view_or_change_permission(self, request, obj=None):
-        return request.user.is_eternal()
+        return request.user.is_immortal()
 
     def has_delete_permission(self, request, obj=None):
-        return request.user.is_eternal()
+        return request.user.is_immortal()
+
+    def has_view_or_change_permission(self, request, obj=None):
+        return request.user.is_immortal()
 
 
 class QuestRewardsAdminInline(admin.TabularInline):
@@ -43,10 +43,10 @@ class QuestRewardsAdminInline(admin.TabularInline):
     model = QuestReward
 
     def has_add_permission(self, request, obj=None):
-        return request.user.is_eternal()
-
-    def has_view_or_change_permission(self, request, obj=None):
-        return request.user.is_eternal()
+        return request.user.is_immortal()
 
     def has_delete_permission(self, request, obj=None):
-        return request.user.is_eternal()
+        return request.user.is_immortal()
+
+    def has_view_or_change_permission(self, request, obj=None):
+        return request.user.is_immortal()

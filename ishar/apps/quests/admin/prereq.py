@@ -17,13 +17,13 @@ class QuestPrereqsAdmin(admin.ModelAdmin):
     model = QuestPrereq
 
     def has_add_permission(self, request, obj=None):
-        return request.user.is_eternal()
-
-    def has_view_or_change_permission(self, request, obj=None):
-        return request.user.is_eternal()
+        return request.user.is_immortal()
 
     def has_delete_permission(self, request, obj=None):
-        return request.user.is_eternal()
+        return request.user.is_immortal()
+
+    def has_view_or_change_permission(self, request, obj=None):
+        return request.user.is_immortal()
 
 
 class QuestPrereqsAdminInline(admin.TabularInline):
@@ -34,10 +34,10 @@ class QuestPrereqsAdminInline(admin.TabularInline):
     model = QuestPrereq
 
     def has_add_permission(self, request, obj=None):
-        return request.user.is_eternal()
-
-    def has_view_or_change_permission(self, request, obj=None):
-        return request.user.is_eternal()
+        return request.user.is_immortal()
 
     def has_delete_permission(self, request, obj=None):
-        return request.user.is_eternal()
+        return request.user.is_immortal()
+
+    def has_view_or_change_permission(self, request, obj=None):
+        return request.user.is_immortal()

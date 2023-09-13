@@ -37,7 +37,7 @@ class PatchAdmin(admin.ModelAdmin):
         return request.user.is_god()
 
     def has_view_permission(self, request, obj=None):
-        return request.user.is_eternal()
+        return request.user.is_immortal()
 
     def has_delete_permission(self, request, obj=None):
         return request.user.is_god()

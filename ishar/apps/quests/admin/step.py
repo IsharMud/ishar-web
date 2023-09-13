@@ -27,13 +27,13 @@ class QuestStepsAdmin(admin.ModelAdmin):
     )
 
     def has_add_permission(self, request, obj=None):
-        return request.user.is_eternal()
-
-    def has_view_or_change_permission(self, request, obj=None):
-        return request.user.is_eternal()
+        return request.user.is_immortal()
 
     def has_delete_permission(self, request, obj=None):
-        return request.user.is_eternal()
+        return request.user.is_immortal()
+
+    def has_view_or_change_permission(self, request, obj=None):
+        return request.user.is_immortal()
 
 
 class QuestStepsAdminInline(admin.TabularInline):
@@ -44,10 +44,10 @@ class QuestStepsAdminInline(admin.TabularInline):
     model = QuestStep
 
     def has_add_permission(self, request, obj=None):
-        return request.user.is_eternal()
-
-    def has_view_or_change_permission(self, request, obj=None):
-        return request.user.is_eternal()
+        return request.user.is_immortal()
 
     def has_delete_permission(self, request, obj=None):
-        return request.user.is_eternal()
+        return request.user.is_immortal()
+
+    def has_view_or_change_permission(self, request, obj=None):
+        return request.user.is_immortal()

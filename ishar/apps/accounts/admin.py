@@ -103,7 +103,7 @@ class AccountsAdmin(UserAdmin):
         """
         return False
 
-    def has_view_or_change_permission(self, request, obj=None):
+    def has_change_permission(self, request, obj=None):
         return request.user.is_god()
 
     def has_delete_permission(self, request, obj=None):
@@ -111,6 +111,9 @@ class AccountsAdmin(UserAdmin):
         Disable deleting accounts in /admin/.
         """
         return False
+
+    def has_view_permission(self, request, obj=None):
+        return request.user.is_eternal()
 
 
 @admin.register(AccountUpgrade)
@@ -130,13 +133,13 @@ class AccountUpgradesAdmin(admin.ModelAdmin):
     readonly_fields = ("id",)
 
     def has_add_permission(self, request, obj=None):
-        return request.user.is_god()
+        return request.user.is_eternal()
 
     def has_change_permission(self, request, obj=None):
-        return request.user.is_god()
-
-    def has_view_permission(self, request, obj=None):
         return request.user.is_eternal()
 
     def has_delete_permission(self, request, obj=None):
-        return request.user.is_god()
+        return request.user.is_eternal()
+
+    def has_view_permission(self, request, obj=None):
+        return request.user.is_immortal()

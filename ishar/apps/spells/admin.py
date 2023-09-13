@@ -13,16 +13,13 @@ class ForceAdmin(admin.ModelAdmin):
     list_display = search_fields = ("force_name",)
 
     def has_add_permission(self, request, obj=None):
-        return request.user.is_eternal()
-
-    def has_change_permission(self, request, obj=None):
-        return request.user.is_eternal()
+        return request.user.is_immortal()
 
     def has_delete_permission(self, request, obj=None):
-        return request.user.is_eternal()
+        return request.user.is_immortal()
 
-    def has_view_permission(self, request, obj=None):
-        return request.user.is_eternal()
+    def has_view_or_change_permission(self, request, obj=None):
+        return request.user.is_immortal()
 
 
 class SpellsFlagsAdminInline(admin.StackedInline):
@@ -33,16 +30,13 @@ class SpellsFlagsAdminInline(admin.StackedInline):
     model = SpellSpellFlag
 
     def has_add_permission(self, request, obj=None):
-        return request.user.is_eternal()
-
-    def has_change_permission(self, request, obj=None):
-        return request.user.is_eternal()
+        return request.user.is_immortal()
 
     def has_delete_permission(self, request, obj=None):
-        return request.user.is_eternal()
+        return request.user.is_immortal()
 
-    def has_view_permission(self, request, obj=None):
-        return request.user.is_eternal()
+    def has_view_or_change_permission(self, request, obj=None):
+        return request.user.is_immortal()
 
 
 class SpellsForcesAdminInline(admin.StackedInline):
@@ -53,16 +47,13 @@ class SpellsForcesAdminInline(admin.StackedInline):
     model = SpellForce
 
     def has_add_permission(self, request, obj=None):
-        return request.user.is_eternal()
-
-    def has_change_permission(self, request, obj=None):
-        return request.user.is_eternal()
+        return request.user.is_immortal()
 
     def has_delete_permission(self, request, obj=None):
-        return request.user.is_eternal()
+        return request.user.is_immortal()
 
-    def has_view_permission(self, request, obj=None):
-        return request.user.is_eternal()
+    def has_view_or_change_permission(self, request, obj=None):
+        return request.user.is_immortal()
 
 
 @admin.register(SpellFlag)
@@ -75,16 +66,13 @@ class SpellFlagAdmin(admin.ModelAdmin):
     model = SpellFlag
 
     def has_add_permission(self, request, obj=None):
-        return request.user.is_eternal()
-
-    def has_change_permission(self, request, obj=None):
-        return request.user.is_eternal()
+        return request.user.is_immortal()
 
     def has_delete_permission(self, request, obj=None):
-        return request.user.is_eternal()
+        return request.user.is_immortal()
 
-    def has_view_permission(self, request, obj=None):
-        return request.user.is_eternal()
+    def has_view_or_change_permission(self, request, obj=None):
+        return request.user.is_immortal()
 
 
 @admin.register(SpellSpellFlag)
@@ -103,16 +91,13 @@ class SpellsFlagsAdmin(admin.ModelAdmin):
     search_fields = ("id", "spell", "flag")
 
     def has_add_permission(self, request, obj=None):
-        return request.user.is_eternal()
-
-    def has_change_permission(self, request, obj=None):
-        return request.user.is_eternal()
+        return request.user.is_immortal()
 
     def has_delete_permission(self, request, obj=None):
-        return request.user.is_eternal()
+        return request.user.is_immortal()
 
-    def has_view_permission(self, request, obj=None):
-        return request.user.is_eternal()
+    def has_view_or_change_permission(self, request, obj=None):
+        return request.user.is_immortal()
 
 
 @admin.register(Spell)
@@ -143,13 +128,10 @@ class SpellAdmin(admin.ModelAdmin):
     )
 
     def has_add_permission(self, request, obj=None):
-        return request.user.is_eternal()
-
-    def has_change_permission(self, request, obj=None):
-        return request.user.is_eternal()
+        return request.user.is_immortal()
 
     def has_delete_permission(self, request, obj=None):
-        return request.user.is_eternal()
+        return request.user.is_immortal()
 
-    def has_view_permission(self, request, obj=None):
-        return request.user.is_eternal()
+    def has_view_or_change_permission(self, request, obj=None):
+        return request.user.is_immortal()
