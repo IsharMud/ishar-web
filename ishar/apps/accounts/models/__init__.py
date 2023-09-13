@@ -206,7 +206,7 @@ class Account(AbstractBaseUser, PermissionsMixin):
     is_admin = is_superuser = is_god
 
     # "Eternal"s and above can log in to Django Admin
-    is_staff = is_eternal
+    is_staff = is_immortal
 
     def check_password(self, raw_password: str = None) -> bool:
         """
