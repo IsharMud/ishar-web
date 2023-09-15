@@ -311,7 +311,7 @@ class Player(models.Model):
         stats = {}
 
         # Immortals have no stats.
-        if self.is_immortal:
+        if self.is_immortal() is True:
             return stats
 
         # No stats for mortal players below level five (5),
@@ -447,7 +447,7 @@ class Player(models.Model):
         """
 
         # Immortal players do not earn essence
-        if self.is_immortal:
+        if self.is_immortal() is True:
             return 0
 
         # Survival players earn less essence from renown

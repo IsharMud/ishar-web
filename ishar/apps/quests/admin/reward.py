@@ -15,7 +15,6 @@ class QuestRewardsAdmin(admin.ModelAdmin):
         ("Quest", {"fields": ("quest",)}),
         ("Class", {"fields": ("class_restrict",)})
     )
-    filter_horizontal = filter_vertical = ()
     list_display = ("quest_reward_id", "reward_type", "quest", "class_restrict")
     list_filter = (
         "reward_type", "class_restrict",
@@ -25,6 +24,9 @@ class QuestRewardsAdmin(admin.ModelAdmin):
     readonly_fields = ("quest_reward_id",)
     search_fields = ("reward_num", "reward_type", "quest", "class_restrict")
 
+    def has_module_permission(self, request, obj=None):
+        return request.user.is_immortal()
+
 
 class QuestRewardsAdminInline(admin.TabularInline):
     """
@@ -32,3 +34,6 @@ class QuestRewardsAdminInline(admin.TabularInline):
     """
     extra = 1
     model = QuestReward
+
+    def has_module_permission(self, request, obj=None):
+        return request.user.is_immortal()

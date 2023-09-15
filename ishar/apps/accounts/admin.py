@@ -77,6 +77,7 @@ class AccountsAdmin(UserAdmin):
             }
         )
     )
+    filter_horizontal = ()
     inlines = (AccountPlayersInlineAdmin,)
     list_display = (
         "account_name", model.EMAIL_FIELD, "player_count", "current_essence",
@@ -106,6 +107,15 @@ class AccountsAdmin(UserAdmin):
         """
         return False
 
+    def has_change_permission(self, request, obj=None):
+        return request.user.is_god()
+
+    def has_module_permission(self, request, obj=None):
+        return request.user.is_eternal()
+
+    def has_view_permission(self, request, obj=None):
+        return request.user.is_eternal()
+
 
 @admin.register(AccountUpgrade)
 class AccountUpgradesAdmin(admin.ModelAdmin):
@@ -122,3 +132,6 @@ class AccountUpgradesAdmin(admin.ModelAdmin):
     list_filter = ("is_disabled",)
     search_fields = ("name", "description")
     readonly_fields = ("id",)
+
+    def has_module_permission(self, request, obj=None):
+        return request.user.is_immortal()

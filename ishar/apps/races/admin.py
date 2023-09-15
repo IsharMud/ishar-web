@@ -32,7 +32,6 @@ class RacesAdmin(admin.ModelAdmin):
             "endure_heat", "endure_cold", "is_undead", "is_playable"
         )}),
     )
-    filter_horizontal = filter_vertical = ()
     list_display = (
         "display_name", "symbol", "is_playable", "folk_name",
         "short_description"
@@ -44,6 +43,9 @@ class RacesAdmin(admin.ModelAdmin):
         "short_description", "long_description"
     )
 
+    def has_module_permission(self, request, obj=None):
+        return request.user.is_immortal()
+
 
 @admin.register(RacialAffinity)
 class RacialAffinitiesAdmin(admin.ModelAdmin):
@@ -52,8 +54,9 @@ class RacialAffinitiesAdmin(admin.ModelAdmin):
     """
     model = Race
     fieldsets = ((None, {"fields": ("race", "force", "affinity_type")}),)
-    filter_horizontal = filter_vertical = ()
     list_display = ("race", "force", "affinity_type")
     list_filter = ("force", "affinity_type")
-    readonly_fields = ()
     search_fields = ("race", "force", "affinity_type")
+
+    def has_module_permission(self, request, obj=None):
+        return request.user.is_immortal()

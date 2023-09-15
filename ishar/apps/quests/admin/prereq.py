@@ -11,10 +11,12 @@ class QuestPrereqsAdmin(admin.ModelAdmin):
     fieldsets = (
         (None, {"fields": ("quest", "required_quest")}),
     )
-    filter_horizontal = filter_vertical = ()
     list_display = search_fields = ("quest", "required_quest")
     list_filter = (("quest", admin.RelatedOnlyFieldListFilter),)
     model = QuestPrereq
+
+    def has_module_permission(self, request, obj=None):
+        return request.user.is_immortal()
 
 
 class QuestPrereqsAdminInline(admin.TabularInline):
@@ -23,3 +25,6 @@ class QuestPrereqsAdminInline(admin.TabularInline):
     """
     fk_name = "quest"
     model = QuestPrereq
+
+    def has_module_permission(self, request, obj=None):
+        return request.user.is_immortal()

@@ -40,6 +40,9 @@ class QuestsAdmin(ModelAdmin):
         "completion_message", "quest_intro",
     )
 
+    def has_module_permission(self, request, obj=None):
+        return request.user.is_immortal()
+
     def save_model(self, request, obj, form, change):
         if obj and not change:
             obj.deprecated_prerequisite = '-1'

@@ -42,3 +42,6 @@ class ClassesAdmin(admin.ModelAdmin):
         "class_name", "is_playable", "class_display", "class_description"
     )
     search_fields = ("class_name", "class_display", "class_description")
+
+    def has_module_permission(self, request, obj=None):
+        return request.user.is_immortal()

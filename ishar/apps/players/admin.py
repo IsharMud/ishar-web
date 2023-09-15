@@ -65,6 +65,15 @@ class PlayerAdmin(admin.ModelAdmin):
         """
         return False
 
+    def has_change_permission(self, request, obj=None):
+        return request.user.is_god()
+
+    def has_module_permission(self, request, obj=None):
+        return request.user.is_eternal()
+
+    def has_view_permission(self, request, obj=None):
+        return request.user.is_eternal()
+
     def get_account_link(self, obj):
         """
         Admin link for account display.

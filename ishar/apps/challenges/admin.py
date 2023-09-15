@@ -43,3 +43,6 @@ class ChallengesAdmin(admin.ModelAdmin):
     list_filter = ("is_active", ChallengeCompletedListFilter)
     readonly_fields = ("challenge_id", "is_completed")
     search_fields = ("challenge_desc", "winner_desc", "mob_vnum", "mob_name")
+
+    def has_module_permission(self, request, obj=None):
+        return request.user.is_immortal()

@@ -205,7 +205,7 @@ class Account(AbstractBaseUser, PermissionsMixin):
     # "God"s are administrators/superusers for Django Admin
     is_admin = is_superuser = is_god
 
-    # "Eternal"s and above can log in to Django Admin
+    # Immortals and above can log in to Django Admin
     is_staff = is_immortal
 
     def check_password(self, raw_password: str = None) -> bool:
@@ -247,3 +247,5 @@ class Account(AbstractBaseUser, PermissionsMixin):
         if self.save():
             return True
         return False
+
+    groups = None

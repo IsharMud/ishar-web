@@ -1,12 +1,12 @@
+from django.contrib.auth import get_user_model
 from rest_framework.serializers import ModelSerializer
 
-from .models import Account
 from .models.upgrade import AccountUpgrade
 
 
 class AccountSerializer(ModelSerializer):
     class Meta:
-        model = Account
+        model = get_user_model()
         fields = "__all__"
 
 
