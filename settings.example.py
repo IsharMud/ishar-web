@@ -69,6 +69,29 @@ AUTHENTICATION_BACKENDS = (
     ('ishar.apps.accounts.backends.IsharUserAuthBackend'),
 )
 
+# Order of character statistics based on player class
+CLASS_STATS = {
+    "WARRIOR": (
+        "Strength", "Agility", "Endurance", "Willpower", "Focus", "Perception"
+    ),
+    "ROGUE": (
+        "Agility", "Perception", "Strength", "Focus", "Endurance", "Willpower"
+    ),
+    "CLERIC": (
+        "Willpower", "Strength", "Perception", "Endurance", "Focus", "Agility"
+    ),
+    "MAGICIAN": (
+        "Perception", "Focus", "Agility", "Willpower", "Endurance", "Strength"
+    ),
+    "NECROMANCER": (
+        "Focus", "Willpower", "Perception", "Agility", "Strength", "Endurance"
+    ),
+    # Alphabetic as last resort
+    "OTHER": (
+        "Agility", "Endurance", "Focus", "Perception", "Strength", "Willpower"
+    )
+}
+
 # CSRF/session cookies
 CSRF_COOKIE_DOMAIN = SESSION_COOKIE_DOMAIN = ALLOWED_HOSTS[0]
 CSRF_COOKIE_HTTPONLY = CSRF_COOKIE_SECURE = True

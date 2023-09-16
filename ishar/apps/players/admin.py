@@ -2,7 +2,7 @@ from django.conf import settings
 from django.contrib import admin
 from django.utils.safestring import mark_safe
 
-from .models import Player, RemortUpgrade
+from .models import Player, PlayerCommon, RemortUpgrade
 
 
 class ImmortalTypeListFilter(admin.SimpleListFilter):
@@ -19,8 +19,24 @@ class ImmortalTypeListFilter(admin.SimpleListFilter):
     def queryset(self, request, queryset):
         qs = queryset
         if self.value():
-            qs = qs.filter(true_level=self.value())
+            qs = qs.filter(common__level=self.value())
         return qs
+
+
+class PlayerCommonInlineAdmin(admin.TabularInline):
+    model = PlayerCommon
+
+    def has_add_permission(self, request, obj):
+        """
+        Disabling adding players in /admin/accounts/ inline.
+        """
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        """
+        Disabling deleting players in /admin/accounts/ inline.
+        """
+        return False
 
 
 @admin.register(Player)
@@ -33,7 +49,7 @@ class PlayerAdmin(admin.ModelAdmin):
     fieldsets = (
         (None, {"fields": (
             "id", "player_type", "account", "name", "description",
-            "true_level", "game_type", "is_deleted", "online"
+            "player_level", "game_type", "is_deleted", "online"
         )}),
         ("Points", {"fields": ("bankacc", "renown", "remorts", "favors")}),
         ("Totals", {"fields": (
@@ -42,15 +58,18 @@ class PlayerAdmin(admin.ModelAdmin):
         ("Rooms", {"fields": ("bound_room", "load_room", "inn_limit")}),
         ("Dates", {"fields": ("birth", "logon", "logout")})
     )
+    inlines = (PlayerCommonInlineAdmin,)
     list_display = (
         "name", "get_account_link", "player_type", "is_survival", "is_deleted",
-        "level", "renown"
+        "player_level", "renown"
     )
     list_filter = (
         "game_type", "is_deleted", ImmortalTypeListFilter,
-        ("account", admin.RelatedOnlyFieldListFilter), "true_level",
+        ("account", admin.RelatedOnlyFieldListFilter),
     )
-    readonly_fields = ("id", "birth", "logon", "logout", "player_type")
+    readonly_fields = (
+        "id", "birth", "logon", "logout", "player_type", "player_level"
+    )
     search_fields = ("name", "account__account_name")
 
     def has_add_permission(self, request, obj=None):
@@ -73,6 +92,9 @@ class PlayerAdmin(admin.ModelAdmin):
 
     def has_view_permission(self, request, obj=None):
         return request.user.is_eternal()
+
+    def player_level(self, obj):
+        return obj.common.level
 
     def get_account_link(self, obj):
         """

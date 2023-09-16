@@ -519,7 +519,7 @@ class RacesSkills(models.Model):
         db_table = 'races_skills'
 
 
-class RacialAffinities(models.Model):
+class RaceAffinities(models.Model):
     race = models.ForeignKey(Races, models.DO_NOTHING)
     force = models.ForeignKey(Forces, models.DO_NOTHING)
     affinity_type = models.IntegerField()

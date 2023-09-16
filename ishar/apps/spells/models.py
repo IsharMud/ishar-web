@@ -32,10 +32,13 @@ class SpellFlag(models.Model):
     Spell Flag.
     """
     id = models.AutoField(
-        primary_key=True,
+        blank=False,
+        editable=False,
         help_text=(
             "Auto-generated permanent identification number for a spell flag."
         ),
+        null=False,
+        primary_key=True,
         verbose_name="Spell Flag ID"
     )
     name = models.CharField(

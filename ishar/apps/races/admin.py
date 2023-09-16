@@ -1,6 +1,28 @@
 from django.contrib import admin
 
-from .models import Race, RacialAffinity
+from .models import Race, RaceAffinity, RaceSkill
+
+
+class RaceAffinityAdminInline(admin.TabularInline):
+    """
+    Ishar race affinity inline administration.
+    """
+    extra = 1
+    model = RaceAffinity
+
+    def has_module_permission(self, request, obj=None):
+        return request.user.is_immortal()
+
+
+class RaceSkillAdminInline(admin.TabularInline):
+    """
+    Ishar race skill inline administration.
+    """
+    extra = 1
+    model = RaceSkill
+
+    def has_module_permission(self, request, obj=None):
+        return request.user.is_immortal()
 
 
 @admin.register(Race)
@@ -32,6 +54,7 @@ class RacesAdmin(admin.ModelAdmin):
             "endure_heat", "endure_cold", "is_undead", "is_playable"
         )}),
     )
+    inlines = (RaceSkillAdminInline, RaceAffinityAdminInline)
     list_display = (
         "display_name", "symbol", "is_playable", "folk_name",
         "short_description"
@@ -47,16 +70,51 @@ class RacesAdmin(admin.ModelAdmin):
         return request.user.is_immortal()
 
 
-@admin.register(RacialAffinity)
-class RacialAffinitiesAdmin(admin.ModelAdmin):
+@admin.register(RaceAffinity)
+class RaceAffinitiesAdmin(admin.ModelAdmin):
     """
-    Ishar race administration.
+    Ishar race affinity administration.
     """
-    model = Race
-    fieldsets = ((None, {"fields": ("race", "force", "affinity_type")}),)
-    list_display = ("race", "force", "affinity_type")
-    list_filter = ("force", "affinity_type")
+    model = RaceAffinity
+    fieldsets = (
+        (None, {"fields": ("race_affinity_id",)}),
+        ("Race", {"fields": ("race",)}),
+        ("Force", {"fields": ("force",)}),
+        ("Affinity", {"fields": ("affinity_type",)})
+    )
+    list_display = ("race_affinity_id", "race", "force", "affinity_type")
+    list_filter = (
+        "affinity_type",
+        ("force", admin.RelatedOnlyFieldListFilter),
+        ("race", admin.RelatedOnlyFieldListFilter),
+    )
+    readonly_fields = ("race_affinity_id",)
     search_fields = ("race", "force", "affinity_type")
+
+    def has_module_permission(self, request, obj=None):
+        return request.user.is_immortal()
+
+
+@admin.register(RaceSkill)
+class RaceSkillAdmin(admin.ModelAdmin):
+    """
+    Ishar race skill administration.
+    """
+    model = RaceSkill
+    fieldsets = (
+        (None, {"fields": ("race_skill_id",)}),
+        ("Race", {"fields": ("race",)}),
+        ("Skill/Spell", {"fields": ("skill",)}),
+        ("Level", {"fields": ("level",)})
+    )
+    list_display = ("race_skill_id", "race", "skill", "level")
+    list_filter = (
+        "level",
+        ("race", admin.RelatedOnlyFieldListFilter),
+        ("skill", admin.RelatedOnlyFieldListFilter),
+    )
+    readonly_fields = ("race_skill_id",)
+    search_fields = ("race", "skill", "level")
 
     def has_module_permission(self, request, obj=None):
         return request.user.is_immortal()
