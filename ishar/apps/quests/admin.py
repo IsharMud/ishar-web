@@ -1,11 +1,56 @@
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
 
-from .prereq import QuestPrereqsAdminInline
-from .reward import QuestRewardsAdminInline
-from .step import QuestStepsAdminInline
+from .models import Quest, QuestPrereq, QuestReward, QuestStep
 
-from ..models import Quest
+
+@admin.register(QuestPrereq)
+class QuestPrereqsAdmin(admin.ModelAdmin):
+    """
+    Ishar quest prerequisite administration.
+    """
+    fieldsets = (
+        (None, {"fields": ("quest", "required_quest")}),
+    )
+    list_display = search_fields = ("quest", "required_quest")
+    list_filter = (("quest", admin.RelatedOnlyFieldListFilter),)
+    model = QuestPrereq
+
+    def has_module_permission(self, request, obj=None):
+        return request.user.is_immortal()
+
+
+class QuestPrereqsAdminInline(admin.TabularInline):
+    """
+    Ishar quest prerequisite administration inline.
+    """
+    fk_name = "quest"
+    model = QuestPrereq
+
+    def has_module_permission(self, request, obj=None):
+        return request.user.is_immortal()
+
+
+class QuestRewardsAdminInline(admin.TabularInline):
+    """
+    Ishar quest reward administration inline.
+    """
+    extra = 1
+    model = QuestReward
+
+    def has_module_permission(self, request, obj=None):
+        return request.user.is_immortal()
+
+
+class QuestStepsAdminInline(admin.TabularInline):
+    """
+    Ishar quest step administration inline.
+    """
+    extra = 1
+    model = QuestStep
+
+    def has_module_permission(self, request, obj=None):
+        return request.user.is_immortal()
 
 
 @admin.register(Quest)

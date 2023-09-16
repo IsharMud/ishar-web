@@ -1,9 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 
-from .models import Quest
-from .models.prereq import QuestPrereq
-from .models.reward import QuestReward
-from .models.step import QuestStep
+from .models import Quest, QuestPrereq, QuestReward, QuestStep
 
 
 class QuestSerializer(ModelSerializer):
@@ -18,13 +15,13 @@ class QuestPrereqSerializer(ModelSerializer):
         fields = "__all__"
 
 
-class QuestRewardSerializer(ModelSerializer):
-    class Meta:
-        model = QuestReward
-        fields = "__all__"
-
-
 class QuestStepSerializer(ModelSerializer):
     class Meta:
         model = QuestStep
+        fields = "__all__"
+
+
+class QuestRewardSerializer(ModelSerializer):
+    class Meta:
+        model = QuestReward
         fields = "__all__"

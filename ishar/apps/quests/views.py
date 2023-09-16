@@ -1,10 +1,7 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import permissions, viewsets
 
-from .models import Quest
-from .models.prereq import QuestPrereq
-from .models.reward import QuestReward
-from .models.step import QuestStep
+from .models import Quest, QuestPrereq, QuestStep, QuestReward
 from .serializers import (
     QuestSerializer,
     QuestPrereqSerializer, QuestRewardSerializer, QuestStepSerializer

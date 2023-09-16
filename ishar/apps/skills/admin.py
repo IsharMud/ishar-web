@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Force, SpellFlag, SkillForce, Skill, SkillSpellFlag
+from .models import Force, SkillForce, Skill, SkillSpellFlag
 
 
 @admin.register(Force)
@@ -18,7 +18,7 @@ class ForceAdmin(admin.ModelAdmin):
 
 class SkillsSpellFlagsAdminInline(admin.TabularInline):
     """
-    Ishar spell's flags inline administration.
+    Ishar skill/spell's flags inline administration.
     """
     extra = 1
     model = SkillSpellFlag
@@ -33,38 +33,6 @@ class SkillsForcesAdminInline(admin.TabularInline):
     """
     extra = 1
     model = SkillForce
-
-    def has_module_permission(self, request, obj=None):
-        return request.user.is_immortal()
-
-
-@admin.register(SpellFlag)
-class SpellFlagAdmin(admin.ModelAdmin):
-    """
-    Ishar spell flag administration.
-    """
-    fieldsets = ((None, {"fields": ("name", "description")}),)
-    list_display = search_fields = ("name", "description")
-    model = SpellFlag
-
-    def has_module_permission(self, request, obj=None):
-        return request.user.is_immortal()
-
-
-@admin.register(SkillSpellFlag)
-class SkillSpellsFlagsAdmin(admin.ModelAdmin):
-    """
-    Ishar skill/spell flag administration.
-    """
-    model = SkillSpellFlag
-    fieldsets = ((None, {"fields": ("id", "skill", "flag")}),)
-    list_display = ("skill", "flag")
-    list_filter = (
-        ("skill", admin.RelatedOnlyFieldListFilter),
-        ("flag", admin.RelatedOnlyFieldListFilter)
-    )
-    readonly_fields = ("id",)
-    search_fields = ("id", "skill", "flag")
 
     def has_module_permission(self, request, obj=None):
         return request.user.is_immortal()
