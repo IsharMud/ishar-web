@@ -138,7 +138,7 @@ INSTALLED_APPS = [
     "ishar.apps.quests",
     "ishar.apps.races",
     "ishar.apps.seasons",
-    "ishar.apps.spells",
+    "ishar.apps.skills"
 ]
 
 MIDDLEWARE = [

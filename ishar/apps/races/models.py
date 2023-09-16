@@ -1,6 +1,6 @@
 from django.db import models
 
-from ..spells.models import Force, Spell
+from ..skills.models import Force, Skill
 
 
 class Race(models.Model):
@@ -287,7 +287,7 @@ class RaceSkill(models.Model):
     )
     skill = models.ForeignKey(
         db_column="skill_id",
-        to=Spell,
+        to=Skill,
         on_delete=models.CASCADE,
         help_text="Skill (or spell) related to a race.",
         verbose_name="Skill"

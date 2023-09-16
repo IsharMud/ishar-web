@@ -1,8 +1,8 @@
 from rest_framework import viewsets, permissions
 
-from .models import Force, Spell, SpellFlag, SpellSpellFlag
-from .serializers import ForceSerializer, SpellSerializer, \
-    SpellFlagSerializer, SpellSpellFlagSerializer
+from .models import Force, Skill, SpellFlag, SkillSpellFlag
+from .serializers import ForceSerializer, SkillSerializer, \
+    SpellFlagSerializer, SkillSpellFlagSerializer
 
 
 class ForcesViewSet(viewsets.ModelViewSet):
@@ -15,12 +15,12 @@ class ForcesViewSet(viewsets.ModelViewSet):
     queryset = model.objects.all()
 
 
-class SpellsViewSet(viewsets.ModelViewSet):
+class SkillsViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows spells to be viewed or edited.
     """
-    model = Spell
-    serializer_class = SpellSerializer
+    model = Skill
+    serializer_class = SkillSerializer
     permission_classes = [permissions.IsAdminUser]
     queryset = model.objects.all()
 
@@ -35,11 +35,11 @@ class SpellFlagsViewSet(viewsets.ModelViewSet):
     queryset = model.objects.all()
 
 
-class SpellsFlagsViewSet(viewsets.ModelViewSet):
+class SkillsFlagsViewSet(viewsets.ModelViewSet):
     """
-    API endpoint that allows spell's flags to be viewed or edited.
+    API endpoint that allows skill/spell's flags to be viewed or edited.
     """
-    model = SpellSpellFlag
-    serializer_class = SpellSpellFlagSerializer
+    model = SkillSpellFlag
+    serializer_class = SkillSpellFlagSerializer
     permission_classes = [permissions.IsAdminUser]
     queryset = model.objects.all()

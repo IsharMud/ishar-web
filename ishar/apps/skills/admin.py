@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Force, SpellFlag, SpellForce, Spell, SpellSpellFlag
+from .models import Force, SpellFlag, SkillForce, Skill, SkillSpellFlag
 
 
 @admin.register(Force)
@@ -16,23 +16,23 @@ class ForceAdmin(admin.ModelAdmin):
         return request.user.is_immortal()
 
 
-class SpellsFlagsAdminInline(admin.StackedInline):
+class SkillsSpellFlagsAdminInline(admin.TabularInline):
     """
     Ishar spell's flags inline administration.
     """
     extra = 1
-    model = SpellSpellFlag
+    model = SkillSpellFlag
 
     def has_module_permission(self, request, obj=None):
         return request.user.is_immortal()
 
 
-class SpellsForcesAdminInline(admin.StackedInline):
+class SkillsForcesAdminInline(admin.TabularInline):
     """
-    Ishar spell's forces inline administration.
+    Ishar skill's forces inline administration.
     """
     extra = 1
-    model = SpellForce
+    model = SkillForce
 
     def has_module_permission(self, request, obj=None):
         return request.user.is_immortal()
@@ -51,29 +51,29 @@ class SpellFlagAdmin(admin.ModelAdmin):
         return request.user.is_immortal()
 
 
-@admin.register(SpellSpellFlag)
-class SpellsFlagsAdmin(admin.ModelAdmin):
+@admin.register(SkillSpellFlag)
+class SkillSpellsFlagsAdmin(admin.ModelAdmin):
     """
-    Ishar spell flag administration.
+    Ishar skill/spell flag administration.
     """
-    model = SpellSpellFlag
-    fieldsets = ((None, {"fields": ("id", "spell", "flag")}),)
-    list_display = ("spell", "flag")
+    model = SkillSpellFlag
+    fieldsets = ((None, {"fields": ("id", "skill", "flag")}),)
+    list_display = ("skill", "flag")
     list_filter = (
-        ("spell", admin.RelatedOnlyFieldListFilter),
+        ("skill", admin.RelatedOnlyFieldListFilter),
         ("flag", admin.RelatedOnlyFieldListFilter)
     )
     readonly_fields = ("id",)
-    search_fields = ("id", "spell", "flag")
+    search_fields = ("id", "skill", "flag")
 
     def has_module_permission(self, request, obj=None):
         return request.user.is_immortal()
 
 
-@admin.register(Spell)
-class SpellAdmin(admin.ModelAdmin):
+@admin.register(Skill)
+class SkillAdmin(admin.ModelAdmin):
     """
-    Ishar spell administration.
+    Ishar skill administration.
     """
     fieldsets = (
         (None, {"fields": ("enum_symbol", "func_name", "skill_name")}),
@@ -87,10 +87,10 @@ class SpellAdmin(admin.ModelAdmin):
         ("Scale/Mod", {"fields": ("scale", "mod_stat_1", "mod_stat_2")}),
         ("Booleans", {"fields": ("is_spell", "is_skill", "is_type")})
     )
-    inlines = (SpellsFlagsAdminInline, SpellsForcesAdminInline)
+    inlines = (SkillsSpellFlagsAdminInline, SkillsForcesAdminInline)
     list_display = ("skill_name", "is_spell", "is_skill", "is_type")
     list_filter = ("is_spell", "is_skill", "is_type")
-    model = Spell
+    model = Skill
     search_fields = (
         "enum_symbol", "func_name", "skill_name",
         "wearoff_msg", "chant_text", "appearance", "decide_func"
