@@ -14,11 +14,11 @@ class QuestReward(models.Model):
         verbose_name="Quest Reward ID"
     )
     reward_type = models.IntegerField(
-        choices=[
+        choices=(
             (0, "Object_always"), (1, "Object_Choice"), (2, "Money"),
             (3, "Alignment"), (4, "Skill"), (5, "Renown"), (6, "Experience"),
             (7, "Quest"), (8, "Relic")
-        ],
+        ),
         help_text="Reward type.",
         verbose_name="Reward Type"
     )

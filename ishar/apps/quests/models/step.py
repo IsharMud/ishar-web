@@ -11,7 +11,7 @@ class QuestStep(models.Model):
         verbose_name="Quest Step ID"
     )
     step_type = models.IntegerField(
-        choices=[(0, 'Object'), (1, 'Kill'), (2, 'Room')],
+        choices=((0, 'Object'), (1, 'Kill'), (2, 'Room')),
         help_text="Quest step type.",
         verbose_name="Step Type",
     )
