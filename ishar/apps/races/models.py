@@ -236,7 +236,12 @@ class RaceAffinity(models.Model):
         verbose_name="Force"
     )
     affinity_type = models.IntegerField(
-        choices=((0, "Vulnerability"), (1, "Resistance"), (3, "Immunity")),
+        choices=(
+            (0, "Vulnerability"),
+            (1, "Susceptibility"),
+            (2, "Resistance"),
+            (3, "Immunity")
+        ),
         help_text="Type of race affinity.",
         verbose_name="Affinity Type"
     )
