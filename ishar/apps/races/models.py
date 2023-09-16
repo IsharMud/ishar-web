@@ -262,7 +262,8 @@ class RaceAffinity(models.Model):
 
     def __str__(self):
         return (
-            f"{self.force} @ {self.race} / {self.get_affinity_type_display()}"
+            f"{self.force} @ {self.race} / "
+            f"{self.get_affinity_type_display()} ({self.affinity_type})"
         )
 
 
