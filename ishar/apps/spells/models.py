@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 
 
 class Force(models.Model):
@@ -85,7 +86,9 @@ class Spell(models.Model):
         verbose_name="Skill Name"
     )
     min_posn = models.IntegerField(
-        blank=True, null=True,
+        blank=True,
+        choices=settings.PLAYER_POSITIONS,
+        null=True,
         help_text="Minimum posn of the spell.",
         verbose_name="Minimum posn"
     )

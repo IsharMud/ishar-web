@@ -63,6 +63,14 @@ IMMORTAL_LEVELS = (
     (21, "Consort"),
 )
 
+# Player position values
+PLAYER_POSITIONS = (
+    (0, "POSITION_DEAD"), (1, "POSITION_DYING"), (2, "POSITION_STUNNED"),
+    (3, "POSITION_PARALYZED"), (4, "POSITION_SLEEPING"), (5, "POSITION_HOISTED"),
+    (6, "POSITION_RESTING"), (7, "POSITION_SITTING"), (8, "POSITION_RIDING"),
+    (9, "UNUSED_POSN"), (10, "POSITION_STANDING")
+)
+
 # Authentication using MySQL database user accounts
 AUTH_USER_MODEL = "accounts.Account"
 AUTHENTICATION_BACKENDS = (
