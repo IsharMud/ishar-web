@@ -8,8 +8,9 @@ class ForceAdmin(admin.ModelAdmin):
     """
     Ishar force administration.
     """
-    fieldsets = ((None, {"fields": ("force_name",)}),)
-    list_display = search_fields = ("force_name",)
+    fields = ("id", "force_name")
+    list_display = list_display_links = search_fields = fields
+    readonly_fields = ("id",)
 
     def has_module_permission(self, request, obj=None):
         return request.user.is_immortal()

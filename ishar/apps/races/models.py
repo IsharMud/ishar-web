@@ -251,8 +251,8 @@ class RaceAffinity(models.Model):
         db_table = "racial_affinities"
         default_related_name = "affinity"
         ordering = ("race_affinity_id",)
-        verbose_name = "Race Affinity"
-        verbose_name_plural = "Race Affinities"
+        verbose_name = "Affinity"
+        verbose_name_plural = "Affinities"
 
     def __repr__(self):
         return (
@@ -302,8 +302,8 @@ class RaceSkill(models.Model):
         managed = False
         db_table = 'races_skills'
         ordering = ("race_skill_id",)
-        verbose_name = "Race Skill"
-        verbose_name_plural = "Race Skills"
+        verbose_name = "Skill"
+        verbose_name_plural = "Skills"
 
     def __repr__(self):
         return (
