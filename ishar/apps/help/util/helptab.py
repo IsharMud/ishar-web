@@ -24,6 +24,7 @@ regexes = {
     'minimum': re.compile(r'^ *(Minimum|minimum|Min|min) *\: *(.+)$'),
     'level': re.compile(r'^ *(Level|level) *\: *(.+)$'),
     'class': re.compile(r'^ *(Class|Classes) *\: *(.+)$'),
+    'component': re.compile(r'^ *(Component|Components) *\: *(.+)$'),
     'save': re.compile(r'^ *(Saves?) *\: *(.+)$'),
     'stats': re.compile(r'^ *(Stats?) *\: *(.+)$'),
     'topic': re.compile(r'^ *(Topic) *\: *(.+)$')

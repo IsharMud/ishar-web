@@ -218,7 +218,8 @@ class Player(models.Model):
 
     def __repr__(self) -> str:
         return (
-            f"Player: {repr(self.__str__())} ({self.id}) [{self.player_type}]'"
+            f"Player: {repr(self.__str__())} ({self.id}) "
+            f"[{self.get_player_type()}]"
         )
 
     def __str__(self) -> str:
@@ -301,6 +302,13 @@ class Player(models.Model):
         return False
 
     @property
+    def player_css(self):
+        """
+        Player CSS class.
+        """
+        return f"{self.get_player_type().lower()}-player"
+
+    @property
     def player_stats(self) -> dict:
         """
         Player stats.
@@ -318,8 +326,6 @@ class Player(models.Model):
         if self.true_level < 5 and self.online < 3600:
             return stats
 
-        # TODO: PlayerCommon
-
         # Otherwise, get the players actual stats
         players_stats = {
             "Agility": self.common.agility,
@@ -330,15 +336,15 @@ class Player(models.Model):
             "Willpower": self.common.willpower
         }
 
-        # Put the players stats in the appropriate order,
-        #   based on their class, and return them
+        # Put players stats in appropriate order, based on their class.
+        stats_order = settings.CLASS_STATS.get(None)
         class_name = self.common.player_class.class_name
-        stats_order = settings.CLASS_STATS[-1]
         if class_name in settings.CLASS_STATS:
-            stats_order = settings.CLASS_STATS[class_name]
+            stats_order = settings.CLASS_STATS.get(class_name)
 
         for stat_order in stats_order:
             stats[stat_order] = players_stats[stat_order]
+
         return stats
 
     def get_immortal_type(self) -> (str, None):
@@ -389,10 +395,10 @@ class Player(models.Model):
         """
         Player gender ownership.
         """
-        if self.sex == 1:
+        if self.common.sex == 1:
             return "his"
 
-        if self.sex == 2:
+        if self.common.sex == 2:
             return "her"
 
         return "their"
@@ -401,10 +407,10 @@ class Player(models.Model):
         """
         Player gender ownership plural.
         """
-        if self.sex == 1:
+        if self.common.sex == 1:
             return "his"
 
-        if self.sex == 2:
+        if self.common.sex == 2:
             return "hers"
 
         return "have"

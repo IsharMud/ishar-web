@@ -42,50 +42,49 @@
         {% if not player.is_immortal %}
             <ul id="player-details">
                 <li title="Name: {{ player.name | title | safe }} / Class: {{ player.common.player_class.class_display_name }} / Race: {{ player.common.player_race.display_name }}">
-                    {{ player.name | title | safe }} is a {{ player.common.player_class.class_display }} of {{ player.common.player_race.folk_name | lower }} origin.
+                    {{ player.name | title | safe }} is a {{ player.common.player_class.class_display }} of {{ player.common.race.folk_name | lower }} origin.
                 </li>
                 <li title="Level: {{ player.common.level }} {% if player.remorts > 0 %} / Remorts: {{ player.remorts }}{% endif %}">
-                    {{ player.gender | title }} is level {{ player.true_level }}
+                    {{ player.get_player_gender }} {{ player.get_player_phrase }} {{ player.get_player_phrase }} level {{ player.common.level }}
             {% if player.remorts > 0 %}
-                    and remorted {{ player.remorts }} time{% if player.remorts != 1 %}s{% endif %}
+                    and remorted {{ player.remorts }} time{{ player.remorts|pluralize }}
             {% endif %}.
                 </li>
             {% if player.total_renown > 0 %}
                 <li title="Total Renown: {{ player.total_renown }}">
-                    {{ player.gender | title }} accumulated {{ player.total_renown }} renown.
+                    {{ player.get_player_gender | title }} accumulated {{ player.total_renown }} renown.
                 </li>
             {% endif %}
             {% if player.quests_completed > 0 %}
                 <li title="Quests Completed: {{ player.quests_completed }}">
-                    {{ player.gender | title }} completed {{ player.quests_completed }} quest
+                    {{ player.get_player_gender | title }} completed {{ player.quests_completed }} quest
                     {% if player.quests_completed != 1 %}s{% endif %}.
                 </li>
             {% endif %}
             {% if player.challenges_completed > 0 %}
                 <li title="Challenges Completed: {{ player.challenges_completed }}">
-                    {{ player.get_gender | title }} completed {{ player.challenges_completed }} challenge
+                    {{ player.get_player_gender | title }} completed {{ player.challenges_completed }} challenge
                     {% if player.challenges_completed != 1 %}s{% endif %}.
                 </li>
             {% endif %}
                 <li title="Alignment: {{ player.player_alignment }} ({{ player.common.alignment }})">
-                    {{ player.get_gender_own | title }} alignment is {{ player.player_alignment }}.
+                    {{ player.get_player_gender_own | title }} alignment is {{ player.player_alignment }}.
                 </li>
                 <li title="{% if player.player_type == 'Classic' %}Deaths: {{ player.deaths }}{% elif player.player_type == 'Dead' %}{{ player.name | title | safe }} is DEAD!{% else %}{{ player.name | title | safe }} is a {{ player.player_type }} player!{% endif %}">
             {% if player.player_type == 'Dead' %}
-                    {{ player.name | title | safe }} is <span class="flash-error">DEAD</span>!
+                    {{ player.name | title | safe }} is <span class="message-error">DEAD</span>!
                     <ul>
-                        <li title="{{ player.name | title | safe }} died too often. {{ player.get_gender | title }} can not be resurrected!">
-                            {{ player.name | title | safe }} died too often. {{ player.get_gender | title }} can not be resurrected!
+                        <li title="{{ player.name | title | safe }} died too often. {{ player.get_player_gender | title }} can not be resurrected!">
+                            {{ player.name | title | safe }} died too often. {{ player.get_player_gender | title }} can not be resurrected!
                         </li>
                     </ul>
-            {% elif player.player_type == 'Survival' %}
+            {% elif player.player_type == "Survival" %}
                     {{ player.name | title | safe }} is a <span class="{{ player.player_css }}">{{ player.player_type }}</span> player!
             {% else %}
                 {% if player.deaths > 0 %}
-                    {{ player.get_gender | title }} died {{ player.deaths }}
-                    time{% if player.deaths != 1 %}s{% endif %}.
+                    {{ player.get_gender | title }} died {{ player.deaths }} time{{ player.deaths|pluralize }}.
                 {% else %}
-                    {{ player.get_gender | title }} has never died!
+                    {{ player.get_player_gender | title }} has never died!
                 {% endif %}
             {% endif %}
                 </li>
@@ -119,7 +118,7 @@
                 </tr>
                 <tr>
                 {% for stat_name, stat_value in player.player_stats.items %}
-                    <td title="{{ stat_name }}: {{ stat_value }}" {% if loop.first %} id="primary-stat"{% endif %}>
+                    <td title="{{ stat_name }}: {{ stat_value }}" {% if forloop.first %} id="primary-stat"{% endif %}>
                         {{ stat_value }}
                     </td>
                 {% endfor %}

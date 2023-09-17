@@ -47,25 +47,25 @@
                 Essence is preserved across seasons, and can be spent at any time
                 by typing <code>shop</code> after logging in.
             </p>
-    {% if current_user.current_essence and current_user.seasonal_earned %}
+    {% if request.user.current_essence and request.user.seasonal_earned %}
             <ul id="essence-balance">
-                <li title="You currently have: {{ current_user.current_essence }} essence.">
+                <li title="You currently have: {{ request.user.current_essence }} essence.">
                     You currently have:
                 </li>
                 <li class="nested-list">
                     <ul>
                         <li>
-                            {{ current_user.current_essence }}
+                            {{ request.user.current_essence }}
                         </li>
                     </ul>
                 </li>
-                <li title="This season, you have earned: {{ current_user.seasonal_earned }} essence.">
+                <li title="This season, you have earned: {{ request.user.seasonal_earned }} essence.">
                     This season, you have earned:
                 </li>
                 <li class="nested-list">
                     <ul>
                         <li>
-                            {{ current_user.seasonal_earned }}
+                            {{ request.user.seasonal_earned }}
                         </li>
                     </ul>
                 </li>

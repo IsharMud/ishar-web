@@ -83,6 +83,15 @@
             <h2>
                 {% block header %}{% endblock header %}
             </h2>
+{% block messages %}
+    {% if messages %}
+            <ul id="messages">
+        {% for message in messages %}
+                <li class="message-{{ message.tags }}">{{ message }}</li>
+        {% endfor %}
+            </ul>
+    {% endif %}
+{% endblock messages %}
 {% block content %}
 {% endblock content %}
         </div>

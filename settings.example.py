@@ -95,7 +95,7 @@ CLASS_STATS = {
         "Focus", "Willpower", "Perception", "Agility", "Strength", "Endurance"
     ),
     # Alphabetic as last resort
-    "OTHER": (
+    None: (
         "Agility", "Endurance", "Focus", "Perception", "Strength", "Willpower"
     )
 }

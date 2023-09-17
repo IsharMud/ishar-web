@@ -8,7 +8,7 @@
 {% endblock header %}
 {% block title %}Help{% if help_topic and help_topic.name %}: {{ help_topic.name }}{% endif %}{% endblock title %}
 {% block content %}
-    {% if current_user.is_anonymous %}
+    {% if request.user.is_anonymous %}
             <p>
                 If you are new here, you may want to download one of many
                 <a href="{% url "mud_clients" %}" title="MUD clients">MUD clients</a>,
@@ -43,8 +43,8 @@
             </div>
         {% endif %}
     {% endif %}
-    {% if help_topics %}
             <hr>
+    {% if help_topics %}
             <ul class="help-topic-list">
         {% for list_topic in help_topics %}
                 <li title="Topic: {{ list_topic }}">
@@ -52,5 +52,7 @@
                 </li>
         {% endfor %}
             </ul>
+    {% else %}
+        <strong>Sorry, but no help topics were found.</strong>
     {% endif %}
 {% endblock content %}

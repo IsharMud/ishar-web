@@ -56,7 +56,7 @@
                             quests: {{ leader.quests_completed }},
                             challenges: {{ leader.challenges_completed }},
                             deaths: {{ leader.deaths }}
-                        }{% if not loop.last %},{% endif %}
+                        }{% if not forloop.last %},{% endif %}
                       {% endfor %}
                     ],
                     search:     true,

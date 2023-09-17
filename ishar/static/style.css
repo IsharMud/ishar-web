@@ -187,25 +187,25 @@ embed {
 
 .dead-player,
 .survival-player,
-.flash-error {
+.message-error {
     color:              #fa8072;
 }
 
-.flash-info {
+.message-info {
     color:              #09f;
 }
 
-.flash-success, .active-season td {
+.message-success, .active-season td {
     color:              #4cbb17;
 }
 
-.flash-warn,
-.flash-warning
+.message-warn,
+.message-warning
 {
     color:              #f80;
 }
 
-#flashes, #primary-stat {
+#messages, #primary-stat {
     font-weight:        bold;
 }
 
