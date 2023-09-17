@@ -27,10 +27,14 @@
             <br><hr>
             <ul class="help-topic-list">
         {% for help_property in help_properties %}
+            {% with help_property_value=help_topic|get_dict_item:help_property %}
+                {% if help_property_value %}
                 <li>
                     <strong>{{ help_property | title }}</strong>:
-                    <code>{% autoescape off %}{{ help_topic | get_dict_item:help_property }}{% endautoescape %}</code>
+                    <code>{% autoescape off %}{{ help_property_value }}{% endautoescape %}</code>
                 </li>
+                {% endif %}
+            {% endwith %}
         {% endfor %}
             </ul>
         {% if help_topic.body_html %}
