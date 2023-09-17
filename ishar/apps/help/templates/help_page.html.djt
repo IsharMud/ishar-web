@@ -8,7 +8,7 @@
 {% endblock header %}
 {% block title %}Help{% if help_topic and help_topic.name %}: {{ help_topic.name }}{% endif %}{% endblock title %}
 {% block content %}
-    {% if not current_user.is_authenticated %}
+    {% if current_user.is_anonymous %}
             <p>
                 If you are new here, you may want to download one of many
                 <a href="{% url "mud_clients" %}" title="MUD clients">MUD clients</a>,
