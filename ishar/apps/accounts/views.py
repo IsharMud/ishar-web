@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.views import LoginView, LogoutView
+from django.contrib.auth.views import LoginView, LogoutView, TemplateView
 
 from rest_framework import viewsets, permissions
 
@@ -40,3 +40,10 @@ class IsharLogoutView(LogoutView):
 class PortalView(LoginRequiredMixin, LoginView):
     template_name = "portal.html.djt"
 
+
+class AccountView(LoginRequiredMixin, TemplateView):
+    template_name = "account.html.djt"
+
+
+class PasswordView(LoginRequiredMixin, TemplateView):
+    template_name = "password.html.djt"

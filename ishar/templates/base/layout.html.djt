@@ -61,7 +61,7 @@
                 </li>
     {% endif %}
                 <li title="Account">
-                    <a href="{% url "portal" %}">Account</a>
+                    <a href="{% url "account" %}">Account</a>
                 </li>
                 <li title="Challenges">
                     <a href="{% url "challenges" %}">Challenges</a>

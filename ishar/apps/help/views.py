@@ -37,7 +37,7 @@ class HelpPageView(HelpView):
             if help_topic in self.help_topics:
                 self.help_topic = self.help_topics[help_topic]
 
-            # Non-exact matches are more work...
+            # Non-exact matches are more work.
             if not self.help_topic:
 
                 # Redirect to the main help topic, if an alias matched.
