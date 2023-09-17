@@ -29,7 +29,7 @@
                     {{ news.subject }}
                 </h3>
                 <p class="news-body">
-                    {{ news.body }}
+                    {% autoescape off %}{{ news.body }}{% endautoescape %}
                 </p>
                 <p class="news-creation">
                     ~ {{ news.account.account_name }} @ {{ news.created_at }}

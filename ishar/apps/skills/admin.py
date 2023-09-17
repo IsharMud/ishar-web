@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Force, SkillForce, Skill, SkillSpellFlag
+from .models import Force, SkillForce, Skill, SkillSpellFlag, SpellFlag
 
 
 @admin.register(Force)
@@ -63,6 +63,19 @@ class SkillAdmin(admin.ModelAdmin):
         "enum_symbol", "func_name", "skill_name",
         "wearoff_msg", "chant_text", "appearance", "decide_func"
     )
+
+    def has_module_permission(self, request, obj=None):
+        return request.user.is_immortal()
+
+
+@admin.register(SpellFlag)
+class SpellFlagAdmin(admin.ModelAdmin):
+    """
+    Ishar spell flag administration.
+    """
+    fieldsets = ((None, {"fields": ("name", "description")}),)
+    list_display = search_fields = ("name", "description")
+    model = SpellFlag
 
     def has_module_permission(self, request, obj=None):
         return request.user.is_immortal()

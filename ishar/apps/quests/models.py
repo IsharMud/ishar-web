@@ -109,14 +109,14 @@ class QuestPrereq(models.Model):
     quest = models.OneToOneField(
         to=Quest,
         primary_key=True,
-        on_delete=models.DO_NOTHING,
+        on_delete=models.CASCADE,
         db_column="quest_id",
         help_text="Quest which requires a prerequisite.",
         verbose_name="Quest"
     )
     required_quest = models.ForeignKey(
         to=Quest,
-        on_delete=models.DO_NOTHING,
+        on_delete=models.CASCADE,
         db_column="required_quest",
         help_text="Prerequisite quest, required prior to another quest.",
         related_name="questprereq_required_quest_set",
@@ -163,7 +163,7 @@ class QuestReward(models.Model):
         to=Quest,
         db_column="quest_id",
         help_text="Quest which the reward is for.",
-        on_delete=models.DO_NOTHING,
+        on_delete=models.CASCADE,
         related_name="rewards",
         related_query_name="reward",
         verbose_name="Quest"

@@ -60,7 +60,7 @@ class SpellFlag(models.Model):
         verbose_name = "Flag"
 
     def __repr__(self):
-        return f"Spell Flag: {repr(self.__str__())} ({self.id})"
+        return f"{self.__class__.__name__} : {repr(self.__str__())} ({self.id})"
 
     def __str__(self):
         return self.name
@@ -270,8 +270,8 @@ class SkillSpellFlag(models.Model):
         db_table = "skills_spell_flags"
         ordering = ("id", "skill", "flag")
         unique_together = (("skill", "flag"),)
-        verbose_name = "Skill's Flag"
-        verbose_name_plural = "Skill's Flags"
+        verbose_name = "Skill Flag"
+        verbose_name_plural = "Skill Flags"
 
     def __repr__(self):
         return f"{self.__class__.__name__} : {self.__str__()} [{self.id}]"

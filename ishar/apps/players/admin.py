@@ -23,18 +23,21 @@ class ImmortalTypeListFilter(admin.SimpleListFilter):
         return qs
 
 
-class PlayerCommonInlineAdmin(admin.TabularInline):
+class PlayerCommonInlineAdmin(admin.StackedInline):
+    """
+    Player common inline administration.
+    """
     model = PlayerCommon
 
     def has_add_permission(self, request, obj):
         """
-        Disabling adding players in /admin/accounts/ inline.
+        Disabling adding rows to player_common.
         """
         return False
 
     def has_delete_permission(self, request, obj=None):
         """
-        Disabling deleting players in /admin/accounts/ inline.
+        Disabling deleting rows from player_common.
         """
         return False
 
@@ -93,9 +96,11 @@ class PlayerAdmin(admin.ModelAdmin):
     def has_view_permission(self, request, obj=None):
         return request.user.is_eternal()
 
-    def player_level(self, obj):
+    @staticmethod
+    def player_level(obj):
         return obj.common.level
 
+    @admin.display(description="Account", ordering="account")
     def get_account_link(self, obj):
         """
         Admin link for account display.
@@ -105,8 +110,6 @@ class PlayerAdmin(admin.ModelAdmin):
         return mark_safe(
             f'<a href="/admin/accounts/account/{account_id}">{account_name}</a>'
         )
-    get_account_link.short_description = "Account"
-    get_account_link.admin_order_field = "account"
 
 
 @admin.register(RemortUpgrade)
@@ -123,7 +126,6 @@ class RemortUpgradeAdmin(admin.ModelAdmin):
             "survival_renown_cost", "survival_scale")
         }),
     )
-    filter_horizontal = filter_vertical = ()
     list_display = ("display_name", "can_buy", "bonus")
     list_filter = ("can_buy", "bonus")
     readonly_fields = ("upgrade_id",)

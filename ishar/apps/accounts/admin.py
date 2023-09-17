@@ -2,16 +2,53 @@ from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
 from django.db.models import Count
+from django.utils.safestring import mark_safe
 
 from .models.upgrade import AccountUpgrade
 from ..players.models import Player
 
 
-class AccountPlayersInlineAdmin(admin.TabularInline):
+class AccountPlayersLinksInline(admin.TabularInline):
+    """
+    Account players links tabular inline administration.
+    """
     model = Player
-    fields = (
-        "name", "game_type", "is_deleted", "true_level", "remorts",
-        "renown", "total_renown"
+
+    @admin.display(description="Class")
+    def get_player_class(self, obj):
+        """
+        Admin text for player class.
+        """
+        return obj.common.player_class.class_name
+
+    @admin.display(description="Race")
+    def get_player_race(self, obj):
+        """
+        Admin text for player race.
+        """
+        return obj.common.race
+
+    @admin.display(description="Level")
+    def get_player_level(self, obj):
+        """
+        Admin text for player level.
+        """
+        return obj.common.level
+
+    @admin.display(description="Player", ordering="name")
+    def get_player_link(self, obj):
+        """
+        Admin link for player display.
+        """
+        player_id = obj.id
+        player_name = obj.name
+        return mark_safe(
+            f'<a href="/admin/players/player/{player_id}/">{player_name}</a>'
+        )
+
+    fields = readonly_fields = (
+        "id", "get_player_link", "get_player_class", "get_player_race",
+        "get_player_level"
     )
 
     def has_add_permission(self, request, obj):
@@ -20,11 +57,23 @@ class AccountPlayersInlineAdmin(admin.TabularInline):
         """
         return False
 
+    def has_change_permission(self, request, obj):
+        """
+        Disabling changing players in /admin/accounts/ inline.
+        """
+        return False
+
     def has_delete_permission(self, request, obj=None):
         """
         Disabling deleting players in /admin/accounts/ inline.
         """
         return False
+
+    def has_module_permission(self, request, obj=None):
+        return request.user.is_eternal()
+
+    def has_view_permission(self, request, obj=None):
+        return request.user.is_eternal()
 
 
 @admin.register(get_user_model())
@@ -77,13 +126,12 @@ class AccountsAdmin(UserAdmin):
             }
         )
     )
-    filter_horizontal = ()
-    inlines = (AccountPlayersInlineAdmin,)
+    filter_horizontal = list_filter = ()
+    inlines = (AccountPlayersLinksInline,)
     list_display = (
         "account_name", model.EMAIL_FIELD, "player_count", "current_essence",
         "is_god", "is_eternal", "is_immortal"
     )
-    list_filter = ()
     ordering = ("account_id",)
     search_fields = (
         "account_name", model.EMAIL_FIELD,
