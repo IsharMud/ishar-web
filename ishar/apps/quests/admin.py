@@ -93,3 +93,62 @@ class QuestsAdmin(ModelAdmin):
             obj.deprecated_prerequisite = '-1'
             obj.deprecated_max_level = '20'
         super().save_model(request, obj, form, change)
+
+
+@admin.register(QuestReward)
+class QuestRewardsAdmin(admin.ModelAdmin):
+    """
+    Ishar quest reward administration.
+    """
+    fieldsets = (
+        (None, {"fields": ("quest_reward_id",)}),
+        ("Type", {"fields": ("reward_type",)}),
+        ("Number", {"fields": ("reward_num",)}),
+        ("Quest", {"fields": ("quest",)}),
+        ("Class", {"fields": ("class_restrict",)})
+    )
+    list_display = ("quest_reward_id", "reward_type", "quest", "class_restrict")
+    list_filter = (
+        "reward_type", "class_restrict",
+        ("quest", admin.RelatedOnlyFieldListFilter)
+    )
+    model = QuestReward
+    readonly_fields = ("quest_reward_id",)
+    search_fields = ("reward_num", "reward_type", "quest", "class_restrict")
+
+    def has_module_permission(self, request, obj=None):
+        return request.user.is_immortal()
+
+
+@admin.register(QuestStep)
+class QuestStepsAdmin(admin.ModelAdmin):
+    """
+    Ishar quest step administration.
+    """
+
+    @admin.display(description="Class")
+    def get_quest_class(self, obj):
+        return obj.quest.get_class_restrict_display()
+
+    fieldsets = (
+        (None, {"fields": ("step_id", "step_type", "quest")}),
+        ("Details", {"fields": ("target", "num_required", "time_limit")}),
+        ("Mystify", {"fields": ("mystify", "mystify_text")})
+    )
+    list_display = (
+        "step_id", "step_type", "quest", "get_quest_class", "mystify"
+    )
+    list_display_links = ("step_id", "step_type")
+    list_filter = (
+        "step_type", "quest__class_restrict", "mystify",
+        ("quest", admin.RelatedOnlyFieldListFilter), "num_required"
+    )
+    model = QuestStep
+    readonly_fields = ("step_id", "get_quest_class")
+    search_fields = (
+        "step_id", "step_type", "target", "mystify_text",
+        "quest__name", "quest__display_name", "quest__class_restrict"
+    )
+
+    def has_module_permission(self, request, obj=None):
+        return request.user.is_immortal()

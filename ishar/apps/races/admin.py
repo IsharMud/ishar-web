@@ -3,6 +3,32 @@ from django.contrib import admin
 from .models import Race, RaceAffinity, RaceSkill
 
 
+
+@admin.register(RaceAffinity)
+class RaceAffinitiesAdmin(admin.ModelAdmin):
+    """
+    Ishar race affinity administration.
+    """
+    model = RaceAffinity
+    fieldsets = (
+        (None, {"fields": ("race_affinity_id",)}),
+        ("Race", {"fields": ("race",)}),
+        ("Force", {"fields": ("force",)}),
+        ("Affinity", {"fields": ("affinity_type",)})
+    )
+    list_display = ("race_affinity_id", "race", "force", "affinity_type")
+    list_filter = (
+        "affinity_type",
+        ("force", admin.RelatedOnlyFieldListFilter),
+        ("race", admin.RelatedOnlyFieldListFilter),
+    )
+    readonly_fields = ("race_affinity_id",)
+    search_fields = ("race", "force", "affinity_type")
+
+    def has_module_permission(self, request, obj=None):
+        return request.user.is_immortal()
+
+
 class RaceAffinityAdminInline(admin.TabularInline):
     """
     Ishar race affinity inline administration.
