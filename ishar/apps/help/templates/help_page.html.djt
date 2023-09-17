@@ -1,14 +1,14 @@
 {% extends "layout.html.djt" %}
+{% load get_dict_item from ishar%}
 {% block meta_title %}Help: {{ topic }}{% endblock meta_title %}
 {% block meta_description %}Help pages for Ishar MUD{% endblock meta_description %}
-{% block meta_url %}{% url "help_page" help_topic=help_topic %}{% endblock meta_url %}
+{% block meta_url %}{% if help_topic %}{% url "help_page" help_topic=help_topic.name %} %}{% else %}{% url "help" %}{% endif %}{% endblock meta_url %}
 {% block header %}
-<a href="{% url "help" %}">Help</a>
-<a href="{% url "help_page" help_topic=help_topic %}">{{ help_topic }}</a>
+<a href="{% url "help" %}">Help</a>{% if help_topic %} : <a href="{% url "help_page" help_topic=help_topic.name %}">{{ help_topic.name }}</a>{% endif %}
 {% endblock header %}
-{% block title %}Help: {{ topic }}{% endblock title %}
+{% block title %}Help{% if help_topic and help_topic.name %}: {{ help_topic.name }}{% endif %}{% endblock title %}
 {% block content %}
-    {% if current_user.is_anonymous %}
+    {% if not current_user.is_authenticated %}
             <p>
                 If you are new here, you may want to download one of many
                 <a href="{% url "mud_clients" %}" title="MUD clients">MUD clients</a>,
@@ -26,23 +26,20 @@
     {% if help_topic %}
             <br><hr>
             <ul class="help-topic-list">
-        {% for help_property in help_properties.items %}
-            {% if help_property %}
-                {{ help_property }}
-                {% if help_property in help_topic %}
+        {% for help_property in help_properties %}
                 <li>
                     <strong>{{ help_property | title }}</strong>:
-                    <code>{{ help_topic.help_property }}</code>
+                    <code>{% autoescape off %}{{ help_topic | get_dict_item:help_property }}{% endautoescape %}</code>
                 </li>
-                {% endif %}
-            </ul>
-            <div>
-                <pre>{{ help_topic.body_html }}</pre>
-            </div>
-            {% endif %}
         {% endfor %}
+            </ul>
+        {% if help_topic.body_html %}
+            <div>
+                <pre>{% autoescape off %}{{ help_topic.body_html }}{% endautoescape %}</pre>
+            </div>
+        {% endif %}
     {% endif %}
-    {% if help_topics and help_topics is iterable %}
+    {% if help_topics %}
             <hr>
             <ul class="help-topic-list">
         {% for list_topic in help_topics %}
