@@ -19,7 +19,7 @@
                 Whether treading across the barren wasteland of the Tundra or voyaging for the great Ocean, you will
                 never forget the sense of wonder and discovery to be experienced here.
             </p>
-    {% if areas and areas is iterable %}
+    {% if areas %}
             <ul id="world-list">
         {% for area in areas %}
                 <li title="{{ area }}">

@@ -17,6 +17,7 @@ class PlayerView(DetailView):
     query_pk_and_slug = "name"
     template_name = "player.html.djt"
 
+
 class PlayerSearchView(TemplateView):
     """
     Player search view.

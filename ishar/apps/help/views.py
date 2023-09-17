@@ -10,21 +10,38 @@ HELP_PROPERTIES = [
 
 class HelpView(TemplateView):
     template_name = "help_page.html.djt"
-    extra_context = {
-        'help_topic': None,
-        'help_topics': get_help_topics(),
-        'help_properties': HELP_PROPERTIES
-    }
+    help_topics = get_help_topics()
+    help_topic = None
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["help_topic"] = self.help_topic
+        context["help_topics"] = self.help_topics
+        context["help_properties"] = HELP_PROPERTIES
+        return context
 
 
 class HelpPageView(HelpView):
     template_name = "help_page.html.djt"
 
-    def __init__(self, help_topic=None):
-        self.extra_context['help_topic'] = help_topic
-        super().__init__()
+    def dispatch(self, request, *args, **kwargs):
+        help_topic = kwargs.get("help_topic")
+        if help_topic and help_topic in self.help_topics:
+            self.help_topic = self.help_topics[help_topic]
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["help_topic"] = self.help_topic
+        return context
 
 
 class WorldView(HelpView):
     template_name = "world.html.djt"
-    extra_context = {"topics": search_help_topics(search='Area ')}
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        areas = search_help_topics(search='Area ').keys()
+        context["areas"] = areas
+        print(areas)
+        return context

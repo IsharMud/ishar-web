@@ -47,8 +47,7 @@ def get_help_chunks(help_file=settings.HELPTAB):
     # Catch/return exceptions or errors on accessing the 'helptab' file,
     #   and report to Sentry
     except (FileNotFoundError, PermissionError, Exception) as err:
-        sentry_sdk.capture_exception(err)
-        return []
+        raise IOError from err
 
     # Close the 'helptab' file
     finally:
