@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.contrib import admin
 from django.db import models
 from django.conf import settings
@@ -355,6 +357,15 @@ class Player(models.Model):
         """
         return get_immortal_type(level=self.true_level)
 
+    def get_player_alignment(self) -> str:
+        """
+        Player alignment.
+        """
+        for align_text, (low, high) in settings.ALIGNMENTS.items():
+            if low <= self.common.alignment <= high:
+                return align_text
+        return "Unknown"
+
     def get_player_phrase(self) -> str:
         """
         Player phrase.
@@ -383,10 +394,10 @@ class Player(models.Model):
             """
             Player gender.
             """
-            if self.common.sex == 1:
+            if self.common.get_sex_display() == "Male":
                 return "he"
 
-            if self.common.sex == 2:
+            if self.common.get_sex_display() == "Female":
                 return "she"
 
             return "they"
@@ -395,10 +406,10 @@ class Player(models.Model):
         """
         Player gender ownership.
         """
-        if self.common.sex == 1:
+        if self.common.get_sex_display() == "Male":
             return "his"
 
-        if self.common.sex == 2:
+        if self.common.get_sex_display() == "Female":
             return "her"
 
         return "their"
@@ -407,10 +418,10 @@ class Player(models.Model):
         """
         Player gender ownership plural.
         """
-        if self.common.sex == 1:
+        if self.common.get_sex_display() == "Male":
             return "his"
 
-        if self.common.sex == 2:
+        if self.common.get_sex_display() == "Female":
             return "hers"
 
         return "have"
@@ -434,6 +445,13 @@ class Player(models.Model):
             return "Survival"
 
         return "Classic"
+
+    @admin.display(boolean=False, description="Online Time")
+    def online_time(self) -> timedelta:
+        """
+        Online time.
+        """
+        return timedelta(seconds=self.online)
 
     @admin.display(boolean=False, description="Type")
     def player_type(self) -> str:
@@ -570,12 +588,13 @@ class PlayerCommon(models.Model):
         verbose_name="Race"
     )
     sex = models.IntegerField(
+        choices=settings.PLAYER_GENDERS,
         help_text="Sex of the player character.",
         verbose_name="Sex"
     )
     level = models.PositiveIntegerField(
         help_text="Level of the player character.",
-        verbose_name="level"
+        verbose_name="Level"
     )
     weight = models.PositiveSmallIntegerField(
         help_text="Weight of the player character.",
@@ -595,11 +614,11 @@ class PlayerCommon(models.Model):
     )
     strength = models.PositiveIntegerField(
         help_text="Strength of the player character.",
-        verbose_name="Sex"
+        verbose_name="Strength"
     )
     agility = models.PositiveIntegerField(
         help_text="Agility of the player character.",
-        verbose_name="Sex"
+        verbose_name="Agility"
     )
     endurance = models.PositiveIntegerField(
         help_text="Endurance of the player character.",

@@ -63,6 +63,9 @@ IMMORTAL_LEVELS = (
     (21, "Consort"),
 )
 
+# Player gender values
+PLAYER_GENDERS = ((1, "Male"), (2, "Female"))
+
 # Player position values
 PLAYER_POSITIONS = (
     (0, "POSITION_DEAD"), (1, "POSITION_DYING"), (2, "POSITION_STUNNED"),
