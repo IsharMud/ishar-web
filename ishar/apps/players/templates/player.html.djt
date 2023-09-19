@@ -129,11 +129,11 @@
                     on {{ player.birth | date }}.
                 </li>
                 <li title="Logged On: {{ player.logon | naturaltime }}, ({{ player.logon }})">
-                    {{ player.get_player_gender | title }} last logged in {{ player.logon | naturaltime }}
+                    {{ player.get_player_gender | title }} last logged in {{ player.logon | naturaltime }},
                     on {{ player.logon | date }}.
                 </li>
                 <li title="Logged Out: {{ player.logout | naturaltime }}, ({{ player.logout }})">
-                    {{ player.get_player_gender | title }} last logged out {{ player.logout | naturaltime }}
+                    {{ player.get_player_gender | title }} last logged out {{ player.logout | naturaltime }},
                     on {{ player.logon | date }}.
                 </li>
                 <li title="Played For: {{ player.online_time }} ({{ player.online }} seconds)">

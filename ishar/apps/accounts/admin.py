@@ -110,6 +110,7 @@ class AccountsAdmin(UserAdmin):
         ),
         (
             "Last", {
+                "classes": ("collapse",),
                 "fields": ("last_ident", "last_isp", "_last_haddr")
             }
         ),

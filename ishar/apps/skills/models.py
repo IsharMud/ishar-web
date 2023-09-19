@@ -70,6 +70,15 @@ class Skill(models.Model):
     """
     Skill (includes spells).
     """
+    id = models.AutoField(
+        blank=False,
+        db_column="id",
+        editable=False,
+        null=False,
+        help_text="Auto-generated permanent ID number of the skill/spell.",
+        primary_key=True,
+        verbose_name="ID"
+    )
     enum_symbol = models.CharField(
         max_length=255,
         help_text="Internal ENUM symbol of the skill/spell.",

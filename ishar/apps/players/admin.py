@@ -2,7 +2,7 @@ from django.conf import settings
 from django.contrib import admin
 from django.utils.safestring import mark_safe
 
-from .models import Player, PlayerCommon, RemortUpgrade
+from .models import Player, PlayerCommon, PlayerFlag, RemortUpgrade
 
 
 class ImmortalTypeListFilter(admin.SimpleListFilter):
@@ -51,15 +51,27 @@ class PlayerAdmin(admin.ModelAdmin):
     date_hierarchy = "birth"
     fieldsets = (
         (None, {"fields": (
-            "id", "player_type", "account", "name", "description",
-            "player_level", "game_type", "is_deleted", "online"
+            "id", "account", "name", "description", "true_level", "deaths"
         )}),
         ("Points", {"fields": ("bankacc", "renown", "remorts", "favors")}),
-        ("Totals", {"fields": (
-            "deaths", "total_renown", "quests_completed", "challenges_completed"
-        )}),
-        ("Rooms", {"fields": ("bound_room", "load_room", "inn_limit")}),
-        ("Dates", {"fields": ("birth", "logon", "logout")})
+        ("Survival?", {
+            "fields": ("game_type", "is_deleted"),
+            "classes": ("collapse",)
+        }),
+        ("Totals", {
+            "fields": (
+                "total_renown", "quests_completed", "challenges_completed"
+            ),
+            "classes": ("collapse",)
+        }),
+        ("Rooms", {
+            "fields": ("bound_room", "load_room", "inn_limit"),
+            "classes": ("collapse",)
+        }),
+        ("Time", {
+            "fields": ("birth", "logon", "logout", "online", "online_time"),
+            "classes": ("collapse",)
+        })
     )
     inlines = (PlayerCommonInlineAdmin,)
     list_display = (
@@ -71,7 +83,8 @@ class PlayerAdmin(admin.ModelAdmin):
         ("account", admin.RelatedOnlyFieldListFilter),
     )
     readonly_fields = (
-        "id", "birth", "logon", "logout", "player_type", "player_level"
+        "id", "birth", "logon", "logout", "player_type", "player_level",
+        "online_time"
     )
     search_fields = ("name", "account__account_name")
 
@@ -110,6 +123,17 @@ class PlayerAdmin(admin.ModelAdmin):
         return mark_safe(
             f'<a href="/admin/accounts/account/{account_id}">{account_name}</a>'
         )
+
+
+@admin.register(PlayerFlag)
+class PlayerFlagAdmin(admin.ModelAdmin):
+    """
+    Ishar player flag administration.
+    """
+    model = PlayerFlag
+    fieldsets = ((None, {"fields": ("flag_id", "name")}),)
+    list_display = list_display_links = search_fields = ("flag_id", "name",)
+    readonly_fields = ("flag_id",)
 
 
 @admin.register(RemortUpgrade)

@@ -8,9 +8,45 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from ..accounts.models import Account
 from ..classes.models import Class
 from ..races.models import Race
+from ..skills.models import Skill
 
 from ...util.ip import dec2ip
 from ...util.level import get_immortal_level, get_immortal_type
+
+
+class PlayerFlag(models.Model):
+    """
+    Player Flag.
+    """
+    flag_id = models.AutoField(
+        db_column="flag_id",
+        primary_key=True,
+        help_text="Auto-generated permanent player flag identification number.",
+        verbose_name="Player Flag ID"
+    )
+    name = models.CharField(
+        blank=False,
+        db_column="name",
+        max_length=20,
+        null=False,
+        help_text="Name of the player flag.",
+        unique=True,
+        verbose_name="Player Flag Name"
+    )
+
+    class Meta:
+        managed = False
+        db_table = "player_flags"
+        ordering = ("name", "flag_id")
+        verbose_name = "Flag"
+
+    def __repr__(self) -> str:
+        return (
+            f"{self.__class__.__name__}: {repr(self.__str__())} ({self.flag_id})"
+        )
+
+    def __str__(self) -> str:
+        return self.name
 
 
 class Player(models.Model):
@@ -24,6 +60,14 @@ class Player(models.Model):
         related_name="players",
         help_text="Account that owns the player character.",
         verbose_name="Account"
+    )
+    id = models.AutoField(
+        blank=False,
+        null=False,
+        primary_key=True,
+        help_text="Auto-generated permanent player identification number.",
+        unique=True,
+        verbose_name="ID"
     )
     name = models.SlugField(
         unique=True,
@@ -719,3 +763,148 @@ class PlayerCommon(models.Model):
 
     def __str__(self) -> str:
         return self.player.name
+
+
+class PlayersFlag(models.Model):
+    """
+    Player's Flag.
+    """
+    flag = models.ForeignKey(
+        to=PlayerFlag,
+        on_delete=models.CASCADE,
+        related_query_name="+",
+        help_text="Flag affecting a player.",
+        verbose_name="Flag"
+    )
+    player = models.ForeignKey(
+        to=Player,
+        on_delete=models.CASCADE,
+        related_name="flag",
+        related_query_name="flags",
+        help_text="Player affected by a flag.",
+        verbose_name="Player"
+    )
+    value = models.PositiveIntegerField(
+        blank=False,
+        default=0,
+        null=True,
+        help_text="Value of the flag affecting the player.",
+        verbose_name="Value"
+    )
+
+    class Meta:
+        managed = False
+        db_table = "player_player_flags"
+        # The composite primary key (flag_id, player_id) found,
+        #   that is not supported. The first column is selected.
+        unique_together = (("flag", "player"),)
+        ordering = ("flag", "player")
+        verbose_name = "Player's Flag"
+        verbose_name_plural = "Player's Flags"
+
+    def __repr__(self) -> str:
+        return (
+            f"{self.__class__.__name__}: {repr(self.__str__())}"
+        )
+
+    def __str__(self) -> str:
+        return f"{self.flag} @ {self.player} : {self.value}"
+
+
+class PlayerRemortUpgrade(models.Model):
+    """
+    Player Remort Upgrade.
+    """
+    upgrade = models.ForeignKey(
+        db_column="upgrade_id",
+        related_query_name="+",
+        to=RemortUpgrade,
+        to_field="upgrade_id",
+        on_delete=models.CASCADE,
+        help_text="Remort upgrade affecting a player.",
+        verbose_name="Remort Upgrade"
+    )
+    player = models.ForeignKey(
+        db_column="player_id",
+        related_query_name="upgrade",
+        related_name="upgrades",
+        to=Player,
+        to_field="id",
+        on_delete=models.CASCADE,
+        help_text="Player with a remort upgrade.",
+        verbose_name="Player"
+    )
+    value = models.PositiveIntegerField(
+        blank=False,
+        default=0,
+        null=False,
+        help_text="Value of a player's remort upgrade.",
+        verbose_name="Value"
+    )
+    essence_perk = models.BooleanField(
+        help_text="Is the player's remort upgrade an essence perk?",
+        verbose_name="Essence Perk?"
+    )
+
+    class Meta:
+        managed = False
+        db_table = "player_remort_upgrades"
+        unique_together = (("upgrade", "player"),)
+        ordering = ("upgrade", "player")
+        verbose_name = "Player Remort Upgrade"
+        verbose_name_plural = "Player Remort Upgrades"
+
+    def __repr__(self) -> str:
+        return (
+            f"{self.__class__.__name__}: {repr(self.__str__())}"
+        )
+
+    def __str__(self) -> str:
+        return f"{self.upgrade} @ {self.player} : {self.value}"
+
+
+class PlayerSkill(models.Model):
+    """
+    Player Skill.
+    """
+    skill = models.ForeignKey(
+        db_column="skill_id",
+        related_query_name="+",
+        to=Skill,
+        to_field="id",
+        on_delete=models.CASCADE,
+        help_text="Skill/spell related to a player.",
+        verbose_name="Skill"
+    )
+    player = models.ForeignKey(
+        db_column="player_id",
+        related_query_name="skill",
+        related_name="skills",
+        to=Player,
+        to_field="id",
+        on_delete=models.CASCADE,
+        help_text="Player with a skill/spell.",
+        verbose_name="Player"
+    )
+    skill_level = models.PositiveIntegerField(
+        help_text="Skill level of the player's skill.",
+        verbose_name="Skill Level"
+    )
+
+    class Meta:
+        managed = False
+        db_table = "player_skills"
+        # The composite primary key (skill_id, player_id) found,
+        #   that is not supported. The first column is selected.
+        unique_together = (("skill", "player"),)
+        ordering = ("skill", "player")
+        verbose_name = "Player Skill"
+        verbose_name_plural = "Player Skills"
+
+    def __repr__(self) -> str:
+        return (
+            f"{self.__class__.__name__}: {repr(self.__str__())}"
+        )
+
+    def __str__(self) -> str:
+        return f"{self.skill} @ {self.player} : {self.skill_level}"
