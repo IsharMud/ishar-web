@@ -7,9 +7,10 @@ from django.utils import timezone
 
 from passlib.hash import md5_crypt
 
+from ishar.util import dec2ip
+
 from .manager import AccountManager
 from .unsigned import UnsignedAutoField
-from ishar.util.ip import dec2ip
 
 
 class Account(AbstractBaseUser, PermissionsMixin):

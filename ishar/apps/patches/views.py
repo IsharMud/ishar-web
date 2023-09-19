@@ -5,17 +5,34 @@ from .models import Patch
 from .serializers import PatchSerializer
 
 
-class PatchAllView(ListView):
+class PatchesAllView(ListView):
+    """
+    Patches base list view of all patches.
+    """
     context_object_name = "patches"
     model = Patch
+    queryset = model.objects.filter(
+        is_visible=True
+    ).order_by(
+        "-patch_date"
+    ).all()
     template_name = "patches.html.djt"
 
 
-class PatchListView(PatchAllView):
-    paginate_by = 3
+class PatchesLatestView(PatchesAllView):
+    model = Patch
+    queryset = model.objects.filter(
+        is_visible=True
+    ).order_by(
+        "-patch_date"
+    ).all()[:1]
 
 
-class PatchViewSet(viewsets.ReadOnlyModelViewSet):
+class PatchesListView(PatchesAllView):
+    paginate_by = 5
+
+
+class PatchesViewSet(viewsets.ReadOnlyModelViewSet):
     """
     Read-only API endpoint that allows players to be viewed.
     """

@@ -1,7 +1,7 @@
 {% extends "layout.html.djt" %}
 {% load humanize %}
 {% block meta_title %}Season {{ season.season_id }}{% endblock meta_title %}
-{% block meta_description %}Information about season {{ season.season_id }} of Ishar MUD{% endblock meta_description %}
+{% block meta_description %}Season {{ season.season_id }} of Ishar MUD.{% endblock meta_description %}
 {% block meta_url %}{% url "season" season_id=season.season_id %}{% endblock meta_url %}
 {% block title %}Season {{ season.season_id }}{% endblock title %}
 {% block header %}Season {{ season.season_id }}{% endblock header %}

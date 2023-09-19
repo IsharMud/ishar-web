@@ -4,18 +4,19 @@ Ishar MUD API configuration.
 
 from rest_framework import permissions, routers
 
-from .apps.accounts.views import AccountsViewSet, AccountUpgradesViewSet
-from .apps.challenges.views import ChallengesViewSet
-from .apps.classes.views import ClassesViewSet
-from .apps.events.views import GlobalEventsViewSet
-from .apps.news.views import NewsViewSet
-from .apps.patches.views import PatchViewSet
-from .apps.players.views import PlayerViewSet, RemortUpgradesViewSet
-from .apps.quests.views import QuestsViewSet, QuestPrereqsViewSet, \
+from ishar.apps.accounts.views import AccountsViewSet, AccountUpgradesViewSet
+from ishar.apps.challenges.views import ChallengesViewSet
+from ishar.apps.classes.views import ClassesViewSet
+from ishar.apps.events.views import GlobalEventsViewSet
+from ishar.apps.news.views import NewsViewSet
+from ishar.apps.patches.views import PatchesViewSet
+from ishar.apps.players.views import PlayerViewSet, PlayerFlagViewSet, \
+    RemortUpgradesViewSet
+from ishar.apps.quests.views import QuestsViewSet, QuestPrereqsViewSet, \
     QuestRewardsViewSet, QuestStepsViewSet
-from .apps.races.views import RacesViewSet
-from .apps.seasons.views import SeasonViewSet
-from .apps.skills.views import ForcesViewSet, SkillsViewSet, \
+from ishar.apps.races.views import RacesViewSet
+from ishar.apps.seasons.views import SeasonViewSet
+from ishar.apps.skills.views import ForcesViewSet, SkillsViewSet, \
     SpellFlagsViewSet, SkillsFlagsViewSet
 
 
@@ -43,8 +44,9 @@ api_router.register(r"classes", ClassesViewSet, "class")
 api_router.register(r"events", GlobalEventsViewSet, "event")
 api_router.register(r"forces", ForcesViewSet, "force")
 api_router.register(r"news", NewsViewSet, "news")
-api_router.register(r"patches", PatchViewSet, "patch")
+api_router.register(r"patches", PatchesViewSet, "patch")
 api_router.register(r"players", PlayerViewSet, "player")
+api_router.register(r"player_flags", PlayerFlagViewSet, "player_flag")
 api_router.register(r"quests", QuestsViewSet, "quest")
 api_router.register(r"quest_prereqs", QuestPrereqsViewSet, "quest_prereq")
 api_router.register(r"quest_rewards", QuestRewardsViewSet, "quest_reward")

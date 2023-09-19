@@ -4,8 +4,9 @@ from django.contrib.auth.admin import UserAdmin
 from django.db.models import Count
 from django.utils.safestring import mark_safe
 
+from ishar.apps.players.models import Player
+
 from .models.upgrade import AccountUpgrade
-from ..players.models import Player
 
 
 class AccountPlayersLinksInline(admin.TabularInline):
@@ -19,14 +20,7 @@ class AccountPlayersLinksInline(admin.TabularInline):
         """
         Admin text for player class.
         """
-        return obj.common.player_class.class_name
-
-    @admin.display(description="Race")
-    def get_player_race(self, obj):
-        """
-        Admin text for player race.
-        """
-        return obj.common.race
+        return obj.common.player_class.class_name.title()
 
     @admin.display(description="Level")
     def get_player_level(self, obj):
@@ -38,7 +32,7 @@ class AccountPlayersLinksInline(admin.TabularInline):
     @admin.display(description="Player", ordering="name")
     def get_player_link(self, obj):
         """
-        Admin link for player display.
+        Admin link for player name.
         """
         player_id = obj.id
         player_name = obj.name
@@ -46,9 +40,23 @@ class AccountPlayersLinksInline(admin.TabularInline):
             f'<a href="/admin/players/player/{player_id}/">{player_name}</a>'
         )
 
+    @admin.display(description="Game Type", ordering="game_type")
+    def get_player_game_type(self, obj):
+        """
+        Admin text for player game type.
+        """
+        return obj.get_game_type_display()
+
+    @admin.display(description="Race")
+    def get_player_race(self, obj):
+        """
+        Admin text for player race.
+        """
+        return obj.common.race
+
     fields = readonly_fields = (
         "id", "get_player_link", "get_player_class", "get_player_race",
-        "get_player_level"
+        "get_player_level", "get_player_game_type"
     )
 
     def has_add_permission(self, request, obj):

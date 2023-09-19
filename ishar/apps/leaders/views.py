@@ -1,13 +1,14 @@
 from django.conf import settings
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.list import ListView
 
-from ...apps.players.models import Player
+from ishar.apps.players.models import Player
 
 
 MINIMUM_IMMORTAL = min(settings.IMMORTAL_LEVELS)[0]
 
 
-class LeadersView(ListView):
+class LeadersView(LoginRequiredMixin, ListView):
     """
     Leaders view.
     """

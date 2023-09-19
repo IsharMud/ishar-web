@@ -1,6 +1,6 @@
 from django.db import models
 
-from ..skills.models import Force, Skill
+from ishar.apps.skills.models import Force, Skill
 
 
 class Race(models.Model):

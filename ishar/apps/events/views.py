@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils import timezone
 from django.views.generic.list import ListView
 from rest_framework import viewsets, permissions
@@ -6,7 +7,7 @@ from .models import GlobalEvent
 from .serializers import GlobalEventSerializer
 
 
-class GlobalEventsView(ListView):
+class GlobalEventsView(LoginRequiredMixin, ListView):
     """
     Global events view.
     """

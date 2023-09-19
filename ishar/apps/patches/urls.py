@@ -1,9 +1,10 @@
 from django.urls import path
 
-from .views import PatchListView, PatchAllView
+from .views import PatchesAllView, PatchesLatestView, PatchesListView
 
 
 urlpatterns = [
-    path("", PatchListView.as_view(), name="patches"),
-    path("all/", PatchAllView.as_view(), name="all"),
+    path("", PatchesListView.as_view(), name="patches"),
+    path("all/", PatchesAllView.as_view(), name="all"),
+    path("latest/", PatchesLatestView.as_view(), name="latest"),
 ]

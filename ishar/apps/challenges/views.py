@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.list import ListView
 from rest_framework import viewsets, permissions
 
@@ -5,7 +6,7 @@ from .models import Challenge
 from .serializers import ChallengesSerializer
 
 
-class ChallengesView(ListView):
+class ChallengesView(LoginRequiredMixin, ListView):
     """
     Challenges view.
     """

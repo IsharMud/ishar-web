@@ -49,6 +49,14 @@ class HelpPageView(HelpView):
                 # Search for the topic name, if no aliases matched.
                 search_topics = search_help_topics(search=help_topic)
                 if search_topics:
+
+                    # Redirect to match, if single search result.
+                    if len(search_topics) == 1:
+                        return redirect(
+                            to="help_page",
+                            help_topic=search_topics.popitem()[0]
+                        )
+
                     self.help_topics = search_topics
 
                 # 404 with error message, if no search results.

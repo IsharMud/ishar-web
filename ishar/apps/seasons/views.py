@@ -1,5 +1,4 @@
 from django.views.generic import DetailView, TemplateView
-
 from rest_framework import viewsets, permissions
 
 from .models import Season

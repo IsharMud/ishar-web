@@ -5,13 +5,14 @@ from django.db import models
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 
-from ..accounts.models import Account
-from ..classes.models import Class
-from ..races.models import Race
-from ..skills.models import Skill
+from ishar.util import dec2ip
 
-from ...util.ip import dec2ip
-from ...util.level import get_immortal_level, get_immortal_type
+from ishar.apps.accounts.models import Account
+from ishar.apps.classes.models import Class
+from ishar.apps.races.models import Race
+from ishar.apps.skills.models import Skill
+
+from .util import get_immortal_level, get_immortal_type
 
 
 class PlayerFlag(models.Model):

@@ -1,4 +1,4 @@
-from ..apps.classes.models import Class
+from .models import Class
 
 
 def get_classes(playable=True):

@@ -1,12 +1,14 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import DetailView
 from django.views.generic.base import TemplateView
 from rest_framework import viewsets, permissions
 
-from .models import Player, RemortUpgrade
-from .serializers import PlayerSerializer, RemortUpgradeSerializer
+from .models import Player, PlayerFlag, RemortUpgrade
+from .serializers import PlayerSerializer, PlayerFlagSerializer, \
+    RemortUpgradeSerializer
 
 
-class PlayerView(DetailView):
+class PlayerView(LoginRequiredMixin, DetailView):
     """
     Player view.
     """
@@ -18,7 +20,7 @@ class PlayerView(DetailView):
     template_name = "player.html.djt"
 
 
-class PlayerSearchView(TemplateView):
+class PlayerSearchView(LoginRequiredMixin, TemplateView):
     """
     Player search view.
     """
@@ -35,6 +37,16 @@ class PlayerViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [permissions.IsAdminUser]
     queryset = model.objects.all()
     serializer_class = PlayerSerializer
+
+
+class PlayerFlagViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows player flags to be viewed or edited.
+    """
+    model = PlayerFlag
+    permission_classes = [permissions.IsAdminUser]
+    queryset = model.objects.all()
+    serializer_class = PlayerFlagSerializer
 
 
 class RemortUpgradesViewSet(viewsets.ModelViewSet):
