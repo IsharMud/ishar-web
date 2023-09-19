@@ -168,7 +168,9 @@ class AccountsAdmin(UserAdmin):
         return request.user.is_god()
 
     def has_module_permission(self, request, obj=None):
-        return request.user.is_eternal()
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_eternal()
+        return False
 
     def has_view_permission(self, request, obj=None):
         return request.user.is_eternal()
