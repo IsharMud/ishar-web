@@ -1,0 +1,14 @@
+{% extends "base/layout.html.j2" %}
+{% block meta_title %}Page Not Found{% endblock meta_title %}
+{% block meta_description %}Page Not Found / Hmmm... the page you are looking for can not be found.{% endblock meta_description %}
+{% block meta_url %}{% endblock meta_url %}
+{% block title %}Page Not Found{% endblock title %}
+{% block header %}Page Not Found{% endblock header %}
+{% block content %}
+                <p>
+                    Hmmm... the page you are looking for can not be found.
+                </p>
+                <p>
+                    You may want to return to the <a href="{% url "index" %}">front page</a>.
+                </p>
+{% endblock content %}

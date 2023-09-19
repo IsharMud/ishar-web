@@ -1,0 +1,174 @@
+{% extends "layout.html.djt" %}
+{% block meta_title %}Frequently Asked Questions{% endblock meta_title %}
+{% block meta_description %}Frequently Asked Questions by new players of the game{% endblock meta_description %}
+{% block meta_url %}{% url "faqs" %}{% endblock meta_url %}
+{% block title %}Frequently Asked Questions{% endblock title %}
+{% block header %}Frequently Asked Questions{% endblock header %}
+{% block content %}
+                <p>
+                    Here are a few common questions that are asked about Ishar MUD.
+                </p>
+                <p>
+                    You may also want to visit the
+                    <a href="/help/MUD%20Basics/">MUD Basics help page</a>
+                    or our <a href="/getstarted/">getting started guide</a>.
+                </p>
+                <ul>
+                    <li title="Is Ishar MUD free?">
+                        <h3>
+                            Is Ishar MUD free?
+                        </h3>
+                    </li>
+                    <li class="faq-answers">
+                        <ul>
+                            <li>
+                                <strong>Yes</strong>! While you are welcome to <a href="/support/" title="Support">offer support</a>, Ishar MUD is free to use, play, and enjoy.
+                            </li>
+                        </ul>
+                    </li>
+                    <li title="Are there player classes?">
+                        <h3>
+                            Are there player classes?
+                        </h3>
+                    </li>
+                    <li class="faq-answers">
+                        <ul>
+                            <li>
+                                <a href="/help/Classes/" title="Classes">Yes! There are 5 classes</a> available to choose from, when you create a player character:
+                            </li>
+                            <li class="nested-list">
+                                <ol>
+                                    <li>
+                                        <a href="/help/Warrior/">Warrior</a> -- For those who seek to master the art of war.
+                                    </li>
+                                    <li>
+                                        <a href="/help/Rogue/">Rogue</a> -- Sly and cunning, skilled in all things sublime.
+                                    </li>
+                                    <li>
+                                        <a href="/help/Cleric/">Cleric</a> -- The followers of the spirits, both good and evil.
+                                    </li>
+                                    <li>
+                                        <a href="/help/Magician/">Magician</a> -- Practitioners of the mystic arts, masters of magic.
+                                    </li>
+                                    <li>
+                                        <a href="/help/Necromancer/">Necromancer</a> -- Practitioners of necromancy, masters of the undead.
+                                    </li>
+                                </ol>
+                            </li>
+                        </ul>
+                    </li>
+                    <li title="Are there player races?">
+                        <h3>
+                            Are there player races?
+                        </h3>
+                    </li>
+                    <li class="faq-answers">
+                        <ul>
+                            <li>
+                                <a href="/help/Races/">Yes! There are 6 races</a> available to choose from, when you create a player character:
+                            </li>
+                            <li class="nested-list">
+                                <ol>
+                                    <li>
+                                        Human -- appears to be of human origin
+                                    </li>
+                                    <li>
+                                        Elf -- looks to be of elven descent
+                                    </li>
+                                    <li>
+                                        Dwarf -- appears dwarvish
+                                    </li>
+                                    <li>
+                                        Halfling -- seems wizened beyond years, and built stockily yet frail
+                                    </li>
+                                    <li>
+                                        Gnome -- is possessed of gnomish features
+                                    </li>
+                                    <li>
+                                        Half-Elven -- looks to be of human and elven descent
+                                    </li>
+                                </ol>
+                            </li>
+                        </ul>
+                    </li>
+                    <li title="Is there role-playing?">
+                        <h3>
+                            Is there role-playing?
+                        </h3>
+                    </li>
+                    <li class="faq-answers">
+                        <ul>
+                            <li>
+                                <strong>No</strong>, Ishar MUD does not require role-playing.
+                            </li>
+                        </ul>
+                    </li>
+                    <li title="What about my equipment when I log out?">
+                        <h3>
+                            What about my equipment when I log out?
+                        </h3>
+                    </li>
+                    <li class="faq-answers">
+                        <ul>
+                            <li>
+                                When you sign out or log off, your character's equipment, gear, and inventory is simply <strong>preserved until the end of the season</strong>.
+                            </li>
+                            <li>
+                                The <a href="/season/" title="Season">season</a> currently changes every four (4) months. You can find more information about seasons at the <a href="/patches/" title="Patches">patches page</a>.
+                            </li>
+                        </ul>
+                    </li>
+                    <li title="Is death permanent?">
+                        <h3>
+                            Is death permanent?
+                        </h3>
+                    </li>
+                    <li class="faq-answers">
+                        <ul>
+                            <li>
+                                <strong>You can choose</strong> your <a href="/help/Game%20Types/" title="game type">game type</a> (either Classic, or Survival mode) each time that you create a new player character!
+                            </li>
+                            <li>
+                                While survival mode gains experience faster, classic mode subtracts experience upon death, but allows you to retrieve your character's corpse.
+                            </li>
+                        </ul>
+                    </li>
+                    <li title="Can I have multiple characters or multi-play?">
+                        <h3>
+                            Can I have multiple characters or multi-play?
+                        </h3>
+                    </li>
+                    <li class="faq-answers">
+                        <ul>
+                            <li>
+                                You can have up to <strong>ten (10) player characters</strong> per account!
+                            </li>
+                            <li>
+                                You may actively <a href="/help/Mutliplay/" title="Multiplay">multi-play</a> three (3) characters at once.
+                            </li>
+                            <li>
+                                Only one account is allowed per person!
+                            </li>
+                        </ul>
+                    </li>
+                    <li title="Is there player-killing (PK) or player-versus-player (PvP) combat?">
+                        <h3>
+                            Is there player-killing (PK) or player-versus-player (PvP) combat?
+                        </h3>
+                    </li>
+                    <li class="faq-answers">
+                        <ul>
+                            <li>
+                                <a href="/help/Player%20Killing/" title="Player Killing">Yes and no</a>.
+                            </li>
+                            <li>
+                                While player-versus-player combat (or PK'ing) is possible, it is very rare, and not a requirement of the game.
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+                <p>
+                    If there is any thing that you think is missing, please feel free to reach out
+                    by e-mailing <a href="mailto:admin@isharmud.com" target="_blank">admin@isharmud.com</a>.
+                </p>
+{% endblock content %}

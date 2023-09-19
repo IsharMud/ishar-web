@@ -1,0 +1,58 @@
+{% extends "layout.html.djt" %}
+{% load get_dict_item from ishar%}
+{% block meta_title %}Help: {{ topic }}{% endblock meta_title %}
+{% block meta_description %}Help pages for Ishar MUD{% endblock meta_description %}
+{% block meta_url %}{% if help_topic %}{% url "help_page" help_topic=help_topic.name %} %}{% else %}{% url "help" %}{% endif %}{% endblock meta_url %}
+{% block header %}
+<a href="{% url "help" %}">Help</a>{% if help_topic %} : <a href="{% url "help_page" help_topic=help_topic.name %}">{{ help_topic.name }}</a>{% endif %}
+{% endblock header %}
+{% block title %}Help{% if help_topic and help_topic.name %}: {{ help_topic.name }}{% endif %}{% endblock title %}
+{% block content %}
+    {% if request.user.is_anonymous %}
+            <p>
+                If you are new here, you may want to download one of many
+                <a href="{% url "mud_clients" %}" title="MUD clients">MUD clients</a>,
+                and see our <a href="{% url "getstarted" %}" title="getting started guide">getting started guide</a>.
+            </p>
+    {% endif %}
+            <div>
+                <form method="get" action="{% url "help" %}" id="help-search-form">
+                    Search field
+                    <input type="submit" value="Search">
+                    (<i>such as &quot;<a href="{% url "help_page" help_topic='spell' %}">spell</a>&quot; or
+                    &quot;<a href="{% url "help_page" help_topic='MUD Basics' %}">MUD Basics</a>&quot;</i>)
+                </form>
+            </div>
+    {% if help_topic %}
+            <br><hr>
+            <ul class="help-topic-list">
+        {% for help_property in help_properties %}
+            {% with help_property_value=help_topic|get_dict_item:help_property %}
+                {% if help_property_value %}
+                <li>
+                    <strong>{{ help_property | title }}</strong>:
+                    <code>{% autoescape off %}{{ help_property_value }}{% endautoescape %}</code>
+                </li>
+                {% endif %}
+            {% endwith %}
+        {% endfor %}
+            </ul>
+        {% if help_topic.body_html %}
+            <div>
+                <pre>{% autoescape off %}{{ help_topic.body_html }}{% endautoescape %}</pre>
+            </div>
+        {% endif %}
+    {% endif %}
+            <hr>
+    {% if help_topics %}
+            <ul class="help-topic-list">
+        {% for list_topic in help_topics %}
+                <li title="Topic: {{ list_topic }}">
+                    <a href="{% url "help_page" help_topic=list_topic %}">{{ list_topic }}</a>
+                </li>
+        {% endfor %}
+            </ul>
+    {% else %}
+        <strong>Sorry, but no help topics were found.</strong>
+    {% endif %}
+{% endblock content %}
