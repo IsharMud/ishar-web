@@ -34,16 +34,26 @@ class SeasonsAdmin(admin.ModelAdmin):
     )
 
     def has_add_permission(self, request, obj=None):
-        return request.user.is_god()
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_god()
+        return False
 
     def has_delete_permission(self, request, obj=None):
-        return request.user.is_god()
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_god()
+        return False
 
     def has_change_permission(self, request, obj=None):
-        return request.user.is_god()
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_god()
+        return False
 
     def has_module_permission(self, request, obj=None):
-        return request.user.is_immortal()
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_immortal()
+        return False
 
     def has_view_permission(self, request, obj=None):
-        return request.user.is_immortal()
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_immortal()
+        return False

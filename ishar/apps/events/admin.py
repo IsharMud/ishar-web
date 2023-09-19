@@ -23,4 +23,6 @@ class GlobalEventsAdmin(admin.ModelAdmin):
     search_fields = ("event_name", "event_desc", "start_time", "end_time")
 
     def has_module_permission(self, request, obj=None):
-        return request.user.is_immortal()
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_immortal()
+        return False

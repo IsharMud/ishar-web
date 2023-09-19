@@ -101,13 +101,19 @@ class PlayerAdmin(admin.ModelAdmin):
         return False
 
     def has_change_permission(self, request, obj=None):
-        return request.user.is_god()
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_god()
+        return False
 
     def has_module_permission(self, request, obj=None):
-        return request.user.is_eternal()
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_eternal()
+        return False
 
     def has_view_permission(self, request, obj=None):
-        return request.user.is_eternal()
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_eternal()
+        return False
 
     @staticmethod
     def player_level(obj):

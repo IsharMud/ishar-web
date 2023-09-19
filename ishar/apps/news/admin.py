@@ -26,24 +26,32 @@ class NewsAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
 
     def has_add_permission(self, request, obj=None):
-        return request.user.is_god()
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_god()
+        return False
 
     def has_change_permission(self, request, obj=None):
-        if request.user.is_god():
-            return True
-        if obj and obj.account and request.user == obj.account:
-            return True
+        if request.user and not request.user.is_anonymous:
+            if request.user.is_god():
+                return True
+            if obj and obj.account and request.user == obj.account:
+                return True
         return False
 
     def has_delete_permission(self, request, obj=None):
-        if request.user.is_god():
-            return True
-        if obj and obj.account and request.user == obj.account:
-            return True
+        if request.user and not request.user.is_anonymous:
+            if request.user.is_god():
+                return True
+            if obj and obj.account and request.user == obj.account:
+                return True
         return False
 
     def has_module_permission(self, request, obj=None):
-        return request.user.is_eternal()
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_eternal()
+        return False
 
     def has_view_permission(self, request, obj=None):
-        return request.user.is_eternal()
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_eternal()
+        return False

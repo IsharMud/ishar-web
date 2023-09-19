@@ -13,7 +13,9 @@ class ForceAdmin(admin.ModelAdmin):
     readonly_fields = ("id",)
 
     def has_module_permission(self, request, obj=None):
-        return request.user.is_immortal()
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_immortal()
+        return False
 
 
 class SkillsSpellFlagsAdminInline(admin.TabularInline):
@@ -24,7 +26,9 @@ class SkillsSpellFlagsAdminInline(admin.TabularInline):
     model = SkillSpellFlag
 
     def has_module_permission(self, request, obj=None):
-        return request.user.is_immortal()
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_immortal()
+        return False
 
 
 class SkillsForcesAdminInline(admin.TabularInline):
@@ -35,7 +39,9 @@ class SkillsForcesAdminInline(admin.TabularInline):
     model = SkillForce
 
     def has_module_permission(self, request, obj=None):
-        return request.user.is_immortal()
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_immortal()
+        return False
 
 
 @admin.register(Skill)
@@ -65,7 +71,9 @@ class SkillAdmin(admin.ModelAdmin):
     )
 
     def has_module_permission(self, request, obj=None):
-        return request.user.is_immortal()
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_immortal()
+        return False
 
 
 @admin.register(SpellFlag)
@@ -78,4 +86,6 @@ class SpellFlagAdmin(admin.ModelAdmin):
     model = SpellFlag
 
     def has_module_permission(self, request, obj=None):
-        return request.user.is_immortal()
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_immortal()
+        return False

@@ -45,4 +45,6 @@ class ChallengesAdmin(admin.ModelAdmin):
     search_fields = ("challenge_desc", "winner_desc", "mob_vnum", "mob_name")
 
     def has_module_permission(self, request, obj=None):
-        return request.user.is_immortal()
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_immortal()
+        return False

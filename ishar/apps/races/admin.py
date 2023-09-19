@@ -26,7 +26,9 @@ class RaceAffinitiesAdmin(admin.ModelAdmin):
     search_fields = ("race", "force", "affinity_type")
 
     def has_module_permission(self, request, obj=None):
-        return request.user.is_immortal()
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_immortal()
+        return False
 
 
 class RaceAffinityAdminInline(admin.TabularInline):
@@ -37,7 +39,9 @@ class RaceAffinityAdminInline(admin.TabularInline):
     model = RaceAffinity
 
     def has_module_permission(self, request, obj=None):
-        return request.user.is_immortal()
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_immortal()
+        return False
 
 
 class RaceSkillAdminInline(admin.TabularInline):
@@ -48,7 +52,9 @@ class RaceSkillAdminInline(admin.TabularInline):
     model = RaceSkill
 
     def has_module_permission(self, request, obj=None):
-        return request.user.is_immortal()
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_immortal()
+        return False
 
 
 @admin.register(Race)
@@ -93,4 +99,6 @@ class RacesAdmin(admin.ModelAdmin):
     )
 
     def has_module_permission(self, request, obj=None):
-        return request.user.is_immortal()
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_immortal()
+        return False

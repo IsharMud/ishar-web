@@ -28,7 +28,9 @@ class QuestPrereqsAdminInline(admin.TabularInline):
     model = QuestPrereq
 
     def has_module_permission(self, request, obj=None):
-        return request.user.is_immortal()
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_immortal()
+        return False
 
 
 class QuestRewardsAdminInline(admin.TabularInline):
@@ -39,7 +41,9 @@ class QuestRewardsAdminInline(admin.TabularInline):
     model = QuestReward
 
     def has_module_permission(self, request, obj=None):
-        return request.user.is_immortal()
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_immortal()
+        return False
 
 
 class QuestStepsAdminInline(admin.TabularInline):
@@ -50,7 +54,9 @@ class QuestStepsAdminInline(admin.TabularInline):
     model = QuestStep
 
     def has_module_permission(self, request, obj=None):
-        return request.user.is_immortal()
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_immortal()
+        return False
 
 
 @admin.register(Quest)
@@ -71,7 +77,6 @@ class QuestsAdmin(ModelAdmin):
         )}),
         ("Mobiles", {"fields": ("quest_source", "quest_return")})
     )
-    filter_horizontal = filter_vertical = ()
     inlines = (
         QuestPrereqsAdminInline, QuestStepsAdminInline, QuestRewardsAdminInline
     )
@@ -86,7 +91,9 @@ class QuestsAdmin(ModelAdmin):
     )
 
     def has_module_permission(self, request, obj=None):
-        return request.user.is_immortal()
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_immortal()
+        return False
 
     def save_model(self, request, obj, form, change):
         if obj and not change:
@@ -117,7 +124,9 @@ class QuestRewardsAdmin(admin.ModelAdmin):
     search_fields = ("reward_num", "reward_type", "quest", "class_restrict")
 
     def has_module_permission(self, request, obj=None):
-        return request.user.is_immortal()
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_immortal()
+        return False
 
 
 @admin.register(QuestStep)
@@ -151,4 +160,6 @@ class QuestStepsAdmin(admin.ModelAdmin):
     )
 
     def has_module_permission(self, request, obj=None):
-        return request.user.is_immortal()
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_immortal()
+        return False

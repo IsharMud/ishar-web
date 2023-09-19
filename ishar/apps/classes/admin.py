@@ -44,4 +44,6 @@ class ClassesAdmin(admin.ModelAdmin):
     search_fields = ("class_name", "class_display", "class_description")
 
     def has_module_permission(self, request, obj=None):
-        return request.user.is_immortal()
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_immortal()
+        return False
