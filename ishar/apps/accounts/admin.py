@@ -193,4 +193,6 @@ class AccountUpgradesAdmin(admin.ModelAdmin):
     readonly_fields = ("id",)
 
     def has_module_permission(self, request, obj=None):
-        return request.user.is_immortal()
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_eternal()
+        return False
