@@ -32,7 +32,7 @@
                     {% autoescape off %}{{ news.body }}{% endautoescape %}
                 </p>
                 <p class="news-creation">
-                    ~ {{ news.account.account_name }} @ {{ news.created_at }}
+                    ~ {{ news.account.account_name }} @ {{ news.created }}
                 </p>
                 <hr>
     {% endif %}
