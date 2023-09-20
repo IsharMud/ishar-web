@@ -34,7 +34,7 @@ class PatchesListView(PatchesAllView):
 
 class PatchesViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    Read-only API endpoint that allows players to be viewed.
+    Read-only API endpoint that allows patches to be viewed.
     """
     model = Patch
     permission_classes = [permissions.IsAdminUser]

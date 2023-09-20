@@ -15,7 +15,7 @@ from .unsigned import UnsignedAutoField
 
 class Account(AbstractBaseUser, PermissionsMixin):
     """
-    Account/user that logs in to the website, and MUD/game.
+    User account that logs in to the website, and MUD/game.
     """
     account_id = UnsignedAutoField(
         primary_key=True,

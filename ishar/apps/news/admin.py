@@ -14,11 +14,10 @@ class NewsAdmin(admin.ModelAdmin):
         ("Content", {"fields": ("subject", "body")}),
         ("Authorship", {"fields": ("created", "account")}),
     )
-    filter_horizontal = filter_vertical = ()
-    list_display = ("subject", "created", "account")
-    list_filter = (("account", admin.RelatedOnlyFieldListFilter),)
+    list_display = ("subject", "created", "is_visible", "account")
+    list_filter = ("is_visible", ("account", admin.RelatedOnlyFieldListFilter),)
     readonly_fields = ("news_id", "account")
-    search_fields = ("subject", "body", "account")
+    search_fields = ("subject", "body", "account", "is_visible")
 
     def save_model(self, request, obj, form, change):
         if not change:

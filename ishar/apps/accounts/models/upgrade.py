@@ -1,5 +1,4 @@
 from django.db import models
-from django.contrib import admin
 
 
 class AccountUpgrade(models.Model):
@@ -55,7 +54,7 @@ class AccountUpgrade(models.Model):
         verbose_name_plural = "Upgrades"
 
     def __repr__(self):
-        return f"Account Upgrade: {repr(self.__str__())}"
+        return f"{self.__class__.__name__}: {repr(self.__str__())}"
 
     def __str__(self) -> str:
         return self.name or self.id
