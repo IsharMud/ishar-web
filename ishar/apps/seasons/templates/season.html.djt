@@ -39,7 +39,7 @@
                 Essence
             </h3>
             <p>
-                &quot;<a title="Essence" href="{% url "portal" %}">Essence</a>&quot;
+                &quot;<a title="Essence" href="{% url "help_page" help_topic="Essence" %}">Essence</a>&quot;
                 are the rewards points that you earn during the season!
 
             </p>
