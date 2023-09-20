@@ -157,6 +157,9 @@ class RemortUpgradeAdmin(admin.ModelAdmin):
         }),
     )
     list_display = ("display_name", "can_buy", "bonus")
-    list_filter = ("can_buy", "bonus")
+    list_filter = (
+        "can_buy", "bonus", "max_value",
+        "renown_cost", "survival_renown_cost", "scale", "survival_scale"
+    )
     readonly_fields = ("upgrade_id",)
     search_fields = ("name", "display_name")
