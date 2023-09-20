@@ -31,18 +31,18 @@
 {% endblock header %}
 {% block content %}
     {% if player %}
-            <h3 id="player" title="{{ player.player_title | striptags | safe }}">
+            <h3 id="player" title="{{ player.player_title }}">
                 {{ player.player_title }}
             </h3>
         {% if player.description %}
             <p id="player-description">
-                {{ player.description | safe }}
+                {{ player.description }}
             </p>
         {% endif %}
         {% if not player.is_immortal %}
             <ul id="player-details">
-                <li title="Name: {{ player.name | title | safe }} / Class: {{ player.common.player_class.class_display_name }} / Race: {{ player.common.player_race.display_name }}">
-                    {{ player.name | title | safe }} {{ player.get_player_phrase }} a {{ player.common.player_class.class_display }} of {{ player.common.race.folk_name | lower }} origin.
+                <li title="Name: {{ player.name | title }} / Class: {{ player.common.player_class.class_display_name }} / Race: {{ player.common.player_race.display_name }}">
+                    {{ player.name | title }} {{ player.get_player_phrase }} a {{ player.common.player_class.class_display }} of {{ player.common.race.folk_name | lower }} origin.
                 </li>
                 <li title="Level: {{ player.common.level }} {% if player.remorts > 0 %} / Remorts: {{ player.remorts }}{% endif %}">
                     {{ player.get_player_gender | title }} {{ player.get_player_phrase }} level {{ player.common.level }}{% if player.remorts > 0 %} and {{ player.get_player_phrase_owns }} remorted {{ player.remorts }} time{{ player.remorts|pluralize }}{% endif %}.
@@ -65,16 +65,16 @@
                 <li title="Alignment: {{ player.get_player_alignment }} ({{ player.common.alignment }})">
                     {{ player.get_player_gender_own | title }} alignment {{ player.get_player_phrase }} {{ player.get_player_alignment | lower }}.
                 </li>
-                <li title="{% if player.player_type == 'Classic' %}Deaths: {{ player.deaths }}{% elif player.player_type == 'Dead' %}{{ player.name | title | safe }} is DEAD!{% else %}{{ player.name | title | safe }} is a {{ player.player_type }} player!{% endif %}">
+                <li title="{% if player.player_type == 'Classic' %}Deaths: {{ player.deaths }}{% elif player.player_type == 'Dead' %}{{ player.name | title }} is DEAD!{% else %}{{ player.name | title }} is a {{ player.player_type }} player!{% endif %}">
             {% if player.player_type == 'Dead' %}
-                    {{ player.name | title | safe }} is <span class="message-error">DEAD</span>!
+                    {{ player.name | title }} is <span class="message-error">DEAD</span>!
                     <ul>
-                        <li title="{{ player.name | title | safe }} died too often. {{ player.get_player_gender | title }} can not be resurrected!">
-                            {{ player.name | title | safe }} died too often. {{ player.get_player_gender | title }} can not be resurrected!
+                        <li title="{{ player.name | title }} died too often. {{ player.get_player_gender | title }} can not be resurrected!">
+                            {{ player.name | title }} died too often. {{ player.get_player_gender | title }} can not be resurrected!
                         </li>
                     </ul>
             {% elif player.player_type == "Survival" %}
-                    {{ player.name | title | safe }} {{ player.get_player_phrase }} a <span class="{{ player.player_css }}">{{ player.player_type }}</span> player!
+                    {{ player.name | title }} {{ player.get_player_phrase }} a <span class="{{ player.player_css }}">{{ player.player_type }}</span> player!
             {% else %}
                 {% if player.deaths > 0 %}
                     {{ player.get_player_gender | title }} {{ player.get_player_phrase_owns }} died {{ player.deaths }} time{{ player.deaths|pluralize }}.
@@ -90,8 +90,8 @@
             </h3>
             <ol id="player-remort-upgrades">
                 {% for remort_upgrade in remort_upgrades %}
-                <li title="{{ remort_upgrade.upgrade.display_name | title | safe }} {% if remort_upgrade.value > 1 %} (x{{ remort_upgrade.value }}){% endif %}">
-                    {{ remort_upgrade.upgrade.display_name | title | safe }}
+                <li title="{{ remort_upgrade.upgrade.display_name | title }} {% if remort_upgrade.value > 1 %} (x{{ remort_upgrade.value }}){% endif %}">
+                    {{ remort_upgrade.upgrade.display_name | title }}
                     {% if remort_upgrade.value > 1 %}
                         (x{{ remort_upgrade.value }})
                     {% endif %}
@@ -143,7 +143,7 @@
         {% else %}
             <ul>
                 <li>
-                    {{ player.name | title | safe }} {{ player.get_player_phrase }} a <span class="{{ player.player_css }}">{{ player.player_type }}</span> character!
+                    {{ player.name | title }} {{ player.get_player_phrase }} a <span class="{{ player.player_css }}">{{ player.player_type }}</span> character!
                 </li>
             </ul>
         {% endif %}

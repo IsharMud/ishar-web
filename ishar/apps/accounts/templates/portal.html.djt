@@ -3,7 +3,7 @@
 {% block meta_description %}Portal for players to see information about their account and characters.{% endblock meta_description %}
 {% block meta_url %}{% url "portal" %}{% endblock meta_url %}
 {% block title %}Portal{% endblock title %}
-{% block header %}Welcome{% if request.user.account_name %}, {{ request.user.account_name | title | safe }}{% endif %}!{% endblock header %}
+{% block header %}Welcome{% if request.user.account_name %}, {{ request.user.account_name | title }}{% endif %}!{% endblock header %}
 {% block scripts %}
     {% if request.user.players %}
         <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>

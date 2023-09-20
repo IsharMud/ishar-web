@@ -44,6 +44,7 @@ class AccountPlayersLinksInline(admin.TabularInline):
         player_id = obj.id
         player_name = obj.name
         return mark_safe(
+            # TODO: url() this
             f'<a href="/admin/players/player/{player_id}/">{player_name}</a>'
         )
 

@@ -1,10 +1,10 @@
 {% extends "base/layout.html.djt" %}
 {% load humanize %}
-{% block meta_title %}Account ({{ request.user.name | safe }}){% endblock meta_title %}
+{% block meta_title %}Account ({{ request.user.account_name | title }}){% endblock meta_title %}
 {% block meta_description %}Your Ishar MUD Account{% endblock meta_description %}
 {% block meta_url %}{% url "account" %}{% endblock meta_url %}
-{% block title %}Account ({{ request.user.account_name | title | safe }}){% endblock title %}
-{% block header %}Account ({{ request.user.account_name | safe }}){% endblock header %}
+{% block title %}Account ({{ request.user.account_name | title }}){% endblock title %}
+{% block header %}Account ({{ request.user.account_name | title }}){% endblock header %}
 {% block content %}
             <h4 title="Created">
                 Created

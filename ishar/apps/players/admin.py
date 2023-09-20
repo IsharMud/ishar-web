@@ -127,6 +127,7 @@ class PlayerAdmin(admin.ModelAdmin):
         account_id = obj.account.account_id
         account_name = obj.account.account_name
         return mark_safe(
+            # TODO: url() this
             f'<a href="/admin/accounts/account/{account_id}">{account_name}</a>'
         )
 
