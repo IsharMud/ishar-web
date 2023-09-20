@@ -50,7 +50,7 @@ class SkillAdmin(admin.ModelAdmin):
     Ishar skill administration.
     """
     fieldsets = (
-        (None, {"fields": ("enum_symbol", "func_name", "skill_name")}),
+        (None, {"fields": ("id", "enum_symbol", "func_name", "skill_name")}),
         ("Minimums", {"fields": ("min_posn", "min_use")}),
         ("Cost", {"fields": ("spell_breakpoint", "held_cost")}),
         ("Text", {
@@ -69,6 +69,7 @@ class SkillAdmin(admin.ModelAdmin):
     )
     list_filter = ("skill_type", "is_spell", "is_skill", "is_type")
     model = Skill
+    readonly_fields = ("id",)
     search_fields = (
         "enum_symbol", "func_name", "skill_name",
         "wearoff_msg", "chant_text", "appearance", "decide_func"
