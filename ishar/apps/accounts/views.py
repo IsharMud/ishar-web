@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import PasswordChangeView
@@ -40,5 +41,5 @@ class AccountView(PortalView):
 
 
 class PasswordView(LoginRequiredMixin, PasswordChangeView):
-    success_url = "/portal/"
+    success_url = settings.LOGIN_REDIRECT_URL
     template_name = "password.html.djt"

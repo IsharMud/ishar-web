@@ -32,8 +32,8 @@ the getting started guide, or even by downloading a MUD client!
 
 ### More Information
 
-The website is using a combination of Python, Flask, SQLAlchemy, MariaDB,
-nginx, and uwsgi, among other things.
+The website is using a combination of Python, Django, MariaDB, nginx, and uwsgi,
+among other things.
 
 The MUD itself is written in C,
 while relying upon "[Mocha](https://old.isharmud.com/mocha/)".
