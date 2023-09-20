@@ -37,7 +37,3 @@ among other things.
 
 The MUD itself is written in C,
 while relying upon "[Mocha](https://old.isharmud.com/mocha/)".
-
-#### (GitHub) Actions
-[![CodeQL](https://github.com/IsharMud/ishar-web/actions/workflows/codeql.yml/badge.svg)](https://github.com/IsharMud/ishar-web/actions/workflows/codeql.yml)
-[![Lint](https://github.com/IsharMud/ishar-web/actions/workflows/lint.yml/badge.svg)](https://github.com/IsharMud/ishar-web/actions/workflows/lint.yml)

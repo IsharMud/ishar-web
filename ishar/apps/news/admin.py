@@ -8,14 +8,14 @@ class NewsAdmin(admin.ModelAdmin):
     """
     Ishar news administration.
     """
-    date_hierarchy = "created_at"
+    date_hierarchy = "created"
     fieldsets = (
         (None, {"fields": ("news_id",)}),
         ("Content", {"fields": ("subject", "body")}),
-        ("Authorship", {"fields": ("created_at", "account")}),
+        ("Authorship", {"fields": ("created", "account")}),
     )
     filter_horizontal = filter_vertical = ()
-    list_display = ("subject", "created_at", "account")
+    list_display = ("subject", "created", "account")
     list_filter = (("account", admin.RelatedOnlyFieldListFilter),)
     readonly_fields = ("news_id", "account")
     search_fields = ("subject", "body", "account")

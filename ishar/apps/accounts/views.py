@@ -4,7 +4,6 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import PasswordChangeView
 from django.views.generic.base import TemplateView
 
-
 from rest_framework import viewsets, permissions
 
 from .models.upgrade import AccountUpgrade

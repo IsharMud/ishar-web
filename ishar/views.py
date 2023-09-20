@@ -61,5 +61,9 @@ class WelcomeView(TemplateView):
         Add news to the main page.
         """
         context = super().get_context_data(**kwargs)
-        context["news"] = News.objects.first()
+        context["news"] = News.objects.filter(
+            is_visible=True
+        ).order_by(
+            "-created"
+        ).first()
         return context

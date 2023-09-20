@@ -40,7 +40,7 @@ class Patch(models.Model):
     is_visible = models.BooleanField(
         default=True,
         help_text="Should the patch be visible publicly?",
-        verbose_name="Is Visible?"
+        verbose_name="Visible?"
     )
 
     class Meta:
@@ -53,7 +53,8 @@ class Patch(models.Model):
     def __repr__(self):
         return (
             f"{self.__class__.__name__}: "
-            f"{repr(self.__str__())} @ {self.patch_date} ({self.patch_id})"
+            f"{repr(self.__str__())} @ {self.patch_date} ({self.patch_id}) "
+            f"[by {self.account.account_name}]"
         )
 
     def __str__(self):
