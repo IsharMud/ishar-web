@@ -1,6 +1,8 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.views import LoginView, LogoutView, TemplateView
+from django.contrib.auth.views import PasswordChangeView
+from django.views.generic.base import TemplateView
+
 
 from rest_framework import viewsets, permissions
 
@@ -29,14 +31,6 @@ class AccountUpgradesViewSet(viewsets.ModelViewSet):
     serializer_class = AccountUpgradeSerializer
 
 
-class IsharLoginView(LoginView):
-    template_name = "login.html.djt"
-
-
-class IsharLogoutView(LogoutView):
-    template_name = "logout.html.djt"
-
-
 class PortalView(LoginRequiredMixin, TemplateView):
     template_name = "portal.html.djt"
 
@@ -45,5 +39,6 @@ class AccountView(PortalView):
     template_name = "account.html.djt"
 
 
-class PasswordView(LoginRequiredMixin, TemplateView):
+class PasswordView(LoginRequiredMixin, PasswordChangeView):
+    success_url = "/portal/"
     template_name = "password.html.djt"

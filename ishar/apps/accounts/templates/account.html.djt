@@ -22,7 +22,7 @@
             </h4>
             <ul id="account-manage">
                 <li title="Change your password">
-                    <a href="{% url "portal" %}">Change your password</a>
+                    <a href="{% url "password" %}">Change your password</a>
                 </li>
                 <li title="View your players">
                     <a href="{% url "portal" %}">View your players</a>

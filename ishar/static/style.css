@@ -187,7 +187,7 @@ embed {
 
 .dead-player,
 .survival-player,
-.message-error {
+.message-error, .errorlist {
     color:              #fa8072;
 }
 

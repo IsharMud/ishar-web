@@ -36,6 +36,7 @@ urlpatterns = [
 
     path("getstarted/", StartView.as_view(), name="getstarted"),
     path("get_started/", StartView.as_view(), name="get_started"),
+    path("start/", StartView.as_view(), name="start"),
 
     path("help/", include("ishar.apps.help.urls"), name="help"),
     path("leaders/", include("ishar.apps.leaders.urls"), name="leaders"),
@@ -48,7 +49,6 @@ urlpatterns = [
     path("portal/", include("ishar.apps.accounts.urls"), name="portal"),
     path("season/", include("ishar.apps.seasons.urls"), name="season"),
 
-    path("start/", StartView.as_view(), name="start"),
     path("support/", SupportView.as_view(), name="support"),
     path("world/", WorldView.as_view(), name="world"),
 ]
