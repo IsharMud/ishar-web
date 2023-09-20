@@ -84,14 +84,14 @@
             {% endif %}
                 </li>
             </ul>
-            {% if player.remort_upgrades %}
+            {% if remort_upgrades %}
             <h3 title="Remort Upgrades">
                 Remort Upgrades
             </h3>
             <ol id="player-remort-upgrades">
-                {% for remort_upgrade in player.remort_upgrades %}
-                <li title="{{ remort_upgrade.remort_upgrade.name | title | safe }} {% if remort_upgrade.value > 1 %} (x{{ remort_upgrade.value }}){% endif %}">
-                    {{ remort_upgrade.remort_upgrade.name | title | safe }}
+                {% for remort_upgrade in remort_upgrades %}
+                <li title="{{ remort_upgrade.upgrade.display_name | title | safe }} {% if remort_upgrade.value > 1 %} (x{{ remort_upgrade.value }}){% endif %}">
+                    {{ remort_upgrade.upgrade.display_name | title | safe }}
                     {% if remort_upgrade.value > 1 %}
                         (x{{ remort_upgrade.value }})
                     {% endif %}

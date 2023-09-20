@@ -59,8 +59,8 @@
                 Upgrades
             </h4>
             <ul id="essence-upgrades">
-    {% if request.user.upgrades %}
-        {% for upgraded in request.user.upgrades %}
+    {% if account_upgrades %}
+        {% for upgraded in account_upgrades %}
             {% if upgraded.amount and upgraded.amount > 0 %}
                 <li title="{{ upgraded.upgrade.name }}{% if upgrade.amount > 1 %} (x{{ upgrade.amount }}){% endif %}">
                     {{ upgraded.upgrade.name }}

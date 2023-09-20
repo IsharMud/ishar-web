@@ -3,7 +3,7 @@ from django.views.generic import DetailView
 from django.views.generic.base import TemplateView
 from rest_framework import viewsets, permissions
 
-from .models import Player, PlayerFlag, RemortUpgrade
+from .models import Player, PlayerFlag, PlayerRemortUpgrade, RemortUpgrade
 from .serializers import PlayerSerializer, PlayerFlagSerializer, \
     RemortUpgradeSerializer
 
@@ -14,10 +14,28 @@ class PlayerView(LoginRequiredMixin, DetailView):
     """
     context_object_name = "player"
     model = Player
-    slug_field = "name"
-    slug_url_kwarg = "name"
-    query_pk_and_slug = "name"
+    slug_field = slug_url_kwarg = query_pk_and_slug = "name"
     template_name = "player.html.djt"
+
+    def get_context_data(self, **kwargs):
+        """
+        Include remort upgrades in the context on the player page.
+        """
+        context = super(PlayerView, self).get_context_data(**kwargs)
+        context["remort_upgrades"] = PlayerRemortUpgrade.objects.filter(
+            player=self.get_object(),
+            value__gt=0
+        ).all()
+        return context
+
+    def setup(self, request, *args, **kwargs):
+        self.extra_context = {
+            "remort_upgrades": PlayerRemortUpgrade.objects.filter(
+                player=kwargs.get(self.context_object_name),
+                value__gt=0
+            ).all()
+        }
+        return super().setup(request, *args, **kwargs)
 
 
 class PlayerSearchView(LoginRequiredMixin, TemplateView):

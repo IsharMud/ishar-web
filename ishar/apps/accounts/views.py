@@ -6,7 +6,7 @@ from django.views.generic.base import TemplateView
 
 from rest_framework import viewsets, permissions
 
-from .models.upgrade import AccountUpgrade
+from .models.upgrade import AccountUpgrade, AccountAccountUpgrade
 from .serializers import AccountSerializer, AccountUpgradeSerializer
 
 
@@ -37,6 +37,18 @@ class PortalView(LoginRequiredMixin, TemplateView):
 
 class AccountView(PortalView):
     template_name = "account.html.djt"
+
+    def setup(self, request, *args, **kwargs):
+        """
+        Include account upgrades in the context on the account page.
+        """
+        self.extra_context = {
+            "account_upgrades": AccountAccountUpgrade.objects.filter(
+                account=request.user,
+                amount__gt=0
+            ).all()
+        }
+        return super().setup(request, *args, **kwargs)
 
 
 class PasswordView(LoginRequiredMixin, PasswordChangeView):

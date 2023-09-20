@@ -590,8 +590,9 @@ class RemortUpgrade(models.Model):
 
     class Meta:
         db_table = "remort_upgrades"
+        default_related_name = "upgrade"
         managed = False
-        ordering = ("-can_buy", "display_name",)
+        ordering = ("-can_buy", "display_name")
         verbose_name = "Remort Upgrade"
 
     def __repr__(self):
@@ -814,18 +815,10 @@ class PlayersFlag(models.Model):
 
 class PlayerRemortUpgrade(models.Model):
     """
-    Player Remort Upgrade.
+    Player relation to a remort upgrade.
     """
-    upgrade = models.ForeignKey(
-        db_column="upgrade_id",
-        related_query_name="+",
-        to=RemortUpgrade,
-        to_field="upgrade_id",
-        on_delete=models.CASCADE,
-        help_text="Remort upgrade affecting a player.",
-        verbose_name="Remort Upgrade"
-    )
-    player = models.ForeignKey(
+    player = models.OneToOneField(
+        primary_key=True,  # Fake it, just so reads work.
         db_column="player_id",
         related_query_name="upgrade",
         related_name="upgrades",
@@ -834,6 +827,15 @@ class PlayerRemortUpgrade(models.Model):
         on_delete=models.CASCADE,
         help_text="Player with a remort upgrade.",
         verbose_name="Player"
+    )
+    upgrade = models.ForeignKey(
+        db_column="upgrade_id",
+        related_query_name="+",
+        to=RemortUpgrade,
+        to_field="upgrade_id",
+        on_delete=models.CASCADE,
+        help_text="Remort upgrade affecting a player.",
+        verbose_name="Remort Upgrade"
     )
     value = models.PositiveIntegerField(
         blank=False,

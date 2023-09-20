@@ -1,5 +1,7 @@
 from django.db import models
 
+from . import Account
+
 
 class AccountUpgrade(models.Model):
     """
@@ -58,3 +60,44 @@ class AccountUpgrade(models.Model):
 
     def __str__(self) -> str:
         return self.name or self.id
+
+
+class AccountAccountUpgrade(models.Model):
+    """
+    Account upgrade relation to an account.
+    """
+    account = models.OneToOneField(
+        primary_key=True,  # Fake it, just so reads work.
+        db_column="account_id",
+        to=Account,
+        to_field="account_id",
+        on_delete=models.CASCADE,
+        help_text="Account with the specified upgrade.",
+        verbose_name="Account"
+    )
+    upgrade = models.ForeignKey(
+        db_column="account_upgrades_id",
+        to=AccountUpgrade,
+        to_field="id",
+        on_delete=models.CASCADE,
+        help_text="Upgrade which the account has.",
+        verbose_name="Upgrade"
+    )
+    amount = models.PositiveIntegerField(
+        db_column="amount",
+        help_text="Amount of the account upgrade.",
+        verbose_name="Amount"
+    )
+
+    # The composite primary key (account_upgrades_id, account_id) found,
+    #   that is not supported. The first column is selected.
+    class Meta:
+        managed = False
+        db_table = "accounts_account_upgrades"
+        unique_together = (("account", "upgrade"),)
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}: {repr(self.__str__())}"
+
+    def __str__(self) -> str:
+        return f"{self.upgrade} @ {self.account} : {self.amount}"
