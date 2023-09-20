@@ -85,13 +85,16 @@ class Skill(models.Model):
         verbose_name="ENUM Symbol"
     )
     func_name = models.CharField(
-        max_length=255, blank=True, null=True,
+        blank=True,
+        max_length=255,
+        null=True,
         help_text="Internal function name for the skill/spell.",
         verbose_name="Function Name"
     )
     skill_name = models.TextField(
-        blank=True, null=True,
+        blank=True,
         help_text="Friendly name of the skill/spell.",
+        null=True,
         verbose_name="Skill Name"
     )
     min_posn = models.IntegerField(
@@ -172,14 +175,17 @@ class Skill(models.Model):
         verbose_name="Mod Stat 2"
     )
     is_spell = models.BooleanField(
+        blank=True, null=True,
         help_text="Is this a spell?",
         verbose_name="Is Spell?"
     )
     is_skill = models.BooleanField(
+        blank=True, null=True,
         help_text="Is this a skill?",
         verbose_name="Is Skill?"
     )
     is_type = models.BooleanField(
+        blank=True, null=True,
         help_text="Is this a type?",
         verbose_name="Is Type?"
     )
@@ -187,6 +193,15 @@ class Skill(models.Model):
         blank=True, null=True,
         help_text="Internal function for decision-making for the skill/spell.",
         verbose_name="Decide Function"
+    )
+    skill_type = models.IntegerField(
+        choices=((0, "Type"), (1, "Skill"), (2, "Spell"), (3, "Craft")),
+        help_text="Type of skill.",
+        verbose_name="Skill Type"
+    )
+    parent_skill = models.IntegerField(
+        help_text="Parent skill of a skill.",
+        verbose_name="Parent Skill"
     )
 
     class Meta:

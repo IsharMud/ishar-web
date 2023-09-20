@@ -59,11 +59,15 @@ class SkillAdmin(admin.ModelAdmin):
         ("Values", {"fields": ("difficulty", "rate", "notice_chance")}),
         ("Component", {"fields": ("component_type", "component_value")}),
         ("Scale/Mod", {"fields": ("scale", "mod_stat_1", "mod_stat_2")}),
-        ("Booleans", {"fields": ("is_spell", "is_skill", "is_type")})
+        ("Booleans", {"fields": ("is_spell", "is_skill", "is_type")}),
+        ("Type", {"fields": ("skill_type",)}),
+        ("Parent", {"fields": ("parent_skill",)})
     )
     inlines = (SkillsSpellFlagsAdminInline, SkillsForcesAdminInline)
-    list_display = ("skill_name", "is_spell", "is_skill", "is_type")
-    list_filter = ("is_spell", "is_skill", "is_type")
+    list_display = (
+        "skill_name", "skill_type", "is_spell", "is_skill", "is_type"
+    )
+    list_filter = ("skill_type", "is_spell", "is_skill", "is_type")
     model = Skill
     search_fields = (
         "enum_symbol", "func_name", "skill_name",
