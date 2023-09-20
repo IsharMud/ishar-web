@@ -63,7 +63,7 @@
                 </li>
             {% endif %}
                 <li title="Alignment: {{ player.get_player_alignment }} ({{ player.common.alignment }})">
-                    {{ player.get_player_gender_own | title }} alignment {{ player.get_player_phrase }} {{ player.get_player_alignment }}.
+                    {{ player.get_player_gender_own | title }} alignment {{ player.get_player_phrase }} {{ player.get_player_alignment | lower }}.
                 </li>
                 <li title="{% if player.player_type == 'Classic' %}Deaths: {{ player.deaths }}{% elif player.player_type == 'Dead' %}{{ player.name | title | safe }} is DEAD!{% else %}{{ player.name | title | safe }} is a {{ player.player_type }} player!{% endif %}">
             {% if player.player_type == 'Dead' %}
