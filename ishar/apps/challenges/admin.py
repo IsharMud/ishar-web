@@ -42,6 +42,7 @@ class ChallengesAdmin(admin.ModelAdmin):
     list_display = ("challenge_desc", "mob_name", "is_active", "is_completed")
     list_filter = ("is_active", ChallengeCompletedListFilter)
     readonly_fields = ("challenge_id", "is_completed")
+    save_on_top = True
     search_fields = ("challenge_desc", "winner_desc", "mob_vnum", "mob_name")
 
     def has_module_permission(self, request, obj=None):
