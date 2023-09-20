@@ -231,13 +231,12 @@ USE_THOUSAND_SEPARATOR = True
 # Default primary key field type
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-LOGIN_URL = "/portal/login/"
+LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/portal/"
-LOGOUT_URL = "/portal/logout/"
+LOGOUT_URL = "/logout/"
 
 CONNECT_HOST = ALLOWED_HOSTS[0]
-CONNECT_PORT = "23"
+CONNECT_PORT = 23
 CONNECT_URL = (
-    "https://mudslinger.net/play/?host=" +
-    ALLOWED_HOSTS[0] + "&port=" + CONNECT_PORT
+    f"https://mudslinger.net/play/?host={CONNECT_HOST}&port={CONNECT_PORT}"
 )

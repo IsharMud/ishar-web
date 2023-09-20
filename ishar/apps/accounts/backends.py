@@ -18,7 +18,7 @@ class IsharUserAuthBackend(ModelBackend):
         """
         try:
             user = self.model.objects.get(email=username)
-        except self.model.DoesNotExist as no_acct:
+        except self.model.DoesNotExist:
             return None
 
         if user and user.check_password(raw_password=password):

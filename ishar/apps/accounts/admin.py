@@ -22,6 +22,13 @@ class AccountPlayersLinksInline(admin.TabularInline):
         """
         return obj.common.player_class.class_name.title()
 
+    @admin.display(boolean=True, description="Deleted?")
+    def get_player_deleted(self, obj):
+        """
+        Admin boolean for whether player is deleted.
+        """
+        return obj.is_deleted
+
     @admin.display(description="Level")
     def get_player_level(self, obj):
         """
@@ -56,7 +63,7 @@ class AccountPlayersLinksInline(admin.TabularInline):
 
     fields = readonly_fields = (
         "id", "get_player_link", "get_player_class", "get_player_race",
-        "get_player_level", "get_player_game_type"
+        "get_player_level", "get_player_game_type", "get_player_deleted"
     )
 
     def has_add_permission(self, request, obj):
@@ -78,10 +85,14 @@ class AccountPlayersLinksInline(admin.TabularInline):
         return False
 
     def has_module_permission(self, request, obj=None):
-        return request.user.is_eternal()
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_eternal()
+        return False
 
     def has_view_permission(self, request, obj=None):
-        return request.user.is_eternal()
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_eternal()
+        return False
 
 
 @admin.register(get_user_model())

@@ -2,6 +2,8 @@
 isharmud.com base views.
 """
 from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth.views import LoginView, LogoutView
 from django.views.generic.base import RedirectView, TemplateView
 
 from ishar.apps.news.models import News
@@ -22,6 +24,18 @@ class FAQView(TemplateView):
 
 class HistoryView(TemplateView):
     template_name = "history.html.djt"
+
+
+class IsharLoginView(LoginView):
+    template_name = "login.html.djt"
+
+
+class IsharLogoutView(LogoutView):
+    template_name = "welcome.html.djt"
+
+    def dispatch(self, request, *args, **kwargs):
+        messages.success(request, "You have logged out!")
+        return super().dispatch(request, *args, **kwargs)
 
 
 class PortalView(TemplateView):

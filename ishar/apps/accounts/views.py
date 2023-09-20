@@ -37,11 +37,11 @@ class IsharLogoutView(LogoutView):
     template_name = "logout.html.djt"
 
 
-class PortalView(LoginRequiredMixin, LoginView):
+class PortalView(LoginRequiredMixin, TemplateView):
     template_name = "portal.html.djt"
 
 
-class AccountView(LoginRequiredMixin, TemplateView):
+class AccountView(PortalView):
     template_name = "account.html.djt"
 
 
