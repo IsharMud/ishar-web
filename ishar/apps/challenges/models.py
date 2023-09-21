@@ -88,3 +88,17 @@ class Challenge(models.Model):
         if self.winner_desc:
             return True
         return False
+
+    def winners(self) -> list:
+        """
+        List of winners of a challenge.
+        """
+        out = []
+        winners = self.winner_desc
+        if winners:
+            if ',' in winners:
+                for winner in winners.split(','):
+                    out.append(winner.strip())
+            else:
+                out.append(winners)
+        return out

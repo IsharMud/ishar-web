@@ -19,7 +19,7 @@
                     data: [
     {% for challenge in challenges %}
                         {
-        {% if challenge.winner_desc %}
+        {% if challenge.is_completed %}
                             name: gridjs.html('<span class="challenge-completed">{{ challenge.mob_name }}</span>'),
         {% else %}
                             name: "{{ challenge.mob_name }}",
@@ -27,7 +27,11 @@
                             people: "{{ challenge.adj_people }}",
                             level: {{ challenge.orig_level }},
                             reward: {{ challenge.orig_tier }},
-                            completed: "{{ challenge.winner_desc }}"
+        {% if challenge.is_completed and challenge.winners %}
+                            completed: gridjs.html('{% for winner in challenge.winners %}<a href="{% url "player" name=winner %}" title="Player: {{ winner }}">{{ winner }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}')
+        {% else %}
+                            completed: ""
+        {% endif %}
                         },
     {% endfor %}
                     ],
