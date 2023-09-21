@@ -106,9 +106,14 @@ class QuestPrereq(models.Model):
     """
     Quest Prerequisite.
     """
-    quest = models.OneToOneField(
-        to=Quest,
+    id = models.AutoField(
         primary_key=True,
+        db_column="id",
+        help_text="Auto-generated, permanent quest pre-requisite relation ID.",
+        verbose_name="Quest Prerequisite ID"
+    )
+    quest = models.ForeignKey(
+        to=Quest,
         on_delete=models.CASCADE,
         db_column="quest_id",
         help_text="Quest which requires a prerequisite.",
@@ -131,7 +136,7 @@ class QuestPrereq(models.Model):
         verbose_name_plural = "Prerequisites"
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}: {repr(self.__str__())}"
+        return f"{self.__class__.__name__}: {repr(self.__str__())} ({self.id})"
 
     def __str__(self) -> str:
         return f"{self.quest} requires {self.required_quest}"
