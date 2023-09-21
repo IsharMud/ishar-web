@@ -92,7 +92,7 @@ class Quest(models.Model):
         db_table = "quests"
         default_related_name = "quest"
         managed = False
-        ordering = ("-repeatable", "-class_restrict", "display_name")
+        ordering = ("display_name",)
         verbose_name = "Quest"
 
     def __repr__(self) -> str:

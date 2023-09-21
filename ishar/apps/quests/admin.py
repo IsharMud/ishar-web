@@ -82,7 +82,10 @@ class QuestsAdmin(ModelAdmin):
     inlines = (
         QuestPrereqsAdminInline, QuestStepsAdminInline, QuestRewardsAdminInline
     )
-    list_display = ("display_name", "repeatable", "class_restrict", "min_level")
+    list_display = (
+        "quest_id", "display_name", "repeatable", "class_restrict", "min_level"
+    )
+    list_display_links = ("quest_id", "display_name")
     list_filter = ("repeatable", "class_restrict", "min_level")
     readonly_fields = (
         "quest_id", "deprecated_prerequisite", "deprecated_max_level"
