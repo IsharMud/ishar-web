@@ -1,6 +1,6 @@
 {% extends "layout.html.djt" %}
 {% load get_dict_item from ishar%}
-{% block meta_title %}Help: {{ topic }}{% endblock meta_title %}
+{% block meta_title %}Help: {{ help_topic.name }}{% endblock meta_title %}
 {% block meta_description %}Help pages for Ishar MUD{% endblock meta_description %}
 {% block meta_url %}{% if help_topic %}{% url "help_page" help_topic=help_topic.name %} %}{% else %}{% url "help" %}{% endif %}{% endblock meta_url %}
 {% block header %}
@@ -16,12 +16,15 @@
             </p>
     {% endif %}
             <div>
-                <form method="get" action="{% url "help" %}" id="help-search-form">
-                    Search field
-                    <input type="submit" value="Search">
+    {% if help_search_form %}
+                <form method="post">
+                    {% csrf_token %}
+                    {{ help_search_form.as_p }}
+                    <button type="submit">Search</button>
                     (<i>such as &quot;<a href="{% url "help_page" help_topic='spell' %}">spell</a>&quot; or
                     &quot;<a href="{% url "help_page" help_topic='MUD Basics' %}">MUD Basics</a>&quot;</i>)
                 </form>
+    {% endif %}
             </div>
     {% if help_topic %}
             <br><hr>
