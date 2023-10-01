@@ -40,8 +40,8 @@ class Race(models.Model):
     )
     default_height = models.SmallIntegerField(
         blank=True, null=True,
-        help_text="Description of the race.",
-        verbose_name="Description"
+        help_text="Default height of the race.",
+        verbose_name="Default Height"
     )
     default_weight = models.SmallIntegerField(
         blank=True, null=True,
