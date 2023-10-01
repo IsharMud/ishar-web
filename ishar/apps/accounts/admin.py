@@ -6,7 +6,7 @@ from django.utils.safestring import mark_safe
 
 from ishar.apps.players.models import Player
 
-from .models.upgrade import AccountUpgrade
+from ishar.apps.accounts.models.upgrade import AccountUpgrade
 
 
 class AccountPlayersLinksInline(admin.TabularInline):
@@ -16,50 +16,38 @@ class AccountPlayersLinksInline(admin.TabularInline):
     model = Player
 
     @admin.display(description="Class")
-    def get_player_class(self, obj):
-        """
-        Admin text for player class.
-        """
+    def get_player_class(self, obj) -> str:
+        """Admin text for player class."""
         return obj.common.player_class.class_name.title()
 
     @admin.display(boolean=True, description="Deleted?")
-    def get_player_deleted(self, obj):
-        """
-        Admin boolean for whether player is deleted.
-        """
+    def get_player_deleted(self, obj) -> bool:
+        """Admin boolean for whether player is deleted."""
         return obj.is_deleted
 
     @admin.display(description="Level")
-    def get_player_level(self, obj):
-        """
-        Admin text for player level.
-        """
+    def get_player_level(self, obj) -> int:
+        """Admin text for player level."""
         return obj.common.level
 
     @admin.display(description="Player", ordering="name")
-    def get_player_link(self, obj):
-        """
-        Admin link for player name.
-        """
+    def get_player_link(self, obj) -> str:
+        """Admin link for player name."""
         player_id = obj.id
         player_name = obj.name
         return mark_safe(
-            # TODO: url() this
+            # TODO: url/reverse ()? this
             f'<a href="/admin/players/player/{player_id}/">{player_name}</a>'
         )
 
     @admin.display(description="Game Type", ordering="game_type")
-    def get_player_game_type(self, obj):
-        """
-        Admin text for player game type.
-        """
+    def get_player_game_type(self, obj) -> str:
+        """Admin text for player game type."""
         return obj.get_game_type_display()
 
     @admin.display(description="Race")
-    def get_player_race(self, obj):
-        """
-        Admin text for player race.
-        """
+    def get_player_race(self, obj) -> str:
+        """Admin text for player race."""
         return obj.common.race
 
     fields = readonly_fields = (
@@ -67,30 +55,24 @@ class AccountPlayersLinksInline(admin.TabularInline):
         "get_player_level", "get_player_game_type", "get_player_deleted"
     )
 
-    def has_add_permission(self, request, obj):
-        """
-        Disabling adding players in /admin/accounts/ inline.
-        """
+    def has_add_permission(self, request, obj) -> bool:
+        """Disabling adding players in /admin/accounts/ inline."""
         return False
 
-    def has_change_permission(self, request, obj):
-        """
-        Disabling changing players in /admin/accounts/ inline.
-        """
+    def has_change_permission(self, request, obj=None) -> bool:
+        """Disabling changing players in /admin/accounts/ inline."""
         return False
 
-    def has_delete_permission(self, request, obj=None):
-        """
-        Disabling deleting players in /admin/accounts/ inline.
-        """
+    def has_delete_permission(self, request, obj=None) -> bool:
+        """Disabling deleting players in /admin/accounts/ inline."""
         return False
 
-    def has_module_permission(self, request, obj=None):
+    def has_module_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_eternal()
         return False
 
-    def has_view_permission(self, request, obj=None):
+    def has_view_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_eternal()
         return False
@@ -108,24 +90,20 @@ class AccountsAdmin(UserAdmin):
         qs = qs.annotate(player_count=Count("player")).order_by("player_count")
         return qs
 
-    def player_count(self, obj):
+    @admin.display(ordering="player_count")
+    def player_count(self, obj) -> int:
         return obj.player_count
-    player_count.admin_order_field = "player_count"
 
     date_hierarchy = "created_at"
     fieldsets = (
         (
             None, {
-                "fields": (
-                    "account_id", "account_name", model.EMAIL_FIELD,
-                )
+                "fields": ("account_id", "account_name", model.EMAIL_FIELD)
             }
         ),
         (
             "Points", {
-                "fields": (
-                    "current_essence", "earned_essence", "bugs_reported"
-                )
+                "fields": ("current_essence", "earned_essence", "bugs_reported")
             }
         ),
         (
@@ -164,28 +142,28 @@ class AccountsAdmin(UserAdmin):
         "created_at", "create_isp", "create_ident", "_create_haddr"
     )
 
-    def has_add_permission(self, request, obj=None):
-        """
-        Disabling adding accounts in /admin/.
-        """
+    def has_add_permission(self, request, obj=None) -> bool:
+        """Disable adding accounts in /admin/."""
         return False
 
-    def has_delete_permission(self, request, obj=None):
-        """
-        Disable deleting accounts in /admin/.
-        """
+    def has_delete_permission(self, request, obj=None) -> bool:
+        """Disable deleting accounts in /admin/."""
         return False
 
-    def has_change_permission(self, request, obj=None):
-        return request.user.is_god()
+    def has_change_permission(self, request, obj=None) -> bool:
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_god()
+        return False
 
-    def has_module_permission(self, request, obj=None):
+    def has_module_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_eternal()
         return False
 
-    def has_view_permission(self, request, obj=None):
-        return request.user.is_eternal()
+    def has_view_permission(self, request, obj=None) -> bool:
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_eternal()
+        return False
 
 
 @admin.register(AccountUpgrade)

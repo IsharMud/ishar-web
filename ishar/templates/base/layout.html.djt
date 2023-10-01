@@ -57,7 +57,7 @@
             <ul>
     {% if user.is_eternal %}
                 <li title="Admin">
-                    <a href="{% url "admin:index" %}">Admin</a>
+                    <a href="{% url "admin:index" %}" target="_blank">Admin</a>
                 </li>
     {% endif %}
                 <li title="Account">
