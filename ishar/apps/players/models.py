@@ -643,11 +643,11 @@ class PlayerCommon(models.Model):
         verbose_name="Level"
     )
     weight = models.PositiveSmallIntegerField(
-        help_text="Weight of the player character.",
+        help_text="Weight of the player character, in pounds.",
         verbose_name="Weight"
     )
     height = models.PositiveSmallIntegerField(
-        help_text="Height of the player character.",
+        help_text="Height of the player character, in inches.",
         verbose_name="Height"
     )
     comm_points = models.SmallIntegerField(
