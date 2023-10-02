@@ -243,7 +243,10 @@ class SkillComponent(models.Model):
         )
 
     def __str__(self):
-        return f"{self.component_type} : {self.component_value} @ {self.skill}"
+        return (
+            f"{self.skill} / {self.get_component_type_display()}: "
+            f"{self.component_value}"
+        )
 
 
 class SkillForce(models.Model):
