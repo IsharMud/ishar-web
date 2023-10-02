@@ -381,4 +381,4 @@ class RaceDeathload(models.Model):
         )
 
     def __str__(self):
-        return f"{self.vnum} @ {self.race} ({self.percent_chance})"
+        return f"{self.vnum} @ {self.race} ({self.percent_chance}%)"
