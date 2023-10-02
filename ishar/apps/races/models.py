@@ -353,16 +353,20 @@ class RaceDeathload(models.Model):
         blank=False,
         help_text="Percent chance of the race deathload.",
         null=False,
+        validators=(
+            MinValueValidator(limit_value=0),
+            MaxValueValidator(limit_value=100)
+        ),
         verbose_name="Percent Chance"
     )
     min_level = models.IntegerField(
         blank=False,
         help_text="Minimum level of the race deathload.",
         null=False,
-        validators=[
+        validators=(
             MinValueValidator(limit_value=1),
             MaxValueValidator(limit_value=max(settings.IMMORTAL_LEVELS)[0])
-        ],
+        ),
         verbose_name="Minimum Level"
     )
 
