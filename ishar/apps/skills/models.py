@@ -149,16 +149,6 @@ class Skill(models.Model):
         help_text="Appearance of the skill/spell.",
         verbose_name="Appearance"
     )
-    component_type = models.IntegerField(
-        blank=True, null=True,
-        help_text="Component type of the skill/spell.",
-        verbose_name="Component Type"
-    )
-    component_value = models.IntegerField(
-        blank=True, null=True,
-        help_text="Component value of the skill.",
-        verbose_name="Component Value"
-    )
     scale = models.IntegerField(
         blank=True, null=True,
         help_text="Scale of the skill/spell.",
@@ -173,21 +163,6 @@ class Skill(models.Model):
         blank=True, null=True,
         help_text="Mod stat 2 of the skill/spell.",
         verbose_name="Mod Stat 2"
-    )
-    is_spell = models.BooleanField(
-        blank=True, null=True,
-        help_text="Is this a spell?",
-        verbose_name="Is Spell?"
-    )
-    is_skill = models.BooleanField(
-        blank=True, null=True,
-        help_text="Is this a skill?",
-        verbose_name="Is Skill?"
-    )
-    is_type = models.BooleanField(
-        blank=True, null=True,
-        help_text="Is this a type?",
-        verbose_name="Is Type?"
     )
     decide_func = models.TextField(
         blank=True, null=True,
@@ -206,9 +181,7 @@ class Skill(models.Model):
 
     class Meta:
         db_table = "skills"
-        ordering = (
-            "-is_spell", "-is_skill", "-is_type", "skill_name", "enum_symbol"
-        )
+        ordering = ("skill_name",)
         managed = False
         verbose_name = "Skill"
         verbose_name_plural = "Skills"
@@ -218,6 +191,59 @@ class Skill(models.Model):
 
     def __str__(self):
         return self.skill_name or self.enum_symbol
+
+
+class SkillComponent(models.Model):
+    """
+    Skill Component.
+    """
+    skill_components_id = models.AutoField(
+        blank=False,
+        db_column="skill_components_id",
+        editable=False,
+        null=False,
+        help_text="Auto-generated ID number of the skill-component relation.",
+        primary_key=True,
+        verbose_name="Skill Component ID"
+    )
+    skill = models.ForeignKey(
+        blank=False,
+        db_column="skill_id",
+        help_text="Skill related to a component.",
+        null=False,
+        on_delete=models.CASCADE,
+        to=Skill,
+        verbose_name="Skill"
+    )
+    component_type = models.IntegerField(
+        blank=False,
+        choices=((0, None), (1, "Treasure"), (2, "Item")),
+        help_text="Type of component.",
+        null=False,
+        verbose_name="Component Type"
+    )
+    component_value = models.IntegerField(
+        blank=False,
+        help_text="Value of component.",
+        null=False,
+        verbose_name="Component Value"
+    )
+
+    class Meta:
+        managed = False
+        db_table = "skill_components"
+        ordering = ("skill_components_id", "skill")
+        verbose_name = "Component"
+        verbose_name_plural = "Components"
+
+    def __repr__(self):
+        return (
+            f"{self.__class__.__name__}: {self.__str__()} @ "
+            f"[{self.skill_components_id}]"
+        )
+
+    def __str__(self):
+        return f"{self.component_type} : {self.component_value} @ {self.skill}"
 
 
 class SkillForce(models.Model):
@@ -256,10 +282,10 @@ class SkillForce(models.Model):
         verbose_name_plural = "Skill Forces"
 
     def __repr__(self):
-        return f"{self.__class__.__name__}: {repr(self.skill)} @ {self.force}"
+        return f"{self.__class__.__name__}: {self.__str__()} [{self.id}]"
 
     def __str__(self):
-        return self.__repr__()
+        return f"{self.skill} @ {self.force}"
 
 
 class SkillSpellFlag(models.Model):

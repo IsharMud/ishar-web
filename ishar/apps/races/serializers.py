@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 
-from .models import Race
+from ishar.apps.races.models import Race
 
 
 class RaceSerializer(ModelSerializer):

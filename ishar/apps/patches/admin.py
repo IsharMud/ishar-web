@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Patch
+from ishar.apps.patches.models import Patch
 
 
 @admin.register(Patch)

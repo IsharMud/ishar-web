@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 
-from .models import Quest, QuestPrereq, QuestReward, QuestStep
+from ishar.apps.quests.models import Quest, QuestPrereq, QuestReward, QuestStep
 
 
 class QuestSerializer(ModelSerializer):

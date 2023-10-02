@@ -3,8 +3,8 @@ from django.utils import timezone
 from django.views.generic.list import ListView
 from rest_framework import viewsets, permissions
 
-from .models import GlobalEvent
-from .serializers import GlobalEventSerializer
+from ishar.apps.events.models import GlobalEvent
+from ishar.apps.events.serializers import GlobalEventSerializer
 
 
 class GlobalEventsView(LoginRequiredMixin, ListView):

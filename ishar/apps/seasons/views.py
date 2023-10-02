@@ -1,9 +1,9 @@
 from django.views.generic import DetailView, TemplateView
 from rest_framework import viewsets, permissions
 
-from .models import Season
-from .serializers import SeasonSerializer
-from .util import get_current_season
+from ishar.apps.seasons.models import Season
+from ishar.apps.seasons.serializers import SeasonSerializer
+from ishar.apps.seasons.util import get_current_season
 
 
 class SeasonView(DetailView):

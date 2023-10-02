@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import HelpView, HelpPageView
+from ishar.apps.help.views import HelpView, HelpPageView
 
 
 urlpatterns = [

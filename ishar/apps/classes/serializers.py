@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 
-from .models import Class
+from ishar.apps.classes.models import Class
 
 
 class ClassSerializer(ModelSerializer):

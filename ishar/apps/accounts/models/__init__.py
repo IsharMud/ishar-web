@@ -9,8 +9,8 @@ from passlib.hash import md5_crypt
 
 from ishar.util import dec2ip
 
-from .manager import AccountManager
-from .unsigned import UnsignedAutoField
+from ishar.apps.accounts.models.manager import AccountManager
+from ishar.apps.accounts.models.unsigned import UnsignedAutoField
 
 
 class Account(AbstractBaseUser, PermissionsMixin):

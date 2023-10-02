@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework.serializers import ModelSerializer
 
-from .models.upgrade import AccountUpgrade
+from ishar.apps.accounts.models.upgrade import AccountUpgrade
 
 
 class AccountSerializer(ModelSerializer):

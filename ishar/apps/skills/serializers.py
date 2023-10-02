@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 
-from .models import Force, Skill, SpellFlag, SkillSpellFlag
+from ishar.apps.skills.models import Force, Skill, SpellFlag, SkillSpellFlag
 
 
 class ForceSerializer(ModelSerializer):

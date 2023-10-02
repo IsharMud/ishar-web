@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 
-from .models import Challenge
+from ishar.apps.challenges.models import Challenge
 
 
 class ChallengesSerializer(ModelSerializer):

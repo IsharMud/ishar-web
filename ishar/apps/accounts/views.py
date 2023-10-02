@@ -6,8 +6,12 @@ from django.views.generic.base import TemplateView
 
 from rest_framework import viewsets, permissions
 
-from .models.upgrade import AccountUpgrade, AccountAccountUpgrade
-from .serializers import AccountSerializer, AccountUpgradeSerializer
+from ishar.apps.accounts.models.upgrade import (
+    AccountUpgrade, AccountAccountUpgrade
+)
+from ishar.apps.accounts.serializers import (
+    AccountSerializer, AccountUpgradeSerializer
+)
 
 
 class AccountsViewSet(viewsets.ReadOnlyModelViewSet):

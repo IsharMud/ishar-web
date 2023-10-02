@@ -1,6 +1,8 @@
 from django.contrib import admin
 
-from .models import Force, SkillForce, Skill, SkillSpellFlag, SpellFlag
+from ishar.apps.skills.models import (
+    Force, SkillForce, Skill, SkillComponent, SkillSpellFlag, SpellFlag
+)
 
 
 @admin.register(Force)
@@ -11,6 +13,19 @@ class ForceAdmin(admin.ModelAdmin):
     fields = ("id", "force_name")
     list_display = list_display_links = search_fields = fields
     readonly_fields = ("id",)
+
+    def has_module_permission(self, request, obj=None):
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_immortal()
+        return False
+
+
+class SkillsComponentsAdminInline(admin.TabularInline):
+    """
+    Ishar skill/spell's flags components inline administration.
+    """
+    extra = 1
+    model = SkillComponent
 
     def has_module_permission(self, request, obj=None):
         if request.user and not request.user.is_anonymous:
@@ -57,17 +72,17 @@ class SkillAdmin(admin.ModelAdmin):
             "fields": ("wearoff_msg", "chant_text", "appearance", "decide_func")
         }),
         ("Values", {"fields": ("difficulty", "rate", "notice_chance")}),
-        ("Component", {"fields": ("component_type", "component_value")}),
         ("Scale/Mod", {"fields": ("scale", "mod_stat_1", "mod_stat_2")}),
-        ("Booleans", {"fields": ("is_spell", "is_skill", "is_type")}),
         ("Type", {"fields": ("skill_type",)}),
         ("Parent", {"fields": ("parent_skill",)})
     )
-    inlines = (SkillsSpellFlagsAdminInline, SkillsForcesAdminInline)
-    list_display = (
-        "skill_name", "skill_type", "is_spell", "is_skill", "is_type"
+    inlines = (
+        SkillsComponentsAdminInline,
+        SkillsSpellFlagsAdminInline,
+        SkillsForcesAdminInline
     )
-    list_filter = ("skill_type", "is_spell", "is_skill", "is_type")
+    list_display = list_display_links = ("skill_name", "skill_type")
+    list_filter = ("skill_type",)
     model = Skill
     readonly_fields = ("id",)
     search_fields = (
@@ -81,14 +96,39 @@ class SkillAdmin(admin.ModelAdmin):
         return False
 
 
+@admin.register(SkillComponent)
+class SkillComponentAdmin(admin.ModelAdmin):
+    """
+    Ishar skills component administration.
+    """
+    fieldsets = (
+        (None, {"fields": ("skill_components_id",)}),
+        ("Skill", {"fields": ("skill",)}),
+        ("Component", {"fields": ("component_type", "component_value")})
+    )
+    list_display = list_display_links = (
+        "skill_components_id", "skill", "component_type", "component_value"
+    )
+    list_filter = ("component_type", ("skill", admin.RelatedOnlyFieldListFilter))
+    model = SkillComponent
+    ordering = readonly_fields = ("skill_components_id",)
+    search_fields = ("skill", "component_type")
+
+    def has_module_permission(self, request, obj=None):
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_immortal()
+        return False
+
+
 @admin.register(SpellFlag)
 class SpellFlagAdmin(admin.ModelAdmin):
     """
     Ishar spell flag administration.
     """
-    fieldsets = ((None, {"fields": ("name", "description")}),)
+    fieldsets = ((None, {"fields": ("id", "name", "description")}),)
     list_display = search_fields = ("name", "description")
     model = SpellFlag
+    readonly_fields = ("id",)
 
     def has_module_permission(self, request, obj=None):
         if request.user and not request.user.is_anonymous:

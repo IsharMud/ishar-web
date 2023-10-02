@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 
-from .models import Season
+from ishar.apps.seasons.models import Season
 
 
 class SeasonSerializer(ModelSerializer):

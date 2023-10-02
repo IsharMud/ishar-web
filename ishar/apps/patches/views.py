@@ -1,8 +1,8 @@
 from django.views.generic import ListView
 from rest_framework import viewsets, permissions
 
-from .models import Patch
-from .serializers import PatchSerializer
+from ishar.apps.patches.models import Patch
+from ishar.apps.patches.serializers import PatchSerializer
 
 
 class PatchesAllView(ListView):

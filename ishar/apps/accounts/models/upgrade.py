@@ -1,6 +1,6 @@
 from django.db import models
 
-from . import Account
+from ishar.apps.accounts.models import Account
 
 
 class AccountUpgrade(models.Model):

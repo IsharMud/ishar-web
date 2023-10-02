@@ -2,7 +2,9 @@ from django.conf import settings
 from django.contrib import admin
 from django.utils.safestring import mark_safe
 
-from .models import Player, PlayerCommon, PlayerFlag, RemortUpgrade
+from ishar.apps.players.models import (
+    Player, PlayerCommon, PlayerFlag, RemortUpgrade
+)
 
 
 class ImmortalTypeListFilter(admin.SimpleListFilter):

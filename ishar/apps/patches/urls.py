@@ -1,6 +1,8 @@
 from django.urls import path
 
-from .views import PatchesAllView, PatchesLatestView, PatchesListView
+from ishar.apps.patches.views import (
+    PatchesAllView, PatchesLatestView, PatchesListView
+)
 
 
 urlpatterns = [

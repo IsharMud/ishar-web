@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Season
+from ishar.apps.seasons.models import Season
 
 
 @admin.register(Season)
@@ -24,7 +24,7 @@ class SeasonsAdmin(admin.ModelAdmin):
             "season_leader_account", "seasonal_leader_name"
         )})
     )
-    list_display = (
+    list_display = list_display_links = (
         "season_id", "is_active", "effective_date", "expiration_date"
     )
     list_filter = ("is_active",)

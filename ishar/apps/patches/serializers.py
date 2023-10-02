@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 
-from .models import Patch
+from ishar.apps.patches.models import Patch
 
 
 class PatchSerializer(ModelSerializer):

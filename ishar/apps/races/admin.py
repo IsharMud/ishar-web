@@ -1,6 +1,8 @@
 from django.contrib import admin
 
-from .models import Race, RaceAffinity, RacialDeathload, RaceSkill
+from ishar.apps.races.models import (
+    Race, RaceAffinity, RacialDeathload, RaceSkill
+)
 
 
 @admin.register(RaceAffinity)
@@ -41,10 +43,10 @@ class RacialDeathloadAdmin(admin.ModelAdmin):
         ("Race", {"fields": ("race",)}),
         ("Details", {"fields": ("vnum", "percent_chance", "min_level")})
     )
-    list_display = (
+    list_display = list_display_links = (
         "racial_deathload_id", "race", "vnum", "percent_chance", "min_level"
     )
-    list_filter = ("min_level", ("race", admin.RelatedOnlyFieldListFilter))
+    list_filter = (("race", admin.RelatedOnlyFieldListFilter), "min_level")
     readonly_fields = ("racial_deathload_id",)
     search_fields = ("race", "vnum", "percent_chance", "min_level")
 

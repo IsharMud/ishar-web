@@ -1,6 +1,8 @@
 from django.urls import path
 
-from .views import LeadersView, ClassicLeadersView, SurvivalLeadersView
+from ishar.apps.leaders.views import (
+    LeadersView, ClassicLeadersView, SurvivalLeadersView
+)
 
 
 urlpatterns = [

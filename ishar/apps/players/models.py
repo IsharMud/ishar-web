@@ -12,7 +12,7 @@ from ishar.apps.classes.models import Class
 from ishar.apps.races.models import Race
 from ishar.apps.skills.models import Skill
 
-from .util import get_immortal_level, get_immortal_type
+from ishar.apps.players.util import get_immortal_level, get_immortal_type
 
 
 class PlayerFlag(models.Model):

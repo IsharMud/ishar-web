@@ -1,7 +1,7 @@
 from rest_framework import viewsets, permissions
 
-from .models import Race
-from .serializers import RaceSerializer
+from ishar.apps.races.models import Race
+from ishar.apps.races.serializers import RaceSerializer
 
 
 class RacesViewSet(viewsets.ModelViewSet):

@@ -1,7 +1,8 @@
 from django.urls import path
 
-from .views import ChallengesView, CompleteChallengesView, \
-    IncompleteChallengesView
+from ishar.apps.challenges.views import (
+    ChallengesView, CompleteChallengesView, IncompleteChallengesView
+)
 
 
 urlpatterns = [

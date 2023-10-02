@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 
-from .models import News
+from ishar.apps.news.models import News
 
 
 class NewsSerializer(ModelSerializer):

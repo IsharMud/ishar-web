@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import AccountView, PasswordView, PortalView
+from ishar.apps.accounts.views import AccountView, PasswordView, PortalView
 
 
 urlpatterns = [

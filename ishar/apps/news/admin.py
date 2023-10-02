@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import News
+from ishar.apps.news.models import News
 
 
 @admin.register(News)

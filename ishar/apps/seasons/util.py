@@ -1,4 +1,4 @@
-from .models import Season
+from ishar.apps.seasons.models import Season
 
 
 def get_current_season():

@@ -3,9 +3,12 @@ from django.views.generic import DetailView
 from django.views.generic.base import TemplateView
 from rest_framework import viewsets, permissions
 
-from .models import Player, PlayerFlag, PlayerRemortUpgrade, RemortUpgrade
-from .serializers import PlayerSerializer, PlayerFlagSerializer, \
-    RemortUpgradeSerializer
+from ishar.apps.players.models import (
+    Player, PlayerFlag, PlayerRemortUpgrade, RemortUpgrade
+)
+from ishar.apps.players.serializers import (
+    PlayerSerializer, PlayerFlagSerializer, RemortUpgradeSerializer
+)
 
 
 class PlayerView(LoginRequiredMixin, DetailView):

@@ -1,10 +1,10 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import permissions, viewsets
 
-from .models import Quest, QuestPrereq, QuestStep, QuestReward
-from .serializers import (
-    QuestSerializer,
-    QuestPrereqSerializer, QuestRewardSerializer, QuestStepSerializer
+from ishar.apps.quests.models import Quest, QuestPrereq, QuestStep, QuestReward
+from ishar.apps.quests.serializers import (
+    QuestSerializer, QuestPrereqSerializer, QuestRewardSerializer,
+    QuestStepSerializer
 )
 
 

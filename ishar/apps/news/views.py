@@ -1,7 +1,7 @@
 from rest_framework import viewsets, permissions
 
-from .models import News
-from .serializers import NewsSerializer
+from ishar.apps.news.models import News
+from ishar.apps.news.serializers import NewsSerializer
 
 
 class NewsViewSet(viewsets.ModelViewSet):

@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 
-from .models import Player, PlayerFlag, RemortUpgrade
+from ishar.apps.players.models import Player, PlayerFlag, RemortUpgrade
 
 
 class PlayerSerializer(ModelSerializer):

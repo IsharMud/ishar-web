@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
 
-from .models import Quest, QuestPrereq, QuestReward, QuestStep
+from ishar.apps.quests.models import Quest, QuestPrereq, QuestReward, QuestStep
 
 
 @admin.register(QuestPrereq)

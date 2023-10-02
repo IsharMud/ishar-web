@@ -1,8 +1,10 @@
 from rest_framework import viewsets, permissions
 
-from .models import Force, Skill, SpellFlag, SkillSpellFlag
-from .serializers import ForceSerializer, SkillSerializer, \
-    SpellFlagSerializer, SkillSpellFlagSerializer
+from ishar.apps.skills.models import Force, Skill, SpellFlag, SkillSpellFlag
+from ishar.apps.skills.serializers import (
+    ForceSerializer, SkillSerializer, SpellFlagSerializer,
+    SkillSpellFlagSerializer
+)
 
 
 class ForcesViewSet(viewsets.ModelViewSet):

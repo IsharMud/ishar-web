@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Class
+from ishar.apps.classes.models import Class
 
 
 class PlayableClassListFilter(admin.SimpleListFilter):

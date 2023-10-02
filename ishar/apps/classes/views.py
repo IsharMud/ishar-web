@@ -1,7 +1,7 @@
 from rest_framework import viewsets, permissions
 
-from .models import Class
-from .serializers import ClassSerializer
+from ishar.apps.classes.models import Class
+from ishar.apps.classes.serializers import ClassSerializer
 
 
 class ClassesViewSet(viewsets.ModelViewSet):
