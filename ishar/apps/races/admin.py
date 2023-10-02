@@ -1,8 +1,6 @@
 from django.contrib import admin
 
-from ishar.apps.races.models import (
-    Race, RaceAffinity, RacialDeathload, RaceSkill
-)
+from ishar.apps.races.models import Race, RaceAffinity, RaceDeathload, RaceSkill
 
 
 @admin.register(RaceAffinity)
@@ -34,28 +32,29 @@ class RaceAffinitiesAdmin(admin.ModelAdmin):
         return False
 
 
-@admin.register(RacialDeathload)
-class RacialDeathloadAdmin(admin.ModelAdmin):
+@admin.register(RaceDeathload)
+class RaceDeathloadAdmin(admin.ModelAdmin):
     """
-    Ishar racial deathload administration.
+    Ishar race deathload administration.
     """
-    model = RacialDeathload
+    model = RaceDeathload
     fieldsets = (
-        (None, {"fields": ("racial_deathload_id",)}),
+        (None, {"fields": ("id",)}),
         ("Race", {"fields": ("race",)}),
         ("Details", {"fields": ("vnum", "percent_chance", "min_level")})
     )
     list_display = list_display_links = (
-        "racial_deathload_id", "race", "vnum", "percent_chance", "min_level"
+        "id", "race", "vnum", "percent_chance", "min_level"
     )
     list_filter = (("race", admin.RelatedOnlyFieldListFilter), "min_level")
-    readonly_fields = ("racial_deathload_id",)
+    readonly_fields = ("id",)
     search_fields = ("race", "vnum", "percent_chance", "min_level")
 
     def has_module_permission(self, request, obj=None):
         if request.user and not request.user.is_anonymous:
             return request.user.is_immortal()
         return False
+
 
 class RaceAffinityAdminInline(admin.TabularInline):
     """
@@ -70,12 +69,12 @@ class RaceAffinityAdminInline(admin.TabularInline):
         return False
 
 
-class RacialDeathloadAdminInline(admin.TabularInline):
+class RaceDeathloadAdminInline(admin.TabularInline):
     """
-    Ishar racial deathload inline administration.
+    Ishar race deathload inline administration.
     """
     extra = 1
-    model = RacialDeathload
+    model = RaceDeathload
 
     def has_module_permission(self, request, obj=None):
         if request.user and not request.user.is_anonymous:
@@ -126,8 +125,7 @@ class RacesAdmin(admin.ModelAdmin):
         )}),
     )
     inlines = (
-        RaceSkillAdminInline, RaceAffinityAdminInline,
-        RacialDeathloadAdminInline
+        RaceSkillAdminInline, RaceAffinityAdminInline, RaceDeathloadAdminInline
     )
     list_display = (
         "display_name", "symbol", "is_playable", "folk_name",

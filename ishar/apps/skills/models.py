@@ -233,8 +233,8 @@ class SkillComponent(models.Model):
         managed = False
         db_table = "skill_components"
         ordering = ("skill_components_id", "skill")
-        verbose_name = "Component"
-        verbose_name_plural = "Components"
+        verbose_name = "Skill Component"
+        verbose_name_plural = "Skill Components"
 
     def __repr__(self):
         return (
@@ -257,7 +257,7 @@ class SkillForce(models.Model):
         null=False,
         help_text="Auto-generated ID number of the skill-force relation.",
         primary_key=True,
-        verbose_name="ID"
+        verbose_name="Skill Force ID"
     )
     skill = models.ForeignKey(
         db_column="skill_id",

@@ -1,7 +1,8 @@
 from rest_framework.serializers import ModelSerializer
 
-from ishar.apps.skills.models import Force, Skill, SpellFlag, SkillSpellFlag
-
+from ishar.apps.skills.models import (
+    Force, SkillForce, Skill, SkillComponent, SkillSpellFlag, SpellFlag
+)
 
 class ForceSerializer(ModelSerializer):
     class Meta:
@@ -18,6 +19,17 @@ class SkillSerializer(ModelSerializer):
 class SpellFlagSerializer(ModelSerializer):
     class Meta:
         model = SpellFlag
+        fields = "__all__"
+
+
+class SkillComponentSerializer(ModelSerializer):
+    model = SkillComponent
+    fields = "__all__"
+
+
+class SkillForceSerializer(ModelSerializer):
+    class Meta:
+        model = SkillForce
         fields = "__all__"
 
 

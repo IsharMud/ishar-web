@@ -27,21 +27,21 @@ class SkillsViewSet(viewsets.ModelViewSet):
     queryset = model.objects.all()
 
 
-class SpellFlagsViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows spell flags to be viewed or edited.
-    """
-    model = SpellFlag
-    serializer_class = SpellFlagSerializer
-    permission_classes = [permissions.IsAdminUser]
-    queryset = model.objects.all()
-
-
 class SkillsFlagsViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows skill/spell's flags to be viewed or edited.
     """
     model = SkillSpellFlag
     serializer_class = SkillSpellFlagSerializer
+    permission_classes = [permissions.IsAdminUser]
+    queryset = model.objects.all()
+
+
+class SpellFlagsViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows spell flags to be viewed or edited.
+    """
+    model = SpellFlag
+    serializer_class = SpellFlagSerializer
     permission_classes = [permissions.IsAdminUser]
     queryset = model.objects.all()

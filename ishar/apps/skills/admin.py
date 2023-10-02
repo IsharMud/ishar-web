@@ -99,7 +99,7 @@ class SkillAdmin(admin.ModelAdmin):
 @admin.register(SkillComponent)
 class SkillComponentAdmin(admin.ModelAdmin):
     """
-    Ishar skills component administration.
+    Ishar skill component administration.
     """
     fieldsets = (
         (None, {"fields": ("skill_components_id",)}),
@@ -109,7 +109,9 @@ class SkillComponentAdmin(admin.ModelAdmin):
     list_display = list_display_links = (
         "skill_components_id", "skill", "component_type", "component_value"
     )
-    list_filter = ("component_type", ("skill", admin.RelatedOnlyFieldListFilter))
+    list_filter = (
+        "component_type", ("skill", admin.RelatedOnlyFieldListFilter)
+    )
     model = SkillComponent
     ordering = readonly_fields = ("skill_components_id",)
     search_fields = ("skill", "component_type")

@@ -320,14 +320,14 @@ class RaceSkill(models.Model):
         return f"{self.skill} @ {self.race} / Level: {self.level}"
 
 
-class RacialDeathload(models.Model):
+class RaceDeathload(models.Model):
     """
-    Racial Deathload.
+    Race Deathload.
     """
-    racial_deathload_id = models.AutoField(
+    id = models.AutoField(
         blank=False,
         db_column="racial_deathload_id",
-        help_text="Primary identification number of the racial deathload.",
+        help_text="Primary identification number of the race deathload.",
         null=False,
         primary_key=True,
         verbose_name="Race Deathload ID"
@@ -345,19 +345,19 @@ class RacialDeathload(models.Model):
     )
     vnum = models.IntegerField(
         blank=False,
-        help_text="VNUM of the racial deathload.",
+        help_text="VNUM of the race deathload.",
         null=False,
         verbose_name="VNUM"
     )
     percent_chance = models.IntegerField(
         blank=False,
-        help_text="Percent chance of the racial deathload.",
+        help_text="Percent chance of the race deathload.",
         null=False,
         verbose_name="Percent Chance"
     )
     min_level = models.IntegerField(
         blank=False,
-        help_text="Minimum level of the racial deathload.",
+        help_text="Minimum level of the race deathload.",
         null=False,
         validators=[
             MinValueValidator(limit_value=1),
@@ -368,15 +368,16 @@ class RacialDeathload(models.Model):
 
     class Meta:
         db_table = "racial_deathload"
+        default_related_name = "deathload"
         managed = False
-        ordering = ("racial_deathload_id",)
+        ordering = ("id",)
         verbose_name = "Deathload"
         verbose_name_plural = "Deathloads"
 
     def __repr__(self):
         return (
             f"{self.__class__.__name__}: "
-            f"{repr(self.__str__())} [{self.racial_deathload_id}]"
+            f"{repr(self.__str__())} [{self.id}]"
         )
 
     def __str__(self):

@@ -10,14 +10,19 @@ from ishar.apps.classes.views import ClassesViewSet
 from ishar.apps.events.views import GlobalEventsViewSet
 from ishar.apps.news.views import NewsViewSet
 from ishar.apps.patches.views import PatchesViewSet
-from ishar.apps.players.views import PlayerViewSet, PlayerFlagViewSet, \
-    RemortUpgradesViewSet
-from ishar.apps.quests.views import QuestsViewSet, QuestPrereqsViewSet, \
-    QuestRewardsViewSet, QuestStepsViewSet
-from ishar.apps.races.views import RacesViewSet
+from ishar.apps.players.views import (
+    PlayerViewSet, PlayerFlagViewSet, RemortUpgradesViewSet
+)
+from ishar.apps.quests.views import (
+    QuestsViewSet, QuestPrereqsViewSet, QuestRewardsViewSet, QuestStepsViewSet
+)
+from ishar.apps.races.views import (
+    RacesViewSet, RacesAffinityViewSet, RaceDeathloadViewSet, RacesSkillViewSet
+)
 from ishar.apps.seasons.views import SeasonViewSet
-from ishar.apps.skills.views import ForcesViewSet, SkillsViewSet, \
-    SpellFlagsViewSet, SkillsFlagsViewSet
+from ishar.apps.skills.views import (
+    ForcesViewSet, SkillsViewSet, SpellFlagsViewSet, SkillsFlagsViewSet
+)
 
 
 class IsharMUDAPIView(routers.APIRootView):
@@ -52,6 +57,9 @@ api_router.register(r"quest_prereqs", QuestPrereqsViewSet, "quest_prereq")
 api_router.register(r"quest_rewards", QuestRewardsViewSet, "quest_reward")
 api_router.register(r"quest_steps", QuestStepsViewSet, "quest_step")
 api_router.register(r"races", RacesViewSet, "race")
+api_router.register(r"races_affinities", RacesAffinityViewSet, "race_affinity")
+api_router.register(r"races_deathloads", RaceDeathloadViewSet, "race_deathload")
+api_router.register(r"races_skills", RacesSkillViewSet, "race_skill")
 api_router.register("remort_upgrades", RemortUpgradesViewSet, "remort_upgrade")
 api_router.register(r"seasons", SeasonViewSet, "season")
 api_router.register(r"skills", SkillsViewSet, "skill")
