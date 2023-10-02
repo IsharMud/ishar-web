@@ -343,14 +343,15 @@ class RaceDeathload(models.Model):
         related_query_name="deathload",
         verbose_name="Race"
     )
-    vnum = models.IntegerField(
+    vnum = models.PositiveIntegerField(
         blank=False,
         help_text="VNUM of the race deathload.",
         null=False,
         verbose_name="VNUM"
     )
-    percent_chance = models.IntegerField(
+    percent_chance = models.PositiveIntegerField(
         blank=False,
+        default=0,
         help_text="Percent chance of the race deathload.",
         null=False,
         validators=(
@@ -359,8 +360,9 @@ class RaceDeathload(models.Model):
         ),
         verbose_name="Percent Chance"
     )
-    min_level = models.IntegerField(
+    min_level = models.PositiveIntegerField(
         blank=False,
+        default=1,
         help_text="Minimum level of the race deathload.",
         null=False,
         validators=(

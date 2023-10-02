@@ -81,40 +81,15 @@ class SkillAdmin(admin.ModelAdmin):
         SkillsSpellFlagsAdminInline,
         SkillsForcesAdminInline
     )
-    list_display = list_display_links = ("skill_name", "skill_type")
+    list_display = ("skill_name", "skill_type")
     list_filter = ("skill_type",)
     model = Skill
+    ordering = ("-skill_type", "skill_name")
     readonly_fields = ("id",)
     search_fields = (
         "enum_symbol", "func_name", "skill_name",
         "wearoff_msg", "chant_text", "appearance", "decide_func"
     )
-
-    def has_module_permission(self, request, obj=None):
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_immortal()
-        return False
-
-
-@admin.register(SkillComponent)
-class SkillComponentAdmin(admin.ModelAdmin):
-    """
-    Ishar skill component administration.
-    """
-    fieldsets = (
-        (None, {"fields": ("skill_components_id",)}),
-        ("Skill", {"fields": ("skill",)}),
-        ("Component", {"fields": ("component_type", "component_value")})
-    )
-    list_display = list_display_links = (
-        "skill_components_id", "skill", "component_type", "component_value"
-    )
-    list_filter = (
-        "component_type", ("skill", admin.RelatedOnlyFieldListFilter)
-    )
-    model = SkillComponent
-    ordering = readonly_fields = ("skill_components_id",)
-    search_fields = ("skill", "component_type")
 
     def has_module_permission(self, request, obj=None):
         if request.user and not request.user.is_anonymous:
