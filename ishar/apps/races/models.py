@@ -1,4 +1,6 @@
 from django.db import models
+from django.conf import settings
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 from ishar.apps.skills.models import Force, Skill
 
@@ -268,6 +270,9 @@ class RaceAffinity(models.Model):
 
 
 class RaceSkill(models.Model):
+    """
+    Race Skill.
+    """
     race_skill_id = models.AutoField(
         blank=False,
         db_column="race_skill_id",
@@ -313,3 +318,66 @@ class RaceSkill(models.Model):
 
     def __str__(self):
         return f"{self.skill} @ {self.race} / Level: {self.level}"
+
+
+class RacialDeathload(models.Model):
+    """
+    Racial Deathload.
+    """
+    racial_deathload_id = models.AutoField(
+        blank=False,
+        db_column="racial_deathload_id",
+        help_text="Primary identification number of the racial deathload.",
+        null=False,
+        primary_key=True,
+        verbose_name="Race Deathload ID"
+    )
+    race = models.ForeignKey(
+        blank=False,
+        db_column="race_id",
+        to=Race,
+        on_delete=models.CASCADE,
+        null=False,
+        help_text="Race related to the deathload.",
+        related_name="deathloads",
+        related_query_name="deathload",
+        verbose_name="Race"
+    )
+    vnum = models.IntegerField(
+        blank=False,
+        help_text="VNUM of the racial deathload.",
+        null=False,
+        verbose_name="VNUM"
+    )
+    percent_chance = models.IntegerField(
+        blank=False,
+        help_text="Percent chance of the racial deathload.",
+        null=False,
+        verbose_name="Percent Chance"
+    )
+    min_level = models.IntegerField(
+        blank=False,
+        help_text="Minimum level of the racial deathload.",
+        null=False,
+        validators=[
+            MinValueValidator(limit_value=1),
+            MaxValueValidator(limit_value=max(settings.IMMORTAL_LEVELS)[0])
+        ],
+        verbose_name="Minimum Level"
+    )
+
+    class Meta:
+        db_table = "racial_deathload"
+        managed = False
+        ordering = ("racial_deathload_id",)
+        verbose_name = "Deathload"
+        verbose_name_plural = "Deathloads"
+
+    def __repr__(self):
+        return (
+            f"{self.__class__.__name__}: "
+            f"{repr(self.__str__())} [{self.racial_deathload_id}]"
+        )
+
+    def __str__(self):
+        return f"{self.vnum} @ {self.race} ({self.percent_chance})"

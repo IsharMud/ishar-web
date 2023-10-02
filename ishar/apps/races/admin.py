@@ -1,7 +1,6 @@
 from django.contrib import admin
 
-from .models import Race, RaceAffinity, RaceSkill
-
+from .models import Race, RaceAffinity, RacialDeathload, RaceSkill
 
 
 @admin.register(RaceAffinity)
@@ -31,12 +30,48 @@ class RaceAffinitiesAdmin(admin.ModelAdmin):
         return False
 
 
+@admin.register(RacialDeathload)
+class RacialDeathloadAdmin(admin.ModelAdmin):
+    """
+    Ishar racial deathload administration.
+    """
+    model = RacialDeathload
+    fieldsets = (
+        (None, {"fields": ("racial_deathload_id",)}),
+        ("Race", {"fields": ("race",)}),
+        ("Details", {"fields": ("vnum", "percent_chance", "min_level")})
+    )
+    list_display = (
+        "racial_deathload_id", "race", "vnum", "percent_chance", "min_level"
+    )
+    list_filter = ("min_level", ("race", admin.RelatedOnlyFieldListFilter))
+    readonly_fields = ("racial_deathload_id",)
+    search_fields = ("race", "vnum", "percent_chance", "min_level")
+
+    def has_module_permission(self, request, obj=None):
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_immortal()
+        return False
+
 class RaceAffinityAdminInline(admin.TabularInline):
     """
     Ishar race affinity inline administration.
     """
     extra = 1
     model = RaceAffinity
+
+    def has_module_permission(self, request, obj=None):
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_immortal()
+        return False
+
+
+class RacialDeathloadAdminInline(admin.TabularInline):
+    """
+    Ishar racial deathload inline administration.
+    """
+    extra = 1
+    model = RacialDeathload
 
     def has_module_permission(self, request, obj=None):
         if request.user and not request.user.is_anonymous:
@@ -86,7 +121,10 @@ class RacesAdmin(admin.ModelAdmin):
             "endure_heat", "endure_cold", "is_undead", "is_playable"
         )}),
     )
-    inlines = (RaceSkillAdminInline, RaceAffinityAdminInline)
+    inlines = (
+        RaceSkillAdminInline, RaceAffinityAdminInline,
+        RacialDeathloadAdminInline
+    )
     list_display = (
         "display_name", "symbol", "is_playable", "folk_name",
         "short_description"
