@@ -17,7 +17,9 @@ class RaceAffinitiesAdmin(admin.ModelAdmin):
         ("Force", {"fields": ("force",)}),
         ("Affinity", {"fields": ("affinity_type",)})
     )
-    list_display = ("race_affinity_id", "race", "force", "affinity_type")
+    list_display = list_display_links = (
+        "race_affinity_id", "race", "force", "affinity_type"
+    )
     list_filter = (
         "affinity_type",
         ("force", admin.RelatedOnlyFieldListFilter),
