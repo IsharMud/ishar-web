@@ -10,7 +10,7 @@ def get_classes(playable=True):
     if playable:
         query = query.exclude(class_description__isnull=True)
     for _class in query.all():
-        out.append((_class.class_id, _class.class_name.title()))
+        out.append((_class.class_id, _class.get_class_name()))
     return out
 
 

@@ -18,7 +18,7 @@ class AccountPlayersLinksInline(admin.TabularInline):
     @admin.display(description="Class")
     def get_player_class(self, obj) -> str:
         """Admin text for player class."""
-        return obj.common.player_class.class_name.title()
+        return obj.common.player_class.get_class_name()
 
     @admin.display(boolean=True, description="Deleted?")
     def get_player_deleted(self, obj) -> bool:

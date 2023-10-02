@@ -41,21 +41,21 @@ class Class(models.Model):
         verbose_name_plural = "Classes"
 
     def __repr__(self) -> str:
-        return (
-            f"{self.__class__.__name__}: "
-            f"{repr(self.__str__())} [{self.class_id}]"
-        )
+        return f"{self.__class__.__name__}: {self.__str__()} [{self.class_id}]"
 
     def __str__(self) -> str:
-        return self.class_name
+        return self.get_class_name()
+
+    @admin.display(description="Class Name", ordering="class_name")
+    def get_class_name(self) -> str:
+        """Formatted class name."""
+        return self.class_name.replace("_", " ").title()
 
     @admin.display(
         boolean=True, description="Playable?", ordering="class_description"
     )
     def is_playable(self) -> bool:
-        """
-        Boolean whether the class is playable.
-        """
+        """Boolean whether the class is playable."""
         if self.class_description:
             return True
         return False

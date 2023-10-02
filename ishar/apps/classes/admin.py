@@ -39,7 +39,7 @@ class ClassesAdmin(admin.ModelAdmin):
     list_filter = (PlayableClassListFilter,)
     readonly_fields = ("class_id", "is_playable")
     list_display = (
-        "class_name", "is_playable", "class_display", "class_description"
+        "get_class_name", "is_playable", "class_display", "class_description"
     )
     search_fields = ("class_name", "class_display", "class_description")
 
