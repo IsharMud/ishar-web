@@ -17,6 +17,7 @@ class GlobalEventsAdmin(admin.ModelAdmin):
     list_display = (
         "event_name", "event_desc", "start_time", "end_time", "celestial_luck"
     )
+    list_display_links = ("event_name", "event_desc")
     list_filter = ("xp_bonus", "shop_bonus", "celestial_luck")
     ordering = ("-end_time",)
     readonly_fields = ("event_type",)
