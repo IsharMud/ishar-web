@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
+from django.db.models import Count
 
 from ishar.apps.quests.models import Quest, QuestPrereq, QuestReward, QuestStep
 
@@ -84,7 +85,7 @@ class QuestsAdmin(ModelAdmin):
         QuestPrereqsAdminInline, QuestStepsAdminInline, QuestRewardsAdminInline
     )
     list_display = (
-        "quest_id", "display_name", "repeatable", "class_restrict", "min_level"
+        "quest_id", "display_name", "repeatable", "class_restrict", "num_steps"
     )
     list_display_links = ("quest_id", "display_name")
     list_filter = ("repeatable", "class_restrict", "min_level")
@@ -95,6 +96,15 @@ class QuestsAdmin(ModelAdmin):
         "quest_id", "display_name", "name", "description",
         "completion_message", "quest_intro",
     )
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).annotate(
+            num_steps=Count("step")
+        )
+
+    @admin.display(description="# Steps", ordering="num_steps")
+    def num_steps(self, obj):
+        return obj.num_steps
 
     def has_module_permission(self, request, obj=None):
         if request.user and not request.user.is_anonymous:
