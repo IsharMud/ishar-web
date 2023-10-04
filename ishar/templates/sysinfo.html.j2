@@ -1,0 +1,36 @@
+{% extends "layout.html.djt" %}
+{% block meta_title %}System Information{% endblock meta_title %}
+{% block meta_description %}System information about the Ishar MUD server and process{% endblock meta_description %}
+{% block meta_url %}{% url "sysinfo" %}{% endblock meta_url %}
+{% block title %}System Information{% endblock title %}
+{% block header %}System Information{% endblock header %}
+{% block content %}
+    {% if sysinfo %}
+                <p>
+                    Here is some basic system information about the Ishar MUD server process.
+                </p>
+        {% for infokey, infoval in sysinfo.items %}
+                <ul>
+                    <li>
+                        <strong>{{ infokey | title }}</strong>:
+                    </li>
+                    <li class="nested-list">
+                        <ul>
+                            <li>
+                                <code>
+                                    {{ infoval }}
+                                </code>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+        {% endfor %}
+    {% else %}
+                <h3>
+                    Sorry
+                </h3>
+                <p>
+                    Unfortunately, no active Ishar MUD process could be found for this environment.
+                </p>
+    {% endif %}
+{% endblock content %}

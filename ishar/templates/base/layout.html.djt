@@ -1,0 +1,125 @@
+{% load humanize %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+    {% block head %}
+        <meta charset="UTF-8">
+        <meta name="author" content="Ishar MUD">
+        <meta name="description" content="Ishar MUD">
+        <meta name="keywords" content="Ishar MUD, Ishar, IsharMUD, MUD, Multi User Dungeon, Multi-User Dungeon, Game">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta property="og:type" content="website">
+        <meta property="og:site_name" content="Ishar MUD">
+        <meta property="og:title" content="{% block meta_title %}Welcome{% endblock meta_title %} - Ishar MUD">
+        <meta property="og:description" content="Ishar MUD: {% block meta_description %}a free online text-adventure RPG{% endblock meta_description %}">
+        <meta property="og:url" content="{% block meta_url %}{% url "ishar.welcome" %}{% endblock meta_url %}">
+        <meta property="og:image" content="{% block meta_image %}{% static "images/cropped_ishar_logo_dark.png" %}{% endblock meta_image %}">
+        <title>{% block title %}Welcome{% endblock title %} - Ishar MUD</title>
+        <link rel="stylesheet" type="text/css" href="{% static "style.css" %}">
+        <link rel="shortcut icon" href="{% static "images/favicon.ico" %}" type="image/x-icon">
+    {% endblock head %}
+    {% block scripts %}
+    {% endblock scripts %}
+    </head>
+    <body>
+        <header>
+            <a href="{% url 'index' %}" title="Ishar MUD">
+                <h1>
+                    Ishar MUD
+                </h1>
+                <img id="logo" alt="Ishar MUD" src="{% static 'images/header_alpha.png' %}">
+            </a>
+        </header>
+        <nav>
+{% block navigation %}
+            <ul>
+                <li title="Connect to Ishar MUD">
+                    <a href="{% url "connect" %}" target="_blank">Connect</a>
+                </li>
+                <li title="Frequently Asked Questions">
+                   <a href="{% url "faqs" %}">FAQs</a>
+                </li>
+                <li title="Help">
+                    <a href="{% url "help" %}">Help</a>
+                </li>
+                <li title="Patches">
+                    <a href="{% url "patches" %}">Patches</a>
+                </li>
+                <li title="World">
+                    <a href="{% url "world" %}">World</a>
+                </li>
+                <li title="Portal">
+                    <a href="{% url "portal" %}">Portal</a>
+                </li>
+            </ul>
+{% if user and user.is_authenticated %}
+            <ul>
+    {% if user.is_eternal %}
+                <li title="Admin">
+                    <a href="{% url "admin:index" %}" target="_blank">Admin</a>
+                </li>
+    {% endif %}
+                <li title="Account">
+                    <a href="{% url "account" %}">Account</a>
+                </li>
+                <li title="Challenges">
+                    <a href="{% url "challenges" %}">Challenges</a>
+                </li>
+                <li title="Events">
+                    <a href="{% url "events" %}">Events {% if global_event_count and global_event_count > 0 %} ({{ global_event_count }}){% endif %}</a>
+                </li>
+                <li title="Leaders">
+                    <a href="{% url "leaders" %}">Leaders</a>
+                </li>
+                <li title="Log out">
+                    <a href="{% url "logout" %}">Log out ({{ user.get_username }})</a>
+                </li>
+            </ul>
+{% endif %}
+{% endblock navigation %}
+        </nav>
+        <div id="content">
+            <h2>
+                {% block header %}{% endblock header %}
+            </h2>
+{% block messages %}
+    {% if messages %}
+            <ul id="messages">
+        {% for message in messages %}
+                <li class="message-{{ message.tags }}">{{ message }}</li>
+        {% endfor %}
+            </ul>
+    {% endif %}
+{% endblock messages %}
+{% block content %}
+{% endblock content %}
+        </div>
+        <footer>
+{% block footer %}
+            <ul>
+                <li>
+                    <a href="{% url 'support' %}"{% if page == 'support' %} id="active-nav"{% endif %}>❤️ Support Ishar MUD</a>
+                </li>
+                <li>
+                    <a title="Join us on Discord!" href="{%  url "discord" %}" id="join-discord" target="_blank"><img alt="Discord" src="{% static "images/discord.png" %}"> Join us on Discord!</a>
+                </li>
+                <li>
+                    <a title="E-mail Us!" href="mailto:admin@isharmud.com" id="email-us" target="_blank">✉️ E-mail us!</a>
+                </li>
+            </ul>
+    {% if current_season %}
+            <ul>
+                <li title="Season {{ current_season.season_id }} ends {{ current_season.expiration_date | naturaltime }}">
+                    <a href="{% url "current_season" %}">Season {{ current_season.season_id }}</a>
+                    ends {{ current_season.expiration_date | naturaltime }}
+                </li>
+                <li title="Ends {{ current_season.expiration_date }}">
+                    {{ current_season.expiration_date }}
+                </li>
+            </ul>
+    {% endif %}
+{% endblock footer %}
+        </footer>
+    </body>
+</html>

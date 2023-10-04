@@ -1,0 +1,54 @@
+{% extends "layout.html.djt" %}
+{% block meta_title %}Challenges{% endblock meta_title %}
+{% block meta_description %}Challenges, winners, and rewards currently available.{% endblock meta_description %}
+{% block meta_url %}{% url "challenges" %}{% endblock meta_url %}
+{% block title %}Challenges{% endblock title %}
+{% block header %}Challenges{% endblock header %}
+{% block scripts %}
+        <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
+        <script>
+            function showChallenges(where) {
+                new gridjs.Grid({
+                    columns: [
+                        { id: 'name', name: 'Find and Kill' },
+                        { id: 'people', name: 'People' },
+                        { id: 'level', name: 'Level' },
+                        { id: 'reward', name: 'Reward' },
+                        { id: 'completed', name: 'Completed' }
+                    ],
+                    data: [
+    {% for challenge in challenges %}
+                        {
+        {% if challenge.is_completed %}
+                            name: gridjs.html('<span class="challenge-completed">{{ challenge.mob_name }}</span>'),
+        {% else %}
+                            name: "{{ challenge.mob_name }}",
+        {% endif %}
+                            people: "{{ challenge.adj_people }}",
+                            level: {{ challenge.orig_level }},
+                            reward: {{ challenge.orig_tier }},
+        {% if challenge.is_completed and challenge.winners %}
+                            completed: gridjs.html('{% for winner in challenge.winners %}<a href="{% url "player" name=winner %}" title="Player: {{ winner }}">{{ winner }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}')
+        {% else %}
+                            completed: ""
+        {% endif %}
+                        },
+    {% endfor %}
+                    ],
+                    search: true,
+                    sort: true,
+                    pagination: false,
+                    width: '50%'
+                }).render(where);
+            };
+
+        </script>
+{% endblock scripts %}
+{% block content %}
+                <div id="challenges"></div>
+                <script>
+                    showChallenges(
+                        document.getElementById('challenges')
+                    );
+                </script>
+{% endblock content %}

@@ -1,0 +1,97 @@
+{% extends "base/layout.html.djt" %}
+{% block meta_title %}Portal{% endblock meta_title %}
+{% block meta_description %}Portal for players to see information about their account and characters.{% endblock meta_description %}
+{% block meta_url %}{% url "portal" %}{% endblock meta_url %}
+{% block title %}Portal{% endblock title %}
+{% block header %}Welcome{% if request.user.account_name %}, {{ request.user.account_name | title }}{% endif %}!{% endblock header %}
+{% block scripts %}
+    {% if request.user.players %}
+        <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
+        <script>
+            function showPlayers(where) {
+                new gridjs.Grid({
+                    columns: [
+                        {
+                            id:         'name',
+                            name:       'Player',
+                            formatter:  (cell) => gridjs.html(`<a href="/player/${cell}#player">${cell}</a>`)
+                        },
+                        {
+                            id:         'level',
+                            name:       'Level'
+                        },
+                        {
+                            id:         'remorts',
+                            name:       'Remorts'
+                        },
+                        {
+                            id:         'renown',
+                            name:       'Renown'
+                        },
+                        {
+                            id:         'quests',
+                            name:       'Quests'
+                        },
+                        {
+                            id:         'challenges',
+                            name:       'Challenges'
+                        },
+                        {
+                            id:         'deaths',
+                            name:       'Deaths',
+                            sort:       {
+                                            compare: (a, b) => {
+                                                if ( (b > a) || (isNaN(a)) ) {
+                                                    return -1;
+                                                } else if ( (a > b) || (isNaN(b)) ) {
+                                                    return 1;
+                                                } else {
+                                                    return 0;
+                                                };
+                                            }
+                                        }
+                        }
+                    ],
+                    data: [
+                      {% for player in request.user.players.all %}
+                        {
+                            name:       "{{ player.name }}",
+                            level:      {{ player.common.level }},
+                            remorts:    {{ player.remorts }},
+                            renown:     {{ player.total_renown }},
+                            quests:     {{ player.quests_completed }},
+                            challenges: {{ player.challenges_completed }},
+                            deaths:     {{ player.deaths }}
+                        }{% if not forloop.last %},{% endif %}
+                      {% endfor %}
+                    ],
+                    search:     false,
+                    sort:       true,
+                    pagination: false,
+                    width:      '50%'
+                }).render(where);
+            };
+        </script>
+    {% endif %}
+{% endblock scripts %}
+{% block content %}
+    {% if request.user.players %}
+                <h3 title="You have {{ request.user.players.count }} character{{ request.user.players.count | pluralize }}.">
+                    You have {{ request.user.players.count }} character{{ request.user.players.count | pluralize }}:
+                </h3>
+                <div id="players"></div>
+                <script>
+                    showPlayers(document.getElementById('players'));
+                </script>
+    {% else %}
+                <h3 title="You have not created any players yet!">
+                    You have not created any players yet!
+                </h3>
+    {% endif %}
+    {% if request.user.current_essence > 0 %}
+                <h4>
+                    You have {{ request.user.current_essence }}
+                    <a title="essence" href="{% url "account" %}#essence-balance">essence</a>.
+                </h4>
+    {% endif %}
+{% endblock content %}

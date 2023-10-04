@@ -16,7 +16,6 @@ from models.challenge import Challenge
 from models.globalevent import GlobalEvent
 from models.player import Player
 from models.season import Season
-from sentry import sentry_sdk
 from sysinfo import get_connections, get_uptime
 
 

@@ -4,5 +4,9 @@
 !.gitignore
 __pycache__
 config.py
+settings.py
 *_secret.py
-venv/
+/media/
+/old/
+/static/
+/venv/

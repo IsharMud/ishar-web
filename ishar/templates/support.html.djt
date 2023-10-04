@@ -1,0 +1,25 @@
+{% extends "layout.html.djt" %}
+{% load static %}
+{% block meta_title %}Support{% endblock meta_title %}
+{% block meta_description %}Support Ishar MUD with a contribution as a way to say thank you{% endblock meta_description %}
+{% block meta_url %}{% url "support" %}{% endblock meta_url %}
+{% block title %}Support{% endblock title %}
+{% block header %}Support Ishar MUD{% endblock header %}
+{% block content %}
+                <p>
+                    While you are more than welcome to offer support, Ishar MUD is free to use, play, and enjoy!
+                </p>
+                <p>
+                    Any contribution is simply for the development and maintenance of the game, and as a way to say "thank you".
+                </p>
+                <p>
+                    <a href="https://www.patreon.com/bePatron?u=42650263" class="external-clean" target="_blank" id="patron" title="Become A Patron">
+                        <img src="{% static "images/become-a-patron.png" %}" alt="Become A Patron">
+                    </a>
+                </p>
+                <p>
+                    <a href="https://www.buymeacoffee.com/ishar" class="external-clean" target="_blank" id="coffee" title="Buy Me A Coffee">
+                        <img src="{% static "images/buy-me-a-coffee.png" %}" alt="Buy Me A Coffee">
+                    </a>
+                </p>
+{% endblock content %}
