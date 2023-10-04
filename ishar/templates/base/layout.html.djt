@@ -55,7 +55,7 @@
             </ul>
 {% if user and user.is_authenticated %}
             <ul>
-    {% if user.is_eternal %}
+    {% if user.is_staff %}
                 <li title="Admin">
                     <a href="{% url "admin:index" %}" target="_blank">Admin</a>
                 </li>
