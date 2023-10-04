@@ -107,9 +107,11 @@ class QuestPrereq(models.Model):
     Quest Prerequisite.
     """
     quest_prereqs_id = models.AutoField(
-        primary_key=True,
+        blank=False,
         db_column="quest_prereqs_id",
         help_text="Auto-generated, permanent quest pre-requisite relation ID.",
+        primary_key=True,
+        null=False,
         verbose_name="Quest Prerequisite ID"
     )
     quest = models.ForeignKey(
@@ -136,7 +138,10 @@ class QuestPrereq(models.Model):
         verbose_name_plural = "Prerequisites"
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}: {repr(self.__str__())} ({self.id})"
+        return (
+            f"{self.__class__.__name__}: {repr(self.__str__())} "
+            f" ({self.quest_prereqs_id})"
+        )
 
     def __str__(self) -> str:
         return f"{self.quest} requires {self.required_quest}"
