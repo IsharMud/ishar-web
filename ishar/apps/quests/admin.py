@@ -131,6 +131,7 @@ class QuestRewardsAdmin(admin.ModelAdmin):
         ("Class", {"fields": ("class_restrict",)})
     )
     list_display = ("quest_reward_id", "reward_type", "quest", "class_restrict")
+    list_display_links = ("quest_reward_id", "reward_type")
     list_filter = (
         "reward_type", "class_restrict",
         ("quest", admin.RelatedOnlyFieldListFilter)
