@@ -406,6 +406,7 @@ class Player(models.Model):
         """
         Player alignment.
         """
+        print(self.common.alignment)
         for align_text, (low, high) in settings.ALIGNMENTS.items():
             if low <= self.common.alignment <= high:
                 return align_text

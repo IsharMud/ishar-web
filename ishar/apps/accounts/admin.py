@@ -69,12 +69,12 @@ class AccountPlayersLinksInline(admin.TabularInline):
 
     def has_module_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
-            return request.user.is_eternal()
+            return request.user.is_god()
         return False
 
     def has_view_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
-            return request.user.is_eternal()
+            return request.user.is_god()
         return False
 
 
@@ -142,27 +142,26 @@ class AccountsAdmin(UserAdmin):
         "created_at", "create_isp", "create_ident", "_create_haddr"
     )
 
-    def has_add_permission(self, request, obj=None) -> bool:
-        """Disable adding accounts in /admin/."""
-        return False
-
-    def has_delete_permission(self, request, obj=None) -> bool:
-        """Disable deleting accounts in /admin/."""
-        return False
-
-    def has_change_permission(self, request, obj=None) -> bool:
+    def has_module_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
 
-    def has_module_permission(self, request, obj=None) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_eternal()
+    def has_add_permission(self, request) -> bool:
+        """Disabling adding players in /admin/accounts/ inline."""
+        return False
+
+    def has_change_permission(self, request, obj=None) -> bool:
+        """Disabling changing players in /admin/accounts/ inline."""
+        return False
+
+    def has_delete_permission(self, request, obj=None) -> bool:
+        """Disabling deleting players in /admin/accounts/ inline."""
         return False
 
     def has_view_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
-            return request.user.is_eternal()
+            return request.user.is_god()
         return False
 
 
@@ -183,6 +182,26 @@ class AccountUpgradesAdmin(admin.ModelAdmin):
     readonly_fields = ("id",)
 
     def has_module_permission(self, request, obj=None):
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_eternal()
+        return False
+
+    def has_add_permission(self, request):
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_god()
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_god()
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_god()
+        return False
+
+    def has_view_permission(self, request, obj=None):
         if request.user and not request.user.is_anonymous:
             return request.user.is_eternal()
         return False

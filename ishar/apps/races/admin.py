@@ -28,7 +28,27 @@ class RaceAffinitiesAdmin(admin.ModelAdmin):
 
     def has_module_permission(self, request, obj=None):
         if request.user and not request.user.is_anonymous:
-            return request.user.is_immortal()
+            return request.user.is_eternal()
+        return False
+
+    def has_add_permission(self, request):
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_god()
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_god()
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_god()
+        return False
+
+    def has_view_permission(self, request, obj=None):
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_eternal()
         return False
 
 
@@ -52,7 +72,27 @@ class RaceDeathloadAdmin(admin.ModelAdmin):
 
     def has_module_permission(self, request, obj=None):
         if request.user and not request.user.is_anonymous:
-            return request.user.is_immortal()
+            return request.user.is_eternal()
+        return False
+
+    def has_add_permission(self, request):
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_god()
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_god()
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_god()
+        return False
+
+    def has_view_permission(self, request, obj=None):
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_eternal()
         return False
 
 
@@ -65,7 +105,27 @@ class RaceAffinityAdminInline(admin.TabularInline):
 
     def has_module_permission(self, request, obj=None):
         if request.user and not request.user.is_anonymous:
-            return request.user.is_immortal()
+            return request.user.is_eternal()
+        return False
+
+    def has_add_permission(self, request, obj):
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_god()
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_god()
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_god()
+        return False
+
+    def has_view_permission(self, request, obj=None):
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_eternal()
         return False
 
 
@@ -78,7 +138,27 @@ class RaceDeathloadAdminInline(admin.TabularInline):
 
     def has_module_permission(self, request, obj=None):
         if request.user and not request.user.is_anonymous:
-            return request.user.is_immortal()
+            return request.user.is_eternal()
+        return False
+
+    def has_add_permission(self, request, obj):
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_god()
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_god()
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_god()
+        return False
+
+    def has_view_permission(self, request, obj=None):
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_eternal()
         return False
 
 
@@ -91,7 +171,27 @@ class RaceSkillAdminInline(admin.TabularInline):
 
     def has_module_permission(self, request, obj=None):
         if request.user and not request.user.is_anonymous:
-            return request.user.is_immortal()
+            return request.user.is_eternal()
+        return False
+
+    def has_add_permission(self, request, obj):
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_god()
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_god()
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_god()
+        return False
+
+    def has_view_permission(self, request, obj=None):
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_eternal()
         return False
 
 
@@ -140,5 +240,25 @@ class RacesAdmin(admin.ModelAdmin):
 
     def has_module_permission(self, request, obj=None):
         if request.user and not request.user.is_anonymous:
-            return request.user.is_immortal()
+            return request.user.is_eternal()
+        return False
+
+    def has_add_permission(self, request):
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_god()
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_god()
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_god()
+        return False
+
+    def has_view_permission(self, request, obj=None):
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_eternal()
         return False
