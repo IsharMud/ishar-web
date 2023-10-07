@@ -86,9 +86,9 @@ class AccountsAdmin(UserAdmin):
     model = get_user_model()
 
     def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        qs = qs.annotate(player_count=Count("player")).order_by("player_count")
-        return qs
+        return super().get_queryset(request).annotate(
+            player_count=Count("player")
+        ).order_by("player_count")
 
     @admin.display(ordering="player_count")
     def player_count(self, obj) -> int:
@@ -171,10 +171,16 @@ class AccountUpgradesAdmin(admin.ModelAdmin):
     Ishar account upgrade administration.
     """
     fieldsets = (
-        (None, {"fields": ("id", "name", "description", "is_disabled")}),
-        ("Values", {"fields": (
-            "amount", "cost", "increment", "max_value", "scale"
-        )})
+        (
+            None, {
+                "fields": ("id", "name", "description", "is_disabled")
+            }
+        ),
+        (
+            "Values", {
+                "fields": ("amount", "cost", "increment", "max_value", "scale")
+            }
+        )
     )
     list_display = ("name", "is_disabled", "description")
     list_filter = ("is_disabled",)

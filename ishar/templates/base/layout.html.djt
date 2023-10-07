@@ -1,3 +1,4 @@
+{% load bootstrap5 %}
 {% load humanize %}
 {% load static %}
 <!DOCTYPE html>
@@ -16,6 +17,8 @@
         <meta property="og:url" content="{% block meta_url %}{% url "ishar.welcome" %}{% endblock meta_url %}">
         <meta property="og:image" content="{% block meta_image %}{% static "images/cropped_ishar_logo_dark.png" %}{% endblock meta_image %}">
         <title>{% block title %}Welcome{% endblock title %} - Ishar MUD</title>
+        {% bootstrap_css %}
+        {% bootstrap_javascript %}
         <link rel="stylesheet" type="text/css" href="{% static "style.css" %}">
         <link rel="shortcut icon" href="{% static "images/favicon.ico" %}" type="image/x-icon">
     {% endblock head %}
@@ -23,61 +26,67 @@
     {% endblock scripts %}
     </head>
     <body>
-        <header>
-            <a href="{% url 'index' %}" title="Ishar MUD">
-                <h1>
-                    Ishar MUD
-                </h1>
-                <img id="logo" alt="Ishar MUD" src="{% static 'images/header_alpha.png' %}">
-            </a>
-        </header>
-        <nav>
-{% block navigation %}
-            <ul>
-                <li title="Connect to Ishar MUD">
-                    <a href="{% url "connect" %}" target="_blank">Connect</a>
-                </li>
-                <li title="Frequently Asked Questions">
-                   <a href="{% url "faqs" %}">FAQs</a>
-                </li>
-                <li title="Help">
-                    <a href="{% url "help" %}">Help</a>
-                </li>
-                <li title="Patches">
-                    <a href="{% url "patches" %}">Patches</a>
-                </li>
-                <li title="World">
-                    <a href="{% url "world" %}">World</a>
-                </li>
-                <li title="Portal">
-                    <a href="{% url "portal" %}">Portal</a>
-                </li>
-            </ul>
-{% if user and user.is_authenticated %}
-            <ul>
-    {% if user.is_staff %}
-                <li title="Admin">
-                    <a href="{% url "admin:index" %}" target="_blank">Admin</a>
-                </li>
-    {% endif %}
-                <li title="Account">
-                    <a href="{% url "account" %}">Account</a>
-                </li>
-                <li title="Challenges">
-                    <a href="{% url "challenges" %}">Challenges</a>
-                </li>
-                <li title="Events">
-                    <a href="{% url "events" %}">Events {% if global_event_count and global_event_count > 0 %} ({{ global_event_count }}){% endif %}</a>
-                </li>
-                <li title="Leaders">
-                    <a href="{% url "leaders" %}">Leaders</a>
-                </li>
-                <li title="Log out">
-                    <a href="{% url "logout" %}">Log out ({{ user.get_username }})</a>
-                </li>
-            </ul>
+        <nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="{% url 'index' %}" title="Ishar MUD">
+                    <img class="navbar-brand" id="logo" alt="Ishar MUD" src="{% static "images/header_alpha.png" %}" style="width: 25vw;">
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNavDropdown">
+                    <ul class="navbar-nav">
+{% if user.is_staff %}
+                        <li class="nav-item" title="Admin">
+                            <a class="nav-link" href="{% url "admin:index" %}" target="_blank">Admin</a>
+                        </li>
 {% endif %}
-{% endblock navigation %}
+                        <li class="nav-item" title="Connect to Ishar MUD">
+                            <a class="nav-link" href="{% url "connect" %}" target="_blank">Connect</a>
+                        </li>
+                        <li class="nav-item" title="Frequently Asked Questions">
+                            <a class="nav-link" href="{% url "faqs" %}">FAQs</a>
+                        </li>
+                        <li class="nav-item" title="Help">
+                            <a class="nav-link" href="{% url "help" %}">Help</a>
+                        </li>
+                        <li class="nav-item" title="Patches">
+                            <a class="nav-link" href="{% url "patches" %}">Patches</a>
+                        </li>
+                        <li class="nav-item" title="World">
+                            <a class="nav-link" href="{% url "world" %}">World</a>
+                        </li>
+{% if user and user.is_authenticated %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Portal
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li title="Account">
+                                    <a class="dropdown-item" href="{% url "account" %}">Account</a>
+                                </li>
+                                <li title="Challenges">
+                                    <a class="dropdown-item" href="{% url "challenges" %}">Challenges</a>
+                                </li>
+                                <li title="Events">
+                                    <a class="dropdown-item" href="{% url "events" %}">Events {% if global_event_count and global_event_count > 0 %} ({{ global_event_count }}){% endif %}</a>
+                                </li>
+                                <li title="Leaders">
+                                    <a class="dropdown-item" href="{% url "leaders" %}">Leaders</a>
+                                </li>
+                                <li title="Log out">
+                                    <a class="dropdown-item" href="{% url "logout" %}">Log out ({{ user.get_username }})</a>
+                                </li>
+                            </ul>
+                        </li>
+{% else %}
+                        <li class="nav-item" title="Portal">
+                            <a class="nav-link" href="{% url "portal" %}">Portal</a>
+                        </li>
+{% endif %}
+                    </ul>
+                </div>
+            </div>
         </nav>
         <div id="content">
             <h2>
