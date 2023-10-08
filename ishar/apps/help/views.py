@@ -52,8 +52,8 @@ class HelpPageView(HelpView):
             search_topics = search_help_topics(self.help_topics, help_topic)
             if not search_topics:
                 messages.error(
-                    request,
-                    "Sorry, but no such help topic was found."
+                    request=request,
+                    message="Sorry, but no such help topic was found."
                 )
                 self.status = 404
 
