@@ -9,39 +9,24 @@
     {% if season %}
             <ul id="season-details">
                 <li title="Season {{ season.season_id }} began {{ season.effective_date | naturaltime }} on {{ season.effective_date }}">
-                    <strong>
-                        Started
-                    </strong>
+                    <strong>Started</strong>
                     <ul>
-                        <li>
-                            {{ season.effective_date }}
-                        </li>
-                        <li>
-                            {{ season.effective_date | naturaltime }}
-                        </li>
+                        <li>{{ season.effective_date }}</li>
+                        <li>{{ season.effective_date | naturaltime }}</li>
                     </ul>
                 </li>
                 <li title="Season {{ season.season_id }} ends {{ season.expiration_date | naturaltime }} on {{ season.expiration_date }}">
-                    <strong>
-                        Ends
-                    </strong>
+                    <strong>Ends</strong>
                     <ul>
-                        <li>
-                            {{ season.expiration_date }}
-                        </li>
-                        <li>
-                            {{ season.expiration_date | naturaltime }}
-                        </li>
+                        <li>{{ season.expiration_date }}</li>
+                        <li>{{ season.expiration_date | naturaltime }}</li>
                     </ul>
                 </li>
             </ul>
-            <h3>
-                Essence
-            </h3>
+            <h3>Essence</h3>
             <p>
                 &quot;<a title="Essence" href="{% url "help_page" help_topic="Essence" %}">Essence</a>&quot;
                 are the rewards points that you earn during the season!
-
             </p>
             <p>
                 Essence is preserved across seasons, and can be spent at any time
@@ -49,24 +34,16 @@
             </p>
     {% if request.user.current_essence and request.user.seasonal_earned %}
             <ul id="essence-balance">
-                <li title="You currently have: {{ request.user.current_essence }} essence.">
-                    You currently have:
-                </li>
+                <li title="You currently have: {{ request.user.current_essence }} essence.">You currently have:</li>
                 <li class="nested-list">
                     <ul>
-                        <li>
-                            {{ request.user.current_essence }}
-                        </li>
+                        <li>{{ request.user.current_essence }}</li>
                     </ul>
                 </li>
-                <li title="This season, you have earned: {{ request.user.seasonal_earned }} essence.">
-                    This season, you have earned:
-                </li>
+                <li title="This season, you have earned: {{ request.user.seasonal_earned }} essence.">This season, you have earned:</li>
                 <li class="nested-list">
                     <ul>
-                        <li>
-                            {{ request.user.seasonal_earned }}
-                        </li>
+                        <li>{{ request.user.seasonal_earned }} essence</li>
                     </ul>
                 </li>
             </ul>

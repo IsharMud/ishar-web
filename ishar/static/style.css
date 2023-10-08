@@ -1,8 +1,4 @@
-body {
-    font-family: 'Open Sans', sans-serif;
-    background-color: #323639;
-    color: #d6d6d7;
-}
+body, .dropdown-menu { background-color: #323639; color: #d6d6d7; }
 
 h2, h3, h4, h5, strong, th, label, button, input, textarea { color: #fa7; }
 
@@ -33,7 +29,8 @@ textarea { height: 10vh; width: 60vw; }
 embed { height: 90vh; width: 90vh; }
 .faq-answers, .nested-list, .mud-clients { list-style: none; }
 
-.challenge-completed {
+.challenge-completed
+{
     text-decoration: line-through;
     text-decoration-color: #a00;
     text-decoration-thickness: 0.15rem;

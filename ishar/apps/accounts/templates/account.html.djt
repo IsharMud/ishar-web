@@ -6,58 +6,34 @@
 {% block title %}Account ({{ request.user.account_name | title }}){% endblock title %}
 {% block header %}Account ({{ request.user.account_name | title }}){% endblock header %}
 {% block content %}
-            <h4 title="Created">
-                Created
-            </h4>
+            <h4 title="Created">Created</h4>
             <ul id="account-details" title="Created: {{ request.user.created_at }} ({{ request.user.created_at | naturaltime }})">
-                <li>
-                    {{ request.user.created_at }}
-                </li>
-                <li>
-                    {{ request.user.created_at | naturaltime }}
-                </li>
+                <li>{{ request.user.created_at }}</li>
+                <li>{{ request.user.created_at | naturaltime }}</li>
             </ul>
-            <h4 title="Manage">
-                Manage
-            </h4>
+            <h4 title="Manage">Manage</h4>
             <ul id="account-manage">
-                <li title="Change your password">
-                    <a href="{% url "password" %}">Change your password</a>
-                </li>
-                <li title="View your players">
-                    <a href="{% url "portal" %}">View your players</a>
-                </li>
+                <li title="Change your password"><a href="{% url "password" %}">Change your password</a></li>
+                <li title="View your players"><a href="{% url "portal" %}">View your players</a></li>
             </ul>
     {% if request.user.current_essence or request.user.seasonal_earned %}
-            <h4 title="Essence">
-                Essence
-            </h4>
+            <h4 title="Essence">Essence</h4>
             <ul id="essence-balance">
-                <li title="You currently have: {{ request.user.current_essence }} essence.">
-                    You currently have:
-                </li>
+                <li title="You currently have: {{ request.user.current_essence }} essence.">You currently have:</li>
                 <li class="nested-list">
                     <ul>
-                        <li>
-                            {{ request.user.current_essence }} essence
-                        </li>
+                        <li>{{ request.user.current_essence }} essence</li>
                     </ul>
                 </li>
-                <li title="This season, you have earned: {{ request.user.seasonal_earned }} essence.">
-                    This season, you have earned:
-                </li>
+                <li title="This season, you have earned: {{ request.user.seasonal_earned }} essence.">This season, you have earned:</li>
                 <li class="nested-list">
                     <ul>
-                        <li>
-                            {{ request.user.seasonal_earned }} essence
-                        </li>
+                        <li>{{ request.user.seasonal_earned }} essence</li>
                     </ul>
                 </li>
             </ul>
     {% endif %}
-            <h4 title="Upgrades">
-                Upgrades
-            </h4>
+            <h4 title="Upgrades">Upgrades</h4>
             <ul id="essence-upgrades">
     {% if account_upgrades %}
         {% for upgraded in account_upgrades %}
