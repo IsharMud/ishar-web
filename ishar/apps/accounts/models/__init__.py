@@ -208,8 +208,10 @@ class Account(AbstractBaseUser, PermissionsMixin):
 
     # Eternals and above can log in to Django Admin
     @property
-    def is_staff(self) -> bool:
-        return self.is_eternal()
+    def is_staff(self):
+        if self.is_eternal() is True:
+            return True
+        return False
 
     def check_password(self, raw_password: str = None) -> bool:
         """
