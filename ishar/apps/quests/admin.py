@@ -22,7 +22,7 @@ class QuestPrereqsAdmin(admin.ModelAdmin):
             return request.user.is_eternal()
         return False
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_eternal()
         return False
@@ -56,7 +56,7 @@ class QuestPrereqsAdminInline(admin.TabularInline):
             return request.user.is_eternal()
         return False
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_eternal()
         return False
@@ -89,7 +89,7 @@ class QuestRewardsAdminInline(admin.TabularInline):
             return request.user.is_eternal()
         return False
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_eternal()
         return False
@@ -122,7 +122,7 @@ class QuestStepsAdminInline(admin.TabularInline):
             return request.user.is_eternal()
         return False
 
-    def has_add_permission(self, request, obj=None):
+    def has_add_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_eternal()
         return False
@@ -191,7 +191,7 @@ class QuestsAdmin(ModelAdmin):
             return request.user.is_eternal()
         return False
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_eternal()
         return False
@@ -245,7 +245,7 @@ class QuestRewardsAdmin(admin.ModelAdmin):
             return request.user.is_eternal()
         return False
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_eternal()
         return False
@@ -301,7 +301,7 @@ class QuestStepsAdmin(admin.ModelAdmin):
             return request.user.is_eternal()
         return False
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_eternal()
         return False

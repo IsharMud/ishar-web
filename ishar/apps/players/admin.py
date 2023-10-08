@@ -31,13 +31,13 @@ class PlayerCommonInlineAdmin(admin.StackedInline):
     """
     model = PlayerCommon
 
-    def has_add_permission(self, request, obj):
+    def has_add_permission(self, request, obj=None) -> bool:
         """
         Disabling adding rows to player_common.
         """
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None) -> bool:
         """
         Disabling deleting rows from player_common.
         """
@@ -90,29 +90,29 @@ class PlayerAdmin(admin.ModelAdmin):
     )
     search_fields = ("name", "account__account_name")
 
-    def has_add_permission(self, request, obj=None):
+    def has_add_permission(self, request, obj=None) -> bool:
         """
         Disable adding players in /admin/.
         """
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None) -> bool:
         """
         Disable deleting players in /admin/.
         """
         return False
 
-    def has_change_permission(self, request, obj=None):
+    def has_change_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
 
-    def has_module_permission(self, request, obj=None):
+    def has_module_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
 
-    def has_view_permission(self, request, obj=None):
+    def has_view_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
