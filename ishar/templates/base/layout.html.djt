@@ -28,8 +28,8 @@
     <body>
         <nav class="card-group navbar navbar-expand-lg container-fluid">
             <div class="card bg-dark">
-                <a class="card-header navbar-brand" href="{% url 'index' %}" title="Ishar MUD">
-                    <img id="logo" alt="Ishar MUD" src="{% static "images/header_alpha.png" %}" style="width: 25vw;">
+                <a class="card-header" href="{% url 'index' %}" title="Ishar MUD">
+                    <img class="navbar-brand" id="logo" alt="Ishar MUD" src="{% static "images/header_alpha.png" %}" style="width: 20rem;">
                 </a>
                 <div class="card-body">
                     <button class="navbar-toggler navbar-dark" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
