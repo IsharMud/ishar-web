@@ -7,11 +7,11 @@
 {% block scripts %}{% endblock scripts %}
 {% block content %}
     {% if form %}
-        <form method="post" class="container-fluid">
+        <form class="card-body" method="post">
             {% csrf_token %}
             {{ form.as_p }}
-            <button type="submit">Log In</button>
-            <button type="reset">Clear</button>
+            <button class="btn btn btn-outline-primary" type="submit">Log In</button>
+            <button class="btn btn-outline-secondary" type="reset">Clear</button>
         </form>
     {% endif %}
 {% endblock content %}
