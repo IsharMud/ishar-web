@@ -8,7 +8,7 @@
 {% endblock header %}
 {% block title %}Help{% if help_topic and help_topic.name %}: {{ help_topic.name }}{% endif %}{% endblock title %}
 {% block content %}
-    <div class="card-deck">
+    <div class="card-group">
         <div class="card bg-dark">
             <div class="card-body">
     {% if request.user.is_anonymous %}
@@ -32,7 +32,9 @@
             </div>
     {% endif %}
         </div>
+    </div>
     {% if help_topic %}
+    <div class="card-group">
         <div class="card bg-dark">
             <div class="card-title">
                 <ul class="help-topic-list">
@@ -53,8 +55,10 @@
                 <pre class="card-text">{% autoescape off %}{{ help_topic.body_html }}{% endautoescape %}</pre>
             </div>
         {% endif %}
-    {% endif %}
         </div>
+    </div>
+    {% endif %}
+    <div class="card-group">
         <div class="card bg-dark">
             <div class="card-body">
     {% if help_topics %}
