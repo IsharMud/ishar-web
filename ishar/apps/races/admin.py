@@ -26,27 +26,27 @@ class RaceAffinitiesAdmin(admin.ModelAdmin):
     readonly_fields = ("race_affinity_id",)
     search_fields = ("race", "force", "affinity_type")
 
-    def has_module_permission(self, request, obj=None):
+    def has_module_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_eternal()
         return False
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
 
-    def has_change_permission(self, request, obj=None):
+    def has_change_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
 
-    def has_view_permission(self, request, obj=None):
+    def has_view_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_eternal()
         return False
@@ -70,27 +70,27 @@ class RaceDeathloadAdmin(admin.ModelAdmin):
     readonly_fields = ("id",)
     search_fields = ("race", "vnum", "percent_chance", "min_level")
 
-    def has_module_permission(self, request, obj=None):
+    def has_module_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_eternal()
         return False
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
 
-    def has_change_permission(self, request, obj=None):
+    def has_change_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
 
-    def has_view_permission(self, request, obj=None):
+    def has_view_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_eternal()
         return False
@@ -103,27 +103,27 @@ class RaceAffinityAdminInline(admin.TabularInline):
     extra = 1
     model = RaceAffinity
 
-    def has_module_permission(self, request, obj=None):
+    def has_module_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_eternal()
         return False
 
-    def has_add_permission(self, request, obj):
+    def has_add_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
 
-    def has_change_permission(self, request, obj=None):
+    def has_change_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
 
-    def has_view_permission(self, request, obj=None):
+    def has_view_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_eternal()
         return False
@@ -136,27 +136,27 @@ class RaceDeathloadAdminInline(admin.TabularInline):
     extra = 1
     model = RaceDeathload
 
-    def has_module_permission(self, request, obj=None):
+    def has_module_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_eternal()
         return False
 
-    def has_add_permission(self, request, obj):
+    def has_add_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
 
-    def has_change_permission(self, request, obj=None):
+    def has_change_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
 
-    def has_view_permission(self, request, obj=None):
+    def has_view_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_eternal()
         return False
@@ -169,27 +169,27 @@ class RaceSkillAdminInline(admin.TabularInline):
     extra = 1
     model = RaceSkill
 
-    def has_module_permission(self, request, obj=None):
+    def has_module_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_eternal()
         return False
 
-    def has_add_permission(self, request, obj):
+    def has_add_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
 
-    def has_change_permission(self, request, obj=None):
+    def has_change_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
 
-    def has_view_permission(self, request, obj=None):
+    def has_view_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_eternal()
         return False
@@ -238,27 +238,27 @@ class RacesAdmin(admin.ModelAdmin):
         "short_description", "long_description"
     )
 
-    def has_module_permission(self, request, obj=None):
+    def has_module_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_eternal()
         return False
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
 
-    def has_change_permission(self, request, obj=None):
+    def has_change_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
 
-    def has_view_permission(self, request, obj=None):
+    def has_view_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_eternal()
         return False

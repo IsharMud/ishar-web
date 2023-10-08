@@ -14,22 +14,22 @@ class ForceAdmin(admin.ModelAdmin):
     list_display = list_display_links = search_fields = fields
     readonly_fields = ("id",)
 
-    def has_module_permission(self, request, obj=None):
+    def has_module_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_eternal()
         return False
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
 
-    def has_change_permission(self, request, obj=None):
+    def has_change_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
@@ -42,17 +42,17 @@ class SkillsComponentsAdminInline(admin.TabularInline):
     extra = 1
     model = SkillComponent
 
-    def has_module_permission(self, request, obj=None):
+    def has_module_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_eternal()
         return False
 
-    def has_change_permission(self, request, obj=None):
+    def has_change_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
@@ -65,18 +65,17 @@ class SkillsSpellFlagsAdminInline(admin.TabularInline):
     extra = 1
     model = SkillSpellFlag
 
-
-    def has_module_permission(self, request, obj=None):
+    def has_module_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_eternal()
         return False
 
-    def has_change_permission(self, request, obj=None):
+    def has_change_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
@@ -89,18 +88,17 @@ class SkillsForcesAdminInline(admin.TabularInline):
     extra = 1
     model = SkillForce
 
-
-    def has_module_permission(self, request, obj=None):
+    def has_module_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_eternal()
         return False
 
-    def has_change_permission(self, request, obj=None):
+    def has_change_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
@@ -138,22 +136,22 @@ class SkillAdmin(admin.ModelAdmin):
         "wearoff_msg", "chant_text", "appearance", "decide_func"
     )
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
 
-    def has_module_permission(self, request, obj=None):
+    def has_module_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_eternal()
         return False
 
-    def has_change_permission(self, request, obj=None):
+    def has_change_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
@@ -169,27 +167,27 @@ class SpellFlagAdmin(admin.ModelAdmin):
     model = SpellFlag
     readonly_fields = ("id",)
 
-    def has_module_permission(self, request, obj=None):
+    def has_module_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_eternal()
         return False
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
 
-    def has_change_permission(self, request, obj=None):
+    def has_change_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
 
-    def has_view_permission(self, request, obj=None):
+    def has_view_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_eternal()
         return False

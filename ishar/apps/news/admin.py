@@ -19,17 +19,17 @@ class NewsAdmin(admin.ModelAdmin):
     readonly_fields = ("news_id", "account")
     search_fields = ("subject", "body", "account", "is_visible")
 
-    def save_model(self, request, obj, form, change):
+    def save_model(self, request, obj, form, change) -> bool:
         if not change:
             obj.account = request.user
         super().save_model(request, obj, form, change)
 
-    def has_add_permission(self, request, obj=None):
+    def has_add_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
 
-    def has_change_permission(self, request, obj=None):
+    def has_change_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             if request.user.is_god():
                 return True
@@ -37,7 +37,7 @@ class NewsAdmin(admin.ModelAdmin):
                 return True
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             if request.user.is_god():
                 return True
@@ -45,12 +45,12 @@ class NewsAdmin(admin.ModelAdmin):
                 return True
         return False
 
-    def has_module_permission(self, request, obj=None):
+    def has_module_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_eternal()
         return False
 
-    def has_view_permission(self, request, obj=None):
+    def has_view_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_eternal()
         return False

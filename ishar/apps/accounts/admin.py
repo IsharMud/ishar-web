@@ -55,7 +55,7 @@ class AccountPlayersLinksInline(admin.TabularInline):
         "get_player_level", "get_player_game_type", "get_player_deleted"
     )
 
-    def has_add_permission(self, request, obj) -> bool:
+    def has_add_permission(self, request, obj=None) -> bool:
         """Disabling adding players in /admin/accounts/ inline."""
         return False
 
@@ -147,7 +147,7 @@ class AccountsAdmin(UserAdmin):
             return request.user.is_god()
         return False
 
-    def has_add_permission(self, request) -> bool:
+    def has_add_permission(self, request, obj=None) -> bool:
         """Disabling adding players in /admin/accounts/ inline."""
         return False
 
@@ -187,27 +187,27 @@ class AccountUpgradesAdmin(admin.ModelAdmin):
     search_fields = ("name", "description")
     readonly_fields = ("id",)
 
-    def has_module_permission(self, request, obj=None):
+    def has_module_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_eternal()
         return False
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
 
-    def has_change_permission(self, request, obj=None):
+    def has_change_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
 
-    def has_view_permission(self, request, obj=None):
+    def has_view_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_eternal()
         return False

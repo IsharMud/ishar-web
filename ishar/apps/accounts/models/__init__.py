@@ -206,10 +206,10 @@ class Account(AbstractBaseUser, PermissionsMixin):
     # "God"s are administrators/superusers for Django Admin
     is_admin = is_superuser = is_god
 
-    # Immortals and above can log in to Django Admin
+    # Eternals and above can log in to Django Admin
     @property
     def is_staff(self) -> bool:
-        return self.is_immortal()
+        return self.is_eternal()
 
     def check_password(self, raw_password: str = None) -> bool:
         """
@@ -223,10 +223,10 @@ class Account(AbstractBaseUser, PermissionsMixin):
         """
         return self.account_name
 
-    def has_perms(self, perm_list, obj=None):
+    def has_perms(self, perm_list, obj=None) -> bool:
         return self.is_god()
 
-    def has_module_perms(self, app_label):
+    def has_module_perms(self, app_label) -> bool:
         return self.is_god()
 
     @property
