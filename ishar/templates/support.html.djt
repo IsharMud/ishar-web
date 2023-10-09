@@ -6,20 +6,30 @@
 {% block title %}Support{% endblock title %}
 {% block header %}Support Ishar MUD{% endblock header %}
 {% block content %}
-                <p>
+    <div class="card-deck">
+        <div class="card bg-dark">
+            <div class="card-header">
+                <p class="card-text">
                     While you are more than welcome to offer support, Ishar MUD is free to use, play, and enjoy!
                 </p>
-                <p>
+                <p class="card-text">
                     Any contribution is simply for the development and maintenance of the game, and as a way to say "thank you".
                 </p>
-                <p>
-                    <a href="https://www.patreon.com/bePatron?u=42650263" class="external-clean" target="_blank" id="patron" title="Become A Patron">
-                        <img src="{% static "images/become-a-patron.png" %}" alt="Become A Patron">
-                    </a>
-                </p>
-                <p>
-                    <a href="https://www.buymeacoffee.com/ishar" class="external-clean" target="_blank" id="coffee" title="Buy Me A Coffee">
-                        <img src="{% static "images/buy-me-a-coffee.png" %}" alt="Buy Me A Coffee">
-                    </a>
-                </p>
+            </div>
+        </div>
+        <div class="card bg-dark">
+            <p class="card-body">
+                <a class="card-text" href="https://www.patreon.com/bePatron?u=42650263" target="_blank">
+                    <img alt="Become A Patron" src="{% static "images/become-a-patron.png" %}">
+                </a>
+            </p>
+        </div>
+        <div class="card bg-dark">
+            <p class="card-body">
+                <a class="card-text" href="https://www.buymeacoffee.com/ishar" class="external-clean" target="_blank" title="Buy Me A Coffee">
+                    <img alt="Buy Me A Coffee" src="{% static "images/buy-me-a-coffee.png" %}">
+                </a>
+            </p>
+        </div>
+    </div>
 {% endblock content %}

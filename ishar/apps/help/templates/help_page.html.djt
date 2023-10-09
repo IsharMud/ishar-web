@@ -25,10 +25,10 @@
                     {{ help_search_form.as_table }}
                     <button class="btn btn-outline-primary" type="submit">Search</button>
                     <button class="btn btn-outline-secondary" type="reset">Clear</button>
-                    <span class="card-text">
+                    <p class="card-text">
                         (<i>such as &quot;<a href="{% url "help_page" help_topic='spell' %}">spell</a>&quot; or
                         &quot;<a href="{% url "help_page" help_topic='MUD Basics' %}">MUD Basics</a>&quot;</i>)
-                    </span>
+                    </p>
                 </form>
             </div>
     {% endif %}

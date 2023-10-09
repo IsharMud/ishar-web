@@ -28,9 +28,11 @@
     <body>
         <nav class="card-group navbar navbar-expand-lg container-fluid">
             <div class="card bg-dark">
-                <a class="card-header" href="{% url 'index' %}" title="Ishar MUD">
-                    <img class="navbar-brand" id="logo" alt="Ishar MUD" src="{% static "images/header_alpha.png" %}" style="width: 20rem;">
-                </a>
+                <h1 class="card-header">
+                    <a href="{% url 'index' %}" title="Ishar MUD">
+                        <img class="navbar-brand" id="logo" alt="Ishar MUD" src="{% static "images/header_alpha.png" %}" style="width: 20rem;">
+                    </a>
+                </h1>
                 <div class="card-body">
                     <button class="navbar-toggler navbar-dark" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
                         <span class="navbar-toggler-icon"></span>
@@ -60,7 +62,7 @@
 {% if user and user.is_authenticated %}
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="{% url "portal" %}" role="button" data-bs-toggle="dropdown" aria-expanded="false">Portal</a>
-                                <ul class="dropdown-menu">
+                                <ul class="bg-dark dropdown-menu">
                                     <li title="Account">
                                         <a class="dropdown-item" href="{% url "account" %}">Account</a>
                                     </li>
@@ -91,7 +93,6 @@
                 </div>
             </div>
         </nav>
-
         <main class="container-fluid">
             <div class="card bg-dark">
                 <h2 class="card-header">{% block header %}{% endblock header %}</h2>
@@ -112,28 +113,30 @@
                 </div>
             </div>
         </main>
-
+{% if current_season %}
+        <div class="card-group navbar navbar-expand-lg text-center container-fluid">
+            <div class="card bg-dark">
+                <p class="card-body">
+                    <a class="card-text" href="{% url "current_season" %}">{{ current_season }}</a>
+                </p>
+            </div>
+            <div class="card bg-dark">
+                <p class="card-body">
+                    <span class="card-text">ends {{ current_season.expiration_date | naturaltime }}</span>
+                </p>
+            </div>
+        </div>
+{% endif %}
         <footer class="card-group navbar navbar-expand-lg text-center container-fluid">
-{% block footer %}
-    {% if current_season %}
             <div class="card bg-dark">
-                <ul class="card-body list-inline">
-                    <li class="card-text list-inline-item" title="Season {{ current_season.season_id }} ends {{ current_season.expiration_date | naturaltime }}">
-                        <a href="{% url "current_season" %}">Season {{ current_season.season_id }}</a>
-                        ends {{ current_season.expiration_date | naturaltime }}
-                    </li>
-                    <li class="card-text list-inline-item" title="Ends @ {{ current_season.expiration_date }}">@ {{ current_season.expiration_date }}</li>
-                </ul>
+                <a class="card-body card-text" href="mailto:admin@isharmud.com" title="E-mail Us!" target="_blank">✉️ E-mail us!</a>
             </div>
-    {% endif %}
             <div class="card bg-dark">
-                <ul class="card-body list-inline">
-                    <li class="card-text list-inline-item"><a href="{% url 'support' %}"{% if page == 'support' %} id="active-nav"{% endif %}>❤️ Support Ishar MUD</a></li>
-                    <li class="card-text list-inline-item"><a title="Join us on Discord!" href="{%  url "discord" %}" target="_blank"><img alt="Discord" src="{% static "images/discord.png" %}" style="width: 1rem;"> Join us on Discord!</a></li>
-                    <li class="card-text list-inline-item"><a title="E-mail Us!" href="mailto:admin@isharmud.com" id="email-us" target="_blank">✉️ E-mail us!</a></li>
-                </ul>
+                <a class="card-body card-text" href="{% url 'support' %}">❤️ Support Ishar MUD</a>
             </div>
-{% endblock footer %}
+            <div class="card bg-dark">
+                <a class="card-body card-text" href="{%  url "discord" %}" target="_blank" title="Join us on Discord!"><img alt="Discord" src="{% static "images/discord.png" %}" style="width: 1rem;"> Join us on Discord!</a>
+            </div>
         </footer>
     </body>
 </html>

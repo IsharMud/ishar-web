@@ -12,7 +12,7 @@
             <ul class="card-body">
                 <li class="card-text" title="Change your password"><a href="{% url "password" %}">Change your password</a></li>
                 <li class="card-text" title="View your players"><a href="{% url "portal" %}">View your players</a></li>
-            </blockquote>
+            </ul>
         </div>
         <div class="card bg-dark">
             <h3 class="card-header">Created</h3>
@@ -25,10 +25,8 @@
         </div>
     </div>
 
-    <div class="card-group">
-        <div class="card bg-dark">
+    <div class="card bg-dark">
             <h4 class="card-header">Essence</h4>
-        </div>
     </div>
     <div class="card-group">
         <div class="card bg-dark">
@@ -51,8 +49,8 @@
 
     <div class="card-group">
         <div class="card bg-dark">
+            <h4 class="card-header">Upgrades</h4>
             <div class="card-body">
-                <h4 class="card-title">Upgrades</h4>
                     <ul id="essence-upgrades">
     {% if account_upgrades %}
         {% for upgraded in account_upgrades %}
@@ -69,4 +67,5 @@
                         </li>
     {% endif %}
                     </ul>
+            </div>
 {% endblock content %}
