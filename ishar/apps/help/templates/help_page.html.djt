@@ -46,7 +46,7 @@
 
     {% if help_search_form %}
     <div class="card bg-dark">
-        <form class="card-body bg-dark" method="post">
+        <form class="card-body" method="post">
             {% csrf_token %}
             {{ help_search_form.as_p }}
             <p class="card-text">
