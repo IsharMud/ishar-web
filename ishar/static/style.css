@@ -29,7 +29,7 @@ pre { padding-left: 2vw; white-space: pre-wrap; }
     color: #00b7eb;
 }
 
-.nested-list, .faq-answers { list-style: none; }
+.nested-list { list-style: none; }
 .non-classic { text-align: center; }
 .god-player::after { content: ' 😇'; }
 .forger-player::after,  .eternal-player::after, .artisan-player::after,
