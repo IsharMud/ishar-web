@@ -5,21 +5,21 @@
 {% block title %}MUD Clients{% endblock title %}
 {% block header %}MUD Clients{% endblock header %}
 {% block content %}
-                <p>
+                <p class="card-text">
                     While you can certainly enjoy the game via
                     <a href="/connect/" target="_blank" title="Mudslinger">the Mudslinger web client</a>,
                     you might prefer to connect to the game with software designed specifically to help you play a MUD.
                 </p>
-                <p>
+                <p class="card-text">
                     Here are some of the MUD clients that we have heard good things about:
                 </p>
-                <ul id="mud-client-list">
-                    <li class="mud-client-platform" title="Cross-Platform">
+                <ul>
+                    <li title="Cross-Platform">
                         <h3>
                             Cross-Platform
                         </h3>
                     </li>
-                    <li class="mud-clients" title="Cross-Platform">
+                    <li class="nested-list" title="Cross-Platform">
                         <ul>
                             <li title="Mudlet">
                                 <a href="https://www.mudlet.org/" target="_blank" rel="noopener">
@@ -28,12 +28,12 @@
                             </li>
                         </ul>
                     </li>
-                    <li class="mud-client-platform" title="Android">
+                    <li title="Android">
                         <h3>
                             Android
                         </h3>
                     </li>
-                    <li class="mud-clients" title="Android">
+                    <li class="nested-list" title="Android">
                         <ul>
                             <li title="Blowtorch">
                                 <a href="http://bt.happygoatstudios.com/" target="_blank" rel="noopener">
@@ -42,12 +42,12 @@
                             </li>
                         </ul>
                     </li>
-                    <li class="mud-client-platform" title="iOS">
+                    <li title="iOS">
                         <h3>
                             iOS
                         </h3>
                     </li>
-                    <li class="mud-clients" title="iOS">
+                    <li class="nested-list" title="iOS">
                         <ul>
                             <li title="MUDRammer">
                                 <a href="https://splinesoft.net/mudrammer/" target="_blank" rel="noopener">
@@ -56,12 +56,12 @@
                             </li>
                         </ul>
                     </li>
-                    <li class="mud-client-platform" title="Linux / UNIX">
+                    <li title="Linux / UNIX">
                         <h3>
                             Linux / UNIX
                         </h3>
                     </li>
-                    <li class="mud-clients" title="Linux / UNIX">
+                    <li class="nested-list" title="Linux / UNIX">
                         <ul>
                             <li title="TinTin++">
                                 <a href="http://tintin.sourceforge.net/" target="_blank" rel="noopener">
@@ -75,12 +75,12 @@
                             </li>
                         </ul>
                     </li>
-                    <li class="mud-client-platform" title="Mac OS">
+                    <li title="Mac OS">
                         <h3>
                             Mac OS
                         </h3>
                     </li>
-                    <li class="mud-clients" title="Mac OS">
+                    <li class="nested-list" title="Mac OS">
                         <ul>
                             <li title="Atlantis">
                                 <a href="https://www.riverdark.net/atlantis/" target="_blank" rel="noopener">
@@ -94,12 +94,12 @@
                             </li>
                         </ul>
                     </li>
-                    <li class="mud-client-platform" title="Windows">
+                    <li title="Windows">
                         <h3>
                             Windows
                         </h3>
                     </li>
-                    <li class="mud-clients" title="Windows">
+                    <li class="nested-list" title="Windows">
                         <ul>
                             <li title="ZMud">
                                 <a href="https://www.zuggsoft.com/zmud/zmudinfo.htm" target="_blank" rel="noopener">
@@ -129,12 +129,12 @@
                         </ul>
                     </li>
                 </ul>
-                <p>
+                <p class="card-footer">
                     After you download a client, tell it to connect to
                     <code>isharmud.com</code> on port number <code>23</code> or <code>9999</code> to join the game.
                     See our <a href="/getstarted/" title="getting started guide">getting started guide</a>.
                 </p>
-                <p>
+                <p class="card-footer">
                     Everything listed here can be used at no cost.
                     Do not be afraid to try a few, as they all have different strengths and weaknesses.
                 </p>

@@ -6,13 +6,13 @@
 {% block title %}Patches{% endblock title %}
 {% block header %}Patches{% endblock header %}
 {% block content %}
-                <p>
+                <p class="card-title">
                     Ishar MUD is under regular development, and constantly being improved!
                 </p>
     {% if patches %}
-                <ul id="patches-list">
+                <ul class="card-text">
         {% for patch in patches %}
-                    <li class="patch-item" title="{{ patch.patch_name }}">
+                    <li title="{{ patch.patch_name }}">
                         <h3>
                             <a href="{{ patch.patch_file.url }}" target="_blank">{{ patch.patch_name }}</a>
                         </h3>

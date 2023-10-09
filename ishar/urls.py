@@ -4,8 +4,9 @@ isharmud.com URL configuration.
 from django.urls import include, path
 
 from ishar.api import api_router
+from ishar.faq import FAQView
 from ishar.views import (
-    ClientsView, FAQView, HistoryView, IsharLoginView, IsharLogoutView,
+    ClientsView, HistoryView, IsharLoginView, IsharLogoutView,
     StartView, SupportView, WelcomeView
 )
 

@@ -5,7 +5,7 @@
 {% block title %}Get Started{% endblock title %}
 {% block header %}Get Started{% endblock header %}
 {% block content %}
-                <p>
+                <p class="card-text">
                     Ishar is an interactive, multi-user, text adventure game -- also known as a
                     MUD -- where players do battle with fearsome foes and sometimes each other
                     so they can win great wealth and wrest rare prizes from the treasure hoards
@@ -13,7 +13,7 @@
                     experience and advancement in game standing.
                 </p>
 
-                <p>
+                <p class="card-text">
                     I can hear some people groaning out there.  'A TEXT game?  *yawn*  Where's
                     the graphics?  Where's the flash?  Must be booooooring.'  Wrong.  Wrong,
                     wrong, wrong, wrong and wrong again.  I have known players of many different
@@ -21,7 +21,7 @@
                     game, or even heard of one, that inspires the emotional highs and lows a MUD does.
                 </p>
 
-                <p>
+                <p class="card-text">
                     This is at least partly due to the fact that it is a long game.  You start a
                     character at level 1 with very little money and only the meagerest of
                      possessions.  As you play the character, it gets stronger.  You accumulate
@@ -30,18 +30,18 @@
                     probably also make bitter enemies who will kill you if they get a chance.
                 </p>
 
-                <p>
+                <p class="card-text">
                     Playing Ishar starts by <a href="{% url "connect" %}" target="_blank">connecting to the game</a>
                     and typing "<code>new</code>" at the login prompt.  The game walks you through the few steps of
                     creating a new character, then drops you into the virtual world with a few meager possessions and
                     the lowest standing in the game, level 1.
                 </p>
 
-                <p>
+                <p class="card-text">
                     You will enter the game in the center of Mareldja, the largest city:
                 </p>
 
-                <pre>
+                <pre class="card-text">
     Central Plaza
 You stand in the center of a spacious plaza, its periphery adorned
 ith potted plants and carved stone benches.  People stroll about you,
@@ -55,7 +55,7 @@ the compass points.
 100H 100M 0X Exits:NWES&gt;
                 </pre>
 
-                <p>
+                <p class="card-text">
                     In this example, "Central Plaza" is the name of the room or place you are
                     currently located.  Following that is a paragraph with a detailed
                     description of Central Plaza.  Below that is list of people or objects that
@@ -66,7 +66,7 @@ the compass points.
                     you a quick overview of your current status.
                 </p>
 
-                <p>
+                <p class="card-text">
                     Commands are how you interact with the virtual world through your character.
                     For example, typing "<code>north</code>" moves you into the room north of your current
                     location, or "<code>look</code>" will describe your surroundings again.
@@ -74,7 +74,7 @@ the compass points.
                     Assuming one is in the room with you, it would offer:
                 </p>
 
-                <pre>
+                <pre class="card-text">
     The guard is clad in grey and deep turquoise livery.  He radiates
 order and benevolence as he wanders the city streets, protecting the
 innocent and keeping the peace.
@@ -86,7 +86,7 @@ taller than you.
         Wielding-&gt; a long sword
                 </pre>
 
-                <p>
+                <p class="card-text">
                     You do not need to use the full names of most commands.  As you are learning
                     new commands, try to learn the short version.  Instead of typing "<code>north</code>",
                     you can just hit "<code>n</code>" and the Enter key.  "<code>Look</code>" can be shortened to
@@ -95,13 +95,13 @@ taller than you.
                     available at any time with "<code>help &lt;command&gt;</code>".
                 </p>
 
-                <p>
+                <p class="card-text">
                     Similarly, you can use just the first three letters of the names of mobs and
                     players and leave out unnecessary words.  So "<code>look at young guard</code>" could
                     actually be shortened to "<code>l gua</code>".
                 </p>
 
-                <p>
+                <p class="card-text">
                     The first hour you are in the game is the hardest.  It takes a little while
                     to get used to the command syntax and get a feel for moving around in the
                     world and interacting with everything in it.  Don't be afraid of typing
@@ -110,13 +110,13 @@ taller than you.
                     offer detailed information about any command.
                 </p>
 
-                <p>
+                <p class="card-text">
                     You will quickly run into other players who talk to you; see
                     &quot;<a href="{% url "help_page" help_topic='Communication' %}"><code>help communication</code></a>&quot;
                     on how to reply.
                 </p>
 
-                <p>
+                <p class="card-text">
                     Once you make it past the first few hours and want to advance your standing in the game, see
                     &quot;<a href="{% url "help_page" help_topic='Levelling' %}"><code>help levelling</code></a>&quot;.
                 </p>

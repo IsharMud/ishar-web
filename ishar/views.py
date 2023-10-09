@@ -18,10 +18,6 @@ class ConnectRedirectView(RedirectView):
     url = settings.CONNECT_URL
 
 
-class FAQView(TemplateView):
-    template_name = "faq.html.djt"
-
-
 class HistoryView(TemplateView):
     template_name = "history.html.djt"
 
