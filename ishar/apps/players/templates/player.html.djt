@@ -103,7 +103,7 @@
             <h3 title="Statistics">
                 Statistics
             </h3>
-            <table id="player-statistics">
+            <table class="table" id="player-statistics">
                 <tr>
                 {% for stat_name, stat_value in player.player_stats.items %}
                     <th title="{{ stat_name }}: {{ stat_value }}">

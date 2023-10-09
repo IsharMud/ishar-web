@@ -17,10 +17,10 @@
     {% if patches %}
         {% for patch in patches %}
         <div class="card bg-dark">
-            <ul>
+            <ul class="card-header">
                 <li title="{{ patch.patch_name }}">
                     <h3 class="card-header">
-                        <a href="{{ patch.patch_file.url }}" target="_blank">{{ patch.patch_name }}</a>
+                        <a class="card-text" href="{{ patch.patch_file.url }}" target="_blank">{{ patch.patch_name }}</a>
                     </h3>
                 </li>
                 <li class="card-body nested-list">
