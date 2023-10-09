@@ -29,39 +29,24 @@
     </div>
     {% endif %}
 
-    <div class="card-group">
-        <div class="card bg-dark">
-            <h4 class="card-header">Essence</h4>
-            <div class="card-body">
-                <p class="card-text">
-                    &quot;<a title="Essence" href="{% url "help_page" help_topic="Essence" %}">Essence</a>&quot;
-                    are the rewards points that you earn during the season!
-                </p>
-                <p class="card-text">
-                    Essence is preserved across seasons, and can be spent at any time
-                    by typing <code>shop</code> after logging in.
-                </p>
-            </div>
-        </div>
-    </div>
-    {% if request.user.current_essence and request.user.seasonal_earned %}
-    <div class="card-group">
-        <div class="card bg-dark">
-            <div class="card-body">
-                <h5 class="card-title">Current</h5>
-                <p class="card-text">
-                    {{ request.user.current_essence }} essence
-                </p>
-            </div>
-        </div>
-        <div class="card bg-dark">
-            <div class="card-body">
-                <h5 class="card-title">Earned</h5>
-                <p class="card-text">
-                    {{ request.user.current_essence }} essence
-                </p>
-            </div>
-        </div>
-    </div>
+    <div class="card bg-dark">
+        <h4 class="card-header">Essence</h4>
+        <div class="card-body">
+            <p class="card-text">
+                &quot;<a title="Essence" href="{% url "help_page" help_topic="Essence" %}">Essence</a>&quot;
+                are the rewards points that you earn during the season!
+            </p>
+            <p class="card-text">
+                Essence is preserved across seasons, and can be spent at any time
+                by typing &quot;<code>shop</code>&quot; after logging in.
+            </p>
+    {% if request.user and not request.user.is_anonymous %}
+            <p class="card-text">
+                You can view your current essence balance,
+                and see how many points you have earned so far this season,
+                by visiting your <a href="{% url "account" %}#essence">account page</a>.
+            </p>
     {% endif %}
+        </div>
+    </div>
 {% endblock content %}
