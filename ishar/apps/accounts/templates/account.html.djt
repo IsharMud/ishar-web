@@ -8,7 +8,7 @@
 {% block content %}
     <div class="card-group">
         <div class="card bg-dark">
-            <h3 class="card-header">Manage</h3>
+            <h3 class="card-header" id="manage"><a href="#manage">Manage</a></h3>
             <ul class="card-body">
                 <li class="card-text" title="Change your password"><a href="{% url "password" %}">Change your password</a></li>
                 <li class="card-text" title="View your players"><a href="{% url "portal" %}">View your players</a></li>
@@ -26,7 +26,7 @@
     </div>
 
     <div class="card bg-dark">
-            <h4 class="card-header">Essence</h4>
+        <h4 class="card-header" id="essence"><a href="#essence">Essence</a></h4>
     </div>
     <div class="card-group">
         <div class="card bg-dark">
@@ -41,7 +41,7 @@
             <div class="card-body">
                 <h5 class="card-title">Earned</h5>
                 <p class="card-text">
-                    {{ request.user.current_essence }} essence
+                    {{ request.user.seasonal_earned }} essence
                 </p>
             </div>
         </div>
@@ -49,7 +49,7 @@
 
     <div class="card-group">
         <div class="card bg-dark">
-            <h4 class="card-header">Upgrades</h4>
+            <h4 class="card-header" id="upgrades"><a href="#upgrades">Upgrades</a></h4>
             <div class="card-body">
                     <ul id="essence-upgrades">
     {% if account_upgrades %}

@@ -37,8 +37,8 @@
                     <button class="navbar-toggler navbar-dark" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
                         <span class="navbar-toggler-icon"></span>
                     </button>
-                    <div class="collapse navbar-collapse" id="navbarNavDropdown">
-                        <ul class="navbar-nav">
+                    <div class="collapse bg-dark navbar-collapse" id="navbarNavDropdown">
+                        <ul class="navbar-nav bg-dark">
 {% if user.is_staff %}
                             <li class="nav-item" title="Admin">
                                 <a class="nav-link" href="{% url "admin:index" %}" target="_blank">Admin</a>
@@ -60,32 +60,32 @@
                                 <a class="nav-link" href="{% url "world" %}">World</a>
                             </li>
 {% if user and user.is_authenticated %}
-                            <li class="nav-item dropdown">
+                            <li class="nav-item dropdown bg-dark">
                                 <a class="nav-link dropdown-toggle" href="{% url "portal" %}" role="button" data-bs-toggle="dropdown" aria-expanded="false">Portal</a>
                                 <ul class="bg-dark dropdown-menu">
                                     <li title="Account">
-                                        <a class="dropdown-item" href="{% url "account" %}">Account</a>
+                                        <a class="bg-dark nav-link dropdown-item" href="{% url "account" %}">Account</a>
                                     </li>
                                     <li title="Challenges">
-                                        <a class="dropdown-item" href="{% url "challenges" %}">Challenges</a>
+                                        <a class="bg-dark nav-link dropdown-item" href="{% url "challenges" %}">Challenges</a>
                                     </li>
                                     <li title="Events">
-                                        <a class="dropdown-item" href="{% url "events" %}">Events {% if global_event_count and global_event_count > 0 %} ({{ global_event_count }}){% endif %}</a>
+                                        <a class="bg-dark nav-link dropdown-item" href="{% url "events" %}">Events {% if global_event_count and global_event_count > 0 %} ({{ global_event_count }}){% endif %}</a>
                                     </li>
                                     <li title="Leaders">
-                                        <a class="dropdown-item" href="{% url "leaders" %}">Leaders</a>
+                                        <a class="bg-dark nav-link dropdown-item" href="{% url "leaders" %}">Leaders</a>
                                     </li>
                                     <li title="Portal">
-                                        <a class="dropdown-item" href="{% url "portal" %}">Portal</a>
+                                        <a class="bg-dark nav-link dropdown-item" href="{% url "portal" %}">Portal</a>
                                     </li>
                                     <li title="Log out">
-                                        <a class="dropdown-item" href="{% url "logout" %}">Log out ({{ user.get_username }})</a>
+                                        <a class="bg-dark nav-link dropdown-item" href="{% url "logout" %}">Log out ({{ user.get_username }})</a>
                                     </li>
                                 </ul>
                             </li>
 {% else %}
-                            <li class="nav-item" title="Portal">
-                                <a class="nav-link" href="{% url "portal" %}">Portal</a>
+                            <li class="bg-dark nav-item" title="Portal">
+                                <a class="bg-dark nav-link" href="{% url "portal" %}">Portal</a>
                             </li>
 {% endif %}
                         </ul>
@@ -93,6 +93,7 @@
                 </div>
             </div>
         </nav>
+
         <main class="container-fluid">
             <div class="card bg-dark">
                 <h2 class="card-header">{% block header %}{% endblock header %}</h2>
@@ -113,8 +114,9 @@
                 </div>
             </div>
         </main>
+
 {% if current_season %}
-        <div class="card-group navbar navbar-expand-lg text-center container-fluid">
+        <footer class="card-group navbar navbar-expand-lg text-center container-fluid">
             <div class="card bg-dark">
                 <p class="card-body">
                     <a class="card-text" href="{% url "current_season" %}">{{ current_season }}</a>
@@ -125,8 +127,9 @@
                     <span class="card-text">ends {{ current_season.expiration_date | naturaltime }}</span>
                 </p>
             </div>
-        </div>
+        </footer>
 {% endif %}
+
         <footer class="card-group navbar navbar-expand-lg text-center container-fluid">
             <div class="card bg-dark">
                 <a class="card-body card-text" href="mailto:admin@isharmud.com" title="E-mail Us!" target="_blank">✉️ E-mail us!</a>
