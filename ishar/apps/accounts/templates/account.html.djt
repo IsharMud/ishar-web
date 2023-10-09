@@ -6,48 +6,67 @@
 {% block title %}Account ({{ request.user.account_name | title }}){% endblock title %}
 {% block header %}Account ({{ request.user.account_name | title }}){% endblock header %}
 {% block content %}
-            <h4 title="Created">Created</h4>
-            <ul id="account-details" title="Created: {{ request.user.created_at }} ({{ request.user.created_at | naturaltime }})">
-                <li>{{ request.user.created_at }}</li>
-                <li>{{ request.user.created_at | naturaltime }}</li>
-            </ul>
-            <h4 title="Manage">Manage</h4>
-            <ul id="account-manage">
-                <li title="Change your password"><a href="{% url "password" %}">Change your password</a></li>
-                <li title="View your players"><a href="{% url "portal" %}">View your players</a></li>
-            </ul>
-    {% if request.user.current_essence or request.user.seasonal_earned %}
-            <h4 title="Essence">Essence</h4>
-            <ul id="essence-balance">
-                <li title="You currently have: {{ request.user.current_essence }} essence.">You currently have:</li>
-                <li class="nested-list">
-                    <ul>
-                        <li>{{ request.user.current_essence }} essence</li>
-                    </ul>
-                </li>
-                <li title="This season, you have earned: {{ request.user.seasonal_earned }} essence.">This season, you have earned:</li>
-                <li class="nested-list">
-                    <ul>
-                        <li>{{ request.user.seasonal_earned }} essence</li>
-                    </ul>
-                </li>
-            </ul>
-    {% endif %}
-            <h4 title="Upgrades">Upgrades</h4>
-            <ul id="essence-upgrades">
+    <div class="card-group">
+        <div class="card bg-dark">
+            <h3 class="card-header">Manage</h3>
+            <ul class="card-body">
+                <li class="card-text" title="Change your password"><a href="{% url "password" %}">Change your password</a></li>
+                <li class="card-text" title="View your players"><a href="{% url "portal" %}">View your players</a></li>
+            </blockquote>
+        </div>
+        <div class="card bg-dark">
+            <h3 class="card-header">Created</h3>
+            <blockquote class="card-body blockquote">
+                <p class="card-text" title="{{ request.user.created_at }}">{{ request.user.created_at }}</p>
+                <footer class="blockquote-footer" title="{{ request.user.created_at | naturaltime }}">
+                    {{ request.user.created_at | naturaltime }}
+                </footer>
+            </blockquote>
+        </div>
+    </div>
+
+    <div class="card-group">
+        <div class="card bg-dark">
+            <h4 class="card-header">Essence</h4>
+        </div>
+    </div>
+    <div class="card-group">
+        <div class="card bg-dark">
+            <div class="card-body">
+                <h5 class="card-title">Current</h5>
+                <p class="card-text">
+                    {{ request.user.current_essence }} essence
+                </p>
+            </div>
+        </div>
+        <div class="card bg-dark">
+            <div class="card-body">
+                <h5 class="card-title">Earned</h5>
+                <p class="card-text">
+                    {{ request.user.current_essence }} essence
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-group">
+        <div class="card bg-dark">
+            <div class="card-body">
+                <h4 class="card-title">Upgrades</h4>
+                    <ul id="essence-upgrades">
     {% if account_upgrades %}
         {% for upgraded in account_upgrades %}
             {% if upgraded.amount and upgraded.amount > 0 %}
-                <li title="{{ upgraded.upgrade.name }}{% if upgrade.amount > 1 %} (x{{ upgrade.amount }}){% endif %}">
-                    {{ upgraded.upgrade.name }}
-                    {% if upgraded.amount > 1 %} (x{{ upgraded.amount }}){% endif %}
-                </li>
+                        <li title="{{ upgraded.upgrade.name }}{% if upgrade.amount > 1 %} (x{{ upgrade.amount }}){% endif %}">
+                            {{ upgraded.upgrade.name }}
+                            {% if upgraded.amount > 1 %} (x{{ upgraded.amount }}){% endif %}
+                        </li>
             {% endif %}
         {% endfor %}
     {% else %}
-                <li title="You have not purchased any upgrades.">
-                    <i>You have not purchased any upgrades.</i>
-                </li>
+                        <li title="You have not purchased any upgrades.">
+                            <i>You have not purchased any upgrades.</i>
+                        </li>
     {% endif %}
-            </ul>
+                    </ul>
 {% endblock content %}

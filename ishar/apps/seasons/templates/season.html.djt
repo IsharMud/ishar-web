@@ -7,46 +7,61 @@
 {% block header %}Season {{ season.season_id }}{% endblock header %}
 {% block content %}
     {% if season %}
-            <ul id="season-details">
-                <li title="Season {{ season.season_id }} began {{ season.effective_date | naturaltime }} on {{ season.effective_date }}">
-                    <strong>Started</strong>
-                    <ul>
-                        <li>{{ season.effective_date }}</li>
-                        <li>{{ season.effective_date | naturaltime }}</li>
-                    </ul>
-                </li>
-                <li title="Season {{ season.season_id }} ends {{ season.expiration_date | naturaltime }} on {{ season.expiration_date }}">
-                    <strong>Ends</strong>
-                    <ul>
-                        <li>{{ season.expiration_date }}</li>
-                        <li>{{ season.expiration_date | naturaltime }}</li>
-                    </ul>
-                </li>
-            </ul>
-            <h3>Essence</h3>
-            <p>
-                &quot;<a title="Essence" href="{% url "help_page" help_topic="Essence" %}">Essence</a>&quot;
-                are the rewards points that you earn during the season!
-            </p>
-            <p>
-                Essence is preserved across seasons, and can be spent at any time
-                by typing <code>shop</code> after logging in.
-            </p>
+    <div class="card-group">
+        <div class="card bg-dark">
+            <h3 class="card-header">Started</h3>
+            <blockquote class="card-body blockquote">
+                <p class="card-text" title="{{ season.effective_date }}">{{ season.effective_date }}</p>
+                <footer class="blockquote-footer" title="{{ season.effective_date | naturaltime }}">
+                    {{ season.effective_date | naturaltime }}
+                </footer>
+            </blockquote>
+        </div>
+        <div class="card bg-dark">
+            <h3 class="card-header">Ends</h3>
+            <blockquote class="card-body blockquote">
+                <p class="card-text" title="{{ season.expiration_date }}">{{ season.expiration_date }}</p>
+                <footer class="blockquote-footer" title="{{ season.expiration_date | naturaltime }}">
+                    {{ season.expiration_date | naturaltime }}
+                </footer>
+            </blockquote>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="card-group">
+        <div class="card bg-dark">
+            <h4 class="card-header">Essence</h4>
+            <div class="card-body">
+                <p class="card-text">
+                    &quot;<a title="Essence" href="{% url "help_page" help_topic="Essence" %}">Essence</a>&quot;
+                    are the rewards points that you earn during the season!
+                </p>
+                <p class="card-text">
+                    Essence is preserved across seasons, and can be spent at any time
+                    by typing <code>shop</code> after logging in.
+                </p>
+            </div>
+        </div>
+    </div>
     {% if request.user.current_essence and request.user.seasonal_earned %}
-            <ul id="essence-balance">
-                <li title="You currently have: {{ request.user.current_essence }} essence.">You currently have:</li>
-                <li class="nested-list">
-                    <ul>
-                        <li>{{ request.user.current_essence }}</li>
-                    </ul>
-                </li>
-                <li title="This season, you have earned: {{ request.user.seasonal_earned }} essence.">This season, you have earned:</li>
-                <li class="nested-list">
-                    <ul>
-                        <li>{{ request.user.seasonal_earned }} essence</li>
-                    </ul>
-                </li>
-            </ul>
-        {% endif %}
+    <div class="card-group">
+        <div class="card bg-dark">
+            <div class="card-body">
+                <h5 class="card-title">Current</h5>
+                <p class="card-text">
+                    {{ request.user.current_essence }} essence
+                </p>
+            </div>
+        </div>
+        <div class="card bg-dark">
+            <div class="card-body">
+                <h5 class="card-title">Earned</h5>
+                <p class="card-text">
+                    {{ request.user.current_essence }} essence
+                </p>
+            </div>
+        </div>
+    </div>
     {% endif %}
 {% endblock content %}
