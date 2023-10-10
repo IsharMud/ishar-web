@@ -4,8 +4,8 @@
 !.gitignore
 __pycache__
 *.pyc
+uwsgi.ini
 settings.py
-*_secret.py
 venv
 /media/
 /static/
