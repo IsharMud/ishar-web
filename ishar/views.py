@@ -9,11 +9,11 @@ from ishar.apps.news.models import News
 
 
 class IsharLoginView(LoginView):
-    template_name = "login.html.djt"
+    template_name = "login.html"
 
 
 class IsharLogoutView(LogoutView):
-    template_name = "welcome.html.djt"
+    template_name = "welcome.html"
 
     def dispatch(self, request, *args, **kwargs):
         messages.success(request, "You have logged out!")
@@ -21,14 +21,14 @@ class IsharLogoutView(LogoutView):
 
 
 class PortalView(TemplateView):
-    template_name = "portal.html.djt"
+    template_name = "portal.html"
 
 
 class WelcomeView(TemplateView):
     """
     Main page.
     """
-    template_name = "welcome.html.djt"
+    template_name = "welcome.html"
 
     def get_context_data(self, **kwargs):
         """

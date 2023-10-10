@@ -16,7 +16,7 @@ class PatchesAllView(ListView):
     ).order_by(
         "-patch_date"
     ).all()
-    template_name = "patches.html.djt"
+    template_name = "patches.html"
 
 
 class PatchesLatestView(PatchesAllView):

@@ -15,7 +15,7 @@ class ChallengesView(LoginRequiredMixin, ListView):
     queryset = model.objects.filter(
         is_active__exact=1
     )
-    template_name = "challenges.html.djt"
+    template_name = "challenges.html"
 
 
 class CompleteChallengesView(ChallengesView):

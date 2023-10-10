@@ -17,7 +17,7 @@ class GlobalEventsView(LoginRequiredMixin, ListView):
         start_time__lt=timezone.now(),
         end_time__gt=timezone.now()
     )
-    template_name = "events.html.djt"
+    template_name = "events.html"
 
 
 class GlobalEventsViewSet(viewsets.ReadOnlyModelViewSet):

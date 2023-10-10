@@ -36,11 +36,11 @@ class AccountUpgradesViewSet(viewsets.ModelViewSet):
 
 
 class PortalView(LoginRequiredMixin, TemplateView):
-    template_name = "portal.html.djt"
+    template_name = "portal.html"
 
 
 class AccountView(PortalView):
-    template_name = "account.html.djt"
+    template_name = "account.html"
 
     def setup(self, request, *args, **kwargs):
         """
@@ -57,4 +57,4 @@ class AccountView(PortalView):
 
 class PasswordView(LoginRequiredMixin, PasswordChangeView):
     success_url = settings.LOGIN_REDIRECT_URL
-    template_name = "password.html.djt"
+    template_name = "password.html"
