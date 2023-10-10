@@ -3,10 +3,9 @@
 !.github
 !.gitignore
 __pycache__
-config.py
+*.pyc
 settings.py
 *_secret.py
+venv
 /media/
-/old/
 /static/
-/venv/
