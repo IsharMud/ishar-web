@@ -4,7 +4,6 @@
 {% block meta_url %}{% url "login" %}{% endblock meta_url %}
 {% block title %}Log In{% endblock title %}
 {% block header %}Log In{% endblock header %}
-{% block scripts %}{% endblock scripts %}
 {% block content %}
     {% if form %}
     <div class="card bg-dark">
