@@ -1,10 +1,9 @@
-{% extends "layout.html.djt" %}
+{% extends "layout.html" %}
 {% block meta_title %}Log In{% endblock meta_title %}
 {% block meta_description %}Log In{% endblock meta_description %}
 {% block meta_url %}{% url "login" %}{% endblock meta_url %}
 {% block title %}Log In{% endblock title %}
 {% block header %}Log In{% endblock header %}
-{% block scripts %}{% endblock scripts %}
 {% block content %}
     {% if form %}
     <div class="card bg-dark">

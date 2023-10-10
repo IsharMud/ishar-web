@@ -20,7 +20,7 @@ class LeadersView(LoginRequiredMixin, ListView):
         "-challenges_completed", "deaths"
     )
 
-    template_name = "leaders.html.djt"
+    template_name = "leaders.html"
 
 
 class ClassicLeadersView(LeadersView):

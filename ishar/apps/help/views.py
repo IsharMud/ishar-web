@@ -13,7 +13,7 @@ HELP_PROPERTIES = (
 
 
 class HelpView(TemplateView):
-    template_name = "help_page.html.djt"
+    template_name = "help_page.html"
     help_topics = get_help_topics()
     help_topic = None
     http_method_names = ("get", "post")
@@ -38,7 +38,7 @@ class HelpView(TemplateView):
 
 
 class HelpPageView(HelpView):
-    template_name = "help_page.html.djt"
+    template_name = "help_page.html"
 
     def dispatch(self, request, *args, **kwargs):
 
@@ -81,7 +81,7 @@ class WorldView(HelpView):
     """
     World view.
     """
-    template_name = "world.html.djt"
+    template_name = "world.html"
 
     def get_context_data(self, **kwargs):
         """

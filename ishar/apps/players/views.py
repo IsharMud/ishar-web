@@ -18,7 +18,7 @@ class PlayerView(LoginRequiredMixin, DetailView):
     context_object_name = "player"
     model = Player
     slug_field = slug_url_kwarg = query_pk_and_slug = "name"
-    template_name = "player.html.djt"
+    template_name = "player.html"
 
     def get_context_data(self, **kwargs):
         """
@@ -45,7 +45,7 @@ class PlayerSearchView(LoginRequiredMixin, TemplateView):
     """
     Player search view.
     """
-    template_name = "player.html.djt"
+    template_name = "player.html"
     model = Player
 
 
