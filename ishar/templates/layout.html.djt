@@ -14,7 +14,7 @@
         <meta property="og:site_name" content="Ishar MUD">
         <meta property="og:title" content="{% block meta_title %}Welcome{% endblock meta_title %} - Ishar MUD">
         <meta property="og:description" content="Ishar MUD: {% block meta_description %}a free online text-adventure RPG{% endblock meta_description %}">
-        <meta property="og:url" content="{% block meta_url %}{% url "ishar.welcome" %}{% endblock meta_url %}">
+        <meta property="og:url" content="{% block meta_url %}https://isharmud.com/{% endblock meta_url %}">
         <meta property="og:image" content="{% block meta_image %}{% static "images/cropped_ishar_logo_dark.png" %}{% endblock meta_image %}">
         <title>{% block title %}Welcome{% endblock title %} - Ishar MUD</title>
         {% bootstrap_css %}
@@ -48,7 +48,7 @@
                                 <a class="nav-link" href="{% url "connect" %}" target="_blank">Connect</a>
                             </li>
                             <li class="nav-item" title="Frequently Asked Questions">
-                                <a class="nav-link" href="{% url "faqs" %}">FAQs</a>
+                                <a class="nav-link" href="{% url "faq" %}">FAQs</a>
                             </li>
                             <li class="nav-item" title="Help">
                                 <a class="nav-link" href="{% url "help" %}">Help</a>

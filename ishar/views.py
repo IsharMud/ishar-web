@@ -1,25 +1,11 @@
 """
 isharmud.com base views.
 """
-from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.views import LoginView, LogoutView
-from django.views.generic.base import RedirectView, TemplateView
+from django.views.generic.base import TemplateView
 
 from ishar.apps.news.models import News
-
-
-class ClientsView(TemplateView):
-    template_name = "clients.html.djt"
-
-
-class ConnectRedirectView(RedirectView):
-    permanent = True
-    url = settings.CONNECT_URL
-
-
-class HistoryView(TemplateView):
-    template_name = "history.html.djt"
 
 
 class IsharLoginView(LoginView):
@@ -36,14 +22,6 @@ class IsharLogoutView(LogoutView):
 
 class PortalView(TemplateView):
     template_name = "portal.html.djt"
-
-
-class StartView(TemplateView):
-    template_name = "start.html.djt"
-
-
-class SupportView(TemplateView):
-    template_name = "support.html.djt"
 
 
 class WelcomeView(TemplateView):

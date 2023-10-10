@@ -124,6 +124,8 @@ INSTALLED_APPS = [
     "django.contrib.humanize",
     "django.contrib.sessions",
     "django.contrib.messages",
+    "django.contrib.sites",
+    "django.contrib.flatpages",
     "django.contrib.staticfiles",
     "django_filters",
     "rest_framework",

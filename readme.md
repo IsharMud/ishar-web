@@ -22,9 +22,9 @@ the getting started guide, or even by downloading a MUD client!
 - Frequently Asked Questions
   - [https://isharmud.com/faq](https://isharmud.com/faq)
 - Getting Started Guide
-  - [https://isharmud.com/get_started](https://isharmud.com/get_started)
+  - [https://isharmud.com/start](https://isharmud.com/start)
 - MUD Clients
-  - [https://isharmud.com/mud_clients](https://isharmud.com/mud_clients)
+  - [https://isharmud.com/clients](https://isharmud.com/clients)
 
 ## Screenshot
 
