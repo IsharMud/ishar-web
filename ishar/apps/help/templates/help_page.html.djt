@@ -36,8 +36,8 @@
         <div class="card-body">
             <p class="card-text">
                 If you are new here, you may want to download one of many
-                <a href="{% url "mud_clients" %}" title="MUD clients">MUD clients</a>,
-                see our <a href="{% url "getstarted" %}" title="getting started guide">getting started guide</a>, and
+                <a href="{% url "clients" %}" title="MUD clients">MUD clients</a>,
+                see our <a href="{% url "start" %}" title="getting started guide">getting started guide</a>, and
                 <a href="{% url "discord" %}" target="_blank" title="IsharMUD Discord Invitation">join us on Discord</a>!
             </p>
         </div>
