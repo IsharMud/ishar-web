@@ -22,7 +22,7 @@
         {% if challenge.is_completed %}
                             name: gridjs.html('<span class="challenge-completed">{{ challenge.mob_name }}</span>'),
         {% else %}
-                            name: "{{ challenge.mob_name }}",
+                            name: "{% autoescape off %}{{ challenge.mob_name }}{% endautoescape %}",
         {% endif %}
                             people: "{{ challenge.adj_people }}",
                             level: {{ challenge.orig_level }},
@@ -35,6 +35,9 @@
                         },
     {% endfor %}
                     ],
+                    className: {
+                        table: "card-body table table-bordered table-dark text-reset",
+                    },
                     search: true,
                     sort: true,
                     pagination: false,
@@ -45,10 +48,8 @@
         </script>
 {% endblock scripts %}
 {% block content %}
-                <div id="challenges"></div>
+                <div class="card bg-dark" id="challenges"></div>
                 <script>
-                    showChallenges(
-                        document.getElementById('challenges')
-                    );
+                    showChallenges(document.getElementById('challenges'));
                 </script>
 {% endblock content %}

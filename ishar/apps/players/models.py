@@ -499,26 +499,26 @@ class Player(models.Model):
         """
         return timedelta(seconds=self.online)
 
-    @admin.display(boolean=False, description="Type")
+    @property
+    @admin.display(boolean=False, description="Title", ordering="title")
+    def player_title(self):
+        """Player title."""
+        return self.title % self.name
+
+    @admin.display(boolean=False, description="Type", ordering="game_type")
     def player_type(self) -> str:
-        """
-        Player type.
-        """
+        """Player type."""
         return self.get_player_type()
 
     @property
     def podir(self) -> str:
-        """
-        Player "Podir" folder on disk.
-        """
+        """Player "Podir" folder on disk."""
         return f'{settings.MUD_PODIR}/{self.name}'
 
     @property
     @admin.display(description="Seasonal Earned", ordering="seasonal_earned")
     def seasonal_earned(self) -> int:
-        """
-        Amount of essence earned for the player.
-        """
+        """Amount of essence earned for the player."""
 
         # Immortal players do not earn essence
         if self.is_immortal() is True:
