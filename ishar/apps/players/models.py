@@ -4,6 +4,8 @@ from django.contrib import admin
 from django.db import models
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.urls import reverse
+from django.utils.safestring import mark_safe
 
 from ishar.util import dec2ip
 
@@ -394,6 +396,10 @@ class Player(models.Model):
 
         return stats
 
+    def get_absolute_url(self) -> str:
+        """URL to player page"""
+        return reverse("player", kwargs={"name": self.name})
+
     def get_immortal_type(self) -> (str, None):
         """
         Type of immortal.
@@ -403,55 +409,42 @@ class Player(models.Model):
         return get_immortal_type(level=self.true_level)
 
     def get_player_alignment(self) -> str:
-        """
-        Player alignment.
-        """
-        print(self.common.alignment)
+        """Player alignment."""
         for align_text, (low, high) in settings.ALIGNMENTS.items():
             if low <= self.common.alignment <= high:
                 return align_text
         return "Unknown"
 
     def get_player_phrase(self) -> str:
-        """
-        Player phrase.
-        """
+        """Player phrase."""
         if self.is_deleted is True:
             return "was"
         return "is"
 
     def get_player_phrase_own(self) -> str:
-        """
-        Player phrase for ownership.
-        """
+        """Player phrase for ownership."""
         if self.is_deleted is True:
             return "were"
         return "are"
 
     def get_player_phrase_owns(self) -> str:
-        """
-        Player phrase for plural ownership.
-        """
+        """Player phrase for plural ownership."""
         if self.is_deleted is True:
             return "had"
         return "has"
 
     def get_player_gender(self) -> str:
-            """
-            Player gender.
-            """
-            if self.common.get_sex_display() == "Male":
-                return "he"
+        """Player gender."""
+        if self.common.get_sex_display() == "Male":
+            return "he"
 
-            if self.common.get_sex_display() == "Female":
-                return "she"
+        if self.common.get_sex_display() == "Female":
+            return "she"
 
-            return "they"
+        return "they"
 
     def get_player_gender_own(self) -> str:
-        """
-        Player gender ownership.
-        """
+        """Player gender ownership."""
         if self.common.get_sex_display() == "Male":
             return "his"
 
@@ -461,9 +454,7 @@ class Player(models.Model):
         return "their"
 
     def get_player_gender_owns(self) -> str:
-        """
-        Player gender ownership plural.
-        """
+        """Player gender ownership plural."""
         if self.common.get_sex_display() == "Male":
             return "his"
 

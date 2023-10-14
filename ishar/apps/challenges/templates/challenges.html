@@ -20,7 +20,7 @@
     {% for challenge in challenges %}
                         {
         {% if challenge.is_completed %}
-                            name: gridjs.html('<span class="challenge-completed">{{ challenge.mob_name }}</span>'),
+                            name: gridjs.html('<span class="challenge-completed">{% autoescape off %}{{ challenge.mob_name }}{% endautoescape %}</span>'),
         {% else %}
                             name: "{% autoescape off %}{{ challenge.mob_name }}{% endautoescape %}",
         {% endif %}
@@ -48,7 +48,9 @@
         </script>
 {% endblock scripts %}
 {% block content %}
-                <div class="card bg-dark" id="challenges"></div>
+                <div class="card bg-dark">
+                     <div class="card-body" id="challenges"></div>
+                </div>
                 <script>
                     showChallenges(document.getElementById('challenges'));
                 </script>

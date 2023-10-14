@@ -101,11 +101,13 @@
 {% block messages %}
     {% if messages %}
                     <div class="card bg-dark">
-                        <ul class="card-body" id="messages">
+                        <div class="card-body">
+                            <ul class="card-text" id="messages">
         {% for message in messages %}
-                            <li class="card-text message-{{ message.tags }}">{{ message }}</li>
+                            <li class="message-{{ message.tags }}">{{ message }}</li>
         {% endfor %}
-                        </ul>
+                            </ul>
+                        </div>
                     </div>
     {% endif %}
 {% endblock messages %}

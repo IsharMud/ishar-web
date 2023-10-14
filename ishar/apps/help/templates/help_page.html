@@ -11,18 +11,20 @@
 
     {% if help_topic %}
     <div class="card bg-dark">
-        <ul class="card-header help-topic-list">
+        <div class="card-header">
+            <ul class="help-topic-list">
         {% for help_property in help_properties %}
             {% with help_property_value=help_topic|get_dict_item:help_property %}
                 {% if help_property_value %}
-            <li class="card-text">
-                <strong>{{ help_property | title }}</strong>:
-                <code>{% autoescape off %}{{ help_property_value }}{% endautoescape %}</code>
-            </li>
+                <li class="card-text">
+                    <strong>{{ help_property | title }}</strong>:
+                    <code>{% autoescape off %}{{ help_property_value }}{% endautoescape %}</code>
+                </li>
                 {% endif %}
             {% endwith %}
         {% endfor %}
-        </ul>
+            </ul>
+        </div>
         {% if help_topic.body_html %}
         <div class="card-body">
             <pre class="card-text">{% autoescape off %}{{ help_topic.body_html }}{% endautoescape %}</pre>
@@ -46,34 +48,38 @@
 
     {% if help_search_form %}
     <div class="card bg-dark">
-        <form class="card-body" method="post">
-            {% csrf_token %}
-            {{ help_search_form.as_p }}
-            <p class="card-text">
-                <button class="btn btn-outline-primary" type="submit">Search</button>
-                <button class="btn btn-outline-secondary" type="reset">Clear</button>
-            </p>
+        <div class="card-body">
+            <form class="card-text" method="post">
+                {% csrf_token %}
+                {{ help_search_form.as_p }}
+                <p>
+                    <button class="btn btn-outline-primary" type="submit">Search</button>
+                    <button class="btn btn-outline-secondary" type="reset">Clear</button>
+                </p>
+            </form>
     {% if not help_topic %}
             <p class="card-footer blockquote-footer">
                 such as &quot;<a href="{% url "help_page" help_topic="spell" %}">spell</a>&quot; or
                 &quot;<a href="{% url "help_page" help_topic="MUD Basics" %}">MUD Basics</a>&quot;
             </p>
     {% endif %}
-        </form>
+        </div>
     </div>
     {% endif %}
 
     <div class="card bg-dark">
+        <div class="card-body">
     {% if help_topics %}
-        <ul class="card-body help-topic-list">
+            <ul class="card-text help-topic-list">
         {% for list_topic in help_topics %}
-            <li class="card-text" title="Topic: {{ list_topic }}"><a href="{% url "help_page" help_topic=list_topic %}">{{ list_topic }}</a></li>
+                <li title="Topic: {{ list_topic }}"><a href="{% url "help_page" help_topic=list_topic %}">{{ list_topic }}</a></li>
         {% endfor %}
-        </ul>
+            </ul>
     {% else %}
-        <p class="card-body">
-            <strong class="card-text">Sorry, but no help topics were found.</strong>
-        </p>
+            <p class="card-text">
+                <strong>Sorry, but no help topics were found.</strong>
+            </p>
     {% endif %}
+        </div>
     </div>
 {% endblock content %}
