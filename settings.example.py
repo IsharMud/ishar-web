@@ -16,7 +16,7 @@ SECRET_KEY = "SECRET"
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["django.isharmud.com"]
+ALLOWED_HOSTS = ("isharmud.com", "www.isharmud.com")
 
 # SECURITY WARNING: do not share your Discord secrets
 DISCORD = {
@@ -69,15 +69,15 @@ PLAYER_GENDERS = ((1, "Male"), (2, "Female"))
 # Player position values
 PLAYER_POSITIONS = (
     (0, "POSITION_DEAD"), (1, "POSITION_DYING"), (2, "POSITION_STUNNED"),
-    (3, "POSITION_PARALYZED"), (4, "POSITION_SLEEPING"), (5, "POSITION_HOISTED"),
-    (6, "POSITION_RESTING"), (7, "POSITION_SITTING"), (8, "POSITION_RIDING"),
-    (9, "UNUSED_POSN"), (10, "POSITION_STANDING")
+    (3, "POSITION_PARALYZED"), (4, "POSITION_SLEEPING"),
+    (5, "POSITION_HOISTED"), (6, "POSITION_RESTING"), (7, "POSITION_SITTING"),
+    (8, "POSITION_RIDING"), (9, "UNUSED_POSN"), (10, "POSITION_STANDING")
 )
 
 # Authentication using MySQL database user accounts
 AUTH_USER_MODEL = "accounts.Account"
 AUTHENTICATION_BACKENDS = (
-    ('ishar.apps.accounts.backends.IsharUserAuthBackend'),
+    "ishar.apps.accounts.backends.IsharUserAuthBackend",
 )
 
 # Order of character statistics based on player class

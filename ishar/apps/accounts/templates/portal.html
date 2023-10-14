@@ -65,6 +65,9 @@
                         }{% if not forloop.last %},{% endif %}
                       {% endfor %}
                     ],
+                    className: {
+                        table: "card-body table table-bordered table-dark text-reset",
+                    },
                     search:     false,
                     sort:       true,
                     pagination: false,
@@ -75,23 +78,25 @@
     {% endif %}
 {% endblock scripts %}
 {% block content %}
+    <div class="card bg-dark">
     {% if request.user.players %}
-                <h3 title="You have {{ request.user.players.count }} character{{ request.user.players.count | pluralize }}.">
-                    You have {{ request.user.players.count }} character{{ request.user.players.count | pluralize }}:
-                </h3>
-                <div id="players"></div>
-                <script>
-                    showPlayers(document.getElementById('players'));
-                </script>
+        <h3 class="card-header" title="You have {{ request.user.players.count }} character{{ request.user.players.count | pluralize }}.">
+            You have {{ request.user.players.count }} character{{ request.user.players.count | pluralize }}:
+        </h3>
+        <div id="players"></div>
+        <script>
+            showPlayers(document.getElementById('players'));
+        </script>
     {% else %}
-                <h3 title="You have not created any players yet!">
-                    You have not created any players yet!
-                </h3>
+        <h3 class="card-header" title="You have not created any players yet!">
+            You have not created any players yet!
+        </h3>
     {% endif %}
+    </div>
     {% if request.user.current_essence > 0 %}
-                <h4>
-                    You have {{ request.user.current_essence }}
-                    <a title="essence" href="{% url "account" %}#essence-balance">essence</a>.
-                </h4>
+    <h5 class="card-footer">
+        You have {{ request.user.current_essence }}
+        <a title="essence" href="{% url "account" %}#essence-balance">essence</a>.
+    </h5>
     {% endif %}
 {% endblock content %}
