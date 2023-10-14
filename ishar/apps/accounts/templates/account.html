@@ -8,64 +8,79 @@
 {% block content %}
     <div class="card-group">
         <div class="card bg-dark">
-            <h3 class="card-header" id="manage"><a href="#manage">Manage</a></h3>
-            <ul class="card-body">
-                <li class="card-text" title="Change your password"><a href="{% url "password" %}">Change your password</a></li>
-                <li class="card-text" title="View your players"><a href="{% url "portal" %}">View your players</a></li>
-            </ul>
+            <h3 class="card-header" id="manage" title="Manage">Manage</h3>
+            <div class="card-body">
+                <ul class="list-group">
+                    <li class="bg-dark card-text list-group-item" title="Change your password">
+                        <a href="{% url "password" %}">Change your password</a>
+                    </li>
+                    <li class="bg-dark card-text list-group-item" title="View your players">
+                        <a href="{% url "portal" %}">View your players</a>
+                    </li>
+                </ul>
+            </div>
         </div>
+
         <div class="card bg-dark">
-            <h3 class="card-header">Created</h3>
-            <blockquote class="card-body blockquote">
-                <p class="card-text" title="{{ request.user.created_at }}">{{ request.user.created_at }}</p>
-                <footer class="blockquote-footer" title="{{ request.user.created_at | naturaltime }}">
-                    {{ request.user.created_at | naturaltime }}
-                </footer>
-            </blockquote>
+            <h3 class="card-header" title="Created">Created</h3>
+            <div class="card-body">
+                <blockquote class="card-text blockquote">
+                    <p title="{{ request.user.created_at }}">{{ request.user.created_at }}</p>
+                    <footer class="blockquote-footer" title="{{ request.user.created_at | naturaltime }}">
+                        {{ request.user.created_at | naturaltime }}
+                    </footer>
+                </blockquote>
+            </div>
         </div>
     </div>
 
     <div class="card bg-dark">
-        <h4 class="card-header" id="essence"><a href="#essence">Essence</a></h4>
-    </div>
-    <div class="card-group">
-        <div class="card bg-dark">
-            <div class="card-body">
-                <h5 class="card-title">Current</h5>
-                <p class="card-text">
-                    {{ request.user.current_essence }} essence
-                </p>
+        <h4 class="card-header" id="essence" title="Essence">
+            <a href="#essence">Essence</a>
+        </h4>
+        <div class="card-group">
+            <div class="card bg-dark" title="Current Balance: {{ request.user.current_essence }} essence.">
+                <h5 class="card-header">Current</h5>
+                <div class="card-body">
+                    <p class="card-text">
+                        {{ request.user.current_essence }} essence
+                    </p>
+                </div>
             </div>
-        </div>
-        <div class="card bg-dark">
-            <div class="card-body">
-                <h5 class="card-title">Earned</h5>
-                <p class="card-text">
-                    {{ request.user.seasonal_earned }} essence
-                </p>
+            <div class="card bg-dark" title="Earned this season: {{ request.user.seasonal_earned }} essence.">
+                <h5 class="card-header">Earned</h5>
+                <div class="card-body">
+                    <p class="card-text">
+                        {{ request.user.seasonal_earned }} essence
+                    </p>
+                </div>
             </div>
         </div>
     </div>
 
     <div class="card-group">
         <div class="card bg-dark">
-            <h4 class="card-header" id="upgrades"><a href="#upgrades">Upgrades</a></h4>
+            <h4 class="card-header" id="upgrades" title="Upgrades">
+                <a href="#upgrades">Upgrades</a>
+            </h4>
             <div class="card-body">
-                    <ul id="essence-upgrades">
     {% if account_upgrades %}
+                <ul class="list-group card-text" id="essence-upgrades">
         {% for upgraded in account_upgrades %}
             {% if upgraded.amount and upgraded.amount > 0 %}
-                        <li title="{{ upgraded.upgrade.name }}{% if upgrade.amount > 1 %} (x{{ upgrade.amount }}){% endif %}">
-                            {{ upgraded.upgrade.name }}
-                            {% if upgraded.amount > 1 %} (x{{ upgraded.amount }}){% endif %}
-                        </li>
+                    <li class="bg-dark list-group-item text-reset" title="{{ upgraded.upgrade.name }}{% if upgraded.amount > 1 %} (x{{ upgraded.amount }}){% endif %}">
+                        {{ upgraded.upgrade.name }}
+                        {% if upgraded.amount > 1 %} (x{{ upgraded.amount }}){% endif %}
+                    </li>
             {% endif %}
         {% endfor %}
+                </ul>
     {% else %}
-                        <li title="You have not purchased any upgrades.">
-                            <i>You have not purchased any upgrades.</i>
-                        </li>
+                <p class="card-text fst-italic text-reset" title="You have not purchased any upgrades.">
+                    You have not purchased any upgrades.
+                </p>
     {% endif %}
-                    </ul>
             </div>
+        </div>
+    </div>
 {% endblock content %}

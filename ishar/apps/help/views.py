@@ -30,7 +30,6 @@ class HelpView(TemplateView):
 
     @staticmethod
     def post(request, *args, **kwargs):
-        print(request.POST.get("search_topic"))
         return redirect(
             to="help_page",
             help_topic=request.POST.get("search_topic")

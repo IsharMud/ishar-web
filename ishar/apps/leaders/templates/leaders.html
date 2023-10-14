@@ -71,18 +71,26 @@
         </script>
 {% endblock scripts %}
 {% block content %}
-                <ul id="leader-head">
-                    <li title="Classic">
-                        <a href="{% url "classic" %}">Classic</a>
-                    </li>
-                    <li title="Survival">
-                        <a href="{% url "survival" %}">Survival</a>
-                    </li>
-                </ul>
-                <div id="leaders"></div>
-                <script>
-                    showLeaders(
-                        document.getElementById('leaders')
-                    );
-                </script>
+    <div class="card bg-dark">
+        <div class="card-header card-group">
+            <div class="card bg-dark">
+                <div class="card-body">
+                    <a class="card-text" href="{% url "classic" %}">Classic</a>
+                </div>
+            </div>
+            <div class="card bg-dark">
+                <div class="card-body">
+                    <a class="card-text" href="{% url "survival" %}">Survival</a>
+                </div>
+            </div>
+        </div>
+        <div class="card bg-dark">
+             <div class="card-body" id="leaders"></div>
+        </div>
+    </div>
+    <script>
+        showLeaders(
+            document.getElementById('leaders')
+        );
+    </script>
 {% endblock content %}

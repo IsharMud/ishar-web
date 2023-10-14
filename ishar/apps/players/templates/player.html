@@ -1,109 +1,95 @@
 {% extends "layout.html" %}
 {% load humanize %}
-{% block meta_title %}
-    {% if player %}
-        Player: {{ player.name }}{% if player.player_type == 'Dead' %} ☠️{% endif %}
-    {% else %}
-        Player Not Found
-    {% endif %}
-{% endblock meta_title %}
-{% block meta_description %}
-    {% if player %}
-        Player: {{ player.name }}{% if player.player_type == 'Dead' %} ☠️{% endif %}
-    {% else %}
-        Player Not Found
-    {% endif %}
-{% endblock meta_description %}
+{% block meta_title %}{% if player %}Player: {{ player.name }}{% if player.player_type == 'Dead' %} ☠️{% endif %}{% else %}Player Not Found{% endif %}{% endblock meta_title %}
+{% block meta_description %}{% if player %}Player: {{ player.name }}{% if player.player_type == 'Dead' %} ☠️{% endif %}{% else %}Player Not Found{% endif %}{% endblock meta_description %}
 {% block meta_url %}{% url "players" %}{% endblock meta_url %}
-{% block title %}
-    {% if player %}
-        Player: {{ player.name }}{% if player.player_type == 'Dead' %} ☠️{% endif %}
-    {% else %}
-        Player Not Found
-    {% endif %}
-{% endblock title %}
-{% block header %}
-    {% if player %}
-        Player: <span class="{{ player.player_css }}">{{ player.name }}</span>
-    {% else %}
-        Player Not Found
-    {% endif %}
-{% endblock header %}
+{% block title %}{% if player %}Player: {{ player.name }}{% if player.player_type == 'Dead' %} ☠️{% endif %}{% else %}Player Not Found{% endif %}{% endblock title %}
+{% block header %}{% if player %}Player: <a class="{{ player.player_css }}" href="{{ player.get_absolute_url }}" title="{{ player.name }}">{{ player.name }}</a>{% else %}Player Not Found{% endif %}{% endblock header %}
 {% block content %}
+    <div class="card-deck">
     {% if player %}
-            <h3 id="player" title="{{ player.player_title }}">
+        <div class="card bg-dark">
+            <h3 class="card-header" id="player" title="{{ player.player_title }}">
                 {{ player.player_title }}
             </h3>
         {% if player.description %}
-            <p id="player-description">
+            <p class="card-header" id="player-description">
                 {{ player.description }}
             </p>
         {% endif %}
+            <div class="card-body">
         {% if not player.is_immortal %}
-            <ul id="player-details">
-                <li title="Name: {{ player.name | title }} / Class: {{ player.common.player_class.class_display_name }} / Race: {{ player.common.player_race.display_name }}">
-                    {{ player.name | title }} {{ player.get_player_phrase }} a {{ player.common.player_class.class_display }} of {{ player.common.race.folk_name | lower }} origin.
-                </li>
-                <li title="Level: {{ player.common.level }} {% if player.remorts > 0 %} / Remorts: {{ player.remorts }}{% endif %}">
-                    {{ player.get_player_gender | title }} {{ player.get_player_phrase }} level {{ player.common.level }}{% if player.remorts > 0 %} and {{ player.get_player_phrase_owns }} remorted {{ player.remorts }} time{{ player.remorts|pluralize }}{% endif %}.
-                </li>
+                <ul class="card-text" id="player-details">
+                    <li title="Name: {{ player.name | title }} / Class: {{ player.common.player_class.class_display_name }} / Race: {{ player.common.player_race.display_name }}">
+                        {{ player.name | title }} {{ player.get_player_phrase }} a {{ player.common.player_class.class_display }} of {{ player.common.race.folk_name | lower }} origin.
+                    </li>
+                    <li title="Level: {{ player.common.level }} {% if player.remorts > 0 %} / Remorts: {{ player.remorts }}{% endif %}">
+                        {{ player.get_player_gender | title }} {{ player.get_player_phrase }} level {{ player.common.level }}{% if player.remorts > 0 %} and {{ player.get_player_phrase_owns }} remorted {{ player.remorts }} time{{ player.remorts|pluralize }}{% endif %}.
+                    </li>
             {% if player.total_renown > 0 %}
-                <li title="Total Renown: {{ player.total_renown }}">
+                    <li title="Total Renown: {{ player.total_renown }}">
                     {{ player.get_player_gender | title }} {{ player.get_player_phrase_owns }} accumulated {{ player.total_renown }} renown.
-                </li>
+                    </li>
             {% endif %}
             {% if player.quests_completed > 0 %}
-                <li title="Quests Completed: {{ player.quests_completed }}">
-                    {{ player.get_player_gender | title }} {{ player.get_player_phrase_owns }} completed {{ player.quests_completed }} quest{{ player.quests_completed | pluralize }}.
-                </li>
+                    <li title="Quests Completed: {{ player.quests_completed }}">
+                        {{ player.get_player_gender | title }} {{ player.get_player_phrase_owns }} completed {{ player.quests_completed }} quest{{ player.quests_completed | pluralize }}.
+                    </li>
             {% endif %}
             {% if player.challenges_completed > 0 %}
-                <li title="Challenges Completed: {{ player.challenges_completed }}">
-                    {{ player.get_player_gender | title }} {{ player.get_player_phrase_owns }} completed {{ player.challenges_completed }} challenge{{ player.challenges_completed | pluralize }}.
-                </li>
+                    <li title="Challenges Completed: {{ player.challenges_completed }}">
+                        {{ player.get_player_gender | title }} {{ player.get_player_phrase_owns }} completed {{ player.challenges_completed }} challenge{{ player.challenges_completed | pluralize }}.
+                    </li>
             {% endif %}
-                <li title="Alignment: {{ player.get_player_alignment }} ({{ player.common.alignment }})">
-                    {{ player.get_player_gender_own | title }} alignment {{ player.get_player_phrase }} {{ player.get_player_alignment | lower }}.
-                </li>
-                <li title="{% if player.player_type == 'Classic' %}Deaths: {{ player.deaths }}{% elif player.player_type == 'Dead' %}{{ player.name | title }} is DEAD!{% else %}{{ player.name | title }} is a {{ player.player_type }} player!{% endif %}">
+                    <li title="Alignment: {{ player.get_player_alignment }} ({{ player.common.alignment }})">
+                        {{ player.get_player_gender_own | title }} alignment {{ player.get_player_phrase }} {{ player.get_player_alignment | lower }}.
+                    </li>
+                    <li title="{% if player.player_type == 'Classic' %}Deaths: {{ player.deaths }}{% elif player.player_type == 'Dead' %}{{ player.name | title }} is DEAD!{% else %}{{ player.name | title }} is a {{ player.player_type }} player!{% endif %}">
             {% if player.player_type == 'Dead' %}
-                    {{ player.name | title }} is <span class="message-error">DEAD</span>!
-                    <ul>
-                        <li title="{{ player.name | title }} died too often. {{ player.get_player_gender | title }} can not be resurrected!">
-                            {{ player.name | title }} died too often. {{ player.get_player_gender | title }} can not be resurrected!
-                        </li>
-                    </ul>
+                {{ player.name | title }} is <span class="message-error">DEAD</span>!
+                         <ul>
+                            <li title="{{ player.name | title }} died too often. {{ player.get_player_gender | title }} can not be resurrected!">
+                                {{ player.name | title }} died too often. {{ player.get_player_gender | title }} can not be resurrected!
+                            </li>
+                        </ul>
             {% elif player.player_type == "Survival" %}
-                    {{ player.name | title }} {{ player.get_player_phrase }} a <span class="{{ player.player_css }}">{{ player.player_type }}</span> player!
+                {{ player.name | title }} {{ player.get_player_phrase }} a <span class="{{ player.player_css }}">{{ player.player_type }}</span> player!
             {% else %}
                 {% if player.deaths > 0 %}
-                    {{ player.get_player_gender | title }} {{ player.get_player_phrase_owns }} died {{ player.deaths }} time{{ player.deaths|pluralize }}.
+                {{ player.get_player_gender | title }} {{ player.get_player_phrase_owns }} died {{ player.deaths }} time{{ player.deaths|pluralize }}.
                 {% else %}
-                    {{ player.get_player_gender | title }} {{ player.get_player_phrase_owns }} never died!
+                {{ player.get_player_gender | title }} {{ player.get_player_phrase_owns }} never died!
                 {% endif %}
             {% endif %}
-                </li>
-            </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
             {% if remort_upgrades %}
-            <h3 title="Remort Upgrades">
+        <div class="card bg-dark">
+            <h3 class="card-header" title="Remort Upgrades">
                 Remort Upgrades
             </h3>
-            <ol id="player-remort-upgrades">
+            <div class="card-body">
+                <ol class="card-text" id="player-remort-upgrades">
                 {% for remort_upgrade in remort_upgrades %}
-                <li title="{{ remort_upgrade.upgrade.display_name | title }} {% if remort_upgrade.value > 1 %} (x{{ remort_upgrade.value }}){% endif %}">
-                    {{ remort_upgrade.upgrade.display_name | title }}
+                    <li class="card-text" title="{{ remort_upgrade.upgrade.display_name | title }} {% if remort_upgrade.value > 1 %} (x{{ remort_upgrade.value }}){% endif %}">
+                        {{ remort_upgrade.upgrade.display_name | title }}
                     {% if remort_upgrade.value > 1 %}
                         (x{{ remort_upgrade.value }})
                     {% endif %}
                     </li>
                 {% endfor %}
-            </ol>
+                </ol>
+            </div>
+        </div>
             {% endif %}
             {% if player.player_stats %}
-            <h3 title="Statistics">
+        <div class="card bg-dark">
+            <h3 class="card-header" title="Statistics">
                 Statistics
             </h3>
-            <table class="table" id="player-statistics">
+            <table class="card-body table table-bordered table-dark text-reset" id="player-statistics">
                 <tr>
                 {% for stat_name, stat_value in player.player_stats.items %}
                     <th title="{{ stat_name }}: {{ stat_value }}">
@@ -119,33 +105,39 @@
                 {% endfor %}
                 </tr>
             </table>
+        </div>
             {% endif %}
-            <h3 title="Time">
+        <div class="card bg-dark">
+            <h3 class="card-header" title="Time">
                 Time
             </h3>
-            <ul id="player-time">
-                <li title="Birth: {{ player.birth | naturaltime }}, ({{ player.birth }})">
-                    {{ player.get_player_gender | title }} was born {{ player.birth | naturaltime }},
-                    on {{ player.birth | date }}.
-                </li>
-                <li title="Logged On: {{ player.logon | naturaltime }}, ({{ player.logon }})">
-                    {{ player.get_player_gender | title }} last logged in {{ player.logon | naturaltime }},
-                    on {{ player.logon | date }}.
-                </li>
-                <li title="Logged Out: {{ player.logout | naturaltime }}, ({{ player.logout }})">
-                    {{ player.get_player_gender | title }} last logged out {{ player.logout | naturaltime }},
-                    on {{ player.logon | date }}.
-                </li>
-                <li title="Played For: {{ player.online_time }} ({{ player.online }} seconds)">
-                    {{ player.get_player_gender | title }} {{ player.get_player_phrase_owns }} played for {{ player.online_time }}.
-                </li>
-            </ul>
+            <div class="card-body">
+                <ul class="card-text" id="player-time">
+                    <li title="Birth: {{ player.birth | naturaltime }}, ({{ player.birth }})">
+                        {{ player.get_player_gender | title }} was born {{ player.birth | naturaltime }},
+                        on {{ player.birth | date }}.
+                    </li>
+                    <li title="Logged On: {{ player.logon | naturaltime }}, ({{ player.logon }})">
+                        {{ player.get_player_gender | title }} last logged in {{ player.logon | naturaltime }},
+                        on {{ player.logon | date }}.
+                    </li>
+                    <li title="Logged Out: {{ player.logout | naturaltime }}, ({{ player.logout }})">
+                        {{ player.get_player_gender | title }} last logged out {{ player.logout | naturaltime }},
+                        on {{ player.logon | date }}.
+                    </li>
+                    <li title="Played For: {{ player.online_time }} ({{ player.online }} seconds)">
+                        {{ player.get_player_gender | title }} {{ player.get_player_phrase_owns }} played for {{ player.online_time }}.
+                    </li>
+                </ul>
         {% else %}
-            <ul>
-                <li>
-                    {{ player.name | title }} {{ player.get_player_phrase }} a <span class="{{ player.player_css }}">{{ player.player_type }}</span> character!
-                </li>
-            </ul>
+                <ul class="card-text">
+                    <li>
+                        {{ player.name | title }} {{ player.get_player_phrase }} a <span class="{{ player.player_css }}">{{ player.player_type }}</span> character!
+                    </li>
+                </ul>
         {% endif %}
+            </div>
+        </div>
+    </div>
     {% endif %}
 {% endblock content %}
