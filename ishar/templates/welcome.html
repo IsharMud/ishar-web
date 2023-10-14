@@ -3,17 +3,18 @@
 {% block meta_description %}Welcome to Ishar MUD{% endblock meta_description %}
 {% block meta_url %}TODO{% endblock meta_url %}
 {% block title %}Welcome{% endblock title %}
-{% block header %}Welcome{% endblock header %}
+{% block header %}{% if news and news.subject %}{{ news.subject }}{% else %}Welcome{% endif %}{% endblock header %}
 {% block content %}
     {% if news %}
     <div class="card bg-dark">
-        <h3 class="card-header news-subject">{{ news.subject }}</h3>
-        <blockquote class="card-body blockquote">
-            <p class="card-text">{% autoescape off %}{{ news.body }}{% endautoescape %}</p>
-            <footer class="blockquote-footer" title="{{ news.created | date:"r" }}">
-                <cite>{{ news.account.get_username }}</cite> @ {{ news.created | date:"r" }}
-            </footer>
-        </blockquote>
+        <div class="card-body">
+            <blockquote class="blockquote">
+                <p class="card-text">{% autoescape off %}{{ news.body }}{% endautoescape %}</p>
+                <footer class="blockquote-footer" title="{{ news.created | date:"r" }}">
+                    <cite>{{ news.account.get_username }}</cite> @ {{ news.created | date:"r" }}
+                </footer>
+            </blockquote>
+        </div>
     </div>
     {% endif %}
     <div class="card bg-dark">
