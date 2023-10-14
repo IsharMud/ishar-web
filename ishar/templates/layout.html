@@ -134,13 +134,19 @@
 
         <footer class="card-group navbar navbar-expand-lg text-center container-fluid">
             <div class="card bg-dark">
-                <a class="card-body card-text" href="mailto:admin@isharmud.com" title="E-mail Us!" target="_blank">✉️ E-mail us!</a>
+                <div class="card-body">
+                    <a class="card-text" href="mailto:admin@isharmud.com" title="E-mail Us! (admin@isharmud.com)" target="_blank">✉️ E-mail us!</a>
+                </div>
             </div>
             <div class="card bg-dark">
-                <a class="card-body card-text" href="{% url 'support' %}">❤️ Support Ishar MUD</a>
+                <div class="card-body">
+                    <a class="card-text" href="{% url 'support' %}" title="Support Ishar MUD">❤️ Support Ishar MUD</a>
+                </div>
             </div>
             <div class="card bg-dark">
-                <a class="card-body card-text" href="{%  url "discord" %}" target="_blank" title="Join us on Discord!"><img alt="Discord" src="{% static "images/discord.png" %}" style="width: 1rem;"> Join us on Discord!</a>
+                <div class="card-body">
+                    <a class="card-text" href="{%  url "discord" %}" target="_blank" title="Join us on Discord!"><img alt="Discord" src="{% static "images/discord.png" %}" style="width: 1rem;"> Join us on Discord!</a>
+                </div>
             </div>
         </footer>
     </body>

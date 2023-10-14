@@ -398,7 +398,10 @@ class Player(models.Model):
 
     def get_absolute_url(self) -> str:
         """URL to player page"""
-        return reverse("player", kwargs={"name": self.name})
+        return reverse(
+            viewname="player",
+            kwargs={"name": self.name}
+        ) + "#player"
 
     def get_immortal_type(self) -> (str, None):
         """
