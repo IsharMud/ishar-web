@@ -69,8 +69,7 @@
         {% for upgraded in account_upgrades %}
             {% if upgraded.amount and upgraded.amount > 0 %}
                     <li class="bg-dark list-group-item text-reset" title="{{ upgraded.upgrade.name }}{% if upgraded.amount > 1 %} (x{{ upgraded.amount }}){% endif %}">
-                        {{ upgraded.upgrade.name }}
-                        {% if upgraded.amount > 1 %} (x{{ upgraded.amount }}){% endif %}
+                        {{ upgraded.upgrade.name }}{% if upgraded.amount > 1 %} (x{{ upgraded.amount }}){% endif %}
                     </li>
             {% endif %}
         {% endfor %}
