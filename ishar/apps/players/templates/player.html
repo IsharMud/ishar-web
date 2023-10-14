@@ -73,11 +73,8 @@
             <div class="card-body">
                 <ol class="card-text" id="player-remort-upgrades">
                 {% for remort_upgrade in remort_upgrades %}
-                    <li class="card-text" title="{{ remort_upgrade.upgrade.display_name | title }} {% if remort_upgrade.value > 1 %} (x{{ remort_upgrade.value }}){% endif %}">
-                        {{ remort_upgrade.upgrade.display_name | title }}
-                    {% if remort_upgrade.value > 1 %}
-                        (x{{ remort_upgrade.value }})
-                    {% endif %}
+                    <li title="{{ remort_upgrade.upgrade.display_name | title }} {% if remort_upgrade.value > 1 %} (x{{ remort_upgrade.value }}){% endif %}">
+                        {{ remort_upgrade.upgrade.display_name | title }} {% if remort_upgrade.value > 1 %} (x{{ remort_upgrade.value }}){% endif %}
                     </li>
                 {% endfor %}
                 </ol>
@@ -89,22 +86,24 @@
             <h3 class="card-header" title="Statistics">
                 Statistics
             </h3>
-            <table class="card-body table table-bordered table-dark text-reset" id="player-statistics">
-                <tr>
+            <div class="card-body text-reset">
+                <table class="card-text table table-bordered table-dark" id="player-statistics">
+                    <tr>
                 {% for stat_name, stat_value in player.player_stats.items %}
-                    <th title="{{ stat_name }}: {{ stat_value }}">
-                        {{ stat_name }}
-                    </th>
+                        <th title="{{ stat_name }}: {{ stat_value }}">
+                            {{ stat_name }}
+                        </th>
                 {% endfor %}
-                </tr>
-                <tr>
+                    </tr>
+                    <tr>
                 {% for stat_name, stat_value in player.player_stats.items %}
-                    <td title="{{ stat_name }}: {{ stat_value }}" {% if forloop.first %} id="primary-stat"{% endif %}>
-                        {{ stat_value }}
-                    </td>
+                        <td title="{{ stat_name }}: {{ stat_value }}" {% if forloop.first %} id="primary-stat"{% endif %}>
+                            {{ stat_value }}
+                        </td>
                 {% endfor %}
-                </tr>
-            </table>
+                    </tr>
+                </table>
+            </div>
         </div>
             {% endif %}
         <div class="card bg-dark">
@@ -138,6 +137,6 @@
         {% endif %}
             </div>
         </div>
-    </div>
     {% endif %}
+    </div>
 {% endblock content %}
