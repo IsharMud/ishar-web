@@ -6,60 +6,60 @@
 {% block title %}Patches{% endblock title %}
 {% block header %}Patches{% endblock header %}
 {% block content %}
-    <div class="card-deck">
-        <div class="card bg-dark">
-            <div class="card-body">
-                <p class="card-text">
-                    Ishar MUD is under regular development, and constantly being improved!
-                </p>
-            </div>
+<div class="card-deck">
+
+    <div class="card bg-dark">
+        <div class="card-body">
+            <p class="card-text">
+                Ishar MUD is under regular development, and constantly being improved!
+            </p>
         </div>
+    </div>
+
     {% if patches %}
         {% for patch in patches %}
-        <div class="card bg-dark">
-            <ul class="card-header">
-                <li title="{{ patch.patch_name }}">
-                    <h3 class="card-header">
-                        <a class="card-text" href="{{ patch.patch_file.url }}" target="_blank">{{ patch.patch_name }}</a>
-                    </h3>
-                </li>
-                <li class="card-body nested-list">
-                    <ul>
-                        <li class="card-text">
-                            <strong>Date</strong>:
-                            {{ patch.patch_date }}
-                        </li>
-                        <li class="card-text">
-                            <strong>Size</strong>:
-                            {{ patch.patch_file.size | filesizeformat }}
-                        </li>
-                    </ul>
-                </li>
-            </ul>
+    <div class="card bg-dark">
+        <div class="card-header">
+            <h3>
+                <a href="{{ patch.patch_file.url }}" target="_blank">{{ patch.patch_name }}</a>
+            </h3>
         </div>
+        <div class="card-body">
+            <p class="card-text">
+                <strong>Date</strong>:
+                {{ patch.patch_date }}
+            </p>
+            <p class="card-text">
+                <strong>Size</strong>:
+                {{ patch.patch_file.size | filesizeformat }}
+            </p>
+        </div>
+    </div>
         {% endfor %}
 
         {% if page_obj %}
-        <div class="card bg-dark">
+    <div class="card bg-dark">
+        <div class="card-body">
             <div class="card-footer pagination">
-                <span class="card-text">
-                        {% if page_obj.has_previous %}
-                            <a href="?page=1">&laquo; first</a>
-                            <a href="?page={{ page_obj.previous_page_number }}">previous</a>
-                        {% endif %}
+                <div class="card-text">
+            {% if page_obj.has_previous %}
+                    <a href="?page=1">&laquo; first</a>
+                    <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+            {% endif %}
+                    <span class="current">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                    </span>
 
-                        <span class="current">
-                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-                        </span>
-
-                        {% if page_obj.has_next %}
-                            <a href="?page={{ page_obj.next_page_number }}">next</a>
-                            <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
-                        {% endif %}
-                </span>
+            {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}">next</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+            {% endif %}
+                </div>
             </div>
         </div>
         {% endif %}
     </div>
-{% endif %}
+    {% endif %}
+
+</div>
 {% endblock content %}
