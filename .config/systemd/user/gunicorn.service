@@ -1,0 +1,16 @@
+[Unit]
+Description=staging.isharmud.com
+After=network.target syslog.target nss-lookup.target
+
+[Service]
+Restart=on-failure
+Environment="PYTHONPATH=$PYTHONPATH:$HOME:/var/www/staging.isharmud.com/ishar-web/"
+Environment="DJANGO_SETTINGS_MODULE=settings"
+PIDFile=/var/www/staging.isharmud.com/ishar-web/gunicorn.pid
+ExecStart=/var/www/staging.isharmud.com/ishar-web/venv/bin/gunicorn --config /var/www/staging.isharmud.com/ishar-web/gunicorn_configuration.py wsgi:application
+ExecReload=/bin/kill -s HUP $MAINPID
+ExecStop=/bin/kill -s TERM $MAINPID
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
