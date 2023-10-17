@@ -4,10 +4,10 @@ After=network.target syslog.target nss-lookup.target
 
 [Service]
 Restart=on-failure
-Environment="PYTHONPATH=$PYTHONPATH:$HOME/ishar-web"
+Environment="PYTHONPATH=$PYTHONPATH:$HOME:/var/www/staging.isharmud.com/ishar-web/"
 Environment="DJANGO_SETTINGS_MODULE=settings"
-PIDFile=$HOME/gunicorn.pid
-ExecStart=$HOME/ishar-web/venv/bin/gunicorn --config $HOME/ishar-web/gunicorn_configuration.py wsgi:application
+PIDFile=/var/www/staging.isharmud.com/ishar-web/gunicorn.pid
+ExecStart=/var/www/staging.isharmud.com/ishar-web/venv/bin/gunicorn --config /var/www/staging.isharmud.com/ishar-web/gunicorn_configuration.py wsgi:application
 ExecReload=/bin/kill -s HUP $MAINPID
 ExecStop=/bin/kill -s TERM $MAINPID
 PrivateTmp=true
