@@ -5,8 +5,8 @@
 !.gitignore
 __pycache__
 *.pyc
-uwsgi.ini
 settings.py
+gunicorn_configuration.py
 venv
 /media/
 /static/
