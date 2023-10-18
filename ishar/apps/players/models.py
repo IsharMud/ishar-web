@@ -262,7 +262,7 @@ class Player(models.Model):
         managed = False
         db_table = "players"
         default_related_name = "player"
-        order_with_respect_to = "account"
+        ordering = ("id",)
         verbose_name = "Player"
 
     def __repr__(self) -> str:
@@ -314,16 +314,12 @@ class Player(models.Model):
 
     @admin.display(boolean=True, description="Forger?", ordering="-true_level")
     def is_forger(self) -> bool:
-        """
-        Boolean whether player is consort, or above.
-        """
+        """Boolean whether player is consort, or above."""
         return self.is_immortal_type(immortal_type="Forger")
 
     @admin.display(boolean=True, description="God?", ordering="-true_level")
     def is_god(self) -> bool:
-        """
-        Boolean whether player is a "God".
-        """
+        """Boolean whether player is a "God"."""
         return self.is_immortal_type(immortal_type="God")
 
     @admin.display(boolean=True, description="Immortal?", ordering="-true_level")
@@ -334,27 +330,21 @@ class Player(models.Model):
         return self.is_immortal_type(immortal_type="Immortal")
 
     def is_immortal_type(self, immortal_type="Immortal") -> bool:
-        """
-        Boolean whether player is an immortal of a certain type, or above.
-        """
+        """Boolean whether player is an immortal of a certain type, or above."""
         if self.common.level >= get_immortal_level(immortal_type=immortal_type):
             return True
         return False
 
     @admin.display(boolean=True, description="Survival?", ordering='-game_type')
     def is_survival(self) -> bool:
-        """
-        Boolean whether player is Survival ("perm-death").
-        """
+        """Boolean whether player is Survival ("perm-death")."""
         if self.game_type == 1:
             return True
         return False
 
     @property
     def player_css(self):
-        """
-        Player CSS class.
-        """
+        """Player CSS class."""
         return f"{self.get_player_type().lower()}-player"
 
     @property
@@ -750,7 +740,7 @@ class PlayerCommon(models.Model):
         managed = False
         db_table = "player_common"
         default_related_name = "common"
-        order_with_respect_to = "player"
+        ordering = ("player_id",)
         verbose_name = "Player Common"
 
     def __repr__(self) -> str:
@@ -795,7 +785,7 @@ class PlayersFlag(models.Model):
         # The composite primary key (flag_id, player_id) found,
         #   that is not supported. The first column is selected.
         unique_together = (("flag", "player"),)
-        order_with_respect_to = "player"
+        ordering = ("player", "flag")
         verbose_name = "Player's Flag"
         verbose_name_plural = "Player's Flags"
 
@@ -847,8 +837,8 @@ class PlayerRemortUpgrade(models.Model):
     class Meta:
         managed = False
         db_table = "player_remort_upgrades"
+        ordering = ("upgrade", "player")
         unique_together = (("upgrade", "player"),)
-        order_with_respect_to = "player"
         verbose_name = "Player Remort Upgrade"
         verbose_name_plural = "Player Remort Upgrades"
 
@@ -895,7 +885,7 @@ class PlayerSkill(models.Model):
         # The composite primary key (skill_id, player_id) found,
         #   that is not supported. The first column is selected.
         unique_together = (("skill", "player"),)
-        order_with_respect_to = "player"
+        ordering = ("player", "skill", "skill_level")
         verbose_name = "Player Skill"
         verbose_name_plural = "Player Skills"
 

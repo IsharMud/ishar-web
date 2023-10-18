@@ -133,7 +133,7 @@ class QuestPrereq(models.Model):
     class Meta:
         managed = False
         db_table = "quest_prereqs"
-        order_with_respect_to = "quest"
+        ordering = ("quest", "required_quest")
         verbose_name = "Prerequisite"
         verbose_name_plural = "Prerequisites"
 
@@ -191,7 +191,7 @@ class QuestReward(models.Model):
         managed = False
         db_table = "quest_rewards"
         default_related_name = "reward"
-        order_with_respect_to = "quest"
+        ordering = ("quest_reward_id",)
         verbose_name = "Reward"
 
     def __repr__(self) -> str:
@@ -257,7 +257,7 @@ class QuestStep(models.Model):
         managed = False
         db_table = "quest_steps"
         default_related_name = "step"
-        order_with_respect_to = "quest"
+        ordering = ("step_id",)
         verbose_name = "Step"
         verbose_name_plural = "Steps"
 

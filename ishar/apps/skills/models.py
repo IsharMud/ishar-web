@@ -232,7 +232,7 @@ class SkillComponent(models.Model):
     class Meta:
         managed = False
         db_table = "skill_components"
-        order_with_respect_to = "skill"
+        ordering = ("skill_components_id", "skill")
         verbose_name = "Skill Component"
         verbose_name_plural = "Skill Components"
 
@@ -280,7 +280,7 @@ class SkillForce(models.Model):
     class Meta:
         managed = False
         db_table = "skill_forces"
-        order_with_respect_to = "skill"
+        ordering = ("id", "skill", "force")
         verbose_name = "Skill Force"
         verbose_name_plural = "Skill Forces"
 
@@ -321,7 +321,7 @@ class SkillSpellFlag(models.Model):
     class Meta:
         managed = False
         db_table = "skills_spell_flags"
-        order_with_respect_to = "skill"
+        ordering = ("id", "skill", "flag")
         unique_together = (("skill", "flag"),)
         verbose_name = "Skill Flag"
         verbose_name_plural = "Skill Flags"
