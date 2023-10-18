@@ -262,7 +262,7 @@ class Player(models.Model):
         managed = False
         db_table = "players"
         default_related_name = "player"
-        ordering = ("id",)
+        order_with_respect_to = "account"
         verbose_name = "Player"
 
     def __repr__(self) -> str:
@@ -750,7 +750,7 @@ class PlayerCommon(models.Model):
         managed = False
         db_table = "player_common"
         default_related_name = "common"
-        ordering = ("player_id",)
+        order_with_respect_to = "player"
         verbose_name = "Player Common"
 
     def __repr__(self) -> str:
@@ -795,7 +795,7 @@ class PlayersFlag(models.Model):
         # The composite primary key (flag_id, player_id) found,
         #   that is not supported. The first column is selected.
         unique_together = (("flag", "player"),)
-        ordering = ("flag", "player")
+        order_with_respect_to = "player"
         verbose_name = "Player's Flag"
         verbose_name_plural = "Player's Flags"
 
@@ -848,7 +848,7 @@ class PlayerRemortUpgrade(models.Model):
         managed = False
         db_table = "player_remort_upgrades"
         unique_together = (("upgrade", "player"),)
-        ordering = ("upgrade", "player")
+        order_with_respect_to = "player"
         verbose_name = "Player Remort Upgrade"
         verbose_name_plural = "Player Remort Upgrades"
 
@@ -895,7 +895,7 @@ class PlayerSkill(models.Model):
         # The composite primary key (skill_id, player_id) found,
         #   that is not supported. The first column is selected.
         unique_together = (("skill", "player"),)
-        ordering = ("skill", "player")
+        order_with_respect_to = "player"
         verbose_name = "Player Skill"
         verbose_name_plural = "Player Skills"
 

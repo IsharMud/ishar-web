@@ -252,7 +252,7 @@ class RaceAffinity(models.Model):
         managed = False
         db_table = "racial_affinities"
         default_related_name = "affinity"
-        ordering = ("race_affinity_id",)
+        order_with_respect_to = "race"
         verbose_name = "Affinity"
         verbose_name_plural = "Affinities"
 
@@ -305,8 +305,8 @@ class RaceSkill(models.Model):
 
     class Meta:
         managed = False
-        db_table = 'races_skills'
-        ordering = ("race_skill_id",)
+        db_table = "races_skills"
+        order_with_respect_to = "race"
         verbose_name = "Skill"
         verbose_name_plural = "Skills"
 
@@ -376,7 +376,7 @@ class RaceDeathload(models.Model):
         db_table = "racial_deathload"
         default_related_name = "deathload"
         managed = False
-        ordering = ("id",)
+        order_with_respect_to = "race"
         verbose_name = "Deathload"
         verbose_name_plural = "Deathloads"
 

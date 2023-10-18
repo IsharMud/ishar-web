@@ -94,6 +94,7 @@ class AccountAccountUpgrade(models.Model):
     class Meta:
         managed = False
         db_table = "accounts_account_upgrades"
+        order_with_respect_to = "account"
         unique_together = (("account", "upgrade"),)
 
     def __repr__(self):
