@@ -36,7 +36,7 @@ class Class(models.Model):
         managed = False
         db_table = "classes"
         default_related_name = "class"
-        ordering = ("-class_description", "class_name",)
+        ordering = ("-class_description", "class_name")
         verbose_name = "Class"
         verbose_name_plural = "Classes"
 
