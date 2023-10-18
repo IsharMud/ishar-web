@@ -5,9 +5,6 @@ from django.db import models
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.urls import reverse
-from django.utils.safestring import mark_safe
-
-from ishar.util import dec2ip
 
 from ishar.apps.accounts.models import Account
 from ishar.apps.classes.models import Class
@@ -15,6 +12,8 @@ from ishar.apps.races.models import Race
 from ishar.apps.skills.models import Skill
 
 from ishar.apps.players.util import get_immortal_level, get_immortal_type
+
+from ishar.util import dec2ip
 
 
 class PlayerFlag(models.Model):

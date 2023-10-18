@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% block title %}{{ title }}{% endblock title %}
+{% block header %}{{ title }}{% endblock header %}
+{% block content %}
+<div class="card bg-dark">
+    <p class="card-body">
+        {{ message }}
+    </p>
+    <p class="card-footer">
+        You may want to return to the <a href="{% url "index" %}">main page</a>.
+    </p>
+</div>
+{% endblock content %}
