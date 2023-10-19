@@ -8,10 +8,7 @@ from django.contrib.flatpages import views
 from django.urls import include, path
 from django.views.generic import RedirectView
 
-from ishar.views import (
-    Error400BadRequestView, Error401NotAuthorizedView, Error403ForbiddenView,
-    Error404PageNotFoundView, Error405MethodNotAllowedView, ErrorView
-)
+from ishar.views import ErrorView
 
 
 urlpatterns = [
@@ -58,12 +55,51 @@ urlpatterns = [
 ]
 
 # Error handlers
-handler400 = Error400BadRequestView.as_view()
-handler401 = Error401NotAuthorizedView.as_view()
-handler403 = Error403ForbiddenView.as_view()
-handler404 = Error404PageNotFoundView.as_view()
-handler405 = Error405MethodNotAllowedView.as_view()
-handler500 = ErrorView.as_view()
+handler400 = ErrorView.as_view(
+    message="Sorry, but the request was not understood.",
+    status_code=400,
+    title="Bad Request"
+)
+handler401 = ErrorView.as_view(
+    message="Sorry, but you do not have authorization to access this page.",
+    status_code=401,
+    title="Not Authorized"
+)
+handler403 = ErrorView.as_view(
+    message="Sorry, but access to this page is forbidden.",
+    status_code=403,
+    title="Forbidden"
+)
+handler404 = ErrorView.as_view(
+    message="Sorry, but no such page could be found.",
+    status_code=404,
+    title="Page Not Found"
+)
+handler405 = ErrorView.as_view(
+    message="Sorry, but the requested method is not supported.",
+    status_code=405,
+    title="Method Not Allowed"
+)
+handler410 = ErrorView.as_view(
+    message="Sorry, but that resource is gone.",
+    status_code=410,
+    title="Gone"
+)
+handler420 = ErrorView.as_view(
+    message="Sorry, but please enhance your calm.",
+    status_code=420,
+    title="Enhance Your Calm"
+)
+handler500 = ErrorView.as_view(
+    message= "Sorry, but unfortunately, there was an internal server error.",
+    status_code=500,
+    title="Sorry!"
+)
+handler501 = ErrorView.as_view(
+    message= "Sorry, but the server cannot handle your request.",
+    status_code=501,
+    title="Not Implemented"
+)
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
@@ -72,4 +108,7 @@ if settings.DEBUG:
     urlpatterns += path("403/", handler403, name="403"),
     urlpatterns += path("404/", handler404, name="404"),
     urlpatterns += path("405/", handler405, name="405"),
+    urlpatterns += path("410/", handler410, name="410"),
+    urlpatterns += path("420/", handler420, name="420"),
     urlpatterns += path("500/", handler500, name="500"),
+    urlpatterns += path("501/", handler501, name="501"),

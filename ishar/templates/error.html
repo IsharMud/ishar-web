@@ -2,12 +2,14 @@
 {% block title %}{{ title }}{% endblock title %}
 {% block header %}{{ title }}{% endblock header %}
 {% block content %}
-<div class="card bg-dark">
-    <p class="card-body">
-        {{ message }}
-    </p>
-    <p class="card-footer">
-        You may want to return to the <a href="{% url "index" %}">main page</a>.
-    </p>
-</div>
+    <div class="card bg-dark">
+        <div class="card-body">
+            <p class="card-text">
+                {{ message }}
+            </p>
+            <p class="card-text">
+                You may want to return to the <a href="{% url "index" %}">main page</a>.
+            </p>
+        </div>
+    </div>
 {% endblock content %}
