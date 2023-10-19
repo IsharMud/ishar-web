@@ -11,7 +11,7 @@
             <blockquote class="blockquote">
                 <p class="card-text">{% autoescape off %}{{ news.body }}{% endautoescape %}</p>
                 <footer class="blockquote-footer" title="{{ news.created | date:"r" }}">
-                    <cite>{{ news.account.get_username }}</cite> @ {{ news.created | date:"r" }}
+                    <cite>{{ news.account.get_username | title }}</cite> @ {{ news.created | date:"r" }}
                 </footer>
             </blockquote>
         </div>
