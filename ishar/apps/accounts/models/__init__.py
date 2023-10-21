@@ -222,11 +222,18 @@ class Account(AbstractBaseUser, PermissionsMixin):
         return earned
 
     def set_password(self, raw_password: str = None) -> bool:
-        """Method to set account password."""
+        """Method to set the account password."""
         self.password = md5_crypt.hash(secret=raw_password)
         if self.save():
             return True
         return False
+
+    def upgrades(self):
+        """Method to find purchased account upgrades for the account."""
+        return self.all_upgrades.filter(
+            account=self,
+            amount__gt=0
+        )
 
     # Do not model groups or last login.
     groups = None

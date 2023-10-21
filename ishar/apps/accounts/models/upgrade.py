@@ -66,19 +66,24 @@ class AccountAccountUpgrade(models.Model):
     """
     Account upgrade relation to an account.
     """
-    account = models.OneToOneField(
+    account = models.ForeignKey(
         primary_key=True,  # Fake it, just so reads work.
         db_column="account_id",
+        editable=False,
         to=Account,
         to_field="account_id",
+        related_query_name="upgrade",
+        related_name="all_upgrades",
         on_delete=models.CASCADE,
         help_text="Account with the specified upgrade.",
         verbose_name="Account"
     )
     upgrade = models.ForeignKey(
         db_column="account_upgrades_id",
+        editable=False,
         to=AccountUpgrade,
         to_field="id",
+        related_query_name="+",
         on_delete=models.CASCADE,
         help_text="Upgrade which the account has.",
         verbose_name="Upgrade"
