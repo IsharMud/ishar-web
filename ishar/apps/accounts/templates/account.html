@@ -64,12 +64,14 @@
                 <a href="#upgrades">Upgrades</a>
             </h4>
             <div class="card-body">
-    {% if account_upgrades %}
+    {% if request.user.upgrades.all %}
+        <!-- {{ request.user.all_upgrades.all }} -->
                 <ul class="list-group card-text" id="essence-upgrades">
-        {% for upgraded in account_upgrades %}
+        {% for upgraded in request.user.upgrades.all %}
             {% if upgraded.amount and upgraded.amount > 0 %}
                     <li class="bg-dark list-group-item text-reset" title="{{ upgraded.upgrade.name }}{% if upgraded.amount > 1 %} (x{{ upgraded.amount }}){% endif %}">
-                        {{ upgraded.upgrade.name }}{% if upgraded.amount > 1 %} (x{{ upgraded.amount }}){% endif %}
+                        {{ upgraded.upgrade.name }}
+                        {% if upgraded.amount > 1 %}(x{{ upgraded.amount }}){% endif %}
                     </li>
             {% endif %}
         {% endfor %}

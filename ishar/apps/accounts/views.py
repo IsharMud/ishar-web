@@ -46,12 +46,7 @@ class AccountView(PortalView):
         """
         Include account upgrades in the context on the account page.
         """
-        self.extra_context = {
-            "account_upgrades": AccountAccountUpgrade.objects.filter(
-                account=request.user,
-                amount__gt=0
-            ).all()
-        }
+
         return super().setup(request, *args, **kwargs)
 
 

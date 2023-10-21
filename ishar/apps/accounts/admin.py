@@ -6,7 +6,9 @@ from django.utils.safestring import mark_safe
 
 from ishar.apps.players.models import Player
 
-from ishar.apps.accounts.models.upgrade import AccountUpgrade
+from ishar.apps.accounts.models.upgrade import (
+    AccountUpgrade, AccountAccountUpgrade
+)
 
 
 class AccountPlayersLinksInline(admin.TabularInline):
@@ -14,6 +16,8 @@ class AccountPlayersLinksInline(admin.TabularInline):
     Account players links tabular inline administration.
     """
     model = Player
+    verbose_name = "Player"
+    verbose_name_plural = "Players"
 
     @admin.display(description="Class")
     def get_player_class(self, obj) -> str:
@@ -54,6 +58,52 @@ class AccountPlayersLinksInline(admin.TabularInline):
         "id", "get_player_link", "get_player_class", "get_player_race",
         "get_player_level", "get_player_game_type", "get_player_deleted"
     )
+
+    def has_add_permission(self, request, obj=None) -> bool:
+        """Disabling adding players in /admin/accounts/ inline."""
+        return False
+
+    def has_change_permission(self, request, obj=None) -> bool:
+        """Disabling changing players in /admin/accounts/ inline."""
+        return False
+
+    def has_delete_permission(self, request, obj=None) -> bool:
+        """Disabling deleting players in /admin/accounts/ inline."""
+        return False
+
+    def has_module_permission(self, request, obj=None) -> bool:
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_god()
+        return False
+
+    def has_view_permission(self, request, obj=None) -> bool:
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_god()
+        return False
+
+
+class AccountUpgradesLinksAdmin(admin.TabularInline):
+    """
+    Account upgrades links tabular inline administration.
+    """
+    model = AccountAccountUpgrade
+    verbose_name = "Upgrade"
+    verbose_name_plural = "Upgrades"
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(amount__gt=0)
+
+    @admin.display(description="Upgrade", ordering="upgrade")
+    def get_upgrade_link(self, obj) -> str:
+        """Admin link for account upgrade."""
+        upgrade_id = obj.upgrade.id
+        upgrade_name = obj.upgrade.name
+        return mark_safe(
+            # TODO: url/reverse ()? this
+            f'<a href="/admin/accounts/accountupgrade/{upgrade_id}/">{upgrade_name}</a>'
+        )
+
+    fields = readonly_fields = ("get_upgrade_link", "amount")
 
     def has_add_permission(self, request, obj=None) -> bool:
         """Disabling adding players in /admin/accounts/ inline."""
@@ -126,7 +176,7 @@ class AccountsAdmin(UserAdmin):
         )
     )
     filter_horizontal = list_filter = ()
-    inlines = (AccountPlayersLinksInline,)
+    inlines = (AccountPlayersLinksInline, AccountUpgradesLinksAdmin)
     list_display = (
         "account_name", model.EMAIL_FIELD, "player_count", "current_essence",
         "is_god", "is_eternal", "is_immortal"
