@@ -56,7 +56,7 @@ class PlayerFlagsInlineAdmin(admin.TabularInline):
         """Admin link for player flag."""
         # TODO: url/reverse ()? this
         return mark_safe(
-            '<a href="/admin/players/playerflag/{%i}/">{%s}</a>' % (
+            '<a href="/admin/players/playerflag/%i/">%s</a>' % (
                 obj.flag.flag_id,
                 obj.flag.name
             )
