@@ -37,11 +37,9 @@ class AccountPlayersLinksInline(admin.TabularInline):
     @admin.display(description="Player", ordering="name")
     def get_player_link(self, obj) -> str:
         """Admin link for player name."""
-        player_id = obj.id
-        player_name = obj.name
+        # TODO: url/reverse ()? this
         return mark_safe(
-            # TODO: url/reverse ()? this
-            f'<a href="/admin/players/player/{player_id}/">{player_name}</a>'
+            f'<a href="/admin/players/player/{obj.id}/">{obj.name}</a>'
         )
 
     @admin.display(description="Game Type", ordering="game_type")
@@ -60,15 +58,16 @@ class AccountPlayersLinksInline(admin.TabularInline):
     )
 
     def has_add_permission(self, request, obj=None) -> bool:
-        """Disabling adding players in /admin/accounts/ inline."""
+        """Disabling adding players in account admin inline."""
         return False
 
     def has_change_permission(self, request, obj=None) -> bool:
-        """Disabling changing players in /admin/accounts/ inline."""
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_god()
         return False
 
     def has_delete_permission(self, request, obj=None) -> bool:
-        """Disabling deleting players in /admin/accounts/ inline."""
+        """Disabling deleting players in account admin inline."""
         return False
 
     def has_module_permission(self, request, obj=None) -> bool:
@@ -87,34 +86,34 @@ class AccountUpgradesLinksAdmin(admin.TabularInline):
     Account upgrades links tabular inline administration.
     """
     model = AccountAccountUpgrade
+    fields = ("get_upgrade_link", "amount")
+    readonly_fields = ("get_upgrade_link",)
     verbose_name = "Upgrade"
     verbose_name_plural = "Upgrades"
 
-    def get_queryset(self, request):
-        return super().get_queryset(request).filter(amount__gt=0)
+    def get_ordering(self, request):
+        return ("-amount", "upgrade__name")
 
     @admin.display(description="Upgrade", ordering="upgrade")
     def get_upgrade_link(self, obj) -> str:
         """Admin link for account upgrade."""
-        upgrade_id = obj.upgrade.id
-        upgrade_name = obj.upgrade.name
+        # TODO: url/reverse ()? this
         return mark_safe(
-            # TODO: url/reverse ()? this
-            f'<a href="/admin/accounts/accountupgrade/{upgrade_id}/">{upgrade_name}</a>'
+            '<a href="/admin/accounts/accountupgrade/%i/">%s</a>' % (
+                obj.upgrade.id,
+                obj.upgrade.name
+            )
         )
 
-    fields = readonly_fields = ("get_upgrade_link", "amount")
-
     def has_add_permission(self, request, obj=None) -> bool:
-        """Disabling adding players in /admin/accounts/ inline."""
         return False
 
     def has_change_permission(self, request, obj=None) -> bool:
-        """Disabling changing players in /admin/accounts/ inline."""
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_god()
         return False
 
     def has_delete_permission(self, request, obj=None) -> bool:
-        """Disabling deleting players in /admin/accounts/ inline."""
         return False
 
     def has_module_permission(self, request, obj=None) -> bool:
@@ -134,16 +133,6 @@ class AccountsAdmin(UserAdmin):
     Ishar account administration.
     """
     model = get_user_model()
-
-    def get_queryset(self, request):
-        return super().get_queryset(request).annotate(
-            player_count=Count("player")
-        ).order_by("player_count")
-
-    @admin.display(ordering="player_count")
-    def player_count(self, obj) -> int:
-        return obj.player_count
-
     date_hierarchy = "created_at"
     fieldsets = (
         (
@@ -192,21 +181,29 @@ class AccountsAdmin(UserAdmin):
         "created_at", "create_isp", "create_ident", "_create_haddr"
     )
 
+    def get_queryset(self, request):
+        return super().get_queryset(request).annotate(
+            player_count=Count("player")
+        ).order_by("player_count")
+
+    @admin.display(ordering="player_count")
+    def player_count(self, obj) -> int:
+        return obj.player_count
+
     def has_module_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
 
     def has_add_permission(self, request, obj=None) -> bool:
-        """Disabling adding players in /admin/accounts/ inline."""
         return False
 
     def has_change_permission(self, request, obj=None) -> bool:
-        """Disabling changing players in /admin/accounts/ inline."""
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_god()
         return False
 
     def has_delete_permission(self, request, obj=None) -> bool:
-        """Disabling deleting players in /admin/accounts/ inline."""
         return False
 
     def has_view_permission(self, request, obj=None) -> bool:
@@ -243,8 +240,6 @@ class AccountUpgradesAdmin(admin.ModelAdmin):
         return False
 
     def has_add_permission(self, request, obj=None) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_god()
         return False
 
     def has_change_permission(self, request, obj=None) -> bool:
@@ -253,8 +248,6 @@ class AccountUpgradesAdmin(admin.ModelAdmin):
         return False
 
     def has_delete_permission(self, request, obj=None) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_god()
         return False
 
     def has_view_permission(self, request, obj=None) -> bool:

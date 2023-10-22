@@ -40,21 +40,34 @@ class PlayerCommonInlineAdmin(admin.StackedInline):
         return False
 
 
-class PlayerFlagsInlineAdmin(admin.StackedInline):
+class PlayerFlagsInlineAdmin(admin.TabularInline):
     """
-    Player's flags stacked inline administration.
+    Player's flags tabular inline administration.
     """
     model = PlayersFlag
+    fields = ("get_flag_link", "value")
+    readonly_fields = ("get_flag_link",)
 
     def get_queryset(self, request):
-        return super().get_queryset(request).filter(value__gt=0)
+        return super().get_queryset(request).order_by("value")
+        # return qs.filter(value__gt=0).order_by("value")
+
+    @admin.display(description="Flag", ordering="flag")
+    def get_flag_link(self, obj) -> str:
+        """Admin link for player flag."""
+        flag_id = obj.flag.flag_id
+        flag_name = obj.flag.name
+        return mark_safe(
+            # TODO: url/reverse ()? this
+            f'<a href="/admin/players/playerflag/{flag_id}/">{flag_name}</a>'
+        )
 
     def has_add_permission(self, request, obj=None) -> bool:
-        """Disable adding player's flags."""
+        """Disable adding player's flags inline."""
         return False
 
     def has_delete_permission(self, request, obj=None) -> bool:
-        """Disable deleting player's flags."""
+        """Disable deleting player's flags inline."""
         return False
 
 
