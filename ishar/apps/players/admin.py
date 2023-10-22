@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.utils.safestring import mark_safe
 
 from ishar.apps.players.models import (
-    Player, PlayerCommon, PlayerFlag, RemortUpgrade
+    Player, PlayerCommon, PlayerFlag, PlayersFlag, RemortUpgrade
 )
 
 
@@ -32,15 +32,29 @@ class PlayerCommonInlineAdmin(admin.StackedInline):
     model = PlayerCommon
 
     def has_add_permission(self, request, obj=None) -> bool:
-        """
-        Disabling adding rows to player_common.
-        """
+        """Disable adding rows to player_common."""
         return False
 
     def has_delete_permission(self, request, obj=None) -> bool:
-        """
-        Disabling deleting rows from player_common.
-        """
+        """Disable deleting rows from player_common."""
+        return False
+
+
+class PlayerFlagsInlineAdmin(admin.StackedInline):
+    """
+    Player's flags stacked inline administration.
+    """
+    model = PlayersFlag
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(value__gt=0)
+
+    def has_add_permission(self, request, obj=None) -> bool:
+        """Disable adding player's flags."""
+        return False
+
+    def has_delete_permission(self, request, obj=None) -> bool:
+        """Disable deleting player's flags."""
         return False
 
 
@@ -75,7 +89,7 @@ class PlayerAdmin(admin.ModelAdmin):
             "classes": ("collapse",)
         })
     )
-    inlines = (PlayerCommonInlineAdmin,)
+    inlines = (PlayerCommonInlineAdmin, PlayerFlagsInlineAdmin)
     list_display = (
         "name", "get_account_link", "player_type", "is_survival", "is_deleted",
         "player_level", "renown"
@@ -91,15 +105,11 @@ class PlayerAdmin(admin.ModelAdmin):
     search_fields = ("name", "account__account_name")
 
     def has_add_permission(self, request, obj=None) -> bool:
-        """
-        Disable adding players in /admin/.
-        """
+        """Disable adding players in /admin/."""
         return False
 
     def has_delete_permission(self, request, obj=None) -> bool:
-        """
-        Disable deleting players in /admin/.
-        """
+        """Disable deleting players in /admin/."""
         return False
 
     def has_change_permission(self, request, obj=None) -> bool:

@@ -756,8 +756,10 @@ class PlayersFlag(models.Model):
     Player's Flag.
     """
     flag = models.ForeignKey(
+        primary_key=True,
         to=PlayerFlag,
         on_delete=models.CASCADE,
+        editable=False,
         related_query_name="+",
         help_text="Flag affecting a player.",
         verbose_name="Flag"
@@ -765,6 +767,7 @@ class PlayersFlag(models.Model):
     player = models.ForeignKey(
         to=Player,
         on_delete=models.CASCADE,
+        editable=False,
         related_name="flag",
         related_query_name="flags",
         help_text="Player affected by a flag.",
