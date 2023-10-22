@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.utils.safestring import mark_safe
 
 from ishar.apps.players.models import (
-    Player, PlayerCommon, PlayerFlag, RemortUpgrade
+    Player, PlayerCommon, PlayerFlag, PlayersFlag, RemortUpgrade
 )
 
 
@@ -32,15 +32,42 @@ class PlayerCommonInlineAdmin(admin.StackedInline):
     model = PlayerCommon
 
     def has_add_permission(self, request, obj=None) -> bool:
-        """
-        Disabling adding rows to player_common.
-        """
+        """Disable adding rows to player_common."""
         return False
 
     def has_delete_permission(self, request, obj=None) -> bool:
-        """
-        Disabling deleting rows from player_common.
-        """
+        """Disable deleting rows from player_common."""
+        return False
+
+
+class PlayerFlagsInlineAdmin(admin.TabularInline):
+    """
+    Player's flags tabular inline administration.
+    """
+    model = PlayersFlag
+    fields = ("get_flag_link", "value")
+    readonly_fields = ("get_flag_link",)
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).order_by("value")
+        # return qs.filter(value__gt=0).order_by("value")
+
+    @admin.display(description="Flag", ordering="flag")
+    def get_flag_link(self, obj) -> str:
+        """Admin link for player flag."""
+        flag_id = obj.flag.flag_id
+        flag_name = obj.flag.name
+        return mark_safe(
+            # TODO: url/reverse ()? this
+            f'<a href="/admin/players/playerflag/{flag_id}/">{flag_name}</a>'
+        )
+
+    def has_add_permission(self, request, obj=None) -> bool:
+        """Disable adding player's flags inline."""
+        return False
+
+    def has_delete_permission(self, request, obj=None) -> bool:
+        """Disable deleting player's flags inline."""
         return False
 
 
@@ -75,7 +102,7 @@ class PlayerAdmin(admin.ModelAdmin):
             "classes": ("collapse",)
         })
     )
-    inlines = (PlayerCommonInlineAdmin,)
+    inlines = (PlayerCommonInlineAdmin, PlayerFlagsInlineAdmin)
     list_display = (
         "name", "get_account_link", "player_type", "is_survival", "is_deleted",
         "player_level", "renown"
@@ -91,15 +118,11 @@ class PlayerAdmin(admin.ModelAdmin):
     search_fields = ("name", "account__account_name")
 
     def has_add_permission(self, request, obj=None) -> bool:
-        """
-        Disable adding players in /admin/.
-        """
+        """Disable adding players in /admin/."""
         return False
 
     def has_delete_permission(self, request, obj=None) -> bool:
-        """
-        Disable deleting players in /admin/.
-        """
+        """Disable deleting players in /admin/."""
         return False
 
     def has_change_permission(self, request, obj=None) -> bool:
