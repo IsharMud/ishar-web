@@ -3,7 +3,8 @@ from django.contrib import admin
 from django.utils.safestring import mark_safe
 
 from ishar.apps.players.models import (
-    Player, PlayerCommon, PlayerFlag, PlayersFlag, RemortUpgrade
+    Player, PlayerCommon, PlayerFlag, PlayersFlag, PlayerRemortUpgrade,
+    RemortUpgrade
 )
 
 
@@ -30,6 +31,8 @@ class PlayerCommonInlineAdmin(admin.StackedInline):
     Player common inline administration.
     """
     model = PlayerCommon
+    classes = ("collapse",)
+    verbose_name = verbose_name_plural = "Common"
 
     def has_add_permission(self, request, obj=None) -> bool:
         """Disable adding rows to player_common."""
@@ -47,6 +50,9 @@ class PlayerFlagsInlineAdmin(admin.TabularInline):
     model = PlayersFlag
     fields = ("get_flag_link", "value")
     readonly_fields = ("get_flag_link",)
+    classes = ("collapse",)
+    verbose_name = "Flag"
+    verbose_name_plural = "Flags"
 
     def get_ordering(self, request):
         return ("-value", "flag__name")
@@ -68,6 +74,40 @@ class PlayerFlagsInlineAdmin(admin.TabularInline):
 
     def has_delete_permission(self, request, obj=None) -> bool:
         """Disable deleting player's flags inline."""
+        return False
+
+
+class PlayerRemortUpgradesInlineAdmin(admin.TabularInline):
+    """
+    Player's remort upgrades tabular inline administration.
+    """
+    model = PlayerRemortUpgrade
+    classes = ("collapse",)
+    fields = ("get_upgrade_link", "value", "essence_perk")
+    readonly_fields = ("get_upgrade_link",)
+    verbose_name = "Remort Upgrade"
+    verbose_name_plural = "Remort Upgrades"
+
+    def get_ordering(self, request):
+        return ("-value", "-essence_perk", "upgrade__display_name")
+
+    @admin.display(description="Remort Upgrade", ordering="upgrade")
+    def get_upgrade_link(self, obj) -> str:
+        """Admin link for remort upgrade."""
+        # TODO: url/reverse ()? this
+        return mark_safe(
+            '<a href="/admin/players/remortupgrade/%i/">%s</a>' % (
+                obj.upgrade.upgrade_id,
+                obj.upgrade.display_name
+            )
+        )
+
+    def has_add_permission(self, request, obj=None) -> bool:
+        """Disable adding player's remort upgrades inline."""
+        return False
+
+    def has_delete_permission(self, request, obj=None) -> bool:
+        """Disable deleting player's remort upgrades inline."""
         return False
 
 
@@ -102,7 +142,11 @@ class PlayerAdmin(admin.ModelAdmin):
             "classes": ("collapse",)
         })
     )
-    inlines = (PlayerCommonInlineAdmin, PlayerFlagsInlineAdmin)
+    inlines = (
+        PlayerCommonInlineAdmin,
+        PlayerFlagsInlineAdmin,
+        PlayerRemortUpgradesInlineAdmin
+    )
     list_display = (
         "name", "get_account_link", "player_type", "is_survival", "is_deleted",
         "player_level", "renown"
@@ -116,6 +160,8 @@ class PlayerAdmin(admin.ModelAdmin):
         "online_time"
     )
     search_fields = ("name", "account__account_name")
+    verbose_name = "Player"
+    verbose_name_plural = "Players"
 
     def has_add_permission(self, request, obj=None) -> bool:
         """Disable adding players in /admin/."""
@@ -166,6 +212,8 @@ class PlayerFlagAdmin(admin.ModelAdmin):
     fieldsets = ((None, {"fields": ("flag_id", "name")}),)
     list_display = list_display_links = search_fields = ("flag_id", "name",)
     readonly_fields = ("flag_id",)
+    verbose_name = "Player's Flag"
+    verbose_name_plural = "Player's Flags"
 
 
 @admin.register(RemortUpgrade)
@@ -189,3 +237,5 @@ class RemortUpgradeAdmin(admin.ModelAdmin):
     )
     readonly_fields = ("upgrade_id",)
     search_fields = ("name", "display_name")
+    verbose_name = "Remort Upgrade"
+    verbose_name_plural = "Remort Upgrades"
