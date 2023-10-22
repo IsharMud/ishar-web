@@ -787,7 +787,7 @@ class PlayersFlag(models.Model):
         # The composite primary key (flag_id, player_id) found,
         #   that is not supported. The first column is selected.
         unique_together = (("flag", "player"),)
-        ordering = ("player", "flag")
+        ordering = ("player", "flag", "-value")
         verbose_name = "Player's Flag"
         verbose_name_plural = "Player's Flags"
 

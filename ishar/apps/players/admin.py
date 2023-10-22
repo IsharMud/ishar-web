@@ -48,18 +48,18 @@ class PlayerFlagsInlineAdmin(admin.TabularInline):
     fields = ("get_flag_link", "value")
     readonly_fields = ("get_flag_link",)
 
-    def get_queryset(self, request):
-        return super().get_queryset(request).order_by("value")
-        # return qs.filter(value__gt=0).order_by("value")
+    def get_ordering(self, request):
+        return ("-value", "flag__name")
 
     @admin.display(description="Flag", ordering="flag")
     def get_flag_link(self, obj) -> str:
         """Admin link for player flag."""
-        flag_id = obj.flag.flag_id
-        flag_name = obj.flag.name
+        # TODO: url/reverse ()? this
         return mark_safe(
-            # TODO: url/reverse ()? this
-            f'<a href="/admin/players/playerflag/{flag_id}/">{flag_name}</a>'
+            '<a href="/admin/players/playerflag/{%i}/">{%s}</a>' % (
+                obj.flag.flag_id,
+                obj.flag.name
+            )
         )
 
     def has_add_permission(self, request, obj=None) -> bool:
