@@ -13,9 +13,14 @@ class QuestPrereqsAdmin(admin.ModelAdmin):
     fieldsets = (
         (None, {"fields": ("quest", "required_quest")}),
     )
-    list_display = search_fields = ("quest", "required_quest")
+    list_display = ("quest", "required_quest")
     list_filter = (("quest", admin.RelatedOnlyFieldListFilter),)
     model = QuestPrereq
+    search_fields = (
+        "quest__name", "quest__display_name", "quest__class_restrict",
+        "required_quest__name", "required_quest__display_name",
+        "required_quest__class_restrict"
+    )
 
     def has_module_permission(self, request, obj=None):
         if request.user and not request.user.is_anonymous:
