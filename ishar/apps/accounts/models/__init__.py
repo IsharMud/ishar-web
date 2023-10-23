@@ -229,12 +229,11 @@ class Account(AbstractBaseUser, PermissionsMixin):
         return False
 
     def upgrades(self):
-        """Method to find purchased account upgrades for the account."""
+        """Method to find active account upgrades for the account."""
         return self.all_upgrades.filter(
             account=self,
             amount__gt=0
         )
 
-    # Do not model groups or last login.
-    groups = None
-    last_login = None
+    # Do not model groups, last login, or permissions.
+    groups = last_login = user_permissions = None

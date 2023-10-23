@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
 from django.db.models import Count
+from django.urls import reverse
 from django.utils.safestring import mark_safe
 
 from ishar.apps.players.models import Player
@@ -37,9 +38,14 @@ class AccountPlayersLinksInline(admin.TabularInline):
     @admin.display(description="Player", ordering="name")
     def get_player_link(self, obj) -> str:
         """Admin link for player name."""
-        # TODO: url/reverse ()? this
         return mark_safe(
-            f'<a href="/admin/players/player/{obj.id}/">{obj.name}</a>'
+            '<a href="%s">%s</a>' % (
+                reverse(
+                    viewname="admin:players_player_change",
+                    args=(obj.id,)
+                ),
+                obj.name
+            )
         )
 
     @admin.display(description="Game Type", ordering="game_type")
@@ -86,21 +92,24 @@ class AccountUpgradesLinksAdmin(admin.TabularInline):
     Account upgrades links tabular inline administration.
     """
     model = AccountAccountUpgrade
-    fields = ("get_upgrade_link", "amount")
-    readonly_fields = ("get_upgrade_link",)
+    classes = ("collapse",)
+    fields = readonly_fields = ("get_upgrade_link", "amount")
+    ordering = ("-amount", "upgrade__name")
     verbose_name = "Upgrade"
     verbose_name_plural = "Upgrades"
 
-    def get_ordering(self, request):
-        return ("-amount", "upgrade__name")
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(amount__gt=0)
 
     @admin.display(description="Upgrade", ordering="upgrade")
     def get_upgrade_link(self, obj) -> str:
         """Admin link for account upgrade."""
-        # TODO: url/reverse ()? this
         return mark_safe(
-            '<a href="/admin/accounts/accountupgrade/%i/">%s</a>' % (
-                obj.upgrade.id,
+            '<a href="%s">%s</a>' % (
+                reverse(
+                    viewname="admin:accounts_accountupgrade_change",
+                    args=(obj.upgrade.id,)
+                ),
                 obj.upgrade.name
             )
         )
@@ -109,8 +118,6 @@ class AccountUpgradesLinksAdmin(admin.TabularInline):
         return False
 
     def has_change_permission(self, request, obj=None) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_god()
         return False
 
     def has_delete_permission(self, request, obj=None) -> bool:
@@ -142,6 +149,7 @@ class AccountsAdmin(UserAdmin):
         ),
         (
             "Points", {
+                "classes": ("collapse",),
                 "fields": ("current_essence", "earned_essence", "bugs_reported")
             }
         ),

@@ -1,11 +1,12 @@
 from django.conf import settings
 from django.contrib import admin
+from django.urls import reverse
 from django.utils.safestring import mark_safe
 
-from ishar.apps.players.models import (
-    Player, PlayerCommon, PlayerFlag, PlayersFlag, PlayerRemortUpgrade,
-    RemortUpgrade
-)
+from ishar.apps.players.models import Player
+from ishar.apps.players.models.common import PlayerCommon
+from ishar.apps.players.models.flag import PlayerFlag, PlayersFlag
+from ishar.apps.players.models.upgrade import RemortUpgrade, PlayerRemortUpgrade
 
 
 class ImmortalTypeListFilter(admin.SimpleListFilter):
@@ -48,28 +49,34 @@ class PlayerFlagsInlineAdmin(admin.TabularInline):
     Player's flags tabular inline administration.
     """
     model = PlayersFlag
-    fields = ("get_flag_link", "value")
-    readonly_fields = ("get_flag_link",)
     classes = ("collapse",)
+    fields = readonly_fields = ("get_flag_link", "value")
+    ordering = ("-value", "flag__name")
     verbose_name = "Flag"
     verbose_name_plural = "Flags"
 
-    def get_ordering(self, request):
-        return ("-value", "flag__name")
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(value__gt=0)
 
-    @admin.display(description="Flag", ordering="flag")
+    @admin.display(description="Player Flag", ordering="flag__name")
     def get_flag_link(self, obj) -> str:
         """Admin link for player flag."""
-        # TODO: url/reverse ()? this
         return mark_safe(
-            '<a href="/admin/players/playerflag/%i/">%s</a>' % (
-                obj.flag.flag_id,
+            '<a href="%s">%s</a>' % (
+                reverse(
+                    viewname="admin:players_playerflag_change",
+                    args=(obj.flag.flag_id,)
+                ),
                 obj.flag.name
             )
         )
 
     def has_add_permission(self, request, obj=None) -> bool:
         """Disable adding player's flags inline."""
+        return False
+
+    def has_change_permission(self, request, obj=None) -> bool:
+        """Disable changing player's flags inline."""
         return False
 
     def has_delete_permission(self, request, obj=None) -> bool:
@@ -83,27 +90,33 @@ class PlayerRemortUpgradesInlineAdmin(admin.TabularInline):
     """
     model = PlayerRemortUpgrade
     classes = ("collapse",)
-    fields = ("get_upgrade_link", "value", "essence_perk")
-    readonly_fields = ("get_upgrade_link",)
+    fields = readonly_fields = ("get_upgrade_link", "value", "essence_perk")
+    ordering = ("-value", "-essence_perk", "upgrade__display_name")
     verbose_name = "Remort Upgrade"
     verbose_name_plural = "Remort Upgrades"
-
-    def get_ordering(self, request):
-        return ("-value", "-essence_perk", "upgrade__display_name")
 
     @admin.display(description="Remort Upgrade", ordering="upgrade")
     def get_upgrade_link(self, obj) -> str:
         """Admin link for remort upgrade."""
-        # TODO: url/reverse ()? this
         return mark_safe(
-            '<a href="/admin/players/remortupgrade/%i/">%s</a>' % (
-                obj.upgrade.upgrade_id,
+            '<a href="%s">%s</a>' % (
+                reverse(
+                    viewname="admin:players_remortupgrade_change",
+                    args=(obj.upgrade.upgrade_id,)
+                ),
                 obj.upgrade.display_name
             )
         )
 
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(value__gt=0)
+
     def has_add_permission(self, request, obj=None) -> bool:
         """Disable adding player's remort upgrades inline."""
+        return False
+
+    def has_change_permission(self, request, obj=None) -> bool:
+        """Disable changing player's remort upgrades inline."""
         return False
 
     def has_delete_permission(self, request, obj=None) -> bool:
@@ -116,7 +129,6 @@ class PlayerAdmin(admin.ModelAdmin):
     """
     Ishar player administration.
     """
-
     date_hierarchy = "birth"
     fieldsets = (
         (None, {"fields": (
@@ -186,20 +198,21 @@ class PlayerAdmin(admin.ModelAdmin):
             return request.user.is_god()
         return False
 
-    @staticmethod
-    def player_level(obj):
+    @admin.display(description="Level", ordering="common__level")
+    def player_level(self, obj=None):
         return obj.common.level
 
     @admin.display(description="Account", ordering="account")
     def get_account_link(self, obj):
-        """
-        Admin link for account display.
-        """
-        account_id = obj.account.account_id
-        account_name = obj.account.account_name
+        """Admin link for account display."""
         return mark_safe(
-            # TODO: url() this
-            f'<a href="/admin/accounts/account/{account_id}">{account_name}</a>'
+            '<a href="%s">%s</a>' % (
+                reverse(
+                    viewname="admin:accounts_account_change",
+                    args=(obj.account.account_id,)
+                ),
+                obj.account.account_name
+            )
         )
 
 

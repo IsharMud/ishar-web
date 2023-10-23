@@ -65,14 +65,14 @@
                 </ul>
             </div>
         </div>
-            {% if remort_upgrades %}
+            {% if player.remort_upgrades %}
         <div class="card bg-dark">
             <h3 class="card-header" title="Remort Upgrades">
                 Remort Upgrades
             </h3>
             <div class="card-body">
                 <ol class="card-text" id="player-remort-upgrades">
-                {% for remort_upgrade in remort_upgrades %}
+                {% for remort_upgrade in player.remort_upgrades %}
                     <li title="{{ remort_upgrade.upgrade.display_name | title }}{% if remort_upgrade.value > 1 %} (x{{ remort_upgrade.value }}){% endif %}">
                         {{ remort_upgrade.upgrade.display_name | title }}{% if remort_upgrade.value > 1 %} (x{{ remort_upgrade.value }}){% endif %}
                     </li>

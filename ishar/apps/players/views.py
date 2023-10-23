@@ -3,11 +3,12 @@ from django.views.generic import DetailView
 from django.views.generic.base import TemplateView
 from rest_framework import viewsets, permissions
 
-from ishar.apps.players.models import (
-    Player, PlayerFlag, PlayerRemortUpgrade, RemortUpgrade
-)
+from ishar.apps.players.models import Player
+from ishar.apps.players.models.flag import PlayerFlag, PlayersFlag
+from ishar.apps.players.models.upgrade import RemortUpgrade, PlayerRemortUpgrade
 from ishar.apps.players.serializers import (
-    PlayerSerializer, PlayerFlagSerializer, RemortUpgradeSerializer
+    PlayerSerializer, PlayerFlagSerializer, PlayersFlagSerializer,
+    RemortUpgradeSerializer, PlayerRemortUpgradeSerializer
 )
 
 
@@ -20,26 +21,6 @@ class PlayerView(LoginRequiredMixin, DetailView):
     slug_field = slug_url_kwarg = query_pk_and_slug = "name"
     template_name = "player.html"
 
-    def get_context_data(self, **kwargs):
-        """
-        Include remort upgrades in the context on the player page.
-        """
-        context = super(PlayerView, self).get_context_data(**kwargs)
-        context["remort_upgrades"] = PlayerRemortUpgrade.objects.filter(
-            player=self.get_object(),
-            value__gt=0
-        ).all()
-        return context
-
-    def setup(self, request, *args, **kwargs):
-        self.extra_context = {
-            "remort_upgrades": PlayerRemortUpgrade.objects.filter(
-                player=kwargs.get(self.context_object_name),
-                value__gt=0
-            ).all()
-        }
-        return super().setup(request, *args, **kwargs)
-
 
 class PlayerSearchView(LoginRequiredMixin, TemplateView):
     """
@@ -49,7 +30,7 @@ class PlayerSearchView(LoginRequiredMixin, TemplateView):
     model = Player
 
 
-class PlayerViewSet(viewsets.ReadOnlyModelViewSet):
+class PlayerViewSet(viewsets.ModelViewSet):
     """
     Read-only API endpoint that allows players to be viewed.
     """
@@ -75,6 +56,26 @@ class RemortUpgradesViewSet(viewsets.ModelViewSet):
     API endpoint that allows remort upgrades to be viewed or edited.
     """
     model = RemortUpgrade
-    serializer_class = RemortUpgradeSerializer
     permission_classes = [permissions.IsAdminUser]
     queryset = model.objects.all()
+    serializer_class = RemortUpgradeSerializer
+
+
+class PlayersFlagViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows player's flags to be viewed or edited.
+    """
+    model = PlayersFlag
+    permission_classes = [permissions.IsAdminUser]
+    queryset = model.objects.all()
+    serializer_class = PlayersFlagSerializer
+
+
+class PlayerRemortUpgradeViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows player's remort upgrades to be viewed or edited.
+    """
+    model = PlayerRemortUpgrade
+    permission_classes = [permissions.IsAdminUser]
+    queryset = model.objects.all()
+    serializer_class = PlayerRemortUpgradeSerializer

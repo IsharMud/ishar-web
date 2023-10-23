@@ -4,14 +4,17 @@ Ishar MUD API configuration.
 
 from rest_framework import permissions, routers
 
-from ishar.apps.accounts.views import AccountsViewSet, AccountUpgradesViewSet
+from ishar.apps.accounts.views import (
+    AccountsViewSet, AccountUpgradesViewSet, AccountsUpgradesViewSet
+)
 from ishar.apps.challenges.views import ChallengesViewSet
 from ishar.apps.classes.views import ClassesViewSet
 from ishar.apps.events.views import GlobalEventsViewSet
 from ishar.apps.news.views import NewsViewSet
 from ishar.apps.patches.views import PatchesViewSet
 from ishar.apps.players.views import (
-    PlayerViewSet, PlayerFlagViewSet, RemortUpgradesViewSet
+    PlayerViewSet, PlayerFlagViewSet, PlayersFlagViewSet,
+    RemortUpgradesViewSet, PlayerRemortUpgradeViewSet
 )
 from ishar.apps.quests.views import (
     QuestsViewSet, QuestPrereqsViewSet, QuestRewardsViewSet, QuestStepsViewSet
@@ -44,6 +47,7 @@ class IsharMUDAPIRouter(routers.DefaultRouter):
 api_router = IsharMUDAPIRouter()
 api_router.register(r"accounts", AccountsViewSet, "account")
 api_router.register(r"account_upgrades", AccountUpgradesViewSet, "account_upgrade")
+api_router.register(r"accounts_upgrades", AccountsUpgradesViewSet, "accounts_upgrade")
 api_router.register(r"challenges", ChallengesViewSet, "challenge")
 api_router.register(r"classes", ClassesViewSet, "class")
 api_router.register(r"events", GlobalEventsViewSet, "event")
@@ -52,6 +56,8 @@ api_router.register(r"news", NewsViewSet, "news")
 api_router.register(r"patches", PatchesViewSet, "patch")
 api_router.register(r"players", PlayerViewSet, "player")
 api_router.register(r"player_flags", PlayerFlagViewSet, "player_flag")
+api_router.register(r"players_flags", PlayersFlagViewSet, "players_flag")
+api_router.register(r"player_remort_upgrades", PlayerRemortUpgradeViewSet, "player_remort_upgrade")
 api_router.register(r"quests", QuestsViewSet, "quest")
 api_router.register(r"quest_prereqs", QuestPrereqsViewSet, "quest_prereq")
 api_router.register(r"quest_rewards", QuestRewardsViewSet, "quest_reward")
