@@ -3,10 +3,10 @@ from django.contrib import admin
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
-from ishar.apps.players.models import (
-    Player, PlayerCommon, PlayerFlag, PlayersFlag, PlayerRemortUpgrade,
-    RemortUpgrade
-)
+from ishar.apps.players.models import Player
+from ishar.apps.players.models.common import PlayerCommon
+from ishar.apps.players.models.flag import PlayerFlag, PlayersFlag
+from ishar.apps.players.models.upgrade import RemortUpgrade, PlayerRemortUpgrade
 
 
 class ImmortalTypeListFilter(admin.SimpleListFilter):
@@ -50,12 +50,15 @@ class PlayerFlagsInlineAdmin(admin.TabularInline):
     """
     model = PlayersFlag
     classes = ("collapse",)
-    fields = ("get_flag_link", "value")
+    fields = readonly_fields = ("get_flag_link", "value")
     ordering = ("-value", "flag__name")
-    readonly_fields = ("get_flag_link",)
     verbose_name = "Flag"
     verbose_name_plural = "Flags"
 
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(value__gt=0)
+
+    @admin.display(description="Player Flag", ordering="flag__name")
     def get_flag_link(self, obj) -> str:
         """Admin link for player flag."""
         return mark_safe(
@@ -72,6 +75,10 @@ class PlayerFlagsInlineAdmin(admin.TabularInline):
         """Disable adding player's flags inline."""
         return False
 
+    def has_change_permission(self, request, obj=None) -> bool:
+        """Disable changing player's flags inline."""
+        return False
+
     def has_delete_permission(self, request, obj=None) -> bool:
         """Disable deleting player's flags inline."""
         return False
@@ -83,9 +90,8 @@ class PlayerRemortUpgradesInlineAdmin(admin.TabularInline):
     """
     model = PlayerRemortUpgrade
     classes = ("collapse",)
-    fields = ("get_upgrade_link", "value", "essence_perk")
+    fields = readonly_fields = ("get_upgrade_link", "value", "essence_perk")
     ordering = ("-value", "-essence_perk", "upgrade__display_name")
-    readonly_fields = ("get_upgrade_link",)
     verbose_name = "Remort Upgrade"
     verbose_name_plural = "Remort Upgrades"
 
@@ -102,8 +108,15 @@ class PlayerRemortUpgradesInlineAdmin(admin.TabularInline):
             )
         )
 
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(value__gt=0)
+
     def has_add_permission(self, request, obj=None) -> bool:
         """Disable adding player's remort upgrades inline."""
+        return False
+
+    def has_change_permission(self, request, obj=None) -> bool:
+        """Disable changing player's remort upgrades inline."""
         return False
 
     def has_delete_permission(self, request, obj=None) -> bool:
@@ -116,7 +129,6 @@ class PlayerAdmin(admin.ModelAdmin):
     """
     Ishar player administration.
     """
-
     date_hierarchy = "birth"
     fieldsets = (
         (None, {"fields": (
@@ -186,8 +198,8 @@ class PlayerAdmin(admin.ModelAdmin):
             return request.user.is_god()
         return False
 
-    @staticmethod
-    def player_level(obj):
+    @admin.display(description="Level", ordering="common__level")
+    def player_level(self, obj=None):
         return obj.common.level
 
     @admin.display(description="Account", ordering="account")

@@ -92,11 +92,14 @@ class AccountUpgradesLinksAdmin(admin.TabularInline):
     Account upgrades links tabular inline administration.
     """
     model = AccountAccountUpgrade
-    fields = ("get_upgrade_link", "amount")
+    classes = ("collapse",)
+    fields = readonly_fields = ("get_upgrade_link", "amount")
     ordering = ("-amount", "upgrade__name")
-    readonly_fields = ("get_upgrade_link",)
     verbose_name = "Upgrade"
     verbose_name_plural = "Upgrades"
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(amount__gt=0)
 
     @admin.display(description="Upgrade", ordering="upgrade")
     def get_upgrade_link(self, obj) -> str:
@@ -115,8 +118,6 @@ class AccountUpgradesLinksAdmin(admin.TabularInline):
         return False
 
     def has_change_permission(self, request, obj=None) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_god()
         return False
 
     def has_delete_permission(self, request, obj=None) -> bool:
@@ -148,6 +149,7 @@ class AccountsAdmin(UserAdmin):
         ),
         (
             "Points", {
+                "classes": ("collapse",),
                 "fields": ("current_essence", "earned_essence", "bugs_reported")
             }
         ),

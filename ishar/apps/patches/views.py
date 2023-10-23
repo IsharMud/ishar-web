@@ -32,9 +32,9 @@ class PatchesListView(PatchesAllView):
     paginate_by = 5
 
 
-class PatchesViewSet(viewsets.ReadOnlyModelViewSet):
+class PatchesViewSet(viewsets.ModelViewSet):
     """
-    Read-only API endpoint that allows patches to be viewed.
+    API endpoint that allows patches to be viewed or edited.
     """
     model = Patch
     permission_classes = [permissions.IsAdminUser]

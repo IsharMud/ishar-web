@@ -10,11 +10,11 @@ from ishar.apps.accounts.models.upgrade import (
     AccountUpgrade, AccountAccountUpgrade
 )
 from ishar.apps.accounts.serializers import (
-    AccountSerializer, AccountUpgradeSerializer
+    AccountSerializer, AccountUpgradeSerializer, AccountAccountUpgradeSerializer
 )
 
 
-class AccountsViewSet(viewsets.ReadOnlyModelViewSet):
+class AccountsViewSet(viewsets.ModelViewSet):
     """
     Read-only API endpoint that allows accounts to be viewed.
     """
@@ -35,19 +35,22 @@ class AccountUpgradesViewSet(viewsets.ModelViewSet):
     serializer_class = AccountUpgradeSerializer
 
 
+class AccountsUpgradesViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows upgrades to accounts to be viewed or edited.
+    """
+    model = AccountAccountUpgrade
+    permission_classes = [permissions.IsAdminUser]
+    queryset = model.objects.all()
+    serializer_class = AccountAccountUpgradeSerializer
+
+
 class PortalView(LoginRequiredMixin, TemplateView):
     template_name = "portal.html"
 
 
 class AccountView(PortalView):
     template_name = "account.html"
-
-    def setup(self, request, *args, **kwargs):
-        """
-        Include account upgrades in the context on the account page.
-        """
-
-        return super().setup(request, *args, **kwargs)
 
 
 class PasswordView(LoginRequiredMixin, PasswordChangeView):
