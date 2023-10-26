@@ -2,15 +2,53 @@ from datetime import datetime
 
 from django.db import models
 from django.contrib import admin
-from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
+from django.contrib.auth.models import AbstractBaseUser, Group, PermissionsMixin
 from django.utils import timezone
 
 from passlib.hash import md5_crypt
 
-from ishar.util import dec2ip
-
 from ishar.apps.accounts.models.manager import AccountManager
 from ishar.apps.accounts.models.unsigned import UnsignedAutoField
+
+from ishar.util import dec2ip
+
+
+class Players(Group):
+    """
+    Ishar base group.
+    """
+    name = "Players"
+    permissions = ()
+    immortal = False
+
+    class Meta:
+        managed = False
+        ordering = ("name",)
+        proxy = True
+        verbose_name = "Player"
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}: {repr(self.__str__())}"
+
+    def __str__(self) -> str:
+        return self.name
+
+
+class Immortals(Players):
+    name = "Immortals"
+
+
+class Eternals(Immortals):
+    name = "Eternals"
+
+
+class Forgers(Eternals):
+    name = "Forgers"
+
+
+class Gods(Forgers):
+    name = "Gods"
+    permissions = "__all__"
 
 
 class Account(AbstractBaseUser, PermissionsMixin):
@@ -97,6 +135,7 @@ class Account(AbstractBaseUser, PermissionsMixin):
 
     EMAIL_FIELD = USERNAME_FIELD = "email"
     objects = AccountManager()
+    user_permissions = None
 
     class Meta:
         managed = False
@@ -115,26 +154,28 @@ class Account(AbstractBaseUser, PermissionsMixin):
     def __str__(self) -> str:
         return self.get_username()
 
-    @property
-    @admin.display(description="Create IP", ordering="create_haddr")
-    def _create_haddr(self):
+    def get_create_ip(self):
         """IP address that created the account."""
         return dec2ip(self.create_haddr)
 
-    @property
-    @admin.display(description="Last IP", ordering="last_haddr")
-    def _last_haddr(self):
-        """Last IP address that logged in to the account."""
+    def get_last_ip(self):
+        """IP address that last logged in to the account."""
         return dec2ip(self.last_haddr)
 
     @property
     @admin.display(boolean=True, description="Active?")
     def is_active(self) -> bool:
         """Boolean whether account is active."""
-        if self.banned_until and isinstance(self.banned_until, datetime):
-            if self.banned_until > timezone.now():
-                return False
+        if self.is_banned() is True:
+            return False
         return True
+
+    @admin.display(boolean=True, description="Banned?")
+    def is_banned(self) -> bool:
+        if self.banned_until and isinstance(self.is_banned, datetime):
+            if self.banned_until > timezone.now():
+                return True
+        return False
 
     @admin.display(boolean=True, description="Artisan?")
     def is_artisan(self) -> bool:
@@ -235,5 +276,20 @@ class Account(AbstractBaseUser, PermissionsMixin):
             amount__gt=0
         )
 
-    # Do not model groups, last login, or permissions.
-    groups = last_login = user_permissions = None
+    @property
+    def last_login(self) -> datetime:
+        when = self.created_at
+        for player in self.players.all():
+            if player.logon < when:
+                when = player.logon
+        return when
+
+    @property
+    def groups(self) -> (tuple, None):
+        if self.is_god():
+            return (Gods,)
+        if self.is_forger():
+            return (Forgers,)
+        if self.is_eternal():
+            return (Eternals,)
+        return None

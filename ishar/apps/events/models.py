@@ -8,17 +8,17 @@ class GlobalEvent(models.Model):
     event_type = models.IntegerField(
         primary_key=True,
         choices=(
-            (0, 'BONUS_XP'),
-            (1, 'TEST_SERVER'),
-            (2, 'CHALLENGE_XP'),
-            (3, 'CHALLENGE_CYCLE_XP'),
-            (4, 'CRASH_XP'),
-            (5, 'WINTER_FEST'),
-            (6, 'ST_PATRICK'),
-            (7, 'JULY_FOURTH'),
-            (8, 'HALLOWS_EVE'),
-            (9, 'HARVEST_FEST'),
-            (10, 'MAX_EVENT')
+            (0, "BONUS_XP [0]"),
+            (1, "TEST_SERVER [1]"),
+            (2, "CHALLENGE_XP [2]"),
+            (3, "CHALLENGE_CYCLE_XP [3]"),
+            (4, "CRASH_XP [4]"),
+            (5, "WINTER_FEST [5]"),
+            (6, "ST_PATRICK [6]"),
+            (7, "JULY_FOURTH [7]"),
+            (8, "HALLOWS_EVE [8]"),
+            (9, "HARVEST_FEST [9]"),
+            (10, "MAX_EVENT [10]")
         ),
         help_text="Type of event.",
         verbose_name="Event Type",

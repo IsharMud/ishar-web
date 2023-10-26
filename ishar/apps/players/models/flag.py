@@ -60,10 +60,8 @@ class PlayersFlag(models.Model):
         help_text="Player affected by a flag.",
         verbose_name="Player"
     )
-    value = models.PositiveIntegerField(
-        blank=False,
-        default=0,
-        null=True,
+    value = models.BooleanField(
+        editable=False,
         help_text="Value of the flag affecting the player.",
         verbose_name="Value"
     )

@@ -1,8 +1,38 @@
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
 from django.db.models import Count
+from django.urls import reverse
+from django.utils.safestring import mark_safe
 
 from ishar.apps.quests.models import Quest, QuestPrereq, QuestReward, QuestStep
+
+
+def get_quest_class_link(obj=None) -> (str, None):
+    if obj and obj.get_class_restrict_display() is not None:
+        return mark_safe(
+            '<a href="%s">%s</a>' % (
+                reverse(
+                    viewname="admin:classes_class_change",
+                    args=(obj.class_restrict,)
+                ),
+                obj.get_class_restrict_display()
+            )
+        )
+    return None
+
+
+def get_quest_name_link(obj=None) -> (str, None):
+    if obj is not None:
+        return mark_safe(
+            '<a href="%s">%s</a>' % (
+                reverse(
+                    viewname="admin:quests_quest_change",
+                    args=(obj.quest.quest_id,)
+                ),
+                obj.quest.display_name
+            )
+        )
+    return None
 
 
 @admin.register(QuestPrereq)
@@ -14,7 +44,10 @@ class QuestPrereqsAdmin(admin.ModelAdmin):
         (None, {"fields": ("quest", "required_quest")}),
     )
     list_display = ("quest", "required_quest")
-    list_filter = (("quest", admin.RelatedOnlyFieldListFilter),)
+    list_filter = (
+        ("quest", admin.RelatedOnlyFieldListFilter),
+        ("required_quest", admin.RelatedOnlyFieldListFilter)
+    )
     model = QuestPrereq
     search_fields = (
         "quest__name", "quest__display_name", "quest__class_restrict",
@@ -170,7 +203,8 @@ class QuestsAdmin(ModelAdmin):
         QuestPrereqsAdminInline, QuestStepsAdminInline, QuestRewardsAdminInline
     )
     list_display = (
-        "quest_id", "display_name", "repeatable", "class_restrict", "num_steps"
+        "quest_id", "display_name", "repeatable", "num_steps",
+        "get_quest_class_link"
     )
     list_display_links = ("quest_id", "display_name")
     list_filter = ("repeatable", "class_restrict", "min_level")
@@ -186,6 +220,20 @@ class QuestsAdmin(ModelAdmin):
         return super().get_queryset(request).annotate(
             num_steps=Count("step")
         )
+
+    @admin.display(description="Class", ordering="class_restrict")
+    def get_quest_class_link(self, obj=None) -> (str, None):
+        if obj.get_class_restrict_display():
+            return mark_safe(
+                '<a href="%s">%s</a>' % (
+                    reverse(
+                        viewname="admin:classes_class_change",
+                        args=(obj.class_restrict,)
+                    ),
+                    obj.get_class_restrict_display()
+                )
+            )
+        return None
 
     @admin.display(description="# Steps", ordering="num_steps")
     def num_steps(self, obj):
@@ -235,7 +283,10 @@ class QuestRewardsAdmin(admin.ModelAdmin):
         ("Quest", {"fields": ("quest",)}),
         ("Class", {"fields": ("class_restrict",)})
     )
-    list_display = ("quest_reward_id", "reward_type", "quest", "class_restrict")
+    list_display = (
+        "quest_reward_id", "reward_type",
+        "get_quest_name_link", "get_quest_class_link"
+    )
     list_display_links = ("quest_reward_id", "reward_type")
     list_filter = (
         "reward_type", "class_restrict",
@@ -243,63 +294,17 @@ class QuestRewardsAdmin(admin.ModelAdmin):
     )
     model = QuestReward
     readonly_fields = ("quest_reward_id",)
-    search_fields = ("reward_num", "reward_type", "quest", "class_restrict")
-
-    def has_module_permission(self, request, obj=None):
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_eternal()
-        return False
-
-    def has_add_permission(self, request, obj=None) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_eternal()
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_eternal()
-        return False
-
-    def has_delete_permission(self, request, obj=None):
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_eternal()
-        return False
-
-    def has_view_permission(self, request, obj=None):
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_eternal()
-        return False
-
-
-@admin.register(QuestStep)
-class QuestStepsAdmin(admin.ModelAdmin):
-    """
-    Ishar quest step administration.
-    """
-
-    @admin.display(description="Class")
-    def get_quest_class(self, obj):
-        return obj.quest.get_class_restrict_display()
-
-    fieldsets = (
-        (None, {"fields": ("step_id", "step_type", "quest")}),
-        ("Details", {"fields": ("target", "num_required", "time_limit")}),
-        ("Mystify", {"fields": ("mystify", "mystify_text")})
-    )
-    list_display = (
-        "step_id", "step_type", "quest", "get_quest_class", "mystify"
-    )
-    list_display_links = ("step_id", "step_type")
-    list_filter = (
-        "step_type", "quest__class_restrict", "mystify",
-        ("quest", admin.RelatedOnlyFieldListFilter), "num_required"
-    )
-    model = QuestStep
-    readonly_fields = ("step_id", "get_quest_class")
     search_fields = (
-        "step_id", "step_type", "target", "mystify_text",
-        "quest__name", "quest__display_name", "quest__class_restrict"
+        "reward_num", "reward_type", "quest__display_name", "class_restrict"
     )
+
+    @admin.display(description="Quest", ordering="quest__display_name")
+    def get_quest_name_link(self, obj=None):
+        return get_quest_name_link(obj=obj)
+
+    @admin.display(description="Class", ordering="class_restrict")
+    def get_quest_class_link(self, obj=None):
+        return get_quest_class_link(obj=obj)
 
     def has_module_permission(self, request, obj=None):
         if request.user and not request.user.is_anonymous:
