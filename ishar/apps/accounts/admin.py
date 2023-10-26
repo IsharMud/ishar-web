@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin, GroupAdmin
-from django.db.models import Count, Value
+from django.db.models import Count
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
