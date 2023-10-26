@@ -68,16 +68,19 @@ class Quest(models.Model):
     )
     class_restrict = models.IntegerField(
         choices=get_class_options(),
-        help_text="Player class to which the quest is restricted.",
+        help_text="Player class which the quest is restricted to.",
         verbose_name="Class Restrict"
     )
     quest_intro = models.CharField(
-        blank=True, max_length=2000,
+        blank=True,
+        max_length=2000,
+        null=True,
         help_text="Introduction text for the quest.",
         verbose_name="Quest Intro"
     )
     quest_source = models.PositiveIntegerField(
-        blank=True, null=True,
+        blank=True,
+        null=True,
         help_text="Source for the quest.",
         verbose_name="Quest Source"
     )
@@ -96,7 +99,10 @@ class Quest(models.Model):
         verbose_name = "Quest"
 
     def __repr__(self) -> str:
-        return f'Quest: "{self.__str__()}" ({self.quest_id})'
+        return (
+            f"{self.__class__.__name__}: {repr(self.__str__())}"
+            f" ({self.quest_id})"
+        )
 
     def __str__(self) -> str:
         return self.display_name or self.name
@@ -158,9 +164,15 @@ class QuestReward(models.Model):
     )
     reward_type = models.IntegerField(
         choices=(
-            (0, "Object_always"), (1, "Object_Choice"), (2, "Money"),
-            (3, "Alignment"), (4, "Skill"), (5, "Renown"), (6, "Experience"),
-            (7, "Quest"), (8, "Relic")
+            (0, "Object (Always) [0]"),
+            (1, "Object (Choice) [1]"),
+            (2, "Money [2]"),
+            (3, "Alignment [3]"),
+            (4, "Skill [4]"),
+            (5, "Renown [5]"),
+            (6, "Experience [6]"),
+            (7, "Quest [7]"),
+            (8, "Relic [8]")
         ),
         help_text="Reward type.",
         verbose_name="Reward Type"
@@ -217,7 +229,11 @@ class QuestStep(models.Model):
         verbose_name="Quest Step ID"
     )
     step_type = models.IntegerField(
-        choices=((0, 'Object'), (1, 'Kill'), (2, 'Room')),
+        choices=(
+            (0, "Object [0]"),
+            (1, "Kill [1]"),
+            (2, "Room [2]")
+        ),
         help_text="Quest step type.",
         verbose_name="Step Type",
     )

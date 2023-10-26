@@ -21,9 +21,9 @@ class ChallengeCompletedListFilter(admin.SimpleListFilter):
         qs = queryset
         if self.value():
             if self.value() == "1":
-                qs = qs.exclude(winner_desc="")
+                return qs.exclude(winner_desc="")
             if self.value() == "0":
-                qs = qs.filter(winner_desc="")
+                return qs.filter(winner_desc="")
         return qs
 
 
@@ -42,7 +42,6 @@ class ChallengesAdmin(admin.ModelAdmin):
     list_display = ("challenge_desc", "mob_name", "is_active", "is_completed")
     list_filter = ("is_active", ChallengeCompletedListFilter)
     readonly_fields = ("challenge_id", "is_completed")
-    save_on_top = True
     search_fields = ("challenge_desc", "winner_desc", "mob_vnum", "mob_name")
 
     def has_module_permission(self, request, obj=None) -> bool:
@@ -56,17 +55,11 @@ class ChallengesAdmin(admin.ModelAdmin):
         return False
 
     def has_change_permission(self, request, obj=None) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_god()
-        return False
+        return self.has_add_permission(request, obj)
 
     def has_delete_permission(self, request, obj=None) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_god()
-        return False
+        return self.has_change_permission(request, obj)
 
     def has_view_permission(self, request, obj=None) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_eternal()
-        return False
+        return self.has_module_permission(request, obj)
 

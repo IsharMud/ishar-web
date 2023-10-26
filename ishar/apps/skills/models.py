@@ -170,7 +170,12 @@ class Skill(models.Model):
         verbose_name="Decide Function"
     )
     skill_type = models.IntegerField(
-        choices=((0, "Type"), (1, "Skill"), (2, "Spell"), (3, "Craft")),
+        choices=(
+            (0, "Type [0]"),
+            (1, "Skill [1]"),
+            (2, "Spell [2]"),
+            (3, "Craft [3]")
+        ),
         help_text="Type of skill.",
         verbose_name="Skill Type"
     )
@@ -217,7 +222,11 @@ class SkillComponent(models.Model):
     )
     component_type = models.IntegerField(
         blank=False,
-        choices=((0, None), (1, "Treasure"), (2, "Item")),
+        choices=(
+            (0, "None [0]"),
+            (1, "Treasure [1]"),
+            (2, "Item [2]")
+        ),
         help_text="Type of component.",
         null=False,
         verbose_name="Component Type"

@@ -1,15 +1,23 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
-from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.admin import UserAdmin, GroupAdmin
 from django.db.models import Count
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
-from ishar.apps.players.models import Player
-
 from ishar.apps.accounts.models.upgrade import (
     AccountUpgrade, AccountAccountUpgrade
 )
+from ishar.apps.accounts.models import Players
+from ishar.apps.players.models import Player
+
+
+@admin.register(Players)
+class PlayersAdmin(GroupAdmin):
+    """
+    Ishar players group administration.
+    """
+    model = Players
 
 
 class AccountPlayersLinksInline(admin.TabularInline):
@@ -58,33 +66,27 @@ class AccountPlayersLinksInline(admin.TabularInline):
         """Admin text for player race."""
         return obj.common.race
 
+    def has_add_permission(self, request, obj):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_module_permission(self, request):
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_god()
+        return False
+
+    def has_view_permission(self, request, obj=None):
+        return self.has_module_permission(request)
+
     fields = readonly_fields = (
         "id", "get_player_link", "get_player_class", "get_player_race",
         "get_player_level", "get_player_game_type", "get_player_deleted"
     )
-
-    def has_add_permission(self, request, obj=None) -> bool:
-        """Disabling adding players in account admin inline."""
-        return False
-
-    def has_change_permission(self, request, obj=None) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_god()
-        return False
-
-    def has_delete_permission(self, request, obj=None) -> bool:
-        """Disabling deleting players in account admin inline."""
-        return False
-
-    def has_module_permission(self, request, obj=None) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_god()
-        return False
-
-    def has_view_permission(self, request, obj=None) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_god()
-        return False
 
 
 class AccountUpgradesLinksAdmin(admin.TabularInline):
@@ -114,7 +116,7 @@ class AccountUpgradesLinksAdmin(admin.TabularInline):
             )
         )
 
-    def has_add_permission(self, request, obj=None) -> bool:
+    def has_add_permission(self, request, obj):
         return False
 
     def has_change_permission(self, request, obj=None) -> bool:
@@ -129,9 +131,7 @@ class AccountUpgradesLinksAdmin(admin.TabularInline):
         return False
 
     def has_view_permission(self, request, obj=None) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_god()
-        return False
+        return self.has_module_permission(request, obj)
 
 
 @admin.register(get_user_model())
@@ -150,19 +150,21 @@ class AccountsAdmin(UserAdmin):
         (
             "Points", {
                 "classes": ("collapse",),
-                "fields": ("current_essence", "earned_essence", "bugs_reported")
+                "fields": (
+                    "current_essence", "earned_essence", "bugs_reported"
+                )
             }
         ),
         (
             "Last", {
                 "classes": ("collapse",),
-                "fields": ("last_ident", "last_isp", "_last_haddr")
+                "fields": ("last_ident", "last_ip", "last_isp")
             }
         ),
         (
             "Created", {
                 "classes": ("collapse",),
-                "fields": ("create_ident", "create_isp", "_create_haddr")
+                "fields": ("create_ident", "create_ip", "create_isp")
             }
         ),
         (
@@ -181,43 +183,45 @@ class AccountsAdmin(UserAdmin):
     ordering = ("account_id",)
     search_fields = (
         "account_name", model.EMAIL_FIELD,
-        "create_isp", "create_ident", "last_ident", "last_isp",
-        "_create_haddr", "_login_fail_haddr", "_last_haddr"
+        "create_ip", "create_isp", "create_ident",
+        "last_ip", "last_isp", "last_ident"
     )
     readonly_fields = (
-        "account_id", "last_ident", "last_isp", "_last_haddr",
-        "created_at", "create_isp", "create_ident", "_create_haddr"
+        "account_id", "created_at", "player_count",
+        "create_ip", "create_isp", "create_ident",
+        "last_ip", "last_isp", "last_ident"
     )
 
     def get_queryset(self, request):
-        return super().get_queryset(request).annotate(
-            player_count=Count("player")
-        ).order_by("player_count")
+        qs = super().get_queryset(request)
+        qs = qs.annotate(player_count=Count("player"))
+        return qs
 
-    @admin.display(ordering="player_count")
+    @admin.display(description="Create IP")
+    def create_ip(self, obj) -> str:
+        return obj.get_create_ip()
+
+    @admin.display(description="Last IP")
+    def last_ip(self, obj) -> str:
+        return obj.get_last_ip()
+
+    @admin.display(description="# Players", ordering="player_count")
     def player_count(self, obj) -> int:
         return obj.player_count
 
-    def has_module_permission(self, request, obj=None) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_god()
-        return False
-
-    def has_add_permission(self, request, obj=None) -> bool:
-        return False
-
-    def has_change_permission(self, request, obj=None) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_god()
-        return False
+    def has_add_permission(self, request) -> bool:
+        return self.has_module_permission(request)
 
     def has_delete_permission(self, request, obj=None) -> bool:
         return False
 
-    def has_view_permission(self, request, obj=None) -> bool:
+    def has_module_permission(self, request) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
+
+    def has_view_or_change_permission(self, request, obj=None) -> bool:
+        return self.has_module_permission(request)
 
 
 @admin.register(AccountUpgrade)
@@ -242,23 +246,19 @@ class AccountUpgradesAdmin(admin.ModelAdmin):
     search_fields = ("name", "description")
     readonly_fields = ("id",)
 
-    def has_module_permission(self, request, obj=None) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_eternal()
-        return False
-
-    def has_add_permission(self, request, obj=None) -> bool:
-        return False
+    def has_add_permission(self, request):
+        return self.has_module_permission(request)
 
     def has_change_permission(self, request, obj=None) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_god()
         return False
 
     def has_delete_permission(self, request, obj=None) -> bool:
         return False
 
-    def has_view_permission(self, request, obj=None) -> bool:
+    def has_module_permission(self, request):
         if request.user and not request.user.is_anonymous:
-            return request.user.is_eternal()
+            return request.user.is_god()
         return False
+
+    def has_view_permission(self, request, obj=None) -> bool:
+        return self.has_module_permission(request)
