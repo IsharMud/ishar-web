@@ -1,8 +1,10 @@
-body, .dropdown-menu { background-color: #323639; color: #d6d6d7; }
+input, body { background-color: #323639; color: #d6d6d7; }
+.card-header, .card-title { color: #fa7; }
+card, .card-text, .card-footer { color: #d6d6d7; }
+button, textarea, input, select { border: 0.1rem solid #fa7; background-color: #323639; color: #fa7; }
+h1, h2, h3, h4, h5, strong, th, label, th, .gridjs-th-content, .gridjs-td[data-column-id="name"] { color: #fa7; }
 
-h2, h3, h4, h5, strong, th, label, button, input, textarea { color: #fa7; }
-
-button, input, textarea { background-color: #323639; border: 1px solid #d6d6d7; }
+.navbar-dark .navbar-toggler-icon { background-image: url("/static/images/cropped_ishar_logo_dark.png"); }
 
 a[target="_blank"]::after {
     content: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAQElEQVR42qXKwQkAIAxDUUdxtO6/RBQkQZvSi8I/pL4BoGw/XPkh4XigPmsUgh0626AjRsgxHTkUThsG2T/sIlzdTsp52kSS1wAAAABJRU5ErkJggg==);
@@ -12,7 +14,7 @@ a[target="_blank"]::after {
 
 a { color: #09f; text-decoration: none; }
 a:active, a:visited { color: #6082b6; }
-a:hover, #active-nav { color: #d6d6d7; }
+a:hover { color: #d6d6d7; }
 
 pre { padding-left: 2vw; white-space: pre-wrap; }
 

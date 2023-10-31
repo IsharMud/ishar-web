@@ -7,7 +7,7 @@
 {% block header %}Global Events{% endblock header %}
 {% block content %}
     {% if global_events %}
-                <ul>
+                <ul class="card-text">
         {% for global_event in global_events %}
                     <li title="{{ global_event.event_desc }}">
                         <h3>
