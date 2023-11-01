@@ -18,24 +18,25 @@ a:hover { color: #d6d6d7; }
 
 pre { padding-left: 2vw; white-space: pre-wrap; }
 
-.challenge-completed
-{
-    text-decoration: line-through;
-    text-decoration-color: #a00;
-    text-decoration-thickness: 0.15rem;
-}
-
-.god-player, .forger-player, .eternal-player,
-.artisan-player,  .immortal-player, .consort-player
+.god-player,
+.forger-player,
+.eternal-player,
+.artisan-player,
+.immortal-player,
+.consort-player
 {
     color: #00b7eb;
 }
 
 .nested-list { list-style: none; }
 .non-classic { text-align: center; }
+
 .god-player::after { content: ' 😇'; }
-.forger-player::after,  .eternal-player::after, .artisan-player::after,
-.immortal-player::after, .consort-player::after
+.forger-player::after,
+.eternal-player::after,
+.artisan-player::after,
+.immortal-player::after,
+.consort-player::after
 {
     content: ' 👼';
 }
@@ -49,8 +50,8 @@ pre { padding-left: 2vw; white-space: pre-wrap; }
 #player-description { padding-left: 2vw; }
 
 #account-details, #account-manage, #essence-balance, #essence-upgrades,
-#mud-client-list, .help-topic-list, #leader-head, #season-details, #world-list,
-#player-remort-upgrades,  #player-details, #player-time
+#mud-client-list, .help-topic-list, #season-details, #world-list,
+#player-remort-upgrades, #player-details, #player-time
 {
     column-count: 2;
 }

@@ -38,6 +38,12 @@
                 <div class="card-body">
                     <div class="collapse bg-dark navbar-collapse" id="navbarNavDropdown">
                         <ul class="navbar-nav bg-dark">
+                            <li class="nav-item" title="Main">
+                                <a class="nav-link" href="{% url "index" %}">Main</a>
+                            </li>
+                            <li class="nav-item" title="Admin">
+                                <a class="nav-link" href="{% url "admin:index" %}" target="_blank">Admin</a>
+                            </li>
 {% if user.is_staff %}
                             <li class="nav-item" title="Admin">
                                 <a class="nav-link" href="{% url "admin:index" %}" target="_blank">Admin</a>
