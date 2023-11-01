@@ -1,6 +1,6 @@
 input, body { background-color: #323639; color: #d6d6d7; }
 .card-header, .card-title { color: #fa7; }
-card, .card-text, .card-footer { color: #d6d6d7; }
+.card, .card-text, .card-footer { color: #d6d6d7; }
 button, textarea, input, select { border: 0.1rem solid #fa7; background-color: #323639; color: #fa7; }
 h1, h2, h3, h4, h5, strong, th, label, th, .gridjs-th-content, .gridjs-td[data-column-id="name"] { color: #fa7; }
 
@@ -54,4 +54,10 @@ pre { padding-left: 2vw; white-space: pre-wrap; }
 #player-remort-upgrades, #player-details, #player-time
 {
     column-count: 2;
+}
+
+.challenge-completed {
+    text-decoration: line-through;
+    text-decoration-color: #a00;
+    text-decoration-thickness: 0.15rem;
 }
