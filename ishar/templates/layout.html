@@ -31,10 +31,10 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <a href="{% url "index" %}" title="Ishar MUD">
-                    <img class="p-3 navbar-brand" id="logo" alt="Ishar MUD" src="{% static "images/header_alpha.png" %}" style="width: 20vw;">
+                    <img class="m-1 navbar-brand" id="logo" alt="Ishar MUD" src="{% static "images/header_alpha.png" %}" style="width: 20vw;">
                 </a>
                 <div class="collapse navbar-collapse" id="navbarNavDropdown">
-                    <ul class="navbar-nav nav-underline">
+                    <ul class="navbar-nav nav-underline p-2">
                         <li class="nav-item" title="Main">
                             <a class="nav-link" href="{% url "index" %}">Main</a>
                         </li>
@@ -61,7 +61,7 @@
 {% if user and user.is_authenticated %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="{% url "portal" %}" role="button" data-bs-toggle="dropdown" aria-expanded="false">Portal</a>
-                            <ul class="dropdown-menu bg-dark">
+                            <ul class="dropdown-menu bg-dark p-2 border border-secondary">
                                 <li title="Account">
                                     <a class="bg-dark nav-link dropdown-item" href="{% url "account" %}">Account</a>
                                 </li>
