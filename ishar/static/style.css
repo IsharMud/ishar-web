@@ -1,4 +1,6 @@
-:root { --ishar-color: #fa7; }
+:root {
+    --ishar-color: #fa7;
+}
 
 input, body { background-color: #323639; color: #d6d6d7; }
 .card-header, .card-title { color: var(--ishar-color); }
