@@ -36,7 +36,7 @@
                     <img class="m-1 navbar-brand" id="logo" alt="Ishar MUD" src="{% static "images/header_alpha.png" %}" style="height: 10vh;">
                 </a>
                 <div class="collapse navbar-collapse" id="navbarNavDropdown">
-                    <ul class="navbar-nav nav-underline p-2">
+                    <ul class="navbar-nav nav-underline m-2">
                         <li class="nav-item" title="Main">
                             <a class="nav-link" href="{% url "index" %}">Main</a>
                         </li>
@@ -63,23 +63,30 @@
 {% if user and user.is_authenticated %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="{% url "portal" %}" role="button" data-bs-toggle="dropdown" aria-expanded="false">Portal</a>
-                            <ul class="dropdown-menu bg-dark p-2 border border-secondary">
-                                <li title="Account">
+                            <ul class="dropdown-menu dropdown-menu-dark bg-dark border border-secondary">
+                                <li class="nav-item" title="Account">
                                     <a class="bg-dark nav-link dropdown-item" href="{% url "account" %}">Account</a>
                                 </li>
-                                <li title="Challenges">
+                                <li class="nav-item" title="Challenges">
                                     <a class="bg-dark nav-link dropdown-item" href="{% url "challenges" %}">Challenges</a>
                                 </li>
-                                <li title="Events">
-                                    <a class="bg-dark nav-link dropdown-item" href="{% url "events" %}">Events {% if global_event_count and global_event_count > 0 %} ({{ global_event_count }}){% endif %}</a>
+    {% if global_event_count and global_event_count > 0 %}
+                                <li class="nav-item" title="Events ({{ global_event_count }})">
+                                    <a class="bg-dark nav-link dropdown-item" href="{% url "events" %}">Events</a>
+                                    <span class="badge text-bg-secondary">{{ global_event_count }}</span>
                                 </li>
-                                <li title="Leaders">
+    {% endif %}
+                                <li class="nav-item" title="Leaders">
                                     <a class="bg-dark nav-link dropdown-item" href="{% url "leaders" %}">Leaders</a>
                                 </li>
-                                <li title="Portal">
-                                    <a class="bg-dark nav-link dropdown-item" href="{% url "portal" %}">Portal</a>
+                                <li class="nav-item" title="Players">
+                                    <a class="bg-dark nav-link dropdown-item" href="{% url "portal" %}">Players
+    {% if request.user.players and request.user.players.count > 0 %}
+                                        <span class="badge text-bg-secondary">{{ request.user.players.count }}</span>
+                                    </a>
+    {% endif %}
                                 </li>
-                                <li title="Log out">
+                                <li class="nav-item" title="Log out">
                                     <a class="bg-dark nav-link dropdown-item" href="{% url "logout" %}">Log out ({{ user.get_username }})</a>
                                 </li>
                             </ul>
@@ -104,9 +111,9 @@
     {% if messages %}
                     <div class="card bg-dark" style="border: 0.1rem solid var(--ishar-color);">
                         <div class="card-body">
-                            <ul class="card-text" id="messages">
+                            <ul class="card-text fw-bold">
         {% for message in messages %}
-                            <li class="message-{{ message.tags }}">{{ message }}</li>
+                                <li class="message-{{ message.tags }}">{{ message }}</li>
         {% endfor %}
                             </ul>
                         </div>

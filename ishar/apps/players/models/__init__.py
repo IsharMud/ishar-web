@@ -482,7 +482,7 @@ class Player(models.Model):
         return earned
 
     def upgrades(self):
-        """Method to find active account upgrades for the account."""
+        """Method to find active remort upgrades for the player."""
         return self.all_remort_upgrades.filter(
             player=self,
             value__gt=0

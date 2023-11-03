@@ -66,7 +66,7 @@
                       {% endfor %}
                     ],
                     className: {
-                        table: "card-body table table-bordered table-dark text-reset",
+                        table: "card-body table table-bordered table-responsive table-dark text-reset",
                     },
                     search:     false,
                     sort:       true,
@@ -96,7 +96,7 @@
     {% if request.user.current_essence > 0 %}
     <h5 class="card-footer">
         You have {{ request.user.current_essence }}
-        <a title="essence" href="{% url "account" %}#essence-balance">essence</a>.
+        <a title="essence" href="{% url "account" %}#essence">essence</a>.
     </h5>
     {% endif %}
 {% endblock content %}
