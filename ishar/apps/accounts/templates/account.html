@@ -65,7 +65,7 @@
             </h4>
             <div class="card-body">
     {% if request.user.upgrades.all %}
-                <ul class="list-group card-text" id="essence-upgrades">
+                <ul class="list-group list-group-horizontal-sm card-text" id="essence-upgrades">
         {% for upgraded in request.user.upgrades.all %}
                     <li class="bg-dark list-group-item text-reset" title="{{ upgraded.upgrade.name }}{% if upgraded.amount > 1 %} (x{{ upgraded.amount }}){% endif %}">
                         {{ upgraded.upgrade.name }}
