@@ -10,12 +10,12 @@
         <div class="card bg-dark">
             <h3 class="card-header" id="manage" title="Manage">Manage</h3>
             <div class="card-body">
-                <ul class="list-group">
-                    <li class="bg-dark card-text list-group-item" title="Change your password">
-                        <a href="{% url "password" %}">Change your password</a>
+                <ul class="card-text list-group">
+                    <li class="bg-dark list-group-item list-group-item-action list-group-item-dark" title="Change your password">
+                        <a class="list-group-item-text" href="{% url "password" %}">Change your password</a>
                     </li>
-                    <li class="bg-dark card-text list-group-item" title="View your players">
-                        <a href="{% url "portal" %}">View your players</a>
+                    <li class="bg-dark list-group-item list-group-item-action list-group-item-dark" title="View your players">
+                        <a class="list-group-item-text" href="{% url "portal" %}">View your players</a>
                     </li>
                 </ul>
             </div>
@@ -67,7 +67,7 @@
     {% if request.user.upgrades.all %}
                 <ul class="list-group list-group-horizontal-sm card-text" id="essence-upgrades">
         {% for upgraded in request.user.upgrades.all %}
-                    <li class="bg-dark list-group-item text-reset" title="{{ upgraded.upgrade.name }}{% if upgraded.amount > 1 %} (x{{ upgraded.amount }}){% endif %}">
+                    <li class="bg-dark list-group-item list-group-item-dark text-reset" title="{{ upgraded.upgrade.name }}{% if upgraded.amount > 1 %} (x{{ upgraded.amount }}){% endif %}">
                         {{ upgraded.upgrade.name }}
                         {% if upgraded.amount > 1 %}(x{{ upgraded.amount }}){% endif %}
                     </li>

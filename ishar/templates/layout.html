@@ -27,8 +27,8 @@
     {% endblock scripts %}
     </head>
     <body>
-        <header class="container-fluid p-3">
-            <nav class="navbar navbar-dark navbar-expand-lg bg-dark rounded" style="border: 0.1rem solid var(--ishar-color);">
+        <header class="container-xxl p-3">
+            <nav class="p-3 navbar navbar-dark navbar-expand-lg bg-dark rounded" style="border: 0.1rem solid var(--ishar-color);">
                 <button style="border: 0.1rem solid var(--ishar-color);" class="m-1 navbar-toggler navbar-dark" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
@@ -36,7 +36,7 @@
                     <img class="m-1 navbar-brand" id="logo" alt="Ishar MUD" src="{% static "images/header_alpha.png" %}" style="height: 10vh;">
                 </a>
                 <div class="collapse navbar-collapse" id="navbarNavDropdown">
-                    <ul class="navbar-nav nav-underline m-2">
+                    <ul class="navbar-nav nav-underline m-1">
                         <li class="nav-item" title="Main">
                             <a class="nav-link" href="{% url "index" %}">Main</a>
                         </li>
@@ -63,7 +63,7 @@
 {% if user and user.is_authenticated %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="{% url "portal" %}" role="button" data-bs-toggle="dropdown" aria-expanded="false">Portal</a>
-                            <ul class="dropdown-menu dropdown-menu-dark bg-dark border border-secondary">
+                            <ul class="dropdown-menu dropdown-menu-dark bg-dark border border-secondary p-3">
                                 <li class="nav-item" title="Account">
                                     <a class="bg-dark nav-link dropdown-item" href="{% url "account" %}">Account</a>
                                 </li>
@@ -139,7 +139,7 @@
         </footer>
 {% endif %}
 
-        <footer class="container-lg p-3">
+        <footer class="container-xxl p-3">
             <div class="text-center row p-3 bg-dark rounded" style="border: 0.1rem solid var(--ishar-color);">
                 <div class="col">
                     <a href="mailto:admin@isharmud.com" target="_blank" title="E-mail Us! (admin@isharmud.com)">✉️ E-mail us!</a>
