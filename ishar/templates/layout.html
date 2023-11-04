@@ -27,7 +27,7 @@
     {% endblock scripts %}
     </head>
     <body>
-        <header class="container-xxl p-3">
+        <header class="container-xl p-3">
             <nav class="p-3 navbar navbar-dark navbar-expand-lg bg-dark rounded" style="border: 0.1rem solid var(--ishar-color);">
                 <button style="border: 0.1rem solid var(--ishar-color);" class="m-1 navbar-toggler navbar-dark" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -56,9 +56,6 @@
                         </li>
                         <li class="nav-item" title="Patches">
                             <a class="nav-link" href="{% url "patches" %}">Patches</a>
-                        </li>
-                        <li class="nav-item" title="World">
-                            <a class="nav-link" href="{% url "world" %}">World</a>
                         </li>
 {% if user and user.is_authenticated %}
                         <li class="nav-item dropdown">
@@ -96,6 +93,9 @@
                             <a class="nav-link" href="{% url "portal" %}">Portal</a>
                         </li>
 {% endif %}
+                        <li class="nav-item" title="World">
+                            <a class="nav-link" href="{% url "world" %}">World</a>
+                        </li>
                     </ul>
                 </div>
             </nav>
@@ -127,7 +127,7 @@
         </main>
 
 {% if current_season %}
-        <footer class="container-lg p-3">
+        <footer class="container-xl p-3">
             <div class="text-center row p-3 bg-dark rounded" style="border: 0.1rem solid var(--ishar-color);">
                 <div class="col">
                     <a href="{% url "current_season" %}">{{ current_season }}</a>
@@ -139,7 +139,7 @@
         </footer>
 {% endif %}
 
-        <footer class="container-xxl p-3">
+        <footer class="container-xl p-3">
             <div class="text-center row p-3 bg-dark rounded" style="border: 0.1rem solid var(--ishar-color);">
                 <div class="col">
                     <a href="mailto:admin@isharmud.com" target="_blank" title="E-mail Us! (admin@isharmud.com)">✉️ E-mail us!</a>
