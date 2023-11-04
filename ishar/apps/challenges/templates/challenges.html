@@ -13,25 +13,19 @@
                         { id: 'name', name: 'Find and Kill' },
                         { id: 'people', name: 'People' },
                         { id: 'level', name: 'Level' },
-                        { id: 'reward', name: 'Reward' },
-                        { id: 'completed', name: 'Completed' }
+                        { id: 'reward', name: 'Reward' }
                     ],
                     data: [
     {% for challenge in challenges %}
                         {
         {% if challenge.is_completed %}
-                            name: gridjs.html('<span class="challenge-completed">{% autoescape off %}{{ challenge.mob_name }}{% endautoescape %}</span>'),
+                            name: gridjs.html('<span class="challenge-completed">{% autoescape off %}{{ challenge.mob_name }}{% endautoescape %}</span> Completed by {% for winner in challenge.winners %}<a href="{% url "player" name=winner %}" title="Player: {{ winner }}">{{ winner }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}'),
         {% else %}
                             name: "{% autoescape off %}{{ challenge.mob_name }}{% endautoescape %}",
         {% endif %}
                             people: "{{ challenge.adj_people }}",
                             level: {{ challenge.orig_level }},
-                            reward: {{ challenge.orig_tier }},
-        {% if challenge.is_completed and challenge.winners %}
-                            completed: gridjs.html('{% for winner in challenge.winners %}<a href="{% url "player" name=winner %}" title="Player: {{ winner }}">{{ winner }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}')
-        {% else %}
-                            completed: ""
-        {% endif %}
+                            reward: {{ challenge.orig_tier }}
                         },
     {% endfor %}
                     ],
