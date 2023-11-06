@@ -30,7 +30,7 @@
     {% endfor %}
                     ],
                     className: {
-                        table: "card-body table table-bordered table-dark text-reset",
+                        table: "table table-bordered table-dark",
                     },
                     search: true,
                     sort: true,
@@ -42,10 +42,14 @@
         </script>
 {% endblock scripts %}
 {% block content %}
-                <div class="card bg-dark">
-                     <div class="card-body" id="challenges"></div>
-                </div>
-                <script>
-                    showChallenges(document.getElementById('challenges'));
-                </script>
+    <div class="card bg-dark">
+        <div class="card-body">
+            <div class="card-text" id="challenges"></div>
+        </div>
+    </div>
+    <script>
+        showChallenges(
+            document.getElementById('challenges')
+        );
+    </script>
 {% endblock content %}
