@@ -3,7 +3,6 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-    {% block head %}
         <meta charset="UTF-8">
         <meta name="author" content="Ishar MUD">
         <meta name="description" content="Ishar MUD">
@@ -15,19 +14,20 @@
         <meta property="og:description" content="Ishar MUD: {% block meta_description %}a free online text-adventure RPG{% endblock meta_description %}">
         <meta property="og:url" content="{% block meta_url %}{% url "index" %}{% endblock meta_url %}">
         <meta property="og:image" content="{% block meta_image %}{% static "images/cropped_ishar_logo_dark.png" %}{% endblock meta_image %}">
-        <title>{% block title %}Welcome{% endblock title %} - Ishar MUD</title>
+        <title>
+            Ishar MUD: {% block title %}Welcome{% endblock title %}
+        </title>
         <link rel="shortcut icon" href="{% static "images/favicon.ico" %}" type="image/x-icon">
         <link rel="preconnect" href="http://cdn.jsdelivr.net">
         <link rel="dns-prefetch" href="http://cdn.jsdelivr.net">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
         <link rel="stylesheet" type="text/css" href="{% static "style.css" %}">
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
-    {% endblock head %}
     {% block scripts %}
     {% endblock scripts %}
     </head>
     <body>
-        <header class="container-xl p-3">
+        <header class="container-fluid p-3">
             <nav class="p-3 navbar navbar-dark navbar-expand-lg bg-dark rounded" style="border: 0.1rem solid var(--ishar-color);">
                 <button style="border: 0.1rem solid var(--ishar-color);" class="m-1 navbar-toggler navbar-dark" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -38,63 +38,95 @@
                 <div class="collapse navbar-collapse" id="navbarNavDropdown">
                     <ul class="navbar-nav nav-underline m-1">
                         <li class="nav-item" title="Main">
-                            <a class="nav-link" href="{% url "index" %}">Main</a>
+                            <a class="nav-link" href="{% url "index" %}">
+                                Main
+                            </a>
                         </li>
 {% if user.is_staff %}
                         <li class="nav-item" title="Admin">
-                            <a class="nav-link" href="{% url "admin:index" %}" target="_blank">Admin</a>
+                            <a class="nav-link" href="{% url "admin:index" %}" target="_blank">
+                                Admin
+                            </a>
                         </li>
 {% endif %}
                         <li class="nav-item" title="Connect to Ishar MUD">
-                            <a class="nav-link" href="{% url "connect" %}" target="_blank">Connect</a>
+                            <a class="nav-link" href="{% url "connect" %}" target="_blank">
+                                Connect
+                            </a>
                         </li>
                         <li class="nav-item" title="Frequently Asked Questions">
-                            <a class="nav-link" href="{% url "faq" %}">FAQs</a>
+                            <a class="nav-link" href="{% url "faq" %}">
+                                FAQs
+                            </a>
                         </li>
                         <li class="nav-item" title="Help">
-                            <a class="nav-link" href="{% url "help" %}">Help</a>
+                            <a class="nav-link" href="{% url "help" %}">
+                                Help
+                            </a>
                         </li>
                         <li class="nav-item" title="Patches">
-                            <a class="nav-link" href="{% url "patches" %}">Patches</a>
+                            <a class="nav-link" href="{% url "patches" %}">
+                                Patches
+                            </a>
                         </li>
 {% if user and user.is_authenticated %}
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="{% url "portal" %}" role="button" data-bs-toggle="dropdown" aria-expanded="false">Portal</a>
+                            <a class="nav-link dropdown-toggle" href="{% url "portal" %}" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Portal
+                            </a>
                             <ul class="dropdown-menu dropdown-menu-dark bg-dark border border-secondary p-3">
                                 <li class="nav-item" title="Account">
-                                    <a class="bg-dark nav-link dropdown-item" href="{% url "account" %}">Account</a>
+                                    <a class="bg-dark nav-link dropdown-item" href="{% url "account" %}">
+                                        Account
+                                    </a>
                                 </li>
                                 <li class="nav-item" title="Challenges">
-                                    <a class="bg-dark nav-link dropdown-item" href="{% url "challenges" %}">Challenges</a>
+                                    <a class="bg-dark nav-link dropdown-item" href="{% url "challenges" %}">
+                                        Challenges
+                                    </a>
                                 </li>
     {% if global_event_count and global_event_count > 0 %}
                                 <li class="nav-item" title="Events ({{ global_event_count }})">
-                                    <a class="bg-dark nav-link dropdown-item" href="{% url "events" %}">Events</a>
-                                    <span class="badge text-bg-secondary">{{ global_event_count }}</span>
+                                    <a class="bg-dark nav-link dropdown-item" href="{% url "events" %}">
+                                        Events
+                                    </a>
+                                    <span class="badge text-bg-secondary">
+                                        {{ global_event_count }}
+                                    </span>
                                 </li>
     {% endif %}
                                 <li class="nav-item" title="Leaders">
-                                    <a class="bg-dark nav-link dropdown-item" href="{% url "leaders" %}">Leaders</a>
+                                    <a class="bg-dark nav-link dropdown-item" href="{% url "leaders" %}">
+                                        Leaders
+                                    </a>
                                 </li>
                                 <li class="nav-item" title="Players">
                                     <a class="bg-dark nav-link dropdown-item" href="{% url "portal" %}">Players
     {% if request.user.players and request.user.players.count > 0 %}
-                                        <span class="badge text-bg-secondary">{{ request.user.players.count }}</span>
+                                        <span class="badge text-bg-secondary">
+                                            {{ request.user.players.count }}
+                                        </span>
                                     </a>
     {% endif %}
                                 </li>
                                 <li class="nav-item" title="Log out">
-                                    <a class="bg-dark nav-link dropdown-item" href="{% url "logout" %}">Log out ({{ user.get_username }})</a>
+                                    <a class="bg-dark nav-link dropdown-item" href="{% url "logout" %}">
+                                        Log out ({{ user.get_username }})
+                                    </a>
                                 </li>
                             </ul>
                         </li>
 {% else %}
                         <li class="nav-item" title="Portal">
-                            <a class="nav-link" href="{% url "portal" %}">Portal</a>
+                            <a class="nav-link" href="{% url "portal" %}">
+                                Portal
+                            </a>
                         </li>
 {% endif %}
                         <li class="nav-item" title="World">
-                            <a class="nav-link" href="{% url "world" %}">World</a>
+                            <a class="nav-link" href="{% url "world" %}">
+                                World
+                            </a>
                         </li>
                     </ul>
                 </div>
@@ -104,7 +136,9 @@
         <main class="container-fluid p-3">
             <div class="card bg-dark" style="border: 0.1rem solid var(--ishar-color);">
                 <div class="card-header" style="border: 0.1rem solid var(--ishar-color);">
-                    <h2>{% block header %}{% endblock header %}</h2>
+                    <h2>
+                        {% block header %}{% endblock header %}
+                    </h2>
                 </div>
                 <div class="card-body">
 {% block messages %}
@@ -113,7 +147,9 @@
                         <div class="card-body">
                             <ul class="card-text fw-bold">
         {% for message in messages %}
-                                <li class="message-{{ message.tags }}">{{ message }}</li>
+                                <li class="message-{{ message.tags }}">
+                                    {{ message }}
+                                </li>
         {% endfor %}
                             </ul>
                         </div>
@@ -127,10 +163,12 @@
         </main>
 
 {% if current_season %}
-        <footer class="container-xl p-3">
+        <footer class="container-fluid p-3">
             <div class="text-center row p-3 bg-dark rounded" style="border: 0.1rem solid var(--ishar-color);">
                 <div class="col">
-                    <a href="{% url "current_season" %}">{{ current_season }}</a>
+                    <a href="{% url "current_season" %}">
+                        {{ current_season }}
+                    </a>
                 </div>
                 <div class="col">
                     ends {{ current_season.expiration_date | naturaltime }}
@@ -139,16 +177,23 @@
         </footer>
 {% endif %}
 
-        <footer class="container-xl p-3">
+        <footer class="container-fluid p-3">
             <div class="text-center row p-3 bg-dark rounded" style="border: 0.1rem solid var(--ishar-color);">
                 <div class="col">
-                    <a href="mailto:admin@isharmud.com" target="_blank" title="E-mail Us! (admin@isharmud.com)">✉️ E-mail us!</a>
+                    <a href="mailto:admin@isharmud.com" target="_blank" title="E-mail Us! (admin@isharmud.com)">
+                        ✉️ E-mail us!
+                    </a>
                 </div>
                 <div class="col">
-                    <a href="{% url 'support' %}" title="Support Ishar MUD">❤️ Support Ishar MUD</a>
+                    <a href="{% url 'support' %}" title="Support Ishar MUD">
+                        ❤️ Support Ishar MUD
+                    </a>
                 </div>
                 <div class="col">
-                    <a href="{%  url "discord" %}" target="_blank" title="Join us on Discord!"><img alt="Discord" src="{% static "images/discord.png" %}" style="width: 1rem;"> Join us on Discord!</a>
+                    <a href="{%  url "discord" %}" target="_blank" title="Join us on Discord!">
+                        <img alt="Discord" src="{% static "images/discord.png" %}" style="height: 1rem;">
+                        Join us on Discord!
+                    </a>
                 </div>
             </div>
         </footer>
