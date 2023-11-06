@@ -203,7 +203,9 @@ class RacesAdmin(admin.ModelAdmin):
     model = Race
     fieldsets = (
         (None, {"fields": ("race_id", "display_name", "symbol", "folk_name")}),
-        ("Descriptions", {"fields": ("short_description", "long_description")}),
+        ("Descriptions", {"fields": (
+            "description", "short_description","long_description"
+        )}),
         ("Defaults", {"fields": (
             "default_movement", "default_height", "default_weight"
         )}),
@@ -227,15 +229,12 @@ class RacesAdmin(admin.ModelAdmin):
     inlines = (
         RaceSkillAdminInline, RaceAffinityAdminInline, RaceDeathloadAdminInline
     )
-    list_display = (
-        "display_name", "symbol", "is_playable", "folk_name",
-        "short_description"
-    )
+    list_display = ("display_name", "symbol", "is_playable", "folk_name")
     list_filter = ("is_playable",)
     readonly_fields = ("race_id",)
     search_fields = (
         "display_name", "symbol", "folk_name", "attack_noun",
-        "short_description", "long_description"
+        "description", "short_description", "long_description"
     )
 
     def has_module_permission(self, request, obj=None) -> bool:
