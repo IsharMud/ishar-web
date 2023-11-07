@@ -10,6 +10,7 @@ from ishar.apps.accounts.views import (
 from ishar.apps.challenges.views import ChallengesViewSet
 from ishar.apps.classes.views import ClassesViewSet
 from ishar.apps.events.views import GlobalEventsViewSet
+from ishar.apps.faqs.views import FAQViewSet
 from ishar.apps.news.views import NewsViewSet
 from ishar.apps.patches.views import PatchesViewSet
 from ishar.apps.players.views import (
@@ -51,6 +52,7 @@ api_router.register(r"accounts_upgrades", AccountsUpgradesViewSet, "accounts_upg
 api_router.register(r"challenges", ChallengesViewSet, "challenge")
 api_router.register(r"classes", ClassesViewSet, "class")
 api_router.register(r"events", GlobalEventsViewSet, "event")
+api_router.register(r"faq", FAQViewSet, "faq")
 api_router.register(r"forces", ForcesViewSet, "force")
 api_router.register(r"news", NewsViewSet, "news")
 api_router.register(r"patches", PatchesViewSet, "patch")

@@ -1,0 +1,39 @@
+{% extends "layout.html" %}
+{% block meta_title %}Frequently Asked Questions{% endblock meta_title %}
+{% block meta_description %}A few common questions that are asked about Ishar MUD.{% endblock meta_description %}
+{% block meta_url %}{% url "faq" %}{% endblock meta_url %}
+{% block title %}Frequently Asked Questions{% endblock title %}
+{% block header %}Frequently Asked Questions{% endblock header %}
+{% block content %}
+    <p class="lead">
+        Here are a few common questions that are asked about Ishar MUD.
+    </p>
+    <p class="lead">
+        You may also want to visit the
+        <a href="/help/MUD%20Basics/" title="Help: MUD Basics">MUD Basics help page</a>,
+        our <a href="/start/" title="Get Started">getting started guide</a>, and
+        <a href="/discord/" target="_blank" title="IsharMUD Discord">join us on Discord</a>!
+    </p>
+    <div class="accordion bg-dark">
+    {% for faq in faqs %}
+        <div class="accordion-item bg-dark text-white" id="faq-{{ faq.faq_id }}">
+            <h3 class="accordion-header" title="{{ faq.question_text }}">
+                <button class="accordion-button bg-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="true" aria-controls="collapse{{ forloop.counter }}">
+                    {{ faq.question_text }}
+                </button>
+            </h3>
+            <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse show">
+                <div class="accordion-body">
+                    <p title="{{ faq.question_answer }}">
+                        {% autoescape off %}{{ faq.question_answer }}{% endautoescape %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+    <p class="lead">
+        If there is anything that you think is missing, please feel free to reach out, by e-mailing
+        <a class="font-monospace" href="mailto:admin@isharmud.com" target="_blank" title="E-mail: admin@isharmud.com">admin@isharmud.com</a>.
+    </p>
+{% endblock content %}
