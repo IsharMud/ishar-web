@@ -30,18 +30,18 @@
     {% endif %}
 
     <div class="card bg-dark">
-        <h4 class="card-header">Essence</h4>
+        <h4 class="card-header" title="Essence">Essence</h4>
         <div class="card-body">
-            <p class="card-text">
+            <p class="card-text lead">
                 &quot;<a title="Essence" href="{% url "help_page" help_topic="Essence" %}">Essence</a>&quot;
-                are the rewards points that you earn during the season!
+                are the rewards points that you earn during each season!
             </p>
-            <p class="card-text">
+            <p class="card-text lead">
                 Essence is preserved across seasons, and can be spent at any time
                 by typing &quot;<code>shop</code>&quot; after logging in.
             </p>
     {% if request.user and not request.user.is_anonymous %}
-            <p class="card-text">
+            <p class="card-text lead">
                 You can view your current essence balance,
                 and see how many points you have earned so far this season,
                 by visiting your <a href="{% url "account" %}#essence">account page</a>.

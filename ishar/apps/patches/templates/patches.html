@@ -6,60 +6,62 @@
 {% block title %}Patches{% endblock title %}
 {% block header %}Patches{% endblock header %}
 {% block content %}
-<div class="card-deck">
-
-    <div class="card bg-dark">
-        <div class="card-body">
-            <p class="card-text lead">
-                Ishar MUD is under regular development, and constantly being improved!
-            </p>
-        </div>
-    </div>
-
+<p class="lead">
+    Ishar MUD is under regular development, and constantly being improved!
+</p>
+<div class="container-sm">
     {% if patches %}
+    <div class="accordion bg-dark" id="accordionPatches">
         {% for patch in patches %}
-    <div class="card bg-dark">
-        <div class="card-header">
-            <h3>
-                <a href="{{ patch.patch_file.url }}" target="_blank">{{ patch.patch_name }}</a>
+        <div class="accordion-item bg-dark text-white">
+            <h3 class="accordion-header" title="{{ player.name }}">
+                <button class="accordion-button bg-dark text-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="true" aria-controls="collapse{{ forloop.counter }}">
+                    <strong class="p-1">{{ patch.patch_name }}</strong>
+                </button>
             </h3>
-        </div>
-        <div class="card-body">
-            <p class="card-text">
-                <strong>Date</strong>:
-                {{ patch.patch_date }}
-            </p>
-            <p class="card-text">
-                <strong>Size</strong>:
-                {{ patch.patch_file.size | filesizeformat }}
-            </p>
-        </div>
-    </div>
-        {% endfor %}
-
-        {% if page_obj %}
-    <div class="card bg-dark">
-        <div class="card-body">
-            <div class="card-footer pagination">
-                <div class="card-text">
-            {% if page_obj.has_previous %}
-                    <a href="?page=1">&laquo; first</a>
-                    <a href="?page={{ page_obj.previous_page_number }}">previous</a>
-            {% endif %}
-                    <span class="current">
-                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-                    </span>
-
-            {% if page_obj.has_next %}
-                    <a href="?page={{ page_obj.next_page_number }}">next</a>
-                    <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
-            {% endif %}
+            <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse{% if forloop.first %} show{% endif %}" data-bs-parent="#accordionPortal">
+                <div class="accordion-body">
+                    <blockquote class="blockquote">
+                        <p class="p-3">
+                            <a href="{{ patch.patch_file.url }}" target="_blank" title="{{ patch.patch_name }}">
+                                {{ patch.patch_file.name }}
+                            </a>
+                            <small>
+                                <code class="small" title="{{ patch.patch_file.size | filesizeformat }}">
+                                    {{ patch.patch_file.size | filesizeformat }}
+                                </code>
+                            </small>
+                        </p>
+                        <footer class="blockquote-footer" title="-- {{ patch.account.get_username | title }} @ {{ patch.patch_date | date:"r" }}">
+                            <cite>{{ patch.account.get_username | title }}</cite> @ {{ patch.patch_date | date:"r" }}
+                        </footer>
+                    </blockquote>
                 </div>
             </div>
         </div>
-        {% endif %}
+        {% endfor %}
     </div>
+        {% if page_obj %}
+    <div class="pagination lead">
+        <p class="step-links">
+            {% if page_obj.has_previous %}
+            <a href="?page=1">&laquo; first</a>
+            <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+            {% endif %}
+            <span class="current">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">next</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+            {% endif %}
+        </p>
+    </div>
+        {% endif %}
+    {% else %}
+    <p class="lead">
+        No patches found.
+    </p>
     {% endif %}
-
 </div>
 {% endblock content %}

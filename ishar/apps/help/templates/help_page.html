@@ -47,7 +47,7 @@
     {% if request.user.is_anonymous and not help_topic %}
     <div class="card bg-dark">
         <div class="card-body">
-            <p class="card-text">
+            <p class="card-text lead">
                 If you are new here, you may want to download one of many
                 <a href="{% url "clients" %}" title="MUD clients">MUD clients</a>,
                 see our <a href="{% url "start" %}" title="getting started guide">getting started guide</a>, and
