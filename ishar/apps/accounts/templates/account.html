@@ -37,6 +37,11 @@
     <div class="card bg-dark">
         <h4 class="card-header" id="essence" title="Essence">
             <a href="#essence">Essence</a>
+                <a class="small" href="{% url "help_page" help_topic='Essence' %}" title="Help: Essence">
+                    <small class="small">
+                        <span class="small bi bi-question-circle text-white"></span>
+                    </small>
+            </a>
         </h4>
         <div class="card-group">
             <div class="card bg-dark" title="Current Balance: {{ request.user.current_essence }} essence.">

@@ -4,99 +4,93 @@
 {% block meta_url %}{% url "portal" %}{% endblock meta_url %}
 {% block title %}Portal{% endblock title %}
 {% block header %}Welcome{% if request.user.account_name %}, {{ request.user.account_name | title }}{% endif %}!{% endblock header %}
-{% block scripts %}
-    {% if request.user.players %}
-        <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
-        <script>
-            function showPlayers(where) {
-                new gridjs.Grid({
-                    columns: [
-                        {
-                            id:         'name',
-                            name:       'Player',
-                            formatter:  (cell) => gridjs.html(`<a href="/player/${cell}#player">${cell}</a>`)
-                        },
-                        {
-                            id:         'level',
-                            name:       'Level'
-                        },
-                        {
-                            id:         'remorts',
-                            name:       'Remorts'
-                        },
-                        {
-                            id:         'renown',
-                            name:       'Renown'
-                        },
-                        {
-                            id:         'quests',
-                            name:       'Quests'
-                        },
-                        {
-                            id:         'challenges',
-                            name:       'Challenges'
-                        },
-                        {
-                            id:         'deaths',
-                            name:       'Deaths',
-                            sort:       {
-                                            compare: (a, b) => {
-                                                if ( (b > a) || (isNaN(a)) ) {
-                                                    return -1;
-                                                } else if ( (a > b) || (isNaN(b)) ) {
-                                                    return 1;
-                                                } else {
-                                                    return 0;
-                                                };
-                                            }
-                                        }
-                        }
-                    ],
-                    data: [
-                      {% for player in request.user.players.all %}
-                        {
-                            name:       "{{ player.name }}",
-                            level:      {{ player.common.level }},
-                            remorts:    {{ player.remorts }},
-                            renown:     {{ player.total_renown }},
-                            quests:     {{ player.quests_completed }},
-                            challenges: {{ player.challenges_completed }},
-                            deaths:     {{ player.deaths }}
-                        }{% if not forloop.last %},{% endif %}
-                      {% endfor %}
-                    ],
-                    className: {
-                        table: "card-body table table-bordered table-responsive table-dark text-reset",
-                    },
-                    search:     false,
-                    sort:       true,
-                    pagination: false,
-                    width:      '50%'
-                }).render(where);
-            };
-        </script>
-    {% endif %}
-{% endblock scripts %}
 {% block content %}
-    <div class="card bg-dark">
+    <div class="container-md">
     {% if request.user.players %}
-        <h3 class="card-header" title="You have {{ request.user.players.count }} character{{ request.user.players.count | pluralize }}.">
+        <h3 class="m-3" title="You have {{ request.user.players.count }} character{{ request.user.players.count | pluralize }}.">
             You have {{ request.user.players.count }} character{{ request.user.players.count | pluralize }}:
         </h3>
-        <div id="players"></div>
-        <script>
-            showPlayers(document.getElementById('players'));
-        </script>
+        <div class="p-3 accordion accordion-flush bg-dark">
+        {% for player in request.user.players.all %}
+            <div class="accordion-item bg-dark text-white">
+                <h3 class="accordion-header" title="{{ player.name }}">
+                    <button class="accordion-button bg-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false" aria-controls="collapse{{ forloop.counter }}">
+                        <strong>{{ player.name }}</strong>
+                    </button>
+                </h3>
+                <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse">
+                    <div class="accordion-body">
+                        <h4 title="{{ player.player_title }}">
+                            <a href="{{ player.get_absolute_url }}">
+                                <span class="bi bi-person-fill">
+                                    {{ player.player_title }}
+                                </span>
+                            </a>
+                        </h4>
+            {% if not player.is_immortal %}
+                        <ol class="bg-dark list-group list-group-horizontal-sm">
+                            <li class="bg-dark list-group-item list-group-item-text text-white" title="Level: {{ player.common.level }}">
+                                <strong>Level</strong>: {{ player.common.level }}
+                            </li>
+                            <li class="bg-dark list-group-item list-group-item-text text-white" title="Class: {{ player.common.player_class.get_class_name }}">
+                                <strong>Class</strong>: {{ player.common.player_class.get_class_name }}
+                            </li>
+                            <li class="bg-dark list-group-item list-group-item-text text-white" title="Race: {{ player.common.race.display_name }}">
+                                <strong>Race</strong>: {{ player.common.race.display_name }}
+                            </li>
+                            <li class="bg-dark list-group-item list-group-item-text text-white" title="Alignment: {{ player.get_player_alignment }} ({{ player.common.alignment }})">
+                                <strong>Alignment</strong>: {{ player.get_player_alignment }}
+                            </li>
+                {% if player.remorts > 0 %}
+                            <li class="bg-dark list-group-item list-group-item-text text-white" title="Remorts: {{ player.remorts }}">
+                                <strong>Remorts</strong>: {{ player.remorts }}
+                            </li>
+                {% endif %}
+                {% if player.renown > 0 %}
+                            <li class="bg-dark list-group-item list-group-item-text text-white" title="Renown: {{ player.renown }}">
+                                <strong>Renown</strong>: {{ player.renown }}
+                            </li>
+                {% endif %}
+                {% if player.quests_completed > 0 %}
+                            <li class="bg-dark list-group-item list-group-item-text text-white" title="Quests: {{ player.quests_completed }}">
+                                <strong>Quests</strong>: {{ player.quests_completed }}
+                            </li>
+                {% endif %}
+                {% if player.challenges_completed > 0 %}
+                            <li class="bg-dark list-group-item list-group-item-text text-white" title="Challenges: {{ player.challenges_completed }}">
+                                <strong>Challenges</strong>: {{ player.challenges_completed }}
+                            </li>
+                {% endif %}
+                            <li class="bg-dark list-group-item list-group-item-text text-white" title="Deaths: {{ player.deaths }}">
+                                <strong>Deaths</strong>: {{ player.deaths }}
+                            </li>
+                        </ol>
+            {% else %}
+                        <p class="lead text-white">
+                            {{ player.name | title }} {{ player.get_player_phrase }}
+                            a <span class="{{ player.player_css }}">{{ player.player_type }}</span> character!
+                        </p>
+            {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+        </div>
     {% else %}
-        <h3 class="card-header" title="You have not created any players yet!">
+        <h3 class="m-3" title="You have not created any players yet!">
             You have not created any players yet!
         </h3>
     {% endif %}
-    </div>
     {% if request.user.current_essence > 0 %}
-    <h5 class="card-footer">
-        You have {{ request.user.current_essence }}
-        <a title="essence" href="{% url "account" %}#essence">essence</a>.
-    </h5>
+        <h4 class="m-3" title="You have {{ request.user.current_essence }} essence.">
+            You have {{ request.user.current_essence }}
+            <a title="essence" href="{% url "account" %}#essence">essence</a>.
+            <a class="small" href="{% url "help_page" help_topic='Essence' %}" title="Help: Essence">
+                <small class="small">
+                    <span class="small bi bi-question-circle text-white"></span>
+                </small>
+            </a>
+        </h4>
     {% endif %}
+    </div>
 {% endblock content %}

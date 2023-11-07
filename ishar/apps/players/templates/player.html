@@ -85,11 +85,11 @@
             {% endif %}
             {% if player.player_stats %}
         <div class="card bg-dark">
-            <h3 class="card-header" title="Statistics">
+            <h3 class="card-header" id="stats" title="Statistics">
                 Statistics
             </h3>
             <div class="card-body">
-                <ol class="card-text list-group list-group-horizontal-sm bg-dark" id="player-statistics">
+                <ol class="card-text list-group list-group-horizontal-sm bg-dark">
                 {% for stat_name, stat_value in player.player_stats.items %}
                     <li class="bg-dark list-group-item" title="{{ stat_name }}: {{ stat_value }}">
                         <span class="list-group-item-text text-white">
