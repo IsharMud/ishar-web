@@ -4,7 +4,7 @@
 {% block meta_description %}Your Ishar MUD Account{% endblock meta_description %}
 {% block meta_url %}{% url "account" %}{% endblock meta_url %}
 {% block title %}Account ({{ request.user.account_name | title }}){% endblock title %}
-{% block header %}Account ({{ request.user.account_name | title }}){% endblock header %}
+{% block header %}<span class="bi bi-person"></span> Account ({{ request.user.account_name | title }}){% endblock header %}
 {% block content %}
     <div class="card-group">
         <div class="card bg-dark">
@@ -12,10 +12,14 @@
             <div class="card-body">
                 <ul class="card-text list-group">
                     <li class="bg-dark list-group-item list-group-item-action list-group-item-dark" title="Change your password">
-                        <a class="list-group-item-text" href="{% url "password" %}">Change your password</a>
+                        <a class="bi bi-key list-group-item-text" href="{% url "password" %}">
+                            Change your password
+                        </a>
                     </li>
                     <li class="bg-dark list-group-item list-group-item-action list-group-item-dark" title="View your players">
-                        <a class="list-group-item-text" href="{% url "portal" %}">View your players</a>
+                        <a class="bi bi-person-lines-fill list-group-item-text" href="{% url "portal" %}">
+                            View your players
+                        </a>
                     </li>
                 </ul>
             </div>

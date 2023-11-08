@@ -8,6 +8,7 @@
 <nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '>';">
     <ol class="breadcrumb" style="--bs-breadcrumb-divider-color: var(--ishar-color);">
         <li class="breadcrumb-item{% if not help_topic %} active" aria-current="page{% endif %}" title="Help">
+            <span class="text-ishar bi bi-info-square"></span>
             <a href="{% url "help" %}">Help</a>
         </li>
     {% if help_topic %}

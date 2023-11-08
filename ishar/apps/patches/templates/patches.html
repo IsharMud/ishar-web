@@ -4,7 +4,7 @@
 {% block meta_description %}The latest patches to Ishar MUD{% endblock meta_description %}
 {% block meta_url %}{% url "patches" %}{% endblock meta_url %}
 {% block title %}Patches{% endblock title %}
-{% block header %}Patches{% endblock header %}
+{% block header %}<span class="bi bi-bandaid"></span> Patches{% endblock header %}
 {% block content %}
 <p class="lead">
     Ishar MUD is under regular development, and constantly being improved!
@@ -14,7 +14,7 @@
     <div class="accordion m-5">
         {% for patch in patches %}
         <div class="accordion-item bg-dark text-white">
-            <h3 class="accordion-header" title="{{ player.name }}">
+            <h3 class="accordion-header" title="{{ patch.patch_name }}">
                 <button class="accordion-button bg-black fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="true" aria-controls="collapse{{ forloop.counter }}">
                     {{ patch.patch_name }}
                 </button>
