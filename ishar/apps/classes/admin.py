@@ -3,7 +3,7 @@ from django.contrib import admin
 from ishar.apps.classes.models import Class, ClassLevel, ClassRace, ClassSkill
 
 
-class ClassLevelInlineAdmin(admin.StackedInline):
+class ClassLevelInlineAdmin(admin.TabularInline):
     """
     Class Levels tabular inline administration.
     """
@@ -13,7 +13,7 @@ class ClassLevelInlineAdmin(admin.StackedInline):
     model = ClassLevel
 
 
-class ClassRaceInlineAdmin(admin.StackedInline):
+class ClassRaceInlineAdmin(admin.TabularInline):
     """
     Class Race tabular inline administration.
     """
@@ -23,7 +23,7 @@ class ClassRaceInlineAdmin(admin.StackedInline):
     model = ClassRace
 
 
-class ClassSkillInlineAdmin(admin.StackedInline):
+class ClassSkillInlineAdmin(admin.TabularInline):
     """
     Class Skill tabular inline administration.
     """
@@ -85,3 +85,8 @@ class ClassesAdmin(admin.ModelAdmin):
         if request.user and not request.user.is_anonymous:
             return request.user.is_eternal()
         return False
+
+
+admin.site.register(ClassLevel)
+admin.site.register(ClassRace)
+admin.site.register(ClassSkill)
