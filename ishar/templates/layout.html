@@ -39,56 +39,56 @@
                 <div class="collapse navbar-collapse" id="navbarNavDropdown">
                     <ul class="navbar-nav nav-underline m-1">
                         <li class="nav-item" title="Main">
-                            <a class="nav-link" href="{% url "index" %}">
+                            <a class="bi bi-house nav-link" href="{% url "index" %}">
                                 Main
                             </a>
                         </li>
 {% if user.is_staff %}
                         <li class="nav-item" title="Admin">
-                            <a class="nav-link" href="{% url "admin:index" %}" target="_blank">
+                            <a class="bi bi-gear nav-link" href="{% url "admin:index" %}" target="_blank">
                                 Admin
                             </a>
                         </li>
 {% endif %}
                         <li class="nav-item" title="Connect to Ishar MUD">
-                            <a class="nav-link" href="{% url "connect" %}" target="_blank">
+                            <a class="bi bi-globe nav-link" href="{% url "connect" %}" target="_blank">
                                 Connect
                             </a>
                         </li>
                         <li class="nav-item" title="Frequently Asked Questions">
-                            <a class="nav-link" href="{% url "faq" %}">
+                            <a class="bi-question-square nav-link" href="{% url "faq" %}">
                                 FAQs
                             </a>
                         </li>
                         <li class="nav-item" title="Help">
-                            <a class="nav-link" href="{% url "help" %}">
+                            <a class="bi bi-info-square nav-link" href="{% url "help" %}">
                                 Help
                             </a>
                         </li>
                         <li class="nav-item" title="Patches">
-                            <a class="nav-link" href="{% url "patches" %}">
+                            <a class="bi bi-bandaid nav-link" href="{% url "patches" %}">
                                 Patches
                             </a>
                         </li>
 {% if user and user.is_authenticated %}
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="{% url "portal" %}" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <a class="bi bi-menu-button nav-link dropdown-toggle" href="{% url "portal" %}" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 Portal
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark bg-dark border border-secondary p-3">
                                 <li class="nav-item" title="Account">
-                                    <a class="bg-dark nav-link dropdown-item" href="{% url "account" %}">
+                                    <a class="bi bi-person bg-dark nav-link dropdown-item" href="{% url "account" %}">
                                         Account
                                     </a>
                                 </li>
                                 <li class="nav-item" title="Challenges">
-                                    <a class="bg-dark nav-link dropdown-item" href="{% url "challenges" %}">
+                                    <a class="bi bi-award bg-dark nav-link dropdown-item" href="{% url "challenges" %}">
                                         Challenges
                                     </a>
                                 </li>
     {% if global_event_count and global_event_count > 0 %}
                                 <li class="nav-item" title="Events ({{ global_event_count }})">
-                                    <a class="bg-dark nav-link dropdown-item" href="{% url "events" %}">
+                                    <a class="bi bi-calendar-event bg-dark nav-link dropdown-item" href="{% url "events" %}">
                                         Events
                                     </a>
                                     <span class="badge text-bg-secondary">
@@ -97,12 +97,13 @@
                                 </li>
     {% endif %}
                                 <li class="nav-item" title="Leaders">
-                                    <a class="bg-dark nav-link dropdown-item" href="{% url "leaders" %}">
+                                    <a class="bi bi-trophy bg-dark nav-link dropdown-item" href="{% url "leaders" %}">
                                         Leaders
                                     </a>
                                 </li>
                                 <li class="nav-item" title="Players">
-                                    <a class="bg-dark nav-link dropdown-item" href="{% url "portal" %}">Players
+                                    <a class="bi bi-person-lines-fill bg-dark nav-link dropdown-item" href="{% url "portal" %}">
+                                        Players
     {% if request.user.players and request.user.players.count > 0 %}
                                         <span class="badge text-bg-secondary">
                                             {{ request.user.players.count }}
@@ -111,7 +112,7 @@
     {% endif %}
                                 </li>
                                 <li class="nav-item" title="Log out">
-                                    <a class="bg-dark nav-link dropdown-item" href="{% url "logout" %}">
+                                    <a class="bi bi-door-closed bg-dark nav-link dropdown-item" href="{% url "logout" %}">
                                         Log out ({{ user.get_username }})
                                     </a>
                                 </li>
@@ -119,13 +120,13 @@
                         </li>
 {% else %}
                         <li class="nav-item" title="Portal">
-                            <a class="nav-link" href="{% url "portal" %}">
+                            <a class="bi bi-menu-button nav-link" href="{% url "portal" %}">
                                 Portal
                             </a>
                         </li>
 {% endif %}
                         <li class="nav-item" title="World">
-                            <a class="nav-link" href="{% url "world" %}">
+                            <a class="bi bi-globe-asia-australia nav-link" href="{% url "world" %}">
                                 World
                             </a>
                         </li>
