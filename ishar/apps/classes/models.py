@@ -59,8 +59,8 @@ class Class(models.Model):
         verbose_name="Class Stat"
     )
     class_dc = models.IntegerField(
-        help_text="Class DC of the class.",
-        verbose_name="Class DC"
+        help_text="Expertise (DC) of the class.",
+        verbose_name="Class Expertise (DC)"
     )
     base_fortitude = models.IntegerField(
         help_text="Base fortitude of the class.",
@@ -85,7 +85,7 @@ class Class(models.Model):
         return f"{self.__class__.__name__}: {self.__str__()} [{self.class_id}]"
 
     def __str__(self) -> str:
-        return self.class_display
+        return self.get_class_name()
 
     @admin.display(description="Class Name", ordering="class_name")
     def get_class_name(self) -> str:
