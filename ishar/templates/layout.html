@@ -29,7 +29,7 @@
     </head>
     <body>
         <header class="container-fluid p-3">
-            <nav class="p-3 navbar navbar-dark navbar-expand-lg bg-dark rounded" style="border: 0.1rem solid var(--ishar-color);">
+            <nav class="p-3 navbar navbar-dark navbar-expand-lg bg-black rounded" style="border: 0.1rem solid var(--ishar-color);">
                 <button style="border: 0.1rem solid var(--ishar-color);" class="m-1 navbar-toggler navbar-dark" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
@@ -75,20 +75,20 @@
                             <a class="bi bi-menu-button nav-link dropdown-toggle" href="{% url "portal" %}" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 Portal
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-dark bg-dark border border-secondary p-3">
+                            <ul class="dropdown-menu dropdown-menu-dark bg-black border border-secondary p-3">
                                 <li class="nav-item" title="Account">
-                                    <a class="bi bi-person bg-dark nav-link dropdown-item" href="{% url "account" %}">
+                                    <a class="bi bi-person bg-black nav-link dropdown-item" href="{% url "account" %}">
                                         Account
                                     </a>
                                 </li>
                                 <li class="nav-item" title="Challenges">
-                                    <a class="bi bi-award bg-dark nav-link dropdown-item" href="{% url "challenges" %}">
+                                    <a class="bi bi-award bg-black nav-link dropdown-item" href="{% url "challenges" %}">
                                         Challenges
                                     </a>
                                 </li>
     {% if global_event_count and global_event_count > 0 %}
                                 <li class="nav-item" title="Events ({{ global_event_count }})">
-                                    <a class="bi bi-calendar-event bg-dark nav-link dropdown-item" href="{% url "events" %}">
+                                    <a class="bi bi-calendar-event bg-black nav-link dropdown-item" href="{% url "events" %}">
                                         Events
                                     </a>
                                     <span class="badge text-bg-secondary">
@@ -97,12 +97,12 @@
                                 </li>
     {% endif %}
                                 <li class="nav-item" title="Leaders">
-                                    <a class="bi bi-trophy bg-dark nav-link dropdown-item" href="{% url "leaders" %}">
+                                    <a class="bi bi-trophy bg-black nav-link dropdown-item" href="{% url "leaders" %}">
                                         Leaders
                                     </a>
                                 </li>
                                 <li class="nav-item" title="Players">
-                                    <a class="bi bi-person-lines-fill bg-dark nav-link dropdown-item" href="{% url "portal" %}">
+                                    <a class="bi bi-person-lines-fill bg-black nav-link dropdown-item" href="{% url "portal" %}">
                                         Players
     {% if request.user.players and request.user.players.count > 0 %}
                                         <span class="badge text-bg-secondary">
@@ -112,7 +112,7 @@
     {% endif %}
                                 </li>
                                 <li class="nav-item" title="Log out">
-                                    <a class="bi bi-door-closed bg-dark nav-link dropdown-item" href="{% url "logout" %}">
+                                    <a class="bi bi-door-closed bg-black nav-link dropdown-item" href="{% url "logout" %}">
                                         Log out ({{ user.get_username }})
                                     </a>
                                 </li>
@@ -144,7 +144,7 @@
 
         <main class="container-fluid p-3">
             <div class="card bg-dark" style="border: 0.1rem solid var(--ishar-color);">
-                <div class="card-header" style="border: 0.1rem solid var(--ishar-color);">
+                <div class="bg-black card-header" style="border: 0.1rem solid var(--ishar-color);">
                     <h2>
                         {% block header %}{% endblock header %}
                     </h2>
@@ -172,8 +172,8 @@
         </main>
 
 {% if current_season %}
-        <footer class="container-fluid p-3" title="{{ current_season }} ends {{ current_season.expiration_date | naturaltime }}">
-            <div class="text-center row p-3 bg-dark rounded" style="border: 0.1rem solid var(--ishar-color);">
+        <footer class="container-md p-3" title="{{ current_season }} ends {{ current_season.expiration_date | naturaltime }}">
+            <div class="text-center row p-3 bg-black rounded" style="border: 0.1rem solid var(--ishar-color);">
                 <div class="col">
                     <a href="{% url "current_season" %}">
                         {{ current_season }}
@@ -186,8 +186,8 @@
         </footer>
 {% endif %}
 
-        <footer class="container-fluid p-3">
-            <div class="text-center row p-3 bg-dark rounded" style="border: 0.1rem solid var(--ishar-color);">
+        <footer class="container-lg p-3">
+            <div class="text-center row p-3 bg-black rounded" style="border: 0.1rem solid var(--ishar-color);">
                 <div class="col">
                     <a href="mailto:admin@isharmud.com" target="_blank" title="E-mail Us! (admin@isharmud.com)">
                         ✉️ E-mail us!

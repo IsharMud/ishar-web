@@ -82,9 +82,9 @@
         </h3>
     {% endif %}
     {% if request.user.current_essence > 0 %}
-        <h4 class="m-3" title="You have {{ request.user.current_essence }} essence.">
+        <h4 class="m-3" title="You have {{ request.user.current_essence }} essence">
             You have {{ request.user.current_essence }}
-            <a title="essence" href="{% url "account" %}#essence">essence</a>.
+            <a title="essence" href="{% url "account" %}#essence">essence</a>
             <a class="small" href="{% url "help_page" help_topic='Essence' %}" title="Help: Essence">
                 <small class="small">
                     <span class="small bi bi-question-circle text-white"></span>

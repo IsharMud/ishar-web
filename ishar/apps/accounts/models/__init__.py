@@ -133,7 +133,8 @@ class Account(AbstractBaseUser, PermissionsMixin):
         verbose_name="Earned Essence"
     )
 
-    EMAIL_FIELD = USERNAME_FIELD = "email"
+    EMAIL_FIELD = "email"
+    USERNAME_FIELD = "account_name"
     objects = AccountManager()
     user_permissions = None
 
