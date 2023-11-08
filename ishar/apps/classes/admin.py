@@ -3,7 +3,7 @@ from django.contrib import admin
 from ishar.apps.classes.models import Class, ClassLevel, ClassRace, ClassSkill
 
 
-class ClassLevelInlineAdmin(admin.TabularInline):
+class ClassLevelInlineAdmin(admin.StackedInline):
     """
     Class Levels tabular inline administration.
     """
@@ -12,33 +12,8 @@ class ClassLevelInlineAdmin(admin.TabularInline):
     fields = ("level", "male_title", "female_title", "experience")
     model = ClassLevel
 
-    def has_add_permission(self, request, obj) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_god()
-        return False
 
-    def has_change_permission(self, request, obj=None) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_god()
-        return False
-
-    def has_delete_permission(self, request, obj=None) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_god()
-        return False
-
-    def has_module_permission(self, request) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_eternal()
-        return False
-
-    def has_view_permission(self, request, obj=None) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_eternal()
-        return False
-
-
-class ClassRaceInlineAdmin(admin.TabularInline):
+class ClassRaceInlineAdmin(admin.StackedInline):
     """
     Class Race tabular inline administration.
     """
@@ -47,33 +22,8 @@ class ClassRaceInlineAdmin(admin.TabularInline):
     fields = ("race", "player_class")
     model = ClassRace
 
-    def has_add_permission(self, request, obj) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_god()
-        return False
 
-    def has_change_permission(self, request, obj=None) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_god()
-        return False
-
-    def has_delete_permission(self, request, obj=None) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_god()
-        return False
-
-    def has_module_permission(self, request) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_eternal()
-        return False
-
-    def has_view_permission(self, request, obj=None) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_eternal()
-        return False
-
-
-class ClassSkillInlineAdmin(admin.TabularInline):
+class ClassSkillInlineAdmin(admin.StackedInline):
     """
     Class Skill tabular inline administration.
     """
@@ -81,31 +31,6 @@ class ClassSkillInlineAdmin(admin.TabularInline):
     extra = 1
     fields = ("player_class", "skill", "min_level", "max_learn")
     model = ClassSkill
-
-    def has_add_permission(self, request, obj) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_god()
-        return False
-
-    def has_change_permission(self, request, obj=None) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_god()
-        return False
-
-    def has_delete_permission(self, request, obj=None) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_god()
-        return False
-
-    def has_module_permission(self, request) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_eternal()
-        return False
-
-    def has_view_permission(self, request, obj=None) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_eternal()
-        return False
 
 
 @admin.register(Class)
