@@ -17,6 +17,11 @@ class ClassLevelInlineAdmin(admin.TabularInline):
             return request.user.is_god()
         return False
 
+    def has_change_permission(self, request, obj=None) -> bool:
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_god()
+        return False
+
     def has_delete_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
@@ -24,10 +29,10 @@ class ClassLevelInlineAdmin(admin.TabularInline):
 
     def has_module_permission(self, request) -> bool:
         if request.user and not request.user.is_anonymous:
-            return request.user.is_god()
+            return request.user.is_eternal()
         return False
 
-    def has_view_permission(self, request, obj=None) -> bool:
+    def has_view_permission(self, request, obj=None):
         if request.user and not request.user.is_anonymous:
             return request.user.is_eternal()
         return False
@@ -47,6 +52,11 @@ class ClassRaceInlineAdmin(admin.TabularInline):
             return request.user.is_god()
         return False
 
+    def has_change_permission(self, request, obj=None) -> bool:
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_god()
+        return False
+
     def has_delete_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
@@ -54,7 +64,7 @@ class ClassRaceInlineAdmin(admin.TabularInline):
 
     def has_module_permission(self, request) -> bool:
         if request.user and not request.user.is_anonymous:
-            return request.user.is_god()
+            return request.user.is_eternal()
         return False
 
     def has_view_permission(self, request, obj=None):
@@ -77,19 +87,24 @@ class ClassSkillInlineAdmin(admin.TabularInline):
             return request.user.is_god()
         return False
 
-    def has_delete_permission(self, request, obj) -> bool:
+    def has_change_permission(self, request, obj=None) -> bool:
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_god()
+        return False
+
+    def has_delete_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
 
     def has_module_permission(self, request) -> bool:
         if request.user and not request.user.is_anonymous:
-            return request.user.is_god()
+            return request.user.is_eternal()
         return False
 
     def has_view_permission(self, request, obj=None):
         if request.user and not request.user.is_anonymous:
-            return request.user.is_god()
+            return request.user.is_eternal()
         return False
 
 
@@ -121,12 +136,7 @@ class ClassesAdmin(admin.ModelAdmin):
     readonly_fields = ("class_id",)
     search_fields = ("class_name", "class_display", "class_description")
 
-    def has_module_permission(self, request, obj=None) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_eternal()
-        return False
-
-    def has_add_permission(self, request, obj=None) -> bool:
+    def has_add_permission(self, request, obj) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
@@ -141,7 +151,12 @@ class ClassesAdmin(admin.ModelAdmin):
             return request.user.is_god()
         return False
 
-    def has_view_permission(self, request, obj=None) -> bool:
+    def has_module_permission(self, request) -> bool:
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_eternal()
+        return False
+
+    def has_view_permission(self, request, obj=None):
         if request.user and not request.user.is_anonymous:
             return request.user.is_eternal()
         return False
