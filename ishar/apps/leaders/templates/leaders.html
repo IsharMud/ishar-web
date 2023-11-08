@@ -3,7 +3,11 @@
 {% block meta_description %}Leader board of top players of the game and their achievements{% endblock meta_description %}
 {% block meta_url %}{% url "leaders" %}{% endblock meta_url %}
 {% block title %}Leaders{% endblock title %}
-{% block header %}<a href="{% url "leaders" %}">Leaders</a>{% endblock header %}
+{% block header %}
+    <a class="bi bi-trophy" href="{% url "leaders" %}">
+        Leaders
+    </a>
+{% endblock header %}
 {% block scripts %}
         <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
         <script>

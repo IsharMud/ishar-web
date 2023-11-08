@@ -4,7 +4,7 @@
 {% block meta_description %}Season {{ season.season_id }} of Ishar MUD.{% endblock meta_description %}
 {% block meta_url %}{% url "season" season_id=season.season_id %}{% endblock meta_url %}
 {% block title %}Season {{ season.season_id }}{% endblock title %}
-{% block header %}Season {{ season.season_id }}{% endblock header %}
+{% block header %}<span class="bi bi-calendar"></span> Season {{ season.season_id }}{% endblock header %}
 {% block content %}
     {% if season %}
     <div class="card-group">

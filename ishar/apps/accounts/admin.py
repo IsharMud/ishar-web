@@ -144,7 +144,9 @@ class AccountsAdmin(UserAdmin):
     fieldsets = (
         (
             None, {
-                "fields": ("account_id", "account_name", model.EMAIL_FIELD)
+                "fields": (
+                    "account_id", model.USERNAME_FIELD, model.EMAIL_FIELD
+                )
             }
         ),
         (
@@ -177,12 +179,12 @@ class AccountsAdmin(UserAdmin):
     filter_horizontal = list_filter = ()
     inlines = (AccountPlayersLinksInline, AccountUpgradesLinksAdmin)
     list_display = (
-        "account_name", model.EMAIL_FIELD, "player_count", "current_essence",
-        "is_god", "is_eternal", "is_immortal"
+        model.USERNAME_FIELD, model.EMAIL_FIELD, "player_count",
+        "current_essence", "is_god", "is_eternal", "is_immortal"
     )
     ordering = ("account_id",)
     search_fields = (
-        "account_name", model.EMAIL_FIELD,
+        model.USERNAME_FIELD, model.EMAIL_FIELD,
         "create_ip", "create_isp", "create_ident",
         "last_ip", "last_isp", "last_ident"
     )

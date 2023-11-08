@@ -3,10 +3,15 @@
 {% block meta_description %}Log In{% endblock meta_description %}
 {% block meta_url %}{% url "login" %}{% endblock meta_url %}
 {% block title %}Log In{% endblock title %}
-{% block header %}Log In{% endblock header %}
+{% block header %}<span class="bi bi-door-open"></span> Log In{% endblock header %}
 {% block content %}
     {% if form %}
     <div class="card bg-dark">
+        <div class="card-header">
+            <p class="card-text">
+                Please use your <strong><em>account name</em></strong> to log in - thank you!
+            </p>
+        </div>
         <form class="card-body" method="post">
             {% csrf_token %}
             {{ form.as_p }}
