@@ -59,8 +59,8 @@ class Class(models.Model):
         verbose_name="Class Stat"
     )
     class_dc = models.IntegerField(
-        help_text="Class DC of the class.",
-        verbose_name="Class DC"
+        help_text="Expertise (DC) of the class.",
+        verbose_name="Class Expertise (DC)"
     )
     base_fortitude = models.IntegerField(
         help_text="Base fortitude of the class.",
