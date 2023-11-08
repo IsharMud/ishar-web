@@ -17,7 +17,7 @@ class IsharUserAuthBackend(ModelBackend):
         Authenticate against MD5Crypt hash from the database for the username.
         """
         try:
-            user = self.model.objects.get(email=username)
+            user = self.model.objects.get(account_name=username)
         except self.model.DoesNotExist:
             return None
 

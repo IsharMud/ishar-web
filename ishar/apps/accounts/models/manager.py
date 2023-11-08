@@ -34,7 +34,9 @@ class AccountManager(BaseUserManager):
         However, it will not be a "superuser", since no players.
         """
         user = self.create_user(
-            email=email, account_name=account_name, password=password
+            email=email,
+            account_name=account_name,
+            password=password
         )
         user.save(using=self._db)
         return user
