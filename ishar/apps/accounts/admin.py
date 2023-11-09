@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
-from django.contrib.auth.admin import UserAdmin, GroupAdmin
+from django.contrib.auth.admin import UserAdmin  # , GroupAdmin
 from django.db.models import Count
 from django.urls import reverse
 from django.utils.safestring import mark_safe
@@ -8,16 +8,16 @@ from django.utils.safestring import mark_safe
 from ishar.apps.accounts.models.upgrade import (
     AccountUpgrade, AccountAccountUpgrade
 )
-from ishar.apps.accounts.models import Players
+# from ishar.apps.accounts.models import Players
 from ishar.apps.players.models import Player
 
 
-@admin.register(Players)
-class PlayersAdmin(GroupAdmin):
-    """
-    Ishar players group administration.
-    """
-    model = Players
+# @admin.register(Players)
+# class PlayersAdmin(GroupAdmin):
+#    """
+#    Ishar players group administration.
+#    """
+#    model = Players
 
 
 class AccountPlayersLinksInline(admin.TabularInline):

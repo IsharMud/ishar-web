@@ -39,7 +39,9 @@
         </div>
         {% if help_topic.body_html %}
         <div class="card-body">
-            <pre class="card-text">{% autoescape off %}{{ help_topic.body_html }}{% endautoescape %}</pre>
+            <pre class="card-text p-2" style="white-space: pre-wrap;">
+                {% autoescape off %}{{ help_topic.body_html }}{% endautoescape %}
+            </pre>
         </div>
         {% endif %}
     </div>

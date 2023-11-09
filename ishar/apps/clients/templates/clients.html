@@ -27,7 +27,7 @@
         {% for client in category.clients.all %}
             {% if client.is_visible %}
                         <li class="border-0 bg-dark list-group-item">
-                            <a class="list-group-item-text" href="{{ client.url }}" id="client-{{ client.client_id }}" title="{{ client.name }}">
+                            <a class="list-group-item-text" href="{{ client.url }}" id="client-{{ client.client_id }}" target="_blank" title="{{ client.name }}">
                                 {{ client.name }}
                             </a>
                         </li>

@@ -10,7 +10,6 @@ button, textarea, input, select { border: 0.1rem solid var(--ishar-color); backg
 h1, h2, h3, h4, h5, strong, th, label, th, .gridjs-th-content, .gridjs-td[data-column-id="name"] { color: var(--ishar-color); }
 
 .navbar-dark .navbar-toggler-icon { background-image: url("/static/images/cropped_ishar_logo_dark.png"); }
-
 .navbar-expand-lg .navbar-nav .nav-link { color: var(--ishar-color); }
 
 a[target="_blank"]::after {
@@ -22,11 +21,9 @@ a[target="_blank"]::after {
 a { color: #09f; text-decoration: none; }
 a:active, a:visited { color: #6082b6; }
 a:hover { color: #d6d6d7; }
-pre { padding-left: 2vw; white-space: pre-wrap; }
 
 .god-player, .forger-player, .eternal-player, .artisan-player, .immortal-player, .consort-player { color: #00b7eb; }
 .nested-list { list-style: none; }
-.non-classic { text-align: center; }
 .god-player::after { content: ' 😇'; }
 .forger-player::after, .eternal-player::after, .artisan-player::after, .immortal-player::after, .consort-player::after {  content: ' 👼'; }
 .dead-player::after { content: ' ☠️'; }
