@@ -22,12 +22,6 @@ urlpatterns = [
     # Flat pages.
     #
 
-    # MUD clients.
-    path("clients/", views.flatpage, {"url": "/clients/"}, name="clients"),
-
-    # Frequently Asked Questions ("FAQ"s).
-    # path("faq/", views.flatpage, {"url": "/faq/"}, name="faq"),
-
     # History.
     path("history/", views.flatpage, {"url": "/history/"}, name="history"),
 

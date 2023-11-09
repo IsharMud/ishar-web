@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+{% block meta_title %}MUD Clients{% endblock meta_title %}
+{% block meta_description %}A few common questions that are asked about Ishar MUD.{% endblock meta_description %}
+{% block meta_url %}{% url "faq" %}{% endblock meta_url %}
+{% block title %}MUD Clients{% endblock title %}
+{% block header %}<span class="bi bi-terminal-split"></span> MUD Clients{% endblock header %}
+{% block content %}
+    <p class="lead">
+        While you can certainly enjoy the game via
+        <a href="{% url "connect" %}" target="_blank" title="Mudslinger">the Mudslinger web client</a>,
+        you might prefer to connect to the game with software designed specifically to help you play a MUD.
+    </p>
+    <p class="lead">
+        Here are some of the MUD clients that we have heard good things about:
+    </p>
+    <div class="accordion m-3">
+    {% for category in mud_client_categories %}
+        <div class="accordion-item bg-dark text-white" id="category-{{ category.category_id }}">
+            <h3 class="accordion-header" title="{{ category.name }}">
+                <button class="fw-bold accordion-button bg-black" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ category.category_id }}" aria-expanded="true" aria-controls="collapse{{ category.category_id }}">
+                    {{ category.name }}
+                </button>
+            </h3>
+            <div id="collapse{{ category.category_id }}" class="accordion-collapse collapse show">
+                <div class="accordion-body">
+                    <ul class="list-group">
+        {% for client in category.clients.all %}
+            {% if client.is_visible %}
+                        <li class="border-0 bg-dark list-group-item">
+                            <a class="list-group-item-text" href="{{ client.url }}" id="client-{{ client.client_id }}" title="{{ client.name }}">
+                                {{ client.name }}
+                            </a>
+                        </li>
+            {% endif %}
+        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+     </div>
+    <p class="lead">
+        Do not be afraid to try a few, as they all have different strengths and weaknesses.
+        After you download a client, tell it to connect to <code>isharmud.com</code> on
+        port number <code>23</code> or <code>9999</code> to join the game.
+    </p>
+    <p class="lead">
+        Please check out our <a href="/start/" title="getting started guide">getting started guide</a> as well!
+    </p>
+{% endblock content %}
