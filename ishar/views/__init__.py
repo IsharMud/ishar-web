@@ -1,8 +1,3 @@
-"""
-isharmud.com base views.
-"""
-from django.contrib import messages
-from django.contrib.auth.views import LoginView, LogoutView
 from django.views.generic.base import TemplateView
 
 from ishar.apps.news.models import News
@@ -28,29 +23,11 @@ class ErrorView(TemplateView):
         return self.render_to_response(context, status=self.status_code)
 
 
-class IsharLoginView(LoginView):
+class SupportView(TemplateView):
     """
-    Log-in page.
+    Information about how to support Ishar MUD.
     """
-    template_name = "login.html"
-
-
-class IsharLogoutView(LogoutView):
-    """
-    Log-out page.
-    """
-    template_name = "welcome.html"
-
-    def dispatch(self, request, *args, **kwargs):
-        messages.success(request, "You have logged out!")
-        return super().dispatch(request, *args, **kwargs)
-
-
-class PortalView(TemplateView):
-    """
-    Portal view for logged-in users.
-    """
-    template_name = "portal.html"
+    template_name = "support.html"
 
 
 class WelcomeView(TemplateView):
