@@ -51,7 +51,7 @@ class MUDClientCategory(models.Model):
         verbose_name_plural = "MUD Client Categories"
 
     def get_absolute_url(self) -> str:
-        return reverse(viewname="clients") + "#category-" + self.category_id
+        return f'{reverse(viewname="clients")}#category-{self.category_id}'
 
     def get_admin_link(self) -> str:
         return mark_safe(
@@ -131,7 +131,7 @@ class MUDClient(models.Model):
         verbose_name_plural = "MUD Clients"
 
     def get_absolute_url(self) -> str:
-        return reverse(viewname="clients") + "#client-" + self.client_id
+        return f'{reverse(viewname="clients")}#client-{self.client_id}'
 
     def get_admin_url(self) -> str:
         return reverse(
