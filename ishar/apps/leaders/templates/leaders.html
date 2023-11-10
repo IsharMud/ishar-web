@@ -1,12 +1,24 @@
 {% extends "layout.html" %}
-{% block meta_title %}Leaders{% endblock meta_title %}
-{% block meta_description %}Leader board of top players of the game and their achievements{% endblock meta_description %}
-{% block meta_url %}{% url "leaders" %}{% endblock meta_url %}
-{% block title %}Leaders{% endblock title %}
+{% block meta_title %}Leaders{% if game_type %} / {{ game_type }}{% endif %}{% endblock meta_title %}
+{% block meta_description %}Leader board of top{% if game_type %} {{ game_type|lower }}{% endif %} players of the game and their achievements{% endblock meta_description %}
+{% block meta_url %}{% if game_type %}{% url game_type|lower %}{% else %}{% url "leaders" %}{% endif %}{% endblock meta_url %}
+{% block title %}Leaders{% if game_type %} / {{ game_type }}{% endif %}{% endblock title %}
 {% block header %}
-    <a class="bi bi-trophy" href="{% url "leaders" %}">
-        Leaders
-    </a>
+<nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '•';">
+    <ol class="breadcrumb" style="--bs-breadcrumb-divider-color: var(--ishar-color);">
+        <li class="breadcrumb-item{% if not game_type %} active" aria-current="page{% endif %}" title="Leaders">
+            <span class="text-ishar bi bi-trophy"></span>
+            <a href="{% url "leaders" %}">
+                Leaders
+            </a>
+        </li>
+    {% if game_type %}
+        <li class="breadcrumb-item active" aria-current="page" title="{{ help_topic.name }}">
+            <span class="text-ishar">{{ game_type }}</span>
+        </li>
+    {% endif %}
+    </ol>
+</nav>
 {% endblock header %}
 {% block scripts %}
         <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
@@ -75,28 +87,22 @@
         </script>
 {% endblock scripts %}
 {% block content %}
-    <div class="card bg-dark">
-        <div class="card-header card-group">
-            <div class="card bg-dark">
-                <div class="card-body">
-                    <a class="card-text" href="{% url "classic" %}">Classic</a>
-                </div>
-            </div>
-            <div class="card bg-dark">
-                <div class="card-body">
-                    <a class="card-text" href="{% url "survival" %}">Survival</a>
-                </div>
-            </div>
-        </div>
-        <div class="card bg-dark">
-             <div class="card-body">
-                  <div class="card-text" id="leaders"></div>
-             </div>
-        </div>
-    </div>
-    <script>
-        showLeaders(
-            document.getElementById('leaders')
-        );
-    </script>
+    <ul class="m-1 p-1 list-group list-group-horizontal">
+        <li class="list-group-item bg-dark" title="Classic">
+    {% if game_type != "Classic" %}
+            <a class="list-group-item-text" href="{% url "classic" %}">Classic</a>
+    {% else %}
+            <span class="text-ishar">Classic</span>
+    {% endif %}
+        </li>
+        <li class="list-group-item bg-dark" title="Survival">
+    {% if game_type != "Survival" %}
+            <a class="list-group-item-text" href="{% url "survival" %}">Survival</a>
+    {% else %}
+            <span class="text-ishar">Survival</span>
+    {% endif %}
+        </li>
+    </ul>
+    <div class="m-1 p-1" id="leaders"></div>
+    <script>showLeaders( document.getElementById('leaders'));</script>
 {% endblock content %}

@@ -4,7 +4,8 @@ isharmud.com URL configuration.
 from django.urls import include, path
 
 from ishar.api import api_router
-from ishar.views import IsharLoginView, IsharLogoutView, WelcomeView
+from ishar.views import SupportView, WelcomeView
+from ishar.views.auth import IsharLoginView, IsharLogoutView
 from ishar.apps.help.views import WorldView
 
 
@@ -24,5 +25,6 @@ urlpatterns = [
     path("player/", include("ishar.apps.players.urls"), name="player"),
     path("portal/", include("ishar.apps.accounts.urls"), name="portal"),
     path("season/", include("ishar.apps.seasons.urls"), name="season"),
+    path("support/", SupportView.as_view(), name="support"),
     path("world/", WorldView.as_view(), name="world"),
 ]

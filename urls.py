@@ -29,7 +29,7 @@ urlpatterns = [
     path("start/", views.flatpage, {"url": "/start/"}, name="start"),
 
     # Support (Ishar MUD).
-    path("support/", views.flatpage, {"url": "/support/"}, name="support"),
+    # path("support/", views.flatpage, {"url": "/support/"}, name="support"),
 
     #
     # Redirects.
