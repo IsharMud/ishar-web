@@ -23,6 +23,12 @@ class ErrorView(TemplateView):
         return self.render_to_response(context, status=self.status_code)
 
 
+class StartView(TemplateView):
+    """
+    Getting started guide.
+    """
+    template_name = "start.html"
+
 class SupportView(TemplateView):
     """
     Information about how to support Ishar MUD.
