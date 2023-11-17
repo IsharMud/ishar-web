@@ -24,7 +24,7 @@
             </h3>
             <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse show">
                 <div class="accordion-body">
-                    <p title="{{ faq.question_answer }}">
+                    <p>
                         {% autoescape off %}{{ faq.question_answer }}{% endautoescape %}
                     </p>
                 </div>
