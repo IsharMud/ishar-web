@@ -3,7 +3,12 @@
 {% block meta_description %}A few MUD clients that we have heard good things about.{% endblock meta_description %}
 {% block meta_url %}{% url "clients" %}{% endblock meta_url %}
 {% block title %}MUD Clients{% endblock title %}
-{% block header %}<span class="bi bi-terminal-split"></span> MUD Clients{% endblock header %}
+{% block header %}
+    <span class="bi bi-terminal-split"></span>
+    <a href="{% url "clients" %}" title="MUD Clients">
+        MUD Clients
+    </a>
+{% endblock header %}
 {% block content %}
     <p class="lead">
         While you can certainly enjoy the game via
