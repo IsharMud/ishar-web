@@ -77,6 +77,13 @@
 {% endblock scripts %}
 {% block content %}
     <ul class="m-1 p-1 list-group list-group-horizontal">
+        <li class="list-group-item bg-dark" title="All">
+    {% if game_type %}
+            <a class="list-group-item-text" href="{% url "leaders" %}">All</a>
+    {% else %}
+            <span class="text-ishar">All</span>
+    {% endif %}
+        </li>
         <li class="list-group-item bg-dark" title="Classic">
     {% if game_type != "Classic" %}
             <a class="list-group-item-text" href="{% url "classic" %}">Classic</a>
