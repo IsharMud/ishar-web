@@ -4,32 +4,41 @@ from django.views.generic.list import ListView
 
 from ishar.apps.players.models import Player
 
-MINIMUM_IMMORTAL = min(settings.IMMORTAL_LEVELS)[0]
-
 
 class LeadersView(LoginRequiredMixin, ListView):
     """
-    Leaders view.
+    Filter and order players to determine leaders.
+        Optional filter for game type:
+            Classic = 0, Survival = 1, All = None
+            (used by child classes)
     """
     model = Player
     context_object_name = "leader_players"
     template_name = "leaders.html"
-    ordering = (
-        "-remorts", "-total_renown", "-quests_completed",
-        "-challenges_completed", "deaths"
-    )
-
     game_type = None
 
     def get_queryset(self):
+        """Filter and order players to determine leaders."""
+
+        # Exclude immortals players.
         qs = self.model.objects.filter(
             true_level__lt=min(settings.IMMORTAL_LEVELS)[0]
         )
+
+        # Optionally filter game type (Classic/Survival).
         if self.game_type is not None:
             qs = qs.filter(game_type__exact=self.game_type)
+
+        # Order the players based upon their progress,
+        #   sorting and returning the "leaders".
+        qs = qs.order_by(
+            "-remorts", "-total_renown", "-quests_completed",
+            "-challenges_completed", "deaths"
+        )
         return qs
 
     def get_context_data(self, *, object_list=None, **kwargs):
+        """Include friendly name of any optional game type in context."""
         context = super().get_context_data(object_list=None, **kwargs)
         context["game_type"] = self.game_type
         if context["game_type"] is not None:
@@ -38,14 +47,10 @@ class LeadersView(LoginRequiredMixin, ListView):
 
 
 class ClassicLeadersView(LeadersView):
-    """
-    Classic players leaders view.
-    """
+    """Classic players leaders view."""
     game_type = 0
 
 
 class SurvivalLeadersView(LeadersView):
-    """
-    Survival players leaders view.
-    """
+    """Survival players leaders view."""
     game_type = 1
