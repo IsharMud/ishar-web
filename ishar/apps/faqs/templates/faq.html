@@ -10,9 +10,9 @@
     </p>
     <p class="lead">
         You may also want to visit the
-        <a href="/help/MUD%20Basics/" title="Help: MUD Basics">MUD Basics help page</a>,
-        our <a href="/start/" title="Get Started">getting started guide</a>, and
-        <a href="/discord/" target="_blank" title="IsharMUD Discord">join us on Discord</a>!
+        <a href="{% url "help_page" help_topic="MUD Basics" %}" title="Help: MUD Basics">MUD Basics help page</a>,
+        our <a href="{% url "start" %}" title="Get Started">getting started guide</a>, and
+        <a href="{% url "discord" %}" target="_blank" title="IsharMUD Discord">join us on Discord</a>!
     </p>
     <div class="accordion m-5">
     {% for faq in faqs %}

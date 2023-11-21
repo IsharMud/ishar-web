@@ -13,7 +13,7 @@ class IsharLogoutView(LogoutView):
     """
     Log-out page.
     """
-    template_name = "welcome.html"
+    template_name = "home.html"
 
     def dispatch(self, request, *args, **kwargs):
         messages.success(request, "You have logged out!")

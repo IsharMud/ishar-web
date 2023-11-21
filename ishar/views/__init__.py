@@ -36,11 +36,11 @@ class SupportView(TemplateView):
     template_name = "support.html"
 
 
-class WelcomeView(TemplateView):
+class HomeView(TemplateView):
     """
-    Main page.
+    Home page.
     """
-    template_name = "welcome.html"
+    template_name = "home.html"
 
     def get_context_data(self, **kwargs):
         """Include latest news post on main page."""

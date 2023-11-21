@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% load get_dict_item from ishar%}
+{% load get_dict_item from ishar %}
 {% block meta_title %}Help: {{ help_topic.name }}{% endblock meta_title %}
 {% block meta_description %}Help pages for Ishar MUD{% endblock meta_description %}
 {% block meta_url %}{% if help_topic %}{% url "help_page" help_topic=help_topic.name %} %}{% else %}{% url "help" %}{% endif %}{% endblock meta_url %}

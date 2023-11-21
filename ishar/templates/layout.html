@@ -10,11 +10,11 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta property="og:type" content="website">
         <meta property="og:site_name" content="Ishar MUD">
-        <meta property="og:title" content="Ishar MUD: {% block meta_title %}Welcome{% endblock meta_title %}">
+        <meta property="og:title" content="Ishar MUD: {% block meta_title %}Home{% endblock meta_title %}">
         <meta property="og:description" content="Ishar MUD: {% block meta_description %}a free online text-adventure RPG{% endblock meta_description %}">
         <meta property="og:image" content="https://{{ request.META.HTTP_HOST }}{% block meta_image %}{% static "images/cropped_ishar_logo_dark.png" %}{% endblock meta_image %}">
         <meta property="og:url" content="https://{{ request.META.HTTP_HOST }}{% block meta_url %}{% url "index" %}{% endblock meta_url %}">
-        <title>Ishar MUD: {% block title %}Welcome{% endblock title %}</title>
+        <title>Ishar MUD: {% block title %}Home{% endblock title %}</title>
         <link rel="shortcut icon" href="{% static "images/favicon.ico" %}" type="image/x-icon">
         <link rel="dns-prefetch" href="http://cdn.jsdelivr.net">
         <link rel="preconnect" href="http://cdn.jsdelivr.net">
@@ -36,9 +36,9 @@
                 </a>
                 <div class="collapse navbar-collapse" id="navbarNavDropdown">
                     <ul class="navbar-nav nav-underline m-1">
-                        <li class="nav-item" title="Main">
+                        <li class="nav-item" title="Home">
                             <a class="bi bi-house nav-link" href="{% url "index" %}">
-                                Main
+                                Home
                             </a>
                         </li>
 {% if user.is_staff %}
@@ -88,10 +88,10 @@
                                 <li class="nav-item" title="Events ({{ global_event_count }})">
                                     <a class="bi bi-calendar-event bg-black nav-link dropdown-item" href="{% url "events" %}">
                                         Events
+                                        <span class="badge text-bg-secondary">
+                                            {{ global_event_count }}
+                                        </span>
                                     </a>
-                                    <span class="badge text-bg-secondary">
-                                        {{ global_event_count }}
-                                    </span>
                                 </li>
     {% endif %}
                                 <li class="nav-item" title="Leaders">
