@@ -84,7 +84,7 @@
     <div class="card bg-dark">
         <div class="card-body">
     {% if help_topics %}
-            <ul class="card-text help-topic-list">
+            <ul class="card-text two-col">
         {% for list_topic in help_topics %}
                 <li title="Topic: {{ list_topic }}"><a href="{% url "help_page" help_topic=list_topic %}">{{ list_topic }}</a></li>
         {% endfor %}
