@@ -33,5 +33,5 @@ a:hover { color: #d6d6d7; }
 .message-success, .active-season td { color: #4cbb17; }
 .message-warn, .message-warning  { color: #f80; }
 
-.help-topic-list, #world-list, #player-details, #player-time { column-count: 2; }
+.two-col { column-count: 2; }
 .challenge-completed { text-decoration: line-through; text-decoration-color: #a00; text-decoration-thickness: 0.15rem; }

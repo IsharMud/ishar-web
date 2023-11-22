@@ -24,7 +24,7 @@
     {% if help_topic %}
     <div class="card bg-dark">
         <div class="card-header">
-            <ul class="help-topic-list">
+            <ul class="two-col">
         {% for help_property in help_properties %}
             {% with help_property_value=help_topic|get_dict_item:help_property %}
                 {% if help_property_value %}
