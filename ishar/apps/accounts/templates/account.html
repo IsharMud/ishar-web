@@ -6,88 +6,109 @@
 {% block title %}Account ({{ request.user.account_name | title }}){% endblock title %}
 {% block header %}<span class="bi bi-person"></span> Account ({{ request.user.account_name | title }}){% endblock header %}
 {% block content %}
-    <div class="card-group">
-        <div class="card bg-dark">
-            <h3 class="card-header" id="manage" title="Manage">Manage</h3>
-            <div class="card-body">
-                <ul class="card-text list-group">
-                    <li class="bg-dark list-group-item list-group-item-action list-group-item-dark" title="Change your password">
-                        <a class="bi bi-key list-group-item-text" href="{% url "password" %}">
-                            Change your password
-                        </a>
-                    </li>
-                    <li class="bg-dark list-group-item list-group-item-action list-group-item-dark" title="View your players">
-                        <a class="bi bi-person-lines-fill list-group-item-text" href="{% url "portal" %}">
-                            View your players
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
 
-        <div class="card bg-dark">
-            <h3 class="card-header" title="Created">Created</h3>
-            <div class="card-body">
-                <blockquote class="card-text blockquote">
-                    <p title="{{ request.user.created_at }}">{{ request.user.created_at }}</p>
-                    <footer class="blockquote-footer" title="{{ request.user.created_at | naturaltime }}">
-                        {{ request.user.created_at | naturaltime }}
-                    </footer>
-                </blockquote>
-            </div>
-        </div>
-    </div>
-
-    <div class="card bg-dark">
-        <h4 class="card-header" id="essence" title="Essence">
-            <a href="#essence">Essence</a>
-                <a class="small" href="{% url "help_page" help_topic='Essence' %}" title="Help: Essence">
-                    <small class="small">
-                        <span class="small bi bi-question-circle text-white"></span>
-                    </small>
-            </a>
-        </h4>
-        <div class="card-group">
-            <div class="card bg-dark" title="Current Balance: {{ request.user.current_essence }} essence.">
-                <h5 class="card-header">Current</h5>
-                <div class="card-body">
-                    <p class="card-text">
-                        {{ request.user.current_essence }} essence
-                    </p>
-                </div>
-            </div>
-            <div class="card bg-dark" title="Earned this season: {{ request.user.seasonal_earned }} essence.">
-                <h5 class="card-header">Earned</h5>
-                <div class="card-body">
-                    <p class="card-text">
-                        {{ request.user.seasonal_earned }} essence
-                    </p>
+    <div class="accordion m-3 rounded">
+        <div class="accordion-item bg-dark" id="manage">
+            <h3 class="accordion-header" title="Manage">
+                <button class="fw-bold accordion-button bg-black" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-manage" aria-expanded="true" aria-controls="collapse-manage">
+                    Manage
+                </button>
+            </h3>
+            <div id="collapse-manage" class="accordion-collapse collapse show">
+                <div class="accordion-body">
+                    <ul class="list-group list-group-horizontal-md">
+                        <li class="bg-dark border-0 list-group-item" title="Change Password">
+                            <span class="bi bi-dot text-ishar"></span>
+                            <a class="bi bi-key list-group-item-text" href="{% url "password" %}">
+                                Change Password
+                            </a>
+                        </li>
+                        <li class="bg-dark border-0 list-group-item" title="View Players">
+                            <span class="bi bi-dot text-ishar"></span>
+                            <a class="bi bi-person-lines-fill list-group-item-text" href="{% url "portal" %}">
+                                View Players
+                            </a>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="card-group">
-        <div class="card bg-dark">
-            <h4 class="card-header" id="upgrades" title="Upgrades">
-                <a href="#upgrades">Upgrades</a>
+    <div class="accordion m-3 rounded">
+        <div class="accordion-item bg-dark" id="essence">
+            <h4 class="accordion-header" title="Essence">
+                <button class="fw-bold accordion-button bg-black" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-essence" aria-expanded="true" aria-controls="collapse-essence">
+                    Essence
+                </button>
             </h4>
-            <div class="card-body">
-    {% if request.user.upgrades.all %}
-                <ul class="list-group list-group-horizontal-sm card-text" id="essence-upgrades">
-        {% for upgraded in request.user.upgrades.all %}
-                    <li class="bg-dark list-group-item list-group-item-dark text-reset" title="{{ upgraded.upgrade.name }}{% if upgraded.amount > 1 %} (x{{ upgraded.amount }}){% endif %}">
-                        {{ upgraded.upgrade.name }}
-                        {% if upgraded.amount > 1 %}(x{{ upgraded.amount }}){% endif %}
-                    </li>
-        {% endfor %}
-                </ul>
-    {% else %}
-                <p class="card-text fst-italic text-reset" title="You have not purchased any upgrades.">
-                    You have not purchased any upgrades.
-                </p>
-    {% endif %}
+            <div id="collapse-essence" class="accordion-collapse collapse show">
+                <div class="accordion-body">
+                    <ul class="list-group list-group-horizontal-sm">
+                        <li class="bg-dark border-0 list-group-item list-group-item-text text-white" title="Current: {{ request.user.current_essence }} essence">
+                            <span class="bi bi-dot text-ishar">Current</span>
+                            <ul>
+                                <li>{{ request.user.current_essence }} essence</li>
+                            </ul>
+                        </li>
+                        <li class="bg-dark border-0 list-group-item list-group-item-text text-white" title="Earned: {{ request.user.seasonal_earned }} essence">
+                            <span class="bi bi-dot text-ishar">Earned</span>
+                            <ul>
+                                <li>{{ request.user.seasonal_earned }} essence</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
+
+    <div class="accordion m-3 rounded">
+        <div class="accordion-item bg-dark" id="upgrades">
+            <h4 class="accordion-header" title="Upgrades">
+                <button class="fw-bold accordion-button bg-black" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-upgrades" aria-expanded="true" aria-controls="collapse-upgrades">
+                    Upgrades
+                </button>
+            </h4>
+            <div id="collapse-upgrades" class="accordion-collapse collapse show">
+                <div class="accordion-body">
+        {% if request.user.upgrades.all %}
+                    <ul class="list-group list-group-horizontal-sm">
+            {% for upgraded in request.user.upgrades.all %}
+                        <li class="bg-dark border-0 list-group-item list-group-item-text text-white" title="{{ upgraded.upgrade.name }}{% if upgraded.amount > 1 %} (x{{ upgraded.amount }}){% endif %}">
+                            <span class="bi bi-dot text-ishar"></span>
+                            {{ upgraded.upgrade.name }}{% if upgraded.amount > 1 %}<span class="text-ishar"> (x{{ upgraded.amount }})</span>{% endif %}
+                        </li>
+            {% endfor %}
+                    </ul>
+        {% else %}
+                    <p class="fst-italic text-reset" title="You have not purchased any upgrades.">
+                        You have not purchased any upgrades.
+                    </p>
+        {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion m-3 rounded">
+        <div class="accordion-item bg-dark" id="created">
+            <h3 class="accordion-header" title="Created">
+                <button class="fw-bold accordion-button bg-black" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-created" aria-expanded="true" aria-controls="collapse-created">
+                    Created
+                </button>
+            </h3>
+            <div id="collapse-created" class="accordion-collapse collapse show">
+                <div class="accordion-body">
+                    <blockquote class="blockquote">
+                        <p class="text-white" title="{{ request.user.created_at }}">{{ request.user.created_at }}</p>
+                        <footer class="blockquote-footer" title="{{ request.user.created_at | naturaltime }}">
+                            {{ request.user.created_at | naturaltime }}
+                        </footer>
+                    </blockquote>
+                </div>
+            </div>
+        </div>
+    </div>
+
 {% endblock content %}

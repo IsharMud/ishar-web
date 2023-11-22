@@ -10,7 +10,7 @@
         <h3 class="m-3" title="You have {{ request.user.players.count }} character{{ request.user.players.count | pluralize }}.">
             You have {{ request.user.players.count }} character{{ request.user.players.count | pluralize }}:
         </h3>
-        <div class="accordion m-5">
+        <div class="accordion m-3">
         {% for player in request.user.players.all %}
             <div class="accordion-item bg-dark text-white">
                 <h3 class="accordion-header" title="{{ player.name }}">
