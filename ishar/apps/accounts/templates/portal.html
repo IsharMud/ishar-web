@@ -28,7 +28,7 @@
                             </a>
                         </h4>
             {% if not player.is_immortal %}
-                        <ol class="bg-dark list-group list-group-horizontal-sm">
+                        <ol class="bg-dark list-group list-group-horizontal-md">
                             <li class="bg-dark list-group-item list-group-item-text text-white" title="Level: {{ player.common.level }}">
                                 <strong>Level</strong>: {{ player.common.level }}
                             </li>
@@ -82,15 +82,15 @@
         </h3>
     {% endif %}
     {% if request.user.current_essence > 0 %}
-        <h4 class="m-3" title="You have {{ request.user.current_essence }} essence">
+        <h5 class="m-3" title="You have {{ request.user.current_essence }} essence.">
             You have {{ request.user.current_essence }}
-            <a title="essence" href="{% url "account" %}#essence">essence</a>
-            <a class="small" href="{% url "help_page" help_topic='Essence' %}" title="Help: Essence">
-                <small class="small">
-                    <span class="small bi bi-question-circle text-white"></span>
+            <a title="essence" href="{% url "account" %}#essence">essence</a>.
+            <a href="{% url "help_page" help_topic='Essence' %}" title="Help: Essence">
+                <small>
+                    <span class="bi bi-question-circle text-white"></span>
                 </small>
             </a>
-        </h4>
+        </h5>
     {% endif %}
     </div>
 {% endblock content %}

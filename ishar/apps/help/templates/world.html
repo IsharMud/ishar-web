@@ -24,7 +24,7 @@
         </div>
     {% if areas %}
         <div class="card-body">
-            <ul class="card-text" id="world-list">
+            <ul class="card-text two-col">
         {% for area in areas %}
                 <li title="{{ area }}">
                     <a href="{% url "help_page" help_topic=area %}">{{ area }}</a>

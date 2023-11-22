@@ -40,11 +40,14 @@
             <h4 class="accordion-header" title="Essence">
                 <button class="fw-bold accordion-button bg-black" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-essence" aria-expanded="true" aria-controls="collapse-essence">
                     Essence
+                    <a href="{% url "help_page" help_topic='Essence' %}" title="Help: Essence">
+                        <span class="bi p-1 bi-question-circle text-secondary"></span>
+                    </a>
                 </button>
             </h4>
             <div id="collapse-essence" class="accordion-collapse collapse show">
                 <div class="accordion-body">
-                    <ul class="list-group list-group-horizontal-sm">
+                    <ul class="list-group list-group-horizontal-md">
                         <li class="bg-dark border-0 list-group-item list-group-item-text text-white" title="Current: {{ request.user.current_essence }} essence">
                             <span class="bi bi-dot text-ishar">Current</span>
                             <ul>
@@ -73,7 +76,7 @@
             <div id="collapse-upgrades" class="accordion-collapse collapse show">
                 <div class="accordion-body">
         {% if request.user.upgrades.all %}
-                    <ul class="list-group list-group-horizontal-sm">
+                    <ul class="list-group list-group-horizontal-md">
             {% for upgraded in request.user.upgrades.all %}
                         <li class="bg-dark border-0 list-group-item list-group-item-text text-white" title="{{ upgraded.upgrade.name }}{% if upgraded.amount > 1 %} (x{{ upgraded.amount }}){% endif %}">
                             <span class="bi bi-dot text-ishar"></span>
