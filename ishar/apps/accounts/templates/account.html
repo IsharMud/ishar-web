@@ -6,7 +6,6 @@
 {% block title %}Account ({{ request.user.account_name | title }}){% endblock title %}
 {% block header %}<span class="bi bi-person"></span> Account ({{ request.user.account_name | title }}){% endblock header %}
 {% block content %}
-
     <div class="accordion m-3 rounded">
         <div class="accordion-item bg-dark" id="manage">
             <h3 class="accordion-header" title="Manage">
@@ -33,9 +32,7 @@
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="accordion m-3 rounded">
         <div class="accordion-item bg-dark" id="essence">
             <h4 class="accordion-header" title="Essence">
                 <button class="fw-bold accordion-button bg-black" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-essence" aria-expanded="true" aria-controls="collapse-essence">
@@ -64,9 +61,7 @@
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="accordion m-3 rounded">
         <div class="accordion-item bg-dark" id="upgrades">
             <h4 class="accordion-header" title="Upgrades">
                 <button class="fw-bold accordion-button bg-black" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-upgrades" aria-expanded="true" aria-controls="collapse-upgrades">
@@ -92,9 +87,7 @@
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="accordion m-3 rounded">
         <div class="accordion-item bg-dark" id="created">
             <h3 class="accordion-header" title="Created">
                 <button class="fw-bold accordion-button bg-black" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-created" aria-expanded="true" aria-controls="collapse-created">

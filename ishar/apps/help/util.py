@@ -9,10 +9,10 @@ from ishar.apps.classes.models import Class
 
 
 # Retrieve playable player class names
-player_classes = []
-playable_classes = Class.objects.exclude(class_description="").all()
-for playable_class in playable_classes:
-    player_classes.append(playable_class.class_display)
+PLAYER_CLASSES = []
+PLAYABLE_CLASSES = Class.objects.exclude(class_description="").all()
+for playable_class in PLAYER_CLASSES:
+    PLAYER_CLASSES.append(playable_class.class_display)
 
 # Compile a few regular expressions for use later
 #   to parse out specific items from help topic chunks
@@ -132,7 +132,7 @@ def parse_help_body(line=None):
     return line
 
 
-def parse_help_class(class_line=None, player_classes=player_classes):
+def parse_help_class(class_line=None):
     """
     Parse a single class line from a single topic chunk
         from the MUD 'helptab' file, and link the Player Class help page.
@@ -145,8 +145,12 @@ def parse_help_class(class_line=None, player_classes=player_classes):
     for topic_class in topic_classes:
         i += 1
         topic_class = topic_class.strip()
-        if topic_class in player_classes:
-            string_out += f'<a href="/help/{topic_class}">{topic_class}</a>'
+        if topic_class in PLAYER_CLASSES:
+            string_out += (
+                f'<a href="/help/{topic_class}"'
+                f' title="Help: {topic_class} (Class)">'
+                f'{topic_class}</a>'
+            )
             if i != num_topic_classes:
                 string_out += ', '
         else:
@@ -178,16 +182,19 @@ def parse_help_content(content=None):
 
         if is_see_also:
             i = 0
-            rmbegin = line.split(':')
-            related_topics = rmbegin[-1].strip().split(',')
+            rm_begin = line.split(':')
+            related_topics = rm_begin[-1].strip().split(',')
             num_related = len(related_topics)
 
             # Loop through each related topic to link them
             for related_topic in related_topics:
                 i += 1
                 if related_topic and related_topic.strip() != '':
-                    related_link = f'<a href="/help/{related_topic.strip()}">'\
+                    related_link = (
+                        f'<a href="/help/{related_topic.strip()}"'
+                        f' title="Help: {related_topic.strip()}">'
                         f'{related_topic.strip()}</a>'
+                    )
                     help_topic['body_html'] += related_link
                     help_topic['body_text'] += related_topic.strip()
                     help_topic['see_also'].append(related_topic.strip())
@@ -217,7 +224,7 @@ def parse_help_content(content=None):
     cmd_pattern = r"`help ([\w| ]+)'"
     help_topic['body_html'] = re.sub(
         cmd_pattern,
-        r'`<a href="/help/\1">help \1</a>`',
+        r'`<a href="/help/\1" title="Help: \1">help \1</a>`',
         help_topic['body_html'],
         re.MULTILINE
     )
