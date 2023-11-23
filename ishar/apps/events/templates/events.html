@@ -33,15 +33,17 @@
                 </h3>
                 <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse show">
                     <div class="accordion-body">
-                        <ul class="list-group">
-                            <li class="rounded bg-dark list-group-item list-group-item-text text-white" title="Ends: {{ global_event.end_time }} ({{ global_event.end_time | naturaltime }})">
+                        <ul class="list-group list-group-horizontal-md">
+                            <li class="border-0 bg-dark list-group-item list-group-item-text text-white" title="Ends: {{ global_event.end_time }} ({{ global_event.end_time | naturaltime }})">
                                 <strong>Ends</strong>:
                                 {{ global_event.end_time | naturaltime }}
                             </li>
-                            <li class="rounded bg-dark list-group-item list-group-item-text text-white" title="Started: {{ global_event.start_time }} ({{ global_event.start_time | naturaltime }})">
+                            <li class="border-0 bg-dark list-group-item list-group-item-text text-white" title="Started: {{ global_event.start_time }} ({{ global_event.start_time | naturaltime }})">
                                 <strong>Started</strong>:
                                 {{ global_event.start_time | naturaltime }}
                             </li>
+                        </ul>
+                        <ul class="list-group list-group-horizontal-md">
             {% if global_event.xp_bonus and global_event.xp_bonus != '' and global_event.xp_bonus != 0 %}
                             <li class="border-0 bg-dark list-group-item list-group-item-text text-white" title="XP Bonus: {% widthratio global_event.xp_bonus 1 1 %}%">
                                 <strong>XP Bonus</strong>:

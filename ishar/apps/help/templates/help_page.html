@@ -22,78 +22,72 @@
 {% block content %}
 
     {% if help_topic %}
-    <div class="card bg-dark">
-        <div class="card-header">
+    <div class="bg-dark">
+        {% if help_properties and help_properties|length > 0 %}
+            <!--
+            {{ help_properties }}
+            {{ help_properties|length }}
+            -->
+        <div class="bg-black rounded border border-secondary m-3 p-3">
             <ul class="two-col">
-        {% for help_property in help_properties %}
-            {% with help_property_value=help_topic|get_dict_item:help_property %}
-                {% if help_property_value %}
-                <li class="card-text">
+            {% for help_property in help_properties %}
+                {% with help_property_value=help_topic|get_dict_item:help_property %}
+                    {% if help_property_value %}
+                <li>
                     <strong>{{ help_property | title }}</strong>:
                     <code>{% autoescape off %}{{ help_property_value }}{% endautoescape %}</code>
                 </li>
-                {% endif %}
-            {% endwith %}
-        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            {% endfor %}
             </ul>
         </div>
+        {% endif %}
         {% if help_topic.body_html %}
-        <div class="card-body">
-            <pre class="card-text p-2" style="white-space: pre-wrap;">
-                {% autoescape off %}{{ help_topic.body_html }}{% endautoescape %}
-            </pre>
-        </div>
+        <pre class="bg-black border border-secondary m-3 p-3" style="white-space: pre-wrap;">
+            {% autoescape off %}{{ help_topic.body_html }}{% endautoescape %}
+        </pre>
         {% endif %}
     </div>
     {% endif %}
 
     {% if request.user.is_anonymous and not help_topic %}
-    <div class="card bg-dark">
-        <div class="card-body">
-            <p class="card-text lead">
-                If you are new here, you may want to download one of many
-                <a href="{% url "clients" %}" title="MUD clients">MUD clients</a>,
-                see our <a href="{% url "start" %}" title="getting started guide">getting started guide</a>, and
-                <a href="{% url "discord" %}" target="_blank" title="IsharMUD Discord Invitation">join us on Discord</a>!
-            </p>
-        </div>
-    </div>
+    <p class="bg-black border border-secondary m-3 p-3 rounded lead">
+        If you are new here, you may want to download one of many
+        <a href="{% url "clients" %}" title="MUD clients">MUD clients</a>,
+        see our <a href="{% url "start" %}" title="getting started guide">getting started guide</a>,
+        and <a href="{% url "discord" %}" target="_blank" title="Ishar MUD Discord Invitation">join us on Discord</a>!
+    </p>
     {% endif %}
 
     {% if help_search_form %}
-    <div class="card bg-dark">
-        <div class="card-body">
-            <form class="card-text" action="{% url "help" %}" method="post">
-                {% csrf_token %}
-                {{ help_search_form.as_p }}
-                <p>
-                    <button class="btn btn-outline-primary" type="submit">Search</button>
-                    <button class="btn btn-outline-secondary" type="reset">Clear</button>
-                </p>
-            </form>
-    {% if not help_topic %}
-            <p class="card-footer blockquote-footer">
-                such as &quot;<a href="{% url "help_page" help_topic="spell" %}">spell</a>&quot; or
-                &quot;<a href="{% url "help_page" help_topic="MUD Basics" %}">MUD Basics</a>&quot;
+    <div class="bg-black border border-secondary m-3 p-3 rounded">
+        <form class="card-text" action="{% url "help" %}" method="post">
+            {% csrf_token %}
+            {{ help_search_form.as_p }}
+            <p>
+                <button class="btn btn-outline-primary rounded" type="submit">Search</button>
+                <button class="btn btn-outline-secondary rounded" type="reset">Clear</button>
             </p>
-    {% endif %}
-        </div>
+        </form>
+        <p class="blockquote-footer">
+            such as &quot;<a href="{% url "help_page" help_topic="spell" %}" title="Help: Spell">spell</a>&quot; or
+            &quot;<a href="{% url "help_page" help_topic="MUD Basics" %}" title="Help: MUD Basics">MUD Basics</a>&quot;
+        </p>
     </div>
     {% endif %}
 
-    <div class="card bg-dark">
-        <div class="card-body">
+    <div class="bg-black border border-secondary m-3 p-3">
     {% if help_topics %}
-            <ul class="card-text two-col">
+        <ul class="two-col">
         {% for list_topic in help_topics %}
-                <li title="Topic: {{ list_topic }}"><a href="{% url "help_page" help_topic=list_topic %}">{{ list_topic }}</a></li>
+            <li title="Topic: {{ list_topic }}"><a href="{% url "help_page" help_topic=list_topic %}">{{ list_topic }}</a></li>
         {% endfor %}
-            </ul>
+        </ul>
     {% else %}
-            <p class="card-text">
+        <p class="lead">
                 <strong>Sorry, but no help topics were found.</strong>
-            </p>
+        </p>
     {% endif %}
-        </div>
     </div>
 {% endblock content %}

@@ -13,6 +13,9 @@ HELP_PROPERTIES = (
 
 
 class HelpView(TemplateView):
+    """
+    Help view.
+    """
     template_name = "help_page.html"
     help_topics = get_help_topics()
     help_topic = None
@@ -37,6 +40,9 @@ class HelpView(TemplateView):
 
 
 class HelpPageView(HelpView):
+    """
+    Help page view.
+    """
     template_name = "help_page.html"
 
     def dispatch(self, request, *args, **kwargs):

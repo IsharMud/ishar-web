@@ -150,16 +150,14 @@
                 <div class="card-body">
 {% block messages %}
     {% if messages %}
-                    <div class="card bg-dark" style="border: 0.1rem solid var(--ishar-color);">
-                        <div class="card-body">
-                            <ul class="card-text lead fw-bold">
+                    <div class="bg-black border border-secondary m-3 p-3 rounded">
+                        <ul class="card-text lead fw-bold">
         {% for message in messages %}
-                                <li class="message-{{ message.tags }}">
-                                    {{ message }}
-                                </li>
+                            <li class="message-{{ message.tags }}">
+                                {{ message }}
+                            </li>
         {% endfor %}
-                            </ul>
-                        </div>
+                        </ul>
                     </div>
     {% endif %}
 {% endblock messages %}
