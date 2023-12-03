@@ -16,15 +16,12 @@
     </p>
         {% endif %}
         {% if not player.is_immortal %}
-    <div class="accordion m-3 rounded" id="details">
-        <div class="bg-dark accordion-item">
-            <h3 class="accordion-header" title="Details">
-                <button class="fw-bold accordion-button bg-black" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-details" aria-expanded="true" aria-controls="collapse-details">
-                    Details
-                </button>
-            </h3>
-            <div id="collapse-details" class="accordion-collapse collapse show">
-                <div class="accordion-body text-white">
+    <div class="m-3">
+        <details class="m-1" id="details" open>
+            <summary class="h3 p-2 text-ishar bg-black border border-light rounded" title="{{ faq.question_text }}">
+                Details
+            </summary>
+            <div class="m-3">
                     <ul class="list-group list-group-horizontal-md">
                         <li class="bg-dark border-0 list-group-item list-group-item-text text-white" title="Name: {{ player.name | title }} / Class: {{ player.common.player_class.get_class_name }} / Race: {{ player.common.race.display_name }}">
                             <span class="bi bi-dot text-ishar"></span>
@@ -76,18 +73,15 @@
                     {% endif %}
                         </li>
                     </ul>
-                </div>
             </div>
-        </div>
+        </details>
+
             {% if player.upgrades %}
-        <div class="accordion-item bg-dark" id="upgrades">
-            <h4 class="accordion-header" title="Remort Upgrades">
-                <button class="fw-bold accordion-button bg-black" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-upgrades" aria-expanded="true" aria-controls="collapse-upgrades">
-                    Remort Upgrades
-                </button>
-            </h4>
-            <div id="collapse-upgrades" class="accordion-collapse collapse show">
-                <div class="accordion-body text-white">
+        <details class="m-1" id="upgrades" open>
+            <summary class="h4 p-2 text-ishar bg-black border border-light rounded" title="{{ faq.question_text }}">
+                Remort Upgrades
+            </summary>
+            <div class="m-3">
                     <ul class="list-group list-group-horizontal-md">
                 {% for upgraded in player.upgrades.all %}
                         <li class="bg-dark border-0 list-group-item list-group-item-text text-white" title="{{ upgraded.upgrade.display_name }}{% if upgraded.value > 1 %} (x{{ upgraded.value }}){% endif %}">
@@ -96,19 +90,15 @@
                         </li>
                 {% endfor %}
                     </ul>
-                </div>
             </div>
-        </div>
+        </details>
             {% endif %}
             {% if player.player_stats %}
-        <div class="accordion-item bg-dark" id="stats">
-            <h4 class="accordion-header" title="Statistics">
-                <button class="fw-bold accordion-button bg-black" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-stats" aria-expanded="true" aria-controls="collapse-stats">
-                    Statistics
-                </button>
-            </h4>
-            <div id="collapse-stats" class="accordion-collapse collapse show">
-                <div class="accordion-body text-white">
+        <details class="m-1" id="stats "open>
+            <summary class="h4 p-2 text-ishar bg-black border border-light rounded" title="{{ faq.question_text }}">
+                Statistics
+            </summary>
+            <div class="m-3">
                     <ol class="list-group list-group-horizontal-md">
                 {% for stat_name, stat_value in player.player_stats.items %}
                         <li class="bg-dark border-0 list-group-item" title="{{ stat_name }}: {{ stat_value }}">
@@ -119,19 +109,15 @@
                         </li>
                 {% endfor %}
                     </ol>
-                </div>
             </div>
-        </div>
+        </details>
             {% endif %}
 
-        <div class="accordion-item bg-dark" id="time">
-            <h4 class="accordion-header" title="Time">
-                <button class="fw-bold accordion-button bg-black" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-time" aria-expanded="true" aria-controls="collapse-time">
-                    Time
-                </button>
-            </h4>
-            <div id="collapse-time" class="accordion-collapse collapse show">
-                <div class="accordion-body">
+        <details class="m-1" id="time" open>
+            <summary class="h4 p-2 text-ishar bg-black border border-light rounded" title="{{ faq.question_text }}">
+                Time
+            </summary>
+            <div class="m-3">
                     <ul class="list-group list-group-horizontal-md">
                         <li class="bg-dark border-0 list-group-item list-group-item-text text-white" title="Logged On: {{ player.logon | naturaltime }}, ({{ player.logon }})">
                             <span class="bi bi-dot text-ishar"></span>
@@ -144,8 +130,6 @@
                             on {{ player.logon | date }}.
                         </li>
                     </ul>
-                </div>
-                <div class="accordion-body">
                     <ul class="list-group list-group-horizontal-md">
                         <li class="bg-dark border-0 list-group-item list-group-item-text text-white" title="Birth: {{ player.birth | naturaltime }}, ({{ player.birth }})">
                             <span class="bi bi-dot text-ishar"></span>
@@ -158,9 +142,8 @@
                             for {{ player.online_time }}.
                         </li>
                     </ul>
-                </div>
             </div>
-        </div>
+        </details>
     </div>
         {% else %}
     <p class="lead">
