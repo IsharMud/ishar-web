@@ -9,7 +9,7 @@ input, body { background-color: #323639; color: #d6d6d7; }
 button, textarea, input, select { border: 0.1rem solid var(--ishar-color); background-color: #323639; color: var(--ishar-color); }
 h1, h2, h3, h4, h5, strong, th, label, th, .gridjs-th-content, .gridjs-td[data-column-id="name"] { color: var(--ishar-color); }
 
-.navbar-dark .navbar-toggler-icon { background-image: url("/static/images/cropped_ishar_logo_dark.png"); }
+/* .navbar-dark .navbar-toggler-icon { background-image: url("/static/images/new_trans.png"); } */
 .navbar-expand-lg .navbar-nav .nav-link { color: var(--ishar-color); }
 
 a[target="_blank"]::after {
