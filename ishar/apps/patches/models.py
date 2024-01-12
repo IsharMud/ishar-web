@@ -1,5 +1,9 @@
+import os
+
+from django.conf import settings
 from django.core.validators import FileExtensionValidator
 from django.db import models
+from django.dispatch import receiver
 from django.utils import timezone
 
 from ishar.apps.accounts.models import Account
@@ -35,6 +39,7 @@ class Patch(models.Model):
         max_length=100,
         help_text="PDF file of the patch.",
         verbose_name="Patch File",
+        upload_to=settings.PATCHES_URL,
         validators=[FileExtensionValidator(allowed_extensions=['pdf'])]
     )
     is_visible = models.BooleanField(
@@ -59,3 +64,28 @@ class Patch(models.Model):
 
     def __str__(self):
         return self.patch_name
+
+
+@receiver(models.signals.post_delete, sender=Patch)
+def auto_delete_file_on_delete(sender, instance, **kwargs):
+    """Delete old patch PDF from file-system when Patch object is deleted."""
+    if instance.patch_file:
+        if os.path.isfile(instance.patch_file.path):
+            os.remove(instance.patch_file.path)
+
+
+@receiver(models.signals.pre_save, sender=Patch)
+def auto_delete_file_on_change(sender, instance, **kwargs):
+    """Delete old patch PDF from file-system when Patch object is updated."""
+    if not instance.pk:
+        return False
+
+    try:
+        old_file = Patch.objects.get(pk=instance.pk).patch_file
+    except Patch.DoesNotExist:
+        return False
+
+    new_file = instance.patch_file
+    if not old_file == new_file:
+        if os.path.isfile(old_file.path):
+            os.remove(old_file.path)
