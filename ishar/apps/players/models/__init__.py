@@ -437,10 +437,10 @@ class Player(models.Model):
 
         return "Classic"
 
-    @admin.display(boolean=False, description="Online Time")
-    def online_time(self) -> timedelta:
+    @admin.display(boolean=False, description="Online Timedelta")
+    def online_timedelta(self) -> timedelta:
         """
-        Online time.
+        Online timedelta.
         """
         return timedelta(seconds=self.online)
 

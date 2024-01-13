@@ -136,10 +136,10 @@
                             {{ player.get_player_gender | title }} was born {{ player.birth | naturaltime }},
                             on {{ player.birth | date }}.
                         </li>
-                        <li class="bg-dark border-0 list-group-item list-group-item-text text-white" title="Played For: {{ player.online_time }} ({{ player.online }} seconds)">
+                        <li class="bg-dark border-0 list-group-item list-group-item-text text-white" title="Played For: {{ player.online_timedelta | naturaltime }} ({{ player.online }} seconds)">
                             <span class="bi bi-dot text-ishar"></span>
-                            {{ player.get_player_gender | title }} {{ player.get_player_phrase_owns }} played
-                            for {{ player.online_time }}.
+                            {{ player.get_player_gender | title }} {{ player.get_player_phrase_owns }} played for
+                            {{ player.online_timedelta | naturaltime }}.
                         </li>
                     </ul>
             </div>

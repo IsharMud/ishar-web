@@ -150,7 +150,7 @@ class PlayerAdmin(admin.ModelAdmin):
             "classes": ("collapse",)
         }),
         ("Time", {
-            "fields": ("birth", "logon", "logout", "online", "online_time"),
+            "fields": ("birth", "logon", "logout", "online", "online_timedelta"),
             "classes": ("collapse",)
         })
     )
@@ -169,7 +169,7 @@ class PlayerAdmin(admin.ModelAdmin):
     )
     readonly_fields = (
         "id", "birth", "logon", "logout", "player_type", "player_level",
-        "online_time"
+        "online_timedelta"
     )
     search_fields = ("name", "account__account_name")
     verbose_name = "Player"
