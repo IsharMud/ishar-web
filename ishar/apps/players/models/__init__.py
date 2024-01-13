@@ -5,6 +5,8 @@ from django.db import models
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.urls import reverse
+from django.utils.timesince import timesince
+from django.utils.timezone import now
 
 from ishar.apps.accounts.models import Account
 from ishar.apps.players.util import get_immortal_level, get_immortal_type
@@ -443,6 +445,15 @@ class Player(models.Model):
         Online timedelta.
         """
         return timedelta(seconds=self.online)
+
+    @admin.display(boolean=False, description="Online Time")
+    def online_time(self) -> str:
+        """
+        Online time humanized string.
+        """
+        if self.online > 60:
+            return timesince(now() - self.online_timedelta())
+        return f"{self.online} seconds"
 
     @property
     @admin.display(boolean=False, description="Title", ordering="title")
