@@ -82,10 +82,9 @@
                 Remort Upgrades
             </summary>
             <div class="m-3">
-                    <ul class="list-group list-group-horizontal-md">
+                    <ul class="list-group list-group-numbered list-group-horizontal-md">
                 {% for upgraded in player.upgrades.all %}
                         <li class="bg-dark border-0 list-group-item list-group-item-text text-white" title="{{ upgraded.upgrade.display_name }}{% if upgraded.value > 1 %} (x{{ upgraded.value }}){% endif %}">
-                            <span class="bi bi-dot text-ishar"></span>
                             {{ upgraded.upgrade.display_name }}{% if upgraded.value > 1 %}<span class="text-ishar"> (x{{ upgraded.value }})</span>{% endif %}
                         </li>
                 {% endfor %}
