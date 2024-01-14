@@ -74,11 +74,6 @@
                                 Portal
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark bg-black border border-secondary p-3">
-                                <li class="nav-item" title="Account">
-                                    <a class="bi bi-person bg-black nav-link dropdown-item" href="{% url "account" %}">
-                                        Account
-                                    </a>
-                                </li>
                                 <li class="nav-item" title="Challenges">
                                     <a class="bi bi-award bg-black nav-link dropdown-item" href="{% url "challenges" %}">
                                         Challenges
@@ -99,15 +94,10 @@
                                         Leaders
                                     </a>
                                 </li>
-                                <li class="nav-item" title="Players">
+                                <li class="nav-item" title="Portal">
                                     <a class="bi bi-person-lines-fill bg-black nav-link dropdown-item" href="{% url "portal" %}">
-                                        Players
-    {% if request.user.players and request.user.players.count > 0 %}
-                                        <span class="badge text-bg-secondary">
-                                            {{ request.user.players.count }}
-                                        </span>
+                                        Portal
                                     </a>
-    {% endif %}
                                 </li>
                                 <li class="nav-item" title="Log out">
                                     <a class="bi bi-door-closed bg-black nav-link dropdown-item" href="{% url "logout" %}">

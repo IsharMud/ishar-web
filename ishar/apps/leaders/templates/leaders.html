@@ -6,99 +6,104 @@
 {% block header %}
 <nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '•';">
     <ol class="breadcrumb" style="--bs-breadcrumb-divider-color: var(--ishar-color);">
-        <li class="breadcrumb-item{% if not game_type %} active" aria-current="page{% endif %}" title="Leaders">
+        <li class="breadcrumb-item" title="Portal">
             <span class="text-ishar bi bi-trophy"></span>
+            <a href="{% url "portal" %}">Portal</a>
+        </li>
+        <li class="breadcrumb-item{% if not game_type %} active" aria-current="page{% endif %}" title="Leaders">
             <a href="{% url "leaders" %}">
                 Leaders
             </a>
         </li>
     {% if game_type %}
-        <li class="breadcrumb-item active" aria-current="page" title="{{ help_topic.name }}">
-            <span class="text-ishar">{{ game_type }}</span>
+        <li class="breadcrumb-item active" aria-current="page" title="{{ game_type }} Leaders">
+            <a href="{% url game_type|lower %}">
+                {{ game_type }}
+            </a>
         </li>
     {% endif %}
     </ol>
 </nav>
 {% endblock header %}
 {% block scripts %}
-        <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
-        <script>
-            function showLeaders(where) {
-                new gridjs.Grid({
-                    columns: [
-                        {
-                            id: 'name',
-                            name: 'Player',
-                            formatter:  (cell) => gridjs.html(`<a href="/player/${cell}#player">${cell}</a>`)
-                        },
-                        {
-                            id: 'remorts',
-                            name: 'Remorts'
-                        },
-                        {
-                            id: 'renown',
-                            name: 'Renown'
-                        },
-                        {
-                            id: 'quests',
-                            name: 'Quests'
-                        },
-                        {
-                            id: 'challenges',
-                            name: 'Challenges'
-                        },
-                        {
-                            id: 'deaths',
-                            name: 'Deaths'
-                        }
-                    ],
-                    data: [
-                      {% for leader in leader_players %}
-                        {
-                            name: "{{ leader.name }}",
-                            remorts: {{ leader.remorts }},
-                            renown: {{ leader.total_renown }},
-                            quests: {{ leader.quests_completed }},
-                            challenges: {{ leader.challenges_completed }},
-                            deaths: {{ leader.deaths }}
-                        }{% if not forloop.last %},{% endif %}
-                      {% endfor %}
-                    ],
-                    className: {
-                        table: "table table-bordered table-dark",
-                    },
-                    search:     true,
-                    sort:       true,
-                    pagination: true,
-                    width:      '50%'
-                }).render(where);
-            };
-        </script>
+<script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
+<script>
+    function showLeaders(where) {
+        new gridjs.Grid({
+            columns: [
+                {
+                    id: 'name',
+                    name: 'Player',
+                    formatter:  (cell) => gridjs.html(`<a href="/player/${cell}#player">${cell}</a>`)
+                },
+                {
+                    id: 'remorts',
+                    name: 'Remorts'
+                },
+                {
+                    id: 'renown',
+                    name: 'Renown'
+                },
+                {
+                    id: 'quests',
+                    name: 'Quests'
+                },
+                {
+                    id: 'challenges',
+                    name: 'Challenges'
+                },
+                {
+                    id: 'deaths',
+                    name: 'Deaths'
+                }
+            ],
+            data: [
+              {% for leader in leader_players %}
+                {
+                    name: "{{ leader.name }}",
+                    remorts: {{ leader.remorts }},
+                    renown: {{ leader.total_renown }},
+                    quests: {{ leader.quests_completed }},
+                    challenges: {{ leader.challenges_completed }},
+                    deaths: {{ leader.deaths }}
+                }{% if not forloop.last %},{% endif %}
+              {% endfor %}
+            ],
+            className: {
+                table: "table table-bordered table-dark",
+            },
+            search:     true,
+            sort:       true,
+            pagination: true,
+            width:      '50%'
+        }).render(where);
+    };
+</script>
 {% endblock scripts %}
 {% block content %}
-    <ul class="m-1 p-1 list-group list-group-horizontal">
-        <li class="list-group-item bg-dark" title="All">
-    {% if game_type %}
-            <a class="list-group-item-text" href="{% url "leaders" %}">All</a>
-    {% else %}
-            <span class="text-ishar">All</span>
-    {% endif %}
-        </li>
-        <li class="list-group-item bg-dark" title="Classic">
-    {% if game_type != "Classic" %}
-            <a class="list-group-item-text" href="{% url "classic" %}">Classic</a>
-    {% else %}
-            <span class="text-ishar">Classic</span>
-    {% endif %}
-        </li>
-        <li class="list-group-item bg-dark" title="Survival">
-    {% if game_type != "Survival" %}
-            <a class="list-group-item-text" href="{% url "survival" %}">Survival</a>
-    {% else %}
-            <span class="text-ishar">Survival</span>
-    {% endif %}
-        </li>
-    </ul>
-    <div class="m-1 p-1" id="leaders"></div>
-    <script>showLeaders( document.getElementById('leaders'));</script>
+<ul class="m-1 p-1 list-group list-group-horizontal">
+    <li class="list-group-item bg-dark" title="All">
+{% if game_type %}
+        <a class="list-group-item-text" href="{% url "leaders" %}">All</a>
+{% else %}
+        <span class="text-ishar">All</span>
+{% endif %}
+    </li>
+    <li class="list-group-item bg-dark" title="Classic">
+{% if game_type != "Classic" %}
+        <a class="list-group-item-text" href="{% url "classic" %}">Classic</a>
+{% else %}
+        <span class="text-ishar">Classic</span>
+{% endif %}
+    </li>
+    <li class="list-group-item bg-dark" title="Survival">
+{% if game_type != "Survival" %}
+        <a class="list-group-item-text" href="{% url "survival" %}">Survival</a>
+{% else %}
+        <span class="text-ishar">Survival</span>
+{% endif %}
+    </li>
+</ul>
+<div class="m-1 p-1" id="leaders"></div>
+<script>showLeaders( document.getElementById('leaders'));</script>
 {% endblock content %}

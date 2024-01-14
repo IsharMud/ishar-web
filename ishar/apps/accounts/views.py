@@ -49,10 +49,6 @@ class PortalView(LoginRequiredMixin, TemplateView):
     template_name = "portal.html"
 
 
-class AccountView(PortalView):
-    template_name = "account.html"
-
-
 class PasswordView(LoginRequiredMixin, PasswordChangeView):
     success_url = settings.LOGIN_REDIRECT_URL
     template_name = "password.html"

@@ -1,96 +1,184 @@
 {% extends "layout.html" %}
+{% load humanize %}
 {% block meta_title %}Portal{% endblock meta_title %}
 {% block meta_description %}Portal for players to see information about their account and characters.{% endblock meta_description %}
 {% block meta_url %}{% url "portal" %}{% endblock meta_url %}
 {% block title %}Portal{% endblock title %}
-{% block header %}<span class="bi bi-person-lines-fill"></span> Welcome{% if request.user.account_name %}, {{ request.user.account_name | title }}{% endif %}!{% endblock header %}
+{% block header %}
+<nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '•';">
+    <ol class="breadcrumb" style="--bs-breadcrumb-divider-color: var(--ishar-color);">
+        <li class="breadcrumb-item active" aria-current="page" title="Portal">
+            <span class="bi bi-person-lines-fill text-ishar"></span>
+            <a href="{% url "portal" %}">Portal</a>
+        </li>
+    </ol>
+</nav>
+{% endblock header %}
 {% block content %}
-    <div class="container-md">
-    {% if request.user.players %}
-        <h3 class="m-3" title="You have {{ request.user.players.count }} character{{ request.user.players.count | pluralize }}.">
-            You have {{ request.user.players.count }} character{{ request.user.players.count | pluralize }}:
-        </h3>
-        <div class="accordion m-3">
-        {% for player in request.user.players.all %}
-            <div class="accordion-item bg-dark text-white">
-                <h3 class="accordion-header" title="{{ player.name }}">
-                    <button class="accordion-button bg-black fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false" aria-controls="collapse{{ forloop.counter }}">
-                        <span class="{{ player.player_css }}">{{ player.name }}</span>
-                    </button>
-                </h3>
-                <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse">
-                    <div class="accordion-body">
-                        <h4 title="{{ player.player_title }}">
-                            <a href="{{ player.get_absolute_url }}">
-                                <span class="bi bi-person-fill">
-                                    {{ player.player_title }}
-                                </span>
-                            </a>
-                        </h4>
-            {% if not player.is_immortal %}
-                        <ol class="bg-dark list-group list-group-horizontal-md">
-                            <li class="bg-dark list-group-item list-group-item-text text-white" title="Level: {{ player.common.level }}">
-                                <strong>Level</strong>: {{ player.common.level }}
-                            </li>
-                            <li class="bg-dark list-group-item list-group-item-text text-white" title="Class: {{ player.common.player_class.get_class_name }}">
-                                <strong>Class</strong>: {{ player.common.player_class.get_class_name }}
-                            </li>
-                            <li class="bg-dark list-group-item list-group-item-text text-white" title="Race: {{ player.common.race.display_name }}">
-                                <strong>Race</strong>: {{ player.common.race.display_name }}
-                            </li>
-                            <li class="bg-dark list-group-item list-group-item-text text-white" title="Alignment: {{ player.get_player_alignment }} ({{ player.common.alignment }})">
-                                <strong>Alignment</strong>: {{ player.get_player_alignment }}
-                            </li>
-                {% if player.remorts > 0 %}
-                            <li class="bg-dark list-group-item list-group-item-text text-white" title="Remorts: {{ player.remorts }}">
-                                <strong>Remorts</strong>: {{ player.remorts }}
-                            </li>
+    <ul class="m-1 bg-dark list-group list-group-horizontal-md">
+        <li class="bg-dark border-secondary list-group-item" title="Challenges">
+            <span class="bi bi-award text-ishar"></span>
+            <a class="list-group-item-text" href="{% url "challenges" %}">
+                Challenges
+            </a>
+        </li>
+        <li class="bg-dark border-secondary list-group-item" title="Leaders">
+            <span class="bi bi-trophy text-ishar"></span>
+            <a class="list-group-item-text" href="{% url "leaders" %}">
+                Leaders
+            </a>
+        </li>
+        <li class="bg-dark border-secondary list-group-item" title="Password">
+            <span class="bi bi-key text-ishar"></span>
+            <a class="list-group-item-text" href="{% url "password" %}">
+                Password
+            </a>
+        </li>
+    </ul>
+
+    <hr>
+
+{% if request.user.players %}
+    <p class="lead" title="You have {{ request.user.players.count }} character{{ request.user.players.count | pluralize }}.">
+        You have {{ request.user.players.count }} character{{ request.user.players.count | pluralize }}:
+    </p>
+
+    {% for player in request.user.players.all %}
+    <details class="m-1">
+
+        <summary class="h3 p-2 text-ishar bg-black border border-secondary rounded" title="Manage Account ({{ request.user.account_name }})">
+            <span class="text-secondary">{{  forloop.counter }}.</span>
+            <span class="{{ player.player_css }}">{{ player.name }}</span>
+        </summary>
+
+        <div class="m-3">
+
+            <h4 title="{{ player.player_title }}">
+                <a href="{{ player.get_absolute_url }}">
+                    <span class="bi bi-person-fill">
+                        {{ player.player_title }}
+                    </span>
+                </a>
+            </h4>
+
+        {% if not player.is_immortal %}
+            <ol class="bg-dark list-group list-group-horizontal-md">
+                <li class="bg-dark border-secondary list-group-item list-group-item-text text-white" title="Level: {{ player.common.level }}">
+                    <strong>Level</strong>: {{ player.common.level }}
+                </li>
+                <li class="bg-dark border-secondary list-group-item list-group-item-text text-white" title="Class: {{ player.common.player_class.get_class_name }}">
+                    <strong>Class</strong>: {{ player.common.player_class.get_class_name }}
+                </li>
+                <li class="bg-dark border-secondary list-group-item list-group-item-text text-white" title="Race: {{ player.common.race.display_name }}">
+                    <strong>Race</strong>: {{ player.common.race.display_name }}
+                </li>
+                <li class="bg-dark border-secondary list-group-item list-group-item-text text-white" title="Alignment: {{ player.get_player_alignment }} ({{ player.common.alignment }})">
+                    <strong>Alignment</strong>: {{ player.get_player_alignment }}
+                </li>
+            {% if player.remorts > 0 %}
+                <li class="bg-dark border-secondary list-group-item list-group-item-text text-white" title="Remorts: {{ player.remorts }}">
+                    <strong>Remorts</strong>: {{ player.remorts }}
+                </li>
                 {% endif %}
                 {% if player.renown > 0 %}
-                            <li class="bg-dark list-group-item list-group-item-text text-white" title="Renown: {{ player.renown }}">
-                                <strong>Renown</strong>: {{ player.renown }}
-                            </li>
+                <li class="bg-dark border-secondary list-group-item list-group-item-text text-white" title="Renown: {{ player.renown }}">
+                    <strong>Renown</strong>: {{ player.renown }}
+                </li>
                 {% endif %}
                 {% if player.quests_completed > 0 %}
-                            <li class="bg-dark list-group-item list-group-item-text text-white" title="Quests: {{ player.quests_completed }}">
-                                <strong>Quests</strong>: {{ player.quests_completed }}
-                            </li>
+                <li class="bg-dark border-secondary list-group-item list-group-item-text text-white" title="Quests: {{ player.quests_completed }}">
+                    <strong>Quests</strong>: {{ player.quests_completed }}
+                </li>
                 {% endif %}
                 {% if player.challenges_completed > 0 %}
-                            <li class="bg-dark list-group-item list-group-item-text text-white" title="Challenges: {{ player.challenges_completed }}">
-                                <strong>Challenges</strong>: {{ player.challenges_completed }}
-                            </li>
+                <li class="bg-dark border-secondary list-group-item list-group-item-text text-white" title="Challenges: {{ player.challenges_completed }}">
+                    <strong>Challenges</strong>: {{ player.challenges_completed }}
+                </li>
                 {% endif %}
-                            <li class="bg-dark list-group-item list-group-item-text text-white" title="Deaths: {{ player.deaths }}">
-                                <strong>Deaths</strong>: {{ player.deaths }}
-                            </li>
-                        </ol>
-            {% else %}
-                        <p class="lead text-white">
-                            {{ player.name | title }} {{ player.get_player_phrase }}
-                            a <span class="{{ player.player_css }}">{{ player.player_type }}</span> character!
-                        </p>
-            {% endif %}
-                    </div>
-                </div>
-            </div>
-        {% endfor %}
+                <li class="bg-dark border-secondary list-group-item list-group-item-text text-white" title="Deaths: {{ player.deaths }}">
+                    <strong>Deaths</strong>: {{ player.deaths }}
+                </li>
+            </ol>
+        {% else %}
+            <p class="lead text-white">
+                {{ player.name | title }} {{ player.get_player_phrase }}
+                a <span class="{{ player.player_css }}">{{ player.player_type }}</span> character!
+            </p>
+        {% endif %}
         </div>
-    {% else %}
-        <h3 class="m-3" title="You have not created any players yet!">
-            You have not created any players yet!
-        </h3>
-    {% endif %}
-    {% if request.user.current_essence > 0 %}
-        <h5 class="m-3" title="You have {{ request.user.current_essence }} essence.">
-            You have {{ request.user.current_essence }}
-            <a title="essence" href="{% url "account" %}#essence">essence</a>.
-            <a href="{% url "help_page" help_topic='Essence' %}" title="Help: Essence">
-                <small>
-                    <span class="bi bi-question-circle text-white"></span>
-                </small>
-            </a>
-        </h5>
-    {% endif %}
+
+    </details>
+    {% endfor %}
+{% else %}
+    <h3 class="m-3" title="You have not created any players yet!">
+        You have not created any players yet!
+    </h3>
+{% endif %}
+
+<hr>
+
+<details class="m-1"{% if request.user.current_essence > 0 %} open{% endif %}>
+    <summary id="essence" class="h3 p-2 text-ishar bg-black border border-secondary rounded" title="Essence ({{ request.user.account_name }})">
+        Essence
+        <a href="{% url "help_page" help_topic='Essence' %}" title="Help: Essence">
+            <span class="bi p-1 bi-question-circle text-secondary"></span>
+        </a>
+        <a class="anchor-link" href="#essence" aria-label="Link to this section: Essence ({{ request.user.account_name }})">&#x23;</a>
+    </summary>
+    <div class="m-3">
+        <ul class="list-group list-group-horizontal-md">
+            <li class="bg-dark border-secondary list-group-item list-group-item-text text-white" title="Current: {{ request.user.current_essence }} essence">
+                <strong>Current</strong>:
+                {{ request.user.current_essence }} essence
+            </li>
+            <li class="bg-dark border-secondary list-group-item list-group-item-text text-white" title="Earned: {{ request.user.seasonal_earned }} essence">
+                <strong>Earned</strong>:
+                {{ request.user.seasonal_earned }} essence</li>
+            </li>
+        </ul>
     </div>
+</details>
+
+<details class="m-1"{% if request.user.upgrades.count > 0 %} open{% endif %}>
+    <summary id="upgrades" class="h3 p-2 text-ishar bg-black border border-secondary rounded" title="Account Upgrades ({{ request.user.account_name }}): {{ request.user.upgrades.count }}}">
+        Upgrades
+        {% if request.user.upgrades.count > 0 %}({{ request.user.upgrades.count }}){% endif %}
+        <a class="anchor-link" href="#upgrades" aria-label="Link to this section: Account Upgrades ({{ request.user.account_name }})">&#x23;</a>
+    </summary>
+    <div class="m-3">
+{% if request.user.upgrades.all %}
+        <ol class="list-group list-group-horizontal-md list-group-numbered">
+    {% for upgraded in request.user.upgrades.all %}
+            <li class="bg-dark border-secondary list-group-item list-group-item-text text-white" title="{{ upgraded.upgrade.name }}{% if upgraded.amount > 1 %} (x{{ upgraded.amount }}){% endif %}">
+                {{ upgraded.upgrade.name }}{% if upgraded.amount > 1 %}<span class="text-ishar"> (<strong>x{{ upgraded.amount }}</strong>)</span>{% endif %}
+            </li>
+    {% endfor %}
+        </ol>
+{% else %}
+        <p class="fst-italic text-reset" title="You have not purchased any upgrades.">
+            You have not purchased any upgrades.
+        </p>
+{% endif %}
+    </div>
+</details>
+
+<details class="m-1">
+    <summary id="created" class="h3 p-2 text-ishar bg-black border border-secondary rounded" title="Account Created ({{ request.user.account_name }}): {{ request.user.created_at | naturaltime }}">
+        Created
+        <a class="anchor-link" href="#created" aria-label="Link to this section: Account Created ({{ request.user.account_name }}): {{ request.user.created_at | naturaltime }}">&#x23;</a>
+    </summary>
+    <div class="m-3">
+        <p>Your account was created:</p>
+        <blockquote class="blockquote">
+            <p class="text-white" title="{{ request.user.created_at }}">
+                {{ request.user.created_at }}
+            </p>
+            <footer class="blockquote-footer" title="{{ request.user.created_at | naturaltime }}">
+                {{ request.user.created_at | naturaltime }}
+            </footer>
+        </blockquote>
+    </div>
+</details>
+
+
 {% endblock content %}

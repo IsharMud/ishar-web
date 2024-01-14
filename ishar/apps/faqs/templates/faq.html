@@ -3,32 +3,46 @@
 {% block meta_description %}A few common questions that are asked about Ishar MUD.{% endblock meta_description %}
 {% block meta_url %}{% url "faq" %}{% endblock meta_url %}
 {% block title %}Frequently Asked Questions{% endblock title %}
-{% block header %}<span class="bi bi-question-square"></span> Frequently Asked Questions{% endblock header %}
+{% block header %}
+<nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '•';">
+    <ol class="breadcrumb" style="--bs-breadcrumb-divider-color: var(--ishar-color);">
+        <li class="breadcrumb-item active" aria-current="page" title="Portal">
+            <span class="bi bi-question-square text-ishar"></span>
+            <a href="{% url "faq" %}">Frequently Asked Questions</a>
+        </li>
+    </ol>
+</nav>
+{% endblock header %}
 {% block content %}
-    <p class="lead">
-        Here are a few common questions that are asked about Ishar MUD.
-    </p>
-    <p class="lead">
-        You may also want to visit the
-        <a href="{% url "help_page" help_topic="MUD Basics" %}" title="Help: MUD Basics">MUD Basics help page</a>,
-        our <a href="{% url "start" %}" title="Get Started">getting started guide</a>, and
-        <a href="{% url "discord" %}" target="_blank" title="Ishar MUD Discord">join us on Discord</a>!
-    </p>
-    <div class="m-3">
+<p class="lead">
+    Here are a few common questions that are asked about Ishar MUD.
+</p>
+<p class="lead">
+    You may also want to visit the
+    <a href="{% url "help_page" help_topic="MUD Basics" %}" title="Help: MUD Basics">MUD Basics help page</a>,
+    our <a href="{% url "start" %}" title="Get Started">getting started guide</a>, and
+    <a href="{% url "discord" %}" target="_blank" title="Ishar MUD Discord">join us on Discord</a>!
+</p>
+{% if faqs %}
     {% for faq in faqs %}
-        <details class="m-1" open>
-          <summary id="{{ faq.slug }}" class="h3 p-2 text-ishar bg-black border border-light rounded" title="{{ faq.question_text }}">
-              {{ faq.question_text }}
-              <a class="anchor-link" href="#{{ faq.slug }}" aria-label="Link to this section: Frequently Asked Question: {{ faq.question_text }} ({{ faq.slug }})">&#x23;</a>
-          </summary>
-          <div class="m-3">
-              {% autoescape off %}{{ faq.question_answer }}{% endautoescape %}
-          </div>
-        </details>
+<details class="m-1" open>
+  <summary id="{{ faq.slug }}" class="h3 p-2 text-ishar bg-black border border-light rounded" title="{{ faq.question_text }}">
+      {{ faq.question_text }}
+      <a class="anchor-link" href="#{{ faq.slug }}" aria-label="Link to this section: Frequently Asked Question: {{ faq.question_text }} ({{ faq.slug }})">&#x23;</a>
+  </summary>
+  <div class="m-3">
+      {% autoescape off %}{{ faq.question_answer }}{% endautoescape %}
+  </div>
+</details>
     {% endfor %}
-    </div>
-    <p class="lead">
-        If there is anything that you think is missing, please feel free to reach out, by e-mailing
-        <a class="font-monospace" href="mailto:admin@isharmud.com" target="_blank" title="E-mail: admin@isharmud.com">admin@isharmud.com</a>.
-    </p>
+{%  else %}
+<p class="lead">
+    No patches found.
+</p>
+{%  endif %}
+
+<p class="lead">
+    If there is anything that you think is missing, please feel free to reach out, by e-mailing
+    <a class="font-monospace" href="mailto:admin@isharmud.com" target="_blank" title="E-mail: admin@isharmud.com">admin@isharmud.com</a>.
+</p>
 {% endblock content %}

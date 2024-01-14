@@ -4,61 +4,65 @@
 {% block meta_description %}The latest patches to Ishar MUD{% endblock meta_description %}
 {% block meta_url %}{% url "patches" %}{% endblock meta_url %}
 {% block title %}Patches{% endblock title %}
-{% block header %}<span class="bi bi-bandaid"></span> Patches{% endblock header %}
+{% block header %}
+<nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '•';">
+    <ol class="breadcrumb" style="--bs-breadcrumb-divider-color: var(--ishar-color);">
+        <li class="breadcrumb-item active" aria-current="page" title="Patches">
+            <span class="bi bi-bandaid text-ishar"></span>
+            <a href="{% url "patches" %}">Patches</a>
+        </li>
+    </ol>
+</nav>
+{% endblock header %}
 {% block content %}
 <p class="lead">
     Ishar MUD is under regular development, and constantly being improved!
 </p>
-<div class="container-sm">
-    {% if patches %}
-    <div class="m-3">
-        {% for patch in patches %}
-        <details class="m-1" {% if forloop.first and page_obj.number == 1 %} open{% endif %}>
-            <summary id="{{ patch.patch_name | slugify }}" class="h3 p-2 text-ishar bg-black border border-light rounded" title="{{ patch.patch_name }}">
-                {{ patch.patch_name }}
-                <a class="anchor-link" href="#{{ patch.patch_name | slugify }}" aria-label="Link to this section: Patch {{ patch.patch_name }} ({{ patch.patch_name | slugify }})">&#x23;</a>
-            </summary>
-            <div class="m-3">
-                <blockquote class="blockquote">
-                    <p>
-                        <a href="{{ patch.patch_file.url }}" target="_blank" title="{{ patch.patch_file.name }} &lt;{{ patch.patch_file.url }}&gt;">
-                            {{ patch.patch_file.name }}
-                        </a>
-                        <small>
-                            <code title="{{ patch.patch_file.size | filesizeformat }}">
-                                {{ patch.patch_file.size | filesizeformat }}
-                            </code>
-                        </small>
-                    </p>
-                    <footer class="blockquote-footer" title="-- {{ patch.account.get_username | title }} @ {{ patch.patch_date | date:"r" }}">
-                        <cite>{{ patch.account.get_username | title }}</cite> @ {{ patch.patch_date | date:"r" }}
-                    </footer>
-                </blockquote>
-            </div>
-        </details>
-        {% endfor %}
-    </div>
-        {% if page_obj %}
-    <div class="pagination lead">
-        <p class="step-links">
-            {% if page_obj.has_previous %}
-            <a href="?page=1">&laquo; first</a>
-            <a href="?page={{ page_obj.previous_page_number }}">previous</a>
-            {% endif %}
-            <span class="current">
-                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-            </span>
-            {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}">next</a>
-            <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
-            {% endif %}
+
+{% if patches %}
+    {% for patch in patches %}
+<details class="m-1" {% if forloop.first and page_obj.number == 1 %} open{% endif %}>
+    <summary id="{{ patch.patch_name | slugify }}" class="h3 p-2 text-ishar bg-black border border-light rounded" title="{{ patch.patch_name }}">
+        {{ patch.patch_name }}
+        <a class="anchor-link" href="#{{ patch.patch_name | slugify }}" aria-label="Link to this section: Patch {{ patch.patch_name }} ({{ patch.patch_name | slugify }})">&#x23;</a>
+    </summary>
+    <blockquote class="blockquote">
+        <p>
+            <a href="{{ patch.patch_file.url }}" target="_blank" title="{{ patch.patch_file.name }} &lt;{{ patch.patch_file.url }}&gt;">
+                {{ patch.patch_file.name }}
+            </a>
+            <small>
+                <code title="{{ patch.patch_file.size | filesizeformat }}">
+                    {{ patch.patch_file.size | filesizeformat }}
+                </code>
+            </small>
         </p>
-    </div>
+        <footer class="blockquote-footer" title="-- {{ patch.account.get_username | title }} @ {{ patch.patch_date | date:"r" }}">
+            <cite>{{ patch.account.get_username | title }}</cite> @ {{ patch.patch_date | date:"r" }}
+        </footer>
+    </blockquote>
+</details>
+    {% endfor %}
+    {% if page_obj %}
+<div class="pagination lead">
+    <p class="step-links">
+        {% if page_obj.has_previous %}
+        <a href="?page=1">&laquo; first</a>
+        <a href="?page={{ page_obj.previous_page_number }}">previous</a>
         {% endif %}
-    {% else %}
+        <span class="current">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </span>
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}">next</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+        {% endif %}
+    </p>
+</div>
+    {% endif %}
+{% else %}
     <p class="lead">
         No patches found.
     </p>
-    {% endif %}
-</div>
+{% endif %}
 {% endblock content %}

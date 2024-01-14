@@ -18,29 +18,27 @@
     <p class="lead">
         Here are some of the MUD clients that we have heard good things about:
     </p>
-    <div class="m-3">
     {% for category in mud_client_categories %}
-       <details class="m-1" open>
-            <summary id="category-{{ category.name | slugify }}" class="h3 p-2 text-ishar bg-black border border-light rounded" title="{{ category.name }}">
-                {{ category.name }}
-                <a class="anchor-link" href="#category-{{ category.name | slugify }}" aria-label="Link to this section: MUD Client Category {{ category.name }} ({{ category.name | slugify }})">&#x23;</a>
-            </summary>
-            <div class="m-3">
-                    <ul class="list-group">
+   <details class="m-1" open>
+        <summary id="category-{{ category.name | slugify }}" class="h3 p-2 text-ishar bg-black border border-light rounded" title="{{ category.name }}">
+            {{ category.name }}
+            <a class="anchor-link" href="#category-{{ category.name | slugify }}" aria-label="Link to this section: MUD Client Category {{ category.name }} ({{ category.name | slugify }})">&#x23;</a>
+        </summary>
+        <div class="m-3">
+            <ul class="list-group">
         {% for client in category.clients.all %}
             {% if client.is_visible %}
-                        <li class="border-0 bg-dark list-group-item">
-                            <a class="list-group-item-text" href="{{ client.url }}" id="client-{{ client.name | slugify }}" target="_blank" title="{{ client.name }}">
-                                {{ client.name }}
-                            </a>
-                        </li>
+                <li class="border-0 bg-dark list-group-item">
+                    <a class="list-group-item-text" href="{{ client.url }}" id="client-{{ client.name | slugify }}" target="_blank" title="{{ client.name }}">
+                        {{ client.name }}
+                    </a>
+                </li>
             {% endif %}
         {% endfor %}
-                    </ul>
-            </div>
-       </details>
+            </ul>
+        </div>
+   </details>
     {% endfor %}
-     </div>
     <p class="lead">
         Do not be afraid to try a few, as they all have different strengths and weaknesses.
         After you download a client, tell it to connect to <code>isharmud.com</code> on
