@@ -20,9 +20,10 @@
     </p>
     <div class="m-3">
     {% for category in mud_client_categories %}
-       <details class="m-1" id="category-{{ category.name | slugify }}" open>
-            <summary class="h3 p-2 text-ishar bg-black border border-light rounded" title="{{ category.name }}">
+       <details class="m-1" open>
+            <summary id="category-{{ category.name | slugify }}" class="h3 p-2 text-ishar bg-black border border-light rounded" title="{{ category.name }}">
                 {{ category.name }}
+                <a class="anchor-link" href="#category-{{ category.name | slugify }}" aria-label="Link to this section: MUD Client Category {{ category.name }} ({{ category.name | slugify }})">&#x23;</a>
             </summary>
             <div class="m-3">
                     <ul class="list-group">

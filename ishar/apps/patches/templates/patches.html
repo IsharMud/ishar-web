@@ -13,14 +13,15 @@
     {% if patches %}
     <div class="m-3">
         {% for patch in patches %}
-        <details class="m-1" id="patch-{{ patch.patch_id }}"{% if forloop.first and page_obj.number == 1 %} open{% endif %}>
-            <summary class="h3 p-2 text-ishar bg-black border border-light rounded" title="{{ patch.patch_name }}">
+        <details class="m-1" {% if forloop.first and page_obj.number == 1 %} open{% endif %}>
+            <summary id="{{ patch.patch_name | slugify }}" class="h3 p-2 text-ishar bg-black border border-light rounded" title="{{ patch.patch_name }}">
                 {{ patch.patch_name }}
+                <a class="anchor-link" href="#{{ patch.patch_name | slugify }}" aria-label="Link to this section: Patch {{ patch.patch_name }} ({{ patch.patch_name | slugify }})">&#x23;</a>
             </summary>
             <div class="m-3">
                 <blockquote class="blockquote">
                     <p>
-                        <a href="{{ patch.patch_file.url }}" target="_blank" title="{{ patch.patch_name }}">
+                        <a href="{{ patch.patch_file.url }}" target="_blank" title="{{ patch.patch_file.name }} &lt;{{ patch.patch_file.url }}&gt;">
                             {{ patch.patch_file.name }}
                         </a>
                         <small>

@@ -16,9 +16,10 @@
     </p>
     <div class="m-3">
     {% for faq in faqs %}
-        <details class="m-1" id="faq-{{ faq.faq_id }}" open>
-          <summary class="h3 p-2 text-ishar bg-black border border-light rounded" title="{{ faq.question_text }}">
+        <details class="m-1" open>
+          <summary id="{{ faq.slug }}" class="h3 p-2 text-ishar bg-black border border-light rounded" title="{{ faq.question_text }}">
               {{ faq.question_text }}
+              <a class="anchor-link" href="#{{ faq.slug }}" aria-label="Link to this section: Frequently Asked Question: {{ faq.question_text }} ({{ faq.slug }})">&#x23;</a>
           </summary>
           <div class="m-3">
               {% autoescape off %}{{ faq.question_answer }}{% endautoescape %}

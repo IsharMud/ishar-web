@@ -15,6 +15,13 @@ class FAQ(models.Model):
         primary_key=True,
         verbose_name="FAQ ID"
     )
+    slug = models.SlugField(
+        default=None,
+        help_text="Short (slug) name for the HTML anchor/URL.",
+        max_length=16,
+        unique=True,
+        verbose_name="(Slug) Name"
+    )
     account = models.ForeignKey(
         db_column="account_id",
         blank=False,
@@ -73,7 +80,7 @@ class FAQ(models.Model):
 
     def get_absolute_url(self) -> str:
         """Anchored URL to FAQ page."""
-        return reverse(viewname="faq") + "#faq-" + self.faq_id
+        return reverse(viewname="faq") + "#" + self.slug
 
     def __repr__(self):
         return (
