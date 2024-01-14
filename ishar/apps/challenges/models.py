@@ -7,59 +7,59 @@ class Challenge(models.Model):
     Challenge.
     """
     challenge_id = models.SmallAutoField(
-        primary_key=True,
         help_text="Auto-generated permanent challenge identification number.",
-        verbose_name="Challenge ID"
+        primary_key=True,
+        verbose_name="Challenge ID",
     )
     mob_vnum = models.IntegerField(
         help_text="VNUM of the mobile target of the challenge.",
         verbose_name="Mobile VNUM"
     )
-    orig_level = models.IntegerField(
-        help_text="Original level of the challenge.",
-        verbose_name="Original Level"
+    max_level = models.IntegerField(
+        help_text="Maximum level of the challenge.",
+        verbose_name="Maximum Level"
     )
-    orig_people = models.IntegerField(
-        help_text="Original number of people for the challenge.",
-        verbose_name="Original People"
+    max_people = models.IntegerField(
+        help_text="Maximum number of people for the challenge.",
+        verbose_name="Maximum People"
     )
-    orig_tier = models.IntegerField(
-        help_text="Original tier of the challenge.",
-        verbose_name="Original Tier"
-    )
-    adj_level = models.IntegerField(
-        help_text="Adjusted level of the challenge.",
-        verbose_name="Adjusted Level"
-    )
-    adj_people = models.IntegerField(
-        help_text="Adjusted number of people for the challenge.",
-        verbose_name="Adjusted People"
-    )
-    adj_tier = models.IntegerField(
-        help_text="Adjusted tier of the challenge.",
-        verbose_name="Adjusted Tier"
+    chall_tier = models.IntegerField(
+        help_text="Tier of the challenge.",
+        verbose_name="Challenge Tier"
     )
     challenge_desc = models.CharField(
-        max_length=80,
         help_text="Friendly description of the challenge.",
+        max_length=80,
         verbose_name="Challenge Description"
     )
     winner_desc = models.CharField(
-        max_length=80,
         help_text=(
             "Description of the winner(s) of the challenge. "
             "Blank indicates that the challenge is not complete."
         ),
+        max_length=80,
         verbose_name="Winner Description"
     )
     mob_name = models.CharField(
-        max_length=30,
         help_text="Name of the mobile target of the challenge.",
+        max_length=30,
         verbose_name="Mobile Name"
     )
     is_active = models.BooleanField(
         help_text="Is the challenge currently active?",
         verbose_name="Active?"
+    )
+    last_completion = models.DateTimeField(
+        help_text="Date and time when the challenge was last completed.",
+        verbose_name="Last Completion"
+    )
+    num_completed = models.IntegerField(
+        help_text="Number of times that the challenge has been completed.",
+        verbose_name="Number Completed"
+    )
+    num_picked = models.IntegerField(
+        help_text="Number of times that the challenge has been picked.",
+        verbose_name="Number Picked"
     )
 
     class Meta:

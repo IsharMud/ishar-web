@@ -28,9 +28,9 @@
         {% else %}
                             name: "{% autoescape off %}{{ challenge.mob_name }}{% endautoescape %}",
         {% endif %}
-                            people: "{{ challenge.adj_people }}",
-                            level: {{ challenge.orig_level }},
-                            reward: {{ challenge.orig_tier }}
+                            people: "{{ challenge.max_people }}",
+                            level: {{ challenge.max_level }},
+                            reward: {{ challenge.chall_tier }}
                         },
     {% endfor %}
                     ],
