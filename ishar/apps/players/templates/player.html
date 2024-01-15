@@ -34,11 +34,11 @@
         {% if not player.is_immortal %}
     <div class="m-3">
         <details class="bg-black border border-secondary rounded mx-1 my-3" open>
-            <summary class="h3 p-2 text-ishar bg-black border border-secondary rounded" title="Details">
+            <summary class="h3 p-2 text-ishar bg-black" title="Details">
                 Details
                 <a class="anchor-link" href="#details" aria-label="Link to this section: Details">&#x23;</a>
             </summary>
-            <div class="bg-black m-3" id="details">
+            <div class="bg-black border-top border-secondary m-3" id="details">
                 <ul class="bg-black list-group list-group-horizontal-md list-group-dark">
                     <li id="class" class="bg-black border-0 list-group-item list-group-item-text text-white" title="Name: {{ player.name | title }} / Class: {{ player.common.player_class.get_class_name }} / Race: {{ player.common.race.display_name }}">
                         <span class="bi bi-dot text-ishar"></span>
@@ -95,12 +95,12 @@
 
             {% if player.upgrades %}
         <details class="bg-black border border-secondary rounded mx-1 my-3" open>
-            <summary class="h4 p-2 text-ishar bg-black border border-secondary rounded" title="Remort Upgrades">
+            <summary class="h4 p-2 text-ishar bg-black" title="Remort Upgrades">
                 Remort Upgrades
                 {% if player.upgrades.count > 0 %}({{ player.upgrades.count }}){% endif %}
                 <a class="anchor-link" href="#upgrades" aria-label="Link to this section: Remort Upgrades">&#x23;</a>
             </summary>
-            <div class="bg-black m-3" id="upgrades">
+            <div class="bg-black border-top border-secondary m-3" id="upgrades">
                     <ul class="bg-black list-group list-group-dark list-group-numbered list-group-horizontal-md">
                 {% for upgraded in player.upgrades.all %}
                         <li class="bg-black border-0 list-group-item list-group-item-text text-white" title="{{ upgraded.upgrade.display_name }}{% if upgraded.value > 1 %} (x{{ upgraded.value }}){% endif %}">
@@ -114,11 +114,11 @@
 
             {% if player.player_stats %}
         <details class="bg-black border border-secondary rounded mx-1 my-3" open>
-            <summary class="h4 p-2 text-ishar bg-black border border-secondary rounded" title="Statistics">
+            <summary class="h4 p-2 text-ishar bg-black" title="Statistics">
                 Statistics
                 <a class="anchor-link" href="#stats" aria-label="Link to this section: Statistics">&#x23;</a>
             </summary>
-            <div class="bg-black m-3" id="stats">
+            <div class="bg-black border-top border-secondary  m-3" id="stats">
                 <ol class="bg-black list-group list-group-dark list-group-horizontal-md">
                 {% for stat_name, stat_value in player.player_stats.items %}
                     <li class="bg-black border-0 list-group-item" title="{{ stat_name }}: {{ stat_value }}">
@@ -134,11 +134,11 @@
             {% endif %}
 
         <details class="bg-black border border-secondary rounded mx-1 my-3" open>
-            <summary class="h4 p-2 text-ishar border border-secondary rounded" title="Time">
+            <summary class="h4 p-2 text-ishar" title="Time">
                 Time
                 <a class="anchor-link" href="#time" aria-label="Link to this section: Time">&#x23;</a>
             </summary>
-            <div class="bg-black m-3" id="time">
+            <div class="bg-black border-top border-secondary m-3" id="time">
                 <ul class="bg-black list-group list-group-dark list-group-horizontal-md">
                     <li class="bg-black border-0 list-group-item list-group-item-text text-white" title="Logged On: {{ player.logon | naturaltime }}, ({{ player.logon }})">
                         <span class="bi bi-dot text-ishar"></span>

@@ -46,7 +46,7 @@
     {% for player in request.user.players.all %}
     <details class="mx-1 my-3 bg-black border border-secondary rounded">
 
-        <summary class="h3 p-2 text-ishar bg-black border border-secondary rounded" title="Manage Account ({{ request.user.account_name }})">
+        <summary class="h3 p-2 text-ishar bg-black" title="Manage Account ({{ request.user.account_name }})">
             <span class="text-secondary">{{  forloop.counter }}.</span>
             <span class="{{ player.player_css }}">{{ player.name }}</span>
         </summary>
@@ -118,7 +118,7 @@
 <hr>
 
 <details class="bg-black mx-1 my-3 border border-secondary rounded"{% if request.user.current_essence > 0 %} open{% endif %}>
-    <summary id="essence" class="h3 p-2 text-ishar bg-black border border-secondary rounded" title="Essence ({{ request.user.account_name }})">
+    <summary id="essence" class="h3 p-2 text-ishar bg-black" title="Essence ({{ request.user.account_name }})">
         Essence
         <a href="{% url "help_page" help_topic='Essence' %}" title="Help: Essence">
             <span class="bi p-1 bi-question-circle text-secondary"></span>
@@ -140,7 +140,7 @@
 </details>
 
 <details class="mx-1 my-3 bg-black border border-secondary rounded"{% if request.user.upgrades.count > 0 %} open{% endif %}>
-    <summary id="upgrades" class="h3 p-2 text-ishar bg-black border border-secondary rounded" title="Account Upgrades ({{ request.user.account_name }}): {{ request.user.upgrades.count }}}">
+    <summary id="upgrades" class="h3 p-2 text-ishar bg-black" title="Account Upgrades ({{ request.user.account_name }}): {{ request.user.upgrades.count }}}">
         Upgrades
         {% if request.user.upgrades.count > 0 %}({{ request.user.upgrades.count }}){% endif %}
         <a class="anchor-link" href="#upgrades" aria-label="Link to this section: Account Upgrades ({{ request.user.account_name }})">&#x23;</a>
@@ -163,7 +163,7 @@
 </details>
 
 <details class="bg-black mx-1 my-3 border border-secondary rounded">
-    <summary id="created" class="h3 bg-black p-2 text-ishar border border-secondary rounded" title="Account Created ({{ request.user.account_name }}): {{ request.user.created_at | naturaltime }}">
+    <summary id="created" class="h3 bg-black p-2 text-ishar" title="Account Created ({{ request.user.account_name }}): {{ request.user.created_at | naturaltime }}">
         Created
         <a class="anchor-link" href="#created" aria-label="Link to this section: Account Created ({{ request.user.account_name }}): {{ request.user.created_at | naturaltime }}">&#x23;</a>
     </summary>
