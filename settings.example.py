@@ -82,19 +82,19 @@ AUTHENTICATION_BACKENDS = (
 
 # Order of character statistics based on player class
 CLASS_STATS = {
-    "WARRIOR": (
+    "Warrior": (
         "Strength", "Agility", "Endurance", "Willpower", "Focus", "Perception"
     ),
-    "ROGUE": (
+    "Rogue": (
         "Agility", "Perception", "Strength", "Focus", "Endurance", "Willpower"
     ),
-    "CLERIC": (
+    "Cleric": (
         "Willpower", "Strength", "Perception", "Endurance", "Focus", "Agility"
     ),
-    "MAGICIAN": (
+    "Magician": (
         "Perception", "Focus", "Agility", "Willpower", "Endurance", "Strength"
     ),
-    "NECROMANCER": (
+    "Necromancer": (
         "Focus", "Willpower", "Perception", "Agility", "Strength", "Endurance"
     ),
     # Alphabetic as last resort
