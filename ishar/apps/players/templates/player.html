@@ -4,7 +4,23 @@
 {% block meta_description %}{% if player %}Player: {{ player.name }}{% if player.player_type == 'Dead' %} ☠️{% endif %}{% else %}Player Not Found{% endif %}{% endblock meta_description %}
 {% block meta_url %}{% url "players" %}{% endblock meta_url %}
 {% block title %}{% if player %}Player: {{ player.name }}{% if player.player_type == 'Dead' %} ☠️{% endif %}{% else %}Player Not Found{% endif %}{% endblock title %}
-{% block header %}{% if player %}Player: <a class="{{ player.player_css }}" href="{{ player.get_absolute_url }}" title="{{ player.name }}">{{ player.name }}</a>{% else %}Player Not Found{% endif %}{% endblock header %}
+{% block header %}
+<nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '•';">
+    <ol class="breadcrumb" style="--bs-breadcrumb-divider-color: var(--ishar-color);">
+        <li class="breadcrumb-item" title="Portal">
+            <span class="bi bi-person text-ishar"></span>
+            <a href="{% url "portal" %}">Portal</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+{% if player %}
+            <a class="{{ player.player_css }}" href="{{ player.get_absolute_url }}" title="{{ player.name }}">{{ player.name }}</a>
+{% else %}
+            <span class="Player Not Found">Player Not Found</span>
+{% endif %}
+        </li>
+    </ol>
+</nav>
+{% endblock header %}
 {% block content %}
     {% if player %}
     <h3 id="player" title="{{ player.player_title }}">
@@ -18,7 +34,7 @@
         {% if not player.is_immortal %}
     <div class="m-3">
         <details class="m-1" id="details" open>
-            <summary class="h3 p-2 text-ishar bg-black border border-light rounded" title="{{ faq.question_text }}">
+            <summary class="h3 p-2 text-ishar bg-black border border-secondary rounded" title="{{ faq.question_text }}">
                 Details
             </summary>
             <div class="m-3">
@@ -78,23 +94,25 @@
 
             {% if player.upgrades %}
         <details class="m-1" id="upgrades" open>
-            <summary class="h4 p-2 text-ishar bg-black border border-light rounded" title="{{ faq.question_text }}">
+            <summary class="h4 p-2 text-ishar bg-black border border-secondary rounded" title="Remort Upgrades">
                 Remort Upgrades
+                {% if player.upgrades.count > 0 %}({{ player.upgrades.count }}){% endif %}
             </summary>
             <div class="m-3">
                     <ul class="list-group list-group-numbered list-group-horizontal-md">
                 {% for upgraded in player.upgrades.all %}
                         <li class="bg-dark border-0 list-group-item list-group-item-text text-white" title="{{ upgraded.upgrade.display_name }}{% if upgraded.value > 1 %} (x{{ upgraded.value }}){% endif %}">
-                            {{ upgraded.upgrade.display_name }}{% if upgraded.value > 1 %}<span class="text-ishar"> (x{{ upgraded.value }})</span>{% endif %}
+                            {{ upgraded.upgrade.display_name }}{% if upgraded.value > 1 %}<span class="text-ishar"> (<strong>x{{ upgraded.value }}</strong>)</span>{% endif %}
                         </li>
                 {% endfor %}
                     </ul>
             </div>
         </details>
             {% endif %}
+
             {% if player.player_stats %}
-        <details class="m-1" id="stats "open>
-            <summary class="h4 p-2 text-ishar bg-black border border-light rounded" title="{{ faq.question_text }}">
+        <details class="m-1" id="stats" open>
+            <summary class="h4 p-2 text-ishar bg-black border border-secondary rounded" title="Statistics">
                 Statistics
             </summary>
             <div class="m-3">
@@ -112,30 +130,30 @@
         </details>
             {% endif %}
 
-        <details class="m-1" id="time" open>
-            <summary class="h4 p-2 text-ishar bg-black border border-light rounded" title="{{ faq.question_text }}">
+        <details class="bg-black border border-secondary rounded m-1" id="time" open>
+            <summary class="h4 p-2 text-ishar border border-secondary rounded" title="Time">
                 Time
             </summary>
-            <div class="m-3">
-                    <ul class="list-group list-group-horizontal-md">
-                        <li class="bg-dark border-0 list-group-item list-group-item-text text-white" title="Logged On: {{ player.logon | naturaltime }}, ({{ player.logon }})">
+            <div class="bg-black m-3">
+                    <ul class="bg-black list-group list-group-dark list-group-horizontal-md">
+                        <li class="bg-black border-0 list-group-item list-group-item-text text-white" title="Logged On: {{ player.logon | naturaltime }}, ({{ player.logon }})">
                             <span class="bi bi-dot text-ishar"></span>
                             {{ player.get_player_gender | title }} last logged on {{ player.logon | naturaltime }},
                             on {{ player.logon | date }}.
                         </li>
-                        <li class="bg-dark border-0 list-group-item list-group-item-text text-white" title="Logged Out: {{ player.logout | naturaltime }}, ({{ player.logout }})">
+                        <li class="bg-black border-0 list-group-item list-group-item-text text-white" title="Logged Out: {{ player.logout | naturaltime }}, ({{ player.logout }})">
                             <span class="bi bi-dot text-ishar"></span>
                             {{ player.get_player_gender | title }} last logged out {{ player.logout | naturaltime }},
                             on {{ player.logon | date }}.
                         </li>
                     </ul>
-                    <ul class="list-group list-group-horizontal-md">
-                        <li class="bg-dark border-0 list-group-item list-group-item-text text-white" title="Birth: {{ player.birth | naturaltime }}, ({{ player.birth }})">
+                    <ul class="bg-black list-group list-group-horizontal-md">
+                        <li class="bg-black border-0 list-group-item list-group-item-text text-white" title="Birth: {{ player.birth | naturaltime }}, ({{ player.birth }})">
                             <span class="bi bi-dot text-ishar"></span>
                             {{ player.get_player_gender | title }} was born {{ player.birth | naturaltime }},
                             on {{ player.birth | date }}.
                         </li>
-                        <li class="bg-dark border-0 list-group-item list-group-item-text text-white" title="Played For: {{ player.online_time }} ({{ player.online }} seconds)">
+                        <li class="bg-black border-0 list-group-item list-group-item-text text-white" title="Played For: {{ player.online_time }} ({{ player.online }} seconds)">
                             <span class="bi bi-dot text-ishar"></span>
                             {{ player.get_player_gender | title }} {{ player.get_player_phrase_owns }} played for
                             {{ player.online_time }}.

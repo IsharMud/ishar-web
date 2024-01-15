@@ -16,19 +16,19 @@
 {% endblock header %}
 {% block content %}
     <ul class="m-1 bg-dark list-group list-group-horizontal-md">
-        <li class="bg-dark border-secondary list-group-item" title="Challenges">
+        <li class="bg-black border-secondary list-group-item" title="Challenges">
             <span class="bi bi-award text-ishar"></span>
             <a class="list-group-item-text" href="{% url "challenges" %}">
                 Challenges
             </a>
         </li>
-        <li class="bg-dark border-secondary list-group-item" title="Leaders">
+        <li class="bg-black border-secondary list-group-item" title="Leaders">
             <span class="bi bi-trophy text-ishar"></span>
             <a class="list-group-item-text" href="{% url "leaders" %}">
                 Leaders
             </a>
         </li>
-        <li class="bg-dark border-secondary list-group-item" title="Password">
+        <li class="bg-black border-secondary list-group-item" title="Password">
             <span class="bi bi-key text-ishar"></span>
             <a class="list-group-item-text" href="{% url "password" %}">
                 Password
@@ -36,15 +36,13 @@
         </li>
     </ul>
 
-    <hr>
-
 {% if request.user.players %}
     <p class="lead" title="You have {{ request.user.players.count }} character{{ request.user.players.count | pluralize }}.">
         You have {{ request.user.players.count }} character{{ request.user.players.count | pluralize }}:
     </p>
 
     {% for player in request.user.players.all %}
-    <details class="m-1">
+    <details class="m-1 bg-black border border-secondary rounded">
 
         <summary class="h3 p-2 text-ishar bg-black border border-secondary rounded" title="Manage Account ({{ request.user.account_name }})">
             <span class="text-secondary">{{  forloop.counter }}.</span>
@@ -62,7 +60,7 @@
             </h4>
 
         {% if not player.is_immortal %}
-            <ol class="bg-dark list-group list-group-horizontal-md">
+            <ol class="bg-black list-group list-group-horizontal-md">
                 <li class="bg-dark border-secondary list-group-item list-group-item-text text-white" title="Level: {{ player.common.level }}">
                     <strong>Level</strong>: {{ player.common.level }}
                 </li>
@@ -115,9 +113,7 @@
     </h3>
 {% endif %}
 
-<hr>
-
-<details class="m-1"{% if request.user.current_essence > 0 %} open{% endif %}>
+<details class="bg-black m-1 border border-secondary rounded"{% if request.user.current_essence > 0 %} open{% endif %}>
     <summary id="essence" class="h3 p-2 text-ishar bg-black border border-secondary rounded" title="Essence ({{ request.user.account_name }})">
         Essence
         <a href="{% url "help_page" help_topic='Essence' %}" title="Help: Essence">
@@ -126,20 +122,20 @@
         <a class="anchor-link" href="#essence" aria-label="Link to this section: Essence ({{ request.user.account_name }})">&#x23;</a>
     </summary>
     <div class="m-3">
-        <ul class="list-group list-group-horizontal-md">
+        <ul class="bg-black list-group list-group-horizontal-md">
             <li class="bg-dark border-secondary list-group-item list-group-item-text text-white" title="Current: {{ request.user.current_essence }} essence">
                 <strong>Current</strong>:
                 {{ request.user.current_essence }} essence
             </li>
             <li class="bg-dark border-secondary list-group-item list-group-item-text text-white" title="Earned: {{ request.user.seasonal_earned }} essence">
                 <strong>Earned</strong>:
-                {{ request.user.seasonal_earned }} essence</li>
+                {{ request.user.seasonal_earned }} essence
             </li>
         </ul>
     </div>
 </details>
 
-<details class="m-1"{% if request.user.upgrades.count > 0 %} open{% endif %}>
+<details class="m-1 bg-black border border-secondary rounded"{% if request.user.upgrades.count > 0 %} open{% endif %}>
     <summary id="upgrades" class="h3 p-2 text-ishar bg-black border border-secondary rounded" title="Account Upgrades ({{ request.user.account_name }}): {{ request.user.upgrades.count }}}">
         Upgrades
         {% if request.user.upgrades.count > 0 %}({{ request.user.upgrades.count }}){% endif %}
@@ -147,7 +143,7 @@
     </summary>
     <div class="m-3">
 {% if request.user.upgrades.all %}
-        <ol class="list-group list-group-horizontal-md list-group-numbered">
+        <ol class="bg-black list-group list-group-horizontal-md list-group-numbered">
     {% for upgraded in request.user.upgrades.all %}
             <li class="bg-dark border-secondary list-group-item list-group-item-text text-white" title="{{ upgraded.upgrade.name }}{% if upgraded.amount > 1 %} (x{{ upgraded.amount }}){% endif %}">
                 {{ upgraded.upgrade.name }}{% if upgraded.amount > 1 %}<span class="text-ishar"> (<strong>x{{ upgraded.amount }}</strong>)</span>{% endif %}
@@ -162,8 +158,8 @@
     </div>
 </details>
 
-<details class="m-1">
-    <summary id="created" class="h3 p-2 text-ishar bg-black border border-secondary rounded" title="Account Created ({{ request.user.account_name }}): {{ request.user.created_at | naturaltime }}">
+<details class="bg-black m-1 border border-secondary rounded">
+    <summary id="created" class="h3 bg-black p-2 text-ishar border border-secondary rounded" title="Account Created ({{ request.user.account_name }}): {{ request.user.created_at | naturaltime }}">
         Created
         <a class="anchor-link" href="#created" aria-label="Link to this section: Account Created ({{ request.user.account_name }}): {{ request.user.created_at | naturaltime }}">&#x23;</a>
     </summary>
@@ -179,6 +175,4 @@
         </blockquote>
     </div>
 </details>
-
-
 {% endblock content %}

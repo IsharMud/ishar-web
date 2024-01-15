@@ -2,7 +2,16 @@
 {% block meta_title %}World{% endblock meta_title %}
 {% block meta_description %}The World of Ishar is vast and very detailed with many areas{% endblock meta_description %}
 {% block meta_url %}{% url "world" %}{% endblock meta_url %}
-{% block header %}<span class="bi bi-globe-asia-australia "></span> World{% endblock header %}
+{% block header %}
+<nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '•';">
+    <ol class="breadcrumb" style="--bs-breadcrumb-divider-color: var(--ishar-color);">
+        <li class="breadcrumb-item active" aria-current="page" title="World">
+            <span class="bi bi-globe-asia-australia text-ishar"></span>
+            <a href="{% url "world" %}">World</a>
+        </li>
+    </ol>
+</nav>
+{% endblock header %}
 {% block title %}World{% endblock title %}
 {% block content %}
     <div class="card bg-dark">

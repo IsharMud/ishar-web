@@ -2,17 +2,14 @@
 .text-ishar { color: var(--ishar-color); }
 .accordion-button { --bs-accordion-btn-color: var(--ishar-color); --bs-accordion-active-color: var(--ishar-color); }
 .accordion-button:after { background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ffffff'><path fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/></svg>") !important; }
+.navbar-expand-lg .navbar-nav .nav-link { color: var(--ishar-color); }
 
 input, body { background-color: #323639; color: #d6d6d7; }
 .card-header, .card-title { color: var(--ishar-color); }
 .card, .card-text, .card-footer { color: #d6d6d7; }
 button, textarea, input, select { border: 0.1rem solid var(--ishar-color); background-color: #323639; color: var(--ishar-color); }
 h1, h2, h3, h4, h5, strong, th, label, th, .gridjs-th-content, .gridjs-td[data-column-id="name"] { color: var(--ishar-color); }
-
 summary h3 { display: inline-block; }
-
-.navbar-dark .navbar-toggler-icon { background-image: url("/static/images/new_trans.png"); }
-.navbar-expand-lg .navbar-nav .nav-link { color: var(--ishar-color); }
 
 a[target="_blank"]::after {
     content: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAQElEQVR42qXKwQkAIAxDUUdxtO6/RBQkQZvSi8I/pL4BoGw/XPkh4XigPmsUgh0626AjRsgxHTkUThsG2T/sIlzdTsp52kSS1wAAAABJRU5ErkJggg==);

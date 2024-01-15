@@ -5,83 +5,72 @@
 {% block meta_url %}{% url "season" season_id=season.season_id %}{% endblock meta_url %}
 {% block title %}Season {{ season.season_id }}{% endblock title %}
 {% block header %}
-    <span class="bi bi-calendar"></span>
-    Season {{ season.season_id }}
+<nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '•';">
+    <ol class="breadcrumb" style="--bs-breadcrumb-divider-color: var(--ishar-color);">
+        <li class="breadcrumb-item active" aria-current="page" title="Season {{ season.season_id }}">
+            <span class="bi bi-calendar text-ishar"></span>
+            <a href="{% url "season" season_id=season.season_id %}">Season {{ season.season_id }}</a>
+        </li>
+    </ol>
+</nav>
 {% endblock header %}
 {% block content %}
+
     {% if season %}
-    <div class="accordion m-3 rounded">
+<div class="card-group">
 
-        <div class="accordion-item bg-dark text-white" id="start" title="Start: {{ season.effective_date | naturaltime }} @ {{ season.effective_date }}">
-            <h3 class="accordion-header">
-                <button class="fw-bold accordion-button bg-black" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-start" aria-expanded="true" aria-controls="collapse-start">
-                    Start
-                </button>
-            </h3>
-            <div id="collapse-start" class="accordion-collapse collapse show">
-                <div class="accordion-body">
-                    <blockquote class="blockquote">
-                        <p>
-                            {{ season.effective_date }}
-                        </p>
-                        <footer class="blockquote-footer">
-                            {{ season.effective_date | naturaltime }}
-                        </footer>
-                    </blockquote>
-                </div>
-            </div>
-        </div>
-
-        <div class="accordion-item bg-dark text-white" id="end" title="End: {{ season.expiration_date | naturaltime }} @ {{ season.expiration_date }}">
-            <h3 class="accordion-header">
-                <button class="fw-bold accordion-button bg-black" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-end" aria-expanded="true" aria-controls="collapse-end">
-                    End
-                </button>
-            </h3>
-            <div id="collapse-end" class="accordion-collapse collapse show">
-                <div class="accordion-body">
-                    <blockquote class="blockquote">
-                        <p>
-                            {{ season.expiration_date }}
-                        </p>
-                        <footer class="blockquote-footer">
-                            {{ season.expiration_date | naturaltime }}
-                        </footer>
-                    </blockquote>
-                </div>
-            </div>
-        </div>
-
+    <div class="bg-dark border border-secondary card m-1 rounded" id="start" title="Season {{ season.season_id }} Start: {{ season.effective_date | naturaltime }} @ {{ season.effective_date }}">
+        <h3 class="bg-black border border-secondary card-title card-header p-2">
+            Start
+            <a class="anchor-link" href="#start" aria-label="Link to this section: Season {{ season.season_id }} Start">&#x23;</a>
+        </h3>
+        <blockquote class="blockquote card-text p-3">
+            <p>{{ season.effective_date }}</p>
+            <footer class="blockquote-footer">{{ season.effective_date | naturaltime }}</footer>
+        </blockquote>
     </div>
+
+    <div class="bg-dark border border-secondary card m-1 rounded" id="end" title="Season {{ season.season_id }} End: {{ season.expiration_date | naturaltime }} @ {{ season.expiration_date }}">
+        <h3 class="bg-black border border-secondary card-title card-header p-2">
+            End
+            <a class="anchor-link" href="#end" aria-label="Link to this section: Season {{ season.season_id }} End">&#x23;</a>
+        </h3>
+        <blockquote class="blockquote card-text p-3">
+            <p>{{ season.expiration_date }}</p>
+            <footer class="blockquote-footer">{{ season.expiration_date | naturaltime }}</footer>
+        </blockquote>
+    </div>
+
+</div>
     {% endif %}
 
-    <div class="accordion m-3 rounded">
-        <div class="accordion-item bg-dark text-white" id="essence" title="Essence">
-            <h3 class="accordion-header">
-                <button class="fw-bold accordion-button bg-black" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-essence" aria-expanded="true" aria-controls="collapse-essence">
-                    Essence
-                </button>
-            </h3>
-            <div id="collapse-essence" class="accordion-collapse collapse show">
-                <div class="accordion-body">
-                    <p class="lead">
-                        &quot;<a title="Help: Essence" href="{% url "help_page" help_topic="Essence" %}">Essence</a>&quot;
-                        are the rewards points that you earn during each season!
-                    </p>
-                    <p class="lead">
-                        Essence is preserved across seasons, and can be spent at any time
-                        by typing &quot;<code>shop</code>&quot; after logging in.
-                    </p>
-    {% if request.user and not request.user.is_anonymous %}
-                    <p class="lead">
-                        You can view your current essence balance,
-                        and see how many points you have earned so far this season,
-                        by visiting your
-                        <a href="{% url "portal" %}#essence" title="account portal page">account portal page</a>.
-                    </p>
-    {% endif %}
-                </div>
-            </div>
+    <div class="card bg-dark border border-secondary m-1 rounded" id="essence">
+
+        <div class="bg-black border border-secondary card-header card-title p-2 rounded">
+            <h4 title="Essence">
+                Essence
+                <a class="anchor-link" href="#essence" aria-label="Link to this section: Season {{ season.season_id }} Essence">&#x23;</a>
+            </h4>
         </div>
+
+        <div class="card-body p-3">
+            <p class="lead">
+                &quot;<a title="Help: Essence" href="{% url "help_page" help_topic="Essence" %}">Essence</a>&quot;
+                are the rewards points that you earn during each season!
+            </p>
+            <p class="lead">
+                Essence is preserved across seasons, and can be spent at any time
+                by typing &quot;<code>shop</code>&quot; after logging in.
+            </p>
+    {% if request.user and not request.user.is_anonymous %}
+            <p class="lead">
+                You can view your current essence balance,
+                and see how many points you have earned so far this season,
+                by visiting your
+                <a href="{% url "portal" %}#essence" title="account portal page">account portal page</a>.
+            </p>
+    {% endif %}
+        </div>
+
     </div>
 {% endblock content %}
