@@ -19,7 +19,7 @@
     {% if season %}
 <div class="card-group">
 
-    <div class="bg-dark border border-secondary card m-1 rounded" id="start" title="Season {{ season.season_id }} Start: {{ season.effective_date | naturaltime }} @ {{ season.effective_date }}">
+    <div class="bg-dark border border-secondary card mx-1 my-1 rounded" id="start" title="Season {{ season.season_id }} Start: {{ season.effective_date | naturaltime }} @ {{ season.effective_date }}">
         <h3 class="bg-black border border-secondary card-title card-header p-2">
             Start
             <a class="anchor-link" href="#start" aria-label="Link to this section: Season {{ season.season_id }} Start">&#x23;</a>
@@ -30,7 +30,7 @@
         </blockquote>
     </div>
 
-    <div class="bg-dark border border-secondary card m-1 rounded" id="end" title="Season {{ season.season_id }} End: {{ season.expiration_date | naturaltime }} @ {{ season.expiration_date }}">
+    <div class="bg-dark border border-secondary card mx-1 my-1 rounded" id="end" title="Season {{ season.season_id }} End: {{ season.expiration_date | naturaltime }} @ {{ season.expiration_date }}">
         <h3 class="bg-black border border-secondary card-title card-header p-2">
             End
             <a class="anchor-link" href="#end" aria-label="Link to this section: Season {{ season.season_id }} End">&#x23;</a>
@@ -44,7 +44,7 @@
 </div>
     {% endif %}
 
-    <div class="card bg-dark border border-secondary m-1 rounded" id="essence">
+    <div class="card bg-dark border border-secondary mx-1 my-1 rounded" id="essence">
 
         <div class="bg-black border border-secondary card-header card-title p-2 rounded">
             <h4 title="Essence">

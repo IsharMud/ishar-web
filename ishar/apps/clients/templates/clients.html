@@ -19,15 +19,15 @@
         Here are some of the MUD clients that we have heard good things about:
     </p>
     {% for category in mud_client_categories %}
-   <details class="mx-1 my-3" open>
+   <details class="bg-black border border-secondary rounded mx-1 my-3" open>
         <summary id="category-{{ category.name | slugify }}" class="h3 p-2 text-ishar bg-black border border-secondary rounded" title="{{ category.name }}">
             {{ category.name }}
             <a class="anchor-link" href="#category-{{ category.name | slugify }}" aria-label="Link to this section: MUD Client Category {{ category.name }} ({{ category.name | slugify }})">&#x23;</a>
         </summary>
-       <ul class="list-group">
+       <ul class="bg-black list-group list-group-horizontal-md list-group-dark">
         {% for client in category.clients.all %}
             {% if client.is_visible %}
-            <li class="border-0 bg-dark list-group-item">
+            <li class="border-0 bg-black list-group-item">
             <span class="bi bi-dot text-ishar"></span>
                 <a class="list-group-item-text" href="{{ client.url }}" id="client-{{ client.name | slugify }}" target="_blank" title="{{ client.name }}">
                     {{ client.name }}

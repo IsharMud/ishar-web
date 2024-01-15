@@ -14,7 +14,7 @@
 {% endblock header %}
 {% block content %}
     {% if news %}
-    <div class="card bg-dark">
+    <div class="card bg-black border border-secondary rounded mx-1 my-3">
         <div class="card-body">
             <blockquote class="blockquote">
                 <p class="card-text">{% autoescape off %}{{ news.body }}{% endautoescape %}</p>
@@ -25,7 +25,7 @@
         </div>
     </div>
     {% endif %}
-    <div class="card bg-dark">
+    <div class="card bg-black border border-secondary rounded mx-1 my-3">
         <div class="card-body">
             <p class="card-text">
                 Dive into the immersive realms of <strong>Ishar</strong>, a high medieval fantasy MUD offering not just a game, but a spiritual journey of continuous growth and rejuvenation.
@@ -49,13 +49,13 @@
         </div>
     </div>
     <div class="card-group">
-        <div class="card bg-black border border-secondary rounded">
+        <div class="card bg-black border border-secondary rounded mx-1 my-1">
             <p class="card-header">
                 Play for free by connecting with any
                 <a href="{% url "clients" %}">MUD client</a> to:
             </p>
         </div>
-        <div class="card bg-black border border-secondary rounded">
+        <div class="card bg-black border border-secondary rounded mx-1 my-1">
             <strong class="card-header">Host</strong>
             <div class="card-body">
                 <ul class="card-text">
@@ -63,7 +63,7 @@
                 </ul>
             </div>
         </div>
-        <div class="card bg-black border border-secondary rounded">
+        <div class="card bg-black border border-secondary rounded mx-1 my-1">
             <strong class="card-header">Port(s)</strong>
             <div class="card-body">
                 <ul class="card-text">
