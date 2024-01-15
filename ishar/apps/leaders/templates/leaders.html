@@ -70,7 +70,7 @@
               {% endfor %}
             ],
             className: {
-                table: "table table-bordered table-dark",
+                table: "table table-bordered table-dark table-striped",
             },
             search:     true,
             sort:       true,
@@ -81,22 +81,22 @@
 </script>
 {% endblock scripts %}
 {% block content %}
-<ul class="m-1 p-1 list-group list-group-horizontal">
-    <li class="list-group-item bg-dark" title="All">
+<ul class="m-1 px-1 py-3 list-group list-group-horizontal">
+    <li class="list-group-item bg-black" title="All">
 {% if game_type %}
         <a class="list-group-item-text" href="{% url "leaders" %}">All</a>
 {% else %}
         <span class="text-ishar">All</span>
 {% endif %}
     </li>
-    <li class="list-group-item bg-dark" title="Classic">
+    <li class="list-group-item bg-black" title="Classic">
 {% if game_type != "Classic" %}
         <a class="list-group-item-text" href="{% url "classic" %}">Classic</a>
 {% else %}
         <span class="text-ishar">Classic</span>
 {% endif %}
     </li>
-    <li class="list-group-item bg-dark" title="Survival">
+    <li class="list-group-item bg-black" title="Survival">
 {% if game_type != "Survival" %}
         <a class="list-group-item-text" href="{% url "survival" %}">Survival</a>
 {% else %}

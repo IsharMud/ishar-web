@@ -25,7 +25,7 @@
 </p>
 {% if faqs %}
     {% for faq in faqs %}
-<details class="m-1" open>
+<details class="bg-black mx-1 my-3 border border-secondary rounded" open>
   <summary id="{{ faq.slug }}" class="h3 p-2 text-ishar bg-black border border-secondary rounded" title="{{ faq.question_text }}">
       {{ faq.question_text }}
       <a class="anchor-link" href="#{{ faq.slug }}" aria-label="Link to this section: Frequently Asked Question: {{ faq.question_text }} ({{ faq.slug }})">&#x23;</a>

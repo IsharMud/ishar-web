@@ -25,8 +25,8 @@
     {% block scripts %}
     {% endblock scripts %}
     </head>
-    <body>
-        <header class="container-fluid p-3">
+    <body class="m-1">
+        <header class="container-fluid px-1 py-1">
             <nav class="p-3 navbar navbar-dark navbar-expand-lg bg-black rounded" style="border: 0.1rem solid var(--ishar-color);">
                 <button style="border: 0.1rem solid var(--ishar-color);" class="m-1 navbar-toggler navbar-dark" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -99,7 +99,7 @@
                                         Portal
                                     </a>
                                 </li>
-                                <li class="nav-item"><hr class="dropdown-divider border-secondary"></li>
+                                <li class="nav-item text-ishar"><hr class="dropdown-divider border-secondary"></li>
                                 <li class="nav-item" title="Log out">
                                     <a class="bi bi-door-closed bg-black nav-link dropdown-item" href="{% url "logout" %}">
                                         Log out ({{ user.get_username }})
@@ -131,7 +131,7 @@
             </nav>
         </header>
 
-        <main class="container-fluid p-3">
+        <main class="container-fluid px-1 py-1">
             <div class="card bg-dark" style="border: 0.1rem solid var(--ishar-color);">
                 <div class="bg-black card-header" style="border: 0.1rem solid var(--ishar-color);">
                     <h2>
@@ -159,7 +159,7 @@
         </main>
 
 {% if current_season %}
-        <footer class="container-md p-3" title="{{ current_season }} ends {{ current_season.expiration_date | naturaltime }}">
+        <footer class="container-md px-3 py-1" title="{{ current_season }} ends {{ current_season.expiration_date | naturaltime }}">
             <div class="text-center row p-3 bg-black rounded" style="border: 0.1rem solid var(--ishar-color);">
                 <div class="col">
                     <a href="{% url "current_season" %}">
@@ -173,7 +173,7 @@
         </footer>
 {% endif %}
 
-        <footer class="container-lg p-3">
+        <footer class="container-lg px-3 py-1">
             <div class="text-center row p-3 bg-black rounded" style="border: 0.1rem solid var(--ishar-color);">
                 <div class="col">
                     <a class="bi bi-envelope-at" href="mailto:admin@isharmud.com" target="_blank" title="E-mail Us! (admin@isharmud.com)">
