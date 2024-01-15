@@ -33,75 +33,77 @@
         {% endif %}
         {% if not player.is_immortal %}
     <div class="m-3">
-        <details class="m-1" id="details" open>
-            <summary class="h3 p-2 text-ishar bg-black border border-secondary rounded" title="{{ faq.question_text }}">
+        <details class="bg-black border border-secondary rounded mx-1 my-3" open>
+            <summary class="h3 p-2 text-ishar bg-black border border-secondary rounded" title="Details">
                 Details
+                <a class="anchor-link" href="#details" aria-label="Link to this section: Details">&#x23;</a>
             </summary>
-            <div class="m-3">
-                    <ul class="list-group list-group-horizontal-md">
-                        <li class="bg-dark border-0 list-group-item list-group-item-text text-white" title="Name: {{ player.name | title }} / Class: {{ player.common.player_class.get_class_name }} / Race: {{ player.common.race.display_name }}">
-                            <span class="bi bi-dot text-ishar"></span>
-                            {{ player.name | title }} {{ player.get_player_phrase }} a {{ player.common.player_class.class_display }} of {{ player.common.race.folk_name | lower }} origin.
-                        </li>
-                        <li class="bg-dark border-0 list-group-item list-group-item-text text-white" title="Level: {{ player.common.level }} {% if player.remorts > 0 %} / Remorts: {{ player.remorts }}{% endif %}">
-                            <span class="bi bi-dot text-ishar"></span>
-                            {{ player.get_player_gender | title }} {{ player.get_player_phrase }} level {{ player.common.level }}{% if player.remorts > 0 %} and {{ player.get_player_phrase_owns }} remorted {{ player.remorts }} time{{ player.remorts|pluralize }}{% endif %}.
-                        </li>
+            <div class="bg-black m-3" id="details">
+                <ul class="bg-black list-group list-group-horizontal-md list-group-dark">
+                    <li id="class" class="bg-black border-0 list-group-item list-group-item-text text-white" title="Name: {{ player.name | title }} / Class: {{ player.common.player_class.get_class_name }} / Race: {{ player.common.race.display_name }}">
+                        <span class="bi bi-dot text-ishar"></span>
+                        {{ player.name | title }} {{ player.get_player_phrase }} a {{ player.common.player_class.class_display }} of {{ player.common.race.folk_name | lower }} origin.
+                    </li>
+                    <li id="level" class="bg-black border-0 list-group-item list-group-item-text text-white" title="Level: {{ player.common.level }} {% if player.remorts > 0 %} / Remorts: {{ player.remorts }}{% endif %}">
+                        <span class="bi bi-dot text-ishar"></span>
+                        {{ player.get_player_gender | title }} {{ player.get_player_phrase }} level {{ player.common.level }}{% if player.remorts > 0 %} and {{ player.get_player_phrase_owns }} remorted {{ player.remorts }} time{{ player.remorts|pluralize }}{% endif %}.
+                    </li>
                     {% if player.total_renown > 0 %}
-                        <li class="bg-dark border-0 list-group-item list-group-item-text text-white" title="Total Renown: {{ player.total_renown }}">
-                            <span class="bi bi-dot text-ishar"></span>
-                            {{ player.get_player_gender | title }} {{ player.get_player_phrase_owns }} accumulated {{ player.total_renown }} renown.
-                        </li>
+                    <li id="total-renown" class="bg-black border-0 list-group-item list-group-item-text text-white" title="Total Renown: {{ player.total_renown }}">
+                        <span class="bi bi-dot text-ishar"></span>
+                        {{ player.get_player_gender | title }} {{ player.get_player_phrase_owns }} accumulated {{ player.total_renown }} renown.
+                    </li>
                     {% endif %}
                     {% if player.quests_completed > 0 %}
-                        <li class="bg-dark border-0 list-group-item list-group-item-text text-white" title="Quests Completed: {{ player.quests_completed }}">
-                            <span class="bi bi-dot text-ishar"></span>
-                            {{ player.get_player_gender | title }} {{ player.get_player_phrase_owns }} completed {{ player.quests_completed }} quest{{ player.quests_completed | pluralize }}.
-                        </li>
+                    <li id="quests" class="bg-black border-0 list-group-item list-group-item-text text-white" title="Quests Completed: {{ player.quests_completed }}">
+                        <span class="bi bi-dot text-ishar"></span>
+                        {{ player.get_player_gender | title }} {{ player.get_player_phrase_owns }} completed {{ player.quests_completed }} quest{{ player.quests_completed | pluralize }}.
+                    </li>
                     {% endif %}
                     {% if player.challenges_completed > 0 %}
-                        <li class="bg-dark border-0 list-group-item list-group-item-text text-white" title="Challenges Completed: {{ player.challenges_completed }}">
-                            <span class="bi bi-dot text-ishar"></span>
-                            {{ player.get_player_gender | title }} {{ player.get_player_phrase_owns }} completed {{ player.challenges_completed }} challenge{{ player.challenges_completed | pluralize }}.
-                        </li>
+                    <li id="challenges" class="bg-black border-0 list-group-item list-group-item-text text-white" title="Challenges Completed: {{ player.challenges_completed }}">
+                        <span class="bi bi-dot text-ishar"></span>
+                        {{ player.get_player_gender | title }} {{ player.get_player_phrase_owns }} completed {{ player.challenges_completed }} challenge{{ player.challenges_completed | pluralize }}.
+                    </li>
                     {% endif %}
-                        <li class="bg-dark border-0 list-group-item list-group-item-text text-white" title="Alignment: {{ player.get_player_alignment }} ({{ player.common.alignment }})">
-                            <span class="bi bi-dot text-ishar"></span>
-                            {{ player.get_player_gender_own | title }} alignment {{ player.get_player_phrase }} {{ player.get_player_alignment | lower }}.
-                        </li>
-                        <li class="bg-dark border-0 list-group-item list-group-item-text text-white" title="{% if player.player_type == 'Classic' %}Deaths: {{ player.deaths }}{% elif player.player_type == 'Dead' %}{{ player.name | title }} is DEAD!{% else %}{{ player.name | title }} is a {{ player.player_type }} player!{% endif %}">
-                            <span class="bi bi-dot text-ishar"></span>
+                    <li id="alignment" class="bg-black border-0 list-group-item list-group-item-text text-white" title="Alignment: {{ player.get_player_alignment }} ({{ player.common.alignment }})">
+                        <span class="bi bi-dot text-ishar"></span>
+                        {{ player.get_player_gender_own | title }} alignment {{ player.get_player_phrase }} {{ player.get_player_alignment | lower }}.
+                    </li>
+                    <li id="deaths" class="bg-black border-0 list-group-item list-group-item-text text-white" title="{% if player.player_type == 'Classic' %}Deaths: {{ player.deaths }}{% elif player.player_type == 'Dead' %}{{ player.name | title }} is DEAD!{% else %}{{ player.name | title }} is a {{ player.player_type }} player!{% endif %}">
+                        <span class="bi bi-dot text-ishar"></span>
                     {% if player.player_type == 'Dead' %}
-                        {{ player.name | title }} is <span class="message-error">DEAD</span>!
-                            <ul>
-                                <li title="{{ player.name | title }} died too often. {{ player.get_player_gender | title }} can not be resurrected!">
-                                    {{ player.name | title }} died too often. {{ player.get_player_gender | title }} can not be resurrected!
-                                </li>
-                            </ul>
+                    {{ player.name | title }} is <span class="message-error">DEAD</span>!
+                        <ul id="dead">
+                            <li title="{{ player.name | title }} died too often. {{ player.get_player_gender | title }} can not be resurrected!">
+                                {{ player.name | title }} died too often. {{ player.get_player_gender | title }} can not be resurrected!
+                            </li>
+                        </ul>
                     {% elif player.player_type == "Survival" %}
-                            {{ player.name | title }} {{ player.get_player_phrase }} a <span class="{{ player.player_css }}">{{ player.player_type }}</span> player!
+                        {{ player.name | title }} {{ player.get_player_phrase }} a <span class="{{ player.player_css }}">{{ player.player_type }}</span> player!
                     {% else %}
                         {% if player.deaths > 0 %}
-                            {{ player.get_player_gender | title }} {{ player.get_player_phrase_owns }} died {{ player.deaths }} time{{ player.deaths|pluralize }}.
+                        {{ player.get_player_gender | title }} {{ player.get_player_phrase_owns }} died {{ player.deaths }} time{{ player.deaths|pluralize }}.
                         {% else %}
-                            {{ player.get_player_gender | title }} {{ player.get_player_phrase_owns }} never died!
+                        {{ player.get_player_gender | title }} {{ player.get_player_phrase_owns }} never died!
                         {% endif %}
                     {% endif %}
-                        </li>
-                    </ul>
+                    </li>
+                </ul>
             </div>
         </details>
 
             {% if player.upgrades %}
-        <details class="m-1" id="upgrades" open>
+        <details class="bg-black border border-secondary rounded mx-1 my-3" open>
             <summary class="h4 p-2 text-ishar bg-black border border-secondary rounded" title="Remort Upgrades">
                 Remort Upgrades
                 {% if player.upgrades.count > 0 %}({{ player.upgrades.count }}){% endif %}
+                <a class="anchor-link" href="#upgrades" aria-label="Link to this section: Remort Upgrades">&#x23;</a>
             </summary>
-            <div class="m-3">
-                    <ul class="list-group list-group-numbered list-group-horizontal-md">
+            <div class="bg-black m-3" id="upgrades">
+                    <ul class="bg-black list-group list-group-dark list-group-numbered list-group-horizontal-md">
                 {% for upgraded in player.upgrades.all %}
-                        <li class="bg-dark border-0 list-group-item list-group-item-text text-white" title="{{ upgraded.upgrade.display_name }}{% if upgraded.value > 1 %} (x{{ upgraded.value }}){% endif %}">
+                        <li class="bg-black border-0 list-group-item list-group-item-text text-white" title="{{ upgraded.upgrade.display_name }}{% if upgraded.value > 1 %} (x{{ upgraded.value }}){% endif %}">
                             {{ upgraded.upgrade.display_name }}{% if upgraded.value > 1 %}<span class="text-ishar"> (<strong>x{{ upgraded.value }}</strong>)</span>{% endif %}
                         </li>
                 {% endfor %}
@@ -111,54 +113,56 @@
             {% endif %}
 
             {% if player.player_stats %}
-        <details class="m-1" id="stats" open>
+        <details class="bg-black border border-secondary rounded mx-1 my-3" open>
             <summary class="h4 p-2 text-ishar bg-black border border-secondary rounded" title="Statistics">
                 Statistics
+                <a class="anchor-link" href="#stats" aria-label="Link to this section: Statistics">&#x23;</a>
             </summary>
-            <div class="m-3">
-                    <ol class="list-group list-group-horizontal-md">
+            <div class="bg-black m-3" id="stats">
+                <ol class="bg-black list-group list-group-dark list-group-horizontal-md">
                 {% for stat_name, stat_value in player.player_stats.items %}
-                        <li class="bg-dark border-0 list-group-item" title="{{ stat_name }}: {{ stat_value }}">
-                            <span class="list-group-item-text text-white{% if forloop.first %} fw-bold{% endif %}">
-                                <span class="text-ishar">{{ stat_name }}</span>:
-                                {{ stat_value }}
-                            </span>
-                        </li>
+                    <li class="bg-black border-0 list-group-item" title="{{ stat_name }}: {{ stat_value }}">
+                        <span class="list-group-item-text text-white{% if forloop.first %} fw-bold{% endif %}">
+                            <span class="text-ishar">{{ stat_name }}</span>:
+                            {{ stat_value }}
+                        </span>
+                    </li>
                 {% endfor %}
-                    </ol>
+                </ol>
             </div>
         </details>
             {% endif %}
 
-        <details class="bg-black border border-secondary rounded m-1" id="time" open>
+        <details class="bg-black border border-secondary rounded mx-1 my-3" open>
             <summary class="h4 p-2 text-ishar border border-secondary rounded" title="Time">
                 Time
+                <a class="anchor-link" href="#time" aria-label="Link to this section: Time">&#x23;</a>
             </summary>
-            <div class="bg-black m-3">
-                    <ul class="bg-black list-group list-group-dark list-group-horizontal-md">
-                        <li class="bg-black border-0 list-group-item list-group-item-text text-white" title="Logged On: {{ player.logon | naturaltime }}, ({{ player.logon }})">
-                            <span class="bi bi-dot text-ishar"></span>
-                            {{ player.get_player_gender | title }} last logged on {{ player.logon | naturaltime }},
-                            on {{ player.logon | date }}.
-                        </li>
-                        <li class="bg-black border-0 list-group-item list-group-item-text text-white" title="Logged Out: {{ player.logout | naturaltime }}, ({{ player.logout }})">
-                            <span class="bi bi-dot text-ishar"></span>
-                            {{ player.get_player_gender | title }} last logged out {{ player.logout | naturaltime }},
-                            on {{ player.logon | date }}.
-                        </li>
-                    </ul>
-                    <ul class="bg-black list-group list-group-horizontal-md">
-                        <li class="bg-black border-0 list-group-item list-group-item-text text-white" title="Birth: {{ player.birth | naturaltime }}, ({{ player.birth }})">
-                            <span class="bi bi-dot text-ishar"></span>
-                            {{ player.get_player_gender | title }} was born {{ player.birth | naturaltime }},
-                            on {{ player.birth | date }}.
-                        </li>
-                        <li class="bg-black border-0 list-group-item list-group-item-text text-white" title="Played For: {{ player.online_time }} ({{ player.online }} seconds)">
-                            <span class="bi bi-dot text-ishar"></span>
-                            {{ player.get_player_gender | title }} {{ player.get_player_phrase_owns }} played for
-                            {{ player.online_time }}.
-                        </li>
-                    </ul>
+            <div class="bg-black m-3" id="time">
+                <ul class="bg-black list-group list-group-dark list-group-horizontal-md">
+                    <li class="bg-black border-0 list-group-item list-group-item-text text-white" title="Logged On: {{ player.logon | naturaltime }}, ({{ player.logon }})">
+                        <span class="bi bi-dot text-ishar"></span>
+                        {{ player.get_player_gender | title }} last logged on {{ player.logon | naturaltime }},
+                        on {{ player.logon | date }}.
+                    </li>
+                    <li class="bg-black border-0 list-group-item list-group-item-text text-white" title="Logged Out: {{ player.logout | naturaltime }}, ({{ player.logout }})">
+                        <span class="bi bi-dot text-ishar"></span>
+                        {{ player.get_player_gender | title }} last logged out {{ player.logout | naturaltime }},
+                        on {{ player.logon | date }}.
+                    </li>
+                </ul>
+                <ul class="bg-black list-group list-group-horizontal-md">
+                    <li class="bg-black border-0 list-group-item list-group-item-text text-white" title="Birth: {{ player.birth | naturaltime }}, ({{ player.birth }})">
+                        <span class="bi bi-dot text-ishar"></span>
+                        {{ player.get_player_gender | title }} was born {{ player.birth | naturaltime }},
+                        on {{ player.birth | date }}.
+                    </li>
+                    <li class="bg-black border-0 list-group-item list-group-item-text text-white" title="Played For: {{ player.online_time }} ({{ player.online }} seconds)">
+                        <span class="bi bi-dot text-ishar"></span>
+                        {{ player.get_player_gender | title }} {{ player.get_player_phrase_owns }} played for
+                        {{ player.online_time }}.
+                    </li>
+                </ul>
             </div>
         </details>
     </div>
