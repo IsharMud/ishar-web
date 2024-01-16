@@ -26,10 +26,6 @@ the getting started guide, or even by downloading a MUD client!
 - MUD Clients
   - [https://isharmud.com/clients](https://isharmud.com/clients)
 
-## Screenshot
-
-<img width="1205" alt="Screenshot 2022-12-15 at 3 01 10 PM" src="https://user-images.githubusercontent.com/1127228/207955688-6a21763a-1391-462c-8958-f48a5930cc5b.png">
-
 ### More Information
 
 The website is using a combination of Python, Django, MariaDB, nginx, and gunicorn,
