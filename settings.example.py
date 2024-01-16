@@ -97,6 +97,9 @@ CLASS_STATS = {
     "Necromancer": (
         "Focus", "Willpower", "Perception", "Agility", "Strength", "Endurance"
     ),
+    "Shaman": (
+        "Willpower", "Agility", "Endurance", "Focus", "Perception", "Strength",
+    ),
     # Alphabetic as last resort
     None: (
         "Agility", "Endurance", "Focus", "Perception", "Strength", "Willpower"
