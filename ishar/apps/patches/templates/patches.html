@@ -28,7 +28,7 @@
     </summary>
     <blockquote class="border-top border-secondary blockquote m-3">
         <p>
-            <a href="{{ patch.patch_file.url }}" target="_blank" title="{{ patch.patch_file.name }} &lt;{{ patch.patch_file.url }}&gt;">
+            <a href="{{ patch.patch_file.url }}" target="_blank" title="{{ patch.patch_file.name }} &lt;https://{{ request.META.HTTP_HOST }}{{ patch.patch_file.url }}&gt;">
                 {{ patch.patch_file.name }}
             </a>
             <small>

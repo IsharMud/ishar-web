@@ -44,26 +44,21 @@
     {% endfor %}
                     ],
                     className: {
-                        table: "table table-bordered table-dark table-striped",
+                        table: 'table table-dark table-striped border border-secondary rounded'
+                    },
+                    style: {
+                        table: {'max-width': '50vw'},
+                        th: {'background-color': 'rgba(0, 0, 0, 0.1)'},
                     },
                     search: true,
                     sort: true,
-                    pagination: false,
-                    width: '50%'
+                    pagination: false
                 }).render(where);
             };
 
         </script>
 {% endblock scripts %}
 {% block content %}
-    <div class="card bg-dark">
-        <div class="card-body">
-            <div class="card-text" id="challenges"></div>
-        </div>
-    </div>
-    <script>
-        showChallenges(
-            document.getElementById('challenges')
-        );
-    </script>
+    <div class="bg-black mx-1 my-3 p-1 border border-secondary rounded" id="challenges"></div>
+    <script>showChallenges(document.getElementById('challenges'));</script>
 {% endblock content %}

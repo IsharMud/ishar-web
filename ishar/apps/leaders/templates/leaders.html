@@ -70,12 +70,15 @@
               {% endfor %}
             ],
             className: {
-                table: "table table-bordered table-dark table-striped",
+                table: 'table table-dark table-striped border border-secondary rounded'
+            },
+            style: {
+                table: {'max-width': '50vw'},
+                th: {'background-color': 'rgba(0, 0, 0, 0.1)'},
             },
             search:     true,
             sort:       true,
             pagination: true,
-            width:      '50%'
         }).render(where);
     };
 </script>
@@ -84,26 +87,26 @@
 <ul class="m-1 px-1 py-3 list-group list-group-horizontal">
     <li class="list-group-item bg-black" title="All">
 {% if game_type %}
-        <a class="list-group-item-text" href="{% url "leaders" %}">All</a>
+        <a class="list-group-item-text" href="{% url "leaders" %}#leaders">All</a>
 {% else %}
         <span class="text-ishar">All</span>
 {% endif %}
     </li>
     <li class="list-group-item bg-black" title="Classic">
 {% if game_type != "Classic" %}
-        <a class="list-group-item-text" href="{% url "classic" %}">Classic</a>
+        <a class="list-group-item-text" href="{% url "classic" %}#leaders">Classic</a>
 {% else %}
         <span class="text-ishar">Classic</span>
 {% endif %}
     </li>
     <li class="list-group-item bg-black" title="Survival">
 {% if game_type != "Survival" %}
-        <a class="list-group-item-text" href="{% url "survival" %}">Survival</a>
+        <a class="list-group-item-text" href="{% url "survival" %}#leaders">Survival</a>
 {% else %}
         <span class="text-ishar">Survival</span>
 {% endif %}
     </li>
 </ul>
-<div class="mx-1 my-3 p-1" id="leaders"></div>
+<div class="bg-black mx-1 my-3 p-1 border border-secondary rounded" id="leaders"></div>
 <script>showLeaders( document.getElementById('leaders'));</script>
 {% endblock content %}
