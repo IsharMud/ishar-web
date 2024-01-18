@@ -74,7 +74,7 @@ class PlayerRemortUpgrade(models.Model):
     """
     Player relation to a remort upgrade.
     """
-    player = models.OneToOneField(
+    player = models.ForeignKey(
         primary_key=True,  # Fake it, just so reads work.
         db_column="player_id",
         editable=False,

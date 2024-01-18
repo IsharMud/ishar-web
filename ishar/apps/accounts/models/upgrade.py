@@ -66,7 +66,7 @@ class AccountAccountUpgrade(models.Model):
     """
     Account upgrade relation to an account.
     """
-    account = models.OneToOneField(
+    account = models.ForeignKey(
         primary_key=True,  # Fake it, just so reads work.
         db_column="account_id",
         editable=False,

@@ -42,7 +42,7 @@ class PlayersFlag(models.Model):
     """
     Player's Flag.
     """
-    flag = models.OneToOneField(
+    flag = models.ForeignKey(
         primary_key=True,
         to=PlayerFlag,
         on_delete=models.CASCADE,
