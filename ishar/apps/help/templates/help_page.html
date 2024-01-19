@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% load get_dict_item from ishar %}
 {% block meta_title %}Help: {{ help_topic.name }}{% endblock meta_title %}
-{% block meta_description %}Help pages for Ishar MUD{% endblock meta_description %}
+{% block meta_description %}Help pages for {{ WEBSITE_TITLE }}{% endblock meta_description %}
 {% block meta_url %}{% if help_topic %}{% url "help_page" help_topic=help_topic.name %} %}{% else %}{% url "help" %}{% endif %}{% endblock meta_url %}
 {% block title %}Help{% if help_topic and help_topic.name %}: {{ help_topic.name }}{% endif %}{% endblock title %}
 {% block header %}
@@ -56,7 +56,7 @@
         If you are new here, you may want to download one of many
         <a href="{% url "clients" %}" title="MUD clients">MUD clients</a>,
         see our <a href="{% url "start" %}" title="getting started guide">getting started guide</a>,
-        and <a href="{% url "discord" %}" target="_blank" title="Ishar MUD Discord Invitation">join us on Discord</a>!
+        and <a href="{% url "discord" %}" target="_blank" title="{{ WEBSITE_TITLE }} Discord Invitation">join us on Discord</a>!
     </p>
     {% endif %}
 

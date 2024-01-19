@@ -29,6 +29,7 @@ class StartView(TemplateView):
     """
     template_name = "start.html"
 
+
 class SupportView(TemplateView):
     """
     Information about how to support Ishar MUD.

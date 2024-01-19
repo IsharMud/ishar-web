@@ -7,6 +7,9 @@ import pymysql
 
 pymysql.install_as_MySQLdb()
 
+# Set website title.
+WEBSITE_TITLE = "Ishar MUD"
+
 # Silence OneToOneField warnings.
 SILENCED_SYSTEM_CHECKS = ["fields.W342"]
 """
@@ -148,8 +151,7 @@ INSTALLED_APPS = [
     "django.contrib.flatpages",
     "django.contrib.staticfiles",
     "django_filters",
-    "rest_framework",
-    "rest_framework.authtoken",
+    "ninja",
     "ishar",
     "ishar.apps.accounts",
     "ishar.apps.challenges",
@@ -193,7 +195,8 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "ishar.contexts.current_season",
-                "ishar.contexts.global_event_count"
+                "ishar.contexts.global_event_count",
+                "ishar.contexts.website_title",
             ],
             "libraries": {
                 "ishar": "ishar.templatetags"
@@ -229,17 +232,6 @@ LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
-
-# REST Framework API
-REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework.authentication.SessionAuthentication",
-        "rest_framework.authentication.TokenAuthentication"
-    ),
-    "DEFAULT_FILTER_BACKENDS": [
-        "django_filters.rest_framework.DjangoFilterBackend",
-    ]
-}
 
 # Static files (CSS, JavaScript, images)
 STATIC_URL = "static/"

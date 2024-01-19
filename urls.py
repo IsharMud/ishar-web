@@ -8,6 +8,7 @@ from django.contrib.flatpages import views
 from django.urls import include, path
 from django.views.generic import RedirectView
 
+from ishar.api import api
 from ishar.views import ErrorView
 
 
@@ -17,6 +18,9 @@ urlpatterns = [
 
     # Django-Admin.
     path("admin/", admin.site.urls, name="admin"),
+
+    # Django-Ninja.
+    path("api/", api.urls, name="api"),
 
     #
     # Flat pages.

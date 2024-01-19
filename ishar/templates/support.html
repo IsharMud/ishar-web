@@ -1,18 +1,18 @@
 {% extends "layout.html" %}
 {% load static %}
-{% block meta_title %}Support Ishar MUD{% endblock meta_title %}
-{% block meta_description %}Please consider supporting Ishar MUD in any way that you can!{% endblock meta_description %}
+{% block meta_title %}Support {{ WEBSITE_TITLE }}{% endblock meta_title %}
+{% block meta_description %}Please consider supporting {{ WEBSITE_TITLE }} in any way that you can!{% endblock meta_description %}
 {% block meta_url %}{% url "support" %}{% endblock meta_url %}
-{% block title %}Support Ishar MUD{% endblock title %}
+{% block title %}Support {{ WEBSITE_TITLE }}{% endblock title %}
 {% block header %}
     <span class="bi bi-heart"></span>
-    <a href="{% url "support" %}" title="Support Ishar MUD">
-        Support Ishar MUD
+    <a href="{% url "support" %}" title="Support {{ WEBSITE_TITLE }}">
+        Support {{ WEBSITE_TITLE }}
     </a>
 {% endblock header %}
 {% block content %}
     <p class="lead card-text">
-        While you are more than welcome to offer support, Ishar MUD is free to use, play, and enjoy!
+        While you are more than welcome to offer support, {{ WEBSITE_TITLE }} is free to use, play, and enjoy!
     </p>
     <p class="lead card-text">
         Any contribution is simply for the development and maintenance of the game, and as a way to say "thank you".

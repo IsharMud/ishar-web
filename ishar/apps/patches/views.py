@@ -1,8 +1,6 @@
 from django.views.generic import ListView
-from rest_framework import viewsets, permissions
 
 from ishar.apps.patches.models import Patch
-from ishar.apps.patches.serializers import PatchSerializer
 
 
 class PatchesAllView(ListView):
@@ -30,13 +28,3 @@ class PatchesLatestView(PatchesAllView):
 
 class PatchesListView(PatchesAllView):
     paginate_by = 5
-
-
-class PatchesViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows patches to be viewed or edited.
-    """
-    model = Patch
-    permission_classes = [permissions.IsAdminUser]
-    queryset = model.objects.all()
-    serializer_class = PatchSerializer

@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% load static %}
 {% block meta_title %}Patches{% endblock meta_title %}
-{% block meta_description %}The latest patches to Ishar MUD{% endblock meta_description %}
+{% block meta_description %}The latest patches to {{ WEBSITE_TITLE }}{% endblock meta_description %}
 {% block meta_url %}{% url "patches" %}{% endblock meta_url %}
 {% block title %}Patches{% endblock title %}
 {% block header %}
@@ -16,7 +16,7 @@
 {% endblock header %}
 {% block content %}
 <p class="lead">
-    Ishar MUD is under regular development, and constantly being improved!
+    {{ WEBSITE_TITLE }} is under regular development, and constantly being improved!
 </p>
 
 {% if patches %}

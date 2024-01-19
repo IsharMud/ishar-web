@@ -1,9 +1,7 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.list import ListView
-from rest_framework import viewsets, permissions
 
 from ishar.apps.challenges.models import Challenge
-from ishar.apps.challenges.serializers import ChallengesSerializer
 
 
 class ChallengesView(LoginRequiredMixin, ListView):
@@ -12,9 +10,7 @@ class ChallengesView(LoginRequiredMixin, ListView):
     """
     context_object_name = "challenges"
     model = Challenge
-    queryset = model.objects.filter(
-        is_active__exact=1
-    )
+    queryset = model.objects.filter(is_active__exact=1)
     template_name = "challenges.html"
 
 
@@ -39,13 +35,3 @@ class IncompleteChallengesView(ChallengesView):
         is_active__exact=1,
         winner_desc__exact=""
     )
-
-
-class ChallengesViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows challenges to be viewed or edited.
-    """
-    model = Challenge
-    permission_classes = [permissions.IsAdminUser]
-    queryset = model.objects.all()
-    serializer_class = ChallengesSerializer

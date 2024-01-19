@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block meta_title %}Frequently Asked Questions{% endblock meta_title %}
-{% block meta_description %}A few common questions that are asked about Ishar MUD.{% endblock meta_description %}
+{% block meta_description %}A few common questions that are asked about {{ WEBSITE_TITLE }}.{% endblock meta_description %}
 {% block meta_url %}{% url "faq" %}{% endblock meta_url %}
 {% block title %}Frequently Asked Questions{% endblock title %}
 {% block header %}
@@ -15,13 +15,13 @@
 {% endblock header %}
 {% block content %}
 <p class="lead">
-    Here are a few common questions that are asked about Ishar MUD.
+    Here are a few common questions that are asked about {{ WEBSITE_TITLE }}.
 </p>
 <p class="lead">
     You may also want to visit the
     <a href="{% url "help_page" help_topic="MUD Basics" %}" title="Help: MUD Basics">MUD Basics help page</a>,
     our <a href="{% url "start" %}" title="Get Started">getting started guide</a>, and
-    <a href="{% url "discord" %}" target="_blank" title="Ishar MUD Discord">join us on Discord</a>!
+    <a href="{% url "discord" %}" target="_blank" title="{{ WEBSITE_TITLE }} Discord">join us on Discord</a>!
 </p>
 {% if faqs %}
     {% for faq in faqs %}
