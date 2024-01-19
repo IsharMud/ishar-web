@@ -4,6 +4,13 @@ from ishar.apps.accounts.models import Account
 
 
 class Command(BaseCommand):
+    """essence command to find essence for account(s)"""
+
+    # python manage.py essence tyler eric
+    """
+    Account "tyler": 50 essence
+    Account "eric": 7 essence
+    """
     help = "Check the amount of essence for an account"
 
     def add_arguments(self, parser):
@@ -19,8 +26,8 @@ class Command(BaseCommand):
 
             self.stdout.write(
                 self.style.SUCCESS(
-                    'Account "%s" / Current Essence: %i' % (
-                        (account.account_name, account.current_essence)
+                    'Account "%s": %i essence' % (
+                        account.account_name, account.current_essence
                     )
                 )
             )

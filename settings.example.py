@@ -7,6 +7,20 @@ import pymysql
 
 pymysql.install_as_MySQLdb()
 
+# Silence OneToOneField warnings.
+SILENCED_SYSTEM_CHECKS = ["fields.W342"]
+"""
+System check identified some issues:
+
+WARNINGS:
+accounts.AccountAccountUpgrade.account: (fields.W342) Setting unique=True on a ForeignKey has the same effect as using a OneToOneField.
+        HINT: ForeignKey(unique=True) is usually better served by a OneToOneField.
+players.PlayerRemortUpgrade.player: (fields.W342) Setting unique=True on a ForeignKey has the same effect as using a OneToOneField.
+        HINT: ForeignKey(unique=True) is usually better served by a OneToOneField.
+players.PlayersFlag.flag: (fields.W342) Setting unique=True on a ForeignKey has the same effect as using a OneToOneField.
+        HINT: ForeignKey(unique=True) is usually better served by a OneToOneField.
+"""
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent
 
