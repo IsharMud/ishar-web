@@ -131,7 +131,6 @@ CSRF_COOKIE_SAMESITE = SESSION_COOKIE_SAMESITE = "Strict"
 CSRF_TRUSTED_ORIGINS = ("https://isharmud.com", "https://www.isharmud.com")
 SESSION_COOKIE_HTTPONLY = SESSION_COOKIE_SECURE = True
 
-
 # E-mail
 ADMINS = MANAGERS = (("Eric OC", "eric@ericoc.com"),)
 DEFAULT_FROM_EMAIL = "django@" + ALLOWED_HOSTS[0]
@@ -156,6 +155,7 @@ INSTALLED_APPS = [
     "ishar.apps.accounts",
     "ishar.apps.challenges",
     "ishar.apps.classes",
+    "ishar.apps.clients",
     "ishar.apps.events",
     "ishar.apps.faqs",
     "ishar.apps.help",
