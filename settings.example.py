@@ -28,6 +28,7 @@ players.PlayersFlag.flag: (fields.W342) Setting unique=True on a ForeignKey has 
 BASE_DIR = Path(__file__).resolve().parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
+REST_TOKEN = "SECRET"
 SECRET_KEY = "SECRET"
 
 # SECURITY WARNING: don't run with debug turned on in production!

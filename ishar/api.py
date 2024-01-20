@@ -3,7 +3,7 @@ Ishar MUD API configuration.
 """
 from django.conf import settings
 from ninja import NinjaAPI
-from ninja.security import django_auth_superuser
+from ninja.security import django_auth_superuser, HttpBearer
 
 
 def local_debug(request):
@@ -15,8 +15,15 @@ def local_debug(request):
     return False
 
 
+class BearerToken(HttpBearer):
+    def authenticate(self, request, token):
+        if token == settings.REST_TOKEN:
+            return True
+        return False
+
+
 api = NinjaAPI(
-    auth=(local_debug, django_auth_superuser),
+    auth=(local_debug, BearerToken(), django_auth_superuser),
     csrf=False,
     description=f"{settings.WEBSITE_TITLE} API",
     docs_url="/",
