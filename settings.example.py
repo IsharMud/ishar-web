@@ -151,7 +151,6 @@ INSTALLED_APPS = [
     "django.contrib.sites",
     "django.contrib.flatpages",
     "django.contrib.staticfiles",
-    "django_filters",
     "ninja",
     "ishar",
     "ishar.apps.accounts",
