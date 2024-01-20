@@ -28,11 +28,11 @@ a:hover { color: #d6d6d7; }
 .dead-player, .dead-player a, .survival-player, .survival-player a, .message-error, .errorlist {
     color: #fa8072;
 }
-.dead-player a:active, .dead-player a:visited,
-.survival-player a:active, .survival-player a:visited {
+a.dead-player:active, a.dead-player:visited,
+a.survival-player:active, a.survival-player:visited {
     color: #700;
 }
-.dead-player a:hover, .survival-player a:hover { color: #800; }
+a.dead-player:hover, a.survival-player:hover { color: #800; }
 .dead-player::after { content: ' ☠️'; }
 
 .message-info { color: #09f; }
