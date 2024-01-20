@@ -1,7 +1,8 @@
 from datetime import datetime
+from typing import List
+
 from django.shortcuts import get_object_or_404
 from ninja import Schema
-from typing import List
 
 from ishar.api import api
 from ishar.apps.challenges.models import Challenge

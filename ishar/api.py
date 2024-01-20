@@ -41,6 +41,7 @@ from ishar.apps.accounts.api.upgrades import (
 from ishar.apps.challenges.api import (
     challenges, active, complete, inactive, incomplete, challenge
 )
+from ishar.apps.patches.api import patches, latest, hidden, visible, patch
 from ishar.apps.players.api import players, player_id, player_name
 from ishar.apps.players.api.classic import classic
 from ishar.apps.players.api.survival import survival, dead, living
