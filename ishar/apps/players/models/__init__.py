@@ -5,6 +5,7 @@ from django.db import models
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.urls import reverse
+from django.utils.html import format_html
 from django.utils.timesince import timesince
 from django.utils.timezone import now
 
@@ -309,6 +310,20 @@ class Player(models.Model):
     def player_css(self):
         """Player CSS class."""
         return f"{self.get_player_type().lower()}-player"
+
+    @property
+    def player_link(self):
+        """Player link."""
+        return (
+            format_html(
+                '<a class="%s" href="%s" title="%s">%s</a>' % (
+                    self.player_css,
+                    self.get_absolute_url(),
+                    self.name,
+                    self.name,
+                )
+            )
+        )
 
     @property
     def player_stats(self) -> dict:
