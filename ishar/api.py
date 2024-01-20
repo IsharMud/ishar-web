@@ -24,11 +24,18 @@ api = NinjaAPI(
     version="4.6.0"
 )
 
-from ishar.apps.accounts.api import account, accounts, account_players
+from ishar.apps.accounts.api import accounts, account_id, account_name
+from ishar.apps.accounts.api.players import (
+    account_id_players, account_name_players
+)
+from ishar.apps.accounts.api.upgrades import (
+    upgrades, account_id_upgrades, account_name_upgrades
+)
+
 from ishar.apps.challenges.api import (
-    challenge, challenges, complete, incomplete, active, inactive
+    challenges, active, complete, inactive, incomplete, challenge
 )
 from ishar.apps.players.api import (
-    player, players, classic, survival, living, dead, immortals
+    players, player_id, player_name, classic, survival, dead, living, immortals
 )
-from ishar.apps.seasons.api import current, season, seasons
+from ishar.apps.seasons.api import current, seasons, season

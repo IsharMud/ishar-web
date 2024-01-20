@@ -23,18 +23,9 @@ class ChallengeSchema(Schema):
 
 
 @api.get(
-    path="/challenge/{challenge_id}/",
-    response=ChallengeSchema,
-    tags=["challenges"]
-)
-def challenge(request, challenge_id: int):
-    """Single challenge by ID."""
-    return get_object_or_404(Challenge, challenge_id=challenge_id)
-
-
-@api.get(
     path="/challenges/",
     response=List[ChallengeSchema],
+    summary="Any and all challenges.",
     tags=["challenges"]
 )
 def challenges(request):
@@ -43,8 +34,20 @@ def challenges(request):
 
 
 @api.get(
+    path="/challenges/active/",
+    response=List[ChallengeSchema],
+    summary="Challenges which are currently active.",
+    tags=["challenges"]
+)
+def active(request):
+    """Challenges which are currently active."""
+    return Challenge.objects.filter(is_active__exact=1)
+
+
+@api.get(
     path="/challenges/complete/",
     response=List[ChallengeSchema],
+    summary="Active challenges with winners.",
     tags=["challenges"]
 )
 def complete(request):
@@ -57,8 +60,20 @@ def complete(request):
 
 
 @api.get(
+    path="/challenges/inactive/",
+    response=List[ChallengeSchema],
+    summary="Challenges which are currently NOT active.",
+    tags=["challenges"]
+)
+def inactive(request):
+    """Challenges which are currently NOT active."""
+    return Challenge.objects.filter(is_active__exact=0)
+
+
+@api.get(
     path="/challenges/incomplete/",
     response=List[ChallengeSchema],
+    summary="Active challenges, with NO winners.",
     tags=["challenges"]
 )
 def incomplete(request):
@@ -70,20 +85,11 @@ def incomplete(request):
 
 
 @api.get(
-    path="/challenges/active/",
-    response=List[ChallengeSchema],
-    tags=["challenges"]
+    path="/challenge/{challenge_id}/",
+    response=ChallengeSchema,
+    summary="Single challenge, by ID.",
+    tags=["challenges"],
 )
-def active(request):
-    """Challenges which are currently active."""
-    return Challenge.objects.filter(is_active__exact=1)
-
-
-@api.get(
-    path="/challenges/inactive/",
-    response=List[ChallengeSchema],
-    tags=["challenges"]
-)
-def inactive(request):
-    """Challenges which are currently NOT active."""
-    return Challenge.objects.filter(is_active__exact=0)
+def challenge(request, challenge_id: int):
+    """Single challenge by ID."""
+    return get_object_or_404(Challenge, challenge_id=challenge_id)
