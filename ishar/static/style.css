@@ -25,8 +25,8 @@ a:hover { color: #d6d6d7; }
 .nested-list { list-style: none; }
 .god-player::after { content: ' 😇'; }
 .forger-player::after, .eternal-player::after, .artisan-player::after, .immortal-player::after, .consort-player::after {  content: ' 👼'; }
-.dead-player::after { content: ' ☠️'; }
 .dead-player, .survival-player, .message-error, .errorlist  { color: #fa8072; }
+.dead-player::after { content: ' ☠️'; }
 
 .message-info { color: #09f; }
 .message-success, .active-season td { color: #4cbb17; }
