@@ -73,7 +73,7 @@
                     <li id="deaths" class="bg-black border-0 list-group-item list-group-item-text text-white" title="{% if player.player_type == 'Classic' %}Deaths: {{ player.deaths }}{% elif player.player_type == 'Dead' %}{{ player.name | title }} is DEAD!{% else %}{{ player.name | title }} is a {{ player.player_type }} player!{% endif %}">
                         <span class="bi bi-dot text-ishar"></span>
                     {% if player.player_type == 'Dead' %}
-                    {{ player.name | title }} is <span class="message-error">DEAD</span>!
+                    {{ player.name | title }} is <span class="dead-note">DEAD</span>!
                         <ul id="dead">
                             <li title="{{ player.name | title }} died too often. {{ player.get_player_gender | title }} can not be resurrected!">
                                 {{ player.name | title }} died too often. {{ player.get_player_gender | title }} can not be resurrected!
