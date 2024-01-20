@@ -38,11 +38,11 @@ from ishar.apps.accounts.api.players import (
 from ishar.apps.accounts.api.upgrades import (
     upgrades, account_id_upgrades, account_name_upgrades
 )
-
 from ishar.apps.challenges.api import (
     challenges, active, complete, inactive, incomplete, challenge
 )
-from ishar.apps.players.api import (
-    players, player_id, player_name, classic, survival, dead, living, immortals
-)
+from ishar.apps.players.api import players, player_id, player_name
+from ishar.apps.players.api.classic import classic
+from ishar.apps.players.api.survival import survival, dead, living
+from ishar.apps.players.api.immortals import immortals
 from ishar.apps.seasons.api import current, seasons, season

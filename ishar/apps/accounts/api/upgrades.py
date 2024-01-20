@@ -1,38 +1,15 @@
-from datetime import datetime
-from django.shortcuts import get_object_or_404
-from ninja import Schema
 from typing import List
+
+from django.shortcuts import get_object_or_404
 
 from ishar.api import api
 from ishar.apps.accounts.models import Account
 from ishar.apps.accounts.models.upgrade import (
     AccountUpgrade, AccountAccountUpgrade
 )
-
-
-class UpgradeSchema(Schema):
-    """Upgrade schema."""
-    id: int
-    name: str
-
-
-class AccountUpgradeSchema(Schema):
-    """Account Upgrade schema."""
-    id: int
-    cost: int
-    description: str
-    name: str
-    max_value: int
-    scale: int
-    is_disabled: bool
-    increment: int
-    amount: int
-
-
-class AccountAccountUpgradeSchema(Schema):
-    """Account Account Upgrade schema."""
-    upgrade: UpgradeSchema
-    amount: int
+from ishar.apps.accounts.api.schemas import (
+    AccountUpgradeSchema, AccountAccountUpgradeSchema
+)
 
 
 @api.get(

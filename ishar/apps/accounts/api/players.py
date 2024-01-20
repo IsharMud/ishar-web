@@ -1,33 +1,10 @@
-from datetime import datetime
 from typing import List
 
 from django.shortcuts import get_object_or_404
-from ninja import Schema
 
 from ishar.api import api
 from ishar.apps.accounts.models import Account
-
-
-class AccountPlayerSchema(Schema):
-    """Account player schema."""
-    id: int
-    name: str
-    is_deleted: bool
-    birth: datetime
-    logon: datetime
-    logout: datetime
-    bankacc: int
-    deaths: int
-    remorts: int
-    renown: int
-    true_level: int
-    favors: int
-    total_renown: int
-    quests_completed: int
-    challenges_completed: int
-    game_type: int
-    player_stats: dict
-    player_type: str
+from ishar.apps.accounts.api.schemas import AccountPlayerSchema
 
 
 @api.get(
