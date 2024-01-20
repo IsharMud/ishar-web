@@ -23,7 +23,7 @@ class ImmortalSchema(Schema):
 
 
 class PlayerSchema(Schema):
-    """Player API schema."""
+    """Player schema."""
     id: int
     name: str
     account: PlayerAccountSchema
@@ -46,15 +46,13 @@ class PlayerSchema(Schema):
 
 
 @api.get(
-    path="/player/{id_or_name}/",
-    response=PlayerAccountSchema,
+    path="/player/{name}/",
+    response=PlayerSchema,
     tags=["players"]
 )
-def player(request, id_or_name):
-    """Single player, by ID or name."""
-    if id_or_name.isnumeric():
-        return get_object_or_404(Player, id=id_or_name)
-    return get_object_or_404(Player, name=id_or_name)
+def player(request, name: str):
+    """Player, by name."""
+    return get_object_or_404(Player, name=name)
 
 
 @api.get(
@@ -66,7 +64,7 @@ def players(request):
     """All players - excluding Immortals, Artisans, Eternals, Gods, etc."""
     return Player.objects.filter(
         true_level__lt=min(settings.IMMORTAL_LEVELS)[0],
-    )
+    ).all()
 
 
 @api.get(
@@ -125,4 +123,4 @@ def immortals(request):
     """Immortals."""
     return Player.objects.filter(
         true_level__gte=min(settings.IMMORTAL_LEVELS)[0]
-    )
+    ).all()

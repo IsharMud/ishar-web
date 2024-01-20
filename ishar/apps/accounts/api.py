@@ -27,31 +27,23 @@ class AccountPlayersSchema(Schema):
 
 
 @api.get(
-    path="/account/{id_or_name}/",
+    path="/account/{name}/",
     response=AccountSchema,
     tags=["accounts"]
 )
-def account(request, id_or_name):
-    """Single account, by ID or name."""
-    if id_or_name.isnumeric():
-        return get_object_or_404(Account, account_id=id_or_name)
-    return get_object_or_404(Account, account_name=id_or_name)
+def account(request, name: str):
+    """Single account, by name."""
+    return get_object_or_404(Account, account_name=name)
 
 
 @api.get(
-    path="/account/{id_or_name}/players/",
+    path="/account/{name}/players/",
     response=List[AccountPlayersSchema],
     tags=["accounts"]
 )
-def account_players(request, id_or_name):
-    """Players related to a single account, by ID or name."""
-    if id_or_name.isnumeric():
-        acct = get_object_or_404(Account, account_id=id_or_name)
-    else:
-        acct = get_object_or_404(Account, account_name=id_or_name)
-    if acct.pk:
-        return acct.players.all()
-    return acct
+def account_players(request, name: str):
+    """Players related to a single account name."""
+    return get_object_or_404(Account, account_name=name).players.all()
 
 
 @api.get(path="/accounts/", response=List[AccountSchema], tags=["accounts"])
