@@ -8,28 +8,53 @@ from ishar.apps.accounts.models import Account
 
 
 class AccountSchema(Schema):
-    """Account API schema."""
+    """Account schema."""
     account_id: int
-    created_at: datetime
-    current_essence: int
-    email: str
     account_name: str
+    created_at: datetime
+    last_login: datetime
+    current_essence: int
     earned_essence: int
+    seasonal_earned: int
+    player_count: int
 
 
-@api.get(path="/accounts", response=List[AccountSchema])
+class AccountPlayersSchema(Schema):
+    """Account players schema."""
+    id: int
+    name: str
+    player_type: str
+
+
+@api.get(
+    path="/account/{id_or_name}/",
+    response=AccountSchema,
+    tags=["accounts"]
+)
+def account(request, id_or_name):
+    """Single account, by ID or name."""
+    if id_or_name.isnumeric():
+        return get_object_or_404(Account, account_id=id_or_name)
+    return get_object_or_404(Account, account_name=id_or_name)
+
+
+@api.get(
+    path="/account/{id_or_name}/players/",
+    response=List[AccountPlayersSchema],
+    tags=["accounts"]
+)
+def account_players(request, id_or_name):
+    """Players related to a single account, by ID or name."""
+    if id_or_name.isnumeric():
+        acct = get_object_or_404(Account, account_id=id_or_name)
+    else:
+        acct = get_object_or_404(Account, account_name=id_or_name)
+    if acct.pk:
+        return acct.players.all()
+    return acct
+
+
+@api.get(path="/accounts/", response=List[AccountSchema], tags=["accounts"])
 def accounts(request):
-    qs = Account.objects
-    if request.user.is_superuser():
-        return qs.all()
-    return qs.filter(account=request.user).all()
-
-
-@api.get(path="/accounts/{account_id}", response=AccountSchema)
-def account(request, account_id: int):
-    account = get_object_or_404(Account, account_id=account_id)
-    if not request.user == account or not request.user.is_superuser():
-        return 401, {"message": ""}
-    if request.user == account:
-        return account
-    return 401, {'message': 'Unauthorized'}
+    """All accounts."""
+    return Account.objects.all()

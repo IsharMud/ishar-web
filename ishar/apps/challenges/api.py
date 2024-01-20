@@ -8,7 +8,7 @@ from ishar.apps.challenges.models import Challenge
 
 
 class ChallengeSchema(Schema):
-    """Challenge API schema."""
+    """Challenge schema."""
     challenge_id: int
     max_level: int
     max_people: int
@@ -22,13 +22,33 @@ class ChallengeSchema(Schema):
     num_picked: int
 
 
-@api.get(path="/challenges", response=List[ChallengeSchema])
+@api.get(
+    path="/challenge/{challenge_id}/",
+    response=ChallengeSchema,
+    tags=["challenges"]
+)
+def challenge(request, challenge_id: int):
+    """Single challenge by ID."""
+    return get_object_or_404(Challenge, challenge_id=challenge_id)
+
+
+@api.get(
+    path="/challenges/",
+    response=List[ChallengeSchema],
+    tags=["challenges"]
+)
 def challenges(request):
-    return Challenge.objects.filter(is_active__exact=1)
+    """Any and all challenges - including inactive, incomplete, etc."""
+    return Challenge.objects.all()
 
 
-@api.get(path="/challenges/complete", response=List[ChallengeSchema])
-def complete_challenges(request):
+@api.get(
+    path="/challenges/complete/",
+    response=List[ChallengeSchema],
+    tags=["challenges"]
+)
+def complete(request):
+    """Active challenges with winners."""
     return Challenge.objects.filter(
         is_active__exact=1
     ).exclude(
@@ -36,15 +56,34 @@ def complete_challenges(request):
     )
 
 
-@api.get(path="/challenges/incomplete", response=List[ChallengeSchema])
-def incomplete_challenges(request):
+@api.get(
+    path="/challenges/incomplete/",
+    response=List[ChallengeSchema],
+    tags=["challenges"]
+)
+def incomplete(request):
+    """Active challenges, with NO winners."""
     return Challenge.objects.filter(
         is_active__exact=1,
         winner_desc__exact=""
     )
 
 
-@api.get(path="/challenges/{challenge_id}", response=ChallengeSchema)
-def challenge(request, challenge_id: int):
-    return get_object_or_404(Challenge, challenge_id=challenge_id)
+@api.get(
+    path="/challenges/active/",
+    response=List[ChallengeSchema],
+    tags=["challenges"]
+)
+def active(request):
+    """Challenges which are currently active."""
+    return Challenge.objects.filter(is_active__exact=1)
 
+
+@api.get(
+    path="/challenges/inactive/",
+    response=List[ChallengeSchema],
+    tags=["challenges"]
+)
+def inactive(request):
+    """Challenges which are currently NOT active."""
+    return Challenge.objects.filter(is_active__exact=0)

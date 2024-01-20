@@ -194,11 +194,6 @@ class AccountsAdmin(UserAdmin):
         "last_ip", "last_isp", "last_ident"
     )
 
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        qs = qs.annotate(player_count=Count("player"))
-        return qs
-
     @admin.display(description="Create IP")
     def create_ip(self, obj) -> str:
         return obj.get_create_ip()
@@ -207,9 +202,6 @@ class AccountsAdmin(UserAdmin):
     def last_ip(self, obj) -> str:
         return obj.get_last_ip()
 
-    @admin.display(description="# Players", ordering="player_count")
-    def player_count(self, obj) -> int:
-        return obj.player_count
 
     def has_add_permission(self, request) -> bool:
         return self.has_module_permission(request)

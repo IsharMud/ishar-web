@@ -286,6 +286,11 @@ class Account(AbstractBaseUser, PermissionsMixin):
         return when
 
     @property
+    @admin.display(description="# Players", ordering="player_count")
+    def player_count(self) -> int:
+        return self.players.count()
+
+    @property
     def groups(self) -> (tuple, None):
         if self.is_god():
             return (Gods,)
