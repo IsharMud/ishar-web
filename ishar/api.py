@@ -7,7 +7,10 @@ from ninja.security import django_auth_superuser
 
 
 def local_debug(request):
-    if request.META["REMOTE_ADDR"] == "127.0.0.1" and settings.DEBUG:
+    if (
+        settings.DEBUG and settings.ALLOWED_HOSTS[0] == "127.0.0.1" and
+        request.META["REMOTE_ADDR"] == "127.0.0.1"
+    ):
         return True
     return False
 
