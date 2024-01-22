@@ -6,6 +6,7 @@ from django.urls import include, path
 from ishar.views import StartView, SupportView, HomeView
 from ishar.views.auth import IsharLoginView, IsharLogoutView
 from ishar.apps.help.views import WorldView
+from ishar.apps.players.views import PlayerWhoView
 
 
 urlpatterns = [
@@ -25,5 +26,6 @@ urlpatterns = [
     path("season/", include("ishar.apps.seasons.urls"), name="season"),
     path("start/", StartView.as_view(), name="start"),
     path("support/", SupportView.as_view(), name="support"),
+    path("who/", PlayerWhoView.as_view(), name="who"),
     path("world/", WorldView.as_view(), name="world"),
 ]

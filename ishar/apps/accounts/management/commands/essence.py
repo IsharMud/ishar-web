@@ -4,30 +4,26 @@ from ishar.apps.accounts.models import Account
 
 
 class Command(BaseCommand):
-    """essence command to find essence for account(s)"""
+    """essence command to find essence for account(s)."""
 
-    # python manage.py essence tyler eric
-    """
-    Account "tyler": 50 essence
-    Account "eric": 7 essence
-    """
-    help = "Check the amount of essence for an account"
+    help = "Find essence for an account."
 
     def add_arguments(self, parser):
-        parser.add_argument("accounts", nargs="+", type=str)
+        parser.add_argument("essence", nargs=1, type=str)
 
     def handle(self, *args, **kwargs):
 
-        for account_name in kwargs["accounts"]:
-            try:
-                account = Account.objects.get(account_name=account_name)
-            except Account.DoesNotExist:
-                raise CommandError('Account "%s" not found!' % account_name)
+        account_name = kwargs["essence"][0]
+        try:
+            account = Account.objects.get(account_name=account_name)
+        except Account.DoesNotExist:
+            raise CommandError('Account "%s" not found!' % account_name)
 
-            self.stdout.write(
-                self.style.SUCCESS(
-                    'Account "%s": %i essence' % (
-                        account.account_name, account.current_essence
-                    )
+        self.stdout.write(
+            self.style.SUCCESS(
+                '%s\n\t%i essence' % (
+                    account.__repr__(),
+                    account.current_essence
                 )
             )
+        )

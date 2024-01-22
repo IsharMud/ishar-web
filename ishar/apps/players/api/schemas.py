@@ -9,27 +9,31 @@ class PlayerAccountSchema(Schema):
     account_name: str
 
 
-class PlayerSchema(Schema):
-    """Player schema."""
+class BasePlayerSchema(Schema):
+    """Base player schema."""
     id: int
     name: str
     account: PlayerAccountSchema
+    remorts: int
+    true_level: int
+    player_type: str
+
+
+class PlayerSchema(BasePlayerSchema):
+    """Player schema."""
+    game_type: int
     is_deleted: bool
     birth: datetime
     logon: datetime
     logout: datetime
     bankacc: int
     deaths: int
-    remorts: int
     renown: int
-    true_level: int
     favors: int
     total_renown: int
     quests_completed: int
     challenges_completed: int
-    game_type: int
     player_stats: dict
-    player_type: str
 
 
 class ImmortalSchema(Schema):

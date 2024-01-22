@@ -149,7 +149,7 @@ class Account(AbstractBaseUser, PermissionsMixin):
     def __repr__(self) -> str:
         return (
             __class__.__name__ +
-            f" : {repr(self.__str__())} [{self.account_id}]"
+            f": {repr(self.__str__())} [{self.account_id}]"
         )
 
     def __str__(self) -> str:
