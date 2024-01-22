@@ -36,9 +36,7 @@
         </li>
     </ul>
 
-    <hr>
-
-{% if request.user.players %}
+{% if request.user.players and request.user.players.count > 0 %}
     <p class="lead" title="You have {{ request.user.players.count }} character{{ request.user.players.count | pluralize }}.">
         You have {{ request.user.players.count }} character{{ request.user.players.count | pluralize }}:
     </p>
@@ -110,12 +108,10 @@
     </details>
     {% endfor %}
 {% else %}
-    <h3 class="m-3" title="You have not created any players yet!">
+    <p class="lead m-3" title="You have not created any players yet!">
         You have not created any players yet!
-    </h3>
+    </p>
 {% endif %}
-
-<hr>
 
 <details class="bg-black mx-1 my-3 border border-secondary rounded"{% if request.user.current_essence > 0 %} open{% endif %}>
     <summary id="essence" class="h3 p-2 text-ishar bg-black" title="Essence ({{ request.user.account_name }})">

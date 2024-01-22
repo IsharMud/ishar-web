@@ -11,7 +11,7 @@ def current_season(request):
     """
     Context processor for current Ishar MUD season.
     """
-    return {"current_season": get_current_season()}
+    return {"CURRENT_SEASON": get_current_season()}
 
 
 def global_event_count(request):
