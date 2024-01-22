@@ -3,7 +3,7 @@
 {% block meta_title %}Who's Online?{% endblock meta_title %}
 {% block meta_description %}Number of players currently online.{% endblock meta_description %}
 {% block meta_url %}{% url "who" %}{% endblock meta_url %}
-{% block title %}Who's Online?{% endblock title %}
+{% block title %}Who's Online?{% if players %} ({{ players | length }} player{{ players|pluralize }}){% endif %}{% endblock title %}
 {% block header %}
 <nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '•';">
     <ol class="breadcrumb" style="--bs-breadcrumb-divider-color: var(--ishar-color);">
@@ -36,8 +36,8 @@
         </ol>
     </div>
     {% else %}
-    <p class="lead">
-        <strong>Sorry, but there are currently no players online.</strong>
+    <p class="lead m-3">
+        Sorry, but there are currently no players online.
     </p>
     {% endif %}
 {% endblock content %}
