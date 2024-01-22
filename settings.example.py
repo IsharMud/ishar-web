@@ -1,141 +1,83 @@
 """
 isharmud.com Django settings.
 """
+from os import getenv
 from pathlib import Path
-import pymysql
+from pymysql import install_as_MySQLdb
+from django.core.management.utils import get_random_secret_key
 
 
-pymysql.install_as_MySQLdb()
+# Set up MySQL.
+install_as_MySQLdb()
 
-# Set website title.
-WEBSITE_TITLE = "Ishar MUD"
-
-# Silence OneToOneField warnings.
+# Silence OneToOneField recommendation warnings.
 SILENCED_SYSTEM_CHECKS = ["fields.W342"]
-"""
-System check identified some issues:
 
-WARNINGS:
-accounts.AccountAccountUpgrade.account: (fields.W342) Setting unique=True on a ForeignKey has the same effect as using a OneToOneField.
-        HINT: ForeignKey(unique=True) is usually better served by a OneToOneField.
-players.PlayerRemortUpgrade.player: (fields.W342) Setting unique=True on a ForeignKey has the same effect as using a OneToOneField.
-        HINT: ForeignKey(unique=True) is usually better served by a OneToOneField.
-players.PlayersFlag.flag: (fields.W342) Setting unique=True on a ForeignKey has the same effect as using a OneToOneField.
-        HINT: ForeignKey(unique=True) is usually better served by a OneToOneField.
-"""
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# Build project path(s).
 BASE_DIR = Path(__file__).resolve().parent
 
-# SECURITY WARNING: keep the secret key used in production secret!
-REST_TOKEN = "SECRET"
-SECRET_KEY = "SECRET"
+# Django secret key and REST API token for django-ninja.
+REST_TOKEN = getenv("DJANGO_REST_TOKEN") or get_random_secret_key()
+SECRET_KEY = getenv("DJANGO_SECRET_KEY", get_random_secret_key())
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+# Debug.
+DEBUG = bool(getenv("DJANGO_DEBUG", False))
 
-ALLOWED_HOSTS = ("isharmud.com", "www.isharmud.com")
+# Allowed hosts.
+DJANGO_HOSTS = getenv("DJANGO_HOSTS", "isharmud.com www.isharmud.com")
+ALLOWED_HOSTS = DJANGO_HOSTS.split()
 
-# SECURITY WARNING: do not share your Discord secrets
-DISCORD = {
-    "APPLICATION_ID": "EXAMPLE",
-    "GUILD": "EXAMPLE",
-    "PUBLIC_KEY": "EXAMPLE",
-    "TOKEN": "SECRET.SECRET.SECRET",
-    "URL": "https://discord.com/invite/EXAMPLE"
+# Database(s).
+DATABASES = {
+    # Staging.
+    "ishar_test": {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": "ishar_test",
+        "USER": "ishar_test",
+        "PASSWORD": "SECRET",
+        "HOST": "127.0.0.1",
+        "PORT": 3306
+    },
+    # Production
+    "ishar": {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": "ishar",
+        "USER": "ishar",
+        "PASSWORD": "SECRET",
+        "HOST": "127.0.0.1",
+        "PORT": 3306
+    }
 }
+DEFAULT_DB = getenv("DJANGO_DATABASE", "ishar")
+DATABASES["default"] = DATABASES[DEFAULT_DB]
 
-# SECURITY WARNING: do not share your Sentry secret(s)
-SENTRY_DSN = "SECRET"
+# Default primary key field type.
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# MUD home and lib directory, for "helptab" file reading and player "Podir"s
-MUD_HOME = Path("/home/ishar/ishar-mud")
-MUD_LIB = Path(MUD_HOME, "lib")
-HELPTAB = Path(MUD_LIB, "Misc/helptab")
-MUD_PODIR = Path(MUD_LIB, "Podir")
-
-# Player karma alignment ranges
-ALIGNMENTS = {
-    "Very Evil": (-1500, -1000),
-    "Evil": (-1000, -500),
-    "Slightly Evil": (-500, -250),
-    "Neutral": (-250, 250),
-    "Slightly Good": (250, 500),
-    "Good": (500, 1000),
-    "Very Good": (1000, 1500)
-}
-
-# Player game types
-GAME_TYPES = [
-    (0, "Classic"),
-    (1, "Survival")
-]
-
-# Player immortal levels/types
-IMMORTAL_LEVELS = (
-    (26, "God"),
-    (25, "Forger"),
-    (24, "Eternal"),
-    (23, "Artisan"),
-    (22, "Immortal"),
-    (21, "Consort"),
+# CSRF cookie.
+CSRF_COOKIE_DOMAIN = ALLOWED_HOSTS[0]
+CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SAMESITE = "Strict"
+CSRF_COOKIE_SECURE = False
+DJANGO_ORIGINS = getenv(
+    "DJANGO_ORIGINS",
+    "https://isharmud.com https://www.isharmud.com"
 )
+CSRF_TRUSTED_ORIGINS = DJANGO_ORIGINS.split()
 
-# Player gender values
-PLAYER_GENDERS = ((1, "Male"), (2, "Female"))
+# Session cookie.
+SESSION_COOKIE_DOMAIN = ALLOWED_HOSTS[0]
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = "Strict"
+SESSION_COOKIE_SECURE = True
 
-# Player position values
-PLAYER_POSITIONS = (
-    (0, "POSITION_DEAD"), (1, "POSITION_DYING"), (2, "POSITION_STUNNED"),
-    (3, "POSITION_PARALYZED"), (4, "POSITION_SLEEPING"),
-    (5, "POSITION_HOISTED"), (6, "POSITION_RESTING"), (7, "POSITION_SITTING"),
-    (8, "POSITION_RIDING"), (9, "UNUSED_POSN"), (10, "POSITION_STANDING")
-)
-
-# Authentication using MySQL database user accounts
-AUTH_USER_MODEL = "accounts.Account"
-AUTHENTICATION_BACKENDS = (
-    "ishar.apps.accounts.backends.IsharUserAuthBackend",
-)
-
-# Order of character statistics based on player class
-CLASS_STATS = {
-    "Warrior": (
-        "Strength", "Agility", "Endurance", "Willpower", "Focus", "Perception"
-    ),
-    "Rogue": (
-        "Agility", "Perception", "Strength", "Focus", "Endurance", "Willpower"
-    ),
-    "Cleric": (
-        "Willpower", "Strength", "Perception", "Endurance", "Focus", "Agility"
-    ),
-    "Magician": (
-        "Perception", "Focus", "Agility", "Willpower", "Endurance", "Strength"
-    ),
-    "Necromancer": (
-        "Focus", "Willpower", "Perception", "Agility", "Strength", "Endurance"
-    ),
-    "Shaman": (
-        "Willpower", "Agility", "Endurance", "Focus", "Perception", "Strength",
-    ),
-    # Alphabetic as last resort
-    None: (
-        "Agility", "Endurance", "Focus", "Perception", "Strength", "Willpower"
-    )
-}
-
-# CSRF/session cookies
-CSRF_COOKIE_DOMAIN = SESSION_COOKIE_DOMAIN = ALLOWED_HOSTS[0]
-CSRF_COOKIE_HTTPONLY = CSRF_COOKIE_SECURE = True
-CSRF_COOKIE_SAMESITE = SESSION_COOKIE_SAMESITE = "Strict"
-CSRF_TRUSTED_ORIGINS = ("https://isharmud.com", "https://www.isharmud.com")
-SESSION_COOKIE_HTTPONLY = SESSION_COOKIE_SECURE = True
-
-# E-mail
-ADMINS = MANAGERS = (("Eric OC", "eric@ericoc.com"),)
-DEFAULT_FROM_EMAIL = "django@" + ALLOWED_HOSTS[0]
+# E-mail.
+ADMINS = MANAGERS = (("Example Person", "person@example.com"),)
+DEFAULT_FROM_EMAIL = SERVER_EMAIL = "admin@" + ALLOWED_HOSTS[0]
 EMAIL_SUBJECT_PREFIX = "[Django: " + ALLOWED_HOSTS[0] + "] "
-SERVER_EMAIL = "admin@" + ALLOWED_HOSTS[0]
+EMAIL_HOST = "localhost"
+EMAIL_PORT = 25
+EMAIL_HOST_USER = EMAIL_HOST_PASSWORD = None
 
 # Application definition
 INSTALLED_APPS = [
@@ -207,51 +149,133 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "wsgi.application"
 
-# Database
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": "ishar",
-        "USER": "ishar",
-        "PASSWORD": "SECRET",
-        "HOST": "127.0.0.1",
-        "PORT": 3306
-    }
-}
-
-# Password validation
+# Authentication.
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"}
 ]
-
-# Internationalization
-LANGUAGE_CODE = "en-us"
-TIME_ZONE = "UTC"
-USE_I18N = True
-USE_TZ = True
-
-# Static files (CSS, JavaScript, images)
-STATIC_URL = "static/"
-STATIC_ROOT = Path(BASE_DIR, STATIC_URL)
-
-# Media (for patch PDF files)
-MEDIA_URL = "media/"
-MEDIA_ROOT = Path(BASE_DIR, MEDIA_URL)
-
-USE_THOUSAND_SEPARATOR = True
-
-# Default primary key field type
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
+AUTH_USER_MODEL = "accounts.Account"
+AUTHENTICATION_BACKENDS = (
+    "ishar.apps.accounts.backends.IsharUserAuthBackend",
+)
 LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/portal/"
 LOGOUT_URL = "/logout/"
 
-CONNECT_HOST = ALLOWED_HOSTS[0]
-CONNECT_PORT = 23
-CONNECT_URL = (
-    f"https://mudslinger.net/play/?host={CONNECT_HOST}&port={CONNECT_PORT}"
+# Website title.
+WEBSITE_TITLE = "Ishar MUD"
+
+# Logging
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "WARNING",
+    },
+}
+
+# Internationalization.
+LANGUAGE_CODE = "en-us"
+TIME_ZONE = "UTC"
+USE_I18N = True
+USE_THOUSAND_SEPARATOR = True
+USE_TZ = True
+
+# Static.
+STATIC_URL = "static/"
+STATIC_ROOT = Path(BASE_DIR, STATIC_URL)
+
+# Media.
+MEDIA_URL = "media/"
+MEDIA_ROOT = Path(BASE_DIR, MEDIA_URL)
+PATCHES_URL = "patches/"
+
+# Discord.
+DISCORD = {
+    "APPLICATION_ID": "EXAMPLE",
+    "GUILD": "EXAMPLE",
+    "PUBLIC_KEY":
+    "EXAMPLE",
+    "TOKEN":
+    "SECRET",
+    "URL": "https://discord.com/invite/VBmMXUpeve"
+}
+
+# MUD files.
+MUD_HOME = Path(getenv("DJANGO_MUD_HOME", "/home/ishar/ishar-mud"))
+MUD_LIB = Path(MUD_HOME, "lib")
+HELPTAB = Path(MUD_LIB, "Misc/helptab")
+MUD_PODIR = Path(MUD_LIB, "Podir")
+
+# Player alignments.
+ALIGNMENTS = {
+    "Very Evil": (-1500, -1000),
+    "Evil": (-1000, -500),
+    "Slightly Evil": (-500, -250),
+    "Neutral": (-250, 250),
+    "Slightly Good": (250, 500),
+    "Good": (500, 1000),
+    "Very Good": (1000, 1500)
+}
+
+# Player game types.
+GAME_TYPES = [(0, "Classic"), (1, "Survival")]
+
+# Player immortal levels/types.
+IMMORTAL_LEVELS = (
+    (26, "God"),
+    (25, "Forger"),
+    (24, "Eternal"),
+    (23, "Artisan"),
+    (22, "Immortal"),
+    (21, "Consort"),
+)
+
+# Player genders.
+PLAYER_GENDERS = ((1, "Male"), (2, "Female"))
+
+# Player positions.
+PLAYER_POSITIONS = (
+    (0, "POSITION_DEAD"), (1, "POSITION_DYING"), (2, "POSITION_STUNNED"),
+    (3, "POSITION_PARALYZED"), (4, "POSITION_SLEEPING"),
+    (5, "POSITION_HOISTED"), (6, "POSITION_RESTING"), (7, "POSITION_SITTING"),
+    (8, "POSITION_RIDING"), (9, "UNUSED_POSN"), (10, "POSITION_STANDING")
+)
+
+# Order statistics by class.
+CLASS_STATS = {
+    "Warrior": (
+        "Strength", "Agility", "Endurance", "Willpower", "Focus", "Perception"
+    ),
+    "Rogue": (
+        "Agility", "Perception", "Strength", "Focus", "Endurance", "Willpower"
+    ),
+    "Cleric": (
+        "Willpower", "Strength", "Perception", "Endurance", "Focus", "Agility"
+    ),
+    "Magician": (
+        "Perception", "Focus", "Agility", "Willpower", "Endurance", "Strength"
+    ),
+    "Necromancer": (
+        "Focus", "Willpower", "Perception", "Agility", "Strength", "Endurance"
+    ),
+    "Shaman": (
+        "Willpower", "Agility", "Endurance", "Focus", "Perception", "Strength",
+    ),
+    # Alphabetic as last resort
+    None: (
+        "Agility", "Endurance", "Focus", "Perception", "Strength", "Willpower"
+    )
+}
+
+CONNECT_URL = "https://mudslinger.net/play/?host=%s&port=%i" % (
+    ALLOWED_HOSTS[0], 23
 )
