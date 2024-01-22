@@ -107,6 +107,33 @@
 {% endif %}
     </li>
 </ul>
-<div class="bg-black mx-1 my-3 p-1 border border-secondary rounded" id="leaders"></div>
+
+{% if game_type and game_type == "Survival" %}
+<ul class="m-2 px-1 py-1 list-group list-group-horizontal">
+    <li class="list-group-item bg-black" title="Survival">
+    {% if deleted is None %}
+        <span class="text-ishar">All</span>
+    {% else %}
+        <a class="list-group-item-text" href="{% url "survival" %}#leaders">All</a>
+    {% endif %}
+    </li>
+    <li class="list-group-item bg-black" title="Survival">
+    {% if deleted is True %}
+        <span class="text-ishar">Dead</span>
+    {% else %}
+        <a class="list-group-item-text" href="{% url "dead_survival" %}#leaders">Dead</a>
+    {% endif %}
+    </li>
+    <li class="list-group-item bg-black" title="Survival">
+    {% if deleted is False %}
+        <span class="text-ishar">Living</span>
+    {% else %}
+        <a class="list-group-item-text" href="{% url "living_survival" %}#leaders">Living</a>
+    {% endif %}
+    </li>
+</ul>
+{% endif %}
+
+<div id="leaders"></div>
 <script>showLeaders( document.getElementById('leaders'));</script>
 {% endblock content %}

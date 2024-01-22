@@ -18,7 +18,7 @@ class LeadersView(LoginRequiredMixin, ListView):
     game_type = None
 
     def get_queryset(self):
-        """Filter and order players to determine leaders."""
+        """Filter players."""
 
         # Exclude immortals players.
         qs = self.model.objects.filter(
@@ -54,3 +54,30 @@ class ClassicLeadersView(LeadersView):
 class SurvivalLeadersView(LeadersView):
     """Survival players leaders view."""
     game_type = 1
+    deleted = None
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        """Include boolean when viewing dead or living survival players."""
+        context = super().get_context_data(object_list=None, **kwargs)
+        context["deleted"] = self.deleted
+        return context
+
+    def get_queryset(self):
+        """Filter survival players."""
+        qs = super().get_queryset()
+
+        # Optionally filter is_deleted (Dead/Living).
+        if self.deleted is not None:
+            qs = qs.filter(is_deleted=self.deleted)
+
+        return qs
+
+
+class SurvivalDeadLeadersView(SurvivalLeadersView):
+    """Dead survival players leaders view."""
+    deleted = True
+
+
+class SurvivalLivingLeadersView(SurvivalLeadersView):
+    """Living survival players leaders view."""
+    deleted = False
