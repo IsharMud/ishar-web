@@ -58,7 +58,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 CSRF_COOKIE_DOMAIN = ALLOWED_HOSTS[0]
 CSRF_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SAMESITE = "Strict"
-CSRF_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = True
 DJANGO_ORIGINS = getenv(
     "DJANGO_ORIGINS",
     "https://isharmud.com https://www.isharmud.com"
