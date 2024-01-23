@@ -101,9 +101,12 @@
                                 </li>
                                 <li class="nav-item text-ishar"><hr class="dropdown-divider border-secondary"></li>
                                 <li class="nav-item" title="Log out">
-                                    <a class="bi bi-door-closed bg-black nav-link dropdown-item" href="{% url "logout" %}">
-                                        Log out ({{ user.get_username }})
-                                    </a>
+                                    <form action="{% url "logout" %}" method="post" id="logout">
+                                        {% csrf_token %}
+                                        <a class="bi bi-door-closed bg-black nav-link dropdown-item" href="#" onclick="document.getElementById('logout').submit()">
+                                            Log Out ({{ request.user.get_username }})
+                                        </a>
+                                    </form>
                                 </li>
                             </ul>
                         </li>
