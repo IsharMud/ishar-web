@@ -68,16 +68,16 @@ class SurvivalLeadersView(LeadersView):
 
         # Optionally filter is_deleted (Dead/Living).
         if self.deleted is not None:
-            qs = qs.filter(is_deleted=self.deleted)
+            qs = qs.filter(is_deleted__exact=self.deleted)
 
         return qs
 
 
 class SurvivalDeadLeadersView(SurvivalLeadersView):
     """Dead survival players leaders view."""
-    deleted = True
+    deleted = 1
 
 
 class SurvivalLivingLeadersView(SurvivalLeadersView):
     """Living survival players leaders view."""
-    deleted = False
+    deleted = 0

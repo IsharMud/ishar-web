@@ -13,44 +13,6 @@ from ishar.apps.accounts.models.unsigned import UnsignedAutoField
 from ishar.util import dec2ip
 
 
-class Players(Group):
-    """
-    Ishar base group.
-    """
-    name = "Players"
-    permissions = ()
-    immortal = False
-
-    class Meta:
-        managed = False
-        ordering = ("name",)
-        proxy = True
-        verbose_name = "Player"
-
-    def __repr__(self) -> str:
-        return f"{self.__class__.__name__}: {repr(self.__str__())}"
-
-    def __str__(self) -> str:
-        return self.name
-
-
-class Immortals(Players):
-    name = "Immortals"
-
-
-class Eternals(Immortals):
-    name = "Eternals"
-
-
-class Forgers(Eternals):
-    name = "Forgers"
-
-
-class Gods(Forgers):
-    name = "Gods"
-    permissions = "__all__"
-
-
 class Account(AbstractBaseUser, PermissionsMixin):
     """
     User account that logs in to the website, and MUD/game.
@@ -289,13 +251,3 @@ class Account(AbstractBaseUser, PermissionsMixin):
     @admin.display(description="# Players", ordering="player_count")
     def player_count(self) -> int:
         return self.players.count()
-
-    @property
-    def groups(self) -> (tuple, None):
-        if self.is_god():
-            return (Gods,)
-        if self.is_forger():
-            return (Forgers,)
-        if self.is_eternal():
-            return (Eternals,)
-        return None

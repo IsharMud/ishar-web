@@ -19,7 +19,7 @@ class AccountPlayerSchema(Schema):
     """Account player schema."""
     id: int
     name: str
-    is_deleted: bool
+    is_deleted: int
     birth: datetime
     logon: datetime
     logout: datetime

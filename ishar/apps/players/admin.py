@@ -136,7 +136,11 @@ class PlayerAdmin(admin.ModelAdmin):
         )}),
         ("Points", {"fields": ("bankacc", "renown", "remorts", "favors")}),
         ("Survival?", {
-            "fields": ("game_type", "is_deleted"),
+            "fields": ("game_type",),
+            "classes": ("collapse",)
+        }),
+        ("Deleted?", {
+            "fields": ("is_deleted",),
             "classes": ("collapse",)
         }),
         ("Totals", {
@@ -163,11 +167,11 @@ class PlayerAdmin(admin.ModelAdmin):
         PlayerRemortUpgradesInlineAdmin
     )
     list_display = (
-        "name", "get_account_link", "player_type", "is_survival", "is_deleted",
+        "name", "get_account_link", "player_type", "is_survival",
         "player_level", "renown"
     )
     list_filter = (
-        "game_type", "is_deleted", ImmortalTypeListFilter,
+        "game_type", ImmortalTypeListFilter,
         ("account", admin.RelatedOnlyFieldListFilter),
     )
     readonly_fields = (

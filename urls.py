@@ -19,6 +19,8 @@ urlpatterns = [
     # Django-Admin.
     path("admin/", admin.site.urls, name="admin"),
 
+    path("i18n/", include('django.conf.urls.i18n')),
+
     # Django-Ninja.
     path("api/", api.urls, name="api"),
 

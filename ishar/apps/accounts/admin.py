@@ -1,23 +1,13 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
-from django.contrib.auth.admin import UserAdmin  # , GroupAdmin
-from django.db.models import Count
+from django.contrib.auth.admin import UserAdmin
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
 from ishar.apps.accounts.models.upgrade import (
     AccountUpgrade, AccountAccountUpgrade
 )
-# from ishar.apps.accounts.models import Players
 from ishar.apps.players.models import Player
-
-
-# @admin.register(Players)
-# class PlayersAdmin(GroupAdmin):
-#    """
-#    Ishar players group administration.
-#    """
-#    model = Players
 
 
 class AccountPlayersLinksInline(admin.TabularInline):
@@ -33,10 +23,12 @@ class AccountPlayersLinksInline(admin.TabularInline):
         """Admin text for player class."""
         return obj.common.player_class.get_class_name()
 
-    @admin.display(boolean=True, description="Deleted?")
+    @admin.display(boolean=True, description="Deleted?", ordering="is_deleted")
     def get_player_deleted(self, obj) -> bool:
         """Admin boolean for whether player is deleted."""
-        return obj.is_deleted
+        if obj.is_deleted > 0:
+            return True
+        return False
 
     @admin.display(description="Level")
     def get_player_level(self, obj) -> int:

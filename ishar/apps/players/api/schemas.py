@@ -22,7 +22,7 @@ class BasePlayerSchema(Schema):
 class PlayerSchema(BasePlayerSchema):
     """Player schema."""
     game_type: int
-    is_deleted: bool
+    is_deleted: int
     birth: datetime
     logon: datetime
     logout: datetime

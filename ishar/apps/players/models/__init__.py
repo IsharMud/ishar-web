@@ -181,7 +181,7 @@ class Player(models.Model):
         help_text="Last Internet Service Provider (ISP) change.",
         verbose_name="Last ISP Change"
     )
-    is_deleted = models.BooleanField(
+    is_deleted = models.PositiveIntegerField(
         blank=False,
         default=0,
         null=False,
@@ -230,10 +230,11 @@ class Player(models.Model):
         verbose_name = "Player"
 
     def __repr__(self) -> str:
-        return (
-            f"Player: {repr(self.__str__())} ({self.id}) "
-            f"[{self.get_player_type()}]"
-        )
+        return self.name
+#        return "%s: %s" % (
+#            self.__class__.name,
+#            repr(self.__str__)
+#        )
 
     def __str__(self) -> str:
         return self.name
@@ -388,19 +389,19 @@ class Player(models.Model):
 
     def get_player_phrase(self) -> str:
         """Player phrase."""
-        if self.is_deleted is True:
+        if self.is_deleted > 0:
             return "was"
         return "is"
 
     def get_player_phrase_own(self) -> str:
         """Player phrase for ownership."""
-        if self.is_deleted is True:
+        if self.is_deleted > 0:
             return "were"
         return "are"
 
     def get_player_phrase_owns(self) -> str:
         """Player phrase for plural ownership."""
-        if self.is_deleted is True:
+        if self.is_deleted > 0:
             return "had"
         return "has"
 
@@ -445,6 +446,12 @@ class Player(models.Model):
         """
         if self.is_deleted == 1:
             return "Dead"
+
+        if self.is_deleted == 2:
+            return "Pending Delete"
+
+        if self.is_deleted == 3:
+            return "Deleted"
 
         if self.true_level >= min(settings.IMMORTAL_LEVELS)[0]:
             return get_immortal_type(level=self.true_level)

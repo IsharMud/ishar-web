@@ -37,23 +37,13 @@ def get_help_chunks(help_file=settings.HELPTAB):
         by '#' character, to roughly separate topics"""
 
     # Open the 'helptab' file (read-only)
-    try:
-        with open(file=help_file, mode='r', encoding='utf-8') as help_fh:
+    with open(file=help_file, mode='r', encoding='utf-8') as help_fh:
 
-            # Split the contents of the file into a list,
-            #   where each item is separated by "\n#\n":
-            #   hash (#) on a line by itself
-            #   and return "chunks" except the first (instructions/example)
-            return help_fh.read().split('\n#\n')[1:]
-
-    # Catch/return exceptions or errors on accessing the 'helptab' file,
-    #   and report to Sentry
-    except (FileNotFoundError, PermissionError, Exception) as err:
-        raise IOError from err
-
-    # Close the 'helptab' file
-    finally:
-        help_fh.close()
+        # Split the contents of the file into a list,
+        #   where each item is separated by "\n#\n":
+        #   hash (#) on a line by itself
+        #   and return "chunks" except the first (instructions/example)
+        return help_fh.read().split('\n#\n')[1:]
 
 
 def get_help_topics():
