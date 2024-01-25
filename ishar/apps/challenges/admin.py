@@ -34,14 +34,16 @@ class ChallengesAdmin(admin.ModelAdmin):
     """
     fieldsets = (
         (None, {"fields": ("challenge_id", "is_active", "is_completed")}),
-        ("Details", {"fields": ("challenge_desc", "winner_desc")}),
+        ("Details", {"fields": (
+            "challenge_desc", "winner_desc", "last_completion"
+        )}),
         ("Target", {"fields": ("mob_vnum", "mob_name")}),
-        ("Original", {"fields": ("orig_level", "orig_people", "orig_tier")}),
-        ("Adjusted", {"fields": ("adj_level", "adj_people", "adj_tier")}),
+        ("Maximums", {"fields": ("max_level", "max_people",)}),
+        ("Totals", {"fields": ("num_completed", "num_picked",)}),
     )
     list_display = ("challenge_desc", "mob_name", "is_active", "is_completed")
     list_filter = ("is_active", ChallengeCompletedListFilter)
-    readonly_fields = ("challenge_id", "is_completed")
+    readonly_fields = ("challenge_id", "is_completed", "last_completion")
     search_fields = ("challenge_desc", "winner_desc", "mob_vnum", "mob_name")
 
     def has_module_permission(self, request, obj=None) -> bool:
