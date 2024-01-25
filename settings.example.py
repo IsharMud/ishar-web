@@ -65,11 +65,24 @@ DJANGO_ORIGINS = getenv(
 )
 CSRF_TRUSTED_ORIGINS = DJANGO_ORIGINS.split()
 
+# Language cookie.
+LANGUAGE_COOKIE_DOMAIN = ALLOWED_HOSTS[0]
+LANGUAGE_COOKIE_HTTPONLY = True
+LANGUAGE_COOKIE_SAMESITE = "Strict"
+LANGUAGE_COOKIE_SECURE = True
+
 # Session cookie.
 SESSION_COOKIE_DOMAIN = ALLOWED_HOSTS[0]
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = "Strict"
 SESSION_COOKIE_SECURE = True
+
+# Internationalization.
+LANGUAGE_CODE = "en-us"
+TIME_ZONE = "UTC"
+USE_I18N = True
+USE_THOUSAND_SEPARATOR = True
+USE_TZ = True
 
 # E-mail.
 ADMINS = MANAGERS = (("Example Person", "person@example.com"),)
@@ -183,13 +196,6 @@ LOGGING = {
     },
 }
 
-# Internationalization.
-LANGUAGE_CODE = "en-us"
-TIME_ZONE = "UTC"
-USE_I18N = True
-USE_THOUSAND_SEPARATOR = True
-USE_TZ = True
-
 # Static.
 STATIC_URL = "static/"
 STATIC_ROOT = Path(BASE_DIR, STATIC_URL)
@@ -280,3 +286,5 @@ CLASS_STATS = {
 CONNECT_URL = "https://mudslinger.net/play/?host=%s&port=%i" % (
     ALLOWED_HOSTS[0], 23
 )
+
+X_FRAME_OPTIONS = "SAMEORIGIN"
