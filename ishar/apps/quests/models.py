@@ -2,7 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 
-# from ishar.apps.classes.util import get_class_options
+from ishar.apps.classes.models import PLAYER_CLASSES
 
 
 class Quest(models.Model):
@@ -67,7 +67,7 @@ class Quest(models.Model):
         verbose_name="Prerequisite (Deprecated)"
     )
     class_restrict = models.IntegerField(
-        # choices=get_class_options(),
+        choices=PLAYER_CLASSES,
         help_text="Player class which the quest is restricted to.",
         verbose_name="Class Restrict"
     )
@@ -191,7 +191,7 @@ class QuestReward(models.Model):
         verbose_name="Quest"
     )
     class_restrict = models.IntegerField(
-        # choices=get_class_options(),
+        choices=PLAYER_CLASSES,
         help_text="Player class which the reward is restricted to.",
         verbose_name="Class Restrict"
     )

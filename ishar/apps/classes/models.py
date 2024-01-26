@@ -5,6 +5,18 @@ from ishar.apps.races.models import Race
 from ishar.apps.skills.models import Skill
 
 
+PLAYER_CLASSES = [
+    (-1, None),
+    (0, "Warrior"),
+    (1, "Rogue"),
+    (2, "Cleric"),
+    (3, "Magician"),
+    (4, "No Class"),
+    (9, "Necromancer"),
+    (11, "Shaman")
+]
+
+
 class Class(models.Model):
     """
     Player/Mobile Class.
