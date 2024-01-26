@@ -32,8 +32,8 @@
         new gridjs.Grid({
             columns: [
                 {
-                    id: 'link',
-                    name: 'Link',
+                    id: 'player',
+                    name: 'Player',
                     formatter: (cell) => gridjs.html(`${cell}`)
                 },
                 {
@@ -60,7 +60,7 @@
             data: [
               {% for leader in leader_players %}
                 {
-                    link: '{{ leader.player_link }}',
+                    player: '{{ leader.player_link }}',
                     remorts: {{ leader.remorts }},
                     renown: {{ leader.total_renown }},
                     quests: {{ leader.quests_completed }},

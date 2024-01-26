@@ -17,7 +17,7 @@ class SeasonsAdmin(admin.ModelAdmin):
         ("Averages", {"fields": (
             "average_essence_gain", "average_remorts", "avg_renown"
         )}),
-        ("Averages", {"fields": (
+        ("Maximums", {"fields": (
             "max_essence_gain", "max_remorts", "max_renown"
         )}),
         ("Leader", {"fields": (

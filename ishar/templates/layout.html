@@ -162,11 +162,11 @@
         </main>
 
 {% if CURRENT_SEASON %}
-        <footer class="container-md px-3 py-1" title="{{ CURRENT_SEASON }} ends {{ CURRENT_SEASON.expiration_date | naturaltime }}">
+        <footer class="container-md px-3 py-1" title="Season {{ CURRENT_SEASON.season_id }} ends {{ CURRENT_SEASON.expiration_date | naturaltime }}">
             <div class="text-center row p-3 bg-black rounded" style="border: 0.1rem solid var(--ishar-color);">
                 <div class="col">
                     <a href="{% url "current_season" %}">
-                        {{ CURRENT_SEASON }}
+                        Season {{ CURRENT_SEASON.season_id }}
                     </a>
                 </div>
                 <div class="col">

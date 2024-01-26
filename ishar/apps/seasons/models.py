@@ -1,4 +1,6 @@
 from django.db import models
+from django.urls import reverse
+from django.utils.html import mark_safe
 
 
 class Season(models.Model):
@@ -68,8 +70,30 @@ class Season(models.Model):
         ordering = ("-is_active", "-season_id")
         verbose_name = "Season"
 
+    def get_absolute_url(self) -> str:
+        return reverse(viewname="season", args=(self.season_id,))
+
+    def get_admin_link(self) -> str:
+        return mark_safe(
+            '<a href="%s" title="%s">%s</a>' % (
+                self.get_admin_url(),
+                self.__repr__(),
+                self.__repr__()
+            )
+        )
+
+    def get_admin_url(self) -> str:
+        return reverse(
+            viewname="admin:seasons_season_change",
+            args=(self.season_id,)
+        )
+
     def __repr__(self):
-        return self.__str__()
+        return f"{self.__class__.__name__}: {repr(self.__str__())}"
 
     def __str__(self):
-        return f"Season {self.season_id}"
+        return "%i (%s - %s)" % (
+            self.season_id,
+            self.effective_date.strftime("%c"),
+            self.expiration_date.strftime("%c"),
+        )
