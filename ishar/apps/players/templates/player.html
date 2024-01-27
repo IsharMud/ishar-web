@@ -100,14 +100,14 @@
                 {% if player.upgrades.count > 0 %}({{ player.upgrades.count }}){% endif %}
                 <a class="anchor-link" href="#upgrades" aria-label="Link to this section: Remort Upgrades">&#x23;</a>
             </summary>
-            <div class="bg-black border-top border-secondary m-3" id="upgrades">
-                    <ul class="bg-black list-group list-group-dark list-group-numbered list-group-horizontal-md">
-                {% for upgraded in player.upgrades.all %}
-                        <li class="bg-black border-0 list-group-item list-group-item-text text-white" title="{{ upgraded.upgrade.display_name }}{% if upgraded.value > 1 %} (x{{ upgraded.value }}){% endif %}">
-                            {{ upgraded.upgrade.display_name }}{% if upgraded.value > 1 %}<span class="text-ishar"> (<strong>x{{ upgraded.value }}</strong>)</span>{% endif %}
-                        </li>
+            <div class="bg-black m-3" id="upgrades">
+                <ol class="bg-black list-group list-group-horizontal-md list-group-numbered">
+                {% for upgraded in request.user.upgrades.all %}
+                    <li class="bg-dark border-secondary list-group-item list-group-item-text text-white" title="{{ upgraded.upgrade.name }}{% if upgraded.amount > 1 %} (x{{ upgraded.amount }}){% endif %}">
+                        {{ upgraded.upgrade.name }}{% if upgraded.amount > 1 %}<span class="text-ishar"> (<strong>x{{ upgraded.amount }}</strong>)</span>{% endif %}
+                    </li>
                 {% endfor %}
-                    </ul>
+                </ol>
             </div>
         </details>
             {% endif %}
@@ -118,10 +118,10 @@
                 Statistics
                 <a class="anchor-link" href="#stats" aria-label="Link to this section: Statistics">&#x23;</a>
             </summary>
-            <div class="bg-black border-top border-secondary  m-3" id="stats">
+            <div class="bg-black m-3" id="stats">
                 <ol class="bg-black list-group list-group-dark list-group-horizontal-md">
                 {% for stat_name, stat_value in player.player_stats.items %}
-                    <li class="bg-black border-0 list-group-item" title="{{ stat_name }}: {{ stat_value }}">
+                    <li class="bg-dark border-secondary list-group-item list-group-item-text text-white" title="{{ stat_name }}: {{ stat_value }}">
                         <span class="list-group-item-text text-white{% if forloop.first %} fw-bold{% endif %}">
                             <span class="text-ishar">{{ stat_name }}</span>:
                             {{ stat_value }}
