@@ -23,6 +23,13 @@ class ErrorView(TemplateView):
         return self.render_to_response(context, status=self.status_code)
 
 
+class HistoryView(TemplateView):
+    """
+    History page.
+    """
+    template_name = "history.html"
+
+
 class StartView(TemplateView):
     """
     Getting started guide.

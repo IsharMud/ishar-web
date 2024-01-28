@@ -4,7 +4,6 @@ isharmud.com root URL configuration.
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.contrib.flatpages import views
 from django.urls import include, path
 from django.views.generic import RedirectView
 
@@ -23,19 +22,6 @@ urlpatterns = [
 
     # Django-Ninja.
     path("api/", api.urls, name="api"),
-
-    #
-    # Flat pages.
-    #
-
-    # History.
-    path("history/", views.flatpage, {"url": "/history/"}, name="history"),
-
-    # Getting started guide.
-    path("start/", views.flatpage, {"url": "/start/"}, name="start"),
-
-    # Support (Ishar MUD).
-    # path("support/", views.flatpage, {"url": "/support/"}, name="support"),
 
     #
     # Redirects.
