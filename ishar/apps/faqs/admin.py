@@ -10,17 +10,19 @@ class FAQAdmin(admin.ModelAdmin):
     """
     date_hierarchy = "created"
     fieldsets = (
-        (None, {"fields": ("faq_id",)}),
+        (None, {"fields": ("faq_id", "slug")}),
         ("Question", {"fields": ("question_text", "question_answer")}),
         ("Authorship", {"fields": ("created", "account")}),
         ("Display", {"fields": ("is_visible", "display_order")}),
     )
-    list_display = ("faq_id", "question_text", "is_visible", "display_order")
-    list_display_links = ("faq_id", "question_text")
+    list_display = (
+        "faq_id", "slug", "question_text", "is_visible", "display_order"
+    )
+    list_display_links = ("faq_id", "slug", "question_text")
     list_filter = ("is_visible", ("account", admin.RelatedOnlyFieldListFilter))
     readonly_fields = ("faq_id", "account", "created")
     search_fields = (
-        "question_text", "question_answer", "account", "is_visible"
+        "slug", "question_text", "question_answer", "account", "is_visible"
     )
 
     def save_model(self, request, obj, form, change):
