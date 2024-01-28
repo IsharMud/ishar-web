@@ -102,9 +102,9 @@
             </summary>
             <div class="bg-black m-3" id="upgrades">
                 <ol class="bg-black list-group list-group-horizontal-md list-group-numbered">
-                {% for upgraded in request.user.upgrades.all %}
-                    <li class="bg-dark border-secondary list-group-item list-group-item-text text-white" title="{{ upgraded.upgrade.name }}{% if upgraded.amount > 1 %} (x{{ upgraded.amount }}){% endif %}">
-                        {{ upgraded.upgrade.name }}{% if upgraded.amount > 1 %}<span class="text-ishar"> (<strong>x{{ upgraded.amount }}</strong>)</span>{% endif %}
+                {% for upgraded in player.upgrades.all %}
+                    <li class="bg-dark border-secondary list-group-item list-group-item-text text-white" title="{{ upgraded.upgrade.display_name }}{% if upgraded.value > 1 %} (x{{ upgraded.value }}){% endif %}">
+                        {{ upgraded.upgrade.display_name }}{% if upgraded.value > 1 %}<span class="text-ishar"> (<strong>x{{ upgraded.value }}</strong>)</span>{% endif %}
                     </li>
                 {% endfor %}
                 </ol>
