@@ -111,6 +111,7 @@ INSTALLED_APPS = [
     "ishar.apps.challenges",
     "ishar.apps.classes",
     "ishar.apps.clients",
+    "ishar.apps.discord",
     "ishar.apps.events",
     "ishar.apps.faqs",
     "ishar.apps.help",

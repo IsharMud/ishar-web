@@ -14,6 +14,7 @@ urlpatterns = [
     path("areas/", WorldView.as_view(), name="areas"),
     path("challenges/", include("ishar.apps.challenges.urls"), name="challenges"),
     path("clients/", include("ishar.apps.clients.urls"), name="clients"),
+    path("discord/", include("ishar.apps.discord.urls"), name="discord"),
     path("events/", include("ishar.apps.events.urls"), name="events"),
     path("faq/", include("ishar.apps.faqs.urls"), name="faq"),
     path("help/", include("ishar.apps.help.urls"), name="help"),

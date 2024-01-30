@@ -23,20 +23,10 @@ urlpatterns = [
     # Django-Ninja.
     path("api/", api.urls, name="api"),
 
-    #
-    # Redirects.
-    #
-
-    # Connect via web client.
+    # Redirect to web client.
     path(
         "connect/", RedirectView.as_view(url=settings.CONNECT_URL),
         name="connect"
-    ),
-
-    # Discord invitation.
-    path(
-        "discord/", RedirectView.as_view(url=settings.DISCORD['URL']),
-        name="discord"
     ),
 ]
 

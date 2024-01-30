@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+{% block meta_title %}Interactions{% endblock meta_title %}
+{% block meta_description %}Discord interactions.{% endblock meta_description %}
+{% block meta_url %}{% url "interactions" %}{% endblock meta_url %}
+{% block title %}Interactions{% endblock title %}
+{% block header %}
+    <span class="bi bi-terminal-split"></span>
+    <a href="{% url "interactions" %}" title="Interactions">
+        Interactions
+    </a>
+{% endblock header %}
+{% block content %}
+    <p class="lead">
+        This is a test.
+    </p>
+{% endblock content %}
