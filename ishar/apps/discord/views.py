@@ -1,7 +1,5 @@
-import json
-import os
-
 from django.conf import settings
+from django.core.exceptions import SuspiciousOperation
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import View
@@ -21,13 +19,12 @@ class InteractionsView(View):
 
     def post(self, request, *args, **kwargs):
 
-        print(vars(request))
-
-        code = 400
-        ret = ""
         body = request.body
         sig = request.headers.get("X-Signature-Ed25519")
         ts = request.headers.get("X-Signature-Timestamp")
+        if not sig or not ts:
+            raise SuspiciousOperation("Bad Signature.")
+
         vk = VerifyKey(bytes.fromhex(settings.DISCORD["PUBLIC_KEY"]))
 
         print("body:", body)
@@ -36,14 +33,9 @@ class InteractionsView(View):
         print("vk:", vk)
 
         try:
-            if vk.verify(f"{ts}{body}".encode(), bytes.fromhex(sig)):
-                code = 200
-                ret = "OK"
-        except (BadSignatureError,) as ex:
-            ret = ex
+            verify = vk.verify(f"{ts}{body}".encode(), bytes.fromhex(sig))
+            print("verify:", verify)
+            return JsonResponse(data={"body": "ok"}, status_code=200)
 
-        return JsonResponse(
-            data={"body": ret},
-            status=code,
-            status_code=code,
-        )
+        except (BadSignatureError,) as ex:
+            raise SuspiciousOperation("Bad Signature.") from ex
