@@ -1,5 +1,6 @@
 annotated-types==0.6.0
 asgiref==3.7.2
+cffi==1.16.0
 Django==5.0.1
 django-admin-interface==0.28.3
 django-colorfield==0.11.0
@@ -8,9 +9,11 @@ gunicorn==21.2.0
 packaging==23.2
 passlib==1.7.4
 pillow==10.2.0
+pycparser==2.21
 pydantic==2.5.3
 pydantic_core==2.14.6
 PyMySQL==1.1.0
+PyNaCl==1.5.0
 python-slugify==8.0.1
 sqlparse==0.4.4
 text-unidecode==1.3

@@ -1,6 +1,12 @@
+import json
+import os
+
+from django.conf import settings
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import View
+from nacl.signing import VerifyKey
+from nacl.exceptions import BadSignatureError
 
 
 class InteractionsView(View):
@@ -17,19 +23,27 @@ class InteractionsView(View):
 
         print(vars(request))
 
-        signature = request.headers.get("X-Signature-Ed25519")
-        timestamp = request.headers.get("X-Signature-Timestamp")
+        code = 400
+        ret = ""
+        body = request.body
+        sig = request.headers.get("X-Signature-Ed25519")
+        ts = request.headers.get("X-Signature-Timestamp")
+        vk = VerifyKey(bytes.fromhex(settings.DISCORD["PUBLIC_KEY"]))
 
-        print("Signature:", signature)
-        print("Timestamp:", timestamp)
-        print("kwargs:", kwargs)
+        print("body:", body)
+        print("sig:", sig)
+        print("ts:", ts)
+        print("vk:", vk)
 
-        if kwargs:
-            for kwarg in kwargs:
-                print("kwarg:", vars(kwarg))
+        try:
+            if vk.verify(f"{ts}{body}".encode(), bytes.fromhex(sig)):
+                code = 200
+                ret = "OK"
+        except (BadSignatureError,) as ex:
+            ret = ex
 
         return JsonResponse(
-            {
-                "ping": "pong"
-            }
+            data={"body": ret},
+            status=code,
+            status_code=code,
         )
