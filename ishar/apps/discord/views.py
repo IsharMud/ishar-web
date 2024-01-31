@@ -1,3 +1,4 @@
+import json
 from django.conf import settings
 from django.core.exceptions import SuspiciousOperation
 from django.http import JsonResponse
@@ -20,24 +21,29 @@ class InteractionsView(View):
     def post(self, request, *args, **kwargs):
 
         body = request.body
-        discord_public_key = settings.DISCORD["PUBLIC_KEY"]
-        sig = request.headers.get("X-Signature-Ed25519")
-        ts = request.headers.get("X-Signature-Timestamp")
-        if not sig or not ts:
-            raise SuspiciousOperation("Bad Signature.")
+        signature = request.headers.get("X-Signature-Ed25519")
+        timestamp = request.headers.get("X-Signature-Timestamp")
+        if not signature or not timestamp:
+            raise SuspiciousOperation("Missing signature.")
 
-        print('discord_public_key:', discord_public_key)
         print("body:", body)
-        print("sig:", sig)
-        print("ts:", ts)
 
-        vk = VerifyKey(bytes.fromhex(discord_public_key))
-        print("vk:", vk)
+        json_body = json.loads(body)
+        print("json_body:", json_body)
+
+        in_type = json_body["type"]
+        print("in_type:", in_type)
+
+        print("signature:", signature)
+        print("timestamp:", timestamp)
+
+        verify = VerifyKey(bytes.fromhex(settings.DISCORD["PUBLIC_KEY"]))
+        string = f"{timestamp}{body}".encode()
 
         try:
-            verify = vk.verify(f"{ts}{body}".encode(), bytes.fromhex(sig))
+            verify = verify.verify(string, bytes.fromhex(signature))
             print("verify:", verify)
             return JsonResponse(data={"body": "ok"}, status_code=200)
 
         except (BadSignatureError,) as ex:
-            raise SuspiciousOperation("Bad Signature.") from ex
+            raise SuspiciousOperation("Bad signature.") from ex
