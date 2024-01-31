@@ -1,29 +1,27 @@
-from django.views.generic.base import TemplateView
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.generic.base import View
 
 
-class InteractionsView(TemplateView):
+class InteractionsView(View):
     """
     Interactions view.
     """
-    template_name = "interactions.html"
-    http_method_names = ("get", "post")
-    status = 200
+    http_method_names = ("post",)
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
-
+    @csrf_exempt
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 
-    def get(self, request, *args, **kwargs):
-        return self.render_to_response(
-            context=self.get_context_data(**kwargs),
-            status=self.status
-        )
+    @staticmethod
+    def post(request, *args, **kwargs):
+        print(vars(request))
+        if kwargs:
+            for kwarg in kwargs:
+                print(vars(kwarg))
 
-    def post(self, request, *args, **kwargs):
-        return self.render_to_response(
-            context=self.get_context_data(**kwargs),
-            status=self.status
+        return JsonResponse(
+            {
+                "ping": "pong"
+            }
         )
