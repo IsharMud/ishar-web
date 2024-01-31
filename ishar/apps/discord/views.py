@@ -13,12 +13,20 @@ class InteractionsView(View):
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 
-    @staticmethod
-    def post(request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
+
         print(vars(request))
+
+        signature = request.headers.get("X-Signature-Ed25519")
+        timestamp = request.headers.get("X-Signature-Timestamp")
+
+        print("Signature:", signature)
+        print("Timestamp:", timestamp)
+        print("kwargs:", kwargs)
+
         if kwargs:
             for kwarg in kwargs:
-                print(vars(kwarg))
+                print("kwarg:", vars(kwarg))
 
         return JsonResponse(
             {
