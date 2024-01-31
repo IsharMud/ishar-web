@@ -90,6 +90,13 @@ class Quest(models.Model):
         help_text="Return for the quest.",
         verbose_name="Quest Return"
     )
+    start_item = models.IntegerField(
+        blank=True,
+        default=0,
+        null=True,
+        help_text="Start item for the quest.",
+        verbose_name="Start Item"
+    )
 
     class Meta:
         db_table = "quests"
@@ -267,6 +274,12 @@ class QuestStep(models.Model):
         max_length=80,
         help_text="Mystify text for the quest step.",
         verbose_name="Mystify Text"
+    )
+    auto_complete = models.BooleanField(
+        blank=True,
+        default=False,
+        null=True,
+        help_text="Boolean whether the quest step is automatically completed."
     )
 
     class Meta:

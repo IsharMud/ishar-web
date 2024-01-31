@@ -197,7 +197,8 @@ class QuestsAdmin(ModelAdmin):
         ("Messages", {"fields": (
             "description", "quest_intro", "completion_message"
         )}),
-        ("Mobiles", {"fields": ("quest_source", "quest_return")})
+        ("Mobiles", {"fields": ("quest_source", "quest_return")}),
+        ("Items", {"fields": ("start_item",)}),
     )
     inlines = (
         QuestPrereqsAdminInline, QuestStepsAdminInline, QuestRewardsAdminInline
