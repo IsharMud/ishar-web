@@ -8,7 +8,7 @@ from django.views.generic.base import View
 from nacl.signing import VerifyKey
 from nacl.exceptions import BadSignatureError
 
-from apps.seasons.models import Season
+from ishar.apps.seasons.models import Season
 
 
 class InteractionsView(View):
