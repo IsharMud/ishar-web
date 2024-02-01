@@ -78,7 +78,8 @@ class InteractionsView(View):
                     "type": 4,
                     "data": {
                         "content": (
-                            "The player who has died most is %s - %i times!" % (
+                            "The player who has died most is "
+                            "%s :skull_crossbones: %i times!" % (
                                 dead_head.name,
                                 dead_head.deaths
                             )
