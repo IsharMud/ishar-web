@@ -110,6 +110,10 @@ class InteractionsView(View):
 
                 return self.respond("Sorry - no events right now.")
 
+            # "mudtime" command to show server (UTC) time.
+            if command_name == "mudtime":
+                return now().strftime("%c :clock: %Z")
+
             # "Season" command - shows season number and expiration.
             if command_name == "season":
                 season = Season.objects.filter(is_active=1).first()

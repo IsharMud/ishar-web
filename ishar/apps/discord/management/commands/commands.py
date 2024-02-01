@@ -53,6 +53,11 @@ class Command(BaseCommand):
             },
             {
                 "type": 1,
+                "name": "mudtime",
+                "description": "Show current server time.",
+            },
+            {
+                "type": 1,
                 "name": "season",
                 "description": "Show the current season.",
             },
