@@ -112,7 +112,7 @@ class InteractionsView(View):
 
             # "mudtime" command to show server (UTC) time.
             if command_name == "mudtime":
-                return now().strftime("%c :clock: %Z")
+                return self.respond(now().strftime("%c :clock: %Z"))
 
             # "Season" command - shows season number and expiration.
             if command_name == "season":
