@@ -498,18 +498,12 @@ class Player(models.Model):
     def seasonal_earned(self) -> int:
         """Amount of essence earned for the player."""
 
-        # Immortal players do not earn essence
+        # Immortal players do not earn essence.
         if self.is_immortal() is True:
             return 0
 
-        # Survival players earn less essence from renown
-        divisor = 10
-        if self.is_survival() is True:
-            divisor = 20
-
-        # Start with two (2) points for existing,
-        #   with renown/remort equation
-        earned = int(self.total_renown / divisor) + 2
+        # Start with two (2) points for existing, with renown/remort equation.
+        earned = int(self.total_renown / 10) + 2
         if self.remorts > 0:
             earned += int(self.remorts / 5) * 3 + 1
         return earned
