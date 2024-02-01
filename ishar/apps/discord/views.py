@@ -2,11 +2,13 @@ import json
 import logging
 from django.conf import settings
 from django.http import JsonResponse
+from django.utils.timesince import timesince
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import View
 from nacl.signing import VerifyKey
 from nacl.exceptions import BadSignatureError
-from pprint import pformat
+
+from apps.seasons.models import Season
 
 
 class InteractionsView(View):
@@ -51,8 +53,16 @@ class InteractionsView(View):
         if interaction_type == 2:
             interaction_data = interaction_body.get("data")
             if interaction_data.get("name") == "season":
+                current_season = Season.objects.filter(is_active=1).first()
                 logging.info("Season command.")
                 return JsonResponse({
                     "type": 4,
-                    "data": {"content": "Congrats on sending your command!"},
+                    "data": {
+                        "content": (
+                            "It is currently season %i, which ends in %s." % (
+                                current_season.season_id,
+                                timesince(current_season.expiration_date)
+                            )
+                        )
+                    },
                 })
