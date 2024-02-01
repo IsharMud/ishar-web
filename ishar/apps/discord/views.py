@@ -23,26 +23,19 @@ class InteractionsView(View):
 
         verify_key = VerifyKey(bytes.fromhex(settings.DISCORD["PUBLIC_KEY"]))
 
-        signature = request.headers["X-Signature-Ed25519"]
-        logging.info(signature)
-
-        timestamp = request.headers["X-Signature-Timestamp"]
-        logging.info(timestamp)
-
+        signature = request.headers.get("X-Signature-Ed25519")
+        timestamp = request.headers.get("X-Signature-Timestamp")
         body = request.body.decode("utf-8")
-        logging.info(body)
 
         if not signature or not timestamp or not body:
-            msg = "Missing signature"
-            logging.info(msg)
-            raise SuspiciousOperation(msg)
+            logging.info("Missing signature.")
+            return JsonResponse(data={"error": "Invalid request."}, status=400)
 
         try:
-            verify_key.verify(
-                f"{timestamp}{body}".encode(),
-                bytes.fromhex(signature)
-            )
-            logging.info("KEY OK")
+            string = f"{timestamp}{body}".encode()
+            verify_key.verify(string, bytes.fromhex(signature))
+            logging.info("KEY OK.")
+            logging.debug(body)
             return JsonResponse({"type": 1})
 
         except BadSignatureError as bad_sig:
