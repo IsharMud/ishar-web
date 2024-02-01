@@ -41,6 +41,8 @@ class InteractionsView(View):
             logging.info(f"{timestamp} KEY OK.")
             logging.info(body)
             logging.info(pformat(json.loads(body)))
+            logging.info(pformat(json.loads(body.get("data"))))
+
             return JsonResponse({"type": 1})
 
         except BadSignatureError as bad_sig:
