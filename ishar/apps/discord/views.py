@@ -8,6 +8,7 @@ from django.views.generic.base import View
 from nacl.signing import VerifyKey
 from nacl.exceptions import BadSignatureError
 
+from ishar.apps.players.models import Player
 from ishar.apps.seasons.models import Season
 
 
@@ -63,6 +64,21 @@ class InteractionsView(View):
                                 current_season.season_id,
                                 timeuntil(current_season.expiration_date),
                                 current_season.expiration_date.strftime("%c")
+                            )
+                        )
+                    },
+                })
+
+            if interaction_data.get("name") == "deadhead":
+                dead_head = Player.objects.order_by("-deaths").first()
+                logging.info("Deadhead command: %s" % (dead_head,))
+                return JsonResponse({
+                    "type": 4,
+                    "data": {
+                        "content": (
+                            "The player who has died most is %s - %i times!" % (
+                                dead_head.name,
+                                dead_head.deaths
                             )
                         )
                     },

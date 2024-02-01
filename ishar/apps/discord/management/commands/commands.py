@@ -40,11 +40,18 @@ class Command(BaseCommand):
             )
         )
 
-        all_commands = [{
-            "type": 1,
-            "name": "season",
-            "description": "Show the current Ishar MUD season.",
-        }]
+        all_commands = [
+            {
+                "type": 1,
+                "name": "season",
+                "description": "Show the current season.",
+            },
+            {
+                "type": 1,
+                "name": "deadhead",
+                "description": "Show the player with the most deaths.",
+            },
+        ]
 
         reg = requests.put(
             url=discord_url, headers=discord_headers, json=all_commands
