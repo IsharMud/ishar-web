@@ -1,4 +1,5 @@
 import json
+import logging
 from django.conf import settings
 from django.core.exceptions import SuspiciousOperation
 from django.http import JsonResponse
@@ -23,20 +24,27 @@ class InteractionsView(View):
         verify_key = VerifyKey(bytes.fromhex(settings.DISCORD["PUBLIC_KEY"]))
 
         signature = request.headers["X-Signature-Ed25519"]
+        logging.info(signature)
+
         timestamp = request.headers["X-Signature-Timestamp"]
+        logging.info(timestamp)
+
         body = request.body.decode("utf-8")
+        logging.info(body)
 
         if not signature or not timestamp or not body:
-            raise SuspiciousOperation("Missing signature.")
+            msg = "Missing signature"
+            logging.info(msg)
+            raise SuspiciousOperation(msg)
 
         try:
             verify_key.verify(
-                f'{timestamp}{body}'.encode(), bytes.fromhex(signature)
+                f"{timestamp}{body}".encode(),
+                bytes.fromhex(signature)
             )
+            logging.info("KEY OK")
             return JsonResponse({"type": 1})
 
-        except BadSignatureError:
-            return JsonResponse(
-                data={"error": "Invalid request method"},
-                status=405
-            )
+        except BadSignatureError as bad_sig:
+            logging.exception(bad_sig)
+            return JsonResponse(data={"error": "Invalid request."}, status=400)

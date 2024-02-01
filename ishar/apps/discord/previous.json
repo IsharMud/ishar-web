@@ -1,0 +1,168 @@
+[
+  {
+    "id": "1017543947414945801",
+    "application_id": "1017453251060314162",
+    "version": "1075831848678211607",
+    "default_member_permissions": "2147483648",
+    "type": 1,
+    "name": "season",
+    "description": "Show the current Ishar MUD season",
+    "guild_id": "636680767921061909",
+    "nsfw": false
+  },
+  {
+    "id": "1017559754052210781",
+    "application_id": "1017453251060314162",
+    "version": "1075831848678211608",
+    "default_member_permissions": "2147483648",
+    "type": 1,
+    "name": "challenges",
+    "description": "Find Ishar MUD challenge(s)",
+    "guild_id": "636680767921061909",
+    "options": [
+      {
+        "type": 3,
+        "name": "search",
+        "description": "name of a mob to search challenges"
+      }
+    ],
+    "nsfw": false
+  },
+  {
+    "id": "1043688451800834129",
+    "application_id": "1017453251060314162",
+    "version": "1075831848678211609",
+    "default_member_permissions": "2147483648",
+    "type": 1,
+    "name": "deadhead",
+    "description": "Show the player with the most in-game deaths",
+    "guild_id": "636680767921061909",
+    "nsfw": false
+  },
+  {
+    "id": "1050206476330860604",
+    "application_id": "1017453251060314162",
+    "version": "1075831848678211610",
+    "default_member_permissions": "2147483648",
+    "type": 1,
+    "name": "mudhelp",
+    "description": "Find Ishar MUD help topic",
+    "guild_id": "636680767921061909",
+    "options": [
+      {
+        "type": 3,
+        "name": "search",
+        "description": "title of a help topic to search for",
+        "required": true
+      }
+    ],
+    "nsfw": false
+  },
+  {
+    "id": "1050213634694971413",
+    "application_id": "1017453251060314162",
+    "version": "1075831848678211611",
+    "default_member_permissions": "2147483648",
+    "type": 1,
+    "name": "faq",
+    "description": "Link to the Frequently Asked Questions page",
+    "guild_id": "636680767921061909",
+    "nsfw": false
+  },
+  {
+    "id": "1050214457147670639",
+    "application_id": "1017453251060314162",
+    "version": "1075831848678211612",
+    "default_member_permissions": "2147483648",
+    "type": 1,
+    "name": "faqs",
+    "description": "Link to the Frequently Asked Questions page",
+    "guild_id": "636680767921061909",
+    "nsfw": false
+  },
+  {
+    "id": "1050214457147670640",
+    "application_id": "1017453251060314162",
+    "version": "1075831848678211613",
+    "default_member_permissions": "2147483648",
+    "type": 1,
+    "name": "get_started",
+    "description": "Link to the Getting Started page",
+    "guild_id": "636680767921061909",
+    "nsfw": false
+  },
+  {
+    "id": "1050214457147670641",
+    "application_id": "1017453251060314162",
+    "version": "1075831848678211614",
+    "default_member_permissions": "2147483648",
+    "type": 1,
+    "name": "getstarted",
+    "description": "Link to the Getting Started page",
+    "guild_id": "636680767921061909",
+    "nsfw": false
+  },
+  {
+    "id": "1050454503327023125",
+    "application_id": "1017453251060314162",
+    "version": "1075831848678211615",
+    "default_member_permissions": "2147483648",
+    "type": 1,
+    "name": "spell",
+    "description": "Find Ishar MUD spell help",
+    "guild_id": "636680767921061909",
+    "options": [
+      {
+        "type": 3,
+        "name": "search",
+        "description": "name of a spell to search for",
+        "required": true
+      }
+    ],
+    "nsfw": false
+  },
+  {
+    "id": "1052356283254181918",
+    "application_id": "1017453251060314162",
+    "version": "1075831848678211616",
+    "default_member_permissions": "2147483648",
+    "type": 1,
+    "name": "events",
+    "description": "Show any global events",
+    "guild_id": "636680767921061909",
+    "nsfw": false
+  },
+  {
+    "id": "1052731233110605864",
+    "application_id": "1017453251060314162",
+    "version": "1075831848720158770",
+    "default_member_permissions": "2147483648",
+    "type": 1,
+    "name": "uptime",
+    "description": "Show the MUD process uptime",
+    "guild_id": "636680767921061909",
+    "nsfw": false
+  },
+  {
+    "id": "1054925744280711198",
+    "application_id": "1017453251060314162",
+    "version": "1075831848720158771",
+    "default_member_permissions": "2147483648",
+    "type": 1,
+    "name": "mudtime",
+    "description": "Show the MUD server time",
+    "guild_id": "636680767921061909",
+    "nsfw": false
+  },
+  {
+    "id": "1057519281119694939",
+    "application_id": "1017453251060314162",
+    "version": "1057519281119694940",
+    "default_member_permissions": "2147483648",
+    "type": 1,
+    "name": "connections",
+    "description": "Show the MUD process connections",
+    "guild_id": "636680767921061909",
+    "nsfw": false
+  }
+]
