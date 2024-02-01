@@ -2,7 +2,7 @@ import json
 import logging
 from django.conf import settings
 from django.http import JsonResponse
-from django.utils.timesince import timesince
+from django.utils.timesince import timeuntil
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import View
 from nacl.signing import VerifyKey
@@ -59,9 +59,10 @@ class InteractionsView(View):
                     "type": 4,
                     "data": {
                         "content": (
-                            "It is currently season %i, which ends in %s." % (
+                            "It is season %i, which ends in %s at %s." % (
                                 current_season.season_id,
-                                timesince(current_season.expiration_date)
+                                timeuntil(current_season.expiration_date),
+                                current_season.expiration_date.strftime("%c")
                             )
                         )
                     },
