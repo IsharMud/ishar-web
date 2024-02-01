@@ -62,7 +62,7 @@ class InteractionsView(View):
                             "It is season %i :hourglass_flowing_sand:" % (
                                 season.season_id
                             ),
-                            ", which ends in %s at %s." % (
+                            " which ends in %s at %s." % (
                                 timeuntil(season.expiration_date),
                                 season.expiration_date.strftime("%c %Z")
                             )
