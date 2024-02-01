@@ -41,8 +41,8 @@ class InteractionsView(View):
             logging.info(f"{timestamp} KEY OK.")
             logging.info(body)
             logging.info(pformat(json.loads(body)))
-            logging.info(pformat(json.loads(body.get('type'))))
-            logging.info(pformat(json.loads(body.get("data"))))
+            logging.info(pformat(json.loads(body).get('type')))
+            logging.info(pformat(json.loads(body).get("data")))
 
             return JsonResponse({"type": 1})
 
