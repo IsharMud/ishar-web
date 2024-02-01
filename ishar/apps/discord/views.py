@@ -70,7 +70,9 @@ class InteractionsView(View):
                 })
 
             if interaction_data.get("name") == "deadhead":
-                dead_head = Player.objects.order_by("-deaths").first()
+                dead_head = Player.objects.filter(
+                    true_level__lt=min(settings.IMMORTAL_LEVELS)[0],
+                ).order_by("-deaths").first()
                 logging.info("Deadhead command: %s" % (dead_head,))
                 return JsonResponse({
                     "type": 4,
