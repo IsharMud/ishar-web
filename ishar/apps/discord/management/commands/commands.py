@@ -43,13 +43,18 @@ class Command(BaseCommand):
         all_commands = [
             {
                 "type": 1,
-                "name": "season",
-                "description": "Show the current season.",
+                "name": "deadhead",
+                "description": "Show the player with the most deaths.",
             },
             {
                 "type": 1,
-                "name": "deadhead",
-                "description": "Show the player with the most deaths.",
+                "name": "events",
+                "description": "Show any active events.",
+            },
+            {
+                "type": 1,
+                "name": "season",
+                "description": "Show the current season.",
             },
         ]
 

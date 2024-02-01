@@ -1,16 +1,5 @@
 [
   {
-    "id": "1017543947414945801",
-    "application_id": "1017453251060314162",
-    "version": "1075831848678211607",
-    "default_member_permissions": "2147483648",
-    "type": 1,
-    "name": "season",
-    "description": "Show the current Ishar MUD season",
-    "guild_id": "636680767921061909",
-    "nsfw": false
-  },
-  {
     "id": "1017559754052210781",
     "application_id": "1017453251060314162",
     "version": "1075831848678211608",
@@ -26,17 +15,6 @@
         "description": "name of a mob to search challenges"
       }
     ],
-    "nsfw": false
-  },
-  {
-    "id": "1043688451800834129",
-    "application_id": "1017453251060314162",
-    "version": "1075831848678211609",
-    "default_member_permissions": "2147483648",
-    "type": 1,
-    "name": "deadhead",
-    "description": "Show the player with the most in-game deaths",
-    "guild_id": "636680767921061909",
     "nsfw": false
   },
   {
@@ -119,17 +97,6 @@
         "required": true
       }
     ],
-    "nsfw": false
-  },
-  {
-    "id": "1052356283254181918",
-    "application_id": "1017453251060314162",
-    "version": "1075831848678211616",
-    "default_member_permissions": "2147483648",
-    "type": 1,
-    "name": "events",
-    "description": "Show any global events",
-    "guild_id": "636680767921061909",
     "nsfw": false
   },
   {
