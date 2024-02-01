@@ -3,7 +3,6 @@ import logging
 from django.conf import settings
 from django.http import JsonResponse
 from django.utils.timesince import timeuntil
-from django.utils.timezone import localtime
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import View
 from nacl.signing import VerifyKey
@@ -77,11 +76,10 @@ class InteractionsView(View):
                 season = Season.objects.filter(is_active=1).first()
                 return self.respond(
                     "It is season %i :hourglass_flowing_sand: "
-                    "which ends in %s at %s (%s)." % (
+                    "which ends in %s at %s." % (
                         season.season_id,
                         timeuntil(season.expiration_date),
-                        season.expiration_date.strftime("%c %Z"),
-                        localtime(season.expiration_date).strftime("%c %Z")
+                        season.expiration_date.strftime("%c %Z")
                     )
                 )
 
