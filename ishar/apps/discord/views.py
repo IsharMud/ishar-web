@@ -35,7 +35,7 @@ class InteractionsView(View):
             string = f"{timestamp}{body}".encode()
             verify_key.verify(string, bytes.fromhex(signature))
             logging.info("KEY OK.")
-            logging.debug(body)
+            logging.info(body)
             return JsonResponse({"type": 1})
 
         except BadSignatureError as bad_sig:
