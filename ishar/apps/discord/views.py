@@ -3,6 +3,7 @@ import logging
 from django.conf import settings
 from django.http import JsonResponse
 from django.utils.timesince import timeuntil
+from django.utils.timezone import localtime
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import View
 from nacl.signing import VerifyKey
@@ -22,10 +23,30 @@ class InteractionsView(View):
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 
-    @staticmethod
-    def error(message="Invalid request.", status=400) -> JsonResponse:
+    def error(self, message="Invalid request.", status=400) -> JsonResponse:
         logging.error("%s (%s)" % (message, status))
-        return JsonResponse(data={"error": message}, status=status)
+        return JsonResponse(
+            data={
+                "error": message
+            },
+            status=status
+        )
+
+    def respond(self, message=None, msg_type=4, status=200) -> JsonResponse:
+        if message is not None:
+            return JsonResponse(
+                data={
+                    "type": msg_type,
+                    "data": {
+                        "content": message
+                    }
+                },
+                status=status
+            )
+        return self.error()
+
+    def pong(self) -> JsonResponse:
+        return JsonResponse({"type": 1})
 
     def post(self, request, *args, **kwargs) -> JsonResponse:
         verify_key = VerifyKey(bytes.fromhex(settings.DISCORD["PUBLIC_KEY"]))
@@ -39,7 +60,6 @@ class InteractionsView(View):
         try:
             string = f"{timestamp}{body}".encode()
             verify_key.verify(string, bytes.fromhex(signature))
-
         except BadSignatureError as bad_sig:
             logging.exception(bad_sig)
             return self.error("Invalid signature.")
@@ -48,40 +68,31 @@ class InteractionsView(View):
         interaction_type = interaction_body.get("type")
 
         if interaction_type == 1:
-            logging.info("PING: OK!")
-            return JsonResponse({"type": 1})
+            return self.pong()
 
         if interaction_type == 2:
             interaction_data = interaction_body.get("data")
+
             if interaction_data.get("name") == "season":
                 season = Season.objects.filter(is_active=1).first()
-                return JsonResponse({
-                    "type": 4,
-                    "data": {
-                        "content": (
-                            "It is season %i :hourglass_flowing_sand: "
-                            "which ends in %s at %s." % (
-                                season.season_id,
-                                timeuntil(season.expiration_date),
-                                season.expiration_date.strftime("%c %Z")
-                            )
-                        )
-                    },
-                })
+                return self.respond(
+                    "It is season %i :hourglass_flowing_sand: "
+                    "which ends in %s at %s (%s)." % (
+                        season.season_id,
+                        timeuntil(season.expiration_date),
+                        season.expiration_date.strftime("%c %Z"),
+                        localtime(season.expiration_date).strftime("%c %Z")
+                    )
+                )
 
             if interaction_data.get("name") == "deadhead":
                 dead_head = Player.objects.filter(
                     true_level__lt=min(settings.IMMORTAL_LEVELS)[0],
                 ).order_by("-deaths").first()
-                return JsonResponse({
-                    "type": 4,
-                    "data": {
-                        "content": (
-                            "The player who has died most is "
-                            "%s :skull_crossbones: %i times!" % (
-                                dead_head.name,
-                                dead_head.deaths
-                            )
-                        )
-                    },
-                })
+                return self.respond(
+                    "The player who has died most is "
+                    "%s :skull_crossbones: %i times!" % (
+                        dead_head.name,
+                        dead_head.deaths
+                    )
+                )
