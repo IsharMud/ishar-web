@@ -59,10 +59,9 @@ class InteractionsView(View):
                     "type": 4,
                     "data": {
                         "content": (
-                            "It is season %i :hourglass_flowing_sand:" % (
-                                season.season_id
-                            ),
-                            " which ends in %s at %s." % (
+                            "It is season %i :hourglass_flowing_sand: "
+                            "which ends in %s at %s." % (
+                                season.season_id,
                                 timeuntil(season.expiration_date),
                                 season.expiration_date.strftime("%c %Z")
                             )
