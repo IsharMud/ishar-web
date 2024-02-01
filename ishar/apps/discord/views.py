@@ -75,8 +75,8 @@ class InteractionsView(View):
             if interaction_data.get("name") == "season":
                 season = Season.objects.filter(is_active=1).first()
                 return self.respond(
-                    "It is season %i :hourglass_flowing_sand: "
-                    "which ends in %s at %s." % (
+                    "Season %i :hourglass_flowing_sand: "
+                    "ends %s :alarm_clock: %s." % (
                         season.season_id,
                         timeuntil(season.expiration_date),
                         season.expiration_date.strftime("%c %Z")
@@ -88,7 +88,6 @@ class InteractionsView(View):
                     true_level__lt=min(settings.IMMORTAL_LEVELS)[0],
                 ).order_by("-deaths").first()
                 return self.respond(
-                    "The player who has died most is "
                     "%s :skull_crossbones: %i times!" % (
                         dead_head.name,
                         dead_head.deaths
