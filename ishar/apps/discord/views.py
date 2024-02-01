@@ -1,3 +1,4 @@
+import json
 import logging
 from django.conf import settings
 from django.http import JsonResponse
@@ -39,7 +40,7 @@ class InteractionsView(View):
             verify_key.verify(string, bytes.fromhex(signature))
             logging.info(f"{timestamp} KEY OK.")
             logging.info(body)
-            logging.info(pformat(body))
+            logging.info(pformat(json.loads(body)))
             return JsonResponse({"type": 1})
 
         except BadSignatureError as bad_sig:
