@@ -54,5 +54,5 @@ class InteractionsView(View):
                 logging.info("Season command.")
                 return JsonResponse({
                     "type": 4,
-                    "content": "Congrats on sending your command!"
+                    "data": {"content": "Congrats on sending your command!"},
                 })
