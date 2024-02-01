@@ -54,16 +54,17 @@ class InteractionsView(View):
         if interaction_type == 2:
             interaction_data = interaction_body.get("data")
             if interaction_data.get("name") == "season":
-                current_season = Season.objects.filter(is_active=1).first()
-                logging.info("Season command.")
+                season = Season.objects.filter(is_active=1).first()
                 return JsonResponse({
                     "type": 4,
                     "data": {
                         "content": (
-                            "It is season %i, which ends in %s at %s." % (
-                                current_season.season_id,
-                                timeuntil(current_season.expiration_date),
-                                current_season.expiration_date.strftime("%c")
+                            "It is season %i :hourglass_flowing_sand:" % (
+                                season.season_id
+                            ),
+                            ", which ends in %s at %s." % (
+                                timeuntil(season.expiration_date),
+                                season.expiration_date.strftime("%c %Z")
                             )
                         )
                     },
@@ -73,7 +74,6 @@ class InteractionsView(View):
                 dead_head = Player.objects.filter(
                     true_level__lt=min(settings.IMMORTAL_LEVELS)[0],
                 ).order_by("-deaths").first()
-                logging.info("Deadhead command: %s" % (dead_head,))
                 return JsonResponse({
                     "type": 4,
                     "data": {
