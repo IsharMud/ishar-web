@@ -20,30 +20,23 @@ class InteractionsView(View):
 
     def post(self, request, *args, **kwargs):
 
-        body = request.body
-        signature = request.headers.get("X-Signature-Ed25519")
-        timestamp = request.headers.get("X-Signature-Timestamp")
-        if not signature or not timestamp:
+        verify_key = VerifyKey(bytes.fromhex(settings.DISCORD["PUBLIC_KEY"]))
+
+        signature = request.headers["X-Signature-Ed25519"]
+        timestamp = request.headers["X-Signature-Timestamp"]
+        body = request.body.decode("utf-8")
+
+        if not signature or not timestamp or not body:
             raise SuspiciousOperation("Missing signature.")
 
-        print("body:", body)
-
-        json_body = json.loads(body)
-        print("json_body:", json_body)
-
-        in_type = json_body["type"]
-        print("in_type:", in_type)
-
-        print("signature:", signature)
-        print("timestamp:", timestamp)
-
-        verify = VerifyKey(bytes.fromhex(settings.DISCORD["PUBLIC_KEY"]))
-        string = f"{timestamp}{body}".encode()
-
         try:
-            verify = verify.verify(string, bytes.fromhex(signature))
-            print("verify:", verify)
-            return JsonResponse(data={"body": "ok"}, status_code=200)
+            verify_key.verify(
+                f'{timestamp}{body}'.encode(), bytes.fromhex(signature)
+            )
+            return JsonResponse({"type": 1})
 
-        except (BadSignatureError,) as ex:
-            raise SuspiciousOperation("Bad signature.") from ex
+        except BadSignatureError:
+            return JsonResponse(
+                data={"error": "Invalid request method"},
+                status=405
+            )
