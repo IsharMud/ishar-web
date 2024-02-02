@@ -118,7 +118,7 @@ class InteractionsView(View):
             if command_name == "faq":
                 return self.respond(
                     message="%s://%s%s" % (
-                        request.scheme, request.get_host, reverse("faq")
+                        request.scheme, request.get_host(), reverse("faq")
                     )
                 )
 
