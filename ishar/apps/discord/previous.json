@@ -37,28 +37,6 @@
     "nsfw": false
   },
   {
-    "id": "1050213634694971413",
-    "application_id": "1017453251060314162",
-    "version": "1075831848678211611",
-    "default_member_permissions": "2147483648",
-    "type": 1,
-    "name": "faq",
-    "description": "Link to the Frequently Asked Questions page",
-    "guild_id": "636680767921061909",
-    "nsfw": false
-  },
-  {
-    "id": "1050214457147670639",
-    "application_id": "1017453251060314162",
-    "version": "1075831848678211612",
-    "default_member_permissions": "2147483648",
-    "type": 1,
-    "name": "faqs",
-    "description": "Link to the Frequently Asked Questions page",
-    "guild_id": "636680767921061909",
-    "nsfw": false
-  },
-  {
     "id": "1050214457147670640",
     "application_id": "1017453251060314162",
     "version": "1075831848678211613",
@@ -107,17 +85,6 @@
     "type": 1,
     "name": "uptime",
     "description": "Show the MUD process uptime",
-    "guild_id": "636680767921061909",
-    "nsfw": false
-  },
-  {
-    "id": "1054925744280711198",
-    "application_id": "1017453251060314162",
-    "version": "1075831848720158771",
-    "default_member_permissions": "2147483648",
-    "type": 1,
-    "name": "mudtime",
-    "description": "Show the MUD server time",
     "guild_id": "636680767921061909",
     "nsfw": false
   },

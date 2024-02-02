@@ -113,6 +113,12 @@ class InteractionsView(View):
 
                 return self.respond("Sorry - no events right now.")
 
+            # "faq" command to link frequently asked questions.
+            if command_name == "faq":
+                return self.respond(
+                    message="%s/faq/" % (settings.DJANGO_ORIGINS[0])
+                )
+
             # "mudtime" command to show server (UTC) time.
             if command_name == "mudtime":
                 return self.respond(now().strftime("%c :clock: %Z"))

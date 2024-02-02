@@ -53,6 +53,11 @@ class Command(BaseCommand):
             },
             {
                 "type": 1,
+                "name": "faq",
+                "description": "Link to frequently asked questions (FAQs).",
+            },
+            {
+                "type": 1,
                 "name": "mudtime",
                 "description": "Show current server time.",
             },
