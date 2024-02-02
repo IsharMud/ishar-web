@@ -18,7 +18,7 @@ class InteractionsView(View):
     """
     Interactions view.
     """
-    http_method_names = ("post",)
+    http_method_names = ("get", "post")
 
     @csrf_exempt
     def dispatch(self, request, *args, **kwargs):
@@ -32,6 +32,9 @@ class InteractionsView(View):
             },
             status=status
         )
+
+    def get(self, *args, **kwargs) -> JsonResponse:
+        return self.error(message="Method not supported.", status=405)
 
     def respond(self, message=None, msg_type=4, status=200) -> JsonResponse:
         if message is not None:
