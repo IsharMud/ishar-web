@@ -116,7 +116,11 @@ class InteractionsView(View):
 
             # "faq" command to link frequently asked questions.
             if command_name == "faq":
-                return self.respond(message=reverse(viewname="faq"))
+                return self.respond(
+                    message="%s://%s%s" % (
+                        request.scheme, request.host, reverse("faq")
+                    )
+                )
 
             # "mudtime" command to show server (UTC) time.
             if command_name == "mudtime":
