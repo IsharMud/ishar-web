@@ -2,6 +2,7 @@ import json
 import logging
 from django.conf import settings
 from django.http import JsonResponse
+from django.urls import reverse
 from django.utils.timesince import timeuntil
 from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_exempt
@@ -115,9 +116,7 @@ class InteractionsView(View):
 
             # "faq" command to link frequently asked questions.
             if command_name == "faq":
-                return self.respond(
-                    message="%s/faq/" % (settings.DJANGO_ORIGINS[0])
-                )
+                return self.respond(message=reverse(viewname="faq"))
 
             # "mudtime" command to show server (UTC) time.
             if command_name == "mudtime":
