@@ -4,6 +4,7 @@
 !.github
 !.gitignore
 __pycache__
+*.log
 *.pyc
 settings.py
 gunicorn_configuration.py
@@ -11,3 +12,4 @@ venv
 /media/
 /static/
 /lib/
+/logs/

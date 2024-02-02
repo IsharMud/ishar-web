@@ -183,17 +183,67 @@ LOGOUT_URL = "/logout/"
 WEBSITE_TITLE = "Ishar MUD"
 
 # Logging
+LOGGING_DIR = "logs/"
+LOGGING_ROOT = Path(BASE_DIR, LOGGING_DIR)
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
-    "handlers": {
-        "console": {
-            "class": "logging.StreamHandler",
+    "filters": {
+        "require_debug_false": {
+            "()": "django.utils.log.RequireDebugFalse",
+        },
+        "require_debug_true": {
+            "()": "django.utils.log.RequireDebugTrue",
         },
     },
-    "root": {
-        "handlers": ["console"],
-        "level": "WARNING",
+    "formatters": {
+        "django.server": {
+            "()": "django.utils.log.ServerFormatter",
+            "format": "[{server_time}] {message}",
+            "style": "{",
+        }
+    },
+    "handlers": {
+        "console": {
+            "level": "INFO",
+            "class": "logging.StreamHandler",
+        },
+        "discord": {
+            "level": "INFO",
+            "filters": ["require_debug_false"],
+            "class": "logging.FileHandler",
+            "filename": Path(LOGGING_ROOT, "discord.log"),
+        },
+        "django.server": {
+            "level": "INFO",
+            "class": "logging.StreamHandler",
+            "formatter": "django.server",
+        },
+        "mail_admins": {
+            "level": "ERROR",
+            "filters": ["require_debug_false"],
+            "class": "django.utils.log.AdminEmailHandler",
+        },
+        "error_log": {
+            "level": "ERROR",
+            "class": "logging.FileHandler",
+            "filename": Path(LOGGING_ROOT, "errors.log"),
+        },
+    },
+    "loggers": {
+        "discord": {
+            "handlers": ["console", "discord"],
+            "level": "INFO",
+        },
+        "django": {
+            "handlers": ["console", "mail_admins", "error_log"],
+            "level": "INFO",
+        },
+        "django.server": {
+            "handlers": ["django.server"],
+            "level": "INFO",
+            "propagate": False,
+        },
     },
 }
 
@@ -210,10 +260,8 @@ PATCHES_URL = "patches/"
 DISCORD = {
     "APPLICATION_ID": "EXAMPLE",
     "GUILD": "EXAMPLE",
-    "PUBLIC_KEY":
-    "EXAMPLE",
-    "TOKEN":
-    "SECRET",
+    "PUBLIC_KEY": "EXAMPLE",
+    "TOKEN": "SECRET",
     "URL": "https://discord.com/invite/VBmMXUpeve"
 }
 
