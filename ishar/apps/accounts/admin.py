@@ -194,9 +194,8 @@ class AccountsAdmin(UserAdmin):
     def last_ip(self, obj) -> str:
         return obj.get_last_ip()
 
-
     def has_add_permission(self, request) -> bool:
-        return self.has_module_permission(request)
+        return False
 
     def has_delete_permission(self, request, obj=None) -> bool:
         return False

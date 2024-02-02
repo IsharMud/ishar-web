@@ -184,7 +184,7 @@ WEBSITE_TITLE = "Ishar MUD"
 
 # Logging
 LOGGING_DIR = "logs/"
-LOGGING_ROOT = Path(BASE_DIR, LOGGING_DIR)
+LOGGING_ROOT = Path(BASE_DIR.parent, LOGGING_DIR)
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
