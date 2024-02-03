@@ -15,7 +15,7 @@ def slash(interaction_json, request):
 
     # "events" command - any active events and when they expire.
     if command_name == "events":
-        return events()
+        return events(request)
 
     # "faq" command to link frequently asked questions.
     if command_name == "faq":
@@ -27,7 +27,7 @@ def slash(interaction_json, request):
 
     # "season" command - shows season number and expiration.
     if command_name == "season":
-        return season()
+        return season(request)
 
     # Raise UnknownCommandException as last resort.
     raise UnknownCommandException
