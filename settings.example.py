@@ -182,7 +182,7 @@ LOGOUT_URL = "/logout/"
 # Website title.
 WEBSITE_TITLE = "Ishar MUD"
 
-# Logging
+# Logging.
 LOGGING_DIR = "logs/"
 LOGGING_ROOT = Path(BASE_DIR.parent, LOGGING_DIR)
 LOGGING = {
@@ -197,6 +197,13 @@ LOGGING = {
         },
     },
     "formatters": {
+        "verbose": {
+            "format": (
+                "{asctime} [{levelname}] {module} {process:d} ({thread:d}):"
+                " {message}"
+            ),
+            "style": "{",
+        },
         "django.server": {
             "()": "django.utils.log.ServerFormatter",
             "format": "[{server_time}] {message}",
@@ -207,12 +214,14 @@ LOGGING = {
         "console": {
             "level": "INFO",
             "class": "logging.StreamHandler",
+            "formatter": "verbose",
         },
         "discord": {
             "level": "INFO",
             "filters": ["require_debug_false"],
             "class": "logging.FileHandler",
             "filename": Path(LOGGING_ROOT, "discord.log"),
+            "formatter": "verbose",
         },
         "django.server": {
             "level": "INFO",
@@ -228,6 +237,7 @@ LOGGING = {
             "level": "ERROR",
             "class": "logging.FileHandler",
             "filename": Path(LOGGING_ROOT, "errors.log"),
+            "formatter": "verbose",
         },
     },
     "loggers": {
