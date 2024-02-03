@@ -19,7 +19,7 @@ def events(request):
 
     # Proceed if there are any active events.
     if global_events.count() > 0:
-        events_url = "%s://%s%s" % (
+        events_url = "<%s://%s%s>" % (
             request.scheme, request.get_host(), reverse("events")
         )
         reply = "%i events:\n%s\n" % (global_events.count(), events_url)
