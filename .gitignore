@@ -8,6 +8,7 @@ __pycache__
 *.pyc
 settings.py
 gunicorn_configuration.py
+test.py
 venv
 /media/
 /static/

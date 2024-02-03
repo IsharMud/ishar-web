@@ -3,10 +3,10 @@ from .commands import *
 from ..exceptions import UnknownCommandException
 
 
-def slash(interaction, request):
+def slash(interaction_json, request):
     """Handle slash commands."""
 
-    interaction_data = interaction.get("data")
+    interaction_data = interaction_json.get("data")
     command_name = interaction_data.get("name")
 
     # "deadhead" command - player with most deaths.

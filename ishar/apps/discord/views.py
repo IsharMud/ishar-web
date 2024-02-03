@@ -54,7 +54,10 @@ class InteractionsView(View):
 
             # Process the slash command.
             try:
-                message = slash(interaction=interaction, request=request)
+                message = slash(
+                    interaction_json=interaction["json"],
+                    request=request
+                )
 
             # Log and reply for unknown slash commands.
             except UnknownCommandException:
