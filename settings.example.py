@@ -198,10 +198,8 @@ LOGGING = {
     },
     "formatters": {
         "verbose": {
-            "format": (
-                "{asctime} [{levelname}] {module} {process:d} ({thread:d}):"
-                " {message}"
-            ),
+            "datefmt": "%Y-%m-%d %H:%M:%S %Z",
+            "format": "{asctime} [{levelname}] {message}",
             "style": "{",
         },
         "django.server": {
