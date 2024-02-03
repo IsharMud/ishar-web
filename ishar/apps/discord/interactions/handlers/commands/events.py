@@ -26,7 +26,7 @@ def events():
                 num,
                 event.event_desc,
                 timeuntil(event.end_time),
-                event.end_time.strftime("%c %Z")
+                event.end_time.strftime("%A, %B %d, %Y at %I:%M:%S %p %Z")
             )
 
     # Return the reply.
