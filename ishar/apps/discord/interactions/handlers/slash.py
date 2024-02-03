@@ -1,14 +1,12 @@
-from .deadhead import deadhead
-from .events import events
-from .faq import faq
-from .season import season
-from .mudtime import mudtime
+from .commands import *
 
-from ..error import error
+from ..exceptions import UnknownCommandException
 
 
-def handle_command(interaction_data, request):
-    """Handle various incoming slash command requests."""
+def slash(interaction, request):
+    """Handle slash commands."""
+
+    interaction_data = interaction.get("data")
     command_name = interaction_data.get("name")
 
     # "deadhead" command - player with most deaths.
@@ -31,5 +29,5 @@ def handle_command(interaction_data, request):
     if command_name == "season":
         return season()
 
-    # Last resort is to error with "invalid command".
-    return error(message="Invalid command", status=400)
+    # Raise UnknownCommandException as last resort.
+    raise UnknownCommandException

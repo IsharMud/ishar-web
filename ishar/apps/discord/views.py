@@ -5,7 +5,9 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import View
 
 from .interactions.error import error
-from .interactions.handlers import handle_command
+from .interactions.exceptions import UnknownCommandException
+from .interactions.handlers.response import respond
+from .interactions.handlers.slash import slash
 from .interactions.log import logger
 from .interactions.pong import pong
 from .interactions.verify import verify
@@ -38,21 +40,30 @@ class InteractionsView(View):
         if verification is not True:
             return error("Signature could not be verified.", status=500)
 
-        # Get the contents of the interaction, and its type.
-        interaction_body = json.loads(request.body.decode("utf-8"))
-        interaction_type = interaction_body.get("type")
+        # Decode JSON of the interaction, and get interaction type.
+        interaction = {"body": request.body.decode("utf-8")}
+        interaction["json"] = json.loads(interaction["body"])
+        interaction["type"] = interaction["json"].get("type")
 
         # Reply to ping, with pong, for URL endpoint validation.
-        if interaction_type == 1:
+        if interaction["type"] == 1:
             return pong()
 
-        # Reply to slash commands.
-        if interaction_type == 2:
-            return handle_command(
-                interaction_data=interaction_body.get("data"),
-                request=request
-            )
+        # Handle slash commands.
+        if interaction["type"] == 2:
 
-        # Log and return JSON error for unknown interaction types.
-        logger.error("Type %d:\n%s" % (interaction_type, interaction_body))
-        return error(message="Unknown interaction type", status=400)
+            # Process the slash command.
+            try:
+                message = slash(interaction=interaction, request=request)
+
+            # Log and reply for unknown slash commands.
+            except UnknownCommandException:
+                logger.error("Unknown slash command:\n%s" % interaction)
+                message = "Unknown slash command."
+
+            # Reply to the slash command.
+            return respond(message=message)
+
+        # Log and return JSON error for unknown interaction type.
+        logger.error("Unknown interaction type:\n%s" % interaction)
+        return error(message="Unknown interaction type.", status=400)

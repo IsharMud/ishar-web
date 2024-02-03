@@ -3,11 +3,12 @@ from django.utils.timezone import now
 
 from ishar.apps.events.models import GlobalEvent
 
-from ..response import respond
 
-
-def events() -> respond:
+def events():
     """List any active global events."""
+
+    # Default message assuming there are no active events.
+    reply = "Sorry - no events right now."
 
     # Find the global active events in the database.
     global_events = GlobalEvent.objects.filter(
@@ -28,7 +29,5 @@ def events() -> respond:
                 event.end_time.strftime("%c %Z")
             )
 
-        return respond(reply)
-
-    # Say so if there are no active events.
-    return respond("Sorry - no events right now.")
+    # Return the reply.
+    return reply
