@@ -140,7 +140,9 @@
 <details class="mx-1 my-3 bg-black border border-secondary rounded"{% if request.user.upgrades.count > 0 %} open{% endif %}>
     <summary id="upgrades" class="h3 p-2 text-ishar bg-black" title="Account Upgrades ({{ request.user.account_name }}): {{ request.user.upgrades.count }}}">
         Upgrades
-        {% if request.user.upgrades.count > 0 %}({{ request.user.upgrades.count }}){% endif %}
+{% if request.user.upgrades.count > 0 %}
+        <span class="badge bg-secondary text-white rounded-pill">{{ request.user.upgrades.count }}</span>
+{% endif %}
         <a class="anchor-link" href="#upgrades" aria-label="Link to this section: Account Upgrades ({{ request.user.account_name }})">&#x23;</a>
     </summary>
     <div class="m-3">
@@ -148,7 +150,10 @@
         <ol class="bg-black list-group list-group-horizontal-md list-group-numbered">
     {% for upgraded in request.user.upgrades.all %}
             <li class="bg-dark border-secondary list-group-item list-group-item-text text-white" title="{{ upgraded.upgrade.name }}{% if upgraded.amount > 1 %} (x{{ upgraded.amount }}){% endif %}">
-                {{ upgraded.upgrade.name }}{% if upgraded.amount > 1 %}<span class="text-ishar"> (<strong>x{{ upgraded.amount }}</strong>)</span>{% endif %}
+                {{ upgraded.upgrade.name }}
+        {% if upgraded.amount > 1 %}
+                <span class="badge bg-black text-ishar rounded-pill">x{{ upgraded.amount }}</span>
+        {% endif %}
             </li>
     {% endfor %}
         </ol>
