@@ -2,14 +2,10 @@
 {% block title %}{{ title }}{% endblock title %}
 {% block header %}{{ title }}{% endblock header %}
 {% block content %}
-    <div class="card bg-dark">
-        <div class="card-body">
-            <p class="card-text lead">
-                {{ message }}
-            </p>
-            <p class="card-text lead">
-                You may want to return to the <a href="{% url "index" %}" title="home page">home page</a>.
-            </p>
-        </div>
-    </div>
+    <p class="lead">
+        {{ message }}
+    </p>
+    <p class="lead">
+        You may want to return to the <a href="{% url "index" %}" title="home page">home page</a>.
+    </p>
 {% endblock content %}

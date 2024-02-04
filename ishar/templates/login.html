@@ -6,21 +6,17 @@
 {% block header %}<span class="bi bi-door-open"></span> Log In{% endblock header %}
 {% block content %}
     {% if form %}
-    <div class="card bg-black border border-secondary rounded">
-        <div class="card-header">
-            <p class="card-text lead">
-                Please use your <strong><em>account name</em></strong>
-                or <strong><em>e-mail address</em></strong> to log in - thank you!
-            </p>
-        </div>
-        <form class="card-body" method="post">
+        <p class="lead">
+            Please use your <strong><em>account name</em></strong>
+            or <strong><em>e-mail address</em></strong> to log in - thank you!
+        </p>
+        <form method="post">
             {% csrf_token %}
             {{ form.as_p }}
-            <p class="card-text">
+            <p>
                 <button class="btn btn-outline-primary" type="submit">Log In</button>
                 <button class="btn btn-outline-secondary" type="reset">Clear</button>
             </p>
         </form>
-    </div>
     {% endif %}
 {% endblock content %}

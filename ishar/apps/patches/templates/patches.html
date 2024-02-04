@@ -20,8 +20,9 @@
 </p>
 
 {% if patches %}
+    {% include "pagination.html" %}
     {% for patch in patches %}
-<details class="bg-black border border-secondary rounded mx-1 my-3" {% if forloop.first and page_obj.number == 1 %} open{% endif %}>
+<details class="bg-black border border-secondary rounded mx-1 my-3" {% if forloop.first %} open{% endif %}>
     <summary id="{{ patch.patch_name | slugify }}" class="h3 p-2 text-ishar bg-black" title="{{ patch.patch_name }}">
         {{ patch.patch_name }}
         <a class="anchor-link" href="#{{ patch.patch_name | slugify }}" aria-label="Link to this section: Patch {{ patch.patch_name }} ({{ patch.patch_name | slugify }})">&#x23;</a>
@@ -38,28 +39,12 @@
             </small>
         </p>
         <footer class="blockquote-footer" title="-- {{ patch.account.get_username | title }} @ {{ patch.patch_date | date:"r" }}">
-            <cite>{{ patch.account.get_username | title }}</cite> @ {{ patch.patch_date | date:"r" }}
+            <cite>{{ patch.account.get_username | title }}</cite> @ {{ patch.patch_date | date:"l, F jS, Y" }}
         </footer>
     </blockquote>
 </details>
     {% endfor %}
-    {% if page_obj %}
-<div class="pagination lead">
-    <p class="step-links">
-        {% if page_obj.has_previous %}
-        <a href="?page=1">&laquo; first</a>
-        <a href="?page={{ page_obj.previous_page_number }}">previous</a>
-        {% endif %}
-        <span class="current">
-            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-        </span>
-        {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}">next</a>
-        <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
-        {% endif %}
-    </p>
-</div>
-    {% endif %}
+    {% include "pagination.html" %}
 {% else %}
     <p class="lead">
         No patches found.

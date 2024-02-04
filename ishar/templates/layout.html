@@ -25,10 +25,11 @@
     {% block scripts %}
     {% endblock scripts %}
     </head>
+
     <body class="m-1">
-        <header class="container-fluid px-1 py-1">
-            <nav class="p-3 navbar navbar-dark navbar-expand-lg bg-black rounded" style="border: 0.1rem solid var(--ishar-color);">
-                <button style="border: 0.1rem solid var(--ishar-color);" class="m-1 navbar-toggler navbar-dark" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+        <header class="container-fluid p-1">
+            <nav class="p-1 navbar navbar-dark navbar-expand-lg bg-black rounded border-ishar">
+                <button class="m-1 navbar-toggler navbar-dark border-ishar" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle Navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <a href="{% url "index" %}" title="{{ WEBSITE_TITLE }}">
@@ -124,60 +125,47 @@
                         </li>
                     </ul>
                 </div>
-            <!--
-                <a class="navbar-link" href="{% url "index" %}" title="{{ WEBSITE_TITLE }}">
-                    <h1 class="navbar-text" style="color: var(--ishar-color);">
-                        {{ WEBSITE_TITLE }}
-                    </h1>
-                </a>
-            -->
             </nav>
         </header>
 
-        <main class="container-fluid px-1 py-1">
-            <div class="card bg-dark" style="border: 0.1rem solid var(--ishar-color);">
-                <div class="bg-black card-header" style="border: 0.1rem solid var(--ishar-color);">
-                    <h2>
-                        {% block header %}{% endblock header %}
-                    </h2>
-                </div>
-                <div class="card-body">
+        <main class="container-fluid p-1">
+            <h2 class="bg-black rounded border-ishar p-2">
+                {% block header %}{% endblock header %}
+            </h2>
 {% block messages %}
     {% if messages %}
-                    <div class="bg-black border border-secondary m-3 p-3 rounded">
-                        <ul class="card-text lead fw-bold">
+            <div class="bg-black border border-secondary m-3 p-3 rounded">
+                <ul class="lead fw-bold">
         {% for message in messages %}
-                            <li class="message-{{ message.tags }}">
-                                {{ message }}
-                            </li>
+                    <li class="message-{{ message.tags }}">
+                        {{ message }}
+                    </li>
         {% endfor %}
-                        </ul>
-                    </div>
+                </ul>
+            </div>
     {% endif %}
 {% endblock messages %}
+            <div class="bg-black border-ishar p-3 rounded">
 {% block content %}
 {% endblock content %}
-                </div>
             </div>
         </main>
 
 {% if CURRENT_SEASON %}
-        <footer class="container-md px-3 py-1" title="Season {{ CURRENT_SEASON.season_id }} ends {{ CURRENT_SEASON.expiration_date | naturaltime }}">
-            <div class="text-center row p-3 bg-black rounded" style="border: 0.1rem solid var(--ishar-color);">
+        <footer class="container-fluid text-center" title="Season {{ CURRENT_SEASON.season_id }} ends {{ CURRENT_SEASON.expiration_date | naturaltime }}">
+            <div class="row border-ishar bg-black rounded align-items-center m-1 p-3">
                 <div class="col">
-                    <a href="{% url "current_season" %}">
-                        Season {{ CURRENT_SEASON.season_id }}
-                    </a>
+                    <a href="{% url "current_season" %}">Season {{ CURRENT_SEASON.season_id }}</a>
                 </div>
                 <div class="col">
-                    ends {{ CURRENT_SEASON.expiration_date | naturaltime }}
+                    Ends {{ CURRENT_SEASON.expiration_date | naturaltime }}
                 </div>
             </div>
         </footer>
 {% endif %}
 
-        <footer class="container-lg px-3 py-1">
-            <div class="text-center row p-3 bg-black rounded" style="border: 0.1rem solid var(--ishar-color);">
+        <footer class="container-fluid text-center">
+            <div class="row border-ishar bg-black rounded align-items-center m-1 p-3">
                 <div class="col">
                     <a class="bi bi-envelope-at" href="mailto:admin@isharmud.com" target="_blank" title="E-mail Us! (admin@isharmud.com)">
                         E-mail us!
@@ -195,5 +183,6 @@
                 </div>
             </div>
         </footer>
+
     </body>
 </html>

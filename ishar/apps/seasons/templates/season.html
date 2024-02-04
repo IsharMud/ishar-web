@@ -5,22 +5,18 @@
 {% block meta_url %}{% url "season" season_id=season.season_id %}{% endblock meta_url %}
 {% block title %}Season {{ season.season_id }}{% endblock title %}
 {% block header %}
-<nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '•';">
-    <ol class="breadcrumb" style="--bs-breadcrumb-divider-color: var(--ishar-color);">
-        <li class="breadcrumb-item active" aria-current="page" title="Season {{ season.season_id }}">
-            <span class="bi bi-calendar text-ishar"></span>
-            <a href="{% url "season" season_id=season.season_id %}">Season {{ season.season_id }}</a>
-        </li>
-    </ol>
-</nav>
+    <span class="bi bi-calendar"></span>
+    <a href="{% url "season" season_id=season.season_id %}" title="Season {{ season.season_id }}">
+        Season {{ season.season_id }}
+    </a>
 {% endblock header %}
 {% block content %}
 
     {% if season %}
 <div class="card-group">
 
-    <div class="bg-dark border border-secondary card mx-1 my-1 rounded" id="start" title="Season {{ season.season_id }} Start: {{ season.effective_date | naturaltime }} @ {{ season.effective_date }}">
-        <h3 class="bg-black border border-secondary card-title card-header p-2">
+    <div class="bg-black border border-secondary card mx-1 my-1 rounded" id="start" title="Season {{ season.season_id }} Start: {{ season.effective_date | naturaltime }} @ {{ season.effective_date }}">
+        <h3 class="border border-secondary card-title card-header p-2">
             Start
             <a class="anchor-link" href="#start" aria-label="Link to this section: Season {{ season.season_id }} Start">&#x23;</a>
         </h3>
@@ -30,8 +26,8 @@
         </blockquote>
     </div>
 
-    <div class="bg-dark border border-secondary card mx-1 my-1 rounded" id="end" title="Season {{ season.season_id }} End: {{ season.expiration_date | naturaltime }} @ {{ season.expiration_date }}">
-        <h3 class="bg-black border border-secondary card-title card-header p-2">
+    <div class="bg-black border border-secondary card mx-1 my-1 rounded" id="end" title="Season {{ season.season_id }} End: {{ season.expiration_date | naturaltime }} @ {{ season.expiration_date }}">
+        <h3 class="border border-secondary card-title card-header p-2">
             End
             <a class="anchor-link" href="#end" aria-label="Link to this section: Season {{ season.season_id }} End">&#x23;</a>
         </h3>
@@ -44,7 +40,7 @@
 </div>
     {% endif %}
 
-    <div class="card bg-dark border border-secondary mx-1 my-1 rounded" id="essence">
+    <div class="card bg-black border border-secondary mx-1 my-1 rounded" id="essence">
 
         <div class="bg-black border border-secondary card-header card-title p-2 rounded">
             <h4 title="Essence">

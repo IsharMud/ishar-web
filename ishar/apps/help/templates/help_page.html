@@ -22,13 +22,13 @@
 {% block content %}
 
     {% if help_topic %}
-    <div class="bg-dark">
+    <div class="bg-black">
         {% if help_properties and help_properties|length > 0 %}
             <!--
             {{ help_properties }}
             {{ help_properties|length }}
             -->
-        <div class="bg-black rounded border border-secondary m-3 p-3">
+        <div class="bg-black rounded m-1 p-1">
             <ul class="two-col">
             {% for help_property in help_properties %}
                 {% with help_property_value=help_topic|get_dict_item:help_property %}
@@ -44,7 +44,7 @@
         </div>
         {% endif %}
         {% if help_topic.body_html %}
-        <pre class="bg-black border border-secondary m-3 p-3" style="white-space: pre-wrap;">
+        <pre class="bg-black m-1 p-1" style="white-space: pre-wrap;">
             {% autoescape off %}{{ help_topic.body_html }}{% endautoescape %}
         </pre>
         {% endif %}
@@ -52,7 +52,7 @@
     {% endif %}
 
     {% if request.user.is_anonymous and not help_topic %}
-    <p class="bg-black border border-secondary m-3 p-3 rounded lead">
+    <p class="bg-black m-1 p-1 lead">
         If you are new here, you may want to download one of many
         <a href="{% url "clients" %}" title="MUD clients">MUD clients</a>,
         see our <a href="{% url "start" %}" title="getting started guide">getting started guide</a>,
@@ -61,8 +61,8 @@
     {% endif %}
 
     {% if help_search_form %}
-    <div class="bg-black border border-secondary m-3 p-3 rounded">
-        <form class="card-text" action="{% url "help" %}" method="post">
+    <div class="bg-black m-1 p-1">
+        <form action="{% url "help" %}" method="post">
             {% csrf_token %}
             {{ help_search_form.as_p }}
             <p>
@@ -77,16 +77,18 @@
     </div>
     {% endif %}
 
-    <div class="bg-black border border-secondary m-3 p-3">
+    <div class="bg-black m-1 p-1">
     {% if help_topics %}
         <ul class="two-col">
         {% for list_topic in help_topics %}
-            <li title="Topic: {{ list_topic }}"><a href="{% url "help_page" help_topic=list_topic %}">{{ list_topic }}</a></li>
+            <li title="Topic: {{ list_topic }}">
+                <a href="{% url "help_page" help_topic=list_topic %}">{{ list_topic }}</a>
+            </li>
         {% endfor %}
         </ul>
     {% else %}
         <p class="lead">
-                <strong>Sorry, but no help topics were found.</strong>
+            <strong>Sorry, but no help topics were found.</strong>
         </p>
     {% endif %}
     </div>
