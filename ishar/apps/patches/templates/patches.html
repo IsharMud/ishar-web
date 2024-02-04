@@ -5,12 +5,19 @@
 {% block meta_url %}{% url "patches" %}{% endblock meta_url %}
 {% block title %}Patches{% endblock title %}
 {% block header %}
-<nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '•';">
-    <ol class="breadcrumb" style="--bs-breadcrumb-divider-color: var(--ishar-color);">
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
         <li class="breadcrumb-item active" aria-current="page" title="Patches">
-            <span class="bi bi-bandaid text-ishar"></span>
+            <span class="bi bi-bandaid"></span>
             <a href="{% url "patches" %}">Patches</a>
         </li>
+        {% if page_obj.number and page_obj.number != 1 %}
+        <li class="breadcrumb-item active" aria-current="page" title="Patches">
+            <a href="{% url "patches" %}?page={{ page_obj.number }}">
+                Page {{ page_obj.number }}
+            </a>
+        </li>
+        {% endif %}
     </ol>
 </nav>
 {% endblock header %}
@@ -20,14 +27,13 @@
 </p>
 
 {% if patches %}
-    {% include "pagination.html" %}
     {% for patch in patches %}
-<details class="bg-black border border-secondary rounded mx-1 my-3" {% if forloop.first %} open{% endif %}>
-    <summary id="{{ patch.patch_name | slugify }}" class="h3 p-2 text-ishar bg-black" title="{{ patch.patch_name }}">
+<details {% if forloop.first %} open{% endif %}>
+    <summary id="{{ patch.patch_name | slugify }}" class="h3 text-ishar" title="{{ patch.patch_name }}">
         {{ patch.patch_name }}
         <a class="anchor-link" href="#{{ patch.patch_name | slugify }}" aria-label="Link to this section: Patch {{ patch.patch_name }} ({{ patch.patch_name | slugify }})">&#x23;</a>
     </summary>
-    <blockquote class="border-top border-secondary blockquote m-3">
+    <blockquote class="blockquote">
         <p>
             <a href="{{ patch.patch_file.url }}" target="_blank" title="{{ patch.patch_file.name }} &lt;https://{{ request.META.HTTP_HOST }}{{ patch.patch_file.url }}&gt;">
                 {{ patch.patch_file.name }}
@@ -38,12 +44,13 @@
                 </code>
             </small>
         </p>
-        <footer class="blockquote-footer" title="-- {{ patch.account.get_username | title }} @ {{ patch.patch_date | date:"r" }}">
+        <footer class="blockquote-footer" title="-- {{ patch.account.get_username | title }} @ {{ patch.patch_date | date:"l, F jS, Y" }}">
             <cite>{{ patch.account.get_username | title }}</cite> @ {{ patch.patch_date | date:"l, F jS, Y" }}
         </footer>
     </blockquote>
 </details>
     {% endfor %}
+    <hr>
     {% include "pagination.html" %}
 {% else %}
     <p class="lead">

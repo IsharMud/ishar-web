@@ -25,14 +25,17 @@
 </p>
 {% if faqs %}
     {% for faq in faqs %}
-<details class="bg-black mx-1 my-3 border border-secondary rounded" open>
-  <summary id="{{ faq.slug }}" class="h3 p-2 text-ishar bg-black" title="{{ faq.question_text }}">
-      {{ faq.question_text }}
-      <a class="anchor-link" href="#{{ faq.slug }}" aria-label="Link to this section: Frequently Asked Question: {{ faq.question_text }} ({{ faq.slug }})">&#x23;</a>
-  </summary>
-  <div class="m-3 p-2 border-top border-secondary">
-      {% autoescape off %}{{ faq.question_answer }}{% endautoescape %}
-  </div>
+<hr>
+<details open>
+    <summary id="{{ faq.slug }}" class="h3 text-ishar" title="{{ faq.question_text }}">
+        {{ faq.question_text }}
+        <a class="anchor-link" href="#{{ faq.slug }}" aria-label="Link to this section: Frequently Asked Question: {{ faq.question_text }} ({{ faq.slug }})">
+            &#x23;
+        </a>
+    </summary>
+    {% autoescape off %}
+    {{ faq.question_answer }}
+    {% endautoescape %}
 </details>
     {% endfor %}
 {%  else %}
@@ -40,7 +43,7 @@
     <i>No questions were found.</i>
 </p>
 {%  endif %}
-
+<hr>
 <p class="lead">
     If there is anything that you think is missing, please feel free to reach out, by e-mailing
     <a class="font-monospace" href="mailto:admin@isharmud.com" target="_blank" title="E-mail: admin@isharmud.com">admin@isharmud.com</a>.
