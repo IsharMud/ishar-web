@@ -36,7 +36,7 @@
                 <a href="{% url "index" %}" title="{{ WEBSITE_TITLE }}">
                     <img class="navbar-brand" id="logo" alt="{{ WEBSITE_TITLE }}" src="{% static "images/new_trans.png" %}" style="height: 10rem;">
                 </a>
-                <div class="collapse navbar-collapse" id="navbarNavDropdown">
+                <div class="collapse navbar-collapse p-3" id="navbarNavDropdown">
                     <ul class="navbar-nav nav-underline">
                         <li class="nav-item" title="Home">
                             <a class="bi bi-house nav-link" href="{% url "index" %}">
@@ -101,7 +101,9 @@
                                         Portal
                                     </a>
                                 </li>
-                                <li class="nav-item text-ishar"><hr class="dropdown-divider border-secondary"></li>
+                                <li class="nav-item text-ishar">
+                                    <hr class="dropdown-divider border-secondary">
+                                </li>
                                 <li class="nav-item" title="Log out">
                                     <form action="{% url "logout" %}" method="post" id="logout">
                                         {% csrf_token %}
