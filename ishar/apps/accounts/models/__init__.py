@@ -7,6 +7,7 @@ from django.utils import timezone
 
 from passlib.hash import md5_crypt
 
+from ishar.apps.accounts.models.level import ImmortalLevel
 from ishar.apps.accounts.models.manager import AccountManager
 from ishar.apps.accounts.models.unsigned import UnsignedAutoField
 
@@ -94,6 +95,12 @@ class Account(AbstractBaseUser, PermissionsMixin):
         help_text="Amount of essence earned.",
         verbose_name="Earned Essence"
     )
+    immortal_level = models.SmallIntegerField(
+        choices=ImmortalLevel,
+        default=ImmortalLevel.IMM_NONE,
+        help_text="Immortal level for the account.",
+        verbose_name="Immortal Level"
+    )
 
     EMAIL_FIELD = "email"
     USERNAME_FIELD = "account_name"
@@ -142,52 +149,37 @@ class Account(AbstractBaseUser, PermissionsMixin):
 
     @admin.display(boolean=True, description="Artisan?")
     def is_artisan(self) -> bool:
-        """Boolean whether any Artisan (or above) players."""
-        for player in self.players.all():
-            if player.is_artisan():
-                return True
-        return False
-
-    @admin.display(boolean=True, description="Consort?")
-    def is_consort(self) -> bool:
-        """Boolean whether any Consort (or above) players."""
-        for player in self.players.all():
-            if player.is_consort():
-                return True
+        """Boolean whether Artisan."""
+        if self.immortal_level >= ImmortalLevel.IMM_ARTISAN:
+            return True
         return False
 
     @admin.display(boolean=True, description="Eternal?")
     def is_eternal(self) -> bool:
-        """Boolean whether any Eternal (or above) players."""
-        for player in self.players.all():
-            if player.is_eternal():
-                return True
+        """Boolean whether Eternal."""
+        if self.immortal_level >= ImmortalLevel.IMM_ETERNAL:
+            return True
         return False
 
     @admin.display(boolean=True, description="Forger?")
     def is_forger(self) -> bool:
-        """Boolean whether any Forger (or above) players."""
-        for player in self.players.all():
-            if player.is_forger():
-                return True
+        """Boolean whether Forger."""
+        if self.immortal_level >= ImmortalLevel.IMM_FORGER:
+            return True
         return False
 
     @admin.display(boolean=True, description="God?")
     def is_god(self) -> bool:
-        """Boolean whether any God players."""
-        for player in self.players.all():
-            if player.is_god():
-                return True
+        """Boolean whether God."""
+        if self.immortal_level >= ImmortalLevel.IMM_GOD:
+            return True
         return False
 
     @admin.display(boolean=True, description="Immortal?")
     def is_immortal(self) -> bool:
-        """
-        Boolean whether any immortal (or above, but not consort) players.
-        """
-        for player in self.players.all():
-            if player.is_immortal():
-                return True
+        """Boolean whether Immortal."""
+        if self.immortal_level >= ImmortalLevel.IMM_IMMORTAL:
+            return True
         return False
 
     # "God"s are administrators/superusers for Django Admin
