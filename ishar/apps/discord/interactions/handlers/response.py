@@ -10,6 +10,6 @@ def respond(
     response_data = {"type": msg_type, "data": {"content": message}}
 
     if ephemeral is True:
-        response_data["data"]["content"]["flags"] = 64
+        response_data["data"]["flags"] = 64
 
     return JsonResponse(data=response_data, status=status)
