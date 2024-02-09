@@ -137,8 +137,7 @@ class AccountsAdmin(UserAdmin):
         (
             None, {
                 "fields": (
-                    "account_id", model.USERNAME_FIELD, model.EMAIL_FIELD,
-                    "immortal_level"
+                    "account_id", model.USERNAME_FIELD, model.EMAIL_FIELD
                 )
             }
         ),
@@ -169,12 +168,11 @@ class AccountsAdmin(UserAdmin):
             }
         )
     )
-    filter_horizontal = ()
-    list_filter = ("immortal_level",)
+    filter_horizontal = list_filter = ()
     inlines = (AccountPlayersLinksInline, AccountUpgradesLinksAdmin)
     list_display = (
         model.USERNAME_FIELD, model.EMAIL_FIELD, "player_count",
-        "current_essence", "immortal_level"
+        "current_essence", "is_god", "is_eternal", "is_immortal"
     )
     ordering = ("account_id",)
     search_fields = (
