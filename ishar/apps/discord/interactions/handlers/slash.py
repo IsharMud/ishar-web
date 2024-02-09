@@ -22,7 +22,7 @@ def slash(interaction_json, request):
         return faq(request=request), False
 
     # "mudhelp" command to link a MUD help topic.
-    if command_name == "mudtime":
+    if command_name == "mudhelp":
         return mudhelp(request=request, interaction=interaction_data)
 
     # "mudtime" command to show server (UTC) time.
