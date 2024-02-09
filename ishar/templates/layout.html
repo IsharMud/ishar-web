@@ -7,14 +7,19 @@
         <meta name="author" content="{{ WEBSITE_TITLE }}">
         <meta name="description" content="{{ WEBSITE_TITLE }}">
         <meta name="keywords" content="{{ WEBSITE_TITLE }}, Ishar, IsharMUD, MUD, Multi User Dungeon, Multi-User Dungeon, Game">
+        <meta name="msapplication-TileColor" content="#ffaa77">
+        <meta name="theme-color" content="#000000">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta property="og:type" content="website">
         <meta property="og:site_name" content="{{ WEBSITE_TITLE }}">
         <meta property="og:title" content="{{ WEBSITE_TITLE }}: {% block meta_title %}Home{% endblock meta_title %}">
         <meta property="og:description" content="{{ WEBSITE_TITLE }}: {% block meta_description %}a free online text-adventure RPG{% endblock meta_description %}">
-        <meta property="og:image" content="https://{{ request.META.HTTP_HOST }}{% block meta_image %}{% static "images/new_trans.png" %}{% endblock meta_image %}">
+        <meta property="og:image" content="https://{{ request.META.HTTP_HOST }}{% block meta_image %}{% static "images/logo.png" %}{% endblock meta_image %}">
         <meta property="og:url" content="https://{{ request.META.HTTP_HOST }}{% block meta_url %}{% url "index" %}{% endblock meta_url %}">
         <title>{{ WEBSITE_TITLE }}: {% block title %}Home{% endblock title %}</title>
+        <link rel="apple-touch-icon" sizes="180x180" href="{% static "images/apple-touch-icon.png" %}">
+        <link rel="icon" type="image/png" sizes="32x32" href="{% static "images/favicon-32x32.png" %}">
+        <link rel="icon" type="image/png" sizes="16x16" href="{% static "images/favicon-16x16.png" %}">
         <link rel="shortcut icon" href="{% static "images/favicon.ico" %}" type="image/x-icon">
         <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
         <link rel="preconnect" href="https://cdn.jsdelivr.net">
@@ -34,7 +39,7 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <a href="{% url "index" %}" title="{{ WEBSITE_TITLE }}">
-                    <img class="navbar-brand" id="logo" alt="{{ WEBSITE_TITLE }}" src="{% static "images/new_trans.png" %}" style="height: 10rem;">
+                    <img class="navbar-brand" id="logo" alt="{{ WEBSITE_TITLE }}" src="{% static "images/logo.png" %}" style="height: 10rem;">
                 </a>
                 <div class="collapse navbar-collapse p-3" id="navbarNavDropdown">
                     <ul class="navbar-nav nav-underline">
