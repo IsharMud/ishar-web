@@ -20,7 +20,7 @@ def mudhelp(request, interaction=None):
     ephemeral = True
     if search_results:
         ephemeral = False
-        help_url = "<%s://%s%s>" % (
+        help_url = "%s://%s%s" % (
             request.scheme,
             request.get_host(),
             reverse(viewname="help_page", args=(search_query,))
