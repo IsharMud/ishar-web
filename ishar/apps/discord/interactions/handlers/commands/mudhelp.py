@@ -11,7 +11,7 @@ def mudhelp(request, interaction=None):
     reply = "Sorry - no help topic(s) could be found."
 
     # Find help topics, based upon search query.
-    search_query = interaction
+    search_query = interaction["options"][0]["value"]
     print("search_query:", search_query)
     search_results = None
     if search_query:
