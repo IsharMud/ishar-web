@@ -3,7 +3,7 @@ asgiref==3.7.2
 certifi==2023.11.17
 cffi==1.16.0
 charset-normalizer==3.3.2
-Django==5.0.1
+Django==5.0.2
 django-admin-interface==0.28.3
 django-colorfield==0.11.0
 django-ninja==1.1.0
