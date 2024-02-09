@@ -12,7 +12,6 @@ def mudhelp(request, interaction=None):
 
     # Find help topics, based upon search query.
     search_query = interaction["options"][0]["value"]
-    print("search_query:", search_query)
     search_results = None
     if search_query:
         search_results = search_help_topics(search=search_query)
@@ -27,7 +26,7 @@ def mudhelp(request, interaction=None):
             reverse(viewname="help_page", args=(search_query,))
         )
         num_results = len(search_results)
-        reply = "%i %s:\n%s\n" % (
+        reply = "%i %s: <%s>" % (
             num_results,
             ngettext(singular="topic", plural="topics", number=num_results),
             help_url
