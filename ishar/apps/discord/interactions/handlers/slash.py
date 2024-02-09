@@ -15,11 +15,15 @@ def slash(interaction_json, request):
 
     # "events" command - any active events and when they expire.
     if command_name == "events":
-        return events(request)
+        return events(request=request)
 
     # "faq" command to link frequently asked questions.
     if command_name == "faq":
-        return faq(request)
+        return faq(request=request)
+
+    # "mudhelp" command to link a MUD help topic.
+    if command_name == "mudtime":
+        return mudhelp(request=request, interaction=interaction_data)
 
     # "mudtime" command to show server (UTC) time.
     if command_name == "mudtime":
@@ -27,7 +31,7 @@ def slash(interaction_json, request):
 
     # "season" command - shows season number and expiration.
     if command_name == "season":
-        return season(request)
+        return season(request=request)
 
     # Raise UnknownCommandException as last resort.
     raise UnknownCommandException

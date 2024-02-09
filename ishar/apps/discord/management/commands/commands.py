@@ -58,6 +58,18 @@ class Command(BaseCommand):
             },
             {
                 "type": 1,
+                "name": "mudhelp",
+                "description": "Search MUD help for a topic.",
+                "options": [
+                    {
+                        "name": "topic",
+                        "description": "Name of the help topic to search for.",
+                        "type": 1
+                    }
+                ]
+            },
+            {
+                "type": 1,
                 "name": "mudtime",
                 "description": "Show current server time.",
             },
