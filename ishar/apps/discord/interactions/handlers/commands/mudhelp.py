@@ -18,7 +18,9 @@ def mudhelp(request, interaction=None):
         search_results = search_help_topics(search=search_query)
 
     # Proceed if any help topics are found.
+    ephemeral = True
     if search_results:
+        ephemeral = False
         help_url = "<%s://%s%s>" % (
             request.scheme,
             request.get_host(),
@@ -32,4 +34,4 @@ def mudhelp(request, interaction=None):
         )
 
     # Return the reply.
-    return reply
+    return reply, ephemeral

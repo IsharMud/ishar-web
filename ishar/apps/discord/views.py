@@ -53,8 +53,9 @@ class InteractionsView(View):
         if interaction["type"] == 2:
 
             # Process the slash command.
+            ephemeral = True
             try:
-                message = slash(
+                message, ephemeral = slash(
                     interaction_json=interaction["json"],
                     request=request
                 )
@@ -65,7 +66,7 @@ class InteractionsView(View):
                 message = "Unknown slash command."
 
             # Reply to the slash command.
-            return respond(message=message)
+            return respond(message=message, ephemeral=ephemeral)
 
         # Log and return JSON error for unknown interaction type.
         logger.error("Unknown interaction type:\n%s" % interaction)

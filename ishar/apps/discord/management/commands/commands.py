@@ -64,7 +64,8 @@ class Command(BaseCommand):
                     {
                         "name": "topic",
                         "description": "Name of the help topic to search for.",
-                        "type": 1
+                        "type": 3,
+                        "required": True
                     }
                 ]
             },

@@ -11,7 +11,7 @@ def slash(interaction_json, request):
 
     # "deadhead" command - player with most deaths.
     if command_name == "deadhead":
-        return deadhead()
+        return deadhead(), False
 
     # "events" command - any active events and when they expire.
     if command_name == "events":
@@ -19,7 +19,7 @@ def slash(interaction_json, request):
 
     # "faq" command to link frequently asked questions.
     if command_name == "faq":
-        return faq(request=request)
+        return faq(request=request), False
 
     # "mudhelp" command to link a MUD help topic.
     if command_name == "mudtime":
@@ -27,11 +27,11 @@ def slash(interaction_json, request):
 
     # "mudtime" command to show server (UTC) time.
     if command_name == "mudtime":
-        return mudtime()
+        return mudtime(), False
 
     # "season" command - shows season number and expiration.
     if command_name == "season":
-        return season(request=request)
+        return season(request=request), False
 
     # Raise UnknownCommandException as last resort.
     raise UnknownCommandException

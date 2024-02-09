@@ -18,7 +18,9 @@ def events(request):
     ).all()
 
     # Proceed if there are any active events.
+    ephemeral = True
     if global_events.count() > 0:
+        ephemeral = False
         events_url = "<%s://%s%s>" % (
             request.scheme, request.get_host(), reverse("events")
         )
@@ -34,4 +36,4 @@ def events(request):
             )
 
     # Return the reply.
-    return reply
+    return reply, ephemeral
