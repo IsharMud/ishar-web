@@ -113,11 +113,14 @@ class SkillAdmin(admin.ModelAdmin):
         (None, {"fields": ("id", "enum_symbol", "func_name", "skill_name")}),
         ("Minimums", {"fields": ("min_posn", "min_use")}),
         ("Cost", {"fields": ("spell_breakpoint", "held_cost")}),
-        ("Text", {
-            "fields": ("wearoff_msg", "chant_text", "appearance", "decide_func")
-        }),
+        ("Text", {"fields": (
+                "wearoff_msg", "chant_text", "appearance", "decide_func",
+                "obj_display"
+        )}),
         ("Values", {"fields": ("difficulty", "rate", "notice_chance")}),
-        ("Scale/Mod", {"fields": ("scale", "mod_stat_1", "mod_stat_2")}),
+        ("Scale/Mod", {"fields": (
+            "scale", "mod_stat_1", "mod_stat_2", "special_int"
+        )}),
         ("Type", {"fields": ("skill_type",)}),
         ("Parent", {"fields": ("parent_skill",)})
     )
