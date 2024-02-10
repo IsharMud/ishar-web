@@ -4,8 +4,8 @@
 {% block meta_url %}{% if game_type %}{% url game_type|lower %}{% else %}{% url "leaders" %}{% endif %}{% endblock meta_url %}
 {% block title %}Leaders{% if game_type %} / {{ game_type }}{% endif %}{% endblock title %}
 {% block header %}
-<nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '•';">
-    <ol class="breadcrumb" style="--bs-breadcrumb-divider-color: var(--ishar-color);">
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
         <li class="breadcrumb-item" title="Portal">
             <span class="text-ishar bi bi-trophy"></span>
             <a href="{% url "portal" %}">Portal</a>

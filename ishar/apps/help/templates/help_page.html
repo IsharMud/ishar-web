@@ -5,8 +5,8 @@
 {% block meta_url %}{% if help_topic %}{% url "help_page" help_topic=help_topic.name %} %}{% else %}{% url "help" %}{% endif %}{% endblock meta_url %}
 {% block title %}Help{% if help_topic and help_topic.name %}: {{ help_topic.name }}{% endif %}{% endblock title %}
 {% block header %}
-<nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '•';">
-    <ol class="breadcrumb" style="--bs-breadcrumb-divider-color: var(--ishar-color);">
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
         <li class="breadcrumb-item{% if not help_topic %} active" aria-current="page{% endif %}" title="Help">
             <span class="text-ishar bi bi-info-circle"></span>
             <a href="{% url "help" %}">Help</a>
