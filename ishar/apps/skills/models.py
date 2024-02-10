@@ -180,6 +180,7 @@ class Skill(models.Model):
         verbose_name="Skill Type"
     )
     parent_skill = models.IntegerField(
+        default=-1,
         help_text='Parent skill ID of a skill. Value of "-1" means no parent.',
         verbose_name="Parent Skill"
     )
