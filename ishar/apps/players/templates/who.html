@@ -5,8 +5,8 @@
 {% block meta_url %}{% url "who" %}{% endblock meta_url %}
 {% block title %}Who's Online?{% if players %} ({{ players | length }} player{{ players|pluralize }}){% endif %}{% endblock title %}
 {% block header %}
-<nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '•';">
-    <ol class="breadcrumb" style="--bs-breadcrumb-divider-color: var(--ishar-color);">
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
         <li class="breadcrumb-item" title="Portal">
             <span class="bi bi-people text-ishar"></span>
             <a href="{% url "portal" %}">Portal</a>
