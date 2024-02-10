@@ -237,6 +237,13 @@ class SkillComponent(models.Model):
         null=False,
         verbose_name="Component Value"
     )
+    component_count = models.SmallIntegerField(
+        blank=False,
+        default=1,
+        null=False,
+        help_text="Count of components.",
+        verbose_name="Component Count"
+    )
 
     class Meta:
         managed = False
