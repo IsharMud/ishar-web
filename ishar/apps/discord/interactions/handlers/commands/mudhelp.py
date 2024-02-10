@@ -16,9 +16,16 @@ def mudhelp(request, interaction=None, _spell=False):
     search_query = interaction["options"][0]["value"]
     search_results = None
     if search_query:
+        search_topics = None
+
+        # Limit to only the "Spell " topics, if searching a spell.
         if _spell:
-            search_query = f"Spell {search_query}"
-        search_results = search_help_topics(search=search_query)
+            search_topics = search_help_topics(search="Spell ")
+
+        search_results = search_help_topics(
+            all_topics=search_topics,
+            search=search_query
+        )
 
     # Proceed if any help topics are found.
     ephemeral = True
