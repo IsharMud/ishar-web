@@ -61,11 +61,11 @@
               {% for leader in leader_players %}
                 {
                     player: '{{ leader.player_link }}',
-                    remorts: {{ leader.remorts }},
-                    renown: {{ leader.total_renown }},
-                    quests: {{ leader.quests_completed }},
-                    challenges: {{ leader.challenges_completed }},
-                    deaths: {{ leader.deaths }}
+                    remorts: {{ leader.remorts | stringformat:"s" }},
+                    renown: {{ leader.total_renown | stringformat:"s" }},
+                    quests: {{ leader.quests_completed | stringformat:"s" }},
+                    challenges: {{ leader.challenges_completed | stringformat:"s" }},
+                    deaths: {{ leader.deaths | stringformat:"s" }}
                 }{% if not forloop.last %},{% endif %}
               {% endfor %}
             ],
