@@ -24,8 +24,8 @@ def mudhelp(request, interaction=None):
 
         if num_results == 1:
             print("search_results:", search_results)
-            print("search_results[0]", search_results[0])
-            search_query = search_results[0]["name"]
+            print("search_results[0]", search_results['name'])
+            search_query = search_results["name"]
 
         help_url = "%s://%s%s" % (
             request.scheme,
