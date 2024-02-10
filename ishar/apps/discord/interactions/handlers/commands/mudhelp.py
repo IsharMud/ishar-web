@@ -21,7 +21,7 @@ def mudhelp(request, interaction=None):
     if search_results:
         ephemeral = False
         help_url_prefix = "%s://%s" % (request.scheme, request.get_host())
-        help_url_page = search_results
+        help_url_page = search_query
         url_fmt = "<%s%s>"
 
         num_results = len(search_results)
