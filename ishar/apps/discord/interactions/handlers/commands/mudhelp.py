@@ -26,15 +26,13 @@ def mudhelp(request, interaction=None, _spell=False):
         ephemeral = False
         help_url_prefix = "%s://%s" % (request.scheme, request.get_host())
         help_url_page = search_query
-        url_fmt = "<%s%s>"
 
         num_results = len(search_results)
         if num_results == 1:
             search_result = next(iter(search_results.values()))
             help_url_page = search_result["name"]
-            url_fmt = "%s%s"
 
-        help_url = url_fmt % (
+        help_url = "%s%s" % (
             help_url_prefix,
             reverse(viewname="help_page", args=(help_url_page,))
         )
