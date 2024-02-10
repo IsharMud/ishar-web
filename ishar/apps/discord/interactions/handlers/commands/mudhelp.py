@@ -20,21 +20,22 @@ def mudhelp(request, interaction=None):
     ephemeral = True
     if search_results:
         ephemeral = False
+        help_url_prefix = "%s://%s" % (request.scheme, request.get_host())
+        help_url_page = search_results
+        url_fmt = "<%s%s>"
+
         num_results = len(search_results)
-
         if num_results == 1:
-            print("search_results:", search_results)
             search_result = next(iter(search_results.values()))
-            print("search_result:", search_result)
-            print('search_result["name"]:', search_result["name"])
-            search_query = search_result["name"]
+            help_url_page = search_result["name"]
+            url_fmt = "%s%s"
 
-        help_url = "%s://%s%s" % (
-            request.scheme,
-            request.get_host(),
-            reverse(viewname="help_page", args=(search_query,))
+        help_url = url_fmt % (
+            help_url_prefix,
+            reverse(viewname="help_page", args=(help_url_page,))
         )
-        reply = "%i %s: <%s>" % (
+
+        reply = "%i %s: %s" % (
             num_results,
             ngettext(singular="topic", plural="topics", number=num_results),
             help_url
