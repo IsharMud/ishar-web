@@ -24,7 +24,7 @@ def mudhelp(request, interaction=None):
 
         if num_results == 1:
             print("search_results:", search_results)
-            search_result = next(search_results)
+            search_result = next(iter(search_results))
             print("search_result:", search_result)
             print('search_result["name"]:', search_result["name"])
             search_query = search_result["name"]
