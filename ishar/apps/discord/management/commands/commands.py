@@ -79,6 +79,19 @@ class Command(BaseCommand):
                 "name": "season",
                 "description": "Show the current season.",
             },
+            {
+                "type": 1,
+                "name": "spell",
+                "description": "Search MUD help for a spell.",
+                "options": [
+                    {
+                        "name": "spell",
+                        "description": "Name of the spell to search for.",
+                        "type": 3,
+                        "required": True
+                    }
+                ]
+            },
         ]
 
         reg = requests.put(
