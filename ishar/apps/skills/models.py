@@ -183,20 +183,6 @@ class Skill(models.Model):
         help_text='Parent skill ID of a skill. Value of "-1" means no parent.',
         verbose_name="Parent Skill"
     )
-    special_int = models.IntegerField(
-        blank=True,
-        default=-1,
-        null=True,
-        help_text="Integer that is special.",
-        verbose_name="Special Integer"
-    )
-    obj_display = models.CharField(
-        max_length=80,
-        blank=True,
-        null=True,
-        help_text="Display text for object.",
-        verbose_name="Object Display"
-    )
 
     class Meta:
         db_table = "skills"
