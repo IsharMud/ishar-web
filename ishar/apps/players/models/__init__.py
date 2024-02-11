@@ -14,6 +14,49 @@ from ishar.apps.players.util import get_immortal_level, get_immortal_type
 from ishar.util import dec2ip
 
 
+# Set order of stats based upon each player class.
+CLASS_STATS = {
+    "Warrior": (
+        "Strength", "Agility", "Endurance", "Willpower", "Focus",
+        "Perception"
+    ),
+    "Rogue": (
+        "Agility", "Perception", "Strength", "Focus", "Endurance",
+        "Willpower"
+    ),
+    "Cleric": (
+        "Willpower", "Strength", "Perception", "Endurance", "Focus",
+        "Agility"
+    ),
+    "Magician": (
+        "Perception", "Focus", "Agility", "Willpower", "Endurance",
+        "Strength"
+    ),
+    "Necromancer": (
+        "Focus", "Willpower", "Perception", "Agility", "Strength",
+        "Endurance"
+    ),
+    "Shaman": (
+        "Willpower", "Agility", "Endurance", "Focus", "Perception",
+        "Strength",
+    ),
+    # Alphabetic as last resort
+    None: (
+        "Agility", "Endurance", "Focus", "Perception", "Strength",
+        "Willpower"
+    )
+}
+
+
+class GameType(models.IntegerChoices):
+    """
+    Player character game types.
+    """
+    CLASSIC = 0, "Classic"
+    SURVIVAL = 1, "Survival"
+    HARDCORE = 2, "Hardcore"
+
+
 class Player(models.Model):
     """
     Player character.
@@ -207,7 +250,7 @@ class Player(models.Model):
     game_type = models.IntegerField(
         help_text="Player game type.",
         verbose_name="Game Type",
-        choices=settings.GAME_TYPES
+        choices=GameType
     )
     birth = models.DateTimeField(
         help_text="Date and time that the player was created.",
@@ -300,10 +343,17 @@ class Player(models.Model):
             return True
         return False
 
+    @admin.display(boolean=True, description="Hardcore?", ordering='-game_type')
+    def is_hardcore(self) -> bool:
+        """Boolean whether player is "hardcore"."""
+        if self.game_type == GameType.HARDCORE:
+            return True
+        return False
+
     @admin.display(boolean=True, description="Survival?", ordering='-game_type')
     def is_survival(self) -> bool:
-        """Boolean whether player is Survival ("perm-death")."""
-        if self.game_type == 1:
+        """Boolean whether player is "survival"."""
+        if self.game_type == GameType.SURVIVAL:
             return True
         return False
 
@@ -355,10 +405,10 @@ class Player(models.Model):
         }
 
         # Put players stats in appropriate order, based on their class.
-        stats_order = settings.CLASS_STATS.get(None)
+        stats_order = CLASS_STATS.get(None)
         class_name = self.common.player_class.class_name
-        if class_name in settings.CLASS_STATS:
-            stats_order = settings.CLASS_STATS.get(class_name)
+        if class_name in CLASS_STATS:
+            stats_order = CLASS_STATS.get(class_name)
 
         for stat_order in stats_order:
             stats[stat_order] = players_stats[stat_order]
@@ -382,7 +432,16 @@ class Player(models.Model):
 
     def get_player_alignment(self) -> str:
         """Player alignment."""
-        for align_text, (low, high) in settings.ALIGNMENTS.items():
+        alignments = {
+            "Very Evil": (-1500, -1000),
+            "Evil": (-1000, -500),
+            "Slightly Evil": (-500, -250),
+            "Neutral": (-250, 250),
+            "Slightly Good": (250, 500),
+            "Good": (500, 1000),
+            "Very Good": (1000, 1500)
+        }
+        for align_text, (low, high) in alignments.items():
             if low <= self.common.alignment <= high:
                 return align_text
         return "Unknown"
@@ -455,6 +514,9 @@ class Player(models.Model):
 
         if self.true_level >= min(settings.IMMORTAL_LEVELS)[0]:
             return get_immortal_type(level=self.true_level)
+
+        if self.is_hardcore() is True:
+            return "Hardcore"
 
         if self.is_survival() is True:
             return "Survival"

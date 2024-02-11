@@ -36,15 +36,22 @@ a img:hover{ opacity: 0.8; }
 .nested-list { list-style: none; }
 .god-player::after { content: ' 😇'; }
 .forger-player::after, .eternal-player::after, .artisan-player::after, .immortal-player::after, .consort-player::after {  content: ' 👼'; }
-.dead-player, .dead-player a, .survival-player, .survival-player a, .message-error, .errorlist {
+
+.dead-player, .dead-player a,
+.survival-player, .survival-player a,
+.hardcore-player, .hardcore-player a,
+.message-error, .errorlist {
     color: #d02b2b;
 }
+
 a.dead-player:active, a.dead-player:visited,
-a.survival-player:active, a.survival-player:visited
+a.survival-player:active, a.survival-player:visited,
+a.hardcore-player:active, a.hardcore-player:visited
 {
     color: #fa8072;
 }
-.dead-note, a.dead-player:hover, a.survival-player:hover { color: #f00; }
+.dead-note, a.dead-player:hover, a.survival-player:hover, a.hardcore-player:hover { color: #f00; }
+.dead-player::after { content: ' ☠️'; }
 .dead-player::after { content: ' ☠️'; }
 
 .message-info { color: #09f; }

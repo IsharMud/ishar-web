@@ -167,7 +167,7 @@ class PlayerAdmin(admin.ModelAdmin):
         PlayerRemortUpgradesInlineAdmin
     )
     list_display = (
-        "name", "get_account_link", "player_type", "is_survival",
+        "name", "get_account_link", "player_type", "is_hardcore", "is_survival",
         "player_level", "renown"
     )
     list_filter = (

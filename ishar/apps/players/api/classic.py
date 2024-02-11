@@ -1,7 +1,7 @@
 from typing import List
 
 from ishar.api import api
-from ishar.apps.players.models import Player
+from ishar.apps.players.models import GameType, Player
 from ishar.apps.players.api.schemas import PlayerSchema
 
 
@@ -13,4 +13,4 @@ from ishar.apps.players.api.schemas import PlayerSchema
 )
 def classic(request):
     """Classic players."""
-    return Player.objects.filter(game_type__exact=0).all()
+    return Player.objects.filter(game_type__exact=GameType.CLASSIC).all()

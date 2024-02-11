@@ -3,8 +3,22 @@ from typing import List
 from django.conf import settings
 
 from ishar.api import api
-from ishar.apps.players.models import Player
+from ishar.apps.players.models import GameType, Player
 from ishar.apps.players.api.schemas import PlayerSchema
+
+
+@api.get(
+    path="/players/hardcore/",
+    response=List[PlayerSchema],
+    summary="Hardcore players.",
+    tags=["players"]
+)
+def hardcore(request):
+    """Hardcore players."""
+    return Player.objects.filter(
+        true_level__lt=min(settings.IMMORTAL_LEVELS)[0],
+        game_type__exact=GameType.HARDCORE
+    ).all()
 
 
 @api.get(
@@ -17,35 +31,35 @@ def survival(request):
     """Survival players."""
     return Player.objects.filter(
         true_level__lt=min(settings.IMMORTAL_LEVELS)[0],
-        game_type__exact=1
+        game_type__exact=GameType.SURVIVAL
     ).all()
 
 
 @api.get(
-    path="/players/survival/dead/",
+    path="/players/dead/",
     response=List[PlayerSchema],
-    summary="Dead survival players.",
+    summary="Dead players.",
     tags=["players"]
 )
 def dead(request):
-    """Dead survival players."""
+    """Dead players."""
     return Player.objects.filter(
         true_level__lt=min(settings.IMMORTAL_LEVELS)[0],
-        game_type__exact=1,
+        game_type__gt=GameType.CLASSIC,
         is_deleted__exact=1
     ).all()
 
 
 @api.get(
-    path="/players/survival/living/",
+    path="/players/living/",
     response=List[PlayerSchema],
-    summary="Living survival players.",
+    summary="Living players.",
     tags=["players"]
 )
 def living(request):
-    """Living survival players."""
+    """Living players."""
     return Player.objects.filter(
         true_level__lt=min(settings.IMMORTAL_LEVELS)[0],
-        game_type__exact=1,
+        game_type__gt=GameType.CLASSIC,
         is_deleted__exact=0
     ).all()

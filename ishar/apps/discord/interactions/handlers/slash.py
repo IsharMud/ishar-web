@@ -21,6 +21,10 @@ def slash(interaction_json, request):
     if command_name == "faq":
         return faq(request=request), False
 
+    # "leaders" command to link leader page.
+    if command_name == "leaders":
+        return leaders(request=request), False
+
     # "mudhelp" command to search MUD help topics.
     if command_name == "mudhelp":
         return mudhelp(request=request, interaction=interaction_data)
