@@ -9,6 +9,10 @@ def slash(interaction_json, request):
     interaction_data = interaction_json.get("data")
     command_name = interaction_data.get("name")
 
+    # "leaders" command to link leaders page.
+    if command_name == "challenges":
+        return challenges(request=request), False
+
     # "deadhead" command - player with most deaths.
     if command_name == "deadhead":
         return deadhead(), False
@@ -21,7 +25,7 @@ def slash(interaction_json, request):
     if command_name == "faq":
         return faq(request=request), False
 
-    # "leaders" command to link leader page.
+    # "leaders" command to link leaders page.
     if command_name == "leaders":
         return leaders(request=request), False
 

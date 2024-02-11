@@ -43,6 +43,11 @@ class Command(BaseCommand):
         all_commands = [
             {
                 "type": 1,
+                "name": "challenges",
+                "description": "Link to the list of MUD challenges.",
+            },
+            {
+                "type": 1,
                 "name": "deadhead",
                 "description": "Show the player with the most deaths.",
             },
