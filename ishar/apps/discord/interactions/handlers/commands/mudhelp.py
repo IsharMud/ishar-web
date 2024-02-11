@@ -49,7 +49,7 @@ def mudhelp(request, interaction=None, _spell=False):
             singular = "spell"
         plural = singular + "s"
 
-        reply = "%i %s: %s" % (
+        reply = "%i %s :information_source: %s" % (
             num_results,
             ngettext(singular, plural, num_results),
             ngettext(help_url, f"<{help_url}>", num_results),
