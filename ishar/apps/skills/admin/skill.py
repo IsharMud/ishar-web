@@ -1,8 +1,4 @@
-from copy import copy
-
-from django.contrib import admin, messages
-from django.urls import reverse
-from django.utils.html import mark_safe
+from django.contrib.admin import ModelAdmin, register
 
 from ishar.apps.skills.models.skill import Skill
 
@@ -12,8 +8,8 @@ from .inlines.skill_force import SkillForceAdminInline
 from .inlines.spell_flag import SkillSpellFlagAdminInline
 
 
-@admin.register(Skill)
-class SkillAdmin(admin.ModelAdmin):
+@register(Skill)
+class SkillAdmin(ModelAdmin):
     """
     Skill administration.
     """
@@ -43,7 +39,6 @@ class SkillAdmin(admin.ModelAdmin):
     model = Skill
     ordering = ("-skill_type", "skill_name")
     readonly_fields = ("id",)
-    # actions = ("duplicate",)
     save_as = True
     save_as_continue = True
     save_on_top = True
@@ -71,47 +66,3 @@ class SkillAdmin(admin.ModelAdmin):
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
-
-    def duplicate(self, request, queryset):
-        for obj in queryset:
-            duped_obj = copy(obj)
-            duped_obj.skill_name += " Copy"
-            duped_obj.pk = None
-            try:
-                duped_obj.save()
-                if duped_obj.pk:
-
-                    for flag in obj.flags.all():
-                        duped_obj.flags.add(flag)
-                    for force in obj.forces.all():
-                        duped_obj.forces.add(force)
-                    for component in obj.components.all():
-                        duped_obj.components.add(component)
-
-                    duped_obj.save()
-
-                    messages.success(
-                        request,
-                        message=mark_safe(
-                            "Record duplicated as %s." % (
-                                '<a href="%s">%s<a/>' % (
-                                    reverse(
-                                        viewname="admin:skills_skill_change",
-                                        args=(duped_obj.pk,)
-                                    ),
-                                    duped_obj
-                                )
-                            )
-                        )
-                    )
-
-            except Exception as dupe_exc:
-                print(dupe_exc)
-                messages.error(
-                    request,
-                    message=(
-                        "There was an error trying to duplicate the record(s)."
-                    )
-                )
-
-    duplicate.short_description = "Duplicate selected record"
