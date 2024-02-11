@@ -1,5 +1,79 @@
 from django.db import models
-from django.conf import settings
+
+
+class SkillMod(models.IntegerChoices):
+    """
+    Skill mod.
+    """
+    NONE = 0, "None"
+    NEGATIVE_ONE = -1, "Negative One"
+    STRENGTH = 1, "Strength"
+    PERCEPTION = 2, "Perception"
+    FOCUS = 3, "Focus"
+    AGILITY = 4, "Agility"
+    ENDURANCE = 5, "Endurance"
+    WILLPOWER = 6, "Willpower"
+    SPEED = 7, "Speed"
+    SEX = 8, "Sex"
+    AGE = 9, "Age"
+    WEIGHT = 10, "Weight"
+    HEIGHT = 11, "Height"
+    SPELL_POINTS = 12, "Spell Points"
+    HIT_POINTS = 13, "Hit Points"
+    MOVE_POINTS = 14, "Move Points"
+    ARMOR = 15, "Armor"
+    ATTACK = 16, "Attack"
+    DAMAGE = 17, "Melee Damage"
+    HEAL = 18, "Heal"
+    SAVE_POISON = 19, "Fortitude"
+    SAVE_PETRIFICATION = 20, "Fortitude"
+    SAVE_BREATH = 21, "Reflex"
+    SAVE_MAGIC = 22, "Resilience"
+    ALIGNMENT = 23, "Alignment"
+    LIGHT_IN = 24, "Light In"
+    LIGHT_ON = 25, "Light On"
+    FIRESHIELD = 26, "Fireshield"
+    SAVE_ILLUSION = 27, "Resilience"
+    HEAL_HIT = 28, "Heal Hit"
+    HEAL_SPELL = 29, "Heal Spell"
+    HEAL_MOVE = 30, "Heal Move"
+    HEAL_FAVOR = 31, "Heal Favor"
+    SAVE_ALL = 32, "Save All"
+    CRITICAL = 33, "Critical"
+    BODY = 34, "Body"
+    MIND = 35, "Mind"
+    XP = 36, "Experience"
+    SAVE_DISTRACTION = 37, "Resilience"
+    SUSTAIN_SPELL = 38, "Sustained Spell"
+    EXPERTISE = 39, "Expertise"
+    SAVE_FORTITUDE = 40, "Fortitude"
+    SAVE_REFLEX = 41, "Reflex"
+    SAVE_RESILIENCE = 42, "Resilience"
+    SPELL_POTENCY = 43, "Spell Potency"
+    RESISTANCE = 44, "Resistance"
+    SPELL_DAMAGE = 45, "Spell Damage"
+    HEALING_POWER = 46, "Healing Power"
+    SUSCEPTIBILITY = 47, "Susceptibility"
+    IMMUNITY = 48, "Immunity"
+    VULNERABILITY = 49, "Vulnerability"
+
+
+class PlayerPosition(models.IntegerChoices):
+    """
+    Player positions.
+    """
+    NEGATIVE_ONE = -1, "Negative One [-1]"
+    POSITION_DEAD = 0, "Dead [0]"
+    POSITION_DYING = 1, "Dying [1]"
+    POSITION_STUNNED = 2, "Stunned [2]"
+    POSITION_PARALYZED = 3, "Paralyzed [3]"
+    POSITION_SLEEPING = 4, "Sleeping [4]"
+    POSITION_HOISTED = 5, "Hoisted [5]"
+    POSITION_RESTING = 6, "Resting [6]"
+    POSITION_SITTING = 7, "Sitting [7]"
+    POSITION_RIDING = 8, "Riding [8]"
+    UNUSED_POSN = 9, "Unused [9]"
+    POSITION_STANDING = 10, "Standing [10]"
 
 
 class Force(models.Model):
@@ -48,7 +122,9 @@ class SpellFlag(models.Model):
         verbose_name="Spell Flag Name"
     )
     description = models.CharField(
-        max_length=255, blank=True, null=True,
+        max_length=255,
+        blank=True,
+        null=True,
         help_text="Description of the spell flag.",
         verbose_name="Spell Flag Description"
     )
@@ -99,7 +175,7 @@ class Skill(models.Model):
     )
     min_posn = models.IntegerField(
         blank=True,
-        choices=settings.PLAYER_POSITIONS,
+        choices=PlayerPosition,
         null=True,
         help_text="Minimum position to use the skill/spell.",
         verbose_name="Minimum Position"

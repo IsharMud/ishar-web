@@ -1,4 +1,4 @@
-from django.contrib import admin
+from django.contrib import admin, messages
 
 from ishar.apps.skills.models import (
     Force, SkillForce, Skill, SkillComponent, SkillSpellFlag, SpellFlag
@@ -130,10 +130,11 @@ class SkillAdmin(admin.ModelAdmin):
         SkillsForcesAdminInline
     )
     list_display = ("skill_name", "skill_type")
-    list_filter = ("skill_type",)
+    list_filter = ("skill_type", "min_posn")
     model = Skill
     ordering = ("-skill_type", "skill_name")
     readonly_fields = ("id",)
+    actions = ("duplicate",)
     search_fields = (
         "enum_symbol", "func_name", "skill_name",
         "wearoff_msg", "chant_text", "appearance", "decide_func"
@@ -158,6 +159,13 @@ class SkillAdmin(admin.ModelAdmin):
         if request.user and not request.user.is_anonymous:
             return request.user.is_god()
         return False
+
+    def duplicate(self, request, queryset):
+        for obj in queryset:
+            obj.pk = None
+            if obj.save():
+                messages.success(request, "Record duplicated.")
+    duplicate.short_description = "Duplicate selected record"
 
 
 @admin.register(SpellFlag)
