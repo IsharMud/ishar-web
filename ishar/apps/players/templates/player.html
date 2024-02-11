@@ -99,6 +99,9 @@
             {% elif player.player_type == "Survival" %}
                 {{ player.name | title }} {{ player.get_player_phrase }} a
                 <span class="{{ player.player_css }}">{{ player.player_type }}</span> player!
+            {% elif player.player_type == "Hardcore" %}
+                {{ player.name | title }} {{ player.get_player_phrase }} a
+                <span class="{{ player.player_css }}">{{ player.player_type }}</span> player!
             {% else %}
                 {% if player.deaths > 0 %}
                 {{ player.get_player_gender | title }} {{ player.get_player_phrase_owns }}

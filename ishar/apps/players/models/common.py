@@ -1,9 +1,16 @@
 from django.db import models
-from django.conf import settings
 
 from ishar.apps.classes.models import Class
 from ishar.apps.races.models import Race
 from ishar.apps.players.models import Player
+
+
+class PlayerGender(models.IntegerChoices):
+    """
+    Player character genders.
+    """
+    MALE = 1, "Male"
+    FEMALE = 2, "Female"
 
 
 class PlayerCommon(models.Model):
@@ -38,9 +45,9 @@ class PlayerCommon(models.Model):
         verbose_name="Race"
     )
     sex = models.IntegerField(
-        choices=settings.PLAYER_GENDERS,
-        help_text="Sex of the player character.",
-        verbose_name="Sex"
+        choices=PlayerGender,
+        help_text="Sex/gender of the player character.",
+        verbose_name="Sex/Gender"
     )
     level = models.PositiveIntegerField(
         help_text="Level of the player character.",

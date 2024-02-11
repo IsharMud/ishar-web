@@ -2,7 +2,18 @@ from django.db import models
 from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 
-from ishar.apps.skills.models import Force, Skill
+from ishar.apps.skills.models.force import Force
+from ishar.apps.skills.models.skill import Skill
+
+
+class AffinityType(models.IntegerChoices):
+    """
+    Affinity types.
+    """
+    VULNERABILITY = 0, "Vulnerability [0]"
+    SUSCEPTIBILITY = 1, "Susceptibility [1]"
+    RESISTANCE = 2, "Resistance [2]"
+    IMMUNITY = 3, "Immunity [3]"
 
 
 class Race(models.Model):
@@ -238,12 +249,7 @@ class RaceAffinity(models.Model):
         verbose_name="Force"
     )
     affinity_type = models.IntegerField(
-        choices=(
-            (0, "Vulnerability [0]"),
-            (1, "Susceptibility [1]"),
-            (2, "Resistance [2]"),
-            (3, "Immunity [3]")
-        ),
+        choices=AffinityType,
         help_text="Type of race affinity.",
         verbose_name="Affinity Type"
     )

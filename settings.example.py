@@ -54,41 +54,22 @@ DATABASES["default"] = DATABASES[DEFAULT_DB]
 # Default primary key field type.
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# CSRF cookie.
-CSRF_COOKIE_DOMAIN = ALLOWED_HOSTS[0]
-CSRF_COOKIE_HTTPONLY = True
-CSRF_COOKIE_SAMESITE = "Strict"
-CSRF_COOKIE_SECURE = True
+# CSRF and session cookies.
+CSRF_COOKIE_DOMAIN = SESSION_COOKIE_DOMAIN = ALLOWED_HOSTS[0]
+CSRF_COOKIE_HTTPONLY = SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SAMESITE = SESSION_COOKIE_SAMESITE = "Strict"
+CSRF_COOKIE_SECURE = SESSION_COOKIE_SECURE = True
 DJANGO_ORIGINS = getenv(
     "DJANGO_ORIGINS",
     "https://isharmud.com https://www.isharmud.com"
 )
 CSRF_TRUSTED_ORIGINS = DJANGO_ORIGINS.split()
 
-# Language cookie.
-LANGUAGE_COOKIE_DOMAIN = ALLOWED_HOSTS[0]
-LANGUAGE_COOKIE_HTTPONLY = True
-LANGUAGE_COOKIE_SAMESITE = "Strict"
-LANGUAGE_COOKIE_SECURE = True
-
-# Session cookie.
-SESSION_COOKIE_DOMAIN = ALLOWED_HOSTS[0]
-SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_SAMESITE = "Strict"
-SESSION_COOKIE_SECURE = True
-
-# Internationalization.
-LANGUAGE_CODE = "en-us"
-TIME_ZONE = "UTC"
-USE_I18N = True
-USE_THOUSAND_SEPARATOR = True
-USE_TZ = True
-
 # E-mail.
-ADMINS = MANAGERS = (("Example Person", "person@example.com"),)
+ADMINS = MANAGERS = (("Administrator", "admin@" + ALLOWED_HOSTS[0]),)
 DEFAULT_FROM_EMAIL = SERVER_EMAIL = "admin@" + ALLOWED_HOSTS[0]
 EMAIL_SUBJECT_PREFIX = "[Django: " + ALLOWED_HOSTS[0] + "] "
-EMAIL_HOST = "localhost"
+EMAIL_HOST = "mail.example.com"
 EMAIL_PORT = 25
 EMAIL_HOST_USER = EMAIL_HOST_PASSWORD = None
 
@@ -180,11 +161,11 @@ LOGIN_REDIRECT_URL = "/portal/"
 LOGOUT_URL = "/logout/"
 
 # Website title.
-WEBSITE_TITLE = "Ishar MUD"
+WEBSITE_TITLE = f"Ishar MUD LOCAL (DB: {DATABASES['default']['NAME']})"
 
 # Logging.
 LOGGING_DIR = "logs/"
-LOGGING_ROOT = Path(BASE_DIR.parent, LOGGING_DIR)
+LOGGING_ROOT = Path(BASE_DIR, LOGGING_DIR)
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -255,6 +236,13 @@ LOGGING = {
     },
 }
 
+# Internationalization.
+LANGUAGE_CODE = "en-us"
+TIME_ZONE = "UTC"
+USE_I18N = True
+USE_THOUSAND_SEPARATOR = True
+USE_TZ = True
+
 # Static.
 STATIC_URL = "static/"
 STATIC_ROOT = Path(BASE_DIR, STATIC_URL)
@@ -274,24 +262,11 @@ DISCORD = {
 }
 
 # MUD files.
-MUD_HOME = Path(getenv("DJANGO_MUD_HOME", "/home/ishar/ishar-mud"))
+MUD_HOME = getenv("DJANGO_MUD_HOME", "/home/ishar/ishar-mud")
+MUD_HOME_PATH = Path(MUD_HOME)
 MUD_LIB = Path(MUD_HOME, "lib")
 HELPTAB = Path(MUD_LIB, "Misc/helptab")
 MUD_PODIR = Path(MUD_LIB, "Podir")
-
-# Player alignments.
-ALIGNMENTS = {
-    "Very Evil": (-1500, -1000),
-    "Evil": (-1000, -500),
-    "Slightly Evil": (-500, -250),
-    "Neutral": (-250, 250),
-    "Slightly Good": (250, 500),
-    "Good": (500, 1000),
-    "Very Good": (1000, 1500)
-}
-
-# Player game types.
-GAME_TYPES = [(0, "Classic"), (1, "Survival")]
 
 # Player immortal levels/types.
 IMMORTAL_LEVELS = (
@@ -302,43 +277,6 @@ IMMORTAL_LEVELS = (
     (22, "Immortal"),
     (21, "Consort"),
 )
-
-# Player genders.
-PLAYER_GENDERS = ((1, "Male"), (2, "Female"))
-
-# Player positions.
-PLAYER_POSITIONS = (
-    (0, "POSITION_DEAD"), (1, "POSITION_DYING"), (2, "POSITION_STUNNED"),
-    (3, "POSITION_PARALYZED"), (4, "POSITION_SLEEPING"),
-    (5, "POSITION_HOISTED"), (6, "POSITION_RESTING"), (7, "POSITION_SITTING"),
-    (8, "POSITION_RIDING"), (9, "UNUSED_POSN"), (10, "POSITION_STANDING")
-)
-
-# Order statistics by class.
-CLASS_STATS = {
-    "Warrior": (
-        "Strength", "Agility", "Endurance", "Willpower", "Focus", "Perception"
-    ),
-    "Rogue": (
-        "Agility", "Perception", "Strength", "Focus", "Endurance", "Willpower"
-    ),
-    "Cleric": (
-        "Willpower", "Strength", "Perception", "Endurance", "Focus", "Agility"
-    ),
-    "Magician": (
-        "Perception", "Focus", "Agility", "Willpower", "Endurance", "Strength"
-    ),
-    "Necromancer": (
-        "Focus", "Willpower", "Perception", "Agility", "Strength", "Endurance"
-    ),
-    "Shaman": (
-        "Willpower", "Agility", "Endurance", "Focus", "Perception", "Strength",
-    ),
-    # Alphabetic as last resort
-    None: (
-        "Agility", "Endurance", "Focus", "Perception", "Strength", "Willpower"
-    )
-}
 
 CONNECT_URL = "https://mudslinger.net/play/?host=%s&port=%i" % (
     ALLOWED_HOSTS[0], 23

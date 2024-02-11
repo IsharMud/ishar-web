@@ -2,35 +2,9 @@ from django.contrib import admin
 
 from ishar.apps.classes.models import Class, ClassLevel, ClassRace, ClassSkill
 
-
-class ClassLevelInlineAdmin(admin.TabularInline):
-    """
-    Class Levels tabular inline administration.
-    """
-    classes = ("collapse",)
-    extra = 1
-    fields = ("level", "male_title", "female_title", "experience")
-    model = ClassLevel
-
-
-class ClassRaceInlineAdmin(admin.TabularInline):
-    """
-    Class Race tabular inline administration.
-    """
-    classes = ("collapse",)
-    extra = 1
-    fields = ("race", "player_class")
-    model = ClassRace
-
-
-class ClassSkillInlineAdmin(admin.TabularInline):
-    """
-    Class Skill tabular inline administration.
-    """
-    classes = ("collapse",)
-    extra = 1
-    fields = ("player_class", "skill", "min_level", "max_learn")
-    model = ClassSkill
+from .level import ClassLevelInlineAdmin
+from .race import ClassRaceInlineAdmin
+from .skill import ClassSkillInlineAdmin
 
 
 @admin.register(Class)

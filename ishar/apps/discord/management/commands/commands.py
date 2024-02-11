@@ -58,6 +58,11 @@ class Command(BaseCommand):
             },
             {
                 "type": 1,
+                "name": "leaders",
+                "description": "Link to the list of leading MUD players.",
+            },
+            {
+                "type": 1,
                 "name": "mudhelp",
                 "description": "Search MUD help for a topic.",
                 "options": [

@@ -1,8 +1,8 @@
 {% extends "layout.html" %}
 {% block meta_title %}Leaders{% if game_type %} / {{ game_type }}{% endif %}{% endblock meta_title %}
 {% block meta_description %}Leader board of top{% if game_type %} {{ game_type|lower }}{% endif %} players of the game and their achievements{% endblock meta_description %}
-{% block meta_url %}{% if game_type %}{% url game_type|lower %}{% else %}{% url "leaders" %}{% endif %}{% endblock meta_url %}
-{% block title %}Leaders{% if game_type %} / {{ game_type }}{% endif %}{% endblock title %}
+{% block meta_url %}{% url "leaders" %}{% endblock meta_url %}
+{% block title %}Leaders{% if game_type and game_type_name %} / {{ game_type_name }}{% endif %}{% endblock title %}
 {% block header %}
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
@@ -15,10 +15,10 @@
                 Leaders
             </a>
         </li>
-    {% if game_type %}
-        <li class="breadcrumb-item active" aria-current="page" title="{{ game_type }} Leaders">
-            <a href="{% url game_type|lower %}">
-                {{ game_type }}
+    {% if game_type and game_type_name %}
+        <li class="breadcrumb-item active" aria-current="page" title="{{ game_type_name }} Leaders">
+            <a href="#leaders">
+                {{ game_type_name }}
             </a>
         </li>
     {% endif %}
@@ -83,52 +83,57 @@
     };
 </script>
 {% endblock scripts %}
-{% block content %}
-<ul class="m-1 px-1 py-3 list-group list-group-horizontal">
+{% block content %}<ul class="m-1 px-1 py-3 list-group list-group-horizontal">
+{% for num, name in game_types %}
+{% endfor %}
     <li class="list-group-item bg-black" title="All">
-{% if game_type %}
-        <a class="list-group-item-text" href="{% url "leaders" %}#leaders">All</a>
-{% else %}
+{% if game_type is None %}
         <span class="text-ishar">All</span>
-{% endif %}
-    </li>
-    <li class="list-group-item bg-black" title="Classic">
-{% if game_type != "Classic" %}
-        <a class="list-group-item-text" href="{% url "classic" %}#leaders">Classic</a>
 {% else %}
-        <span class="text-ishar">Classic</span>
+        <a class="list-group-item-text" href="{% url "leaders" %}#leaders">All</a>
 {% endif %}
     </li>
-    <li class="list-group-item bg-black" title="Survival">
-{% if game_type != "Survival" %}
-        <a class="list-group-item-text" href="{% url "survival" %}#leaders">Survival</a>
+{% for num, name in game_types %}
+    <li class="list-group-item bg-black" title="{{ name }}">
+    <!--
+game_type {{ game_type }}
+game_type_name: {{ game_type_name }}
+game_types: {{ game_types }}
+
+num: {{ num }}
+name: {{ name }}
+    -->
+{% if game_type == num %}
+    <!-- {{ game_type }} is {{ num }} -->
+        <span class="text-ishar">{{ name }}</span>
 {% else %}
-        <span class="text-ishar">Survival</span>
+        <a class="list-group-item-text" href="{% url "leaders" %}{{ name|lower }}#leaders">{{ name }}</a>
 {% endif %}
     </li>
+{% endfor %}
 </ul>
 
-{% if game_type and game_type == "Survival" %}
+{% if game_type > 0 %}
 <ul class="m-2 px-1 py-1 list-group list-group-horizontal">
-    <li class="list-group-item bg-black" title="Survival">
+    <li class="list-group-item bg-black" title="All">
     {% if deleted is None %}
         <span class="text-ishar">All</span>
     {% else %}
-        <a class="list-group-item-text" href="{% url "survival" %}#leaders">All</a>
+        <a class="list-group-item-text" href="{% url "leaders" %}{{ game_type_name|lower }}/">All</a>
     {% endif %}
     </li>
-    <li class="list-group-item bg-black" title="Survival">
-    {% if deleted is True %}
+    <li class="list-group-item bg-black" title="Dead">
+    {% if deleted == 1 %}
         <span class="text-ishar">Dead</span>
     {% else %}
-        <a class="list-group-item-text" href="{% url "dead_survival" %}#leaders">Dead</a>
+        <a class="list-group-item-text" href="{% url "leaders" %}{{ game_type_name|lower }}/dead/">Dead</a>
     {% endif %}
     </li>
-    <li class="list-group-item bg-black" title="Survival">
-    {% if deleted is False %}
+    <li class="list-group-item bg-black" title="Living">
+    {% if deleted == 0 %}
         <span class="text-ishar">Living</span>
     {% else %}
-        <a class="list-group-item-text" href="{% url "living_survival" %}#leaders">Living</a>
+        <a class="list-group-item-text" href="{% url "leaders" %}{{ game_type_name|lower }}/living/">Living</a>
     {% endif %}
     </li>
 </ul>

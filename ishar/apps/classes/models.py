@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.db import models
 
 from ishar.apps.races.models import Race
-from ishar.apps.skills.models import Skill
+from ishar.apps.skills.models.skill import Skill
 
 
 PLAYER_CLASSES = [
