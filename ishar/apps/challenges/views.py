@@ -8,30 +8,23 @@ class ChallengesView(LoginRequiredMixin, ListView):
     """
     Challenges view.
     """
+    completed = None
     context_object_name = "challenges"
     model = Challenge
-    queryset = model.objects.filter(is_active__exact=1)
     template_name = "challenges.html"
 
+    def get_queryset(self):
+        # Filter queryset.
+        qs = super().get_queryset()
 
-class CompleteChallengesView(ChallengesView):
-    """
-    Complete challenges view.
-    """
-    model = Challenge
-    queryset = model.objects.filter(
-        is_active__exact=1
-    ).exclude(
-        winner_desc__exact=""
-    )
+        # Find active challenges.
+        qs = qs.filter(is_active__exact=1)
 
+        # Optional filter by completion.
+        if self.completed is not None:
+            if self.completed is False:
+                qs = qs.filter(winner_desc__exact="")
+            if self.completed is True:
+                qs = qs.exclude(winner_desc__exact="")
 
-class IncompleteChallengesView(ChallengesView):
-    """
-    Complete challenges view.
-    """
-    model = Challenge
-    queryset = model.objects.filter(
-        is_active__exact=1,
-        winner_desc__exact=""
-    )
+        return qs

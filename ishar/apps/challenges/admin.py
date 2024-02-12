@@ -21,9 +21,9 @@ class ChallengeCompletedListFilter(admin.SimpleListFilter):
         qs = queryset
         if self.value():
             if self.value() == "1":
-                return qs.exclude(winner_desc="")
+                return qs.exclude(winner_desc__exact="")
             if self.value() == "0":
-                return qs.filter(winner_desc="")
+                return qs.filter(winner_desc__exact="")
         return qs
 
 
@@ -64,4 +64,3 @@ class ChallengesAdmin(admin.ModelAdmin):
 
     def has_view_permission(self, request, obj=None) -> bool:
         return self.has_module_permission(request, obj)
-
