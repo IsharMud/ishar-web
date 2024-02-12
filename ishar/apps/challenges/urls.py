@@ -1,12 +1,18 @@
 from django.urls import path
 
-from ishar.apps.challenges.views import (
-    ChallengesView, CompleteChallengesView, IncompleteChallengesView
-)
+from .views import ChallengesView
 
 
 urlpatterns = [
     path("", ChallengesView.as_view(), name="challenges"),
-    path("complete/", CompleteChallengesView.as_view(), name="complete"),
-    path("incomplete/", IncompleteChallengesView.as_view(), name="incomplete"),
+    path(
+        "complete/",
+        ChallengesView.as_view(completed=True),
+        name="complete"
+    ),
+    path(
+        "incomplete/",
+        ChallengesView.as_view(completed=False),
+        name="incomplete"
+    ),
 ]
