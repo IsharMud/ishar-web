@@ -1,6 +1,9 @@
 from django.contrib import admin
 
-from ishar.apps.classes.models import Class, ClassLevel, ClassRace, ClassSkill
+from ishar.apps.classes.models import Class
+from ishar.apps.classes.models.level import ClassLevel
+from ishar.apps.classes.models.race import ClassRace
+from ishar.apps.classes.models.skill import ClassSkill
 
 from .level import ClassLevelInlineAdmin
 from .race import ClassRaceInlineAdmin

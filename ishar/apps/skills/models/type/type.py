@@ -1,16 +1,14 @@
 from django.db.models import IntegerChoices
 
 
-class ImmortalLevel(IntegerChoices):
+class SkillType(IntegerChoices):
     """
-    Immortal levels.
+    Skill types.
     """
-    IMM_NONE = 0, "None"
-    IMM_IMMORTAL = 1, "Immortal"
-    IMM_ARTISAN = 2, "Artisan"
-    IMM_ETERNAL = 3, "Eternal"
-    IMM_FORGER = 4, "Forger"
-    IMM_GOD = 5, "God"
+    TYPE = 0
+    SKILL = 1
+    SPELL = 2
+    CRAFT = 3
 
     def __repr__(self) -> str:
         return "%s: %s (%i)" % (

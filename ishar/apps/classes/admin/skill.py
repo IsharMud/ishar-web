@@ -1,6 +1,6 @@
 from django.contrib.admin import TabularInline
 
-from ishar.apps.classes.models import ClassSkill
+from ishar.apps.classes.models.skill import ClassSkill
 
 
 class ClassSkillInlineAdmin(TabularInline):

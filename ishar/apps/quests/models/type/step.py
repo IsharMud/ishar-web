@@ -1,16 +1,13 @@
 from django.db.models import IntegerChoices
 
 
-class ImmortalLevel(IntegerChoices):
+class QuestStepType(IntegerChoices):
     """
-    Immortal levels.
+    Quest step types.
     """
-    IMM_NONE = 0, "None"
-    IMM_IMMORTAL = 1, "Immortal"
-    IMM_ARTISAN = 2, "Artisan"
-    IMM_ETERNAL = 3, "Eternal"
-    IMM_FORGER = 4, "Forger"
-    IMM_GOD = 5, "God"
+    OBJECT = 0
+    KILL = 1
+    ROOM = 2
 
     def __repr__(self) -> str:
         return "%s: %s (%i)" % (

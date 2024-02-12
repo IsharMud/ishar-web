@@ -1,6 +1,7 @@
 from django.db import models
 
-from .position import PlayerPosition
+from .type.position import PlayerPosition
+from .type.type import SkillType
 
 
 class Skill(models.Model):
@@ -107,12 +108,7 @@ class Skill(models.Model):
         verbose_name="Decide Function"
     )
     skill_type = models.IntegerField(
-        choices=(
-            (0, "Type [0]"),
-            (1, "Skill [1]"),
-            (2, "Spell [2]"),
-            (3, "Craft [3]")
-        ),
+        choices=SkillType,
         help_text="Type of skill.",
         verbose_name="Skill Type"
     )
@@ -143,8 +139,10 @@ class Skill(models.Model):
         verbose_name = "Skill"
         verbose_name_plural = "Skills"
 
-    def __repr__(self):
-        return f"{self.__class__.__name__}: {repr(self.__str__())}"
+    def __repr__(self) -> str:
+        return "%s: %s (%i)" % (
+            self.__class__.__name__, repr(self.__str__()), self.pk
+        )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.skill_name or self.enum_symbol

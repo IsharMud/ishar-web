@@ -1,37 +1,30 @@
 from django.contrib import admin
 
-from ishar.apps.seasons.models import Season
+from ishar.apps.races.models.affinity import RaceAffinity
 
 
-@admin.register(Season)
-class SeasonAdmin(admin.ModelAdmin):
+@admin.register(RaceAffinity)
+class RaceAffinitiesAdmin(admin.ModelAdmin):
     """
-    Season administration.
+    Ishar race affinity administration.
     """
-    date_hierarchy = "effective_date"
+    model = RaceAffinity
     fieldsets = (
-        (None, {"fields": ("season_id", "is_active")}),
-        ("Dates", {"fields": (
-            "effective_date", "expiration_date", "last_challenge_cycle"
-        )}),
-        ("Averages", {"fields": (
-            "average_essence_gain", "average_remorts", "avg_renown"
-        )}),
-        ("Maximums", {"fields": (
-            "max_essence_gain", "max_remorts", "max_renown"
-        )}),
-        ("Leader", {"fields": (
-            "season_leader_account", "seasonal_leader_name"
-        )})
+        (None, {"fields": ("race_affinity_id",)}),
+        ("Race", {"fields": ("race",)}),
+        ("Force", {"fields": ("force",)}),
+        ("Affinity", {"fields": ("affinity_type",)})
     )
     list_display = list_display_links = (
-        "season_id", "is_active", "effective_date", "expiration_date"
+        "race_affinity_id", "race", "force", "affinity_type"
     )
-    list_filter = ("is_active",)
-    readonly_fields = ("season_id",)
-    search_fields = (
-        "seasonal_leader_name", "effective_date", "expiration_date"
+    list_filter = (
+        "affinity_type",
+        ("force", admin.RelatedOnlyFieldListFilter),
+        ("race", admin.RelatedOnlyFieldListFilter),
     )
+    readonly_fields = ("race_affinity_id",)
+    search_fields = ("race", "force", "affinity_type")
 
     def has_module_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:

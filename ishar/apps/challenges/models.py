@@ -71,10 +71,7 @@ class Challenge(models.Model):
         verbose_name_plural = "Challenges"
 
     def __repr__(self):
-        return (
-            f"{self.__class__.__name__}: {repr(self.__str__())} "
-            f"({self.challenge_id})"
-        )
+        return f"{self.__class__.__name__}: {repr(self.__str__())} ({self.pk})"
 
     def __str__(self):
         return self.challenge_desc or self.mob_name or self.challenge_id
