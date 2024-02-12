@@ -4,9 +4,9 @@ from ishar.apps.seasons.models import Season
 
 
 @admin.register(Season)
-class SeasonsAdmin(admin.ModelAdmin):
+class SeasonAdmin(admin.ModelAdmin):
     """
-    Ishar seasons administration.
+    Season administration.
     """
     date_hierarchy = "effective_date"
     fieldsets = (

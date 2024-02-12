@@ -1,11 +1,11 @@
 from django.db import models
 from django.urls import reverse
-from django.utils.html import mark_safe
+from django.utils.html import format_html
 
 
 class Season(models.Model):
     """
-    Ishar Season.
+    Season.
     """
     season_id = models.AutoField(
         primary_key=True,
@@ -74,7 +74,7 @@ class Season(models.Model):
         return reverse(viewname="season", args=(self.season_id,))
 
     def get_admin_link(self) -> str:
-        return mark_safe(
+        return format_html(
             '<a href="%s" title="%s">%s</a>' % (
                 self.get_admin_url(),
                 self.__repr__(),

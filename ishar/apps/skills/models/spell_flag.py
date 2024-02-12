@@ -41,8 +41,10 @@ class SkillSpellFlag(models.Model):
         verbose_name = "Skill Flag"
         verbose_name_plural = "Skill Flags"
 
-    def __repr__(self):
-        return f"{self.__class__.__name__} : {self.__str__()} [{self.id}]"
+    def __repr__(self) -> str:
+        return "%s: %s (%i)" % (
+            self.__class__.__name__, repr(self.__str__()), self.pk
+        )
 
-    def __str__(self):
-        return f"{self.skill} @ {self.flag}"
+    def __str__(self) -> str:
+        return "%s @ %s" % (self.skill, self.flag)

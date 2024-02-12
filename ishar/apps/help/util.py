@@ -8,12 +8,6 @@ from django.conf import settings
 from ishar.apps.classes.models import Class
 
 
-# Retrieve playable player class names
-PLAYER_CLASSES = []
-PLAYABLE_CLASSES = Class.objects.exclude(class_description="").all()
-for playable_class in PLAYER_CLASSES:
-    PLAYER_CLASSES.append(playable_class.class_display)
-
 # Compile a few regular expressions for use later
 #   to parse out specific items from help topic chunks
 see_also_regex = re.compile(
@@ -132,10 +126,15 @@ def parse_help_class(class_line=None):
     num_topic_classes = len(topic_classes)
     string_out = str()
     i = 0
+
+    playable_classes = Class.objects.filter(
+        is_playable=True
+    ).values_list("class_name", flat=True)
+
     for topic_class in topic_classes:
         i += 1
         topic_class = topic_class.strip()
-        if topic_class in PLAYER_CLASSES:
+        if topic_class in playable_classes:
             string_out += (
                 f'<a href="/help/{topic_class}"'
                 f' title="Help: {topic_class} (Class)">'
