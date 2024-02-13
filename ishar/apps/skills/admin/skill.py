@@ -39,9 +39,7 @@ class SkillAdmin(ModelAdmin):
     model = Skill
     ordering = ("-skill_type", "skill_name")
     readonly_fields = ("id",)
-    save_as = True
-    save_as_continue = True
-    save_on_top = True
+    save_as = save_as_new = True
     search_fields = (
         "enum_symbol", "func_name", "skill_name",
         "wearoff_msg", "chant_text", "appearance", "decide_func"
