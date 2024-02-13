@@ -7,6 +7,7 @@ from django.utils import timezone
 
 from passlib.hash import md5_crypt
 
+from ishar.apps.accounts.models.level import ImmortalLevel
 from ishar.apps.accounts.models.manager import AccountManager
 from ishar.apps.accounts.models.unsigned import UnsignedAutoField
 
@@ -93,6 +94,13 @@ class Account(AbstractBaseUser, PermissionsMixin):
     earned_essence = models.IntegerField(
         help_text="Amount of essence earned.",
         verbose_name="Earned Essence"
+    )
+    immortal_level = models.SmallIntegerField(
+        blank=True,
+        choices=ImmortalLevel,
+        null=True,
+        help_text="Immortal level of the account.",
+        verbose_name="Immortal Level"
     )
 
     EMAIL_FIELD = "email"
