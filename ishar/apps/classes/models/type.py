@@ -5,14 +5,14 @@ class PlayerClass(IntegerChoices):
     """
     Player classes.
     """
-    NONE = -1, "Negative One"
-    WARRIOR = 0, "Warrior"
-    ROGUE = 1, "Rogue"
-    CLERIC = 2, "Cleric"
-    MAGICIAN = 3, "Magician"
-    NO_CLASS = 4, "No Class"
-    NECROMANCER = 9, "Necromancer"
-    SHAMAN = 11, "Shaman"
+    NEGATIVE_ONE = -1
+    WARRIOR = 0
+    ROGUE = 1
+    CLERIC = 2
+    MAGICIAN = 3
+    NO_CLASS = 4
+    NECROMANCER = 9
+    SHAMAN = 11
 
     def __repr__(self) -> str:
         return "%s: %s (%i)" % (

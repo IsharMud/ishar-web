@@ -1,13 +1,13 @@
-from django.contrib.admin import TabularInline
+from django.contrib.admin import ModelAdmin, register
 
 from ishar.apps.classes.models.race import ClassRace
 
 
-class ClassRaceInlineAdmin(TabularInline):
+@register(ClassRace)
+class ClassRaceAdmin(ModelAdmin):
     """
-    Class Race tabular inline administration.
+    Ishar class race administration.
     """
-    classes = ("collapse",)
-    extra = 1
-    fields = ("race", "player_class")
-    model = ClassRace
+    list_display = ("classes_races_id", "player_class", "race")
+    list_display_links = list_display
+    list_filter = ("player_class", "race")

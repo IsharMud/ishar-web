@@ -1,13 +1,14 @@
 from django.contrib import admin
 
 from ishar.apps.classes.models import Class
-from ishar.apps.classes.models.level import ClassLevel
-from ishar.apps.classes.models.race import ClassRace
-from ishar.apps.classes.models.skill import ClassSkill
 
-from .level import ClassLevelInlineAdmin
-from .race import ClassRaceInlineAdmin
-from .skill import ClassSkillInlineAdmin
+from .level import ClassLevelAdmin
+from .race import ClassRaceAdmin
+from .skill import ClassSkillAdmin
+
+from .inlines.level import ClassLevelInlineAdmin
+from .inlines.race import ClassRaceInlineAdmin
+from .inlines.skill import ClassSkillInlineAdmin
 
 
 @admin.register(Class)
@@ -62,8 +63,3 @@ class ClassAdmin(admin.ModelAdmin):
         if request.user and not request.user.is_anonymous:
             return request.user.is_eternal()
         return False
-
-
-admin.site.register(ClassLevel)
-admin.site.register(ClassRace)
-admin.site.register(ClassSkill)
