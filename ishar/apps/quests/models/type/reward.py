@@ -5,20 +5,20 @@ class QuestRewardType(IntegerChoices):
     """
     Quest reward types.
     """
-    NEGATIVE_ONE = -1, "Negative One"
+    NEGATIVE_ONE = -1
     OBJECT_ALWAYS = 0, "Object (Always)"
     OBJECT_CHOICE = 1, "Object (Choice)"
-    MONEY = 2, "Money"
-    ALIGNMENT = 3, "Alignment"
-    SKILL = 4, "Skill"
-    RENOWN = 5, "Renown"
-    EXPERIENCE = 6, "Experience"
-    QUEST = 7, "Quest"
-    RELIC = 8, "Relic"
+    MONEY = 2
+    ALIGNMENT = 3
+    SKILL = 4
+    RENOWN = 5
+    EXPERIENCE = 6
+    QUEST = 7
+    RELIC = 8
 
     def __repr__(self) -> str:
         return "%s: %s (%i)" % (
-            self.__class__.__name__, repr(self.__str__()), self.value
+            self.__class__.__name__, self.__str__(), self.value
         )
 
     def __str__(self) -> str:

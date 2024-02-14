@@ -63,9 +63,10 @@ class GlobalEvent(models.Model):
         verbose_name_plural = "Global Events"
 
     def __repr__(self):
-        return (
-            f"{self.__class__.__name__}: {repr(self.__str__())} "
-            f"[{self.event_type}]"
+        return "%s: %s (%s)" % (
+            self.__class__.__name__,
+            self.__str__(),
+            self.event_type
         )
 
     def __str__(self):

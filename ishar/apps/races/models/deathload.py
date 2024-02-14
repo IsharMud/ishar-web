@@ -65,11 +65,10 @@ class RaceDeathload(models.Model):
         verbose_name = "Deathload"
         verbose_name_plural = "Deathloads"
 
-    def __repr__(self):
-        return (
-            f"{self.__class__.__name__}: "
-            f"{repr(self.__str__())} [{self.id}]"
+    def __repr__(self) -> str:
+        return "%s: %s (%i)" % (
+            self.__class__.__name__, self.__str__(), self.pk
         )
 
     def __str__(self):
-        return f"{self.vnum} @ {self.race} ({self.percent_chance}%)"
+        return "%i @ %s" % (self.vnum, self.race)

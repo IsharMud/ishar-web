@@ -36,14 +36,14 @@ class QuestRewardAdmin(admin.ModelAdmin):
     def get_quest_name_link(self, obj=None):
         if obj.quest and obj.quest.display_name:
             return format_html(
-            '<a href="%s">%s</a>' % (
-                reverse(
-                    viewname="admin:quests_quest_change",
-                    args=(obj.quest.quest_id,)
-                ),
-                obj.quest.display_name
+                '<a href="%s">%s</a>' % (
+                    reverse(
+                        viewname="admin:quests_quest_change",
+                        args=(obj.quest.quest_id,)
+                    ),
+                    obj.quest.display_name
+                )
             )
-        )
         return None
 
     @admin.display(description="Class", ordering="quest__class_restrict")

@@ -5,8 +5,8 @@ from django.urls import include, path
 
 from ishar.views import HistoryView, HomeView, StartView, SupportView
 from ishar.views.auth import IsharLoginView, IsharLogoutView
-from ishar.apps.help.views import WorldView
-from ishar.apps.players.views import PlayerWhoView
+from ishar.apps.players.views.who import PlayerWhoView
+from ishar.apps.help.views.world import WorldView
 
 
 urlpatterns = [

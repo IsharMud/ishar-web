@@ -1,10 +1,10 @@
-from django.contrib import admin
+from django.contrib.admin import ModelAdmin, register
 
 from ishar.apps.seasons.models import Season
 
 
-@admin.register(Season)
-class SeasonAdmin(admin.ModelAdmin):
+@register(Season)
+class SeasonAdmin(ModelAdmin):
     """
     Season administration.
     """

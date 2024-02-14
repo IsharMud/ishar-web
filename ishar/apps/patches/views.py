@@ -3,28 +3,24 @@ from django.views.generic import ListView
 from ishar.apps.patches.models import Patch
 
 
-class PatchesAllView(ListView):
-    """
-    Patches base list view of all patches.
-    """
+class BasePatchView(ListView):
+    """Patches base list view lists all patches."""
     context_object_name = "patches"
     model = Patch
-    queryset = model.objects.filter(
-        is_visible=True
-    ).order_by(
-        "-patch_date"
-    ).all()
     template_name = "patches.html"
 
-
-class PatchesLatestView(PatchesAllView):
-    model = Patch
-    queryset = model.objects.filter(
-        is_visible=True
-    ).order_by(
-        "-patch_date"
-    ).all()[:1]
+    def get_queryset(self):
+        return super().get_queryset().filter(is_visible=True).all()
 
 
-class PatchesListView(PatchesAllView):
+class PatchesLatestView(BasePatchView):
+    """Latest patch view."""
+
+    def get_queryset(self):
+        # Return a list of the single most recent item
+        return super().get_queryset().all()[:1]
+
+
+class PatchesView(BasePatchView):
+    """Paginated view of patches."""
     paginate_by = 5

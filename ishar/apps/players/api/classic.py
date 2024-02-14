@@ -1,7 +1,8 @@
 from typing import List
 
 from ishar.api import api
-from ishar.apps.players.models import GameType, Player
+from ishar.apps.players.models.game_type import GameType
+from ishar.apps.players.models.player import Player
 from ishar.apps.players.api.schemas import PlayerSchema
 
 

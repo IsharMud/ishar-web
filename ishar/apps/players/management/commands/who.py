@@ -2,7 +2,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.db.models import F
 
-from ishar.apps.players.models import Player
+from ishar.apps.players.models.player import Player
 
 
 class Command(BaseCommand):

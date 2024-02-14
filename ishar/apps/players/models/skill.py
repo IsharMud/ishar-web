@@ -1,7 +1,7 @@
 from django.db import models
 
-from ishar.apps.players.models import Player
-from ishar.apps.skills.models import Skill
+from ishar.apps.players.models.player import Player
+from ishar.apps.skills.models.skill import Skill
 
 
 class PlayerSkill(models.Model):
@@ -43,9 +43,9 @@ class PlayerSkill(models.Model):
         verbose_name_plural = "Player Skills"
 
     def __repr__(self) -> str:
-        return (
-            f"{self.__class__.__name__}: {repr(self.__str__())}"
+        return "%s: %s (%i)" % (
+            self.__class__.__name__, self.__str__(), self.pk
         )
 
     def __str__(self) -> str:
-        return f"{self.skill} @ {self.player} : {self.skill_level}"
+        return "%s @ %s" % (self.skill, self.player)

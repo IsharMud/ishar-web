@@ -1,4 +1,5 @@
 from django.contrib.admin import ModelAdmin, register
+
 from ishar.apps.skills.models.flag import SpellFlag
 
 

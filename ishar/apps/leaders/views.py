@@ -2,7 +2,8 @@ from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.list import ListView
 
-from ishar.apps.players.models import GameType, Player
+from ishar.apps.players.models.game_type import GameType
+from ishar.apps.players.models.player import Player
 
 
 class LeadersView(LoginRequiredMixin, ListView):

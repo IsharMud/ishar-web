@@ -199,9 +199,8 @@ class Race(models.Model):
         verbose_name = "Race"
 
     def __repr__(self):
-        return (
-            f"{self.__class__.__name__}: "
-            f"{repr(self.__str__())} ({self.race_id})"
+        return "%s: %s (%i)" % (
+            self.__class__.__name__, self.__str__(), self.pk
         )
 
     def __str__(self):

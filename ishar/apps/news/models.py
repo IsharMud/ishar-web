@@ -49,14 +49,14 @@ class News(models.Model):
         db_table = "news"
         default_related_name = "news"
         ordering = ("-created", "-news_id")
-        verbose_name = "News"
-        verbose_name_plural = "News"
+        verbose_name = "News Post"
+        verbose_name_plural = "News Posts"
 
     def __repr__(self):
-        return (
-            f"{self.__class__.__name__}: "
-            f"{repr(self.__str__())} @ {self.created} ({self.news_id}) "
-            f"[by {self.account.account_name}]"
+        return "%s: %s (%i)" % (
+            self.__class__.__name__,
+            self.__str__(),
+            self.pk
         )
 
     def __str__(self):

@@ -1,6 +1,6 @@
 from django.db import models
 
-from ishar.apps.players.models import Player
+from ishar.apps.players.models.player import Player
 
 
 class PlayerFlag(models.Model):
@@ -30,8 +30,8 @@ class PlayerFlag(models.Model):
         verbose_name = "Flag"
 
     def __repr__(self) -> str:
-        return (
-            f"{self.__class__.__name__}: {repr(self.__str__())} ({self.flag_id})"
+        return "%s: %s (%i)" % (
+            self.__class__.__name__, self.__str__(), self.flag_id
         )
 
     def __str__(self) -> str:
@@ -77,9 +77,9 @@ class PlayersFlag(models.Model):
         verbose_name_plural = "Player's Flags"
 
     def __repr__(self) -> str:
-        return (
-            f"{self.__class__.__name__}: {repr(self.__str__())}"
+        return "%s: %s (%s)" % (
+            self.__class__.__name__, self.__str__(), self.value
         )
 
     def __str__(self) -> str:
-        return f"{self.flag} @ {self.player} : {self.value}"
+        return "%s @ %s" % (self.flag, self.player)

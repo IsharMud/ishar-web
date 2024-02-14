@@ -3,7 +3,7 @@ from typing import List
 from django.conf import settings
 
 from ishar.api import api
-from ishar.apps.players.models import Player
+from ishar.apps.players.models.player import Player
 from ishar.apps.players.api.schemas import ImmortalSchema
 
 

@@ -40,7 +40,7 @@ class Patch(models.Model):
         help_text="PDF file of the patch.",
         verbose_name="Patch File",
         upload_to=settings.PATCHES_URL,
-        validators=[FileExtensionValidator(allowed_extensions=['pdf'])]
+        validators=[FileExtensionValidator(allowed_extensions=["pdf"])]
     )
     is_visible = models.BooleanField(
         default=True,
@@ -56,10 +56,8 @@ class Patch(models.Model):
         verbose_name_plural = "Patches"
 
     def __repr__(self):
-        return (
-            f"{self.__class__.__name__}: "
-            f"{repr(self.__str__())} @ {self.patch_date} ({self.patch_id}) "
-            f"[by {self.account.account_name}]"
+        return "%s: %s (%i)" % (
+            self.__class__.__name__, self.__str__(), self.pk
         )
 
     def __str__(self):

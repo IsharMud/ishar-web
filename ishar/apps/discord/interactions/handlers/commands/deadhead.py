@@ -1,6 +1,6 @@
 from django.conf import settings
 
-from ishar.apps.players.models import Player
+from ishar.apps.players.models.player import Player
 
 
 def deadhead():

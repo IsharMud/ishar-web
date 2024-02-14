@@ -45,14 +45,15 @@ class RaceAffinity(models.Model):
         verbose_name = "Affinity"
         verbose_name_plural = "Affinities"
 
-    def __repr__(self):
-        return (
-            f"{self.__class__.__name__}: "
-            f"{repr(self.__str__())} [{self.race_affinity_id}]"
+    def __repr__(self) -> str:
+        return "%s: %s (%i)" % (
+            self.__class__.__name__, self.__str__(), self.pk
         )
 
     def __str__(self):
-        return (
-            f"{self.force} @ {self.race} / "
-            f"{self.get_affinity_type_display()} ({self.affinity_type})"
+        return "%s @ %s / %s (%s)" % (
+            self.force,
+            self.race,
+            self.get_affinity_type_display(),
+            self.affinity_type
         )

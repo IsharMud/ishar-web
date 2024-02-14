@@ -116,10 +116,9 @@ class Account(AbstractBaseUser, PermissionsMixin):
         verbose_name = "Account"
         verbose_name_plural = "Accounts"
 
-    def __repr__(self) -> str:
-        return (
-            __class__.__name__ +
-            f": {repr(self.__str__())} [{self.account_id}]"
+    def __repr__(self):
+        return "%s: %s (%i)" % (
+            self.__class__.__name__, self.__str__(), self.pk
         )
 
     def __str__(self) -> str:

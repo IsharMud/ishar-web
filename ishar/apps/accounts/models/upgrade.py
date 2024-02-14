@@ -56,10 +56,12 @@ class AccountUpgrade(models.Model):
         verbose_name_plural = "Upgrades"
 
     def __repr__(self):
-        return f"{self.__class__.__name__}: {repr(self.__str__())}"
+        return "%s: %s (%i)" % (
+            self.__class__.__name__, self.__str__(), self.pk
+        )
 
     def __str__(self) -> str:
-        return self.name or self.id
+        return self.description or self.name
 
 
 class AccountAccountUpgrade(models.Model):
@@ -102,7 +104,9 @@ class AccountAccountUpgrade(models.Model):
         unique_together = (("account", "upgrade"),)
 
     def __repr__(self):
-        return f"{self.__class__.__name__}: {repr(self.__str__())}"
+        return "%s: %s (%i)" % (
+            self.__class__.__name__, self.__str__(), self.amount
+        )
 
     def __str__(self) -> str:
-        return f"{self.upgrade} @ {self.account} : {self.amount}"
+        return "%s @ %s" % (self.upgrade, self.account)

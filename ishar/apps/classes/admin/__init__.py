@@ -11,7 +11,7 @@ from .skill import ClassSkillInlineAdmin
 
 
 @admin.register(Class)
-class ClassesAdmin(admin.ModelAdmin):
+class ClassAdmin(admin.ModelAdmin):
     """
     Ishar class administration.
     """

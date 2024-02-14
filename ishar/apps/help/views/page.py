@@ -1,42 +1,8 @@
 from django.contrib import messages
 from django.shortcuts import redirect
-from django.views.generic.base import TemplateView
 
-
-from ishar.apps.help.forms import HelpSearchForm
-from ishar.apps.help.util import get_help_topics, search_help_topics
-
-
-HELP_PROPERTIES = (
-    "syntax", "level", "minimum", "class", "component", "topic", "save", "stats"
-)
-
-
-class HelpView(TemplateView):
-    """
-    Help view.
-    """
-    template_name = "help_page.html"
-    help_topics = get_help_topics()
-    help_topic = None
-    http_method_names = ("get", "post")
-    search_form = HelpSearchForm()
-    status = 200
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["help_properties"] = HELP_PROPERTIES
-        context["help_search_form"] = self.search_form
-        context["help_topic"] = self.help_topic
-        context["help_topics"] = self.help_topics
-        return context
-
-    @staticmethod
-    def post(request, *args, **kwargs):
-        return redirect(
-            to="help_page",
-            help_topic=request.POST.get("search_topic")
-        )
+from ishar.apps.help.util import search_help_topics
+from ishar.apps.help.views import HelpView
 
 
 class HelpPageView(HelpView):
@@ -80,19 +46,3 @@ class HelpPageView(HelpView):
             context=self.get_context_data(**kwargs),
             status=self.status
         )
-
-
-class WorldView(HelpView):
-    """
-    World view.
-    """
-    template_name = "world.html"
-
-    def get_context_data(self, **kwargs):
-        """
-        Include "areas" context using the "Area " items from the "helptab" file.
-        """
-        context = super().get_context_data(**kwargs)
-        areas = search_help_topics(search='Area ').keys()
-        context["areas"] = areas
-        return context

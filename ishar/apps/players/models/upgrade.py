@@ -1,6 +1,7 @@
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
-from ishar.apps.players.models import Player
+from ishar.apps.players.models.player import Player
 
 
 class RemortUpgrade(models.Model):
@@ -60,11 +61,13 @@ class RemortUpgrade(models.Model):
         default_related_name = "upgrade"
         managed = False
         ordering = ("-can_buy", "display_name")
-        verbose_name = "Remort Upgrade"
-        verbose_name_plural = "Remort Upgrades"
+        verbose_name = _("Remort Upgrade")
+        verbose_name_plural = _("Remort Upgrades")
 
     def __repr__(self):
-        return f"{self.__class__.__name__}: {repr(self.__str__())}"
+        return "%s: %s (%i)" % (
+            self.__class__.__name__, self.__str__(), self.pk
+        )
 
     def __str__(self):
         return self.display_name
@@ -113,13 +116,13 @@ class PlayerRemortUpgrade(models.Model):
         db_table = "player_remort_upgrades"
         ordering = ("upgrade", "player")
         unique_together = (("upgrade", "player"),)
-        verbose_name = "Player's Remort Upgrade"
-        verbose_name_plural = "Player's Remort Upgrades"
+        verbose_name = _("Player's Remort Upgrade")
+        verbose_name_plural = _("Player's Remort Upgrades")
 
     def __repr__(self) -> str:
-        return (
-            f"{self.__class__.__name__}: {repr(self.__str__())}"
+        return "%s: %s (%i)" % (
+            self.__class__.__name__, self.__str__(), self.value
         )
 
     def __str__(self) -> str:
-        return f"{self.upgrade} @ {self.player} : {self.value}"
+        return "%s @ %s" % (self.upgrade, self.player)
