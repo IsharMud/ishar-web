@@ -485,15 +485,8 @@ class Player(models.Model):
 
         return "have"
 
-    def get_player_type(self):
-        """
-        Get the type pf player (string), returns one of:
-            - Dead
-            - An immortal type:
-                * One of settings.IMMORTAL_LEVELS tuple text values.
-            - Survival
-            - Classic
-        """
+    def get_player_type(self) -> str:
+        """Get the type pf player."""
         if self.is_deleted == 1:
             return "Dead"
 

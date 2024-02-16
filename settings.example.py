@@ -10,9 +10,6 @@ from django.core.management.utils import get_random_secret_key
 # Set up MySQL.
 install_as_MySQLdb()
 
-# Silence OneToOneField recommendation warnings.
-SILENCED_SYSTEM_CHECKS = ["fields.W342"]
-
 # Build project path(s).
 BASE_DIR = Path(__file__).resolve().parent
 

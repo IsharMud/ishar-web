@@ -2,14 +2,14 @@ from django.contrib.admin import display, TabularInline
 from django.urls import reverse
 from django.utils.html import format_html
 
-from ishar.apps.players.models.flag import PlayersFlag
+from ishar.apps.players.models.player_player_flag import PlayerPlayerFlag
 
 
 class PlayerFlagsInlineAdmin(TabularInline):
     """
     Player's flags tabular inline administration.
     """
-    model = PlayersFlag
+    model = PlayerPlayerFlag
     classes = ("collapse",)
     fields = readonly_fields = ("get_flag_link", "value")
     ordering = ("-value", "flag__name")

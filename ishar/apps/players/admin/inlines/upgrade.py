@@ -2,7 +2,7 @@ from django.contrib.admin import display, TabularInline
 from django.urls import reverse
 from django.utils.html import format_html
 
-from ishar.apps.players.models.upgrade import  PlayerRemortUpgrade
+from ishar.apps.players.models.player_remort_upgrade import PlayerRemortUpgrade
 
 
 class PlayerRemortUpgradesInlineAdmin(TabularInline):

@@ -1,6 +1,6 @@
 from django.contrib.admin import ModelAdmin, register
 
-from ishar.apps.players.models.upgrade import RemortUpgrade
+from ishar.apps.players.models.remort_upgrade import RemortUpgrade
 
 
 @register(RemortUpgrade)

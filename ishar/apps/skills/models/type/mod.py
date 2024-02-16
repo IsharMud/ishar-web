@@ -59,7 +59,9 @@ class SkillModType(IntegerChoices):
 
     def __repr__(self) -> str:
         return "%s: %s (%s)" % (
-            self.__class__.__name__, self.__str__(), self.value
+            self.__class__.__name__,
+            self.__str__(),
+            self.value
         )
 
     def __str__(self) -> str:

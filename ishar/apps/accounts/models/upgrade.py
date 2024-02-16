@@ -69,7 +69,7 @@ class AccountAccountUpgrade(models.Model):
     Account upgrade relation to an account.
     """
     account = models.ForeignKey(
-        primary_key=True,  # Fake it, just so reads work.
+        # primary_key=True,  # Fake it, just so reads work.
         db_column="account_id",
         editable=False,
         to=Account,
@@ -80,11 +80,12 @@ class AccountAccountUpgrade(models.Model):
         help_text="Account with the specified upgrade.",
         verbose_name="Account"
     )
-    upgrade = models.ForeignKey(
+    upgrade = models.OneToOneField(
         db_column="account_upgrades_id",
         editable=False,
         to=AccountUpgrade,
         to_field="id",
+        primary_key=True,
         related_query_name="+",
         on_delete=models.CASCADE,
         help_text="Upgrade which the account has.",

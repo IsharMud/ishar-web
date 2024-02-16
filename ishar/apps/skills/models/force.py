@@ -27,5 +27,5 @@ class Force(models.Model):
             self.pk
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.force_name
