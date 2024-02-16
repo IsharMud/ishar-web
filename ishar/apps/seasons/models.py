@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from django.db import models
 from django.urls import reverse
 from django.utils.html import format_html
+from django.utils.timezone import now
 
 
 class Season(models.Model):
@@ -79,10 +80,11 @@ class Season(models.Model):
         )
 
     def __str__(self) -> str:
+        dt_fmt = "%a, %b %d, %Y"
         return "%i (%s - %s)" % (
             self.season_id,
-            self.effective_date.strftime("%a, %b %d, %Y"),
-            self.expiration_date.strftime("%a, %b %d, %Y"),
+            self.effective_date.strftime(dt_fmt),
+            self.expiration_date.strftime(dt_fmt),
         )
 
     def get_absolute_url(self) -> str:
@@ -96,7 +98,7 @@ class Season(models.Model):
             '<a href="%s" title="%s">%s</a>' % (
                 self.get_admin_url(),
                 self.__repr__(),
-                self.__repr__()
+                self.__repr__(),
             )
         )
 
@@ -107,7 +109,10 @@ class Season(models.Model):
         )
 
     def get_next_cycle(self) -> (datetime, None):
-        """Automated cycle of challenges is one (1) week after last cycle."""
+        """Cycle of challenges is X amount of time after last cycle."""
         if self.last_challenge_cycle:
-            return self.last_challenge_cycle + timedelta(days=7)
+            if isinstance(self.last_challenge_cycle, datetime):
+                if self.last_challenge_cycle <= now():
+                    add_time = timedelta(days=7)
+                    return self.last_challenge_cycle + add_time
         return None
