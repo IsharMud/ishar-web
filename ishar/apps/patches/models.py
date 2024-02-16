@@ -51,6 +51,7 @@ class Patch(models.Model):
     class Meta:
         managed = True
         db_table = "patches"
+        default_related_name = "patch"
         ordering = ("-patch_date",)
         verbose_name = "Patch"
         verbose_name_plural = "Patches"
