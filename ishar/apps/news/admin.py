@@ -19,7 +19,7 @@ class NewsAdmin(admin.ModelAdmin):
     readonly_fields = ("news_id", "account")
     search_fields = ("subject", "body", "account", "is_visible")
 
-    def save_model(self, request, obj, form, change) -> bool:
+    def save_model(self, request, obj, form, change):
         if not change:
             obj.account = request.user
         super().save_model(request, obj, form, change)
