@@ -58,7 +58,7 @@
             <li id="level" class="bg-black border-0 list-group-item list-group-item-text text-white" title="Level: {{ player.common.level }} {% if player.remorts > 0 %} / Remorts: {{ player.remorts }}{% endif %}">
                 <span class="bi bi-dot text-ishar"></span>
                 {{ player.get_player_gender | title }} {{ player.get_player_phrase }}
-                level {{ player.common.level }}{% if player.remorts > 0 %}and {{ player.get_player_phrase_owns }} remorted {{ player.remorts }} time{{ player.remorts|pluralize }}{% endif %}.
+                level {{ player.common.level }}{% if player.remorts > 0 %} and {{ player.get_player_phrase_owns }} remorted {{ player.remorts }} time{{ player.remorts|pluralize }}{% endif %}.
             </li>
             {% if player.total_renown > 0 %}
             <li id="total-renown" class="bg-black border-0 list-group-item list-group-item-text text-white" title="Total Renown: {{ player.total_renown }}">
