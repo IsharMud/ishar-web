@@ -1,4 +1,5 @@
 from .challenges import challenges
+from .cycle import cycle
 from .deadhead import deadhead
 from .events import events
 from .faq import faq
