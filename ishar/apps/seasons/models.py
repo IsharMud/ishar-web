@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from django.db import models
 from django.urls import reverse
 from django.utils.html import format_html
@@ -67,11 +69,27 @@ class Season(models.Model):
         managed = False
         db_table = "seasons"
         default_related_name = "season"
-        ordering = ("-is_active", "-season_id")
+        ordering = ("-season_id",)
         verbose_name = "Season"
 
+    def __repr__(self) -> str:
+        return "%s: %s" % (
+            self.__class__.__name__,
+            self.__str__()
+        )
+
+    def __str__(self) -> str:
+        return "%i (%s - %s)" % (
+            self.season_id,
+            self.effective_date.strftime("%a, %b %d, %Y"),
+            self.expiration_date.strftime("%a, %b %d, %Y"),
+        )
+
     def get_absolute_url(self) -> str:
-        return reverse(viewname="season", args=(self.season_id,))
+        return reverse(
+            viewname="season",
+            args=(self.season_id,)
+        )
 
     def get_admin_link(self) -> str:
         return format_html(
@@ -97,3 +115,9 @@ class Season(models.Model):
             self.effective_date.strftime("%c"),
             self.expiration_date.strftime("%c"),
         )
+
+    def get_next_cycle(self) -> (datetime, None):
+        """Automated cycle of challenges is one (1) week after last cycle."""
+        if self.last_challenge_cycle:
+            return self.last_challenge_cycle + timedelta(days=7)
+        return None
