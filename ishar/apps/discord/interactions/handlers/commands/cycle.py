@@ -8,5 +8,5 @@ def cycle():
     next_cycle = get_current_season().get_next_cycle()
     return "Challenges will next cycle in %s :hourglass_flowing_sand: %s" % (
         timeuntil(next_cycle),
-        next_cycle.strftime("%A, %B %d, %Y @ %I %p %Z"),
+        next_cycle.strftime("%A, %B %d, %Y @ %I:%M:%S %p %Z"),
     )
