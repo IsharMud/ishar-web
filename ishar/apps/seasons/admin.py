@@ -1,4 +1,4 @@
-from django.contrib.admin import ModelAdmin, register
+from django.contrib.admin import display, ModelAdmin, register
 
 from ishar.apps.seasons.models import Season
 
@@ -12,7 +12,8 @@ class SeasonAdmin(ModelAdmin):
     fieldsets = (
         (None, {"fields": ("season_id", "is_active")}),
         ("Dates", {"fields": (
-            "effective_date", "expiration_date", "last_challenge_cycle"
+            "effective_date", "expiration_date", "last_challenge_cycle",
+            "next_cycle"
         )}),
         ("Averages", {"fields": (
             "average_essence_gain", "average_remorts", "avg_renown"
@@ -28,7 +29,7 @@ class SeasonAdmin(ModelAdmin):
         "season_id", "is_active", "effective_date", "expiration_date"
     )
     list_filter = ("is_active",)
-    readonly_fields = ("season_id",)
+    readonly_fields = ("season_id", "next_cycle")
     search_fields = (
         "seasonal_leader_name", "effective_date", "expiration_date"
     )
@@ -57,3 +58,9 @@ class SeasonAdmin(ModelAdmin):
         if request.user and not request.user.is_anonymous:
             return request.user.is_eternal()
         return False
+
+    @display(
+        description="Next Challenge Cycle", ordering="last_challenge_cycle"
+    )
+    def next_cycle(self, obj=None):
+        return obj.get_next_cycle().strftime("%a, %b %d, %Y @ %I:%M:%S %p")

@@ -59,6 +59,22 @@
         </script>
 {% endblock scripts %}
 {% block content %}
+    {% if CURRENT_SEASON and CURRENT_SEASON.get_next_cycle %}
+    <div id="next-cycle">
+        <p>
+            Challenges will next cycle in
+            {{ CURRENT_SEASON.get_next_cycle | timeuntil }}.
+        </p>
+    </div>
+    {% endif %}
     <div id="challenges"></div>
     <script>showChallenges(document.getElementById('challenges'));</script>
+    {% if CURRENT_SEASON and CURRENT_SEASON.get_next_cycle %}
+    <div id="next-cycle">
+        <p>
+            Challenges will next cycle in
+            {{ CURRENT_SEASON.get_next_cycle | timeuntil }}.
+        </p>
+    </div>
+    {% endif %}
 {% endblock content %}
