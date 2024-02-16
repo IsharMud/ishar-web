@@ -48,6 +48,11 @@ class Command(BaseCommand):
             },
             {
                 "type": 1,
+                "name": "cycle",
+                "description": "Show when challenges will cycle next.",
+            },
+            {
+                "type": 1,
                 "name": "deadhead",
                 "description": "Show the player with the most deaths.",
             },

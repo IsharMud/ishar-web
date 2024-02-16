@@ -9,9 +9,13 @@ def slash(interaction_json, request):
     interaction_data = interaction_json.get("data")
     command_name = interaction_data.get("name")
 
-    # "leaders" command to link leaders page.
+    # "challenges" command to link challenges page.
     if command_name == "challenges":
         return challenges(request=request), False
+
+    # "cycle" command to show when challenges will cycle next.
+    if command_name == "cycle":
+        return cycle(), False
 
     # "deadhead" command - player with most deaths.
     if command_name == "deadhead":
