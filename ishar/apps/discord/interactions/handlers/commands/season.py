@@ -1,12 +1,12 @@
 from django.urls import reverse
 from django.utils.timesince import timeuntil
 
-from ishar.apps.seasons.models import Season
+from ishar.apps.seasons.util import get_current_season
 
 
 def season(request):
     """Current season number, expiration, time until expiration, and URL."""
-    current_season = Season.objects.filter(is_active=1).first()
+    current_season = get_current_season()
     current_season_url = "%s://%s%s" % (
         request.scheme, request.get_host(), reverse("current_season")
     )
