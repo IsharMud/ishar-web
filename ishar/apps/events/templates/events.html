@@ -20,28 +20,23 @@
     {% endif %}
 {% endblock header %}
 {% block content %}
-    {% if global_events %}
-    <div class="accordion m-3">
+    {% if global_events and global_event_count > 0 %}
+<p class="lead">
+    There are currently {{ global_event_count }}
+    event{{ global_event_count|pluralize }} active!
+</p>
         {% for global_event in global_events %}
-        <div class="accordion-item bg-dark text-white" id="event-{{ global_event.event_type }}">
-            <h3 class="accordion-header" title="{{ global_event.event_desc }}">
-                <button class="fw-bold accordion-button bg-black" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="true" aria-controls="collapse{{ forloop.counter }}">
-                    {{ global_event.event_desc }}
-                </button>
-            </h3>
-            <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse show">
-                <div class="accordion-body">
-                    <ul class="list-group list-group-horizontal-md">
-                        <li class="border-0 bg-dark list-group-item list-group-item-text text-white" title="Ends: {{ global_event.end_time }} ({{ global_event.end_time | naturaltime }})">
-                            <strong>Ends</strong>:
-                            {{ global_event.end_time | naturaltime }}
-                        </li>
-                        <li class="border-0 bg-dark list-group-item list-group-item-text text-white" title="Started: {{ global_event.start_time }} ({{ global_event.start_time | naturaltime }})">
-                            <strong>Started</strong>:
-                            {{ global_event.start_time | naturaltime }}
-                        </li>
-                    </ul>
-                    <ul class="list-group list-group-horizontal-md">
+<details>
+    <summary class="h3 text-ishar" title="{{ global_event.event_desc }}">
+        {{ global_event.event_desc }}
+    </summary>
+    <blockquote class="blockquote">
+        <ul class="list-group list-group-horizontal-md">
+            <li class="border-0 bg-dark list-group-item list-group-item-text text-white" title="Ends: {{ global_event.end_time }} ({{ global_event.end_time | naturaltime }})">
+                <strong>Ends</strong>:
+                {{ global_event.end_time }}
+                ({{ global_event.end_time | naturaltime }})"
+            </li>
             {% if global_event.xp_bonus and global_event.xp_bonus != '' and global_event.xp_bonus != 0 %}
                         <li class="border-0 bg-dark list-group-item list-group-item-text text-white" title="XP Bonus: {% widthratio global_event.xp_bonus 1 1 %}%">
                             <strong>XP Bonus</strong>:
@@ -61,21 +56,22 @@
                         </li>
             {% endif %}
                     </ul>
-                </div>
-            </div>
-        </div>
+        <footer class="blockquote-footer" title="Started: {{ global_event.start_time }} ({{ global_event.start_time | naturaltime }})">
+            Started {{ global_event.start_time | naturaltime }}
+        </footer>
+    </blockquote>
+</details>
         {% endfor %}
-    </div>
     {% else %}
-    <h3 title="Sorry!">
-        Sorry!
-    </h3>
-    <p title="Unfortunately, there are no active global events right now.">
-        Unfortunately, there are no active events right now.
-    </p>
-    <p title="Please check back later, or maybe try out some challenges!">
-        Please check back later, or maybe try out some
-        <a href="{% url "challenges" %}" title="challenges">challenges</a>!
-    </p>
+<h3 title="Sorry!">
+    Sorry!
+</h3>
+<p class="lead" title="Unfortunately, there are no active events right now.">
+    Unfortunately, there are no active events right now.
+</p>
+<p class="lead" title="Please check back later, or maybe try out some challenges!">
+    Please check back later, or maybe try out some
+    <a href="{% url "challenges" %}" title="challenges">challenges</a>!
+</p>
     {% endif %}
 {% endblock content %}
