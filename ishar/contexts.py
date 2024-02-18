@@ -18,7 +18,7 @@ def global_event_count(request):
     """
     Context processor for number of current global events within the MUD.
     """
-    return {"global_event_count": get_global_event_count()}
+    return {"GLOBAL_EVENT_COUNT": get_global_event_count()}
 
 
 def website_title(request):
