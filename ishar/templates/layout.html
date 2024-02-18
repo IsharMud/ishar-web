@@ -86,12 +86,12 @@
                                         Challenges
                                     </a>
                                 </li>
-    {% if global_event_count and global_event_count > 0 %}
-                                <li class="nav-item" title="Events ({{ global_event_count }})">
+    {% if GLOBAL_EVENT_COUNT and GLOBAL_EVENT_COUNT > 0 %}
+                                <li class="nav-item" title="Events ({{ GLOBAL_EVENT_COUNT }})">
                                     <a class="bi bi-calendar-event bg-black nav-link dropdown-item" href="{% url "events" %}">
                                         Events
                                         <span class="badge text-bg-secondary">
-                                            {{ global_event_count }}
+                                            {{ GLOBAL_EVENT_COUNT }}
                                         </span>
                                     </a>
                                 </li>

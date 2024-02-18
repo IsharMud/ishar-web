@@ -1,9 +1,9 @@
 {% extends "layout.html" %}
 {% load humanize %}
-{% block meta_title %}Events{% if global_event_count > 0 %} ({{ global_event_count }}){% endif %}{% endblock meta_title %}
+{% block meta_title %}Events{% if GLOBAL_EVENT_COUNT > 0 %} ({{ GLOBAL_EVENT_COUNT }}){% endif %}{% endblock meta_title %}
 {% block meta_description %}
-    {% if global_event_count > 0 %}
-        {{ global_event_count }} event{{ global_event_count|pluralize }} active.
+    {% if GLOBAL_EVENT_COUNT > 0 %}
+        {{ GLOBAL_EVENT_COUNT }} event{{ GLOBAL_EVENT_COUNT|pluralize }} active.
     {% else %}
         No active events right now.
     {% endif %}
@@ -13,17 +13,16 @@
 {% block header %}
     <span class="bi bi-calendar-event"></span>
     <a href="{% url "events" %}" title="Events">Events</a>
-    {% if global_event_count > 0 %}
-    <span class="badge text-bg-secondary" title="{{ global_event_count }} event{{ global_event_count|pluralize }} active">
-        {{ global_event_count }}
+    {% if GLOBAL_EVENT_COUNT > 0 %}
+    <span class="badge text-bg-secondary" title="{{ GLOBAL_EVENT_COUNT }} event{{ GLOBAL_EVENT_COUNT|pluralize }} active">
+        {{ GLOBAL_EVENT_COUNT }}
     </span>
     {% endif %}
 {% endblock header %}
 {% block content %}
-    {% if global_events and global_event_count > 0 %}
-<p class="lead">
-    There are currently {{ global_event_count }}
-    event{{ global_event_count|pluralize }} active!
+    {% if global_events and GLOBAL_EVENT_COUNT > 0 %}
+<p class="lead" title="{{ GLOBAL_EVENT_COUNT }} event{{ global_event_count|pluralize }} active.">
+    {{ GLOBAL_EVENT_COUNT }} event{{ global_event_count|pluralize }} active.
 </p>
         {% for global_event in global_events %}
 <details open>
