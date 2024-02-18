@@ -26,40 +26,38 @@
     event{{ global_event_count|pluralize }} active!
 </p>
         {% for global_event in global_events %}
-<details>
+<details open>
     <summary class="h3 text-ishar" title="{{ global_event.event_desc }}">
         {{ global_event.event_desc }}
     </summary>
-    <blockquote class="blockquote">
-        <ul class="list-group list-group-horizontal-md">
-            <li class="border-0 bg-dark list-group-item list-group-item-text text-white" title="Ends: {{ global_event.end_time }} ({{ global_event.end_time | naturaltime }})">
-                <strong>Ends</strong>:
-                {{ global_event.end_time }}
-                ({{ global_event.end_time | naturaltime }})"
-            </li>
-            {% if global_event.xp_bonus and global_event.xp_bonus != '' and global_event.xp_bonus != 0 %}
-                        <li class="border-0 bg-dark list-group-item list-group-item-text text-white" title="XP Bonus: {% widthratio global_event.xp_bonus 1 1 %}%">
-                            <strong>XP Bonus</strong>:
-                            {% widthratio global_event.xp_bonus 1 1 %}%
-                        </li>
-            {% endif %}
-            {% if global_event.shop_bonus and global_event.shop_bonus != '' and global_event.shop_bonus != 0 %}
-                        <li class="border-0 bg-dark list-group-item list-group-item-text text-white" title="Shop Bonus: {% widthratio 100 global_event.shop_bonus 1 %}%">
-                            <strong>Shop Bonus</strong>:
-                            {% widthratio 100 global_event.shop_bonus 1 %}% off
-                        </li>
-            {% endif %}
-            {% if global_event.is_luck %}
-                        <li class="border-0 bg-dark list-group-item list-group-item-text text-white" title="Shavar and Chenchir shine brightly! (+50 gold &amp; +25% moves)">
-                            <strong>Shavar and Chenchir shine brightly</strong>:
-                            +50 gold &amp; +25% moves!
-                        </li>
-            {% endif %}
-                    </ul>
-        <footer class="blockquote-footer" title="Started: {{ global_event.start_time }} ({{ global_event.start_time | naturaltime }})">
-            Started {{ global_event.start_time | naturaltime }}
-        </footer>
-    </blockquote>
+    <p>
+        <strong>Ends</strong>:
+        {{ global_event.end_time }}
+        ({{ global_event.end_time | naturaltime }})
+    </p>
+    <p title="Started: {{ global_event.start_time }} ({{ global_event.start_time | naturaltime }})">
+        <strong>Started</strong>:
+        {{ global_event.start_time }} 
+        ({{ global_event.start_time | naturaltime }})
+    </p>
+    {% if global_event.xp_bonus and global_event.xp_bonus != '' and global_event.xp_bonus != 0 %}
+    <p>
+        <strong>XP Bonus</strong>:
+        {% widthratio global_event.xp_bonus 1 1 %}%
+    </P>
+    {% endif %}
+    {% if global_event.shop_bonus and global_event.shop_bonus != '' and global_event.shop_bonus != 0 %}
+    <p>
+        <strong>Shop Bonus</strong>:
+        {% widthratio 100 global_event.shop_bonus 1 %}% off
+    </p>
+    {% endif %}
+    {% if global_event.is_luck %}
+    <p>
+        <strong>Shavar and Chenchir shine brightly</strong>:
+        +50 gold &amp; +25% moves!
+    </p>
+    {% endif %}
 </details>
         {% endfor %}
     {% else %}
