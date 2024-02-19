@@ -25,9 +25,8 @@
 <p class="lead">
     {{ WEBSITE_TITLE }} is under regular development, and constantly being improved!
 </p>
-
-{% if patches %}
-    {% for patch in patches %}
+    {% if patches %}
+        {% for patch in patches %}
 <details {% if forloop.first %} open{% endif %}>
     <summary id="{{ patch.patch_name | slugify }}" class="h3 text-ishar" title="{{ patch.patch_name }}">
         {{ patch.patch_name }}
@@ -49,12 +48,12 @@
         </footer>
     </blockquote>
 </details>
-    {% endfor %}
+        {% endfor %}
     <hr>
-    {% include "pagination.html" %}
-{% else %}
-    <p class="lead">
-        No patches found.
-    </p>
-{% endif %}
+        {% include "pagination.html" %}
+    {% else %}
+<p class="lead">
+    No patches found.
+</p>
+    {% endif %}
 {% endblock content %}

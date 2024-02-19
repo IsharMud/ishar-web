@@ -35,7 +35,7 @@ class Quest(models.Model):
         help_text="Minimum level of a player that may partake in the quest.",
         validators=[
             MinValueValidator(limit_value=1),
-            MaxValueValidator(limit_value=max(settings.IMMORTAL_LEVELS)[0])
+            MaxValueValidator(limit_value=settings.MAX_IMMORTAL_LEVEL)
         ],
         verbose_name="Minimum Level"
     )
@@ -46,7 +46,7 @@ class Quest(models.Model):
         help_text="(Deprecated) Maximum level of player that may do the quest.",
         validators=[
             MinValueValidator(limit_value=1),
-            MaxValueValidator(limit_value=max(settings.IMMORTAL_LEVELS)[0])
+            MaxValueValidator(limit_value=settings.MAX_IMMORTAL_LEVEL)
         ],
         verbose_name="Maximum Level (Deprecated)"
     )

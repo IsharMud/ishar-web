@@ -233,7 +233,7 @@ def parse_help_header(header=None):
     lines = header.split('\n')
 
     # Name the topic if mortals should reach it, and it starts with "32 "
-    if int(lines[0].strip()) < min(settings.IMMORTAL_LEVELS)[0] and lines[1].startswith('32 '):
+    if int(lines[0].strip()) < settings.MIN_IMMORTAL_LEVEL and lines[1].startswith('32 '):
         help_header['name'] = lines[1].replace('32 ', '').strip()
         help_header['aliases'] = []
 
