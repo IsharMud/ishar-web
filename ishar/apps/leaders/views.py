@@ -23,7 +23,7 @@ class LeadersView(LoginRequiredMixin, ListView):
 
         # Exclude immortals.
         qs = self.model.objects.exclude(
-            true_level__gte=min(settings.IMMORTAL_LEVELS)[0]
+            true_level__gte=settings.MIN_IMMORTAL_LEVEL
         )
 
         # Optionally filter for living/dead players.

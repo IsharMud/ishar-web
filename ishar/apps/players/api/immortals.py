@@ -16,5 +16,5 @@ from ishar.apps.players.api.schemas import ImmortalSchema
 def immortals(request):
     """Immortals."""
     return Player.objects.filter(
-        true_level__gte=min(settings.IMMORTAL_LEVELS)[0]
+        true_level__gte=settings.MIN_IMMORTAL_LEVEL
     ).all()

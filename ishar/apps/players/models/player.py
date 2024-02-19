@@ -86,7 +86,7 @@ class Player(models.Model):
         help_text="True level of the player character.",
         validators=[
             MinValueValidator(limit_value=1),
-            MaxValueValidator(limit_value=max(settings.IMMORTAL_LEVELS)[0])
+            MaxValueValidator(limit_value=settings.MAX_IMMORTAL_LEVEL)
         ],
         verbose_name="True Level"
     )
@@ -496,7 +496,7 @@ class Player(models.Model):
         if self.is_deleted == 3:
             return "Deleted"
 
-        if self.true_level >= min(settings.IMMORTAL_LEVELS)[0]:
+        if self.true_level >= settings.MIN_IMMORTAL_LEVEL:
             return get_immortal_type(level=self.true_level)
 
         if self.is_hardcore() is True:
