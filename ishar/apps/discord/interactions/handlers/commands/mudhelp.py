@@ -8,9 +8,10 @@ def mudhelp(request, interaction=None, _spell=False):
     """Search and return links to help topics."""
 
     # Default message assuming nothing is found.
-    reply = "Sorry - no such help topic could be found."
+    find_what = "help topic"
     if _spell:
-        reply = "Sorry - no such spell could be found."
+        find_what = "spell"
+    reply = "Sorry no such %s could be found." % find_what
 
     # Find help topics, based upon search query.
     search_query = interaction["options"][0]["value"]
@@ -44,14 +45,9 @@ def mudhelp(request, interaction=None, _spell=False):
             reverse(viewname="help_page", args=(help_url_page,))
         )
 
-        singular = "topic"
-        if _spell:
-            singular = "spell"
-        plural = singular + "s"
-
         reply = "%i %s :information_source: %s" % (
             num_results,
-            ngettext(singular, plural, num_results),
+            ngettext(find_what, find_what + "s", num_results),
             ngettext(help_url, f"<{help_url}>", num_results),
         )
 
