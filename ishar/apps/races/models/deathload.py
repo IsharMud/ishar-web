@@ -52,7 +52,7 @@ class RaceDeathload(models.Model):
         null=False,
         validators=(
             MinValueValidator(limit_value=1),
-            MaxValueValidator(limit_value=settings.MAX_IMMORTAL_LEVEL)
+            MaxValueValidator(limit_value=30)
         ),
         verbose_name="Minimum Level"
     )
