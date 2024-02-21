@@ -16,8 +16,9 @@ from ishar.apps.players.api.schemas import PlayerSchema
 )
 def hardcore(request):
     """Hardcore players."""
-    return Player.objects.filter(
-        true_level__lt=settings.MIN_IMMORTAL_LEVEL,
+    return Player.objects.exclude(
+        true_level__gte=settings.MIN_IMMORTAL_LEVEL
+    ).filter(
         game_type__exact=GameType.HARDCORE
     ).all()
 
@@ -30,8 +31,9 @@ def hardcore(request):
 )
 def survival(request):
     """Survival players."""
-    return Player.objects.filter(
-        true_level__lt=settings.MIN_IMMORTAL_LEVEL,
+    return Player.objects.exclude(
+        true_level__gte=settings.MIN_IMMORTAL_LEVEL
+    ).filter(
         game_type__exact=GameType.SURVIVAL
     ).all()
 
@@ -44,8 +46,9 @@ def survival(request):
 )
 def dead(request):
     """Dead players."""
-    return Player.objects.filter(
-        true_level__lt=settings.MIN_IMMORTAL_LEVEL,
+    return Player.objects.exclude(
+        true_level__gte=settings.MIN_IMMORTAL_LEVEL
+    ).filter(
         game_type__gt=GameType.CLASSIC,
         is_deleted__exact=1
     ).all()
@@ -59,8 +62,9 @@ def dead(request):
 )
 def living(request):
     """Living players."""
-    return Player.objects.filter(
-        true_level__lt=settings.MIN_IMMORTAL_LEVEL,
+    return Player.objects.exclude(
+        true_level__gte=settings.MIN_IMMORTAL_LEVEL
+    ).filter(
         game_type__gt=GameType.CLASSIC,
         is_deleted__exact=0
     ).all()

@@ -16,8 +16,8 @@ from ishar.apps.players.api.schemas import PlayerSchema
 )
 def players(request):
     """All players - excluding Immortals, Artisans, Eternals, Gods, etc."""
-    return Player.objects.filter(
-        true_level__lt=settings.MIN_IMMORTAL_LEVEL
+    return Player.objects.exclude(
+        true_level__gte=settings.MIN_IMMORTAL_LEVEL
     ).all()
 
 
