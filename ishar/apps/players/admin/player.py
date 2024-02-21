@@ -23,28 +23,23 @@ class PlayerAdmin(admin.ModelAdmin):
         ("Points", {"fields": ("bankacc", "renown", "remorts", "favors")}),
         ("Survival?", {
             "fields": ("game_type",),
-            "classes": ("collapse",)
         }),
         ("Deleted?", {
             "fields": ("is_deleted",),
-            "classes": ("collapse",)
         }),
         ("Totals", {
             "fields": (
                 "total_renown", "quests_completed", "challenges_completed"
             ),
-            "classes": ("collapse",)
         }),
         ("Rooms", {
             "fields": ("bound_room", "load_room", "inn_limit"),
-            "classes": ("collapse",)
         }),
         ("Time", {
             "fields": (
                 "birth", "logon", "logout",
                 "online", "online_timedelta", "online_time"
             ),
-            "classes": ("collapse",)
         })
     )
     inlines = (

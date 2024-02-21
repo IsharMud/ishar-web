@@ -10,7 +10,6 @@ class PlayerFlagsInlineAdmin(TabularInline):
     Player's flags tabular inline administration.
     """
     model = PlayerPlayerFlag
-    classes = ("collapse",)
     fields = readonly_fields = ("get_flag_link", "value")
     ordering = ("-value", "flag__name")
     verbose_name = "Flag"

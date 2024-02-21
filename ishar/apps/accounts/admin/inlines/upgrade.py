@@ -10,7 +10,6 @@ class AccountUpgradesLinksAdmin(TabularInline):
     Account upgrades links tabular inline administration.
     """
     model = AccountAccountUpgrade
-    classes = ("collapse",)
     fields = readonly_fields = ("get_upgrade_link", "amount")
     ordering = ("-amount", "upgrade__name")
     verbose_name = "Upgrade"

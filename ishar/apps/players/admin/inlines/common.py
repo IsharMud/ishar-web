@@ -8,7 +8,6 @@ class PlayerCommonInlineAdmin(StackedInline):
     Player common inline administration.
     """
     model = PlayerCommon
-    classes = ("collapse",)
     verbose_name = verbose_name_plural = "Common"
 
     def has_add_permission(self, request, obj=None) -> bool:

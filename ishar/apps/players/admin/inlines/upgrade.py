@@ -10,7 +10,6 @@ class PlayerRemortUpgradesInlineAdmin(TabularInline):
     Player's remort upgrades tabular inline administration.
     """
     model = PlayerRemortUpgrade
-    classes = ("collapse",)
     fields = readonly_fields = ("get_upgrade_link", "value", "essence_perk")
     ordering = ("-value", "-essence_perk", "upgrade__display_name")
     verbose_name = "Remort Upgrade"
