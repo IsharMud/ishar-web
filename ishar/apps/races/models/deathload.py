@@ -55,6 +55,24 @@ class RaceDeathload(models.Model):
         ),
         verbose_name="Minimum Level"
     )
+    max_level = models.PositiveIntegerField(
+        blank=True,
+        default=30,
+        help_text="Maximum level of the race deathload.",
+        null=True,
+        validators=(
+            MinValueValidator(limit_value=1),
+            MaxValueValidator(limit_value=30)
+        ),
+        verbose_name="Maximum Level"
+    )
+    max_load = models.PositiveIntegerField(
+        blank=True,
+        default=1,
+        help_text="Maximum load number of the race deathload.",
+        null=True,
+        verbose_name="Maximum Load"
+    )
 
     class Meta:
         db_table = "racial_deathload"
