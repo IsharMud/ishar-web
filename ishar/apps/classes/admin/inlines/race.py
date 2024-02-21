@@ -7,7 +7,6 @@ class ClassRaceInlineAdmin(TabularInline):
     """
     Class Race tabular inline administration.
     """
-    classes = ("collapse",)
     extra = 1
     fields = ("race", "player_class")
     model = ClassRace
