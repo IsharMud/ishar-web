@@ -5,8 +5,8 @@ from ishar.apps.players.models import Player
 
 def deadhead():
     """Player with the highest number of deaths."""
-    dead_head = Player.objects.filter(
-        true_level__lt=settings.MIN_IMMORTAL_LEVEL
+    dead_head = Player.objects.exclude(
+        true_level__gte=settings.MIN_IMMORTAL_LEVEL
     ).order_by(
         "-deaths"
     ).first()
