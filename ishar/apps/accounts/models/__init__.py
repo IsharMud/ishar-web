@@ -102,6 +102,12 @@ class Account(AbstractBaseUser, PermissionsMixin):
         help_text="Immortal level of the account.",
         verbose_name="Immortal Level"
     )
+    is_private = models.BooleanField(
+        db_column="is_private",
+        default=False,
+        help_text="Does the account want private player profiles?",
+        verbose_name="Is Private?"
+    )
 
     EMAIL_FIELD = "email"
     USERNAME_FIELD = "account_name"
@@ -118,7 +124,9 @@ class Account(AbstractBaseUser, PermissionsMixin):
 
     def __repr__(self):
         return "%s: %s (%i)" % (
-            self.__class__.__name__, self.__str__(), self.pk
+            self.__class__.__name__,
+            self.__str__(),
+            self.pk
         )
 
     def __str__(self) -> str:
