@@ -1,6 +1,6 @@
 from django.contrib.admin import display, ModelAdmin, register
 
-from ishar.apps.seasons.models import Season
+from .models import Season
 
 
 @register(Season)
