@@ -1,4 +1,4 @@
-from ishar.apps.races.models.skill import RaceSkill
+from ...models.skill import RaceSkill
 
 from . import BaseRaceAdminInline
 

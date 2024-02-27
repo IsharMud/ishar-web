@@ -1,9 +1,9 @@
 from django.contrib.admin import TabularInline
 
-from ishar.apps.classes.models.level import ClassLevel
+from ...models.level import ClassLevel
 
 
-class ClassLevelInlineAdmin(TabularInline):
+class ClassLevelTabularInline(TabularInline):
     """
     Class Levels tabular inline administration.
     """

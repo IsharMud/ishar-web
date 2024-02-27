@@ -1,6 +1,6 @@
 from django.contrib.admin import ModelAdmin, register
 
-from ishar.apps.classes.models.race import ClassRace
+from ..models.race import ClassRace
 
 
 @register(ClassRace)

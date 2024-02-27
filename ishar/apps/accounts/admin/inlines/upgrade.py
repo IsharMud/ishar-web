@@ -2,7 +2,7 @@ from django.contrib.admin import display, TabularInline
 from django.urls import reverse
 from django.utils.html import format_html
 
-from ishar.apps.accounts.models.upgrade import AccountAccountUpgrade
+from ...models.upgrade import AccountAccountUpgrade
 
 
 class AccountUpgradesLinksAdmin(TabularInline):

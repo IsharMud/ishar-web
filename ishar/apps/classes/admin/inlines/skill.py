@@ -1,9 +1,9 @@
 from django.contrib.admin import TabularInline
 
-from ishar.apps.classes.models.skill import ClassSkill
+from ...models.skill import ClassSkill
 
 
-class ClassSkillInlineAdmin(TabularInline):
+class ClassSkillTabularInline(TabularInline):
     """
     Class Skill tabular inline administration.
     """

@@ -2,7 +2,7 @@ from django.contrib.admin import (
     ModelAdmin, register, RelatedOnlyFieldListFilter
 )
 
-from ishar.apps.faqs.models import FAQ
+from .models import FAQ
 
 
 @register(FAQ)

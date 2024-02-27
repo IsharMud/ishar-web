@@ -1,4 +1,4 @@
-from ishar.apps.races.models.deathload import RaceDeathload
+from ...models.deathload import RaceDeathload
 
 from . import BaseRaceAdminInline
 

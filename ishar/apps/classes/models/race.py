@@ -1,6 +1,6 @@
 from django.db import models
 
-from . import Class
+from ishar.apps.classes.models import Class
 
 from ishar.apps.races.models.race import Race
 

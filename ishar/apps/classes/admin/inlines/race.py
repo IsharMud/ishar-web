@@ -1,9 +1,9 @@
 from django.contrib.admin import TabularInline
 
-from ishar.apps.classes.models.race import ClassRace
+from ...models.race import ClassRace
 
 
-class ClassRaceInlineAdmin(TabularInline):
+class ClassRaceTabularInline(TabularInline):
     """
     Class Race tabular inline administration.
     """

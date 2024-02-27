@@ -21,8 +21,8 @@
 {% endblock header %}
 {% block content %}
     {% if global_events and GLOBAL_EVENT_COUNT > 0 %}
-<p class="lead" title="{{ GLOBAL_EVENT_COUNT }} event{{ global_event_count|pluralize }} active.">
-    {{ GLOBAL_EVENT_COUNT }} event{{ global_event_count|pluralize }} active.
+<p class="lead" title="{{ GLOBAL_EVENT_COUNT }} event{{ GLOBAL_EVENT_COUNT|pluralize }} active.">
+    {{ GLOBAL_EVENT_COUNT }} event{{ GLOBAL_EVENT_COUNT|pluralize }} active.
 </p>
         {% for global_event in global_events %}
 <details open>

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from ishar.apps.races.models.race import Race
+from ..models.race import Race
 
 from .inlines.affinity import RaceAffinityAdminInline
 from .inlines.deathload import RaceDeathloadAdminInline

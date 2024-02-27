@@ -2,7 +2,7 @@ from django.urls import reverse
 from django.utils.timesince import timeuntil
 from django.utils.timezone import now
 
-from ishar.apps.events.models import GlobalEvent
+from ishar.apps.events.models.event import GlobalEvent
 
 
 def events(request):

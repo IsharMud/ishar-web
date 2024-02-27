@@ -3,11 +3,10 @@ isharmud.com URL configuration.
 """
 from django.urls import include, path
 
-from ishar.views import HistoryView, HomeView, StartView, SupportView
-from ishar.views.auth import IsharLoginView, IsharLogoutView
-from ishar.apps.players.views.who import PlayerWhoView
-from ishar.apps.help.views.world import WorldView
-
+from .apps.players.views.who import PlayerWhoView
+from .apps.help.views.world import WorldView
+from .views import HistoryView, HomeView, StartView, SupportView
+from .views.auth import IsharLoginView, IsharLogoutView
 
 urlpatterns = [
     path("", HomeView.as_view(), name="index"),

@@ -1,18 +1,18 @@
-from django.contrib import admin
+from django.contrib.admin import ModelAdmin, register
 
-from ishar.apps.classes.models import Class
+from ..models import Class
 
 from .level import ClassLevelAdmin
 from .race import ClassRaceAdmin
 from .skill import ClassSkillAdmin
 
-from .inlines.level import ClassLevelInlineAdmin
-from .inlines.race import ClassRaceInlineAdmin
-from .inlines.skill import ClassSkillInlineAdmin
+from .inlines.level import ClassLevelTabularInline
+from .inlines.race import ClassRaceTabularInline
+from .inlines.skill import ClassSkillTabularInline
 
 
-@admin.register(Class)
-class ClassAdmin(admin.ModelAdmin):
+@register(Class)
+class ClassAdmin(ModelAdmin):
     """
     Ishar class administration.
     """
@@ -29,7 +29,9 @@ class ClassAdmin(admin.ModelAdmin):
         )}),
     )
     inlines = (
-        ClassLevelInlineAdmin, ClassRaceInlineAdmin, ClassSkillInlineAdmin
+        ClassLevelTabularInline,
+        ClassRaceTabularInline,
+        ClassSkillTabularInline
     )
     list_filter = ("is_playable",)
     list_display = list_display_links = (

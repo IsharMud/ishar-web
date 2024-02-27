@@ -1,6 +1,6 @@
 from django.contrib.admin import ModelAdmin, register
 
-from ishar.apps.classes.models.level import ClassLevel
+from ..models.level import ClassLevel
 
 
 @register(ClassLevel)

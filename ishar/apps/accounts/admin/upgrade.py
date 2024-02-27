@@ -1,6 +1,6 @@
 from django.contrib.admin import ModelAdmin, register
 
-from ishar.apps.accounts.models.upgrade import AccountUpgrade
+from ..models.upgrade import AccountUpgrade
 
 
 @register(AccountUpgrade)

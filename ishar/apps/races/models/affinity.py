@@ -1,9 +1,9 @@
 from django.db import models
 
+from ishar.apps.skills.models.force import Force
+
 from .race import Race
 from .type import AffinityType
-
-from ishar.apps.skills.models.force import Force
 
 
 class RaceAffinity(models.Model):

@@ -2,8 +2,8 @@ from django.contrib.admin import display, register
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
 
-from ishar.apps.accounts.admin.inlines.player import AccountPlayersLinksAdmin
-from ishar.apps.accounts.admin.inlines.upgrade import AccountUpgradesLinksAdmin
+from .inlines.player import AccountPlayersLinksAdmin
+from .inlines.upgrade import AccountUpgradesLinksAdmin
 
 
 @register(get_user_model())

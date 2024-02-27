@@ -1,6 +1,6 @@
 from django.contrib.admin import ModelAdmin, register
 
-from ishar.apps.skills.models.skill import Skill
+from ..models.skill import Skill
 
 from .inlines.component import SkillComponentAdminInline
 from .inlines.mod import SkillModAdminInline

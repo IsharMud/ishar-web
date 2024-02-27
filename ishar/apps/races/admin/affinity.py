@@ -2,7 +2,7 @@ from django.contrib.admin import (
     ModelAdmin, register, RelatedOnlyFieldListFilter
 )
 
-from ishar.apps.races.models.affinity import RaceAffinity
+from ..models.affinity import RaceAffinity
 
 
 @register(RaceAffinity)

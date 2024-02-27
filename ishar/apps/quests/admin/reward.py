@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
 
-from ishar.apps.quests.models.reward import QuestReward
+from ..models.reward import QuestReward
 
 
 @admin.register(QuestReward)

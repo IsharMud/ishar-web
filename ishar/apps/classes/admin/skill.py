@@ -1,6 +1,6 @@
 from django.contrib.admin import ModelAdmin, register
 
-from ishar.apps.classes.models.skill import ClassSkill
+from ..models.skill import ClassSkill
 
 
 @register(ClassSkill)

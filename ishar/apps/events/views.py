@@ -1,8 +1,8 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.utils import timezone
+from django.utils.timezone import now
 from django.views.generic.list import ListView
 
-from ishar.apps.events.models import GlobalEvent
+from .models.event import GlobalEvent
 
 
 class GlobalEventsView(LoginRequiredMixin, ListView):
@@ -11,8 +11,11 @@ class GlobalEventsView(LoginRequiredMixin, ListView):
     """
     context_object_name = "global_events"
     model = GlobalEvent
-    queryset = model.objects.filter(
-        start_time__lt=timezone.now(),
-        end_time__gt=timezone.now()
-    )
     template_name = "events.html"
+
+    def get_queryset(self):
+        current = now()
+        return super().get_queryset().filter(
+            start_time__lt=current,
+            end_time__gt=current
+        )

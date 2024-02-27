@@ -1,5 +1,5 @@
-from ishar.apps.help.util import search_help_topics
-from ishar.apps.help.views import HelpView
+from ..util import search_help_topics
+from ..views import HelpView
 
 
 class WorldView(HelpView):

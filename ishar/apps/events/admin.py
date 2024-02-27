@@ -1,6 +1,6 @@
 from django.contrib.admin import ModelAdmin, register
 
-from ishar.apps.events.models import GlobalEvent
+from .models.event import GlobalEvent
 
 
 @register(GlobalEvent)

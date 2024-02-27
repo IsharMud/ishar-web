@@ -7,11 +7,11 @@ from django.utils import timezone
 
 from passlib.hash import md5_crypt
 
-from ishar.apps.accounts.models.level import ImmortalLevel
-from ishar.apps.accounts.models.manager import AccountManager
-from ishar.apps.accounts.models.unsigned import UnsignedAutoField
+from ishar.util.ip import dec2ip
 
-from ishar.util import dec2ip
+from .level import ImmortalLevel
+from .manager import AccountManager
+from .unsigned import UnsignedAutoField
 
 
 class Account(AbstractBaseUser, PermissionsMixin):

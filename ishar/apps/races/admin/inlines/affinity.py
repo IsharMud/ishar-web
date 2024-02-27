@@ -1,4 +1,4 @@
-from ishar.apps.races.models.affinity import RaceAffinity
+from ...models.affinity import RaceAffinity
 
 from . import BaseRaceAdminInline
 
