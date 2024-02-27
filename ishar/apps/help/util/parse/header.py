@@ -1,3 +1,5 @@
+from django.conf import settings
+
 
 def parse_help_header(header=None):
     """

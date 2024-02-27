@@ -95,16 +95,6 @@ class Account(AbstractBaseUser, PermissionsMixin):
         help_text="Amount of essence earned.",
         verbose_name="Earned Essence"
     )
-<<<<<<< HEAD
-=======
-    immortal_level = models.SmallIntegerField(
-        blank=True,
-        choices=ImmortalLevel,
-        null=True,
-        help_text="Immortal level of the account.",
-        verbose_name="Immortal Level"
-    )
->>>>>>> staging
     is_private = models.BooleanField(
         db_column="is_private",
         default=False,
