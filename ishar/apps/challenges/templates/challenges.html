@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block meta_title %}Challenges{% endblock meta_title %}
-{% block meta_description %}Challenges, winners, and rewards currently available.{% endblock meta_description %}
+{% block meta_description %}Challenges currently available, A.{% endblock meta_description %}
 {% block meta_url %}{% url "challenges" %}{% endblock meta_url %}
 {% block title %}Challenges{% endblock title %}
 {% block header %}
@@ -27,7 +27,6 @@
                         { id: 'name', name: 'Find and Kill' },
                         { id: 'people', name: 'People' },
                         { id: 'level', name: 'Level' },
-                        { id: 'reward', name: 'Reward' }
                     ],
                     data: [
     {% for challenge in challenges %}
@@ -39,7 +38,6 @@
         {% endif %}
                             people: "{{ challenge.max_people }}",
                             level: {{ challenge.max_level }},
-                            reward: {{ challenge.chall_tier }}
                         },
     {% endfor %}
                     ],
