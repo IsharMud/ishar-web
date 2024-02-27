@@ -1,7 +1,7 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.list import ListView
 
-from ishar.apps.challenges.models import Challenge
+from .models import Challenge
 
 
 class ChallengesView(LoginRequiredMixin, ListView):

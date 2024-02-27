@@ -1,6 +1,6 @@
 from django.views.generic.list import ListView
 
-from ishar.apps.clients.models import MUDClientCategory  # , MUDClient
+from ishar.apps.clients.models.category import MUDClientCategory
 
 
 class MUDClientsView(ListView):

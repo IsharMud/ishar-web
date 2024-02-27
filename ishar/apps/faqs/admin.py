@@ -1,10 +1,12 @@
-from django.contrib import admin
+from django.contrib.admin import (
+    ModelAdmin, register, RelatedOnlyFieldListFilter
+)
 
-from ishar.apps.faqs.models import FAQ
+from .models import FAQ
 
 
-@admin.register(FAQ)
-class FAQAdmin(admin.ModelAdmin):
+@register(FAQ)
+class FAQAdmin(ModelAdmin):
     """
     Ishar news administration.
     """
@@ -19,7 +21,7 @@ class FAQAdmin(admin.ModelAdmin):
         "faq_id", "slug", "question_text", "is_visible", "display_order"
     )
     list_display_links = ("faq_id", "slug", "question_text")
-    list_filter = ("is_visible", ("account", admin.RelatedOnlyFieldListFilter))
+    list_filter = ("is_visible", ("account", RelatedOnlyFieldListFilter))
     readonly_fields = ("faq_id", "account", "created")
     search_fields = (
         "slug", "question_text", "question_answer", "account", "is_visible"

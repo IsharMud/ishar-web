@@ -2,13 +2,14 @@ from django.urls import reverse
 from django.utils.timesince import timeuntil
 from django.utils.timezone import now
 
-from ishar.apps.events.models import GlobalEvent
+from ishar.apps.events.models.event import GlobalEvent
 
 
 def events(request):
     """List any active global events."""
 
     # Default message assuming there are no active events.
+    ephemeral = True
     reply = "Sorry - no events right now."
 
     # Find the global active events in the database.
@@ -18,13 +19,17 @@ def events(request):
     ).all()
 
     # Proceed if there are any active events.
-    ephemeral = True
     if global_events.count() > 0:
         ephemeral = False
         events_url = "%s://%s%s" % (
-            request.scheme, request.get_host(), reverse("events")
+            request.scheme,
+            request.get_host(),
+            reverse("events")
         )
-        reply = "%i events: <%s>" % (global_events.count(), events_url)
+        reply = "%i events: <%s>" % (
+            global_events.count(),
+            events_url
+        )
 
         # List the number, description, time left, and expiration of the event.
         for (num, event) in enumerate(global_events.all(), start=1):

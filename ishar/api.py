@@ -25,7 +25,7 @@ class BearerToken(HttpBearer):
 api = NinjaAPI(
     auth=(local_debug, BearerToken(), django_auth_superuser),
     csrf=False,
-    description=f"{settings.WEBSITE_TITLE} API",
+    description="%s API" % (settings.WEBSITE_TITLE),
     docs_url="/",
     title=settings.WEBSITE_TITLE,
     version="4.6.0"

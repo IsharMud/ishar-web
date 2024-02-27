@@ -1,11 +1,18 @@
+<<<<<<< HEAD
 from django.contrib import admin
+=======
+>>>>>>> staging
 from django.contrib.admin import display, ModelAdmin, register
 
 from ishar.apps.seasons.models import Season
 
 
 @register(Season)
+<<<<<<< HEAD
 class SeasonAdmin(admin.ModelAdmin):
+=======
+class SeasonAdmin(ModelAdmin):
+>>>>>>> staging
     """
     Season administration.
     """

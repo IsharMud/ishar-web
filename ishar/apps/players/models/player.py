@@ -9,11 +9,18 @@ from django.utils.timesince import timesince
 from django.utils.timezone import now
 
 from ishar.apps.accounts.models import Account
+<<<<<<< HEAD
 
 from ishar.apps.players.models.game_type import GameType
 from ishar.apps.players.util import get_immortal_level, get_immortal_type
 
 from ishar.util import dec2ip
+=======
+from ishar.util.ip import dec2ip
+
+from .game_type import GameType
+from ..util import get_immortal_level, get_immortal_type
+>>>>>>> staging
 
 
 class Player(models.Model):

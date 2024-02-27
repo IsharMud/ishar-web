@@ -10,10 +10,8 @@ from ishar.apps.classes.models import Class
 
 # Compile a few regular expressions for use later
 #   to parse out specific items from help topic chunks
-see_also_regex = re.compile(
-    r'^ *(see also|also see|also see help on|see help on|related) *\: *',
-    re.IGNORECASE
-)
+pattern = r'^ *(see also|also see|also see help on|see help on|related) *\: *'
+see_also_regex = re.compile(pattern=pattern, flags=re.IGNORECASE)
 regexes = {
     'syntax': re.compile(r'^ *(Syntax|syntax) *\: *(.+)$'),
     'minimum': re.compile(r'^ *(Minimum|minimum|Min|min) *\: *(.+)$'),

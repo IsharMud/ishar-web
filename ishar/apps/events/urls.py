@@ -1,6 +1,6 @@
 from django.urls import path
 
-from ishar.apps.events.views import GlobalEventsView
+from .views import GlobalEventsView
 
 
 urlpatterns = [

@@ -4,8 +4,9 @@ from ninja import Schema
 from typing import List
 
 from ishar.api import api
-from ishar.apps.seasons.models import Season
-from ishar.apps.seasons.util import get_current_season
+
+from .models import Season
+from .util import get_current_season
 
 
 class SeasonSchema(Schema):

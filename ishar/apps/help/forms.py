@@ -1,5 +1,5 @@
-from django import forms
+from django.forms import Form, CharField
 
 
-class HelpSearchForm(forms.Form):
-    search_topic = forms.CharField(help_text="", label="")
+class HelpSearchForm(Form):
+    search_topic = CharField(help_text="", label="")

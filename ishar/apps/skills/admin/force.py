@@ -1,6 +1,6 @@
 from django.contrib.admin import ModelAdmin, register
 
-from ishar.apps.skills.models.force import Force
+from ..models.force import Force
 
 
 @register(Force)

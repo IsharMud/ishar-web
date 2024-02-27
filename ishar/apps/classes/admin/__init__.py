@@ -1,17 +1,18 @@
-from django.contrib import admin
+from django.contrib.admin import ModelAdmin, register
 
-from ishar.apps.classes.models import Class
-from ishar.apps.classes.models.level import ClassLevel
-from ishar.apps.classes.models.race import ClassRace
-from ishar.apps.classes.models.skill import ClassSkill
+from ..models import Class
 
-from .level import ClassLevelInlineAdmin
-from .race import ClassRaceInlineAdmin
-from .skill import ClassSkillInlineAdmin
+from .level import ClassLevelAdmin
+from .race import ClassRaceAdmin
+from .skill import ClassSkillAdmin
+
+from .inlines.level import ClassLevelTabularInline
+from .inlines.race import ClassRaceTabularInline
+from .inlines.skill import ClassSkillTabularInline
 
 
-@admin.register(Class)
-class ClassesAdmin(admin.ModelAdmin):
+@register(Class)
+class ClassAdmin(ModelAdmin):
     """
     Ishar class administration.
     """
@@ -28,7 +29,9 @@ class ClassesAdmin(admin.ModelAdmin):
         )}),
     )
     inlines = (
-        ClassLevelInlineAdmin, ClassRaceInlineAdmin, ClassSkillInlineAdmin
+        ClassLevelTabularInline,
+        ClassRaceTabularInline,
+        ClassSkillTabularInline
     )
     list_filter = ("is_playable",)
     list_display = list_display_links = (
@@ -62,8 +65,3 @@ class ClassesAdmin(admin.ModelAdmin):
         if request.user and not request.user.is_anonymous:
             return request.user.is_eternal()
         return False
-
-
-admin.site.register(ClassLevel)
-admin.site.register(ClassRace)
-admin.site.register(ClassSkill)

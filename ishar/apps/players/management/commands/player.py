@@ -2,7 +2,7 @@ from pprint import pformat
 
 from django.core.management.base import BaseCommand, CommandError
 
-from ishar.apps.players.models import Player
+from ishar.apps.players.models.player import Player
 
 
 class Command(BaseCommand):

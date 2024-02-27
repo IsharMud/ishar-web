@@ -1,6 +1,6 @@
 from django.urls import path
 
-from ishar.apps.faqs.views import FAQView
+from .views import FAQView
 
 
 urlpatterns = [

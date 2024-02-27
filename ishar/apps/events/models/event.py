@@ -1,5 +1,7 @@
 from django.db import models
 
+from .event_type import EventType
+
 
 class GlobalEvent(models.Model):
     """
@@ -7,19 +9,7 @@ class GlobalEvent(models.Model):
     """
     event_type = models.IntegerField(
         primary_key=True,
-        choices=(
-            (0, "BONUS_XP [0]"),
-            (1, "TEST_SERVER [1]"),
-            (2, "CHALLENGE_XP [2]"),
-            (3, "CHALLENGE_CYCLE_XP [3]"),
-            (4, "CRASH_XP [4]"),
-            (5, "WINTER_FEST [5]"),
-            (6, "ST_PATRICK [6]"),
-            (7, "JULY_FOURTH [7]"),
-            (8, "HALLOWS_EVE [8]"),
-            (9, "HARVEST_FEST [9]"),
-            (10, "MAX_EVENT [10]")
-        ),
+        choices=EventType,
         help_text="Type of event.",
         verbose_name="Event Type",
     )
@@ -63,9 +53,10 @@ class GlobalEvent(models.Model):
         verbose_name_plural = "Global Events"
 
     def __repr__(self):
-        return (
-            f"{self.__class__.__name__}: {repr(self.__str__())} "
-            f"[{self.event_type}]"
+        return "%s: %s (%s)" % (
+            self.__class__.__name__,
+            self.__str__(),
+            self.event_type
         )
 
     def __str__(self):

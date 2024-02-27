@@ -7,10 +7,11 @@ from django.utils import timezone
 
 from passlib.hash import md5_crypt
 
-from ishar.apps.accounts.models.manager import AccountManager
-from ishar.apps.accounts.models.unsigned import UnsignedAutoField
+from ishar.util.ip import dec2ip
 
-from ishar.util import dec2ip
+from .level import ImmortalLevel
+from .manager import AccountManager
+from .unsigned import UnsignedAutoField
 
 
 class Account(AbstractBaseUser, PermissionsMixin):
@@ -94,6 +95,16 @@ class Account(AbstractBaseUser, PermissionsMixin):
         help_text="Amount of essence earned.",
         verbose_name="Earned Essence"
     )
+<<<<<<< HEAD
+=======
+    immortal_level = models.SmallIntegerField(
+        blank=True,
+        choices=ImmortalLevel,
+        null=True,
+        help_text="Immortal level of the account.",
+        verbose_name="Immortal Level"
+    )
+>>>>>>> staging
     is_private = models.BooleanField(
         db_column="is_private",
         default=False,

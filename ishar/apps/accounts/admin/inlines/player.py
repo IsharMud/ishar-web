@@ -2,7 +2,7 @@ from django.contrib.admin import display, TabularInline
 from django.urls import reverse
 from django.utils.html import format_html
 
-from ishar.apps.players.models import Player
+from ishar.apps.players.models.player import Player
 
 
 class AccountPlayersLinksAdmin(TabularInline):
@@ -71,6 +71,6 @@ class AccountPlayersLinksAdmin(TabularInline):
         return self.has_module_permission(request)
 
     fields = readonly_fields = (
-        "id", "get_player_link", "get_player_class", "get_player_race",
+        "get_player_link", "get_player_class", "get_player_race",
         "get_player_level", "get_player_game_type", "get_player_deleted"
     )

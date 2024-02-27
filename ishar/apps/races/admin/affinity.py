@@ -1,10 +1,12 @@
-from django.contrib import admin
+from django.contrib.admin import (
+    ModelAdmin, register, RelatedOnlyFieldListFilter
+)
 
-from ishar.apps.races.models.affinity import RaceAffinity
+from ..models.affinity import RaceAffinity
 
 
-@admin.register(RaceAffinity)
-class RaceAffinitiesAdmin(admin.ModelAdmin):
+@register(RaceAffinity)
+class RaceAffinityAdmin(ModelAdmin):
     """
     Ishar race affinity administration.
     """
@@ -20,8 +22,8 @@ class RaceAffinitiesAdmin(admin.ModelAdmin):
     )
     list_filter = (
         "affinity_type",
-        ("force", admin.RelatedOnlyFieldListFilter),
-        ("race", admin.RelatedOnlyFieldListFilter),
+        ("force", RelatedOnlyFieldListFilter),
+        ("race", RelatedOnlyFieldListFilter),
     )
     readonly_fields = ("race_affinity_id",)
     search_fields = ("race", "force", "affinity_type")

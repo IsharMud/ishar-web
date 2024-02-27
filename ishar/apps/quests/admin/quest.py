@@ -3,11 +3,11 @@ from django.db.models import Count
 from django.urls import reverse
 from django.utils.html import format_html
 
-from ishar.apps.quests.models.quest import Quest
+from ..models.quest import Quest
 
-from .inlines.prereq import QuestPrereqAdminInline
-from .inlines.reward import QuestRewardAdminInline
-from .inlines.step import QuestStepAdminInline
+from .inlines.prereq import QuestPrereqTabularInline
+from .inlines.reward import QuestRewardTabularInline
+from .inlines.step import QuestStepTabularInline
 
 
 @register(Quest)
@@ -19,7 +19,6 @@ class QuestAdmin(ModelAdmin):
     fieldsets = (
         (None, {"fields": ("quest_id", "name", "display_name", "repeatable")}),
         ("Deprecated", {
-            "classes": ("collapse",),
             "fields": ("deprecated_max_level", "deprecated_prerequisite")
         }),
         ("Players", {"fields": ("min_level", "class_restrict",)}),
@@ -30,7 +29,9 @@ class QuestAdmin(ModelAdmin):
         ("Items", {"fields": ("start_item",)}),
     )
     inlines = (
-        QuestPrereqAdminInline, QuestStepAdminInline, QuestRewardAdminInline
+        QuestPrereqTabularInline,
+        QuestStepTabularInline,
+        QuestRewardTabularInline
     )
     list_display = (
         "quest_id", "display_name", "repeatable", "num_steps",

@@ -1,6 +1,6 @@
 from django.db import models
 
-from . import Class
+from ishar.apps.classes.models import Class
 
 from ishar.apps.races.models.race import Race
 
@@ -38,7 +38,7 @@ class ClassRace(models.Model):
 
     def __repr__(self) -> str:
         return "%s: %s (%i)" % (
-            self.__class__.__name__, repr(self.__str__()), self.pk
+            self.__class__.__name__, self.__str__(), self.pk
         )
 
     def __str__(self) -> str:

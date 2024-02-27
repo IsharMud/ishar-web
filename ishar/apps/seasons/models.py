@@ -108,6 +108,7 @@ class Season(models.Model):
             args=(self.season_id,)
         )
 
+<<<<<<< HEAD
     def __repr__(self):
         return f"{self.__class__.__name__}: {repr(self.__str__())}"
 
@@ -118,6 +119,8 @@ class Season(models.Model):
             self.expiration_date.strftime("%c"),
         )
 
+=======
+>>>>>>> staging
     def get_next_cycle(self) -> (datetime, None):
         """Cycle of challenges is X amount of time after last cycle."""
         if self.last_challenge_cycle:

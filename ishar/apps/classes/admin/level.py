@@ -1,13 +1,13 @@
-from django.contrib.admin import TabularInline
+from django.contrib.admin import ModelAdmin, register
 
-from ishar.apps.classes.models.level import ClassLevel
+from ..models.level import ClassLevel
 
 
-class ClassLevelInlineAdmin(TabularInline):
+@register(ClassLevel)
+class ClassLevelAdmin(ModelAdmin):
     """
-    Class Levels tabular inline administration.
+    Ishar class level administration.
     """
-    classes = ("collapse",)
-    extra = 1
-    fields = ("level", "male_title", "female_title", "experience")
-    model = ClassLevel
+    list_display = ("class_level_id", "player_class", "level")
+    list_display_links = list_display
+    list_filter = ("player_class", "level")

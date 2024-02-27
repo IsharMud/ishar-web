@@ -1,36 +1,8 @@
-from django.contrib.admin import TabularInline
+from ...models.skill import RaceSkill
 
-from ishar.apps.races.models.skill import RaceSkill
+from . import BaseRaceAdminInline
 
 
-class RaceSkillAdminInline(TabularInline):
-    """
-    Race skill inline administration.
-    """
-    extra = 1
+class RaceSkillAdminInline(BaseRaceAdminInline):
+    """Race skill inline administration."""
     model = RaceSkill
-
-    def has_module_permission(self, request, obj=None) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_eternal()
-        return False
-
-    def has_add_permission(self, request, obj=None) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_god()
-        return False
-
-    def has_change_permission(self, request, obj=None) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_god()
-        return False
-
-    def has_delete_permission(self, request, obj=None) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_god()
-        return False
-
-    def has_view_permission(self, request, obj=None) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_eternal()
-        return False

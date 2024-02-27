@@ -1,10 +1,10 @@
-from django.contrib import admin
+from django.contrib.admin import ModelAdmin, register
 
-from ishar.apps.events.models import GlobalEvent
+from .models.event import GlobalEvent
 
 
-@admin.register(GlobalEvent)
-class GlobalEventsAdmin(admin.ModelAdmin):
+@register(GlobalEvent)
+class GlobalEventsAdmin(ModelAdmin):
     """
     Ishar global event administration.
     """
@@ -47,4 +47,3 @@ class GlobalEventsAdmin(admin.ModelAdmin):
         if request.user and not request.user.is_anonymous:
             return request.user.is_eternal()
         return False
-

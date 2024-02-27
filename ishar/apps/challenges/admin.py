@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from ishar.apps.challenges.models import Challenge
+from .models import Challenge
 
 
 class ChallengeCompletedListFilter(admin.SimpleListFilter):

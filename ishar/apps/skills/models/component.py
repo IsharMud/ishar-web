@@ -59,14 +59,12 @@ class SkillComponent(models.Model):
         verbose_name = "Skill Component"
         verbose_name_plural = "Skill Components"
 
-    def __repr__(self):
-        return (
-            f"{self.__class__.__name__}: {self.__str__()} @ "
-            f"[{self.skill_components_id}]"
+    def __repr__(self) -> str:
+        return "%s: %s (%i)" % (
+            self.__class__.__name__,
+            self.__str__(),
+            self.pk
         )
 
-    def __str__(self):
-        return (
-            f"{self.skill} / {self.get_component_type_display()}: "
-            f"{self.component_value}"
-        )
+    def __str__(self) -> str:
+        return "%s @ %s" % (self.get_component_type_display(), self.skill)

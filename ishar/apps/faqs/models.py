@@ -83,11 +83,9 @@ class FAQ(models.Model):
         return reverse(viewname="faq") + "#" + self.slug
 
     def __repr__(self):
-        return (
-            f"{self.__class__.__name__}: "
-            f"{repr(self.__str__())} @ {self.created} ({self.faq_id}) "
-            f"[by {self.account.account_name}]"
+        return "%s: %s (%i)" % (
+            self.__class__.__name__, self.__str__(), self.pk
         )
 
     def __str__(self):
-        return self.question_text
+        return self.slug

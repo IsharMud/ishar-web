@@ -1,9 +1,6 @@
 from django.contrib.admin import display
 from django.db import models
 
-from ishar.apps.races.models.race import Race
-from ishar.apps.skills.models.skill import Skill
-
 
 class Class(models.Model):
     """

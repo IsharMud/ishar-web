@@ -24,7 +24,6 @@ class AccountAdmin(UserAdmin):
         ),
         (
             "Points", {
-                "classes": ("collapse",),
                 "fields": (
                     "current_essence", "earned_essence", "bugs_reported"
                 )
@@ -32,19 +31,16 @@ class AccountAdmin(UserAdmin):
         ),
         (
             "Last", {
-                "classes": ("collapse",),
                 "fields": ("last_ident", "last_ip", "last_isp")
             }
         ),
         (
             "Created", {
-                "classes": ("collapse",),
                 "fields": ("create_ident", "create_ip", "create_isp")
             }
         ),
         (
             "Dates", {
-                "classes": ("collapse",),
                 "fields": ("account_gift", "banned_until", "created_at")
             }
         )

@@ -1,6 +1,6 @@
 from django.views.generic.list import ListView
 
-from ishar.apps.faqs.models import FAQ
+from .models import FAQ
 
 
 class FAQView(ListView):
