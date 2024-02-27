@@ -9,7 +9,6 @@ from django.utils.timesince import timesince
 from django.utils.timezone import now
 
 from ishar.apps.accounts.models import Account
-
 from ishar.util.ip import dec2ip
 
 from .game_type import GameType
