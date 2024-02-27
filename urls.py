@@ -7,13 +7,13 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views.generic import RedirectView
 
-from ishar.api import api
-from ishar.views import ErrorView
+from ishar.apps.core.api import api
+from ishar.apps.core.views import ErrorView
 
 
 urlpatterns = [
     # isharmud.com URL configuration.
-    path("", include("ishar.urls"), name="ishar"),
+    path("", include("ishar.apps.core.urls"), name="ishar"),
 
     # Django-Admin.
     path("admin/", admin.site.urls, name="admin"),

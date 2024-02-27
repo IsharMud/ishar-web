@@ -9,7 +9,7 @@ from django.utils.timesince import timesince
 from django.utils.timezone import now
 
 from ishar.apps.accounts.models import Account
-from ishar.util.ip import dec2ip
+from ishar.apps.core.util.ip import dec2ip
 
 from .game_type import GameType
 from ..util import get_immortal_level, get_immortal_type

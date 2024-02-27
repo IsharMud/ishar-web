@@ -3,7 +3,7 @@ from typing import List
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 
-from ishar.api import api
+from ishar.apps.core.api import api
 from ishar.apps.players.models.player import Player
 from ishar.apps.players.api.schemas import PlayerSchema
 

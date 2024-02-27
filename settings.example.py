@@ -17,6 +17,9 @@ BASE_DIR = Path(__file__).resolve().parent
 REST_TOKEN = getenv("DJANGO_REST_TOKEN") or get_random_secret_key()
 SECRET_KEY = getenv("DJANGO_SECRET_KEY", get_random_secret_key())
 
+# Website title.
+WEBSITE_TITLE = "Ishar MUD"
+
 # Debug.
 DEBUG = bool(getenv("DJANGO_DEBUG", False))
 
@@ -31,7 +34,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.mysql",
         "NAME": "ishar_test",
         "USER": "ishar_test",
-        "PASSWORD": "SECRET",
+        "PASSWORD": "secret",
         "HOST": "127.0.0.1",
         "PORT": 3306
     },
@@ -40,7 +43,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.mysql",
         "NAME": "ishar",
         "USER": "ishar",
-        "PASSWORD": "SECRET",
+        "PASSWORD": "secret",
         "HOST": "127.0.0.1",
         "PORT": 3306
     }
@@ -63,10 +66,10 @@ DJANGO_ORIGINS = getenv(
 CSRF_TRUSTED_ORIGINS = DJANGO_ORIGINS.split()
 
 # E-mail.
-ADMINS = MANAGERS = (("Administrator", "admin@" + ALLOWED_HOSTS[0]),)
 DEFAULT_FROM_EMAIL = SERVER_EMAIL = "admin@" + ALLOWED_HOSTS[0]
-EMAIL_SUBJECT_PREFIX = "[Django: " + ALLOWED_HOSTS[0] + "] "
-EMAIL_HOST = "mail.example.com"
+ADMINS = MANAGERS = (("Example", SERVER_EMAIL),)
+EMAIL_SUBJECT_PREFIX = "[Django: " + WEBSITE_TITLE + "] "
+EMAIL_HOST = "smtp.example.com"
 EMAIL_PORT = 25
 EMAIL_HOST_USER = EMAIL_HOST_PASSWORD = None
 
@@ -83,23 +86,24 @@ INSTALLED_APPS = [
     # "django.contrib.flatpages",
     "django.contrib.staticfiles",
     "ninja",
-    "ishar",
-    "ishar.apps.accounts",
-    "ishar.apps.challenges",
-    "ishar.apps.classes",
-    "ishar.apps.clients",
-    "ishar.apps.discord",
-    "ishar.apps.events",
-    "ishar.apps.faqs",
-    "ishar.apps.help",
-    "ishar.apps.leaders",
-    "ishar.apps.news",
-    "ishar.apps.patches",
-    "ishar.apps.players",
-    "ishar.apps.quests",
-    "ishar.apps.races",
-    "ishar.apps.seasons",
-    "ishar.apps.skills"
+    "ishar.apps.core.CoreConfig",
+    "ishar.apps.accounts.AccountsConfig",
+    "ishar.apps.challenges.ChallengesConfig",
+    "ishar.apps.classes.ClassesConfig",
+    "ishar.apps.clients.ClientsConfig",
+    "ishar.apps.discord.DiscordConfig",
+    "ishar.apps.events.EventsConfig",
+    "ishar.apps.faqs.FAQsConfig",
+    "ishar.apps.help.HelpConfig",
+    "ishar.apps.leaders.LeadersConfig",
+    "ishar.apps.mobs.MobsConfig",
+    "ishar.apps.news.NewsConfig",
+    "ishar.apps.patches.PatchesConfig",
+    "ishar.apps.players.PlayersConfig",
+    "ishar.apps.quests.QuestsConfig",
+    "ishar.apps.races.RacesConfig",
+    "ishar.apps.seasons.SeasonsConfig",
+    "ishar.apps.skills.SkillsConfig"
 ]
 
 MIDDLEWARE = [
@@ -128,12 +132,12 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "ishar.contexts.current_season",
-                "ishar.contexts.global_event_count",
-                "ishar.contexts.website_title",
+                "ishar.apps.core.contexts.current_season",
+                "ishar.apps.core.contexts.global_event_count",
+                "ishar.apps.core.contexts.website_title",
             ],
             "libraries": {
-                "ishar": "ishar.templatetags"
+                "ishar": "ishar.apps.core.templatetags"
             }
         },
     },
@@ -155,9 +159,6 @@ AUTHENTICATION_BACKENDS = (
 LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/portal/"
 LOGOUT_URL = "/logout/"
-
-# Website title.
-WEBSITE_TITLE = f"Ishar MUD LOCAL (DB: {DATABASES['default']['NAME']})"
 
 # Logging.
 LOGGING_DIR = "logs/"
@@ -318,6 +319,7 @@ JAZZMIN_SETTINGS = {
     # If you want to use a single search field you dont need to use a list, you can use a simple string
     "search_model": [
         "accounts.Account",
+        "mobs.MobData",
         "players.Player",
         "quests.Quest",
         "skills.Skill"
@@ -412,6 +414,10 @@ JAZZMIN_SETTINGS = {
 
         # faqs
         "faqs.FAQ": "fas fa-question",
+
+        # mobs
+        "mobs": "fas fa-skull",
+        "mobs.MobData": "fas fa-skull",
 
         # (MUD) clients
         "clients.MUDClient": "fas fa-terminal",

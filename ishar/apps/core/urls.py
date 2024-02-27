@@ -3,8 +3,9 @@ isharmud.com URL configuration.
 """
 from django.urls import include, path
 
-from .apps.players.views.who import PlayerWhoView
-from .apps.help.views.world import WorldView
+from ishar.apps.players.views.who import PlayerWhoView
+from ishar.apps.help.views.world import WorldView
+
 from .views import HistoryView, HomeView, StartView, SupportView
 from .views.auth import IsharLoginView, IsharLogoutView
 
