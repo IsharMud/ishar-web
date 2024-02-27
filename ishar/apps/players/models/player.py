@@ -323,6 +323,17 @@ class Player(models.Model):
     @property
     def player_link(self):
         """Player link."""
+        if self.account.is_private:
+            return (
+                format_html(
+                    '<span class="%s" title="%s">%s</a>' % (
+                        self.player_css,
+                        self.name,
+                        self.name,
+                    )
+                )
+            )
+
         return (
             format_html(
                 '<a class="%s" href="%s" title="%s">%s</a>' % (

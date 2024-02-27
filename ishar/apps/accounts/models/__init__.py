@@ -94,6 +94,12 @@ class Account(AbstractBaseUser, PermissionsMixin):
         help_text="Amount of essence earned.",
         verbose_name="Earned Essence"
     )
+    is_private = models.BooleanField(
+        db_column="is_private",
+        default=False,
+        help_text="Does the account want private player profiles?",
+        verbose_name="Is Private?"
+    )
 
     EMAIL_FIELD = "email"
     USERNAME_FIELD = "account_name"
@@ -108,10 +114,11 @@ class Account(AbstractBaseUser, PermissionsMixin):
         verbose_name = "Account"
         verbose_name_plural = "Accounts"
 
-    def __repr__(self) -> str:
-        return (
-            __class__.__name__ +
-            f": {repr(self.__str__())} [{self.account_id}]"
+    def __repr__(self):
+        return "%s: %s (%i)" % (
+            self.__class__.__name__,
+            self.__str__(),
+            self.pk
         )
 
     def __str__(self) -> str:

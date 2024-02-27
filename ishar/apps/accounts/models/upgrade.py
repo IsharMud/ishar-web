@@ -1,6 +1,6 @@
 from django.db import models
 
-from ishar.apps.accounts.models import Account
+from . import Account
 
 
 class AccountUpgrade(models.Model):
@@ -56,10 +56,14 @@ class AccountUpgrade(models.Model):
         verbose_name_plural = "Upgrades"
 
     def __repr__(self):
-        return f"{self.__class__.__name__}: {repr(self.__str__())}"
+        return "%s: %s (%i)" % (
+            self.__class__.__name__,
+            self.__str__(),
+            self.pk
+        )
 
     def __str__(self) -> str:
-        return self.name or self.id
+        return self.description or self.name
 
 
 class AccountAccountUpgrade(models.Model):
@@ -67,7 +71,7 @@ class AccountAccountUpgrade(models.Model):
     Account upgrade relation to an account.
     """
     account = models.ForeignKey(
-        primary_key=True,  # Fake it, just so reads work.
+        # primary_key=True,  # Fake it, just so reads work.
         db_column="account_id",
         editable=False,
         to=Account,
@@ -78,11 +82,12 @@ class AccountAccountUpgrade(models.Model):
         help_text="Account with the specified upgrade.",
         verbose_name="Account"
     )
-    upgrade = models.ForeignKey(
+    upgrade = models.OneToOneField(
         db_column="account_upgrades_id",
         editable=False,
         to=AccountUpgrade,
         to_field="id",
+        primary_key=True,
         related_query_name="+",
         on_delete=models.CASCADE,
         help_text="Upgrade which the account has.",
@@ -102,7 +107,9 @@ class AccountAccountUpgrade(models.Model):
         unique_together = (("account", "upgrade"),)
 
     def __repr__(self):
-        return f"{self.__class__.__name__}: {repr(self.__str__())}"
+        return "%s: %s (%i)" % (
+            self.__class__.__name__, self.__str__(), self.amount
+        )
 
     def __str__(self) -> str:
-        return f"{self.upgrade} @ {self.account} : {self.amount}"
+        return "%s @ %s" % (self.upgrade, self.account)
