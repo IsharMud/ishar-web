@@ -1,4 +1,6 @@
-from django.contrib import admin
+from django.contrib import admin, messages
+from django.urls import reverse
+from django.utils.html import format_html
 
 from .inlines.desc import MobileDescriptionsTabularInline
 from .inlines.flag import MobileFlagTabularInline
@@ -8,14 +10,13 @@ from ..models.mobile import Mobile
 
 @admin.register(Mobile)
 class MobileAdmin(admin.ModelAdmin):
-    """
-    Ishar mobile administration.
-    """
-    list_display = ("id", "long_name", "level", "description")
+    """Ishar mobile administration."""
+    list_display = ("id", "long_name", "level", "description", "is_challenge")
     list_display_links = ("id", "long_name")
     list_filter = (
         "mob_class", "level", "race", "sex",
         ("spec_func", admin.EmptyFieldListFilter),
+        ("challenge", admin.EmptyFieldListFilter),
     )
     readonly_fields = ("id",)
     search_fields = (
@@ -51,3 +52,26 @@ class MobileAdmin(admin.ModelAdmin):
         if request.user and not request.user.is_anonymous:
             return request.user.is_eternal()
         return False
+
+    @admin.display(
+        boolean=True, description="Challenge?", ordering="challenge"
+    )
+    def is_challenge(self, obj=None) -> bool:
+        return obj.is_challenge()
+
+    def render_change_form(
+        self, request, context, add=False, change=False, form_url="", obj=None
+    ):
+        if obj.is_challenge():
+            message = format_html(
+                'This mobile is a <a href="%s">challenge</a>.' % (
+                    reverse(
+                        viewname="admin:challenges_challenge_change",
+                        args=(obj.challenge.first().pk,)
+                    )
+                )
+            )
+            messages.info(request, message)
+        return super().render_change_form(
+            request, context, add, change, form_url, obj
+        )

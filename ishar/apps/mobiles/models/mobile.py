@@ -1,16 +1,13 @@
 from django.db import models
 
 from ishar.apps.classes.models import Class
-
 from ishar.apps.players.models.gender import PlayerGender
 from ishar.apps.races.models.race import Race
 from ishar.apps.skills.models.type.position import PlayerPosition
 
 
 class Mobile(models.Model):
-    """
-    Mobile.
-    """
+    """Mobile."""
     id = models.AutoField(
         blank=False,
         db_column="id",
@@ -233,7 +230,10 @@ class Mobile(models.Model):
         help_text="Permanent hit points of the mobile.",
         verbose_name="Permanent Hit Points"
     )
-    perm_move_pts = models.SmallIntegerField()
+    perm_move_pts = models.SmallIntegerField(
+        help_text="Permanent move points of the mobile.",
+        verbose_name="Permanent Move Points"
+    )
     perm_spell_pts = models.SmallIntegerField(
         help_text="Permanent spell points of the mobile.",
         verbose_name="Permanent Spell Points"
@@ -282,6 +282,12 @@ class Mobile(models.Model):
         help_text="High amount of the health range for the mobile.",
         verbose_name="Health Range High"
     )
+
+    def is_challenge(self):
+        if self.challenge:
+            if self.challenge.count() > 0:
+                return True
+        return False
 
     class Meta:
         managed = False
