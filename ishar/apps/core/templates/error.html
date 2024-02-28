@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+{% block title %}{{ title }}{% endblock title %}
+{% block header %}{{ title }}{% endblock header %}
+{% block content %}
+    <p class="lead">
+        {{ message }}
+    </p>
+    <p class="lead">
+        You may want to return to the <a href="{% url "index" %}" title="home page">home page</a>.
+    </p>
+{% endblock content %}
