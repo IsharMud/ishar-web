@@ -4,7 +4,7 @@ from typing import List
 from django.shortcuts import get_object_or_404
 from ninja import Schema
 
-from ishar.api import api
+from ishar.apps.core.api import api
 from .models import Challenge
 
 

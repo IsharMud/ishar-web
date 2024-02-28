@@ -44,6 +44,7 @@
             </div>
         </li>
     </ul>
+    <p class="p-1 m-1 lead" id="privateMsgNode"></p>
 
 {% if request.user.players and request.user.players.count > 0 %}
     <p class="lead" title="You have {{ request.user.players.count }} character{{ request.user.players.count | pluralize }}.">
@@ -211,6 +212,8 @@
         </footer>
     </blockquote>
 </details>
+
+{% csrf_token %}
 <script>
     const tooltipList = new bootstrap.Tooltip(document.getElementById('privateInfo'));
 

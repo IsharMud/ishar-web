@@ -3,8 +3,8 @@ isharmud.com context processors for Django templates.
 """
 from django.conf import settings
 
-from .apps.seasons.util import get_current_season
-from .apps.events.util import get_global_event_count
+from ishar.apps.seasons.util import get_current_season
+from ishar.apps.events.util import get_global_event_count
 
 
 def current_season(request):
