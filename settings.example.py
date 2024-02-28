@@ -85,7 +85,7 @@ INSTALLED_APPS = [
     "django.contrib.sites",
     # "django.contrib.flatpages",
     "django.contrib.staticfiles",
-    "ninja",
+    # "ninja",
     "ishar.apps.core.CoreConfig",
     "ishar.apps.accounts.AccountsConfig",
     "ishar.apps.challenges.ChallengesConfig",

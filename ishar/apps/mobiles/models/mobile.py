@@ -16,9 +16,9 @@ class Mobile(models.Model):
         db_column="id",
         editable=False,
         null=False,
-        help_text="Primary key identification number of the mobile.",
+        help_text="Primary key identification number (VNUM) of the mobile.",
         primary_key=True,
-        verbose_name="Mobile ID"
+        verbose_name="Mobile ID (VNUM)"
     )
     name = models.CharField(
         max_length=100,
@@ -292,14 +292,14 @@ class Mobile(models.Model):
         verbose_name_plural = "Mobiles"
 
     def __repr__(self) -> str:
-        return "%s: %s [%d]" % (
+        return "%s: %s" % (
             self.__class__.__name__,
             self.__str__(),
-            self.pk
         )
 
     def __str__(self) -> str:
-        return "%s (Level %i)" % (
+        return "%s (Level %i) [%i]" % (
             self.long_name or self.name,
-            self.level
+            self.level,
+            self.pk
         )

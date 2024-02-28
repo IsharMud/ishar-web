@@ -32,9 +32,9 @@
     {% for challenge in challenges %}
                         {
         {% if challenge.is_completed %}
-                            name: gridjs.html('<span class="challenge-completed">{% autoescape off %}{{ challenge.mob_name }}{% endautoescape %}</span><br><span class="text-white" title="Completed by">Completed by</span> {% for winner in challenge.winners %}<a href="{% url "player" name=winner %}#player" title="Player: {{ winner }}">{{ winner }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}'),
+                            name: gridjs.html('<span class="challenge-completed">{% autoescape off %}{{ challenge.mobile.long_name }}{% endautoescape %}</span><br><span class="text-white" title="Completed by">Completed by</span> {% for winner in challenge.winners %}<a href="{% url "player" name=winner %}#player" title="Player: {{ winner }}">{{ winner }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}'),
         {% else %}
-                            name: "{% autoescape off %}{{ challenge.mob_name }}{% endautoescape %}",
+                            name: "{% autoescape off %}{{ challenge.mobile.long_name }}{% endautoescape %}",
         {% endif %}
                             people: "{{ challenge.max_people }}",
                             level: {{ challenge.max_level }},

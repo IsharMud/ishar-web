@@ -1,19 +1,23 @@
 from django.db import models
 from django.contrib import admin
 
+from ishar.apps.mobiles.models.mobile import Mobile
+
 
 class Challenge(models.Model):
-    """
-    Challenge.
-    """
+    """Challenge."""
     challenge_id = models.SmallAutoField(
         help_text="Auto-generated permanent challenge identification number.",
         primary_key=True,
         verbose_name="Challenge ID",
     )
-    mob_vnum = models.IntegerField(
-        help_text="VNUM of the mobile target of the challenge.",
-        verbose_name="Mobile VNUM"
+    mobile = models.ForeignKey(
+        db_column="mob_vnum",
+        to=Mobile,
+        to_field="id",
+        on_delete=models.DO_NOTHING,
+        help_text="Target mobile of the challenge.",
+        verbose_name="Mobile"
     )
     max_level = models.IntegerField(
         help_text="Maximum level of the challenge.",
@@ -39,11 +43,6 @@ class Challenge(models.Model):
         ),
         max_length=80,
         verbose_name="Winner Description"
-    )
-    mob_name = models.CharField(
-        help_text="Name of the mobile target of the challenge.",
-        max_length=30,
-        verbose_name="Mobile Name"
     )
     is_active = models.BooleanField(
         help_text="Is the challenge currently active?",

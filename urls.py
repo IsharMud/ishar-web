@@ -7,7 +7,6 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views.generic import RedirectView
 
-from ishar.apps.core.api import api
 from ishar.apps.core.views import ErrorView
 
 
@@ -19,9 +18,6 @@ urlpatterns = [
     path("admin/", admin.site.urls, name="admin"),
 
     path("i18n/", include('django.conf.urls.i18n')),
-
-    # Django-Ninja.
-    path("api/", api.urls, name="api"),
 
     # Redirect to web client.
     path(
