@@ -21,7 +21,7 @@ class SetPrivateView(LoginRequiredMixin, View):
                 account.is_private = True
             elif request.user.is_private:
                 account.is_private = False
-            account.save(update_fields="is_private")
+            account.save(update_fields=("is_private",))
 
             self.message = {"is_private": account.is_private}
             self.status = 200
