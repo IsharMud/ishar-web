@@ -1,25 +1,15 @@
-from django.contrib import admin
+from django.contrib.admin import TabularInline
 
-from ..models.mob_data import MobData
+from ...models.desc import MobileDescription
 
 
-@admin.register(MobData)
-class MobDataAdmin(admin.ModelAdmin):
-    """
-    Ishar mob data administration.
-    """
-    list_display = ("id", "long_name", "level", "description")
-    list_display_links = ("id", "long_name")
-    list_filter = (
-        "level", "mob_class", "race", "sex",
-        ("spec_func", admin.EmptyFieldListFilter),
-    )
-    readonly_fields = ("id",)
-    search_fields = (
-        "name", "long_name", "room_desc", "description", "spec_func"
-    )
-    show_full_result_count = True
-    show_facets = admin.ShowFacets.ALWAYS
+class MobileDescriptionsTabularInline(TabularInline):
+    """Mobile descriptions tabular inline administration."""
+    model = MobileDescription
+    extra = 1
+    fields = ("extra_name", "extra_description")
+    verbose_name = "Description"
+    verbose_name_plural = "Descriptions"
 
     def has_add_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:

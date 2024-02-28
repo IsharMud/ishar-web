@@ -96,7 +96,7 @@ INSTALLED_APPS = [
     "ishar.apps.faqs.FAQsConfig",
     "ishar.apps.help.HelpConfig",
     "ishar.apps.leaders.LeadersConfig",
-    "ishar.apps.mobs.MobsConfig",
+    "ishar.apps.mobiles.MobilesConfig",
     "ishar.apps.news.NewsConfig",
     "ishar.apps.patches.PatchesConfig",
     "ishar.apps.players.PlayersConfig",
@@ -319,7 +319,7 @@ JAZZMIN_SETTINGS = {
     # If you want to use a single search field you dont need to use a list, you can use a simple string
     "search_model": [
         "accounts.Account",
-        "mobs.MobData",
+        "mobiles.Mobile",
         "players.Player",
         "quests.Quest",
         "skills.Skill"
@@ -415,9 +415,9 @@ JAZZMIN_SETTINGS = {
         # faqs
         "faqs.FAQ": "fas fa-question",
 
-        # mobs
-        "mobs": "fas fa-skull",
-        "mobs.MobData": "fas fa-skull",
+        # mobiles
+        "mobiles": "fas fa-skull",
+        "mobiles.Mobile": "fas fa-skull",
 
         # (MUD) clients
         "clients.MUDClient": "fas fa-terminal",
