@@ -73,7 +73,7 @@ EMAIL_HOST = "smtp.example.com"
 EMAIL_PORT = 25
 EMAIL_HOST_USER = EMAIL_HOST_PASSWORD = None
 
-# Application definition
+# Application definition.
 INSTALLED_APPS = [
     "jazzmin",
     "django.contrib.admin",
@@ -86,24 +86,24 @@ INSTALLED_APPS = [
     # "django.contrib.flatpages",
     "django.contrib.staticfiles",
     # "ninja",
-    "ishar.apps.core.CoreConfig",
-    "ishar.apps.accounts.AccountsConfig",
-    "ishar.apps.challenges.ChallengesConfig",
-    "ishar.apps.classes.ClassesConfig",
-    "ishar.apps.clients.ClientsConfig",
-    "ishar.apps.discord.DiscordConfig",
-    "ishar.apps.events.EventsConfig",
-    "ishar.apps.faqs.FAQsConfig",
-    "ishar.apps.help.HelpConfig",
-    "ishar.apps.leaders.LeadersConfig",
-    "ishar.apps.mobiles.MobilesConfig",
-    "ishar.apps.news.NewsConfig",
-    "ishar.apps.patches.PatchesConfig",
-    "ishar.apps.players.PlayersConfig",
-    "ishar.apps.quests.QuestsConfig",
-    "ishar.apps.races.RacesConfig",
-    "ishar.apps.seasons.SeasonsConfig",
-    "ishar.apps.skills.SkillsConfig"
+    "ishar.apps.CoreConfig",
+    "ishar.apps.AccountsConfig",
+    "ishar.apps.ChallengesConfig",
+    "ishar.apps.ClassesConfig",
+    "ishar.apps.ClientsConfig",
+    "ishar.apps.DiscordConfig",
+    "ishar.apps.EventsConfig",
+    "ishar.apps.FAQsConfig",
+    "ishar.apps.HelpConfig",
+    "ishar.apps.LeadersConfig",
+    "ishar.apps.MobilesConfig",
+    "ishar.apps.NewsConfig",
+    "ishar.apps.PatchesConfig",
+    "ishar.apps.PlayersConfig",
+    "ishar.apps.QuestsConfig",
+    "ishar.apps.RacesConfig",
+    "ishar.apps.SeasonsConfig",
+    "ishar.apps.SkillsConfig"
 ]
 
 MIDDLEWARE = [
@@ -501,7 +501,7 @@ JAZZMIN_UI_TWEAKS = {
     "brand_small_text": False,
     "brand_colour": False,
     "accent": "accent-primary",
-    "navbar": "navbar-dark",
+    "navbar": "navbar-white navbar-light",
     "no_navbar_border": False,
     "navbar_fixed": False,
     "layout_boxed": False,
@@ -514,8 +514,8 @@ JAZZMIN_UI_TWEAKS = {
     "sidebar_nav_compact_style": False,
     "sidebar_nav_legacy_style": False,
     "sidebar_nav_flat_style": False,
-    "theme": "cyborg",
-    "dark_mode_theme": "cyborg",
+    "theme": "cerulean",
+    "dark_mode_theme": None,
     "button_classes": {
         "primary": "btn-primary",
         "secondary": "btn-secondary",
