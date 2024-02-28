@@ -19,7 +19,7 @@ class MobileAdmin(admin.ModelAdmin):
     )
     readonly_fields = ("id",)
     search_fields = (
-        "name", "long_name", "room_desc", "description", "spec_func"
+        "id", "name", "long_name", "room_desc", "description", "spec_func"
     )
     inlines = (MobileDescriptionsTabularInline, MobileFlagTabularInline)
     show_full_result_count = True
