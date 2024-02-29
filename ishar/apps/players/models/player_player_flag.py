@@ -1,13 +1,12 @@
 from django.db import models
 
-from ishar.apps.players.models.flag import PlayerFlag
-from ishar.apps.players.models.player import Player
+from ishar.apps.core.models.player_flag import PlayerFlag
+
+from .player import Player
 
 
 class PlayerPlayerFlag(models.Model):
-    """
-    Player's Flag.
-    """
+    """Player player flag."""
     flag = models.OneToOneField(
         primary_key=True,
         to=PlayerFlag,

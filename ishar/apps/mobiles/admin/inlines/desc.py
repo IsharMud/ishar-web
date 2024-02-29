@@ -3,13 +3,11 @@ from django.contrib.admin import TabularInline
 from ...models.desc import MobileDescription
 
 
-class MobileDescriptionsTabularInline(TabularInline):
-    """Mobile descriptions tabular inline administration."""
+class MobileDescriptionTabularInline(TabularInline):
+    """Mobile description tabular inline administration."""
     model = MobileDescription
     extra = 1
     fields = ("extra_name", "extra_description")
-    verbose_name = "Description"
-    verbose_name_plural = "Descriptions"
 
     def has_add_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:

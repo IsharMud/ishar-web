@@ -1,15 +1,19 @@
-from django.contrib.admin import ModelAdmin, register
+from django.contrib.admin import EmptyFieldListFilter, ModelAdmin, register
 
-from ishar.apps.players.models.flag import PlayerFlag
+from ..models.affect_flag import AffectFlag
 
 
-@register(PlayerFlag)
-class PlayerFlagAdmin(ModelAdmin):
-    """Player flag administration."""
-    model = PlayerFlag
-    fieldsets = ((None, {"fields": ("flag_id", "name")}),)
-    list_display = list_display_links = search_fields = ("flag_id", "name",)
+@register(AffectFlag)
+class AffectFlagAdmin(ModelAdmin):
+    """Affect flag administration."""
+    model = AffectFlag
+    list_display = (
+        "flag_id", "display_name", "name", "is_beneficial", "item_description"
+    )
+    list_display_links = ("flag_id", "display_name", "name")
+    list_filter = ("is_beneficial", ("item_description", EmptyFieldListFilter),)
     readonly_fields = ("flag_id",)
+    search_fields = ("flag_id", "display_name", "name", "item_description")
     verbose_name = "Player's Flag"
     verbose_name_plural = "Player's Flags"
 

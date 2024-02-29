@@ -1,6 +1,6 @@
 from django.db import models
 
-from ishar.apps.players.models.flag import PlayerFlag
+from ishar.apps.core.models.player_flag import PlayerFlag
 
 from .mobile import Mobile
 

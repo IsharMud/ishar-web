@@ -2,7 +2,8 @@ from django.contrib import admin, messages
 from django.urls import reverse
 from django.utils.html import format_html
 
-from .inlines.desc import MobileDescriptionsTabularInline
+from .inlines.affect_flag import MobileAffectFlagTabularInline
+from .inlines.desc import MobileDescriptionTabularInline
 from .inlines.flag import MobileFlagTabularInline
 
 from ..models.mobile import Mobile
@@ -22,7 +23,11 @@ class MobileAdmin(admin.ModelAdmin):
     search_fields = (
         "id", "name", "long_name", "room_desc", "description", "spec_func"
     )
-    inlines = (MobileDescriptionsTabularInline, MobileFlagTabularInline)
+    inlines = (
+        MobileDescriptionTabularInline,
+        MobileAffectFlagTabularInline,
+        MobileFlagTabularInline,
+    )
     show_full_result_count = True
     show_facets = admin.ShowFacets.ALWAYS
 

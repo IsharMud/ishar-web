@@ -32,18 +32,12 @@ class PlayerRemortUpgradesInlineAdmin(TabularInline):
         return super().get_queryset(request).filter(value__gt=0)
 
     def has_add_permission(self, request) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_forger()
         return False
 
     def has_change_permission(self, request, obj=None) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_forger()
         return False
 
     def has_delete_permission(self, request, obj=None) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_forger()
         return False
 
     def has_module_permission(self, request) -> bool:

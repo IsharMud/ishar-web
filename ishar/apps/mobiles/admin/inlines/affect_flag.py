@@ -1,14 +1,14 @@
 from django.contrib.admin import TabularInline
 
-from ...models.flag import MobileFlag
+from ...models.affect_flag import MobileAffectFlag
 
 
-class MobileFlagTabularInline(TabularInline):
-    """Mobile player flag tabular inline administration."""
-    model = MobileFlag
+class MobileAffectFlagTabularInline(TabularInline):
+    """Mobile affect flag tabular inline administration."""
+    model = MobileAffectFlag
     extra = 1
-    fields = ("flag", "value")
-    ordering = ("-value", "flag__name")
+    fields = ("affect_flag", "value")
+    ordering = ("-value", "affect_flag__name")
 
     def has_add_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
@@ -17,8 +17,7 @@ class MobileFlagTabularInline(TabularInline):
 
     def has_change_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
-            if request.user.is_god():
-                return True
+            return request.user.is_god()
         return False
 
     def has_delete_permission(self, request, obj=None) -> bool:

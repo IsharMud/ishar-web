@@ -24,7 +24,7 @@ class PlayerFlagsInlineAdmin(TabularInline):
         return format_html(
             '<a href="%s">%s</a>' % (
                 reverse(
-                    viewname="admin:players_playerflag_change",
+                    viewname="admin:core_playerflag_change",
                     args=(obj.flag.flag_id,)
                 ),
                 obj.flag.name
@@ -32,18 +32,12 @@ class PlayerFlagsInlineAdmin(TabularInline):
         )
 
     def has_add_permission(self, request) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_forger()
         return False
 
     def has_change_permission(self, request, obj=None) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_forger()
         return False
 
     def has_delete_permission(self, request, obj=None) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_forger()
         return False
 
     def has_module_permission(self, request) -> bool:
