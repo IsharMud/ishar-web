@@ -114,6 +114,8 @@
         </ul>
     </details>
 
+        {% if not player.account.is_private %}
+
             {% if player.upgrades %}
     <hr>
         <details class="m-2" open>
@@ -205,6 +207,8 @@
                 </li>
             </ul>
     </details>
+
+        {% endif %}
 
         {% else %}
     <p class="lead">
