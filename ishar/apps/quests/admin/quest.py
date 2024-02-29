@@ -70,33 +70,25 @@ class QuestAdmin(ModelAdmin):
     def num_steps(self, obj):
         return obj.num_steps
 
-    def has_module_permission(self, request, obj=None):
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_eternal()
-        return False
-
-    def has_add_permission(self, request, obj=None) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_eternal()
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_eternal()
-        return False
-
-    def has_delete_permission(self, request, obj=None):
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_eternal()
-        return False
-
-    def has_view_permission(self, request, obj=None):
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_eternal()
-        return False
-
     def save_model(self, request, obj, form, change):
         if obj and not change:
             obj.deprecated_prerequisite = '-1'
             obj.deprecated_max_level = '20'
         super().save_model(request, obj, form, change)
+
+    def has_add_permission(self, request) -> bool:
+        return self.has_module_permission(request)
+
+    def has_change_permission(self, request, obj=None) -> bool:
+        return self.has_module_permission(request)
+
+    def has_delete_permission(self, request, obj=None) -> bool:
+        return self.has_module_permission(request)
+
+    def has_module_permission(self, request) -> bool:
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_eternal()
+        return False
+
+    def has_view_permission(self, request, obj=None) -> bool:
+        return self.has_module_permission(request)

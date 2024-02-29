@@ -53,24 +53,32 @@ class AccountPlayersLinksAdmin(TabularInline):
         """Admin text for player race."""
         return obj.common.race
 
-    def has_add_permission(self, request, obj):
-        return False
-
-    def has_change_permission(self, request, obj=None):
-        return False
-
-    def has_delete_permission(self, request, obj=None):
-        return False
-
-    def has_module_permission(self, request):
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_god()
-        return False
-
-    def has_view_permission(self, request, obj=None):
-        return self.has_module_permission(request)
-
     fields = readonly_fields = (
         "get_player_link", "get_player_class", "get_player_race",
         "get_player_level", "get_player_game_type", "get_player_deleted"
     )
+
+    def has_add_permission(self, request, obj=None) -> bool:
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_forger()
+        return False
+
+    def has_change_permission(self, request, obj=None) -> bool:
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_forger()
+        return False
+
+    def has_delete_permission(self, request, obj=None) -> bool:
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_forger()
+        return False
+
+    def has_module_permission(self, request) -> bool:
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_eternal()
+        return False
+
+    def has_view_permission(self, request, obj=None) -> bool:
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_eternal()
+        return False

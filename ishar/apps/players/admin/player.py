@@ -63,29 +63,6 @@ class PlayerAdmin(admin.ModelAdmin):
     verbose_name = "Player"
     verbose_name_plural = "Players"
 
-    def has_add_permission(self, request, obj=None) -> bool:
-        """Disable adding players in /admin/."""
-        return False
-
-    def has_delete_permission(self, request, obj=None) -> bool:
-        """Disable deleting players in /admin/."""
-        return False
-
-    def has_change_permission(self, request, obj=None) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_god()
-        return False
-
-    def has_module_permission(self, request, obj=None) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_eternal()
-        return False
-
-    def has_view_permission(self, request, obj=None) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_eternal()
-        return False
-
     @admin.display(description="Level", ordering="common__level")
     def player_level(self, obj=None):
         return obj.common.level
@@ -102,3 +79,24 @@ class PlayerAdmin(admin.ModelAdmin):
                 obj.account.account_name
             )
         )
+
+    def has_add_permission(self, request) -> bool:
+        return False
+
+    def has_change_permission(self, request, obj=None) -> bool:
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_forger()
+        return False
+
+    def has_delete_permission(self, request, obj=None) -> bool:
+        return False
+
+    def has_module_permission(self, request) -> bool:
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_eternal()
+        return False
+
+    def has_view_permission(self, request, obj=None) -> bool:
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_eternal()
+        return False
