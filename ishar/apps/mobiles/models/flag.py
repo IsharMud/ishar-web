@@ -59,5 +59,5 @@ class MobileFlag(models.Model):
     def __str__(self) -> str:
         return "%s @ %s" % (
             self.flag,
-            self.mob
+            self.mobile
         )
