@@ -35,12 +35,12 @@
 
         <header class="container-fluid p-1">
             <nav class="navbar navbar-dark navbar-expand-lg bg-black rounded border-ishar">
-                <button class="m-1 navbar-toggler navbar-dark border-ishar" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle Navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
                 <a href="{% url "index" %}" title="{{ WEBSITE_TITLE }}">
                     <img class="navbar-brand" id="logo" alt="{{ WEBSITE_TITLE }}" src="{% static "images/logo.png" %}" style="height: 10rem;">
                 </a>
+                <button class="m-3 navbar-toggler navbar-dark border-ishar" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle Navigation">
+                    <span class="m-1 navbar-toggler-icon"></span>
+                </button>
                 <div class="collapse navbar-collapse p-3" id="navbarNavDropdown">
                     <ul class="navbar-nav nav-underline">
                         <li class="nav-item" title="Home">
