@@ -212,23 +212,29 @@
 </details>
 
 <script>
+    // Enable Bootstrap tooltips.
     const tooltipList = new bootstrap.Tooltip(document.getElementById('privateInfo'));
 
+    /* Define function to let a user toggle their profile public/private. */
     function togglePrivate(itemId) {
 
-        // Confirmation text.
+        // Get toggle switch.
         const item = document.getElementById(itemId);
+
+        // Set up confirmation text.
         var messageText = "";
         const msgNode = document.getElementById("privateMsgNode");
 
-        // Make public.
+        // Change value, and format text when either making...
+
+        // Public.
         if (item.value == "true") {
             item.value = false;
             var messageText = "public";
             msgNode.classList.remove("message-success");
             msgNode.classList.add("message-warning");
 
-        // Make private.
+        // Private.
         } else if (item.value == "false") {
             item.value = true;
             var messageText = "private";
@@ -236,18 +242,21 @@
             msgNode.classList.add("message-success");
         };
 
+        // POST request to HTTPS endpoint to toggle profile privacy.
         const xhr = new XMLHttpRequest();
         xhr.open("POST", "{% url 'set_private' %}");
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
-        // Display confirmation text for five (5) seconds before clearing.
+        // Show text five (5) seconds before clearing, upon successful request.
         xhr.onreadystatechange = () => {
             if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
                 msgNode.innerHTML = `Your profile has been made <b><em>${messageText}</em></b>.`
                 setTimeout(function() { msgNode.innerHTML = ""; }, 5*1000);
             };
         };
-        xhr.send(`csrfmiddlewaretoken={{ csrf_token }}&value=${item.value}`);
+
+        // Include CSRF token in the POST request.
+        xhr.send(`csrfmiddlewaretoken={{ csrf_token }}`);
     };
 </script>
 {% endblock content %}
