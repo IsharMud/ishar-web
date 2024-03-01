@@ -1,7 +1,8 @@
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.detail import DetailView
 
-from ishar.apps.players.models.player import Player
+from ..models.player import Player
 
 
 class PlayerView(LoginRequiredMixin, DetailView):
@@ -12,3 +13,19 @@ class PlayerView(LoginRequiredMixin, DetailView):
     model = Player
     slug_field = slug_url_kwarg = query_pk_and_slug = "name"
     template_name = "player.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        """
+        Since immortals can see private player profiles,
+        let them know if they are viewing a private profile.
+        """
+        if request.user:
+            if request.user.is_authenticated and request.user.is_immortal():
+                obj = self.get_object()
+                if obj.account.is_private:
+                    messages.add_message(
+                        request=request,
+                        level=messages.INFO,
+                        message="This player has marked their profile private."
+                    )
+        return super().dispatch(request, *args, **kwargs)
