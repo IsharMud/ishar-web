@@ -7,7 +7,7 @@ from ishar.apps.skills.models.type.position import PlayerPosition
 
 
 class Mobile(models.Model):
-    """Mobile."""
+    """Ishar mobile."""
     id = models.AutoField(
         blank=False,
         db_column="id",
@@ -304,8 +304,8 @@ class Mobile(models.Model):
         )
 
     def __str__(self) -> str:
-        return "%s (Level %i) [%i]" % (
+        return "%i. %s (Level %i)" % (
+            self.pk,
             self.long_name or self.name,
-            self.level,
-            self.pk
+            self.level
         )
