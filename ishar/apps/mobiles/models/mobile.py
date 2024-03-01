@@ -293,7 +293,7 @@ class Mobile(models.Model):
         managed = False
         db_table = "mob_data"
         default_related_name = "mobile"
-        ordering = ("name",)
+        ordering = ("id",)
         verbose_name = "Mobile"
         verbose_name_plural = "Mobiles"
 
