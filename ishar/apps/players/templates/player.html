@@ -118,7 +118,7 @@
 
             {% if player.upgrades %}
     <hr>
-        <details class="m-2" open>
+        <details class="m-2"{% if not player.account.is_private %} open{% endif %}>
             <summary id="upgrades" class="h4 text-ishar" title="Remort Upgrades{% if player.upgrades.count > 0 %} ({{ player.upgrades.count }}){% endif %}">
                 Remort Upgrades
                 {% if player.upgrades.count > 0 %}
@@ -149,7 +149,7 @@
 
             {% if player.player_stats %}
     <hr>
-        <details class="m-2" open>
+        <details class="m-2"{% if not player.account.is_private %} open{% endif %}>
             <summary id="stats" class="h4 text-ishar" title="Statistics">
                 Statistics
                 <a class="anchor-link" href="#stats" aria-label="Link to this section: Statistics">
@@ -172,7 +172,7 @@
             {% endif %}
 
     <hr>
-        <details class="m-2" open>
+        <details class="m-2"{% if not player.account.is_private %} open{% endif %}>
             <summary  id="time" class="h4 text-ishar" title="Time">
                 Time
                 <a class="anchor-link" href="#time" aria-label="Link to this section: Time">
