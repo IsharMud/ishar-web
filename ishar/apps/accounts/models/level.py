@@ -2,20 +2,20 @@ from django.db.models import IntegerChoices
 
 
 class ImmortalLevel(IntegerChoices):
-    """
-    Immortal levels.
-    """
-    IMM_NONE = 0, "None"
-    IMM_IMMORTAL = 1, "Immortal"
-    IMM_ARTISAN = 2, "Artisan"
-    IMM_ETERNAL = 3, "Eternal"
-    IMM_FORGER = 4, "Forger"
-    IMM_GOD = 5, "God"
+    """Immortal level choices."""
+    NONE = 0
+    IMMORTAL = 1
+    ARTISAN = 2
+    ETERNAL = 3
+    FORGER = 4
+    GOD = 5
 
     def __repr__(self) -> str:
-        return "%s: %s (%s)" % (
-            self.__class__.__name__, self.__str__(), self.value
+        return "%s: %s (%i)" % (
+            self.__class__.__name__,
+            self.__str__(),
+            self.value
         )
 
-    def __str__(self) -> str:
+    def __str__(self):
         return self.name

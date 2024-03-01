@@ -48,8 +48,10 @@ class Account(AbstractBaseUser, PermissionsMixin):
     )
     last_isp = models.CharField(
         max_length=25,
-        help_text=("Last Internet Service Provider (ISP) that logged in "
-                   "to the account."),
+        help_text=(
+            "Last Internet Service Provider (ISP) that logged in to the "
+            "account."
+        ),
         verbose_name="Last ISP"
     )
     create_ident = models.CharField(
@@ -121,7 +123,7 @@ class Account(AbstractBaseUser, PermissionsMixin):
         verbose_name = "Account"
         verbose_name_plural = "Accounts"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "%s: %s (%i)" % (
             self.__class__.__name__,
             self.__str__(),
@@ -131,13 +133,17 @@ class Account(AbstractBaseUser, PermissionsMixin):
     def __str__(self) -> str:
         return self.get_username()
 
-    def get_create_ip(self):
+    def check_password(self, raw_password: str = None) -> bool:
+        """Method to check account password."""
+        return md5_crypt.verify(secret=raw_password, hash=self.password)
+
+    def get_create_ip(self) -> (str, None):
         """IP address that created the account."""
         return dec2ip(self.create_haddr)
 
     def get_gravatar(self) -> (str, None):
-        """URL of any Gravatar.com image for the account e-mail address."""
-        if self.email:
+        """Gravatar.com image for any account e-mail address."""
+        if self.email and "@" in self.email:
             email = sanitize_email(self.email)
             avatar = Gravatar(email)
             if avatar:
@@ -146,9 +152,19 @@ class Account(AbstractBaseUser, PermissionsMixin):
                     return image
         return None
 
-    def get_last_ip(self):
+    def get_last_ip(self) -> (str, None):
         """IP address that last logged in to the account."""
         return dec2ip(self.last_haddr)
+
+    def get_username(self) -> str:
+        """Return account username."""
+        return self.account_name
+
+    def has_perms(self, perm_list, obj=None) -> bool:
+        return self.is_god()
+
+    def has_module_perms(self, app_label) -> bool:
+        return self.is_god()
 
     @property
     @admin.display(boolean=True, description="Active?")
@@ -167,77 +183,68 @@ class Account(AbstractBaseUser, PermissionsMixin):
 
     @admin.display(boolean=True, description="Artisan?")
     def is_artisan(self) -> bool:
-        """Boolean whether any Artisan (or above) players."""
-        for player in self.players.all():
-            if player.is_artisan():
-                return True
-        return False
-
-    @admin.display(boolean=True, description="Consort?")
-    def is_consort(self) -> bool:
-        """Boolean whether any Consort (or above) players."""
-        for player in self.players.all():
-            if player.is_consort():
+        """Boolean whether Artisan (or above)."""
+        if self.immortal_level:
+            if self.immortal_level >= ImmortalLevel.ARTISAN:
                 return True
         return False
 
     @admin.display(boolean=True, description="Eternal?")
     def is_eternal(self) -> bool:
-        """Boolean whether any Eternal (or above) players."""
-        for player in self.players.all():
-            if player.is_eternal():
+        """Boolean whether Eternal (or above)."""
+        if self.immortal_level:
+            if self.immortal_level >= ImmortalLevel.ETERNAL:
                 return True
         return False
 
     @admin.display(boolean=True, description="Forger?")
     def is_forger(self) -> bool:
-        """Boolean whether any Forger (or above) players."""
-        for player in self.players.all():
-            if player.is_forger():
+        """Boolean whether Forger (or above)."""
+        if self.immortal_level:
+            if self.immortal_level >= ImmortalLevel.FORGER:
                 return True
         return False
 
     @admin.display(boolean=True, description="God?")
     def is_god(self) -> bool:
-        """Boolean whether any God players."""
-        for player in self.players.all():
-            if player.is_god():
+        """Boolean whether God (or above?)."""
+        if self.immortal_level:
+            if self.immortal_level >= ImmortalLevel.GOD:
                 return True
         return False
 
     @admin.display(boolean=True, description="Immortal?")
     def is_immortal(self) -> bool:
-        """
-        Boolean whether any immortal (or above, but not consort) players.
-        """
-        for player in self.players.all():
-            if player.is_immortal():
+        """Boolean whether immortal, or above."""
+        if self.immortal_level:
+            if self.immortal_level >= ImmortalLevel.IMMORTAL:
                 return True
         return False
 
-    # "God"s are administrators/superusers for Django Admin
+    # "God"s are administrators/superusers, for Django Admin.
     is_admin = is_superuser = is_god
 
-    # Eternal players, and above, can also log in to Django Admin
     @property
-    def is_staff(self):
+    def is_staff(self) -> bool:
+        """Eternals, and above, can log in to Django Admin."""
         if self.is_eternal() is True:
             return True
         return False
 
-    def check_password(self, raw_password: str = None) -> bool:
-        """Method to check account password."""
-        return md5_crypt.verify(secret=raw_password, hash=self.password)
+    @property
+    def last_login(self) -> datetime:
+        """Most recent login of all players for the account."""
+        when = self.created_at
+        for player in self.players.all():
+            if player.logon < when:
+                when = player.logon
+        return when
 
-    def get_username(self) -> str:
-        """Return account username."""
-        return self.account_name
-
-    def has_perms(self, perm_list, obj=None) -> bool:
-        return self.is_god()
-
-    def has_module_perms(self, app_label) -> bool:
-        return self.is_god()
+    @property
+    @admin.display(description="# Players", ordering="player_count")
+    def player_count(self) -> int:
+        """Number of players for the account."""
+        return self.players.count()
 
     @property
     def seasonal_earned(self) -> int:
@@ -257,22 +264,9 @@ class Account(AbstractBaseUser, PermissionsMixin):
             return True
         return False
 
-    def upgrades(self):
+    def upgrades(self) -> iter:
         """Method to find active account upgrades for the account."""
         return self.all_upgrades.filter(
             account=self,
             amount__gt=0
         )
-
-    @property
-    def last_login(self) -> datetime:
-        when = self.created_at
-        for player in self.players.all():
-            if player.logon < when:
-                when = player.logon
-        return when
-
-    @property
-    @admin.display(description="# Players", ordering="player_count")
-    def player_count(self) -> int:
-        return self.players.count()

@@ -5,9 +5,7 @@ from ishar.apps.players.models.remort_upgrade import RemortUpgrade
 
 @register(RemortUpgrade)
 class RemortUpgradeAdmin(ModelAdmin):
-    """
-    Remort upgrades administration.
-    """
+    """Remort upgrades administration."""
     model = RemortUpgrade
     fieldsets = (
         (None, {"fields": ("upgrade_id", "name", "display_name")}),

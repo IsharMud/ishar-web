@@ -2,19 +2,17 @@ from django.contrib import admin
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
-from ishar.apps.players.models.player import Player
-
 from .filters import ImmortalTypeListFilter
 from .inlines.common import PlayerCommonInlineAdmin
 from .inlines.flag import PlayerFlagsInlineAdmin
 from .inlines.upgrade import PlayerRemortUpgradesInlineAdmin
 
+from ..models.player import Player
+
 
 @admin.register(Player)
 class PlayerAdmin(admin.ModelAdmin):
-    """
-    Player administration.
-    """
+    """Ishar player administration."""
     date_hierarchy = "birth"
     fieldsets = (
         (None, {"fields": (
