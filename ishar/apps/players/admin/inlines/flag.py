@@ -31,7 +31,7 @@ class PlayerFlagsInlineAdmin(TabularInline):
             )
         )
 
-    def has_add_permission(self, request) -> bool:
+    def has_add_permission(self, request, obj) -> bool:
         return False
 
     def has_change_permission(self, request, obj=None) -> bool:

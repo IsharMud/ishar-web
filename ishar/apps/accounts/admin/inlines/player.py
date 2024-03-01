@@ -58,7 +58,7 @@ class AccountPlayersLinksAdmin(TabularInline):
         "get_player_level", "get_player_game_type", "get_player_deleted"
     )
 
-    def has_add_permission(self, request, obj=None) -> bool:
+    def has_add_permission(self, request, obj) -> bool:
         if request.user and not request.user.is_anonymous:
             return request.user.is_forger()
         return False
