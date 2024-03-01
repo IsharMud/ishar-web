@@ -1,10 +1,9 @@
 from datetime import datetime
-
 from django.db import models
 from django.contrib import admin
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.utils import timezone
-
+from libgravatar import Gravatar, sanitize_email
 from passlib.hash import md5_crypt
 
 from ishar.apps.core.util.ip import dec2ip
@@ -135,6 +134,17 @@ class Account(AbstractBaseUser, PermissionsMixin):
     def get_create_ip(self):
         """IP address that created the account."""
         return dec2ip(self.create_haddr)
+
+    def get_gravatar(self) -> (str, None):
+        """URL of any Gravatar.com image for the account e-mail address."""
+        if self.email:
+            email = sanitize_email(self.email)
+            avatar = Gravatar(email)
+            if avatar:
+                image = avatar.get_image()
+                if image:
+                    return image
+        return None
 
     def get_last_ip(self):
         """IP address that last logged in to the account."""

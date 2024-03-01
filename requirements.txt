@@ -9,6 +9,7 @@ django-jazzmin==2.6.0
 django-ninja==1.1.0
 gunicorn==21.2.0
 idna==3.6
+libgravatar==1.0.4
 packaging==23.2
 passlib==1.7.4
 pycparser==2.21

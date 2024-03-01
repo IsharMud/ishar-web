@@ -324,7 +324,7 @@ JAZZMIN_SETTINGS = {
     ],
 
     # Field name on user model that contains avatar ImageField/URLField/Charfield or a callable that receives the user
-    "user_avatar": None,
+    "user_avatar": "get_gravatar",
 
     ############
     # Top Menu #
