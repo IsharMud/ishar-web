@@ -536,7 +536,7 @@ class Player(models.Model):
     @property
     def podir(self) -> str:
         """Player "Podir" folder on disk."""
-        return "%s/%s" % (settings.MUD_PODOR, self.name)
+        return "%s/%s" % (settings.MUD_PODIR, self.name)
 
     @property
     @display(description="Seasonal Earned", ordering="seasonal_earned")
