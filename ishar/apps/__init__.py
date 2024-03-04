@@ -1,4 +1,5 @@
 from .accounts import AccountsConfig
+from .achievements import AchievementsConfig
 from .challenges import ChallengesConfig
 from .classes import ClassesConfig
 from .clients import ClientsConfig

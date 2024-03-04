@@ -86,6 +86,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "ishar.apps.CoreConfig",
     "ishar.apps.AccountsConfig",
+    "ishar.apps.AchievementsConfig",
     "ishar.apps.ChallengesConfig",
     "ishar.apps.ClassesConfig",
     "ishar.apps.ClientsConfig",
@@ -396,6 +397,10 @@ JAZZMIN_SETTINGS = {
         # accounts
         "accounts.Account": "fas fa-user",
         "accounts.AccountUpgrade": "fas fa-arrow-up",
+
+        # achievements
+        "achievements.Achievement": "fas fa-mountain",
+        "achievements.AchievementReward": "fas fa-award",
 
         # challenges
         "challenges.Challenge": "fas fa-award",
