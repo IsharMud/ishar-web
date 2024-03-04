@@ -3,6 +3,7 @@ from django.views.generic import RedirectView
 
 from ishar.apps.leaders.views import LeadersView
 
+
 urlpatterns = [
     path("", LeadersView.as_view(), name="leaders"),
 

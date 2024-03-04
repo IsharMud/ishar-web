@@ -3,6 +3,12 @@
 {% block meta_description %}Leader board of top{% if game_type %} {{ game_type|lower }}{% endif %} players of the game and their achievements{% endblock meta_description %}
 {% block meta_url %}{% url "leaders" %}{% endblock meta_url %}
 {% block title %}Leaders{% if game_type and game_type_name %} / {{ game_type_name }}{% endif %}{% endblock title %}
+{% block scripts %}
+        <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+        <link rel="stylesheet" href="https://cdn.datatables.net/2.0.1/css/dataTables.bootstrap5.css">
+        <script src="https://cdn.datatables.net/2.0.1/js/dataTables.js"></script>
+        <script src="https://cdn.datatables.net/2.0.1/js/dataTables.bootstrap5.js"></script>
+{% endblock scripts %}
 {% block header %}
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
@@ -25,64 +31,6 @@
     </ol>
 </nav>
 {% endblock header %}
-{% block scripts %}
-<script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
-<script>
-    function showLeaders(where) {
-        new gridjs.Grid({
-            columns: [
-                {
-                    id: 'player',
-                    name: 'Player',
-                    formatter: (cell) => gridjs.html(`${cell}`)
-                },
-                {
-                    id: 'remorts',
-                    name: 'Remorts'
-                },
-                {
-                    id: 'renown',
-                    name: 'Renown'
-                },
-                {
-                    id: 'quests',
-                    name: 'Quests'
-                },
-                {
-                    id: 'challenges',
-                    name: 'Challenges'
-                },
-                {
-                    id: 'deaths',
-                    name: 'Deaths'
-                }
-            ],
-            data: [
-              {% for leader in leader_players %}
-                {
-                    player: '{{ leader.player_link }}',
-                    remorts: {{ leader.remorts | stringformat:"s" }},
-                    renown: {{ leader.total_renown | stringformat:"s" }},
-                    quests: {{ leader.quests_completed | stringformat:"s" }},
-                    challenges: {{ leader.challenges_completed | stringformat:"s" }},
-                    deaths: {{ leader.deaths | stringformat:"s" }}
-                }{% if not forloop.last %},{% endif %}
-              {% endfor %}
-            ],
-            className: {
-                table: 'table table-dark table-striped border border-secondary rounded'
-            },
-            style: {
-                table: {'max-width': '50vw'},
-                th: {'background-color': 'rgba(0, 0, 0, 0.1)'},
-            },
-            search:     true,
-            sort:       true,
-            pagination: true,
-        }).render(where);
-    };
-</script>
-{% endblock scripts %}
 {% block content %}<ul class="m-1 px-1 py-3 list-group list-group-horizontal">
 {% for num, name in game_types %}
 {% endfor %}
@@ -95,16 +43,7 @@
     </li>
 {% for num, name in game_types %}
     <li class="list-group-item bg-black" title="{{ name }}">
-    <!--
-game_type {{ game_type }}
-game_type_name: {{ game_type_name }}
-game_types: {{ game_types }}
-
-num: {{ num }}
-name: {{ name }}
-    -->
 {% if game_type == num %}
-    <!-- {{ game_type }} is {{ num }} -->
         <span class="text-ishar">{{ name }}</span>
 {% else %}
         <a class="list-group-item-text" href="{% url "leaders" %}{{ name|lower }}#leaders">{{ name }}</a>
@@ -138,7 +77,36 @@ name: {{ name }}
     </li>
 </ul>
 {% endif %}
-
-<div id="leaders"></div>
-<script>showLeaders( document.getElementById('leaders'));</script>
+<table id="leadersTable"></table>
+{{ leaders|json_script:"leaders" }}
+<script>
+    const leaders = [];
+    const leadersData = JSON.parse(JSON.parse(document.getElementById("leaders").textContent));
+    function buildLeader(leader) { leaders.push(leader.fields); };
+    leadersData.forEach(buildLeader);
+    const pageTable = new DataTable('#leadersTable', {
+        columns: [
+            {
+                data: 'name', title: 'Name',
+                render: function (data, type, row) {
+                    return `<a href="/player/${data}">${data}</a>`;
+                },
+            },
+            { data: 'remorts', title: 'Remorts',},
+            { data: 'total_renown', title: 'Renown' },
+            { data: 'quests_completed', title: 'Quests' },
+            { data: 'challenges_completed', title: 'Challenges' },
+            { data: 'deaths', title: 'Deaths '},
+        ],
+        columnDefs: [],
+        data: leaders,
+    });
+    pageTable.order([
+        { name: 'remorts', dir: 'desc', },
+        { name: 'total_renown', dir: 'desc', },
+        { name: 'quests_completed', dir: 'desc', },
+        { name: 'challenges_completed', dir: 'desc', },
+        { name: 'deaths', dir: 'asc', },
+    ]).draw();
+</script>
 {% endblock content %}

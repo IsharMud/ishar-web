@@ -1,9 +1,9 @@
-from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.serializers import serialize
 from django.views.generic.list import ListView
 
 from ishar.apps.players.models.game_type import GameType
-from ishar.apps.players.models.player import Player
+from .models.leader import Leader
 
 
 class LeadersView(LoginRequiredMixin, ListView):
@@ -11,8 +11,8 @@ class LeadersView(LoginRequiredMixin, ListView):
     Filter and order players to determine leaders.
         Optionally filter for game type, and living/dead.
     """
-    model = Player
-    context_object_name = "leader_players"
+    model = Leader
+    context_object_name = "leaders"
     template_name = "leaders.html"
     deleted = None
     game_type = None
@@ -20,11 +20,7 @@ class LeadersView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         """Filter players."""
-
-        # Exclude immortals.
-        qs = self.model.objects.exclude(
-            true_level__gte=settings.MIN_IMMORTAL_LEVEL
-        )
+        qs = super().get_queryset()
 
         # Optionally filter for living/dead players.
         if self.deleted is not None:
@@ -36,12 +32,6 @@ class LeadersView(LoginRequiredMixin, ListView):
                 GameType._value2member_map_[self.game_type].label
             qs = qs.filter(game_type__exact=self.game_type)
 
-        # Order the players based upon their progress,
-        #   sorting and returning the "leaders".
-        qs = qs.order_by(
-            "-remorts", "-total_renown", "-quests_completed",
-            "-challenges_completed", "deaths"
-        )
         return qs
 
     def get_context_data(self, *, object_list=None, **kwargs):
@@ -51,4 +41,13 @@ class LeadersView(LoginRequiredMixin, ListView):
         context["game_type"] = self.game_type
         context["game_type_name"] = self.game_type_name
         context["game_types"] = GameType.choices
+        context[self.context_object_name] = serialize(
+            format="json",
+            queryset=context.get(self.context_object_name),
+            fields=(
+                "name", "remorts", "total_renown", "quests_completed",
+                "challenges_completed", "deaths", "player_type", "game_type",
+                "get_player_type"
+            )
+        )
         return context
