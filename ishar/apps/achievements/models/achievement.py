@@ -33,6 +33,12 @@ class Achievement(models.Model):
         help_text="Updated time of the achievement.",
         verbose_name="Updated"
     )
+    category = models.PositiveSmallIntegerField(
+        blank=True,
+        null=True,
+        help_text="Category of the achievement.",
+        verbose_name="Category"
+    )
 
     class Meta:
         managed = False
