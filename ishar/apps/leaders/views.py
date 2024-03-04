@@ -45,9 +45,8 @@ class LeadersView(LoginRequiredMixin, ListView):
             format="json",
             queryset=context.get(self.context_object_name),
             fields=(
-                "name", "remorts", "total_renown", "quests_completed",
-                "challenges_completed", "deaths", "player_type", "game_type",
-                "get_player_type"
+                "name", "remorts", "total_renown", "challenges_completed",
+                "deaths", "player_type", "game_type", "get_player_type"
             )
         )
         return context

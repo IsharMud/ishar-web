@@ -17,7 +17,6 @@ class Leader(Player):
 
     class Meta:
         ordering = (
-            "-remorts", "-total_renown", "-quests_completed",
-            "-challenges_completed", "deaths"
+            "-remorts", "-total_renown", "-challenges_completed", "deaths"
         )
         proxy = True
