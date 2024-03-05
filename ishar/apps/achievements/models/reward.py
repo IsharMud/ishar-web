@@ -17,7 +17,7 @@ class AchievementReward(models.Model):
         null=True,
         to=Achievement,
         to_field="achievement_id",
-        on_delete=models.SET_NULL,
+        on_delete=models.DO_NOTHING,
         help_text="Achievement related to the reward.",
         verbose_name="Achievement"
     )

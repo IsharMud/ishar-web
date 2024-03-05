@@ -17,7 +17,7 @@ class AchievementCriteria(models.Model):
         null=True,
         to=Achievement,
         to_field="achievement_id",
-        on_delete=models.CASCADE,
+        on_delete=models.DO_NOTHING,
         help_text="Achievement related to a criteria.",
         verbose_name="Achievement"
     )

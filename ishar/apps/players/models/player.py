@@ -21,7 +21,7 @@ class Player(models.Model):
     """
     account = models.ForeignKey(
         to=Account,
-        on_delete=models.CASCADE,
+        on_delete=models.DO_NOTHING,
         related_query_name="player",
         related_name="players",
         help_text="Account that owns the player character.",

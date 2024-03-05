@@ -13,7 +13,7 @@ class AccountAccountUpgrade(models.Model):
         to_field="account_id",
         related_query_name="upgrade",
         related_name="all_upgrades",
-        on_delete=models.CASCADE,
+        on_delete=models.DO_NOTHING,
         help_text="Account with the specified upgrade.",
         verbose_name="Account"
     )
@@ -24,7 +24,7 @@ class AccountAccountUpgrade(models.Model):
         to_field="id",
         primary_key=True,
         related_query_name="+",
-        on_delete=models.CASCADE,
+        on_delete=models.DO_NOTHING,
         help_text="Upgrade which the account has.",
         verbose_name="Upgrade"
     )

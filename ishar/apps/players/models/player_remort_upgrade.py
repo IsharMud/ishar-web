@@ -17,7 +17,7 @@ class PlayerRemortUpgrade(models.Model):
         related_name="all_remort_upgrades",
         to=Player,
         to_field="id",
-        on_delete=models.CASCADE,
+        on_delete=models.DO_NOTHING,
         help_text="Player with a remort upgrade.",
         verbose_name="Player"
     )
@@ -28,7 +28,7 @@ class PlayerRemortUpgrade(models.Model):
         to_field="upgrade_id",
         primary_key=True,
         related_query_name="+",
-        on_delete=models.CASCADE,
+        on_delete=models.DO_NOTHING,
         help_text="Remort upgrade affecting a player.",
         verbose_name="Remort Upgrade"
     )

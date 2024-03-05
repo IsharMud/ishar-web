@@ -16,7 +16,7 @@ class SkillMod(models.Model):
     skill = models.ForeignKey(
         db_column="skill_id",
         to=Skill,
-        on_delete=models.CASCADE,
+        on_delete=models.DO_NOTHING,
         help_text="Skill/spell related to the mod.",
         related_name="mods",
         related_query_name="mod",

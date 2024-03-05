@@ -20,7 +20,7 @@ class RaceDeathload(models.Model):
         blank=False,
         db_column="race_id",
         to=Race,
-        on_delete=models.CASCADE,
+        on_delete=models.DO_NOTHING,
         null=False,
         help_text="Race related to the deathload.",
         related_name="deathloads",

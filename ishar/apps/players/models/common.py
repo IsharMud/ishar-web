@@ -13,7 +13,7 @@ class PlayerCommon(models.Model):
     player = models.OneToOneField(
         db_column="player_id",
         help_text="Player character with common attributes.",
-        on_delete=models.CASCADE,
+        on_delete=models.DO_NOTHING,
         primary_key=True,
         related_name="common",
         related_query_name="common",
@@ -24,7 +24,7 @@ class PlayerCommon(models.Model):
     player_class = models.ForeignKey(
         db_column="class_id",
         help_text="Class of the player character.",
-        on_delete=models.CASCADE,
+        on_delete=models.DO_NOTHING,
         related_query_name="+",
         to=Class,
         verbose_name="Class"
@@ -32,7 +32,7 @@ class PlayerCommon(models.Model):
     race = models.ForeignKey(
         db_column="race_id",
         help_text="Race of the player character.",
-        on_delete=models.CASCADE,
+        on_delete=models.DO_NOTHING,
         related_query_name="+",
         to=Race,
         verbose_name="Race"

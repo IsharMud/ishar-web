@@ -13,7 +13,7 @@ class PlayerSkill(models.Model):
         related_query_name="+",
         to=Skill,
         to_field="id",
-        on_delete=models.CASCADE,
+        on_delete=models.DO_NOTHING,
         help_text="Skill/spell related to a player.",
         verbose_name="Skill"
     )
@@ -23,7 +23,7 @@ class PlayerSkill(models.Model):
         related_name="skills",
         to=Player,
         to_field="id",
-        on_delete=models.CASCADE,
+        on_delete=models.DO_NOTHING,
         help_text="Player with a skill/spell.",
         verbose_name="Player"
     )

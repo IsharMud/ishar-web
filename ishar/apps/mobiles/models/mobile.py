@@ -141,7 +141,7 @@ class Mobile(models.Model):
     )
     race = models.ForeignKey(
         to=Race,
-        on_delete=models.SET_NULL,
+        on_delete=models.DO_NOTHING,
         blank=True,
         null=True,
         help_text="Race of the mobile.",
@@ -149,7 +149,7 @@ class Mobile(models.Model):
     )
     mob_class = models.ForeignKey(
         to=Class,
-        on_delete=models.SET_NULL,
+        on_delete=models.DO_NOTHING,
         db_column="class_id",
         blank=True,
         null=True,

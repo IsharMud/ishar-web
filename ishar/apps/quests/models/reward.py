@@ -28,7 +28,7 @@ class QuestReward(models.Model):
         to=Quest,
         db_column="quest_id",
         help_text="Quest which the reward is for.",
-        on_delete=models.CASCADE,
+        on_delete=models.DO_NOTHING,
         related_name="rewards",
         related_query_name="reward",
         verbose_name="Quest"

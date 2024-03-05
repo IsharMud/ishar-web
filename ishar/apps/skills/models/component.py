@@ -21,7 +21,7 @@ class SkillComponent(models.Model):
         db_column="skill_id",
         help_text="Skill related to a component.",
         null=False,
-        on_delete=models.CASCADE,
+        on_delete=models.DO_NOTHING,
         related_name="components",
         related_query_name="component",
         to=Skill,

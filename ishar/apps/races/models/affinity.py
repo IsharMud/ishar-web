@@ -19,7 +19,7 @@ class RaceAffinity(models.Model):
     )
     race = models.ForeignKey(
         to=Race,
-        on_delete=models.CASCADE,
+        on_delete=models.DO_NOTHING,
         help_text="Race of the affinity.",
         related_name="affinities",
         related_query_name="affinity",
@@ -27,7 +27,7 @@ class RaceAffinity(models.Model):
     )
     force = models.ForeignKey(
         to=Force,
-        on_delete=models.CASCADE,
+        on_delete=models.DO_NOTHING,
         help_text="Force of the affinity.",
         verbose_name="Force"
     )

@@ -10,7 +10,7 @@ class PlayerPlayerFlag(models.Model):
     flag = models.OneToOneField(
         primary_key=True,
         to=PlayerFlag,
-        on_delete=models.CASCADE,
+        on_delete=models.DO_NOTHING,
         editable=False,
         related_query_name="+",
         help_text="Flag affecting a player.",
@@ -18,7 +18,7 @@ class PlayerPlayerFlag(models.Model):
     )
     player = models.ForeignKey(
         to=Player,
-        on_delete=models.CASCADE,
+        on_delete=models.DO_NOTHING,
         editable=False,
         related_name="flag",
         related_query_name="flags",

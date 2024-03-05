@@ -29,7 +29,7 @@ class QuestStep(models.Model):
     quest = models.ForeignKey(
         null=False,
         to=Quest,
-        on_delete=models.CASCADE,
+        on_delete=models.DO_NOTHING,
         related_name='steps',
         related_query_name='step',
         help_text="Quest related to the quest step.",

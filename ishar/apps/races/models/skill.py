@@ -20,7 +20,7 @@ class RaceSkill(models.Model):
     race = models.ForeignKey(
         db_column="race_id",
         to=Race,
-        on_delete=models.CASCADE,
+        on_delete=models.DO_NOTHING,
         help_text="Race related to a skill.",
         related_name="skills",
         related_query_name="skill",
@@ -29,7 +29,7 @@ class RaceSkill(models.Model):
     skill = models.ForeignKey(
         db_column="skill_id",
         to=Skill,
-        on_delete=models.CASCADE,
+        on_delete=models.DO_NOTHING,
         help_text="Skill (or spell) related to a race.",
         verbose_name="Skill"
     )

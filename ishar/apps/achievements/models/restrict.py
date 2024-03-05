@@ -17,7 +17,7 @@ class AchievementClassRestrict(models.Model):
         db_column="achievement_id",
         to=Achievement,
         to_field="achievement_id",
-        on_delete=models.CASCADE,
+        on_delete=models.DO_NOTHING,
         help_text="Achievement which is restricted to a specific class.",
         verbose_name="Achievement"
     )
@@ -27,7 +27,7 @@ class AchievementClassRestrict(models.Model):
         null=True,
         to=Class,
         to_field="class_id",
-        on_delete=models.CASCADE,
+        on_delete=models.DO_NOTHING,
         help_text="Class which the achievement is restricted to.",
         verbose_name="Class"
     )

@@ -18,7 +18,7 @@ class SkillSpellFlag(models.Model):
     )
     skill = models.ForeignKey(
         to=Skill,
-        on_delete=models.CASCADE,
+        on_delete=models.DO_NOTHING,
         db_column="skill_id",
         help_text="Skill/spell affected by the flag.",
         related_name="flags",
@@ -27,7 +27,7 @@ class SkillSpellFlag(models.Model):
     )
     flag = models.ForeignKey(
         to=SpellFlag,
-        on_delete=models.CASCADE,
+        on_delete=models.DO_NOTHING,
         db_column="flag_id",
         help_text="Flag affecting the skill/spell.",
         verbose_name="Flag"

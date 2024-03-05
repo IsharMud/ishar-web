@@ -20,7 +20,7 @@ class SkillForce(models.Model):
     skill = models.ForeignKey(
         db_column="skill_id",
         to=Skill,
-        on_delete=models.CASCADE,
+        on_delete=models.DO_NOTHING,
         help_text="Skill/spell related to a force.",
         related_name="forces",
         related_query_name="force",
@@ -29,7 +29,7 @@ class SkillForce(models.Model):
     force = models.ForeignKey(
         db_column="force_id",
         to=Force,
-        on_delete=models.CASCADE,
+        on_delete=models.DO_NOTHING,
         help_text="Force related to a skill/spell.",
         verbose_name="Force"
     )
