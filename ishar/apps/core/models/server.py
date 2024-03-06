@@ -24,14 +24,13 @@ class MUDProcess(models.Model):
     )
     name = models.CharField(
         db_column="name",
-        default="ishar-mud",
+        default="ishar",
         max_length=32,
         help_text="Name of the MUD process.",
         verbose_name="Name"
     )
     user = models.CharField(
         db_column="user",
-        default="ishar-mud",
         max_length=32,
         help_text="Name of the MUD process.",
         verbose_name="Name"
