@@ -5,7 +5,7 @@ class SpellFlag(models.Model):
     """
     Spell Flag.
     """
-    id = models.PositiveIntegerField(
+    id = models.AutoField(
         blank=False,
         editable=False,
         help_text=(

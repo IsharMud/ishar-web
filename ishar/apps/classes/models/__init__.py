@@ -8,7 +8,7 @@ class Class(models.Model):
     """
     class_id = models.PositiveIntegerField(
         primary_key=True,
-        help_text="Auto-generated primary key identifying class.",
+        help_text="Permanent class identification number.",
         verbose_name="Class ID"
     )
     class_name = models.CharField(

@@ -1,17 +1,18 @@
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 from .mobile import Mobile
 
 
 class MobileDescription(models.Model):
     """Mobile description."""
-    id = models.PositiveIntegerField(
+    id = models.AutoField(
         db_column="id",
         primary_key=True,
-        help_text=(
-            "Auto-generated permanent ID number of the mobile description."
+        help_text=_(
+            "Auto-generated, permanent ID number of the mobile description."
         ),
-        verbose_name="Mobile Description ID"
+        verbose_name=_("Mobile Description ID")
     )
     mobile = models.ForeignKey(
         db_column="mob_id",

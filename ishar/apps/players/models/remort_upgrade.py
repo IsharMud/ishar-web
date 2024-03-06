@@ -6,7 +6,7 @@ class RemortUpgrade(models.Model):
     """
     Remort Upgrade.
     """
-    upgrade_id = models.PositiveIntegerField(
+    upgrade_id = models.AutoField(
         help_text=_(
             "Auto-generated, permanent identification number of the remort "
             "upgrade."

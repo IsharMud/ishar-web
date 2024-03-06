@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 from ishar.apps.core.models.player_flag import PlayerFlag
 
@@ -7,11 +8,14 @@ from .mobile import Mobile
 
 class MobileFlag(models.Model):
     """Mobile player flag."""
-    id = models.PositiveIntegerField(
+    id = models.AutoField(
         db_column="id",
         primary_key=True,
-        help_text="Auto-generated permanent ID number of the mob player flag.",
-        verbose_name="Mob Player Flag ID"
+        help_text=_(
+            "Auto-generated permanent identification number of the mobile "
+            "player flag."
+        ),
+        verbose_name=_("Mobile Player Flag ID")
     )
     mobile = models.ForeignKey(
         db_column="mob_id",

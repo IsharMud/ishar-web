@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 from ishar.apps.core.models.affect_flag import AffectFlag
 
@@ -7,10 +8,12 @@ from .mobile import Mobile
 
 class MobileAffectFlag(models.Model):
     """Ishar mobile affect flag."""
-    id = models.PositiveIntegerField(
+    id = models.AutoField(
         db_column="id",
         blank=False,
-        help_text="Auto-generated ID number of the mobile affect flag.",
+        help_text=_(
+            "Auto-generated identification number of the mobile affect flag."
+        ),
         null=False,
         primary_key=True,
         verbose_name="ID"

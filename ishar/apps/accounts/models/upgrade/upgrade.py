@@ -3,7 +3,7 @@ from django.db import models
 
 class AccountUpgrade(models.Model):
     """Account upgrade."""
-    id = models.PositiveIntegerField(
+    id = models.AutoField(
         primary_key=True,
         help_text="Auto-generated permanent ID number of the account upgrade.",
         verbose_name="Account Upgrade ID"

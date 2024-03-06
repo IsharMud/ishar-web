@@ -9,7 +9,7 @@ class RaceSkill(models.Model):
     """
     Race Skill.
     """
-    race_skill_id = models.PositiveIntegerField(
+    race_skill_id = models.AutoField(
         blank=False,
         db_column="race_skill_id",
         help_text="Primary identification number of the race skill.",

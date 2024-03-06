@@ -5,7 +5,7 @@ class PlayerFlag(models.Model):
     """
     Player Flag.
     """
-    flag_id = models.PositiveIntegerField(
+    flag_id = models.AutoField(
         db_column="flag_id",
         primary_key=True,
         help_text="Auto-generated identification number of the player flag.",

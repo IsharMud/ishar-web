@@ -3,7 +3,7 @@ from django.db import models
 
 class AffectFlag(models.Model):
     """Ishar affect flag, used by both mobiles and players."""
-    flag_id = models.PositiveIntegerField(
+    flag_id = models.AutoField(
         blank=False,
         help_text="Auto-generated identification number of the affect flag.",
         null=False,

@@ -4,8 +4,7 @@ from django.utils import timezone
 
 class Achievement(models.Model):
     """Ishar achievement."""
-    achievement_id = models.PositiveIntegerField(
-        editable=False,
+    achievement_id = models.AutoField(
         primary_key=True,
         help_text="Primary key identification number of the achievement.",
         verbose_name="Achievement ID"

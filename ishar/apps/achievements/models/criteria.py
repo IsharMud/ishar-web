@@ -1,15 +1,19 @@
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 from .achievement import Achievement
 
 
 class AchievementCriteria(models.Model):
     """Ishar achievement criteria."""
-    criteria_id = models.PositiveIntegerField(
+    criteria_id = models.AutoField(
         db_column="criteria_id",
-        help_text="Achievement criteria identification number primary key.",
+        help_text=_(
+            "Auto-generated, permanent achievement criteria identification "
+            "number primary key."
+        ),
         primary_key=True,
-        verbose_name="Achievement Criteria ID",
+        verbose_name=_("Achievement Criteria ID"),
     )
     achievement = models.ForeignKey(
         blank=True,

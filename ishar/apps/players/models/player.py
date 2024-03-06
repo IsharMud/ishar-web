@@ -27,13 +27,10 @@ class Player(models.Model):
         help_text="Account that owns the player character.",
         verbose_name="Account"
     )
-    id = models.PositiveIntegerField(
-        blank=False,
-        null=False,
+    id = models.AutoField(
         primary_key=True,
         help_text="Auto-generated permanent player identification number.",
-        unique=True,
-        verbose_name="ID"
+        verbose_name="(Player) ID"
     )
     name = models.SlugField(
         unique=True,

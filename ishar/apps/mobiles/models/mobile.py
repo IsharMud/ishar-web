@@ -8,14 +8,10 @@ from ishar.apps.skills.models.type.position import PlayerPosition
 
 class Mobile(models.Model):
     """Ishar mobile."""
-    id = models.PositiveIntegerField(
-        blank=False,
-        db_column="id",
-        editable=False,
-        null=False,
-        help_text="Primary key identification number (VNUM) of the mobile.",
+    id = models.AutoField(
+        help_text='Primary key identification number ("VNUM") of the mobile.',
         primary_key=True,
-        verbose_name="Mobile ID (VNUM)"
+        verbose_name='Mobile ID ("VNUM")'
     )
     name = models.CharField(
         max_length=100,

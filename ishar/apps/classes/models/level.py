@@ -7,9 +7,9 @@ class ClassLevel(models.Model):
     """
     Class Level.
     """
-    class_level_id = models.PositiveIntegerField(
+    class_level_id = models.AutoField(
         primary_key=True,
-        help_text="Auto-generated primary key for class level identifier.",
+        help_text="Auto-generated, primary key for class level identifier.",
         verbose_name="Class Level ID"
     )
     level = models.IntegerField(

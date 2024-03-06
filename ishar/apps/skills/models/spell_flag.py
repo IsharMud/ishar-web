@@ -8,10 +8,7 @@ class SkillSpellFlag(models.Model):
     """
     Skill association to a spell flag.
     """
-    id = models.PositiveIntegerField(
-        blank=False,
-        editable=False,
-        null=False,
+    id = models.AutoField(
         help_text="Auto-generated ID number of the skill-flag relation.",
         primary_key=True,
         verbose_name="ID"

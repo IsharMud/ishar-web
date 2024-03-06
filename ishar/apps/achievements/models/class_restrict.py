@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 from ishar.apps.classes.models import Class
 
@@ -7,11 +8,14 @@ from .achievement import Achievement
 
 class AchievementClassRestrict(models.Model):
     """Ishar achievement class restriction."""
-    acr_id = models.PositiveIntegerField(
+    acr_id = models.AutoField(
         db_column="acr_id",
         primary_key=True,
-        help_text="Achievement class restriction identification primary key.",
-        verbose_name="Achievement Class Restriction ID"
+        help_text=_(
+            "Auto-generated, permanent class restriction identification "
+            "primary key."
+        ),
+        verbose_name=_("Achievement Class Restriction ID")
     )
     achievement = models.OneToOneField(
         db_column="achievement_id",

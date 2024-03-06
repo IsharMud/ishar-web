@@ -9,9 +9,9 @@ class ClassRace(models.Model):
     """
     Class Race.
     """
-    classes_races_id = models.PositiveIntegerField(
+    classes_races_id = models.AutoField(
         primary_key=True,
-        help_text="Auto-generated primary key for class race identifier.",
+        help_text="Auto-generated, primary key for class race identifier.",
         verbose_name="Class Race ID"
     )
     race = models.ForeignKey(

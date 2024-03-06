@@ -1,11 +1,12 @@
 from django.db import models
 
 from .achievement import Achievement
+from .type.reward import AchievementRewardType
 
 
 class AchievementReward(models.Model):
     """Ishar achievement reward."""
-    reward_id = models.PositiveIntegerField(
+    reward_id = models.AutoField(
         db_column="reward_id",
         help_text="Achievement reward identification number primary key.",
         primary_key=True,
@@ -23,6 +24,7 @@ class AchievementReward(models.Model):
     )
     reward_type = models.PositiveIntegerField(
         blank=True,
+        choices=AchievementRewardType,
         null=True,
         help_text="Type of the achievement reward.",
         verbose_name="Type"
@@ -57,7 +59,7 @@ class AchievementReward(models.Model):
 
     def __str__(self):
         return "%s (%s) @ %s" % (
-            self.reward_type,
-            self.reward_value,
+            self.get_reward_type_display(),
+            self.git,
             self.achievement
         )

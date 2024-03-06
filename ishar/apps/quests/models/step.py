@@ -8,7 +8,7 @@ class QuestStep(models.Model):
     """
     Quest Step.
     """
-    step_id = models.PositiveIntegerField(
+    step_id = models.AutoField(
         primary_key=True,
         help_text="Quest step identification number",
         verbose_name="Quest Step ID"

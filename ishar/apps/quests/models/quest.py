@@ -9,7 +9,7 @@ class Quest(models.Model):
     """
     Quest playable by a player character.
     """
-    quest_id = models.PositiveIntegerField(
+    quest_id = models.AutoField(
         primary_key=True,
         help_text="Auto-generated permanent unique quest number.",
         verbose_name="Quest ID"

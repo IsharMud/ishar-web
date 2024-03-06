@@ -7,7 +7,7 @@ class SkillComponent(models.Model):
     """
     Skill Component.
     """
-    skill_components_id = models.PositiveIntegerField(
+    skill_components_id = models.AutoField(
         blank=False,
         db_column="skill_components_id",
         editable=False,
