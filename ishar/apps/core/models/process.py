@@ -74,8 +74,10 @@ def get_process(name="ishar", user=getlogin()):
         pass
         return None
 
-    if current_pid and current_pid == current_process.process_id:
-        return current_process
+    if current_process and current_pid:
+        if current_process.process_id:
+            if current_pid == current_process.process_id:
+                return current_process
 
     MUDProcess.objects.filter(
         name=name,
