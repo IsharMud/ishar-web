@@ -336,7 +336,7 @@ JAZZMIN_SETTINGS = {
 
         # Url that gets reversed (Permissions can be added)
         # {"name": "Home",  "url": "admin:index", "permissions": ["auth.view_user"]},
-        { "name": "Home",  "url": "admin:index"},
+        {"name": "Home",  "url": "admin:index"},
 
         # external url that opens in a new window (Permissions can be added)
         # {"name": "Support", "url": "https://github.com/farridav/django-jazzmin/issues", "new_window": True},
@@ -441,9 +441,6 @@ JAZZMIN_SETTINGS = {
         # players
         "players": "fas fa-users-cog",
         "players.Player": "fas fa-user",
-        "players.PlayerFlag": "fas fa-flag",
-        "players.PlayerFlags": "fas fa-flag",
-        "players.PlayersFlag": "fas fa-flag",
         "players.RemortUpgrade": "fas fa-arrow-up",
 
         # quests
@@ -485,7 +482,7 @@ JAZZMIN_SETTINGS = {
     # Whether to link font from fonts.googleapis.com (use custom_css to supply font otherwise)
     "use_google_fonts_cdn": True,
     # Whether to show the UI customizer on the sidebar
-    "show_ui_builder": False,
+    "show_ui_builder": True,
 
     ###############
     # Change view #

@@ -1,27 +1,35 @@
 from django.contrib.admin import ModelAdmin, register
 from django.contrib import messages
+from django.utils.translation import gettext_lazy as _
 
-from ..models.process import MUDProcess, get_process
+from ..models.process import MUDProcess
+from ..util.process import get_process
 
 
 @register(MUDProcess)
 class MUDProcessAdmin(ModelAdmin):
     """MUD process administration."""
     model = MUDProcess
-    fields = list_display = readonly_fields = (
-        "process_id", "name", "user", "last_updated"
-    )
+    list_display = ("process_id", "name", "user")
+    fields = readonly_fields = list_display + ("last_updated",)
     verbose_name = "MUD Process"
     verbose_name_plural = "MUD Processes"
 
     def get_list_filter(self, request):
         get_process()
+        if self.model.objects.count() == 0:
+            messages.warning(
+                request=request,
+                message=_("No MUD process found!")
+            )
         return super().get_list_filter(request)
 
     def has_add_permission(self, request) -> bool:
         return False
 
     def has_change_permission(self, request, obj=None) -> bool:
+        if request.user and not request.user.is_anonymous:
+            return request.user.is_forger()
         return False
 
     def has_delete_permission(self, request, obj=None) -> bool:
