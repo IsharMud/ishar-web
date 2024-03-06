@@ -2,6 +2,7 @@
 from os import getlogin
 
 from django.db import models
+from django.utils.timesince import timesince
 from django.utils.timezone import now
 
 
@@ -67,3 +68,6 @@ class MUDProcess(models.Model):
         ordering = ("-last_updated",)
         verbose_name = "MUD Process"
         verbose_name_plural = "MUD Processes"
+
+    def runtime(self):
+        return timesince(self.created)

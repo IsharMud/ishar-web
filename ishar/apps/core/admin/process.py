@@ -10,8 +10,8 @@ from ..util.process import get_process
 class MUDProcessAdmin(ModelAdmin):
     """MUD process administration."""
     model = MUDProcess
-    list_display = ("process_id", "name", "user")
-    fields = readonly_fields = list_display + ("last_updated",)
+    list_display = ("process_id", "name", "user", "created", "runtime")
+    fields = readonly_fields = list_display + ("last_updated", "created")
     verbose_name = "MUD Process"
     verbose_name_plural = "MUD Processes"
 
