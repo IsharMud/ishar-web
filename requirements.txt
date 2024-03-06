@@ -4,7 +4,7 @@ certifi==2024.2.2
 cffi==1.16.0
 charset-normalizer==3.3.2
 cryptography==42.0.5
-Django==5.0.2
+Django==5.0.3
 django-jazzmin==2.6.0
 django-ninja==1.1.0
 gunicorn==21.2.0
@@ -12,6 +12,7 @@ idna==3.6
 libgravatar==1.0.4
 packaging==23.2
 passlib==1.7.4
+psutil==5.9.8
 pycparser==2.21
 pydantic==2.6.2
 pydantic_core==2.16.3
