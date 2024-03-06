@@ -35,12 +35,6 @@ class AchievementReward(models.Model):
         help_text="Value of the achievement reward",
         verbose_name="Value"
     )
-    description = models.TextField(
-        blank=True,
-        null=True,
-        help_text="Description of the achievement reward.",
-        verbose_name="Description"
-    )
 
     class Meta:
         managed = False

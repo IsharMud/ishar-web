@@ -10,7 +10,7 @@ class AchievementRewardAdmin(admin.ModelAdmin):
     list_display_links = ("reward_id", "reward_type",)
     list_filter = ("achievement", "reward_type",)
     readonly_fields = ("reward_id",)
-    search_fields = ("reward_value", "description",)
+    search_fields = ("reward_value",)
 
     def has_module_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
