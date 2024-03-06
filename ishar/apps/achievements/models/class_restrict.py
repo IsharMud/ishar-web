@@ -7,7 +7,7 @@ from .achievement import Achievement
 
 class AchievementClassRestrict(models.Model):
     """Ishar achievement class restriction."""
-    acr_id = models.AutoField(
+    acr_id = models.PositiveIntegerField(
         db_column="acr_id",
         primary_key=True,
         help_text="Achievement class restriction identification primary key.",

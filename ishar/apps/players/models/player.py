@@ -27,7 +27,7 @@ class Player(models.Model):
         help_text="Account that owns the player character.",
         verbose_name="Account"
     )
-    id = models.AutoField(
+    id = models.PositiveIntegerField(
         blank=False,
         null=False,
         primary_key=True,

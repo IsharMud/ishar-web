@@ -5,7 +5,7 @@ from .achievement import Achievement
 
 class AchievementCriteria(models.Model):
     """Ishar achievement criteria."""
-    criteria_id = models.AutoField(
+    criteria_id = models.PositiveIntegerField(
         db_column="criteria_id",
         help_text="Achievement criteria identification number primary key.",
         primary_key=True,

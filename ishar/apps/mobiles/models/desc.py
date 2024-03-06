@@ -5,7 +5,7 @@ from .mobile import Mobile
 
 class MobileDescription(models.Model):
     """Mobile description."""
-    id = models.AutoField(
+    id = models.PositiveIntegerField(
         db_column="id",
         primary_key=True,
         help_text=(

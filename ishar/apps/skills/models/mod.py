@@ -8,7 +8,7 @@ class SkillMod(models.Model):
     """
     Skill mod.
     """
-    skill_mod_id = models.AutoField(
+    skill_mod_id = models.PositiveIntegerField(
         primary_key=True,
         help_text = "Auto-generated permanent unique skill mod number.",
         verbose_name="Skill Mod ID"

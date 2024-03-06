@@ -7,7 +7,7 @@ from .mobile import Mobile
 
 class MobileAffectFlag(models.Model):
     """Ishar mobile affect flag."""
-    id = models.AutoField(
+    id = models.PositiveIntegerField(
         db_column="id",
         blank=False,
         help_text="Auto-generated ID number of the mobile affect flag.",

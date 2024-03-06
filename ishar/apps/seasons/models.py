@@ -10,7 +10,7 @@ class Season(models.Model):
     """
     Season.
     """
-    season_id = models.AutoField(
+    season_id = models.PositiveIntegerField(
         primary_key=True,
         help_text="Auto-generated permanent season (identification) number.",
         verbose_name="Season ID"

@@ -1,6 +1,6 @@
-from django.contrib.admin import display, TabularInline
+from django.contrib.admin import TabularInline
 
-from ...models.restrict import AchievementClassRestrict
+from ...models.class_restrict import AchievementClassRestrict
 
 
 class AchievementClassRestrictTabularInline(TabularInline):

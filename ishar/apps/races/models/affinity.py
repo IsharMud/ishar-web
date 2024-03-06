@@ -10,7 +10,7 @@ class RaceAffinity(models.Model):
     """
     Race Affinity.
     """
-    race_affinity_id = models.AutoField(
+    race_affinity_id = models.PositiveIntegerField(
         blank=False,
         help_text="Primary identification number of the race affinity.",
         null=False,

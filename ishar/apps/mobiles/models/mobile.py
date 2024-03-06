@@ -8,7 +8,7 @@ from ishar.apps.skills.models.type.position import PlayerPosition
 
 class Mobile(models.Model):
     """Ishar mobile."""
-    id = models.AutoField(
+    id = models.PositiveIntegerField(
         blank=False,
         db_column="id",
         editable=False,

@@ -8,7 +8,7 @@ class RaceDeathload(models.Model):
     """
     Race Deathload.
     """
-    id = models.AutoField(
+    id = models.PositiveIntegerField(
         blank=False,
         db_column="racial_deathload_id",
         help_text="Primary identification number of the race deathload.",

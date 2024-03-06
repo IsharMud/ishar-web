@@ -9,7 +9,7 @@ class ClassSkill(models.Model):
     """
     Class Skill.
     """
-    class_skills_id = models.AutoField(
+    class_skills_id = models.PositiveIntegerField(
         primary_key=True,
         help_text="Auto-generated primary key for class skill identifier.",
         verbose_name="Class Skill ID"

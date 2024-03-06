@@ -8,7 +8,7 @@ class Skill(models.Model):
     """
     Skill (includes spells).
     """
-    id = models.AutoField(
+    id = models.PositiveIntegerField(
         blank=False,
         db_column="id",
         editable=False,

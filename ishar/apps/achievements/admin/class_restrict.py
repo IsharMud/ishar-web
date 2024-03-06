@@ -1,23 +1,15 @@
 from django.contrib import admin
 
-from .inlines.class_restrict import AchievementClassRestrictTabularInline
-from .inlines.criteria import AchievementCriteriaTabularInline
-from .inlines.reward import AchievementRewardTabularInline
-from ..models.achievement import Achievement
+from ..models.class_restrict import AchievementClassRestrict
 
 
-@admin.register(Achievement)
-class AchievementsAdmin(admin.ModelAdmin):
-    """Ishar achievements administration."""
-    inlines = (
-        AchievementClassRestrictTabularInline,
-        AchievementCriteriaTabularInline,
-        AchievementRewardTabularInline
-    )
-    list_display = ("achievement_id", "name", "description", "is_hidden")
-    list_filter = ("is_hidden", "created_at", "updated_at")
-    readonly_fields = ("achievement_id", "created_at", "updated_at")
-    search_fields = ("name", "description")
+@admin.register(AchievementClassRestrict)
+class AchievementClassRestrictAdmin(admin.ModelAdmin):
+    """Ishar achievement class restriction administration."""
+    list_display = ("acr_id", "achievement", "player_class",)
+    list_filter = ("achievement", "player_class",)
+    readonly_fields = ("acr_id",)
+    search_fields = ("achievement", "player_class")
 
     def has_module_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:

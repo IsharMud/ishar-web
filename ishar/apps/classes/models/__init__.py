@@ -6,7 +6,7 @@ class Class(models.Model):
     """
     Player/mobile class.
     """
-    class_id = models.AutoField(
+    class_id = models.PositiveIntegerField(
         primary_key=True,
         help_text="Auto-generated primary key identifying class.",
         verbose_name="Class ID"

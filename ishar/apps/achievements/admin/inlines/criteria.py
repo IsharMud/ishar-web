@@ -8,7 +8,7 @@ class AchievementCriteriaTabularInline(TabularInline):
     extra = 1
     model = AchievementCriteria
     verbose_name = "Criteria"
-    verbose_name_plural = "Criterion"
+    verbose_name_plural = "Criteria"
 
     def has_add_permission(self, request, obj) -> bool:
         if request.user and not request.user.is_anonymous:

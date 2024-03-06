@@ -7,7 +7,7 @@ class QuestPrereq(models.Model):
     """
     Quest Prerequisite.
     """
-    quest_prereqs_id = models.AutoField(
+    quest_prereqs_id = models.PositiveIntegerField(
         blank=False,
         db_column="quest_prereqs_id",
         help_text="Auto-generated, permanent quest pre-requisite relation ID.",

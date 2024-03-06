@@ -5,7 +5,7 @@ class Race(models.Model):
     """
     Race.
     """
-    race_id = models.AutoField(
+    race_id = models.PositiveIntegerField(
         primary_key=True,
         help_text="Auto-generated primary identification number of the race.",
         verbose_name="Race ID"

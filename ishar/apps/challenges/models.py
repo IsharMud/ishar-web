@@ -6,7 +6,7 @@ from ishar.apps.mobiles.models.mobile import Mobile
 
 class Challenge(models.Model):
     """Challenge."""
-    challenge_id = models.SmallAutoField(
+    challenge_id = models.PositiveIntegerField(
         help_text="Auto-generated permanent challenge identification number.",
         primary_key=True,
         verbose_name="Challenge ID",

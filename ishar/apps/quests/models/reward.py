@@ -10,7 +10,7 @@ class QuestReward(models.Model):
     """
     Quest Reward.
     """
-    quest_reward_id = models.AutoField(
+    quest_reward_id = models.PositiveIntegerField(
         primary_key=True,
         help_text="Auto-generated, permanent quest reward ID number.",
         verbose_name="Quest Reward ID"

@@ -7,7 +7,7 @@ from .mobile import Mobile
 
 class MobileFlag(models.Model):
     """Mobile player flag."""
-    id = models.AutoField(
+    id = models.PositiveIntegerField(
         db_column="id",
         primary_key=True,
         help_text="Auto-generated permanent ID number of the mob player flag.",

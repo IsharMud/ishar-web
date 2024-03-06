@@ -8,7 +8,7 @@ class SkillSpellFlag(models.Model):
     """
     Skill association to a spell flag.
     """
-    id = models.AutoField(
+    id = models.PositiveIntegerField(
         blank=False,
         editable=False,
         null=False,

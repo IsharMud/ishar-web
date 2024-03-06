@@ -8,7 +8,7 @@ class SkillForce(models.Model):
     """
     Skill Force.
     """
-    id = models.AutoField(
+    id = models.PositiveIntegerField(
         blank=False,
         db_column="id",
         editable=False,
