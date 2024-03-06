@@ -131,9 +131,9 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "ishar.apps.core.contexts.current_season",
-                "ishar.apps.core.contexts.global_event_count",
                 "ishar.apps.core.contexts.website_title",
+                "ishar.apps.events.contexts.global_event_count",
+                "ishar.apps.seasons.contexts.current_season",
             ],
             "libraries": {
                 "ishar": "ishar.apps.core.templatetags"
@@ -422,7 +422,6 @@ JAZZMIN_SETTINGS = {
         "core": "fas fa-flag",
         "core.PlayerFlag": "fas fa-flag",
         "core.AffectFlag": "fas fa-flag",
-        "core.MUDProcess": "fas fa-microchip",
 
         # events
         "events.GlobalEvent": "fas fa-calendar",
@@ -435,15 +434,16 @@ JAZZMIN_SETTINGS = {
         "mobiles.Mobile": "fas fa-skull",
 
         # news
+        "new": "fas fa-newspaper",
         "news.News": "fas fa-newspaper",
 
         # patches
+        "patches": "fas fa-file-pdf",
         "patches.Patch": "fas fa-file-pdf",
 
-        # players
-        "players": "fas fa-users-cog",
-        "players.Player": "fas fa-user",
-        "players.RemortUpgrade": "fas fa-arrow-up",
+        # processes
+        "processes": "fas fa-microchip",
+        "processes.MUDProcess": "fas fa-microchip",
 
         # quests
         "quests.Quest": "fas fa-mountain",

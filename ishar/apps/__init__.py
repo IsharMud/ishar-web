@@ -13,6 +13,7 @@ from .mobiles import MobilesConfig
 from .news import NewsConfig
 from .patches import PatchesConfig
 from .players import PlayersConfig
+from .processes import ProcessesConfig
 from .quests import QuestsConfig
 from .races import RacesConfig
 from .seasons import SeasonsConfig
