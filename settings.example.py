@@ -400,6 +400,8 @@ JAZZMIN_SETTINGS = {
 
         # achievements
         "achievements.Achievement": "fas fa-mountain",
+        "achievements.AchievementClassRestrict": "fas fa-not-equal",
+        "achievements.AchievementCriteria": "fas fa-table",
         "achievements.AchievementReward": "fas fa-award",
 
         # challenges
@@ -420,7 +422,7 @@ JAZZMIN_SETTINGS = {
         "core": "fas fa-flag",
         "core.PlayerFlag": "fas fa-flag",
         "core.AffectFlag": "fas fa-flag",
-        "core.MUDProcess": "fas fa-terminal",
+        "core.MUDProcess": "fas fa-microchip",
 
         # events
         "events.GlobalEvent": "fas fa-calendar",
