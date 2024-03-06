@@ -412,6 +412,16 @@ JAZZMIN_SETTINGS = {
         "classes.ClassRace": "fas fa-user",
         "classes.ClassSkill": "fas fa-brain",
 
+        # (MUD) clients
+        "clients.MUDClient": "fas fa-terminal",
+        "clients.MUDClientCategory": "fas fa-folder",
+
+        # core
+        "core": "fas fa-flag",
+        "core.PlayerFlag": "fas fa-flag",
+        "core.AffectFlag": "fas fa-flag",
+        "core.MUDProcess": "fas fa-terminal",
+
         # events
         "events.GlobalEvent": "fas fa-calendar",
 
@@ -421,10 +431,6 @@ JAZZMIN_SETTINGS = {
         # mobiles
         "mobiles": "fas fa-skull",
         "mobiles.Mobile": "fas fa-skull",
-
-        # (MUD) clients
-        "clients.MUDClient": "fas fa-terminal",
-        "clients.MUDClientCategory": "fas fa-folder",
 
         # news
         "news.News": "fas fa-newspaper",
