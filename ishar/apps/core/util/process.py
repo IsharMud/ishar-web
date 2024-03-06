@@ -20,7 +20,8 @@ def get_process(name="ishar", user=getlogin()):
     # Find the actual running Ishar process ID (PID).
     try:
         current_pid = check_output(["pgrep", "-u", user, name])
-    except CalledProcessError:
+        current_pid = int(current_pid.decode().strip())
+    except (CalledProcessError, ValueError):
         pass
         return None
 
