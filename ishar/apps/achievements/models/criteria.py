@@ -49,8 +49,7 @@ class AchievementCriteria(models.Model):
         db_table = "achievement_criteria"
         default_related_name = "criteria"
         ordering = ("achievement", "criteria_type",)
-        verbose_name = "Achievement Criteria"
-        verbose_name_plural = "Achievement Criterion"
+        verbose_name = verbose_name_plural = "Achievement Criteria"
 
     def __repr__(self):
         return "%s: %s (%i)" % (
