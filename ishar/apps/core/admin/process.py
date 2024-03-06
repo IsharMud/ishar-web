@@ -1,7 +1,7 @@
 from django.contrib.admin import ModelAdmin, register
 from django.contrib import messages
 
-from ..models.server import MUDProcess, get_process
+from ..models.process import MUDProcess, get_process
 
 
 @register(MUDProcess)
@@ -14,18 +14,9 @@ class MUDProcessAdmin(ModelAdmin):
     verbose_name = "MUD Process"
     verbose_name_plural = "MUD Processes"
 
-    def get_model_perms(self, request):
-        try:
-            get_process()
-        except PermissionError:
-            pass
-            messages.error(
-                request= request,
-                message=(
-                    "Sorry, but there is no permission to find the process ID."
-                )
-            )
-        return super().get_model_perms(request)
+    def get_list_filter(self, request):
+        get_process()
+        return super().get_list_filter(request)
 
     def has_add_permission(self, request) -> bool:
         return False

@@ -3,7 +3,7 @@ from django.db import models
 from django.utils.timezone import now
 
 from os import getlogin
-from subprocess import check_output
+from subprocess import CalledProcessError, check_output
 
 
 class MUDProcessManager(models.Manager):
@@ -58,14 +58,23 @@ class MUDProcess(models.Model):
         managed = True
         db_table = "mud_processes"
         default_related_name = "process"
+        ordering = ("-last_updated",)
         verbose_name = "MUD Process"
         verbose_name_plural = "MUD Processes"
 
 
-def get_process(name="ishar-mud", user=getlogin()):
-    current_process = MUDProcess.objects.first()
-    current_pid = check_output(["pidof", name], user=user)
-    if current_process == current_pid:
+def get_process(name="ishar", user=getlogin()):
+    current_process = MUDProcess.objects.filter(
+        name__exact=name, user__exact=user
+    ).order_by("-last_updated").first()
+
+    try:
+        current_pid = check_output(["pgrep", "-u", user, name])
+    except CalledProcessError:
+        pass
+        return None
+
+    if current_pid and current_pid == current_process.process_id:
         return current_process
 
     MUDProcess.objects.filter(
