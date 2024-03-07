@@ -237,7 +237,7 @@ class Player(models.Model):
 
     @property
     @display(description="Create IP", ordering="create_haddr")
-    def _create_haddr(self):
+    def _create_haddr(self) -> str:
         """
         IP address that created the account.
         """
@@ -245,7 +245,7 @@ class Player(models.Model):
 
     @property
     @display(description="Login Fail IP", ordering="login_fail_haddr")
-    def _login_fail_haddr(self):
+    def _login_fail_haddr(self) -> str:
         """
         Last IP address that failed to log in to the account.
         """
@@ -253,7 +253,7 @@ class Player(models.Model):
 
     @property
     @display(description="Last IP", ordering="last_haddr")
-    def _last_haddr(self):
+    def _last_haddr(self) -> str:
         """
         Last IP address that logged in to the account.
         """
@@ -312,12 +312,12 @@ class Player(models.Model):
         return False
 
     @property
-    def player_css(self):
+    def player_css(self) -> str:
         """Player CSS class."""
         return "%s-player" % (self.get_player_type().lower())
 
     @property
-    def player_link(self):
+    def player_link(self) -> str:
         """Player link."""
         return (
             format_html(
