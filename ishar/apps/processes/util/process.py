@@ -24,6 +24,12 @@ def get_process(name="ishar", user=getlogin()):
         current_pid = int(current_pid.decode().strip())
     except (CalledProcessError, ValueError):
         pass
+        # Delete any existing database records for this environment.
+        MUDProcess.objects.filter(
+            name=name,
+            user=user,
+            last_updated__lt=now()
+        ).delete()
         return None
 
     # Use the existing database record, if it is correct.
