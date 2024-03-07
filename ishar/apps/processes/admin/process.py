@@ -61,7 +61,7 @@ class MUDProcessAdmin(ModelAdmin):
                 level=level,
                 message=_(message % (obj.process_id,))
             )
-        return redirect(reverse("admin:processes_process_change"))
+        return redirect(reverse("admin:processes_mudprocess_changelist"))
 
     @action(description="Terminate")
     def terminate(self, request, queryset):
@@ -77,4 +77,4 @@ class MUDProcessAdmin(ModelAdmin):
                 level=level,
                 message=_(message % (obj.process_id,))
             )
-        return redirect(reverse("admin:processes_process_change"))
+        return redirect(reverse("admin:processes_mudprocess_changelist"))
