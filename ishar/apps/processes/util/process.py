@@ -1,10 +1,9 @@
 """Ishar MUD server process utilities."""
 from datetime import datetime
+from django.utils.timezone import make_aware, now
 from os import getlogin
-from subprocess import CalledProcessError, check_output
-
-from django.utils.timezone import now
 from psutil import Process
+from subprocess import CalledProcessError, check_output
 
 from ..models.process import MUDProcess
 
@@ -53,7 +52,11 @@ def get_process(name="ishar", user=getlogin()):
         name=name,
         user=user,
         last_updated=now(),
-        created=datetime.fromtimestamp(Process(pid=current_pid).create_time())
+        created=make_aware(
+            datetime.fromtimestamp(
+                timestamp=Process(pid=current_pid).create_time(),
+            )
+        )
     )
     new.save()
     return new
