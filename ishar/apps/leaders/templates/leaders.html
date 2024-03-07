@@ -97,7 +97,10 @@
             { data: 'challenges_completed', title: 'Challenges' },
             { data: 'deaths', title: 'Deaths '},
         ],
-        columnDefs: [],
+        columnDefs: [
+            { type: 'html', targets: [0] },
+            { type: 'num', targets: [1, 2, 3, 4] },
+        ],
         data: leaders,
         order: [[1, 'desc'], [2, 'desc'], [3, 'desc'], [4, 'asc']],
     });

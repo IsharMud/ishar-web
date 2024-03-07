@@ -1,11 +1,5 @@
 # TODO
 
-## [GridJS](https://github.com/IsharMud/ishar-web/issues/20)
-
-- Leaders ([`/leaders/`](https://isharmud.com/leaders/)) gridjs tables overflows the layout to the right on mobile
-  - Challenges ([`/challenges/`](https://isharmud.com/challenges/)) is not as bad, but still...
-
-
 ## [Helptab](https://github.com/IsharMud/ishar-web/issues/19)
 
 Reading the help (`helptab`) file is very complicated and messy...
