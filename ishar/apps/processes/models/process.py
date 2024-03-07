@@ -76,8 +76,11 @@ class MUDProcess(models.Model):
         if self.process_id:
             process = self.get_process()
             if process:
-                if process.kill():
+                try:
+                    process.kill()
                     return True
+                except:
+                    pass
         return False
 
     def runtime(self):
@@ -87,6 +90,9 @@ class MUDProcess(models.Model):
         if self.process_id:
             process = self.get_process()
             if process:
-                if process.terminate():
+                try:
+                    process.terminate()
                     return True
+                except:
+                    pass
         return False
