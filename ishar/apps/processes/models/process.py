@@ -1,15 +1,10 @@
 """Ishar MUD server process model."""
-from os import getlogin
-
 from django.db import models
 from django.utils.timesince import timesince
 from django.utils.timezone import now
+from psutil import Process
 
-
-class MUDProcessManager(models.Manager):
-    """MUD process manager limits to the local user."""
-    def get_queryset(self):
-        return super().get_queryset().filter(user__exact=getlogin())
+from .manager import MUDProcessManager
 
 
 class MUDProcess(models.Model):
@@ -52,14 +47,17 @@ class MUDProcess(models.Model):
     )
 
     def __repr__(self):
-        return "%s: %s (%s)" % (
+        return "%s: %s [%s]" % (
             self.__class__.name,
             self.__str__(),
-            self.pid
+            self.user
         )
 
     def __str__(self):
-        return self.name
+        return "%s (%i)" % (
+            self.name,
+            self.process_id
+        )
 
     class Meta:
         managed = True
@@ -69,5 +67,26 @@ class MUDProcess(models.Model):
         verbose_name = "MUD Process"
         verbose_name_plural = "MUD Processes"
 
+    def get_process(self):
+        if self.process_id:
+            return Process(pid=self.process_id)
+        return None
+
+    def kill(self):
+        if self.process_id:
+            process = self.get_process()
+            if process:
+                if process.kill():
+                    return True
+        return False
+
     def runtime(self):
         return timesince(self.created)
+
+    def terminate(self):
+        if self.process_id:
+            process = self.get_process()
+            if process:
+                if process.terminate():
+                    return True
+        return False

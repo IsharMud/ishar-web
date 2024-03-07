@@ -1,5 +1,6 @@
-from django.contrib.admin import ModelAdmin, register
+from django.contrib.admin import action, ModelAdmin, register
 from django.contrib import messages
+from django.shortcuts import redirect, reverse
 from django.utils.translation import gettext_lazy as _
 
 from ..models.process import MUDProcess
@@ -10,19 +11,20 @@ from ..util.process import get_process
 class MUDProcessAdmin(ModelAdmin):
     """MUD process administration."""
     model = MUDProcess
+    actions = ("terminate", "kill",)
     list_display = ("process_id", "name", "user", "runtime")
     fields = readonly_fields = list_display + ("created", "last_updated",)
     verbose_name = "MUD Process"
     verbose_name_plural = "MUD Processes"
 
-    def get_list_filter(self, request):
+    def get_changelist(self, request):
         get_process()
         if self.model.objects.count() == 0:
             messages.warning(
                 request=request,
                 message=_("No MUD process found!")
             )
-        return super().get_list_filter(request)
+        return super().get_changelist(request)
 
     def has_add_permission(self, request) -> bool:
         return False
@@ -44,3 +46,35 @@ class MUDProcessAdmin(ModelAdmin):
         if request.user and not request.user.is_anonymous:
             return request.user.is_eternal()
         return False
+
+    @action(description="Kill")
+    def kill(self, request, queryset):
+        for obj in queryset:
+            if obj.kill():
+                level = messages.SUCCESS
+                message = "Successfully sent SIGKILL to process ID %d."
+            else:
+                level = messages.ERROR
+                message = "Failed sending SIGKILL to process ID %d."
+            messages.add_message(
+                request=request,
+                level=level,
+                message=_(message % (obj.process_id,))
+            )
+        return redirect(reverse("admin:processes_process_change"))
+
+    @action(description="Terminate")
+    def terminate(self, request, queryset):
+        for obj in queryset:
+            if obj.terminate():
+                level = messages.SUCCESS
+                message = "Successfully sent SIGTERM to process ID %d."
+            else:
+                level = messages.ERROR
+                message = "Failed sending SIGTERM to process ID %d."
+            messages.add_message(
+                request=request,
+                level=level,
+                message=_(message % (obj.process_id,))
+            )
+        return redirect(reverse("admin:processes_process_change"))

@@ -14,7 +14,8 @@ def get_process(name="ishar", user=getlogin()):
 
     # Find existing process in the database.
     current_process = MUDProcess.objects.filter(
-        name__exact=name, user__exact=user
+        name__exact=name,
+        user__exact=user
     ).order_by("-last_updated").first()
 
     # Find the actual running Ishar process ID (PID).

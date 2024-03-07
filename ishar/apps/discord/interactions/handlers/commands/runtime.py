@@ -1,5 +1,3 @@
-from django.utils.timezone import now
-
 from ishar.apps.processes.util.process import get_process
 
 
