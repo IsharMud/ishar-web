@@ -75,7 +75,7 @@ class Challenge(models.Model):
         )
 
     def __str__(self):
-        return self.challenge_desc or self.mob_name
+        return self.challenge_desc or self.mobile.long_name
 
     @admin.display(boolean=True, description="Complete?", ordering="winner_desc")
     def is_completed(self):

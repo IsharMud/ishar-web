@@ -99,12 +99,8 @@
         ],
         columnDefs: [],
         data: leaders,
+        order: [[1, 'desc'], [2, 'desc'], [3, 'desc'], [4, 'asc']],
     });
-    pageTable.order([
-        { name: 'remorts', dir: 'desc', },
-        { name: 'total_renown', dir: 'desc', },
-        { name: 'challenges_completed', dir: 'desc', },
-        { name: 'deaths', dir: 'asc', },
-    ]).draw();
+    pageTable.draw();
 </script>
 {% endblock content %}

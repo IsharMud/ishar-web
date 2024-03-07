@@ -3,6 +3,12 @@
 {% block meta_description %}Challenges currently available, A.{% endblock meta_description %}
 {% block meta_url %}{% url "challenges" %}{% endblock meta_url %}
 {% block title %}Challenges{% endblock title %}
+{% block scripts %}
+        <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+        <link rel="stylesheet" href="https://cdn.datatables.net/2.0.1/css/dataTables.bootstrap5.css">
+        <script src="https://cdn.datatables.net/2.0.1/js/dataTables.js"></script>
+        <script src="https://cdn.datatables.net/2.0.1/js/dataTables.bootstrap5.js"></script>
+{% endblock scripts %}
 {% block header %}
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
@@ -18,47 +24,27 @@
     </ol>
 </nav>
 {% endblock header %}
-{% block scripts %}
-        <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
-        <script>
-            function showChallenges(where) {
-                new gridjs.Grid({
-                    columns: [
-                        { id: 'name', name: 'Find and Kill' },
-                        { id: 'people', name: 'People' },
-                        { id: 'level', name: 'Level' },
-                    ],
-                    data: [
-    {% for challenge in challenges %}
-                        {
-        {% if challenge.is_completed %}
-                            name: gridjs.html('<span class="challenge-completed">{% autoescape off %}{{ challenge.mobile.long_name }}{% endautoescape %}</span><br><span class="text-white" title="Completed by">Completed by</span> {% for winner in challenge.winners %}<a href="{% url "player" name=winner %}#player" title="Player: {{ winner }}">{{ winner }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}'),
-        {% else %}
-                            name: "{% autoescape off %}{{ challenge.mobile.long_name }}{% endautoescape %}",
-        {% endif %}
-                            people: "{{ challenge.max_people }}",
-                            level: {{ challenge.max_level }},
-                        },
-    {% endfor %}
-                    ],
-                    className: {
-                        table: 'table table-dark table-striped border border-secondary rounded'
-                    },
-                    style: {
-                        table: {'max-width': '50vw'},
-                        th: {'background-color': 'rgba(0, 0, 0, 0.1)'},
-                    },
-                    search: true,
-                    sort: true,
-                    pagination: false
-                }).render(where);
-            };
-
-        </script>
-{% endblock scripts %}
 {% block content %}
     {% include "cycle.html" %}
-    <div id="challenges"></div>
-    <script>showChallenges(document.getElementById('challenges'));</script>
+    <table id="challengesTable"></table>
     {% include "cycle.html" %}
+    {{ challenges|json_script:"challenges" }}
+    <script>
+    const challenges = [];
+    const challengesData = JSON.parse(JSON.parse(document.getElementById("challenges").textContent));
+    function buildChallenge(challenge) { challenges.push(challenge.fields); };
+    challengesData.forEach(buildChallenge);
+    const pageTable = new DataTable('#challengesTable', {
+        columns: [
+            { data: 'mobile', title: 'Find & Kill',},
+            { data: 'max_people', title: 'Max People' },
+            { data: 'max_level', title: 'Max Level' },
+        ],
+        columnDefs: [{ type: 'num', targets: [1,2] }],
+        data: challenges,
+        order: [[2, 'desc'], [1, 'desc'], ['0', 'asc']],
+        pageLength: 15,
+    });
+    pageTable.draw();
+</script>
 {% endblock content %}

@@ -1,16 +1,20 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import (
+    LoginRequiredMixin, PermissionRequiredMixin
+)
+from django.core.serializers import serialize
 from django.views.generic.list import ListView
 
 from .models import Challenge
 
 
-class ChallengesView(LoginRequiredMixin, ListView):
+class ChallengesView(LoginRequiredMixin, ListView, PermissionRequiredMixin):
     """
     Challenges view.
     """
     completed = None
     context_object_name = "challenges"
     model = Challenge
+    permission_required = "challenges.view_challenge"
     template_name = "challenges.html"
 
     def get_queryset(self):
@@ -28,3 +32,17 @@ class ChallengesView(LoginRequiredMixin, ListView):
                 qs = qs.exclude(winner_desc__exact="")
 
         return qs
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(object_list=None, **kwargs)
+        context[self.context_object_name] = serialize(
+            format="json",
+            queryset=context.get(self.context_object_name),
+            use_natural_foreign_keys=True,
+            use_natural_primary_keys=True,
+            fields=(
+                "mobile", "challenge_desc",
+                "max_level", "max_people", "winner_desc"
+            )
+        )
+        return context

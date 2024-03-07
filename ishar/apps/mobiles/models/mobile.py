@@ -6,8 +6,15 @@ from ishar.apps.races.models.race import Race
 from ishar.apps.skills.models.type.position import PlayerPosition
 
 
+class MobileManager(models.Manager):
+    def get_by_natural_key(self, long_name):
+        return self.get(long_name=long_name)
+
+
 class Mobile(models.Model):
     """Ishar mobile."""
+    objects = MobileManager()
+
     id = models.AutoField(
         help_text='Primary key identification number ("VNUM") of the mobile.',
         primary_key=True,
@@ -21,6 +28,7 @@ class Mobile(models.Model):
     long_name = models.CharField(
         max_length=100,
         help_text="Long name of the mobile.",
+        unique=True,
         verbose_name="Long Name"
     )
     room_desc = models.CharField(
@@ -305,3 +313,6 @@ class Mobile(models.Model):
             self.long_name or self.name,
             self.level
         )
+
+    def natural_key(self):
+        return self.long_name
