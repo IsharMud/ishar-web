@@ -6,4 +6,5 @@ from .faq import faq
 from .leaders import leaders
 from .mudhelp import mudhelp
 from .mudtime import mudtime
+from .runtime import runtime
 from .season import season

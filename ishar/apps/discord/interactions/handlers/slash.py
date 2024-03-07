@@ -47,6 +47,10 @@ def slash(interaction_json, request):
     if command_name == "mudtime":
         return mudtime(), False
 
+    # "runtime" command to show server process runtime.
+    if command_name == "runtime":
+        return runtime(), False
+
     # "season" command - shows season number and expiration.
     if command_name == "season":
         return season(request=request), False

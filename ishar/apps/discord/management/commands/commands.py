@@ -91,6 +91,11 @@ class Command(BaseCommand):
             },
             {
                 "type": 1,
+                "name": "runtime",
+                "description": "Show current server runtime.",
+            },
+            {
+                "type": 1,
                 "name": "season",
                 "description": "Show the current season.",
             },
