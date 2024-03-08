@@ -5,13 +5,14 @@ from django.utils.translation import gettext_lazy as _
 
 from ..models.process import MUDProcess
 from ..util.process import get_process
+from ..util.service import restart_service
 
 
 @register(MUDProcess)
 class MUDProcessAdmin(ModelAdmin):
     """MUD process administration."""
     model = MUDProcess
-    actions = ("terminate", "kill",)
+    actions = ("restart", "terminate", "kill",)
     list_display = ("process_id", "name", "user", "runtime")
     fields = readonly_fields = list_display + ("created", "last_updated",)
     verbose_name = "MUD Process"
@@ -60,6 +61,20 @@ class MUDProcessAdmin(ModelAdmin):
                 request=request,
                 level=level,
                 message=_(message % (obj.process_id,))
+            )
+        return redirect(reverse("admin:processes_mudprocess_changelist"))
+
+    @action(description="Restart")
+    def restart(self, request):
+        if restart_service():
+            messages.success(
+                request=request,
+                message="Successfully sent systemctl restart."
+            )
+        else:
+            messages.error(
+                request=request,
+                message="Failed sending systemctl restart."
             )
         return redirect(reverse("admin:processes_mudprocess_changelist"))
 
