@@ -65,7 +65,7 @@ class MUDProcessAdmin(ModelAdmin):
         return redirect(reverse("admin:processes_mudprocess_changelist"))
 
     @action(description="Restart")
-    def restart(self, request):
+    def restart(self, request, qs):
         if restart_service():
             messages.success(
                 request=request,
