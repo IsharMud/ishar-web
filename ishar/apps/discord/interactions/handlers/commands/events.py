@@ -26,7 +26,7 @@ def events(request):
             request.get_host(),
             reverse("events")
         )
-        reply = "%i events: <%s>" % (
+        reply = "%i events: <%s>\n" % (
             global_events.count(),
             events_url
         )
