@@ -45,8 +45,9 @@ class Title(models.Model):
         )
 
     def __str__(self) -> str:
-        return "%s / [F: %s - M: %s]" % (
-            self.prepend,
+        if self.female_text == self.male_text:
+            return self.female_text
+        return "F: %s - M: %s" % (
             self.female_text,
             self.male_text,
         )

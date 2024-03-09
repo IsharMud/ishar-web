@@ -28,7 +28,8 @@ class PlayerAdmin(admin.ModelAdmin):
         ("Time", {"fields": (
             "birth", "logon", "logout", "online", "online_timedelta",
             "online_time"
-        )})
+        )}),
+        ("Titles", {"fields": ("title", "title_id")}),
     )
     inlines = (
         PlayerCommonInlineAdmin,
@@ -46,8 +47,8 @@ class PlayerAdmin(admin.ModelAdmin):
     )
     readonly_fields = (
         "id", "birth", "game_type", "logon", "logout",
-        "player_type", "player_level",
-        "online_timedelta", "online_time"
+        "player_type", "player_level", "online_timedelta",
+        "online_time", "title", "title_id",
     )
     search_fields = ("name", "account__account_name")
     verbose_name = "Player"

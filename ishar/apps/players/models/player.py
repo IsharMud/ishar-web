@@ -7,8 +7,10 @@ from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.timesince import timesince
 from django.utils.timezone import now
+from django.utils.translation import gettext_lazy as _
 
 from ishar.apps.accounts.models import Account
+from ishar.apps.core.models.title import Title
 from ishar.apps.core.util.ip import dec2ip
 
 from .game_type import GameType
@@ -56,9 +58,19 @@ class Player(models.Model):
         verbose_name="Description"
     )
     title = models.CharField(
+        db_column="title",
         max_length=45,
         help_text="User-selectable player title.",
         verbose_name="Title"
+    )
+    title_id = models.ForeignKey(
+        blank=True,
+        db_column="title_id",
+        null=True,
+        to=Title,
+        on_delete=models.DO_NOTHING,
+        help_text=_("Title related to an account."),
+        verbose_name=_("Title")
     )
     poofin = models.CharField(
         max_length=80,
