@@ -5,6 +5,7 @@ from django.utils.safestring import mark_safe
 from .filters import ImmortalTypeListFilter
 from .inlines.common import PlayerCommonInlineAdmin
 from .inlines.flag import PlayerFlagsInlineAdmin
+from .inlines.stat import PlayerStatInlineAdmin
 from .inlines.upgrade import PlayerRemortUpgradesInlineAdmin
 
 from ..models.player import Player
@@ -16,34 +17,24 @@ class PlayerAdmin(admin.ModelAdmin):
     date_hierarchy = "birth"
     fieldsets = (
         (None, {"fields": (
-            "id", "account", "name", "description", "true_level", "deaths"
+            "id", "account", "name", "description", "true_level", "game_type",
+            "deaths", "is_deleted",
         )}),
         ("Points", {"fields": ("bankacc", "renown", "remorts", "favors")}),
-        ("Game Type", {
-            "fields": ("game_type",),
-        }),
-        ("Deleted?", {
-            "fields": ("is_deleted",),
-        }),
-        ("Totals", {
-            "fields": (
-                "total_renown", "quests_completed", "challenges_completed"
-            ),
-        }),
-        ("Rooms", {
-            "fields": ("bound_room", "load_room", "inn_limit"),
-        }),
-        ("Time", {
-            "fields": (
-                "birth", "logon", "logout",
-                "online", "online_timedelta", "online_time"
-            ),
-        })
+        ("Totals", {"fields": (
+            "total_renown", "quests_completed", "challenges_completed"
+        )}),
+        ("Rooms", {"fields": ("bound_room", "load_room", "inn_limit")}),
+        ("Time", {"fields": (
+            "birth", "logon", "logout", "online", "online_timedelta",
+            "online_time"
+        )})
     )
     inlines = (
         PlayerCommonInlineAdmin,
         PlayerFlagsInlineAdmin,
-        PlayerRemortUpgradesInlineAdmin
+        PlayerRemortUpgradesInlineAdmin,
+        PlayerStatInlineAdmin,
     )
     list_display = (
         "name", "get_account_link", "player_type", "is_hardcore", "is_survival",
