@@ -2,7 +2,7 @@
 {% load i18n static %}
 {% block object-tools %}
 <div>
-    <form action="restart/" method="POST">
+    <form action="restart/" method="POST" onsubmit="return confirm('Are you sure you want to restart the MUD?');">
         {% csrf_token %}
         <button class="btn btn-danger form-control" name="restart" type="submit">Restart</button>
     </form>
