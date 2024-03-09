@@ -1,0 +1,11 @@
+{% extends "admin/change_list.html" %}
+{% load i18n static %}
+{% block object-tools %}
+<div>
+    <form action="restart/" method="POST">
+        {% csrf_token %}
+        <button class="btn btn-danger form-control" name="restart" type="submit">Restart</button>
+    </form>
+</div>
+    {{ block.super }}
+{% endblock object-tools %}

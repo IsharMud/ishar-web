@@ -1,6 +1,7 @@
 from django.contrib.admin import action, ModelAdmin, register
 from django.contrib import messages
 from django.shortcuts import redirect, reverse
+from django.urls import path
 from django.utils.translation import gettext_lazy as _
 
 from ..models.process import MUDProcess
@@ -12,14 +13,14 @@ from ..util.service import restart_service
 class MUDProcessAdmin(ModelAdmin):
     """MUD process administration."""
     model = MUDProcess
-    actions = ("restart", "terminate", "kill",)
+    actions = ("terminate", "kill",)
+    change_list_template = "change_list.html"
     list_display = ("process_id", "name", "user", "runtime")
     fields = readonly_fields = list_display + ("created", "last_updated",)
     verbose_name = "MUD Process"
     verbose_name_plural = "MUD Processes"
 
     def get_changelist(self, request):
-        get_process()
         if self.model.objects.count() == 0:
             messages.warning(
                 request=request,
@@ -27,13 +28,17 @@ class MUDProcessAdmin(ModelAdmin):
             )
         return super().get_changelist(request)
 
+    def get_urls(self):
+        get_process()
+        urls = super().get_urls()
+        custom_urls = [path("restart/", self.restart, name="restart"),]
+        return custom_urls + urls
+
     def has_add_permission(self, request) -> bool:
         return False
 
     def has_change_permission(self, request, obj=None) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_forger()
-        return False
+        return self.has_module_permission(request)
 
     def has_delete_permission(self, request, obj=None) -> bool:
         return False
@@ -44,9 +49,7 @@ class MUDProcessAdmin(ModelAdmin):
         return False
 
     def has_view_permission(self, request, obj=None) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_eternal()
-        return False
+        return self.has_module_permission(request)
 
     @action(description="Kill")
     def kill(self, request, queryset):
@@ -64,8 +67,7 @@ class MUDProcessAdmin(ModelAdmin):
             )
         return redirect(reverse("admin:processes_mudprocess_changelist"))
 
-    @action(description="Restart")
-    def restart(self, request, qs):
+    def restart(self, request,):
         if restart_service():
             messages.success(
                 request=request,
