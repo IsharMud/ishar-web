@@ -403,6 +403,7 @@ JAZZMIN_SETTINGS = {
         "achievements.AchievementClassRestrict": "fas fa-not-equal",
         "achievements.AchievementCriteria": "fas fa-table",
         "achievements.AchievementReward": "fas fa-award",
+        "achievements.AchievementTrigger": "fas fa-stopwatch",
 
         # challenges
         "challenges.Challenge": "fas fa-award",
