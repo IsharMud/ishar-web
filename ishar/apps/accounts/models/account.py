@@ -115,12 +115,13 @@ class Account(AbstractBaseUser, PermissionsMixin):
         help_text="Number of communication points for the communication.",
         verbose_name="Communication Points"
     )
-    achievement_points = models.PositiveIntegerField(
-        blank=True,
-        null=True,
-        help_text="Number of achievement points for the account.",
-        verbose_name="Achievement Points?"
-    )
+#   This does not exist in production >.<
+#    achievement_points = models.PositiveIntegerField(
+#        blank=True,
+#        null=True,
+#        help_text="Number of achievement points for the account.",
+#        verbose_name="Achievement Points?"
+#    )
 
     EMAIL_FIELD = "email"
     USERNAME_FIELD = "account_name"
