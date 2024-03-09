@@ -69,14 +69,14 @@ class Challenge(models.Model):
         verbose_name = "Challenge"
         verbose_name_plural = "Challenges"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "%s: %s (%i)" % (
             self.__class__.__name__,
             self.__str__(),
             self.pk
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.challenge_desc or self.mobile.long_name
 
     @admin.display(boolean=True, description="Complete?", ordering="winner_desc")

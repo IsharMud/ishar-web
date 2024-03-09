@@ -44,8 +44,13 @@ class PlayerSkill(models.Model):
 
     def __repr__(self) -> str:
         return "%s: %s (%i)" % (
-            self.__class__.__name__, self.__str__(), self.pk
+            self.__class__.__name__,
+            self.__str__(),
+            self.pk
         )
 
     def __str__(self) -> str:
-        return "%s @ %s" % (self.skill, self.player)
+        return "%s @ %s" % (
+            self.skill,
+            self.player
+        )

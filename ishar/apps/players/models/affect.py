@@ -60,7 +60,7 @@ class PlayerAffect(models.Model):
     class Meta:
         managed = False
         db_table = "player_affects"
-        ordering = ("name", "flag_id")
+        ordering = ("player", "affect",)
         unique_together = (("player", "affect"),)
         verbose_name = "Player Affect"
 

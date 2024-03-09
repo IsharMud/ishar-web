@@ -9,6 +9,7 @@ class AccountUpgradesLinksAdmin(TabularInline):
     """
     Account upgrades links tabular inline administration.
     """
+    extra = 0
     model = AccountAccountUpgrade
     fields = readonly_fields = ("get_upgrade_link", "amount")
     ordering = ("-amount", "upgrade__name")
@@ -32,18 +33,12 @@ class AccountUpgradesLinksAdmin(TabularInline):
         )
 
     def has_add_permission(self, request, obj) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_forger()
         return False
 
     def has_change_permission(self, request, obj=None) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_forger()
         return False
 
     def has_delete_permission(self, request, obj=None) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_forger()
         return False
 
     def has_module_permission(self, request) -> bool:
