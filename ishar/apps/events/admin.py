@@ -4,7 +4,7 @@ from .models.event import GlobalEvent
 
 
 @register(GlobalEvent)
-class GlobalEventsAdmin(ModelAdmin):
+class GlobalEventAdmin(ModelAdmin):
     """
     Ishar global event administration.
     """

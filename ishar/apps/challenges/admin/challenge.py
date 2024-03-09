@@ -1,36 +1,13 @@
-from django.contrib import admin
+from django.contrib.admin import display, ModelAdmin, register
 from django.urls import reverse
 from django.utils.html import format_html
 
-from .models import Challenge
+from .filter import ChallengeCompletedListFilter
+from ..models.challenge import Challenge
 
 
-class ChallengeCompletedListFilter(admin.SimpleListFilter):
-    title = "Completed"
-    parameter_name = "is_completed"
-
-    def lookups(self, request, model_admin):
-        return (
-            (1, "Yes"),
-            (0, "No")
-        )
-
-    def queryset(self, request, queryset):
-        """
-        Determine whether a challenge is complete based on whether
-            the "winner_desc" column is empty or not.
-        """
-        qs = queryset
-        if self.value():
-            if self.value() == "1":
-                return qs.exclude(winner_desc__exact="")
-            if self.value() == "0":
-                return qs.filter(winner_desc__exact="")
-        return qs
-
-
-@admin.register(Challenge)
-class ChallengesAdmin(admin.ModelAdmin):
+@register(Challenge)
+class ChallengeAdmin(ModelAdmin):
     """
     Ishar challenge administration.
     """
@@ -75,7 +52,7 @@ class ChallengesAdmin(admin.ModelAdmin):
     def has_view_permission(self, request, obj=None) -> bool:
         return self.has_module_permission(request, obj)
 
-    @admin.display(description="Mobile", ordering="mobile__long_name")
+    @display(description="Mobile", ordering="mobile__long_name")
     def mobile_link(self, obj):
         """Admin link for mobile."""
         return format_html(

@@ -5,7 +5,7 @@ from ishar.apps.mobiles.models.mobile import Mobile
 
 
 class Challenge(models.Model):
-    """Challenge."""
+    """Ishar challenge."""
     challenge_id = models.AutoField(
         help_text="Auto-generated, permanent challenge identification number.",
         primary_key=True,
@@ -71,7 +71,9 @@ class Challenge(models.Model):
 
     def __repr__(self):
         return "%s: %s (%i)" % (
-            self.__class__.__name__, self.__str__(), self.pk
+            self.__class__.__name__,
+            self.__str__(),
+            self.pk
         )
 
     def __str__(self):

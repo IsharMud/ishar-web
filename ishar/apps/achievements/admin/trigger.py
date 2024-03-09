@@ -1,16 +1,15 @@
 from django.contrib.admin import ModelAdmin, register
 
-from ..models.criteria import AchievementCriteria
+from ..models.trigger import AchievementTrigger
 
 
-@register(AchievementCriteria)
-class AchievementCriteriaAdmin(ModelAdmin):
-    """Ishar achievement criteria administration."""
-    list_display = ("criteria_id", "criteria_type", "achievement",)
-    list_display_links = ("criteria_id", "criteria_type",)
-    list_filter = ("achievement", "criteria_type",)
-    readonly_fields = ("criteria_id",)
-    search_fields = ("description", "target_value",)
+@register(AchievementTrigger)
+class AchievementTriggerAdmin(ModelAdmin):
+    """Ishar trigger reward administration."""
+    list_display = ("achievement_triggers_id", "trigger_type", "achievement",)
+    list_display_links = ("achievement_triggers_id", "trigger_type",)
+    list_filter = ("achievement", "trigger_type",)
+    readonly_fields = ("achievement_triggers_id",)
 
     def has_module_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:

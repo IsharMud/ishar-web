@@ -32,7 +32,8 @@ class Achievement(models.Model):
         help_text="Updated time of the achievement.",
         verbose_name="Updated"
     )
-    category = models.PositiveSmallIntegerField(
+    category = models.CharField(
+        max_length=80,
         blank=True,
         null=True,
         help_text="Category of the achievement.",

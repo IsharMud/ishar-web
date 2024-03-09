@@ -4,7 +4,7 @@ from django.contrib.auth.mixins import (
 from django.core.serializers import serialize
 from django.views.generic.list import ListView
 
-from .models import Challenge
+from .models.challenge import Challenge
 
 
 class ChallengesView(LoginRequiredMixin, ListView, PermissionRequiredMixin):

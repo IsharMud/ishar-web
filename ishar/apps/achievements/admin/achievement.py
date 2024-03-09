@@ -3,16 +3,18 @@ from django.contrib import admin
 from .inlines.class_restrict import AchievementClassRestrictTabularInline
 from .inlines.criteria import AchievementCriteriaTabularInline
 from .inlines.reward import AchievementRewardTabularInline
+from .inlines.trigger import AchievementTriggerTabularInline
 from ..models.achievement import Achievement
 
 
 @admin.register(Achievement)
-class AchievementsAdmin(admin.ModelAdmin):
-    """Ishar achievements administration."""
+class AchievementAdmin(admin.ModelAdmin):
+    """Ishar achievement administration."""
     inlines = (
         AchievementClassRestrictTabularInline,
         AchievementCriteriaTabularInline,
-        AchievementRewardTabularInline
+        AchievementRewardTabularInline,
+        AchievementTriggerTabularInline,
     )
     list_display = ("achievement_id", "name", "description", "is_hidden")
     list_filter = ("is_hidden", "created_at", "updated_at")

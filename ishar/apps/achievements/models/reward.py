@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 from .achievement import Achievement
 from .type.reward import AchievementRewardType
@@ -8,9 +9,9 @@ class AchievementReward(models.Model):
     """Ishar achievement reward."""
     reward_id = models.AutoField(
         db_column="reward_id",
-        help_text="Achievement reward identification number primary key.",
+        help_text=_("Achievement reward identification number primary key."),
         primary_key=True,
-        verbose_name="Achievement Reward ID",
+        verbose_name=_("Achievement Reward ID"),
     )
     achievement = models.ForeignKey(
         blank=True,
@@ -19,30 +20,30 @@ class AchievementReward(models.Model):
         to=Achievement,
         to_field="achievement_id",
         on_delete=models.DO_NOTHING,
-        help_text="Achievement related to the reward.",
-        verbose_name="Achievement"
+        help_text=_("Achievement related to the reward."),
+        verbose_name=_("Achievement")
     )
     reward_type = models.PositiveIntegerField(
         blank=True,
         choices=AchievementRewardType,
         null=True,
-        help_text="Type of the achievement reward.",
-        verbose_name="Type"
+        help_text=_("Type of the achievement reward."),
+        verbose_name=_("Type")
     )
     reward_value = models.IntegerField(
         blank=True,
         null=True,
         help_text="Value of the achievement reward",
-        verbose_name="Value"
+        verbose_name=_("Value")
     )
 
     class Meta:
         managed = False
-        db_table = 'achievement_rewards'
+        db_table = "achievement_rewards"
         default_related_name = "reward"
         ordering = ("achievement", "reward_type",)
-        verbose_name = "Achievement Reward"
-        verbose_name_plural = "Achievement Rewards"
+        verbose_name = _("Achievement Reward")
+        verbose_name_plural = _("Achievement Rewards")
 
     def __repr__(self):
         return "%s: %s (%i)" % (
