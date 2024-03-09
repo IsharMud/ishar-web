@@ -99,6 +99,7 @@ INSTALLED_APPS = [
     "ishar.apps.NewsConfig",
     "ishar.apps.PatchesConfig",
     "ishar.apps.PlayersConfig",
+    "ishar.apps.ProcessesConfig",
     "ishar.apps.QuestsConfig",
     "ishar.apps.RacesConfig",
     "ishar.apps.SeasonsConfig",
@@ -422,7 +423,8 @@ JAZZMIN_SETTINGS = {
         # core
         "core": "fas fa-flag",
         "core.PlayerFlag": "fas fa-flag",
-        "core.AffectFlag": "fas fa-flag",
+        "core.qAffectFlag": "fas fa-flag",
+        "core.Title": "fas fa-tag",
 
         # events
         "events.GlobalEvent": "fas fa-calendar",

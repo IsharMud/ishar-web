@@ -1,7 +1,7 @@
 from django.db import models
 
 from ishar.apps.classes.models import Class
-from ishar.apps.players.models.gender import PlayerGender
+from ishar.apps.core.models.gender import Gender
 from ishar.apps.players.models.player import Player
 from ishar.apps.races.models.race import Race
 
@@ -38,7 +38,7 @@ class PlayerCommon(models.Model):
         verbose_name="Race"
     )
     sex = models.IntegerField(
-        choices=PlayerGender,
+        choices=Gender,
         help_text="Sex/gender of the player character.",
         verbose_name="Sex/Gender"
     )
@@ -164,7 +164,9 @@ class PlayerCommon(models.Model):
 
     def __repr__(self) -> str:
         return "%s: %s (%i)" % (
-            self.__class__.__name__, self.__str__(), self.pk
+            self.__class__.__name__,
+            self.__str__(),
+            self.pk
         )
 
     def __str__(self) -> str:

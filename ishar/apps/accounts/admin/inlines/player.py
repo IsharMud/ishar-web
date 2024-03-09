@@ -10,6 +10,7 @@ class AccountPlayersLinksAdmin(TabularInline):
     Account players links tabular inline administration.
     """
     model = Player
+    extra = 0
     verbose_name = "Player"
     verbose_name_plural = "Players"
 
@@ -59,8 +60,6 @@ class AccountPlayersLinksAdmin(TabularInline):
     )
 
     def has_add_permission(self, request, obj) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_forger()
         return False
 
     def has_change_permission(self, request, obj=None) -> bool:

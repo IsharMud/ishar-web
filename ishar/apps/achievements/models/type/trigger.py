@@ -12,7 +12,7 @@ class AchievementTriggerType(IntegerChoices):
     DEATH = 4
     QUEST_COMPLETE = 5
     CHALLENGE_COMPLETE = 6
-    MAX_TRIGGER =7
+    MAX_TRIGGER = 7
 
     def __repr__(self) -> str:
         return "%s: %s (%i)" % (

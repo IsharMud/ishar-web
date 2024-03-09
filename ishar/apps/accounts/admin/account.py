@@ -3,6 +3,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
 
 from .inlines.player import AccountPlayersLinksAdmin
+from .inlines.soulbound_item import AccountSoulboundItemAdmin
+from .inlines.title import AccountTitleAdmin
 from .inlines.upgrade import AccountUpgradesLinksAdmin
 
 
@@ -47,7 +49,12 @@ class AccountAdmin(UserAdmin):
     )
     filter_horizontal = ()
     list_filter = ("immortal_level",)
-    inlines = (AccountPlayersLinksAdmin, AccountUpgradesLinksAdmin)
+    inlines = (
+        AccountPlayersLinksAdmin,
+        AccountSoulboundItemAdmin,
+        AccountTitleAdmin,
+        AccountUpgradesLinksAdmin,
+    )
     list_display = (
         model.USERNAME_FIELD, model.EMAIL_FIELD, "player_count",
         "current_essence", "immortal_level"

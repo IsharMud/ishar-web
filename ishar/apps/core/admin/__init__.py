@@ -5,6 +5,7 @@ from django.contrib.auth.admin import Group
 
 from .affect_flag import AffectFlagAdmin
 from .player_flag import PlayerFlagAdmin
+from .title import TitleAdmin
 
 
 # Set header and title text for /admin/

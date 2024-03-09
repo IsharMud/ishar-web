@@ -1,7 +1,7 @@
 from django.db import models
 
 from ishar.apps.classes.models import Class
-from ishar.apps.players.models.gender import PlayerGender
+from ishar.apps.core.models.gender import Gender
 from ishar.apps.races.models.race import Race
 from ishar.apps.skills.models.type.position import PlayerPosition
 
@@ -138,7 +138,7 @@ class Mobile(models.Model):
     )
     sex = models.PositiveIntegerField(
         blank=True,
-        choices=PlayerGender,
+        choices=Gender,
         null=True,
         help_text="Sex/gender of the mobile.",
         verbose_name="Sex"

@@ -19,7 +19,7 @@ class PlayerAdmin(admin.ModelAdmin):
             "id", "account", "name", "description", "true_level", "deaths"
         )}),
         ("Points", {"fields": ("bankacc", "renown", "remorts", "favors")}),
-        ("Survival?", {
+        ("Game Type", {
             "fields": ("game_type",),
         }),
         ("Deleted?", {
@@ -54,7 +54,8 @@ class PlayerAdmin(admin.ModelAdmin):
         ("account", admin.RelatedOnlyFieldListFilter),
     )
     readonly_fields = (
-        "id", "birth", "logon", "logout", "player_type", "player_level",
+        "id", "birth", "game_type", "logon", "logout",
+        "player_type", "player_level",
         "online_timedelta", "online_time"
     )
     search_fields = ("name", "account__account_name")
