@@ -3,7 +3,7 @@ from django.db.models import IntegerChoices
 
 class PlayerPosition(IntegerChoices):
     """
-    Player positions.
+    Ishar player position.
     """
     NEGATIVE_ONE = -1
     DEAD = 0
@@ -26,4 +26,4 @@ class PlayerPosition(IntegerChoices):
         )
 
     def __str__(self) -> str:
-        return self.name
+        return self.name.title()

@@ -6,7 +6,7 @@ from .account import Account
 
 
 class AccountAchievement(models.Model):
-    """Ishar account achievement relation."""
+    """Ishar account achievement."""
     account_achievement_id = models.AutoField(
         primary_key=True,
         help_text=(

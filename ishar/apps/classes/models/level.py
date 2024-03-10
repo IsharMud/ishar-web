@@ -5,7 +5,7 @@ from . import Class
 
 class ClassLevel(models.Model):
     """
-    Class Level.
+    Ishar class level.
     """
     class_level_id = models.AutoField(
         primary_key=True,

@@ -6,7 +6,7 @@ from .flag import SpellFlag
 
 class SkillSpellFlag(models.Model):
     """
-    Skill association to a spell flag.
+    Ishar skill association to a spell flag.
     """
     id = models.AutoField(
         help_text="Auto-generated ID number of the skill-flag relation.",

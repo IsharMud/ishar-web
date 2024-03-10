@@ -19,7 +19,7 @@ from ..util import get_immortal_level, get_immortal_type
 
 class Player(models.Model):
     """
-    Player character.
+    Ishar player.
     """
     account = models.ForeignKey(
         to=Account,

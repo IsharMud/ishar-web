@@ -7,7 +7,7 @@ from ishar.apps.races.models.race import Race
 
 class ClassRace(models.Model):
     """
-    Class Race.
+    Ishar class race.
     """
     classes_races_id = models.AutoField(
         primary_key=True,

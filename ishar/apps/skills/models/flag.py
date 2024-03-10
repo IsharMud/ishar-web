@@ -3,7 +3,7 @@ from django.db import models
 
 class SpellFlag(models.Model):
     """
-    Spell Flag.
+    Ishar spell flag.
     """
     id = models.AutoField(
         blank=False,

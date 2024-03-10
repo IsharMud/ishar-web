@@ -6,7 +6,7 @@ from ishar.apps.accounts.models import Account
 
 class FAQ(models.Model):
     """
-    Frequently Asked Question.
+    Ishar website frequently asked question.
     """
     faq_id = models.AutoField(
         blank=False,

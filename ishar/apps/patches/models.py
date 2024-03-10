@@ -11,7 +11,7 @@ from ishar.apps.accounts.models import Account
 
 class Patch(models.Model):
     """
-    Patch.
+    Ishar website patch PDF notes.
     """
     patch_id = models.AutoField(
         primary_key=True,

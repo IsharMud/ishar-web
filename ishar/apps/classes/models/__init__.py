@@ -4,7 +4,7 @@ from django.db import models
 
 class Class(models.Model):
     """
-    Player/mobile class.
+    Ishar player/mobile class.
     """
     class_id = models.PositiveIntegerField(
         primary_key=True,

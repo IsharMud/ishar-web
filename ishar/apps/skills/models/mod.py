@@ -6,7 +6,7 @@ from .type.mod import SkillModType
 
 class SkillMod(models.Model):
     """
-    Skill mod.
+    Ishar skill mod.
     """
     skill_mod_id = models.AutoField(
         primary_key=True,

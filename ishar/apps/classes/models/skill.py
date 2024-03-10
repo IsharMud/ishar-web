@@ -7,7 +7,7 @@ from . import Class
 
 class ClassSkill(models.Model):
     """
-    Class Skill.
+    Ishar class skill.
     """
     class_skills_id = models.AutoField(
         primary_key=True,

@@ -6,7 +6,7 @@ from .skill import Skill
 
 class SkillForce(models.Model):
     """
-    Skill Force.
+    Ishar skill force.
     """
     id = models.AutoField(
         blank=False,

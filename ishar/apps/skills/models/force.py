@@ -3,7 +3,7 @@ from django.db import models
 
 class Force(models.Model):
     """
-    Force.
+    Ishar force.
     """
     force_name = models.CharField(
         unique=True,

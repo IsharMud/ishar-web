@@ -18,4 +18,4 @@ class ImmortalLevel(IntegerChoices):
         )
 
     def __str__(self):
-        return self.name
+        return self.name.title()

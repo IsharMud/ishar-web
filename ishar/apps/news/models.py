@@ -6,7 +6,7 @@ from ishar.apps.accounts.models import Account
 
 class News(models.Model):
     """
-    News post.
+    Ishar website news post.
     """
     news_id = models.AutoField(
         primary_key=True,

@@ -6,7 +6,7 @@ from .type.type import SkillType
 
 class Skill(models.Model):
     """
-    Skill (includes spells).
+    Ishar skill/spell.
     """
     id = models.AutoField(
         blank=False,

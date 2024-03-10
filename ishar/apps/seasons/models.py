@@ -8,7 +8,7 @@ from django.utils.timezone import now
 
 class Season(models.Model):
     """
-    Season.
+    Ishar season.
     """
     season_id = models.AutoField(
         primary_key=True,

@@ -2,7 +2,7 @@ from django.db import models
 
 
 class AccountUpgrade(models.Model):
-    """Account upgrade."""
+    """Ishar account upgrade, purchased with essence."""
     id = models.AutoField(
         primary_key=True,
         help_text="Auto-generated permanent ID number of the account upgrade.",
