@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% load humanize %}
 {% block meta_title %}Challenges{% endblock meta_title %}
 {% block meta_description %}Challenges currently available, A.{% endblock meta_description %}
 {% block meta_url %}{% url "challenges" %}{% endblock meta_url %}
@@ -25,9 +26,15 @@
 </nav>
 {% endblock header %}
 {% block content %}
-    {% include "cycle.html" %}
+    {% if CURRENT_SEASON and CURRENT_SEASON.get_next_cycle %}
+    <div class="next-cycle">
+        <p class="lead">
+            Challenges will next cycle
+            <strong>{{ CURRENT_SEASON.get_next_cycle | naturaltime }}</strong>.
+        </p>
+    </div>
+    {% endif %}
     <table id="challengesTable"></table>
-    {% include "cycle.html" %}
     {{ challenges|json_script:"challenges" }}
     <script>
     const challenges = [];
@@ -40,10 +47,12 @@
             { data: 'max_people', title: 'Max People' },
             { data: 'max_level', title: 'Max Level' },
         ],
-        columnDefs: [{ type: 'num', targets: [1,2] }],
+        columnDefs: [{ type: 'num', targets: [1, 2] }],
         data: challenges,
+        info: false,
         order: [[2, 'desc'], [1, 'desc'], ['0', 'asc']],
         pageLength: 15,
+        paging: false,
     });
     pageTable.draw();
 </script>
