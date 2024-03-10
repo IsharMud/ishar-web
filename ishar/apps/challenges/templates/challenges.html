@@ -30,11 +30,12 @@
     <div class="next-cycle">
         <p class="lead">
             Challenges will next cycle
-            <strong>{{ CURRENT_SEASON.get_next_cycle | naturaltime }}</strong>.
+            <strong>{{ CURRENT_SEASON.get_next_cycle | naturaltime }}</strong>
+            @ {{ CURRENT_SEASON.get_next_cycle }}.
         </p>
     </div>
     {% endif %}
-    <table id="challengesTable"></table>
+    <table class="m-1 p-1" id="challengesTable"></table>
     {{ challenges|json_script:"challenges" }}
     <script>
     const challenges = [];
@@ -50,6 +51,7 @@
         columnDefs: [{ type: 'num', targets: [1, 2] }],
         data: challenges,
         info: false,
+        layout: { bottomStart: 'search', topEnd: null },
         order: [[2, 'desc'], [1, 'desc'], ['0', 'asc']],
         pageLength: 15,
         paging: false,
