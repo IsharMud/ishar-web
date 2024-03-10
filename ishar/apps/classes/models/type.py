@@ -2,9 +2,7 @@ from django.db.models import IntegerChoices
 
 
 class PlayerClass(IntegerChoices):
-    """
-    Player classes.
-    """
+    """Ishar playable class choices."""
     NEGATIVE_ONE = -1
     WARRIOR = 0
     ROGUE = 1

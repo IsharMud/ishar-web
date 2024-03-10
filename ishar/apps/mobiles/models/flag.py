@@ -7,7 +7,7 @@ from .mobile import Mobile
 
 
 class MobileFlag(models.Model):
-    """Mobile player flag."""
+    """Ishar mobile flag uses player flag."""
     id = models.AutoField(
         db_column="id",
         primary_key=True,

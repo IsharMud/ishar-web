@@ -2,9 +2,7 @@ from django.db.models import IntegerChoices
 
 
 class EventType(IntegerChoices):
-    """
-    Global event type choices.
-    """
+    """Ishar global event type choices."""
     BONUS_XP = 0
     TEST_SERVER = 1
     CHALLENGE_XP = 2

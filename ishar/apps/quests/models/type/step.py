@@ -2,9 +2,7 @@ from django.db.models import IntegerChoices
 
 
 class QuestStepType(IntegerChoices):
-    """
-    Quest step types.
-    """
+    """Quest step type choices."""
     OBJECT = 0
     KILL = 1
     ROOM = 2

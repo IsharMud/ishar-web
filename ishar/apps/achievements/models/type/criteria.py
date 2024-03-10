@@ -2,9 +2,7 @@ from django.db.models import IntegerChoices
 
 
 class AchievementCriteriaType(IntegerChoices):
-    """
-    Achievement criteria type choices.
-    """
+    """Achievement criteria type choices."""
     # Individual means individual character needs to meet criteria.
     INDIVIDUAL = 0
     # Seasonal means your entire account gets aggregated.
@@ -20,4 +18,4 @@ class AchievementCriteriaType(IntegerChoices):
         )
 
     def __str__(self) -> str:
-        return self.name
+        return self.name.title()

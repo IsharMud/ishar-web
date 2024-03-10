@@ -2,9 +2,7 @@ from django.db import models
 
 
 class PlayerFlag(models.Model):
-    """
-    Player Flag.
-    """
+    """Ishar player flag, used by both mobiles and players."""
     flag_id = models.AutoField(
         db_column="flag_id",
         primary_key=True,

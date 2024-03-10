@@ -2,9 +2,7 @@ from django.db.models import IntegerChoices
 
 
 class PlayerPosition(IntegerChoices):
-    """
-    Ishar player position.
-    """
+    """Ishar player position choices."""
     NEGATIVE_ONE = -1
     DEAD = 0
     DYING = 1

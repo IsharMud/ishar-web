@@ -2,9 +2,7 @@ from django.db.models import IntegerChoices
 
 
 class SkillModType(IntegerChoices):
-    """
-    Skill mod types.
-    """
+    """Skill mod type choices."""
     ZERO = 0
     NEGATIVE_ONE = -1
     STRENGTH = 1

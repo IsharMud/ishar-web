@@ -2,9 +2,7 @@ from django.db.models import IntegerChoices
 
 
 class AffinityType(IntegerChoices):
-    """
-    Affinity types.
-    """
+    """Affinity type choices."""
     VULNERABILITY = 0
     SUSCEPTIBILITY = 1
     RESISTANCE = 2
