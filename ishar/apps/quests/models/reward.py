@@ -7,9 +7,7 @@ from .type.reward import QuestRewardType
 
 
 class QuestReward(models.Model):
-    """
-    Quest Reward.
-    """
+    """Ishar quest reward."""
     quest_reward_id = models.AutoField(
         primary_key=True,
         help_text="Auto-generated, permanent quest reward ID number.",

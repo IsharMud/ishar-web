@@ -4,11 +4,13 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 
 from ishar.apps.classes.models.type import PlayerClass
 
+from .managers import QuestManager
+
 
 class Quest(models.Model):
-    """
-    Quest playable by a player character.
-    """
+    """Ishar playable quest."""
+    objects = QuestManager()
+
     quest_id = models.AutoField(
         primary_key=True,
         help_text="Auto-generated permanent unique quest number.",
@@ -114,3 +116,7 @@ class Quest(models.Model):
 
     def __str__(self) -> str:
         return self.display_name or self.name
+
+    def natural_key(self) -> str:
+        # Natural key by display name.
+        return self.display_name

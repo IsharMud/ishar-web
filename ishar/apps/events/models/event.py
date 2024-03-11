@@ -4,9 +4,7 @@ from .event_type import EventType
 
 
 class GlobalEvent(models.Model):
-    """
-    Global Event.
-    """
+    """Ishar global Event."""
     event_type = models.IntegerField(
         primary_key=True,
         choices=EventType,

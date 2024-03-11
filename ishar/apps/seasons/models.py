@@ -7,9 +7,7 @@ from django.utils.timezone import now
 
 
 class Season(models.Model):
-    """
-    Ishar season.
-    """
+    """Ishar season."""
     season_id = models.AutoField(
         primary_key=True,
         help_text="Auto-generated permanent season (identification) number.",
@@ -48,12 +46,14 @@ class Season(models.Model):
         verbose_name="Max Remorts"
     )
     season_leader_account = models.IntegerField(
-        blank=True, null=True,
+        blank=True,
+        null=True,
         help_text="Leader account in the season.",
         verbose_name="Season Leader Account"
     )
     seasonal_leader_name = models.TextField(
-        blank=True, null=True,
+        blank=True,
+        null=True,
         help_text="Leader name in the season.",
         verbose_name="Seasonal Leader Name"
     )

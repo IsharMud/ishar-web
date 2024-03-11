@@ -7,9 +7,7 @@ from .type import AffinityType
 
 
 class RaceAffinity(models.Model):
-    """
-    Race Affinity.
-    """
+    """Ishar race affinity."""
     race_affinity_id = models.AutoField(
         blank=False,
         help_text="Primary identification number of the race affinity.",

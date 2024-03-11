@@ -2,9 +2,7 @@ from django.contrib.auth.models import BaseUserManager
 
 
 class AccountManager(BaseUserManager):
-    """
-    Account manager.
-    """
+    """Ishar account manager."""
 
     def create_user(self, email=None, account_name=None, password=None):
         """
@@ -40,3 +38,7 @@ class AccountManager(BaseUserManager):
         )
         user.save(using=self._db)
         return user
+
+    def get_by_natural_key(self, account_name):
+        """Natural key of the account username."""
+        return self.get(account_name=account_name)

@@ -1,6 +1,4 @@
-"""
-Parse the MUD 'helptab' file
-"""
+"""Parse the MUD 'helptab' file."""
 import re
 
 from django.conf import settings

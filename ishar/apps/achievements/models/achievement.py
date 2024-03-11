@@ -2,8 +2,16 @@ from django.db import models
 from django.utils import timezone
 
 
+class AchievementManager(models.Manager):
+    def get_by_natural_key(self, name):
+        """Natural key of the achievement name."""
+        return self.get(name=name)
+
+
 class Achievement(models.Model):
     """Ishar achievement."""
+    objects = AchievementManager()
+
     achievement_id = models.AutoField(
         primary_key=True,
         help_text="Primary key identification number of the achievement.",
@@ -65,3 +73,7 @@ class Achievement(models.Model):
             self.created_at = now
         self.updated_at = now
         return super().save(*args, **kwargs)
+
+    def natural_key(self) -> str:
+        """Natural key of the achievement name."""
+        return self.name

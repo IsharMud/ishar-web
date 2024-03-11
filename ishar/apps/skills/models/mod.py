@@ -51,4 +51,7 @@ class SkillMod(models.Model):
         )
 
     def __str__(self):
-        return "%s @ %s" % (self.get_mod_location_display(), self.skill)
+        return "%s @ %s" % (
+            self.get_mod_location_display(),
+            self.skill
+        )

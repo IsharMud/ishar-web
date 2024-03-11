@@ -5,9 +5,7 @@ from .flag import SpellFlag
 
 
 class SkillSpellFlag(models.Model):
-    """
-    Ishar skill association to a spell flag.
-    """
+    """Ishar skill relation to a spell flag."""
     id = models.AutoField(
         help_text="Auto-generated ID number of the skill-flag relation.",
         primary_key=True,
@@ -46,4 +44,7 @@ class SkillSpellFlag(models.Model):
         )
 
     def __str__(self) -> str:
-        return "%s @ %s" % (self.skill, self.flag)
+        return "%s @ %s" % (
+            self.skill,
+            self.flag
+        )

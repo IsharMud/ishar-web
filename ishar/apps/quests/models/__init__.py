@@ -1,0 +1,1 @@
+from .quest import Quest

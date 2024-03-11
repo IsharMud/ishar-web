@@ -25,6 +25,7 @@ class PlayerManager(models.Manager):
 class Player(models.Model):
     """Ishar player."""
     objects = PlayerManager()
+
     account = models.ForeignKey(
         to=Account,
         on_delete=models.DO_NOTHING,

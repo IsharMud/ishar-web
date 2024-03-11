@@ -6,9 +6,7 @@ from .models.event import GlobalEvent
 
 
 class GlobalEventsView(LoginRequiredMixin, ListView):
-    """
-    Global events view.
-    """
+    """Global events view."""
     context_object_name = "global_events"
     model = GlobalEvent
     template_name = "events.html"

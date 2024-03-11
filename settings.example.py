@@ -1,6 +1,4 @@
-"""
-isharmud.com Django settings.
-"""
+"""isharmud.com Django settings."""
 from os import getenv
 from pathlib import Path
 from pymysql import install_as_MySQLdb

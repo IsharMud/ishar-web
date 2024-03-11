@@ -14,9 +14,7 @@ from .unsigned import UnsignedAutoField
 
 
 class Account(AbstractBaseUser, PermissionsMixin):
-    """
-    Ishar user account that logs in to the website, and MUD/game.
-    """
+    """Ishar user account that logs in to the website, and MUD/game."""
     account_id = UnsignedAutoField(
         primary_key=True,
         help_text="Auto-generated permanent unique account number.",
@@ -170,7 +168,7 @@ class Account(AbstractBaseUser, PermissionsMixin):
 
     def get_username(self) -> str:
         """Return account username."""
-        return self.account_name
+        return getattr(self, self.USERNAME_FIELD)
 
     def has_perms(self, perm_list, obj=None) -> bool:
         return self.is_god()
@@ -251,6 +249,10 @@ class Account(AbstractBaseUser, PermissionsMixin):
             if player.logon < when:
                 when = player.logon
         return when
+
+    def natural_key(self) -> str:
+        """Natural key of the account username."""
+        return getattr(self, self.USERNAME_FIELD)
 
     @property
     @admin.display(description="# Players", ordering="player_count")

@@ -4,6 +4,7 @@ from django.db import models
 
 class ClassManager(models.Manager):
     def get_by_natural_key(self, class_name):
+        """Natural key by class name."""
         return self.get(class_name=class_name)
 
 
@@ -99,4 +100,5 @@ class Class(models.Model):
         return self.class_name.replace("_", " ").title()
 
     def natural_key(self) -> str:
+        """Natural key by class name."""
         return self.get_class_name()

@@ -4,10 +4,14 @@ from django.utils import timezone
 from ishar.apps.accounts.models import Account
 
 
+class NewsManager(models.Manager):
+    def get_by_natural_key(self, subject):
+        # Natural key is news post subject.
+        return self.get(patch_name=subject)
+
+
 class News(models.Model):
-    """
-    Ishar website news post.
-    """
+    """Ishar website news post."""
     news_id = models.AutoField(
         primary_key=True,
         help_text="Auto-generated permanent ID number of the news post.",
@@ -60,4 +64,8 @@ class News(models.Model):
         )
 
     def __str__(self):
+        return self.subject
+
+    def natural_key(self):
+        # Natural key is news post subject.
         return self.subject

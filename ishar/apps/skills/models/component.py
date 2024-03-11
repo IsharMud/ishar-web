@@ -67,4 +67,7 @@ class SkillComponent(models.Model):
         )
 
     def __str__(self) -> str:
-        return "%s @ %s" % (self.get_component_type_display(), self.skill)
+        return "%s @ %s" % (
+            self.get_component_type_display(),
+            self.skill
+        )

@@ -4,9 +4,7 @@ from .quest import Quest
 
 
 class QuestPrereq(models.Model):
-    """
-    Quest Prerequisite.
-    """
+    """Ishar quest pre-requisite."""
     quest_prereqs_id = models.AutoField(
         blank=False,
         db_column="quest_prereqs_id",

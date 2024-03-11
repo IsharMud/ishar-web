@@ -4,10 +4,16 @@ from django.urls import reverse
 from .category import MUDClientCategory
 
 
+class MUDClientManager(models.Manager):
+    def get_by_natural_key(self, name):
+        """Natural key of the MUD client name."""
+        return self.get(name=name)
+
+
 class MUDClient(models.Model):
-    """
-    MUD Client.
-    """
+    """Website MUD client."""
+    objects = MUDClientManager()
+
     client_id = models.AutoField(
         blank=False,
         help_text="Auto-generated ID number of the MUD client.",
@@ -76,4 +82,8 @@ class MUDClient(models.Model):
         )
 
     def __str__(self):
+        return self.name
+
+    def natural_key(self) -> str:
+        """Natural key of the MUD client name."""
         return self.name
