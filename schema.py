@@ -128,6 +128,7 @@ class AchievementCriteria(models.Model):
     description = models.TextField(blank=True, null=True)
     criteria_type = models.CharField(max_length=32, blank=True, null=True)
     target_value = models.CharField(max_length=10, blank=True, null=True)
+    group_id = models.PositiveIntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -163,9 +164,9 @@ class Achievements(models.Model):
     created_at = models.DateTimeField()
     updated_at = models.DateTimeField()
     category = models.CharField(max_length=80, blank=True, null=True)
-    criteria_type = models.PositiveIntegerField(blank=True, null=True)
     parent_category = models.CharField(max_length=80, blank=True, null=True)
     ordinal = models.IntegerField(blank=True, null=True)
+    criteria_type = models.CharField(max_length=14, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -1208,6 +1209,7 @@ class Seasons(models.Model):
     avg_renown = models.FloatField()
     total_remorts = models.IntegerField()
     game_state = models.SmallIntegerField(blank=True, null=True)
+    multiplay_limit = models.PositiveSmallIntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
