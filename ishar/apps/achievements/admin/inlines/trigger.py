@@ -5,7 +5,7 @@ from ...models.trigger import AchievementTrigger
 
 class AchievementTriggerTabularInline(TabularInline):
     """Achievement reward tabular inline administration."""
-    extra = 1
+    extra = 0
     model = AchievementTrigger
     verbose_name = "Trigger"
     verbose_name_plural = "Triggers"

@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils import timezone
 
+from .type.criteria import AchievementCriteriaType
+
 
 class AchievementManager(models.Manager):
     def get_by_natural_key(self, name):
@@ -46,6 +48,27 @@ class Achievement(models.Model):
         null=True,
         help_text="Category of the achievement.",
         verbose_name="Category"
+    )
+    parent_category = models.CharField(
+        max_length=80,
+        blank=True,
+        null=True,
+        help_text="Parent category of the achievement.",
+        verbose_name="Parent Category"
+    )
+    ordinal = models.IntegerField(
+        blank=True,
+        null=True,
+        help_text="Ordinal of the achievement.",
+        verbose_name="Ordinal"
+    )
+    criteria_type = models.CharField(
+        max_length=14,
+        blank=True,
+        choices=AchievementCriteriaType,
+        null=True,
+        help_text="Criteria type of the achievement.",
+        verbose_name="Criteria Type"
     )
 
     class Meta:

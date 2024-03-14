@@ -65,6 +65,12 @@ class Season(models.Model):
         help_text="Average amount of renown gained in the season.",
         verbose_name="Average Renown"
     )
+    multiplay_limit = models.PositiveSmallIntegerField(
+        blank=True,
+        null=True,
+        help_text="Limit of players that one account can log in to.",
+        verbose_name="Multi-Play Limit"
+    )
 
     class Meta:
         managed = False

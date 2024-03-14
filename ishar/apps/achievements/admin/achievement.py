@@ -17,7 +17,10 @@ class AchievementAdmin(admin.ModelAdmin):
         AchievementTriggerTabularInline,
     )
     list_display = ("achievement_id", "name", "description", "is_hidden")
-    list_filter = ("is_hidden", "created_at", "updated_at")
+    list_filter = (
+        "criteria_type", "category", "parent_category", "is_hidden",
+        "ordinal", "created_at", "updated_at",
+    )
     readonly_fields = ("achievement_id", "created_at", "updated_at")
     search_fields = ("name", "description")
 
