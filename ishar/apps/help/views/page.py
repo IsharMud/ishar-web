@@ -1,7 +1,7 @@
 from django.contrib import messages
 from django.shortcuts import redirect
 
-from ..util import search_help_topics
+from ..utils import search_help_topics
 from ..views import HelpView
 
 

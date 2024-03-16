@@ -1,4 +1,4 @@
-from ..util import search_help_topics
+from ..utils import search_help_topics
 from ..views import HelpView
 
 

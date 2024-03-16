@@ -6,7 +6,7 @@ from django.utils import timezone
 from libgravatar import Gravatar, sanitize_email
 from passlib.hash import md5_crypt
 
-from ishar.apps.core.util.ip import dec2ip
+from ishar.apps.core.utils.ip import dec2ip
 
 from .level import ImmortalLevel
 from .manager import AccountManager

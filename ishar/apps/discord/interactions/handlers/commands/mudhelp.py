@@ -1,7 +1,7 @@
 from django.urls import reverse
 from django.utils.translation import ngettext
 
-from ishar.apps.help.util import search_help_topics
+from ishar.apps.help.utils import search_help_topics
 
 
 def mudhelp(request, interaction=None, _spell=False):

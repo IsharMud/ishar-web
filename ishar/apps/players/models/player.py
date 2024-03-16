@@ -11,10 +11,10 @@ from django.utils.translation import gettext_lazy as _
 
 from ishar.apps.accounts.models import Account
 from ishar.apps.core.models.title import Title
-from ishar.apps.core.util.ip import dec2ip
+from ishar.apps.core.utils.ip import dec2ip
 
 from .game_type import GameType
-from ..util import get_immortal_level, get_immortal_type
+from ..utils import get_immortal_level, get_immortal_type
 
 
 class PlayerManager(models.Manager):

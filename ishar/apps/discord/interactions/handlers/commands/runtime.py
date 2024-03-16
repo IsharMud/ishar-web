@@ -1,4 +1,4 @@
-from ishar.apps.processes.util.process import get_process
+from ishar.apps.processes.utils.process import get_process
 
 
 def runtime():

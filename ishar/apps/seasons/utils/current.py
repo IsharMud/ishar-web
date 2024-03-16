@@ -1,4 +1,4 @@
-from .models import Season
+from ..models.season import Season
 
 
 def get_current_season():

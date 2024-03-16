@@ -119,6 +119,5 @@ class Season(models.Model):
         if self.last_challenge_cycle:
             if isinstance(self.last_challenge_cycle, datetime):
                 if self.last_challenge_cycle <= now():
-                    add_time = timedelta(days=7)
-                    return self.last_challenge_cycle + add_time
+                    return self.last_challenge_cycle + timedelta(days=7)
         return None

@@ -6,6 +6,10 @@ def parse_help_content(content=None):
     """Parse the body content from a single topic chunk
         from the MUD 'helptab' file to return a help topic dictionary"""
 
+    # Compile regular expressions to parse "see also" items from help topics.
+    pattern = r'^ *(see also|also see|also see help on|see help on|related) *\: *'
+    see_also_regex = re.compile(pattern=pattern, flags=re.IGNORECASE)
+
     # Topic body text is everything after the header and '*',
     #   but replace < and > and " with HTML-safe versions
 

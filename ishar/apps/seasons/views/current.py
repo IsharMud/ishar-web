@@ -1,6 +1,6 @@
 from django.views.generic import TemplateView
 
-from ..util import get_current_season
+from ..utils.current import get_current_season
 
 
 class CurrentSeasonView(TemplateView):

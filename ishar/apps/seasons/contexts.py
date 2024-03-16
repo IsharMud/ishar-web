@@ -1,4 +1,4 @@
-from .util import get_current_season
+from .utils import get_current_season
 
 
 def current_season(request):

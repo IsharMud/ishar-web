@@ -1,6 +1,6 @@
 from django.utils.timezone import now
 
-from .models.event import GlobalEvent
+from ..models.event import GlobalEvent
 
 
 def get_global_event_count():
