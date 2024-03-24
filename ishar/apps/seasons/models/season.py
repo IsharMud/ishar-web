@@ -25,10 +25,6 @@ class Season(models.Model):
         help_text="Expiration end date of the season.",
         verbose_name="Expiration Date"
     )
-    last_challenge_cycle = models.DateTimeField(
-        help_text="Last date and time of challenges cycled in the season.",
-        verbose_name="Last Challenge Cycle"
-    )
     average_essence_gain = models.FloatField(
         help_text="Average essence gain in the season.",
         verbose_name="Average Essence Gain"
@@ -57,6 +53,10 @@ class Season(models.Model):
         help_text="Leader name in the season.",
         verbose_name="Seasonal Leader Name"
     )
+    last_challenge_cycle = models.DateTimeField(
+        help_text="Last date and time of challenges cycled in the season.",
+        verbose_name="Last Challenge Cycle"
+    )
     max_renown = models.IntegerField(
         help_text="Max amount of renown gained in the season.",
         verbose_name="Max Renown"
@@ -64,6 +64,16 @@ class Season(models.Model):
     avg_renown = models.FloatField(
         help_text="Average amount of renown gained in the season.",
         verbose_name="Average Renown"
+    )
+    total_remorts = models.IntegerField(
+        help_text="Total number of remorts in the season.",
+        verbose_name="Total Remorts"
+    )
+    game_state = models.SmallIntegerField(
+        blank=True,
+        null=True,
+        help_text="Game state of the season.",
+        verbose_name="Game State"
     )
     multiplay_limit = models.PositiveSmallIntegerField(
         blank=True,

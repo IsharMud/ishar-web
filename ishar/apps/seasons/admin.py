@@ -10,7 +10,7 @@ class SeasonAdmin(ModelAdmin):
     """
     date_hierarchy = "effective_date"
     fieldsets = (
-        (None, {"fields": ("season_id", "is_active")}),
+        (None, {"fields": ("season_id", "is_active", "game_state")}),
         ("Dates", {
             "fields": (
                 "effective_date", "expiration_date", "last_challenge_cycle",
@@ -22,8 +22,10 @@ class SeasonAdmin(ModelAdmin):
             "fields": ("average_essence_gain", "average_remorts", "avg_renown")
         }),
         ("Maximums", {
-            "fields": ("max_essence_gain", "max_remorts", "max_renown"
-        )}),
+            "fields": (
+                "max_essence_gain", "max_remorts", "max_renown", "total_remorts"
+            )
+        }),
         ("Leader", {
             "fields": ("season_leader_account", "seasonal_leader_name")
         }),
