@@ -245,7 +245,7 @@ class Player(models.Model):
         verbose_name = "Player"
 
     def __repr__(self) -> str:
-        return "%s: %s (%i)" % (
+        return "%s: %s (%s)" % (
             self.__class__.__name__,
             self.__str__(),
             self.pk

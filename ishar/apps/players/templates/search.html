@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+{% block meta_title %}Search{% endblock meta_title %}
+{% block meta_description %}Search{% endblock meta_description %}
+{% block meta_url %}{% url "players" %}{% endblock meta_url %}
+{% block title %}Search{% endblock title %}
+{% block header %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item" title="Portal">
+            <span class="bi bi-person text-ishar"></span>
+            <a href="{% url "portal" %}">
+                Portal
+            </a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page" title="Search">
+            <span class="bi bi-search text-ishar"></span>
+            <a href="{% url "players" %}">
+                Search
+            </a>
+        </li>
+    </ol>
+</nav>
+{% endblock header %}
+{% block content %}
+    {% if form %}
+    <div class="form-control-dark" id="player-search-form">
+        <form method="post" action="{% url 'players' %}">
+            {{ form.as_table }}
+            {% csrf_token %}
+            <button class="btn btn-outline-primary" type="submit">Search</button>
+            <button class="btn btn-outline-secondary" type="reset">Clear</button>
+        </form>
+    </div>
+    {% endif %}
+{% endblock content %}
