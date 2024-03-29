@@ -8,7 +8,7 @@ from ..models.object import Object
 @admin.register(Object)
 class ObjectAdmin(admin.ModelAdmin):
     """Ishar mobile administration."""
-    list_display = ("vnum", "longname", "appearance", "description", "state")
+    list_display = ("vnum", "longname", "appearance", "description")
     list_display_links = ("vnum", "longname")
     list_filter = (
         "deleted", "item_type",
