@@ -616,6 +616,9 @@ class MobData(models.Model):
     karma = models.IntegerField()
     hrange_low = models.IntegerField(blank=True, null=True)
     hrange_high = models.IntegerField(blank=True, null=True)
+    created_at = models.DateTimeField(blank=True, null=True)
+    updated_at = models.DateTimeField(blank=True, null=True)
+    is_deleted = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -690,6 +693,160 @@ class News(models.Model):
     class Meta:
         managed = False
         db_table = 'news'
+
+
+class ObjectAffectFlags(models.Model):
+    object_vnum = models.ForeignKey('Objects', models.DO_NOTHING, db_column='object_vnum')
+    affect_flag = models.OneToOneField(AffectFlags, models.DO_NOTHING, primary_key=True)  # The composite primary key (affect_flag_id, object_vnum) found, that is not supported. The first column is selected.
+    value = models.IntegerField()
+    created_at = models.DateTimeField()
+    updated_at = models.DateTimeField()
+
+    class Meta:
+        managed = False
+        db_table = 'object_affect_flags'
+        unique_together = (('affect_flag', 'object_vnum'),)
+
+
+class ObjectExtras(models.Model):
+    object_vnum = models.OneToOneField('Objects', models.DO_NOTHING, db_column='object_vnum', primary_key=True)  # The composite primary key (object_vnum, keywords) found, that is not supported. The first column is selected.
+    keywords = models.CharField(max_length=128)
+    description = models.CharField(max_length=4096)
+    created_at = models.DateTimeField()
+    updated_at = models.DateTimeField()
+
+    class Meta:
+        managed = False
+        db_table = 'object_extras'
+        unique_together = (('object_vnum', 'keywords'),)
+
+
+class ObjectFlags(models.Model):
+    object_vnum = models.OneToOneField('Objects', models.DO_NOTHING, db_column='object_vnum', primary_key=True)
+    magic = models.IntegerField(db_column='MAGIC')  # Field name made lowercase.
+    cursed = models.IntegerField(db_column='CURSED')  # Field name made lowercase.
+    donated = models.IntegerField(db_column='DONATED')  # Field name made lowercase.
+    notgood = models.IntegerField(db_column='NOTGOOD')  # Field name made lowercase.
+    notevil = models.IntegerField(db_column='NOTEVIL')  # Field name made lowercase.
+    notneutral = models.IntegerField(db_column='NOTNEUTRAL')  # Field name made lowercase.
+    invisible = models.IntegerField(db_column='INVISIBLE')  # Field name made lowercase.
+    moved = models.IntegerField(db_column='MOVED')  # Field name made lowercase.
+    notwarrior = models.IntegerField(db_column='NOTWARRIOR')  # Field name made lowercase.
+    notrogue = models.IntegerField(db_column='NOTROGUE')  # Field name made lowercase.
+    notcleric = models.IntegerField(db_column='NOTCLERIC')  # Field name made lowercase.
+    notmagician = models.IntegerField(db_column='NOTMAGICIAN')  # Field name made lowercase.
+    trapped = models.IntegerField(db_column='TRAPPED')  # Field name made lowercase.
+    surface = models.IntegerField(db_column='SURFACE')  # Field name made lowercase.
+    high_rent = models.IntegerField(db_column='HIGH_RENT')  # Field name made lowercase.
+    notmortals = models.IntegerField(db_column='NOTMORTALS')  # Field name made lowercase.
+    day_decay = models.IntegerField(db_column='DAY_DECAY')  # Field name made lowercase.
+    enchanted = models.IntegerField(db_column='ENCHANTED')  # Field name made lowercase.
+    rented = models.IntegerField(db_column='RENTED')  # Field name made lowercase.
+    possessed = models.IntegerField(db_column='POSSESSED')  # Field name made lowercase.
+    persistent = models.IntegerField(db_column='PERSISTENT')  # Field name made lowercase.
+    modified = models.IntegerField(db_column='MODIFIED')  # Field name made lowercase.
+    in_edit = models.IntegerField(db_column='IN_EDIT')  # Field name made lowercase.
+    remove_obj = models.IntegerField(db_column='REMOVE_OBJ')  # Field name made lowercase.
+    controlled = models.IntegerField(db_column='CONTROLLED')  # Field name made lowercase.
+    noident = models.IntegerField(db_column='NOIDENT')  # Field name made lowercase.
+    unrentable = models.IntegerField(db_column='UNRENTABLE')  # Field name made lowercase.
+    nolocate = models.IntegerField(db_column='NOLOCATE')  # Field name made lowercase.
+    artifact = models.IntegerField(db_column='ARTIFACT')  # Field name made lowercase.
+    quest_obj = models.IntegerField(db_column='QUEST_OBJ')  # Field name made lowercase.
+    emp_enchant = models.IntegerField(db_column='EMP_ENCHANT')  # Field name made lowercase.
+    quest_source = models.IntegerField(db_column='QUEST_SOURCE')  # Field name made lowercase.
+    not_shaman = models.IntegerField(db_column='NOT_SHAMAN')  # Field name made lowercase.
+    created_at = models.DateTimeField()
+    updated_at = models.DateTimeField()
+
+    class Meta:
+        managed = False
+        db_table = 'object_flags'
+
+
+class ObjectMods(models.Model):
+    mod_id = models.PositiveIntegerField(primary_key=True)
+    name = models.CharField(unique=True, max_length=30)
+    created_at = models.DateTimeField()
+    updated_at = models.DateTimeField()
+
+    class Meta:
+        managed = False
+        db_table = 'object_mods'
+
+
+class ObjectObjectMods(models.Model):
+    object_vnum = models.OneToOneField('Objects', models.DO_NOTHING, db_column='object_vnum', primary_key=True)  # The composite primary key (object_vnum, mod_slot) found, that is not supported. The first column is selected.
+    mod_slot = models.PositiveIntegerField()
+    object_mod = models.ForeignKey(ObjectMods, models.DO_NOTHING)
+    value = models.IntegerField()
+    created_at = models.DateTimeField()
+    updated_at = models.DateTimeField()
+
+    class Meta:
+        managed = False
+        db_table = 'object_object_mods'
+        unique_together = (('object_vnum', 'mod_slot'),)
+
+
+class ObjectWearableFlags(models.Model):
+    object_vnum = models.OneToOneField('Objects', models.DO_NOTHING, db_column='object_vnum', primary_key=True)
+    take = models.IntegerField(db_column='TAKE')  # Field name made lowercase.
+    wield = models.IntegerField(db_column='WIELD')  # Field name made lowercase.
+    hold = models.IntegerField(db_column='HOLD')  # Field name made lowercase.
+    two_hands = models.IntegerField(db_column='TWO_HANDS')  # Field name made lowercase.
+    body = models.IntegerField(db_column='BODY')  # Field name made lowercase.
+    head = models.IntegerField(db_column='HEAD')  # Field name made lowercase.
+    neck = models.IntegerField(db_column='NECK')  # Field name made lowercase.
+    chest = models.IntegerField(db_column='CHEST')  # Field name made lowercase.
+    back = models.IntegerField(db_column='BACK')  # Field name made lowercase.
+    arms = models.IntegerField(db_column='ARMS')  # Field name made lowercase.
+    wrist = models.IntegerField(db_column='WRIST')  # Field name made lowercase.
+    hands = models.IntegerField(db_column='HANDS')  # Field name made lowercase.
+    finger = models.IntegerField(db_column='FINGER')  # Field name made lowercase.
+    waist = models.IntegerField(db_column='WAIST')  # Field name made lowercase.
+    legs = models.IntegerField(db_column='LEGS')  # Field name made lowercase.
+    feet = models.IntegerField(db_column='FEET')  # Field name made lowercase.
+    about = models.IntegerField(db_column='ABOUT')  # Field name made lowercase.
+    shield = models.IntegerField(db_column='SHIELD')  # Field name made lowercase.
+    face = models.IntegerField(db_column='FACE')  # Field name made lowercase.
+    mouth = models.IntegerField(db_column='MOUTH')  # Field name made lowercase.
+    fore_mark = models.IntegerField(db_column='FORE_MARK')  # Field name made lowercase.
+    upper_body = models.IntegerField(db_column='UPPER_BODY')  # Field name made lowercase.
+    created_at = models.DateTimeField()
+    updated_at = models.DateTimeField()
+
+    class Meta:
+        managed = False
+        db_table = 'object_wearable_flags'
+
+
+class Objects(models.Model):
+    vnum = models.PositiveIntegerField(primary_key=True)
+    name = models.CharField(max_length=128, blank=True, null=True)
+    longname = models.CharField(max_length=256, blank=True, null=True)
+    appearance = models.CharField(max_length=256, blank=True, null=True)
+    description = models.CharField(max_length=8192, blank=True, null=True)
+    func = models.CharField(max_length=128, blank=True, null=True)
+    state = models.IntegerField(blank=True, null=True)
+    timer = models.SmallIntegerField(blank=True, null=True)
+    enchant = models.ForeignKey('Skills', models.DO_NOTHING, db_column='enchant', blank=True, null=True)
+    item_type = models.IntegerField(blank=True, null=True)
+    equipped = models.PositiveIntegerField(blank=True, null=True)
+    size = models.SmallIntegerField(blank=True, null=True)
+    weight = models.IntegerField(blank=True, null=True)
+    value = models.IntegerField(blank=True, null=True)
+    val0 = models.IntegerField(blank=True, null=True)
+    val1 = models.IntegerField(blank=True, null=True)
+    val2 = models.IntegerField(blank=True, null=True)
+    val3 = models.IntegerField(blank=True, null=True)
+    deleted = models.IntegerField()
+    created_at = models.DateTimeField()
+    updated_at = models.DateTimeField()
+
+    class Meta:
+        managed = False
+        db_table = 'objects'
 
 
 class Patches(models.Model):
@@ -898,6 +1055,7 @@ class PlayerRelics(models.Model):
     class Meta:
         managed = False
         db_table = 'player_relics'
+        unique_together = (('player', 'obj_vnum'),)
 
 
 class PlayerRemortUpgrades(models.Model):

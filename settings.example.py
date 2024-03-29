@@ -95,6 +95,7 @@ INSTALLED_APPS = [
     "ishar.apps.LeadersConfig",
     "ishar.apps.MobilesConfig",
     "ishar.apps.NewsConfig",
+    "ishar.apps.ObjectsConfig",
     "ishar.apps.PatchesConfig",
     "ishar.apps.PlayersConfig",
     "ishar.apps.ProcessesConfig",
@@ -435,8 +436,18 @@ JAZZMIN_SETTINGS = {
         "mobiles.Mobile": "fas fa-skull",
 
         # news
-        "new": "fas fa-newspaper",
+        "news": "fas fa-newspaper",
         "news.News": "fas fa-newspaper",
+
+        # objects
+        "objects": "fas fa-object-group",
+        "objects.Object": "fas fa-object-group",
+        "ObjectAffectFlag": "fas fa-flag",
+        "ObjectExtra": "fas fa-diagram-project",
+        "ObjectFlag": "fas fa-flag",
+        "ObjectMod": "fas fa-vector-square",
+        "ObjectObjectMod": "fas fa-draw-polygon",
+        "ObjectWearableFlag": "fas fa-flag",
 
         # patches
         "patches": "fas fa-file-pdf",
