@@ -11,7 +11,7 @@ class ObjectAdmin(admin.ModelAdmin):
     list_display = ("vnum", "longname", "appearance", "description", "state")
     list_display_links = ("vnum", "longname")
     list_filter = (
-        "deleted",
+        "deleted", "item_type",
         ("enchant", admin.RelatedOnlyFieldListFilter),
         ("appearance", admin.EmptyFieldListFilter),
         ("description", admin.EmptyFieldListFilter),

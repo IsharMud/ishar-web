@@ -3,6 +3,8 @@ from django.utils.translation import gettext_lazy as _
 
 from ishar.apps.skills.models.skill import Skill
 
+from .type import ObjectType
+
 
 class Object(models.Model):
     """Ishar object."""
@@ -72,6 +74,7 @@ class Object(models.Model):
     )
     item_type = models.IntegerField(
         blank=True,
+        choices=ObjectType,
         help_text=_("Item type of the object."),
         null=True,
         verbose_name=_("Item Type")
