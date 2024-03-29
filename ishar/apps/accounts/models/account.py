@@ -10,12 +10,11 @@ from ishar.apps.core.utils.ip import dec2ip
 
 from .level import ImmortalLevel
 from .manager import AccountManager
-from .unsigned import UnsignedAutoField
 
 
 class Account(AbstractBaseUser, PermissionsMixin):
     """Ishar user account that logs in to the website, and MUD/game."""
-    account_id = UnsignedAutoField(
+    account_id = models.AutoField(
         primary_key=True,
         help_text="Auto-generated permanent unique account number.",
         verbose_name="Account ID"

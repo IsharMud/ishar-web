@@ -29,7 +29,7 @@ ALLOWED_HOSTS = DJANGO_HOSTS.split()
 DATABASES = {
     # Staging.
     "ishar_test": {
-        "ENGINE": "django.db.backends.mysql",
+        "ENGINE": "ishar.apps.core.backends",
         "NAME": "ishar_test",
         "USER": "ishar_test",
         "PASSWORD": "secret",
@@ -38,7 +38,7 @@ DATABASES = {
     },
     # Production
     "ishar": {
-        "ENGINE": "django.db.backends.mysql",
+        "ENGINE": "ishar.apps.core.backends",
         "NAME": "ishar",
         "USER": "ishar",
         "PASSWORD": "secret",
@@ -50,7 +50,7 @@ DEFAULT_DB = getenv("DJANGO_DATABASE", "ishar")
 DATABASES["default"] = DATABASES[DEFAULT_DB]
 
 # Default primary key field type.
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+DEFAULT_AUTO_FIELD = "ishar.apps.core.models.unsigned.UnsignedAutoField"
 
 # CSRF and session cookies.
 CSRF_COOKIE_DOMAIN = SESSION_COOKIE_DOMAIN = ALLOWED_HOSTS[0]

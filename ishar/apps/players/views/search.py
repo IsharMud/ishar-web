@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import redirect
 from django.views.generic import FormView
@@ -17,6 +18,7 @@ class PlayerSearchView(LoginRequiredMixin, FormView):
         context = self.get_context_data()
         if form.cleaned_data:
             search = form.cleaned_data.get("name")
+            status = 404
             if search:
                 results = self.model.objects.filter(name__icontains=search)
 
@@ -26,14 +28,23 @@ class PlayerSearchView(LoginRequiredMixin, FormView):
 
                     # Redirect directly to a single match.
                     if num_results == 1:
-                        return redirect(results.first().get_absolute_url())
+                        who = results.first()
+                        return redirect(who.get_absolute_url())
 
                     # Otherwise, include results and search term in context.
                     if num_results > 1:
                         context["results"] = results
                         context["search"] = search
+                        status = 200
 
-        return self.render_to_response(context=context)
+                else:
+                    messages.add_message(
+                        request=self.request,
+                        level=messages.ERROR,
+                        message="Sorry, but no such player could be found."
+                    )
+
+        return self.render_to_response(context=context, status=status)
 
     def get_form(self, form_class=None):
         """Remove help text and label from player name search form."""

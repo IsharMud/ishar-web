@@ -1,7 +1,6 @@
-from django.contrib import admin, messages
-from django.urls import reverse
-from django.utils.html import format_html
+from django.contrib import admin
 
+from .inlines.flag import ObjectFlagTabularInline
 from ..models.object import Object
 
 
@@ -17,7 +16,8 @@ class ObjectAdmin(admin.ModelAdmin):
         ("description", admin.EmptyFieldListFilter),
         ("func", admin.EmptyFieldListFilter),
     )
-    readonly_fields = ("vnum",)
+    # inlines = (ObjectFlagTabularInline,)
+    # readonly_fields = ("vnum", "created_at", "updated_at")
     search_fields = (
         "vnum", "name", "longname", "appearance", "description", "func",
     )

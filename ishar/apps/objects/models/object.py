@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from ishar.apps.skills.models.skill import Skill
@@ -6,13 +7,21 @@ from ishar.apps.skills.models.skill import Skill
 from .type import ObjectType
 
 
+class ObjectManager(models.Manager):
+    def get_by_natural_key(self, longname):
+        # Natural key is object long name.
+        return self.get(longname=longname)
+
+
 class Object(models.Model):
     """Ishar object."""
-    vnum = models.PositiveIntegerField(
-        primary_key=True,
+    objects = ObjectManager()
+
+    vnum = models.AutoField(
         help_text=_(
             'Primary key identification number ("VNUM") of the object.'
         ),
+        primary_key=True,
         verbose_name=_('Object ID ("VNUM")')
     )
     name = models.CharField(
@@ -160,6 +169,6 @@ class Object(models.Model):
             self.longname or self.name
         )
 
-    def natural_key(self):
-        # Natural key is object's long name.
-        return self.longname or self.name
+    def natural_key(self) -> str:
+        # Natural key is object "longname".
+        return self.longname

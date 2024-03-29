@@ -1,8 +1,8 @@
 {% extends "layout.html" %}
-{% block meta_title %}Search{% endblock meta_title %}
-{% block meta_description %}Search{% endblock meta_description %}
+{% block meta_title %}Search{% if results %} ({{ results.count }} result{{ results.count|pluralize }}){% endif %}{% endblock meta_title %}
+{% block meta_description %}Search{% if results %} ({{ results.count }} result{{ results.count|pluralize }}){% endif %}{% endblock meta_description %}
 {% block meta_url %}{% url "players" %}{% endblock meta_url %}
-{% block title %}Search{% endblock title %}
+{% block title %}Search{% if results %} ({{ results.count }} result{{ results.count|pluralize }}){% endif %}{% endblock title %}
 {% block header %}
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
@@ -12,12 +12,20 @@
                 Portal
             </a>
         </li>
-        <li class="breadcrumb-item active" aria-current="page" title="Search">
+        <li class="breadcrumb-item{% if not results %} active" aria-current="page{% endif %}" title="Search">
             <span class="bi bi-search text-ishar"></span>
             <a href="{% url "players" %}">
                 Search
             </a>
         </li>
+    {% if results %}
+        <li class="breadcrumb-item active" aria-current="page" title="{{ results.count }} result{{ results.count|pluralize }}">
+            <span class="bi bi-people text-ishar"></span>
+            <a href="#">
+                {{ results.count }} result{{ results.count|pluralize }}
+            </a>
+        </li>
+    {% endif %}
     </ol>
 </nav>
 {% endblock header %}
@@ -31,5 +39,16 @@
             <button class="btn btn-outline-secondary" type="reset">Clear</button>
         </form>
     </div>
+    {% endif %}
+    {% if results %}
+        <hr>
+        <ul class="bg-dark list-group list-group-dark w-50">
+        {% for result in results %}
+            <li class="bg-black border border-secondary list-group-item list-group-item-dark list-group-item-text" title="Race: {{ player.common.race.display_name }}">
+                <strong>{{ forloop.counter }}.</strong>
+                {{ result.player_link }}
+            </li>
+        {% endfor %}
+        </ul>
     {% endif %}
 {% endblock content %}
