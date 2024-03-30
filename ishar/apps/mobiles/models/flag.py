@@ -24,8 +24,8 @@ class MobileFlag(models.Model):
         on_delete=models.DO_NOTHING,
         blank=True,
         null=True,
-        help_text="Mobile related to the mob player flag.",
-        verbose_name="Mobile"
+        help_text=_("Mobile related to the mob player flag."),
+        verbose_name=_("Mobile")
     )
     flag = models.ForeignKey(
         db_column="flag_id",
@@ -34,14 +34,14 @@ class MobileFlag(models.Model):
         on_delete=models.DO_NOTHING,
         blank=True,
         null=True,
-        help_text="Flag related to the mob player flag.",
-        verbose_name="Flag"
+        help_text=_("Flag related to the mob player flag."),
+        verbose_name=_("Flag")
     )
     value = models.IntegerField(
         blank=True,
         null=True,
-        help_text="Value of the mob player flag.",
-        verbose_name="Value"
+        help_text=_("Value of the mob player flag."),
+        verbose_name=_("Value")
     )
 
     class Meta:

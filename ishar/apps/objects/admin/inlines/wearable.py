@@ -1,10 +1,10 @@
 from .base import ObjectBaseInline
 
-from ...models.extra import ObjectExtra
+from ...models.wearable import ObjectWearableFlag
 
 
-class ObjectExtraInline(ObjectBaseInline):
-    """Object extra inline administration."""
-    model = ObjectExtra
-    verbose_name = "Extra"
-    verbose_name_plural = "Extras"
+class ObjectWearableFlagInline(ObjectBaseInline):
+    """Object wearable flag inline administration."""
+    model = ObjectWearableFlag
+    verbose_name = "Wearable Flag"
+    verbose_name_plural = "Wearable Flags"

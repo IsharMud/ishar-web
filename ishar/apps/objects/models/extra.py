@@ -2,7 +2,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from ...models.object import Object
+from ..models.object import Object
 
 
 class ObjectExtra(models.Model):
@@ -39,11 +39,11 @@ class ObjectExtra(models.Model):
 
     class Meta:
         managed = False
-        db_table = "object_flags"
-        default_related_name = "flag"
+        db_table = "object_extras"
+        default_related_name = "extra"
         ordering = ("-object",)
-        verbose_name = "Object Flag"
-        verbose_name_plural = "Object Flags"
+        verbose_name = "Object Extra"
+        verbose_name_plural = "Object Extras"
 
     def __repr__(self) -> str:
         return "%s: %s" % (

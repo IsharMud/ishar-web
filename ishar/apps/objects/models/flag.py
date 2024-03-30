@@ -211,3 +211,15 @@ class ObjectFlag(models.Model):
             self._meta.verbose_name,
             self.object,
         )
+
+    def save(
+        self,
+        force_insert=False, force_update=False, using=None, update_fields=None
+    ):
+        now = timezone.now()
+        if not self.pk:
+            self.created_at = now
+        self.updated_at = now
+        super().save(
+            force_insert=force_insert, using=using, update_fields=update_fields
+        )

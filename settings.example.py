@@ -319,7 +319,7 @@ JAZZMIN_SETTINGS = {
     "search_model": [
         "accounts.Account",
         "mobiles.Mobile",
-        "players.Player",
+        "objects.Object",
         "quests.Quest",
         "skills.Skill"
     ],
@@ -442,12 +442,12 @@ JAZZMIN_SETTINGS = {
         # objects
         "objects": "fas fa-object-group",
         "objects.Object": "fas fa-object-group",
-        "ObjectAffectFlag": "fas fa-flag",
-        "ObjectExtra": "fas fa-diagram-project",
-        "ObjectFlag": "fas fa-flag",
-        "ObjectMod": "fas fa-vector-square",
-        "ObjectObjectMod": "fas fa-draw-polygon",
-        "ObjectWearableFlag": "fas fa-flag",
+        "objects.ObjectAffectFlag": "fas fa-flag",
+        "objects.ObjectExtra": "fas fa-diagram-project",
+        "objects.ObjectFlag": "fas fa-flag",
+        "objects.ObjectMod": "fas fa-vector-square",
+        "objects.ObjectObjectMod": "fas fa-draw-polygon",
+        "objects.ObjectWearableFlag": "fas fa-flag",
 
         # patches
         "patches": "fas fa-file-pdf",

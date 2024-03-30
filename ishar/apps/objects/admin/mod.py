@@ -1,28 +1,16 @@
 from django.contrib import admin
 
-from .inlines.flag import ObjectFlagTabularInline
-from ..models.object import Object
+from ..models.mod import ObjectMod
 
 
-@admin.register(Object)
-class ObjectAdmin(admin.ModelAdmin):
-    """Ishar mobile administration."""
+@admin.register(ObjectMod)
+class ObjectModAdmin(admin.ModelAdmin):
+    """Ishar object mod administration."""
     date_hierarchy = "updated_at"
-    list_display = ("vnum", "longname", "appearance", "description")
-    list_display_links = ("vnum", "longname")
-    list_filter = (
-        "deleted", "item_type",
-        ("enchant", admin.RelatedOnlyFieldListFilter),
-        ("appearance", admin.EmptyFieldListFilter),
-        ("description", admin.EmptyFieldListFilter),
-        ("func", admin.EmptyFieldListFilter),
-        "created_at", "updated_at"
-    )
-    inlines = (ObjectFlagTabularInline,)
-    readonly_fields = ("vnum", "created_at", "updated_at")
-    search_fields = (
-        "vnum", "name", "longname", "appearance", "description", "func",
-    )
+    list_display = list_display_links = ("mod_id", "name")
+    list_filter = ("created_at", "updated_at")
+    readonly_fields = ("mod_id", "created_at", "updated_at")
+    search_fields = ("mod_id", "name")
     show_full_result_count = True
     show_facets = admin.ShowFacets.ALWAYS
 

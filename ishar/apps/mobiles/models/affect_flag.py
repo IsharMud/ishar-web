@@ -36,6 +36,7 @@ class MobileAffectFlag(models.Model):
         blank=True,
         null=True,
         help_text="Affect flag affecting the mobile.",
+        related_name="+",
         verbose_name="Affect Flag"
     )
     value = models.IntegerField(

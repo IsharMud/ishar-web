@@ -1,10 +1,10 @@
 from .base import ObjectBaseInline
 
-from ...models.flag import ObjectFlag
+from ...models.affect_flag import ObjectAffectFlag
 
 
-class ObjectFlagInline(ObjectBaseInline):
-    """Object flag inline administration."""
-    model = ObjectFlag
-    verbose_name = "Flag"
-    verbose_name_plural = "Flags"
+class ObjectAffectFlagInline(ObjectBaseInline):
+    """Object affect flag inline administration."""
+    model = ObjectAffectFlag
+    verbose_name = "Affect Flag"
+    verbose_name_plural = "Affect Flags"
