@@ -128,9 +128,14 @@ class Skill(models.Model):
         help_text="Type of skill.",
         verbose_name="Skill Type"
     )
-    parent_skill = models.IntegerField(
+    parent_skill = models.ForeignKey(
+        db_column="parent_skill",
+        to="self",
+        on_delete=models.DO_NOTHING,
+        null=True,
+        blank=True,
         default=-1,
-        help_text='Parent skill ID of a skill. Value of "-1" means no parent.',
+        help_text='Parent skill of skill.',
         verbose_name="Parent Skill"
     )
     special_int = models.IntegerField(

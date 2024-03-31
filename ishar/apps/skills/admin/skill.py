@@ -38,7 +38,8 @@ class SkillAdmin(admin.ModelAdmin):
     list_filter = (
         "skill_type", "min_posn",
         ("flag", admin.EmptyFieldListFilter),
-        ("mod", admin.RelatedOnlyFieldListFilter)
+        ("mod", admin.RelatedOnlyFieldListFilter),
+        ("parent_skill", admin.RelatedOnlyFieldListFilter)
     )
     model = Skill
     ordering = ("-skill_type", "skill_name")
