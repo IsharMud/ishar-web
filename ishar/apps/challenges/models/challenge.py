@@ -44,11 +44,13 @@ class Challenge(models.Model):
         verbose_name="Challenge Description"
     )
     winner_desc = models.CharField(
+        blank=True,
         help_text=(
             "Description of the winner(s) of the challenge. "
             "Blank indicates that the challenge is not complete."
         ),
         max_length=80,
+        null=True,
         verbose_name="Winner Description"
     )
     is_active = models.BooleanField(
