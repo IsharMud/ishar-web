@@ -18,8 +18,6 @@ class SkillMod(models.Model):
         to=Skill,
         on_delete=models.DO_NOTHING,
         help_text="Skill/spell related to the mod.",
-        related_name="mods",
-        related_query_name="mod",
         verbose_name="Skill"
     )
     mod_location = models.SmallIntegerField(
@@ -39,6 +37,7 @@ class SkillMod(models.Model):
     class Meta:
         managed = False
         db_table = "skill_mods"
+        default_related_name = "mod"
         ordering = ("mod_location",)
         verbose_name = "Skill Mod"
         verbose_name_plural = "Skill Mod"

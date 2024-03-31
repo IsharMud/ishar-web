@@ -150,6 +150,7 @@ class Skill(models.Model):
 
     class Meta:
         db_table = "skills"
+        default_related_name = "skill"
         ordering = ("skill_name",)
         managed = False
         verbose_name = "Skill"

@@ -1,4 +1,4 @@
-from django.contrib.admin import ModelAdmin, register
+from django.contrib import admin
 
 from ..models.skill import Skill
 
@@ -8,8 +8,8 @@ from .inlines.skill_force import SkillForceAdminInline
 from .inlines.spell_flag import SkillSpellFlagAdminInline
 
 
-@register(Skill)
-class SkillAdmin(ModelAdmin):
+@admin.register(Skill)
+class SkillAdmin(admin.ModelAdmin):
     """
     Skill administration.
     """
@@ -35,15 +35,21 @@ class SkillAdmin(ModelAdmin):
         SkillSpellFlagAdminInline,
     )
     list_display = ("skill_name", "skill_type")
-    list_filter = ("skill_type", "min_posn")
+    list_filter = (
+        "skill_type", "min_posn",
+        ("flag", admin.EmptyFieldListFilter),
+        ("mod", admin.RelatedOnlyFieldListFilter)
+    )
     model = Skill
     ordering = ("-skill_type", "skill_name")
     readonly_fields = ("id",)
     save_as = save_as_new = save_on_top = True
     search_fields = (
-        "enum_symbol", "func_name", "skill_name",
-        "wearoff_msg", "chant_text", "appearance", "decide_func"
+        "enum_symbol", "func_name", "skill_name", "wearoff_msg", "chant_text",
+        "appearance", "decide_func"
     )
+    show_facets = admin.ShowFacets.ALWAYS
+    show_full_result_count = True
 
     def has_add_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:

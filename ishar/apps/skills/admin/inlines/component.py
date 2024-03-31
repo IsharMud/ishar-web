@@ -9,6 +9,8 @@ class SkillComponentAdminInline(TabularInline):
     """
     extra = 1
     model = SkillComponent
+    verbose_name = "Component"
+    verbose_name_plural = "Components"
 
     def has_module_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
