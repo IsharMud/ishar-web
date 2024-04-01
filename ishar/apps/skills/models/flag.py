@@ -32,7 +32,8 @@ class SpellFlag(models.Model):
         db_table = "spell_flags"
         managed = False
         ordering = ("name",)
-        verbose_name = "Flag"
+        verbose_name = "Skill Flag"
+        verbose_name_plural = "Skill Flags"
 
     def __repr__(self):
         return "%s: %s (%i)" % (

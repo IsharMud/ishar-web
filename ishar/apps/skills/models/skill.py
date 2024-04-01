@@ -129,13 +129,15 @@ class Skill(models.Model):
         verbose_name="Skill Type"
     )
     parent_skill = models.ForeignKey(
-        db_column="parent_skill",
-        to="self",
-        on_delete=models.DO_NOTHING,
-        null=True,
         blank=True,
+        db_column="parent_skill",
+        db_default=-1,
         default=-1,
-        help_text='Parent skill of skill.',
+        help_text="Parent skill of skill.",
+        null=True,
+        on_delete=models.SET_DEFAULT,
+        related_name="+",
+        to="self",
         verbose_name="Parent Skill"
     )
     special_int = models.IntegerField(

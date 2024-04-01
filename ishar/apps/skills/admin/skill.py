@@ -1,11 +1,11 @@
 from django.contrib import admin
 
-from ..models.skill import Skill
+from .inlines import (
+    SkillComponentAdminInline, SkillModAdminInline, SkillForceAdminInline,
+    SkillSpellFlagAdminInline
+)
 
-from .inlines.component import SkillComponentAdminInline
-from .inlines.mod import SkillModAdminInline
-from .inlines.skill_force import SkillForceAdminInline
-from .inlines.spell_flag import SkillSpellFlagAdminInline
+from ..models.skill import Skill
 
 
 @admin.register(Skill)
@@ -14,7 +14,9 @@ class SkillAdmin(admin.ModelAdmin):
     Skill administration.
     """
     fieldsets = (
-        (None, {"fields": ("id", "enum_symbol", "func_name", "skill_name")}),
+        (None, {"fields": (
+            "id", "enum_symbol", "func_name", "skill_name", "skill_type"
+        )}),
         ("Minimums", {"fields": ("min_posn", "min_use")}),
         ("Cost", {"fields": ("spell_breakpoint", "held_cost")}),
         ("Text", {"fields": (
@@ -25,7 +27,6 @@ class SkillAdmin(admin.ModelAdmin):
         ("Scale/Mod", {"fields": (
             "scale", "mod_stat_1", "mod_stat_2", "special_int"
         )}),
-        ("Type", {"fields": ("skill_type",)}),
         ("Parent", {"fields": ("parent_skill",)})
     )
     inlines = (
@@ -36,13 +37,18 @@ class SkillAdmin(admin.ModelAdmin):
     )
     list_display = ("skill_name", "skill_type")
     list_filter = (
-        "skill_type", "min_posn",
+        "skill_type",
+        "min_posn",
         ("flag", admin.EmptyFieldListFilter),
         ("mod", admin.RelatedOnlyFieldListFilter),
         ("parent_skill", admin.RelatedOnlyFieldListFilter)
     )
     model = Skill
     ordering = ("-skill_type", "skill_name")
+    radio_fields = {
+        "min_posn": admin.HORIZONTAL,
+        "skill_type": admin.HORIZONTAL,
+    }
     readonly_fields = ("id",)
     save_as = save_as_new = save_on_top = True
     search_fields = (

@@ -75,9 +75,10 @@ class Object(models.Model):
         blank=True,
         db_column="enchant",
         help_text=_("Enchantment of the object."),
-        limit_choices_to={"parent_skill__skill_name__exact": "Enchanting"},
+        limit_choices_to=models.Q(parent_skill__skill_name__exact="Enchanting"),
         null=True,
         on_delete=models.DO_NOTHING,
+        related_name="+",
         to=Skill,
         to_field="id",
         verbose_name=_("Enchant")

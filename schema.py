@@ -1426,7 +1426,7 @@ class Skills(models.Model):
     mod_stat_2 = models.IntegerField(blank=True, null=True)
     decide_func = models.TextField()
     skill_type = models.IntegerField()
-    parent_skill = models.IntegerField()
+    parent_skill = models.ForeignKey('self', models.DO_NOTHING, db_column='parent_skill')
     special_int = models.IntegerField(blank=True, null=True)
     obj_display = models.CharField(max_length=80, blank=True, null=True)
 
