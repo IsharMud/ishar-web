@@ -75,6 +75,7 @@ class Object(models.Model):
         blank=True,
         db_column="enchant",
         help_text=_("Enchantment of the object."),
+        limit_choices_to={"parent_skill__skill_name__exact": "Enchanting"},
         null=True,
         on_delete=models.DO_NOTHING,
         to=Skill,
