@@ -2,6 +2,7 @@ from django.urls import path
 from django.views.generic import RedirectView
 
 from ishar.apps.leaders.views import LeadersView
+from ishar.apps.players.models.game_type import GameType
 
 
 urlpatterns = [
@@ -10,7 +11,11 @@ urlpatterns = [
     path("all/", RedirectView.as_view(url="/leaders"), name="all"),
 
     # Classic.
-    path("classic/", LeadersView.as_view(game_type=0), name="classic"),
+    path(
+        "classic/",
+        LeadersView.as_view(game_type=GameType.CLASSIC),
+        name="classic"
+    ),
 
     # Dead/Living.
     # TODO: Find a way to display these.
@@ -18,24 +23,36 @@ urlpatterns = [
     # path("living/", LeadersView.as_view(deleted=0), name="living"),
 
     # Survival.
-    path("survival/", LeadersView.as_view(game_type=1), name="survival"),
     path(
-        "survival/dead/", LeadersView.as_view(game_type=1, deleted=1),
+        "survival/",
+        LeadersView.as_view(game_type=GameType.SURVIVAL),
+        name="survival"
+    ),
+    path(
+        "survival/dead/",
+        LeadersView.as_view(game_type=GameType.SURVIVAL, deleted=1),
         name="dead_survival"
     ),
     path(
-        "survival/living/", LeadersView.as_view(game_type=1, deleted=0),
+        "survival/living/",
+        LeadersView.as_view(game_type=GameType.SURVIVAL, deleted=0),
         name="living_survival"
     ),
 
     # Hardcore.
-    path("hardcore/", LeadersView.as_view(game_type=2), name="hardcore"),
     path(
-        "hardcore/dead/", LeadersView.as_view(game_type=2, deleted=1),
+        "hardcore/",
+        LeadersView.as_view(game_type=GameType.HARDCORE),
+        name="hardcore"
+    ),
+    path(
+        "hardcore/dead/",
+        LeadersView.as_view(game_type=GameType.HARDCORE, deleted=1),
         name="dead_hardcore"
     ),
     path(
-        "hardcore/living/", LeadersView.as_view(game_type=2, deleted=0),
+        "hardcore/living/",
+        LeadersView.as_view(game_type=GameType.HARDCORE, deleted=0),
         name="living_hardcore"
     )
 ]

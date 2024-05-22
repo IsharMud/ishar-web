@@ -4,8 +4,8 @@ from django.db.models import IntegerChoices
 class GameType(IntegerChoices):
     """Ishar player game type choices."""
     CLASSIC = 0
-    SURVIVAL = 1
-    HARDCORE = 2
+    HARDCORE = 1
+    SURVIVAL = 2
 
     def __repr__(self) -> str:
         return "%s: %s" % (
