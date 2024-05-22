@@ -9,10 +9,16 @@ from django.utils import timezone
 from ishar.apps.accounts.models import Account
 
 
+class PatchManager(models.Manager):
+    def get_by_natural_key(self, patch_name):
+        # Natural key is patch name.
+        return self.get(patch_name=patch_name)
+
+
 class Patch(models.Model):
-    """
-    Patch.
-    """
+    """Ishar website patch PDF notes."""
+    objects = PatchManager()
+
     patch_id = models.AutoField(
         primary_key=True,
         help_text="Auto-generated, permanent ID number of the patch.",
@@ -62,6 +68,10 @@ class Patch(models.Model):
         )
 
     def __str__(self):
+        return self.patch_name
+
+    def natural_key(self):
+        # Natural key is patch name.
         return self.patch_name
 
 

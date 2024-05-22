@@ -6,18 +6,15 @@ from django.utils import timezone
 from libgravatar import Gravatar, sanitize_email
 from passlib.hash import md5_crypt
 
-from ishar.apps.core.util.ip import dec2ip
+from ishar.apps.core.utils.ip import dec2ip
 
 from .level import ImmortalLevel
 from .manager import AccountManager
-from .unsigned import UnsignedAutoField
 
 
 class Account(AbstractBaseUser, PermissionsMixin):
-    """
-    User account that logs in to the website, and MUD/game.
-    """
-    account_id = UnsignedAutoField(
+    """Ishar user account that logs in to the website, and MUD/game."""
+    account_id = models.AutoField(
         primary_key=True,
         help_text="Auto-generated permanent unique account number.",
         verbose_name="Account ID"
@@ -171,7 +168,7 @@ class Account(AbstractBaseUser, PermissionsMixin):
 
     def get_username(self) -> str:
         """Return account username."""
-        return self.account_name
+        return getattr(self, self.USERNAME_FIELD)
 
     def has_perms(self, perm_list, obj=None) -> bool:
         return self.is_god()
@@ -252,6 +249,10 @@ class Account(AbstractBaseUser, PermissionsMixin):
             if player.logon < when:
                 when = player.logon
         return when
+
+    def natural_key(self) -> str:
+        """Natural key of the account username."""
+        return getattr(self, self.USERNAME_FIELD)
 
     @property
     @admin.display(description="# Players", ordering="player_count")

@@ -6,7 +6,7 @@ from .skill import Skill
 
 class SkillForce(models.Model):
     """
-    Skill Force.
+    Ishar skill force.
     """
     id = models.AutoField(
         blank=False,
@@ -49,4 +49,7 @@ class SkillForce(models.Model):
         )
 
     def __str__(self) -> str:
-        return "%s @ %s" % (self.skill, self.force)
+        return "%s @ %s" % (
+            self.skill,
+            self.force
+        )

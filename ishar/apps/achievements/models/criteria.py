@@ -2,7 +2,6 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from .achievement import Achievement
-from .type.criteria import AchievementCriteriaType
 
 
 class AchievementCriteria(models.Model):
@@ -32,9 +31,9 @@ class AchievementCriteria(models.Model):
         help_text="Description of the achievement criteria.",
         verbose_name="Description"
     )
-    criteria_type = models.PositiveIntegerField(
+    criteria_type = models.CharField(
+        max_length=32,
         blank=True,
-        choices=AchievementCriteriaType,
         null=True,
         help_text="Type of the achievement criteria.",
         verbose_name="Type"
@@ -42,8 +41,14 @@ class AchievementCriteria(models.Model):
     target_value = models.IntegerField(
         blank=True,
         null=True,
-        help_text="Target value of the achievement criteria",
+        help_text="Target value of the achievement criteria.",
         verbose_name="Target"
+    )
+    group_id = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+        help_text="Group identification number of the achievement criteria.",
+        verbose_name="Group ID"
     )
 
     class Meta:

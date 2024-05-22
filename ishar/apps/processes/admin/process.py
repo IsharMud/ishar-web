@@ -5,8 +5,8 @@ from django.urls import path
 from django.utils.translation import gettext_lazy as _
 
 from ..models.process import MUDProcess
-from ..util.process import get_process
-from ..util.service import restart_service
+from ..utils.process import get_process
+from ..utils.service import restart_service
 
 
 @register(MUDProcess)

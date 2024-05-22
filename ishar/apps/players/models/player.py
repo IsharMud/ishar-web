@@ -7,18 +7,25 @@ from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.timesince import timesince
 from django.utils.timezone import now
+from django.utils.translation import gettext_lazy as _
 
 from ishar.apps.accounts.models import Account
-from ishar.apps.core.util.ip import dec2ip
+from ishar.apps.core.models.title import Title
+from ishar.apps.core.utils.ip import dec2ip
 
 from .game_type import GameType
-from ..util import get_immortal_level, get_immortal_type
+from ..utils import get_immortal_level, get_immortal_type
+
+
+class PlayerManager(models.Manager):
+    def get_by_natural_key(self, name):
+        return self.get(name=name)
 
 
 class Player(models.Model):
-    """
-    Player character.
-    """
+    """Ishar player."""
+    objects = PlayerManager()
+
     account = models.ForeignKey(
         to=Account,
         on_delete=models.DO_NOTHING,
@@ -56,9 +63,19 @@ class Player(models.Model):
         verbose_name="Description"
     )
     title = models.CharField(
+        db_column="title",
         max_length=45,
         help_text="User-selectable player title.",
         verbose_name="Title"
+    )
+    title_id = models.ForeignKey(
+        blank=True,
+        db_column="title_id",
+        null=True,
+        to=Title,
+        on_delete=models.DO_NOTHING,
+        help_text=_("Title related to an account."),
+        verbose_name=_("Title")
     )
     poofin = models.CharField(
         max_length=80,
@@ -228,179 +245,35 @@ class Player(models.Model):
         verbose_name = "Player"
 
     def __repr__(self) -> str:
-        return "%s: %s (%i)" % (
-            self.__class__.__name__, self.__str__(), self.pk
+        return "%s: %s (%s)" % (
+            self.__class__.__name__,
+            self.__str__(),
+            self.pk
         )
 
     def __str__(self) -> str:
         return self.name
 
+    def natural_key(self) -> str:
+        return self.name
+
     @property
     @display(description="Create IP", ordering="create_haddr")
     def _create_haddr(self) -> str:
-        """
-        IP address that created the account.
-        """
+        """IP address that created the account."""
         return dec2ip(self.create_haddr)
 
     @property
     @display(description="Login Fail IP", ordering="login_fail_haddr")
     def _login_fail_haddr(self) -> str:
-        """
-        Last IP address that failed to log in to the account.
-        """
+        """Last IP address that failed to log in to the account."""
         return dec2ip(self.login_fail_haddr)
 
     @property
     @display(description="Last IP", ordering="last_haddr")
     def _last_haddr(self) -> str:
-        """
-        Last IP address that logged in to the account.
-        """
+        """Last IP address that logged in to the account."""
         return dec2ip(self.last_haddr)
-
-    @display(boolean=True, description="Consort?", ordering="-true_level")
-    def is_consort(self) -> bool:
-        """
-        Boolean whether player is consort, or above.
-        """
-        return self.is_immortal_type(immortal_type="Consort")
-
-    @display(boolean=True, description="Eternal?", ordering="-true_level")
-    def is_eternal(self) -> bool:
-        """
-        Boolean whether player is eternal, or above.
-        """
-        return self.is_immortal_type(immortal_type="Eternal")
-
-    @display(boolean=True, description="Forger?", ordering="-true_level")
-    def is_forger(self) -> bool:
-        """Boolean whether player is consort, or above."""
-        return self.is_immortal_type(immortal_type="Forger")
-
-    @display(boolean=True, description="God?", ordering="-true_level")
-    def is_god(self) -> bool:
-        """Boolean whether player is a "God"."""
-        return self.is_immortal_type(immortal_type="God")
-
-    @display(description="Immortal?", ordering="-true_level")
-    def is_immortal(self) -> bool:
-        """
-        Boolean whether player is immortal, or above, but not consort.
-        """
-        return self.is_immortal_type(immortal_type="Immortal")
-    is_immortal.boolean = True
-
-    def is_immortal_type(self, immortal_type="Immortal") -> bool:
-        """Boolean whether player is an immortal of a certain type, or above."""
-        if self.common.level >= get_immortal_level(immortal_type=immortal_type):
-            return True
-        return False
-
-    @display(boolean=True, description="Hardcore?", ordering='-game_type')
-    def is_hardcore(self) -> bool:
-        """Boolean whether player is "hardcore"."""
-        if self.game_type == GameType.HARDCORE:
-            return True
-        return False
-
-    @display(boolean=True, description="Survival?", ordering='-game_type')
-    def is_survival(self) -> bool:
-        """Boolean whether player is "survival"."""
-        if self.game_type == GameType.SURVIVAL:
-            return True
-        return False
-
-    @property
-    def player_css(self) -> str:
-        """Player CSS class."""
-        return "%s-player" % (self.get_player_type().lower())
-
-    @property
-    def player_link(self) -> str:
-        """Player link."""
-        return (
-            format_html(
-                '<a class="%s" href="%s" title="%s">%s</a>' % (
-                    self.player_css,
-                    self.get_absolute_url(),
-                    self.name,
-                    self.name,
-                )
-            )
-        )
-
-    @property
-    def player_stats(self) -> dict:
-        """
-        Player stats.
-        """
-
-        # Set order of stats based upon each player class.
-        class_stats = {
-            "Warrior": (
-                "Strength", "Agility", "Endurance", "Willpower", "Focus",
-                "Perception"
-            ),
-            "Rogue": (
-                "Agility", "Perception", "Strength", "Focus", "Endurance",
-                "Willpower"
-            ),
-            "Cleric": (
-                "Willpower", "Strength", "Perception", "Endurance", "Focus",
-                "Agility"
-            ),
-            "Magician": (
-                "Perception", "Focus", "Agility", "Willpower", "Endurance",
-                "Strength"
-            ),
-            "Necromancer": (
-                "Focus", "Willpower", "Perception", "Agility", "Strength",
-                "Endurance"
-            ),
-            "Shaman": (
-                "Willpower", "Agility", "Endurance", "Focus", "Perception",
-                "Strength",
-            ),
-            # Alphabetic as last resort
-            None: (
-                "Agility", "Endurance", "Focus", "Perception", "Strength",
-                "Willpower"
-            )
-        }
-
-        # Start with empty dictionary.
-        stats = {}
-
-        # Immortals have no stats.
-        if self.is_immortal() is True:
-            return stats
-
-        # No stats for mortal players below level five (5),
-        #   with less than one (1) hour of play-time
-        if self.true_level < 5 and self.online < 3600:
-            return stats
-
-        # Otherwise, get the players actual stats
-        players_stats = {
-            "Agility": self.common.agility,
-            "Endurance": self.common.endurance,
-            "Focus": self.common.focus,
-            "Perception": self.common.perception,
-            "Strength": self.common.strength,
-            "Willpower": self.common.willpower
-        }
-
-        # Put players stats in appropriate order, based on their class.
-        stats_order = class_stats.get(None)
-        class_name = self.common.player_class.class_name
-        if class_name in class_stats:
-            stats_order = class_stats.get(class_name)
-
-        for stat_order in stats_order:
-            stats[stat_order] = players_stats[stat_order]
-
-        return stats
 
     def get_absolute_url(self) -> str:
         """URL to player page"""
@@ -503,21 +376,154 @@ class Player(models.Model):
 
         return "Classic"
 
+    @display(boolean=True, description="Consort?", ordering="-true_level")
+    def is_consort(self) -> bool:
+        """Boolean whether player is consort, or above."""
+        return self.is_immortal_type(immortal_type="Consort")
+
+    @display(boolean=True, description="Eternal?", ordering="-true_level")
+    def is_eternal(self) -> bool:
+        """Boolean whether player is eternal, or above."""
+        return self.is_immortal_type(immortal_type="Eternal")
+
+    @display(boolean=True, description="Forger?", ordering="-true_level")
+    def is_forger(self) -> bool:
+        """Boolean whether player is consort, or above."""
+        return self.is_immortal_type(immortal_type="Forger")
+
+    @display(boolean=True, description="God?", ordering="-true_level")
+    def is_god(self) -> bool:
+        """Boolean whether player is a "God"."""
+        return self.is_immortal_type(immortal_type="God")
+
+    @display(description="Immortal?", ordering="-true_level")
+    def is_immortal(self) -> bool:
+        """Boolean whether player is immortal, or above, but not consort."""
+        return self.is_immortal_type(immortal_type="Immortal")
+    is_immortal.boolean = True
+
+    def is_immortal_type(self, immortal_type="Immortal") -> bool:
+        """Boolean whether player is an immortal of a certain type, or above."""
+        if self.common.level >= get_immortal_level(immortal_type=immortal_type):
+            return True
+        return False
+
+    @display(boolean=True, description="Hardcore?", ordering='-game_type')
+    def is_hardcore(self) -> bool:
+        """Boolean whether player is "hardcore"."""
+        if self.game_type == GameType.HARDCORE:
+            return True
+        return False
+
+    @display(boolean=True, description="Survival?", ordering='-game_type')
+    def is_survival(self) -> bool:
+        """Boolean whether player is "survival"."""
+        if self.game_type == GameType.SURVIVAL:
+            return True
+        return False
+
     @display(boolean=False, description="Online Timedelta")
     def online_timedelta(self) -> timedelta:
-        """
-        Online timedelta.
-        """
+        """Online timedelta."""
         return timedelta(seconds=self.online)
 
     @display(boolean=False, description="Online Time")
     def online_time(self) -> str:
-        """
-        Online time humanized string.
-        """
+        """Online time humanized string."""
         if self.online > 60:
             return timesince(now() - self.online_timedelta())
         return "%i seconds" % self.online
+
+    @property
+    def player_css(self) -> str:
+        """Player CSS class."""
+        return "%s-player" % (
+            self.get_player_type().lower()
+        )
+
+    @property
+    def player_link(self) -> str:
+        """Player link, with CSS."""
+        return (
+            format_html(
+                '<a class="%s" href="%s" title="%s">%s</a>' % (
+                    self.player_css,
+                    self.get_absolute_url(),
+                    self.name,
+                    self.name,
+                )
+            )
+        )
+
+    @property
+    def player_stats(self) -> dict:
+        """Player stats."""
+
+        # Set order of stats based upon each player class.
+        class_stats = {
+            "Warrior": (
+                "Strength", "Agility", "Endurance", "Willpower", "Focus",
+                "Perception"
+            ),
+            "Rogue": (
+                "Agility", "Perception", "Strength", "Focus", "Endurance",
+                "Willpower"
+            ),
+            "Cleric": (
+                "Willpower", "Strength", "Perception", "Endurance", "Focus",
+                "Agility"
+            ),
+            "Magician": (
+                "Perception", "Focus", "Agility", "Willpower", "Endurance",
+                "Strength"
+            ),
+            "Necromancer": (
+                "Focus", "Willpower", "Perception", "Agility", "Strength",
+                "Endurance"
+            ),
+            "Shaman": (
+                "Willpower", "Agility", "Endurance", "Focus", "Perception",
+                "Strength",
+            ),
+            # Alphabetic as last resort
+            None: (
+                "Agility", "Endurance", "Focus", "Perception", "Strength",
+                "Willpower"
+            )
+        }
+
+        # Start with empty dictionary.
+        stats = {}
+
+        # Immortals have no stats.
+        if self.is_immortal() is True:
+            return stats
+
+        # No stats for mortal players below level five (5),
+        #   with less than one (1) hour of play-time
+        if self.true_level < 5 and self.online < 3600:
+            return stats
+
+        # Otherwise, get the players actual stats
+        players_stats = {
+            "Agility": self.common.agility,
+            "Endurance": self.common.endurance,
+            "Focus": self.common.focus,
+            "Perception": self.common.perception,
+            "Strength": self.common.strength,
+            "Willpower": self.common.willpower
+        }
+
+        # Put players stats in appropriate order, based on their class.
+        stats_order = class_stats.get(None)
+        class_name = self.common.player_class.class_name
+        if class_name in class_stats:
+            stats_order = class_stats.get(class_name)
+
+        for stat_order in stats_order:
+            stats[stat_order] = players_stats[stat_order]
+
+        return stats
 
     @property
     @display(boolean=False, description="Title", ordering="title")

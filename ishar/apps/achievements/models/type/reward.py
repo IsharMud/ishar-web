@@ -2,9 +2,7 @@ from django.db.models import IntegerChoices
 
 
 class AchievementRewardType(IntegerChoices):
-    """
-    Achievement reward types.
-    """
+    """Achievement reward type choices."""
     NEGATIVE_ONE = -1
     ACHIEVEMENT_POINTS = 0
     ESSENCE = 1
@@ -19,4 +17,4 @@ class AchievementRewardType(IntegerChoices):
         )
 
     def __str__(self) -> str:
-        return self.name
+        return self.name.title()

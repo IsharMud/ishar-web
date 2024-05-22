@@ -2,7 +2,7 @@ from django.shortcuts import redirect
 from django.views.generic.base import TemplateView
 
 from ..forms import HelpSearchForm
-from ..util import get_help_topics
+from ..utils.get import get_help_topics
 
 
 HELP_PROPERTIES = (

@@ -1,6 +1,4 @@
-"""
-isharmud.com URL configuration.
-"""
+"""isharmud.com URL configuration."""
 from django.urls import include, path
 
 from ishar.apps.players.views.who import PlayerWhoView

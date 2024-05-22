@@ -5,9 +5,7 @@ from .models.event import GlobalEvent
 
 @register(GlobalEvent)
 class GlobalEventAdmin(ModelAdmin):
-    """
-    Ishar global event administration.
-    """
+    """Ishar global event administration."""
     date_hierarchy = "end_time"
     fieldsets = (
         (None, {"fields": ("event_type", "event_name", "event_desc")}),

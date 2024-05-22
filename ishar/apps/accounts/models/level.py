@@ -2,7 +2,7 @@ from django.db.models import IntegerChoices
 
 
 class ImmortalLevel(IntegerChoices):
-    """Immortal level choices."""
+    """(Account) immortal level choices."""
     NONE = 0
     IMMORTAL = 1
     ARTISAN = 2
@@ -18,4 +18,4 @@ class ImmortalLevel(IntegerChoices):
         )
 
     def __str__(self):
-        return self.name
+        return self.name.title()

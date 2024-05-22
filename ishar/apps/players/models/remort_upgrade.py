@@ -2,10 +2,15 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 
+class RemortUpgradeManager(models.Manager):
+    def get_by_natural_key(self, name):
+        return self.get(name=name)
+
+
 class RemortUpgrade(models.Model):
-    """
-    Remort Upgrade.
-    """
+    """Ishar remort upgrade."""
+    objects = RemortUpgradeManager()
+
     upgrade_id = models.AutoField(
         help_text=_(
             "Auto-generated, permanent identification number of the remort "
@@ -69,3 +74,6 @@ class RemortUpgrade(models.Model):
 
     def __str__(self):
         return self.display_name
+
+    def natural_key(self) -> str:
+        return self.name

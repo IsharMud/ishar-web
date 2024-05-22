@@ -11,6 +11,7 @@ from .help import HelpConfig
 from .leaders import LeadersConfig
 from .mobiles import MobilesConfig
 from .news import NewsConfig
+from .objects import ObjectsConfig
 from .patches import PatchesConfig
 from .players import PlayersConfig
 from .processes import ProcessesConfig

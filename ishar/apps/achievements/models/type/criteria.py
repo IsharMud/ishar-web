@@ -1,23 +1,19 @@
-from django.db.models import IntegerChoices
+from django.db.models import TextChoices
 
 
-class AchievementCriteriaType(IntegerChoices):
-    """
-    Achievement criteria type choices.
-    """
-    # Individual means individual character needs to meet criteria.
-    INDIVIDUAL = 0
-    # Seasonal means your entire account gets aggregated.
-    SEASONAL = 1
-    # Historic means entire account, and historic stats from previous seasons.
-    HISTORIC = 2
+class AchievementCriteriaType(TextChoices):
+    """Achievement criteria type choices."""
+    PLAYER_ONLY = "PlayerOnly", "Player Only"
+    ACCOUNT = "Account"
+    ACCOUNT_GROUPED = "AccountGrouped", "Account (Grouped)"
+    ACCOUNT_TOTAL = "AccountTotal", "Account (Total)"
 
     def __repr__(self) -> str:
         return "%s: %s (%s)" % (
             self.__class__.__name__,
             self.__str__(),
-            self.value
+            self.name
         )
 
     def __str__(self) -> str:
-        return self.name
+        return self.value

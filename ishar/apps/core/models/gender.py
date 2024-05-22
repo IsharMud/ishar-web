@@ -2,9 +2,7 @@ from django.db.models import IntegerChoices
 
 
 class Gender(IntegerChoices):
-    """
-    Player/mobile genders.
-    """
+    """Ishar gender choices, used by both players and mobiles."""
     MALE = 1
     FEMALE = 2
 
@@ -16,4 +14,4 @@ class Gender(IntegerChoices):
         )
 
     def __str__(self) -> str:
-        return self.name
+        return self.name.title()

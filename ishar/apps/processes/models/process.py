@@ -68,11 +68,13 @@ class MUDProcess(models.Model):
         verbose_name_plural = "MUD Processes"
 
     def get_process(self):
+        # Get psutil.Process object or the process ID (PID).
         if self.process_id:
             return Process(pid=self.process_id)
         return None
 
     def kill(self):
+        # Send SIGKILL to process.
         if self.process_id:
             process = self.get_process()
             if process:
@@ -83,10 +85,16 @@ class MUDProcess(models.Model):
                     pass
         return False
 
+    def natural_key(self) -> str:
+        # Natural key by process name.
+        return self.name
+
     def runtime(self):
+        # Human time since process started.
         return timesince(self.created)
 
     def terminate(self):
+        # Send SIGTERM to process.
         if self.process_id:
             process = self.get_process()
             if process:

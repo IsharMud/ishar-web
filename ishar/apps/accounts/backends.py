@@ -1,6 +1,4 @@
-"""
-isharmud.com authentication backend.
-"""
+"""isharmud.com authentication backend."""
 from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import ModelBackend
 

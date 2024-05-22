@@ -1,8 +1,15 @@
 from django.db import models
 
 
+class AccountUpgradeManager(models.Manager):
+    def get_by_natural_key(self, name):
+        return self.get(name=name)
+
+
 class AccountUpgrade(models.Model):
-    """Account upgrade."""
+    """Ishar account upgrade, purchased with essence."""
+    objects = AccountUpgradeManager()
+
     id = models.AutoField(
         primary_key=True,
         help_text="Auto-generated permanent ID number of the account upgrade.",
@@ -52,7 +59,7 @@ class AccountUpgrade(models.Model):
         verbose_name_plural = "Upgrades"
 
     def __repr__(self) -> str:
-        return "%s: %s (%i)" % (
+        return "%s: %s (%d)" % (
             self.__class__.__name__,
             self.__str__(),
             self.pk
@@ -60,3 +67,6 @@ class AccountUpgrade(models.Model):
 
     def __str__(self) -> str:
         return self.description or self.name
+
+    def natural_key(self) -> str:
+        return self.name

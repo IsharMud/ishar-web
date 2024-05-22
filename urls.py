@@ -1,6 +1,4 @@
-"""
-isharmud.com root URL configuration.
-"""
+"""isharmud.com root URL configuration."""
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin

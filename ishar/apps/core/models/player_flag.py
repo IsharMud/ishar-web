@@ -1,10 +1,16 @@
 from django.db import models
 
 
+class PlayerFlagManager(models.Manager):
+    def get_by_natural_key(self, name):
+        # Natural key of the flag name.
+        return self.get(name=name)
+
+
 class PlayerFlag(models.Model):
-    """
-    Player Flag.
-    """
+    """Ishar player flag, used by both mobiles and players."""
+    objects = PlayerFlagManager()
+
     flag_id = models.AutoField(
         db_column="flag_id",
         primary_key=True,
@@ -35,4 +41,8 @@ class PlayerFlag(models.Model):
         )
 
     def __str__(self) -> str:
+        return self.name
+
+    def natural_key(self) -> str:
+        # Natural key of the flag name.
         return self.name

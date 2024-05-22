@@ -2,10 +2,16 @@ from django.contrib.admin import display
 from django.db import models
 
 
+class ClassManager(models.Manager):
+    def get_by_natural_key(self, class_name):
+        """Natural key by class name."""
+        return self.get(class_name=class_name)
+
+
 class Class(models.Model):
-    """
-    Player/mobile class.
-    """
+    """Ishar player/mobile class."""
+    objects = ClassManager()
+
     class_id = models.PositiveIntegerField(
         primary_key=True,
         help_text="Permanent class identification number.",
@@ -79,7 +85,11 @@ class Class(models.Model):
         verbose_name_plural = "Classes"
 
     def __repr__(self) -> str:
-        return "%s %s (%d)" % (self.__class__.__name__, self.__str__(), self.pk)
+        return "%s: %s (%d)" % (
+            self.__class__.__name__,
+            self.__str__(),
+            self.pk
+        )
 
     def __str__(self) -> str:
         return self.get_class_name()
@@ -88,3 +98,7 @@ class Class(models.Model):
     def get_class_name(self) -> str:
         """Formatted class name."""
         return self.class_name.replace("_", " ").title()
+
+    def natural_key(self) -> str:
+        """Natural key by class name."""
+        return self.get_class_name()

@@ -4,9 +4,7 @@ from . import Class
 
 
 class ClassLevel(models.Model):
-    """
-    Class Level.
-    """
+    """Ishar class level."""
     class_level_id = models.AutoField(
         primary_key=True,
         help_text="Auto-generated, primary key for class level identifier.",
@@ -47,8 +45,13 @@ class ClassLevel(models.Model):
 
     def __repr__(self) -> str:
         return "%s: %s (%i)" % (
-            self.__class__.__name__, self.__str__(), self.pk
+            self.__class__.__name__,
+            self.__str__(),
+            self.pk
         )
 
     def __str__(self) -> str:
-        return "Level %i @ %s" % (self.level, self.player_class)
+        return "Level %i @ %s" % (
+            self.level,
+            self.player_class
+        )

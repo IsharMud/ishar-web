@@ -5,9 +5,7 @@ from ishar.apps.skills.models.skill import Skill
 
 
 class PlayerSkill(models.Model):
-    """
-    Player Skill.
-    """
+    """Ishar player skill."""
     skill = models.ForeignKey(
         db_column="skill_id",
         related_query_name="+",

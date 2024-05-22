@@ -73,7 +73,7 @@ class AccountSoulboundItem(models.Model):
         )
 
     def __str__(self):
-        return "%s @ %s" % (
-            self.achievement,
+        return "%d @ %s" % (
+            self.item_id,
             self.account,
         )

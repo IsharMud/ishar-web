@@ -1,9 +1,19 @@
 from django.db import models
 from django.utils import timezone
 
+from .type.criteria import AchievementCriteriaType
+
+
+class AchievementManager(models.Manager):
+    def get_by_natural_key(self, name):
+        """Natural key of the achievement name."""
+        return self.get(name=name)
+
 
 class Achievement(models.Model):
     """Ishar achievement."""
+    objects = AchievementManager()
+
     achievement_id = models.AutoField(
         primary_key=True,
         help_text="Primary key identification number of the achievement.",
@@ -39,6 +49,27 @@ class Achievement(models.Model):
         help_text="Category of the achievement.",
         verbose_name="Category"
     )
+    parent_category = models.CharField(
+        max_length=80,
+        blank=True,
+        null=True,
+        help_text="Parent category of the achievement.",
+        verbose_name="Parent Category"
+    )
+    ordinal = models.IntegerField(
+        blank=True,
+        null=True,
+        help_text="Ordinal of the achievement.",
+        verbose_name="Ordinal"
+    )
+    criteria_type = models.CharField(
+        max_length=14,
+        blank=True,
+        choices=AchievementCriteriaType,
+        null=True,
+        help_text="Criteria type of the achievement.",
+        verbose_name="Criteria Type"
+    )
 
     class Meta:
         managed = False
@@ -65,3 +96,7 @@ class Achievement(models.Model):
             self.created_at = now
         self.updated_at = now
         return super().save(*args, **kwargs)
+
+    def natural_key(self) -> str:
+        """Natural key of the achievement name."""
+        return self.name

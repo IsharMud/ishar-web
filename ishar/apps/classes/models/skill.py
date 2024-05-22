@@ -6,9 +6,7 @@ from . import Class
 
 
 class ClassSkill(models.Model):
-    """
-    Class Skill.
-    """
+    """Ishar class skill."""
     class_skills_id = models.AutoField(
         primary_key=True,
         help_text="Auto-generated primary key for class skill identifier.",
@@ -48,8 +46,13 @@ class ClassSkill(models.Model):
 
     def __repr__(self) -> str:
         return "%s: %s (%i)" % (
-            self.__class__.__name__, self.__str__(), self.pk
+            self.__class__.__name__,
+            self.__str__(),
+            self.pk
         )
 
     def __str__(self) -> str:
-        return "%s @ %s" % (self.skill, self.player_class)
+        return "%s @ %s" % (
+            self.skill,
+            self.player_class
+        )

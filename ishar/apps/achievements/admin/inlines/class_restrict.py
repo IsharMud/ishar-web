@@ -6,6 +6,7 @@ from ...models.class_restrict import AchievementClassRestrict
 class AchievementClassRestrictTabularInline(TabularInline):
     """Achievement class restriction tabular inline administration."""
     model = AchievementClassRestrict
+    extra = 0
     verbose_name = "Class Restriction"
     verbose_name_plural = "Class Restrictions"
 

@@ -6,7 +6,7 @@ from .player import Player
 
 
 class PlayerPlayerFlag(models.Model):
-    """Player player flag."""
+    """Ishar player flag."""
     flag = models.OneToOneField(
         primary_key=True,
         to=PlayerFlag,

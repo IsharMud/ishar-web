@@ -2,9 +2,7 @@ from django.db.models import IntegerChoices
 
 
 class QuestRewardType(IntegerChoices):
-    """
-    Quest reward types.
-    """
+    """Quest reward type choices."""
     NEGATIVE_ONE = -1
     OBJECT_ALWAYS = 0, "Object (Always)"
     OBJECT_CHOICE = 1, "Object (Choice)"
@@ -24,4 +22,4 @@ class QuestRewardType(IntegerChoices):
         )
 
     def __str__(self) -> str:
-        return self.name
+        return self.name.title()

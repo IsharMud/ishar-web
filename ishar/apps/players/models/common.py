@@ -7,9 +7,7 @@ from ishar.apps.races.models.race import Race
 
 
 class PlayerCommon(models.Model):
-    """
-    Player common attributes for class, race, level, etc.
-    """
+    """Ishar player common attributes for class, race, level, etc."""
     player = models.OneToOneField(
         db_column="player_id",
         help_text="Player character with common attributes.",

@@ -1,6 +1,4 @@
-"""
-isharmud.com Django settings.
-"""
+"""isharmud.com Django settings."""
 from os import getenv
 from pathlib import Path
 from pymysql import install_as_MySQLdb
@@ -31,7 +29,7 @@ ALLOWED_HOSTS = DJANGO_HOSTS.split()
 DATABASES = {
     # Staging.
     "ishar_test": {
-        "ENGINE": "django.db.backends.mysql",
+        "ENGINE": "ishar.apps.core.backends",
         "NAME": "ishar_test",
         "USER": "ishar_test",
         "PASSWORD": "secret",
@@ -40,7 +38,7 @@ DATABASES = {
     },
     # Production
     "ishar": {
-        "ENGINE": "django.db.backends.mysql",
+        "ENGINE": "ishar.apps.core.backends",
         "NAME": "ishar",
         "USER": "ishar",
         "PASSWORD": "secret",
@@ -52,7 +50,7 @@ DEFAULT_DB = getenv("DJANGO_DATABASE", "ishar")
 DATABASES["default"] = DATABASES[DEFAULT_DB]
 
 # Default primary key field type.
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+DEFAULT_AUTO_FIELD = "ishar.apps.core.models.unsigned.UnsignedAutoField"
 
 # CSRF and session cookies.
 CSRF_COOKIE_DOMAIN = SESSION_COOKIE_DOMAIN = ALLOWED_HOSTS[0]
@@ -97,6 +95,7 @@ INSTALLED_APPS = [
     "ishar.apps.LeadersConfig",
     "ishar.apps.MobilesConfig",
     "ishar.apps.NewsConfig",
+    "ishar.apps.ObjectsConfig",
     "ishar.apps.PatchesConfig",
     "ishar.apps.PlayersConfig",
     "ishar.apps.ProcessesConfig",
@@ -320,7 +319,7 @@ JAZZMIN_SETTINGS = {
     "search_model": [
         "accounts.Account",
         "mobiles.Mobile",
-        "players.Player",
+        "objects.Object",
         "quests.Quest",
         "skills.Skill"
     ],
@@ -437,8 +436,18 @@ JAZZMIN_SETTINGS = {
         "mobiles.Mobile": "fas fa-skull",
 
         # news
-        "new": "fas fa-newspaper",
+        "news": "fas fa-newspaper",
         "news.News": "fas fa-newspaper",
+
+        # objects
+        "objects": "fas fa-object-group",
+        "objects.Object": "fas fa-object-group",
+        "objects.ObjectAffectFlag": "fas fa-flag",
+        "objects.ObjectExtra": "fas fa-diagram-project",
+        "objects.ObjectFlag": "fas fa-flag",
+        "objects.ObjectMod": "fas fa-vector-square",
+        "objects.ObjectObjectMod": "fas fa-draw-polygon",
+        "objects.ObjectWearableFlag": "fas fa-flag",
 
         # patches
         "patches": "fas fa-file-pdf",

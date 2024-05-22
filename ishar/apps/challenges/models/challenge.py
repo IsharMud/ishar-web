@@ -1,11 +1,18 @@
 from django.db import models
-from django.contrib import admin
+from django.contrib.admin import display
 
 from ishar.apps.mobiles.models.mobile import Mobile
 
 
+class ChallengeManager(models.Manager):
+    def get_by_natural_key(self, challenge_desc):
+        return self.get(challenge_desc=challenge_desc)
+
+
 class Challenge(models.Model):
     """Ishar challenge."""
+    objects = ChallengeManager()
+
     challenge_id = models.AutoField(
         help_text="Auto-generated, permanent challenge identification number.",
         primary_key=True,
@@ -37,11 +44,13 @@ class Challenge(models.Model):
         verbose_name="Challenge Description"
     )
     winner_desc = models.CharField(
+        blank=True,
         help_text=(
             "Description of the winner(s) of the challenge. "
             "Blank indicates that the challenge is not complete."
         ),
         max_length=80,
+        null=True,
         verbose_name="Winner Description"
     )
     is_active = models.BooleanField(
@@ -79,20 +88,18 @@ class Challenge(models.Model):
     def __str__(self) -> str:
         return self.challenge_desc or self.mobile.long_name
 
-    @admin.display(boolean=True, description="Complete?", ordering="winner_desc")
+    def natural_key(self) -> str:
+        return self.challenge_desc
+
+    @display(boolean=True, description="Complete?", ordering="winner_desc")
     def is_completed(self):
-        """
-        Boolean whether challenge has a winner description,
-            meaning that the challenge must have been completed.
-        """
+        """Boolean if challenge has winner description, meaning completed."""
         if self.winner_desc:
             return True
         return False
 
     def winners(self) -> list:
-        """
-        List of winners of a challenge.
-        """
+        """List of players that have won a challenge."""
         out = []
         winners = self.winner_desc
         if winners:

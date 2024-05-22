@@ -17,7 +17,7 @@
     {% if player %}
             {{ player.player_link }}
     {% else %}
-            <span class="Player Not Found">
+            <span>
                 Player Not Found
             </span>
     {% endif %}
@@ -26,6 +26,16 @@
 </nav>
 {% endblock header %}
 {% block content %}
+    {% if form %}
+    <div class="form-control-dark" id="player-search-form">
+        <form method="post" action="{% url 'players' %}">
+            {{ form.as_table }}
+            {% csrf_token %}
+            <button class="btn btn-outline-primary" type="submit">Search</button>
+            <button class="btn btn-outline-secondary" type="reset">Clear</button>
+        </form>
+    </div>
+    {% endif %}
     {% if player %}
     <h3 id="player" title="{{ player.player_title }}">
         {{ player.player_title }}

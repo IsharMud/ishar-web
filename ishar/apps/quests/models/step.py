@@ -5,9 +5,7 @@ from .type.step import QuestStepType
 
 
 class QuestStep(models.Model):
-    """
-    Quest Step.
-    """
+    """Ishar quest step."""
     step_id = models.AutoField(
         primary_key=True,
         help_text="Quest step identification number",
@@ -65,7 +63,11 @@ class QuestStep(models.Model):
         verbose_name_plural = "Steps"
 
     def __repr__(self) -> str:
-        return "%s %s (%d)" % (self.__class__.__name__, self.__str__(), self.pk)
+        return "%s %s (%d)" % (
+            self.__class__.__name__,
+            self.__str__(),
+            self.pk
+        )
 
     def __str__(self) -> str:
         return "%s %d (%d) @ %s" % (

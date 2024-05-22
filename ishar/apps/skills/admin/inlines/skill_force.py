@@ -9,6 +9,8 @@ class SkillForceAdminInline(TabularInline):
     """
     extra = 1
     model = SkillForce
+    verbose_name = "Force"
+    verbose_name_plural = "Forces"
 
     def has_module_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:

@@ -2,9 +2,7 @@ from django.db.models import IntegerChoices
 
 
 class PlayerClass(IntegerChoices):
-    """
-    Player classes.
-    """
+    """Ishar playable class choices."""
     NEGATIVE_ONE = -1
     WARRIOR = 0
     ROGUE = 1
@@ -16,8 +14,10 @@ class PlayerClass(IntegerChoices):
 
     def __repr__(self) -> str:
         return "%s: %s (%i)" % (
-            self.__class__.__name__, self.__str__(), self.value
+            self.__class__.__name__,
+            self.__str__(),
+            self.value
         )
 
     def __str__(self) -> str:
-        return self.name
+        return self.name.title()

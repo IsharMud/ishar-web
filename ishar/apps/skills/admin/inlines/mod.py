@@ -9,6 +9,8 @@ class SkillModAdminInline(TabularInline):
     """
     extra = 1
     model = SkillMod
+    verbose_name = "Mod"
+    verbose_name_plural = "Mods"
 
     def has_module_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:

@@ -2,9 +2,7 @@ from django.db.models import IntegerChoices
 
 
 class SkillType(IntegerChoices):
-    """
-    Skill types.
-    """
+    """Skill type choices."""
     TYPE = 0
     SKILL = 1
     SPELL = 2
@@ -18,4 +16,4 @@ class SkillType(IntegerChoices):
         )
 
     def __str__(self) -> str:
-        return self.name
+        return self.name.title()

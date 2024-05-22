@@ -9,6 +9,8 @@ class SkillSpellFlagAdminInline(TabularInline):
     """
     extra = 1
     model = SkillSpellFlag
+    verbose_name = "Flag"
+    verbose_name_plural = "Flags"
 
     def has_module_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:

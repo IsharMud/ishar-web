@@ -1,9 +1,9 @@
-from django.contrib.admin import TabularInline
+from django.contrib.admin import StackedInline
 
 from ...models.soulbound_item import AccountSoulboundItem
 
 
-class AccountSoulboundItemAdmin(TabularInline):
+class AccountSoulboundItemAdmin(StackedInline):
     """
     Account soulbound item tabular inline administration.
     """

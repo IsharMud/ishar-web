@@ -4,10 +4,16 @@ from django.urls import reverse
 from ishar.apps.accounts.models import Account
 
 
+class FAQManager(models.Manager):
+    def get_by_natural_key(self, slug):
+        # Natural key of the FAQ slug.
+        return self.get(slug=slug)
+
+
 class FAQ(models.Model):
-    """
-    Frequently Asked Question.
-    """
+    """Ishar website frequently asked question."""
+    objects = FAQManager()
+
     faq_id = models.AutoField(
         blank=False,
         help_text="Auto-generated permanent ID number of the question.",
@@ -90,4 +96,8 @@ class FAQ(models.Model):
         )
 
     def __str__(self):
+        return self.slug
+
+    def natural_key(self) -> str:
+        # Natural key of the FAQ slug.
         return self.slug

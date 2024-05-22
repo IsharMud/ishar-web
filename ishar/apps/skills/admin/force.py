@@ -11,6 +11,8 @@ class ForceAdmin(ModelAdmin):
     fields = ("id", "force_name")
     list_display = list_display_links = search_fields = fields
     readonly_fields = ("id",)
+    verbose_name = "Force"
+    verbose_name_plural = "Forces"
 
     def has_module_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:

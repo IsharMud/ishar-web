@@ -2,9 +2,7 @@ from django.db.models import IntegerChoices
 
 
 class AchievementTriggerType(IntegerChoices):
-    """
-    Achievement trigger types.
-    """
+    """Achievement trigger type choices."""
     NONE = 0
     LEVEL_UP = 1
     REMORT = 2
@@ -22,4 +20,4 @@ class AchievementTriggerType(IntegerChoices):
         )
 
     def __str__(self) -> str:
-        return self.name
+        return self.name.title()

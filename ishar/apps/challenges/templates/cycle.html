@@ -1,9 +1,0 @@
-{% load humanize %}
-{% if CURRENT_SEASON and CURRENT_SEASON.get_next_cycle %}
-<div class="next-cycle">
-    <p>
-        Challenges will next cycle
-        {{ CURRENT_SEASON.get_next_cycle | naturaltime }}.
-    </p>
-</div>
-{% endif %}

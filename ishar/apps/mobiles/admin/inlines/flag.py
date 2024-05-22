@@ -9,6 +9,8 @@ class MobileFlagTabularInline(TabularInline):
     extra = 1
     fields = ("flag", "value")
     ordering = ("-value", "flag__name")
+    verbose_name = "Flag"
+    verbose_name_plural = "Flags"
 
     def has_add_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:

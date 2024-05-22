@@ -7,9 +7,7 @@ from django.utils.timezone import now
 
 
 class Season(models.Model):
-    """
-    Season.
-    """
+    """Ishar season."""
     season_id = models.AutoField(
         primary_key=True,
         help_text="Auto-generated permanent season (identification) number.",
@@ -26,10 +24,6 @@ class Season(models.Model):
     expiration_date = models.DateTimeField(
         help_text="Expiration end date of the season.",
         verbose_name="Expiration Date"
-    )
-    last_challenge_cycle = models.DateTimeField(
-        help_text="Last date and time of challenges cycled in the season.",
-        verbose_name="Last Challenge Cycle"
     )
     average_essence_gain = models.FloatField(
         help_text="Average essence gain in the season.",
@@ -48,14 +42,20 @@ class Season(models.Model):
         verbose_name="Max Remorts"
     )
     season_leader_account = models.IntegerField(
-        blank=True, null=True,
+        blank=True,
+        null=True,
         help_text="Leader account in the season.",
         verbose_name="Season Leader Account"
     )
     seasonal_leader_name = models.TextField(
-        blank=True, null=True,
+        blank=True,
+        null=True,
         help_text="Leader name in the season.",
         verbose_name="Seasonal Leader Name"
+    )
+    last_challenge_cycle = models.DateTimeField(
+        help_text="Last date and time of challenges cycled in the season.",
+        verbose_name="Last Challenge Cycle"
     )
     max_renown = models.IntegerField(
         help_text="Max amount of renown gained in the season.",
@@ -64,6 +64,22 @@ class Season(models.Model):
     avg_renown = models.FloatField(
         help_text="Average amount of renown gained in the season.",
         verbose_name="Average Renown"
+    )
+    total_remorts = models.IntegerField(
+        help_text="Total number of remorts in the season.",
+        verbose_name="Total Remorts"
+    )
+    game_state = models.SmallIntegerField(
+        blank=True,
+        null=True,
+        help_text="Game state of the season.",
+        verbose_name="Game State"
+    )
+    multiplay_limit = models.PositiveSmallIntegerField(
+        blank=True,
+        null=True,
+        help_text="Limit of players that one account can log in to.",
+        verbose_name="Multi-Play Limit"
     )
 
     class Meta:
@@ -113,6 +129,5 @@ class Season(models.Model):
         if self.last_challenge_cycle:
             if isinstance(self.last_challenge_cycle, datetime):
                 if self.last_challenge_cycle <= now():
-                    add_time = timedelta(days=7)
-                    return self.last_challenge_cycle + add_time
+                    return self.last_challenge_cycle + timedelta(days=7)
         return None

@@ -10,25 +10,30 @@ class SeasonAdmin(ModelAdmin):
     """
     date_hierarchy = "effective_date"
     fieldsets = (
-        (None, {"fields": ("season_id", "is_active")}),
-        ("Dates", {"fields": (
-            "effective_date", "expiration_date", "last_challenge_cycle",
-            "next_cycle"
-        )}),
-        ("Averages", {"fields": (
-            "average_essence_gain", "average_remorts", "avg_renown"
-        )}),
-        ("Maximums", {"fields": (
-            "max_essence_gain", "max_remorts", "max_renown"
-        )}),
-        ("Leader", {"fields": (
-            "season_leader_account", "seasonal_leader_name"
-        )})
+        (None, {"fields": ("season_id", "is_active", "game_state")}),
+        ("Dates", {
+            "fields": (
+                "effective_date", "expiration_date", "last_challenge_cycle",
+                "next_cycle"
+            )
+        }),
+        ("Multi-Play", {"fields": ("multiplay_limit",)}),
+        ("Averages", {
+            "fields": ("average_essence_gain", "average_remorts", "avg_renown")
+        }),
+        ("Maximums", {
+            "fields": (
+                "max_essence_gain", "max_remorts", "max_renown", "total_remorts"
+            )
+        }),
+        ("Leader", {
+            "fields": ("season_leader_account", "seasonal_leader_name")
+        }),
     )
     list_display = list_display_links = (
         "season_id", "is_active", "effective_date", "expiration_date"
     )
-    list_filter = ("is_active",)
+    list_filter = ("is_active", "multiplay_limit")
     readonly_fields = ("season_id", "next_cycle")
     search_fields = (
         "seasonal_leader_name", "effective_date", "expiration_date"

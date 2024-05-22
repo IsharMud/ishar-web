@@ -1,10 +1,15 @@
 from django.db import models
 
 
+class ForceManager(models.Manager):
+    def get_by_natural_key(self, force_name):
+        return self.get(force_name=force_name)
+
+
 class Force(models.Model):
-    """
-    Force.
-    """
+    """Ishar force."""
+    objects = ForceManager()
+
     force_name = models.CharField(
         unique=True,
         max_length=255,
@@ -28,4 +33,7 @@ class Force(models.Model):
         )
 
     def __str__(self) -> str:
+        return self.force_name
+
+    def natural_key(self) -> str:
         return self.force_name

@@ -2,7 +2,7 @@ from django.db.models import IntegerChoices
 
 
 class GameType(IntegerChoices):
-    """Player game types."""
+    """Ishar player game type choices."""
     CLASSIC = 0
     SURVIVAL = 1
     HARDCORE = 2
@@ -14,4 +14,7 @@ class GameType(IntegerChoices):
         )
 
     def __str__(self) -> str:
-        return "%s (%i)" % (self.name, self.value)
+        return "%s (%i)" % (
+            self.name.title(),
+            self.value
+        )

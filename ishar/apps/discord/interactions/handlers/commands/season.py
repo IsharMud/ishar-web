@@ -1,7 +1,7 @@
 from django.urls import reverse
 from django.utils.timesince import timeuntil
 
-from ishar.apps.seasons.util import get_current_season
+from ishar.apps.seasons.utils.current import get_current_season
 
 
 def season(request):
