@@ -1156,7 +1156,6 @@ class PlayerRelics(models.Model):
     class Meta:
         managed = False
         db_table = 'player_relics'
-        unique_together = (('player', 'obj_vnum'),)
 
 
 class PlayerRemortUpgrades(models.Model):
@@ -1184,7 +1183,7 @@ class PlayerSkills(models.Model):
 
 class PlayerStats(models.Model):
     player_stats_id = models.AutoField(primary_key=True)
-    player = models.ForeignKey('Players', models.DO_NOTHING, blank=True, null=True)
+    player = models.OneToOneField('Players', models.DO_NOTHING, blank=True, null=True)
     total_play_time = models.PositiveIntegerField(blank=True, null=True)
     remort_play_time = models.PositiveIntegerField(blank=True, null=True)
     total_deaths = models.PositiveIntegerField(blank=True, null=True)
@@ -1348,6 +1347,7 @@ class Races(models.Model):
     endure_cold = models.IntegerField()
     is_undead = models.IntegerField()
     starting_city = models.PositiveIntegerField(blank=True, null=True)
+    abbr_name = models.CharField(max_length=4, blank=True, null=True)
 
     class Meta:
         managed = False
