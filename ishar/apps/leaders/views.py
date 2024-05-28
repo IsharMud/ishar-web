@@ -35,12 +35,21 @@ class LeadersView(LoginRequiredMixin, ListView):
         return qs
 
     def get_context_data(self, *, object_list=None, **kwargs):
-        """Include dead/living, game type, and types of games, in context."""
+        """
+        Include dead/living, game type, and types of games, in context,
+            and overwrite appropriate values using player_stats.
+        """
         context = super().get_context_data(object_list=None, **kwargs)
         context["deleted"] = self.deleted
         context["game_type"] = self.game_type
         context["game_type_name"] = self.game_type_name
         context["game_types"] = GameType.choices
+
+        for i in context[self.context_object_name]:
+            i.challenges_completed = i.statistics.total_challenges
+            i.deaths = i.statistics.total_deaths
+            i.total_renown = i.statistics.total_renown
+
         context[self.context_object_name] = serialize(
             format="json",
             queryset=context.get(self.context_object_name),

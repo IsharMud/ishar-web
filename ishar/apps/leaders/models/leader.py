@@ -25,7 +25,10 @@ class Leader(Player):
     class Meta:
         # Re-order proxy model of Player.
         ordering = (
-            "-remorts", "-total_renown", "-challenges_completed", "deaths"
+            "-remorts",
+            "-statistics__total_renown",
+            "-statistics__total_challenges",
+            "-statistics__total_deaths"
         )
         proxy = True
 
