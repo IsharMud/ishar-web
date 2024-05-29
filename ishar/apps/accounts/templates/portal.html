@@ -93,28 +93,30 @@
                 {{ player.remorts }}
             </li>
                 {% endif %}
-                {% if player.renown > 0 %}
-            <li class="bg-black border border-secondary list-group-item list-group-item-dark list-group-item-text text-white" title="Renown: {{ player.renown }}">
-                <strong>Renown</strong>:
-                {{ player.renown }}
+                {% if player.statistics.total_renown > 0 %}
+            <li class="bg-black border border-secondary list-group-item list-group-item-dark list-group-item-text text-white" title="Total Renown: {{ player.statistics.total_renown }}">
+                <strong>Total Renown</strong>:
+                {{ player.statistics.total_renown }}
             </li>
                 {% endif %}
-                {% if player.quests_completed > 0 %}
-            <li class="bg-black border border-secondary list-group-item list-group-item-dark list-group-item-text text-white" title="Quests: {{ player.quests_completed }}">
-                <strong>Quests</strong>:
-                {{ player.quests_completed }}
+                {% if player.statistics.total_quests > 0 %}
+            <li class="bg-black border border-secondary list-group-item list-group-item-dark list-group-item-text text-white" title="Total Quests: {{ player.statistics.total_quests }}">
+                <strong>Total Quests</strong>:
+                {{ player.statistics.total_quests }}
             </li>
                 {% endif %}
-                {% if player.challenges_completed > 0 %}
-            <li class="bg-black border border-secondary list-group-item list-group-item-dark list-group-item-text text-white" title="Challenges: {{ player.challenges_completed }}">
-                <strong>Challenges</strong>:
-                {{ player.challenges_completed }}
+                {% if player.statistics.total_challenges > 0 %}
+            <li class="bg-black border border-secondary list-group-item list-group-item-dark list-group-item-text text-white" title="Total Challenges: {{ player.statistics.total_challenges }}">
+                <strong>Total Challenges</strong>:
+                {{ player.statistics.total_challenges }}
             </li>
                 {% endif %}
-            <li class="bg-black border border-secondary list-group-item list-group-item-dark list-group-item-text text-white" title="Deaths: {{ player.deaths }}">
-                <strong>Deaths</strong>:
-                {{ player.deaths }}
+                {% if player.statistics.total_deaths > 0 %}
+            <li class="bg-black border border-secondary list-group-item list-group-item-dark list-group-item-text text-white" title="Total Deaths: {{ player.statistics.total_deaths }}">
+                <strong>Total Deaths</strong>:
+                {{ player.statistics.total_deaths }}
             </li>
+                {% endif %}
         </ol>
         {% else %}
         <p class="lead text-white">

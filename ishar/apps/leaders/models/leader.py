@@ -28,7 +28,9 @@ class Leader(Player):
             "-remorts",
             "-statistics__total_renown",
             "-statistics__total_challenges",
-            "-statistics__total_deaths"
+            "-statistics__total_quests",
+            "statistics__total_deaths",
+            "-common__level"
         )
         proxy = True
 

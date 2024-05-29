@@ -48,6 +48,7 @@ class LeadersView(LoginRequiredMixin, ListView):
         for i in context[self.context_object_name]:
             i.challenges_completed = i.statistics.total_challenges
             i.deaths = i.statistics.total_deaths
+            i.true_level = i.common.level
             i.total_renown = i.statistics.total_renown
 
         context[self.context_object_name] = serialize(
@@ -55,7 +56,7 @@ class LeadersView(LoginRequiredMixin, ListView):
             queryset=context.get(self.context_object_name),
             fields=(
                 "name", "remorts", "total_renown", "challenges_completed",
-                "deaths"
+                "deaths", "true_level"
             )
         )
         return context

@@ -92,18 +92,19 @@
                     return `<a href="/player/${data}">${data}</a>`;
                 },
             },
-            { data: 'remorts', title: 'Remorts',},
+            { data: 'true_level', title: 'Level' },
+            { data: 'remorts', title: 'Remorts' },
             { data: 'total_renown', title: 'Renown' },
             { data: 'challenges_completed', title: 'Challenges' },
             { data: 'deaths', title: 'Deaths' },
         ],
         columnDefs: [
             { type: 'html', targets: [0] },
-            { type: 'num', targets: [1, 2, 3, 4] },
+            { type: 'num', targets: [1, 2, 3, 4, 5] },
         ],
         data: leaders,
         layout: { bottomStart: 'search', topEnd: null },
-        order: [[1, 'desc'], [2, 'desc'], [3, 'desc'], [4, 'asc']],
+        order: [[2, 'desc'], [3, 'desc'], [4, 'desc'], [5, 'asc'], [1, 'desc']],
     });
     pageTable.draw();
 </script>
