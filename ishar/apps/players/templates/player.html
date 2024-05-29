@@ -106,19 +106,18 @@
                         {{ player.get_player_gender | title }} can not be resurrected!
                     </li>
                 </ul>
-            {% elif player.player_type == "Survival" %}
-                {{ player.name | title }} {{ player.get_player_phrase }} a
-                <span class="{{ player.player_css }}">{{ player.player_type }}</span> player!
-            {% elif player.player_type == "Hardcore" %}
-                {{ player.name | title }} {{ player.get_player_phrase }} a
-                <span class="{{ player.player_css }}">{{ player.player_type }}</span> player!
             {% else %}
-                {% if player.deaths > 0 %}
+                {{ player.name | title }} {{ player.get_player_phrase }} a
+                <span class="{{ player.player_css }}">{{ player.player_type }}</span> player!
+            {% endif %}
+            </li>
+            <li class="bg-black border-0 list-group-item list-group-item-text text-white">
+                <span class="bi bi-dot text-ishar"></span>
+            {% if player.statistics.total_deaths > 0 %}
                 {{ player.get_player_gender | title }} {{ player.get_player_phrase_owns }}
-                died {{ player.deaths }} time{{ player.deaths|pluralize }}.
-                {% else %}
+                died {{ player.statistics.total_deaths }} time{{ player.statistics.total_deaths|pluralize }}.
+            {% else %}
                 {{ player.get_player_gender | title }} {{ player.get_player_phrase_owns }} never died!
-                {% endif %}
             {% endif %}
             </li>
         </ul>
