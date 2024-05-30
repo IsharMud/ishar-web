@@ -11,6 +11,7 @@ def deadhead():
         "-statistics__total_deaths"
     ).first()
 
-    return "%s :skull_crossbones: %i times!" % (
-        dead_head.name, dead_head.deaths
+    return "%s :skull_crossbones: %i total deaths!" % (
+        dead_head.name,
+        dead_head.statistics.total_deaths
     )
