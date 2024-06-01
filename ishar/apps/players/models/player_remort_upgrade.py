@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from ishar.apps.players.models.player import Player
+from ishar.apps.players.models.player import PlayerBase
 from ishar.apps.players.models.remort_upgrade import RemortUpgrade
 
 
@@ -15,7 +15,7 @@ class PlayerRemortUpgrade(models.Model):
         editable=False,
         related_query_name="remort_upgrade",
         related_name="all_remort_upgrades",
-        to=Player,
+        to=PlayerBase,
         to_field="id",
         on_delete=models.DO_NOTHING,
         help_text="Player with a remort upgrade.",

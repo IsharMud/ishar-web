@@ -1,6 +1,6 @@
 from django.db import models
 
-from ishar.apps.players.models.player import Player
+from ishar.apps.players.models.player import PlayerBase
 
 from .challenge import Challenge
 
@@ -15,7 +15,7 @@ class PlayerChallenge(models.Model):
         verbose_name="Player Challenges ID"
     )
     player = models.ForeignKey(
-        to=Player,
+        to=PlayerBase,
         on_delete=models.DO_NOTHING,
         help_text="Player related to a challenge.",
         verbose_name="Player"

@@ -3,7 +3,7 @@ from django.utils.translation import gettext_lazy as _
 
 from ishar.apps.challenges.models.challenge import Challenge
 
-from .player import Player
+from .player import PlayerBase
 
 
 class PlayerChallenge(models.Model):
@@ -16,7 +16,7 @@ class PlayerChallenge(models.Model):
         verbose_name=_("Player Challenges ID")
     )
     player = models.ForeignKey(
-        to=Player,
+        to=PlayerBase,
         on_delete=models.DO_NOTHING,
         help_text=_("Player related to a challenge."),
         verbose_name=_("Player")

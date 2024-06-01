@@ -1,6 +1,6 @@
 from django.db import models
 
-from .player import Player
+from .player import PlayerBase
 from .skill import Skill
 
 
@@ -12,7 +12,7 @@ class PlayerAffect(models.Model):
         verbose_name="Player Affect ID"
     )
     player = models.ForeignKey(
-        to=Player,
+        to=PlayerBase,
         on_delete=models.DO_NOTHING,
         help_text="Player related to the affect.",
         verbose_name="Player"

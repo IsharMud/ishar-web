@@ -7,10 +7,8 @@ from .models.leader import Leader
 
 
 class LeadersView(LoginRequiredMixin, ListView):
-    """
-    Filter and order players to determine leaders.
-        Optionally filter for game type, and living/dead.
-    """
+    """Filter and order players to determine leaders.
+        Optionally filter for game type, and living/dead."""
     model = Leader
     context_object_name = "leaders"
     template_name = "leaders.html"
@@ -19,7 +17,7 @@ class LeadersView(LoginRequiredMixin, ListView):
     game_type_name = None
 
     def get_queryset(self):
-        """Filter players."""
+        """Filter Leader proxy model."""
         qs = super().get_queryset()
 
         # Optionally filter for living/dead players.
@@ -35,10 +33,8 @@ class LeadersView(LoginRequiredMixin, ListView):
         return qs
 
     def get_context_data(self, *, object_list=None, **kwargs):
-        """
-        Include dead/living, game type, and types of games, in context,
-            and overwrite appropriate values using player_stats.
-        """
+        """Include dead/living, game type, and types of games, in context,
+            and overwrite appropriate values using player_stats."""
         context = super().get_context_data(object_list=None, **kwargs)
         context["deleted"] = self.deleted
         context["game_type"] = self.game_type

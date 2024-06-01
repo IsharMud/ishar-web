@@ -2,7 +2,7 @@ from django.db import models
 
 from ishar.apps.core.models.player_flag import PlayerFlag
 
-from .player import Player
+from .player import PlayerBase
 
 
 class PlayerPlayerFlag(models.Model):
@@ -17,7 +17,7 @@ class PlayerPlayerFlag(models.Model):
         verbose_name="Flag"
     )
     player = models.ForeignKey(
-        to=Player,
+        to=PlayerBase,
         on_delete=models.DO_NOTHING,
         editable=False,
         related_name="flag",

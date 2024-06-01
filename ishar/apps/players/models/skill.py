@@ -1,6 +1,6 @@
 from django.db import models
 
-from ishar.apps.players.models.player import Player
+from ishar.apps.players.models.player import PlayerBase
 from ishar.apps.skills.models.skill import Skill
 
 
@@ -19,7 +19,7 @@ class PlayerSkill(models.Model):
         db_column="player_id",
         related_query_name="skill",
         related_name="skills",
-        to=Player,
+        to=PlayerBase,
         to_field="id",
         on_delete=models.DO_NOTHING,
         help_text="Player with a skill/spell.",
