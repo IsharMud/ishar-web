@@ -1156,6 +1156,7 @@ class PlayerRelics(models.Model):
     class Meta:
         managed = False
         db_table = 'player_relics'
+        unique_together = (('player', 'obj_vnum'),)
 
 
 class PlayerRemortUpgrades(models.Model):
