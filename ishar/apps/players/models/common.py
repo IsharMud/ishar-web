@@ -2,7 +2,7 @@ from django.db import models
 
 from ishar.apps.classes.models import Class
 from ishar.apps.core.models.gender import Gender
-from ishar.apps.players.models.player import Player
+from ishar.apps.players.models.player import PlayerBase
 from ishar.apps.races.models.race import Race
 
 
@@ -15,7 +15,7 @@ class PlayerCommon(models.Model):
         primary_key=True,
         related_name="common",
         related_query_name="common",
-        to=Player,
+        to=PlayerBase,
         to_field="id",
         verbose_name="Player"
     )

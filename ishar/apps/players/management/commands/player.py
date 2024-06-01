@@ -2,7 +2,7 @@ from pprint import pformat
 
 from django.core.management.base import BaseCommand, CommandError
 
-from ishar.apps.players.models.player import Player
+from ishar.apps.players.models.player import PlayerBase
 
 
 class Command(BaseCommand):
@@ -18,8 +18,8 @@ class Command(BaseCommand):
         player_name = kwargs["player"][0]
 
         try:
-            player = Player.objects.get(name=player_name)
-        except Player.DoesNotExist:
+            player = PlayerBase.objects.get(name=player_name)
+        except PlayerBase.DoesNotExist:
             raise CommandError('Player "%s" not found!' % player_name)
 
         self.stdout.write(self.style.SUCCESS(pformat(vars(player))))

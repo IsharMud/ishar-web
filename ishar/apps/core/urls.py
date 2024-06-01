@@ -7,6 +7,7 @@ from ishar.apps.help.views.world import WorldView
 from .views import HistoryView, HomeView, StartView, SupportView
 from .views.auth import IsharLoginView, IsharLogoutView
 
+
 urlpatterns = [
     path("", HomeView.as_view(), name="index"),
     path("areas/", WorldView.as_view(), name="areas"),

@@ -2,7 +2,7 @@ from datetime import timedelta
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from .player import Player
+from .player import PlayerBase
 
 
 class PlayerStat(models.Model):
@@ -13,7 +13,7 @@ class PlayerStat(models.Model):
         verbose_name=_("Player Stats ID")
     )
     player = models.OneToOneField(
-        to=Player,
+        to=PlayerBase,
         on_delete=models.DO_NOTHING,
         blank=True,
         null=True,
