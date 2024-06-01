@@ -14,6 +14,7 @@ from .manager import AccountManager
 
 class Account(AbstractBaseUser, PermissionsMixin):
     """Ishar user account that logs in to the website, and MUD/game."""
+
     account_id = models.AutoField(
         primary_key=True,
         help_text="Auto-generated permanent unique account number.",
@@ -112,13 +113,12 @@ class Account(AbstractBaseUser, PermissionsMixin):
         help_text="Number of communication points for the communication.",
         verbose_name="Communication Points"
     )
-#   This does not exist in production >.<
-#    achievement_points = models.PositiveIntegerField(
-#        blank=True,
-#        null=True,
-#        help_text="Number of achievement points for the account.",
-#        verbose_name="Achievement Points?"
-#    )
+    achievement_points = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+        help_text="Number of achievement points for the account.",
+        verbose_name="Achievement Points"
+    )
 
     EMAIL_FIELD = "email"
     USERNAME_FIELD = "account_name"
@@ -126,9 +126,9 @@ class Account(AbstractBaseUser, PermissionsMixin):
     user_permissions = None
 
     class Meta:
-        managed = False
         db_table = "accounts"
         default_related_name = "account"
+        managed = False
         ordering = ("account_id",)
         verbose_name = "Account"
         verbose_name_plural = "Accounts"
@@ -144,12 +144,20 @@ class Account(AbstractBaseUser, PermissionsMixin):
         return self.get_username()
 
     def check_password(self, raw_password: str = None) -> bool:
-        """Method to check account password."""
+        """Check account password."""
         return md5_crypt.verify(secret=raw_password, hash=self.password)
 
-    def get_create_ip(self) -> (str, None):
+    @property
+    @admin.display(description="Create IP", ordering="create_haddr")
+    def create_ip(self) -> (str, None):
         """IP address that created the account."""
         return dec2ip(self.create_haddr)
+
+    @property
+    @admin.display(description="Last IP", ordering="last_haddr")
+    def last_ip(self) -> (str, None):
+        """IP address that last logged into the account."""
+        return dec2ip(self.last_haddr)
 
     def get_gravatar(self) -> (str, None):
         """Gravatar.com image for any account e-mail address."""
@@ -161,10 +169,6 @@ class Account(AbstractBaseUser, PermissionsMixin):
                 if image:
                     return image
         return None
-
-    def get_last_ip(self) -> (str, None):
-        """IP address that last logged in to the account."""
-        return dec2ip(self.last_haddr)
 
     def get_username(self) -> str:
         """Return account username."""

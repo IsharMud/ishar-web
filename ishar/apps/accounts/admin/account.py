@@ -27,7 +27,8 @@ class AccountAdmin(UserAdmin):
         (
             "Points", {
                 "fields": (
-                    "current_essence", "earned_essence", "bugs_reported"
+                    "achievement_points", "current_essence", "earned_essence",
+                    "bugs_reported"
                 )
             }
         ),
@@ -60,24 +61,12 @@ class AccountAdmin(UserAdmin):
         "current_essence", "immortal_level"
     )
     ordering = ("account_id",)
-    search_fields = (
-        model.USERNAME_FIELD, model.EMAIL_FIELD,
-        "create_ip", "create_isp", "create_ident",
-        "last_ip", "last_isp", "last_ident"
-    )
     readonly_fields = (
         "account_id", "created_at", "player_count",
         "create_ip", "create_isp", "create_ident",
         "last_ip", "last_isp", "last_ident"
     )
-
-    @display(description="Create IP")
-    def create_ip(self, obj) -> str:
-        return obj.get_create_ip()
-
-    @display(description="Last IP")
-    def last_ip(self, obj) -> str:
-        return obj.get_last_ip()
+    search_fields = (model.USERNAME_FIELD, model.EMAIL_FIELD)
 
     def has_add_permission(self, request) -> bool:
         return False
