@@ -21,7 +21,7 @@
             <a class="anchor-link" href="#start" aria-label="Link to this section: Season {{ season.season_id }} Start">&#x23;</a>
         </h3>
         <blockquote class="blockquote card-text p-3">
-            <p>{{ season.effective_date }}</p>
+            <p>{{ season.effective_date | date:"l, F d, Y" }}</p>
             <footer class="blockquote-footer">{{ season.effective_date | naturaltime }}</footer>
         </blockquote>
     </div>
@@ -32,7 +32,7 @@
             <a class="anchor-link" href="#end" aria-label="Link to this section: Season {{ season.season_id }} End">&#x23;</a>
         </h3>
         <blockquote class="blockquote card-text p-3">
-            <p>{{ season.expiration_date }}</p>
+            <p>{{ season.expiration_date | date:"l, F d, Y" }}</p>
             <footer class="blockquote-footer">{{ season.expiration_date | naturaltime }}</footer>
         </blockquote>
     </div>
