@@ -17,13 +17,13 @@
             <a href="{% url "portal" %}">Portal</a>
         </li>
         <li class="breadcrumb-item{% if not game_type %} active" aria-current="page{% endif %}" title="Leaders">
-            <a href="{% url "leaders" %}">
+            <a href="{% url "leaders" %}#leaders" id="leaders">
                 Leaders
             </a>
         </li>
-    {% if game_type and game_type_name %}
+    {% if game_type_name %}
         <li class="breadcrumb-item active" aria-current="page" title="{{ game_type_name }} Leaders">
-            <a href="#leaders">
+            <a href="{% url "leaders" %}{{ game_type_name|lower }}#{{ game_type_name|lower }}" id="{{ game_type_name|lower }}">
                 {{ game_type_name }}
             </a>
         </li>
@@ -46,7 +46,7 @@
 {% if game_type == num %}
         <span class="text-ishar">{{ name }}</span>
 {% else %}
-        <a class="list-group-item-text" href="{% url "leaders" %}{{ name|lower }}#leaders">{{ name }}</a>
+        <a class="list-group-item-text" href="{% url "leaders" %}{{ name|lower }}#{{ name|lower }}">{{ name }}</a>
 {% endif %}
     </li>
 {% endfor %}
@@ -78,10 +78,10 @@
 </ul>
 {% endif %}
 <table class="m-1 p-1" id="leadersTable"></table>
-{{ leaders|json_script:"leaders" }}
+{{ leaders|json_script:"leadersJSON" }}
 <script>
     const leaders = [];
-    const leadersData = JSON.parse(JSON.parse(document.getElementById("leaders").textContent));
+    const leadersData = JSON.parse(JSON.parse(document.getElementById("leadersJSON").textContent));
     function buildLeader(leader) { leaders.push(leader.fields); };
     leadersData.forEach(buildLeader);
     const pageTable = new DataTable('#leadersTable', {

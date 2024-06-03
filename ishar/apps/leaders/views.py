@@ -19,7 +19,7 @@ class LeadersView(LoginRequiredMixin, ListView):
     game_type_name = None
 
     def get_queryset(self):
-        """Filter players."""
+        """Filter Leader proxy model of Player (proxy model of PlayerBase)."""
         qs = super().get_queryset()
 
         # Optionally filter for living/dead players.
