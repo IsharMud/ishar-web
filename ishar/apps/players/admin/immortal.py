@@ -1,28 +1,15 @@
-from django.contrib import admin
-from django.urls import reverse
-from django.utils.safestring import mark_safe
-
-from .filters import ImmortalTypeListFilter
-from .inlines.common import PlayerCommonInlineAdmin
-from .inlines.flag import PlayerFlagsInlineAdmin
-from .inlines.stat import PlayerStatInlineAdmin
-from .inlines.upgrade import PlayerRemortUpgradesInlineAdmin
+from django.contrib.admin import register
 
 from .player import PlayerAdmin
 from ..models.immortal import Immortal
 
 
-@admin.register(Immortal)
+@register(Immortal)
 class ImmortalAdmin(PlayerAdmin):
     """Ishar immortal administration."""
     date_hierarchy = "birth"
-    inlines = (
-        PlayerCommonInlineAdmin, PlayerFlagsInlineAdmin, PlayerStatInlineAdmin
-    )
     list_display = ("name", "get_account_link", "player_type", "player_level")
-    list_filter = (
-        ImmortalTypeListFilter, ("account", admin.RelatedOnlyFieldListFilter)
-    )
+    model = Immortal
 
     def has_add_permission(self, request) -> bool:
         return False
