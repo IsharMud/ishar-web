@@ -422,7 +422,7 @@ JAZZMIN_SETTINGS = {
         # core
         "core": "fas fa-flag",
         "core.PlayerFlag": "fas fa-flag",
-        "core.qAffectFlag": "fas fa-flag",
+        "core.AffectFlag": "fas fa-flag",
         "core.Title": "fas fa-tag",
 
         # events
@@ -456,6 +456,12 @@ JAZZMIN_SETTINGS = {
         # processes
         "processes": "fas fa-microchip",
         "processes.MUDProcess": "fas fa-microchip",
+
+        # players
+        "players": "fas fa-users-cog",
+        "players.Player": "fas fa-user",
+        "players.Immortal": "fas fa-user-shield",
+        "players.RemortUpgrade": "fas fa-arrow-up",
 
         # quests
         "quests.Quest": "fas fa-mountain",
