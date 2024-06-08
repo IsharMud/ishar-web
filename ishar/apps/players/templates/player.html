@@ -209,10 +209,10 @@
                     {{ player.birth | naturaltime }},
                     on {{ player.birth | date }}.
                 </li>
-                <li class="bg-black border-0 list-group-item list-group-item-text text-white" title="Played For: {{ player.online_time }} ({{ player.online }} seconds)">
+                <li class="bg-black border-0 list-group-item list-group-item-text text-white" title="Played For: {{ player.statistics.get_total_play_time }} ({{ player.statistics.total_play_time }} seconds)">
                     <span class="bi bi-dot text-ishar"></span>
                     {{ player.get_player_gender | title }} {{ player.get_player_phrase_owns }}
-                    played for {{ player.online_time }}.
+                    played for {{ player.statistics.get_total_play_time }}.
                 </li>
             </ul>
     </details>

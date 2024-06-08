@@ -1,5 +1,6 @@
-from datetime import timedelta
 from django.db import models
+from django.utils.timesince import timesince
+from django.utils.timezone import localtime, timedelta
 from django.utils.translation import gettext_lazy as _
 
 from .player import PlayerBase
@@ -107,3 +108,11 @@ class PlayerStat(models.Model):
     def get_total_play_timedelta(self) -> timedelta:
         """Timedelta of player total play time."""
         return timedelta(seconds=self.total_play_time or 0)
+
+    def get_remort_play_time(self) -> timedelta:
+        """Time to calculate since, for remort play time."""
+        return timesince(localtime() - self.get_remort_play_timedelta())
+
+    def get_total_play_time(self) -> timedelta:
+        """Time to calculate since, for total play time."""
+        return timesince(localtime() - self.get_total_play_timedelta())
