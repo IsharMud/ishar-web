@@ -3,6 +3,7 @@ from django.db import models
 
 class AccountUpgradeManager(models.Manager):
     def get_by_natural_key(self, name):
+        """Natural key by account upgrade name."""
         return self.get(name=name)
 
 
@@ -69,4 +70,5 @@ class AccountUpgrade(models.Model):
         return self.description or self.name
 
     def natural_key(self) -> str:
+        """Natural key by account upgrade name."""
         return self.name

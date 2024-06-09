@@ -8,7 +8,7 @@ from ishar.apps.skills.models.type.position import PlayerPosition
 
 class MobileManager(models.Manager):
     def get_by_natural_key(self, long_name):
-        # Natural key is mobile's long name.
+        """Natural key is mobile's long name."""
         return self.get(long_name=long_name)
 
 
@@ -316,5 +316,5 @@ class Mobile(models.Model):
         )
 
     def natural_key(self):
-        # Natural key is mobile's long name.
+        """Natural key is mobile's long name."""
         return self.long_name

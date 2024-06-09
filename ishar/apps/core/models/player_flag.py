@@ -3,7 +3,7 @@ from django.db import models
 
 class PlayerFlagManager(models.Manager):
     def get_by_natural_key(self, name):
-        # Natural key of the flag name.
+        """Natural key of the player flag name."""
         return self.get(name=name)
 
 
@@ -44,5 +44,5 @@ class PlayerFlag(models.Model):
         return self.name
 
     def natural_key(self) -> str:
-        # Natural key of the flag name.
+        """Natural key of the player flag name."""
         return self.name

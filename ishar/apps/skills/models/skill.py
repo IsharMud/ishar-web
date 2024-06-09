@@ -6,6 +6,7 @@ from .type.type import SkillType
 
 class SkillManager(models.Manager):
     def get_by_natural_key(self, skill_name):
+        """Natural key by skill name."""
         return self.get(skill_name=skill_name)
 
 
@@ -174,4 +175,5 @@ class Skill(models.Model):
         return self.skill_name or self.enum_symbol
 
     def natural_key(self) -> str:
+        """Natural key by skill name or ENUM symbol."""
         return self.skill_name

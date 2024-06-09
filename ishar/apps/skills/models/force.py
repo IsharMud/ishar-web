@@ -3,6 +3,7 @@ from django.db import models
 
 class ForceManager(models.Manager):
     def get_by_natural_key(self, force_name):
+        """Natural key by force name."""
         return self.get(force_name=force_name)
 
 
@@ -36,4 +37,5 @@ class Force(models.Model):
         return self.force_name
 
     def natural_key(self) -> str:
+        """Natural key by force name."""
         return self.force_name

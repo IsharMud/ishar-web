@@ -6,7 +6,7 @@ from ishar.apps.accounts.models import Account
 
 class NewsManager(models.Manager):
     def get_by_natural_key(self, subject):
-        # Natural key is news post subject.
+        """Natural key is news post subject."""
         return self.get(patch_name=subject)
 
 
@@ -67,5 +67,5 @@ class News(models.Model):
         return self.subject
 
     def natural_key(self):
-        # Natural key is news post subject.
+        """Natural key is news post subject."""
         return self.subject

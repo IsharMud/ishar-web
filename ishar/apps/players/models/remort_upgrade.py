@@ -4,6 +4,7 @@ from django.utils.translation import gettext_lazy as _
 
 class RemortUpgradeManager(models.Manager):
     def get_by_natural_key(self, name):
+        """Natural key is remort upgrade name."""
         return self.get(name=name)
 
 
@@ -76,4 +77,5 @@ class RemortUpgrade(models.Model):
         return self.display_name
 
     def natural_key(self) -> str:
+        """Natural key is remort upgrade name."""
         return self.name

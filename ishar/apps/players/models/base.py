@@ -19,6 +19,7 @@ from ..utils import get_immortal_level, get_immortal_type
 
 class PlayerBaseManager(models.Manager):
     def get_by_natural_key(self, name):
+        """Natural key is player name."""
         return self.get(name=name)
 
 
@@ -255,6 +256,7 @@ class PlayerBase(models.Model):
         return self.name
 
     def natural_key(self) -> str:
+        """Natural key is player name."""
         return self.name
 
     @property

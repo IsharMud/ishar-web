@@ -3,7 +3,7 @@ from django.db import models
 
 class AffectFlagManager(models.Manager):
     def get_by_natural_key(self, display_name):
-        # Natural key of the affect flag display name.
+        """Natural key of the affect flag display name."""
         return self.get(display_name=display_name)
 
 
@@ -58,5 +58,5 @@ class AffectFlag(models.Model):
         return self.display_name
 
     def natural_key(self) -> str:
-        # Natural key of the affect flag display name.
+        """Natural key of the affect flag display name."""
         return self.display_name

@@ -9,7 +9,7 @@ from .type import ObjectType
 
 class ObjectManager(models.Manager):
     def get_by_natural_key(self, longname):
-        # Natural key is object long name.
+        """Natural key is object long name."""
         return self.get(longname=longname)
 
 
@@ -172,7 +172,7 @@ class Object(models.Model):
         )
 
     def natural_key(self) -> str:
-        # Natural key is object "longname".
+        """Natural key is object long name."""
         return self.longname
 
     def save(

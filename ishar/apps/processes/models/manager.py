@@ -5,7 +5,7 @@ from os import getlogin
 class MUDProcessManager(Manager):
 
     def get_by_natural_key(self, name):
-        # Natural key by process name.
+        """Natural key by process name."""
         return self.get(name=name)
 
     def get_queryset(self):

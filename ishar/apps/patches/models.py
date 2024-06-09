@@ -11,7 +11,7 @@ from ishar.apps.accounts.models import Account
 
 class PatchManager(models.Manager):
     def get_by_natural_key(self, patch_name):
-        # Natural key is patch name.
+        """Natural key is patch name."""
         return self.get(patch_name=patch_name)
 
 
@@ -71,7 +71,7 @@ class Patch(models.Model):
         return self.patch_name
 
     def natural_key(self):
-        # Natural key is patch name.
+        """Natural key is patch name."""
         return self.patch_name
 
 

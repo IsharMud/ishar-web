@@ -6,7 +6,7 @@ from ishar.apps.accounts.models import Account
 
 class FAQManager(models.Manager):
     def get_by_natural_key(self, slug):
-        # Natural key of the FAQ slug.
+        """Natural key of the FAQ slug."""
         return self.get(slug=slug)
 
 
@@ -99,5 +99,5 @@ class FAQ(models.Model):
         return self.slug
 
     def natural_key(self) -> str:
-        # Natural key of the FAQ slug.
+        """Natural key of the FAQ slug."""
         return self.slug

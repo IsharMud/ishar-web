@@ -3,7 +3,7 @@ from django.db import models
 
 class RaceManager(models.Manager):
     def get_by_natural_key(self, display_name):
-        # Natural key by race display name.
+        """Natural key by race display name."""
         return self.get(display_name=display_name)
 
 
@@ -251,5 +251,5 @@ class Race(models.Model):
         return self.display_name
 
     def natural_key(self) -> str:
-        # Natural key by display name.
+        """Natural key by display name."""
         return self.display_name

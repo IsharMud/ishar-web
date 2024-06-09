@@ -6,6 +6,7 @@ from ishar.apps.mobiles.models.mobile import Mobile
 
 class ChallengeManager(models.Manager):
     def get_by_natural_key(self, challenge_desc):
+        """Natural key by challenge description."""
         return self.get(challenge_desc=challenge_desc)
 
 
@@ -89,6 +90,7 @@ class Challenge(models.Model):
         return self.challenge_desc or self.mobile.long_name
 
     def natural_key(self) -> str:
+        """Natural key by challenge description."""
         return self.challenge_desc
 
     @display(boolean=True, description="Complete?", ordering="winner_desc")
@@ -99,7 +101,7 @@ class Challenge(models.Model):
         return False
 
     def winners(self) -> list:
-        """List of players that have won a challenge."""
+        """List of players that have won the challenge."""
         out = []
         winners = self.winner_desc
         if winners:
