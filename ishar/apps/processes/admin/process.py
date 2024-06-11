@@ -20,16 +20,16 @@ class MUDProcessAdmin(ModelAdmin):
     verbose_name = "MUD Process"
     verbose_name_plural = "MUD Processes"
 
-    def get_changelist(self, request):
+    def get_changelist(self, request, **kwargs):
+        get_process()
         if self.model.objects.count() == 0:
             messages.warning(
                 request=request,
                 message=_("No MUD process found!")
             )
-        return super().get_changelist(request)
+        return super().get_changelist(request, **kwargs)
 
     def get_urls(self):
-        get_process()
         urls = super().get_urls()
         custom_urls = [path("restart/", self.restart, name="restart"),]
         return custom_urls + urls

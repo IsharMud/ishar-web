@@ -15,11 +15,15 @@ class HelpView(TemplateView):
     Help view.
     """
     template_name = "help_page.html"
-    help_topics = get_help_topics()
     help_topic = None
+    help_topics = None
     http_method_names = ("get", "post")
     search_form = HelpSearchForm()
     status = 200
+
+    def setup(self, request, *args, **kwargs):
+        self.help_topics = get_help_topics()
+        super().setup(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
