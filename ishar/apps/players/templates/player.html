@@ -169,10 +169,7 @@
                 {% for stat_name, stat_value in player.player_stats.items %}
                 <li class="border border-secondary bg-black list-group-item list-group-item-dark" title="{{ stat_name }}: {{ stat_value }}">
                     <span class="list-group-item-text text-white{% if forloop.first %} fw-bold{% endif %}">
-                        <span class="text-ishar">
-                            {{ stat_name }}
-                        </span>:
-                        {{ stat_value }}
+                        <span class="text-ishar">{{ stat_name }}</span>: {{ stat_value }}
                     </span>
                 </li>
                 {% endfor %}
