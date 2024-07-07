@@ -159,8 +159,13 @@
             {% if player.player_stats %}
     <hr>
         <details class="m-2"{% if not player.account.is_private %} open{% endif %}>
-            <summary id="stats" class="h4 text-ishar" title="Statistics">
+            <summary id="stats" class="h4 text-ishar" title="Statistics{% if player.get_total_statistics_count %} ({{ player.get_total_statistics_count }}){% endif %}">
                 Statistics
+                {% if player.get_total_statistics_count %}
+                <span class="badge bg-dark text-white rounded-pill">
+                    {{ player.get_total_statistics_count }}
+                </span>
+                {% endif %}
                 <a class="anchor-link" href="#stats" aria-label="Link to this section: Statistics">
                     &#x23;
                 </a>

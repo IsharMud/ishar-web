@@ -528,6 +528,12 @@ class PlayerBase(models.Model):
         return stats
 
     @property
+    @display(boolean=False, description="Total Statistics")
+    def get_total_statistics_count(self) -> int:
+        """Total number of player statistics."""
+        return sum(self.player_stats.values())
+
+    @property
     @display(boolean=False, description="Title", ordering="title")
     def player_title(self):
         """Player title."""
