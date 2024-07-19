@@ -1,5 +1,6 @@
 from django.db import models
 
+from .type.cooldown import SkillCooldownType
 from .type.position import PlayerPosition
 from .type.type import SkillType
 
@@ -152,8 +153,40 @@ class Skill(models.Model):
         max_length=80,
         blank=True,
         null=True,
-        help_text="Display text for object.",
+        help_text="Display text of object related to the skill.",
         verbose_name="Object Display"
+    )
+    req_save = models.IntegerField(
+        blank=True,
+        null=True,
+        help_text="Number of req. save for the skill.",
+        verbose_name="Req. Save"
+    )
+    cooldown_num = models.PositiveSmallIntegerField(
+        blank=True,
+        choices=SkillCooldownType,
+        null=True,
+        help_text="Cool down number type of the skill.",
+        verbose_name="Cool Down Num."
+    )
+    cooldown_size = models.PositiveSmallIntegerField(
+        blank=True,
+        null=True,
+        help_text="Numerical size of the cool down for the skill.",
+        verbose_name="Cool Down Size"
+    )
+    ability_calc_func = models.TextField(
+        blank=True,
+        null=True,
+        help_text="Ability calculation function for the skill.",
+        verbose_name="Ability Calc. Func."
+    )
+    description = models.CharField(
+        max_length=1080,
+        blank=True,
+        null=True,
+        help_text="Textual description of the skill.",
+        verbose_name="Description"
     )
 
     class Meta:

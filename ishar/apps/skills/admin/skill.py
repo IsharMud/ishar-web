@@ -15,13 +15,16 @@ class SkillAdmin(admin.ModelAdmin):
     """
     fieldsets = (
         (None, {"fields": (
-            "id", "enum_symbol", "func_name", "skill_name", "skill_type"
+            "id", "enum_symbol", "skill_name", "skill_type", "description"
         )}),
-        ("Minimums", {"fields": ("min_posn", "min_use")}),
+        ("Minimums", {"fields": ("min_posn", "min_use", "req_save")}),
+        ("Cooldown", {"fields": ("cooldown_num", "cooldown_size")}),
         ("Cost", {"fields": ("spell_breakpoint", "held_cost")}),
+        ("Functions", {"fields": (
+            "func_name", "decide_func", "ability_calc_func"
+        )}),
         ("Text", {"fields": (
-                "wearoff_msg", "chant_text", "appearance", "decide_func",
-                "obj_display"
+            "wearoff_msg", "chant_text", "appearance", "obj_display",
         )}),
         ("Values", {"fields": ("difficulty", "rate", "notice_chance")}),
         ("Scale/Mod", {"fields": (
