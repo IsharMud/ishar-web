@@ -1,11 +1,12 @@
 from django.db.models import IntegerChoices
 
 
-class SkillCooldownType(IntegerChoices):
-    """Skill cooldown type choices."""
-    ZERO = 0
+class SkillSaveType(IntegerChoices):
+    """Skill "req_save" type choices."""
     NEGATIVE_ONE = -1
-    SOMETHING = 1
+    FORTITUDE = 0
+    REFLEX = 1
+    RESILIENCE = 2
 
     def __repr__(self) -> str:
         return "%s: %s (%s)" % (
