@@ -3,6 +3,7 @@ from django.db import models
 from .type.position import PlayerPosition
 from .type.save import SkillSaveType
 from .type.type import SkillType
+from .fields import TextareaField
 
 
 class SkillManager(models.Manager):
@@ -65,7 +66,7 @@ class Skill(models.Model):
         help_text="Held cost of the skill.",
         verbose_name="Held Cost"
     )
-    wearoff_msg = models.TextField(
+    wearoff_msg = TextareaField(
         blank=True,
         null=True,
         help_text="Message shown to the user when the skill wears off.",
