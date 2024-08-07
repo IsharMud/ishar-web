@@ -31,12 +31,12 @@ class PatchAdmin(admin.ModelAdmin):
 
     def has_add_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
-            return request.user.is_god()
+            return request.user.is_forger()
         return False
 
     def has_change_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
-            if request.user.is_god():
+            if request.user.is_forger():
                 return True
             if obj and obj.account and request.user == obj.account:
                 return True
@@ -44,7 +44,7 @@ class PatchAdmin(admin.ModelAdmin):
 
     def has_delete_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
-            if request.user.is_god():
+            if request.user.is_forger():
                 return True
             if obj and obj.account and request.user == obj.account:
                 return True
