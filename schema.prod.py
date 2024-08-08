@@ -807,6 +807,7 @@ class ObjectFlags(models.Model):
     not_shaman = models.IntegerField(db_column='NOT_SHAMAN')  # Field name made lowercase.
     relic = models.IntegerField(db_column='RELIC', blank=True, null=True)  # Field name made lowercase.
     memory = models.IntegerField(db_column='MEMORY', blank=True, null=True)  # Field name made lowercase.
+    notnecromancer = models.IntegerField(db_column='NOTNECROMANCER', blank=True, null=True)  # Field name made lowercase.
     created_at = models.DateTimeField()
     updated_at = models.DateTimeField()
 
@@ -1114,6 +1115,28 @@ class PlayerFlags(models.Model):
         db_table = 'player_flags'
 
 
+class PlayerObjects(models.Model):
+    player_objects_id = models.AutoField(primary_key=True)
+    player = models.ForeignKey('Players', models.DO_NOTHING, blank=True, null=True)
+    object = models.ForeignKey(Objects, models.DO_NOTHING, blank=True, null=True)
+    enchant = models.PositiveIntegerField(blank=True, null=True)
+    timer = models.IntegerField(blank=True, null=True)
+    bound = models.PositiveIntegerField(blank=True, null=True)
+    state = models.PositiveIntegerField(blank=True, null=True)
+    min_level = models.PositiveIntegerField(blank=True, null=True)
+    val0 = models.IntegerField(blank=True, null=True)
+    val1 = models.IntegerField(blank=True, null=True)
+    val2 = models.IntegerField(blank=True, null=True)
+    val3 = models.IntegerField(blank=True, null=True)
+    position_type = models.PositiveIntegerField(blank=True, null=True)
+    position_val = models.IntegerField(blank=True, null=True)
+    parent_player_object = models.PositiveIntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'player_objects'
+
+
 class PlayerPlayerFlags(models.Model):
     flag = models.OneToOneField(PlayerFlags, models.DO_NOTHING, primary_key=True)  # The composite primary key (flag_id, player_id) found, that is not supported. The first column is selected.
     player = models.ForeignKey('Players', models.DO_NOTHING)
@@ -1156,7 +1179,6 @@ class PlayerRelics(models.Model):
     class Meta:
         managed = False
         db_table = 'player_relics'
-        unique_together = (('player', 'obj_vnum'),)
 
 
 class PlayerRemortUpgrades(models.Model):
@@ -1199,6 +1221,25 @@ class PlayerStats(models.Model):
     class Meta:
         managed = False
         db_table = 'player_stats'
+
+
+class PlayerStatsBackup(models.Model):
+    player_stats_id = models.PositiveIntegerField()
+    player_id = models.PositiveIntegerField(blank=True, null=True)
+    total_play_time = models.PositiveIntegerField(blank=True, null=True)
+    remort_play_time = models.PositiveIntegerField(blank=True, null=True)
+    total_deaths = models.PositiveIntegerField(blank=True, null=True)
+    remort_deaths = models.PositiveIntegerField(blank=True, null=True)
+    total_renown = models.PositiveIntegerField(blank=True, null=True)
+    remort_renown = models.PositiveIntegerField(blank=True, null=True)
+    total_challenges = models.PositiveIntegerField(blank=True, null=True)
+    remort_challenges = models.PositiveIntegerField(blank=True, null=True)
+    total_quests = models.PositiveIntegerField(blank=True, null=True)
+    remort_quests = models.PositiveIntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'player_stats_backup'
 
 
 class Players(models.Model):
@@ -1245,6 +1286,53 @@ class Players(models.Model):
     class Meta:
         managed = False
         db_table = 'players'
+
+
+class PlayersBackup2(models.Model):
+    id = models.PositiveIntegerField()
+    account_id = models.PositiveIntegerField()
+    name = models.CharField(max_length=15)
+    create_ident = models.CharField(max_length=10)
+    last_isp = models.CharField(max_length=30)
+    description = models.CharField(max_length=240, blank=True, null=True)
+    title = models.CharField(max_length=45)
+    poofin = models.CharField(max_length=80)
+    poofout = models.CharField(max_length=80)
+    bankacc = models.PositiveIntegerField()
+    logon_delay = models.PositiveSmallIntegerField()
+    true_level = models.PositiveIntegerField()
+    renown = models.PositiveSmallIntegerField()
+    remorts = models.PositiveIntegerField()
+    favors = models.PositiveIntegerField()
+    online = models.IntegerField(blank=True, null=True)
+    bound_room = models.PositiveIntegerField()
+    load_room = models.PositiveIntegerField()
+    invstart_level = models.IntegerField(blank=True, null=True)
+    login_failures = models.PositiveSmallIntegerField()
+    create_haddr = models.IntegerField()
+    login_fail_haddr = models.IntegerField(blank=True, null=True)
+    last_haddr = models.IntegerField(blank=True, null=True)
+    last_ident = models.CharField(max_length=10, blank=True, null=True)
+    load_room_next = models.PositiveIntegerField(blank=True, null=True)
+    load_room_next_expires = models.PositiveIntegerField(blank=True, null=True)
+    aggro_until = models.PositiveIntegerField(blank=True, null=True)
+    inn_limit = models.PositiveSmallIntegerField()
+    held_xp = models.IntegerField(blank=True, null=True)
+    last_isp_change = models.PositiveIntegerField(blank=True, null=True)
+    is_deleted = models.PositiveIntegerField()
+    deaths = models.PositiveSmallIntegerField()
+    total_renown = models.PositiveSmallIntegerField()
+    quests_completed = models.PositiveSmallIntegerField()
+    challenges_completed = models.PositiveSmallIntegerField()
+    game_type = models.IntegerField()
+    birth = models.DateTimeField()
+    logon = models.DateTimeField()
+    logout = models.DateTimeField()
+    title_id = models.PositiveIntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'players_backup_2'
 
 
 class QuestPrereqs(models.Model):
@@ -1297,7 +1385,7 @@ class Quests(models.Model):
     description = models.CharField(max_length=512)
     prerequisite = models.IntegerField()
     class_restrict = models.IntegerField()
-    quest_intro = models.CharField(max_length=2000)
+    quest_intro = models.CharField(max_length=2000, blank=True, null=True)
     quest_source = models.PositiveIntegerField(blank=True, null=True)
     quest_return = models.PositiveIntegerField(blank=True, null=True)
     start_item = models.PositiveIntegerField(blank=True, null=True)
