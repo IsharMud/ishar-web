@@ -1,5 +1,7 @@
 from django.db import models
 
+from .fields.textarea import NoStripTextareaField
+
 from .type.position import PlayerPosition
 from .type.type import SkillType
 
@@ -64,7 +66,7 @@ class Skill(models.Model):
         help_text="Held cost of the skill/spell.",
         verbose_name="Held Cost"
     )
-    wearoff_msg = models.TextField(
+    wearoff_msg = NoStripTextareaField(
         blank=True,
         null=True,
         help_text="Message shown to the user when skill/spell wears off.",
