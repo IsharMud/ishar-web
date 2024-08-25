@@ -244,7 +244,7 @@ class HelpTab:
                 first_line = header_lines[1].strip()
                 if first_line.startswith("32 "):
 
-                    # Use first "32 <Name>" as the name of the help topic.
+                    # Use anything after first space (after "32 ") as name.
                     name = " ".join(first_line.split(" ")[1:]).strip()
 
                     # Create a help topic object using the level and name.
