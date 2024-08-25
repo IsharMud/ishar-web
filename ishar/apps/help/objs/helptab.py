@@ -34,7 +34,7 @@ class HelpTab:
     Interact with the "helptab" file to find sections representing help topics.
     """
     file: Path = HELPTAB_FILE
-    help_topics: list = []
+    help_topics: dict = {}
 
     def __init__(self):
         """Discover, and parse, help topics from "helptab" file sections."""
@@ -112,9 +112,9 @@ class HelpTab:
         # Sections in "helptab" file are separated by "#" on a line alone.
         return contents.split(START_STRING)[1].split("\n#\n")
 
-    def parse(self, sections: list) -> list:
-        """Parse list of "helptab" sections into list of help topic objects."""
-        help_topics = []
+    def parse(self, sections: list) -> dict:
+        """Parse "helptab" sections into dictionary of help topic objects."""
+        help_topics = {}
 
         # Iterate each "helptab" section in the list provided.
         for section in sections:
@@ -159,8 +159,8 @@ class HelpTab:
                     help_topic.parse_body(body=body)
 
             # Append newly created help topic object to list of help topics.
-            if help_topic is not None:
-                help_topics.append(help_topic)
+            if help_topic is not None and help_topic.name:
+                help_topics[help_topic.name] = help_topic
 
         # Return complete list of help topics parsed from "helptab" sections.
         return help_topics
