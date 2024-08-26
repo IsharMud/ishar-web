@@ -66,20 +66,16 @@ class HelpTab:
     Interact with the "helptab" file to find sections representing help topics.
     """
     file: Path = HELPTAB_FILE
-    topics: dict = {}
+    help_topics: dict = {}
 
     def __init__(self):
         """Discover, and parse, help topics from "helptab" file sections."""
-        self.topics = self.parse(self.discover())
+        self.help_topics = self.parse(self.discover())
 
     @property
-    def help_topics(self) -> dict:
-        """Set "help_topics" property to help "topics" dictionary."""
+    def topics(self) -> dict:
+        """Set "topics" property to "help_topics" dictionary."""
         return self.topics
-
-    def topic_count(self) -> int:
-        """Number of help topics found in the "helptab" file."""
-        return len(self.topics)
 
     def __repr__(self) -> str:
         """Show the object type with absolute path and topic count string."""
@@ -87,7 +83,7 @@ class HelpTab:
 
     def __str__(self) -> str:
         """Show absolute path of "helptab" file with number of help topics."""
-        return f"{self.file.absolute()} ({self.topic_count()} topics)"
+        return f"{self.file.absolute()} ({len(self.help_topics)} topics)"
 
 
     class HelpTopic:
