@@ -3,6 +3,7 @@ from logging import getLogger
 from pathlib import Path
 import re
 
+
 # Example from MUD "helptab" file:
 """
 <level>
@@ -31,20 +32,27 @@ START_STRING = ("###########################"
                 "---BEGIN HELP FILE---###########################\n")
 
 # Compile regular expression to parse "see also" items from a help topic.
-SEE_ALSO = r'^ *(see also|also see|also see help on|see help on|related) *\: *'
-SEE_ALSO_REGEX = re.compile(pattern=SEE_ALSO, flags=re.IGNORECASE)
+SEE_ALSO_REGEX = re.compile(
+    pattern=r"^ *(see also|also see|also see help on|see help on|related) *\: "
+            r"* (.+)$",
+    flags=re.IGNORECASE
+)
 
 # Compile regular expressions for items in help topic contents (below "*").
 BODY_REGEXES = {
-    "syntax": re.compile(r'^ *(Syntax|syntax) *\: *(.+)$'),
-    "minimum": re.compile(r'^ *(Minimum|minimum|Min|min) *\: *(.+)$'),
-    "player_level": re.compile(r'^ *(Level|level) *\: *(.+)$'),
-    "player_class": re.compile(r'^ *(Class|Classes) *\: *(.+)$'),
-    "components": re.compile(r'^ *(Components?) *\: *(.+)$'),
-    "saves": re.compile(r'^ *(Saves?) *\: *(.+)$'),
-    "stats": re.compile(r'^ *(Stats?) *\: *(.+)$'),
-    "topic": re.compile(r'^ *(Topic) *\: *(.+)$')
+    "syntax": re.compile(pattern=r"^ *(Syntax|syntax) *\: *(.+)$"),
+    "minimum": re.compile(pattern=r"^ *(Minimum|minimum|Min|min) *\: *(.+)$"),
+    "components": re.compile(pattern=r"^ *(Components?) *\: *(.+)$"),
+    "saves": re.compile(pattern=r"^ *(Saves?) *\: *(.+)$"),
+    "topic": re.compile(pattern=r"^ *(Topic) *\: *(.+)$")
 }
+
+# Compile regular expression for stat in help topic body.
+PLAYER_STATS_REGEX = re.compile(pattern=r"^ *(Stats?) *\: *(.+)$")
+
+# Compile regular expressions for player level and class in help topic body.
+PLAYER_LEVEL_REGEX = re.compile(pattern=r"^ *(Level|level) *\: *(.+)$")
+PLAYER_CLASS_REGEX = re.compile(pattern=r"^ *(Class|Classes) *\: *(.+)$")
 
 # Compile regular expressions to hyperlink inline body text "`help " references.
 HELP_CMD_REGEX = {
@@ -58,24 +66,28 @@ class HelpTab:
     Interact with the "helptab" file to find sections representing help topics.
     """
     file: Path = HELPTAB_FILE
-    help_topics: dict = {}
+    topics: dict = {}
 
     def __init__(self):
         """Discover, and parse, help topics from "helptab" file sections."""
-        self.help_topics = self.parse(self.discover())
+        self.topics = self.parse(self.discover())
+
+    @property
+    def help_topics(self) -> dict:
+        """Set "help_topics" property to help "topics" dictionary."""
+        return self.topics
 
     def topic_count(self) -> int:
         """Number of help topics found in the "helptab" file."""
-        return len(self.help_topics)
+        return len(self.topics)
 
     def __repr__(self) -> str:
-        """Number of help topics and "helptab" file path."""
-        return self.__str__()
+        """Show the object type with absolute path and topic count string."""
+        return f"<{self.__class__.__name__}> {self.__str__()}"
 
     def __str__(self) -> str:
-        """Number of help topics and "helptab" file path."""
-        return (f"{self.__class__.__name__}: {self.topic_count()} topics"
-                f" ({self.file.absolute()})")
+        """Show absolute path of "helptab" file with number of help topics."""
+        return f"{self.file.absolute()} ({self.topic_count()} topics)"
 
 
     class HelpTopic:
@@ -89,15 +101,21 @@ class HelpTab:
         body_html: str = ""
         body_text: str = ""
         see_also: list = []
+        player_level: (int, str, None) = None
+        player_class: (list, str) = []
+        stats: list = []
 
         def __init__(self):
             """Initialization of a "help topic" object."""
-            self.name: str = ""
-            self.level: int = 0
-            self.aliases: list = []
-            self.body_html: str = ""
-            self.body_text: str = ""
-            self.see_also: list = []
+            self.name = ""
+            self.level = 0
+            self.aliases = []
+            self.body_html = ""
+            self.body_text = ""
+            self.see_also = []
+            self.player_level = None
+            self.player_class = []
+            self.stats = []
 
             # Default empty strings for potential body attributes.
             for body_item, body_regex in BODY_REGEXES.items():
@@ -111,70 +129,94 @@ class HelpTab:
                         " ".join(header_line.split(" ")[1:]).strip()
                     )
 
+        def parse_content_line(self, content_line: str):
+            """Parse single line from the content of a help section."""
+
+            # Check whether the line is for a player level.
+            if self.player_level is None:
+                lvl_match = PLAYER_LEVEL_REGEX.findall(string=content_line)
+                if lvl_match and lvl_match[0] and lvl_match[0][1]:
+                    player_level = lvl_match[0][1].strip()
+
+                    # If player level is numeric, set integer, otherwise string.
+                    if player_level.isnumeric():
+                        self.player_level = int(player_level)
+                    else:
+                        self.player_level = player_level
+                    return
+
+            # Check whether the line is for a player class.
+            if not self.player_class:
+                cls_match = PLAYER_CLASS_REGEX.findall(string=content_line)
+                if cls_match and cls_match[0] and cls_match[0][1]:
+                    pclass = cls_match[0][1].strip()
+                    for splitter in (",", "|", "/"):
+                        if splitter in pclass:
+                            psplit = pclass.split(splitter)
+                            for pcls in psplit:
+                                pcls = pcls.strip()
+                                if pcls and pcls not in ("", splitter):
+                                    if pclass in PLAYER_CLASS_NAMES:
+                                        self.player_class.append(pcls)
+                            return
+
+                    if not self.player_class:
+                        if pclass in PLAYER_CLASS_NAMES:
+                            self.player_class.append(pclass)
+                    return
+
+            # Check whether the line is for stats.
+            if not self.stats:
+                stats_match = PLAYER_STATS_REGEX.findall(string=content_line)
+                if stats_match and stats_match[0] and stats_match[0][1]:
+                    stat_line = stats_match[0][1].strip()
+                    for splitter in (",", "|", "/"):
+                        if splitter in stat_line:
+                            stat_split = stat_line.split(splitter)
+                            for stat_item in stat_split:
+                                stat_item = stat_item.strip()
+                                if stat_item and stat_item != splitter:
+                                    logger.debug(f"stats: {self.stats}")
+                                    logger.debug(f"type(stats): {type(self.stats)}")
+                                    self.stats.append(stat_item)
+                            return
+
+                    if not self.stats:
+                        self.stats.append(stat_line)
+                    return
+
+            # Check if the line is "see also" (related topic) text.
+            if not self.see_also:
+                see_also_match = SEE_ALSO_REGEX.match(string=content_line)
+                if see_also_match:
+                    see_also_topics = see_also_match[2].split(",")
+                    for see_also_topic in see_also_match[2].split(","):
+                        see_also_topic = see_also_topic.strip()
+                        if see_also_topic and see_also_topic != "":
+                            self.see_also.append(see_also_topic)
+                    return
+
+            # Replace HTML tags in body text.
+            body_line = content_line
+            for (old, new) in ((">", "g"), ("<", "l")):
+                body_line = body_line.replace(old, f"&{new}t;")
+
+            for body_item, body_regex in BODY_REGEXES.items():
+                body_find = body_regex.findall(string=body_line)
+                if body_find and body_find[0]:
+                    body_match = body_find[0]
+                    self.__setattr__(body_item, body_match[1])
+                    return
+
+            self.body_html += f"{body_line}<br>\n"
+            self.body_text += f"{body_line}\n"
+
         def parse_content(self, content: str):
             """Parse the content (below "*") of a "helptab" section."""
 
-            # Initialize default "see also" (related topic) variables.
-            comma_space = ", "
-            see_also_text = "See Also: "
-            _is_see_also = False
-
             # Iterate each line of the help topic content.
             for content_line in content.split('\n'):
-
-                # Check if the line is "see also" (related topic) text.
-                if SEE_ALSO_REGEX.match(content_line):
-                    self.body_html += see_also_text
-                    self.body_text += see_also_text
-                    _is_see_also = True
-
-                    # Split, format, and count related topics to hyperlink.
-                    i = 0
-                    rm_begin = content_line.split(':')
-                    related_topics = rm_begin[-1].strip().split(',')
-                    num_related = len(related_topics)
-
-                    # Iterate any related topics to hyperlink them.
-                    for related_topic in related_topics:
-                        i += 1
-                        if related_topic and related_topic.strip() != '':
-                            self.body_html += (
-                                f'<a href="/help/{related_topic.strip()}"'
-                                f' title="Help: {related_topic.strip()}">'
-                                f'{related_topic.strip()}</a>'
-                            )
-                            self.body_text += related_topic.strip()
-                            self.see_also.append(related_topic.strip())
-
-                            # Comma-separate related help topics, except last.
-                            if i != num_related:
-                                self.body_html += comma_space
-                                self.body_text += comma_space
-                            else:
-                                _is_see_also = False
-
-                # Parse anything else as if it is the body.
-                else:
-
-                    # Remove HTML tags from the body line.
-                    body_line = content_line
-                    for (old, new) in ((">", "g"), ("<", "l")):
-                        body_line = body_line.replace(old, f"&{new}t;")
-
-                    # Iterate "body" regular expressions for useful attributes.
-                    body_match = None
-                    for body_item, body_regex in BODY_REGEXES.items():
-                        body_find = body_regex.findall(string=body_line)
-
-                        # Set attributes for any matching items from the body.
-                        if body_find and body_find[0]:
-                            body_match = body_find[0]
-                            self.__setattr__(body_item, body_match[1])
-
-                    # Set formatted text for each body, if no match.
-                    if body_match is None:
-                        self.body_text += f"{content_line}\n"
-                        self.body_html += f"{body_line}<br>\n"
+                self.parse_content_line(content_line=content_line)
 
             # Hyperlink "`help command'" inline text within body HTML.
             self.body_html = re.sub(
@@ -193,15 +235,12 @@ class HelpTab:
             return f"{item}es"
 
         def __repr__(self) -> str:
-            """Show the object type with name string, level, and alias count."""
-            return f"{self.__class__.__name__}: {self.__str__()}"
+            """Show the object type with name string."""
+            return f"<{self.__class__.__name__}> {self.__str__()}"
 
         def __str__(self) -> str:
-            """Show the name string, level, and alias count."""
-            return (
-                f"{self.name.__repr__()} (Level {self.level}) "
-                f"[{self.alias_count()} {self.pluralize()}]"
-            )
+            """Show the name of the help topic."""
+            return self.name
 
     def discover(self) -> list:
         """Discover sections within "helptab" file."""
@@ -214,7 +253,7 @@ class HelpTab:
 
     def parse(self, sections: list) -> dict:
         """Parse "helptab" sections into dictionary of help topic objects."""
-        help_topics = {}
+        topics = {}
 
         # Iterate each "helptab" section in the list provided.
         for section in sections:
@@ -260,7 +299,7 @@ class HelpTab:
 
             # Append newly created help topic object to list of help topics.
             if help_topic is not None and help_topic.name:
-                help_topics[help_topic.name] = help_topic
+                topics[help_topic.name] = help_topic
 
         # Return complete list of help topics parsed from "helptab" sections.
-        return help_topics
+        return topics
