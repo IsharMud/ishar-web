@@ -3,6 +3,8 @@ from logging import getLogger
 from pathlib import Path
 import re
 
+from parse import parse_stats
+
 
 # Example from MUD "helptab" file:
 """
@@ -38,23 +40,19 @@ SEE_ALSO_REGEX = re.compile(
     flags=re.IGNORECASE
 )
 
-# Compile regular expressions for items in help topic contents (below "*").
-BODY_REGEXES = {
-    "syntax": re.compile(pattern=r"^ *(Syntax|syntax) *\: *(.+)$"),
-    "minimum": re.compile(pattern=r"^ *(Minimum|minimum|Min|min) *\: *(.+)$"),
-    "components": re.compile(pattern=r"^ *(Components?) *\: *(.+)$"),
-    "saves": re.compile(pattern=r"^ *(Saves?) *\: *(.+)$"),
-    "topic": re.compile(pattern=r"^ *(Topic) *\: *(.+)$")
-}
+# Compile regular expressions for help command minimum and syntax.
+MINIMUM_REGEX = re.compile(pattern=r"^ *(Minimum|minimum|Min|min) *\: *(.+)$")
+SYNTAX_REGEX = re.compile(pattern=r"^ *(Syntax|syntax) *\: *(.+)$")
 
-# Compile regular expression for stat in help topic body.
-PLAYER_STATS_REGEX = re.compile(pattern=r"^ *(Stats?) *\: *(.+)$")
+# Compile regular expression for saves, player classes, and components.
+SAVES_REGEX = re.compile(pattern=r"^ *(Saves?) *\: *(.+)$"),
+PLAYER_CLASSES_REGEX = re.compile(pattern=r"^ *(Class|Classes) *\: *(.+)$")
+COMPONENTS_REGEX = re.compile(pattern=r"^(Components?)\s*\:\s*(?P<items>.+)$")
 
-# Compile regular expressions for player level and class in help topic body.
+# Compile regular expression for player level in help topic body.
 PLAYER_LEVEL_REGEX = re.compile(pattern=r"^ *(Level|level) *\: *(.+)$")
-PLAYER_CLASS_REGEX = re.compile(pattern=r"^ *(Class|Classes) *\: *(.+)$")
 
-# Compile regular expressions to hyperlink inline body text "`help " references.
+# Compile regular expressions to hyperlink body text "`help " references.
 HELP_CMD_REGEX = {
     "PATTERN": r"`help ([\w| ]+)'",
     "SUB": r'`<a href="/help/\1" title="Help: \1">help \1</a>`'
@@ -97,9 +95,13 @@ class HelpTab:
         body_html: str = ""
         body_text: str = ""
         see_also: list = []
+        syntax: str = ""
+        minimum: str = ""
         player_level: (int, str, None) = None
         player_class: (list, str) = []
+        saves: list = []
         stats: list = []
+        components: list = []
 
         def __init__(self):
             """Initialization of a "help topic" object."""
@@ -109,13 +111,13 @@ class HelpTab:
             self.body_html = ""
             self.body_text = ""
             self.see_also = []
+            self.syntax = ""
+            self.minimum = ""
             self.player_level = None
             self.player_class = []
+            self.saves = []
             self.stats = []
-
-            # Default empty strings for potential body attributes.
-            for body_item, body_regex in BODY_REGEXES.items():
-                self.__setattr__(body_item, "")
+            self.components = []
 
         def parse_header(self, header_lines: list):
             """Parse header of a "helptab" section, to gather aliases."""
@@ -134,16 +136,15 @@ class HelpTab:
                 if lvl_match and lvl_match[0] and lvl_match[0][1]:
                     player_level = lvl_match[0][1].strip()
 
-                    # If player level is numeric, set integer, otherwise string.
-                    if player_level.isnumeric():
-                        self.player_level = int(player_level)
-                    else:
-                        self.player_level = player_level
+                    # If player level is numeric, set as integer.
+                    self.player_level = player_level
+                    if self.player_level.isnumeric():
+                        self.player_level = int(self.player_level)
                     return
 
             # Check whether the line is for a player class.
             if not self.player_class:
-                cls_match = PLAYER_CLASS_REGEX.findall(string=content_line)
+                cls_match = PLAYER_CLASSES_REGEX.findall(string=content_line)
                 if cls_match and cls_match[0] and cls_match[0][1]:
                     pclass = cls_match[0][1].strip()
                     for splitter in (",", "|", "/"):
@@ -161,32 +162,23 @@ class HelpTab:
                             self.player_class.append(pclass)
                     return
 
-            # Check whether the line is for stats.
-            if not self.stats:
-                stats_match = PLAYER_STATS_REGEX.findall(string=content_line)
-                if stats_match and stats_match[0] and stats_match[0][1]:
-                    stat_line = stats_match[0][1].strip()
-                    for splitter in (",", "|", "/"):
-                        if splitter in stat_line:
-                            stat_split = stat_line.split(splitter)
-                            for stat_item in stat_split:
-                                stat_item = stat_item.strip()
-                                if stat_item and stat_item != splitter:
-                                    logger.debug(f"stats: {self.stats}")
-                                    logger.debug(f"type(stats): {type(self.stats)}")
-                                    self.stats.append(stat_item)
-                            return
+            # Check whether the line is for stats, and parse if so.
+            if not self.stats and content_line.startswith("Stats  : "):
+                self.stats = parse_stats(line=content_line)
 
-                    if not self.stats:
-                        self.stats.append(stat_line)
-                    return
+            # Check whether the line is for components, and parse if so.
+            if not self.components and content_line.startswith("Component"):
+                components_match = COMPONENTS_REGEX.fullmatch(
+                    string=content_line
+                )
+                self.components = components_match.group("items").split(", ")
 
             # Check if the line is "see also" (related topic) text.
             if not self.see_also:
                 see_also_match = SEE_ALSO_REGEX.match(string=content_line)
                 if see_also_match:
                     see_also_topics = see_also_match[2].split(",")
-                    for see_also_topic in see_also_match[2].split(","):
+                    for see_also_topic in see_also_topics:
                         see_also_topic = see_also_topic.strip()
                         if see_also_topic and see_also_topic != "":
                             self.see_also.append(see_also_topic)
@@ -196,13 +188,6 @@ class HelpTab:
             body_line = content_line
             for (old, new) in ((">", "g"), ("<", "l")):
                 body_line = body_line.replace(old, f"&{new}t;")
-
-            for body_item, body_regex in BODY_REGEXES.items():
-                body_find = body_regex.findall(string=body_line)
-                if body_find and body_find[0]:
-                    body_match = body_find[0]
-                    self.__setattr__(body_item, body_match[1])
-                    return
 
             self.body_html += f"{body_line}<br>\n"
             self.body_text += f"{body_line}\n"
