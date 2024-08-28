@@ -3,6 +3,8 @@ from logging import getLogger
 from pathlib import Path
 import re
 
+from ..utils.parse import parse_player_class, parse_stats
+
 
 logger = getLogger(__name__)
 
@@ -55,40 +57,6 @@ HELP_CMD_REGEX = {
 }
 
 
-def parse_stats(line: str) -> (list, str):
-    """Parse text right of colon, from "Stats  : " in single line."""
-    stats_line = line.split(" : ")[1].strip()
-    stats = []
-    for splitter in (",", "|", "/"):
-        if splitter in stats_line:
-            for stat_item in stats_line.split(splitter):
-                stat_item = stat_item.strip()
-                stats.append(stat_item)
-    if not stats:
-        stats.append(stats_line)
-    return stats
-
-
-PLAYER_CLASS_NAMES = (
-    "Warrior", "Necromancer", "Mage", "Magician", "Shaman", "Cleric", "Rogue",
-)
-
-def parse_player_class(pcls: str) -> list:
-    """Parse text right of colon for a line starting with "Class"."""
-    pcls_line_value = pcls.strip()
-    player_classes = []
-    if pcls_line_value in PLAYER_CLASS_NAMES:
-        player_classes.append(pcls_line_value)
-    else:
-        for splitter in (",", "|", "/"):
-            if splitter in pcls_line_value:
-                for pcls_item in pcls_line_value.split(splitter):
-                    pcls_item = pcls_item.strip()
-                    if pcls_item in PLAYER_CLASS_NAMES:
-                        player_classes.append(pcls_item)
-    return player_classes
-
-
 class HelpTab:
     """
     Interact with the "helptab" file to find sections representing help topics.
@@ -103,7 +71,7 @@ class HelpTab:
     @property
     def topics(self) -> dict:
         """Set "topics" property to "help_topics" dictionary."""
-        return self.topics
+        return self.help_topics
 
     def __repr__(self) -> str:
         """Show the object type with absolute path and topic count string."""
@@ -122,8 +90,6 @@ class HelpTab:
         level: int = 0
         aliases: set = {}
         body: str = ""
-        body_html: str = ""
-        body_text: str = ""
         see_also: set = {}
         syntax: str = ""
         minimum: str = ""
@@ -138,8 +104,7 @@ class HelpTab:
             self.name = ""
             self.level = 0
             self.aliases = set()
-            self.body_html = ""
-            self.body_text = ""
+            self.body = ""
             self.see_also = set()
             self.syntax = ""
             self.minimum = ""
@@ -170,6 +135,7 @@ class HelpTab:
                     self.player_level = player_level
                     if self.player_level.isnumeric():
                         self.player_level = int(self.player_level)
+
                     return
 
             # Check whether the line is for syntax, parsing if so.
@@ -177,12 +143,14 @@ class HelpTab:
                 syntax_match = SYNTAX_REGEX.fullmatch(string=content_line)
                 if syntax_match:
                     self.syntax = syntax_match.group("syntax")
+                    return
 
             # Check whether the line is for minimum, parsing if so.
             if not self.minimum:
                 minimum_match = MINIMUM_REGEX.fullmatch(string=content_line)
                 if minimum_match:
                     self.minimum = minimum_match.group("min")
+                    return
 
             # Check whether the line is for player class, parsing if so.
             if not self.player_class and content_line.startswith("Class"):
@@ -191,6 +159,7 @@ class HelpTab:
                     self.player_class = parse_player_class(
                         pcls=pcls_match.group("pclass")
                     )
+                    return
 
             # Check whether the line is for "Save ", parsing if so.
             if not self.save and content_line.startswith("Save "):
@@ -199,23 +168,23 @@ class HelpTab:
                     save_matched = save_match.group("save").strip()
                     if save_matched:
                         self.save = save_matched
+                        return
 
-            # Check whether the line is for stats, parsing if so.
+            # Check whether the line is for "Stats  : ", parsing if so.
             if not self.stats and content_line.startswith("Stats  : "):
                 self.stats = parse_stats(line=content_line)
+                return
 
             # Check whether the line is for components, parsing if so.
             if not self.components and content_line.startswith("Component"):
                 component_match = COMPONENT_REGEX.fullmatch(string=content_line)
                 self.components = component_match.group("component").split(", ")
+                return
 
-            # Replace HTML tags in body text.
-            body_line = content_line
-            for (old, new) in ((">", "g"), ("<", "l")):
-                body_line = body_line.replace(old, f"&{new}t;")
+            # Finally, consider the line body text.
+            self.body += f"{content_line}\n"
+            return
 
-            self.body_html += f"{body_line}<br>\n"
-            self.body_text += f"{body_line}\n"
 
         def parse_content(self, content: str):
             """Parse the content (below "*") of a "helptab" section."""
@@ -242,6 +211,7 @@ class HelpTab:
                         else:
                             also_topics += content_line
 
+                # Parse line of the help topic content.
                 self.parse_content_line(content_line=content_line)
 
             # Replace line breaks with a comma in the "see also" topics.
@@ -254,20 +224,30 @@ class HelpTab:
                     if also_topic:
                         self.see_also.add(also_topic)
 
-            # Hyperlink "`help command'" inline text within body HTML.
-            self.body_html = re.sub(
+        @property
+        def body_html(self) -> str:
+            """Return body text with links, formatted for HTML display."""
+
+            # Replace HTML tags in body text.
+            body = self.body
+            for (old, new) in ((">", "g"), ("<", "l")):
+                body = body.replace(old, f"&{new}t;")
+
+            # Hyperlink "`help command'" in text within body text.
+            body = re.sub(
                 pattern=HELP_CMD_REGEX["PATTERN"],
                 repl=HELP_CMD_REGEX["SUB"],
-                string=self.body_html,
+                string=body,
                 flags=re.MULTILINE
             )
+            return body
 
         def alias_count(self) -> int:
             """Count of number of help topic aliases."""
             return len(self.aliases)
 
         @property
-        def syntax_html(self):
+        def syntax_html(self) -> str:
             """Return syntax property with HTML tags replaced."""
             syntax_text = self.syntax
             for (old, new) in ((">", "g"), ("<", "l")):
