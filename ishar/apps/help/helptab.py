@@ -1,10 +1,10 @@
-#!/usr/bin/python3
+from django.conf import settings
 from logging import getLogger
 from pathlib import Path
 import re
 
-from parse import parse_stats
 
+logger = getLogger(__name__)
 
 # Example from MUD "helptab" file:
 """
@@ -21,36 +21,32 @@ from parse import parse_stats
 <more text for level X and higher>
 #
 """
-logger = getLogger(__name__)
-
-# Specify "helptab" file, minimum "Immortal" level, player class names, etc.
-HELPTAB_FILE = Path(Path(__file__).parent, "helptab")
-MIN_IMMORTAL_LEVEL = 21
-PLAYER_CLASS_NAMES = (
-    "Warrior", "Necromancer", "Mage", "Magician", "Shaman", "Cleric", "Rogue",
-    "Monk",
+START_STRING = (
+    "###########################"
+    "---BEGIN HELP FILE---"
+    "###########################\n"
 )
-START_STRING = ("###########################"
-                "---BEGIN HELP FILE---###########################\n")
 
 # Compile regular expression to parse "see also" items from a help topic.
 SEE_ALSO_REGEX = re.compile(
-    pattern=r"^ *(see also|also see|also see help on|see help on|related) *\: "
-            r"* (.+)$",
+    pattern=(
+        r"^(see also|also see|also see help on|see help on|related)\s*\:"
+        r"\s*(?P<topics>.+)$"
+    ),
     flags=re.IGNORECASE
 )
 
 # Compile regular expressions for help command minimum and syntax.
-MINIMUM_REGEX = re.compile(pattern=r"^ *(Minimum|minimum|Min|min) *\: *(.+)$")
-SYNTAX_REGEX = re.compile(pattern=r"^ *(Syntax|syntax) *\: *(.+)$")
+MINIMUM_REGEX = re.compile(r"^(Minimum|minimum|Min|min)\s*\:\s*(?P<min>.+)$")
+SYNTAX_REGEX = re.compile(r"^(Syntax|syntax)\s*\:\s*(?P<syntax>.+)$")
 
 # Compile regular expression for saves, player classes, and components.
-SAVES_REGEX = re.compile(pattern=r"^ *(Saves?) *\: *(.+)$"),
-PLAYER_CLASSES_REGEX = re.compile(pattern=r"^ *(Class|Classes) *\: *(.+)$")
-COMPONENTS_REGEX = re.compile(pattern=r"^(Components?)\s*\:\s*(?P<items>.+)$")
+SAVE_REGEX = re.compile(r"^Save\s+:\s+(?P<save>.+)$")
+PLAYER_CLASS_REGEX = re.compile(r"^Class(es)?\s*\:\s*(?P<pclass>.+)")
+COMPONENT_REGEX = re.compile(r"^Components?\s*\:\s*(?P<component>.+)$")
 
 # Compile regular expression for player level in help topic body.
-PLAYER_LEVEL_REGEX = re.compile(pattern=r"^ *(Level|level) *\: *(.+)$")
+PLAYER_LEVEL_REGEX = re.compile(r"^Level\s*\:\s*(?P<level>.+)$")
 
 # Compile regular expressions to hyperlink body text "`help " references.
 HELP_CMD_REGEX = {
@@ -59,11 +55,45 @@ HELP_CMD_REGEX = {
 }
 
 
+def parse_stats(line: str) -> (list, str):
+    """Parse text right of colon, from "Stats  : " in single line."""
+    stats_line = line.split(" : ")[1].strip()
+    stats = []
+    for splitter in (",", "|", "/"):
+        if splitter in stats_line:
+            for stat_item in stats_line.split(splitter):
+                stat_item = stat_item.strip()
+                stats.append(stat_item)
+    if not stats:
+        stats.append(stats_line)
+    return stats
+
+
+PLAYER_CLASS_NAMES = (
+    "Warrior", "Necromancer", "Mage", "Magician", "Shaman", "Cleric", "Rogue",
+)
+
+def parse_player_class(pcls: str) -> list:
+    """Parse text right of colon for a line starting with "Class"."""
+    pcls_line_value = pcls.strip()
+    player_classes = []
+    if pcls_line_value in PLAYER_CLASS_NAMES:
+        player_classes.append(pcls_line_value)
+    else:
+        for splitter in (",", "|", "/"):
+            if splitter in pcls_line_value:
+                for pcls_item in pcls_line_value.split(splitter):
+                    pcls_item = pcls_item.strip()
+                    if pcls_item in PLAYER_CLASS_NAMES:
+                        player_classes.append(pcls_item)
+    return player_classes
+
+
 class HelpTab:
     """
     Interact with the "helptab" file to find sections representing help topics.
     """
-    file: Path = HELPTAB_FILE
+    file: Path = settings.HELPTAB
     help_topics: dict = {}
 
     def __init__(self):
@@ -90,16 +120,16 @@ class HelpTab:
         """
         name: str = ""
         level: int = 0
-        aliases: list = []
+        aliases: set = {}
         body: str = ""
         body_html: str = ""
         body_text: str = ""
-        see_also: list = []
+        see_also: set = {}
         syntax: str = ""
         minimum: str = ""
         player_level: (int, str, None) = None
         player_class: (list, str) = []
-        saves: list = []
+        save: str = ""
         stats: list = []
         components: list = []
 
@@ -107,15 +137,15 @@ class HelpTab:
             """Initialization of a "help topic" object."""
             self.name = ""
             self.level = 0
-            self.aliases = []
+            self.aliases = set()
             self.body_html = ""
             self.body_text = ""
-            self.see_also = []
+            self.see_also = set()
             self.syntax = ""
             self.minimum = ""
             self.player_level = None
             self.player_class = []
-            self.saves = []
+            self.save = ""
             self.stats = []
             self.components = []
 
@@ -123,7 +153,7 @@ class HelpTab:
             """Parse header of a "helptab" section, to gather aliases."""
             for header_line in header_lines:
                 if header_line.startswith("32 "):
-                    self.aliases.append(
+                    self.aliases.add(
                         " ".join(header_line.split(" ")[1:]).strip()
                     )
 
@@ -132,9 +162,9 @@ class HelpTab:
 
             # Check whether the line is for a player level.
             if self.player_level is None:
-                lvl_match = PLAYER_LEVEL_REGEX.findall(string=content_line)
-                if lvl_match and lvl_match[0] and lvl_match[0][1]:
-                    player_level = lvl_match[0][1].strip()
+                lvl_match = PLAYER_LEVEL_REGEX.fullmatch(string=content_line)
+                if lvl_match:
+                    player_level = lvl_match.group("level")
 
                     # If player level is numeric, set as integer.
                     self.player_level = player_level
@@ -142,47 +172,42 @@ class HelpTab:
                         self.player_level = int(self.player_level)
                     return
 
-            # Check whether the line is for a player class.
-            if not self.player_class:
-                cls_match = PLAYER_CLASSES_REGEX.findall(string=content_line)
-                if cls_match and cls_match[0] and cls_match[0][1]:
-                    pclass = cls_match[0][1].strip()
-                    for splitter in (",", "|", "/"):
-                        if splitter in pclass:
-                            psplit = pclass.split(splitter)
-                            for pcls in psplit:
-                                pcls = pcls.strip()
-                                if pcls and pcls not in ("", splitter):
-                                    if pclass in PLAYER_CLASS_NAMES:
-                                        self.player_class.append(pcls)
-                            return
+            # Check whether the line is for syntax, parsing if so.
+            if not self.syntax:
+                syntax_match = SYNTAX_REGEX.fullmatch(string=content_line)
+                if syntax_match:
+                    self.syntax = syntax_match.group("syntax")
 
-                    if not self.player_class:
-                        if pclass in PLAYER_CLASS_NAMES:
-                            self.player_class.append(pclass)
-                    return
+            # Check whether the line is for minimum, parsing if so.
+            if not self.minimum:
+                minimum_match = MINIMUM_REGEX.fullmatch(string=content_line)
+                if minimum_match:
+                    self.minimum = minimum_match.group("min")
 
-            # Check whether the line is for stats, and parse if so.
+            # Check whether the line is for player class, parsing if so.
+            if not self.player_class and content_line.startswith("Class"):
+                pcls_match = PLAYER_CLASS_REGEX.fullmatch(string=content_line)
+                if pcls_match:
+                    self.player_class = parse_player_class(
+                        pcls=pcls_match.group("pclass")
+                    )
+
+            # Check whether the line is for "Save ", parsing if so.
+            if not self.save and content_line.startswith("Save "):
+                save_match = SAVE_REGEX.fullmatch(string=content_line)
+                if save_match:
+                    save_matched = save_match.group("save").strip()
+                    if save_matched:
+                        self.save = save_matched
+
+            # Check whether the line is for stats, parsing if so.
             if not self.stats and content_line.startswith("Stats  : "):
                 self.stats = parse_stats(line=content_line)
 
-            # Check whether the line is for components, and parse if so.
+            # Check whether the line is for components, parsing if so.
             if not self.components and content_line.startswith("Component"):
-                components_match = COMPONENTS_REGEX.fullmatch(
-                    string=content_line
-                )
-                self.components = components_match.group("items").split(", ")
-
-            # Check if the line is "see also" (related topic) text.
-            if not self.see_also:
-                see_also_match = SEE_ALSO_REGEX.match(string=content_line)
-                if see_also_match:
-                    see_also_topics = see_also_match[2].split(",")
-                    for see_also_topic in see_also_topics:
-                        see_also_topic = see_also_topic.strip()
-                        if see_also_topic and see_also_topic != "":
-                            self.see_also.append(see_also_topic)
-                    return
+                component_match = COMPONENT_REGEX.fullmatch(string=content_line)
+                self.components = component_match.group("component").split(", ")
 
             # Replace HTML tags in body text.
             body_line = content_line
@@ -195,19 +220,59 @@ class HelpTab:
         def parse_content(self, content: str):
             """Parse the content (below "*") of a "helptab" section."""
 
+            # Prepare for parsing any "See also" lines.
+            is_see_also = False
+            also_topics = ""
+
             # Iterate each line of the help topic content.
-            for content_line in content.split('\n'):
+            for content_line in content.split("\n"):
+
+                # Parse any "see also" (related) topics into a set.
+                if not self.see_also:
+
+                    # Get text after colon (":") on first "see also" line.
+                    also_match = SEE_ALSO_REGEX.fullmatch(content_line)
+                    if also_match:
+                        is_see_also = True
+
+                    # Store "see also" topics text in a string to parse later.
+                    if is_see_also:
+                        if also_match:
+                            also_topics = also_match.group("topics")
+                        else:
+                            also_topics += content_line
+
                 self.parse_content_line(content_line=content_line)
+
+            # Replace line breaks with a comma in the "see also" topics.
+            also_topics = also_topics.replace("\n", ",")
+
+            # Parse discovered "see also" help topics, adding them to a set.
+            if also_topics:
+                for also_topic in also_topics.split(","):
+                    also_topic = also_topic.strip()
+                    if also_topic:
+                        self.see_also.add(also_topic)
 
             # Hyperlink "`help command'" inline text within body HTML.
             self.body_html = re.sub(
-                pattern=HELP_CMD_REGEX["PATTERN"], repl=HELP_CMD_REGEX["SUB"],
-                string=self.body_html, flags=re.MULTILINE
+                pattern=HELP_CMD_REGEX["PATTERN"],
+                repl=HELP_CMD_REGEX["SUB"],
+                string=self.body_html,
+                flags=re.MULTILINE
             )
 
         def alias_count(self) -> int:
             """Count of number of help topic aliases."""
             return len(self.aliases)
+
+        @property
+        def syntax_html(self):
+            """Return syntax property with HTML tags replaced."""
+            syntax_text = self.syntax
+            for (old, new) in ((">", "g"), ("<", "l")):
+                syntax_text = syntax_text.replace(old, f"&{new}t;")
+            return syntax_text
 
         def pluralize(self, item="alias"):
             """Pluralize "alias", depending upon count of alias(es)."""
@@ -258,7 +323,7 @@ class HelpTab:
             topic_level = int(header_lines[0])
 
             # Only consider helptab sections that are meant for mortal players.
-            if topic_level < MIN_IMMORTAL_LEVEL:
+            if topic_level < settings.MIN_IMMORTAL_LEVEL:
 
                 # Only consider helptab sections for "32 " ("Playing") state.
                 first_line = header_lines[1].strip()
