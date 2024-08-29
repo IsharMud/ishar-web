@@ -253,6 +253,13 @@ class HelpTab:
             return False
 
         @property
+        def is_spell(self) -> bool:
+            """Boolean whether the help topic is a "Spell "."""
+            if self.name.startswith("Spell "):
+                return True
+            return False
+
+        @property
         def body_html(self) -> str:
             """Return body text with links, formatted for HTML display."""
 
