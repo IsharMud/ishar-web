@@ -246,6 +246,13 @@ class HelpTab:
 
 
         @property
+        def is_area(self) -> bool:
+            """Boolean whether the help topic is an "Area "."""
+            if self.name.startswith("Area "):
+                return True
+            return False
+
+        @property
         def body_html(self) -> str:
             """Return body text with links, formatted for HTML display."""
 
