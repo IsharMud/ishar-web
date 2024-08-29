@@ -1,4 +1,3 @@
-from ..utils import search_help_topics
 from ..views import HelpView
 
 
@@ -13,6 +12,8 @@ class WorldView(HelpView):
         Include "areas" context using the "Area " items from the "helptab" file.
         """
         context = super().get_context_data(**kwargs)
-        areas = search_help_topics(search='Area ').keys()
-        context["areas"] = areas
+        context["areas"] = {}
+        for name, item in self.help_topics:
+            if name.startswith("Area "):
+                context["areas"][name] = item
         return context

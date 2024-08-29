@@ -23,30 +23,76 @@
 
     {% if help_topic %}
     <div class="bg-black">
-        {% if help_properties and help_properties|length > 0 %}
-        <!--
-            {{ help_properties }}
-            {{ help_properties|length }}
-        -->
-        <div class="bg-black rounded m-1 p-1">
+        <div class="rounded m-1 p-1">
             <ul class="two-col">
-            {% for help_property in help_properties %}
-                {% with help_property_value=help_topic|get_dict_item:help_property %}
-                    {% if help_property_value %}
+        {% if help_topic.syntax %}
                 <li>
-                    <strong>{{ help_property | title }}</strong>:
-                    <code>{% autoescape off %}{{ help_property_value }}{% endautoescape %}</code>
+                    <strong>Syntax</strong>:
+                    <code>{{ help_topic.syntax }}</code>
                 </li>
-                    {% endif %}
-                {% endwith %}
+        {% endif %}
+        {% if help_topic.minimum %}
+                <li>
+                    <strong>Minimum</strong>:
+                    <code>{{ help_topic.minimum }}</code>
+                </li>
+        {% endif %}
+        {% if help_topic.player_level %}
+                <li>
+                    <strong>Level</strong>:
+                    <code>{{ help_topic.player_level }}</code>
+                </li>
+        {% endif %}
+        {% if help_topic.player_class %}
+                <li>
+                    <strong>Class{{ help_topic.player_class|pluralize:"es" }}</strong>:
+            {% for player_class in help_topic.player_class %}
+                    <code>{{ player_class }}</code>{% if not forloop.last %}, {% endif %}
             {% endfor %}
+                </li>
+        {% endif %}
+        {% if help_topic.save %}
+                <li>
+                    <strong>Save</strong>:
+                    <code>{{ help_topic.save }}</code>
+                </li>
+        {% endif %}
+        {% if help_topic.stats %}
+                <li>
+                    <strong>Stat{{ help_topic.stats|pluralize }}</strong>:
+            {% for stat in help_topic.stats %}
+                    <code>{{ stat }}</code>{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+                </li>
+        {% endif %}
+        {% if help_topic.components %}
+                <li>
+                    <strong>Component{{ help_topic.components|pluralize }}</strong>:
+            {% for component in help_topic.components %}
+                    <code>{{ component }}</code>{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+                </li>
+        {% endif %}
             </ul>
         </div>
-        {% endif %}
         {% if help_topic.body_html %}
         <pre class="bg-black m-1 p-1" style="white-space: pre-wrap;">
             {% autoescape off %}{{ help_topic.body_html }}{% endautoescape %}
         </pre>
+        {% endif %}
+        {% if help_topic.see_also %}
+        <div class="mx-2 px-2">
+            <p>
+                <strong>See Also</strong>:
+            </p>
+            <ul class="list-group list-group-horizontal">
+            {% for also_topic in help_topic.see_also %}
+                <li class="bg-black list-group-item">
+                    <a href="{% url "help" %}{{ also_topic }}" title="Help: {{ also_topic }}">{{ also_topic }}</a>
+                </li>
+            {% endfor %}
+            </ul>
+        </div>
         {% endif %}
     </div>
     {% endif %}

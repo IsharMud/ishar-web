@@ -1,9 +1,11 @@
 from django.contrib import messages
-from django.shortcuts import redirect
+from django.shortcuts import redirect, reverse
+from logging import getLogger
 
-from ..utils import search_help_topics
 from ..views import HelpView
 
+
+logger = getLogger(__name__)
 
 class HelpPageView(HelpView):
     """
@@ -16,25 +18,30 @@ class HelpPageView(HelpView):
         # Get help topic name from URL.
         help_topic = kwargs.get("help_topic")
         if help_topic is not None:
+
+            # Match exact topic names for display.
             if help_topic in self.help_topics:
                 self.help_topic = self.help_topics[help_topic]
                 return super().dispatch(request, *args, **kwargs)
 
-            search_topics = search_help_topics(self.help_topics, help_topic)
-            if not search_topics:
-                messages.error(
-                    request=request,
-                    message="Sorry, but no such help topic was found."
-                )
-                self.status = 404
+            # Otherwise, try a variety of formats of the URL topic name.
+            for fmt in (
+                help_topic, help_topic.strip(), help_topic.title(),
+                help_topic.lower(), help_topic.upper()
+            ):
 
-            if search_topics:
-                if len(search_topics) == 1:
-                    found_topic = next(iter(search_topics.values()))
+                # Redirect to actual help topic name, if necessary.
+                topic = self.help_topics.get(fmt)
+                if topic:
                     return redirect(
-                        to="help_page", help_topic=found_topic["name"]
+                        to=reverse(viewname="help_page", args=(topic.name,))
                     )
-                self.help_topics = search_topics
+
+            self.status = 404
+            messages.error(
+                request=request,
+                message="Sorry, but no such help topic could be found."
+            )
 
         return super().dispatch(request, *args, **kwargs)
 

@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.urls import reverse
 from logging import getLogger
 from pathlib import Path
 import re
@@ -57,16 +58,29 @@ HELP_CMD_REGEX = {
 }
 
 
+def _discover_help(path: Path = settings.HELPTAB) -> list:
+    """Discover sections within "helptab" file."""
+    # Open the "helptab" file (read-only), and gather its entire contents.
+    with open(file=path, mode="r", encoding="utf-8") as helptab_fh:
+        helptab_fo = helptab_fh.read()
+
+    # Sections in "helptab" file are separated by "#" on a line alone.
+    return helptab_fo.split(START_STRING)[1].split("\n#\n")
+
+
 class HelpTab:
     """
     Interact with the "helptab" file to find sections representing help topics.
     """
-    file: Path = settings.HELPTAB
     help_topics: dict = {}
+    path: Path = settings.HELPTAB
 
-    def __init__(self):
+    def __init__(self, path: (Path, str) = settings.HELPTAB):
         """Discover, and parse, help topics from "helptab" file sections."""
-        self.help_topics = self.parse(self.discover())
+        if path and isinstance(path, str):
+            path = Path(path)
+            self.path = path
+        self.help_topics = self.parse(_discover_help(path=self.path))
 
     @property
     def topics(self) -> dict:
@@ -79,7 +93,7 @@ class HelpTab:
 
     def __str__(self) -> str:
         """Show absolute path of "helptab" file with number of help topics."""
-        return f"{self.file.absolute()} ({len(self.help_topics)} topics)"
+        return f"{self.path.absolute()} ({len(self.help_topics)} topics)"
 
 
     class HelpTopic:
@@ -114,6 +128,10 @@ class HelpTab:
             self.stats = []
             self.components = []
 
+        def get_absolute_url(self):
+            """Admin link for account upgrade."""
+            return reverse(viewname="help_page", args=(self.name,))
+
         def parse_header(self, header_lines: list):
             """Parse header of a "helptab" section, to gather aliases."""
             for header_line in header_lines:
@@ -136,21 +154,21 @@ class HelpTab:
                     if self.player_level.isnumeric():
                         self.player_level = int(self.player_level)
 
-                    return
+                    return False
 
             # Check whether the line is for syntax, parsing if so.
             if not self.syntax:
                 syntax_match = SYNTAX_REGEX.fullmatch(string=content_line)
                 if syntax_match:
                     self.syntax = syntax_match.group("syntax")
-                    return
+                    return False
 
             # Check whether the line is for minimum, parsing if so.
             if not self.minimum:
                 minimum_match = MINIMUM_REGEX.fullmatch(string=content_line)
                 if minimum_match:
                     self.minimum = minimum_match.group("min")
-                    return
+                    return False
 
             # Check whether the line is for player class, parsing if so.
             if not self.player_class and content_line.startswith("Class"):
@@ -159,7 +177,7 @@ class HelpTab:
                     self.player_class = parse_player_class(
                         pcls=pcls_match.group("pclass")
                     )
-                    return
+                    return False
 
             # Check whether the line is for "Save ", parsing if so.
             if not self.save and content_line.startswith("Save "):
@@ -168,22 +186,21 @@ class HelpTab:
                     save_matched = save_match.group("save").strip()
                     if save_matched:
                         self.save = save_matched
-                        return
+                        return False
 
             # Check whether the line is for "Stats  : ", parsing if so.
             if not self.stats and content_line.startswith("Stats  : "):
                 self.stats = parse_stats(line=content_line)
-                return
+                return False
 
             # Check whether the line is for components, parsing if so.
             if not self.components and content_line.startswith("Component"):
                 component_match = COMPONENT_REGEX.fullmatch(string=content_line)
                 self.components = component_match.group("component").split(", ")
-                return
+                return False
 
             # Finally, consider the line body text.
-            self.body += f"{content_line}\n"
-            return
+            return True
 
 
         def parse_content(self, content: str):
@@ -212,7 +229,10 @@ class HelpTab:
                             also_topics += content_line
 
                 # Parse line of the help topic content.
-                self.parse_content_line(content_line=content_line)
+                if not is_see_also:
+                    parsed = self.parse_content_line(content_line=content_line)
+                    if parsed is True:
+                        self.body += f"{content_line}\n"
 
             # Replace line breaks with a comma in the "see also" topics.
             also_topics = also_topics.replace("\n", ",")
@@ -223,6 +243,7 @@ class HelpTab:
                     also_topic = also_topic.strip()
                     if also_topic:
                         self.see_also.add(also_topic)
+
 
         @property
         def body_html(self) -> str:
@@ -246,14 +267,6 @@ class HelpTab:
             """Count of number of help topic aliases."""
             return len(self.aliases)
 
-        @property
-        def syntax_html(self) -> str:
-            """Return syntax property with HTML tags replaced."""
-            syntax_text = self.syntax
-            for (old, new) in ((">", "g"), ("<", "l")):
-                syntax_text = syntax_text.replace(old, f"&{new}t;")
-            return syntax_text
-
         def pluralize(self, item="alias"):
             """Pluralize "alias", depending upon count of alias(es)."""
             if self.alias_count() == 1:
@@ -268,14 +281,6 @@ class HelpTab:
             """Show the name of the help topic."""
             return self.name
 
-    def discover(self) -> list:
-        """Discover sections within "helptab" file."""
-        # Open the "helptab" file (read-only), and gather its entire contents.
-        with open(file=self.file, mode="r", encoding="utf-8") as helptab_fh:
-            helptab_fo = helptab_fh.read()
-
-        # Sections in "helptab" file are separated by "#" on a line alone.
-        return helptab_fo.split(START_STRING)[1].split("\n#\n")
 
     def parse(self, sections: list) -> dict:
         """Parse "helptab" sections into dictionary of help topic objects."""

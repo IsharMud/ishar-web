@@ -1,8 +1,6 @@
 from django.urls import reverse
 from django.utils.translation import ngettext
 
-from ishar.apps.help.utils import search_help_topics
-
 
 def mudhelp(request, interaction=None, _spell=False):
     """Search and return links to help topics."""
