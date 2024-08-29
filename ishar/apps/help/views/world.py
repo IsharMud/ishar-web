@@ -13,7 +13,7 @@ class WorldView(HelpView):
         """
         context = super().get_context_data(**kwargs)
         context["areas"] = []
-        for topic in self.help_topics.values():
+        for topic in self.helptab.search("Area "):
             if topic.is_area is True:
-                context["areas"].append(topic.name)
+                context["areas"].append(topic)
         return context

@@ -76,23 +76,19 @@
             </ul>
         </div>
         {% if help_topic.body_html %}
-        <pre class="bg-black m-1 p-1" style="white-space: pre-wrap;">
-            {% autoescape off %}{{ help_topic.body_html }}{% endautoescape %}
-        </pre>
+        <blockquote>
+            <pre class="bg-black text-white border border-secondary mx-3" style="max-width: 80ch;">
+                {% autoescape off %}{{ help_topic.body_html }}{% endautoescape %}
+            </pre>
         {% endif %}
         {% if help_topic.see_also %}
-        <div class="mx-2 px-2">
-            <p>
-                <strong>See Also</strong>:
-            </p>
-            <ul class="list-group list-group-horizontal">
+        <footer class="blockquote-footer">
+            <strong>See Also</strong>:
             {% for also_topic in help_topic.see_also %}
-                <li class="bg-black list-group-item">
-                    <a href="{% url "help" %}{{ also_topic }}" title="Help: {{ also_topic }}">{{ also_topic }}</a>
-                </li>
+            <a href="{% url "help" %}{{ also_topic }}" title="Help: {{ also_topic }}">{{ also_topic }}</a>{% if not forloop.last %}, {% endif %}
             {% endfor %}
-            </ul>
-        </div>
+        </footer>
+        </blockquote>
         {% endif %}
     </div>
     {% endif %}

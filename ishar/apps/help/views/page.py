@@ -1,3 +1,5 @@
+from re import search
+
 from django.contrib import messages
 from django.shortcuts import redirect, reverse
 from logging import getLogger
@@ -19,29 +21,39 @@ class HelpPageView(HelpView):
         help_topic = kwargs.get("help_topic")
         if help_topic is not None:
 
-            # Match exact topic names for display.
-            if help_topic in self.help_topics:
-                self.help_topic = self.help_topics[help_topic]
-                return super().dispatch(request, *args, **kwargs)
+            # Search the "helptab" file topic names and aliases for string.
+            search_results = self.helptab.search(search_name=help_topic)
 
-            # Otherwise, try a variety of formats of the URL topic name.
-            for fmt in (
-                help_topic, help_topic.strip(), help_topic.title(),
-                help_topic.lower(), help_topic.upper()
-            ):
+            # Handle any search results.
+            if search_results:
 
-                # Redirect to actual help topic name, if necessary.
-                topic = self.help_topics.get(fmt)
-                if topic:
+                # Handle single results.
+                if len(search_results) == 1:
+                    search_result = search_results.pop()
+
+                    # Set exact name matches directly.
+                    if help_topic == search_result.name:
+                        self.help_topic = search_result
+                        return super().dispatch(request, *args, **kwargs)
+
+                    # Redirect single result to proper name of the topic.
                     return redirect(
-                        to=reverse(viewname="help_page", args=(topic.name,))
+                        to=reverse(
+                            viewname="help_page",
+                            args=(search_result.name,)
+                        )
                     )
 
-            self.status = 404
-            messages.error(
-                request=request,
-                message="Sorry, but no such help topic could be found."
-            )
+                # Set the help topics to the search results.
+                self.help_topics = search_results
+
+            # Tell user if no search results were found.
+            else:
+                self.status = 404
+                messages.error(
+                    request=request,
+                    message="Sorry, but no such help topic could be found."
+                )
 
         return super().dispatch(request, *args, **kwargs)
 

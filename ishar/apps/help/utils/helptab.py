@@ -348,3 +348,44 @@ class HelpTab:
 
         # Return complete list of help topics parsed from "helptab" sections.
         return topics
+
+
+    def search(self, search_name: str) -> set[HelpTopic,]:
+        """Search help topic names and aliases for a string."""
+        search_results = set()
+
+        # Immediately return exact match.
+        if search_name in self.help_topics:
+            search_results.add(self.help_topics[search_name])
+            return search_results
+
+        # Iterate each help topic object to search their names and aliases.
+        for topic_name, topic in self.help_topics.items():
+
+            # Iterate a variety of formats of the string.
+            do_add = False
+            for name_fmt in (
+                search_name, search_name.strip(), search_name.title(),
+                search_name.lower(), search_name.upper()
+            ):
+
+                # Check if the topic name contains the string.
+                if name_fmt in topic_name:
+                    do_add = True
+
+                # Check for any alias exact matches.
+                elif name_fmt in topic.aliases:
+                    do_add = True
+
+                # Check if the topic aliases contain the string.
+                else:
+                    for alias in topic.aliases:
+                        if name_fmt in alias:
+                            do_add = True
+
+            #  Add the help topic to the search results, if necessary.
+            if do_add is True:
+                search_results.add(topic)
+
+        # Return the set of any found help topics.
+        return search_results
