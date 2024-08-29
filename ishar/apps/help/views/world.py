@@ -13,7 +13,7 @@ class WorldView(HelpView):
         """
         context = super().get_context_data(**kwargs)
         context["areas"] = {}
-        for name, item in self.help_topics:
-            if name.startswith("Area "):
-                context["areas"][name] = item
+        for topic, item in self.help_topics.items():
+            if topic.startswith("Area"):
+                context["areas"][topic] = item
         return context
