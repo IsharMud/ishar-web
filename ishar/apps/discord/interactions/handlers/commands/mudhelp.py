@@ -30,20 +30,18 @@ def mudhelp(request, interaction=None, _spell: bool = False) -> tuple[str, bool]
             ephemeral = False
             num_results = len(results)
             topic_url = reverse(viewname="help_page", args=(search,))
-            reply = (
-                f'{num_results} '
-                f'{ngettext("result", "results", num_results)}'
-            )
+            reply = f"{num_results} results"
 
             # Single result is linked to its name directly.
             if num_results == 1:
                 result = next(iter(results.values()))
                 topic_name = result.name
                 topic_url = result.get_absolute_url()
-                reply = f"{topic_name} "
+                reply = topic_name
 
             # Append the search result URL to the Discord reply message.
-            reply += f" :information_source: <{topic_url}>"
+            reply += (f" :information_source: "
+                      f"<{request.scheme}//{request.get_host()}{topic_url}>")
 
     # Return the reply, and boolean whether it should be ephemeral.
     return reply, ephemeral
