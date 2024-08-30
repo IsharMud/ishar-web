@@ -1,13 +1,8 @@
-from re import search
-
 from django.contrib import messages
-from django.shortcuts import redirect, reverse
-from logging import getLogger
+from django.shortcuts import redirect
 
 from ..views import HelpView
 
-
-logger = getLogger(__name__)
 
 class HelpPageView(HelpView):
     """Help page view."""
