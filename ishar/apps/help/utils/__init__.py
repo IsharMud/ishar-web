@@ -1,2 +1,1 @@
-from .get import *
-from .parse import *
+from .helptab import HelpTab

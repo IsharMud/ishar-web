@@ -24,10 +24,12 @@ class InteractionsView(View):
         """Disable CSRF protection for inbound Discord requests."""
         return super().dispatch(request, *args, **kwargs)
 
+    @staticmethod
     def get(self, *args, **kwargs) -> JsonResponse:
         """Return 405 'Method Not Allowed' JSON error for GET requests."""
         return error("Method not allowed.", status=405)
 
+    @staticmethod
     def post(self, request, *args, **kwargs) -> JsonResponse:
         """Handle incoming POST requests."""
 

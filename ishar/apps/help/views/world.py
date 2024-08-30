@@ -1,18 +1,16 @@
-from ..utils import search_help_topics
 from ..views import HelpView
 
 
 class WorldView(HelpView):
-    """
-    World view.
-    """
+    """World view."""
     template_name = "world.html"
 
     def get_context_data(self, **kwargs):
-        """
-        Include "areas" context using the "Area " items from the "helptab" file.
-        """
+        # Include sorted "areas" context of "Area " topics in "helptab" file.
         context = super().get_context_data(**kwargs)
-        areas = search_help_topics(search='Area ').keys()
-        context["areas"] = areas
+        context["areas"] = []
+        for topic_name, topic in self.helptab.search("Area ").items():
+            if topic.is_area is True:
+                context["areas"].append(topic)
+        context["areas"] = sorted(context["areas"])
         return context

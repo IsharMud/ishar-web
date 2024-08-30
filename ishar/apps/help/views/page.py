@@ -1,48 +1,58 @@
-from django.contrib import messages
-from django.shortcuts import redirect
+from re import search
 
-from ..utils import search_help_topics
+from django.contrib import messages
+from django.shortcuts import redirect, reverse
+from logging import getLogger
+
 from ..views import HelpView
 
 
+logger = getLogger(__name__)
+
 class HelpPageView(HelpView):
-    """
-    Help page view.
-    """
+    """Help page view."""
     template_name = "help_page.html"
 
     def dispatch(self, request, *args, **kwargs):
+        """Handle request for a specific help page. (/help/<topic|search>/)"""
 
         # Get help topic name from URL.
         help_topic = kwargs.get("help_topic")
         if help_topic is not None:
-            if help_topic in self.help_topics:
-                self.help_topic = self.help_topics[help_topic]
-                return super().dispatch(request, *args, **kwargs)
 
-            search_topics = search_help_topics(self.help_topics, help_topic)
-            if not search_topics:
+            # Search the "helptab" file topic names and aliases for string.
+            search_results = self.helptab.search(search_name=help_topic)
+
+            # Handle any search results.
+            if search_results:
+
+                # Handle single results.
+                if len(search_results) == 1:
+                    search_result = next(iter(search_results))
+                    search_result_topic = search_results[search_result]
+
+                    # Set exact name matches directly.
+                    if help_topic == search_result_topic.name:
+                        self.help_topic = search_result_topic
+                        return super().dispatch(request, *args, **kwargs)
+
+                    # Redirect single result to proper name of the topic.
+                    return redirect(to=search_result_topic.get_absolute_url())
+
+                # Set the help topics to the search results.
+                self.help_topics = search_results
+
+            # Set response code and tell user if no search results were found.
+            else:
+                self.status = 404
                 messages.error(
                     request=request,
-                    message="Sorry, but no such help topic was found."
+                    message="Sorry, but no such help topic could be found."
                 )
-                self.status = 404
-
-            if search_topics:
-                if len(search_topics) == 1:
-                    found_topic = next(iter(search_topics.values()))
-                    return redirect(
-                        to="help_page", help_topic=found_topic["name"]
-                    )
-                self.help_topics = search_topics
 
         return super().dispatch(request, *args, **kwargs)
 
-    def get(self, request, *args, **kwargs):
-        """
-        Set HTTP response status code.
-        """
-        return self.render_to_response(
-            context=self.get_context_data(**kwargs),
-            status=self.status
-        )
+    def render_to_response(self, context, **response_kwargs):
+        # Return appropriate HTTP response status code.
+        response_kwargs["status"] = self.status
+        return super().render_to_response(context, **response_kwargs)
