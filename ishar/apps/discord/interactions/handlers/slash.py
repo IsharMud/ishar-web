@@ -3,7 +3,7 @@ from .commands import *
 from ..exceptions import UnknownCommandException
 
 
-def slash(interaction_json, request):
+def slash(interaction_json: dict, request) -> tuple[str, bool]:
     """Handle slash commands."""
 
     interaction_data = interaction_json.get("data")
