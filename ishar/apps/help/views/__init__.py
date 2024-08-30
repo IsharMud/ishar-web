@@ -28,7 +28,6 @@ class HelpView(TemplateView):
         context["help_topic"] = self.help_topic
         return context
 
-    @staticmethod
     def post(self, request, *args, **kwargs):
         # Redirect POST requests to HTTP GET search for the help topic string.
         return redirect(
