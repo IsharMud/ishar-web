@@ -34,8 +34,8 @@
     <div>
         <ul class="two-col">
         {% for area in areas %}
-            <li title="{{ area }}">
-                <a href="{% url "help_page" help_topic=area %}">{{ area }}</a>
+            <li title="{{ area.name }}">
+                <a href="{{ area.get_absolute_url }}">{{ area }}</a>
             </li>
         {% endfor %}
         </ul>

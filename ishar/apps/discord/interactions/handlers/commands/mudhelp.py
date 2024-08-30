@@ -29,17 +29,23 @@ def mudhelp(request, interaction=None, _spell: bool = False) -> tuple[str, bool]
         if results:
             ephemeral = False
             num_results = len(results)
-            topic_url = reverse(viewname="help_page", args=(search,))
-            reply = f"{num_results} results"
 
-            # Single result is linked to its name directly.
+            # Link to single result directly.
             if num_results == 1:
                 result = next(iter(results.values()))
                 topic_name = result.name
                 topic_url = result.get_absolute_url()
                 reply = topic_name
 
-            # Append the search result URL to the Discord reply message.
+            # Link to search for multiple results.
+            else:
+                topic_url = reverse(
+                    viewname="help_page",
+                    args=(search,)
+                ) + "#help"
+                reply = f"{num_results} results"
+
+            # Append the URL to the Discord reply message.
             reply += (f" :information_source: "
                       f"<{request.scheme}://{request.get_host()}{topic_url}>")
 
