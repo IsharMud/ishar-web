@@ -54,7 +54,7 @@ PLAYER_LEVEL_REGEX = re.compile(r"^Level\s*\:\s*(?P<level>.+)$")
 # Compile regular expressions to hyperlink body text "`help " references.
 HELP_CMD_REGEX = {
     "PATTERN": r"`help ([\w| ]+)'",
-    "SUB": r'`<a href="/help/\1" title="Help: \1">help \1</a>`'
+    "SUB": r'`<a href="/help/\1\#topic" title="Help: \1">help \1</a>`'
 }
 
 
@@ -81,11 +81,6 @@ class HelpTab:
             path = Path(path)
             self.path = path
         self.help_topics = self.parse(_discover_help(path=self.path))
-
-    @property
-    def topics(self) -> dict:
-        """Set "topics" property to "help_topics" dictionary."""
-        return self.help_topics
 
     def __repr__(self) -> str:
         """Show the object type with absolute path and topic count string."""
@@ -130,7 +125,7 @@ class HelpTab:
 
         def get_absolute_url(self):
             """Admin link for account upgrade."""
-            return reverse(viewname="help_page", args=(self.name,))
+            return reverse(viewname="help_page", args=(self.name,)) + "#topic"
 
         def parse_header(self, header_lines: list):
             """Parse header of a "helptab" section, to gather aliases."""
@@ -288,13 +283,18 @@ class HelpTab:
             return f"{item}es"
 
         def __repr__(self) -> str:
-            """Show the object type with name string."""
+            """Show object type with name string."""
             return f"<{self.__class__.__name__}> {self.__str__()}"
 
         def __str__(self) -> str:
-            """Show the name of the help topic."""
+            """Show name of the help topic."""
             return self.name
 
+        def __gt__(self, other):
+            return self.name > other.name
+
+        def __lt__(self, other):
+            return self.name < other.name
 
     def parse(self, sections: list) -> dict:
         """Parse "helptab" sections into dictionary of help topic objects."""
@@ -350,24 +350,24 @@ class HelpTab:
         return topics
 
 
-    def search(self, search_name: str) -> set[HelpTopic,]:
+    def search(self, search_name: str) -> dict[str: HelpTopic,]:
         """Search help topic names and aliases for a string."""
-        search_results = set()
 
         # Immediately return exact match.
         if search_name in self.help_topics:
-            search_results.add(self.help_topics[search_name])
-            return search_results
+            return {search_name: self.help_topics[search_name]}
+
+        # Set a variety of formats of the search string.
+        fmts = (search_name.title(), search_name.lower(),search_name.upper(),
+                search_name.strip(),)
 
         # Iterate each help topic object to search their names and aliases.
+        search_results = {}
         for topic_name, topic in self.help_topics.items():
 
-            # Iterate a variety of formats of the string.
+            # Iterate variety of formats of the string.
             do_add = False
-            for name_fmt in (
-                search_name, search_name.strip(), search_name.title(),
-                search_name.lower(), search_name.upper()
-            ):
+            for name_fmt in fmts:
 
                 # Check if the topic name contains the string.
                 if name_fmt in topic_name:
@@ -385,7 +385,7 @@ class HelpTab:
 
             #  Add the help topic to the search results, if necessary.
             if do_add is True:
-                search_results.add(topic)
+                search_results[topic_name] = topic
 
-        # Return the set of any found help topics.
+        # Return the dictionary of any found help topics.
         return search_results

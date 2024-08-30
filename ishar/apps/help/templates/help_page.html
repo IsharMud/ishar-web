@@ -7,13 +7,13 @@
 {% block header %}
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item{% if not help_topic %} active" aria-current="page{% endif %}" title="Help">
+        <li class="breadcrumb-item{% if not help_topic %} active" aria-current="page{% endif %}" id="help" title="Help">
             <span class="text-ishar bi bi-info-circle"></span>
-            <a href="{% url "help" %}">Help</a>
+            <a href="{% url "help" %}#help">Help</a>
         </li>
     {% if help_topic %}
         <li class="breadcrumb-item active" aria-current="page" title="{{ help_topic.name }}">
-             <a href="{% url "help_page" help_topic=help_topic.name %}">{{ help_topic.name }}</a>
+             <a href="{{ help_topic.get_absolute_url }}" id="topic">{{ help_topic.name }}</a>
         </li>
     {% endif %}
     </ol>
@@ -85,7 +85,7 @@
         <footer class="blockquote-footer">
             <strong>See Also</strong>:
             {% for also_topic in help_topic.see_also %}
-            <a href="{% url "help" %}{{ also_topic }}" title="Help: {{ also_topic }}">{{ also_topic }}</a>{% if not forloop.last %}, {% endif %}
+            <a href="{% url "help_page" help_topic=also_topic %}#topic" title="Help: {{ also_topic }}">{{ also_topic }}</a>{% if not forloop.last %}, {% endif %}
             {% endfor %}
         </footer>
         </blockquote>
@@ -104,7 +104,7 @@
 
     {% if help_search_form %}
     <div class="m-1 p-1">
-        <form action="{% url "help" %}" method="post">
+        <form action="{% url "help" %}#help" method="post" id="search">
             {% csrf_token %}
             {{ help_search_form.as_p }}
             <p>
@@ -114,7 +114,7 @@
         </form>
         <p class="blockquote-footer">
             such as &quot;<a href="{% url "help_page" help_topic="spell" %}" title="Help: Spell">spell</a>&quot; or
-            &quot;<a href="{% url "help_page" help_topic="MUD Basics" %}" title="Help: MUD Basics">MUD Basics</a>&quot;
+            &quot;<a href="{% url "help_page" help_topic="MUD Basics" %}#topic" title="Help: MUD Basics">MUD Basics</a>&quot;
         </p>
     </div>
     <hr>
@@ -123,10 +123,10 @@
     <div class="m-1 p-1">
     {% if help_topics %}
         <ul class="two-col">
-        {% for list_topic in help_topics %}
-            <li title="Topic: {{ list_topic }}">
-                <a href="{% url "help_page" help_topic=list_topic %}">
-                    {{ list_topic }}
+        {% for list_topic in help_topics.values %}
+            <li title="Help: {{ list_topic.name }}">
+                <a href="{{ list_topic.get_absolute_url }}">
+                    {{ list_topic.name }}
                 </a>
             </li>
         {% endfor %}

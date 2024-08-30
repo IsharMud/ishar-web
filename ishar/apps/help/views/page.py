@@ -10,9 +10,7 @@ from ..views import HelpView
 logger = getLogger(__name__)
 
 class HelpPageView(HelpView):
-    """
-    Help page view.
-    """
+    """Help page view."""
     template_name = "help_page.html"
 
     def dispatch(self, request, *args, **kwargs):
@@ -29,20 +27,16 @@ class HelpPageView(HelpView):
 
                 # Handle single results.
                 if len(search_results) == 1:
-                    search_result = search_results.pop()
+                    search_result = next(iter(search_results))
+                    search_result_topic = search_results[search_result]
 
                     # Set exact name matches directly.
-                    if help_topic == search_result.name:
-                        self.help_topic = search_result
+                    if help_topic == search_result_topic.name:
+                        self.help_topic = search_result_topic
                         return super().dispatch(request, *args, **kwargs)
 
                     # Redirect single result to proper name of the topic.
-                    return redirect(
-                        to=reverse(
-                            viewname="help_page",
-                            args=(search_result.name,)
-                        )
-                    )
+                    return redirect(to=search_result_topic.get_absolute_url())
 
                 # Set the help topics to the search results.
                 self.help_topics = search_results
@@ -57,11 +51,7 @@ class HelpPageView(HelpView):
 
         return super().dispatch(request, *args, **kwargs)
 
-    def get(self, request, *args, **kwargs):
-        """
-        Set HTTP response status code.
-        """
-        return self.render_to_response(
-            context=self.get_context_data(**kwargs),
-            status=self.status
-        )
+    def render_to_response(self, context, **response_kwargs):
+        """Set HTTP response status code."""
+        response_kwargs["status"] = self.status
+        return super().render_to_response(context, **response_kwargs)
