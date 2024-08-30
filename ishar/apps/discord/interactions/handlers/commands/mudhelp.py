@@ -41,7 +41,7 @@ def mudhelp(request, interaction=None, _spell: bool = False) -> tuple[str, bool]
 
             # Append the search result URL to the Discord reply message.
             reply += (f" :information_source: "
-                      f"<{request.scheme}//{request.get_host()}{topic_url}>")
+                      f"<{request.scheme}://{request.get_host()}{topic_url}>")
 
     # Return the reply, and boolean whether it should be ephemeral.
     return reply, ephemeral
