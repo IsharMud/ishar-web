@@ -5,19 +5,10 @@ from ..forms import HelpSearchForm
 from ..utils.helptab import HelpTab
 
 
-HELP_PROPERTIES = (
-    "syntax", "level", "minimum", "class", "component", "topic", "save", "stats"
-)
-
-
-helptab = HelpTab()
-
 class HelpView(TemplateView):
-    """
-    Help view.
-    """
+    """Help view."""
     template_name = "help_page.html"
-    helptab = None
+    helptab = HelpTab()
     help_topic = None
     help_topics = {}
     http_method_names = ("get", "post")
@@ -26,7 +17,6 @@ class HelpView(TemplateView):
 
     def setup(self, request, *args, **kwargs):
         # Gather help topics from "helptab" file.
-        self.helptab = HelpTab()
         self.help_topics = self.helptab.help_topics
         super().setup(request, *args, **kwargs)
 
@@ -38,6 +28,7 @@ class HelpView(TemplateView):
         context["help_topic"] = self.help_topic
         return context
 
+    @staticmethod
     def post(self, request, *args, **kwargs):
         # Redirect POST requests to HTTP GET search for the help topic string.
         return redirect(

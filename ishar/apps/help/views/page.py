@@ -14,6 +14,7 @@ class HelpPageView(HelpView):
     template_name = "help_page.html"
 
     def dispatch(self, request, *args, **kwargs):
+        """Handle request for a specific help page. (/help/<topic|search>/)"""
 
         # Get help topic name from URL.
         help_topic = kwargs.get("help_topic")
@@ -41,7 +42,7 @@ class HelpPageView(HelpView):
                 # Set the help topics to the search results.
                 self.help_topics = search_results
 
-            # Tell user if no search results were found.
+            # Set response code and tell user if no search results were found.
             else:
                 self.status = 404
                 messages.error(
@@ -52,6 +53,6 @@ class HelpPageView(HelpView):
         return super().dispatch(request, *args, **kwargs)
 
     def render_to_response(self, context, **response_kwargs):
-        """Set HTTP response status code."""
+        # Return appropriate HTTP response status code.
         response_kwargs["status"] = self.status
         return super().render_to_response(context, **response_kwargs)
