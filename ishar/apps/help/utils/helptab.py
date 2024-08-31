@@ -1,8 +1,10 @@
-from django.conf import settings
-from django.urls import reverse
 from logging import getLogger
 from pathlib import Path
 import re
+
+from django.conf import settings
+from django.urls import reverse
+from django.utils.html import format_html
 
 from ..utils.parse import parse_player_class, parse_stats
 
@@ -106,7 +108,7 @@ class HelpTab:
         syntax: str = ""
         minimum: str = ""
         player_level: (int, str, None) = None
-        player_class: (list, str) = []
+        player_class: (list, str, None) = None
         save: str = ""
         stats: list = []
         components: list = []
@@ -121,7 +123,7 @@ class HelpTab:
             self.syntax = ""
             self.minimum = ""
             self.player_level = None
-            self.player_class = []
+            self.player_class = None
             self.save = ""
             self.stats = []
             self.components = []
@@ -293,6 +295,29 @@ class HelpTab:
                 flags=re.MULTILINE
             )
             return body
+
+        @property
+        def player_class_html(self) -> (list, str):
+            """Parse player class items for web display."""
+
+            # If a list, parse each item as a player class to be linked to.
+            if isinstance(self.player_class, list):
+                class_links = []
+
+                # Hyperlink each player class help page.
+                for class_item in self.player_class:
+                    link = reverse(viewname="help_page", args=(class_item,))
+                    link_text = format_html(
+                        '<a href="{}">{}</a>',
+                        link, class_item
+                    )
+                    class_links.append(link_text)
+
+                # Return hyperlinks to class help pages.
+                return class_links
+
+            # Return string directly.
+            return self.player_class
 
         def alias_count(self) -> int:
             """Count of number of help topic aliases."""

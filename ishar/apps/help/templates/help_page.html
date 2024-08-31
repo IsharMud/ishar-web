@@ -48,9 +48,7 @@
         {% if help_topic.player_class %}
                 <li>
                     <strong>Class{{ help_topic.player_class|pluralize:"es" }}</strong>:
-            {% for player_class in help_topic.player_class %}
-                    <code>{{ player_class }}</code>{% if not forloop.last %}, {% endif %}
-            {% endfor %}
+                    <code>{{ help_topic.player_class_html|join:', ' }}</code>
                 </li>
         {% endif %}
         {% if help_topic.save %}
