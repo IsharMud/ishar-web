@@ -1,13 +1,13 @@
 {% extends "layout.html" %}
 {% block meta_title %}World{% endblock meta_title %}
 {% block meta_description %}The World of Ishar is vast and very detailed with many areas{% endblock meta_description %}
-{% block meta_url %}{% url "world" %}{% endblock meta_url %}
+{% block meta_url %}{% url "world" %}#world{% endblock meta_url %}
 {% block header %}
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item active" aria-current="page" title="World">
             <span class="bi bi-globe-asia-australia text-ishar"></span>
-            <a href="{% url "world" %}">World</a>
+            <a href="{% url "world" %}#world" id="world">World</a>
         </li>
     </ol>
 </nav>
@@ -35,7 +35,7 @@
         <ul class="two-col">
         {% for area in areas %}
             <li title="{{ area.name }}">
-                <a href="{{ area.get_absolute_url }}">{{ area }}</a>
+                <a href="{{ area.get_absolute_url }}">{{ area.name }}</a>
             </li>
         {% endfor %}
         </ul>

@@ -12,6 +12,13 @@
             <a href="{% url "help" %}#help">Help</a>
         </li>
     {% if help_topic %}
+        {% if help_topic.is_area %}
+        <li class="breadcrumb-item" aria-current="page" title="World">
+            <span class="bi bi-globe-asia-australia text-ishar"></span>
+            <a href="{% url "world" %}#world" id="world">World</a>
+        </li>
+        {% else %}
+        {% endif %}
         <li class="breadcrumb-item active" aria-current="page" title="{{ help_topic.name }}">
              <a href="{{ help_topic.get_absolute_url }}" id="topic">{{ help_topic.name }}</a>
         </li>
@@ -27,20 +34,17 @@
             <ul class="two-col">
         {% if help_topic.syntax %}
                 <li>
-                    <strong>Syntax</strong>:
-                    <code>{{ help_topic.syntax }}</code>
+                    <strong>Syntax</strong>: <code>{{ help_topic.syntax }}</code>
                 </li>
         {% endif %}
         {% if help_topic.minimum %}
                 <li>
-                    <strong>Minimum</strong>:
-                    <code>{{ help_topic.minimum }}</code>
+                    <strong>Minimum</strong>: <code>{{ help_topic.minimum }}</code>
                 </li>
         {% endif %}
         {% if help_topic.player_level %}
                 <li>
-                    <strong>Level</strong>:
-                    <code>{{ help_topic.player_level }}</code>
+                    <strong>Level</strong>: <code>{{ help_topic.player_level }}</code>
                 </li>
         {% endif %}
         {% if help_topic.player_class %}
@@ -53,8 +57,7 @@
         {% endif %}
         {% if help_topic.save %}
                 <li>
-                    <strong>Save</strong>:
-                    <code>{{ help_topic.save }}</code>
+                    <strong>Save</strong>: <code>{{ help_topic.save }}</code>
                 </li>
         {% endif %}
         {% if help_topic.stats %}
@@ -77,17 +80,17 @@
         </div>
         {% if help_topic.body_html %}
         <blockquote>
-            <pre class="bg-black text-white border border-secondary mx-3" style="max-width: 80ch;">
+            <pre class="bg-black text-white border border-secondary px-1" style="max-width: 80ch;">
                 {% autoescape off %}{{ help_topic.body_html }}{% endautoescape %}
             </pre>
         {% endif %}
         {% if help_topic.see_also %}
-        <footer class="blockquote-footer">
-            <strong>See Also</strong>:
+            <footer class="blockquote-footer">
+                <strong>See Also</strong>:
             {% for also_topic in help_topic.see_also %}
-            <a href="{% url "help_page" help_topic=also_topic %}#topic" title="Help: {{ also_topic }}">{{ also_topic }}</a>{% if not forloop.last %}, {% endif %}
+                <a href="{% url "help_page" help_topic=also_topic %}#topic" title="Help: {{ also_topic }}">{{ also_topic }}</a>{% if not forloop.last %}, {% endif %}
             {% endfor %}
-        </footer>
+            </footer>
         </blockquote>
         {% endif %}
     </div>
@@ -113,8 +116,8 @@
             </p>
         </form>
         <p class="blockquote-footer">
-            such as &quot;<a href="{% url "help_page" help_topic="spell" %}" title="Help: Spell">spell</a>&quot; or
-            &quot;<a href="{% url "help_page" help_topic="MUD Basics" %}#topic" title="Help: MUD Basics">MUD Basics</a>&quot;
+            such as &quot;<a href="{% url 'help_page' help_topic='spell' %}#help" title="Help: Spell">spell</a>&quot; or
+            &quot;<a href="{% url 'help_page' help_topic='MUD Basics' %}#topic" title="Help: MUD Basics">MUD Basics</a>&quot;
         </p>
     </div>
     <hr>
