@@ -316,7 +316,7 @@ class HelpTab:
                 # Return hyperlinks to class help pages.
                 return class_links
 
-            # Return string directly.
+            # Return non-list directly.
             return self.player_class
 
         def alias_count(self) -> int:
@@ -411,6 +411,10 @@ class HelpTab:
         # Iterate each help topic object to search their names and aliases.
         search_results = {}
         for topic_name, topic in self.help_topics.items():
+
+            # Return direct alias match.
+            if search_name in topic.aliases:
+                return {topic_name: topic}
 
             # Iterate variety of formats of the string.
             do_add = False
