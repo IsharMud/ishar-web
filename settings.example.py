@@ -135,9 +135,9 @@ TEMPLATES = [
                 "ishar.apps.events.contexts.global_event_count",
                 "ishar.apps.seasons.contexts.current_season",
             ],
-            "libraries": {
-                "ishar": "ishar.apps.core.templatetags"
-            }
+#            "libraries": {
+#                "ishar": "ishar.apps.core.templatetags"
+#            }
         },
     },
 ]
