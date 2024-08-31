@@ -306,7 +306,7 @@ class HelpTab:
 
                 # Hyperlink each player class help page.
                 for class_item in self.player_class:
-                    link = reverse(viewname="help_page", args=(class_item,))
+                    link = reverse("help_page", args=(class_item,)) + "#topic"
                     link_text = format_html(
                         '<a href="{}">{}</a>',
                         link, class_item
