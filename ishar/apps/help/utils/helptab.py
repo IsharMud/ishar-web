@@ -39,6 +39,9 @@ SEE_ALSO_REGEX = re.compile(
     flags=re.IGNORECASE
 )
 
+# Compile regular expression to match sections for another level in content.
+DIFF_LEVEL_REGEX = re.compile("^\%\%(?P<diff_level>[0-9]{1,2})$")
+
 # Compile regular expressions for help command minimum and syntax.
 MINIMUM_REGEX = re.compile(r"^(Minimum|minimum|Min|min)\s*\:\s*(?P<min>.+)$")
 SYNTAX_REGEX = re.compile(r"^(Syntax|syntax)\s*\:\s*(?P<syntax>.+)$")
@@ -203,42 +206,61 @@ class HelpTab:
 
             # Prepare for parsing any "See also" lines.
             is_see_also = False
+            do_skip = False
             also_topics = ""
 
             # Iterate each line of the help topic content.
             for content_line in content.split("\n"):
 
-                # Parse any "see also" (related) topics into a set.
-                if not self.see_also:
+                # Handle specific level numbers (%%<##> where ## is the level).
+                diff_level_match = DIFF_LEVEL_REGEX.fullmatch(content_line)
+                if diff_level_match:
 
-                    # Get text after colon (":") on first "see also" line.
-                    also_match = SEE_ALSO_REGEX.fullmatch(content_line)
-                    if also_match:
-                        is_see_also = True
+                    # Ignore immortal level sections.
+                    diff_level = int(diff_level_match.group("diff_level"))
+                    if diff_level >= settings.MIN_IMMORTAL_LEVEL:
+                        do_skip = True
+                    else:
+                        do_skip = False
 
-                    # Store "see also" topics text in a string to parse later.
-                    if is_see_also:
+                    # Skip to the next line.
+                    continue
+
+                # Parse line if not otherwise being skipped.
+                if do_skip is False:
+
+                    # Look for any "see also" topics, if there are none.
+                    if not self.see_also:
+
+                        # Consider text after "see also" to be topic names.
+                        also_match = SEE_ALSO_REGEX.fullmatch(content_line)
                         if also_match:
-                            also_topics = also_match.group("topics")
-                        else:
-                            also_topics += content_line
+                            is_see_also = True
 
-                # Parse line of the help topic content.
-                if not is_see_also:
+                        # Add all "see also" topics to long string to be parsed.
+                        if is_see_also:
+                            if also_match:
+                                also_topics = also_match.group("topics")
+                            else:
+                                also_topics += content_line
+
+                            # Skip to the next line.
+                            continue
+
+                    # Parse line as body text.
                     parsed = self.parse_content_line(content_line=content_line)
                     if parsed is True:
                         self.body += f"{content_line}\n"
 
-            # Replace line breaks with a comma in the "see also" topics.
+            # Replace line breaks with a comma in the "see also" topics string.
             also_topics = also_topics.replace("\n", ",")
 
-            # Parse discovered "see also" help topics, adding them to a set.
+            # Parse discovered "see also" help topic, adding them to a set.
             if also_topics:
                 for also_topic in also_topics.split(","):
                     also_topic = also_topic.strip()
                     if also_topic:
                         self.see_also.add(also_topic)
-
 
         @property
         def is_area(self) -> bool:
