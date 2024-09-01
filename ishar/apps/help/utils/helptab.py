@@ -109,6 +109,7 @@ class HelpTab:
         minimum: str = ""
         player_level: (int, str, None) = None
         player_class: (list, str, None) = None
+        position: str = ""
         save: str = ""
         stats: list = []
         components: list = []
@@ -124,6 +125,7 @@ class HelpTab:
             self.minimum = ""
             self.player_level = None
             self.player_class = None
+            self.position = ""
             self.save = ""
             self.stats = []
             self.components = []
@@ -178,6 +180,11 @@ class HelpTab:
                         pcls=pcls_match.group("pclass")
                     )
                     return False
+
+            # Check whether the line is for position ("Posn"), parsing if so.
+            if not self.position and content_line.startswith("Posn   : "):
+                self.position = content_line.split(":")[1].strip()
+                return False
 
             # Check whether the line is for "Save ", parsing if so.
             if not self.save and content_line.startswith("Save "):
@@ -343,7 +350,7 @@ class HelpTab:
         def __lt__(self, other):
             return self.name < other.name
 
-    def parse(self, sections: list) -> dict:
+    def parse(self, sections: list) -> dict[str: HelpTopic,]:
         """Parse "helptab" sections into dictionary of help topic objects."""
         topics = {}
 
@@ -395,7 +402,6 @@ class HelpTab:
 
         # Return complete list of help topics parsed from "helptab" sections.
         return topics
-
 
     def search(self, search_name: str) -> dict[str: HelpTopic,]:
         """Search help topic names and aliases for a string."""
