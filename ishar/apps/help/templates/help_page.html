@@ -51,6 +51,11 @@
                     <code>{{ help_topic.player_class_html|join:', ' }}</code>
                 </li>
         {% endif %}
+        {% if help_topic.position %}
+                <li>
+                    <strong>Position</strong>: <code>{{ help_topic.position }}</code>
+                </li>
+        {% endif %}
         {% if help_topic.save %}
                 <li>
                     <strong>Save</strong>: <code>{{ help_topic.save }}</code>
