@@ -126,6 +126,9 @@
 
     <div class="m-1 p-1">
     {% if help_topics %}
+        <h5 title="{{ help_topics|length }} topics">
+            {{ help_topics|length }} topics
+        </h5>
         <ul class="two-col">
         {% for list_topic in help_topics.values %}
             <li title="Help: {{ list_topic.name }}">

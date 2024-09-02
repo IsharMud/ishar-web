@@ -131,7 +131,7 @@ class HelpTab:
             self.components = []
 
         def get_absolute_url(self):
-            """Admin link for account upgrade."""
+            """URL to help topic page, with anchor."""
             return reverse(viewname="help_page", args=(self.name,)) + "#topic"
 
         def parse_header(self, header_lines: list):

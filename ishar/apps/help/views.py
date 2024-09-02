@@ -7,7 +7,7 @@ from .utils.helptab import HelpTab
 
 
 class HelpView(TemplateView):
-    """Help view."""
+    """Help (/help/(<topic|search>/)?> view."""
     template_name = "help_page.html"
     helptab = HelpTab()
     help_topic = None
@@ -22,9 +22,9 @@ class HelpView(TemplateView):
         super().setup(request, *args, **kwargs)
 
     def dispatch(self, request, *args, **kwargs):
-        """Handle request for a specific help page. (/help/<topic|search>/)"""
+        # Handle requests for search and specific help topic pages.
 
-        # Get help topic name from URL.
+        # Get help topic name from URL, to search or find specific topic page.
         help_topic = kwargs.get("help_topic")
         if help_topic is not None:
 
@@ -38,15 +38,15 @@ class HelpView(TemplateView):
                 if len(search_results) == 1:
                     search_result = next(iter(search_results.values()))
 
-                    # Set exact name matches directly.
+                    # Return exact name match directly.
                     if help_topic == search_result.name:
                         self.help_topic = search_result
                         return super().dispatch(request, *args, **kwargs)
 
-                    # Redirect single result to proper name of the topic.
+                    # Redirect single result to that help topic page.
                     return redirect(to=search_result.get_absolute_url())
 
-                # Set the help topics to the search results.
+                # Set help topics to the search results.
                 self.help_topics = search_results
 
             # Set response code and tell user if no search results were found.
@@ -61,7 +61,7 @@ class HelpView(TemplateView):
 
 
     def get_context_data(self, **kwargs):
-        # Include form, all help topics, and any specific help topic chosen.
+        # Include search form, help topics, and any chosen topic in context.
         context = super().get_context_data(**kwargs)
         context["help_search_form"] = self.search_form
         context["help_topics"] = self.help_topics
@@ -74,7 +74,7 @@ class HelpView(TemplateView):
         return super().render_to_response(context, **response_kwargs)
 
     def post(self, request, *args, **kwargs):
-        # Redirect POST requests to HTTP GET search for the help topic string.
+        # Redirect HTTP POST request to GET (search) for the help topic string.
         return redirect(
             to="help_page",
             help_topic=request.POST.get("search_topic")
@@ -82,11 +82,11 @@ class HelpView(TemplateView):
 
 
 class WorldView(HelpView):
-    """World view."""
+    """World (/world/) view."""
     template_name = "world.html"
 
     def get_context_data(self, **kwargs):
-        # Include sorted "areas" context of "Area " topics in "helptab" file.
+        # Include sorted "areas" context of "Area " topics from "helptab" file.
         context = super().get_context_data(**kwargs)
         context["areas"] = []
         for topic_name, topic in self.helptab.search("Area ").items():
