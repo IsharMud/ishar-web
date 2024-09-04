@@ -7,13 +7,12 @@
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item{% if not help_topic %} active" aria-current="page{% endif %}" id="help" title="Help">
-            <span class="text-ishar bi bi-info-circle"></span>
+            <span class="text-ishar bi bi-{% if help_topic and help_topic.is_area %}globe-asia-australia{% else %}info-circle{% endif %}"></span>
             <a href="{% url "help" %}#help">Help</a>
         </li>
     {% if help_topic %}
         {% if help_topic.is_area %}
-        <li class="breadcrumb-item" aria-current="page" title="World">
-            <span class="bi bi-globe-asia-australia text-ishar"></span>
+        <li class="breadcrumb-item" title="World">
             <a href="{% url "world" %}#areas" id="world">World</a>
         </li>
         {% endif %}
