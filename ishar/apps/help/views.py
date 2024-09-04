@@ -6,10 +6,13 @@ from .forms import HelpSearchForm
 from .utils.helptab import HelpTab
 
 
+HELPTAB = HelpTab()
+
+
 class HelpView(TemplateView):
     """Help (/help/(<topic|search>/)?> view."""
     template_name = "help_page.html"
-    helptab = HelpTab()
+    helptab = HELPTAB
     help_topic = None
     help_topics = {}
     http_method_names = ("get", "post")
@@ -81,9 +84,11 @@ class HelpView(TemplateView):
         )
 
 
-class WorldView(HelpView):
+class WorldView(TemplateView):
     """World (/world/) view."""
+    helptab = HELPTAB
     template_name = "world.html"
+    http_method_names = ("get",)
 
     def get_context_data(self, **kwargs):
         # Include sorted "areas" context of "Area " topics from "helptab" file.

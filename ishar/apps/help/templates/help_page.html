@@ -79,21 +79,21 @@
         {% endif %}
             </ul>
         </div>
-        {% if help_topic.body_html %}
         <blockquote>
+        {% if help_topic.body_html %}
             <pre class="bg-black text-white border border-secondary px-1" style="max-width: 80ch;">
                 {% autoescape off %}{{ help_topic.body_html }}{% endautoescape %}
             </pre>
         {% endif %}
         {% if help_topic.see_also %}
             <footer class="blockquote-footer">
-                <strong>See Also</strong>:
+                <strong id="see-also">See Also</strong>:
             {% for also_topic in help_topic.see_also %}
                 <a href="{% url "help_page" help_topic=also_topic %}#topic" title="Help: {{ also_topic }}">{{ also_topic }}</a>{% if not forloop.last %}, {% endif %}
             {% endfor %}
             </footer>
-        </blockquote>
         {% endif %}
+        </blockquote>
     </div>
     {% endif %}
 
@@ -117,7 +117,7 @@
             </p>
         </form>
         <p class="blockquote-footer">
-            such as &quot;<a href="{% url 'help_page' help_topic='spell' %}#help" title="Help: Spell">spell</a>&quot; or
+            such as &quot;<a href="{% url 'help_page' help_topic='spell' %}#topics" title="Help: Spell">spell</a>&quot; or
             &quot;<a href="{% url 'help_page' help_topic='MUD Basics' %}#topic" title="Help: MUD Basics">MUD Basics</a>&quot;
         </p>
     </div>
@@ -126,7 +126,7 @@
 
     <div class="m-1 p-1">
     {% if help_topics %}
-        <h5 title="{{ help_topics|length }} topics">
+        <h5 title="{{ help_topics|length }} topics" id="topics">
             {{ help_topics|length }} topics
         </h5>
         <ul class="two-col">
