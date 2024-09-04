@@ -36,8 +36,11 @@
     </div>
     {% if areas %}
     <div class="m-1 p-1">
-        <h5 title="{{ areas|length }} areas">
-            {{ areas|length }} areas
+        <h5 title="{{ areas|length }} areas" id="areas">
+            {{ areas|length }} Areas
+            <a class="anchor-link" href="#areas" aria-label="Link to this section: Areas">
+                &#x23;
+            </a>
         </h5>
         <ul class="two-col">
         {% for area in areas %}
