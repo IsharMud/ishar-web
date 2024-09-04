@@ -35,11 +35,14 @@
         </p>
     </div>
     {% if areas %}
-    <div>
+    <div class="m-1 p-1">
+        <h5 title="{{ areas|length }} areas">
+            {{ areas|length }} areas
+        </h5>
         <ul class="two-col">
         {% for area in areas %}
             <li title="{{ area.name }}">
-                <a href="{{ area.get_absolute_url }}">{{ area.name }}</a>
+                <a href="{{ area.get_absolute_url }}" title="{{ area.name }}">{{ area.name }}</a>
             </li>
         {% endfor %}
         </ul>
