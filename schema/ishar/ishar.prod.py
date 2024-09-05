@@ -1219,7 +1219,7 @@ class PlayerSkills(models.Model):
 
 class PlayerStats(models.Model):
     player_stats_id = models.AutoField(primary_key=True)
-    player = models.OneToOneField('Players', models.DO_NOTHING, blank=True, null=True)
+    player = models.ForeignKey('Players', models.DO_NOTHING, blank=True, null=True)
     total_play_time = models.PositiveIntegerField(blank=True, null=True)
     remort_play_time = models.PositiveIntegerField(blank=True, null=True)
     total_deaths = models.PositiveIntegerField(blank=True, null=True)
