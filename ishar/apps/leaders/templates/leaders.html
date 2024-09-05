@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block meta_title %}Leaders{% if game_type %} / {{ game_type }}{% endif %}{% endblock meta_title %}
 {% block meta_description %}Leader board of top{% if game_type %} {{ game_type|lower }}{% endif %} players of the game and their achievements{% endblock meta_description %}
-{% block meta_url %}{% url "leaders" %}{% endblock meta_url %}
+{% block meta_url %}{% url 'leaders' %}{% endblock meta_url %}
 {% block title %}Leaders{% if game_type and game_type_name %} / {{ game_type_name }}{% endif %}{% endblock title %}
 {% block scripts %}
         <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
@@ -14,16 +14,16 @@
     <ol class="breadcrumb">
         <li class="breadcrumb-item" title="Portal">
             <span class="text-ishar bi bi-trophy"></span>
-            <a href="{% url "portal" %}">Portal</a>
+            <a href="{% url 'portal' %}#portal" id="portal">Portal</a>
         </li>
         <li class="breadcrumb-item{% if not game_type %} active" aria-current="page{% endif %}" title="Leaders">
-            <a href="{% url "leaders" %}#leaders" id="leaders">
+            <a href="{% url 'leaders' %}#leaders" id="leaders">
                 Leaders
             </a>
         </li>
     {% if game_type_name %}
         <li class="breadcrumb-item active" aria-current="page" title="{{ game_type_name }} Leaders">
-            <a href="{% url "leaders" %}{{ game_type_name|lower }}#{{ game_type_name|lower }}" id="{{ game_type_name|lower }}">
+            <a href="{% url 'leaders' %}{{ game_type_name|lower }}#{{ game_type_name|lower }}" id="{{ game_type_name|lower }}">
                 {{ game_type_name }}
             </a>
         </li>
@@ -38,7 +38,7 @@
 {% if game_type is None %}
         <span class="text-ishar">All</span>
 {% else %}
-        <a class="list-group-item-text" href="{% url "leaders" %}#leaders">All</a>
+        <a class="list-group-item-text" href="{% url 'leaders' %}#leaders">All</a>
 {% endif %}
     </li>
 {% for num, name in game_types %}
@@ -46,7 +46,7 @@
 {% if game_type == num %}
         <span class="text-ishar">{{ name }}</span>
 {% else %}
-        <a class="list-group-item-text" href="{% url "leaders" %}{{ name|lower }}#{{ name|lower }}">{{ name }}</a>
+        <a class="list-group-item-text" href="{% url 'leaders' %}{{ name|lower }}#{{ name|lower }}">{{ name }}</a>
 {% endif %}
     </li>
 {% endfor %}
@@ -58,21 +58,21 @@
     {% if deleted is None %}
         <span class="text-ishar">All</span>
     {% else %}
-        <a class="list-group-item-text" href="{% url "leaders" %}{{ game_type_name|lower }}/">All</a>
+        <a class="list-group-item-text" href="{% url 'leaders' %}{{ game_type_name|lower }}/">All</a>
     {% endif %}
     </li>
     <li class="list-group-item bg-black" title="Dead">
     {% if deleted == 1 %}
         <span class="text-ishar">Dead</span>
     {% else %}
-        <a class="list-group-item-text" href="{% url "leaders" %}{{ game_type_name|lower }}/dead/">Dead</a>
+        <a class="list-group-item-text" href="{% url 'leaders' %}{{ game_type_name|lower }}/dead/">Dead</a>
     {% endif %}
     </li>
     <li class="list-group-item bg-black" title="Living">
     {% if deleted == 0 %}
         <span class="text-ishar">Living</span>
     {% else %}
-        <a class="list-group-item-text" href="{% url "leaders" %}{{ game_type_name|lower }}/living/">Living</a>
+        <a class="list-group-item-text" href="{% url 'leaders' %}{{ game_type_name|lower }}/living/">Living</a>
     {% endif %}
     </li>
 </ul>

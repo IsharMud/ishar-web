@@ -2,14 +2,14 @@
 {% load humanize %}
 {% block meta_title %}{% if player %}Player: {{ player.name }}{% if player.player_type == 'Dead' %} ☠️{% endif %}{% else %}Player Not Found{% endif %}{% endblock meta_title %}
 {% block meta_description %}{% if player %}Player: {{ player.name }}{% if player.player_type == 'Dead' %} ☠️{% endif %}{% else %}Player Not Found{% endif %}{% endblock meta_description %}
-{% block meta_url %}{% url "players" %}{% endblock meta_url %}
+{% block meta_url %}{% url 'players' %}{% endblock meta_url %}
 {% block title %}{% if player %}Player: {{ player.name }}{% if player.player_type == 'Dead' %} ☠️{% endif %}{% else %}Player Not Found{% endif %}{% endblock title %}
 {% block header %}
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item" title="Portal">
             <span class="bi bi-person text-ishar"></span>
-            <a href="{% url "portal" %}">
+            <a href="{% url 'portal' %}#portal" id="portal">
                 Portal
             </a>
         </li>

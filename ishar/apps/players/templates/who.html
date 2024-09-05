@@ -2,17 +2,17 @@
 {% load humanize %}
 {% block meta_title %}Who's Online?{% endblock meta_title %}
 {% block meta_description %}Number of players currently online.{% endblock meta_description %}
-{% block meta_url %}{% url "who" %}{% endblock meta_url %}
+{% block meta_url %}{% url 'who' %}{% endblock meta_url %}
 {% block title %}Who's Online?{% if players %} ({{ players | length }} player{{ players|pluralize }}){% endif %}{% endblock title %}
 {% block header %}
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item" title="Portal">
             <span class="bi bi-people text-ishar"></span>
-            <a href="{% url "portal" %}">Portal</a>
+            <a href="{% url 'portal' %}#portal" id="portal">Portal</a>
         </li>
         <li class="breadcrumb-item active" aria-current="page" title="Who's Online?">
-            <a href="{% url "who" %}">Who's Online?</a>
+            <a href="{% url 'who' %}#who" id="who">Who's Online?</a>
         </li>
     </ol>
 </nav>

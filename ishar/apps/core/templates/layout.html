@@ -15,7 +15,7 @@
         <meta property="og:title" content="{{ WEBSITE_TITLE }}: {% block meta_title %}Home{% endblock meta_title %}">
         <meta property="og:description" content="{{ WEBSITE_TITLE }}: {% block meta_description %}a free online text-adventure RPG{% endblock meta_description %}">
         <meta property="og:image" content="https://{{ request.META.HTTP_HOST }}{% block meta_image %}{% static "images/logo.png" %}{% endblock meta_image %}">
-        <meta property="og:url" content="https://{{ request.META.HTTP_HOST }}{% block meta_url %}{% url "index" %}{% endblock meta_url %}">
+        <meta property="og:url" content="https://{{ request.META.HTTP_HOST }}{% block meta_url %}{% url 'index' %}{% endblock meta_url %}">
         <title>{{ WEBSITE_TITLE }}: {% block title %}Home{% endblock title %}</title>
         <link rel="apple-touch-icon" sizes="180x180" href="{% static "images/apple-touch-icon.png" %}">
         <link rel="icon" type="image/png" sizes="32x32" href="{% static "images/favicon-32x32.png" %}">
@@ -35,7 +35,7 @@
 
         <header class="container-fluid p-1">
             <nav class="navbar navbar-dark navbar-expand-lg bg-black rounded border-ishar">
-                <a href="{% url "index" %}" title="{{ WEBSITE_TITLE }}">
+                <a href="{% url 'index' %}" title="{{ WEBSITE_TITLE }}">
                     <img class="navbar-brand" id="logo" alt="{{ WEBSITE_TITLE }}" src="{% static "images/logo.png" %}" style="height: 10rem;">
                 </a>
                 <button class="m-3 navbar-toggler navbar-dark border-ishar" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle Navigation">
@@ -44,51 +44,51 @@
                 <div class="collapse navbar-collapse p-3" id="navbarNavDropdown">
                     <ul class="navbar-nav nav-underline">
                         <li class="nav-item" title="Home">
-                            <a class="bi bi-house nav-link" href="{% url "index" %}">
+                            <a class="bi bi-house nav-link" href="{% url 'index' %}">
                                 Home
                             </a>
                         </li>
 {% if user.is_staff %}
                         <li class="nav-item" title="Admin">
-                            <a class="bi bi-gear nav-link" href="{% url "admin:index" %}" target="_blank">
+                            <a class="bi bi-gear nav-link" href="{% url 'admin:index' %}" target="_blank">
                                 Admin
                             </a>
                         </li>
 {% endif %}
                         <li class="nav-item" title="Connect to {{ WEBSITE_TITLE }}">
-                            <a class="bi bi-globe nav-link" href="{% url "connect" %}" target="_blank">
+                            <a class="bi bi-globe nav-link" href="{% url 'connect' %}" target="_blank">
                                 Connect
                             </a>
                         </li>
                         <li class="nav-item" title="Frequently Asked Questions">
-                            <a class="bi-question-circle nav-link" href="{% url "faq" %}">
+                            <a class="bi-question-circle nav-link" href="{% url 'faq' %}#faq">
                                 FAQs
                             </a>
                         </li>
                         <li class="nav-item" title="Help">
-                            <a class="bi bi-info-circle nav-link" href="{% url "help" %}#help">
+                            <a class="bi bi-info-circle nav-link" href="{% url 'help' %}#help">
                                 Help
                             </a>
                         </li>
                         <li class="nav-item" title="Patches">
-                            <a class="bi bi-bandaid nav-link" href="{% url "patches" %}">
+                            <a class="bi bi-bandaid nav-link" href="{% url 'patches' %}#patches">
                                 Patches
                             </a>
                         </li>
 {% if user and user.is_authenticated %}
                         <li class="nav-item dropdown">
-                            <a class="bi bi-menu-button nav-link dropdown-toggle" href="{% url "portal" %}" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <a class="bi bi-menu-button nav-link dropdown-toggle" href="{% url 'portal' %}#portal" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 Portal
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark bg-black border border-secondary p-3">
                                 <li class="nav-item" title="Challenges">
-                                    <a class="bi bi-award bg-black nav-link dropdown-item" href="{% url "challenges" %}">
+                                    <a class="bi bi-award bg-black nav-link dropdown-item" href="{% url 'challenges' %}#challenges">
                                         Challenges
                                     </a>
                                 </li>
     {% if GLOBAL_EVENT_COUNT and GLOBAL_EVENT_COUNT > 0 %}
                                 <li class="nav-item" title="Events ({{ GLOBAL_EVENT_COUNT }})">
-                                    <a class="bi bi-calendar-event bg-black nav-link dropdown-item" href="{% url "events" %}">
+                                    <a class="bi bi-calendar-event bg-black nav-link dropdown-item" href="{% url 'events' %}#events">
                                         Events
                                         <span class="badge text-bg-secondary">
                                             {{ GLOBAL_EVENT_COUNT }}
@@ -97,12 +97,12 @@
                                 </li>
     {% endif %}
                                 <li class="nav-item" title="Leaders">
-                                    <a class="bi bi-trophy bg-black nav-link dropdown-item" href="{% url "leaders" %}">
+                                    <a class="bi bi-trophy bg-black nav-link dropdown-item" href="{% url 'leaders' %}#leaders">
                                         Leaders
                                     </a>
                                 </li>
                                 <li class="nav-item" title="Portal">
-                                    <a class="bi bi-person-lines-fill bg-black nav-link dropdown-item" href="{% url "portal" %}">
+                                    <a class="bi bi-person-lines-fill bg-black nav-link dropdown-item" href="{% url 'portal' %}#portal">
                                         Portal
                                     </a>
                                 </li>
@@ -110,7 +110,7 @@
                                     <hr class="dropdown-divider border-secondary">
                                 </li>
                                 <li class="nav-item" title="Log out">
-                                    <form action="{% url "logout" %}" method="post" id="logout">
+                                    <form action="{% url 'logout' %}" method="post" id="logout">
                                         {% csrf_token %}
                                         <a class="bi bi-door-closed bg-black nav-link dropdown-item" href="#" onclick="document.getElementById('logout').submit()">
                                             Log Out ({{ request.user.get_username }})
@@ -121,13 +121,13 @@
                         </li>
 {% else %}
                         <li class="nav-item" title="Portal">
-                            <a class="bi bi-menu-button nav-link" href="{% url "portal" %}">
+                            <a class="bi bi-menu-button nav-link" href="{% url 'portal' %}#portal">
                                 Portal
                             </a>
                         </li>
 {% endif %}
                         <li class="nav-item" title="World">
-                            <a class="bi bi-globe-asia-australia nav-link" href="{% url "world" %}#world">
+                            <a class="bi bi-globe-asia-australia nav-link" href="{% url 'world' %}#world">
                                 World
                             </a>
                         </li>
@@ -167,7 +167,7 @@
         <footer class="container-fluid px-2 text-center" title="Season {{ CURRENT_SEASON.season_id }} ends {{ CURRENT_SEASON.expiration_date | naturaltime }}">
             <div class="row border-ishar bg-black rounded align-items-center m-1 p-2">
                 <div class="col">
-                    <a href="{% url "current_season" %}">Season {{ CURRENT_SEASON.season_id }}</a>
+                    <a href="{% url 'current_season' %}#season">Season {{ CURRENT_SEASON.season_id }}</a>
                 </div>
                 <div class="col">
                     Ends {{ CURRENT_SEASON.expiration_date | naturaltime }}
@@ -184,12 +184,12 @@
                     </a>
                 </div>
                 <div class="col">
-                    <a class="bi bi-heart" href="{% url 'support' %}" title="Support {{ WEBSITE_TITLE }}">
+                    <a class="bi bi-heart" href="{% url 'support' %}#support" title="Support {{ WEBSITE_TITLE }}">
                         Support {{ WEBSITE_TITLE }}
                     </a>
                 </div>
                 <div class="col">
-                    <a class="bi bi-discord" href="{% url "discord" %}" target="_blank" title="Join us on Discord!">
+                    <a class="bi bi-discord" href="{% url 'discord' %}" target="_blank" title="Join us on Discord!">
                         Join us on Discord!
                     </a>
                 </div>

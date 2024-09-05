@@ -2,14 +2,14 @@
 {% load humanize %}
 {% block meta_title %}Portal{% endblock meta_title %}
 {% block meta_description %}Portal for players to see information about their account and characters.{% endblock meta_description %}
-{% block meta_url %}{% url "portal" %}{% endblock meta_url %}
+{% block meta_url %}{% url 'portal' %}{% endblock meta_url %}
 {% block title %}Portal{% endblock title %}
 {% block header %}
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item active" aria-current="page" title="Portal">
             <span class="bi bi-person-lines-fill text-ishar"></span>
-            <a href="{% url "portal" %}">Portal</a>
+            <a href="{% url 'portal' %}#portal" id="portal">Portal</a>
         </li>
     </ol>
 </nav>
@@ -18,19 +18,19 @@
     <ul class="list-group list-group-horizontal-md">
         <li class="bg-black border border-secondary list-group-item-dark list-group-item" title="Challenges">
             <span class="bi bi-award text-ishar"></span>
-            <a class="list-group-item-text" href="{% url "challenges" %}">
+            <a class="list-group-item-text" href="{% url 'challenges' %}#challenges">
                 Challenges
             </a>
         </li>
         <li class="bg-black border border-secondary list-group-item-dark list-group-item" title="Leaders">
             <span class="bi bi-trophy text-ishar"></span>
-            <a class="list-group-item-text" href="{% url "leaders" %}">
+            <a class="list-group-item-text" href="{% url 'leaders' %}#leaders">
                 Leaders
             </a>
         </li>
         <li class="bg-black border border-secondary list-group-item-dark list-group-item" title="Password">
             <span class="bi bi-key text-ishar"></span>
-            <a class="list-group-item-text" href="{% url "password" %}">
+            <a class="list-group-item-text" href="{% url 'password' %}#password">
                 Password
             </a>
         </li>
@@ -138,7 +138,7 @@
 <details open>
     <summary id="essence" class="h3 text-ishar" title="Essence ({{ request.user.account_name }})">
         Essence
-        <a href="{% url "help_page" help_topic='Essence' %}" title="Help: Essence">
+        <a href="{% url 'help_page' help_topic='Essence' %}" title="Help: Essence">
             <span class="bi p-1 bi-question-circle text-secondary"></span>
         </a>
         <a class="anchor-link" href="#essence" aria-label="Link to this section: Essence ({{ request.user.account_name }})">
