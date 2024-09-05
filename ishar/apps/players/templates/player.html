@@ -59,44 +59,44 @@
             </a>
         </summary>
         <ul class="bg-black list-group list-group-horizontal-md">
-            <li id="class" class="bg-black border-0 list-group-item list-group-item-text text-white" title="Name: {{ player.name | title }} / Class: {{ player.common.player_class.get_class_name }} / Race: {{ player.common.race.display_name }}">
+            <li class="bg-black border-0 list-group-item list-group-item-text text-white" title="Name: {{ player.name | title }} / Class: {{ player.common.player_class.get_class_name }} / Race: {{ player.common.race.display_name }}">
                 <span class="bi bi-dot text-ishar"></span>
                 {{ player.name | title }} {{ player.get_player_phrase }} a
                 {{ player.common.player_class.class_display }} of
                 {{ player.common.race.folk_name | lower }} origin.
             </li>
-            <li id="level" class="bg-black border-0 list-group-item list-group-item-text text-white" title="Level: {{ player.common.level }} {% if player.remorts > 0 %} / Remorts: {{ player.remorts }}{% endif %}">
+            <li class="bg-black border-0 list-group-item list-group-item-text text-white" title="Level: {{ player.common.level }} {% if player.remorts > 0 %} / Remorts: {{ player.remorts }}{% endif %}">
                 <span class="bi bi-dot text-ishar"></span>
                 {{ player.get_player_gender | title }} {{ player.get_player_phrase }}
                 level {{ player.common.level }}{% if player.remorts > 0 %} and {{ player.get_player_phrase_owns }} remorted {{ player.remorts }} time{{ player.remorts|pluralize }}{% endif %}.
             </li>
             {% if player.total_renown > 0 %}
-            <li id="total-renown" class="bg-black border-0 list-group-item list-group-item-text text-white" title="Total Renown: {{ player.total_renown }}">
+            <li class="bg-black border-0 list-group-item list-group-item-text text-white" title="Total Renown: {{ player.total_renown }}">
                 <span class="bi bi-dot text-ishar"></span>
                 {{ player.get_player_gender | title }} {{ player.get_player_phrase_owns }}
                 accumulated {{ player.total_renown }} renown.
             </li>
             {% endif %}
             {% if player.quests_completed > 0 %}
-            <li id="quests" class="bg-black border-0 list-group-item list-group-item-text text-white" title="Quests Completed: {{ player.quests_completed }}">
+            <li class="bg-black border-0 list-group-item list-group-item-text text-white" title="Quests Completed: {{ player.quests_completed }}">
                 <span class="bi bi-dot text-ishar"></span>
                 {{ player.get_player_gender | title }} {{ player.get_player_phrase_owns }}
                 completed {{ player.quests_completed }} quest{{ player.quests_completed | pluralize }}.
             </li>
             {% endif %}
             {% if player.challenges_completed > 0 %}
-            <li id="challenges" class="bg-black border-0 list-group-item list-group-item-text text-white" title="Challenges Completed: {{ player.challenges_completed }}">
+            <li class="bg-black border-0 list-group-item list-group-item-text text-white" title="Challenges Completed: {{ player.challenges_completed }}">
                 <span class="bi bi-dot text-ishar"></span>
                 {{ player.get_player_gender | title }} {{ player.get_player_phrase_owns }}
                 completed {{ player.challenges_completed }} challenge{{ player.challenges_completed | pluralize }}.
             </li>
             {% endif %}
-            <li id="alignment" class="bg-black border-0 list-group-item list-group-item-text text-white" title="Alignment: {{ player.get_player_alignment }} ({{ player.common.alignment }})">
+            <li class="bg-black border-0 list-group-item list-group-item-text text-white" title="Alignment: {{ player.get_player_alignment }} ({{ player.common.alignment }})">
             <span class="bi bi-dot text-ishar"></span>
                 {{ player.get_player_gender_own | title }} alignment {{ player.get_player_phrase }}
                 {{ player.get_player_alignment | lower }}.
             </li>
-            <li id="deaths" class="bg-black border-0 list-group-item list-group-item-text text-white" title="{% if player.player_type == 'Classic' %}Deaths: {{ player.deaths }}{% elif player.player_type == 'Dead' %}{{ player.name | title }} is DEAD!{% else %}{{ player.name | title }} is a {{ player.player_type }} player!{% endif %}">
+            <li class="bg-black border-0 list-group-item list-group-item-text text-white" title="{% if player.player_type == 'Classic' %}Deaths: {{ player.deaths }}{% elif player.player_type == 'Dead' %}{{ player.name | title }} is DEAD!{% else %}{{ player.name | title }} is a {{ player.player_type }} player!{% endif %}">
                 <span class="bi bi-dot text-ishar"></span>
             {% if player.player_type == 'Dead' %}
                 {{ player.name | title }} is <span class="dead-note">DEAD</span>!
