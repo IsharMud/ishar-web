@@ -2,14 +2,14 @@
 {% load static %}
 {% block meta_title %}Support {{ WEBSITE_TITLE }}{% endblock meta_title %}
 {% block meta_description %}Please consider supporting {{ WEBSITE_TITLE }} in any way that you can!{% endblock meta_description %}
-{% block meta_url %}{% url "support" %}{% endblock meta_url %}
+{% block meta_url %}{% url 'support' %}{% endblock meta_url %}
 {% block title %}Support {{ WEBSITE_TITLE }}{% endblock title %}
 {% block header %}
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item active" aria-current="page" title="Support {{ WEBSITE_TITLE }}">
             <span class="bi bi-heart"></span>
-            <a href="{% url "support" %}">
+            <a href="{% url 'support' %}#support" id="support">
                 Support {{ WEBSITE_TITLE }}
             </a>
         </li>

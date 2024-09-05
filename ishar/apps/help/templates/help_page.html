@@ -1,19 +1,19 @@
 {% extends "layout.html" %}
 {% block meta_title %}Help: {{ help_topic.name }}{% endblock meta_title %}
 {% block meta_description %}Help pages for {{ WEBSITE_TITLE }}{% endblock meta_description %}
-{% block meta_url %}{% if help_topic %}{{ help_topic.get_absolute_url }}{% else %}{% url "help" %}#help{% endif %}{% endblock meta_url %}
+{% block meta_url %}{% if help_topic %}{{ help_topic.get_absolute_url }}{% else %}{% url 'help' %}#help{% endif %}{% endblock meta_url %}
 {% block title %}Help{% if help_topic and help_topic.name %}: {{ help_topic.name }}{% endif %}{% endblock title %}
 {% block header %}
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item{% if not help_topic %} active" aria-current="page{% endif %}" id="help" title="Help">
             <span class="text-ishar bi bi-{% if help_topic and help_topic.is_area %}globe-asia-australia{% else %}info-circle{% endif %}"></span>
-            <a href="{% url "help" %}#help">Help</a>
+            <a href="{% url 'help' %}#help">Help</a>
         </li>
     {% if help_topic %}
         {% if help_topic.is_area %}
         <li class="breadcrumb-item" title="World">
-            <a href="{% url "world" %}#areas" id="world">World</a>
+            <a href="{% url 'world' %}#areas" id="world">World</a>
         </li>
         {% endif %}
         <li class="breadcrumb-item active" aria-current="page" title="{{ help_topic.name }}">
@@ -88,7 +88,7 @@
             <footer class="blockquote-footer">
                 <strong id="see-also">See Also</strong>:
             {% for also_topic in help_topic.see_also %}
-                <a href="{% url "help_page" help_topic=also_topic %}#topic" title="Help: {{ also_topic }}">{{ also_topic }}</a>{% if not forloop.last %}, {% endif %}
+                <a href="{% url 'help_page' help_topic=also_topic %}#topic" title="Help: {{ also_topic }}">{{ also_topic }}</a>{% if not forloop.last %}, {% endif %}
             {% endfor %}
             </footer>
         {% endif %}
@@ -99,15 +99,15 @@
     {% if request.user.is_anonymous and not help_topic %}
     <p class="m-1 p-1 lead">
         If you are new here, you may want to download one of many
-        <a href="{% url "clients" %}" title="MUD clients">MUD clients</a>,
-        see our <a href="{% url "start" %}" title="getting started guide">getting started guide</a>,
-        and <a href="{% url "discord" %}" target="_blank" title="{{ WEBSITE_TITLE }} Discord Invitation">join us on Discord</a>!
+        <a href="{% url 'clients' %}#clients" title="MUD clients">MUD clients</a>,
+        see our <a href="{% url 'start' %}#start" title="getting started guide">getting started guide</a>,
+        and <a href="{% url 'discord' %}" target="_blank" title="{{ WEBSITE_TITLE }} Discord Invitation">join us on Discord</a>!
     </p>
     {% endif %}
 
     {% if help_search_form %}
     <div class="m-1 p-1">
-        <form action="{% url "help" %}#help" method="post" id="search">
+        <form action="{% url 'help' %}#help" method="post" id="search">
             {% csrf_token %}
             {{ help_search_form.as_p }}
             <p>

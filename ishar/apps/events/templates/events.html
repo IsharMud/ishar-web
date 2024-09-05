@@ -8,11 +8,11 @@
         No active events right now.
     {% endif %}
 {% endblock meta_description %}
-{% block meta_url %}{% url "events" %}{% endblock meta_url %}
+{% block meta_url %}{% url 'events' %}{% endblock meta_url %}
 {% block title %}Events{% endblock title %}
 {% block header %}
     <span class="bi bi-calendar-event"></span>
-    <a href="{% url "events" %}" title="Events">Events</a>
+    <a href="{% url 'events' %}#events" title="Events" id="events">Events</a>
     {% if GLOBAL_EVENT_COUNT > 0 %}
     <span class="badge text-bg-secondary" title="{{ GLOBAL_EVENT_COUNT }} event{{ GLOBAL_EVENT_COUNT|pluralize }} active">
         {{ GLOBAL_EVENT_COUNT }}
@@ -36,7 +36,7 @@
     </p>
     <p title="Started: {{ global_event.start_time }} ({{ global_event.start_time | naturaltime }})">
         <strong>Started</strong>:
-        {{ global_event.start_time }} 
+        {{ global_event.start_time }}
         ({{ global_event.start_time | naturaltime }})
     </p>
     {% if global_event.xp_bonus and global_event.xp_bonus != '' and global_event.xp_bonus != 0 %}
@@ -68,7 +68,7 @@
 </p>
 <p class="lead" title="Please check back later, or maybe try out some challenges!">
     Please check back later, or maybe try out some
-    <a href="{% url "challenges" %}" title="challenges">challenges</a>!
+    <a href="{% url 'challenges' %}#challenges" title="challenges">challenges</a>!
 </p>
     {% endif %}
 {% endblock content %}

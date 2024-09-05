@@ -2,7 +2,7 @@
 {% load humanize %}
 {% block meta_title %}Challenges{% endblock meta_title %}
 {% block meta_description %}Challenges currently available, A.{% endblock meta_description %}
-{% block meta_url %}{% url "challenges" %}{% endblock meta_url %}
+{% block meta_url %}{% url 'challenges' %}{% endblock meta_url %}
 {% block title %}Challenges{% endblock title %}
 {% block scripts %}
         <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
@@ -15,10 +15,10 @@
     <ol class="breadcrumb">
         <li class="breadcrumb-item" title="Portal">
             <span class="text-ishar bi bi-award"></span>
-            <a href="{% url "portal" %}">Portal</a>
+            <a href="{% url 'portal' %}#portal" id="portal">Portal</a>
         </li>
         <li class="breadcrumb-item active" aria-current="page" title="Challenges">
-            <a href="{% url "challenges" %}">
+            <a href="{% url 'challenges' %}#challenges" id="challenges">
                 Challenges
             </a>
         </li>

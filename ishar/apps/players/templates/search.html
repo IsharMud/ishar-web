@@ -1,27 +1,27 @@
 {% extends "layout.html" %}
 {% block meta_title %}Search{% if results %} ({{ results.count }} result{{ results.count|pluralize }}){% endif %}{% endblock meta_title %}
 {% block meta_description %}Search{% if results %} ({{ results.count }} result{{ results.count|pluralize }}){% endif %}{% endblock meta_description %}
-{% block meta_url %}{% url "players" %}{% endblock meta_url %}
+{% block meta_url %}{% url 'players' %}{% endblock meta_url %}
 {% block title %}Search{% if results %} ({{ results.count }} result{{ results.count|pluralize }}){% endif %}{% endblock title %}
 {% block header %}
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item" title="Portal">
             <span class="bi bi-person text-ishar"></span>
-            <a href="{% url "portal" %}">
+            <a href="{% url 'portal' %}#portal" id="portal">
                 Portal
             </a>
         </li>
         <li class="breadcrumb-item{% if not results %} active" aria-current="page{% endif %}" title="Search">
             <span class="bi bi-search text-ishar"></span>
-            <a href="{% url "players" %}">
+            <a href="{% url 'players' %}#search" id="search">
                 Search
             </a>
         </li>
     {% if results %}
         <li class="breadcrumb-item active" aria-current="page" title="{{ results.count }} result{{ results.count|pluralize }}">
             <span class="bi bi-people text-ishar"></span>
-            <a href="#">
+            <a href="#results" id="results">
                 {{ results.count }} result{{ results.count|pluralize }}
             </a>
         </li>

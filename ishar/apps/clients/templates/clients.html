@@ -1,18 +1,18 @@
 {% extends "layout.html" %}
 {% block meta_title %}MUD Clients{% endblock meta_title %}
 {% block meta_description %}A few MUD clients that we have heard good things about.{% endblock meta_description %}
-{% block meta_url %}{% url "clients" %}{% endblock meta_url %}
+{% block meta_url %}{% url 'clients' %}{% endblock meta_url %}
 {% block title %}MUD Clients{% endblock title %}
 {% block header %}
     <span class="bi bi-terminal-split"></span>
-    <a href="{% url "clients" %}" title="MUD Clients">
+    <a href="{% url 'clients' %}#clients" title="MUD Clients" id="clients">
         MUD Clients
     </a>
 {% endblock header %}
 {% block content %}
     <p class="lead">
         While you can certainly enjoy the game via
-        <a href="{% url "connect" %}" target="_blank" title="Mudslinger">the Mudslinger web client</a>,
+        <a href="{% url 'connect' %}" target="_blank" title="Mudslinger">the Mudslinger web client</a>,
         you might prefer to connect to the game with software designed specifically to help you play a MUD.
     </p>
     <p class="lead">
@@ -46,6 +46,6 @@
         port number <code>23</code> or <code>9999</code> to join the game.
     </p>
     <p class="lead">
-        Please check out our <a href="{% url "start" %}" title="getting started guide">getting started guide</a> as well!
+        Please check out our <a href="{% url 'start' %}#start" title="getting started guide">getting started guide</a> as well!
     </p>
 {% endblock content %}

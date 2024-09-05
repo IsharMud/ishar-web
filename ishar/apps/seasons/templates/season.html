@@ -2,11 +2,11 @@
 {% load humanize %}
 {% block meta_title %}Season {{ season.season_id }}{% endblock meta_title %}
 {% block meta_description %}Season {{ season.season_id }} of {{ WEBSITE_TITLE }}.{% endblock meta_description %}
-{% block meta_url %}{% url "season" season_id=season.season_id %}{% endblock meta_url %}
+{% block meta_url %}{% url 'season' season_id=season.season_id %}{% endblock meta_url %}
 {% block title %}Season {{ season.season_id }}{% endblock title %}
 {% block header %}
     <span class="bi bi-calendar"></span>
-    <a href="{% url "season" season_id=season.season_id %}" title="Season {{ season.season_id }}">
+    <a href="{% url 'season' season_id=season.season_id %}#season" id="season" title="Season {{ season.season_id }}">
         Season {{ season.season_id }}
     </a>
 {% endblock header %}
@@ -51,7 +51,7 @@
 
         <div class="card-body p-3">
             <p class="lead">
-                &quot;<a title="Help: Essence" href="{% url "help_page" help_topic="Essence" %}">Essence</a>&quot;
+                &quot;<a title="Help: Essence" href="{% url 'help_page' help_topic='Essence' %}#topic">Essence</a>&quot;
                 are the rewards points that you earn during each season!
             </p>
             <p class="lead">
@@ -63,7 +63,7 @@
                 You can view your current essence balance,
                 and see how many points you have earned so far this season,
                 by visiting your
-                <a href="{% url "portal" %}#essence" title="account portal page">account portal page</a>.
+                <a href="{% url 'portal' %}#essence" title="account portal page">account portal page</a>.
             </p>
     {% endif %}
         </div>
