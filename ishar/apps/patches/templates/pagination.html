@@ -2,10 +2,10 @@
 <div class="pagination">
     <p class="step-links">
     {% if page_obj.has_previous %}
-        <a href="?page=1">
+        <a href="?page=1#patches">
             &laquo;
         </a>
-        <a href="?page={{ page_obj.previous_page_number }}">
+        <a href="?page={{ page_obj.previous_page_number }}#patches">
             &lt;
         </a>
     {% endif %}
@@ -13,10 +13,10 @@
             Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
         </span>
     {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}">
+        <a href="?page={{ page_obj.next_page_number }}#patches">
             &gt;
         </a>
-        <a href="?page={{ page_obj.paginator.num_pages }}">
+        <a href="?page={{ page_obj.paginator.num_pages }}#patches">
             &raquo;
         </a>
     {% endif %}

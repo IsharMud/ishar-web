@@ -11,13 +11,13 @@
             <span class="bi bi-bandaid"></span>
             <a href="{% url 'patches' %}#patches" id="patches">Patches</a>
         </li>
-        {% if page_obj.number and page_obj.number != 1 %}
+    {% if page_obj.number and page_obj.number != 1 %}
         <li class="breadcrumb-item active" aria-current="page" title="Patches">
-            <a href="{% url 'patches' %}?page={{ page_obj.number }}">
+            <a href="{% url 'patches' %}?page={{ page_obj.number }}#patches">
                 Page {{ page_obj.number }}
             </a>
         </li>
-        {% endif %}
+    {% endif %}
     </ol>
 </nav>
 {% endblock header %}
