@@ -1,0 +1,86 @@
+42d41
+<     is_private = models.IntegerField(blank=True, null=True)
+43a43
+>     is_private = models.IntegerField(blank=True, null=True)
+111d110
+<     is_private = models.IntegerField(blank=True, null=True)
+112a112
+>     is_private = models.IntegerField(blank=True, null=True)
+1239,1257d1238
+< class PlayerStatsBackup(models.Model):
+<     player_stats_id = models.PositiveIntegerField()
+<     player_id = models.PositiveIntegerField(blank=True, null=True)
+<     total_play_time = models.PositiveIntegerField(blank=True, null=True)
+<     remort_play_time = models.PositiveIntegerField(blank=True, null=True)
+<     total_deaths = models.PositiveIntegerField(blank=True, null=True)
+<     remort_deaths = models.PositiveIntegerField(blank=True, null=True)
+<     total_renown = models.PositiveIntegerField(blank=True, null=True)
+<     remort_renown = models.PositiveIntegerField(blank=True, null=True)
+<     total_challenges = models.PositiveIntegerField(blank=True, null=True)
+<     remort_challenges = models.PositiveIntegerField(blank=True, null=True)
+<     total_quests = models.PositiveIntegerField(blank=True, null=True)
+<     remort_quests = models.PositiveIntegerField(blank=True, null=True)
+< 
+<     class Meta:
+<         managed = False
+<         db_table = 'player_stats_backup'
+< 
+< 
+1304,1350d1284
+< class PlayersBackup2(models.Model):
+<     id = models.PositiveIntegerField()
+<     account_id = models.PositiveIntegerField()
+<     name = models.CharField(max_length=15)
+<     create_ident = models.CharField(max_length=10)
+<     last_isp = models.CharField(max_length=30)
+<     description = models.CharField(max_length=240, blank=True, null=True)
+<     title = models.CharField(max_length=45)
+<     poofin = models.CharField(max_length=80)
+<     poofout = models.CharField(max_length=80)
+<     bankacc = models.PositiveIntegerField()
+<     logon_delay = models.PositiveSmallIntegerField()
+<     true_level = models.PositiveIntegerField()
+<     renown = models.PositiveSmallIntegerField()
+<     remorts = models.PositiveIntegerField()
+<     favors = models.PositiveIntegerField()
+<     online = models.IntegerField(blank=True, null=True)
+<     bound_room = models.PositiveIntegerField()
+<     load_room = models.PositiveIntegerField()
+<     invstart_level = models.IntegerField(blank=True, null=True)
+<     login_failures = models.PositiveSmallIntegerField()
+<     create_haddr = models.IntegerField()
+<     login_fail_haddr = models.IntegerField(blank=True, null=True)
+<     last_haddr = models.IntegerField(blank=True, null=True)
+<     last_ident = models.CharField(max_length=10, blank=True, null=True)
+<     load_room_next = models.PositiveIntegerField(blank=True, null=True)
+<     load_room_next_expires = models.PositiveIntegerField(blank=True, null=True)
+<     aggro_until = models.PositiveIntegerField(blank=True, null=True)
+<     inn_limit = models.PositiveSmallIntegerField()
+<     held_xp = models.IntegerField(blank=True, null=True)
+<     last_isp_change = models.PositiveIntegerField(blank=True, null=True)
+<     is_deleted = models.PositiveIntegerField()
+<     deaths = models.PositiveSmallIntegerField()
+<     total_renown = models.PositiveSmallIntegerField()
+<     quests_completed = models.PositiveSmallIntegerField()
+<     challenges_completed = models.PositiveSmallIntegerField()
+<     game_type = models.IntegerField()
+<     birth = models.DateTimeField()
+<     logon = models.DateTimeField()
+<     logout = models.DateTimeField()
+<     title_id = models.PositiveIntegerField(blank=True, null=True)
+< 
+<     class Meta:
+<         managed = False
+<         db_table = 'players_backup_2'
+< 
+< 
+1619a1554,1562
+> class TempSkillIdMap(models.Model):
+>     old_id = models.IntegerField(blank=True, null=True)
+>     new_id = models.IntegerField(blank=True, null=True)
+> 
+>     class Meta:
+>         managed = False
+>         db_table = 'temp_skill_id_map'
+> 
+> 
