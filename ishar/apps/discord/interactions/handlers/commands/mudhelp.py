@@ -42,7 +42,7 @@ def mudhelp(request, interaction=None, _spell: bool = False) -> tuple[str, bool]
                 topic_url = reverse(
                     viewname="help_page",
                     args=(search,)
-                ) + "#help"
+                ) + "#topics"
                 reply = f"{num_results} results"
 
             # Append the URL to the Discord reply message.

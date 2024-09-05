@@ -23,10 +23,11 @@ def events(request):
     num_events = global_events.count()
     if num_events and num_events > 0:
         ephemeral = False
-        events_url = "%s://%s%s" % (
+        events_url = "%s://%s%s#%s" % (
             request.scheme,
             request.get_host(),
-            reverse("events")
+            reverse("events"),
+            "events"
         )
         reply = "%i %s: <%s>\n" % (
             num_events,
