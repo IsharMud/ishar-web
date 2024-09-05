@@ -107,7 +107,7 @@ class Season(models.Model):
         return reverse(
             viewname="season",
             args=(self.season_id,)
-        )
+        ) + "#season"
 
     def get_admin_link(self) -> str:
         return format_html(
