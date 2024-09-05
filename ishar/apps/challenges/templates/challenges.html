@@ -38,24 +38,24 @@
     <table class="m-1 p-1" id="challengesTable"></table>
     {{ challenges|json_script:"challengeJSON" }}
     <script>
-    const challenges = [];
-    const challengesData = JSON.parse(JSON.parse(document.getElementById("challengeJSON").textContent));
-    function buildChallenge(challenge) { challenges.push(challenge.fields); };
-    challengesData.forEach(buildChallenge);
-    const pageTable = new DataTable('#challengesTable', {
-        columns: [
-            { data: 'mobile', title: 'Find & Kill' },
-            { data: 'max_people', title: 'Max People' },
-            { data: 'max_level', title: 'Max Level' },
-        ],
-        columnDefs: [{ type: 'num', targets: [1, 2] }],
-        data: challenges,
-        info: false,
-        layout: { bottomStart: 'search', topEnd: null },
-        order: [[2, 'desc'], [1, 'desc'], ['0', 'asc']],
-        pageLength: 15,
-        paging: false,
-    });
-    pageTable.draw();
-</script>
+        const challenges = [];
+        const challengesData = JSON.parse(JSON.parse(document.getElementById("challengeJSON").textContent));
+        function buildChallenge(challenge) { challenges.push(challenge.fields); };
+        challengesData.forEach(buildChallenge);
+        const pageTable = new DataTable('#challengesTable', {
+            columns: [
+                { data: 'mobile', title: 'Find & Kill' },
+                { data: 'max_people', title: 'Max People' },
+                { data: 'max_level', title: 'Max Level' },
+            ],
+            columnDefs: [{ type: 'num', targets: [1, 2] }],
+            data: challenges,
+            info: false,
+            layout: { bottomStart: 'search', topEnd: null },
+            order: [[2, 'desc'], [1, 'desc'], ['0', 'asc']],
+            pageLength: 15,
+            paging: false,
+        });
+        pageTable.draw();
+    </script>
 {% endblock content %}

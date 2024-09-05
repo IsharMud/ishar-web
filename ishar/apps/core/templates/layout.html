@@ -2,47 +2,62 @@
 {% load static %}
 <!DOCTYPE html>
 <html class="dark" data-bs-theme="dark" lang="en">
+
     <head>
+
         <meta charset="UTF-8">
+
         <meta name="author" content="{{ WEBSITE_TITLE }}">
         <meta name="description" content="{{ WEBSITE_TITLE }}">
         <meta name="keywords" content="{{ WEBSITE_TITLE }}, Ishar, IsharMUD, MUD, Multi User Dungeon, Multi-User Dungeon, Game">
         <meta name="msapplication-TileColor" content="#ffaa77">
         <meta name="theme-color" content="#000000">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
         <meta property="og:type" content="website">
         <meta property="og:site_name" content="{{ WEBSITE_TITLE }}">
         <meta property="og:title" content="{{ WEBSITE_TITLE }}: {% block meta_title %}Home{% endblock meta_title %}">
         <meta property="og:description" content="{{ WEBSITE_TITLE }}: {% block meta_description %}a free online text-adventure RPG{% endblock meta_description %}">
         <meta property="og:image" content="https://{{ request.META.HTTP_HOST }}{% block meta_image %}{% static "images/logo.png" %}{% endblock meta_image %}">
         <meta property="og:url" content="https://{{ request.META.HTTP_HOST }}{% block meta_url %}{% url 'index' %}{% endblock meta_url %}">
+
         <title>{{ WEBSITE_TITLE }}: {% block title %}Home{% endblock title %}</title>
+
         <link rel="apple-touch-icon" sizes="180x180" href="{% static "images/apple-touch-icon.png" %}">
         <link rel="icon" type="image/png" sizes="32x32" href="{% static "images/favicon-32x32.png" %}">
         <link rel="icon" type="image/png" sizes="16x16" href="{% static "images/favicon-16x16.png" %}">
         <link rel="shortcut icon" href="{% static "images/favicon.ico" %}" type="image/x-icon">
+
         <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
         <link rel="preconnect" href="https://cdn.jsdelivr.net">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
         <link rel="stylesheet" type="text/css" href="{% static "style.css" %}">
+
     {% block scripts %}
     {% endblock scripts %}
+
     </head>
 
     <body class="m-1">
 
         <header class="container-fluid p-1">
+
             <nav class="navbar navbar-dark navbar-expand-lg bg-black rounded border-ishar">
+
                 <a href="{% url 'index' %}" title="{{ WEBSITE_TITLE }}">
                     <img class="navbar-brand" id="logo" alt="{{ WEBSITE_TITLE }}" src="{% static "images/logo.png" %}" style="height: 10rem;">
                 </a>
+
                 <button class="m-3 navbar-toggler navbar-dark border-ishar" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle Navigation">
                     <span class="m-1 navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse p-3" id="navbarNavDropdown">
+
                     <ul class="navbar-nav nav-underline">
+
                         <li class="nav-item" title="Home">
                             <a class="bi bi-house nav-link" href="{% url 'index' %}">
                                 Home
@@ -60,32 +75,40 @@
                                 Connect
                             </a>
                         </li>
+
                         <li class="nav-item" title="Frequently Asked Questions">
                             <a class="bi-question-circle nav-link" href="{% url 'faq' %}#faq">
                                 FAQs
                             </a>
                         </li>
+
                         <li class="nav-item" title="Help">
                             <a class="bi bi-info-circle nav-link" href="{% url 'help' %}#help">
                                 Help
                             </a>
                         </li>
+
                         <li class="nav-item" title="Patches">
                             <a class="bi bi-bandaid nav-link" href="{% url 'patches' %}#patches">
                                 Patches
                             </a>
                         </li>
+
 {% if user and user.is_authenticated %}
                         <li class="nav-item dropdown">
+
                             <a class="bi bi-menu-button nav-link dropdown-toggle" href="{% url 'portal' %}#portal" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 Portal
                             </a>
+
                             <ul class="dropdown-menu dropdown-menu-dark bg-black border border-secondary p-3">
+
                                 <li class="nav-item" title="Challenges">
                                     <a class="bi bi-award bg-black nav-link dropdown-item" href="{% url 'challenges' %}#challenges">
                                         Challenges
                                     </a>
                                 </li>
+
     {% if GLOBAL_EVENT_COUNT and GLOBAL_EVENT_COUNT > 0 %}
                                 <li class="nav-item" title="Events ({{ GLOBAL_EVENT_COUNT }})">
                                     <a class="bi bi-calendar-event bg-black nav-link dropdown-item" href="{% url 'events' %}#events">
@@ -96,19 +119,23 @@
                                     </a>
                                 </li>
     {% endif %}
+
                                 <li class="nav-item" title="Leaders">
                                     <a class="bi bi-trophy bg-black nav-link dropdown-item" href="{% url 'leaders' %}#leaders">
                                         Leaders
                                     </a>
                                 </li>
+
                                 <li class="nav-item" title="Portal">
                                     <a class="bi bi-person-lines-fill bg-black nav-link dropdown-item" href="{% url 'portal' %}#portal">
                                         Portal
                                     </a>
                                 </li>
+
                                 <li class="nav-item text-ishar">
                                     <hr class="dropdown-divider border-secondary">
                                 </li>
+
                                 <li class="nav-item" title="Log out">
                                     <form action="{% url 'logout' %}" method="post" id="logout">
                                         {% csrf_token %}
@@ -117,7 +144,9 @@
                                         </a>
                                     </form>
                                 </li>
+
                             </ul>
+
                         </li>
 {% else %}
                         <li class="nav-item" title="Portal">
@@ -131,9 +160,13 @@
                                 World
                             </a>
                         </li>
+
                     </ul>
+
                 </div>
+
             </nav>
+
         </header>
 
         <main class="container-fluid p-1">
@@ -165,36 +198,48 @@
 
 {% if CURRENT_SEASON %}
         <footer class="container-fluid px-2 text-center" title="Season {{ CURRENT_SEASON.season_id }} ends {{ CURRENT_SEASON.expiration_date | naturaltime }}">
+
             <div class="row border-ishar bg-black rounded align-items-center m-1 p-2">
+
                 <div class="col">
                     <a href="{% url 'current_season' %}#season">Season {{ CURRENT_SEASON.season_id }}</a>
                 </div>
+
                 <div class="col">
                     Ends {{ CURRENT_SEASON.expiration_date | naturaltime }}
                 </div>
+
             </div>
+
         </footer>
 {% endif %}
 
         <footer class="container-fluid px-2 text-center">
+
             <div class="row border-ishar bg-black rounded align-items-center m-1 p-2">
+
                 <div class="col">
                     <a class="bi bi-envelope-at" href="mailto:admin@isharmud.com" target="_blank" title="E-mail Us! (admin@isharmud.com)">
                         E-mail us!
                     </a>
                 </div>
+
                 <div class="col">
                     <a class="bi bi-heart" href="{% url 'support' %}#support" title="Support {{ WEBSITE_TITLE }}">
                         Support {{ WEBSITE_TITLE }}
                     </a>
                 </div>
+
                 <div class="col">
                     <a class="bi bi-discord" href="{% url 'discord' %}" target="_blank" title="Join us on Discord!">
                         Join us on Discord!
                     </a>
                 </div>
+
             </div>
+
         </footer>
 
     </body>
+
 </html>
