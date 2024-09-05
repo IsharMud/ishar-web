@@ -2,11 +2,9 @@
 <     is_private = models.IntegerField(blank=True, null=True)
 43a43
 >     is_private = models.IntegerField(blank=True, null=True)
-111d110
-<     is_private = models.IntegerField(blank=True, null=True)
-112a112
->     is_private = models.IntegerField(blank=True, null=True)
-1239,1257d1238
+1237,1255d1236
+< 
+< 
 < class PlayerStatsBackup(models.Model):
 <     player_stats_id = models.PositiveIntegerField()
 <     player_id = models.PositiveIntegerField(blank=True, null=True)
@@ -24,8 +22,6 @@
 <     class Meta:
 <         managed = False
 <         db_table = 'player_stats_backup'
-< 
-< 
 1304,1350d1284
 < class PlayersBackup2(models.Model):
 <     id = models.PositiveIntegerField()
