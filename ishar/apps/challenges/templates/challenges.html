@@ -36,10 +36,10 @@
     </div>
     {% endif %}
     <table class="m-1 p-1" id="challengesTable"></table>
-    {{ challenges|json_script:"challenges" }}
+    {{ challenges|json_script:"challengeJSON" }}
     <script>
     const challenges = [];
-    const challengesData = JSON.parse(JSON.parse(document.getElementById("challenges").textContent));
+    const challengesData = JSON.parse(JSON.parse(document.getElementById("challengeJSON").textContent));
     function buildChallenge(challenge) { challenges.push(challenge.fields); };
     challengesData.forEach(buildChallenge);
     const pageTable = new DataTable('#challengesTable', {
