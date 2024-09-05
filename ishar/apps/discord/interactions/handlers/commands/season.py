@@ -7,8 +7,8 @@ from ishar.apps.seasons.utils.current import get_current_season
 def season(request):
     """Current season number, expiration, time until expiration, and URL."""
     current_season = get_current_season()
-    current_season_url = "%s://%s%s" % (
-        request.scheme, request.get_host(), reverse("current_season")
+    current_season_url = "%s://%s%s#%s" % (
+        request.scheme, request.get_host(), reverse("current_season"), "season"
     )
     dt_fmt = "%A, %B %d, %Y @ %I:%M:%S %p %Z"
 
