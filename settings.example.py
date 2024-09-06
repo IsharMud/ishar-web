@@ -133,6 +133,7 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "ishar.apps.core.contexts.website_title",
                 "ishar.apps.events.contexts.global_event_count",
+                "ishar.apps.players.contexts.player_search_form",
                 "ishar.apps.seasons.contexts.current_season",
             ],
 #            "libraries": {
