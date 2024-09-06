@@ -14,7 +14,7 @@
         </li>
         <li class="breadcrumb-item{% if not results %} active" aria-current="page{% endif %}" title="Search">
             <span class="bi bi-search text-ishar"></span>
-            <a href="{% url 'players' %}#search" id="search">
+            <a href="{% url 'players' %}" id="search">
                 Search
             </a>
         </li>
@@ -30,25 +30,21 @@
 </nav>
 {% endblock header %}
 {% block content %}
-    {% if form %}
-    <div class="form-control-dark" id="player-search-form">
-        <form method="post" action="{% url 'players' %}">
-            {{ form.as_table }}
-            {% csrf_token %}
-            <button class="btn btn-outline-primary" type="submit">Search</button>
-            <button class="btn btn-outline-secondary" type="reset">Clear</button>
-        </form>
-    </div>
-    {% endif %}
     {% if results %}
-        <hr>
+        <h5 title="{{ results.count }} result{{ results.count|pluralize }}">
+            {{ results.count }} result{{ results.count|pluralize }}
+        </h5>
         <ul class="bg-dark list-group list-group-dark w-50">
-        {% for result in results %}
-            <li class="bg-black border border-secondary list-group-item list-group-item-dark list-group-item-text" title="Race: {{ player.common.race.display_name }}">
+        {% for player in results %}
+            <li class="bg-black border border-secondary list-group-item list-group-item-dark list-group-item-text" title="Player: {{ player.name }}">
                 <strong>{{ forloop.counter }}.</strong>
-                {{ result.player_link }}
+                {{ player.player_link }}
             </li>
         {% endfor %}
         </ul>
+    {% else %}
+        <p class="lead fst-italic">
+            Please perform a search for a player name using the form below.
+        </p>
     {% endif %}
 {% endblock content %}

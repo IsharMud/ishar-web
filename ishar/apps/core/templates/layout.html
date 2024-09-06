@@ -194,6 +194,14 @@
 {% endblock content %}
             </div>
 
+    {% block player_search_form %}
+        {% if user and user.is_authenticated and player_search_form %}
+            <div class="bg-black rounded border-ishar m-1 p-3">
+                {% include "search_form.html" %}
+            </div>
+        {% endif %}
+    {% endblock player_search_form %}
+
         </main>
 
 {% if CURRENT_SEASON %}

@@ -1,0 +1,14 @@
+<div class="form-control-dark" id="player-search-form">
+    <form class="row g-3" method="post" action="{% url 'players' %}#search">
+        <div class="col-auto">
+            {{ player_search_form }}
+            {% csrf_token %}
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-outline-primary" type="submit">Search</button>
+        </div>
+        <div class="col-auto">
+            <button class="btn btn-outline-secondary" type="reset">Clear</button>
+        </div>
+    </form>
+</div>
