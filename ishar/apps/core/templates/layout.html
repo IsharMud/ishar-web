@@ -63,13 +63,7 @@
                                 Home
                             </a>
                         </li>
-{% if user.is_staff %}
-                        <li class="nav-item" title="Admin">
-                            <a class="bi bi-gear nav-link" href="{% url 'admin:index' %}" target="_blank">
-                                Admin
-                            </a>
-                        </li>
-{% endif %}
+
                         <li class="nav-item" title="Connect to {{ WEBSITE_TITLE }}">
                             <a class="bi bi-globe nav-link" href="{% url 'connect' %}" target="_blank">
                                 Connect
@@ -103,6 +97,16 @@
 
                             <ul class="dropdown-menu dropdown-menu-dark bg-black border border-secondary p-3">
 
+    {% if user.is_staff %}
+                                <li class="nav-item" title="Admin">
+                                    <a class="bi bi-gear nav-link dropdown-item" href="{% url 'admin:index' %}" target="_blank">
+                                        Admin
+                                    </a>
+                                </li>
+                                <li class="nav-item text-ishar">
+                                    <hr class="dropdown-divider border-secondary">
+                                </li>
+    {% endif %}
                                 <li class="nav-item" title="Challenges">
                                     <a class="bi bi-award bg-black nav-link dropdown-item" href="{% url 'challenges' %}#challenges">
                                         Challenges

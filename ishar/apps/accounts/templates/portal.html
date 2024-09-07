@@ -16,6 +16,14 @@
 {% endblock header %}
 {% block content %}
     <ul class="list-group list-group-horizontal-md">
+    {% if user.is_staff %}
+        <li class="bg-black border border-secondary list-group-item-dark list-group-item" title="Admin">
+            <span class="bi bi-gear text-ishar"></span>
+            <a class="list-group-item-text" href="{% url 'admin:index' %}" target="_blank">
+                Admin
+            </a>
+        </li>
+    {% endif %}
         <li class="bg-black border border-secondary list-group-item-dark list-group-item" title="Challenges">
             <span class="bi bi-award text-ishar"></span>
             <a class="list-group-item-text" href="{% url 'challenges' %}#challenges">
