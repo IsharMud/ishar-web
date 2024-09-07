@@ -32,9 +32,6 @@
         <p class="lead">
             Here is a list of the remort upgrades available to players, and the costs for each upgrade.
         </p>
-        <h5 title="{{ upgrades.count }} upgrade{{ upgrades.count|pluralize }}">
-            {{ upgrades.count }} upgrade{{ upgrades.count|pluralize }}
-        </h5>
         <table class="m-1 p-1" id="upgradesTable"></table>
         {{ upgrades|json_script:"upgradesJSON" }}
         <script>
