@@ -3,16 +3,12 @@ from django.contrib.auth.views import LoginView, LogoutView
 
 
 class IsharLoginView(LoginView):
-    """
-    Log-in page.
-    """
+    """Log-in page."""
     template_name = "login.html"
 
 
 class IsharLogoutView(LogoutView):
-    """
-    Log-out page.
-    """
+    """Log-out page."""
     template_name = "home.html"
 
     def dispatch(self, request, *args, **kwargs):

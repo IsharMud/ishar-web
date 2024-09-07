@@ -24,17 +24,16 @@
 {% block content %}
     {% if upgrades %}
         <p class="lead">
-            Here is a list of the <a href="{% url 'help_page' help_topic='Remort Upgrades' %}">remort upgrades</a>
-            available to players, and the costs for each upgrade.
+            Here is a list of the remort upgrades available to players, and the costs for each upgrade.
         </p>
         <h5 title="{{ upgrades.count }} upgrade{{ upgrades.count|pluralize }}">
             {{ upgrades.count }} upgrade{{ upgrades.count|pluralize }}
         </h5>
         <ul class="bg-dark list-group list-group-dark w-50">
         {% for upgrade in upgrades %}
-            <li class="bg-black border border-secondary list-group-item list-group-item-dark list-group-item-text" title="Remort Upgrade: {{ upgrade.name }}">
+            <li class="bg-black border border-secondary list-group-item list-group-item-dark list-group-item-text" title="Remort Upgrade: {{ upgrade }}">
                 <strong>{{ forloop.counter }}.</strong>
-                {{ upgrade.name }}
+                {{ upgrade }}
             </li>
         {% endfor %}
         </ul>
