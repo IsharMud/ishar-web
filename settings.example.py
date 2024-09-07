@@ -28,7 +28,7 @@ ALLOWED_HOSTS = DJANGO_HOSTS.split()
 DATABASES = {
     # Staging.
     "ishar_test": {
-        "ENGINE": "ishar.apps.core.backends",
+        "ENGINE": "apps.core.backends",
         "NAME": "ishar_test",
         "USER": "ishar_test",
         "PASSWORD": "secret",
@@ -37,7 +37,7 @@ DATABASES = {
     },
     # Production
     "ishar": {
-        "ENGINE": "ishar.apps.core.backends",
+        "ENGINE": "apps.core.backends",
         "NAME": "ishar",
         "USER": "ishar",
         "PASSWORD": "secret",
@@ -49,7 +49,7 @@ DEFAULT_DB = getenv("DJANGO_DATABASE", "ishar")
 DATABASES["default"] = DATABASES[DEFAULT_DB]
 
 # Default primary key field type.
-DEFAULT_AUTO_FIELD = "ishar.apps.core.models.unsigned.UnsignedAutoField"
+DEFAULT_AUTO_FIELD = "apps.core.models.unsigned.UnsignedAutoField"
 
 # CSRF and session cookies.
 CSRF_COOKIE_DOMAIN = SESSION_COOKIE_DOMAIN = ALLOWED_HOSTS[0]
@@ -81,27 +81,27 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.sites",
     "django.contrib.staticfiles",
-    "ishar.apps.CoreConfig",
-    "ishar.apps.AccountsConfig",
-    "ishar.apps.AchievementsConfig",
-    "ishar.apps.ChallengesConfig",
-    "ishar.apps.ClassesConfig",
-    "ishar.apps.ClientsConfig",
-    "ishar.apps.DiscordConfig",
-    "ishar.apps.EventsConfig",
-    "ishar.apps.FAQsConfig",
-    "ishar.apps.HelpConfig",
-    "ishar.apps.LeadersConfig",
-    "ishar.apps.MobilesConfig",
-    "ishar.apps.NewsConfig",
-    "ishar.apps.ObjectsConfig",
-    "ishar.apps.PatchesConfig",
-    "ishar.apps.PlayersConfig",
-    "ishar.apps.ProcessesConfig",
-    "ishar.apps.QuestsConfig",
-    "ishar.apps.RacesConfig",
-    "ishar.apps.SeasonsConfig",
-    "ishar.apps.SkillsConfig"
+    "apps.CoreConfig",
+    "apps.AccountsConfig",
+    "apps.AchievementsConfig",
+    "apps.ChallengesConfig",
+    "apps.ClassesConfig",
+    "apps.ClientsConfig",
+    "apps.DiscordConfig",
+    "apps.EventsConfig",
+    "apps.FAQsConfig",
+    "apps.HelpConfig",
+    "apps.LeadersConfig",
+    "apps.MobilesConfig",
+    "apps.NewsConfig",
+    "apps.ObjectsConfig",
+    "apps.PatchesConfig",
+    "apps.PlayersConfig",
+    "apps.ProcessesConfig",
+    "apps.QuestsConfig",
+    "apps.RacesConfig",
+    "apps.SeasonsConfig",
+    "apps.SkillsConfig"
 ]
 
 MIDDLEWARE = [
@@ -130,13 +130,13 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "ishar.apps.core.contexts.website_title",
-                "ishar.apps.events.contexts.global_event_count",
-                "ishar.apps.players.contexts.player_search_form",
-                "ishar.apps.seasons.contexts.current_season",
+                "apps.core.contexts.website_title",
+                "apps.events.contexts.global_event_count",
+                "apps.players.contexts.player_search_form",
+                "apps.seasons.contexts.current_season",
             ],
 #            "libraries": {
-#                "ishar": "ishar.apps.core.templatetags"
+#                "ishar": "apps.core.templatetags"
 #            }
         },
     },
@@ -153,7 +153,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 AUTH_USER_MODEL = "accounts.Account"
 AUTHENTICATION_BACKENDS = (
-    "ishar.apps.accounts.backends.IsharUserAuthBackend",
+    "apps.accounts.backends.IsharUserAuthBackend",
 )
 LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/portal/"

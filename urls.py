@@ -5,26 +5,31 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views.generic import RedirectView
 
-from ishar.apps.core.views import ErrorView
+from apps.core.views import ErrorView
 
 
 urlpatterns = [
-    # isharmud.com URL configuration.
-    path("", include("ishar.apps.core.urls"), name="ishar"),
-
-    # Django-Admin.
+    path("", include("apps.core.urls"), name="ishar"),
     path("admin/", admin.site.urls, name="admin"),
-
     path("i18n/", include('django.conf.urls.i18n')),
-
-    # Redirect to web client.
     path(
         "connect/", RedirectView.as_view(url=settings.CONNECT_URL),
         name="connect"
     ),
+    path("challenges/", include("apps.challenges.urls"), name="challenges"),
+    path("clients/", include("apps.clients.urls"), name="clients"),
+    path("discord/", include("apps.discord.urls"), name="discord"),
+    path("events/", include("apps.events.urls"), name="events"),
+    path("faq/", include("apps.faqs.urls"), name="faq"),
+    path("help/", include("apps.help.urls"), name="help"),
+    path("leaders/", include("apps.leaders.urls"), name="leaders"),
+    path("patches/", include("apps.patches.urls"), name="patches"),
+    path("player/", include("apps.players.urls"), name="player"),
+    path("portal/", include("apps.accounts.urls"), name="portal"),
+    path("season/", include("apps.seasons.urls"), name="season"),
 ]
 
-# Error handlers
+# Error handlers.
 handler400 = ErrorView.as_view(
     message="Sorry, but the request was not understood.",
     status_code=400,
@@ -72,6 +77,7 @@ handler501 = ErrorView.as_view(
 )
 
 if settings.DEBUG:
+    # Serve ,
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += path("400/", handler400, name="400"),
     urlpatterns += path("401/", handler401, name="401"),
