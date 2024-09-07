@@ -11,8 +11,7 @@ install_as_MySQLdb()
 # Build project path(s).
 BASE_DIR = Path(__file__).resolve().parent
 
-# Django secret key and REST API token for django-ninja.
-REST_TOKEN = getenv("DJANGO_REST_TOKEN") or get_random_secret_key()
+# Django secret key.
 SECRET_KEY = getenv("DJANGO_SECRET_KEY", get_random_secret_key())
 
 # Website title.
