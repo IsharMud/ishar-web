@@ -3,6 +3,12 @@
 {% block meta_description %}Remort upgrades available to players, and their costs.{% endblock meta_description %}
 {% block meta_url %}{% url 'upgrades' %}{% endblock meta_url %}
 {% block title %}Remort Upgrades{% endblock title %}
+{% block scripts %}
+        <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+        <link rel="stylesheet" href="https://cdn.datatables.net/2.0.1/css/dataTables.bootstrap5.css">
+        <script src="https://cdn.datatables.net/2.0.1/js/dataTables.js"></script>
+        <script src="https://cdn.datatables.net/2.0.1/js/dataTables.bootstrap5.js"></script>
+{% endblock scripts %}
 {% block header %}
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
@@ -29,17 +35,39 @@
         <h5 title="{{ upgrades.count }} upgrade{{ upgrades.count|pluralize }}">
             {{ upgrades.count }} upgrade{{ upgrades.count|pluralize }}
         </h5>
-        <ul class="bg-dark list-group list-group-dark w-50">
-        {% for upgrade in upgrades %}
-            <li class="bg-black border border-secondary list-group-item list-group-item-dark list-group-item-text" title="Remort Upgrade: {{ upgrade }}">
-                <strong>{{ forloop.counter }}.</strong>
-                {{ upgrade }}
-            </li>
-        {% endfor %}
-        </ul>
+        <table class="m-1 p-1" id="upgradesTable"></table>
+        {{ upgrades|json_script:"upgradesJSON" }}
+        <script>
+            const remortUpgrades = [];
+            const upgradesData = JSON.parse(JSON.parse(document.getElementById("upgradesJSON").textContent));
+            function buildUpgrade(upgrade) { remortUpgrades.push(upgrade.fields); };
+            upgradesData.forEach(buildUpgrade);
+            const pageTable = new DataTable('#upgradesTable', {
+                columns: [
+                    { data: 'display_name', title: 'Name' },
+                    { data: 'renown_cost', title: 'Renown Cost' },
+                    { data: 'scale', title: 'Scale' },
+                    { data: 'max_value', title: 'Max Value' },
+                    { data: 'survival_renown_cost', title: 'Survival Renown Cost' },
+                    { data: 'survival_scale', title: 'Survival Scale' },
+                    { data: 'bonus', title: 'Bonus' },
+                ],
+                columnDefs: [{ type: 'num', targets: [1,] }],
+                data: remortUpgrades,
+                info: false,
+                layout: { bottomStart: 'search', topEnd: null },
+                order: [0, 'asc'],
+                pageLength: 15,
+                paging: false,
+                scrollX: true,
+            });
+            pageTable.draw();
+        </script>
+
     {% else %}
         <p class="lead fst-italic">
             Sorry, but no remort upgrades were found.
         </p>
     {% endif %}
+
 {% endblock content %}
