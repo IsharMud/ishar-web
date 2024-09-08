@@ -68,14 +68,53 @@ class RemortUpgrade(models.Model):
         verbose_name = _("Remort Upgrade")
         verbose_name_plural = _("Remort Upgrades")
 
-    def __repr__(self):
-        return "%s: %s (%i)" % (
-            self.__class__.__name__, self.__str__(), self.pk
-        )
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__} {self.__str__()} ({self.pk})"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.display_name
 
+    @property
+    def anchor(self) -> str:
+        return self.name.strip().lower().replace("_", "-")
+
+    def calculate_tiers(self, survival: bool) -> list:
+        # Create a list of the cost for each tier of the remort upgrade.
+        tiers = []
+
+        # Return the initialized empty list for disabled upgrades.
+        if self.can_buy is not True:
+            return tiers
+
+        # Determine whether to use classic or survival cost.
+        max_value = self.max_value
+        price = self.renown_cost
+        scale = self.scale
+        if survival:
+            price = self.survival_renown_cost
+            scale = self.survival_scale
+
+        cost = 0
+        value = 0
+        while value <= max_value:
+            i = 1
+            cost += price
+            while i <= scale:
+                i += 1
+                value += 1
+                if value > max_value:
+                    break
+                tiers.append(cost)
+        return tiers
+
+    @property
+    def survival_tiers(self) -> str:
+        return str(self.calculate_tiers(survival=True))
+
+    @property
+    def tiers(self) -> str:
+        return str(self.calculate_tiers(survival=False))
+
     def natural_key(self) -> str:
-        """Natural key is remort upgrade name."""
+        # Natural key is remort upgrade name.
         return self.name

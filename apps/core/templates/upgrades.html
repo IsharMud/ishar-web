@@ -27,12 +27,14 @@
 </nav>
 {% endblock header %}
 {% block content %}
-    {% if upgrades %}
         <p class="lead">
-            Here is a list of the remort upgrades available to players, and the costs for each upgrade.
+            Here is a list of the remort upgrades available to players,
+            and the renown costs for each upgrade.
         </p>
+
+    {% if upgrades_json %}
         <table class="m-1 p-1" id="upgradesTable"></table>
-        {{ upgrades|json_script:"upgradesJSON" }}
+        {{ upgrades_json|json_script:"upgradesJSON" }}
         <script>
             const remortUpgrades = [];
             const upgradesData = JSON.parse(JSON.parse(document.getElementById("upgradesJSON").textContent));
@@ -41,14 +43,11 @@
             const pageTable = new DataTable('#upgradesTable', {
                 columns: [
                     { data: 'display_name', title: 'Name' },
-                    { data: 'renown_cost', title: 'Renown Cost' },
-                    { data: 'scale', title: 'Scale' },
+                    { data: 'renown_cost', title: 'Cost' },
+                    { data: 'survival_renown_cost', title: 'Survival Cost' },
                     { data: 'max_value', title: 'Max Value' },
-                    { data: 'survival_renown_cost', title: 'Survival Renown Cost' },
-                    { data: 'survival_scale', title: 'Survival Scale' },
-                    { data: 'bonus', title: 'Bonus' },
                 ],
-                columnDefs: [{ type: 'num', targets: [1,] }],
+                columnDefs: [{ type: 'num', targets: [1, 2, 3] }],
                 data: remortUpgrades,
                 info: false,
                 layout: { bottomStart: 'search', topEnd: null },
@@ -56,6 +55,7 @@
                 pageLength: 15,
                 paging: false,
                 scrollX: true,
+                searching: false
             });
             pageTable.draw();
         </script>
@@ -66,4 +66,43 @@
         </p>
     {% endif %}
 
+    {% if upgrades %}
+        <table class="table table-dark border rounded m-1 p-1">
+            <thead>
+                <tr class="border rounded">
+                    <th scope="col" title="#">#</th>
+                    <th scope="col" title="Name">Name</th>
+                    <th scope="col" title="Cost">Cost</th>
+                    <th scope="col" title="Tiers">Tiers</th>
+                    <th scope="col" title="Survival Cost">Survival Cost</th>
+                    <th scope="col" title="Survival Tiers">Survival Tiers</th>
+                </tr>
+            </thead>
+        <tbody>
+        {% for upgrade in upgrades %}
+            <tr class="border rounded">
+                <th class="border rounded" scope="row">
+                    <a class="anchor-link" id="{{ upgrade.anchor }}" href="#{{ upgrade.anchor }}" aria-label="Link to this section: Remort Upgrades: {{ upgrade.display_name }} ({{ upgrade.anchor }})">
+                        &#x23;
+                    </a>
+                </th>
+                <td class="border rounded">
+                    <b>{{ upgrade.display_name }}</b>
+                </td>
+                <td class="list-group-item list-group-item-text" title="Cost: {{ upgrade.renown_cost }}">
+                    {{ upgrade.renown_cost }}
+                </td>
+                <td class="border rounded" title="Tiers: {{ upgrade.tiers }}">
+                    {{ upgrade.tiers }}
+                </td>
+                <td class="border rounded" title="Survival Cost: {{ upgrade.survival_renown_cost }}">
+                    {{ upgrade.survival_renown_cost }}
+                </td>
+                <td class="border rounded" title="Survival Tiers: {{ upgrade.survival_tiers }}">
+                    {{ upgrade.survival_tiers }}
+                </td>
+            </tr>
+        {% endfor %}
+        </table>
+    {% endif %}
 {% endblock content %}
