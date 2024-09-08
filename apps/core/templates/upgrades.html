@@ -72,9 +72,7 @@
                 <tr class="border rounded">
                     <th scope="col" title="#">#</th>
                     <th scope="col" title="Name">Name</th>
-                    <th scope="col" title="Cost">Cost</th>
                     <th scope="col" title="Tiers">Tiers</th>
-                    <th scope="col" title="Survival Cost">Survival Cost</th>
                     <th scope="col" title="Survival Tiers">Survival Tiers</th>
                 </tr>
             </thead>
@@ -89,14 +87,8 @@
                 <td class="border rounded">
                     <b>{{ upgrade.display_name }}</b>
                 </td>
-                <td class="list-group-item list-group-item-text" title="Cost: {{ upgrade.renown_cost }}">
-                    {{ upgrade.renown_cost }}
-                </td>
                 <td class="border rounded" title="Tiers: {{ upgrade.tiers }}">
                     {{ upgrade.tiers }}
-                </td>
-                <td class="border rounded" title="Survival Cost: {{ upgrade.survival_renown_cost }}">
-                    {{ upgrade.survival_renown_cost }}
                 </td>
                 <td class="border rounded" title="Survival Tiers: {{ upgrade.survival_tiers }}">
                     {{ upgrade.survival_tiers }}
