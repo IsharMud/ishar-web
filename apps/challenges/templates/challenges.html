@@ -6,9 +6,9 @@
 {% block title %}Challenges{% endblock title %}
 {% block scripts %}
         <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
-        <link rel="stylesheet" href="https://cdn.datatables.net/2.0.1/css/dataTables.bootstrap5.css">
-        <script src="https://cdn.datatables.net/2.0.1/js/dataTables.js"></script>
-        <script src="https://cdn.datatables.net/2.0.1/js/dataTables.bootstrap5.js"></script>
+        <link rel="stylesheet" href="https://cdn.datatables.net/2.1.5/css/dataTables.bootstrap5.css">
+        <script src="https://cdn.datatables.net/2.1.5/js/dataTables.js"></script>
+        <script src="https://cdn.datatables.net/2.1.5/js/dataTables.bootstrap5.js"></script>
 {% endblock scripts %}
 {% block header %}
 <nav aria-label="breadcrumb">
@@ -35,7 +35,9 @@
         </p>
     </div>
     {% endif %}
-    <table class="m-1 p-1" id="challengesTable"></table>
+    <div class="container-md">
+        <table class="table table-striped table-responsive table-responsive-sm table-sm" id="challengesTable"></table>
+    </div>
     {{ challenges|json_script:"challengeJSON" }}
     <script>
         const challenges = [];
@@ -53,7 +55,6 @@
             info: false,
             layout: { bottomStart: 'search', topEnd: null },
             order: [[2, 'desc'], [1, 'desc'], ['0', 'asc']],
-            pageLength: 15,
             paging: false,
             scrollX: true,
         });

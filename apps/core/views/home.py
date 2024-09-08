@@ -4,13 +4,10 @@ from apps.news.models import News
 
 
 class HomeView(TemplateView):
-    """Home page."""
+    """Home page includes latest news post."""
     template_name = "home.html"
 
     def get_context_data(self, **kwargs):
-        # Include latest news post on main page.
         context = super().get_context_data(**kwargs)
-        context["news"] = News.objects.filter(is_visible__exact=True).order_by(
-            "-created"
-        ).first()
+        context["news"] = News.objects.latest()
         return context

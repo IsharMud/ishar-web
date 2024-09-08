@@ -5,9 +5,9 @@
 {% block title %}Remort Upgrades{% endblock title %}
 {% block scripts %}
         <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
-        <link rel="stylesheet" href="https://cdn.datatables.net/2.0.1/css/dataTables.bootstrap5.css">
-        <script src="https://cdn.datatables.net/2.0.1/js/dataTables.js"></script>
-        <script src="https://cdn.datatables.net/2.0.1/js/dataTables.bootstrap5.js"></script>
+        <link rel="stylesheet" href="https://cdn.datatables.net/2.1.5/css/dataTables.bootstrap5.css">
+        <script src="https://cdn.datatables.net/2.1.5/js/dataTables.js"></script>
+        <script src="https://cdn.datatables.net/2.1.5/js/dataTables.bootstrap5.js"></script>
 {% endblock scripts %}
 {% block header %}
 <nav aria-label="breadcrumb">
@@ -27,81 +27,61 @@
 </nav>
 {% endblock header %}
 {% block content %}
-        <p class="lead">
-            Here is a list of the remort upgrades available to players,
-            and the renown costs for each upgrade.
-        </p>
+    <p class="lead">
+        Here are the remort upgrades available to players, and the
+        <a href="{% url 'help_page' help_topic='Renown' %}#topic">renown</a>
+        costs for each upgrade.
+    </p>
 
-    {% if upgrades_json %}
-        <table class="m-1 p-1" id="upgradesTable"></table>
-        {{ upgrades_json|json_script:"upgradesJSON" }}
-        <script>
-            const remortUpgrades = [];
-            const upgradesData = JSON.parse(JSON.parse(document.getElementById("upgradesJSON").textContent));
-            function buildUpgrade(upgrade) { remortUpgrades.push(upgrade.fields); };
-            upgradesData.forEach(buildUpgrade);
-            const pageTable = new DataTable('#upgradesTable', {
-                columns: [
-                    { data: 'display_name', title: 'Name' },
-                    { data: 'renown_cost', title: 'Cost' },
-                    { data: 'survival_renown_cost', title: 'Survival Cost' },
-                ],
-                columnDefs: [{ type: 'num', targets: [1, 2] }],
-                data: remortUpgrades,
-                info: false,
-                layout: { bottomStart: 'search', topEnd: null },
-                order: [0, 'asc'],
-                pageLength: 0,
-                paging: false,
-                scrollX: true,
-                searching: false
-            });
-            pageTable.draw();
-        </script>
-
-    {% else %}
-        <p class="lead fst-italic">
-            Sorry, but no remort upgrades were found.
-        </p>
-    {% endif %}
-
+    <div class="container-md table-responsive">
     {% if upgrades %}
-        <table class="table table-dark table-striped border rounded m-1 p-1">
-            <thead>
-                <tr class="border rounded">
-                    <th scope="col" title="#">
-                        <strong>#</strong>
-                    </th>
-                    <th scope="col" title="Name">
-                        <strong>Name</strong>
-                    </th>
-                    <th scope="col" title="Tiers">
-                        <strong>Tiers</strong>
-                    </th>
-                    <th scope="col" title="Survival Tiers">
-                        <strong>Survival Tiers</strong>
-                    </th>
-                </tr>
-            </thead>
-        <tbody>
+    <table class="caption-top compact display table table-borderless table-sm table-striped" id="upgradesTable">
+        <thead>
+            <tr class="border-ishar">
+                <th scope="col" title="Name">
+                    <span class="text-ishar">Name</span>
+                </th>
+                <th scope="col" title="Tiers">
+                    <span class="text-ishar">Tiers</span>
+                </th>
+                <th scope="col" title="Survival Tiers">
+                    <span class="text-ishar">Survival Tiers</span>
+                </th>
+            </tr>
+        </thead>
+        <tbody class="table-group-divider">
         {% for upgrade in upgrades %}
-            <tr class="border rounded">
-                <th class="border rounded" scope="row">
-                    <a class="anchor-link" id="{{ upgrade.anchor }}" href="#{{ upgrade.anchor }}" aria-label="Link to this section: Remort Upgrades: {{ upgrade.display_name }} ({{ upgrade.anchor }})">
+            <tr class="upgrade-row" id="{{ upgrade.anchor }}">
+                <td data-order="{{ upgrade.display_name }}" data-search="{{ upgrade.display_name }}" title="Name: {{ upgrade.display_name }}">
+                    {{ upgrade.display_name }}
+                    <a class="anchor-link" href="#{{ upgrade.anchor }}" aria-label="Link to this section: Remort Upgrade - {{ upgrade.display_name }} ({{ upgrade.anchor }})">
                         &#x23;
                     </a>
-                </th>
-                <td class="border rounded" title="Name: {{ upgrade.display_name }}">
-                    <b>{{ upgrade.display_name }}</b>
                 </td>
-                <td class="border rounded" title="Tiers: {{ upgrade.tiers }}">
-                    {{ upgrade.tiers }}
+                <td data-order="{{ upgrade.renown_cost }}" data-search="" title="Tiers: {{ upgrade.tiers|join:', ' }}">
+                    {{ upgrade.tiers|join:', ' }}
                 </td>
-                <td class="border rounded" title="Survival Tiers: {{ upgrade.survival_tiers }}">
-                    {{ upgrade.survival_tiers }}
+                <td data-order="{{ upgrade.survival_renown_cost }}" data-search="" title="Survival Tiers: {{ upgrade.survival_tiers|join:', ' }}">
+                    {{ upgrade.survival_tiers|join:', ' }}
                 </td>
             </tr>
         {% endfor %}
-        </table>
+        </tbody>
+    </table>
+    <script>
+        $('#upgradesTable').DataTable({
+            info: false,
+            layout: { bottomStart: 'search', topEnd: null },
+            order: [0, 'asc'],
+            paging: false,
+            scrollX: true,
+        });
+    </script>
+    {% else %}
+    <p class="lead fst-italic">
+        Sorry, but no remort upgrades were found.
+    </p>
     {% endif %}
+</div>
+
 {% endblock content %}

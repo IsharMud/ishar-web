@@ -69,7 +69,7 @@ class RemortUpgrade(models.Model):
         verbose_name_plural = _("Remort Upgrades")
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__} {self.__str__()} ({self.pk})"
+        return f"{self.__class__.__name__}: {self.__str__()} ({self.pk})"
 
     def __str__(self) -> str:
         return self.display_name
@@ -86,11 +86,11 @@ class RemortUpgrade(models.Model):
         if self.can_buy is not True:
             return tiers
 
-        # Determine whether to use classic or survival cost.
+        # Calculate with either classic or survival cost and scale.
         max_value = self.max_value
         price = self.renown_cost
         scale = self.scale
-        if survival:
+        if survival is True:
             price = self.survival_renown_cost
             scale = self.survival_scale
 
@@ -108,12 +108,12 @@ class RemortUpgrade(models.Model):
         return tiers
 
     @property
-    def survival_tiers(self) -> str:
-        return str(self.calculate_tiers(survival=True))
+    def survival_tiers(self) -> list:
+        return self.calculate_tiers(survival=True)
 
     @property
-    def tiers(self) -> str:
-        return str(self.calculate_tiers(survival=False))
+    def tiers(self) -> list:
+        return self.calculate_tiers(survival=False)
 
     def natural_key(self) -> str:
         # Natural key is remort upgrade name.

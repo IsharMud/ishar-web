@@ -7,7 +7,7 @@ from apps.accounts.models import Account
 class NewsManager(models.Manager):
     def get_by_natural_key(self, subject):
         """Natural key is news post subject."""
-        return self.get(patch_name=subject)
+        return self.get(subject=subject)
 
 
 class News(models.Model):
@@ -52,16 +52,13 @@ class News(models.Model):
         managed = True
         db_table = "news"
         default_related_name = "news"
+        get_latest_by = ("is_visible", "created")
         ordering = ("-created", "-news_id")
         verbose_name = "News Post"
         verbose_name_plural = "News Posts"
 
     def __repr__(self):
-        return "%s: %s (%i)" % (
-            self.__class__.__name__,
-            self.__str__(),
-            self.pk
-        )
+        return f"{self.__class__.__name__}: {self.__str__()} ({self.pk})"
 
     def __str__(self):
         return self.subject

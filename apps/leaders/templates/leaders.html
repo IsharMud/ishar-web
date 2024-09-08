@@ -77,7 +77,9 @@
     </li>
 </ul>
 {% endif %}
-<table class="m-1 p-1" id="leadersTable" style="width: 80ch;"></table>
+<div class="container-md">
+    <table class="table table-striped table-responsive table-responsive-sm table-sm" id="leadersTable"></table>
+</div>
 {{ leaders|json_script:"leadersJSON" }}
 <script>
     const leaders = [];
