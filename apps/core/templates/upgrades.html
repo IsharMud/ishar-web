@@ -45,14 +45,13 @@
                     { data: 'display_name', title: 'Name' },
                     { data: 'renown_cost', title: 'Cost' },
                     { data: 'survival_renown_cost', title: 'Survival Cost' },
-                    { data: 'max_value', title: 'Max Value' },
                 ],
-                columnDefs: [{ type: 'num', targets: [1, 2, 3] }],
+                columnDefs: [{ type: 'num', targets: [1, 2] }],
                 data: remortUpgrades,
                 info: false,
                 layout: { bottomStart: 'search', topEnd: null },
                 order: [0, 'asc'],
-                pageLength: 15,
+                pageLength: 0,
                 paging: false,
                 scrollX: true,
                 searching: false
@@ -67,13 +66,21 @@
     {% endif %}
 
     {% if upgrades %}
-        <table class="table table-dark border rounded m-1 p-1">
+        <table class="table table-dark table-striped border rounded m-1 p-1">
             <thead>
                 <tr class="border rounded">
-                    <th scope="col" title="#">#</th>
-                    <th scope="col" title="Name">Name</th>
-                    <th scope="col" title="Tiers">Tiers</th>
-                    <th scope="col" title="Survival Tiers">Survival Tiers</th>
+                    <th scope="col" title="#">
+                        <strong>#</strong>
+                    </th>
+                    <th scope="col" title="Name">
+                        <strong>Name</strong>
+                    </th>
+                    <th scope="col" title="Tiers">
+                        <strong>Tiers</strong>
+                    </th>
+                    <th scope="col" title="Survival Tiers">
+                        <strong>Survival Tiers</strong>
+                    </th>
                 </tr>
             </thead>
         <tbody>
@@ -84,7 +91,7 @@
                         &#x23;
                     </a>
                 </th>
-                <td class="border rounded">
+                <td class="border rounded" title="Name: {{ upgrade.display_name }}">
                     <b>{{ upgrade.display_name }}</b>
                 </td>
                 <td class="border rounded" title="Tiers: {{ upgrade.tiers }}">

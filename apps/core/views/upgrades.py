@@ -20,19 +20,18 @@ class UpgradesView(LoginRequiredMixin, ListView, PermissionRequiredMixin):
         json_object_name = f"{self.context_object_name}_json"
         context[json_object_name] = serialize(
             format="json",
-            queryset=context.get(self.context_object_name).exclude(
-#                max_value__exact=1
+            queryset=context.get(self.context_object_name).filter(
+                max_value__exact=1
             ),
             use_natural_foreign_keys=True,
             use_natural_primary_keys=True,
             fields=(
-                "anchor", "display_name", "renown_cost", "tiers",
-                "survival_renown_cost", "survival_tiers", "max_value",
+                "anchor", "display_name", "renown_cost", "survival_renown_cost"
             )
         )
         context[self.context_object_name] = context.get(
             self.context_object_name
-        ).filter(
-#            max_value__exact=1
+        ).exclude(
+            max_value__exact=1
         )
         return context
