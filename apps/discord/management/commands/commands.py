@@ -112,6 +112,12 @@ class Command(BaseCommand):
                     }
                 ]
             },
+            {
+                "type": 1,
+                "name": "upgrades",
+                "description":
+                    "Link to available remort upgrades and their renown costs."
+            },
         ]
 
         reg = requests.put(

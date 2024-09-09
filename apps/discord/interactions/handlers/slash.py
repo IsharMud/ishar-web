@@ -55,5 +55,9 @@ def slash(interaction_json: dict, request) -> tuple[str, bool]:
     if command_name == "season":
         return season(request=request), False
 
+    # "upgrades" command to link remort upgrades page.
+    if command_name == "upgrades":
+        return upgrades(request=request), False
+
     # Raise UnknownCommandException as last resort.
     raise UnknownCommandException
