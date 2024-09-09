@@ -55,7 +55,7 @@
         <tbody class="table-group-divider">
         {% for upgrade in upgrades %}
             <tr>
-                <td class="border upgrade-row" id="{{ upgrade.anchor }}" data-order="{{ upgrade.display_name }}" data-search="{{ upgrade.display_name }}" title="Name: {{ upgrade.display_name }}">
+                <td class="border anchor-cell" id="{{ upgrade.anchor }}" data-order="{{ upgrade.display_name }}" data-search="{{ upgrade.display_name }}" title="Name: {{ upgrade.display_name }}">
                     {{ upgrade.display_name }}
                     <a class="anchor-link" href="#{{ upgrade.anchor }}" aria-label="Link to this section: Remort Upgrade - {{ upgrade.display_name }} ({{ upgrade.anchor }})">
                         &#x23;
@@ -72,26 +72,34 @@
         </tbody>
     </table>
     <script>
+        const itemName = 'upgrades'
+        const searchLayout = { search: { placeholder: 'Upgrade Name' } }
         $('#upgradesTable').DataTable({
             buttons: ['colvis'],
             language: {
-                info: "Showing _START_ to _END_ of _TOTAL_ upgrades",
-                infoEmpty: "Showing 0 to 0 of 0 upgrades",
-                infoFiltered: "(filtered from _MAX_ total upgrades)",
-                lengthMenu: "Show _MENU_ upgrades",
-                zeroRecords: "No matching upgrades found"
+                info: `Showing _START_ to _END_ of _TOTAL_ ${itemName}`,
+                infoEmpty: `Showing 0 to 0 of 0 ${itemName}`,
+                infoFiltered: `(filtered from _MAX_ total ${itemName})`,
+                lengthMenu: `Show _MENU_ ${itemName}`,
+                zeroRecords: `No matching ${itemName} found`
             },
             layout: {
-                topStart: {
-                    search: { placeholder: 'Upgrade Name' }
-                },
-                bottomStart: 'info',
+                top: 'info',
                 topEnd: {
                     buttons: [{
                         extend: 'colvis',
                         text: 'Columns'
                     }],
-                }
+                },
+                topStart: searchLayout,
+                bottom: 'info',
+                bottomEnd: {
+                    buttons: [{
+                        extend: 'colvis',
+                        text: 'Columns'
+                    }],
+                },
+                bottomStart: searchLayout
             },
             order: [[0, 'asc']],
             paging: false,

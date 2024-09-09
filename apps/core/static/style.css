@@ -59,4 +59,4 @@ a.hardcore-player:active, a.hardcore-player:visited
 
 .two-col { column-count: 2; }
 .challenge-completed { text-decoration: line-through; text-decoration-color: #a00; text-decoration-thickness: 0.15rem; }
-.upgrade-row:target { color: var(--ishar-color); font-weight: bold; }
+.anchor-cell:target { color: var(--ishar-color); font-weight: bold; }

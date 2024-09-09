@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.admin import display
+from django.template.defaultfilters import slugify
 
 from apps.mobiles.models.mobile import Mobile
 
@@ -99,6 +100,10 @@ class Challenge(models.Model):
         if self.winner_desc:
             return True
         return False
+
+    @property
+    def anchor(self) -> str:
+        return slugify(self.mobile.long_name).replace("_", "-")
 
     def winners(self) -> list:
         """List of players that have won the challenge."""

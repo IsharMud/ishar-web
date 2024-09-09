@@ -39,47 +39,96 @@
         </p>
     </div>
     {% endif %}
-    <div class="container-md">
-        <table class="table table-dark table-flush table-sm table-responsive table-responsive-sm table-striped" id="challengesTable">
+    <div class="container-sm w-auto">
+    {% if challenges %}
+        <table class="table table-borderless table-dark table-flush table-sm table-striped" id="challengesTable">
+            <thead>
+                <tr class="border-ishar text-ishar">
+                    <th scope="col" title="Find & Kill">
+                        <span class="text-ishar">Find & Kill</span>
+                    </th>
+                    <th scope="col" title="Max People">
+                        <span class="text-ishar">Max People</span>
+                    </th>
+                    <th scope="col" title="Max Level">
+                        <span class="text-ishar">Max Level</span>
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="table-group-divider">
+        {% for challenge in challenges %}
+                <tr>
+                    <td class="border anchor-cell" id="{{ challenge.anchor }}"  data-order="{{ challenge.mobile.long_name }}" data-search="{{ challenge.mobile.long_name }}" title="Mobile Name: {{ challenge.mobile.long_name }}">
+                        {{ challenge.mobile.long_name }}
+                        <a class="anchor-link" href="#{{ challenge.anchor }}" aria-label="Link to this section: Challenge - {{ challenge.mobile.long_name }} ({{ challenge.anchor }})">
+                            &#x23;
+                        </a>
+                    </td>
+                    <td class="border" data-order="{{ challenge.max_people }}" data-search="" title="Max People: {{ challenge.max_people }}">
+                        {{ challenge.max_people }}
+                    </td>
+                    <td class="border" data-order="{{ challenge.max_level }}" data-search="" title="Max Level: {{ challenge.max_level }}">
+                        {{ challenge.max_level }}
+                    </td>
+                </tr>
+        {% endfor %}
+            </tbody>
         </table>
+        <script>
+            const itemName = 'challenges'
+            const searchLayout = { search: { placeholder: 'Mobile Name' } }
+            $('#challengesTable').DataTable({
+                buttons: ['colvis'],
+                columnDefs: [
+                    {
+                        searchable: true,
+                        targets: [0],
+                        type: 'html'
+                    },
+                    {
+                        searchable: false,
+                        targets: [1, 2],
+                        type: 'num'
+                    }
+                ],
+                language: {
+                    info: `Showing _START_ to _END_ of _TOTAL_ ${itemName}`,
+                    infoEmpty: `Showing 0 to 0 of 0 ${itemName}`,
+                    infoFiltered: `(filtered from _MAX_ total ${itemName})`,
+                    lengthMenu: `Show _MENU_ ${itemName}`,
+                    zeroRecords: `No matching ${itemName} found`
+                },
+                layout: {
+                    top: 'info',
+                    topStart: searchLayout,
+                    topEnd: {
+                        buttons: [{
+                            extend: 'colvis',
+                            text: 'Columns'
+                        }]
+                    },
+                    bottom: 'info',
+                    bottomStart: searchLayout,
+                    bottomEnd: {
+                        buttons: [{
+                            extend: 'colvis',
+                            text: 'Columns'
+                        }]
+                    }
+                },
+                order: [
+                    [2, 'desc'],
+                    [1, 'desc'],
+                    [0, 'asc']
+                ],
+                paging: false,
+                scrollX: true
+            });
+        </script>
+    {% else %}
+        <p class="lead fst-italic">
+            Sorry, but no remort upgrades were found.
+        </p>
+    {% endif %}
     </div>
-    {{ challenges|json_script:"challengeJSON" }}
-    <script>
-        const challenges = [];
-        const challengesData = JSON.parse(JSON.parse(document.getElementById("challengeJSON").textContent));
-        function buildChallenge(challenge) { challenges.push(challenge.fields); };
-        challengesData.forEach(buildChallenge);
-        const pageTable = new DataTable('#challengesTable', {
-            columns: [
-                { data: 'mobile', title: 'Find & Kill' },
-                { data: 'max_people', title: 'Max People', search: false },
-                { data: 'max_level', title: 'Max Level', search: false },
-            ],
-            columnDefs: [{ type: 'num', targets: [1, 2] }],
-            data: challenges,
-            language: {
-                info: "Showing _START_ to _END_ of _TOTAL_ challenges",
-                infoEmpty: "Showing 0 to 0 of 0 challenges",
-                infoFiltered: "(filtered from _MAX_ total challenges)",
-                lengthMenu: "Show _MENU_ challenges",
-                zeroRecords: "No matching challenges found"
-            },
-            layout: {
-                topStart: {
-                    search: { placeholder: 'Mobile Name' }
-                },
-                bottomStart: {
-                    buttons: [{
-                        extend: 'colvis',
-                        text: 'Columns'
-                    }],
-                },
-                topEnd: 'info'
-            },
-            order: [[2, 'desc'], [1, 'desc'], ['0', 'asc']],
-            paging: false,
-            scrollX: true
-        });
-        pageTable.draw();
-    </script>
 {% endblock content %}

@@ -81,58 +81,111 @@
     </li>
 </ul>
 {% endif %}
-<div class="container-md">
-    <table class="table table-dark table-flush table-sm table-responsive table-responsive-sm table-striped" id="leadersTable">
+
+<div class="container-sm w-auto">
+{% if leaders %}
+    <table class="table table-borderless table-dark table-flush table-sm table-striped" id="leadersTable">
+        <thead>
+            <tr class="border-ishar text-ishar">
+                <th scope="col" title="Name">
+                    <span class="text-ishar">Name</span>
+                </th>
+                <th scope="col" title="Level">
+                    <span class="text-ishar">Level</span>
+                </th>
+                <th scope="col" title="Remorts">
+                    <span class="text-ishar">Remorts</span>
+                </th>
+                <th scope="col" title="Renown">
+                    <span class="text-ishar">Renown</span>
+                </th>
+                <th scope="col" title="Challenges">
+                    <span class="text-ishar">Challenges</span>
+                </th>
+                <th scope="col" title="Deaths">
+                    <span class="text-ishar">Deaths</span>
+                </th>
+            </tr>
+        </thead>
+        <tbody class="table-group-divider">
+    {% for leader in leaders %}
+            <tr>
+                <td class="border" data-order="{{ leader.name }}" data-search="{{ leader.name }}" title="Player Name: {{ leader.name }}">
+                    {{ leader.player_link }}
+                </td>
+                <td class="border" data-order="{{ leader.true_level }}" data-search="" title="Level: {{ leader.true_level }}">
+                    {{ leader.true_level }}
+                </td>
+                <td class="border" data-order="{{ leader.remorts }}" data-search="" title="Remorts: {{ leader.remorts }}">
+                    {{ leader.remorts }}
+                </td>
+                <td class="border" data-order="{{ leader.total_renown }}" data-search="" title="Renown: {{ leader.total_renown }}">
+                    {{ leader.total_renown }}
+                </td>
+                <td class="border" data-order="{{ leader.challenges_completed }}" data-search="" title="Challenges: {{ leader.challenges_completed }}">
+                    {{ leader.challenges_completed }}
+                </td>
+                <td class="border" data-order="{{ leader.deaths }}" data-search="" title="Deaths: {{ leader.deaths }}">
+                    {{ leader.deaths }}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
     </table>
+    {% endif %}
 </div>
-{{ leaders|json_script:"leadersJSON" }}
 <script>
-    const leaders = [];
-    const leadersData = JSON.parse(JSON.parse(document.getElementById("leadersJSON").textContent));
-    function buildLeader(leader) { leaders.push(leader.fields); };
-    leadersData.forEach(buildLeader);
-    const pageTable = new DataTable('#leadersTable', {
+    const itemName = 'players'
+    const searchLayout = { search: { placeholder: 'Player Name' } }
+    $('#leadersTable').DataTable({
         buttons: ['colvis'],
-        columns: [
-            {
-                data: 'name',
-                title: 'Player Name',
-                render: function (data, type, row) {
-                    return `<a href="/player/${data}#player">${data}</a>`;
-                },
-            },
-            { data: 'true_level', title: 'Level' },
-            { data: 'remorts', title: 'Remorts' },
-            { data: 'total_renown', title: 'Renown' },
-            { data: 'challenges_completed', title: 'Challenges' },
-            { data: 'deaths', title: 'Deaths' },
-        ],
         columnDefs: [
-            { type: 'html', targets: [0] },
-            { type: 'num', targets: [1, 2, 3, 4, 5] },
+            {
+                searchable: true,
+                targets: [0],
+                type: 'html'
+            },
+            {
+                searchable: false,
+                targets: [1, 2, 3, 4, 5],
+                type: 'num'
+            }
         ],
-        data: leaders,
         language: {
-            info: "Showing _START_ to _END_ of _TOTAL_ players",
-            infoEmpty: "Showing 0 to 0 of 0 players",
-            infoFiltered: "(filtered from _MAX_ total players)",
-            lengthMenu: "Show _MENU_ players",
-            zeroRecords: "No matching players found"
+            info: `Showing _START_ to _END_ of _TOTAL_ ${itemName}`,
+            infoEmpty: `Showing 0 to 0 of 0 ${itemName}`,
+            infoFiltered: `(filtered from _MAX_ total ${itemName})`,
+            lengthMenu: `Show _MENU_ ${itemName}`,
+            zeroRecords: `No matching ${itemName} found`
         },
         layout: {
-            topStart: {
-                search: { placeholder: 'Player Name' }
-            },
+            top: 'info',
             topEnd: {
                 buttons: [{
                     extend: 'colvis',
                     text: 'Columns'
                 }],
             },
-            bottomStart: 'info'
+            topStart: searchLayout,
+
+            bottom: 'info',
+            bottomEnd: 'paging',
+            bottomStart: 'pageLength'
         },
-        lengthMenu: [5, 10, 15, 20, 25, 50, 75, 100, { label: 'all', value: -1 }],
-        order: [[2, 'desc'], [3, 'desc'], [4, 'desc'], [5, 'asc'], [1, 'desc']],
+        lengthMenu: [
+            5, 10, 15, 20, 25, 50, 75, 100,
+            {
+                label: 'all',
+                value: -1
+            }
+        ],
+        order: [
+            [2, 'desc'],
+            [3, 'desc'],
+            [4, 'desc'],
+            [5, 'asc'],
+            [1, 'desc']
+        ],
         pageLength: 10,
         scrollX: true
     });
