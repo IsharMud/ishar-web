@@ -31,104 +31,125 @@
 {% endblock header %}
 {% block content %}
     {% if CURRENT_SEASON and CURRENT_SEASON.get_next_cycle %}
-    <div class="next-cycle">
-        <p class="lead">
-            Challenges will next cycle
-            <strong>{{ CURRENT_SEASON.get_next_cycle | naturaltime }}</strong>
-            @ {{ CURRENT_SEASON.get_next_cycle }}
-        </p>
+<div class="container-sm w-auto p-3">
+    <div class="card">
+        <div class="g-0 row">
+            <div class="anchor-cell bi bi-clock card-header col-md-4" id="cycle">
+                Next Cycle
+                <a class="anchor-link" href="#cycle" aria-label="Link to this section: Next Cycle: {{ CURRENT_SEASON.get_next_cycle | naturaltime }} ({{ CURRENT_SEASON.get_next_cycle }})">
+                    &#x23;
+                </a>
+            </div>
+            <div class="card-body col-md-4">
+                <p class="card-text fw-bold">
+                    {{ CURRENT_SEASON.get_next_cycle | naturaltime }}
+                </p>
+            </div>
+            <div class="card-footer col-md-4">
+                <time class="fst-italic" datetime="{{ CURRENT_SEASON.get_next_cycle|date:"c" }}">
+                    {{ CURRENT_SEASON.get_next_cycle }}
+                </time>
+            </div>
+        </div>
     </div>
+</div>
     {% endif %}
-    <div class="container-sm w-auto">
+<div class="container-sm w-auto">
     {% if challenges %}
-        <table class="table table-borderless table-dark table-flush table-sm table-striped" id="challengesTable">
-            <thead>
-                <tr class="border-ishar text-ishar">
-                    <th scope="col" title="Find & Kill">
-                        <span class="text-ishar">Find & Kill</span>
-                    </th>
-                    <th scope="col" title="Max People">
-                        <span class="text-ishar">Max People</span>
-                    </th>
-                    <th scope="col" title="Max Level">
-                        <span class="text-ishar">Max Level</span>
-                    </th>
-                </tr>
-            </thead>
-            <tbody class="table-group-divider">
+    <table class="table table-borderless table-dark table-flush table-sm table-striped" id="challengesTable">
+        <thead>
+            <tr class="border-ishar text-ishar">
+                <th scope="col" title="Find & Kill">
+                    <span class="text-ishar">Find & Kill</span>
+                </th>
+                <th scope="col" title="Max People">
+                    <span class="text-ishar">Max People</span>
+                </th>
+                <th scope="col" title="Max Level">
+                    <span class="text-ishar">Max Level</span>
+                </th>
+            </tr>
+        </thead>
+        <tbody class="table-group-divider">
         {% for challenge in challenges %}
-                <tr>
-                    <td class="border anchor-cell" id="{{ challenge.anchor }}"  data-order="{{ challenge.mobile.long_name }}" data-search="{{ challenge.mobile.long_name }}" title="Mobile Name: {{ challenge.mobile.long_name }}">
-                        {{ challenge.mobile.long_name }}
-                        <a class="anchor-link" href="#{{ challenge.anchor }}" aria-label="Link to this section: Challenge - {{ challenge.mobile.long_name }} ({{ challenge.anchor }})">
-                            &#x23;
-                        </a>
-                    </td>
-                    <td class="border" data-order="{{ challenge.max_people }}" data-search="" title="Max People: {{ challenge.max_people }}">
-                        {{ challenge.max_people }}
-                    </td>
-                    <td class="border" data-order="{{ challenge.max_level }}" data-search="" title="Max Level: {{ challenge.max_level }}">
-                        {{ challenge.max_level }}
-                    </td>
-                </tr>
+            <tr>
+                <td class="border anchor-cell" id="{{ challenge.anchor }}"  data-order="{{ challenge.mobile.long_name }}" data-search="{{ challenge.mobile.long_name }}" title="Mobile Name: {{ challenge.mobile.long_name }}">
+                    {{ challenge.mobile.long_name }}
+                    <a class="anchor-link" href="#{{ challenge.anchor }}" aria-label="Link to this section: Challenge - {{ challenge.mobile.long_name }} ({{ challenge.anchor }})">
+                        &#x23;
+                    </a>
+                </td>
+                <td class="border" data-order="{{ challenge.max_people }}" data-search="" title="Max People: {{ challenge.max_people }}">
+                    {{ challenge.max_people }}
+                </td>
+                <td class="border" data-order="{{ challenge.max_level }}" data-search="" title="Max Level: {{ challenge.max_level }}">
+                    {{ challenge.max_level }}
+                </td>
+            </tr>
         {% endfor %}
-            </tbody>
-        </table>
-        <script>
-            const itemName = 'challenges'
-            const searchLayout = { search: { placeholder: 'Mobile Name' } }
-            $('#challengesTable').DataTable({
-                buttons: ['colvis'],
-                columnDefs: [
-                    {
-                        searchable: true,
-                        targets: [0],
-                        type: 'html'
-                    },
-                    {
-                        searchable: false,
-                        targets: [1, 2],
-                        type: 'num'
-                    }
-                ],
-                language: {
-                    info: `Showing _START_ to _END_ of _TOTAL_ ${itemName}`,
-                    infoEmpty: `Showing 0 to 0 of 0 ${itemName}`,
-                    infoFiltered: `(filtered from _MAX_ total ${itemName})`,
-                    lengthMenu: `Show _MENU_ ${itemName}`,
-                    zeroRecords: `No matching ${itemName} found`
-                },
-                layout: {
-                    top: 'info',
-                    topStart: searchLayout,
-                    topEnd: {
-                        buttons: [{
-                            extend: 'colvis',
-                            text: 'Columns'
-                        }]
-                    },
-                    bottom: 'info',
-                    bottomStart: searchLayout,
-                    bottomEnd: {
-                        buttons: [{
-                            extend: 'colvis',
-                            text: 'Columns'
-                        }]
-                    }
-                },
-                order: [
-                    [2, 'desc'],
-                    [1, 'desc'],
-                    [0, 'asc']
-                ],
-                paging: false,
-                scrollX: true
-            });
-        </script>
+        </tbody>
+    </table>
+</div>
+<script>
+    const itemName = 'challenges'
+    const searchLayout = { search: { placeholder: 'Mobile Name' } }
+    $('#challengesTable').DataTable({
+        buttons: ['colvis'],
+        columnDefs: [
+            {
+                searchable: true,
+                targets: [0],
+                type: 'html'
+            },
+            {
+                searchable: false,
+                targets: [1, 2],
+                type: 'num'
+            }
+        ],
+        language: {
+            info: `Showing _START_ to _END_ of _TOTAL_ ${itemName}`,
+            infoEmpty: `Showing 0 to 0 of 0 ${itemName}`,
+            infoFiltered: `(filtered from _MAX_ total ${itemName})`,
+            lengthMenu: `Show _MENU_ ${itemName}`,
+            zeroRecords: `No matching ${itemName} found`
+        },
+        layout: {
+            top: 'info',
+            topStart: searchLayout,
+            topEnd: {
+                buttons: [{
+                    extend: 'colvis',
+                    text: 'Columns'
+                }]
+            },
+            bottom: 'info',
+            bottomStart: searchLayout,
+            bottomEnd: {
+                buttons: [{
+                    extend: 'colvis',
+                    text: 'Columns'
+                }]
+            }
+        },
+        order: [
+            [2, 'desc'],
+            [1, 'desc'],
+            [0, 'asc']
+        ],
+        paging: false,
+        scrollX: true
+    });
+</script>
     {% else %}
-        <p class="lead fst-italic">
-            Sorry, but no remort upgrades were found.
-        </p>
-    {% endif %}
+<div class="p-3">
+    <div class="card">
+        <div class="card-body">
+            <p class="card-text fst-italic lead text-warning">
+                Sorry, but no challenges were found.
+            </p>
+        </div>
     </div>
+</div>
+    {% endif %}
 {% endblock content %}

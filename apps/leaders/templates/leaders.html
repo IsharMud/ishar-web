@@ -35,55 +35,54 @@
     </ol>
 </nav>
 {% endblock header %}
-{% block content %}<ul class="m-1 px-1 py-3 list-group list-group-horizontal">
-{% for num, name in game_types %}
-{% endfor %}
+{% block content %}
+<ul class="m-1 px-1 py-3 list-group list-group-horizontal">
     <li class="list-group-item bg-black" title="All">
-{% if game_type is None %}
-        <span class="text-ishar">All</span>
-{% else %}
-        <a class="list-group-item-text" href="{% url 'leaders' %}#leaders">All</a>
-{% endif %}
-    </li>
-{% for num, name in game_types %}
-    <li class="list-group-item bg-black" title="{{ name }}">
-{% if game_type == num %}
-        <span class="text-ishar">{{ name }}</span>
-{% else %}
-        <a class="list-group-item-text" href="{% url 'leaders' %}{{ name|lower }}#{{ name|lower }}">{{ name }}</a>
-{% endif %}
-    </li>
-{% endfor %}
-</ul>
-
-{% if game_type > 0 %}
-<ul class="m-2 px-1 py-1 list-group list-group-horizontal">
-    <li class="list-group-item bg-black" title="All">
-    {% if deleted is None %}
+    {% if game_type is None %}
         <span class="text-ishar">All</span>
     {% else %}
-        <a class="list-group-item-text" href="{% url 'leaders' %}{{ game_type_name|lower }}/">All</a>
+        <a class="list-group-item-text" href="{% url 'leaders' %}#leaders">All</a>
     {% endif %}
+    </li>
+    {% for num, name in game_types %}
+    <li class="list-group-item bg-black" title="{{ name }}">
+        {% if game_type == num %}
+        <span class="text-ishar">{{ name }}</span>
+        {% else %}
+        <a class="list-group-item-text" href="{% url 'leaders' %}{{ name|lower }}#{{ name|lower }}">{{ name }}</a>
+        {% endif %}
+    </li>
+    {% endfor %}
+</ul>
+
+    {% if game_type > 0 %}
+<ul class="m-2 p-1 list-group list-group-horizontal">
+    <li class="list-group-item bg-black" title="All">
+        {% if deleted is None %}
+        <span class="text-ishar">All</span>
+        {% else %}
+        <a class="list-group-item-text" href="{% url 'leaders' %}{{ game_type_name|lower }}/">All</a>
+        {% endif %}
     </li>
     <li class="list-group-item bg-black" title="Dead">
-    {% if deleted == 1 %}
+        {% if deleted == 1 %}
         <span class="text-ishar">Dead</span>
-    {% else %}
+        {% else %}
         <a class="list-group-item-text" href="{% url 'leaders' %}{{ game_type_name|lower }}/dead/">Dead</a>
-    {% endif %}
+        {% endif %}
     </li>
     <li class="list-group-item bg-black" title="Living">
-    {% if deleted == 0 %}
+        {% if deleted == 0 %}
         <span class="text-ishar">Living</span>
-    {% else %}
+        {% else %}
         <a class="list-group-item-text" href="{% url 'leaders' %}{{ game_type_name|lower }}/living/">Living</a>
-    {% endif %}
+        {% endif %}
     </li>
 </ul>
-{% endif %}
+    {% endif %}
 
+    {% if leaders %}
 <div class="container-sm w-auto">
-{% if leaders %}
     <table class="table table-borderless table-dark table-flush table-sm table-striped" id="leadersTable">
         <thead>
             <tr class="border-ishar text-ishar">
@@ -108,7 +107,7 @@
             </tr>
         </thead>
         <tbody class="table-group-divider">
-    {% for leader in leaders %}
+        {% for leader in leaders %}
             <tr>
                 <td class="border" data-order="{{ leader.name }}" data-search="{{ leader.name }}" title="Player Name: {{ leader.name }}">
                     {{ leader.player_link }}
@@ -132,7 +131,6 @@
         {% endfor %}
         </tbody>
     </table>
-    {% endif %}
 </div>
 <script>
     const itemName = 'players'
@@ -189,6 +187,16 @@
         pageLength: 10,
         scrollX: true
     });
-    pageTable.draw();
 </script>
+    {% else %}
+<div class="p-3">
+    <div class="card">
+        <div class="card-body">
+            <p class="card-text fst-italic lead text-warning">
+                Sorry, but no players were found.
+            </p>
+        </div>
+    </div>
+</div>
+    {% endif %}
 {% endblock content %}

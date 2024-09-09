@@ -31,24 +31,30 @@
 </nav>
 {% endblock header %}
 {% block content %}
-<p class="lead">
-    Here are the remort upgrades available to players, and the
-    <a href="{% url 'help_page' help_topic='Renown' %}#topic">renown</a>
-    costs for each upgrade.
-</p>
+<div class="p-3">
+    <div class="card">
+        <div class="card-body">
+            <p class="card-text lead">
+                Here are the remort upgrades available to players, and the
+                <a href="{% url 'help_page' help_topic='Renown' %}#topic">renown</a>
+                costs for each upgrade.
+            </p>
+        </div>
+    </div>
+</div>
 <div class="container-md">
     {% if upgrades %}
-    <table class="table table-dark table-flush table-borderless table-sm table-responsive table-responsive-sm table-striped" id="upgradesTable">
+    <table class="table table-borderless table-dark table-flush table-sm table-striped" id="upgradesTable">
         <thead>
             <tr class="border-ishar">
                 <th scope="col" title="Name">
                     <span class="text-ishar">Name</span>
                 </th>
-                <th scope="col" title="Tiers">
-                    <span class="text-ishar">Tiers</span>
+                <th scope="col" title="Tiers (Count)">
+                    <span class="text-ishar">Tiers (Count)</span>
                 </th>
-                <th scope="col" title="Survival Tiers">
-                    <span class="text-ishar">Survival Tiers</span>
+                <th scope="col" title="Survival Tiers (Count)">
+                    <span class="text-ishar">Survival Tiers (Count)</span>
                 </th>
             </tr>
         </thead>
@@ -61,55 +67,78 @@
                         &#x23;
                     </a>
                 </td>
-                <td class="border" data-order="{{ upgrade.renown_cost }}" data-search="" title="Tiers: {{ upgrade.tiers|join:', ' }}">
-                    {{ upgrade.tiers|join:', ' }}
+                <td class="border" data-order="{{ upgrade.renown_cost }}" data-search="" title="Tiers: {{ upgrade.tiers|join:', ' }} ({{ upgrade.tiers|length }} tier{{ upgrade.tiers|pluralize }})">
+                    {{ upgrade.tiers|join:", " }}
+                    (<strong>{{ upgrade.tiers|length }}</strong>)
                 </td>
-                <td class="border" data-order="{{ upgrade.survival_renown_cost }}" data-search="" title="Survival Tiers: {{ upgrade.survival_tiers|join:', ' }}">
-                    {{ upgrade.survival_tiers|join:', ' }}
+                <td class="border" data-order="{{ upgrade.survival_renown_cost }}" data-search="" title="Survival Tiers: {{ upgrade.survival_tiers|join:', ' }} ({{ upgrade.survival_tiers|length }} tier{{ upgrade.survival_tiers|pluralize }})">
+                    {{ upgrade.survival_tiers|join:", " }}
+                    (<strong>{{ upgrade.survival_tiers|length }}</strong>)
                 </td>
             </tr>
         {% endfor %}
         </tbody>
+        <tfoot>
+            <tr class="border-ishar">
+                <th scope="col" title="Name">
+                    <span class="text-ishar">Name</span>
+                </th>
+                <th scope="col" title="Tiers (Count)">
+                    <span class="text-ishar">Tiers (Count)</span>
+                </th>
+                <th scope="col" title="Survival Tiers (Count)">
+                    <span class="text-ishar">Survival Tiers (Count)</span>
+                </th>
+            </tr>
+        </tfoot>
     </table>
-    <script>
-        const itemName = 'upgrades'
-        const searchLayout = { search: { placeholder: 'Upgrade Name' } }
-        $('#upgradesTable').DataTable({
-            buttons: ['colvis'],
-            language: {
-                info: `Showing _START_ to _END_ of _TOTAL_ ${itemName}`,
-                infoEmpty: `Showing 0 to 0 of 0 ${itemName}`,
-                infoFiltered: `(filtered from _MAX_ total ${itemName})`,
-                lengthMenu: `Show _MENU_ ${itemName}`,
-                zeroRecords: `No matching ${itemName} found`
-            },
-            layout: {
-                top: 'info',
-                topEnd: {
-                    buttons: [{
-                        extend: 'colvis',
-                        text: 'Columns'
-                    }],
-                },
-                topStart: searchLayout,
-                bottom: 'info',
-                bottomEnd: {
-                    buttons: [{
-                        extend: 'colvis',
-                        text: 'Columns'
-                    }],
-                },
-                bottomStart: searchLayout
-            },
-            order: [[0, 'asc']],
-            paging: false,
-            scrollX: true
-        });
-    </script>
-    {% else %}
-    <p class="lead fst-italic">
-        Sorry, but no remort upgrades were found.
-    </p>
-    {% endif %}
 </div>
+<script>
+    const itemName = 'upgrades'
+    const searchLayout = { search: { placeholder: 'Upgrade Name' } }
+    $('#upgradesTable').DataTable({
+        buttons: ['colvis'],
+        language: {
+            info: `Showing _START_ to _END_ of _TOTAL_ ${itemName}`,
+            infoEmpty: `Showing 0 to 0 of 0 ${itemName}`,
+            infoFiltered: `(filtered from _MAX_ total ${itemName})`,
+            lengthMenu: `Show _MENU_ ${itemName}`,
+            zeroRecords: `No matching ${itemName} found`
+        },
+        layout: {
+            top: 'info',
+            topEnd: {
+                buttons: [{
+                    extend: 'colvis',
+                    text: 'Columns'
+                }],
+            },
+            topStart: searchLayout,
+            bottom: 'info',
+            bottomEnd: {
+                buttons: [{
+                    extend: 'colvis',
+                    text: 'Columns'
+                }],
+            },
+            bottomStart: searchLayout
+        },
+        order: [
+            [0, 'asc']
+        ],
+        paging: false,
+        scrollX: true
+    });
+</script>
+    {% else %}
+<div class="p-3">
+    <div class="card">
+        <div class="card-body">
+            <p class="card-text fst-italic lead text-warning">
+                Sorry, but no upgrades were found.
+            </p>
+        </div>
+    </div>
+</div>
+    {% endif %}
 {% endblock content %}
