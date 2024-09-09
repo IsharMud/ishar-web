@@ -73,7 +73,7 @@
         <tbody class="table-group-divider">
         {% for challenge in challenges %}
             <tr>
-                <td class="border anchor-cell" id="{{ challenge.anchor }}"  data-order="{{ challenge.mobile.long_name }}" data-search="{{ challenge.mobile.long_name }}" title="Mobile Name: {{ challenge.mobile.long_name }}">
+                <td class="{% if challenge.winner_desc %}challenge-completed {% endif %}border anchor-cell" id="{{ challenge.anchor }}"  data-order="{{ challenge.mobile.long_name }}" data-search="{{ challenge.mobile.long_name }}" title="Mobile Name: {{ challenge.mobile.long_name }}">
                     {{ challenge.mobile.long_name }}
                     <a class="anchor-link" href="#{{ challenge.anchor }}" aria-label="Link to this section: Challenge - {{ challenge.mobile.long_name }} ({{ challenge.anchor }})">
                         &#x23;
