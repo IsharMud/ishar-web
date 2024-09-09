@@ -40,7 +40,8 @@
     </div>
     {% endif %}
     <div class="container-md">
-        <table class="table table-striped table-responsive table-responsive-sm table-sm" id="challengesTable"></table>
+        <table class="table table-dark table-flush table-sm table-responsive table-responsive-sm table-striped" id="challengesTable">
+        </table>
     </div>
     {{ challenges|json_script:"challengeJSON" }}
     <script>
@@ -51,16 +52,33 @@
         const pageTable = new DataTable('#challengesTable', {
             columns: [
                 { data: 'mobile', title: 'Find & Kill' },
-                { data: 'max_people', title: 'Max People' },
-                { data: 'max_level', title: 'Max Level' },
+                { data: 'max_people', title: 'Max People', search: false },
+                { data: 'max_level', title: 'Max Level', search: false },
             ],
             columnDefs: [{ type: 'num', targets: [1, 2] }],
             data: challenges,
-            info: false,
-            layout: { bottomStart: 'search', topEnd: null },
+            language: {
+                info: "Showing _START_ to _END_ of _TOTAL_ challenges",
+                infoEmpty: "Showing 0 to 0 of 0 challenges",
+                infoFiltered: "(filtered from _MAX_ total challenges)",
+                lengthMenu: "Show _MENU_ challenges",
+                zeroRecords: "No matching challenges found"
+            },
+            layout: {
+                topStart: {
+                    search: { placeholder: 'Mobile Name' }
+                },
+                bottomStart: {
+                    buttons: [{
+                        extend: 'colvis',
+                        text: 'Columns'
+                    }],
+                },
+                topEnd: 'info'
+            },
             order: [[2, 'desc'], [1, 'desc'], ['0', 'asc']],
             paging: false,
-            scrollX: true,
+            scrollX: true
         });
         pageTable.draw();
     </script>

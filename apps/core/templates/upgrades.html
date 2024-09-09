@@ -31,15 +31,14 @@
 </nav>
 {% endblock header %}
 {% block content %}
-    <p class="lead">
-        Here are the remort upgrades available to players, and the
-        <a href="{% url 'help_page' help_topic='Renown' %}#topic">renown</a>
-        costs for each upgrade.
-    </p>
-
-    <div class="container-md table-responsive">
+<p class="lead">
+    Here are the remort upgrades available to players, and the
+    <a href="{% url 'help_page' help_topic='Renown' %}#topic">renown</a>
+    costs for each upgrade.
+</p>
+<div class="container-md">
     {% if upgrades %}
-    <table class="caption-top compact display table table-borderless table-sm table-striped" id="upgradesTable">
+    <table class="table table-dark table-flush table-borderless table-sm table-responsive table-responsive-sm table-striped" id="upgradesTable">
         <thead>
             <tr class="border-ishar">
                 <th scope="col" title="Name">
@@ -55,17 +54,17 @@
         </thead>
         <tbody class="table-group-divider">
         {% for upgrade in upgrades %}
-            <tr class="upgrade-row" id="{{ upgrade.anchor }}">
-                <td data-order="{{ upgrade.display_name }}" data-search="{{ upgrade.display_name }}" title="Name: {{ upgrade.display_name }}">
+            <tr>
+                <td class="border upgrade-row" id="{{ upgrade.anchor }}" data-order="{{ upgrade.display_name }}" data-search="{{ upgrade.display_name }}" title="Name: {{ upgrade.display_name }}">
                     {{ upgrade.display_name }}
                     <a class="anchor-link" href="#{{ upgrade.anchor }}" aria-label="Link to this section: Remort Upgrade - {{ upgrade.display_name }} ({{ upgrade.anchor }})">
                         &#x23;
                     </a>
                 </td>
-                <td data-order="{{ upgrade.renown_cost }}" data-search="" title="Tiers: {{ upgrade.tiers|join:', ' }}">
+                <td class="border" data-order="{{ upgrade.renown_cost }}" data-search="" title="Tiers: {{ upgrade.tiers|join:', ' }}">
                     {{ upgrade.tiers|join:', ' }}
                 </td>
-                <td data-order="{{ upgrade.survival_renown_cost }}" data-search="" title="Survival Tiers: {{ upgrade.survival_tiers|join:', ' }}">
+                <td class="border" data-order="{{ upgrade.survival_renown_cost }}" data-search="" title="Survival Tiers: {{ upgrade.survival_tiers|join:', ' }}">
                     {{ upgrade.survival_tiers|join:', ' }}
                 </td>
             </tr>
@@ -75,13 +74,28 @@
     <script>
         $('#upgradesTable').DataTable({
             buttons: ['colvis'],
-            dom: 'Bfrtip',
-            layout: {
-                topStart: { buttons: ['colvis'] }
+            language: {
+                info: "Showing _START_ to _END_ of _TOTAL_ upgrades",
+                infoEmpty: "Showing 0 to 0 of 0 upgrades",
+                infoFiltered: "(filtered from _MAX_ total upgrades)",
+                lengthMenu: "Show _MENU_ upgrades",
+                zeroRecords: "No matching upgrades found"
             },
-            order: [0, 'asc'],
+            layout: {
+                topStart: {
+                    search: { placeholder: 'Upgrade Name' }
+                },
+                bottomStart: 'info',
+                topEnd: {
+                    buttons: [{
+                        extend: 'colvis',
+                        text: 'Columns'
+                    }],
+                }
+            },
+            order: [[0, 'asc']],
             paging: false,
-            scrollX: true,
+            scrollX: true
         });
     </script>
     {% else %}
@@ -90,5 +104,4 @@
     </p>
     {% endif %}
 </div>
-
 {% endblock content %}
