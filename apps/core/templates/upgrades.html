@@ -62,10 +62,10 @@
         {% for upgrade in upgrades %}
             <tr>
                 <td class="border anchor-cell" id="{{ upgrade.anchor }}" data-order="{{ upgrade.display_name }}" data-search="{{ upgrade.display_name }}" title="Name: {{ upgrade.display_name }}">
-                    {{ upgrade.display_name }}
                     <a class="anchor-link" href="#{{ upgrade.anchor }}" aria-label="Link to this section: Remort Upgrade - {{ upgrade.display_name }} ({{ upgrade.anchor }})">
                         &#x23;
                     </a>
+                    {{ upgrade.display_name }}
                 </td>
                 <td class="border" data-order="{{ upgrade.renown_cost }}" data-search="" title="Tiers: {{ upgrade.tiers|join:', ' }} ({{ upgrade.tiers|length }} tier{{ upgrade.tiers|pluralize }})">
                     {{ upgrade.tiers|join:", " }}
