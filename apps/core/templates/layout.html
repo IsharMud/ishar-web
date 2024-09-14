@@ -95,8 +95,28 @@
                                     <hr class="dropdown-divider border-secondary">
                                 </li>
                                 <li class="nav-item" title="All Help Topics">
-                                    <a class="nav-link dropdown-item" href="{% url 'help' %}#topics">
+                                    <a class="bi bi-question-circle bg-black nav-link dropdown-item" href="{% url 'help' %}#topics">
                                         All Topics
+                                    </a>
+                                </li>
+                                <li class="nav-item" title="Basics">
+                                    <a class="bi bi-collection-play nav-link dropdown-item" href="{% url 'help_page' help_topic='MUD Basics' %}#topic">
+                                        Basics
+                                    </a>
+                                </li>
+                                <li class="nav-item" title="Get Started">
+                                    <a class="bi bi-rocket-takeoff nav-link dropdown-item" href="{% url 'start' %}#start">
+                                        Get Started
+                                    </a>
+                                </li>
+                                <li class="nav-item" title="History">
+                                    <a class="bi bi-clock-history nav-link dropdown-item" href="{% url 'history' %}#history">
+                                        History
+                                    </a>
+                                </li>
+                                <li class="nav-item" title="MUD Clients">
+                                    <a class="bi bi-terminal-split nav-link dropdown-item" href="{% url 'clients' %}#clients">
+                                        MUD Clients
                                     </a>
                                 </li>
                             </ul>
