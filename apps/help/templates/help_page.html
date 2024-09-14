@@ -113,11 +113,10 @@
     </p>
     {% endif %}
 
-    {% if help_search_form %}
     <div class="m-1 p-1">
         <div class="card bg-black">
             <div class="card-body">
-                <form action="{% url 'help' %}#help" method="post" id="search">
+                <form action="{% url 'help' %}#help" method="post" id="search" role="search">
                     {% csrf_token %}
                     {{ help_search_form.as_p }}
                     <p>
@@ -136,7 +135,6 @@
             </div>
         </div>
     </div>
-    {% endif %}
 
     <div class="m-1 p-1">
     {% if help_topics %}

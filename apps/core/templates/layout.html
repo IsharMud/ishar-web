@@ -76,11 +76,31 @@
                             </a>
                         </li>
 
-                        <li class="nav-item" title="Help">
-                            <a class="bi bi-info-circle nav-link" href="{% url 'help' %}#help">
+                       <li class="nav-item dropdown">
+                            <a class="bi bi-info-circle nav-link dropdown-toggle" href="{% url 'help' %}#help" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 Help
                             </a>
-                        </li>
+                            <ul class="dropdown-menu dropdown-menu-dark bg-black border border-secondary p-3">
+                                <li class="nav-item" title="Search Help Topics">
+                                    <form action="{% url 'help' %}#help" method="post" id="search" role="search">
+                                        {% csrf_token %}
+                                        {{ help_search_form.as_p }}
+                                        <p>
+                                            <button class="btn btn-outline-primary rounded" type="submit">Search</button>
+                                            <button class="btn btn-outline-secondary rounded" type="reset">Clear</button>
+                                        </p>
+                                    </form>
+                                </li>
+                                <li class="nav-item text-ishar">
+                                    <hr class="dropdown-divider border-secondary">
+                                </li>
+                                <li class="nav-item" title="All Help Topics">
+                                    <a class="nav-link dropdown-item" href="{% url 'help' %}#topics">
+                                        All Topics
+                                    </a>
+                                </li>
+                            </ul>
+                       </li>
 
                         <li class="nav-item" title="Patches">
                             <a class="bi bi-bandaid nav-link" href="{% url 'patches' %}#patches">
@@ -90,13 +110,10 @@
 
 {% if user and user.is_authenticated %}
                         <li class="nav-item dropdown">
-
                             <a class="bi bi-menu-button nav-link dropdown-toggle" href="{% url 'portal' %}#portal" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 Portal
                             </a>
-
                             <ul class="dropdown-menu dropdown-menu-dark bg-black border border-secondary p-3">
-
     {% if user.is_staff %}
                                 <li class="nav-item" title="Admin">
                                     <a class="bi bi-gear nav-link dropdown-item" href="{% url 'admin:index' %}" target="_blank">

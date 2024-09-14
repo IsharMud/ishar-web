@@ -2,7 +2,6 @@ from django.contrib import messages
 from django.shortcuts import redirect
 from django.views.generic.base import TemplateView
 
-from .forms import HelpSearchForm
 from .utils.helptab import HelpTab
 
 
@@ -16,7 +15,6 @@ class HelpView(TemplateView):
     help_topic = None
     help_topics = {}
     http_method_names = ("get", "post")
-    search_form = HelpSearchForm()
     status = 200
 
     def setup(self, request, *args, **kwargs):
@@ -66,7 +64,6 @@ class HelpView(TemplateView):
     def get_context_data(self, **kwargs):
         # Include search form, help topics, and any chosen topic in context.
         context = super().get_context_data(**kwargs)
-        context["help_search_form"] = self.search_form
         context["help_topics"] = self.help_topics
         context["help_topic"] = self.help_topic
         return context

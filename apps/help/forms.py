@@ -9,7 +9,7 @@ class HelpSearchForm(Form):
         widget=TextInput(
             attrs={
                 "class": "rounded",
-                "placeholder": "Topic"
+                "placeholder": "Topic Name"
             }
         )
     )
