@@ -1,8 +1,8 @@
 {% extends "layout.html" %}
-{% block meta_title %}Help: {{ help_topic.display_name }}{% endblock meta_title %}
+{% block meta_title %}Help: {{ help_topic.name }}{% endblock meta_title %}
 {% block meta_description %}Help pages for {{ WEBSITE_TITLE }}{% endblock meta_description %}
 {% block meta_url %}{% if help_topic %}{{ help_topic.get_absolute_url }}{% else %}{% url 'help' %}#help{% endif %}{% endblock meta_url %}
-{% block title %}Help{% if help_topic and help_topic.display_name %}: {{ help_topic.display_name }}{% endif %}{% endblock title %}
+{% block title %}Help{% if help_topic and help_topic.name %}: {{ help_topic.name }}{% endif %}{% endblock title %}
 {% block header %}
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
@@ -16,9 +16,9 @@
             <a href="{% url 'world' %}#areas" id="world">World</a>
         </li>
         {% endif %}
-        <li class="breadcrumb-item active" aria-current="page" title="{{ help_topic.display_name }}">
+        <li class="breadcrumb-item active" aria-current="page" title="{{ help_topic.name }}">
              <a href="{{ help_topic.get_absolute_url }}" id="topic">
-                 {{ help_topic.display_name }}
+                 {{ help_topic.name }}
              </a>
         </li>
     {% endif %}
@@ -132,9 +132,9 @@
         </h5>
         <ul class="two-col">
         {% for list_topic in help_topics.values %}
-            <li title="Help: {{ list_topic.display_name }}">
+            <li title="Help: {{ list_topic.name }}">
                 <a href="{{ list_topic.get_absolute_url }}">
-                    {{ list_topic.display_name }}
+                    {{ list_topic.name }}
                 </a>
             </li>
         {% endfor %}
