@@ -79,14 +79,10 @@ class Achievement(models.Model):
         verbose_name = "Achievement"
         verbose_name_plural = "Achievements"
 
-    def __repr__(self):
-        return "%s: %s (%i)" % (
-            self.__class__.__name__,
-            self.__str__(),
-            self.pk
-        )
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__} {self.__str__()} ({self.pk})"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
     def save(self, *args, **kwargs):

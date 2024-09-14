@@ -58,16 +58,9 @@ class AchievementCriteria(models.Model):
         ordering = ("achievement", "criteria_type",)
         verbose_name = verbose_name_plural = "Achievement Criteria"
 
-    def __repr__(self):
-        return "%s: %s (%i)" % (
-            self.__class__.__name__,
-            self.__str__(),
-            self.pk
-        )
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__} {self.__str__()} ({self.pk})"
 
-    def __str__(self):
-        return "%s (%s) @ %s" % (
-            self.criteria_type,
-            self.target_value,
-            self.achievement
-        )
+    def __str__(self) -> str:
+        return f"{self.criteria_type} ({self.target_value})" \
+                f" @ {self.achievement}"

@@ -56,13 +56,12 @@ class QuestAdmin(ModelAdmin):
     def get_quest_class_link(self, obj=None) -> (str, None):
         if obj.get_class_restrict_display():
             return format_html(
-                '<a href="%s">%s</a>' % (
-                    reverse(
-                        viewname="admin:classes_class_change",
-                        args=(obj.class_restrict,)
-                    ),
-                    obj.get_class_restrict_display()
-                )
+                '<a href="{}">{}</a>',
+                reverse(
+                    viewname="admin:classes_class_change",
+                    args=(obj.class_restrict,)
+                ),
+                obj.get_class_restrict_display()
             )
         return None
 

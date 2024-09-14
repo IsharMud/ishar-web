@@ -38,15 +38,8 @@ class AchievementTrigger(models.Model):
         verbose_name = _("Achievement Trigger")
         verbose_name_plural = _("Achievement Triggers")
 
-    def __repr__(self):
-        return "%s: %s (%i)" % (
-            self.__class__.__name__,
-            self.__str__(),
-            self.pk
-        )
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}: {self.__str__()} ({self.pk})"
 
-    def __str__(self):
-        return "%s @ %s" % (
-            self.trigger_type,
-            self.achievement,
-        )
+    def __str__(self) -> str:
+        return f"{self.trigger_type} @ {self.achievement}"

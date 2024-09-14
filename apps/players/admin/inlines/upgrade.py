@@ -19,13 +19,12 @@ class PlayerRemortUpgradesInlineAdmin(TabularInline):
     def get_upgrade_link(self, obj) -> str:
         """Admin link for remort upgrade."""
         return format_html(
-            '<a href="%s">%s</a>' % (
-                reverse(
-                    viewname="admin:players_remortupgrade_change",
-                    args=(obj.upgrade.upgrade_id,)
-                ),
-                obj.upgrade.display_name
-            )
+            '<a href="{}">{}</a>',
+            reverse(
+                viewname="admin:players_remortupgrade_change",
+                args=(obj.upgrade.upgrade_id,)
+            ),
+            obj.upgrade.display_name
         )
 
     def get_queryset(self, request):

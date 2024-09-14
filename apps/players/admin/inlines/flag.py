@@ -22,13 +22,12 @@ class PlayerFlagsInlineAdmin(TabularInline):
     def get_flag_link(self, obj) -> str:
         """Admin link for player flag."""
         return format_html(
-            '<a href="%s">%s</a>' % (
-                reverse(
-                    viewname="admin:core_playerflag_change",
-                    args=(obj.flag.flag_id,)
-                ),
-                obj.flag.name
-            )
+            '<a href="{}">{}</a>',
+            reverse(
+                viewname="admin:core_playerflag_change",
+                args=(obj.flag.flag_id,)
+            ),
+            obj.flag.name
         )
 
     def has_add_permission(self, request, obj) -> bool:

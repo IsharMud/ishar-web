@@ -303,17 +303,10 @@ class Mobile(models.Model):
         verbose_name_plural = "Mobiles"
 
     def __repr__(self) -> str:
-        return "%s: %s" % (
-            self.__class__.__name__,
-            self.__str__(),
-        )
+        return f"{self.__class__.__name__}: {self.__str__()}"
 
     def __str__(self) -> str:
-        return "%i. %s (Level %i)" % (
-            self.pk,
-            self.long_name or self.name,
-            self.level
-        )
+        return f"{self.pk}. {self.long_name or self.name} (Level {self.level})"
 
     def natural_key(self):
         """Natural key is mobile's long name."""

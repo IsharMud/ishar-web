@@ -60,11 +60,7 @@ class AccountUpgrade(models.Model):
         verbose_name_plural = "Upgrades"
 
     def __repr__(self) -> str:
-        return "%s: %s (%d)" % (
-            self.__class__.__name__,
-            self.__str__(),
-            self.pk
-        )
+        return f"{self.__class__.__name__}: {self.__str__()} ({self.pk})"
 
     def __str__(self) -> str:
         return self.description or self.name

@@ -20,7 +20,7 @@ class Command(BaseCommand):
         try:
             player = PlayerBase.objects.get(name=player_name)
         except PlayerBase.DoesNotExist:
-            raise CommandError('Player "%s" not found!' % player_name)
+            raise CommandError(f'Player ("{player_name}") not found!')
 
         self.stdout.write(self.style.SUCCESS(pformat(vars(player))))
         self.stdout.write(self.style.SUCCESS(player.account.__repr__()))

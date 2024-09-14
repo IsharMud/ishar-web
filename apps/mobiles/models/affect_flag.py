@@ -54,14 +54,7 @@ class MobileAffectFlag(models.Model):
         verbose_name_plural = "Mobile Affect Flags"
 
     def __repr__(self) -> str:
-        return "%s: %s (%i)" % (
-            self.__class__.__name__,
-            self.__str__(),
-            self.pk
-        )
+        return f"{self.__class__.__name__}: {self.__str__()} ({self.pk})"
 
     def __str__(self) -> str:
-        return "%s @ %s" % (
-            self.flag,
-            self.mobile
-        )
+        return f"{self.affect_flag} @ {self.mobile}"

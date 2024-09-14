@@ -34,11 +34,7 @@ class PlayerFlag(models.Model):
         verbose_name = "Player/Mobile Flag"
 
     def __repr__(self) -> str:
-        return "%s: %s (%i)" % (
-            self.__class__.__name__,
-            self.__str__(),
-            self.flag_id
-        )
+        return f"{self.__class__.__name__}: {self.__str__()} ({self.flag_id})"
 
     def __str__(self) -> str:
         return self.name

@@ -36,50 +36,62 @@
 </nav>
 {% endblock header %}
 {% block content %}
-<ul class="m-1 px-1 py-3 list-group list-group-horizontal">
-    <li class="list-group-item bg-black" title="All">
+<div class="p-3">
+
+    <div class="card m-1">
+        <div class="card-body">
+            <ul class="list-group list-group-horizontal">
+                <li class="list-group-item bg-black card-text" title="All">
     {% if game_type is None %}
-        <span class="text-ishar">All</span>
+                    <span class="text-ishar">All</span>
     {% else %}
-        <a class="list-group-item-text" href="{% url 'leaders' %}#leaders">All</a>
+                    <a class="list-group-item-text" href="{% url 'leaders' %}#leaders">All</a>
     {% endif %}
-    </li>
+                </li>
     {% for num, name in game_types %}
-    <li class="list-group-item bg-black" title="{{ name }}">
+                <li class="list-group-item bg-black card-text" title="{{ name }}">
         {% if game_type == num %}
-        <span class="text-ishar">{{ name }}</span>
+                    <span class="text-ishar">{{ name }}</span>
         {% else %}
-        <a class="list-group-item-text" href="{% url 'leaders' %}{{ name|lower }}#{{ name|lower }}">{{ name }}</a>
+                    <a class="list-group-item-text" href="{% url 'leaders' %}{{ name|lower }}#{{ name|lower }}">{{ name }}</a>
         {% endif %}
-    </li>
+                </li>
     {% endfor %}
-</ul>
+            </ul>
+        </div>
+    </div>
 
     {% if game_type > 0 %}
-<ul class="m-2 p-1 list-group list-group-horizontal">
-    <li class="list-group-item bg-black" title="All">
+    <div class="card m-1">
+        <div class="card-body">
+            <ul class="list-group list-group-horizontal">
+                <li class="list-group-item bg-black card-text" title="All">
         {% if deleted is None %}
-        <span class="text-ishar">All</span>
+                    <span class="text-ishar">All</span>
         {% else %}
-        <a class="list-group-item-text" href="{% url 'leaders' %}{{ game_type_name|lower }}/">All</a>
+                    <a class="list-group-item-text" href="{% url 'leaders' %}{{ game_type_name|lower }}/">All</a>
         {% endif %}
-    </li>
-    <li class="list-group-item bg-black" title="Dead">
+                </li>
+                <li class="list-group-item bg-black card-text" title="Dead">
         {% if deleted == 1 %}
-        <span class="text-ishar">Dead</span>
+                    <span class="text-ishar">Dead</span>
         {% else %}
-        <a class="list-group-item-text" href="{% url 'leaders' %}{{ game_type_name|lower }}/dead/">Dead</a>
+                    <a class="list-group-item-text" href="{% url 'leaders' %}{{ game_type_name|lower }}/dead/">Dead</a>
         {% endif %}
-    </li>
-    <li class="list-group-item bg-black" title="Living">
+                </li>
+                <li class="list-group-item bg-black card-text" title="Living">
         {% if deleted == 0 %}
-        <span class="text-ishar">Living</span>
+                    <span class="text-ishar">Living</span>
         {% else %}
-        <a class="list-group-item-text" href="{% url 'leaders' %}{{ game_type_name|lower }}/living/">Living</a>
+                    <a class="list-group-item-text" href="{% url 'leaders' %}{{ game_type_name|lower }}/living/">Living</a>
         {% endif %}
-    </li>
-</ul>
+                </li>
+            </ul>
+        </div>
+    </div>
     {% endif %}
+
+</div>
 
     {% if leaders %}
 <div class="container-sm w-auto">

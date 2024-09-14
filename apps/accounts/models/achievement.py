@@ -56,15 +56,8 @@ class AccountAchievement(models.Model):
         verbose_name = "Account Achievement"
         verbose_name_plural = "Account Achievements"
 
-    def __repr__(self):
-        return "%s: %s (%i)" % (
-            self.__class__.__name__,
-            self.__str__(),
-            self.pk
-        )
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}: {self.__str__()} ({self.pk})"
 
-    def __str__(self):
-        return "%s @ %s" % (
-            self.achievement,
-            self.account,
-        )
+    def __str__(self) ->str:
+        return f"{self.achievement} @ {self.account}"

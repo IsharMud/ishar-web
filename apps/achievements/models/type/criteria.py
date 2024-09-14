@@ -9,11 +9,7 @@ class AchievementCriteriaType(TextChoices):
     ACCOUNT_TOTAL = "AccountTotal", "Account (Total)"
 
     def __repr__(self) -> str:
-        return "%s: %s (%s)" % (
-            self.__class__.__name__,
-            self.__str__(),
-            self.name
-        )
+        return f"{self.__class__.__name__}: {self.__str__()} ({self.name})"
 
     def __str__(self) -> str:
         return self.value

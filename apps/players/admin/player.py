@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import reverse
-from django.utils.safestring import mark_safe
+from django.utils.html import format_html
 
 from .filters import ImmortalTypeListFilter
 from .inlines.common import PlayerCommonInlineAdmin
@@ -61,14 +61,13 @@ class PlayerAdmin(admin.ModelAdmin):
     @admin.display(description="Account", ordering="account")
     def get_account_link(self, obj):
         """Admin link for account display."""
-        return mark_safe(
-            '<a href="%s">%s</a>' % (
-                reverse(
-                    viewname="admin:accounts_account_change",
-                    args=(obj.account.account_id,)
-                ),
-                obj.account.account_name
-            )
+        return format_html(
+            '<a href="{}">{}</a>',
+            reverse(
+                viewname="admin:accounts_account_change",
+                args=(obj.account.account_id,)
+            ),
+            obj.account.account_name
         )
 
     def has_add_permission(self, request) -> bool:

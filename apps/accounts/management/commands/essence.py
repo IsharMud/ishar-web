@@ -17,13 +17,10 @@ class Command(BaseCommand):
         try:
             account = Account.objects.get(account_name=account_name)
         except Account.DoesNotExist:
-            raise CommandError('Account "%s" not found!' % account_name)
+            raise CommandError(f'Account ("{account_name}") not found!')
 
         self.stdout.write(
             self.style.SUCCESS(
-                '%s\n\t%i essence' % (
-                    account.__repr__(),
-                    account.current_essence
-                )
+                f"{account.__repr__()}\n\t{account.current_essence} essence"
             )
         )

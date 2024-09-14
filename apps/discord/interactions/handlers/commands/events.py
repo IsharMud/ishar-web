@@ -23,29 +23,21 @@ def events(request):
     num_events = global_events.count()
     if num_events and num_events > 0:
         ephemeral = False
-        events_url = "%s://%s%s#%s" % (
-            request.scheme,
-            request.get_host(),
-            reverse("events"),
-            "events"
+        events_url = (
+            f'{request.scheme}://{request.get_host()}{reverse("events")}#events'
         )
-        reply = "%i %s: <%s>\n" % (
-            num_events,
-            ngettext(
-                singular='event',
-                plural='events',
-                number=num_events
-            ),
-            events_url
+        reply = (
+            f'{num_events} '
+            f'{ngettext(singular="event", plural="events", number=num_events)}:'
+            f' <{events_url}>\n'
         )
 
         # List the number, description, time left, and expiration of the event.
         for (num, event) in enumerate(global_events.all(), start=1):
-            reply += "%i. %s - ends %s :alarm_clock: %s.\n" % (
-                num,
-                event.event_desc,
-                timeuntil(event.end_time),
-                event.end_time.strftime("%A, %B %d, %Y at %I:%M:%S %p %Z")
+            end = event.end_time.strftime("%A, %B %d, %Y at %I:%M:%S %p %Z")
+            reply += (
+                f"{num}. {event.event_desc} - ends {timeuntil(event.end_time)}"
+                f" :alarm_clock: {end}.\n"
             )
 
     # Return the reply.

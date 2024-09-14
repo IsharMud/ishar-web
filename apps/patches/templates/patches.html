@@ -22,9 +22,16 @@
 </nav>
 {% endblock header %}
 {% block content %}
-<p class="lead">
-    {{ WEBSITE_TITLE }} is under regular development, and constantly being improved!
-</p>
+<div class="p-3">
+    <div class="card">
+        <div class="card-body">
+            <p class="card-text lead">
+                {{ WEBSITE_TITLE }} is under regular development,
+                and constantly being improved!
+            </p>
+        </div>
+    </div>
+</div>
     {% if patches %}
         {% for patch in patches %}
 <details {% if forloop.first %} open{% endif %}>

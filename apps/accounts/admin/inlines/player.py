@@ -35,13 +35,12 @@ class AccountPlayersLinksAdmin(TabularInline):
     def get_player_link(self, obj) -> str:
         """Admin link for player name."""
         return format_html(
-            '<a href="%s">%s</a>' % (
-                reverse(
-                    viewname="admin:players_player_change",
-                    args=(obj.id,)
-                ),
-                obj.name
-            )
+            '<a href="{}">{}</a>',
+            reverse(
+                viewname="admin:players_player_change",
+                args=(obj.id,)
+            ),
+            obj.name
         )
 
     @display(description="Game Type", ordering="game_type")

@@ -38,14 +38,7 @@ class AccountTitle(models.Model):
         verbose_name_plural = _("Account Titles")
 
     def __repr__(self) -> str:
-        return "%s: %s (%i)" % (
-            self.__class__.__name__,
-            self.__str__(),
-            self.pk
-        )
+        return f"%{self.__class__.__name__}: {self.__str__()} ({self.pk})"
 
     def __str__(self) -> str:
-        return "%s @ %s" % (
-            self.title,
-            self.account
-        )
+        return f"{self.title} @ {self.account}"

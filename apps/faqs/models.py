@@ -88,14 +88,10 @@ class FAQ(models.Model):
         """Anchored URL to FAQ page."""
         return reverse(viewname="faq") + "#" + self.slug
 
-    def __repr__(self):
-        return "%s: %s (%i)" % (
-            self.__class__.__name__,
-            self.__str__(),
-            self.pk
-        )
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}: {self.__str__()} ({self.pk})"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.slug
 
     def natural_key(self) -> str:

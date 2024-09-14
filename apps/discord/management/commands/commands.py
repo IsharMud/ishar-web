@@ -12,15 +12,16 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         discord_url = (
-            "https://discord.com/api/v10/applications/%s/guilds/%s/commands" % (
-                settings.DISCORD["APPLICATION_ID"], settings.DISCORD["GUILD"]
-            )
+            f'https://discord.com/api/v10/applications/'
+            f'{settings.DISCORD["APPLICATION_ID"]}/guilds/'
+            f'{settings.DISCORD["GUILD"]}/commands'
         )
         discord_headers = {
-            "Authorization": "Bot %s" % (settings.DISCORD["TOKEN"]),
+            "Authorization": f'Bot {settings.DISCORD["TOKEN"]}',
             "Content-Type": "application/json",
             "User-agent": (
-                "IsharMUD Discord Bot / https://github.com/IsharMud/ishar-web/"
+                f"{settings.WEBSITE_TITLE} Discord Bot"
+                " / https://github.com/IsharMud/ishar-web/"
             ),
         }
 
@@ -29,14 +30,16 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR("Bad response."))
             self.stdout.write(
                 self.style.ERROR(
-                    "%s:\n%s" % (pformat(req), pformat(req.json()))
+                    f"{pformat(req)}:\n"
+                    f"{pformat(req.json())}"
                 )
             )
             raise CommandError(pformat(req.reason))
 
         self.stdout.write(
             self.style.SUCCESS(
-                "%s:\n%s" % (pformat(req), pformat(req.json()))
+                f"{pformat(req)}:\n"
+                f"{pformat(req.json())}"
             )
         )
 
@@ -128,13 +131,15 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR("Bad response."))
             self.stdout.write(
                 self.style.ERROR(
-                    "%s:\n%s" % (pformat(reg), pformat(reg.json()))
+                    f"{pformat(reg)}:\n"
+                    f"{pformat(reg.json())}"
                 )
             )
             raise CommandError(pformat(reg.reason))
 
         self.stdout.write(
             self.style.SUCCESS(
-                "%s:\n%s" % (pformat(reg), pformat(reg.json()))
+                f"{pformat(reg)}:\n"
+                f"{pformat(reg.json())}"
             )
         )

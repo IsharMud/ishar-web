@@ -8,13 +8,7 @@ class GameType(IntegerChoices):
     SURVIVAL = 2
 
     def __repr__(self) -> str:
-        return "%s: %s" % (
-            self.__class__.__name__,
-            self.__str__()
-        )
+        return f"{self.__class__.__name__}: {self.__str__()}"
 
     def __str__(self) -> str:
-        return "%s (%i)" % (
-            self.name.title(),
-            self.value
-        )
+        return f"{self.name.title()} (self.value)"

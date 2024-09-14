@@ -130,6 +130,15 @@ class HelpTab:
             self.stats = []
             self.components = []
 
+        @property
+        def display_name(self, replace_me: str = "") -> str:
+            if self.is_area:
+                replace_me = "Area"
+            if self.is_spell:
+                replace_me = "Spell"
+            return self.name.replace(f"{replace_me} ", "")
+
+
         def get_absolute_url(self):
             """URL to help topic page, with anchor."""
             return reverse(viewname="help_page", args=(self.name,)) + "#topic"

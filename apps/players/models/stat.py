@@ -89,19 +89,13 @@ class PlayerStat(models.Model):
         ordering = ("player",)
         verbose_name = verbose_name_plural = _("Player Statistics")
 
-    def __repr__(self):
-        return "%s (%i)" % (
-            self.__str__(),
-            self.pk
-        )
+    def __repr__(self) -> str:
+        return f"{self.__str__()} ({self.pk})"
 
-    def __str__(self):
-        return "%s: %s" % (
-            self.__class__.__name__,
-            self.player
-        )
+    def __str__(self) -> str:
+        return f"{self.__class__.__name__}: {self.player}"
 
-    def get_remort_play_timedelta(self):
+    def get_remort_play_timedelta(self) -> timedelta:
         """Timedelta of player remort play time."""
         return timedelta(seconds=self.remort_play_time or 0)
 

@@ -43,15 +43,8 @@ class SkillMod(models.Model):
         verbose_name = "Skill Mod"
         verbose_name_plural = "Skill Mod"
 
-    def __repr__(self):
-        return "%s: %s (%i)" %(
-            self.__class__.__name__,
-            self.__str__(),
-            self.pk
-        )
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}: {self.__str__()} ({self.pk})"
 
-    def __str__(self):
-        return "%s @ %s" % (
-            self.get_mod_location_display(),
-            self.skill
-        )
+    def __str__(self) -> str:
+        return f"{self.get_mod_location_display()} @ {self.skill}"

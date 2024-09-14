@@ -37,11 +37,7 @@ class QuestPrereq(models.Model):
         verbose_name_plural = "Prerequisites"
 
     def __repr__(self) -> str:
-        return "%s: %s (%i)" % (
-            self.__class__.__name__,
-            self.__str__(),
-            self.pk
-        )
+        return f"{self.__class__.__name__}: {self.__str__()} ({self.pk})"
 
     def __str__(self) -> str:
-        return "%s requires %s" % (self.quest, self.required_quest)
+        return f"{self.quest} required {self.required_quest}"

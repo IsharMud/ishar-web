@@ -46,18 +46,11 @@ class MUDProcess(models.Model):
         verbose_name="Created"
     )
 
-    def __repr__(self):
-        return "%s: %s [%s]" % (
-            self.__class__.name,
-            self.__str__(),
-            self.user
-        )
+    def __repr__(self) -> str:
+        return f"{self.__class__.name}: {self.__str__()} [{self.user}]"
 
-    def __str__(self):
-        return "%s (%i)" % (
-            self.name,
-            self.process_id
-        )
+    def __str__(self) -> str:
+        return f"{self.name} ({self.process_id})"
 
     class Meta:
         managed = True

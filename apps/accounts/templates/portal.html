@@ -15,50 +15,63 @@
 </nav>
 {% endblock header %}
 {% block content %}
-    <ul class="list-group list-group-horizontal-md">
+<div class="p-3">
+
+    <div class="card m-1">
+        <div class="card-body">
+            <ul class="list-group list-group-horizontal-md">
     {% if user.is_staff %}
-        <li class="bg-black border border-secondary list-group-item-dark list-group-item" title="Admin">
-            <span class="bi bi-gear text-ishar"></span>
-            <a class="list-group-item-text" href="{% url 'admin:index' %}" target="_blank">
-                Admin
-            </a>
-        </li>
+                <li class="bg-black border border-secondary card-text list-group-item-dark list-group-item" title="Admin">
+                    <span class="bi bi-gear text-ishar"></span>
+                    <a class="list-group-item-text" href="{% url 'admin:index' %}" target="_blank">
+                        Admin
+                    </a>
+                </li>
     {% endif %}
-        <li class="bg-black border border-secondary list-group-item-dark list-group-item" title="Challenges">
-            <span class="bi bi-award text-ishar"></span>
-            <a class="list-group-item-text" href="{% url 'challenges' %}#challenges">
-                Challenges
-            </a>
-        </li>
-        <li class="bg-black border border-secondary list-group-item-dark list-group-item" title="Leaders">
-            <span class="bi bi-trophy text-ishar"></span>
-            <a class="list-group-item-text" href="{% url 'leaders' %}#leaders">
-                Leaders
-            </a>
-        </li>
-        <li class="bg-black border border-secondary list-group-item-dark list-group-item" title="Password">
-            <span class="bi bi-key text-ishar"></span>
-            <a class="list-group-item-text" href="{% url 'password' %}#password">
-                Password
-            </a>
-        </li>
-        <li class="bg-black border border-secondary list-group-item-dark list-group-item">
-            <div class="form-check form-switch">
-                <input class="form-check-input" type="checkbox" role="switch" name="isPrivate" id="privateSwitch" value="{% if request.user.is_private %}true{% else %}false{% endif %}" onclick="togglePrivate(this.id);"{% if request.user.is_private %} checked{% endif %}>
-                <label class="form-check-label" for="privateSwitch">Private</label>
-                <a href="#" data-bs-toggle="tooltip" id="privateInfo" data-bs-title="The &quot;private&quot; setting limits the amount of information shown on your player's profile pages.">
-                    <span class="bi p-1 bi-question-circle text-secondary"></span>
-                </a>
-            </div>
-        </li>
-        <li class="bg-black border border-secondary list-group-item-dark list-group-item" title="Upgrades">
-            <span class="bi bi-shield text-ishar"></span>
-            <a class="list-group-item-text" href="{% url 'upgrades' %}#upgrades">
-                Upgrades
-            </a>
-        </li>
-    </ul>
-    <p class="p-1 m-1 lead" id="privateMsgNode"></p>
+                <li class="bg-black border border-secondary card-text list-group-item-dark list-group-item" title="Challenges">
+                    <span class="bi bi-award text-ishar"></span>
+                    <a class="list-group-item-text" href="{% url 'challenges' %}#challenges">
+                        Challenges
+                    </a>
+                </li>
+                <li class="bg-black border border-secondary card-text list-group-item-dark list-group-item" title="Leaders">
+                    <span class="bi bi-trophy text-ishar"></span>
+                    <a class="list-group-item-text" href="{% url 'leaders' %}#leaders">
+                        Leaders
+                    </a>
+                </li>
+                <li class="bg-black border border-secondary card-text list-group-item-dark list-group-item" title="Password">
+                    <span class="bi bi-key text-ishar"></span>
+                    <a class="list-group-item-text" href="{% url 'password' %}#password">
+                        Password
+                    </a>
+                </li>
+                <li class="bg-black border border-secondary card-text list-group-item-dark list-group-item">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" name="isPrivate" id="privateSwitch" value="{% if request.user.is_private %}true{% else %}false{% endif %}" onclick="togglePrivate(this.id);"{% if request.user.is_private %} checked{% endif %}>
+                        <label class="form-check-label" for="privateSwitch">Private</label>
+                        <a href="#" data-bs-toggle="tooltip" id="privateInfo" data-bs-title="The &quot;private&quot; setting limits the amount of information shown on your player's profile pages.">
+                            <span class="bi p-1 bi-question-circle text-secondary"></span>
+                        </a>
+                    </div>
+                </li>
+                <li class="bg-black border border-secondary card-text list-group-item-dark list-group-item" title="Upgrades">
+                    <span class="bi bi-shield text-ishar"></span>
+                    <a class="list-group-item-text" href="{% url 'upgrades' %}#upgrades">
+                        Upgrades
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="card m-1" id="privateMsgDiv" style="display: none;">
+        <div class="card-body">
+            <p class="card-text lead" id="privateMsgNode"></p>
+        </div>
+    </div>
+
+</div>
 
 {% if request.user.players and request.user.players.count > 0 %}
     <p class="lead" title="You have {{ request.user.players.count }} character{{ request.user.players.count | pluralize }}.">
@@ -239,6 +252,7 @@
 
         // Set up confirmation text.
         var messageText = "";
+        const msgDiv = document.getElementById("privateMsgDiv");
         const msgNode = document.getElementById("privateMsgNode");
 
         // Change value, and format text when either making...
@@ -266,8 +280,9 @@
         // Show text five (5) seconds before clearing, upon successful request.
         xhr.onreadystatechange = () => {
             if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+                msgDiv.style.display = 'block';
                 msgNode.innerHTML = `Your profile has been made <b><em>${messageText}</em></b>.`
-                setTimeout(function() { msgNode.innerHTML = ""; }, 5*1000);
+                setTimeout(function() { msgNode.innerHTML = ""; msgDiv.style.display = 'none'; }, 5*1000);
             };
         };
 

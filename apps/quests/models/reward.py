@@ -48,15 +48,8 @@ class QuestReward(models.Model):
         verbose_name = "Reward"
 
     def __repr__(self) -> str:
-        return "%s: %s (%i)" % (
-            self.__class__.__name__,
-            self.__str__(),
-            self.pk
-        )
+        return f"{self.__class__.__name__}: {self.__str__()} ({self.pk})"
 
     def __str__(self) -> str:
-        return "%s (%i) @ %s" % (
-            self.get_reward_type_display(),
-            self.reward_num,
-            self.quest
-        )
+        return f"{self.get_reward_type_display()} ({self.reward_num})"\
+                f" @ {self.quest}"

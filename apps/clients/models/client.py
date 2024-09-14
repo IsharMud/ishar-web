@@ -66,7 +66,7 @@ class MUDClient(models.Model):
         verbose_name_plural = "MUD Clients"
 
     def get_absolute_url(self) -> str:
-        return "%s#client-%i" % (reverse(viewname="clients"), self.client_id)
+        return f'{reverse(viewname="clients")}#client-{self.client_id}'
 
     def get_admin_url(self) -> str:
         return reverse(
@@ -74,14 +74,10 @@ class MUDClient(models.Model):
             args=(self.client_id,)
         )
 
-    def __repr__(self):
-        return "%s: %s (%i)" % (
-            self.__class__.__name__,
-            self.__str__(),
-            self.pk
-        )
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}: {self.__str__()} ({self.pk})"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
     def natural_key(self) -> str:

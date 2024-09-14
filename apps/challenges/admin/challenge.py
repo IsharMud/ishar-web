@@ -56,11 +56,10 @@ class ChallengeAdmin(ModelAdmin):
     def mobile_link(self, obj):
         """Admin link for mobile."""
         return format_html(
-            '<a href="%s">%s</a>' % (
-                reverse(
-                    viewname="admin:mobiles_mobile_change",
-                    args=(obj.mobile.pk,)
-                ),
-                obj.mobile
-            )
+            '<a href="{}">{}</a>',
+            reverse(
+                viewname="admin:mobiles_mobile_change",
+                args=(obj.mobile.pk,)
+            ),
+            obj.mobile
         )

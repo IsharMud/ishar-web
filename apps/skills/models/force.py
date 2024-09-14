@@ -27,11 +27,7 @@ class Force(models.Model):
         verbose_name = "Force"
 
     def __repr__(self):
-        return "%s: %s (%i)" % (
-            self.__class__.__name__,
-            self.__str__(),
-            self.pk
-        )
+        return f"{self.__class__.__name__}: {self.__str__()} ({self.pk})"
 
     def __str__(self) -> str:
         return self.force_name

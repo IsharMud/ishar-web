@@ -1,4 +1,6 @@
 from datetime import timedelta
+from pathlib import Path
+
 from django.db import models
 from django.conf import settings
 from django.contrib.admin import display
@@ -246,11 +248,7 @@ class PlayerBase(models.Model):
         verbose_name = "Player"
 
     def __repr__(self) -> str:
-        return "%s: %s (%s)" % (
-            self.__class__.__name__,
-            self.__str__(),
-            self.pk
-        )
+        return f"{self.__class__.__name__}: {self.__str__()} ({self.pk})"
 
     def __str__(self) -> str:
         return self.name
@@ -439,22 +437,14 @@ class PlayerBase(models.Model):
     @property
     def player_css(self) -> str:
         """Player CSS class."""
-        return "%s-player" % (
-            self.get_player_type().lower()
-        )
+        return f"{self.get_player_type().lower()}-player"
 
     @property
     def player_link(self) -> str:
         """Player link, with CSS."""
-        return (
-            format_html(
-                '<a class="%s" href="%s" title="%s">%s</a>' % (
-                    self.player_css,
-                    self.get_absolute_url(),
-                    self.name,
-                    self.name,
-                )
-            )
+        return format_html(
+            '<a class="{}" href="{}" title="{}">{}</a>',
+            self.player_css, self.get_absolute_url(), self.name, self.name
         )
 
     @property
@@ -547,7 +537,7 @@ class PlayerBase(models.Model):
     @property
     def podir(self) -> str:
         """Player "Podir" folder on disk."""
-        return "%s/%s" % (settings.MUD_PODIR, self.name)
+        return Path(settings.MUD_PODIR, self.name)
 
     @property
     @display(description="Seasonal Earned", ordering="seasonal_earned")

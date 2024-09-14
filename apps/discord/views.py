@@ -60,14 +60,13 @@ class InteractionsView(View):
                     request=request
                 )
 
-            # Log and reply for unknown slash commands.
+            # Log unknown slash commands.
             except UnknownCommandException:
-                logger.error("Unknown slash command:\n%s" % interaction)
-                message = "Unknown slash command."
+                logger.error(f"Unknown slash command:\n{interaction}")
 
             # Reply to the slash command.
-            return respond(message=message, ephemeral=ephemeral)
+            return respond(message="Unknown slash command.", ephemeral=ephemeral)
 
         # Log and return JSON error for unknown interaction type.
-        logger.error("Unknown interaction type:\n%s" % interaction)
+        logger.error(f"Unknown interaction type:\n{interaction}")
         return error(message="Unknown interaction type.", status=400)

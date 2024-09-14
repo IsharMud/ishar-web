@@ -57,15 +57,12 @@ class MUDClientCategory(models.Model):
         verbose_name_plural = "MUD Client Categories"
 
     def get_absolute_url(self) -> str:
-        return "%s#category-%i" % (
-            reverse(viewname="clients"), self.category_id
-        )
+        return f'{reverse(viewname="clients")}#category-{self.category_id}'
 
     def get_admin_link(self) -> str:
         return format_html(
-            '<a href="%s" title="%s">%s</a>' % (
-                self.get_admin_url(), self.name, self.name
-            )
+            '<a href="{}" title="{}">{}</a>',
+            self.get_admin_url(), self.name, self.name
         )
 
     def get_admin_url(self) -> str:
@@ -74,14 +71,10 @@ class MUDClientCategory(models.Model):
             args=(self.category_id,)
         )
 
-    def __repr__(self):
-        return "%s: %s (%i)" % (
-            self.__class__.__name__,
-            self.__str__(),
-            self.pk
-        )
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}: {self.__str__()} ({self.pk})"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
     def natural_key(self) -> str:

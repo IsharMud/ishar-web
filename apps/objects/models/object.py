@@ -160,16 +160,10 @@ class Object(models.Model):
         verbose_name_plural = "Objects"
 
     def __repr__(self) -> str:
-        return "%s: %s" % (
-            self.__class__.__name__,
-            self.__str__(),
-        )
+        return f"{self.__class__.__name__} {self.__str__()}"
 
     def __str__(self) -> str:
-        return "%i. %s" % (
-            self.pk,
-            self.longname or self.name
-        )
+        return f"{self.pk}. {self.longname or self.name}"
 
     def natural_key(self) -> str:
         """Natural key is object long name."""

@@ -61,17 +61,10 @@ class ObjectObjectMod(models.Model):
         verbose_name_plural = "Object's Mods"
 
     def __repr__(self) -> str:
-        return "%s: %s" % (
-            self.__class__.__name__,
-            self.__str__()
-        )
+        return f"{self.__class__.__name__}: {self.__str__()}"
 
     def __str__(self) -> str:
-        return "%s (Slot: %i) @ %s" % (
-            self.object_mod,
-            self.mod_slot,
-            self.object,
-        )
+        return f"{self.object_mod} (Slot: {self.mod_slot}) @ {self.object}"
 
     def save(
         self,

@@ -21,33 +21,27 @@ class Command(BaseCommand):
         try:
             account = Account.objects.get(account_name=account_name)
         except Account.DoesNotExist:
-            raise CommandError('Account "%s" not found!' % account_name)
+            raise CommandError('Account f"{account_name}" not found!')
 
         self.stdout.write(self.style.SUCCESS(pformat(vars(account))))
 
         if account.players:
-
-            self.stdout.write(
-                self.style.SUCCESS(
-                    '%i %s' % (
-                        account.players.count(),
-                        ngettext(
-                            singular="player",
-                            plural="players",
-                            number=account.players.count()
-                        )
-                    )
-                )
+            num_players = account.players.count()
+            phrase = ngettext(
+                singular="player",
+                plural="players",
+                number=num_players
             )
+            self.stdout.write(self.style.SUCCESS(f'{num_players} {phrase}'))
 
-            if account.players.count() > 0:
+            if num_players > 0:
 
                 players = enumerate(account.players.all(), start=1)
 
                 for (num, player) in players:
                     self.stdout.write(
                         self.style.SUCCESS(
-                            "\t%i. %s" % (num, player.__repr__())
+                            f"\t{num}. {player.__repr__()}"
                         )
                     )
 

@@ -68,15 +68,16 @@ class MobileAdmin(admin.ModelAdmin):
         self, request, context, add=False, change=False, form_url="", obj=None
     ):
         if obj.is_challenge():
-            message = format_html(
-                'This mobile is a <a href="%s">challenge</a>.' % (
+            messages.info(
+                request=request,
+                message=format_html(
+                    'This mobile is a <a href="{}">challenge</a>.',
                     reverse(
                         viewname="admin:challenges_challenge_change",
                         args=(obj.challenge.first().pk,)
                     )
                 )
             )
-            messages.info(request, message)
         return super().render_change_form(
             request, context, add, change, form_url, obj
         )

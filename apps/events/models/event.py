@@ -50,12 +50,10 @@ class GlobalEvent(models.Model):
         verbose_name = "Global Event"
         verbose_name_plural = "Global Events"
 
-    def __repr__(self):
-        return "%s: %s (%s)" % (
-            self.__class__.__name__,
-            self.__str__(),
-            self.event_type
+    def __repr__(self) -> str:
+        return (
+            f"{self.__class__.__name__}: {self.__str__()} ({self.event_type})"
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.event_desc

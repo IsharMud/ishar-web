@@ -23,13 +23,12 @@ class AccountUpgradesLinksAdmin(TabularInline):
     def get_upgrade_link(self, obj) -> str:
         """Admin link for account upgrade."""
         return format_html(
-            '<a href="%s">%s</a>' % (
-                reverse(
-                    viewname="admin:accounts_accountupgrade_change",
-                    args=(obj.upgrade.id,)
-                ),
-                obj.upgrade.name
-            )
+            '<a href="{}">{}</a>',
+            reverse(
+                viewname="admin:accounts_accountupgrade_change",
+                args=(obj.upgrade.id,)
+            ),
+            obj.upgrade.name
         )
 
     def has_add_permission(self, request, obj) -> bool:

@@ -90,18 +90,12 @@ class Season(models.Model):
         verbose_name = "Season"
 
     def __repr__(self) -> str:
-        return "%s: %s" % (
-            self.__class__.__name__,
-            self.__str__()
-        )
+        return f"{self.__class__.__name__}: {self.__str__()}"
 
     def __str__(self) -> str:
         dt_fmt = "%a, %b %d, %Y"
-        return "%i (%s - %s)" % (
-            self.season_id,
-            self.effective_date.strftime(dt_fmt),
-            self.expiration_date.strftime(dt_fmt),
-        )
+        return f"{self.season_id} ({self.effective_date.strftime(dt_fmt)}" \
+                f" - {self.expiration_date.strftime(dt_fmt)})"
 
     def get_absolute_url(self) -> str:
         return reverse(
@@ -111,11 +105,10 @@ class Season(models.Model):
 
     def get_admin_link(self) -> str:
         return format_html(
-            '<a href="%s" title="%s">%s</a>' % (
-                self.get_admin_url(),
-                self.__repr__(),
-                self.__repr__(),
-            )
+            '<a href="{}" title="{}">{}</a>',
+            self.get_admin_url(),
+            self.__repr__(),
+            self.__repr__()
         )
 
     def get_admin_url(self) -> str:

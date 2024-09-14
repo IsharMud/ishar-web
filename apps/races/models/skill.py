@@ -46,12 +46,8 @@ class RaceSkill(models.Model):
         verbose_name = "Skill"
         verbose_name_plural = "Skills"
 
-    def __repr__(self):
-        return "%s: %s (%s)" % (
-            self.__class__.__name__, self.__str__(), self.pk
-        )
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}: {self.__str__()} ({self.pk})"
 
-    def __str__(self):
-        return "%s @ %s / Level: %i" % (
-            self.skill, self.race, self.level
-        )
+    def __str__(self) -> str:
+        return f"{self.skill} @ {self.race} / Level: {self.level}"

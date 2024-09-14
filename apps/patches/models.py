@@ -62,12 +62,10 @@ class Patch(models.Model):
         verbose_name = "Patch"
         verbose_name_plural = "Patches"
 
-    def __repr__(self):
-        return "%s: %s (%i)" % (
-            self.__class__.__name__, self.__str__(), self.pk
-        )
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}: {self.__str__()} ({self.pk})"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.patch_name
 
     def natural_key(self):

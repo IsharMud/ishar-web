@@ -45,16 +45,9 @@ class AchievementReward(models.Model):
         verbose_name = _("Achievement Reward")
         verbose_name_plural = _("Achievement Rewards")
 
-    def __repr__(self):
-        return "%s: %s (%i)" % (
-            self.__class__.__name__,
-            self.__str__(),
-            self.pk
-        )
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}: {self.__str__()} ({self.pk})"
 
-    def __str__(self):
-        return "%s (%s) @ %s" % (
-            self.get_reward_type_display(),
-            self.reward_value,
-            self.achievement
-        )
+    def __str__(self) -> str:
+        return f"{self.get_reward_type_display()} ({self.reward_value})" \
+                f" @ {self.achievement}"

@@ -146,16 +146,10 @@ class ObjectWearableFlag(models.Model):
         verbose_name_plural = "Object Wearable Flags"
 
     def __repr__(self) -> str:
-        return "%s: %s" % (
-            self.__class__.__name__,
-            self.__str__()
-        )
+        return f"{self.__class__.__name__}: {self.__str__()}"
 
     def __str__(self) -> str:
-        return "%s @ %s" % (
-            self._meta.verbose_name,
-            self.object,
-        )
+        return f"{self._meta.verbose_name} @ {self.object}"
 
     def save(
             self,

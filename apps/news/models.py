@@ -57,10 +57,10 @@ class News(models.Model):
         verbose_name = "News Post"
         verbose_name_plural = "News Posts"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"{self.__class__.__name__}: {self.__str__()} ({self.pk})"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.subject
 
     def natural_key(self):
