@@ -313,7 +313,7 @@ class HelpTab:
             return body
 
         @property
-        def player_class_html(self) -> (list, str):
+        def player_class_html(self) -> str:
             """Parse player class items for web display."""
 
             # If a list, parse each item as a player class to be linked to.
@@ -322,7 +322,10 @@ class HelpTab:
 
                 # Hyperlink each player class help page.
                 for class_item in self.player_class:
-                    link = reverse("help_page", args=(class_item,)) + "#topic"
+                    link = reverse(
+                        viewname="help_page",
+                        args=(class_item,)
+                    ) + "#topic"
                     link_text = format_html(
                         '<a href="{}">{}</a>',
                         link, class_item
@@ -330,7 +333,7 @@ class HelpTab:
                     class_links.append(link_text)
 
                 # Return hyperlinks to class help pages.
-                return class_links
+                return ", ".join(class_links)
 
             # Return non-list directly.
             return self.player_class

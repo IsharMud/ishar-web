@@ -15,12 +15,18 @@
         <li class="breadcrumb-item" title="World">
             <a href="{% url 'world' %}#areas" id="world">World</a>
         </li>
-        {% endif %}
+        <li class="breadcrumb-item active" aria-current="page" title="{{ help_topic.display_name }}">
+             <a href="{{ help_topic.get_absolute_url }}" id="topic">
+                 {{ help_topic.display_name }}
+             </a>
+        </li>
+        {% else %}
         <li class="breadcrumb-item active" aria-current="page" title="{{ help_topic.name }}">
              <a href="{{ help_topic.get_absolute_url }}" id="topic">
                  {{ help_topic.name }}
              </a>
         </li>
+        {% endif %}
     {% endif %}
     </ol>
 </nav>
@@ -49,7 +55,7 @@
         {% if help_topic.player_class %}
                 <li>
                     <strong>Class{{ help_topic.player_class|pluralize:"es" }}</strong>:
-                    <code>{{ help_topic.player_class_html|join:', ' }}</code>
+                    <code>{{ help_topic.player_class_html|safe }}</code>
                 </li>
         {% endif %}
         {% if help_topic.position %}
@@ -108,7 +114,7 @@
     {% endif %}
 
     {% if help_search_form %}
-    <div class="p-1">
+    <div class="m-1 p-1">
         <div class="card bg-black">
             <div class="card-body">
                 <form action="{% url 'help' %}#help" method="post" id="search">
@@ -130,7 +136,6 @@
             </div>
         </div>
     </div>
-    <hr>
     {% endif %}
 
     <div class="m-1 p-1">
