@@ -9,5 +9,5 @@ def cycle():
     until_next = timeuntil(next_cycle_dt)
     return (
         f'Challenges will next cycle in {until_next} :hourglass_flowing_sand:'
-        f' {next_cycle_dt.strftime("%A, %B %d, %Y @ %I:%M:%S %p %Z")}'
+        f' {next_cycle_dt.strftime("%A, %B %d, %Y @ %I:%M:%S %p %Z")}.'
     )

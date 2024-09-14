@@ -1,4 +1,5 @@
-import json
+from json import loads as json_loads
+from logging import getLogger
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -8,9 +9,11 @@ from .interactions.error import error
 from .interactions.exceptions import UnknownCommandException
 from .interactions.handlers.response import respond
 from .interactions.handlers.slash import slash
-from .interactions.log import logger
 from .interactions.pong import pong
 from .interactions.verify import verify
+
+
+logger = getLogger(__name__)
 
 
 class InteractionsView(View):
@@ -42,7 +45,7 @@ class InteractionsView(View):
 
         # Decode JSON of the interaction, and get interaction type.
         interaction = {"body": request.body.decode("utf-8")}
-        interaction["json"] = json.loads(interaction["body"])
+        interaction["json"] = json_loads(interaction["body"])
         interaction["type"] = interaction["json"].get("type")
 
         # Reply to ping, with pong, for URL endpoint validation.
@@ -65,8 +68,11 @@ class InteractionsView(View):
                 logger.error(f"Unknown slash command:\n{interaction}")
 
             # Reply to the slash command.
-            return respond(message="Unknown slash command.", ephemeral=ephemeral)
+            return respond(
+                message="Unknown slash command.",
+                ephemeral=ephemeral
+            )
 
         # Log and return JSON error for unknown interaction type.
-        logger.error(f"Unknown interaction type:\n{interaction}")
+        logger.error(f"Unknown Discord interaction type:\n{interaction}")
         return error(message="Unknown interaction type.", status=400)

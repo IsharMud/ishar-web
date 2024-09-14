@@ -8,5 +8,4 @@ def runtime():
         'Running since'
         f' {process.created.strftime("%A, %B %d, %Y @ %I:%M:%S %p %Z")}'
         f' ({process.runtime()}) :clock:'
-
     )

@@ -2,7 +2,7 @@ from django.http import JsonResponse
 
 
 def respond(
-        message=None, msg_type=4, ephemeral=True, status=200
+    message=None, msg_type=4, ephemeral=True, status=200
 ) -> JsonResponse:
     """Build and return a JSON response."""
 
