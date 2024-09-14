@@ -1,9 +1,10 @@
+from logging import getLogger
 from django.conf import settings
 
 from nacl.signing import VerifyKey
-from nacl.exceptions import BadSignatureError
 
-from .log import logger
+
+logger = getLogger(__name__)
 
 
 def verify(request):
@@ -21,17 +22,12 @@ def verify(request):
 
     # Return None if any expected data is missing.
     if not signature or not timestamp or not body:
-        return None
+        raise ValueError("Missing Discord request header signature data.")
 
     # Verify signature of the incoming POST request message body.
-    try:
-        string = f"{timestamp}{body}".encode()
-        if verify_key.verify(string, bytes.fromhex(signature)):
-            return True
-
-    # Log, and proceed to fail, if the signature is invalid.
-    except (BadSignatureError, ValueError) as bad_sig:
-        logger.exception(bad_sig)
+    string = f"{timestamp}{body}".encode()
+    if verify_key.verify(string, bytes.fromhex(signature)):
+        return True
 
     # Return False as last resort.
     return False

@@ -10,17 +10,22 @@
     </a>
 {% endblock header %}
 {% block content %}
-    <p class="lead">
-        While you can certainly enjoy the game via
-        <a href="{% url 'connect' %}" target="_blank" title="Mudslinger">the Mudslinger web client</a>,
-        you might prefer to connect to the game with software designed specifically to help you play a MUD.
-    </p>
-    <p class="lead">
-        Here are some of the MUD clients that we have heard good things about:
-    </p>
+    <div class="p-3">
+        <div class="card">
+            <div class="card-body">
+                <p class="card-text lead">
+                    While you can certainly enjoy the game via
+                    <a href="{% url 'connect' %}" target="_blank" title="Mudslinger">the Mudslinger web client</a>,
+                    you might prefer to connect to the game with software designed specifically to help you play a MUD.
+                </p>
+                <p class="card-text lead">
+                    Here are some of the MUD clients that we have heard good things about:
+                </p>
+            </div>
+        </div>
+    </div>
     {% for category in mud_client_categories %}
-    <hr>
-   <details open>
+    <details open>
         <summary id="category-{{ category.name | slugify }}" class="h3 text-ishar" title="{{ category.name }}">
             {{ category.name }}
             <a class="anchor-link" href="#category-{{ category.name | slugify }}" aria-label="Link to this section: MUD Client Category {{ category.name }} ({{ category.name | slugify }})">&#x23;</a>
@@ -37,15 +42,20 @@
             {% endif %}
         {% endfor %}
         </ul>
-   </details>
+    </details>
     {% endfor %}
-    <hr>
-    <p class="lead">
-        Do not be afraid to try a few, as they all have different strengths and weaknesses.
-        After you download a client, tell it to connect to <code>isharmud.com</code> on
-        port number <code>23</code> or <code>9999</code> to join the game.
-    </p>
-    <p class="lead">
-        Please check out our <a href="{% url 'start' %}#start" title="getting started guide">getting started guide</a> as well!
-    </p>
+    <div class="p-3">
+        <div class="card">
+            <div class="card-body">
+                <p class="card-text lead">
+                    Do not be afraid to try a few, as they all have different strengths and weaknesses.
+                    After you download a client, tell it to connect to <code>isharmud.com</code> on
+                    port number <code>23</code> or <code>9999</code> to join the game.
+                </p>
+                <p class="card-text lead">
+                    Please check out our <a href="{% url 'start' %}#start" title="getting started guide">getting started guide</a> as well!
+                </p>
+            </div>
+        </div>
+    </div>
 {% endblock content %}

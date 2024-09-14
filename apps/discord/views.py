@@ -4,12 +4,9 @@ from logging import getLogger
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import View
+from nacl.exceptions import BadSignatureError
 
-from .interactions.error import error
-from .interactions.exceptions import UnknownCommandException
-from .interactions.handlers.response import respond
 from .interactions.handlers.slash import slash
-from .interactions.pong import pong
 from .interactions.verify import verify
 
 
@@ -17,62 +14,79 @@ logger = getLogger(__name__)
 
 
 class InteractionsView(View):
-    """
-    Interactions view.
-    """
-    http_method_names = ("get", "post")
+    """Interactions view."""
+    http_method_names = ("post",)
 
     @csrf_exempt
     def dispatch(self, request, *args, **kwargs):
-        """Disable CSRF protection for inbound Discord requests."""
+        # Disable CSRF protection for inbound Discord requests.
         return super().dispatch(request, *args, **kwargs)
 
-    def get(self, *args, **kwargs) -> JsonResponse:
-        """Return 405 'Method Not Allowed' JSON error for GET requests."""
-        return error("Method not allowed.", status=405)
-
     def post(self, request, *args, **kwargs) -> JsonResponse:
-        """Handle incoming POST requests."""
+        """Handle incoming POST requests (slash commands)."""
 
-        # Ensure that the incoming request has a valid signature.
-        verification = verify(request)
-        if verification is None:
-            return error("Missing signature.", status=400)
-        if verification is False:
-            return error("Invalid signature.", status=400)
-        if verification is not True:
-            return error("Signature could not be verified.", status=500)
+        # Verify signature sent in the HTTPS request headers from Discord.
+        try:
+            verified = verify(request)
+
+            if verified is not True:
+                return JsonResponse(
+                    data={"error": "Cannot verify signature."},
+                    status=500
+                )
+
+        except BadSignatureError as discord_bad_sig:
+            logger.exception(discord_bad_sig)
+            return JsonResponse(
+                data={"error": "Invalid signature!"},
+                status=401
+            )
+
+        except ValueError as discord_sig_missing:
+            logger.exception(discord_sig_missing)
+            return JsonResponse(
+                data={"error": "Missing signature."},
+                status=400
+            )
 
         # Decode JSON of the interaction, and get interaction type.
         interaction = {"body": request.body.decode("utf-8")}
         interaction["json"] = json_loads(interaction["body"])
         interaction["type"] = interaction["json"].get("type")
 
-        # Reply to ping, with pong, for URL endpoint validation.
+        # Ping/pong.
         if interaction["type"] == 1:
-            return pong()
+            return JsonResponse(data={"type": 1}, status=200)
 
-        # Handle slash commands.
+        # Slash (/) commands.
         if interaction["type"] == 2:
-
-            # Process the slash command.
-            ephemeral = True
+            ephemeral = True  # Respond to only the user, by default.
             try:
                 message, ephemeral = slash(
                     interaction_json=interaction["json"],
                     request=request
                 )
 
-            # Log unknown slash commands.
-            except UnknownCommandException:
-                logger.error(f"Unknown slash command:\n{interaction}")
+            # Handle unknown slash commands.
+            except ModuleNotFoundError as unknown_slash:
+                logger.exception(unknown_slash)
+                message = "Unknown command."
+                ephemeral = True
 
-            # Reply to the slash command.
-            return respond(
-                message="Unknown slash command.",
-                ephemeral=ephemeral
-            )
+            # Finally, build the reply to the slash command.
+            response = {
+                "data": {
+                    "content": message
+                },
+                "type": 4
+            }
 
-        # Log and return JSON error for unknown interaction type.
-        logger.error(f"Unknown Discord interaction type:\n{interaction}")
-        return error(message="Unknown interaction type.", status=400)
+            # Mark the message ephemeral, when necessary.
+            if ephemeral is True:
+                response["data"]["flags"] = 64
+
+            return JsonResponse(data=response, status=200)
+
+        # Unknown interaction type.
+        logger.error(f"Unknown Discord interaction:\n{interaction}")
+        return JsonResponse(data={"error": "Unknown interaction."}, status=401)

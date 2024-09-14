@@ -6,5 +6,10 @@ class HelpSearchForm(Form):
     search_topic = CharField(
         help_text="",
         label="",
-        widget=TextInput(attrs={'class': "rounded"})
+        widget=TextInput(
+            attrs={
+                "class": "rounded",
+                "placeholder": "Topic"
+            }
+        )
     )

@@ -1,7 +1,5 @@
 from .commands import *
 
-from ..exceptions import UnknownCommandException
-
 
 def slash(interaction_json: dict, request) -> tuple[str, bool]:
     """Handle slash commands."""
@@ -59,5 +57,5 @@ def slash(interaction_json: dict, request) -> tuple[str, bool]:
     if command_name == "upgrades":
         return upgrades(request=request), False
 
-    # Raise UnknownCommandException as last resort.
-    raise UnknownCommandException
+    # Raise ModuleNotFoundError as last resort.
+    raise ModuleNotFoundError(f"No Discord slash command: {command_name}.")
