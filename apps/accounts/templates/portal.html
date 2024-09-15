@@ -159,9 +159,7 @@
         You have not created any players yet!
     </p>
 {% endif %}
-
 <hr>
-
 <details open>
     <summary id="essence" class="h3 text-ishar" title="Essence ({{ request.user.account_name }})">
         Essence
@@ -183,9 +181,7 @@
         </li>
     </ul>
 </details>
-
 <hr>
-
 <details{% if request.user.upgrades.count > 0 %} open{% endif %}>
     <summary id="upgrades" class="h3 text-ishar" title="Account Upgrades ({{ request.user.account_name }}): {{ request.user.upgrades.count }}}">
         Upgrades
