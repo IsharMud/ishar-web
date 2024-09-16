@@ -23,7 +23,9 @@ class PlayerSearchView(LoginRequiredMixin, FormView):
                 results = self.model.objects.filter(
                     name__icontains=search,
                     account__is_private__exact=False
-                ).order_by("name")
+                ).order_by(
+                    "name"
+                )
 
                 # Count any results.
                 if results:

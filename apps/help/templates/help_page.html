@@ -115,15 +115,21 @@
 
     <div class="m-1 p-1">
         <div class="card bg-black">
-            <div class="card-body">
-                <form action="{% url 'help' %}#help" method="post" id="search" role="search">
-                    {% csrf_token %}
-                    {{ help_search_form.as_p }}
-                    <p>
-                        <button class="btn btn-outline-primary rounded" type="submit">Search</button>
-                        <button class="btn btn-outline-secondary rounded" type="reset">Clear</button>
-                    </p>
-                </form>
+            <div class="card-body d-flex form-control-dark input-group">
+                <div class="form-control-dark" id="help-search-form">
+                    <form class="row g-3" method="post" id="search" action="{% url 'help' %}#search">
+                        <div class="col-auto">
+                            {{ help_search_form }}
+                            {% csrf_token %}
+                        </div>
+                        <div class="col-auto">
+                            <button class="btn btn-outline-primary" type="submit">Search</button>
+                        </div>
+                        <div class="col-auto">
+                            <button class="btn btn-outline-secondary" type="reset">Clear</button>
+                        </div>
+                    </form>
+                </div>
             </div>
             <div class="card-footer">
                 <span class="blockquote-footer">

@@ -77,45 +77,56 @@
                         </li>
 
                        <li class="nav-item dropdown">
-                            <a class="bi bi-info-circle nav-link dropdown-toggle" href="{% url 'help' %}#help" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <a class="bg-black bi bi-info-circle nav-link dropdown-toggle" href="{% url 'help' %}#help" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 Help
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark bg-black border border-secondary p-3">
                                 <li class="nav-item" title="Search Help Topics">
-                                    <form action="{% url 'help' %}#help" method="post" id="search" role="search">
-                                        {% csrf_token %}
-                                        {{ help_search_form.as_p }}
-                                        <p>
-                                            <button class="btn btn-outline-primary rounded" type="submit">Search</button>
-                                            <button class="btn btn-outline-secondary rounded" type="reset">Clear</button>
-                                        </p>
-                                    </form>
+                                    <div class="d-flex form-control-dark input-group">
+                                        <div class="form-control-dark">
+                                            <form class="row g-3" method="post" action="{% url 'help' %}#search">
+                                                <div class="col-auto">
+                                                    {{ help_search_form }}
+                                                    {% csrf_token %}
+                                                </div>
+                                                <div class="col-auto">
+                                                    <button class="btn btn-outline-primary" type="submit">Search</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+
                                 </li>
                                 <li class="nav-item text-ishar">
                                     <hr class="dropdown-divider border-secondary">
                                 </li>
                                 <li class="nav-item" title="All Help Topics">
-                                    <a class="bi bi-question-circle bg-black nav-link dropdown-item" href="{% url 'help' %}#topics">
+                                    <a class="bg-black bi bi-question-circle nav-link dropdown-item" href="{% url 'help' %}#topics">
                                         All Topics
                                     </a>
                                 </li>
                                 <li class="nav-item" title="Basics">
-                                    <a class="bi bi-collection-play nav-link dropdown-item" href="{% url 'help_page' help_topic='MUD Basics' %}#topic">
+                                    <a class="bg-black bi bi-collection-play nav-link dropdown-item" href="{% url 'help_page' help_topic='MUD Basics' %}#topic">
                                         Basics
                                     </a>
                                 </li>
                                 <li class="nav-item" title="Get Started">
-                                    <a class="bi bi-rocket-takeoff nav-link dropdown-item" href="{% url 'start' %}#start">
+                                    <a class="bg-black bi bi-rocket-takeoff nav-link dropdown-item" href="{% url 'start' %}#start">
                                         Get Started
                                     </a>
                                 </li>
+                                <li class="nav-item" title="Get Started">
+                                    <a class="bg-black bi bi-info-circle nav-link dropdown-item" href="{% url 'help' %}#help">
+                                        Help
+                                    </a>
+                                </li>
                                 <li class="nav-item" title="History">
-                                    <a class="bi bi-clock-history nav-link dropdown-item" href="{% url 'history' %}#history">
+                                    <a class="bg-black bi bi-clock-history nav-link dropdown-item" href="{% url 'history' %}#history">
                                         History
                                     </a>
                                 </li>
                                 <li class="nav-item" title="MUD Clients">
-                                    <a class="bi bi-terminal-split nav-link dropdown-item" href="{% url 'clients' %}#clients">
+                                    <a class="bg-black bi bi-terminal-split nav-link dropdown-item" href="{% url 'clients' %}#clients">
                                         MUD Clients
                                     </a>
                                 </li>
@@ -123,20 +134,20 @@
                        </li>
 
                         <li class="nav-item" title="Patches">
-                            <a class="bi bi-bandaid nav-link" href="{% url 'patches' %}#patches">
+                            <a class="bg-black bi bi-bandaid nav-link" href="{% url 'patches' %}#patches">
                                 Patches
                             </a>
                         </li>
 
 {% if user and user.is_authenticated %}
                         <li class="nav-item dropdown">
-                            <a class="bi bi-menu-button nav-link dropdown-toggle" href="{% url 'portal' %}#portal" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <a class="bg-black bi bi-menu-button nav-link dropdown-toggle" href="{% url 'portal' %}#portal" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 Portal
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark bg-black border border-secondary p-3">
     {% if user.is_staff %}
                                 <li class="nav-item" title="Admin">
-                                    <a class="bi bi-gear nav-link dropdown-item" href="{% url 'admin:index' %}" target="_blank">
+                                    <a class="bg-black bi bi-gear nav-link dropdown-item" href="{% url 'admin:index' %}" target="_blank">
                                         Admin
                                     </a>
                                 </li>
@@ -145,14 +156,14 @@
                                 </li>
     {% endif %}
                                 <li class="nav-item" title="Challenges">
-                                    <a class="bi bi-award bg-black nav-link dropdown-item" href="{% url 'challenges' %}#challenges">
+                                    <a class="bg-black bi bi-award nav-link dropdown-item" href="{% url 'challenges' %}#challenges">
                                         Challenges
                                     </a>
                                 </li>
 
     {% if GLOBAL_EVENT_COUNT and GLOBAL_EVENT_COUNT > 0 %}
                                 <li class="nav-item" title="Events ({{ GLOBAL_EVENT_COUNT }})">
-                                    <a class="bi bi-calendar-event bg-black nav-link dropdown-item" href="{% url 'events' %}#events">
+                                    <a class="bg-black bi bi-calendar-event nav-link dropdown-item" href="{% url 'events' %}#events">
                                         Events
                                         <span class="badge text-bg-secondary">
                                             {{ GLOBAL_EVENT_COUNT }}
@@ -162,19 +173,19 @@
     {% endif %}
 
                                 <li class="nav-item" title="Leaders">
-                                    <a class="bi bi-trophy bg-black nav-link dropdown-item" href="{% url 'leaders' %}#leaders">
+                                    <a class="bg-black bi bi-trophy nav-link dropdown-item" href="{% url 'leaders' %}#leaders">
                                         Leaders
                                     </a>
                                 </li>
 
                                 <li class="nav-item" title="Portal">
-                                    <a class="bi bi-person-lines-fill bg-black nav-link dropdown-item" href="{% url 'portal' %}#portal">
+                                    <a class="bg-black bi bi-person-lines-fill nav-link dropdown-item" href="{% url 'portal' %}#portal">
                                         Portal
                                     </a>
                                 </li>
 
                                 <li class="nav-item" title="Upgrades">
-                                    <a class="bi bi-shield bg-black nav-link dropdown-item" href="{% url 'upgrades' %}#upgrades">
+                                    <a class="bg-black bi bi-shield nav-link dropdown-item" href="{% url 'upgrades' %}#upgrades">
                                         Upgrades
                                     </a>
                                 </li>
@@ -186,7 +197,7 @@
                                 <li class="nav-item" title="Log out">
                                     <form action="{% url 'logout' %}" method="post" id="logout">
                                         {% csrf_token %}
-                                        <a class="bi bi-door-closed bg-black nav-link dropdown-item" href="#" onclick="document.getElementById('logout').submit()">
+                                        <a class="bi bi-door-closed nav-link dropdown-item" href="#" onclick="document.getElementById('logout').submit()">
                                             Log Out ({{ request.user.get_username }})
                                         </a>
                                     </form>
