@@ -27,8 +27,8 @@
     {% for category in mud_client_categories %}
     <details open>
         <summary id="category-{{ category.name | slugify }}" class="h3 text-ishar" title="{{ category.name }}">
-            {{ category.name }}
             <a class="anchor-link" href="#category-{{ category.name | slugify }}" aria-label="Link to this section: MUD Client Category {{ category.name }} ({{ category.name | slugify }})">&#x23;</a>
+            {{ category.name }}
         </summary>
        <ul class="border-0 border-secondary bg-black list-group list-group-dark">
         {% for client in category.clients.all %}

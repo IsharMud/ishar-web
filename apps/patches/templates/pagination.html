@@ -1,25 +1,29 @@
 {% if page_obj %}
-<div class="pagination">
-    <p class="step-links">
+<div class="p-3">
+    <div class="pagination card">
+        <div class="card-body">
+            <p class="card-text lead step-links text-body-secondary">
     {% if page_obj.has_previous %}
-        <a href="?page=1#patches">
-            &laquo;
-        </a>
-        <a href="?page={{ page_obj.previous_page_number }}#patches">
-            &lt;
-        </a>
+                <a href="?page=1#patches">
+                    &laquo;
+                </a>
+                <a href="?page={{ page_obj.previous_page_number }}#patches">
+                    &lt;
+                </a>
     {% endif %}
-        <span class="current">
-            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-        </span>
+                <span class="current">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                </span>
     {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}#patches">
-            &gt;
-        </a>
-        <a href="?page={{ page_obj.paginator.num_pages }}#patches">
-            &raquo;
-        </a>
+                <a href="?page={{ page_obj.next_page_number }}#patches">
+                    &gt;
+                </a>
+                <a href="?page={{ page_obj.paginator.num_pages }}#patches">
+                    &raquo;
+                </a>
     {% endif %}
-    </p>
+            </p>
+        </div>
+    </div>
 </div>
 {% endif %}

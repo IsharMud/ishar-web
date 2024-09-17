@@ -17,8 +17,8 @@
 
     <div class="bg-black border border-secondary card mx-1 my-1 rounded" id="start" title="Season {{ season.season_id }} Start: {{ season.effective_date | naturaltime }} @ {{ season.effective_date }}">
         <h3 class="border border-secondary card-title card-header p-2">
-            Start
             <a class="anchor-link" href="#start" aria-label="Link to this section: Season {{ season.season_id }} Start">&#x23;</a>
+            Start
         </h3>
         <blockquote class="blockquote card-text p-3">
             <p>{{ season.effective_date | date:"l, F d, Y" }}</p>
@@ -28,8 +28,8 @@
 
     <div class="bg-black border border-secondary card mx-1 my-1 rounded" id="end" title="Season {{ season.season_id }} End: {{ season.expiration_date | naturaltime }} @ {{ season.expiration_date }}">
         <h3 class="border border-secondary card-title card-header p-2">
-            End
             <a class="anchor-link" href="#end" aria-label="Link to this section: Season {{ season.season_id }} End">&#x23;</a>
+            End
         </h3>
         <blockquote class="blockquote card-text p-3">
             <p>{{ season.expiration_date | date:"l, F d, Y" }}</p>
@@ -44,8 +44,8 @@
 
         <div class="bg-black border border-secondary card-header card-title p-2 rounded">
             <h4 title="Essence">
-                Essence
                 <a class="anchor-link" href="#essence" aria-label="Link to this section: Season {{ season.season_id }} Essence">&#x23;</a>
+                Essence
             </h4>
         </div>
 

@@ -162,12 +162,12 @@
 <hr>
 <details open>
     <summary id="essence" class="h3 text-ishar" title="Essence ({{ request.user.account_name }})">
+        <a class="anchor-link" href="#essence" aria-label="Link to this section: Essence ({{ request.user.account_name }})">
+            &#x23;
+        </a>
         Essence
         <a href="{% url 'help_page' help_topic='Essence' %}" title="Help: Essence">
             <span class="bi p-1 bi-question-circle text-secondary"></span>
-        </a>
-        <a class="anchor-link" href="#essence" aria-label="Link to this section: Essence ({{ request.user.account_name }})">
-            &#x23;
         </a>
     </summary>
     <ul class="bg-black list-group list-group-horizontal-md">
@@ -184,15 +184,15 @@
 <hr>
 <details{% if request.user.upgrades.count > 0 %} open{% endif %}>
     <summary id="upgrades" class="h3 text-ishar" title="Account Upgrades ({{ request.user.account_name }}): {{ request.user.upgrades.count }}}">
+        <a class="anchor-link" href="#upgrades" aria-label="Link to this section: Account Upgrades ({{ request.user.account_name }})">
+            &#x23;
+        </a>
         Upgrades
 {% if request.user.upgrades.count > 0 %}
         <span class="badge bg-dark text-white rounded-pill">
             {{ request.user.upgrades.count }}
         </span>
 {% endif %}
-        <a class="anchor-link" href="#upgrades" aria-label="Link to this section: Account Upgrades ({{ request.user.account_name }})">
-            &#x23;
-        </a>
     </summary>
 {% if request.user.upgrades.all %}
     <ol class="list-group list-group-horizontal-vertical list-group-numbered">
@@ -220,10 +220,10 @@
 
 <details open>
     <summary id="created" class="h3 text-ishar" title="Account Created ({{ request.user.account_name }}): {{ request.user.created_at | naturaltime }}">
-        Created
         <a class="anchor-link" href="#created" aria-label="Link to this section: Account Created ({{ request.user.account_name }}): {{ request.user.created_at | naturaltime }}">
             &#x23;
         </a>
+        Created
     </summary>
     <p>Your account was created:</p>
     <blockquote class="blockquote">

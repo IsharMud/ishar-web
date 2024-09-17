@@ -13,7 +13,7 @@
         </li>
     {% if page_obj.number and page_obj.number != 1 %}
         <li class="breadcrumb-item active" aria-current="page" title="Patches">
-            <a href="{% url 'patches' %}?page={{ page_obj.number }}#patches">
+            <a href="{% url 'patches' %}?page={{ page_obj.number }}#patches" id="page">
                 Page {{ page_obj.number }}
             </a>
         </li>
@@ -36,8 +36,10 @@
         {% for patch in patches %}
 <details {% if forloop.first %} open{% endif %}>
     <summary id="{{ patch.patch_name | slugify }}" class="h3 text-ishar" title="{{ patch.patch_name }}">
+        <a class="anchor-link" href="#{{ patch.patch_name | slugify }}" aria-label="Link to this section: Patch {{ patch.patch_name }} ({{ patch.patch_name | slugify }})">
+            &#x23;
+        </a>
         {{ patch.patch_name }}
-        <a class="anchor-link" href="#{{ patch.patch_name | slugify }}" aria-label="Link to this section: Patch {{ patch.patch_name }} ({{ patch.patch_name | slugify }})">&#x23;</a>
     </summary>
     <blockquote class="blockquote">
         <p>
@@ -56,7 +58,6 @@
     </blockquote>
 </details>
         {% endfor %}
-    <hr>
         {% include "pagination.html" %}
     {% else %}
 <p class="lead">
