@@ -103,7 +103,7 @@ class Challenge(models.Model):
         return slugify(self.mobile.long_name).replace("_", "-")
 
     def winners(self) -> list[str,]:
-        # List of players that have won the challenge.
+        # List of players that have won a completed challenge.
         out = []
         winners = self.winner_desc
         if winners:
@@ -115,8 +115,16 @@ class Challenge(models.Model):
         return out
 
     def winners_links(self) -> list[str,]:
-        # List of links to players that have won the challenge.
+        # List of links to players that have won a completed challenge.
         out = []
         for winner in self.winners():
-            out.append(Player.objects.get(name=winner).player_link)
+            try:
+                player = Player.objects.get(name=winner)
+            except Player.DoesNotExist:
+                item = winner
+            else:
+                item = player.name
+                if player.player_link:
+                    item = player.player_link
+            out.append(item)
         return out

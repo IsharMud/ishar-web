@@ -81,9 +81,9 @@
                         {{ challenge.mobile.long_name }}
                     </span>
             {% if challenge.is_completed %}
-                    <span class="challenge-complete">
-                        <strong>Completed</strong>
-                        by {{ challenge.winners_links|join:", " }}
+                    <span class="fw-normal text-ishar">
+                        <b>Completed</b> by
+                        {{ challenge.winners_links|join:", " }}
                     </span>
             {% endif %}
                 </td>
