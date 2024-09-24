@@ -2,24 +2,26 @@
 <nav aria-label="Patches page navigation">
     <ul class="pagination m-0">
 
-        <li class="page-item">
     {% if page_obj.number != 1 %}
+        <li class="page-item">
             <a aria-label="First" class="page-link" href="?page=1#patches" >
                 &laquo;
             </a>
     {% else %}
+        <li class="page-item disabled">
             <a aria-label="First" aria-hidden="true" class="page-link" href="#patches">
                 &laquo;
             </a>
     {% endif %}
         </li>
 
-        <li class="page-item">
     {% if page_obj.has_previous %}
+        <li class="page-item">
             <a aria-label="Previous" class="page-link" href="?page={{ page_obj.previous_page_number }}#patches">
                 &lt;
             </a>
     {% else %}
+        <li class="page-item disabled">
             <a aria-label="Previous" aria-hidden="true" class="page-link" href="#patches">
                 &lt;
             </a>
@@ -34,24 +36,26 @@
         </li>
     {% endfor %}
 
-        <li class="page-item">
     {% if page_obj.has_next %}
+        <li class="page-item">
             <a aria-label="Next" class="page-link" href="?page={{ page_obj.next_page_number }}#patches">
                 &gt;
             </a>
     {% else %}
+        <li class="page-item disabled">
             <a aria-label="Next" aria-hidden="true" class="page-link" href="#patches">
                 &gt;
             </a>
     {% endif %}
         </li>
 
-        <li class="page-item">
     {% if page_obj.number != page_obj.paginator.num_pages %}
+        <li class="page-item">
             <a aria-label="Last" class="page-link" href="?page={{ page_obj.paginator.num_pages }}#patches">
                 &raquo;
             </a>
     {% else %}
+        <li class="page-item disabled">
             <a aria-label="Last" aria-hidden="true" class="page-link" href="#patches">
                 &raquo;
             </a>
