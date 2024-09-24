@@ -3,11 +3,12 @@ from django.contrib.admin import display
 from django.template.defaultfilters import slugify
 
 from apps.mobiles.models.mobile import Mobile
+from apps.players.models.player import Player
 
 
 class ChallengeManager(models.Manager):
     def get_by_natural_key(self, challenge_desc):
-        """Natural key by challenge description."""
+        # Natural key by challenge description.
         return self.get(challenge_desc=challenge_desc)
 
 
@@ -87,12 +88,12 @@ class Challenge(models.Model):
         return self.challenge_desc or self.mobile.long_name
 
     def natural_key(self) -> str:
-        """Natural key by challenge description."""
+        # Natural key by challenge description.
         return self.challenge_desc
 
     @display(boolean=True, description="Complete?", ordering="winner_desc")
-    def is_completed(self):
-        """Boolean if challenge has winner description, meaning completed."""
+    def is_completed(self) -> bool:
+        # Boolean if challenge has winner description, meaning completed.
         if self.winner_desc:
             return True
         return False
@@ -101,8 +102,8 @@ class Challenge(models.Model):
     def anchor(self) -> str:
         return slugify(self.mobile.long_name).replace("_", "-")
 
-    def winners(self) -> list:
-        """List of players that have won the challenge."""
+    def winners(self) -> list[str,]:
+        # List of players that have won the challenge.
         out = []
         winners = self.winner_desc
         if winners:
@@ -111,4 +112,11 @@ class Challenge(models.Model):
                     out.append(winner.strip())
             else:
                 out.append(winners)
+        return out
+
+    def winners_links(self) -> list[str,]:
+        # List of links to players that have won the challenge.
+        out = []
+        for winner in self.winners():
+            out.append(Player.objects.get(name=winner).player_link)
         return out

@@ -58,5 +58,5 @@ a.hardcore-player:active, a.hardcore-player:visited
 .message-warn, .message-warning  { color: #f80; }
 
 .two-col { column-count: 2; }
-.challenge-completed { text-decoration: line-through; text-decoration-color: #a00; text-decoration-thickness: 0.15rem; }
+.challenge-completed { text-decoration: line-through; text-decoration-color: #a00; text-decoration-thickness: 0.25rem; }
 .anchor-cell:target { color: var(--ishar-color); font-weight: bold; }

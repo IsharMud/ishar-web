@@ -81,12 +81,10 @@
                         {{ challenge.mobile.long_name }}
                     </span>
             {% if challenge.is_completed %}
-                <br>
-                <strong>Completed</strong> by
-                {% for challenger in challenge.winners %}
-                    {% if forloop.last %}and{% endif %}
-                    <a href="{% url 'player' name=challenger %}#player">{{ challenger }}</a>{% if not forloop.last %},{% endif %}
-                {% endfor %}
+                    <span class="challenge-complete">
+                        <strong>Completed</strong>
+                        by {{ challenge.winners_links|join:", " }}
+                    </span>
             {% endif %}
                 </td>
                 <td class="border" data-order="{{ challenge.max_people }}" data-search="" title="Max People: {{ challenge.max_people }}">
