@@ -1,29 +1,63 @@
 {% if page_obj %}
-<div class="p-3">
-    <div class="pagination card">
-        <div class="card-body">
-            <p class="card-text lead step-links text-body-secondary">
+<nav aria-label="Patches page navigation">
+    <ul class="pagination m-0">
+
+        <li class="page-item">
+    {% if page_obj.number != 1 %}
+            <a aria-label="First" class="page-link" href="?page=1#patches" >
+                &laquo;
+            </a>
+    {% else %}
+            <a aria-label="First" aria-hidden="true" class="page-link" href="#">
+                &laquo;
+            </a>
+    {% endif %}
+        </li>
+
+        <li class="page-item">
     {% if page_obj.has_previous %}
-                <a href="?page=1#patches">
-                    &laquo;
-                </a>
-                <a href="?page={{ page_obj.previous_page_number }}#patches">
-                    &lt;
-                </a>
+            <a aria-label="Previous" class="page-link" href="?page={{ page_obj.previous_page_number }}#patches">
+                &lt;
+            </a>
+    {% else %}
+            <a aria-label="Previous" aria-hidden="true" class="page-link" href="#">
+                &lt;
+            </a>
     {% endif %}
-                <span class="current">
-                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-                </span>
+        </li>
+
+    {% for item in page_obj.paginator.page_range %}
+        <li class="page-item{% if page_obj.number == item %} active" aria-current="page{% endif %}">
+            <a aria-label="Page #{{ item }}" class="page-link" href="?page={{ item }}#patches">
+                {{ item }}
+            </a>
+        </li>
+    {% endfor %}
+
+        <li class="page-item">
     {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}#patches">
-                    &gt;
-                </a>
-                <a href="?page={{ page_obj.paginator.num_pages }}#patches">
-                    &raquo;
-                </a>
+            <a aria-label="Next" class="page-link" href="?page={{ page_obj.next_page_number }}#patches">
+                &gt;
+            </a>
+    {% else %}
+            <a aria-label="Next" aria-hidden="true" class="page-link" href="#">
+                &gt;
+            </a>
     {% endif %}
-            </p>
-        </div>
-    </div>
-</div>
+        </li>
+
+        <li class="page-item">
+    {% if page_obj.number != page_obj.paginator.num_pages %}
+            <a aria-label="Last" class="page-link" href="?page={{ page_obj.paginator.num_pages }}#patches">
+                &raquo;
+            </a>
+    {% else %}
+            <a aria-label="Last" aria-hidden="true" class="page-link" href="#">
+                &raquo;
+            </a>
+    {% endif %}
+        </li>
+
+    </ul>
+</nav>
 {% endif %}

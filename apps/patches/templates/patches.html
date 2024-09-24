@@ -58,7 +58,13 @@
     </blockquote>
 </details>
         {% endfor %}
+<div class="p-3">
+    <div class="card">
+        <div class="card-body">
         {% include "pagination.html" %}
+        </div>
+    </div>
+</div>
     {% else %}
 <p class="lead">
     No patches found.

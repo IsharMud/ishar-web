@@ -278,9 +278,7 @@ IMMORTAL_LEVELS = (
 MIN_IMMORTAL_LEVEL = min(IMMORTAL_LEVELS)[0]
 MAX_IMMORTAL_LEVEL = max(IMMORTAL_LEVELS)[0]
 
-CONNECT_URL = "https://mudslinger.net/play/?host=%s&port=%i" % (
-    ALLOWED_HOSTS[0], 23
-)
+CONNECT_URL = f"https://mudslinger.net/play/?host={ALLOWED_HOSTS[0]}&port=23"
 
 X_FRAME_OPTIONS = "SAMEORIGIN"
 

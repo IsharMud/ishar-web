@@ -97,7 +97,7 @@
                 {{ player.get_player_alignment | lower }}.
             </li>
 
-            <li class="bg-black border-0 list-group-item list-group-item-text text-white" title="{% if player.player_type == 'Classic' %}Deaths: {{ player.deaths }}{% elif player.player_type == 'Dead' %}{{ player.name | title }} is DEAD!{% else %}{{ player.name | title }} is a {{ player.player_type }} player!{% endif %}">
+            <li class="bg-black border-0 list-group-item list-group-item-text text-white" title="{{ player.name | title }} is a {{ player.player_type|default:"unknown"|lower }} player!">
                 <span class="bi bi-dot text-ishar"></span>
             {% if player.player_type == 'Dead' %}
                 {{ player.name | title }} is <span class="dead-note">DEAD</span>!
@@ -109,7 +109,7 @@
                 </ul>
             {% else %}
                 {{ player.name | title }} {{ player.get_player_phrase }} a
-                <span class="{{ player.player_css }}">{{ player.player_type }}</span> player!
+                <span class="{{ player.player_css }}">{{ player.player_type|default:"unknown"|lower }}</span> player.
             {% endif %}
             </li>
 
