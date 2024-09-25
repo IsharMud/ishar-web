@@ -1,5 +1,5 @@
 {% if page_obj %}
-<nav aria-label="Patches page navigation">
+<nav aria-label="Patches pages navigation">
     <ul class="pagination m-0">
 
     {% if page_obj.number != 1 %}
@@ -18,12 +18,12 @@
     {% if page_obj.has_previous %}
         <li class="page-item">
             <a aria-label="Previous" class="page-link" href="?page={{ page_obj.previous_page_number }}#patches">
-                &lt;
+                &#8249;
             </a>
     {% else %}
         <li class="page-item disabled">
             <a aria-label="Previous" aria-hidden="true" class="page-link" href="#patches">
-                &lt;
+                &#8249;
             </a>
     {% endif %}
         </li>
@@ -39,12 +39,12 @@
     {% if page_obj.has_next %}
         <li class="page-item">
             <a aria-label="Next" class="page-link" href="?page={{ page_obj.next_page_number }}#patches">
-                &gt;
+                &#8250;
             </a>
     {% else %}
         <li class="page-item disabled">
             <a aria-label="Next" aria-hidden="true" class="page-link" href="#patches">
-                &gt;
+                &#8250;
             </a>
     {% endif %}
         </li>
