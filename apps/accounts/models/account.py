@@ -119,6 +119,18 @@ class Account(AbstractBaseUser, PermissionsMixin):
         help_text="Number of achievement points for the account.",
         verbose_name="Achievement Points"
     )
+    beta_tester = models.IntegerField(
+        blank=True,
+        null=True,
+        help_text="Is the account a beta tester?",
+        verbose_name="Beta Tester"
+    )
+    free_refresh = models.IntegerField(
+        blank=True,
+        null=True,
+        help_text="Free refresh?",
+        verbose_name="Free Refresh"
+    )
 
     EMAIL_FIELD = "email"
     USERNAME_FIELD = "account_name"

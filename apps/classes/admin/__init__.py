@@ -27,6 +27,10 @@ class ClassAdmin(ModelAdmin):
         ("Base", {"fields": (
             "base_fortitude", "base_resilience", "base_reflex"
         )}),
+        ("Priority", {"fields": (
+            "strength_priority", "agility_priority", "endurance_priority",
+            "perception_priority", "focus_priority", "willpower_priority"
+        )}),
     )
     inlines = (
         ClassLevelTabularInline,

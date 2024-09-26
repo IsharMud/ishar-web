@@ -1,6 +1,7 @@
 from django.db import models
 
 from apps.achievements.models.achievement import Achievement
+from apps.objects.models.object import Object
 
 from .account import Account
 
@@ -46,7 +47,13 @@ class AccountAchievement(models.Model):
         verbose_name="Account"
     )
 
-    completed_by = models.CharField(max_length=100, blank=True, null=True)
+    completed_by = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        help_text="Account achievement completed by.",
+        verbose_name="Completed By"
+    )
 
     class Meta:
         managed = False

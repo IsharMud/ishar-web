@@ -39,8 +39,8 @@ class AccountBackup(models.Model):
     banned_until = models.DateTimeField(blank=True, null=True)
     bugs_reported = models.IntegerField()
     earned_essence = models.IntegerField()
-    immortal_level = models.SmallIntegerField(blank=True, null=True)
     is_private = models.IntegerField(blank=True, null=True)
+    immortal_level = models.SmallIntegerField(blank=True, null=True)
     comm = models.IntegerField(blank=True, null=True)
     achievement_points = models.PositiveIntegerField(blank=True, null=True)
     beta_tester = models.IntegerField(blank=True, null=True)
@@ -85,6 +85,7 @@ class AccountUpgrades(models.Model):
     is_disabled = models.IntegerField()
     increment = models.IntegerField()
     amount = models.IntegerField()
+    grants_memory = models.ForeignKey('Objects', models.DO_NOTHING, db_column='grants_memory', blank=True, null=True)
 
     class Meta:
         managed = False
@@ -113,6 +114,7 @@ class Accounts(models.Model):
     comm = models.IntegerField(blank=True, null=True)
     achievement_points = models.PositiveIntegerField(blank=True, null=True)
     beta_tester = models.IntegerField(blank=True, null=True)
+    free_refresh = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -399,6 +401,12 @@ class Classes(models.Model):
     base_fortitude = models.IntegerField()
     base_resilience = models.IntegerField()
     base_reflex = models.IntegerField()
+    strength_priority = models.IntegerField(blank=True, null=True)
+    agility_priority = models.IntegerField(blank=True, null=True)
+    endurance_priority = models.IntegerField(blank=True, null=True)
+    perception_priority = models.IntegerField(blank=True, null=True)
+    focus_priority = models.IntegerField(blank=True, null=True)
+    willpower_priority = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -690,8 +698,8 @@ class MobPlayerFlags(models.Model):
 
 
 class MobStats(models.Model):
-    mob_stats_id = models.AutoField(primary_key=True)
-    mob = models.ForeignKey(MobData, models.DO_NOTHING, blank=True, null=True)
+    mob_stats_id = models.PositiveIntegerField(primary_key=True)
+    mob = models.OneToOneField(MobData, models.DO_NOTHING, blank=True, null=True)
     num_loaded_all = models.PositiveIntegerField(blank=True, null=True)
     num_loaded_season = models.PositiveIntegerField(blank=True, null=True)
     num_killed_all = models.PositiveIntegerField(blank=True, null=True)
@@ -908,6 +916,7 @@ class Objects(models.Model):
     created_at = models.DateTimeField()
     updated_at = models.DateTimeField()
     calculated_value = models.IntegerField(blank=True, null=True)
+    grant_skill = models.ForeignKey('Skills', models.DO_NOTHING, db_column='grant_skill', related_name='objects_grant_skill_set', blank=True, null=True)
 
     class Meta:
         managed = False
@@ -1438,6 +1447,7 @@ class RemortUpgrades(models.Model):
     bonus = models.IntegerField()
     survival_scale = models.IntegerField()
     survival_renown_cost = models.IntegerField()
+    reward_skill = models.ForeignKey('Skills', models.DO_NOTHING, db_column='reward_skill', blank=True, null=True)
 
     class Meta:
         managed = False
@@ -1549,15 +1559,6 @@ class SpellFlags(models.Model):
     class Meta:
         managed = False
         db_table = 'spell_flags'
-
-
-class TempSkillIdMap(models.Model):
-    old_id = models.IntegerField(blank=True, null=True)
-    new_id = models.IntegerField(blank=True, null=True)
-
-    class Meta:
-        managed = False
-        db_table = 'temp_skill_id_map'
 
 
 class Titles(models.Model):

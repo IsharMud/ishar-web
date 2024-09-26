@@ -7,7 +7,7 @@ from .mobile import Mobile
 
 
 class MobileAffectFlag(models.Model):
-    """Ishar mobile affect flag."""
+    """Ishar mobile affect flag uses affect flag."""
     id = models.AutoField(
         db_column="id",
         blank=False,
@@ -25,8 +25,8 @@ class MobileAffectFlag(models.Model):
         on_delete=models.DO_NOTHING,
         blank=True,
         null=True,
-        help_text="Mobile affected by the affect flag.",
-        verbose_name="Mobile"
+        help_text=_("Mobile affected by the affect flag."),
+        verbose_name=_("Mobile")
     )
     affect_flag = models.ForeignKey(
         db_column="flag_id",
@@ -35,13 +35,13 @@ class MobileAffectFlag(models.Model):
         on_delete=models.DO_NOTHING,
         blank=True,
         null=True,
-        help_text="Affect flag affecting the mobile.",
+        help_text=_("Affect flag affecting the mobile."),
         related_name="+",
-        verbose_name="Affect Flag"
+        verbose_name=_("Affect Flag")
     )
     value = models.IntegerField(
-        help_text="Value of the affect flag affecting the mobile.",
-        verbose_name="Value"
+        help_text=_("Value of the affect flag affecting the mobile."),
+        verbose_name=_("Value")
     )
 
     class Meta:
@@ -50,8 +50,8 @@ class MobileAffectFlag(models.Model):
         default_related_name = "affect_flag"
         ordering = ("-id",)
         unique_together = (("mobile", "affect_flag"),)
-        verbose_name = "Mobile Affect Flag"
-        verbose_name_plural = "Mobile Affect Flags"
+        verbose_name = _("Mobile Affect Flag")
+        verbose_name_plural = _("Mobile Affect Flags")
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}: {self.__str__()} ({self.pk})"

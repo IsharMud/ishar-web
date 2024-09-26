@@ -1,16 +1,16 @@
 from django.contrib.admin import TabularInline
 
-from ...models.flag import MobileFlag
+from ...models.player_flag import MobilePlayerFlag
 
 
-class MobileFlagTabularInline(TabularInline):
+class MobilePlayerFlagTabularInline(TabularInline):
     """Mobile player flag tabular inline administration."""
-    model = MobileFlag
+    model = MobilePlayerFlag
     extra = 1
-    fields = ("flag", "value")
-    ordering = ("-value", "flag__name")
-    verbose_name = "Flag"
-    verbose_name_plural = "Flags"
+    fields = ("player_flag", "value")
+    ordering = ("-value", "player_flag__name")
+    verbose_name = "Player Flag"
+    verbose_name_plural = "Player Flags"
 
     def has_add_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:

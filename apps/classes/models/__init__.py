@@ -75,7 +75,44 @@ class Class(models.Model):
     )
     base_reflex = models.IntegerField(
         help_text="Base reflex of the class.",
-        verbose_name="Base Reflex")
+        verbose_name="Base Reflex"
+    )
+    strength_priority = models.IntegerField(
+        blank=True,
+        null=True,
+        help_text="Strength priority of the class.",
+        verbose_name="Strength Priority"
+    )
+    agility_priority = models.IntegerField(
+        blank=True,
+        null=True,
+        help_text="Agility priority of the class.",
+        verbose_name="Agility Priority"
+    )
+    endurance_priority = models.IntegerField(
+        blank=True,
+        null=True,
+        help_text="Endurance priority of the class.",
+        verbose_name="Endurance Priority"
+    )
+    perception_priority = models.IntegerField(
+        blank=True,
+        null=True,
+        help_text="Perception priority of the class.",
+        verbose_name="Perception Priority"
+    )
+    focus_priority = models.IntegerField(
+        blank=True,
+        null=True,
+        help_text="Focus priority of the class.",
+        verbose_name="Focus Priority"
+    )
+    willpower_priority = models.IntegerField(
+        blank=True,
+        null=True,
+        help_text="Willpower priority of the class.",
+        verbose_name="Willpower Priority"
+    )
 
     class Meta:
         managed = False
