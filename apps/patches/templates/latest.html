@@ -25,6 +25,13 @@
         <div class="card-body">
             <embed style="height: 80vh;" src="{{ patches.0.get_absolute_url }}" type="application/pdf" width="100%">
         </div>
+        <div class="card-footer">
+            <span class="blockquote-footer">
+                <a href="{{ patches.0.get_absolute_url }}" target="_blank" title="Open: {{ patches.0.patch_file.name }}">
+                    {{ patches.0.patch_file.name }}
+                </a>
+            </span>
+        </div>
     </div>
 </div>
 {% endblock content %}
