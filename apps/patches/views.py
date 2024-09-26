@@ -13,14 +13,13 @@ class BasePatchView(ListView):
         return super().get_queryset().filter(is_visible=True).all()
 
 
+class PatchesView(BasePatchView):
+    """Main paginated view of patches."""
+    paginate_by = 5
+
+
 class PatchesLatestView(BasePatchView):
-    """Latest patch view."""
+    template_name = "latest.html"
 
     def get_queryset(self):
-        # Return a list of the single most recent item
         return super().get_queryset().all()[:1]
-
-
-class PatchesView(BasePatchView):
-    """Paginated view of patches."""
-    paginate_by = 5

@@ -76,7 +76,7 @@
                             </a>
                         </li>
 
-                       <li class="nav-item dropdown">
+                        <li class="nav-item dropdown">
                             <a class="bg-black bi bi-info-circle nav-link dropdown-toggle" href="{% url 'help' %}#help" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 Help
                             </a>
@@ -131,14 +131,29 @@
                                     </a>
                                 </li>
                             </ul>
-                       </li>
-
+                        </li>
                         <li class="nav-item" title="Patches">
                             <a class="bg-black bi bi-bandaid nav-link" href="{% url 'patches' %}#patches">
                                 Patches
                             </a>
                         </li>
-
+                        <li class="nav-item dropdown">
+                            <a class="bg-black bi bi-menu-button nav-link dropdown-toggle" href="{% url 'portal' %}#portal" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Patches
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-dark bg-black border border-secondary p-3">
+                                <li class="nav-item" title="Admin">
+                                    <a class="bg-black bi bi-file-earmark-pdf nav-link dropdown-item" href="{% url 'latestpatch' %}#latest">
+                                        Latest
+                                    </a>
+                                </li>
+                                <li class="nav-item" title="Admin">
+                                    <a class="bg-black bi bi-collection nav-link dropdown-item" href="{% url 'patches' %}#patches">
+                                        All
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
 {% if user and user.is_authenticated %}
                         <li class="nav-item dropdown">
                             <a class="bg-black bi bi-menu-button nav-link dropdown-toggle" href="{% url 'portal' %}#portal" role="button" data-bs-toggle="dropdown" aria-expanded="false">

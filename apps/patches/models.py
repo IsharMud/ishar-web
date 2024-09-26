@@ -72,6 +72,9 @@ class Patch(models.Model):
         """Natural key is patch name."""
         return self.patch_name
 
+    def get_absolute_url(self) -> str:
+        return f"{settings.MEDIA_URL}{self.patch_file.name}"
+
 
 @receiver(models.signals.post_delete, sender=Patch)
 def auto_delete_file_on_delete(sender, instance, **kwargs):
