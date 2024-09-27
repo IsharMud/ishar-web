@@ -9,7 +9,7 @@ from .type import ObjectType
 
 class ObjectManager(models.Manager):
     def get_by_natural_key(self, longname):
-        """Natural key is object long name."""
+        # Natural key is object long name.
         return self.get(longname=longname)
 
 
@@ -18,9 +18,7 @@ class Object(models.Model):
     objects = ObjectManager()
 
     vnum = models.AutoField(
-        help_text=_(
-            'Primary key identification number ("VNUM") of the object.'
-        ),
+        help_text=_('Primary key ID number ("VNUM") of the object.'),
         primary_key=True,
         verbose_name=_('Object ID ("VNUM")')
     )
@@ -150,6 +148,23 @@ class Object(models.Model):
         help_text=_("Date and time when the object was updated."),
         verbose_name=_("Updated At")
     )
+    calculated_value = models.IntegerField(
+        blank=True,
+        null=True,
+        help_text=_("Calculated value of the object."),
+        verbose_name=_("Calculated Value")
+    )
+    grant_skill = models.ForeignKey(
+        to=Skill,
+        to_field="",
+        on_delete=models.DO_NOTHING,
+        db_column="grant_skill",
+        related_name="objects_grant_skill_set",
+        blank=True,
+        null=True,
+        help_text=_("Skill granted by the object."),
+        verbose_name=_("Grant Skill")
+    )
 
     class Meta:
         managed = False
@@ -166,7 +181,7 @@ class Object(models.Model):
         return f"{self.pk}. {self.longname or self.name}"
 
     def natural_key(self) -> str:
-        """Natural key is object long name."""
+        # Natural key is object long name.
         return self.longname
 
     def save(

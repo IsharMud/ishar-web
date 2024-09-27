@@ -6,7 +6,7 @@ from .type.criteria import AchievementCriteriaType
 
 class AchievementManager(models.Manager):
     def get_by_natural_key(self, name):
-        """Natural key of the achievement name."""
+        # Natural key of the achievement name.
         return self.get(name=name)
 
 
@@ -86,7 +86,7 @@ class Achievement(models.Model):
         return self.name
 
     def save(self, *args, **kwargs):
-        """Update timestamps on save."""
+        # Update timestamps on save.
         now = timezone.now()
         if not self.pk:
             self.created_at = now
@@ -94,5 +94,5 @@ class Achievement(models.Model):
         return super().save(*args, **kwargs)
 
     def natural_key(self) -> str:
-        """Natural key of the achievement name."""
+        # Natural key of the achievement name.
         return self.name

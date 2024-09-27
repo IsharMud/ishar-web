@@ -10,9 +10,7 @@ from .inlines.upgrade import AccountUpgradesLinksAdmin
 
 @register(get_user_model())
 class AccountAdmin(UserAdmin):
-    """
-    Account administration.
-    """
+    """Account administration."""
     model = get_user_model()
     date_hierarchy = "created_at"
     fieldsets = (
@@ -20,7 +18,7 @@ class AccountAdmin(UserAdmin):
             None, {
                 "fields": (
                     "account_id", model.USERNAME_FIELD, model.EMAIL_FIELD,
-                    "immortal_level"
+                    "immortal_level", "free_refresh"
                 )
             }
         ),

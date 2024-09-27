@@ -17,6 +17,7 @@ class ObjectAdmin(admin.ModelAdmin):
     list_filter = (
         "deleted", "item_type",
         ("enchant", admin.RelatedOnlyFieldListFilter),
+        ("grant_skill", admin.RelatedOnlyFieldListFilter),
         ("appearance", admin.EmptyFieldListFilter),
         ("description", admin.EmptyFieldListFilter),
         ("func", admin.EmptyFieldListFilter),

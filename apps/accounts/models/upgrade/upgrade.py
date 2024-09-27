@@ -1,9 +1,11 @@
 from django.db import models
 
+from apps.objects.models.object import Object
+
 
 class AccountUpgradeManager(models.Manager):
     def get_by_natural_key(self, name):
-        """Natural key by account upgrade name."""
+        # Natural key by account upgrade name.
         return self.get(name=name)
 
 
@@ -50,6 +52,16 @@ class AccountUpgrade(models.Model):
         help_text="Amount of the account upgrade.",
         verbose_name="Amount"
     )
+    grants_memory = models.ForeignKey(
+        to=Object,
+        to_field="vnum",
+        on_delete=models.DO_NOTHING,
+        db_column="grants_memory",
+        blank=True,
+        null=True,
+        help_text="Grants memory of the account upgrade.",
+        verbose_name="Grants Memory"
+    )
 
     class Meta:
         managed = False
@@ -66,5 +78,5 @@ class AccountUpgrade(models.Model):
         return self.description or self.name
 
     def natural_key(self) -> str:
-        """Natural key by account upgrade name."""
+        # Natural key by account upgrade name.
         return self.name

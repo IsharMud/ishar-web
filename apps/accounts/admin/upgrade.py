@@ -5,14 +5,12 @@ from ..models.upgrade import AccountUpgrade
 
 @register(AccountUpgrade)
 class AccountUpgradeAdmin(ModelAdmin):
-    """
-    Account upgrade administration.
-    """
+    """Account upgrade administration."""
     fieldsets = (
         (None, {"fields": ("id", "name", "description", "is_disabled")}),
-        ("Values", {
-            "fields": ("amount", "cost", "increment", "max_value", "scale")
-        })
+        ("Values", {"fields": (
+            "amount", "cost", "increment", "max_value", "scale", "grants_memory"
+        )})
     )
     list_display = ("name", "is_disabled", "description")
     list_filter = ("is_disabled",)

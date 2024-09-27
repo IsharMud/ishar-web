@@ -32,17 +32,16 @@ class PlayerAdmin(admin.ModelAdmin):
         ("Titles", {"fields": ("title", "title_id")}),
     )
     inlines = (
-        PlayerCommonInlineAdmin,
-        PlayerFlagsInlineAdmin,
-        PlayerRemortUpgradesInlineAdmin,
-        PlayerStatInlineAdmin,
+        PlayerCommonInlineAdmin, PlayerFlagsInlineAdmin,
+        PlayerRemortUpgradesInlineAdmin, PlayerStatInlineAdmin,
     )
     list_display = (
         "name", "get_account_link", "player_type", "is_hardcore", "is_survival",
         "player_level", "renown"
     )
     list_filter = (
-        "game_type", ImmortalTypeListFilter,
+        "game_type",
+        ImmortalTypeListFilter,
         ("account", admin.RelatedOnlyFieldListFilter),
     )
     readonly_fields = (

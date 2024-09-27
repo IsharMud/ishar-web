@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from apps.skills.models.skill import Skill
+
 
 class RemortUpgradeManager(models.Manager):
     def get_by_natural_key(self, name):
@@ -58,6 +60,16 @@ class RemortUpgrade(models.Model):
     survival_renown_cost = models.IntegerField(
         help_text=_("Renown cost of the remort upgrade, for survival players."),
         verbose_name=_("Survival Renown Cost")
+    )
+    reward_skill = models.ForeignKey(
+        to=Skill,
+        to_field="id",
+        blank=True,
+        null=True,
+        db_column="reward_skill",
+        on_delete=models.DO_NOTHING,
+        help_text=_("Skill rewarded by the remort upgrade."),
+        verbose_name=_("Reward Skill")
     )
 
     class Meta:

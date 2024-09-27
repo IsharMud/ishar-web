@@ -8,7 +8,6 @@ class PlayerSkill(models.Model):
     """Ishar player skill."""
     skill = models.ForeignKey(
         db_column="skill_id",
-        related_query_name="+",
         to=Skill,
         to_field="id",
         on_delete=models.DO_NOTHING,
