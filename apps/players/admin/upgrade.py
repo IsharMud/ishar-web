@@ -11,7 +11,7 @@ class RemortUpgradeAdmin(admin.ModelAdmin):
         (None, {"fields": ("upgrade_id", "name", "display_name")}),
         ("Availability", {"fields": ("can_buy", "bonus", "max_value")}),
         ("Amounts", {"fields": ("renown_cost", "scale")}),
-        ("Survival Amounts", {"fields": (
+        ("Hardcore Amounts", {"fields": (
             "survival_renown_cost", "survival_scale"
         )}),
         ("Skill", {"fields": ("reward_skill",)}),
