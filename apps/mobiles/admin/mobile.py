@@ -5,6 +5,7 @@ from django.utils.html import format_html
 from .inlines.affect_flag import MobileAffectFlagTabularInline
 from .inlines.desc import MobileDescriptionTabularInline
 from .inlines.player_flag import MobilePlayerFlagTabularInline
+from .inlines.stat import MobileStatAdminInline
 
 from ..models.mobile import Mobile
 
@@ -27,6 +28,7 @@ class MobileAdmin(admin.ModelAdmin):
         MobileDescriptionTabularInline,
         MobileAffectFlagTabularInline,
         MobilePlayerFlagTabularInline,
+        MobileStatAdminInline,
     )
     show_full_result_count = True
     show_facets = admin.ShowFacets.ALWAYS
