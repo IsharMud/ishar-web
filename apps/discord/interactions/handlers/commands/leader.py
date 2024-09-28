@@ -15,7 +15,14 @@ def leader(request, interaction=None):
     qs = qs.filter(game_type__exact=game_type.value)
     game_type_label = game_type.label
     pprint(game_type_label)
-    lead_player = qs.first()
+    lead_player = qs.order_by(
+        "-remorts",
+        "-statistics__total_renown",
+        "-statistics__total_challenges",
+        "-statistics__total_quests",
+        "statistics__total_deaths",
+        "-common__level"
+    ).first()
     return (
         f':trophy: {lead_player.name} is the current {game_type_label} leader!'
     )
