@@ -9,7 +9,7 @@ def leader(request, interaction=None):
     qs = Leader.objects
     game_type_name = settings.WEBSITE_TITLE
     if find_game_type:
-        game_type_name = GameType._value2member_map_[find_game_type].label
+        game_type_name = GameType._value2member_map_[int(find_game_type)].label
         qs.filter(game_type__exact=find_game_type)
     lead_player = qs.order_by(
         "-remorts",
