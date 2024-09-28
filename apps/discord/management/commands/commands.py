@@ -76,10 +76,10 @@ class Command(BaseCommand):
                 "type": 1,
                 "description": "List the leading player, by game type.",
                 "options": [{
-                    "name": "game_type",
+                    "name": "type",
                     "description": "Game type to find the leader of.",
                     "type": 3,
-                    "required": False,
+                    "required": True,
                     "choices": [
                         {
                             "name": "Classic",
