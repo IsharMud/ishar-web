@@ -8,20 +8,25 @@ from apps.players.models.object import PlayerObject
 class PlayerObjectsInlineAdmin(TabularInline):
     """Player's objects inline administration."""
     model = PlayerObject
-    list_display = ("get_object_link",)
+    fields = readonly_fields = (
+        "object", "enchant", "timer", "position_type", "position_val",
+        "get_container_link", "state", "bound", "min_level",
+        "val0", "val1", "val2", "val3"
+    )
     verbose_name = "Object"
-    verbose_name_plural = "Objects"
 
-    @display(description="Object", ordering="object__longname")
-    def get_object_link(self, obj) -> str:
-        """Admin link for player flag."""
+    @display(
+        description="Parent (Container) Object",
+        ordering="parent_player_object"
+    )
+    def get_container_link(self, obj) -> str:
         return format_html(
             '<a href="{}">{}</a>',
             reverse(
                 viewname="admin:objects_object_change",
-                args=(obj.object,)
+                args=(obj.parent_player_object.object.pk,)
             ),
-            obj.object.longname or obj.object.name
+            obj.parent_player_object.object
         )
 
     def has_add_permission(self, request, obj) -> bool:
