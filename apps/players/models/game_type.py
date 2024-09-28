@@ -7,8 +7,12 @@ class GameType(IntegerChoices):
     HARDCORE = 1
     SURVIVAL = 2
 
+    @property
+    def title(self):
+        return self.name.title()
+
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}: {self.__str__()}"
 
     def __str__(self) -> str:
-        return f"{self.name.title()} (self.value)"
+        return f"{self.title} ({self.value})"

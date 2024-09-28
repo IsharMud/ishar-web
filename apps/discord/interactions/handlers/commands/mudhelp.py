@@ -15,9 +15,8 @@ def mudhelp(request, interaction=None, _spell: bool = False) -> tuple[str, bool]
     find_what = "help topic"
     results = {}
 
-    # TODO: Fix Discord spell search (/spell <spell>)
-    # if _spell:
-    #     find_what = "spell"
+    if _spell:
+        find_what = "spell"
 
     # Find help topics, based upon search query.
     reply = f"Sorry no such {find_what} could be found."

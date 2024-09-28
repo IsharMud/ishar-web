@@ -1,5 +1,7 @@
 from django.urls import reverse
 
+from apps.leaders.models.leader import Leader
+
 
 def leaders(request):
     """Link to leaders page."""

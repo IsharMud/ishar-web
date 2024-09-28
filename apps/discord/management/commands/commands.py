@@ -3,6 +3,8 @@ from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from pprint import pformat
 
+from apps.players.models.game_type import GameType
+
 
 class Command(BaseCommand):
     """Get Discord bot commands."""
@@ -68,6 +70,31 @@ class Command(BaseCommand):
                 "type": 1,
                 "name": "faq",
                 "description": "Link to frequently asked questions (FAQs).",
+            },
+            {
+                "name": "leader",
+                "type": 1,
+                "description": "List the leading player, by game type.",
+                "options": [{
+                    "name": "type",
+                    "description": "Game type to find the leader of.",
+                    "type": 3,
+                    "required": True,
+                    "choices": [
+                        {
+                            "name": "Classic",
+                            "value": str(GameType.CLASSIC.value)
+                        },
+                        {
+                            "name": "Hardcore",
+                            "value": str(GameType.HARDCORE.value)
+                        },
+                        {
+                            "name": "Survival",
+                            "value": str(GameType.SURVIVAL.value)
+                        }
+                    ]
+                }]
             },
             {
                 "type": 1,
