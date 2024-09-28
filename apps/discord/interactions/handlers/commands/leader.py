@@ -21,7 +21,7 @@ def leader(request, interaction=None):
         "-statistics__total_challenges",
         "-statistics__total_quests",
         "statistics__total_deaths",
-        "-common__level"
+        "-true_level"
     ).first()
     return (
         f':trophy: {lead_player.name} is the current {game_type_label} leader!'
