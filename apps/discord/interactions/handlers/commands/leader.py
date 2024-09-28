@@ -1,10 +1,10 @@
 from django.conf import settings
-from pprint import pprint
-from apps.leaders.models import Leader
+
+from apps.leaders.models.leader import Leader
+from apps.players.models.game_type import GameType
 
 
 def leader(request, interaction=None):
-    pprint(interaction["options"])
     find_game_type = interaction["options"][0].get("value")
     qs = Leader.objects
     game_type_name = settings.WEBSITE_TITLE
