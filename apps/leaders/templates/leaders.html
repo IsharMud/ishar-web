@@ -113,6 +113,9 @@
                 <th scope="col" title="Challenges">
                     <span class="text-ishar">Challenges</span>
                 </th>
+                <th scope="col" title="Quests">
+                    <span class="text-ishar">Quests</span>
+                </th>
                 <th scope="col" title="Deaths">
                     <span class="text-ishar">Deaths</span>
                 </th>
@@ -136,6 +139,9 @@
                 <td class="border" data-order="{{ leader.challenges_completed }}" data-search="" title="Challenges: {{ leader.challenges_completed }}">
                     {{ leader.challenges_completed }}
                 </td>
+                <td class="border" data-order="{{ leader.quests_completed }}" data-search="" title="Quests: {{ leader.quests_completed }}">
+                    {{ leader.quests_completed }}
+                </td>
                 <td class="border" data-order="{{ leader.deaths }}" data-search="" title="Deaths: {{ leader.deaths }}">
                     {{ leader.deaths }}
                 </td>
@@ -157,7 +163,7 @@
             },
             {
                 searchable: false,
-                targets: [1, 2, 3, 4, 5],
+                targets: [1, 2, 3, 4, 5, 6],
                 type: 'num'
             }
         ],
@@ -177,7 +183,6 @@
                 }],
             },
             topStart: searchLayout,
-
             bottom: 'info',
             bottomEnd: 'paging',
             bottomStart: 'pageLength'
@@ -188,13 +193,6 @@
                 label: 'all',
                 value: -1
             }
-        ],
-        order: [
-            [2, 'desc'],
-            [3, 'desc'],
-            [4, 'desc'],
-            [5, 'asc'],
-            [1, 'desc']
         ],
         pageLength: 10,
         scrollX: true
