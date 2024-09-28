@@ -79,7 +79,7 @@ class Command(BaseCommand):
                     "name": "type",
                     "description": "Game type to find the leader of.",
                     "type": 3,
-                    "required": True,
+                    "required": False,
                     "choices": [
                         {
                             "name": "Classic",

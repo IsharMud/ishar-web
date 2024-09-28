@@ -18,6 +18,8 @@ class PlayerStat(models.Model):
         on_delete=models.DO_NOTHING,
         blank=True,
         null=True,
+        related_name="statistics",
+        related_query_name="statistics",
         help_text=_("Player related to the statistics"),
         verbose_name=_("Player")
     )

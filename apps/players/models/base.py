@@ -355,15 +355,9 @@ class PlayerBase(models.Model):
         return "have"
 
     def get_player_type(self) -> str:
-        """Get the type pf player."""
-        if self.is_deleted == 1:
+        """Get the type of player."""
+        if self.is_deleted > 0:
             return "Dead"
-
-        if self.is_deleted == 2:
-            return "Pending Delete"
-
-        if self.is_deleted == 3:
-            return "Deleted"
 
         if self.true_level >= settings.MIN_IMMORTAL_LEVEL:
             return get_immortal_type(level=self.true_level)

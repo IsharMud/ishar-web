@@ -5,17 +5,15 @@ from apps.players.models.game_type import GameType
 
 
 def leader(request, interaction=None):
+
+    lead_label = settings.WEBSITE_TITLE
     find_game_type = interaction["options"][0].get("value")
     qs = Leader.objects
-    game_type_label = settings.WEBSITE_TITLE
-    find_game_type = int(find_game_type)
-    pprint(find_game_type)
-    game_type = GameType._value2member_map_[find_game_type]
-    pprint(game_type)
-    qs = qs.filter(game_type__exact=game_type.value)
-    game_type_label = game_type.label
-    pprint(game_type_label)
+
+    if find_game_type:
+        game_type = GameType._value2member_map_[int(find_game_type)]
+        qs = qs.filter(game_type__exact=game_type.value)
+        lead_label = game_type.label
+
     lead_player = qs.first()
-    return (
-        f':trophy: {lead_player.name} is the current {game_type_label} leader!'
-    )
+    return f':trophy: {lead_player.name} is the current {lead_label} leader!'

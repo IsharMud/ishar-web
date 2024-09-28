@@ -2,7 +2,7 @@
 {% block meta_title %}Leaders{% if game_type %} / {{ game_type }}{% endif %}{% endblock meta_title %}
 {% block meta_description %}Leader board of top{% if game_type %} {{ game_type|lower }}{% endif %} players of the game and their achievements{% endblock meta_description %}
 {% block meta_url %}{% url 'leaders' %}{% endblock meta_url %}
-{% block title %}Leaders{% if game_type and game_type_name %} / {{ game_type_name }}{% endif %}{% endblock title %}
+{% block title %}Leaders{% if game_type %} / {{ game_type.label }}{% endif %}{% endblock title %}
 {% block scripts %}
     <link href="https://cdn.datatables.net/2.1.6/css/dataTables.bootstrap5.css" rel="stylesheet">
     <link href="https://cdn.datatables.net/buttons/3.1.2/css/buttons.bootstrap5.css" rel="stylesheet">
@@ -25,10 +25,10 @@
                 Leaders
             </a>
         </li>
-    {% if game_type_name %}
-        <li class="breadcrumb-item active" aria-current="page" title="{{ game_type_name }} Leaders">
-            <a href="{% url 'leaders' %}{{ game_type_name|lower }}#{{ game_type_name|lower }}" id="{{ game_type_name|lower }}">
-                {{ game_type_name }}
+    {% if game_type %}
+        <li class="breadcrumb-item active" aria-current="page" title="{{ game_type.label }} Leaders">
+            <a href="{% url 'leaders' %}{{ game_type.label|lower }}#{{ game_type.label|lower }}" id="{{ game_type.label|lower }}">
+                {{ game_type.label }}
             </a>
         </li>
     {% endif %}
@@ -37,7 +37,6 @@
 {% endblock header %}
 {% block content %}
 <div class="p-3">
-
     <div class="card m-1">
         <div class="card-body">
             <ul class="list-group list-group-horizontal">
@@ -60,37 +59,6 @@
             </ul>
         </div>
     </div>
-
-    {% if game_type > 0 %}
-    <div class="card m-1">
-        <div class="card-body">
-            <ul class="list-group list-group-horizontal">
-                <li class="list-group-item bg-black card-text" title="All">
-        {% if deleted is None %}
-                    <span class="text-ishar">All</span>
-        {% else %}
-                    <a class="list-group-item-text" href="{% url 'leaders' %}{{ game_type_name|lower }}/">All</a>
-        {% endif %}
-                </li>
-                <li class="list-group-item bg-black card-text" title="Dead">
-        {% if deleted == 1 %}
-                    <span class="text-ishar">Dead</span>
-        {% else %}
-                    <a class="list-group-item-text" href="{% url 'leaders' %}{{ game_type_name|lower }}/dead/">Dead</a>
-        {% endif %}
-                </li>
-                <li class="list-group-item bg-black card-text" title="Living">
-        {% if deleted == 0 %}
-                    <span class="text-ishar">Living</span>
-        {% else %}
-                    <a class="list-group-item-text" href="{% url 'leaders' %}{{ game_type_name|lower }}/living/">Living</a>
-        {% endif %}
-                </li>
-            </ul>
-        </div>
-    </div>
-    {% endif %}
-
 </div>
 
     {% if leaders %}
@@ -127,20 +95,20 @@
                 <td class="border" data-order="{{ leader.name }}" data-search="{{ leader.name }}" title="Player Name: {{ leader.name }}">
                     {{ leader.player_link }}
                 </td>
-                <td class="border" data-order="{{ leader.true_level }}" data-search="" title="Level: {{ leader.true_level }}">
-                    {{ leader.true_level }}
+                <td class="border" data-order="{{ leader.level }}" data-search="" title="Level: {{ leader.level }}">
+                    {{ leader.level }}
                 </td>
                 <td class="border" data-order="{{ leader.remorts }}" data-search="" title="Remorts: {{ leader.remorts }}">
                     {{ leader.remorts }}
                 </td>
-                <td class="border" data-order="{{ leader.total_renown }}" data-search="" title="Renown: {{ leader.total_renown }}">
-                    {{ leader.total_renown }}
+                <td class="border" data-order="{{ leader.renown }}" data-search="" title="Renown: {{ leader.renown }}">
+                    {{ leader.renown }}
                 </td>
-                <td class="border" data-order="{{ leader.challenges_completed }}" data-search="" title="Challenges: {{ leader.challenges_completed }}">
-                    {{ leader.challenges_completed }}
+                <td class="border" data-order="{{ leader.challenges }}" data-search="" title="Challenges: {{ leader.challenges }}">
+                    {{ leader.challenges }}
                 </td>
-                <td class="border" data-order="{{ leader.quests_completed }}" data-search="" title="Quests: {{ leader.quests_completed }}">
-                    {{ leader.quests_completed }}
+                <td class="border" data-order="{{ leader.quests }}" data-search="" title="Quests: {{ leader.quests }}">
+                    {{ leader.quests }}
                 </td>
                 <td class="border" data-order="{{ leader.deaths }}" data-search="" title="Deaths: {{ leader.deaths }}">
                     {{ leader.deaths }}

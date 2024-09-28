@@ -3,6 +3,7 @@ from apps.players.models.player import Player
 
 class Leader(Player):
     """Ishar leader."""
+
     class Meta:
         # Re-order proxy model of Player.
         ordering = (
