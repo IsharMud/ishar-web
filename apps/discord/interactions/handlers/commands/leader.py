@@ -10,12 +10,10 @@ def leader(request, interaction=None):
     pprint(interaction["options"][0])
     qs = Leader.objects
     game_type_label = settings.WEBSITE_TITLE
-    if find_game_type and find_game_type.isnumeric():
-        find_game_type = int(find_game_type)
-        pprint(find_game_type)
-        game_type = GameType._value2member_map_[find_game_type]
-        qs.filter(game_type__exact=game_type)
-        game_type_label = game_type.label
+    find_game_type = int(find_game_type)
+    game_type = GameType._value2member_map_[find_game_type]
+    qs.filter(game_type__exact=game_type.value)
+    game_type_label = game_type.label
     lead_player = qs.order_by(
         "-remorts",
         "-statistics__total_renown",
