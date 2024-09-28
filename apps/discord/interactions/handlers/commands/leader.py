@@ -21,6 +21,6 @@ def leader(request, interaction=None):
 
     lead_player = qs.first()
     return (
-        f':trophy: {lead_player.name} is the current {lead_label} leader!'
+        f':trophy: {lead_player.name} is the {lead_label} leader!'
         f' <{request.scheme}://{request.get_host()}{lead_url}>'
     )
