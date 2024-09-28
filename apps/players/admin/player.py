@@ -5,6 +5,7 @@ from django.utils.html import format_html
 from .filters import ImmortalTypeListFilter
 from .inlines.common import PlayerCommonInlineAdmin
 from .inlines.flag import PlayerFlagsInlineAdmin
+from .inlines.object import PlayerObjectsInlineAdmin
 from .inlines.stat import PlayerStatInlineAdmin
 from .inlines.upgrade import PlayerRemortUpgradesInlineAdmin
 
@@ -34,6 +35,7 @@ class PlayerAdmin(admin.ModelAdmin):
     inlines = (
         PlayerCommonInlineAdmin, PlayerFlagsInlineAdmin,
         PlayerRemortUpgradesInlineAdmin, PlayerStatInlineAdmin,
+        PlayerObjectsInlineAdmin
     )
     list_display = (
         "name", "get_account_link", "player_type", "is_hardcore", "is_survival",
