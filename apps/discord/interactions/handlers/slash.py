@@ -27,6 +27,10 @@ def slash(interaction_json: dict, request) -> tuple[str, bool]:
     if command_name == "faq":
         return faq(request=request), False
 
+    # "leader" command to list leader, by game type.
+    if command_name == "leader":
+        return leader(request=request, interaction=interaction_data), False
+
     # "leaders" command to link leaders page.
     if command_name == "leaders":
         return leaders(request=request), False
