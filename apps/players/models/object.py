@@ -78,9 +78,7 @@ class PlayerObject(models.Model):
         on_delete=models.DO_NOTHING,
         to=Object,
         to_field="vnum",
-        verbose_name='Object ID ("VNUM")',
-        blank=True,
-        null=True
+        verbose_name="Object"
     )
     enchant = models.PositiveIntegerField(
         blank=True,
