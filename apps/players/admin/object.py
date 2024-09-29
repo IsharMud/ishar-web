@@ -60,12 +60,10 @@ class PlayerObjectAdmin(admin.ModelAdmin):
 
     def has_module_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
-            return request.user.is_eternal()
+            return request.user.is_forger()
         return False
 
     def has_add_permission(self, request, obj=None) -> bool:
-        if request.user and not request.user.is_anonymous:
-            return request.user.is_forger()
         return False
 
     def has_change_permission(self, request, obj=None) -> bool:
