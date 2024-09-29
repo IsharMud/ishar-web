@@ -9,16 +9,13 @@ class PlayerObjectsInlineAdmin(TabularInline):
     """Player's objects inline administration."""
     model = PlayerObject
     fields = readonly_fields = (
-        "object", "enchant", "timer", "position_type", "position_val",
-        "get_container_link", "state", "bound", "min_level",
+        "object", "position_type", "position_val", "get_container_link",
+        "enchant", "timer", "state", "bound", "min_level",
         "val0", "val1", "val2", "val3"
     )
     verbose_name = "Object"
 
-    @display(
-        description="Parent (Container) Object",
-        ordering="parent_player_object"
-    )
+    @display(description="Container")
     def get_container_link(self, obj) -> str:
         return format_html(
             '<a href="{}">{}</a>',

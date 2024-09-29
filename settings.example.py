@@ -461,6 +461,7 @@ JAZZMIN_SETTINGS = {
         "players.Player": "fas fa-user",
         "players.Immortal": "fas fa-user-shield",
         "players.RemortUpgrade": "fas fa-arrow-up",
+        "players.PlayerObject": "fas fa-object-group",
 
         # quests
         "quests.Quest": "fas fa-mountain",
