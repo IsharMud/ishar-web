@@ -25,6 +25,7 @@ class RemortUpgradeAdmin(admin.ModelAdmin):
     readonly_fields = ("upgrade_id",)
     search_fields = ("name", "display_name")
     show_facets = admin.ShowFacets.ALWAYS
+    show_full_result_count = True
     verbose_name = "Remort Upgrade"
     verbose_name_plural = "Remort Upgrades"
 

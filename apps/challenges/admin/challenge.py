@@ -1,4 +1,4 @@
-from django.contrib.admin import display, ModelAdmin, register
+from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
 
@@ -6,11 +6,9 @@ from .filter import ChallengeCompletedListFilter
 from ..models.challenge import Challenge
 
 
-@register(Challenge)
-class ChallengeAdmin(ModelAdmin):
-    """
-    Ishar challenge administration.
-    """
+@admin.register(Challenge)
+class ChallengeAdmin(admin.ModelAdmin):
+    """Ishar challenge administration."""
     fieldsets = (
         (None, {"fields": ("challenge_id", "is_active", "is_completed")}),
         ("Details", {"fields": (
@@ -32,6 +30,8 @@ class ChallengeAdmin(ModelAdmin):
         "challenge_desc", "winner_desc",
         "mobile__long_name", "mobile__name", "mobile__id"
     )
+    show_facets = admin.ShowFacets.ALWAYS
+    show_full_result_count = True
 
     def has_module_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
@@ -52,9 +52,9 @@ class ChallengeAdmin(ModelAdmin):
     def has_view_permission(self, request, obj=None) -> bool:
         return self.has_module_permission(request, obj)
 
-    @display(description="Mobile", ordering="mobile__long_name")
+    @admin.display(description="Mobile", ordering="mobile__long_name")
     def mobile_link(self, obj):
-        """Admin link for mobile."""
+        # Admin link for mobile.
         return format_html(
             '<a href="{}">{}</a>',
             reverse(

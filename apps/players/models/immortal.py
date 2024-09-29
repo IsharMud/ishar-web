@@ -15,4 +15,5 @@ class Immortal(PlayerBase):
     objects = ImmortalManager()
 
     class Meta:
+        ordering = ("true_level", "common__level",)
         proxy = True

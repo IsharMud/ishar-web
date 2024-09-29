@@ -3,10 +3,7 @@ from django.contrib.admin import SimpleListFilter
 
 
 class ImmortalTypeListFilter(SimpleListFilter):
-    """
-    Determine whether a player is certain type of immortal,
-        based on their "true_level" column value.
-    """
+    """Find players of certain immortal type by "__common__level"."""
     title = "Immortal Type"
     parameter_name = "immortal_type"
 
@@ -14,7 +11,6 @@ class ImmortalTypeListFilter(SimpleListFilter):
         return settings.IMMORTAL_LEVELS
 
     def queryset(self, request, queryset):
-        qs = queryset
         if self.value():
-            qs = qs.filter(common__level=self.value())
-        return qs
+            queryset = queryset.filter(common__level=self.value())
+        return queryset

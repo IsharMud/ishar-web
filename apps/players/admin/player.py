@@ -2,7 +2,6 @@ from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
 
-from .filters import ImmortalTypeListFilter
 from .inlines.common import PlayerCommonInlineAdmin
 from .inlines.flag import PlayerFlagsInlineAdmin
 from .inlines.object import PlayerObjectsInlineAdmin
@@ -43,7 +42,6 @@ class PlayerAdmin(admin.ModelAdmin):
     )
     list_filter = (
         "game_type",
-        ImmortalTypeListFilter,
         ("account", admin.RelatedOnlyFieldListFilter),
     )
     readonly_fields = (
@@ -52,6 +50,8 @@ class PlayerAdmin(admin.ModelAdmin):
         "online_time", "title", "title_id",
     )
     search_fields = ("name", "account__account_name")
+    show_facets = admin.ShowFacets.ALWAYS
+    show_full_result_count = True
     verbose_name = "Player"
     verbose_name_plural = "Players"
 

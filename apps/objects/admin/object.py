@@ -1,9 +1,7 @@
 from django.contrib import admin
 
-from .inlines import (
-    ObjectAffectFlagInline, ObjectExtraInline, ObjectFlagInline,
-    ObjectObjectModInline, ObjectWearableFlagInline
-)
+from .inlines import ObjectAffectFlagInline, ObjectExtraInline, \
+    ObjectFlagInline, ObjectObjectModInline, ObjectWearableFlagInline
 
 from ..models.object import Object
 

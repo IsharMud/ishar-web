@@ -58,7 +58,6 @@ class PositionValue(models.IntegerChoices):
         return self.name.title()
 
 
-
 class PlayerObject(models.Model):
 
     player_objects_id = models.AutoField(
@@ -167,21 +166,9 @@ class PlayerObject(models.Model):
     )
     def is_contained(self):
         if self.parent_player_object:
-            return True
+            if self.parent_player_object != "0":
+                return True
         return False
-
-    in_container = is_contained
-
-    def get_player_containers(self):
-        ctrs = []
-        for container in self.objects.filter(
-            player=self.player,
-            parent_player_object__isnull=False
-        ).all():
-            ctrs.append(
-                (container.object.pk, container.object.display)
-            )
-        return ctrs
 
     class Meta:
         managed = False
