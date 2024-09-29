@@ -10,7 +10,7 @@ from ..models.object import Object
 
 @admin.register(Object)
 class ObjectAdmin(admin.ModelAdmin):
-    """Ishar mobile administration."""
+    """Ishar object administration."""
     date_hierarchy = "updated_at"
     list_display = ("vnum", "longname", "appearance", "description")
     list_display_links = ("vnum", "longname")
@@ -22,6 +22,7 @@ class ObjectAdmin(admin.ModelAdmin):
         ("description", admin.EmptyFieldListFilter),
         ("func", admin.EmptyFieldListFilter),
         ("extra", admin.EmptyFieldListFilter),
+        "flag__artifact", "flag__relic",
         "created_at", "updated_at"
     )
     inlines = (

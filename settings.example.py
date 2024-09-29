@@ -440,6 +440,7 @@ JAZZMIN_SETTINGS = {
 
         # objects
         "objects": "fas fa-object-group",
+        "objects.Artifact": "fas fa-cross",
         "objects.Object": "fas fa-object-group",
         "objects.ObjectAffectFlag": "fas fa-flag",
         "objects.ObjectExtra": "fas fa-diagram-project",
@@ -447,6 +448,7 @@ JAZZMIN_SETTINGS = {
         "objects.ObjectMod": "fas fa-vector-square",
         "objects.ObjectObjectMod": "fas fa-draw-polygon",
         "objects.ObjectWearableFlag": "fas fa-flag",
+        "objects.Relic": "fas fa-ankh",
 
         # patches
         "patches": "fas fa-file-pdf",

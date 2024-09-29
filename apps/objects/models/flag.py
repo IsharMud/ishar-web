@@ -185,15 +185,11 @@ class ObjectFlag(models.Model):
     )
     relic = models.BooleanField(
         db_column="RELIC",
-        blank=True,
-        null=True,
         help_text=_('"RELIC" flag of the object.'),
         verbose_name=_("Relic")
     )
     memory = models.BooleanField(
         db_column="MEMORY",
-        blank=True,
-        null=True,
         help_text=_('"MEMORY" flag of the object.'),
         verbose_name=_("Memory")
     )
