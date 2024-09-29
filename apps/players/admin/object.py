@@ -13,7 +13,8 @@ class PlayerObjectAdmin(admin.ModelAdmin):
         ("Object", {"fields": ("object",)}),
         ("Position", {"fields": ("position_type", "position_val",)}),
         ("Container", {"fields": ("parent_player_object",)}),
-        ("Details", {"fields": ("enchant", "timer", "state", "bound", "min_level")
+        ("Details", {
+            "fields": ("enchant", "timer", "state", "bound", "min_level")
         }),
         ("Values", {"fields": ("val0", "val1", "val2", "val3")}),
     )
@@ -24,7 +25,8 @@ class PlayerObjectAdmin(admin.ModelAdmin):
         "position_type",
         "position_val",
         ("parent_player_object", admin.EmptyFieldListFilter),
-        "enchant", "min_level"
+        "enchant", "min_level",
+        "object__flag__artifact", "object__flag__relic"
     )
     readonly_fields = ("player_objects_id",)
     search_fields = (

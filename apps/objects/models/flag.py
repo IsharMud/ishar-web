@@ -183,6 +183,20 @@ class ObjectFlag(models.Model):
         help_text=_('"QUEST_SOURCE" flag of the object.'),
         verbose_name=_("Quest Source")
     )
+    relic = models.BooleanField(
+        db_column="RELIC",
+        blank=True,
+        null=True,
+        help_text=_('"RELIC" flag of the object.'),
+        verbose_name=_("Relic")
+    )
+    memory = models.BooleanField(
+        db_column="MEMORY",
+        blank=True,
+        null=True,
+        help_text=_('"MEMORY" flag of the object.'),
+        verbose_name=_("Memory")
+    )
     created_at = models.DateTimeField(
         help_text=_("Date and time when the object flag was created."),
         verbose_name=_("Created At")
