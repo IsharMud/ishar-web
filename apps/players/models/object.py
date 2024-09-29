@@ -1,3 +1,4 @@
+from django.contrib.admin import display
 from django.db import models
 
 from apps.objects.models.object import Object
@@ -161,13 +162,23 @@ class PlayerObject(models.Model):
         verbose_name="Container"
     )
 
+    @property
+    @display(
+        description="Contained?", boolean=True, ordering="parent_player_object"
+    )
+    def is_contained(self):
+        if self.parent_player_object:
+            return True
+        return False
+
+    in_container = is_contained
+
     class Meta:
         managed = False
         db_table = "player_objects"
         default_related_name = "player_object"
         ordering = ("-position_type", "-position_val", "-pk")
         verbose_name = "Player Object"
-        verbose_name_plural = "Player's Objects"
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}: {self.__str__()} ({self.pk})"

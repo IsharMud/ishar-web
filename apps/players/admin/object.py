@@ -8,18 +8,16 @@ class PlayerObjectAdmin(admin.ModelAdmin):
     """Player objects administration."""
     model = PlayerObject
     fieldsets = (
-        (None, {"fields": ("player_objects_id",)}),
-        ("Player", {"fields": ("player",)}),
-        ("Object", {"fields": ("object",)}),
+        (None, {"fields": (
+            "player_objects_id", "player", "object", "parent_player_object"
+        )}),
         ("Position", {"fields": ("position_type", "position_val",)}),
-        ("Container", {"fields": ("parent_player_object",)}),
-        ("Details", {
-            "fields": ("enchant", "timer", "state", "bound", "min_level")
-        }),
+        ("Details", {"fields": (
+            "enchant", "timer", "state", "bound", "min_level"
+        )}),
         ("Values", {"fields": ("val0", "val1", "val2", "val3")}),
     )
-    list_display = ("player", "object", "position_type", "position_val")
-    list_display_links = ("player", "object")
+    list_display = ("__str__", "position_type", "position_val", "is_contained")
     list_filter = (
         ("player", admin.RelatedOnlyFieldListFilter),
         "position_type",
