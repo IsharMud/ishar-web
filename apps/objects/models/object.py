@@ -8,9 +8,9 @@ from .type import ObjectType
 
 
 class ObjectManager(models.Manager):
-    def get_by_natural_key(self, longname):
+    def get_by_natural_key(self, display):
         # Natural key is object long name.
-        return self.get(longname=longname)
+        return self.get(display=display)
 
 
 class Object(models.Model):
@@ -178,11 +178,15 @@ class Object(models.Model):
         return f"{self.__class__.__name__} {self.__str__()}"
 
     def __str__(self) -> str:
-        return f"{self.pk}. {self.longname or self.name}"
+        return f"{self.pk}. {self.display}"
+
+    @property
+    def display(self):
+        return self.longname or self.name
 
     def natural_key(self) -> str:
         # Natural key is object long name.
-        return self.longname
+        return self.display
 
     def save(
         self,

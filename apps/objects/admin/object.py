@@ -12,8 +12,8 @@ from ..models.object import Object
 class ObjectAdmin(admin.ModelAdmin):
     """Ishar object administration."""
     date_hierarchy = "updated_at"
-    list_display = ("vnum", "longname", "appearance", "description")
-    list_display_links = ("vnum", "longname")
+    list_display = ("vnum", "display", "appearance", "description")
+    list_display_links = ("vnum", "display")
     list_filter = (
         "deleted", "item_type",
         ("enchant", admin.RelatedOnlyFieldListFilter),
@@ -29,7 +29,7 @@ class ObjectAdmin(admin.ModelAdmin):
         ObjectAffectFlagInline, ObjectExtraInline, ObjectFlagInline,
         ObjectObjectModInline, ObjectWearableFlagInline
     )
-    readonly_fields = ("vnum", "created_at", "updated_at")
+    readonly_fields = ("vnum", "display", "created_at", "updated_at")
     search_fields = (
         "vnum", "name", "longname", "appearance", "description", "func",
     )
