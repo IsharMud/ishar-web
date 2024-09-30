@@ -49,14 +49,21 @@ class PlayerObjectAdmin(admin.ModelAdmin):
     )
     readonly_fields = (
         "player_objects_id","player", "object", "parent_player_object",
-        "position_type", "position_val", "is_contained", "enchant", "timer",
-        "state", "bound", "min_level", "val0", "val1", "val2", "val3"
+        "position_type", "position_val",
+        "is_contained", "enchant", "timer", "state", "bound", "min_level",
+        "val0", "val1", "val2", "val3"
     )
     search_fields = (
         "player__name", "object__vnum", "object__name", "object__longname"
     )
     show_facets = admin.ShowFacets.ALWAYS
     show_full_result_count = True
+
+    @admin.display(
+        description="Contained?", boolean=True, ordering="parent_player_object"
+    )
+    def is_contained(self, obj) -> bool:
+        return obj.is_contained()
 
     def has_module_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:

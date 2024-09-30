@@ -1,4 +1,3 @@
-from django.contrib.admin import display
 from django.db import models
 
 from apps.objects.models.object import Object
@@ -149,25 +148,20 @@ class PlayerObject(models.Model):
         verbose_name="Position Value"
     )
     parent_player_object = models.ForeignKey(
-        blank=True,
+        blank=False,
+        null=False,
         db_column="parent_player_object",
         default=0,
         help_text="Parent player object (container) of the player object.",
-        null=True,
         on_delete=models.SET_DEFAULT,
         related_name="+",
         to="self",
         verbose_name="Container"
     )
 
-    @property
-    @display(
-        description="Contained?", boolean=True, ordering="parent_player_object"
-    )
-    def is_contained(self):
-        if self.parent_player_object:
-            if self.parent_player_object != "0":
-                return True
+    def is_contained(self) -> bool:
+        if self.position_type == PositionType.INSIDE_OF_SOMETHING_ELSE:
+            return True
         return False
 
     class Meta:
