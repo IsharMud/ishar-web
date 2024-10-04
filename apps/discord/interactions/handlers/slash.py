@@ -2,7 +2,7 @@ from .commands import *
 
 
 def slash(interaction_json: dict, request) -> tuple[str, bool]:
-    """Handle slash commands."""
+    # Handle Discord slash commands.
 
     interaction_data = interaction_json.get("data")
     command_name = interaction_data.get("name")
