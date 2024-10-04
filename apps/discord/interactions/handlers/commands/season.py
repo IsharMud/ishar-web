@@ -1,4 +1,3 @@
-from django.urls import reverse
 from django.utils.timesince import timeuntil
 
 from apps.seasons.utils.current import get_current_season
