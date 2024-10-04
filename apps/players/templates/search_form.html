@@ -1,7 +1,7 @@
 <div class="form-control-dark" id="player-search-form">
     <form class="row g-3" method="post" action="{% url 'players' %}#search">
         <div class="col-auto">
-            {{ player_search_form }}
+            {{ PLAYER_SEARCH_FORM }}
             {% csrf_token %}
         </div>
         <div class="col-auto">

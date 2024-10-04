@@ -119,7 +119,7 @@
                 <div class="form-control-dark" id="help-search-form">
                     <form class="row g-3" method="post" id="search" action="{% url 'help' %}#search">
                         <div class="col-auto">
-                            {{ help_search_form }}
+                            {{ HELP_SEARCH_FORM }}
                             {% csrf_token %}
                         </div>
                         <div class="col-auto">
