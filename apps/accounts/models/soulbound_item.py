@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from apps.objects.models.object import Object
+
 from .account import Account
 
 
@@ -14,11 +16,15 @@ class AccountSoulboundItem(models.Model):
         ),
         verbose_name=_("Account Soulbound Item ID")
     )
-    item_id = models.PositiveIntegerField(
+    item = models.ForeignKey(
+        to=Object,
+        to_field="vnum",
+        on_delete=models.DO_NOTHING,
+        db_column="item_id",
         blank=True,
         null=True,
-        help_text=_("Item identification number related to an account."),
-        verbose_name=_("Item ID")
+        help_text=_("Item related to account."),
+        verbose_name=_("Item")
     )
     cooldown = models.PositiveIntegerField(
         blank=True,
@@ -61,8 +67,8 @@ class AccountSoulboundItem(models.Model):
         managed = False
         db_table = "account_soulbound_items"
         default_related_name = "soulbound_item"
-        ordering = ("item_id", "account",)
-        unique_together = (("item_id", "account"),)
+        ordering = ("item__vnum", "account",)
+        unique_together = (("item", "account"),)
         verbose_name = "Account Soulbound Item"
         verbose_name_plural = "Account Soulbound Items"
 
@@ -70,4 +76,4 @@ class AccountSoulboundItem(models.Model):
         return f"{self.__class__.__name__}: {self.__str__()} ({self.pk})"
 
     def __str__(self) -> str:
-        return f"{self.item_id} @ {self.account}"
+        return f"{self.item} @ {self.account}"
