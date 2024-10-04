@@ -13,7 +13,7 @@ def slash(interaction_json: dict, request) -> tuple[str, bool]:
 
     # "cycle" command to show when challenges will cycle next.
     if command_name == "cycle":
-        return cycle(), False
+        return cycle(request=request), False
 
     # "deadhead" command - player with most deaths.
     if command_name == "deadhead":
