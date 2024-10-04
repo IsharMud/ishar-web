@@ -4,9 +4,7 @@ from apps.skills.models.skill_force import SkillForce
 
 
 class SkillForceAdminInline(TabularInline):
-    """
-    Skill force inline administration.
-    """
+    """Skill force inline administration."""
     extra = 1
     model = SkillForce
     verbose_name = "Force"

@@ -1,7 +1,5 @@
 from django.contrib import admin
 
-from apps.players.models.object import PlayerObject
-
 
 class PlayerObjectContainedListFilter(admin.SimpleListFilter):
     title = "Contained?"
@@ -22,10 +20,9 @@ class PlayerObjectContainedListFilter(admin.SimpleListFilter):
         return queryset
 
 
-@admin.register(PlayerObject)
 class PlayerObjectAdmin(admin.ModelAdmin):
     """Player objects administration."""
-    model = PlayerObject
+
     fieldsets = (
         (None, {"fields": (
             "player_objects_id", "player", "object", "parent_player_object"

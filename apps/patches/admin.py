@@ -5,9 +5,8 @@ from apps.patches.models import Patch
 
 @admin.register(Patch)
 class PatchAdmin(admin.ModelAdmin):
-    """
-    Ishar patch administration.
-    """
+    """Ishar patch administration."""
+
     date_hierarchy = "patch_date"
     fieldsets = (
         (None, {"fields": ("patch_id", "is_visible")}),
@@ -17,14 +16,15 @@ class PatchAdmin(admin.ModelAdmin):
     list_display = (
         "patch_name", "patch_file", "patch_date", "is_visible", "account"
     )
-    list_filter = ("is_visible", ("account", admin.RelatedOnlyFieldListFilter))
+    list_filter = (
+        "is_visible",
+        ("account", admin.RelatedOnlyFieldListFilter)
+    )
     readonly_fields = ("patch_id", "account")
     search_fields = ("patch_name", "account", "patch_date", "is_visible")
 
     def save_model(self, request, obj, form, change):
-        """
-        For newly added patches, the account is the uploading user.
-        """
+        # For newly added patches, the account is the uploading user.
         if not change:
             obj.account = request.user
         super().save_model(request, obj, form, change)

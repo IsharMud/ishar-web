@@ -3,9 +3,9 @@ from django.contrib.admin import EmptyFieldListFilter, ModelAdmin, register
 from ..models.affect_flag import AffectFlag
 
 
-@register(AffectFlag)
 class AffectFlagAdmin(ModelAdmin):
     """Affect flag administration."""
+
     model = AffectFlag
     list_display = (
         "flag_id", "display_name", "name", "is_beneficial", "item_description"

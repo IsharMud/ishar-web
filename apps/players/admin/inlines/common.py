@@ -4,9 +4,8 @@ from apps.players.models.common import PlayerCommon
 
 
 class PlayerCommonInlineAdmin(StackedInline):
-    """
-    Player common inline administration.
-    """
+    """Player common inline administration."""
+
     model = PlayerCommon
     verbose_name = verbose_name_plural = "Common"
 

@@ -1,9 +1,6 @@
-from django.contrib.admin import ModelAdmin, register
-
-from ..models.upgrade import AccountUpgrade
+from django.contrib.admin import ModelAdmin
 
 
-@register(AccountUpgrade)
 class AccountUpgradeAdmin(ModelAdmin):
     """Account upgrade administration."""
     fieldsets = (

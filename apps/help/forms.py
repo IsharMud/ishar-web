@@ -3,6 +3,7 @@ from django.forms import Form, CharField, TextInput
 
 class HelpSearchForm(Form):
     """Form with single text input for searching help topic names."""
+
     search_topic = CharField(
         help_text="",
         label="",

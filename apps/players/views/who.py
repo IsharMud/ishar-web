@@ -6,9 +6,7 @@ from apps.players.models.player import Player
 
 
 class PlayerWhoView(LoginRequiredMixin, ListView):
-    """
-    "Who" view shows online players.
-    """
+    """Show online players."""
     context_object_name = "players"
     model = Player
     template_name = "who.html"

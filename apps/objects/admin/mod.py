@@ -1,11 +1,9 @@
 from django.contrib import admin
 
-from ..models.mod import ObjectMod
 
-
-@admin.register(ObjectMod)
 class ObjectModAdmin(admin.ModelAdmin):
     """Ishar object mod administration."""
+
     date_hierarchy = "updated_at"
     list_display = list_display_links = ("mod_id", "name")
     list_filter = ("created_at", "updated_at")

@@ -5,9 +5,8 @@ from apps.news.models import News
 
 @admin.register(News)
 class NewsAdmin(admin.ModelAdmin):
-    """
-    Ishar news administration.
-    """
+    """Ishar news administration."""
+
     date_hierarchy = "created"
     fieldsets = (
         (None, {"fields": ("news_id",)}),
@@ -15,7 +14,10 @@ class NewsAdmin(admin.ModelAdmin):
         ("Authorship", {"fields": ("created", "account")}),
     )
     list_display = ("subject", "created", "is_visible", "account")
-    list_filter = ("is_visible", ("account", admin.RelatedOnlyFieldListFilter),)
+    list_filter = (
+        "is_visible",
+        ("account", admin.RelatedOnlyFieldListFilter),
+    )
     readonly_fields = ("news_id", "account")
     search_fields = ("subject", "body", "account", "is_visible")
 

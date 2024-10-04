@@ -6,9 +6,8 @@ from apps.players.models.player_remort_upgrade import PlayerRemortUpgrade
 
 
 class PlayerRemortUpgradesInlineAdmin(TabularInline):
-    """
-    Player's remort upgrades tabular inline administration.
-    """
+    """Player's remort upgrades tabular inline administration."""
+
     model = PlayerRemortUpgrade
     fields = readonly_fields = ("get_upgrade_link", "value", "essence_perk")
     ordering = ("-value", "-essence_perk", "upgrade__display_name")
@@ -17,7 +16,7 @@ class PlayerRemortUpgradesInlineAdmin(TabularInline):
 
     @display(description="Remort Upgrade", ordering="upgrade")
     def get_upgrade_link(self, obj) -> str:
-        """Admin link for remort upgrade."""
+        # Admin link for remort upgrade.
         return format_html(
             '<a href="{}">{}</a>',
             reverse(

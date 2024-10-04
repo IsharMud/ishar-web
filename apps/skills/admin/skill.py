@@ -1,18 +1,17 @@
 from django.contrib import admin
 
-from .inlines import (
-    SkillComponentAdminInline, SkillModAdminInline, SkillForceAdminInline,
-    SkillSpellFlagAdminInline
-)
+from .inlines.component import SkillComponentAdminInline
+from .inlines.mod import SkillModAdminInline
+from .inlines.skill_force import SkillForceAdminInline
+from .inlines.spell_flag import SkillSpellFlagAdminInline
 
 from ..models.skill import Skill
 
 
 @admin.register(Skill)
 class SkillAdmin(admin.ModelAdmin):
-    """
-    Skill administration.
-    """
+    """Skill administration."""
+
     fieldsets = (
         (None, {"fields": (
             "id", "enum_symbol", "skill_name", "skill_type", "description"

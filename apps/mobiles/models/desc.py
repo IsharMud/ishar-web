@@ -6,6 +6,7 @@ from .mobile import Mobile
 
 class MobileDescription(models.Model):
     """Mobile description."""
+
     id = models.AutoField(
         db_column="id",
         primary_key=True,

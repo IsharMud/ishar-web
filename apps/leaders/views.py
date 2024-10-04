@@ -2,7 +2,7 @@ from django.http import Http404
 from django.views.generic.list import ListView
 
 from apps.players.models.game_type import GameType
-from .models.leader import Leader
+from .models import Leader
 
 
 class LeadersView(ListView):

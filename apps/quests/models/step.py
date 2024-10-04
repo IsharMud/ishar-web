@@ -1,11 +1,24 @@
 from django.db import models
 
 from .quest import Quest
-from .type.step import QuestStepType
+
+
+class QuestStepType(models.IntegerChoices):
+    """Quest step type choices."""
+    OBJECT = 0
+    KILL = 1
+    ROOM = 2
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}: {self.__str__()} ({self.value})"
+
+    def __str__(self) -> str:
+        return self.name.title()
 
 
 class QuestStep(models.Model):
     """Ishar quest step."""
+
     step_id = models.AutoField(
         primary_key=True,
         help_text="Quest step identification number",

@@ -3,6 +3,7 @@ from django.contrib.admin import TabularInline
 
 class BaseClassTabularInline(TabularInline):
     """Base class inline tabular administration."""
+
     extra = 1
     model = None
 

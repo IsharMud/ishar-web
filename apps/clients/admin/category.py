@@ -1,13 +1,9 @@
-from django.contrib.admin import ModelAdmin, register
-
-from apps.clients.models.category import MUDClientCategory
+from django.contrib.admin import ModelAdmin
 
 
-@register(MUDClientCategory)
 class MUDClientCategoryAdmin(ModelAdmin):
-    """
-    MUD client category administration.
-    """
+    """MUD client category administration."""
+
     fields = list_display = ("name", "is_visible", "display_order")
     list_filter = ("is_visible",)
     readonly_fields = ("category_id",)

@@ -4,9 +4,8 @@ from .models import FAQ
 
 
 class FAQView(ListView):
-    """
-    Frequently Asked Questions view.
-    """
+    """Frequently Asked Questions view."""
+
     context_object_name = "faqs"
     model = FAQ
     template_name = "faq.html"

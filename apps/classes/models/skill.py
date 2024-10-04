@@ -2,11 +2,12 @@ from django.db import models
 
 from apps.skills.models.skill import Skill
 
-from . import Class
+from .cls import Class
 
 
 class ClassSkill(models.Model):
     """Ishar class skill."""
+
     class_skills_id = models.AutoField(
         primary_key=True,
         help_text="Auto-generated primary key for class skill identifier.",

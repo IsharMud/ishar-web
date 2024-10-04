@@ -1,10 +1,7 @@
-from django.contrib import admin
-
-from ..models.class_restrict import AchievementClassRestrict
+from django.contrib.admin import ModelAdmin
 
 
-@admin.register(AchievementClassRestrict)
-class AchievementClassRestrictAdmin(admin.ModelAdmin):
+class AchievementClassRestrictAdmin(ModelAdmin):
     """Ishar achievement class restriction administration."""
     list_display = ("acr_id", "player_class", "achievement",)
     list_filter = ("achievement", "player_class",)

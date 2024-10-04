@@ -3,11 +3,32 @@ from django.db import models
 from apps.classes.models.type import PlayerClass
 
 from .quest import Quest
-from .type.reward import QuestRewardType
+
+
+class QuestRewardType(models.IntegerChoices):
+    """Quest reward type choices."""
+
+    NEGATIVE_ONE = -1
+    OBJECT_ALWAYS = 0, "Object (Always)"
+    OBJECT_CHOICE = 1, "Object (Choice)"
+    MONEY = 2
+    ALIGNMENT = 3
+    SKILL = 4
+    RENOWN = 5
+    EXPERIENCE = 6
+    QUEST = 7
+    RELIC = 8
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}: {self.__str__()} ({self.value})"
+
+    def __str__(self) -> str:
+        return self.name.title()
 
 
 class QuestReward(models.Model):
     """Ishar quest reward."""
+
     quest_reward_id = models.AutoField(
         primary_key=True,
         help_text="Auto-generated, permanent quest reward ID number.",
@@ -51,5 +72,7 @@ class QuestReward(models.Model):
         return f"{self.__class__.__name__}: {self.__str__()} ({self.pk})"
 
     def __str__(self) -> str:
-        return f"{self.get_reward_type_display()} ({self.reward_num})"\
-                f" @ {self.quest}"
+        return (
+            f"{self.get_reward_type_display()} ({self.reward_num})"
+            f" @ {self.quest}"
+        )

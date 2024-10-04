@@ -4,9 +4,7 @@ from apps.skills.models.spell_flag import SkillSpellFlag
 
 
 class SkillSpellFlagAdminInline(TabularInline):
-    """
-    Skill/spell flag inline administration.
-    """
+    """Skill/spell flag inline administration."""
     extra = 1
     model = SkillSpellFlag
     verbose_name = "Flag"

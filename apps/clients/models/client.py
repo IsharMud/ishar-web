@@ -6,12 +6,13 @@ from .category import MUDClientCategory
 
 class MUDClientManager(models.Manager):
     def get_by_natural_key(self, name):
-        """Natural key of the MUD client name."""
+        # Natural key of the MUD client name.
         return self.get(name=name)
 
 
 class MUDClient(models.Model):
     """Website MUD client."""
+
     objects = MUDClientManager()
 
     client_id = models.AutoField(
@@ -81,5 +82,5 @@ class MUDClient(models.Model):
         return self.name
 
     def natural_key(self) -> str:
-        """Natural key of the MUD client name."""
+        # Natural key of the MUD client name.
         return self.name

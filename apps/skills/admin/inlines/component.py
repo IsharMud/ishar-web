@@ -4,9 +4,7 @@ from apps.skills.models.component import SkillComponent
 
 
 class SkillComponentAdminInline(TabularInline):
-    """
-    Skill/spell components inline administration.
-    """
+    """Skill/spell components inline administration."""
     extra = 1
     model = SkillComponent
     verbose_name = "Component"

@@ -2,11 +2,12 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils.timezone import now
 from django.views.generic.list import ListView
 
-from .models.event import GlobalEvent
+from .models import GlobalEvent
 
 
 class GlobalEventsView(LoginRequiredMixin, ListView):
     """Global events view."""
+
     context_object_name = "global_events"
     model = GlobalEvent
     template_name = "events.html"

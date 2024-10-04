@@ -6,9 +6,7 @@ from apps.players.models.remort_upgrade import RemortUpgrade
 
 
 class PlayerRemortUpgrade(models.Model):
-    """
-    Player relation to a remort upgrade.
-    """
+    """Player relation to a remort upgrade."""
     player = models.ForeignKey(
         # primary_key=True,  # Fake it, just so reads work.
         db_column="player_id",

@@ -1,12 +1,9 @@
 from django.contrib import admin
 
-from apps.players.models.remort_upgrade import RemortUpgrade
 
-
-@admin.register(RemortUpgrade)
 class RemortUpgradeAdmin(admin.ModelAdmin):
     """Remort upgrades administration."""
-    model = RemortUpgrade
+
     fieldsets = (
         (None, {"fields": ("upgrade_id", "name", "display_name")}),
         ("Availability", {"fields": ("can_buy", "bonus", "max_value")}),

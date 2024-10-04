@@ -6,6 +6,7 @@ from .achievement import Achievement
 
 class AchievementCriteria(models.Model):
     """Ishar achievement criteria."""
+
     criteria_id = models.AutoField(
         db_column="criteria_id",
         help_text=_(
@@ -62,5 +63,6 @@ class AchievementCriteria(models.Model):
         return f"{self.__class__.__name__} {self.__str__()} ({self.pk})"
 
     def __str__(self) -> str:
-        return f"{self.criteria_type} ({self.target_value})" \
-                f" @ {self.achievement}"
+        return (
+            f"{self.criteria_type} ({self.target_value}) @ {self.achievement}"
+        )

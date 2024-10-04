@@ -1,12 +1,13 @@
 from django.db import models
 
-from apps.classes.models import Class
+from apps.classes.models.cls import Class
 
 from apps.races.models.race import Race
 
 
 class ClassRace(models.Model):
     """Ishar class race."""
+
     classes_races_id = models.AutoField(
         primary_key=True,
         help_text="Auto-generated, primary key for class race identifier.",

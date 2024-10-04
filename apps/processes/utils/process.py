@@ -54,7 +54,7 @@ def get_process(name="ishar", user=getlogin()):
         last_updated=now(),
         created=make_aware(
             datetime.fromtimestamp(
-                timestamp=Process(pid=current_pid).create_time(),
+                Process(pid=current_pid).create_time()
             )
         )
     )

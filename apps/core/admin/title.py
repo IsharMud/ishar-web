@@ -3,9 +3,9 @@ from django.contrib.admin import ModelAdmin, register
 from ..models.title import Title
 
 
-@register(Title)
 class TitleAdmin(ModelAdmin):
     """Title administration."""
+
     model = Title
     fields = ("title_id", "male_text", "female_text", "prepend",)
     list_display = list_display_links = fields

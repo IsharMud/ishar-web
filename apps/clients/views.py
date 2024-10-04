@@ -4,9 +4,8 @@ from apps.clients.models.category import MUDClientCategory
 
 
 class MUDClientsView(ListView):
-    """
-    MUD Clients view.
-    """
+    """MUD Clients view."""
+
     context_object_name = "mud_client_categories"
     model = MUDClientCategory
     template_name = "clients.html"

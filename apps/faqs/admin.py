@@ -7,9 +7,8 @@ from .models import FAQ
 
 @register(FAQ)
 class FAQAdmin(ModelAdmin):
-    """
-    Ishar news administration.
-    """
+    """Ishar news administration."""
+
     date_hierarchy = "created"
     fieldsets = (
         (None, {"fields": ("faq_id", "slug")}),
@@ -21,7 +20,10 @@ class FAQAdmin(ModelAdmin):
         "faq_id", "slug", "question_text", "is_visible", "display_order"
     )
     list_display_links = ("faq_id", "slug", "question_text")
-    list_filter = ("is_visible", ("account", RelatedOnlyFieldListFilter))
+    list_filter = (
+        "is_visible",
+        ("account", RelatedOnlyFieldListFilter)
+    )
     readonly_fields = ("faq_id", "account", "created")
     search_fields = (
         "slug", "question_text", "question_answer", "account", "is_visible"

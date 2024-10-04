@@ -1,10 +1,47 @@
 from django.db import models
-from django.utils import timezone
+from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 
 from apps.skills.models.skill import Skill
 
-from .type import ObjectType
+
+class ObjectType(models.IntegerChoices):
+    """Object type choices."""
+
+    NO_TYPE = 0
+    LIGHT = 1
+    WEAPON = 2
+    ARMOR = 3
+    KEY = 4
+    SCROLL = 5
+    WAND = 6
+    STAFF = 7
+    POTION = 8
+    CHEST = 9
+    SACK = 10
+    DRINK = 11
+    FOOD = 12
+    TRAP = 13
+    TREASURE = 14
+    NOTE = 15
+    BOAT = 16
+    OTHER = 17
+    MONEY = 18
+    LOOT = 19
+    MARK = 20
+    TOTEM = 21
+    QUEST = 22
+    TOME = 23
+    TEMPORAL = 24
+    COMPONENT = 25
+    TEMPORAL_COMPONENT = 26
+    MAX_OBJECT = 27
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}: {self.__str__()} ({self.value})"
+
+    def __str__(self) -> str:
+        return self.name.title()
 
 
 class ObjectManager(models.Manager):
@@ -73,7 +110,9 @@ class Object(models.Model):
         blank=True,
         db_column="enchant",
         help_text=_("Enchantment of the object."),
-        limit_choices_to=models.Q(parent_skill__skill_name__exact="Enchanting"),
+        limit_choices_to=models.Q(
+            parent_skill__skill_name__exact="Enchanting"
+        ),
         null=True,
         on_delete=models.DO_NOTHING,
         related_name="+",
@@ -192,10 +231,9 @@ class Object(models.Model):
         self,
         force_insert=False, force_update=False, using=None, update_fields=None
     ):
-        now = timezone.now()
         if not self.pk:
-            self.created_at = now
-        self.updated_at = now
+            self.created_at = now()
+        self.updated_at = now()
         super().save(
             force_insert=force_insert, using=using, update_fields=update_fields
         )

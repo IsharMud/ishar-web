@@ -74,9 +74,8 @@ def _discover_help(path: Path = settings.HELPTAB) -> list:
 
 
 class HelpTab:
-    """
-    Interact with the "helptab" file to find sections representing help topics.
-    """
+    """Interact with "helptab" file finding sections representing help topics."""
+
     help_topics: dict = {}
     path: Path = settings.HELPTAB
 

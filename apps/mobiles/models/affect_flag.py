@@ -8,6 +8,7 @@ from .mobile import Mobile
 
 class MobileAffectFlag(models.Model):
     """Ishar mobile affect flag uses affect flag."""
+
     id = models.AutoField(
         db_column="id",
         blank=False,

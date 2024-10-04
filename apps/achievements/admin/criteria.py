@@ -1,9 +1,6 @@
-from django.contrib.admin import ModelAdmin, register
-
-from ..models.criteria import AchievementCriteria
+from django.contrib.admin import ModelAdmin
 
 
-@register(AchievementCriteria)
 class AchievementCriteriaAdmin(ModelAdmin):
     """Ishar achievement criteria administration."""
     list_display = ("criteria_id", "criteria_type", "achievement",)

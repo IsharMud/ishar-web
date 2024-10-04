@@ -1,13 +1,14 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from apps.classes.models import Class
+from apps.classes.models.cls import Class
 
 from .achievement import Achievement
 
 
 class AchievementClassRestrict(models.Model):
     """Ishar achievement class restriction."""
+
     acr_id = models.AutoField(
         db_column="acr_id",
         primary_key=True,

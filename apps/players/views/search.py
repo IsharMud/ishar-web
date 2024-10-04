@@ -9,13 +9,14 @@ from ..models.player import Player
 
 class PlayerSearchView(LoginRequiredMixin, FormView):
     """Player search view with form."""
+
     form_class = PlayerSearchForm
     model = Player
     status = 200
     template_name = "results.html"
 
     def form_valid(self, form):
-        """Process valid form."""
+        # Process valid form.
         context = self.get_context_data()
         if form.cleaned_data:
             search = form.cleaned_data.get("name")

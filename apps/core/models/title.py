@@ -4,6 +4,7 @@ from django.utils.translation import gettext_lazy as _
 
 class Title(models.Model):
     """Ishar title."""
+
     title_id = models.AutoField(
         primary_key=True,
         help_text=_("Primary key identification number of the title."),

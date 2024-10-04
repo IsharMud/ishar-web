@@ -1,6 +1,6 @@
 from django.db import models
 
-from apps.classes.models import Class
+from apps.classes.models.cls import Class
 from apps.core.models.gender import Gender
 from apps.players.models.player import PlayerBase
 from apps.races.models.race import Race

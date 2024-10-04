@@ -5,6 +5,7 @@ from ...models.player_flag import MobilePlayerFlag
 
 class MobilePlayerFlagTabularInline(TabularInline):
     """Mobile player flag tabular inline administration."""
+
     model = MobilePlayerFlag
     extra = 1
     fields = ("player_flag", "value")

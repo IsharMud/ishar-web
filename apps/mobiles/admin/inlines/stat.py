@@ -5,6 +5,7 @@ from ...models.stat import MobileStat
 
 class MobileStatAdminInline(StackedInline):
     """Mobile statistic flag inline administration."""
+
     model = MobileStat
     extra = 0
     verbose_name = "Statistic"

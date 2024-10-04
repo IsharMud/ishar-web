@@ -2,8 +2,8 @@ from .object import Object, ObjectManager
 
 
 class RelicManager(ObjectManager):
-    """Filter for objects with relic flag."""
     def get_queryset(self):
+        # Filter for objects with relic flag.
         return super().get_queryset().filter(flag__relic=True)
 
 

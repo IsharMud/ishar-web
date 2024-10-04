@@ -2,7 +2,25 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from .achievement import Achievement
-from .type.trigger import AchievementTriggerType
+
+
+class AchievementTriggerType(models.IntegerChoices):
+    """Achievement trigger type choices."""
+
+    NONE = 0
+    LEVEL_UP = 1
+    REMORT = 2
+    GAIN_RENOWN = 3
+    DEATH = 4
+    QUEST_COMPLETE = 5
+    CHALLENGE_COMPLETE = 6
+    MAX_TRIGGER = 7
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}: {self.__str__()} ({self.value})"
+
+    def __str__(self) -> str:
+        return self.name.title()
 
 
 class AchievementTrigger(models.Model):

@@ -1,10 +1,11 @@
 from django.db import models
 
-from . import Class
+from .cls import Class
 
 
 class ClassLevel(models.Model):
     """Ishar class level."""
+
     class_level_id = models.AutoField(
         primary_key=True,
         help_text="Auto-generated, primary key for class level identifier.",

@@ -1,9 +1,6 @@
-from django.contrib.admin import ModelAdmin, register
-
-from ..models.reward import AchievementReward
+from django.contrib.admin import ModelAdmin
 
 
-@register(AchievementReward)
 class AchievementRewardAdmin(ModelAdmin):
     """Ishar achievement reward administration."""
     list_display = ("reward_id", "reward_type", "achievement",)

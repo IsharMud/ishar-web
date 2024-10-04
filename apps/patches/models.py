@@ -4,14 +4,14 @@ from django.conf import settings
 from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.dispatch import receiver
-from django.utils import timezone
+from django.utils.timezone import now
 
 from apps.accounts.models import Account
 
 
 class PatchManager(models.Manager):
     def get_by_natural_key(self, patch_name):
-        """Natural key is patch name."""
+        # Natural key is patch name.
         return self.get(patch_name=patch_name)
 
 
@@ -31,7 +31,7 @@ class Patch(models.Model):
         verbose_name="Account"
     )
     patch_date = models.DateTimeField(
-        default=timezone.now,
+        default=now,
         help_text="Date and time of the patch to sort/display on the website.",
         verbose_name="Patch Date"
     )
@@ -78,7 +78,7 @@ class Patch(models.Model):
 
 @receiver(models.signals.post_delete, sender=Patch)
 def auto_delete_file_on_delete(sender, instance, **kwargs):
-    """Delete old patch PDF from file-system when Patch object is deleted."""
+    # Delete old patch PDF from file-system when Patch object is deleted.
     if instance.patch_file:
         if os.path.isfile(instance.patch_file.path):
             os.remove(instance.patch_file.path)
@@ -86,7 +86,7 @@ def auto_delete_file_on_delete(sender, instance, **kwargs):
 
 @receiver(models.signals.pre_save, sender=Patch)
 def auto_delete_file_on_change(sender, instance, **kwargs):
-    """Delete old patch PDF from file-system when Patch object is updated."""
+    # Delete old patch PDF from file-system when Patch object is updated.
     if not instance.pk:
         return False
 

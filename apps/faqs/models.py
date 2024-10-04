@@ -6,12 +6,13 @@ from apps.accounts.models import Account
 
 class FAQManager(models.Manager):
     def get_by_natural_key(self, slug):
-        """Natural key of the FAQ slug."""
+        # Natural key of the FAQ slug.
         return self.get(slug=slug)
 
 
 class FAQ(models.Model):
     """Ishar website frequently asked question."""
+
     objects = FAQManager()
 
     faq_id = models.AutoField(
@@ -85,8 +86,8 @@ class FAQ(models.Model):
         verbose_name_plural = "Frequently Asked Questions"
 
     def get_absolute_url(self) -> str:
-        """Anchored URL to FAQ page."""
-        return reverse(viewname="faq") + "#" + self.slug
+        # Anchored URL to FAQ page.
+        return f'{reverse(viewname="faq")}#{self.slug}'
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}: {self.__str__()} ({self.pk})"
@@ -95,5 +96,5 @@ class FAQ(models.Model):
         return self.slug
 
     def natural_key(self) -> str:
-        """Natural key of the FAQ slug."""
+        # Natural key of the FAQ slug.
         return self.slug

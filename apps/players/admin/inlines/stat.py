@@ -6,9 +6,8 @@ from ...models.stat import PlayerStat
 
 
 class PlayerStatInlineAdmin(StackedInline):
-    """
-    Player stat inline administration.
-    """
+    """Player stat inline administration."""
+
     model = PlayerStat
     fieldsets = (
         ("Time", {"fields": ("get_total_play_time", "get_remort_play_time")}),

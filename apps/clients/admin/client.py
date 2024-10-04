@@ -1,13 +1,9 @@
-from django.contrib.admin import display, ModelAdmin, register
-
-from apps.clients.models.client import MUDClient
+from django.contrib.admin import display, ModelAdmin
 
 
-@register(MUDClient)
 class MUDClientAdmin(ModelAdmin):
-    """
-    MUD client administration.
-    """
+    """MUD client administration."""
+
     fields = ("name", "category", "url", "is_visible")
     list_display = ("name", "get_category_link", "is_visible")
     list_filter = ("category", "is_visible")

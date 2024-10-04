@@ -5,12 +5,13 @@ from django.utils.html import format_html
 
 class MUDClientCategoryManager(models.Manager):
     def get_by_natural_key(self, name):
-        """Natural key of the MUD client category name."""
+        # Natural key of the MUD client category name.
         return self.get(name=name)
 
 
 class MUDClientCategory(models.Model):
     """Website MUD client category."""
+
     objects = MUDClientCategoryManager()
 
     category_id = models.AutoField(
@@ -78,5 +79,5 @@ class MUDClientCategory(models.Model):
         return self.name
 
     def natural_key(self) -> str:
-        """Natural key of the MUD client category name."""
+        # Natural key of the MUD client category name.
         return self.name

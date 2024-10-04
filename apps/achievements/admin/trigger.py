@@ -1,9 +1,6 @@
-from django.contrib.admin import ModelAdmin, register
-
-from ..models.trigger import AchievementTrigger
+from django.contrib.admin import ModelAdmin
 
 
-@register(AchievementTrigger)
 class AchievementTriggerAdmin(ModelAdmin):
     """Ishar trigger reward administration."""
     list_display = ("achievement_triggers_id", "trigger_type", "achievement",)

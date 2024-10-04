@@ -1,5 +1,5 @@
 from django.db import models
-from django.utils import timezone
+from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 
 from .object import Object
@@ -7,6 +7,7 @@ from .object import Object
 
 class ObjectFlag(models.Model):
     """Ishar object flag."""
+
     object = models.OneToOneField(
         db_column="object_vnum",
         help_text=_(
@@ -220,10 +221,9 @@ class ObjectFlag(models.Model):
         self,
         force_insert=False, force_update=False, using=None, update_fields=None
     ):
-        now = timezone.now()
         if not self.pk:
-            self.created_at = now
-        self.updated_at = now
+            self.created_at = now()
+        self.updated_at = now()
         super().save(
             force_insert=force_insert, using=using, update_fields=update_fields
         )

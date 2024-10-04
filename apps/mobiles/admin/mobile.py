@@ -7,12 +7,10 @@ from .inlines.desc import MobileDescriptionTabularInline
 from .inlines.player_flag import MobilePlayerFlagTabularInline
 from .inlines.stat import MobileStatAdminInline
 
-from ..models.mobile import Mobile
 
-
-@admin.register(Mobile)
 class MobileAdmin(admin.ModelAdmin):
     """Ishar mobile administration."""
+
     list_display = ("id", "long_name", "level", "description", "is_challenge")
     list_display_links = ("id", "long_name")
     list_filter = (

@@ -2,7 +2,7 @@ from datetime import datetime
 from django.db import models
 from django.contrib import admin
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
-from django.utils import timezone
+from django.utils.timezone import now
 from libgravatar import Gravatar, sanitize_email
 from passlib.hash import md5_crypt
 
@@ -199,7 +199,7 @@ class Account(AbstractBaseUser, PermissionsMixin):
     @admin.display(boolean=True, description="Banned?")
     def is_banned(self) -> bool:
         if self.banned_until and isinstance(self.is_banned, datetime):
-            if self.banned_until > timezone.now():
+            if self.banned_until > now():
                 return True
         return False
 

@@ -6,9 +6,8 @@ from apps.players.models.player_player_flag import PlayerPlayerFlag
 
 
 class PlayerFlagsInlineAdmin(TabularInline):
-    """
-    Player's flags tabular inline administration.
-    """
+    """Player's flags tabular inline administration."""
+
     model = PlayerPlayerFlag
     fields = readonly_fields = ("get_flag_link", "value")
     ordering = ("-value", "flag__name")

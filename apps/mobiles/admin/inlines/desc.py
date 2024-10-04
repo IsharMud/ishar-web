@@ -5,6 +5,7 @@ from ...models.desc import MobileDescription
 
 class MobileDescriptionTabularInline(TabularInline):
     """Mobile description tabular inline administration."""
+
     model = MobileDescription
     extra = 1
     fields = ("extra_name", "extra_description")

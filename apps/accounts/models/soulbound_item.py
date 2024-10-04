@@ -6,6 +6,7 @@ from .account import Account
 
 class AccountSoulboundItem(models.Model):
     """Ishar account soulbound item."""
+
     account_soulbound_id = models.AutoField(
         primary_key=True,
         help_text=_(

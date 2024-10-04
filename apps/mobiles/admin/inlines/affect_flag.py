@@ -5,6 +5,7 @@ from ...models.affect_flag import MobileAffectFlag
 
 class MobileAffectFlagTabularInline(TabularInline):
     """Mobile affect flag tabular inline administration."""
+
     model = MobileAffectFlag
     extra = 1
     fields = ("affect_flag", "value")

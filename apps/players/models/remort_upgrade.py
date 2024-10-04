@@ -6,7 +6,7 @@ from apps.skills.models.skill import Skill
 
 class RemortUpgradeManager(models.Manager):
     def get_by_natural_key(self, name):
-        """Natural key is remort upgrade name."""
+        # Natural key is remort upgrade name.
         return self.get(name=name)
 
 

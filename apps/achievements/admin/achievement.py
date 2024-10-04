@@ -1,14 +1,12 @@
-from django.contrib import admin
+from django.contrib.admin import ModelAdmin
 
 from .inlines.class_restrict import AchievementClassRestrictTabularInline
 from .inlines.criteria import AchievementCriteriaTabularInline
 from .inlines.reward import AchievementRewardTabularInline
 from .inlines.trigger import AchievementTriggerTabularInline
-from ..models.achievement import Achievement
 
 
-@admin.register(Achievement)
-class AchievementAdmin(admin.ModelAdmin):
+class AchievementAdmin(ModelAdmin):
     """Ishar achievement administration."""
     inlines = (
         AchievementClassRestrictTabularInline,

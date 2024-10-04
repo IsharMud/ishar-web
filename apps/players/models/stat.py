@@ -98,17 +98,17 @@ class PlayerStat(models.Model):
         return f"{self.__class__.__name__}: {self.player}"
 
     def get_remort_play_timedelta(self) -> timedelta:
-        """Timedelta of player remort play time."""
+        # Timedelta of player remort play time.
         return timedelta(seconds=self.remort_play_time or 0)
 
     def get_total_play_timedelta(self) -> timedelta:
-        """Timedelta of player total play time."""
+        # Timedelta of player total play time.
         return timedelta(seconds=self.total_play_time or 0)
 
     def get_remort_play_time(self) -> timedelta:
-        """Time to calculate since, for remort play time."""
+        # Time to calculate since, for remort play time.
         return timesince(localtime() - self.get_remort_play_timedelta())
 
     def get_total_play_time(self) -> timedelta:
-        """Time to calculate since, for total play time."""
+        # Time to calculate since, for total play time.
         return timesince(localtime() - self.get_total_play_timedelta())

@@ -1,6 +1,6 @@
 from django.db import models
 
-from apps.classes.models import Class
+from apps.classes.models.cls import Class
 from apps.core.models.gender import Gender
 from apps.races.models.race import Race
 from apps.skills.models.type.position import PlayerPosition
@@ -8,12 +8,13 @@ from apps.skills.models.type.position import PlayerPosition
 
 class MobileManager(models.Manager):
     def get_by_natural_key(self, long_name):
-        """Natural key is mobile's long name."""
+        # Natural key is mobile's long name.
         return self.get(long_name=long_name)
 
 
 class Mobile(models.Model):
     """Ishar mobile."""
+
     objects = MobileManager()
 
     id = models.AutoField(
@@ -309,5 +310,5 @@ class Mobile(models.Model):
         return f"{self.pk}. {self.long_name or self.name} (Level {self.level})"
 
     def natural_key(self):
-        """Natural key is mobile's long name."""
+        # Natural key is mobile long name.
         return self.long_name

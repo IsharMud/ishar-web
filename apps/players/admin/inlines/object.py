@@ -7,6 +7,7 @@ from apps.players.models.object import PlayerObject
 
 class PlayerObjectsInlineAdmin(TabularInline):
     """Player's objects inline administration."""
+
     model = PlayerObject
     fields = readonly_fields = (
         "object", "position_type", "position_val", "get_container_link",

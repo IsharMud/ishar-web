@@ -1,5 +1,5 @@
 from django.db import models
-from django.utils import timezone
+from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 
 from .object import Object
@@ -7,6 +7,7 @@ from .object import Object
 
 class ObjectWearableFlag(models.Model):
     """Ishar object wearable flag."""
+
     object = models.OneToOneField(
         db_column="object_vnum",
         help_text=_(
@@ -142,8 +143,8 @@ class ObjectWearableFlag(models.Model):
         db_table = "object_wearable_flags"
         default_related_name = "wearable_flag"
         ordering = ("-object",)
-        verbose_name = "Object Wearable Flag"
-        verbose_name_plural = "Object Wearable Flags"
+        verbose_name = _("Object Wearable Flag")
+        verbose_name_plural = _("Object Wearable Flags")
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}: {self.__str__()}"
@@ -156,10 +157,9 @@ class ObjectWearableFlag(models.Model):
             force_insert=False, force_update=False, using=None,
             update_fields=None
     ):
-        now = timezone.now()
         if not self.pk:
-            self.created_at = now
-        self.updated_at = now
+            self.created_at = now()
+        self.updated_at = now()
         super().save(
             force_insert=force_insert, using=using, update_fields=update_fields
         )

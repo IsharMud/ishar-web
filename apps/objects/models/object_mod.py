@@ -1,5 +1,5 @@
 from django.db import models
-from django.utils import timezone
+from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 
 from .mod import ObjectMod
@@ -8,6 +8,7 @@ from .object import Object
 
 class ObjectObjectMod(models.Model):
     """Ishar object object mod."""
+
     object = models.OneToOneField(
         db_column="object_vnum",
         editable=False,
@@ -57,8 +58,8 @@ class ObjectObjectMod(models.Model):
         default_related_name = "object_mod"
         ordering = ("-object", "mod_slot")
         unique_together = (("object", "mod_slot"),)
-        verbose_name = "Object's Mod"
-        verbose_name_plural = "Object's Mods"
+        verbose_name = _("Object's Mod")
+        verbose_name_plural = _("Object's Mods")
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}: {self.__str__()}"
@@ -70,10 +71,9 @@ class ObjectObjectMod(models.Model):
         self,
         force_insert=False, force_update=False, using=None, update_fields=None
     ):
-        now = timezone.now()
         if not self.pk:
-            self.created_at = now
-        self.updated_at = now
+            self.created_at = now()
+        self.updated_at = now()
         super().save(
             force_insert=force_insert, using=using, update_fields=update_fields
         )

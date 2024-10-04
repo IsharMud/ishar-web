@@ -8,12 +8,10 @@ from .inlines.object import PlayerObjectsInlineAdmin
 from .inlines.stat import PlayerStatInlineAdmin
 from .inlines.upgrade import PlayerRemortUpgradesInlineAdmin
 
-from ..models.player import Player
 
-
-@admin.register(Player)
 class PlayerAdmin(admin.ModelAdmin):
     """Ishar player administration."""
+
     date_hierarchy = "birth"
     fieldsets = (
         (None, {"fields": (
@@ -33,8 +31,8 @@ class PlayerAdmin(admin.ModelAdmin):
     )
     inlines = (
         PlayerCommonInlineAdmin, PlayerFlagsInlineAdmin,
-        PlayerRemortUpgradesInlineAdmin, PlayerStatInlineAdmin,
-        PlayerObjectsInlineAdmin
+        PlayerObjectsInlineAdmin, PlayerRemortUpgradesInlineAdmin,
+        PlayerStatInlineAdmin,
     )
     list_display = (
         "name", "get_account_link", "player_type", "is_hardcore", "is_survival",

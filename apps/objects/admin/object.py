@@ -6,9 +6,9 @@ from .inlines import ObjectAffectFlagInline, ObjectExtraInline, \
 from ..models.object import Object
 
 
-@admin.register(Object)
 class ObjectAdmin(admin.ModelAdmin):
     """Ishar object administration."""
+
     date_hierarchy = "updated_at"
     list_display = ("vnum", "display", "appearance", "description")
     list_display_links = ("vnum", "display")

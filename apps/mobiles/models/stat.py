@@ -6,6 +6,7 @@ from .mobile import Mobile
 
 class MobileStat(models.Model):
     """Ishar mobile statistics."""
+
     mob_stats_id = models.AutoField(
         primary_key=True,
         help_text=_("Auto-generated primary key for mobile statistic ID."),

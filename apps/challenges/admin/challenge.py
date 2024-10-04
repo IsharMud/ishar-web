@@ -2,11 +2,27 @@ from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
 
-from .filter import ChallengeCompletedListFilter
-from ..models.challenge import Challenge
+
+class ChallengeCompletedListFilter(admin.SimpleListFilter):
+    """Admin list filter to identify (in)complete challenges."""
+    title = "Completed?"
+    parameter_name = "completed"
+
+    def lookups(self, request, model_admin):
+        return (
+            ("1", "Yes"),
+            ("0", "No")
+        )
+
+    def queryset(self, request, queryset):
+        if self.value():
+            if self.value() == "1":
+                queryset = queryset.exclude(winner_desc__exact="")
+            if self.value() == "0":
+                queryset = queryset.filter(winner_desc__exact="")
+        return queryset
 
 
-@admin.register(Challenge)
 class ChallengeAdmin(admin.ModelAdmin):
     """Ishar challenge administration."""
     fieldsets = (

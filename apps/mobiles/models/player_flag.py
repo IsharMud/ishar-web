@@ -8,6 +8,7 @@ from .mobile import Mobile
 
 class MobilePlayerFlag(models.Model):
     """Ishar mobile player flag uses player flag."""
+
     mobile = models.ForeignKey(
         db_column="mob_id",
         to=Mobile,

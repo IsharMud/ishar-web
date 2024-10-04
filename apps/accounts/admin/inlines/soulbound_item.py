@@ -4,9 +4,8 @@ from ...models.soulbound_item import AccountSoulboundItem
 
 
 class AccountSoulboundItemAdmin(StackedInline):
-    """
-    Account soulbound item tabular inline administration.
-    """
+    """Account soulbound item tabular inline administration."""
+
     model = AccountSoulboundItem
     extra = 1
     fields = ("item_id", "cooldown", "last_used", "time_gained", "updated_at")

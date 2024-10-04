@@ -1,7 +1,19 @@
 from django.db import models
-from django.utils import timezone
+from django.utils.timezone import now
 
-from .type.criteria import AchievementCriteriaType
+
+class AchievementCriteriaType(models.TextChoices):
+    """Achievement criteria type choices."""
+    PLAYER_ONLY = "PlayerOnly", "Player Only"
+    ACCOUNT = "Account"
+    ACCOUNT_GROUPED = "AccountGrouped", "Account (Grouped)"
+    ACCOUNT_TOTAL = "AccountTotal", "Account (Total)"
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}: {self.__str__()} ({self.name})"
+
+    def __str__(self) -> str:
+        return self.value
 
 
 class AchievementManager(models.Manager):
@@ -87,10 +99,9 @@ class Achievement(models.Model):
 
     def save(self, *args, **kwargs):
         # Update timestamps on save.
-        now = timezone.now()
         if not self.pk:
-            self.created_at = now
-        self.updated_at = now
+            self.created_at = now()
+        self.updated_at = now()
         return super().save(*args, **kwargs)
 
     def natural_key(self) -> str:
