@@ -7,7 +7,7 @@ from apps.events.models import GlobalEvent
 
 
 def events(request):
-    """List any active global events."""
+    # List any active global events.
 
     # Default message assuming there are no active events.
     ephemeral = True

@@ -2,7 +2,7 @@ from apps.processes.utils.process import get_process
 
 
 def runtime():
-    """Show the current server process runtime."""
+    # Show the current server process runtime.
     process = get_process()
     return (
         'Running since'

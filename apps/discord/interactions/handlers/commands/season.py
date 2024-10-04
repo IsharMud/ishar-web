@@ -5,7 +5,7 @@ from apps.seasons.utils.current import get_current_season
 
 
 def season(request):
-    """Current season number, expiration, time until expiration, and URL."""
+    # Current season number, expiration, time until expiration, and URL.
     current_season = get_current_season()
     dt_fmt = "%A, %B %d, %Y @ %I:%M:%S %p %Z"
 

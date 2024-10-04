@@ -1,7 +1,11 @@
 from apps.players.models.player import Player
 
 
-def deadhead():
-    """Player with the highest number of total deaths."""
-    dh = Player.objects.order_by("-statistics__total_deaths").first()
-    return f"{dh.name} :skull_crossbones: {dh.statistics.total_deaths} deaths!"
+def deadhead(request):
+    # Player with the highest number of total deaths.
+    who = Player.objects.order_by("-statistics__total_deaths").first()
+    url = f"<{request.scheme}://{request.get_host()}{who.get_absolute_url()}>"
+    deaths = who.statistics.total_deaths
+    return (
+        f"[{who.name}]({url}) :skull_crossbones: {deaths} deaths!"
+    )

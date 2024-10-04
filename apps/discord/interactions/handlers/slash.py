@@ -17,7 +17,7 @@ def slash(interaction_json: dict, request) -> tuple[str, bool]:
 
     # "deadhead" command - player with most deaths.
     if command_name == "deadhead":
-        return deadhead(), False
+        return deadhead(request=request), False
 
     # "events" command - any active events and when they expire.
     if command_name == "events":
