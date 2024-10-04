@@ -35,7 +35,7 @@ def mudhelp(request, interaction=None, _spell: bool = False) -> tuple[str, bool]
                 result = next(iter(results.values()))
                 topic_name = result.name
                 topic_url = result.get_absolute_url()
-                reply = topic_name
+                reply += topic_name
 
             # Link to search for multiple results.
             else:
@@ -43,7 +43,7 @@ def mudhelp(request, interaction=None, _spell: bool = False) -> tuple[str, bool]
                     viewname="help_page",
                     args=(search,)
                 ) + "#topics"
-                reply = f"{num_results} results"
+                reply += f"{num_results} results"
 
             # Append the URL to the Discord reply message.
             reply += f"](<{request.scheme}://{request.get_host()}{topic_url}>)"
