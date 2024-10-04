@@ -18,10 +18,10 @@ def leader(request, interaction=None):
         game_type = GameType._value2member_map_[int(find_game_type)]
         qs = qs.filter(game_type__exact=game_type.value)
         lead_label = game_type.label
+        lead_url = f'{reverse(lead_label.lower())}#{lead_label.lower()}'
 
     lead_player = qs.first()
     return (
-        f':trophy: {lead_player.name} is the {lead_label}'
-        f' [leader](<{request.scheme}://{request.get_host()}'
-        f'{reverse(lead_label.lower())}#{lead_label.lower()}>)!'
+        f':trophy: {lead_player.name} is the [{lead_label} leader]'
+        f'(<{request.scheme}://{request.get_host()}{lead_url}>)!'
     )
