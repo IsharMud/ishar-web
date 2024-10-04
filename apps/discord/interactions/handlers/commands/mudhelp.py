@@ -1,11 +1,10 @@
 from django.urls import reverse
-from django.utils.translation import ngettext
 
 from apps.help.utils.helptab import HelpTab
 
 
 def mudhelp(request, interaction=None, _spell: bool = False) -> tuple[str, bool]:
-    """Search and return links to help topics."""
+    # Search and return links to help topics.
 
     # Access and parse "helptab" file.
     helptab = HelpTab()
