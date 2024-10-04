@@ -1,7 +1,8 @@
 from django.conf import settings
 from django.urls import reverse
 
-from apps.leaders.models.leader import Leader
+from apps.leaders.models import Leader
+
 from apps.players.models.game_type import GameType
 
 
@@ -17,10 +18,10 @@ def leader(request, interaction=None):
         game_type = GameType._value2member_map_[int(find_game_type)]
         qs = qs.filter(game_type__exact=game_type.value)
         lead_label = game_type.label
-        lead_url = f'{reverse(lead_label.lower())}#{lead_label.lower()}'
 
     lead_player = qs.first()
     return (
-        f':trophy: {lead_player.name} is the {lead_label} leader!'
-        f' <{request.scheme}://{request.get_host()}{lead_url}>'
+        f':trophy: {lead_player.name} is the {lead_label}'
+        f' [leader](<{request.scheme}://{request.get_host()}'
+        f'{reverse(lead_label.lower())}#{lead_label.lower()}>)!'
     )

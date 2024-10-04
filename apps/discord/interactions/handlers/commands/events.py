@@ -3,7 +3,7 @@ from django.utils.timesince import timeuntil
 from django.utils.timezone import now
 from django.utils.translation import ngettext
 
-from apps.events.models.event import GlobalEvent
+from apps.events.models import GlobalEvent
 
 
 def events(request):
@@ -24,12 +24,14 @@ def events(request):
     if num_events and num_events > 0:
         ephemeral = False
         events_url = (
-            f'{request.scheme}://{request.get_host()}{reverse("events")}#events'
+            f'<{request.scheme}://{request.get_host()}'
+            f'{reverse("events")}#events>'
         )
         reply = (
-            f'{num_events} '
+            f'[{num_events} '
             f'{ngettext(singular="event", plural="events", number=num_events)}:'
-            f' <{events_url}>\n'
+            f'](<{request.scheme}://{request.get_host()}'
+            f'{reverse("events")}#events>)\n'
         )
 
         # List the number, description, time left, and expiration of the event.
