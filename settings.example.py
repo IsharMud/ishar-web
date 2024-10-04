@@ -24,6 +24,26 @@ DEBUG = bool(getenv("DJANGO_DEBUG", False))
 DJANGO_HOSTS = getenv("DJANGO_HOSTS", "isharmud.com www.isharmud.com")
 ALLOWED_HOSTS = DJANGO_HOSTS.split()
 
+# Caching.
+DJANGO_CACHE_KEY = getenv("DJANGO_CACHE_KEY", "ishar")
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+        "LOCATION": Path(BASE_DIR, "cache"),
+        "TIMEOUT": 60,
+        "OPTIONS": {"MAX_ENTRIES": 1000},
+    },
+    DJANGO_CACHE_KEY: {
+        "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+        "LOCATION": Path(BASE_DIR, "cache", DJANGO_CACHE_KEY),
+        "TIMEOUT": 300,
+        "OPTIONS": {"MAX_ENTRIES": 1000},
+    }
+}
+CACHE_MIDDLEWARE_ALIAS =  DJANGO_CACHE_KEY
+CACHE_MIDDLEWARE_SECONDS = 300
+CACHE_MIDDLEWARE_KEY_PREFIX =f"{DJANGO_CACHE_KEY}_"
+
 # Database(s).
 DATABASES = {
     # Staging.
@@ -107,7 +127,9 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.cache.UpdateCacheMiddleware",
     "django.middleware.common.CommonMiddleware",
+    "django.middleware.cache.FetchFromCacheMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
