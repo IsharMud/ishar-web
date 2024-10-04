@@ -7,8 +7,8 @@ from apps.seasons.utils.current import get_current_season
 def cycle(request):
     # Show the next challenge cycle time.
     cycle_url = (
-        f'(<{request.scheme}://{request.get_host()}'
-        f'{reverse("challenges")}#cycle>)'
+        f'<{request.scheme}://{request.get_host()}'
+        f'{reverse("challenges")}#cycle>'
     )
     next_cycle_dt = get_current_season().get_next_cycle()
     until_next = timeuntil(next_cycle_dt)
