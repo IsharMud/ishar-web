@@ -21,7 +21,7 @@ class HelpView(TemplateView):
     def setup(self, request, *args, **kwargs):
         # Gather help topics from "helptab" file.
         self.help_topics = self.helptab.help_topics
-        super().setup(request, *args, **kwargs)
+        return super().setup(request, *args, **kwargs)
 
     def dispatch(self, request, *args, **kwargs):
         # Handle requests for search and specific help topic pages.

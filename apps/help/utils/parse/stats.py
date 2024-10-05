@@ -1,5 +1,6 @@
 def parse_stats(line: str) -> list:
-    """Parse text right of colon, from "Stats  : " in single line."""
+    # Parse text right of colon, from "Stats  : " in single line.
+
     stats_line = line.split(" : ")[1].strip()
     stats = []
     for splitter in (",", "|", "/"):

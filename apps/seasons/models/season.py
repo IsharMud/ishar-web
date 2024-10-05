@@ -86,7 +86,8 @@ class Season(models.Model):
         managed = False
         db_table = "seasons"
         default_related_name = "season"
-        ordering = ("-season_id",)
+        get_latest_by = ("is_active", "season_id")
+        ordering = ("-is_active", "-season_id",)
         verbose_name = "Season"
 
     def __repr__(self) -> str:
@@ -94,8 +95,10 @@ class Season(models.Model):
 
     def __str__(self) -> str:
         dt_fmt = "%a, %b %d, %Y"
-        return f"{self.season_id} ({self.effective_date.strftime(dt_fmt)}" \
-                f" - {self.expiration_date.strftime(dt_fmt)})"
+        return (
+            f"{self.season_id} ({self.effective_date.strftime(dt_fmt)}"
+            f" - {self.expiration_date.strftime(dt_fmt)})"
+        )
 
     def get_absolute_url(self) -> str:
         return reverse(

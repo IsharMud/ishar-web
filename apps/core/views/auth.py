@@ -12,5 +12,5 @@ class IsharLogoutView(LogoutView):
     template_name = "home.html"
 
     def dispatch(self, request, *args, **kwargs):
-        messages.success(request, "You have logged out!")
+        messages.success(request=request, message="You have logged out!")
         return super().dispatch(request, *args, **kwargs)

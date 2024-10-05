@@ -64,7 +64,8 @@ HELP_CMD_REGEX = {
 
 
 def _discover_help(path: Path = settings.HELPTAB) -> list:
-    """Discover sections within "helptab" file."""
+    # Discover sections within "helptab" file.
+
     # Open the "helptab" file (read-only), and gather its entire contents.
     with open(file=path, mode="r", encoding="utf-8") as helptab_fh:
         helptab_fo = helptab_fh.read()
@@ -74,31 +75,32 @@ def _discover_help(path: Path = settings.HELPTAB) -> list:
 
 
 class HelpTab:
-    """Interact with "helptab" file finding sections representing help topics."""
+    """
+    Interact with MUD "helptab" file finding sections representing help topics.
+    """
 
     help_topics: dict = {}
     path: Path = settings.HELPTAB
 
     def __init__(self, path: (Path, str) = settings.HELPTAB):
-        """Discover, and parse, help topics from "helptab" file sections."""
+        # Discover, and parse, help topics from "helptab" file sections.
         if path and isinstance(path, str):
             path = Path(path)
             self.path = path
         self.help_topics = self.parse(_discover_help(path=self.path))
 
     def __repr__(self) -> str:
-        """Show the object type with absolute path and topic count string."""
+        # Show the object type with absolute path and topic count string.
         return f"<{self.__class__.__name__}> {self.__str__()}"
 
     def __str__(self) -> str:
-        """Show absolute path of "helptab" file with number of help topics."""
+        # Show absolute path of "helptab" file with number of help topics.
         return f"{self.path.absolute()} ({len(self.help_topics)} topics)"
 
 
     class HelpTopic:
-        """
-        Help topic from "helptab" file.
-        """
+        """Help topic from "helptab" file."""
+
         name: str = ""
         level: int = 0
         aliases: set = {}
@@ -114,7 +116,8 @@ class HelpTab:
         components: list = []
 
         def __init__(self):
-            """Initialization of a "help topic" object."""
+            # Initialization of a "help topic" object.
+
             self.name = ""
             self.level = 0
             self.aliases = set()
@@ -139,11 +142,11 @@ class HelpTab:
 
 
         def get_absolute_url(self):
-            """URL to help topic page, with anchor."""
+            # URL to help topic page, with anchor.
             return reverse(viewname="help_page", args=(self.name,)) + "#topic"
 
         def parse_header(self, header_lines: list):
-            """Parse header of a "helptab" section, to gather aliases."""
+            # Parse header of a "helptab" section, to gather aliases.
             for header_line in header_lines:
                 if header_line.startswith("32 "):
                     self.aliases.add(
@@ -151,7 +154,7 @@ class HelpTab:
                     )
 
         def parse_content_line(self, content_line: str):
-            """Parse single line from the content of a help section."""
+            # Parse single line from the content of a help section.
 
             # Check whether the line is for a player level.
             if self.player_level is None:
@@ -219,7 +222,7 @@ class HelpTab:
 
 
         def parse_content(self, content: str):
-            """Parse the content (below "*") of a "helptab" section."""
+            # Parse the content (below "*") of a "helptab" section.
 
             # Prepare for parsing any "See also" lines.
             is_see_also = False
@@ -281,21 +284,21 @@ class HelpTab:
 
         @property
         def is_area(self) -> bool:
-            """Boolean whether the help topic is an "Area "."""
+            # Boolean whether the help topic is an "Area ".
             if self.name.startswith("Area "):
                 return True
             return False
 
         @property
         def is_spell(self) -> bool:
-            """Boolean whether the help topic is a "Spell "."""
+            # Boolean whether the help topic is a "Spell ".
             if self.name.startswith("Spell "):
                 return True
             return False
 
         @property
         def body_html(self) -> str:
-            """Return body text with links, formatted for HTML display."""
+            # Return body text with links, formatted for HTML display.
 
             # Replace HTML tags in body text.
             body = self.body
@@ -313,7 +316,7 @@ class HelpTab:
 
         @property
         def player_class_html(self) -> str:
-            """Parse player class items for web display."""
+            # Parse player class items for web display.
 
             # If a list, parse each item as a player class to be linked to.
             if isinstance(self.player_class, list):
@@ -338,21 +341,21 @@ class HelpTab:
             return self.player_class
 
         def alias_count(self) -> int:
-            """Count of number of help topic aliases."""
+            # Count of number of help topic aliases.
             return len(self.aliases)
 
         def pluralize(self, item="alias"):
-            """Pluralize "alias", depending upon count of alias(es)."""
+            # Pluralize "alias", depending upon count of alias(es).
             if self.alias_count() == 1:
                 return item
             return f"{item}es"
 
         def __repr__(self) -> str:
-            """Show object type with name string."""
+            # Show object type with name string.
             return f"<{self.__class__.__name__}> {self.__str__()}"
 
         def __str__(self) -> str:
-            """Show name of the help topic."""
+            # Show name of the help topic.
             return self.name
 
         def __gt__(self, other):
@@ -362,7 +365,7 @@ class HelpTab:
             return self.name < other.name
 
     def parse(self, sections: list) -> dict[str: HelpTopic,]:
-        """Parse "helptab" sections into dictionary of help topic objects."""
+        # Parse "helptab" sections into dictionary of help topic objects.
         topics = {}
 
         # Iterate each "helptab" section in the list provided.
@@ -415,7 +418,7 @@ class HelpTab:
         return topics
 
     def search(self, search_name: str) -> dict[str: HelpTopic,]:
-        """Search help topic names and aliases for a string."""
+        # Search help topic names and aliases for a string.
 
         # Immediately return exact match.
         if search_name in self.help_topics:
