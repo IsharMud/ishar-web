@@ -110,6 +110,7 @@ INSTALLED_APPS = [
     "apps.DiscordConfig",
     "apps.EventsConfig",
     "apps.FAQsConfig",
+    "apps.FeedbackConfig",
     "apps.HelpConfig",
     "apps.LeadersConfig",
     "apps.MobilesConfig",
@@ -451,6 +452,10 @@ JAZZMIN_SETTINGS = {
 
         # faqs
         "faqs.FAQ": "fas fa-question",
+
+        # feedback
+        "feedback": "fas fa-flag",
+        "feedback.FeedbackSubmission": "fas fa-flag",
 
         # mobiles
         "mobiles": "fas fa-skull",

@@ -7,6 +7,7 @@ from .core import CoreConfig
 from .discord import DiscordConfig
 from .events import EventsConfig
 from .faqs import FAQsConfig
+from .feedback import FeedbackConfig
 from .help import HelpConfig
 from .leaders import LeadersConfig
 from .mobiles import MobilesConfig

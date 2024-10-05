@@ -1,0 +1,62 @@
+{% extends "layout.html" %}
+{% block meta_title %}Feedback{% endblock meta_title %}
+{% block meta_description %}Submit feedback about {{ WEBSITE_TITLE }}.{% endblock meta_description %}
+{% block meta_url %}{% url 'feedback' %}{% endblock meta_url %}
+{% block title %}Feedback{% endblock title %}
+{% block header %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item" title="Portal">
+            <span class="text-ishar bi bi-trophy"></span>
+            <a href="{% url 'portal' %}#portal" id="portal">Portal</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page" title="Feedback">
+            <span class="bi bi-flag text-ishar"></span>
+            <a href="{% url 'feedback' %}#feedback" id="feedback">Feedback</a>
+        </li>
+    </ol>
+</nav>
+{% endblock header %}
+{% block content %}
+<div class="p-3">
+    <div class="card m-1">
+        <div class="card-body">
+            <p class="card-text lead">
+                Please feel free to submit any bug reports, ideas, suggestions,
+                or other feedback that you have about Ishar MUD!
+            </p>
+        </div>
+    </div>
+</div>
+    {% if form %}
+<div class="p-3">
+    <form method="post">
+        <div class="bg-black border-ishar card container-sm">
+            <div class="card-body">
+                <p class="bg-black card-text mb-3">
+                    {{ form }}
+                </p>
+                {% csrf_token %}
+                <p class="card-text mb-3">
+                    <button class="btn btn-outline-primary" type="submit">Send</button>
+                    <button class="btn btn-outline-secondary" type="reset">Reset</button>
+                </p>
+            </div>
+        </div>
+    </form>
+</div>
+    {% endif %}
+<div class="p-3">
+    <div class="card">
+        <div class="card-body">
+            <p class="card-text lead">
+                Additionally, you are always more than welcome to reach out by e-mailing
+                <a class="code font-monospace" href="mailto:admin@isharmud.com" target="_blank" style="" title="E-mail: admin@isharmud.com">
+                    admin@isharmud.com
+                    <i class="bi bi-envelope-at"></i>
+                </a>.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock content %}

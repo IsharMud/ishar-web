@@ -21,6 +21,7 @@ urlpatterns = [
     path("discord/", include("apps.discord.urls"), name="discord"),
     path("events/", include("apps.events.urls"), name="events"),
     path("faq/", include("apps.faqs.urls"), name="faq"),
+    path("feedback/", include("apps.feedback.urls"), name="feedback"),
     path("help/", include("apps.help.urls"), name="help"),
     path("leaders/", include("apps.leaders.urls"), name="leaders"),
     path("patches/", include("apps.patches.urls"), name="patches"),

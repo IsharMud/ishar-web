@@ -14,7 +14,7 @@ body { background-color: #323639; color: #d6d6d7; }
 .card-header, .card-title { color: var(--ishar-color); }
 .card, .card-text, .card-footer { color: #d6d6d7; }
 button, textarea, select { border: 0.1rem solid var(--ishar-color); background-color: #323639; color: var(--ishar-color); }
-textarea { white-space: break-spaces; }
+textarea { white-space: break-spaces; background-color: #000; }
 input { border: 0.1rem solid var(--ishar-color); background-color: #000; color: var(--ishar-color); }
 h1, h2, h3, h4, h5, strong, th, label, th { color: var(--ishar-color); }
 summary h3 { display: inline-block; }

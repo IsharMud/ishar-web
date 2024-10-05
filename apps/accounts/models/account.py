@@ -6,6 +6,7 @@ from django.utils.timezone import now
 from libgravatar import Gravatar, sanitize_email
 from passlib.hash import md5_crypt
 
+from apps.core.models.unsigned import UnsignedAutoField
 from apps.core.utils.ip import dec2ip
 
 from .level import ImmortalLevel
@@ -15,7 +16,7 @@ from .manager import AccountManager
 class Account(AbstractBaseUser, PermissionsMixin):
     """Ishar user account that logs in to the website, and MUD/game."""
 
-    account_id = models.AutoField(
+    account_id = UnsignedAutoField(
         primary_key=True,
         help_text="Auto-generated permanent unique account number.",
         verbose_name="Account ID"
