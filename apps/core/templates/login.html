@@ -10,13 +10,29 @@
             Please use your <strong><em>account name</em></strong>
             or <strong><em>e-mail address</em></strong> to log in - thank you!
         </p>
+        {% if form.errors %}
+            {% for item, err_msg in form.errors.items %}
+                {{ err_msg }}
+            {% endfor %}
+        {% endif %}
         <form method="post">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <p>
-                <button class="btn btn-outline-primary" type="submit">Log In</button>
-                <button class="btn btn-outline-secondary" type="reset">Clear</button>
-            </p>
+            <div class="bg-black border-ishar card container-sm">
+                <div class="card-body">
+                    <p class="mb-3">
+                        <label for="id_username" class="form-label">Account Name / E-mail Address:</label>
+                        <input class="bg-black form-control rounded" type="text" name="username" autocapitalize="none" autocomplete="username" maxlength="25" required="" id="id_username">
+                    </p>
+                    <p class="mb-3">
+                        <label for="id_password" class="form-label">Password</label>
+                        <input class="bg-black form-control rounded" type="password" name="password" autocomplete="current-password" required="" id="id_password">
+                    </p>
+                    {% csrf_token %}
+                    <p>
+                        <button class="btn btn-outline-primary" type="submit">Log In</button>
+                        <button class="btn btn-outline-secondary" type="reset">Clear</button>
+                    </p>
+                </div>
+            </div>
         </form>
     {% endif %}
 {% endblock content %}
