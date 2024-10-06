@@ -17,8 +17,8 @@
 </nav>
 {% endblock header %}
 {% block content %}
-<div class="p-3">
     {% block feedback_content %}
+<div class="p-3">
     <div class="card m-1">
         <div class="card-body">
             <ul class="list-group list-group-horizontal-md">
@@ -53,14 +53,6 @@
                 Please feel free to <a href="{% url 'submit_feedback' %}#submit">submit</a>
                 any bug reports, ideas, suggestions, or other feedback that you have about Ishar MUD!
             </p>
-        </div>
-    </div>
-    {% endblock feedback_content %}
-</div>
-    {% block feedback_footer %}
-<div class="p-3">
-    <div class="card">
-        <div class="card-body">
             <p class="card-text lead">
                 Additionally, you are always more than welcome to reach out by e-mailing
                 <a class="code font-monospace" href="mailto:admin@isharmud.com" target="_blank" style="" title="E-mail: admin@isharmud.com">
@@ -71,5 +63,5 @@
         </div>
     </div>
 </div>
-    {% endblock feedback_footer %}
+    {% endblock feedback_content %}
 {% endblock content %}
