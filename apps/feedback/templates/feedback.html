@@ -34,7 +34,7 @@
         <div class="bg-black border-ishar card container-sm">
             <div class="card-body">
                 <p class="bg-black card-text mb-3">
-                    {{ form }}
+                    {{ form.as_p }}
                 </p>
                 {% csrf_token %}
                 <p class="card-text mb-3">

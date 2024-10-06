@@ -81,16 +81,15 @@ class FeedbackSubmission(models.Model):
         default_related_name = "submission"
         get_latest_by = ("submitted",)
         ordering = ("-submitted",)
-        verbose_name = "Feedback Submission"
-        verbose_name_plural = "Feedback Submissions"
+        verbose_name = "Submission"
+        verbose_name_plural = "Submissions"
+
 
     def __repr__(self) -> str:
-        return f"{self.__str__()} [{self.pk}]"
+        return f"{self.__class__.__name__}: {self.__str__()} [{self.pk}]"
 
     def __str__(self) -> str:
-        return (
-            f"{self.__class__.__name__} (by {self.account} @ {self.submitted})"
-        )
+        return f"{self.subject} ({self.get_submission_type_display()})"
 
     def natural_key(self) -> int:
         # Natural key has to be the ID.
@@ -100,3 +99,11 @@ class FeedbackSubmission(models.Model):
         if self.submission_type == FeedbackSubmissionType.COMPLETE:
             return True
         return False
+
+    def mark_complete(self) -> bool:
+        try:
+            self.submission_type = FeedbackSubmissionType.COMPLETE
+            self.save()
+            return True
+        except:
+            raise
