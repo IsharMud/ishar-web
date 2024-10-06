@@ -63,12 +63,14 @@
 <div class="px-4 py-2">
     <div class="card m-1">
         <div class="card-body">
-            <p class="card-text fst-italic lead text-warning">
-                Sorry, but no feedback submissions were found at this time.
+            <p class="card-text">
+                <strong>
+                    Sorry, but no feedback submissions were found at this time.
+                </strong>
             </p>
-            <p class="card-text lead">
-                Please check back again later, or
-                <a href="{% url 'submit_feedback' %}#submit">submit your own</a> feedback.
+            <p class="card-text">
+                Please check back again later or
+                <a href="{% url 'submit_feedback' %}#submit">submit your own feedback</a>.
             </p>
         </div>
     </div>
