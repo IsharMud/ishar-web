@@ -2,13 +2,14 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.detail import DetailView
 
+from apps.core.views.mixins import NeverCacheMixin
+
 from ..models.player import Player
 
 
-class PlayerView(LoginRequiredMixin, DetailView):
-    """
-    Player view.
-    """
+class PlayerView(NeverCacheMixin, LoginRequiredMixin, DetailView):
+    """Player view."""
+
     context_object_name = "player"
     model = Player
     slug_field = slug_url_kwarg = query_pk_and_slug = "name"

@@ -1,11 +1,13 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.detail import DetailView
 
+from apps.core.views.mixins import NeverCacheMixin
+
 from ..models.choices import FeedbackSubmissionType
 from ..models.submission import FeedbackSubmission
 
 
-class SubmissionView(LoginRequiredMixin, DetailView):
+class SubmissionView(LoginRequiredMixin, NeverCacheMixin, DetailView):
     """Single feedback submission page."""
 
     context_object_name = "submission"

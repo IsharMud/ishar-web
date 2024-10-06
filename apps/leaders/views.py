@@ -1,11 +1,14 @@
 from django.http import Http404
 from django.views.generic.list import ListView
 
+from apps.core.views.mixins import NeverCacheMixin
 from apps.players.models.game_type import GameType
+
 from .models import Leader
 
 
-class LeadersView(ListView):
+class LeadersView(NeverCacheMixin, ListView):
+    """Lead players view."""
 
     model = Leader
     context_object_name = "leaders"

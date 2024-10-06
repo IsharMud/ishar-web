@@ -2,11 +2,14 @@ from django.db.models import F
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.list import ListView
 
+from apps.core.views.mixins import NeverCacheMixin
+
 from apps.players.models.player import Player
 
 
-class PlayerWhoView(LoginRequiredMixin, ListView):
+class PlayerWhoView(NeverCacheMixin, LoginRequiredMixin, ListView):
     """Show online players."""
+
     context_object_name = "players"
     model = Player
     template_name = "who.html"

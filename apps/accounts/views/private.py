@@ -2,10 +2,12 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.views.generic.base import View
 
+from apps.core.views.mixins import NeverCacheMixin
+
 from ..models.account import Account
 
 
-class SetPrivateView(LoginRequiredMixin, View):
+class SetPrivateView(NeverCacheMixin, LoginRequiredMixin, View):
     """
     Set private view.
     Used by "portal" template via JavaScript AJAX/XMLHttpRequest ("XHR").

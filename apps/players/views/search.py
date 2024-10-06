@@ -3,11 +3,13 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import redirect
 from django.views.generic import FormView
 
+from apps.core.views.mixins import NeverCacheMixin
+
 from ..forms import PlayerSearchForm
 from ..models.player import Player
 
 
-class PlayerSearchView(LoginRequiredMixin, FormView):
+class PlayerSearchView(NeverCacheMixin, LoginRequiredMixin, FormView):
     """Player search view with form."""
 
     form_class = PlayerSearchForm

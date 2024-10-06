@@ -2,11 +2,13 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from django.views.generic.edit import CreateView
 
+from apps.core.views.mixins import NeverCacheMixin
+
 from ..forms import SubmitFeedbackForm
 from ..models.submission import FeedbackSubmission
 
 
-class SubmitFeedbackView(LoginRequiredMixin, CreateView):
+class SubmitFeedbackView(LoginRequiredMixin, NeverCacheMixin, CreateView):
     """Feedback submission creation form view."""
 
     form_class = SubmitFeedbackForm

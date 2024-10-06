@@ -1,12 +1,13 @@
 from django.views.generic.list import ListView
 
+from apps.core.views.mixins import NeverCacheMixin
+
 from .models.challenge import Challenge
 
 
-class ChallengesView(ListView):
-    """
-    Challenges view.
-    """
+class ChallengesView(NeverCacheMixin, ListView):
+    """Challenges view."""
+
     completed = None
     context_object_name = "challenges"
     model = Challenge

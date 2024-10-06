@@ -6,6 +6,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import View
 from nacl.exceptions import BadSignatureError
 
+from apps.core.views.mixins import NeverCacheMixin
+
 from .interactions.handlers.slash import slash
 from .interactions.verify import verify
 
@@ -13,7 +15,7 @@ from .interactions.verify import verify
 logger = getLogger(__name__)
 
 
-class InteractionsView(View):
+class InteractionsView(NeverCacheMixin, View):
     """Interactions view."""
     http_method_names = ("post",)
 
