@@ -19,7 +19,7 @@
 {% endblock header %}
 {% block content %}
 <div class="p-3">
-    <div class="card m-1">
+    <div class="card m-1 bg-black border-ishar">
         <div class="card-body">
             <p class="card-text lead">
                 Please feel free to <a href="{% url 'submit_feedback' %}#submit">submit</a>
@@ -28,32 +28,41 @@
         </div>
     </div>
 </div>
-
-<div class="p-3">
+{% if submissions %}
+        {% for submission in submissions %}
+<div class="px-4 py-2">
     <div class="card m-1">
         <div class="card-body">
-    {% if submissions %}
-        {% for submission in submissions %}
-            <details>
-                <summary title="{{ submission.subject }}" id="{{ submission.submission_id }}">
-                    <i class="{{ submission.get_display_icon }}"></i>
-                    <strong>{{ submission.subject }}</strong>
-                    -
-                    <span class="text-secondary">
-                        {{ submission.submitted | naturaltime }}
-                        <i>by {{ submission.account.get_username | title }}</i>
-                    </span>
-                    <a class="anchor-link" href="#{{ submission.submission_id }}" aria-label="Link to this feedback submission: {{ submission.subject }} ({{ submission.submission_id }})">
-                        &#x23;
-                    </a>
-                </summary>
-                {{ submission.body_text }}
-            </details>
-            {% if not forloop.last %}
-            <hr>
-            {% endif %}
+            <div class="card-title">
+                <i class="{{ submission.get_display_icon }}"></i>
+                <strong>{{ submission.subject }}</strong>
+            </div>
+            <blockquote class="blockquote mb-0">
+                <p class="card-text">
+                    {{ submission.body_text }}
+                </p>
+                <footer class="blockquote-footer">
+                    <cite>{{ submission.account.get_username | title }}</cite>
+                </footer>
+            </blockquote>
+        </div>
+        <div class="card-footer text-body-secondary">
+            {{ submission.submitted | naturaltime }}
+        </div>
+    </div>
+</div>
         {% endfor %}
+<div class="px-4 py-2">
+    <div class="card m-1 bg-black">
+        <div class="card-body">
+        {% include "pagination.html" %}
+        </div>
+    </div>
+</div>
     {% else %}
+<div class="px-4 py-2">
+    <div class="card m-1">
+        <div class="card-body">
             <p class="card-text fst-italic lead text-warning">
                 Sorry, but no feedback submissions were found at this time.
             </p>
@@ -61,13 +70,12 @@
                 Please check back again later, or
                 <a href="{% url 'submit_feedback' %}#submit">submit your own</a> feedback.
             </p>
-    {% endif %}
         </div>
     </div>
 </div>
-
+    {% endif %}
 <div class="p-3">
-    <div class="card m-1">
+    <div class="card m-1 border-ishar bg-black">
         <div class="card-body">
             <p class="card-text">
                 Additionally, you are always more than welcome to reach out by e-mailing

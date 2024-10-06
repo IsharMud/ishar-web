@@ -13,6 +13,7 @@ class FeedbackView(LoginRequiredMixin, NeverCacheMixin, ListView):
     context_object_name = "submissions"
     http_method_names = ("get",)
     model = FeedbackSubmission
+    paginate_by = 3
     queryset = model.objects.exclude(
         submission_type__exact=FeedbackSubmissionType.COMPLETE
     )
