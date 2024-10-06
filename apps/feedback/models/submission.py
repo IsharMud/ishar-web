@@ -98,12 +98,6 @@ class FeedbackSubmission(models.Model):
     def __str__(self) -> str:
         return f"{self.subject} ({self.get_submission_type_display()})"
 
-    def get_absolute_url(self) -> str:
-        return (
-            f'{reverse(viewname="feedback_submission", args=(self.pk,))}'
-            '#subject'
-        )
-
     def natural_key(self) -> int:
         # Natural key has to be the ID.
         return self.submission_id

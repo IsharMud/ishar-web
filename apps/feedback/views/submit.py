@@ -14,7 +14,7 @@ class SubmitFeedbackView(LoginRequiredMixin, NeverCacheMixin, CreateView):
     form_class = SubmitFeedbackForm
     http_method_names = ("get", "post")
     model = FeedbackSubmission
-    success_url = "/"
+    success_url = "/feedback/#feedback"
     template_name = "submit.html"
     user = None
 

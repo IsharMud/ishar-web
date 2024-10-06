@@ -14,5 +14,5 @@ class StartView(TemplateView):
     template_name = "start.html"
 
 class SupportView(TemplateView):
-    """Information about how to support Ishar MUD."""
+    """Information about how to offer support."""
     template_name = "support.html"

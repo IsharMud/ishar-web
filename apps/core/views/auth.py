@@ -1,13 +1,15 @@
 from django.contrib import messages
 from django.contrib.auth.views import LoginView, LogoutView
 
+from .mixins import NeverCacheMixin
 
-class IsharLoginView(LoginView):
+
+class IsharLoginView(NeverCacheMixin, LoginView):
     """Log-in page."""
     template_name = "login.html"
 
 
-class IsharLogoutView(LogoutView):
+class IsharLogoutView(NeverCacheMixin, LogoutView):
     """Log-out page."""
     template_name = "home.html"
 

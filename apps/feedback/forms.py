@@ -56,7 +56,9 @@ class SubmitFeedbackForm(ModelForm):
         )
     )
     private = BooleanField(
-        # help_text="Private?",
+        help_text=(
+            'This setting limits your submission to "Forger" / "God" immortals.'
+        ),
         label="Private?",
         required=False,
         widget=CheckboxInput(attrs={"aria-label": "Private?"})

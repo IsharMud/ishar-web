@@ -1,7 +1,7 @@
 {% extends "feedback.html" %}
 {% block meta_title %}Submit Feedback{% endblock meta_title %}
 {% block meta_description %}Submit feedback about {{ WEBSITE_TITLE }}.{% endblock meta_description %}
-{% block meta_url %}{% url 'submit_feedback' %}{% endblock meta_url %}
+{% block meta_url %}{% url 'submit_feedback' %}#submit{% endblock meta_url %}
 {% block title %}Submit Feedback{% endblock title %}
 {% block header %}
 <nav aria-label="breadcrumb">
@@ -19,7 +19,22 @@
     </ol>
 </nav>
 {% endblock header %}
-{% block feedback_content %}
+{% block content %}
+<div class ="p-3">
+    <div class="card m-1">
+        <div class="card-body">
+            <p class="card-text lead">
+                <strong>We truly thank you for your feedback!</strong>
+                We sincerely appreciate any input on how {{ WEBSITE_TITLE }} can be improved.
+            </p>
+            <p class="card-text lead">
+                When reporting a <a href={% url 'help_page' help_topic='Bug' %}#topic">bug</a>,
+                please make sure to include specific details,
+                in order for administrators to fully reproduce the problem.
+            </p>
+        </div>
+    </div>
+</div>
 <form method="post">
     <div class="bg-black border-ishar card container-sm">
         <div class="card-body">
@@ -34,4 +49,4 @@
         </div>
     </div>
 </form>
-{% endblock feedback_content %}
+{% endblock content %}

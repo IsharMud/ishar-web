@@ -12,48 +12,58 @@
         </li>
         <li class="breadcrumb-item active" aria-current="page" title="Feedback">
             <a href="{% url 'feedback' %}#feedback" id="feedback">Feedback</a>
+            <a class="list-group-item-text" href="{% url 'admin:feedback_feedbacksubmission_changelist' %}" target="_blank" title="Feedback Admin">
+                <i class="bi bi-gear text-ishar"></i>
+            </a>
         </li>
     </ol>
 </nav>
 {% endblock header %}
 {% block content %}
-    {% block feedback_content %}
 <div class="p-3">
     <div class="card m-1">
         <div class="card-body">
-            <ul class="list-group list-group-horizontal-md">
-        {% if request.user.is_forger %}
-                <li class="bg-black border border-secondary card-text list-group-item-dark list-group-item" title="Feedback Admin">
-                    <span class="bi bi-gear text-ishar"></span>
-                    <a class="list-group-item-text" href="{% url 'admin:feedback_feedbacksubmission_changelist' %}" target="_blank">
-                        Admin
+    {% if submissions %}
+        {% for submission in submissions %}
+            <details>
+                <summary id="{{ submission.submission_id }}" title="{{ submission.subject }}">
+                    <i class="bi bi-person-{% if submission.private %}lock text-danger{% else %}raised-hand text-info{% endif %}"></i>
+                    <a class="anchor-link" href="#{{ submission.submission_id }}" aria-label="Link to this feedback submission: {{ submission.subject }} ({{ submission.submission_id }})">
+                        &#x23;
                     </a>
-                </li>
-        {% endif %}
-                <li class="bg-black border border-secondary card-text list-group-item-dark list-group-item" title="Submit Feedback">
-                    <span class="bi bi-mailbox-flag text-ishar"></span>
-                    <a class="list-group-item-text" href="{% url 'submit_feedback' %}">
-                        Submit
-                    </a>
-                </li>
-                <li class="bg-black border border-secondary card-text list-group-item-dark list-group-item" title="View All Feedback">
-                    <span class="bi bi-view-list text-ishar"></span>
-                    <a class="list-group-item-text" href="{% url 'all_feedback' %}#all">
-                        View All
-                    </a>
-                </li>
-            </ul>
+                    <strong>{{ submission.subject }}</strong>
+                    <span class="text-secondary">
+                        @ {{ submission.submitted }}
+                        <i>by {{ submission.account.get_username | title }}</i>
+                    </span>
+                </summary>
+                {{ submission.body_text }}
+            </details>
+            {% if not forloop.last %}
+            <hr>
+            {% endif %}
+        {% endfor %}
+    {% else %}
+            <p class="card-text fst-italic lead text-warning">
+                Sorry, but no feedback submissions were found at this time.
+            </p>
+            <p class="card-text lead">
+                Please check back again later, or
+                <a href="{% url 'submit_feedback' %}#submit">submit your own</a> feedback.
+            </p>
+    {% endif %}
         </div>
     </div>
 </div>
+
 <div class="p-3">
     <div class="card m-1">
         <div class="card-body">
-            <p class="card-text lead">
+            <p class="card-text">
                 Please feel free to <a href="{% url 'submit_feedback' %}#submit">submit</a>
-                any bug reports, ideas, suggestions, or other feedback that you have about Ishar MUD!
+                any bug reports, ideas, suggestions, or other feedback that you have about {{ WEBSITE_TITLE }}!
             </p>
-            <p class="card-text lead">
+            <p class="card-text">
                 Additionally, you are always more than welcome to reach out by e-mailing
                 <a class="code font-monospace" href="mailto:admin@isharmud.com" target="_blank" style="" title="E-mail: admin@isharmud.com">
                     admin@isharmud.com
@@ -63,5 +73,4 @@
         </div>
     </div>
 </div>
-    {% endblock feedback_content %}
 {% endblock content %}
