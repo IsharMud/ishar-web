@@ -13,11 +13,6 @@
         </li>
         <li class="breadcrumb-item active" aria-current="page" title="Feedback">
             <a href="{% url 'feedback' %}#feedback" id="feedback">Feedback</a>
-    {% if request.user and request.user.is_forger %}
-            <a class="list-group-item-text" href="{% url 'admin:feedback_feedbacksubmission_changelist' %}" target="_blank" title="Feedback Admin">
-                <i class="bi bi-gear text-ishar"></i>
-            </a>
-    {% endif %}
         </li>
     </ol>
 </nav>
@@ -26,19 +21,31 @@
 <div class="p-3">
     <div class="card m-1">
         <div class="card-body">
+            <p class="card-text lead">
+                Please feel free to <a href="{% url 'submit_feedback' %}#submit">submit</a>
+                any bug reports, ideas, suggestions, or other feedback that you have about {{ WEBSITE_TITLE }}!
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="p-3">
+    <div class="card m-1">
+        <div class="card-body">
     {% if submissions %}
         {% for submission in submissions %}
             <details>
-                <summary id="{{ submission.submission_id }}" title="{{ submission.subject }}">
-                    <i class="bi bi-person-{% if submission.private %}lock text-danger{% else %}raised-hand text-info{% endif %}"></i>
+                <summary title="{{ submission.subject }}" id="{{ submission.submission_id }}">
+                    <i class="{{ submission.get_display_icon }}"></i>
+                    <strong>{{ submission.subject }}</strong>
+                    -
+                    <span class="text-secondary">
+                        {{ submission.submitted | naturaltime }}
+                        <i>by {{ submission.account.get_username | title }}</i>
+                    </span>
                     <a class="anchor-link" href="#{{ submission.submission_id }}" aria-label="Link to this feedback submission: {{ submission.subject }} ({{ submission.submission_id }})">
                         &#x23;
                     </a>
-                    <strong>{{ submission.subject }}</strong>
-                    <span class="text-secondary">
-                        @ {{ submission.submitted | naturaltime }}
-                        <i>by {{ submission.account.get_username | title }}</i>
-                    </span>
                 </summary>
                 {{ submission.body_text }}
             </details>
@@ -63,13 +70,9 @@
     <div class="card m-1">
         <div class="card-body">
             <p class="card-text">
-                Please feel free to <a href="{% url 'submit_feedback' %}#submit">submit</a>
-                any bug reports, ideas, suggestions, or other feedback that you have about {{ WEBSITE_TITLE }}!
-            </p>
-            <p class="card-text">
                 Additionally, you are always more than welcome to reach out by e-mailing
-                <a class="code font-monospace" href="mailto:admin@isharmud.com" target="_blank" style="" title="E-mail: admin@isharmud.com">
-                    admin@isharmud.com
+                <a class="code font-monospace" href="mailto:{{ ADMIN_EMAIL }}" target="_blank" style="" title="E-mail: {{ ADMIN_EMAIL }}">
+                    {{ ADMIN_EMAIL }}
                     <i class="bi bi-envelope-at"></i>
                 </a>.
             </p>

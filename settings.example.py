@@ -153,6 +153,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "apps.core.contexts.admin_email",
                 "apps.core.contexts.website_title",
                 "apps.events.contexts.global_event_count",
                 "apps.help.contexts.help_search_form",

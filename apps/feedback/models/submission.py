@@ -118,7 +118,14 @@ class FeedbackSubmission(models.Model):
         except:
             raise
 
-    def should_display(self) -> bool:
-        if self.is_private() or self.is_complete():
-            return False
-        return True
+    def get_display_icon(self):
+        color = "info"
+        icon = "person-raised-hand"
+
+        if self.is_private():
+            color = "danger"
+
+        if self.submission_type == FeedbackSubmissionType.BUG_REPORT:
+            icon = "bug"
+
+        return f"bi bi-{icon} text-{color}"
