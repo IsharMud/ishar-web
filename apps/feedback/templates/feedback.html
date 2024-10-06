@@ -12,9 +12,11 @@
         </li>
         <li class="breadcrumb-item active" aria-current="page" title="Feedback">
             <a href="{% url 'feedback' %}#feedback" id="feedback">Feedback</a>
+    {% if request.user and request.user.is_forger %}
             <a class="list-group-item-text" href="{% url 'admin:feedback_feedbacksubmission_changelist' %}" target="_blank" title="Feedback Admin">
                 <i class="bi bi-gear text-ishar"></i>
             </a>
+    {% endif %}
         </li>
     </ol>
 </nav>
