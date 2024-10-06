@@ -35,9 +35,7 @@
         <div class="card-header card-title">
             <i class="{{ submission.get_display_icon }}"></i>
             <strong class="h5 mx-1">{{ submission.subject }}</strong>
-            <span class="badge text-bg-secondary">
-                {{ submission.get_vote_display }}
-            </span>
+            {{ submission.get_vote_display_badge }}
         </div>
         <div class="card-body">
             <blockquote class="blockquote mb-0">

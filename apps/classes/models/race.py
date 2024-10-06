@@ -36,7 +36,7 @@ class ClassRace(models.Model):
         verbose_name_plural = "Classes Races"
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}: self.__str__(), self.pk"
+        return f"{self.__class__.__name__}: {self.__str__()} [{self.pk}]"
 
     def __str__(self) -> str:
         return f"{self.race} @ {self.player_class}"

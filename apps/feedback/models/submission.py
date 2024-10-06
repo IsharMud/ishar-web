@@ -1,6 +1,6 @@
 from django.core.validators import MinLengthValidator, MaxLengthValidator
 from django.db import models
-from django.urls import reverse
+from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 
 from apps.accounts.models import Account
@@ -91,7 +91,6 @@ class FeedbackSubmission(models.Model):
         verbose_name = "Submission"
         verbose_name_plural = "Submissions"
 
-
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}: {self.__str__()} [{self.pk}]"
 
@@ -136,6 +135,20 @@ class FeedbackSubmission(models.Model):
             return True
         except:
             raise
+
+    def get_vote_display_color(self) -> str:
+        color = "secondary"
+        if self.vote_total > 0:
+            color = "success"
+        if self.vote_total < 0:
+            color = "danger"
+        return color
+
+    def get_vote_display_badge(self):
+        return format_html(
+            '<span class="badge rounded-pill text-bg-{}">{}</span>',
+            self.get_vote_display_color(), self.vote_total
+        )
 
     def get_display_icon(self):
         color = "info"

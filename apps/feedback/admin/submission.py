@@ -43,8 +43,8 @@ class FeedbackAdmin(admin.ModelAdmin):
     actions_on_bottom = actions_on_top = True
     date_hierarchy = "submitted"
     fields = (
-        "submission_id", "submission_type", "private", "account", "submitted",
-        "subject", "body_text"
+        "submission_id", "submission_type", "vote_count", "private",
+        "account", "submitted", "subject", "body_text"
     )
     inlines = (FeedbackVoteAdminInline,)
     list_display = (
@@ -59,7 +59,8 @@ class FeedbackAdmin(admin.ModelAdmin):
         "submitted"
     )
     readonly_fields = (
-        "submission_id", "account", "submitted", "is_complete", "is_private"
+        "submission_id", "account", "submitted", "is_complete", "is_private",
+        "vote_count"
     )
     search_fields = ("subject", "body_text", "account__account_name")
     show_facets = admin.ShowFacets.ALWAYS
