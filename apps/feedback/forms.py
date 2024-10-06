@@ -1,9 +1,11 @@
 from django.core import validators
-from django.forms import \
-    ModelForm, CharField, TypedChoiceField, Select, Textarea, TextInput
+from django.forms import (
+    ModelForm, BooleanField, CharField, CheckboxInput, Select, Textarea,
+    TextInput, TypedChoiceField
+)
 
-from .choices import FeedbackSubmissionTypePublic
-from .models import FeedbackSubmission
+from .models.choices import FeedbackSubmissionTypePublic
+from .models.submission import FeedbackSubmission
 
 
 class SubmitFeedbackForm(ModelForm):
@@ -58,7 +60,17 @@ class SubmitFeedbackForm(ModelForm):
             }
         )
     )
+    private = BooleanField(
+        # help_text="Private?",
+        label="Private?",
+        widget=CheckboxInput(
+            attrs={
+                # "class": "form-control rounded",
+                "aria-label": "Private?",
+            }
+        )
+    )
 
     class Meta:
         model = FeedbackSubmission
-        fields = ("submission_type", "subject", "body_text")
+        fields = ("submission_type", "subject", "body_text", "private")

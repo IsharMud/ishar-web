@@ -56,6 +56,12 @@ class FeedbackSubmission(models.Model):
         null=False,
         verbose_name=_("Message")
     )
+    private = models.BooleanField(
+        db_column="private",
+        default=False,
+        help_text=_("Should the feedback submission be private?"),
+        verbose_name=_("Private?")
+    )
     account = models.ForeignKey(
         db_column="account_id",
         blank=False,
@@ -100,6 +106,9 @@ class FeedbackSubmission(models.Model):
             return True
         return False
 
+    def is_private(self) -> bool:
+        return self.private
+
     def mark_complete(self) -> bool:
         try:
             self.submission_type = FeedbackSubmissionType.COMPLETE
@@ -107,3 +116,8 @@ class FeedbackSubmission(models.Model):
             return True
         except:
             raise
+
+    def should_display(self) -> bool:
+        if self.private or self.is_complete():
+            return False
+        return True

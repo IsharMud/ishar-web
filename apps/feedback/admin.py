@@ -4,7 +4,8 @@ from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 
-from .models import FeedbackSubmission, FeedbackSubmissionType
+from .models.choices import FeedbackSubmissionType
+from .models.submission import FeedbackSubmission
 
 
 
@@ -41,23 +42,24 @@ class FeedbackAdmin(admin.ModelAdmin):
     actions_on_bottom = actions_on_top = True
     date_hierarchy = "submitted"
     fields = (
-        "submission_id", "submission_type", "is_complete", "account",
-        "submitted", "subject", "body_text"
+        "submission_id", "submission_type", "is_complete", "is_private",
+        "account", "submitted", "subject", "body_text"
     )
     list_display = (
-        "submission_id", "subject", "submission_type", "is_complete",
-        "account", "submitted"
+        "submission_id", "subject", "submission_type",
+        "is_complete", "is_private", "account", "submitted"
     )
     list_display_links = ("submission_id", "subject")
     list_filter = (
         "submission_type",
+        "private",
         ("account", admin.RelatedOnlyFieldListFilter),
         "submitted",
         FeedbackCompleteListFilter
     )
     readonly_fields = (
         "submission_id", "subject", "body_text", "account", "submitted",
-        "is_complete"
+        "is_complete", "is_private"
     )
     search_fields = ("subject", "body_text", "account__account_name")
     show_facets = admin.ShowFacets.ALWAYS
@@ -87,9 +89,14 @@ class FeedbackAdmin(admin.ModelAdmin):
         return self.has_module_permission(request, obj)
 
     @admin.display(description="Complete?", ordering="-submission_type")
-    def is_complete(self, obj):
+    def is_complete(self, obj) -> bool:
         return obj.is_complete()
     is_complete.boolean = True
+
+    @admin.display(description="Private?", ordering="-private")
+    def is_private(self, obj) -> bool:
+        return obj.is_private()
+    is_private.boolean = True
 
     @admin.action(description=f"Mark selected {verbose_name_plural} complete")
     def mark_complete(self, request, queryset):
