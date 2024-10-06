@@ -20,12 +20,12 @@ class SubmitFeedbackForm(ModelForm):
         choices=FeedbackSubmissionTypePublic,
         coerce=int,
         # help_text="Type",
-        # label="Type",
+        label="",
         widget=RadioSelect(attrs={"aria-label": "Type"})
     )
     subject = CharField(
         # help_text="Subject / Title",
-        label="Subject / Title",
+        label="",
         min_length=1,
         max_length=64,
         validators=(
@@ -42,7 +42,7 @@ class SubmitFeedbackForm(ModelForm):
     )
     body_text = CharField(
         # help_text="Message",
-        label="Message",
+        label="",
         validators=(
             validators.MinLengthValidator(limit_value=1),
             validators.MaxLengthValidator(limit_value=1024)
