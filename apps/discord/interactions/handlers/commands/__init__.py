@@ -3,6 +3,7 @@ from .cycle import cycle
 from .deadhead import deadhead
 from .events import events
 from .faq import faq
+from .feedback import feedback
 from .leader import leader
 from .leaders import leaders
 from .mudhelp import mudhelp

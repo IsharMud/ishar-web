@@ -72,6 +72,11 @@ class Command(BaseCommand):
                 "description": "Link to frequently asked questions (FAQs).",
             },
             {
+                "type": 1,
+                "name": "feedback",
+                "description": "Link to feedback page to send bug report, idea, or suggestion.",
+            },
+            {
                 "name": "leader",
                 "type": 1,
                 "description": "List the leading player, by game type.",
