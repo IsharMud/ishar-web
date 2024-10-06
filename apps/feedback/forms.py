@@ -63,6 +63,7 @@ class SubmitFeedbackForm(ModelForm):
     private = BooleanField(
         # help_text="Private?",
         label="Private?",
+        required=False,
         widget=CheckboxInput(
             attrs={
                 # "class": "form-control rounded",

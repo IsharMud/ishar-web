@@ -1,0 +1,37 @@
+{% extends "feedback.html" %}
+{% block meta_title %}Submit Feedback{% endblock meta_title %}
+{% block meta_description %}Submit feedback about {{ WEBSITE_TITLE }}.{% endblock meta_description %}
+{% block meta_url %}{% url 'submit_feedback' %}{% endblock meta_url %}
+{% block title %}Submit Feedback{% endblock title %}
+{% block header %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item" title="Portal">
+            <span class="text-ishar bi bi-flag"></span>
+            <a href="{% url 'portal' %}#portal" id="portal">Portal</a>
+        </li>
+        <li class="breadcrumb-item" title="Feedback">
+            <a href="{% url 'feedback' %}#feedback" id="feedback">Feedback</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page" title="Feedback">
+            <a href="{% url 'submit_feedback' %}#submit" id="submit">Submit</a>
+        </li>
+    </ol>
+</nav>
+{% endblock header %}
+{% block feedback_content %}
+<form method="post">
+    <div class="bg-black border-ishar card container-sm">
+        <div class="card-body">
+            <div class="bg-black card-text mb-3">
+                {{ form.as_p }}
+            </div>
+            {% csrf_token %}
+            <p class="card-text mb-3">
+                <button class="btn btn-outline-primary" type="submit">Send</button>
+                <button class="btn btn-outline-secondary" type="reset">Reset</button>
+            </p>
+        </div>
+    </div>
+</form>
+{% endblock feedback_content %}

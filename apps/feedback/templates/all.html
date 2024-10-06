@@ -1,0 +1,49 @@
+{% extends "feedback.html" %}
+{% block meta_title %}All Feedback{% endblock meta_title %}
+{% block meta_description %}View all feedback about {{ WEBSITE_TITLE }}.{% endblock meta_description %}
+{% block meta_url %}{% url 'all_feedback' %}{% endblock meta_url %}
+{% block title %}All Feedback{% endblock title %}
+{% block header %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item" title="Portal">
+            <span class="text-ishar bi bi-flag"></span>
+            <a href="{% url 'portal' %}#portal" id="portal">Portal</a>
+        </li>
+        <li class="breadcrumb-item" title="Feedback">
+            <a href="{% url 'feedback' %}#feedback" id="feedback">Feedback</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page" title="All">
+            <a href="{% url 'all_feedback' %}#all" id="all">All</a>
+        </li>
+    </ol>
+</nav>
+{% endblock header %}
+{% block feedback_content %}
+<div class="card m-1">
+    <div class="card-body">
+    {% if submissions %}
+        <ul class="list-group list-group-horizontal-md">
+        {% for submission in submissions %}
+            <li class="list-group-item">
+                <a href="{{ submission.get_absolute_url }}">
+                    {{ submission.subject }}
+                </a>
+                <br>
+                -- <code>{{ submission.submitted }}</code>
+                by <i>{{ submission.account.get_username | title }}</i>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p class="card-text fst-italic lead">
+            Sorry, but no feedback submissions were found at this time!
+        </p>
+        <p class="card-text fst-italic lead">
+            Please check back again later, or
+            <a href="{% url 'submit_feedback' %}#submit">submit your own</a> feedback.
+        </p>
+    {% endif %}
+    </div>
+</div>
+{% endblock feedback_content %}

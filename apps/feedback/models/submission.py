@@ -1,5 +1,6 @@
 from django.core.validators import MinLengthValidator, MaxLengthValidator
 from django.db import models
+from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 from apps.accounts.models import Account
@@ -97,6 +98,12 @@ class FeedbackSubmission(models.Model):
     def __str__(self) -> str:
         return f"{self.subject} ({self.get_submission_type_display()})"
 
+    def get_absolute_url(self) -> str:
+        return (
+            f'{reverse(viewname="feedback_submission", args=(self.pk,))}'
+            '#subject'
+        )
+
     def natural_key(self) -> int:
         # Natural key has to be the ID.
         return self.submission_id
@@ -118,6 +125,6 @@ class FeedbackSubmission(models.Model):
             raise
 
     def should_display(self) -> bool:
-        if self.private or self.is_complete():
+        if self.is_private() or self.is_complete():
             return False
         return True

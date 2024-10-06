@@ -1,17 +1,16 @@
 {% extends "layout.html" %}
 {% block meta_title %}Feedback{% endblock meta_title %}
-{% block meta_description %}Submit feedback about {{ WEBSITE_TITLE }}.{% endblock meta_description %}
-{% block meta_url %}{% url 'feedback' %}{% endblock meta_url %}
+{% block meta_description %}Feedback about {{ WEBSITE_TITLE }}.{% endblock meta_description %}
+{% block meta_url %}{% url 'feedback' %}#feedback{% endblock meta_url %}
 {% block title %}Feedback{% endblock title %}
 {% block header %}
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item" title="Portal">
-            <span class="text-ishar bi bi-trophy"></span>
+            <span class="text-ishar bi bi-flag"></span>
             <a href="{% url 'portal' %}#portal" id="portal">Portal</a>
         </li>
         <li class="breadcrumb-item active" aria-current="page" title="Feedback">
-            <span class="bi bi-flag text-ishar"></span>
             <a href="{% url 'feedback' %}#feedback" id="feedback">Feedback</a>
         </li>
     </ol>
@@ -19,33 +18,46 @@
 {% endblock header %}
 {% block content %}
 <div class="p-3">
+    {% block feedback_content %}
     <div class="card m-1">
         <div class="card-body">
-            <p class="card-text lead">
-                Please feel free to submit any bug reports, ideas, suggestions,
-                or other feedback that you have about Ishar MUD!
-            </p>
+            <ul class="list-group list-group-horizontal-md">
+        {% if request.user.is_forger %}
+                <li class="bg-black border border-secondary card-text list-group-item-dark list-group-item" title="Feedback Admin">
+                    <span class="bi bi-gear text-ishar"></span>
+                    <a class="list-group-item-text" href="{% url 'admin:feedback_feedbacksubmission_changelist' %}" target="_blank">
+                        Admin
+                    </a>
+                </li>
+        {% endif %}
+                <li class="bg-black border border-secondary card-text list-group-item-dark list-group-item" title="Submit Feedback">
+                    <span class="bi bi-mailbox-flag text-ishar"></span>
+                    <a class="list-group-item-text" href="{% url 'submit_feedback' %}">
+                        Submit
+                    </a>
+                </li>
+                <li class="bg-black border border-secondary card-text list-group-item-dark list-group-item" title="View All Feedback">
+                    <span class="bi bi-view-list text-ishar"></span>
+                    <a class="list-group-item-text" href="{% url 'all_feedback' %}">
+                        View All
+                    </a>
+                </li>
+            </ul>
         </div>
     </div>
 </div>
-    {% if form %}
 <div class="p-3">
-    <form method="post">
-        <div class="bg-black border-ishar card container-sm">
-            <div class="card-body">
-                <p class="bg-black card-text mb-3">
-                    {{ form.as_p }}
-                </p>
-                {% csrf_token %}
-                <p class="card-text mb-3">
-                    <button class="btn btn-outline-primary" type="submit">Send</button>
-                    <button class="btn btn-outline-secondary" type="reset">Reset</button>
-                </p>
-            </div>
+    <div class="card m-1">
+        <div class="card-body">
+            <p class="card-text lead">
+                Please feel free to <a href="{% url 'submit_feedback' %}#submit">submit</a>
+                any bug reports, ideas, suggestions, or other feedback that you have about Ishar MUD!
+            </p>
         </div>
-    </form>
+    </div>
+    {% endblock feedback_content %}
 </div>
-    {% endif %}
+    {% block feedback_footer %}
 <div class="p-3">
     <div class="card">
         <div class="card-body">
@@ -59,4 +71,5 @@
         </div>
     </div>
 </div>
+    {% endblock feedback_footer %}
 {% endblock content %}

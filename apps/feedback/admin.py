@@ -8,7 +8,6 @@ from .models.choices import FeedbackSubmissionType
 from .models.submission import FeedbackSubmission
 
 
-
 class FeedbackCompleteListFilter(admin.SimpleListFilter):
     """Admin list filter to identify (in)complete feedback submissions."""
 
@@ -42,8 +41,8 @@ class FeedbackAdmin(admin.ModelAdmin):
     actions_on_bottom = actions_on_top = True
     date_hierarchy = "submitted"
     fields = (
-        "submission_id", "submission_type", "is_complete", "is_private",
-        "account", "submitted", "subject", "body_text"
+        "submission_id", "submission_type", "private", "account", "submitted",
+        "subject", "body_text"
     )
     list_display = (
         "submission_id", "subject", "submission_type",
@@ -53,19 +52,27 @@ class FeedbackAdmin(admin.ModelAdmin):
     list_filter = (
         "submission_type",
         "private",
+        FeedbackCompleteListFilter,
         ("account", admin.RelatedOnlyFieldListFilter),
-        "submitted",
-        FeedbackCompleteListFilter
+        "submitted"
     )
     readonly_fields = (
-        "submission_id", "subject", "body_text", "account", "submitted",
-        "is_complete", "is_private"
+        "submission_id", "account", "submitted", "is_complete", "is_private"
     )
     search_fields = ("subject", "body_text", "account__account_name")
     show_facets = admin.ShowFacets.ALWAYS
     show_full_result_count = True
     verbose_name = "Submission"
     verbose_name_plural = "Submissions"
+
+    def get_readonly_fields(self, request, obj=None):
+        fields = super().get_readonly_fields(request, obj=obj)
+        if request.user and not request.user.is_anonymous:
+            if not request.user.is_god():
+                fields = fields + (
+                    "submission_type", "subject", "body_text", "private"
+                )
+        return fields
 
     def has_module_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:

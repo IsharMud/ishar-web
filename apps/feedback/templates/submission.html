@@ -1,0 +1,32 @@
+{% extends "feedback.html" %}
+{% block meta_title %}Feedback {{ submission.subject }}{% endblock meta_title %}
+{% block meta_description %}View feedback submission {{ submission.subject }}.{% endblock meta_description %}
+{% block meta_url %}{{ submission.get_absolute_url }}{% endblock meta_url %}
+{% block title %}Feedback{% endblock title %}
+{% block header %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item" title="Portal">
+            <span class="text-flag bi bi-flag"></span>
+            <a href="{% url 'portal' %}#portal" id="portal">Portal</a>
+        </li>
+        <li class="breadcrumb-item" title="Feedback">
+            <a href="{% url 'feedback' %}#feedback" id="feedback">Feedback</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page" title="All">
+            <a href="{{ submission.get_absolute_url }}" id="subject">
+                {{ submission.subject }}
+            </a>
+        </li>
+    </ol>
+</nav>
+{% endblock header %}
+{% block feedback_content %}
+<div class="card m-1">
+    <div class="card-body">
+        <p class="card-text">
+            {{ submission.body_text }}
+        </p>
+    </div>
+</div>
+{% endblock feedback_content %}

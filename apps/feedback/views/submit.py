@@ -1,19 +1,19 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
-from django.views.generic import CreateView
+from django.views.generic.edit import CreateView
 
-from .forms import SubmitFeedbackForm
-from .models import FeedbackSubmission
+from ..forms import SubmitFeedbackForm
+from ..models.submission import FeedbackSubmission
 
 
-class FeedbackView(LoginRequiredMixin, CreateView):
-    """Feedback submission form view."""
+class SubmitFeedbackView(LoginRequiredMixin, CreateView):
+    """Feedback submission creation form view."""
 
     form_class = SubmitFeedbackForm
     http_method_names = ("get", "post")
     model = FeedbackSubmission
     success_url = "/"
-    template_name = "feedback.html"
+    template_name = "submit.html"
     user = None
 
     def get_form_kwargs(self):
