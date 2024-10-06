@@ -457,6 +457,7 @@ JAZZMIN_SETTINGS = {
         # feedback
         "feedback": "fas fa-flag",
         "feedback.FeedbackSubmission": "fas fa-flag",
+        "feedback.FeedbackVote": "fas fa-person-booth",
 
         # mobiles
         "mobiles": "fas fa-skull",

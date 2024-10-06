@@ -96,11 +96,30 @@ class FeedbackSubmission(models.Model):
         return f"{self.__class__.__name__}: {self.__str__()} [{self.pk}]"
 
     def __str__(self) -> str:
-        return f"{self.subject} ({self.get_submission_type_display()})"
+        return f"{self.get_submission_type_display()}: {self.subject}"
 
     def natural_key(self) -> int:
         # Natural key has to be the ID.
         return self.submission_id
+
+    def calculate_votes(self) -> int:
+        vote_total = 0
+        for vote in self.votes.all():
+            if vote.vote_value is True:
+                vote_total = vote_total + 1
+            if vote.vote_value is False:
+                vote_total = vote_total - 1
+        return vote_total
+
+    @property
+    def vote_total(self) -> int:
+        return self.calculate_votes()
+
+    def get_vote_display(self) -> str:
+        vote_total = self.vote_total
+        if vote_total > 0:
+            vote_total = f"+{vote_total}"
+        return str(vote_total)
 
     def is_complete(self) -> bool:
         if self.submission_type == FeedbackSubmissionType.COMPLETE:

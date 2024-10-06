@@ -1,2 +1,2 @@
-from .comment import FeedbackComment
 from .submission import FeedbackSubmission
+from .vote import FeedbackVote

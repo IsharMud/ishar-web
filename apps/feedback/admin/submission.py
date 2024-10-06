@@ -4,8 +4,10 @@ from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 
-from .models.choices import FeedbackSubmissionType
-from .models.submission import FeedbackSubmission
+from ..models.choices import FeedbackSubmissionType
+from ..models.submission import FeedbackSubmission
+
+from .inlines.vote import FeedbackVoteAdminInline
 
 
 class FeedbackCompleteListFilter(admin.SimpleListFilter):
@@ -44,11 +46,11 @@ class FeedbackAdmin(admin.ModelAdmin):
         "submission_id", "submission_type", "private", "account", "submitted",
         "subject", "body_text"
     )
+    inlines = (FeedbackVoteAdminInline,)
     list_display = (
-        "submission_id", "subject", "submission_type",
+        "__str__", "submission_type", "vote_count",
         "is_complete", "is_private", "account", "submitted"
     )
-    list_display_links = ("submission_id", "subject")
     list_filter = (
         "submission_type",
         "private",
@@ -64,6 +66,10 @@ class FeedbackAdmin(admin.ModelAdmin):
     show_full_result_count = True
     verbose_name = "Submission"
     verbose_name_plural = "Submissions"
+
+    @admin.display(description="Votes", ordering="votes")
+    def vote_count(self, obj=None):
+        return obj.get_vote_display()
 
     def get_readonly_fields(self, request, obj=None):
         fields = super().get_readonly_fields(request, obj=obj)
