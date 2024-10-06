@@ -30,12 +30,21 @@
 </div>
 {% if submissions %}
         {% for submission in submissions %}
-<div class="px-4 py-2">
+<div class="px-4 py-2" id="{{ submission.submission_id }}">
     <div class="card m-1">
-        <div class="card-header card-title">
-            <i class="{{ submission.get_display_icon }}"></i>
-            <strong class="h5 mx-1">{{ submission.subject }}</strong>
-            {{ submission.get_vote_display_badge }}
+        <div class="card-header">
+            <a class="anchor-link" href="#{{ submission.submission_id }}" aria-label="Link to this {{ submission.get_submission_type_display }}: {{ submission.subject }} ({{ submission.submission_id }})">
+                <i class="bi bi-{{ submission.display_icon }} text-primary text-decoration-none" title="{{ submission.get_submission_type_display }}: {{ submission.subject }} ({{ submission.submission_id }})"></i>
+            </a>
+    {% if submission.private %}
+            <i class="bi bi-lock text-danger" title="This is a Private suggestion."></i>
+    {% endif %}
+            <strong class="card-title h5 mx-1">{{ submission.subject }}</strong>
+    {% if not submission.private %}
+            <span class="badge rounded-pill text-bg-{% if submission.vote_total > 0 %}success{% elif submission.vote_total < 0 %}danger{% else %}secondary{% endif %}">
+                {% if submission.vote_total > 0 %}+{% endif %}<span id="voteTotal{{ submission.submission_id }}">{{ submission.vote_total }}</span>
+            </span>
+    {% endif %}
         </div>
         <div class="card-body">
             <blockquote class="blockquote mb-0">

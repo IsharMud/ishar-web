@@ -43,12 +43,12 @@ class FeedbackAdmin(admin.ModelAdmin):
     actions_on_bottom = actions_on_top = True
     date_hierarchy = "submitted"
     fields = (
-        "submission_id", "submission_type", "vote_count", "private",
+        "submission_id", "submission_type", "vote_total", "private",
         "account", "submitted", "subject", "body_text"
     )
     inlines = (FeedbackVoteAdminInline,)
     list_display = (
-        "__str__", "submission_type", "vote_count",
+        "__str__", "submission_type", "vote_total",
         "is_complete", "is_private", "account", "submitted"
     )
     list_filter = (
@@ -60,7 +60,7 @@ class FeedbackAdmin(admin.ModelAdmin):
     )
     readonly_fields = (
         "submission_id", "account", "submitted", "is_complete", "is_private",
-        "vote_count"
+        "vote_total"
     )
     search_fields = ("subject", "body_text", "account__account_name")
     show_facets = admin.ShowFacets.ALWAYS
@@ -69,8 +69,13 @@ class FeedbackAdmin(admin.ModelAdmin):
     verbose_name_plural = "Submissions"
 
     @admin.display(description="Votes", ordering="votes")
-    def vote_count(self, obj=None):
-        return obj.get_vote_display()
+    def vote_total(self, obj=None):
+        return obj.vote_total
+
+    def get_inlines(self, request, obj):
+        if obj.is_private() is True:
+            return ()
+        return super().get_inlines(request, obj)
 
     def get_readonly_fields(self, request, obj=None):
         fields = super().get_readonly_fields(request, obj=obj)

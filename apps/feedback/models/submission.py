@@ -101,7 +101,10 @@ class FeedbackSubmission(models.Model):
         # Natural key has to be the ID.
         return self.submission_id
 
-    def calculate_votes(self) -> int:
+    def calculate_votes(self) -> (None, int):
+        if self.is_private() is True:
+            return None
+
         vote_total = 0
         for vote in self.votes.all():
             if vote.vote_value is True:
@@ -110,15 +113,11 @@ class FeedbackSubmission(models.Model):
                 vote_total = vote_total - 1
         return vote_total
 
-    @property
-    def vote_total(self) -> int:
-        return self.calculate_votes()
-
-    def get_vote_display(self) -> str:
-        vote_total = self.vote_total
-        if vote_total > 0:
-            vote_total = f"+{vote_total}"
-        return str(vote_total)
+    def is_bug(self) -> bool:
+        if self.submission_type == FeedbackSubmissionType.BUG_REPORT:
+            return True
+        return False
+    is_bug_report = is_bug
 
     def is_complete(self) -> bool:
         if self.submission_type == FeedbackSubmissionType.COMPLETE:
@@ -136,28 +135,12 @@ class FeedbackSubmission(models.Model):
         except:
             raise
 
-    def get_vote_display_color(self) -> str:
-        color = "secondary"
-        if self.vote_total > 0:
-            color = "success"
-        if self.vote_total < 0:
-            color = "danger"
-        return color
+    @property
+    def display_icon(self):
+        if self.is_bug():
+            return "bug"
+        return "person-raised-hand"
 
-    def get_vote_display_badge(self):
-        return format_html(
-            '<span class="badge rounded-pill text-bg-{}">{}</span>',
-            self.get_vote_display_color(), self.vote_total
-        )
-
-    def get_display_icon(self):
-        color = "info"
-        icon = "person-raised-hand"
-
-        if self.is_private():
-            color = "danger"
-
-        if self.submission_type == FeedbackSubmissionType.BUG_REPORT:
-            icon = "bug"
-
-        return f"bi bi-{icon} text-{color}"
+    @property
+    def vote_total(self) -> (None, int):
+        return self.calculate_votes()
