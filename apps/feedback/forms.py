@@ -1,6 +1,6 @@
 from django.core import validators
 from django.forms import (
-    ModelForm, BooleanField, CharField, CheckboxInput, Select, Textarea,
+    ModelForm, BooleanField, CharField, CheckboxInput, RadioSelect, Textarea,
     TextInput, TypedChoiceField
 )
 
@@ -20,13 +20,8 @@ class SubmitFeedbackForm(ModelForm):
         choices=FeedbackSubmissionTypePublic,
         coerce=int,
         # help_text="Type",
-        label="Type",
-        widget=Select(
-            attrs={
-                "class": "form-control rounded",
-                "aria-label": "Type",
-            }
-        )
+        # label="Type",
+        widget=RadioSelect(attrs={"aria-label": "Type"})
     )
     subject = CharField(
         # help_text="Subject / Title",
@@ -64,12 +59,7 @@ class SubmitFeedbackForm(ModelForm):
         # help_text="Private?",
         label="Private?",
         required=False,
-        widget=CheckboxInput(
-            attrs={
-                # "class": "form-control rounded",
-                "aria-label": "Private?",
-            }
-        )
+        widget=CheckboxInput(attrs={"aria-label": "Private?"})
     )
 
     class Meta:
