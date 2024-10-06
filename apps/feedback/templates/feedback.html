@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% load humanize %}
 {% block meta_title %}Feedback{% endblock meta_title %}
 {% block meta_description %}Feedback about {{ WEBSITE_TITLE }}.{% endblock meta_description %}
 {% block meta_url %}{% url 'feedback' %}#feedback{% endblock meta_url %}
@@ -35,7 +36,7 @@
                     </a>
                     <strong>{{ submission.subject }}</strong>
                     <span class="text-secondary">
-                        @ {{ submission.submitted }}
+                        @ {{ submission.submitted | naturaltime }}
                         <i>by {{ submission.account.get_username | title }}</i>
                     </span>
                 </summary>
