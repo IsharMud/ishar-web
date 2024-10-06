@@ -52,6 +52,7 @@ class SubmitFeedbackForm(ModelForm):
                 "class": "form-control rounded",
                 "aria-label": "Message",
                 "placeholder": "Message",
+                "rows": 4
             }
         )
     )

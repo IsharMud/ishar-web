@@ -32,13 +32,16 @@
         {% for submission in submissions %}
 <div class="px-4 py-2">
     <div class="card m-1">
+        <div class="card-header card-title">
+            <i class="{{ submission.get_display_icon }}"></i>
+            <strong class="h5 mx-1">{{ submission.subject }}</strong>
+            <span class="badge text-bg-secondary">
+                {{ submission.get_vote_display }}
+            </span>
+        </div>
         <div class="card-body">
-            <div class="card-title">
-                <i class="{{ submission.get_display_icon }}"></i>
-                <strong>{{ submission.subject }}</strong>
-            </div>
             <blockquote class="blockquote mb-0">
-                <p class="card-text">
+                <p class="card-text small">
                     {{ submission.body_text }}
                 </p>
                 <footer class="blockquote-footer">
@@ -52,6 +55,7 @@
     </div>
 </div>
         {% endfor %}
+    {% if page_obj and page_obj.paginator.num_pages > 1 %}
 <div class="px-4 py-2">
     <div class="card m-1 bg-black">
         <div class="card-body">
@@ -59,7 +63,8 @@
         </div>
     </div>
 </div>
-    {% else %}
+    {% endif %}
+{% else %}
 <div class="px-4 py-2">
     <div class="card m-1">
         <div class="card-body">
