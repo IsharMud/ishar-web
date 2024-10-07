@@ -19,7 +19,7 @@
 {% endblock header %}
 {% block content %}
 <div class="p-3">
-    <div class="card m-1 bg-black border-ishar">
+    <div class="card m-1">
         <div class="card-body">
             <p class="card-text lead">
                 Please feel free to <a href="{% url 'submit_feedback' %}#submit">submit</a>
@@ -28,19 +28,23 @@
         </div>
     </div>
 </div>
+
 {% if submissions %}
         {% for submission in submissions %}
-<div class="px-4 py-2" id="{{ submission.submission_id }}">
-    <div class="card m-1">
+<div class="p-3">
+    <div class="border bg-black card m-1">
         <div class="card-header">
-            <a class="anchor-link" href="#{{ submission.submission_id }}" aria-label="Link to this {{ submission.get_submission_type_display }}: {{ submission.subject }} ({{ submission.submission_id }})">
+            <a class="anchor-link" id="{{ submission.submission_id }}" href="#{{ submission.submission_id }}" aria-label="Link to this {{ submission.get_submission_type_display }}: {{ submission.subject }} ({{ submission.submission_id }})">
                 <i class="bi bi-{{ submission.display_icon }} text-primary text-decoration-none" title="{{ submission.get_submission_type_display }}: {{ submission.subject }} ({{ submission.submission_id }})"></i>
             </a>
+            <strong class="card-title h5 mx-1" title="{{ submission.subject }}">
+                {{ submission.subject }}
+            </strong>
     {% if submission.private %}
-            <i class="bi bi-lock text-danger" title="This is a Private suggestion."></i>
-    {% endif %}
-            <strong class="card-title h5 mx-1">{{ submission.subject }}</strong>
-    {% if not submission.private %}
+        <span class="badge rounded-pill text-bg-danger">
+            <b class="bi bi-lock"></b>
+        </span>
+    {% else %}
             <span class="badge rounded-pill vote-count" id="voteCount-{{ submission.submission_id }}"></span>
     {% endif %}
         </div>
@@ -49,15 +53,16 @@
                 <p class="card-text small">
                     {{ submission.body_text }}
                 </p>
-                <footer class="blockquote-footer">
+                <footer class="blockquote-footer" title="{{ submission.account.get_username | title }}">
                     <cite>{{ submission.account.get_username | title }}</cite>
                 </footer>
             </blockquote>
         </div>
-        <div class="card-footer">
-            {{ submission.submitted | naturaltime }}
+        <div class="card-footer" title="{{ submission.submitted|naturaltime }} ({{ submission.submitted }})">
+            {{ submission.submitted|naturaltime }}
+            <i class="text-secondary">({{ submission.submitted }})</i>
     {% if not submission.private %}
-            <button class="vote-button border-0 bg-transparent button px-1 bi bi-arrow-up-circle text-secondary" id="voteButton-{{ submission.submission_id }}" onclick="voteFeedback(this.id)"></button>
+            <button class="vote-button border-0 bg-transparent button px-1 bi bi-arrow-up-circle text-secondary" id="voteButton-{{ submission.submission_id }}" onclick="voteFeedback(this.id)" title="Vote up"></button>
     {% endif %}
         </div>
     </div>
@@ -90,7 +95,7 @@
 </div>
     {% endif %}
 <div class="p-3">
-    <div class="card m-1 border-ishar bg-black">
+    <div class="card m-1">
         <div class="card-body">
             <p class="card-text">
                 Additionally, you are always more than welcome to reach out by e-mailing
