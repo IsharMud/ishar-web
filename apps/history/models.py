@@ -1,4 +1,8 @@
+from datetime import timedelta
+
 from django.db import models
+from django.utils.timesince import timesince
+from django.utils.timezone import localtime
 from django.utils.translation import gettext_lazy as _
 
 from apps.accounts.models.account import Account
@@ -129,3 +133,14 @@ class HistoricSeasonStat(models.Model):
 
     def __str__(self) -> str:
         return f"{self.account} - {self.player_name} @ {self.season}"
+
+    def get_total_play_timedelta(self):
+        return timedelta(seconds=self.play_time or 0)
+
+    def get_total_play_time(self):
+        return timesince(localtime() - self.get_total_play_timedelta())
+
+    def display_total_play_time(self):
+        return (
+            f"{self.get_total_play_time()} ({self.get_total_play_timedelta()})"
+        )

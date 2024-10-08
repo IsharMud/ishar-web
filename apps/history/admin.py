@@ -10,7 +10,7 @@ class HistoryAdmin(admin.ModelAdmin):
     fields = readonly_fields = (
         "season", "account", "player_name", "remorts", "player_class", "race",
         "total_renown", "challenges_completed", "quests_completed", "deaths",
-        "game_type", "play_time", "level"
+        "game_type", "display_total_play_time", "level"
     )
     list_display = (
         "season", "account", "player_name", "remorts",
@@ -44,3 +44,7 @@ class HistoryAdmin(admin.ModelAdmin):
 
     def has_view_permission(self, request, obj=None) -> bool:
         return self.has_module_permission(request, obj=obj)
+
+    @admin.display(description="Play Time", ordering="play_time")
+    def display_total_play_time(self, obj=None):
+        return obj.display_total_play_time()
