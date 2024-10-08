@@ -23,6 +23,7 @@ urlpatterns = [
     path("faq/", include("apps.faqs.urls"), name="faq"),
     path("feedback/", include("apps.feedback.urls"), name="feedback"),
     path("help/", include("apps.help.urls"), name="help"),
+    path("history/", include("apps.history.urls"), name="history"),
     path("leaders/", include("apps.leaders.urls"), name="leaders"),
     path("patches/", include("apps.patches.urls"), name="patches"),
     path("player/", include("apps.players.urls"), name="player"),

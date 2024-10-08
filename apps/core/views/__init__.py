@@ -5,10 +5,6 @@ from .home import HomeView
 from .upgrades import UpgradesView
 
 
-class HistoryView(TemplateView):
-    """History page."""
-    template_name = "history.html"
-
 class StartView(TemplateView):
     """Getting started guide."""
     template_name = "start.html"
