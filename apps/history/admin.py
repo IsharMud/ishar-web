@@ -14,7 +14,8 @@ class HistoryAdmin(admin.ModelAdmin):
     )
     list_display = (
         "season", "account", "player_name", "remorts",
-        "total_renown", "challenges_completed", "quests_completed", "deaths"
+        "total_renown", "challenges_completed", "quests_completed", "deaths",
+        "display_total_play_time"
     )
     list_display_links = ("season", "account", "player_name")
     list_filter = (
