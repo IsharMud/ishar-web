@@ -112,6 +112,7 @@ INSTALLED_APPS = [
     "apps.FAQsConfig",
     "apps.FeedbackConfig",
     "apps.HelpConfig",
+    "apps.HistoryConfig",
     "apps.LeadersConfig",
     "apps.MobilesConfig",
     "apps.NewsConfig",
@@ -453,6 +454,10 @@ JAZZMIN_SETTINGS = {
 
         # faqs
         "faqs.FAQ": "fas fa-question",
+
+        # history
+        "history": "fas fa-monument",
+        "history.HistoricSeasonStat": "fas fa-monument",
 
         # feedback
         "feedback": "fas fa-flag",

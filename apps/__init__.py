@@ -9,6 +9,7 @@ from .events import EventsConfig
 from .faqs import FAQsConfig
 from .feedback import FeedbackConfig
 from .help import HelpConfig
+from .history import HistoryConfig
 from .leaders import LeadersConfig
 from .mobiles import MobilesConfig
 from .news import NewsConfig
