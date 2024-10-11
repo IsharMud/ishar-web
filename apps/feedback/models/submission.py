@@ -1,6 +1,5 @@
 from django.core.validators import MinLengthValidator, MaxLengthValidator
 from django.db import models
-from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 
 from apps.accounts.models import Account
@@ -57,12 +56,6 @@ class FeedbackSubmission(models.Model):
         null=False,
         verbose_name=_("Message")
     )
-    private = models.BooleanField(
-        db_column="private",
-        default=False,
-        help_text=_("Should the feedback submission be private?"),
-        verbose_name=_("Private?")
-    )
     account = models.ForeignKey(
         db_column="account_id",
         blank=False,
@@ -101,10 +94,7 @@ class FeedbackSubmission(models.Model):
         # Natural key has to be the ID.
         return self.submission_id
 
-    def calculate_votes(self) -> (None, int):
-        if self.is_private() is True:
-            return None
-
+    def calculate_votes(self) -> int:
         vote_total = 0
         for vote in self.votes.all():
             if vote.vote_value is True:
@@ -123,9 +113,6 @@ class FeedbackSubmission(models.Model):
         if self.submission_type == FeedbackSubmissionType.COMPLETE:
             return True
         return False
-
-    def is_private(self) -> bool:
-        return self.private
 
     def mark_complete(self) -> bool:
         try:

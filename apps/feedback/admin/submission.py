@@ -43,24 +43,22 @@ class FeedbackAdmin(admin.ModelAdmin):
     actions_on_bottom = actions_on_top = True
     date_hierarchy = "submitted"
     fields = (
-        "submission_id", "submission_type", "vote_total", "private",
+        "submission_id", "submission_type", "vote_total",
         "account", "submitted", "subject", "body_text"
     )
     inlines = (FeedbackVoteAdminInline,)
     list_display = (
-        "__str__", "submission_type", "vote_total",
-        "is_complete", "is_private", "account", "submitted"
+        "__str__", "submission_type", "vote_total", "is_complete", "account",
+        "submitted"
     )
     list_filter = (
         "submission_type",
-        "private",
         FeedbackCompleteListFilter,
         ("account", admin.RelatedOnlyFieldListFilter),
         "submitted"
     )
     readonly_fields = (
-        "submission_id", "account", "submitted", "is_complete", "is_private",
-        "vote_total"
+        "submission_id", "account", "submitted", "is_complete", "vote_total"
     )
     search_fields = ("subject", "body_text", "account__account_name")
     show_facets = admin.ShowFacets.ALWAYS
@@ -72,18 +70,11 @@ class FeedbackAdmin(admin.ModelAdmin):
     def vote_total(self, obj=None):
         return obj.vote_total
 
-    def get_inlines(self, request, obj):
-        if obj.is_private() is True:
-            return ()
-        return super().get_inlines(request, obj)
-
     def get_readonly_fields(self, request, obj=None):
         fields = super().get_readonly_fields(request, obj=obj)
         if request.user and not request.user.is_anonymous:
             if not request.user.is_god():
-                fields = fields + (
-                    "submission_type", "subject", "body_text", "private"
-                )
+                fields = fields + ("submission_type", "subject", "body_text")
         return fields
 
     def has_module_permission(self, request, obj=None) -> bool:
@@ -111,11 +102,6 @@ class FeedbackAdmin(admin.ModelAdmin):
     def is_complete(self, obj) -> bool:
         return obj.is_complete()
     is_complete.boolean = True
-
-    @admin.display(description="Private?", ordering="-private")
-    def is_private(self, obj) -> bool:
-        return obj.is_private()
-    is_private.boolean = True
 
     @admin.action(description=f"Mark selected {verbose_name_plural} complete")
     def mark_complete(self, request, queryset):

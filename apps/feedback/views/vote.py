@@ -4,80 +4,61 @@ from django.views.generic.base import View
 
 from apps.core.views.mixins import NeverCacheMixin
 
-from ..models.choices import FeedbackSubmissionTypePublic
 from ..models.submission import FeedbackSubmission
 from ..models.vote import FeedbackVote
 
 
 class VoteFeedbackView(NeverCacheMixin, LoginRequiredMixin, View):
-    """
-    Vote on feedback submissions, via JavaScript AJAX/XMLHttpRequest ("XHR").
-    """
-    http_method_names = ("get", "post",)
-    status = 400
+    """Votes on feedback submissions."""
+
+    http_method_names = ("get", "post")
     submission = None
     vote = None
+    vote_obj = None
 
     def setup(self, request, *args, **kwargs):
         submission_id = kwargs.get("submission_id")
-        if request.user and request.user.is_authenticated:
-            try:
-                self.submission = FeedbackSubmission.objects.get(
-                    pk=submission_id,
-                    submission_type__in=FeedbackSubmissionTypePublic,
-                    private=False
-                )
-            except FeedbackSubmission.DoesNotExist as no_sub:
-                raise Http404(f"No such feedback: {submission_id}.") from no_sub
-        else:
-            self.status = 401
+        try:
+            self.submission = FeedbackSubmission.objects.get(pk=submission_id)
+        except FeedbackSubmission.DoesNotExist as nsub:
+            raise Http404(f"No such feedback: {submission_id}.") from nsub
         return super().setup(request, *args, **kwargs)
 
     def dispatch(self, request, *args, **kwargs):
-        if self.submission is not None:
-            try:
-                self.vote = FeedbackVote.objects.get(
-                    feedback_submission=self.submission,
-                    account=request.user
-                )
-                self.status = 200
-            except FeedbackVote.DoesNotExist:
-                self.status = 204
-                pass
+        try:
+            self.vote_obj = FeedbackVote.objects.get(
+                feedback_submission=self.submission,
+                account=request.user
+            )
+            self.vote = self.vote_obj.vote_value
+        except FeedbackVote.DoesNotExist:
+            self.vote = None
+
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
-        return self.final_response()
+        data = {
+            "vote": self.vote,
+            "total": self.submission.vote_total
+        }
+        return JsonResponse(data=data)
 
     def post(self, request, *args, **kwargs):
-        if self.submission:
-            if self.vote is not None:
-                if self.vote.vote_value is True:
-                    self.vote.delete()
-                    self.vote = None
-                    self.status = 202
-                    return self.final_response()
+        if isinstance(self.vote_obj, FeedbackVote):
+            self.vote_obj.delete()
+            self.vote = None
 
-            self.vote, created = FeedbackVote.objects.update_or_create(
-                vote_value=True,
-                defaults={
-                    "account": request.user,
-                    "feedback_submission": self.submission
-                }
+        else:
+            self.vote_obj, created = FeedbackVote.objects.update_or_create(
+                feedback_submission=self.submission,
+                account=request.user,
+                defaults={"vote_value": True}
             )
-            self.vote.save()
-            self.status = 201
-        return self.final_response()
+            self.vote = self.vote_obj.vote_value
 
-    def final_response(self, **kwargs):
-        data = {
-            "status": self.status,
-            "vote": {},
-            **kwargs
-        }
-        if self.vote is not None:
-            data["vote"] = {
-                "value": self.vote.vote_value,
-                "voted": self.vote.voted
+        return JsonResponse(
+            data={
+                "vote": self.vote,
+                "total": self.submission.vote_total
             }
-        return JsonResponse(data=data, status=self.status)
+        )

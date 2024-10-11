@@ -40,13 +40,7 @@
             <strong class="card-title h5 mx-1" title="{{ submission.subject }}">
                 {{ submission.subject }}
             </strong>
-    {% if submission.private %}
-        <span class="badge rounded-pill text-bg-danger">
-            <b class="bi bi-lock"></b>
-        </span>
-    {% else %}
             <span class="badge rounded-pill vote-count" id="voteCount-{{ submission.submission_id }}"></span>
-    {% endif %}
         </div>
         <div class="card-body">
             <blockquote class="blockquote mb-0">
@@ -54,16 +48,15 @@
                     {{ submission.body_text }}
                 </p>
                 <footer class="blockquote-footer" title="{{ submission.account.get_username | title }}">
-                    <cite>{{ submission.account.get_username | title }}</cite>
+                    <cite>{{ submission.submitted|naturaltime }}</cite>
                 </footer>
             </blockquote>
         </div>
-        <div class="card-footer" title="{{ submission.submitted|naturaltime }} ({{ submission.submitted }})">
-            {{ submission.submitted|naturaltime }}
-            <i class="text-secondary">({{ submission.submitted }})</i>
-    {% if not submission.private %}
-            <button class="vote-button border-0 bg-transparent button px-1 bi bi-arrow-up-circle text-secondary" id="voteButton-{{ submission.submission_id }}" onclick="voteFeedback(this.id)" title="Vote up"></button>
-    {% endif %}
+        <div class="card-footer" title="{{ submission.submitted }}">
+            <i class="text-secondary">
+                {{ submission.submitted }}
+            </i>
+            <button class="vote-button border-0 bg-transparent button px-1 bi bi-arrow-up-circle text-secondary" id="voteButton-{{ submission.submission_id }}" title="Vote up"></button>
         </div>
     </div>
 </div>
@@ -109,76 +102,55 @@
 </div>
 
 <script>
-    function displayVotes() {
-        Array.from(
-            document.getElementsByClassName("vote-count")
-        ).forEach((element) => {
-            const submissionId = element.id.replace("voteCount-", "")
-            const xhr = new XMLHttpRequest()
-            xhr.open("GET", `/feedback/vote/${submissionId}/count/`)
-            xhr.onreadystatechange = () => {
-                if (xhr.readyState === XMLHttpRequest.DONE) {
-                    if (xhr.status >= 200) {
-                        const voteTotal = JSON.parse(xhr.responseText).vote_total
-                        element.classList.remove("text-bg-danger")
-                        element.classList.remove("text-bg-success")
-                        element.classList.remove("text-bg-secondary")
-                        if (voteTotal < 0) {
-                            element.classList.add("text-bg-danger")
-                        } else if (voteTotal > 0) {
-                            element.classList.add("text-bg-success")
-                        } else {
-                            element.classList.add("text-bg-secondary")
-                        }
-                        element.textContent = voteTotal
-                    }
+    async function displayVotes(submission) {
+        let submissionId = submission.id.replace("voteButton-", "")
+        let submissionCount = document.getElementById(`voteCount-${submissionId}`)
+        let xhr = new XMLHttpRequest()
+        xhr.open("GET", `/feedback/vote/${submissionId}/`)
+        xhr.onreadystatechange = async () => {
+            if (xhr.readyState === XMLHttpRequest.DONE && xhr.status >= 200) {
+                let voteResults = JSON.parse(xhr.responseText)
+                if (voteResults.vote === true) {
+                    submission.classList.remove("text-secondary")
+                    submission.classList.add("text-ishar")
+                } else {
+                    submission.classList.remove("text-ishar")
+                    submission.classList.add("text-secondary")
                 }
-            }
-            xhr.send()
-        })
-    }
-
-    function styleButtons() {
-        Array.from(
-            document.getElementsByClassName("vote-button")
-        ).forEach((element) => {
-            const submissionId = element.id.replace("voteButton-", "")
-            const xhr = new XMLHttpRequest()
-            xhr.open("GET", `/feedback/vote/${submissionId}/`)
-            xhr.onreadystatechange = () => {
-                if (xhr.readyState === XMLHttpRequest.DONE) {
-                    if (xhr.status >= 200) {
-                        if (xhr.status === 200) {
-                            element.classList.remove("text-secondary")
-                            element.classList.add("text-ishar")
-                        }
-                        if (xhr.status === 202 || xhr.status === 204) {
-                            element.classList.remove("text-ishar")
-                            element.classList.add("text-secondary")
-                        }
-                    }
+                submissionCount.classList.remove("text-bg-danger")
+                submissionCount.classList.remove("text-bg-success")
+                submissionCount.classList.remove("text-bg-secondary")
+                if (voteResults.total < 0) {
+                    submissionCount.classList.add("text-bg-danger")
+                } else if (voteResults.total  > 0) {
+                    submissionCount.classList.add("text-bg-success")
+                } else {
+                    submissionCount.classList.add("text-bg-secondary")
                 }
-            }
-            xhr.send()
-        })
-    }
-
-    function voteFeedback(submission) {
-        const submissionId = submission.replace("voteButton-", "");
-        const xhr = new XMLHttpRequest()
-        xhr.open("POST", `/feedback/vote/${submissionId}/`)
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
-        xhr.onreadystatechange = () => {
-            if (xhr.readyState === XMLHttpRequest.DONE) {
-                if (xhr.status >= 200) {
-                    styleButtons()
-                    displayVotes()
-                }
+                submissionCount.textContent = voteResults.total
             }
         }
-        xhr.send(`csrfmiddlewaretoken={{ csrf_token }}`)
+        await xhr.send()
     }
-    styleButtons()
-    displayVotes()
+
+    async function voteFeedback(submission) {
+        let submissionId = submission.id.replace("voteButton-", "");
+        let xhr = new XMLHttpRequest()
+        xhr.open("POST", `/feedback/vote/${submissionId}/`)
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
+        xhr.onreadystatechange = async () => {
+            if (xhr.readyState === XMLHttpRequest.DONE && xhr.status >= 200) {
+                displayVotes(submission)
+            }
+        }
+        await xhr.send(`csrfmiddlewaretoken={{ csrf_token }}`)
+    }
+
+    Array.from(document.getElementsByClassName("vote-button")).forEach(
+        async (element) => {
+            element.onclick = async () => { await voteFeedback(element) }
+            await displayVotes(element)
+        }
+    )
 </script>
 {% endblock content %}

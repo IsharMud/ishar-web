@@ -1,7 +1,6 @@
 from django.core import validators
 from django.forms import (
-    ModelForm, BooleanField, CharField, CheckboxInput, RadioSelect, Textarea,
-    TextInput, TypedChoiceField
+    ModelForm, CharField, RadioSelect, Textarea, TextInput, TypedChoiceField
 )
 
 from .models.choices import FeedbackSubmissionTypePublic
@@ -56,15 +55,7 @@ class SubmitFeedbackForm(ModelForm):
             }
         )
     )
-    private = BooleanField(
-        help_text=(
-            'This setting limits your submission to "Forger" / "God" immortals.'
-        ),
-        label="Private?",
-        required=False,
-        widget=CheckboxInput(attrs={"aria-label": "Private?"})
-    )
 
     class Meta:
         model = FeedbackSubmission
-        fields = ("submission_type", "subject", "body_text", "private")
+        fields = ("submission_type", "subject", "body_text")

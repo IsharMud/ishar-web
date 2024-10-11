@@ -13,21 +13,8 @@ class FeedbackView(LoginRequiredMixin, NeverCacheMixin, ListView):
     context_object_name = "submissions"
     http_method_names = ("get",)
     model = FeedbackSubmission
-    paginate_by = 3
+    paginate_by = 5
     queryset = model.objects.exclude(
         submission_type__exact=FeedbackSubmissionType.COMPLETE
     )
     template_name = "feedback.html"
-    feedback_admin = False
-
-    def setup(self, request, *args, **kwargs):
-        if request.user and not request.user.is_anonymous:
-            if request.user.is_forger():
-                self.feedback_admin = True
-        return super().setup(request, *args, **kwargs)
-
-    def get_queryset(self):
-        qs = super().get_queryset()
-        if self.feedback_admin is True:
-            return qs
-        return qs.exclude(private__exact=True)
