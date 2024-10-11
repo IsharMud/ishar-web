@@ -27,7 +27,7 @@
         </li>
     {% if game_type %}
         <li class="breadcrumb-item active" aria-current="page" title="{{ game_type.label }} Leaders">
-            <a href="{% url 'leaders' %}{{ game_type.label|lower }}#{{ game_type.label|lower }}" id="{{ game_type.label|lower }}">
+            <a href="{% url 'leaders' %}{{ game_type.label|lower }}#{{ game_type.label|lower }}">
                 {{ game_type.label }}
             </a>
         </li>
@@ -40,19 +40,21 @@
     <div class="card m-1">
         <div class="card-body">
             <ul class="list-group list-group-horizontal">
-                <li class="list-group-item bg-black card-text" title="All">
+                <li class="list-group-item bg-black card-text" title="All" id="all">
     {% if game_type is None %}
                     <span class="text-ishar">All</span>
     {% else %}
-                    <a class="list-group-item-text" href="{% url 'leaders' %}#leaders">All</a>
+                    <a class="list-group-item-text" href="{% url 'leaders' %}#all">All</a>
     {% endif %}
                 </li>
     {% for num, name in game_types %}
-                <li class="list-group-item bg-black card-text" title="{{ name }}">
+                <li class="list-group-item bg-black card-text" title="{{ name }}" id="{{ name|lower }}">
         {% if game_type == num %}
                     <span class="text-ishar">{{ name }}</span>
         {% else %}
-                    <a class="list-group-item-text" href="{% url 'leaders' %}{{ name|lower }}#{{ name|lower }}">{{ name }}</a>
+                    <a class="list-group-item-text" href="{% url 'leaders' %}{{ name|lower }}#{{ name|lower }}">
+                        {{ name }}
+                    </a>
         {% endif %}
                 </li>
     {% endfor %}
