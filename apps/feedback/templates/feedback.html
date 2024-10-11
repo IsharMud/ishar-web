@@ -28,6 +28,33 @@
         </div>
     </div>
 </div>
+<div class="p-3">
+    <div class="card m-1">
+        <div class="card-body">
+            <ul class="list-group list-group-horizontal">
+                <li class="list-group-item bg-black card-text" title="All" id="all">
+    {% if submission_type is None %}
+                    <span class="text-ishar">All</span>
+    {% else %}
+                    <a class="list-group-item-text" href="{% url 'feedback' %}#all">All</a>
+    {% endif %}
+                </li>
+    {% for num, name in submission_types %}
+                <li class="list-group-item bg-black card-text" title="{{ name }}" id="{{ name|lower }}">
+        {% if submission_type == num %}
+                    <span class="text-ishar">{{ name }}</span>
+        {% else %}
+                    <a class="list-group-item-text" href="{% url 'feedback' %}{{ name|lower }}#{{ name|lower }}">
+                        {{ name }}
+                    </a>
+        {% endif %}
+                </li>
+    {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+
 
 {% if submissions %}
         {% for submission in submissions %}

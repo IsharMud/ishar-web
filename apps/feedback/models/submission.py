@@ -104,7 +104,7 @@ class FeedbackSubmission(models.Model):
         return vote_total
 
     def is_bug(self) -> bool:
-        if self.submission_type == FeedbackSubmissionType.BUG_REPORT:
+        if self.submission_type == FeedbackSubmissionType.BUG:
             return True
         return False
     is_bug_report = is_bug

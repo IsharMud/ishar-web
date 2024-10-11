@@ -6,8 +6,8 @@ from django.utils.translation import gettext_lazy as _
 
 class FeedbackSubmissionTypePublic(IntegerChoices):
 
-    BUG_REPORT = 1
-    IDEA = 2, _("Idea / Suggestion")
+    BUG = 1
+    IDEA = 2
 
 
     def __repr__(self) -> str:
@@ -21,8 +21,8 @@ class FeedbackSubmissionType(IntegerChoices):
 
     COMPLETE = -1
     OTHER = 0
-    BUG_REPORT = 1
-    IDEA = 2, _("Idea / Suggestion")
+    BUG = 1
+    IDEA = 2
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}: {self.__str__()} ({self.value})"
