@@ -1,0 +1,101 @@
+{% extends "layout.html" %}
+{% load humanize %}
+{% block meta_title %}{{ WEBSITE_TITLE }} News{% endblock meta_title %}
+{% block meta_description %}{{ news_post.0.subject }}{% endblock meta_description %}
+{% block meta_url %}{% url 'news' %}{% if page_obj and page_obj.number != 1 %}?page={{ page_obj.number }}#page{% else %}#news{% endif %}{% endblock meta_url %}
+{% block title %}{{ news_post.0.subject }} - {{ WEBSITE_TITLE }} News{% endblock title %}
+{% block header %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item active" aria-current="page" title="{{ page_obj.number }}" id="news">
+            <span class="bi bi-newspaper text-ishar">
+                {{ news_post.0.subject }}
+            </span>
+        </li>
+    </ol>
+</nav>
+{% endblock header %}
+{% block content %}
+<blockquote class="blockquote">
+    <div class="m-3 p-1">
+        {% autoescape off %}{{ news_post.0.body }}{% endautoescape %}
+    </div>
+    <footer class="mx-3 blockquote-footer" title="{{ news_post.0.created | date:"l, F jS, Y" }}">
+        <cite>
+            {{ news_post.0.account.get_username | title }}
+        </cite>
+        <span class="bi bi-pen"></span>
+        {{ news_post.0.created | date:"l, F jS, Y" }}
+    </footer>
+</blockquote>
+<div class="p-3">
+    <div class="border-0 card bg-black">
+        <div class="card-body">
+            <nav aria-label="news submission pages navigation">
+                <ul class="pagination m-0">
+
+    {% if page_obj.number != 1 %}
+                    <li class="page-item">
+                        <a aria-label="First" class="page-link" href="?page=1#news" >
+                            &laquo;
+                        </a>
+    {% else %}
+                    <li class="page-item disabled">
+                        <a aria-label="First" aria-hidden="true" class="page-link" href="#news">
+                            &laquo;
+                        </a>
+    {% endif %}
+                    </li>
+
+    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a aria-label="Previous" class="page-link" href="?page={{ page_obj.previous_page_number }}#news">
+                            &#8249;
+                        </a>
+    {% else %}
+                    <li class="page-item disabled">
+                        <a aria-label="Previous" aria-hidden="true" class="page-link" href="#news">
+                            &#8249;
+                        </a>
+    {% endif %}
+                    </li>
+
+    {% for item in page_obj.paginator.page_range %}
+                    <li class="page-item{% if page_obj.number == item %} active" aria-current="page{% endif %}">
+                        <a aria-label="Page #{{ item }}" class="page-link" href="?page={{ item }}#news">
+                            {{ item }}
+                        </a>
+                    </li>
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a aria-label="Next" class="page-link" href="?page={{ page_obj.next_page_number }}#news">
+                            &#8250;
+                        </a>
+    {% else %}
+                    <li class="page-item disabled">
+                        <a aria-label="Next" aria-hidden="true" class="page-link" href="#news">
+                            &#8250;
+                        </a>
+    {% endif %}
+                    </li>
+
+    {% if page_obj.number != page_obj.paginator.num_pages %}
+                    <li class="page-item">
+                        <a aria-label="Last" class="page-link" href="?page={{ page_obj.paginator.num_pages }}#news">
+                            &raquo;
+                        </a>
+    {% else %}
+                    <li class="page-item disabled">
+                        <a aria-label="Last" aria-hidden="true" class="page-link" href="#news">
+                            &raquo;
+                        </a>
+    {% endif %}
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+{% endblock content %}

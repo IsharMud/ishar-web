@@ -47,7 +47,9 @@
         {{ faq.question_text }}
     </summary>
     {% autoescape off %}
-    {{ faq.question_answer }}
+    <p>
+        {{ faq.question_answer }}
+    </p>
     {% endautoescape %}
 </details>
     {% endfor %}

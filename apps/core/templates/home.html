@@ -15,7 +15,9 @@
 {% block content %}
     {% if news %}
     <blockquote class="blockquote">
-        <p>{% autoescape off %}{{ news.body }}{% endautoescape %}</p>
+        <div class="m-1 p-1">
+            {% autoescape off %}{{ news.body }}{% endautoescape %}
+        </div>
         <footer class="blockquote-footer" title="{{ news.created | date:"l, F jS, Y" }}">
             <cite>
                 {{ news.account.get_username | title }}
@@ -24,6 +26,11 @@
             {{ news.created | date:"l, F jS, Y" }}
         </footer>
     </blockquote>
+    <small>
+        <a href="{% url 'news' %}">
+            Past News
+        </a>
+    </small>
     <hr>
     {% endif %}
     <p>
