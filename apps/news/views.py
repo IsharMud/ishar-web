@@ -9,5 +9,5 @@ class NewsView(ListView):
     context_object_name = "news_post"
     model = News
     paginate_by = 1
-    queryset = model.objects.filter(is_visible__exact=True).all()[1:]
+    queryset = model.objects.filter(is_visible__exact=True)
     template_name = "news.html"

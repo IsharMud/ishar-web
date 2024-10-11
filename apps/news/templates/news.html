@@ -1,13 +1,13 @@
 {% extends "layout.html" %}
 {% load humanize %}
-{% block meta_title %}{{ WEBSITE_TITLE }} News{% endblock meta_title %}
+{% block meta_title %}News{% endblock meta_title %}
 {% block meta_description %}{{ news_post.0.subject }}{% endblock meta_description %}
-{% block meta_url %}{% url 'news' %}{% if page_obj and page_obj.number != 1 %}?page={{ page_obj.number }}#page{% else %}#news{% endif %}{% endblock meta_url %}
+{% block meta_url %}{% url 'news' %}{% if page_obj and page_obj.number != 1 %}?page={{ page_obj.number }}#news{% else %}#news{% endif %}{% endblock meta_url %}
 {% block title %}{{ news_post.0.subject }} - {{ WEBSITE_TITLE }} News{% endblock title %}
 {% block header %}
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item active" aria-current="page" title="{{ page_obj.number }}" id="news">
+        <li class="breadcrumb-item active" aria-current="page" id="news" title="{{ news_post.0.subject }}">
             <span class="bi bi-newspaper text-ishar">
                 {{ news_post.0.subject }}
             </span>
@@ -20,12 +20,11 @@
     <div class="m-3 p-1">
         {% autoescape off %}{{ news_post.0.body }}{% endautoescape %}
     </div>
-    <footer class="mx-3 blockquote-footer" title="{{ news_post.0.created | date:"l, F jS, Y" }}">
-        <cite>
-            {{ news_post.0.account.get_username | title }}
-        </cite>
+    <footer class="mx-3 blockquote-footer" title="{{ news_post.0.account.get_username | title }} @ {{ news_post.0.created | naturaltime }} ({{ news_post.0.created | date:"l, F jS, Y" }})">
+        <cite>{{ news_post.0.account.get_username | title }}</cite>
         <span class="bi bi-pen"></span>
-        {{ news_post.0.created | date:"l, F jS, Y" }}
+        {{ news_post.0.created | naturaltime }}
+        ({{ news_post.0.created | date:"D. M. jS, Y" }})
     </footer>
 </blockquote>
 <div class="p-3">
