@@ -2,7 +2,7 @@
 {% load humanize %}
 {% block meta_title %}News{% endblock meta_title %}
 {% block meta_description %}{{ news_post.0.subject }}{% endblock meta_description %}
-{% block meta_url %}{% url 'news' %}{% if page_obj and page_obj.number != 1 %}?page={{ page_obj.number }}#news{% else %}#news{% endif %}{% endblock meta_url %}
+{% block meta_url %}{% url 'news' %}{% if page_obj and page_obj.number %}?page={{ page_obj.number }}{% endif %}#news{% endblock meta_url %}
 {% block title %}{{ news_post.0.subject }} - {{ WEBSITE_TITLE }} News{% endblock title %}
 {% block header %}
 <nav aria-label="breadcrumb">
@@ -58,15 +58,11 @@
                         </a>
     {% endif %}
                     </li>
-
-    {% for item in page_obj.paginator.page_range %}
-                    <li class="page-item{% if page_obj.number == item %} active" aria-current="page{% endif %}">
-                        <a aria-label="Page #{{ item }}" class="page-link" href="?page={{ item }}#news">
-                            {{ item }}
+                    <li class="page-item active" aria-current="page">
+                        <a aria-label="Page #{{ page_obj.number }}" class="page-link" href="?page={{ page_obj.number }}#news">
+                            {{ page_obj.number }}
                         </a>
                     </li>
-    {% endfor %}
-
     {% if page_obj.has_next %}
                     <li class="page-item">
                         <a aria-label="Next" class="page-link" href="?page={{ page_obj.next_page_number }}#news">
