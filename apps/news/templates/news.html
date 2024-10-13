@@ -27,12 +27,11 @@
         ({{ news_post.0.created | date:"D. M. jS, Y" }})
     </footer>
 </blockquote>
-<div class="p-3">
+<div class="p-3 d-flex justify-content-end">
     <div class="border-0 card bg-black">
         <div class="card-body">
             <nav aria-label="news submission pages navigation">
                 <ul class="pagination m-0">
-
     {% if page_obj.number != 1 %}
                     <li class="page-item">
                         <a aria-label="First" class="page-link" href="?page=1#news" >
