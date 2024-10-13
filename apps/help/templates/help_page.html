@@ -105,12 +105,15 @@
     {% endif %}
 
     {% if request.user.is_anonymous and not help_topic %}
-    <p class="m-1 p-1 lead">
-        If you are new here, you may want to download one of many
-        <a href="{% url 'clients' %}#clients" title="MUD clients">MUD clients</a>,
-        see our <a href="{% url 'start' %}#start" title="getting started guide">getting started guide</a>,
-        and <a href="{% url 'discord' %}" target="_blank" title="{{ WEBSITE_TITLE }} Discord Invitation">join us on Discord</a>!
-    </p>
+    <div class="alert alert-dark alert-dismissible fade show" role="alert">
+        <p class="m-1 p-1 lead">
+            <strong>If you are new here</strong>, you may want to download one of many
+            <a href="{% url 'clients' %}#clients" title="MUD clients">MUD clients</a>,
+            see our <a href="{% url 'start' %}#start" title="getting started guide">getting started guide</a>,
+            and <a href="{% url 'discord' %}" target="_blank" title="{{ WEBSITE_TITLE }} Discord Invitation">join us on Discord!</a>
+        </p>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
     {% endif %}
 
     <div class="m-1 p-1">

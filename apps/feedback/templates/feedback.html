@@ -92,7 +92,65 @@
 <div class="px-4 py-2">
     <div class="card m-1 bg-black">
         <div class="card-body">
-        {% include "pagination.html" %}
+            <nav aria-label="Feedback submission pages navigation">
+                <ul class="pagination m-0">
+            {% if page_obj.number != 1 %}
+                    <li class="page-item">
+                        <a aria-label="First" class="page-link" href="?page=1#feedback" >
+                            &laquo;
+                        </a>
+            {% else %}
+                <li class="page-item disabled">
+                    <a aria-label="First" aria-hidden="true" class="page-link" href="#feedback">
+                        &laquo;
+                    </a>
+            {% endif %}
+                </li>
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a aria-label="Previous" class="page-link" href="?page={{ page_obj.previous_page_number }}#feedback">
+                        &#8249;
+                    </a>
+            {% else %}
+                <li class="page-item disabled">
+                    <a aria-label="Previous" aria-hidden="true" class="page-link" href="#feedback">
+                        &#8249;
+                    </a>
+            {% endif %}
+                </li>
+            {% for item in page_obj.paginator.page_range %}
+                <li class="page-item{% if page_obj.number == item %} active" aria-current="page{% endif %}">
+                    <a aria-label="Page #{{ item }}" class="page-link" href="?page={{ item }}#feedback">
+                        {{ item }}
+                    </a>
+                </li>
+            {% endfor %}
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a aria-label="Next" class="page-link" href="?page={{ page_obj.next_page_number }}#feedback">
+                        &#8250;
+                    </a>
+            {% else %}
+                <li class="page-item disabled">
+                    <a aria-label="Next" aria-hidden="true" class="page-link" href="#feedback">
+                        &#8250;
+                    </a>
+            {% endif %}
+                </li>
+            {% if page_obj.number != page_obj.paginator.num_pages %}
+                <li class="page-item">
+                    <a aria-label="Last" class="page-link" href="?page={{ page_obj.paginator.num_pages }}#feedback">
+                        &raquo;
+                    </a>
+            {% else %}
+                <li class="page-item disabled">
+                    <a aria-label="Last" aria-hidden="true" class="page-link" href="#feedback">
+                        &raquo;
+                    </a>
+            {% endif %}
+                </li>
+            </ul>
+        </nav>
         </div>
     </div>
 </div>
@@ -101,10 +159,8 @@
 <div class="px-4 py-2">
     <div class="card m-1">
         <div class="card-body">
-            <p class="card-text">
-                <strong>
-                    Sorry, but no feedback submissions were found at this time.
-                </strong>
+            <p class="card-text fst-italic">
+                Sorry, but no feedback submissions were found at this time.
             </p>
             <p class="card-text">
                 Please check back again later or
