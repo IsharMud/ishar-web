@@ -23,7 +23,9 @@
 <div class="p-3">
     <div class="card">
         <div class="card-body">
-            <embed style="height: 80vh;" src="{{ patches.0.get_absolute_url }}" type="application/pdf" width="100%">
+            <div class="embed-responsive object-fit-contain border rounded">
+                <object data="{{ patches.0.get_absolute_url }}" type="application/pdf" style="height: 80vh; width: 100%"></object>
+            </div>
         </div>
         <div class="card-footer">
             <span class="blockquote-footer">
