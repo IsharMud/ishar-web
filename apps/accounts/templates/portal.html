@@ -89,7 +89,7 @@
     <hr>
     <details>
 
-        <summary class="h3 text-ishar bg-black" title="Manage Account ({{ request.user.account_name }})">
+        <summary class="h3 text-ishar bg-black" title="Player: {{ player.name }}">
             <span class="text-secondary">
                 {{  forloop.counter }}.
             </span>
@@ -167,16 +167,16 @@
 {% endif %}
 <hr>
 <details open>
-    <summary id="essence" class="h3 text-ishar" title="Essence ({{ request.user.account_name }})">
-        <a class="anchor-link" href="#essence" aria-label="Link to this section: Essence ({{ request.user.account_name }})">
+    <summary id="essence" class="text-ishar" title="Essence ({{ request.user.account_name }})">
+        <a class="anchor-link h3" href="#essence" aria-label="Link to this section: Essence ({{ request.user.account_name }})">
             &#x23;
         </a>
-        Essence
-        <span class="badge bg-dark text-white rounded-pill small">
+        <h3>Essence</h3>
+        <span class="badge bg-dark rounded-pill border border-secondary">
             {{ request.user.current_essence }}
         </span>
         <button
-            type="button" class="bg-black bi bi-question-circle border-0 p-1 small text-secondary"
+            type="button" class="bg-black bi bi-question-circle border-0 p-1 text-secondary"
             data-bs-toggle="popover" data-bs-html="true" data-bs-title="<strong>Essence?</strong>"
             data-bs-content="&quot;<a title='Help: Essence'
                 href='{% url 'help_page' help_topic='Essence' %}#topic'>Essence</a>&quot;
@@ -197,16 +197,16 @@
 </details>
 <hr>
 <details{% if request.user.upgrades.count > 0 %} open{% endif %}>
-    <summary id="upgrades" class="h3 text-ishar" title="Account Upgrades ({{ request.user.account_name }}): {{ request.user.upgrades.count }}}">
-        <a class="anchor-link" href="#upgrades" aria-label="Link to this section: Account Upgrades ({{ request.user.account_name }})">
+    <summary id="upgrades" class="text-ishar" title="Account Upgrades ({{ request.user.account_name }}): {{ request.user.upgrades.count }}}">
+        <a class="anchor-link h3" href="#upgrades" aria-label="Link to this section: Account Upgrades ({{ request.user.account_name }})">
             &#x23;
         </a>
-        Upgrades
-        <span class="badge bg-dark text-white rounded-pill small">
+        <h3>Upgrades</h3>
+        <span class="badge bg-dark rounded-pill border border-secondary">
             {{ request.user.upgrades.count }}
         </span>
         <button
-            type="button" class="bg-black bi bi-question-circle border-0 p-1 small text-secondary"
+            type="button" class="bg-black bi bi-question-circle border-0 p-1 text-secondary"
             data-bs-toggle="popover" data-bs-html="true" data-bs-title="<strong>Remort Upgrades?</strong>"
             data-bs-content="A list of player remort upgrades
                 (<em>which can be &quot;bought&quot; with renown points in-game</em>)
@@ -214,20 +214,21 @@
         </button>
     </summary>
 {% if request.user.upgrades.all %}
-    <ol class="list-group list-group-horizontal-vertical list-group-numbered">
+    <ul class="bg-black list-group list-group-unbordered border-0">
     {% for upgraded in request.user.upgrades.all %}
-        <li class="bg-black border-0 list-group-item list-group-item-dark" title="{{ upgraded.upgrade.name }}{% if upgraded.amount > 1 %} (x{{ upgraded.amount }}){% endif %}">
+        <li class="bg-black list-group-item border-0" title="{{ upgraded.upgrade.name }} (x{{ upgraded.amount }})">
+            <span class="text-secondary me-3">
+                {{  forloop.counter }}.
+            </span>
             <span class="list-group-item-text text-white">
                 {{ upgraded.upgrade.name }}
             </span>
-        {% if upgraded.amount > 1 %}
             <span class="badge bg-dark text-ishar rounded-pill">
-                x{{ upgraded.amount }}
+                {{ upgraded.amount }}
             </span>
-        {% endif %}
         </li>
     {% endfor %}
-    </ol>
+    </ul>
 {% else %}
     <p class="fst-italic text-reset" title="You have not purchased any upgrades.">
         You have not purchased any upgrades.
@@ -238,11 +239,11 @@
 <hr>
 
 <details open>
-    <summary id="created" class="h3 text-ishar" title="Account Created ({{ request.user.account_name }}): {{ request.user.created_at | naturaltime }}">
-        <a class="anchor-link" href="#created" aria-label="Link to this section: Account Created ({{ request.user.account_name }}): {{ request.user.created_at | naturaltime }}">
+    <summary id="created" class="text-ishar" title="Account Created ({{ request.user.account_name }}): {{ request.user.created_at | naturaltime }}">
+        <a class="anchor-link h3" href="#created" aria-label="Link to this section: Account Created ({{ request.user.account_name }}): {{ request.user.created_at | naturaltime }}">
             &#x23;
         </a>
-        Created
+        <h3>Created</h3>
     </summary>
     <p>Your account was created:</p>
     <blockquote class="blockquote">
