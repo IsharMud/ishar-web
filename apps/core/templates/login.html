@@ -3,7 +3,18 @@
 {% block meta_description %}Log In{% endblock meta_description %}
 {% block meta_url %}{% url 'login' %}{% endblock meta_url %}
 {% block title %}Log In{% endblock title %}
-{% block header %}<span class="bi bi-door-open"></span> Log In{% endblock header %}
+{% block header %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item active" aria-current="page" title="Log In" id="login">
+            <span class="text-ishar bi bi-door-open"></span>
+            <a href="{% url 'login' %}#login" id="login">
+                Log In
+            </a>
+        </li>
+    </ol>
+</nav>
+{% endblock header %}
 {% block content %}
     {% if form %}
         <p class="lead">
