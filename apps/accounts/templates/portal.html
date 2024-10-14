@@ -172,9 +172,17 @@
             &#x23;
         </a>
         Essence
-        <a href="{% url 'help_page' help_topic='Essence' %}" title="Help: Essence">
-            <span class="bi p-1 bi-question-circle text-secondary"></span>
-        </a>
+        <span class="badge bg-dark text-white rounded-pill small">
+            {{ request.user.current_essence }}
+        </span>
+        <button
+            type="button" class="bg-black bi bi-question-circle border-0 p-1 small text-secondary"
+            data-bs-toggle="popover" data-bs-html="true" data-bs-title="<strong>Essence?</strong>"
+            data-bs-content="&quot;<a title='Help: Essence'
+                href='{% url 'help_page' help_topic='Essence' %}#topic'>Essence</a>&quot;
+                are the rewards points that you earn during each season! Essence is preserved across seasons,
+                and can be spent by typing &quot;<code>shop</code>&quot; any time.">
+        </button>
     </summary>
     <ul class="bg-black list-group list-group-horizontal-md">
         <li class="bg-black border border-secondary list-group-item list-group-item-text text-white" title="Current: {{ request.user.current_essence }} essence">
@@ -194,11 +202,16 @@
             &#x23;
         </a>
         Upgrades
-{% if request.user.upgrades.count > 0 %}
-        <span class="badge bg-dark text-white rounded-pill">
+        <span class="badge bg-dark text-white rounded-pill small">
             {{ request.user.upgrades.count }}
         </span>
-{% endif %}
+        <button
+            type="button" class="bg-black bi bi-question-circle border-0 p-1 small text-secondary"
+            data-bs-toggle="popover" data-bs-html="true" data-bs-title="<strong>Remort Upgrades?</strong>"
+            data-bs-content="A list of player remort upgrades
+                (<em>which can be &quot;bought&quot; with renown points in-game</em>)
+                <a href='{% url 'upgrades' %}#upgrades'>is available here</a>.">
+        </button>
     </summary>
 {% if request.user.upgrades.all %}
     <ol class="list-group list-group-horizontal-vertical list-group-numbered">
@@ -243,8 +256,11 @@
 </details>
 
 <script>
-    // Enable Bootstrap tooltips.
-    const tooltipList = new bootstrap.Tooltip(document.getElementById('privateInfo'));
+    // Enable Bootstrap tooltips and popovers.
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+    const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
+    const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
 
     /* Define function to let a user toggle their profile public/private. */
     function togglePrivate(itemId) {
