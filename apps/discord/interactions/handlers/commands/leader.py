@@ -18,7 +18,8 @@ def leader(request, interaction=None):
         game_type = GameType._value2member_map_[int(find_game_type)]
         qs = qs.filter(game_type__exact=game_type.value)
         lead_label = game_type.label
-        lead_url = f'{reverse(lead_label.lower())}#{lead_label.lower()}'
+        lead_url_path = f'{lead_label.lower()}_leaders'
+        lead_url = f'{reverse(lead_url_path)}#{lead_label.lower()}'
 
     lead_player = qs.first()
     return (
