@@ -21,15 +21,15 @@
     </ol>
 </nav>
 {% endblock header %}
+{% block scripts %}let focusTo = 'patches'{% endblock scripts %}
 {% block content %}
 <div class="p-3">
-    <div class="card">
-        <div class="card-body">
-            <p class="card-text lead">
-                {{ WEBSITE_TITLE }} is under regular development,
-                and constantly being improved!
-            </p>
-        </div>
+    <div class="alert alert-dark alert-dismissible fade show" role="alert" id="patch-alert">
+        <p class="lead">
+            {{ WEBSITE_TITLE }} is under regular development,
+            and constantly being improved!
+        </p>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 </div>
     {% if patches %}

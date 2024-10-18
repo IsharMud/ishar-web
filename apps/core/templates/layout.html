@@ -35,10 +35,12 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
         <link rel="stylesheet" type="text/css" href="{% static "style.css" %}">
+{% block includes %}
+{% endblock includes %}
 
-    {% block scripts %}
-    {% endblock scripts %}
-
+        <script>
+{% block scripts %}let focusTo = null{% endblock scripts %}
+        </script>
     </head>
 
     <body class="m-1">
@@ -267,14 +269,14 @@
 {% block content %}
 {% endblock content %}
             </div>
-
-    {% block player_search_form %}
+            <script src="{% static 'js/alertRefocus.js' %}"></script>
+{% block player_search_form %}
         {% if user and user.is_authenticated and PLAYER_SEARCH_FORM %}
             <div class="bg-black rounded border-ishar m-1 p-3">
                 {% include "search_form.html" %}
             </div>
         {% endif %}
-    {% endblock player_search_form %}
+{% endblock player_search_form %}
 
         </main>
 

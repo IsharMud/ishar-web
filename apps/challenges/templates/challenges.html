@@ -4,7 +4,7 @@
 {% block meta_description %}Challenges currently available, A.{% endblock meta_description %}
 {% block meta_url %}{% url 'challenges' %}{% endblock meta_url %}
 {% block title %}Challenges{% endblock title %}
-{% block scripts %}
+{% block includes %}
     <link href="https://cdn.datatables.net/2.1.8/css/dataTables.bootstrap5.css" rel="stylesheet">
     <link href="https://cdn.datatables.net/buttons/3.1.2/css/buttons.bootstrap5.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
@@ -13,7 +13,8 @@
     <script src="https://cdn.datatables.net/buttons/3.1.2/js/dataTables.buttons.js"></script>
     <script src="https://cdn.datatables.net/buttons/3.1.2/js/buttons.bootstrap5.js"></script>
     <script src="https://cdn.datatables.net/buttons/3.1.2/js/buttons.colVis.js"></script>
-{% endblock scripts %}
+{% endblock includes %}
+{% block scripts %}let focusTo = 'challenges'{% endblock scripts %}
 {% block header %}
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
@@ -31,32 +32,27 @@
 {% endblock header %}
 {% block content %}
     {% if CURRENT_SEASON and CURRENT_SEASON.get_next_cycle %}
-<div class="container-sm w-auto p-3">
-    <div class="card">
-        <div class="g-0 row">
-            <div class="anchor-cell bi bi-clock card-header col-md-4" id="cycle">
-                <a class="anchor-link" href="#cycle" aria-label="Link to this section: Next Cycle: {{ CURRENT_SEASON.get_next_cycle | naturaltime }} ({{ CURRENT_SEASON.get_next_cycle }})">
-                    &#x23;
-                </a>
-                Next Cycle
-            </div>
-            <div class="card-body col-md-4">
-                <p class="card-text fw-bold">
-                    {{ CURRENT_SEASON.get_next_cycle | naturaltime }}
-                </p>
-            </div>
-            <div class="card-footer col-md-4">
-                <time class="fst-italic" datetime="{{ CURRENT_SEASON.get_next_cycle|date:"c" }}">
-                    {{ CURRENT_SEASON.get_next_cycle }}
-                </time>
-            </div>
-        </div>
-    </div>
-</div>
+<blockquote class="alert alert-dark alert-dismissible fade show m-3" role="alert" id="cycle">
+    <p class="lead">
+        <a class="anchor-link" href="#cycle" aria-label="Link to this section: Next Cycle: {{ CURRENT_SEASON.get_next_cycle | naturaltime }} ({{ CURRENT_SEASON.get_next_cycle }})">
+            &#x23;
+        </a>
+        Challenges will next cycle <strong>{{ CURRENT_SEASON.get_next_cycle | naturaltime }}</strong>.
+    </p>
+    <footer class="blockquote-footer" title="{{ CURRENT_SEASON.get_next_cycle }}">
+        <caption>
+            @
+            <time datetime="{{ CURRENT_SEASON.get_next_cycle|date:"c" }}">
+                {{ CURRENT_SEASON.get_next_cycle }}
+            </time>
+        </caption>
+    </footer>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</blockquote>
     {% endif %}
-<div class="container-sm w-auto">
+<div class="container-lg w-auto">
     {% if challenges %}
-    <table class="table table-borderless table-dark table-flush table-sm table-striped" id="challengesTable">
+    <table class="table table-borderless table-dark table-flush table-responsive-lg table-striped" id="challengesTable">
         <thead>
             <tr class="border-ishar text-ishar">
                 <th scope="col" title="Find & Kill">

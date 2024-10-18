@@ -4,6 +4,7 @@
 {% block meta_description %}Feedback about {{ WEBSITE_TITLE }}.{% endblock meta_description %}
 {% block meta_url %}{% url 'feedback' %}#feedback{% endblock meta_url %}
 {% block title %}Feedback{% endblock title %}
+{% block scripts %}let focusTo = 'feedback'{% endblock scripts %}
 {% block header %}
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
@@ -19,16 +20,13 @@
 {% endblock header %}
 {% block content %}
 <div class="p-3">
-    <div class="card m-1">
-        <div class="card-body">
-            <p class="card-text lead">
-                Please feel free to <a href="{% url 'submit_feedback' %}#submit">submit</a>
-                any bug reports, ideas, suggestions, or other feedback that you have about {{ WEBSITE_TITLE }}!
-            </p>
-        </div>
+    <div class="alert alert-dark alert-dismissible fade show" role="alert" id="feedback-alert">
+        <p class="lead">
+            Please feel free to <a href="{% url 'submit_feedback' %}#submit">submit</a>
+            any bug reports, ideas, suggestions, or other feedback that you have about {{ WEBSITE_TITLE }}!
+        </p>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
-</div>
-<div class="p-3">
     <div class="card m-1">
         <div class="card-body">
             <ul class="list-group list-group-horizontal">
@@ -60,9 +58,9 @@
         {% for submission in submissions %}
 <div class="p-3">
     <div class="border bg-black card m-1">
-        <div class="card-header">
-            <a class="anchor-link" id="{{ submission.submission_id }}" href="#{{ submission.submission_id }}" aria-label="Link to this {{ submission.get_submission_type_display }}: {{ submission.subject }} ({{ submission.submission_id }})">
-                <i class="bi bi-{{ submission.display_icon }} text-primary text-decoration-none" title="{{ submission.get_submission_type_display }}: {{ submission.subject }} ({{ submission.submission_id }})"></i>
+        <div class="card-header" title="{{ submission.get_submission_type_display }}: {{ submission.subject }} ({{ submission.vote_total }} vote{{ submission.vote_total|pluralize }})">
+            <a class="anchor-link" id="{{ submission.submission_id }}" href="#{{ submission.submission_id }}" aria-label="Link to this {{ submission.get_submission_type_display }}: {{ submission.subject }} ({{ submission.vote_total }} vote{{ submission.vote_total|pluralize }})">
+                <i class="bi bi-{{ submission.display_icon }} text-primary text-decoration-none"></i>
             </a>
             <strong class="card-title h5 mx-1" title="{{ submission.subject }}">
                 {{ submission.subject }}
@@ -74,7 +72,7 @@
                 <p class="card-text small">
                     {{ submission.body_text }}
                 </p>
-                <footer class="blockquote-footer" title="{{ submission.account.get_username | title }}">
+                <footer class="blockquote-footer" title="{{ submission.submitted|naturaltime }}">
                     <cite>{{ submission.submitted|naturaltime }}</cite>
                 </footer>
             </blockquote>
@@ -170,20 +168,15 @@
     </div>
 </div>
     {% endif %}
-<div class="p-3">
-    <div class="card m-1">
-        <div class="card-body">
-            <p class="card-text">
-                Additionally, you are always more than welcome to reach out by e-mailing
-                <a class="code font-monospace" href="mailto:{{ ADMIN_EMAIL }}" target="_blank" style="" title="E-mail: {{ ADMIN_EMAIL }}">
-                    {{ ADMIN_EMAIL }}
-                    <i class="bi bi-envelope-at"></i>
-                </a>.
-            </p>
-        </div>
-    </div>
+<div class="alert alert-dark alert-dismissible fade show m-3" role="alert" id="mail-alert">
+    <p>
+        Additionally, you are always more than welcome to reach out by e-mailing
+        <a class="code font-monospace" href="mailto:{{ ADMIN_EMAIL }}" target="_blank" style="" title="E-mail: {{ ADMIN_EMAIL }}">
+            {{ ADMIN_EMAIL }} <i class="bi bi-envelope-at"></i>
+        </a>.
+    </p>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
-
 <script>
     async function displayVotes(submission) {
         let submissionId = submission.id.replace("voteButton-", "")

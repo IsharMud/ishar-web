@@ -3,6 +3,7 @@
 {% block meta_description %}Log In{% endblock meta_description %}
 {% block meta_url %}{% url 'login' %}{% endblock meta_url %}
 {% block title %}Log In{% endblock title %}
+{% block scripts %}let focusTo = 'id_username'{% endblock scripts %}
 {% block header %}
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
@@ -17,33 +18,44 @@
 {% endblock header %}
 {% block content %}
     {% if form %}
+<div class="p-3">
+    <div class="alert alert-dark alert-dismissible fade show" role="alert" id="login-alert">
         <p class="lead">
             Please use your <strong><em>account name</em></strong>
             or <strong><em>e-mail address</em></strong> to log in - thank you!
         </p>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
         {% if form.errors %}
+    <div class="alert alert-dark show" role="alert">
             {% for item, err_msg in form.errors.items %}
-                {{ err_msg }}
+        <p class="text-danger">
+            <b>{{ err_msg }}</b>
+        </p>
             {% endfor %}
+    </div>
         {% endif %}
-        <form method="post">
-            <div class="bg-black border-ishar card container-sm">
-                <div class="card-body">
-                    <p class="mb-3">
-                        <label for="id_username" class="form-label">Account Name / E-mail Address:</label>
-                        <input class="bg-black form-control rounded" type="text" name="username" autocapitalize="none" autocomplete="username" maxlength="25" required="" id="id_username">
-                    </p>
-                    <p class="mb-3">
-                        <label for="id_password" class="form-label">Password</label>
-                        <input class="bg-black form-control rounded" type="password" name="password" autocomplete="current-password" required="" id="id_password">
-                    </p>
-                    {% csrf_token %}
-                    <p class="mb-3">
-                        <button class="btn btn-outline-primary" type="submit">Log In</button>
-                        <button class="btn btn-outline-secondary" type="reset">Clear</button>
-                    </p>
-                </div>
+</div>
+<div class="p-3">
+    <form method="post" id="login-form">
+        <div class="bg-black border-ishar card container-sm">
+            <div class="card-body">
+                <p class="mb-3">
+                    <label for="id_username" class="form-label">Account Name / E-mail Address:</label>
+                    <input class="bg-black form-control rounded" type="text" name="username" autocapitalize="none" autocomplete="username" maxlength="25" required="" id="id_username">
+                </p>
+                <p class="mb-3">
+                    <label for="id_password" class="form-label">Password</label>
+                    <input class="bg-black form-control rounded" type="password" name="password" autocomplete="current-password" required="" id="id_password">
+                </p>
+                {% csrf_token %}
+                <p class="mb-3">
+                    <button class="btn btn-outline-primary" type="submit">Log In</button>
+                    <button class="btn btn-outline-secondary" type="reset">Clear</button>
+                </p>
             </div>
-        </form>
+        </div>
+    </form>
+</div>
     {% endif %}
 {% endblock content %}
