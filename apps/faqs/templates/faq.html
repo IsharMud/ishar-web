@@ -40,11 +40,9 @@
         </a>
         {{ faq.question_text }}
     </summary>
-    {% autoescape off %}
-    <p>
-        {{ faq.question_answer }}
-    </p>
-    {% endautoescape %}
+    <div class="mb-3 border-bottom">
+        {% autoescape off %}{{ faq.question_answer }}{% endautoescape %}
+    </div>
 </details>
     {% endfor %}
 {% else %}
