@@ -11,7 +11,7 @@ class IsharLoginView(NeverCacheMixin, LoginView):
 
 class IsharLogoutView(NeverCacheMixin, LogoutView):
     """Log-out page."""
-    template_name = "home.html"
+    next_page = "/"
 
     def dispatch(self, request, *args, **kwargs):
         messages.success(request=request, message="You have logged out!")

@@ -213,11 +213,11 @@
                                 </li>
 
                                 <li class="nav-item" title="Log out">
-                                    <form action="{% url 'logout' %}" method="post" id="logout">
+                                    <form action="{% url 'logout' %}" method="post">
                                         {% csrf_token %}
-                                        <a class="bi bi-door-closed nav-link dropdown-item" href="#" onclick="document.getElementById('logout').submit()">
+                                        <button class="bg-black bi bi-door-closed nav-link dropdown-item" type="submit">
                                             Log Out ({{ request.user.get_username }})
-                                        </a>
+                                        </button>
                                     </form>
                                 </li>
 
@@ -253,15 +253,14 @@
 
 {% block messages %}
     {% if messages %}
-            <div class="bg-black m-3 p-3 rounded border-ishar">
-                <ul class="lead fw-bold m-0">
         {% for message in messages %}
-                    <li class="message-{{ message.tags }}">
-                        {{ message }}
-                    </li>
-        {% endfor %}
-                </ul>
+            <div class="p-3 m-3 rounded border-ishar alert alert-dark bg-black alert-dismissible fade show" role="alert">
+                <p class="fw-bold lead message-{{ message.tags }}">
+                    {{ message }}
+                </p>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
+        {% endfor %}
     {% endif %}
 {% endblock messages %}
 
