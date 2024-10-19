@@ -4,5 +4,5 @@ from django.views.generic.base import TemplateView
 from apps.core.views.mixins import NeverCacheMixin
 
 
-class PortalView(NeverCacheMixin, LoginRequiredMixin, TemplateView):
+class PortalView(LoginRequiredMixin, NeverCacheMixin, TemplateView):
     template_name = "portal.html"

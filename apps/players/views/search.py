@@ -9,7 +9,7 @@ from ..forms import PlayerSearchForm
 from ..models.player import Player
 
 
-class PlayerSearchView(NeverCacheMixin, LoginRequiredMixin, FormView):
+class PlayerSearchView(LoginRequiredMixin, NeverCacheMixin, FormView):
     """Player search view with form."""
 
     form_class = PlayerSearchForm

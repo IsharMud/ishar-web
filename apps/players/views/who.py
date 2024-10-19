@@ -7,7 +7,7 @@ from apps.core.views.mixins import NeverCacheMixin
 from apps.players.models.player import Player
 
 
-class PlayerWhoView(NeverCacheMixin, LoginRequiredMixin, ListView):
+class PlayerWhoView(LoginRequiredMixin, NeverCacheMixin, ListView):
     """Show online players."""
 
     context_object_name = "players"

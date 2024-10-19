@@ -7,7 +7,7 @@ from apps.core.views.mixins import NeverCacheMixin
 from ..models.account import Account
 
 
-class SetPrivateView(NeverCacheMixin, LoginRequiredMixin, View):
+class SetPrivateView(LoginRequiredMixin, NeverCacheMixin, View):
     """
     Set private view.
     Used by "portal" template via JavaScript AJAX/XMLHttpRequest ("XHR").

@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import Http404
 from django.views.generic.list import ListView
 
@@ -7,7 +8,7 @@ from apps.players.models.game_type import GameType
 from .models import Leader
 
 
-class LeadersView(NeverCacheMixin, ListView):
+class LeadersView(LoginRequiredMixin, NeverCacheMixin, ListView):
     """Lead players view."""
 
     model = Leader

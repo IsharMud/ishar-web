@@ -8,7 +8,7 @@ from ..models.submission import FeedbackSubmission
 from ..models.vote import FeedbackVote
 
 
-class VoteFeedbackView(NeverCacheMixin, LoginRequiredMixin, View):
+class VoteFeedbackView(LoginRequiredMixin, NeverCacheMixin, View):
     """Votes on feedback submissions."""
 
     http_method_names = ("get", "post")
