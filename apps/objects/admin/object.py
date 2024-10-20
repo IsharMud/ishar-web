@@ -8,14 +8,17 @@ from .inlines import (
     ObjectWearableFlagInline,
 )
 
-from ..models.object import Object
-
 
 class ObjectAdmin(admin.ModelAdmin):
     """Ishar object administration."""
 
     date_hierarchy = "updated_at"
-    list_display = ("vnum", "display", "appearance", "description")
+    list_display = (
+        "vnum",
+        "display",
+        "appearance",
+        "description"
+    )
     list_display_links = ("vnum", "display")
     list_filter = (
         "deleted",
@@ -38,7 +41,12 @@ class ObjectAdmin(admin.ModelAdmin):
         ObjectObjectModInline,
         ObjectWearableFlagInline,
     )
-    readonly_fields = ("vnum", "display", "created_at", "updated_at")
+    readonly_fields = (
+        "vnum",
+        "display",
+        "created_at",
+        "updated_at"
+    )
     search_fields = (
         "vnum",
         "name",

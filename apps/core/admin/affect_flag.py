@@ -1,4 +1,4 @@
-from django.contrib.admin import EmptyFieldListFilter, ModelAdmin, register
+from django.contrib.admin import EmptyFieldListFilter, ModelAdmin
 
 from ..models.affect_flag import AffectFlag
 
