@@ -17,7 +17,7 @@ class MobilePlayerFlag(models.Model):
         blank=True,
         null=True,
         help_text=_("Mobile affected by the player flag."),
-        verbose_name=_("Mobile")
+        verbose_name=_("Mobile"),
     )
     player_flag = models.ForeignKey(
         db_column="flag_id",
@@ -27,13 +27,13 @@ class MobilePlayerFlag(models.Model):
         null=True,
         help_text=_("Player flag associated with the mobile."),
         related_name="+",
-        verbose_name=_("Player Flag")
+        verbose_name=_("Player Flag"),
     )
     value = models.IntegerField(
         blank=True,
         null=True,
         help_text=_("Value of the mobile player flag."),
-        verbose_name=_("Value")
+        verbose_name=_("Value"),
     )
 
     class Meta:
@@ -41,6 +41,12 @@ class MobilePlayerFlag(models.Model):
         db_table = "mob_player_flags"
         default_related_name = "player_flag"
         ordering = ("-id",)
+        constraints = (
+            models.constraints.UniqueConstraint(
+                fields=("mobile", "player_flag"),
+                name="pflag_per_mobile"
+            ),
+        )
         unique_together = (("mobile", "player_flag"),)
         verbose_name = _("Mobile Player Flag")
         verbose_name_plural = _("Mobile Player Flags")

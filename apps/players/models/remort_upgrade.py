@@ -12,6 +12,7 @@ class RemortUpgradeManager(models.Manager):
 
 class RemortUpgrade(models.Model):
     """Ishar remort upgrade."""
+
     objects = RemortUpgradeManager()
 
     upgrade_id = models.AutoField(
@@ -20,13 +21,13 @@ class RemortUpgrade(models.Model):
             "upgrade."
         ),
         primary_key=True,
-        verbose_name=_("Upgrade ID")
+        verbose_name=_("Upgrade ID"),
     )
     name = models.CharField(
         help_text=_("Name of the remort upgrade."),
         max_length=20,
         unique=True,
-        verbose_name=_("Name")
+        verbose_name=_("Name"),
     )
     renown_cost = models.PositiveSmallIntegerField(
         help_text=_("Renown cost of the remort upgrade."),
@@ -34,20 +35,20 @@ class RemortUpgrade(models.Model):
     )
     max_value = models.PositiveSmallIntegerField(
         help_text=_("Maximum value of the remort upgrade."),
-        verbose_name=_("Maximum Value")
+        verbose_name=_("Maximum Value"),
     )
     scale = models.IntegerField(
         help_text=_("Scale of the remort upgrade."),
-        verbose_name=_("Scale")
+        verbose_name=_("Scale"),
     )
     display_name = models.CharField(
         help_text=_("Display name of the remort upgrade."),
         max_length=30,
-        verbose_name=_("Display Name")
+        verbose_name=_("Display Name"),
     )
     can_buy = models.BooleanField(
         help_text=_("Whether the remort upgrade can be bought."),
-        verbose_name=_("Can Buy?")
+        verbose_name=_("Can Buy?"),
     )
     bonus = models.IntegerField(
         help_text=_("Bonus of the remort upgrade."),
@@ -55,11 +56,13 @@ class RemortUpgrade(models.Model):
     )
     survival_scale = models.IntegerField(
         help_text=_("Scale of the remort upgrade, for survival players."),
-        verbose_name=_("Survival Scale")
+        verbose_name=_("Survival Scale"),
     )
     survival_renown_cost = models.IntegerField(
-        help_text=_("Renown cost of the remort upgrade, for survival players."),
-        verbose_name=_("Survival Renown Cost")
+        help_text=_(
+            "Renown cost of the remort upgrade, for survival players."
+        ),
+        verbose_name=_("Survival Renown Cost"),
     )
     reward_skill = models.ForeignKey(
         to=Skill,
@@ -69,7 +72,7 @@ class RemortUpgrade(models.Model):
         db_column="reward_skill",
         on_delete=models.DO_NOTHING,
         help_text=_("Skill rewarded by the remort upgrade."),
-        verbose_name=_("Reward Skill")
+        verbose_name=_("Reward Skill"),
     )
 
     class Meta:

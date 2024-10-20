@@ -12,14 +12,14 @@ class QuestPrereq(models.Model):
         help_text="Auto-generated, permanent quest pre-requisite relation ID.",
         primary_key=True,
         null=False,
-        verbose_name="Quest Prerequisite ID"
+        verbose_name="Quest Prerequisite ID",
     )
     quest = models.ForeignKey(
         to=Quest,
         on_delete=models.DO_NOTHING,
         db_column="quest_id",
         help_text="Quest which requires a prerequisite.",
-        verbose_name="Quest"
+        verbose_name="Quest",
     )
     required_quest = models.ForeignKey(
         to=Quest,
@@ -27,7 +27,7 @@ class QuestPrereq(models.Model):
         db_column="required_quest",
         help_text="Prerequisite quest, required prior to another quest.",
         related_name="questprereq_required_quest_set",
-        verbose_name="Required Quest"
+        verbose_name="Required Quest",
     )
 
     class Meta:

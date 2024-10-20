@@ -6,11 +6,13 @@ from .mixins import NeverCacheMixin
 
 class IsharLoginView(NeverCacheMixin, LoginView):
     """Log-in page."""
+
     template_name = "login.html"
 
 
 class IsharLogoutView(NeverCacheMixin, LogoutView):
     """Log-out page."""
+
     next_page = "/"
 
     def dispatch(self, request, *args, **kwargs):

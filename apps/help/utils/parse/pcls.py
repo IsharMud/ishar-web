@@ -3,6 +3,7 @@ from apps.classes.models.type import PlayerClass
 
 PLAYER_CLASS_NAMES = PlayerClass._member_map_.keys()
 
+
 def parse_player_class(pcls: str) -> (list, str):
     # Parse text right of colon for a line starting with "Class".
 

@@ -12,6 +12,6 @@ class Leader(Player):
             "-statistics__total_challenges",
             "-statistics__total_quests",
             "statistics__total_deaths",
-            "-common__level"
+            "-common__level",
         )
         proxy = True

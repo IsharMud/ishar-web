@@ -5,6 +5,7 @@ from ...models.criteria import AchievementCriteria
 
 class AchievementCriteriaTabularInline(TabularInline):
     """Achievement criteria tabular inline administration."""
+
     extra = 0
     model = AchievementCriteria
     verbose_name = "Criteria"

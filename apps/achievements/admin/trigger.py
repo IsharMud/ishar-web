@@ -3,9 +3,20 @@ from django.contrib.admin import ModelAdmin
 
 class AchievementTriggerAdmin(ModelAdmin):
     """Ishar trigger reward administration."""
-    list_display = ("achievement_triggers_id", "trigger_type", "achievement",)
-    list_display_links = ("achievement_triggers_id", "trigger_type",)
-    list_filter = ("achievement", "trigger_type",)
+
+    list_display = (
+        "achievement_triggers_id",
+        "trigger_type",
+        "achievement",
+    )
+    list_display_links = (
+        "achievement_triggers_id",
+        "trigger_type",
+    )
+    list_filter = (
+        "achievement",
+        "trigger_type",
+    )
     readonly_fields = ("achievement_triggers_id",)
 
     def has_module_permission(self, request, obj=None) -> bool:

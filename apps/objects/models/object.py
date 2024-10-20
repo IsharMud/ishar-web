@@ -52,12 +52,13 @@ class ObjectManager(models.Manager):
 
 class Object(models.Model):
     """Ishar object."""
+
     objects = ObjectManager()
 
     vnum = models.AutoField(
         help_text=_('Primary key ID number ("VNUM") of the object.'),
         primary_key=True,
-        verbose_name=_('Object ID ("VNUM")')
+        verbose_name=_('Object ID ("VNUM")'),
     )
     name = models.CharField(
         max_length=128,
@@ -71,40 +72,40 @@ class Object(models.Model):
         blank=True,
         help_text=_("Long name of the object."),
         null=True,
-        verbose_name=_("Long Name")
+        verbose_name=_("Long Name"),
     )
     appearance = models.CharField(
         max_length=256,
         blank=True,
         help_text=_("Appearance of the object."),
         null=True,
-        verbose_name=_("Appearance")
+        verbose_name=_("Appearance"),
     )
     description = models.CharField(
         max_length=8192,
         blank=True,
         help_text=_("Description of the object."),
         null=True,
-        verbose_name=_("Description")
+        verbose_name=_("Description"),
     )
     func = models.CharField(
         max_length=128,
         blank=True,
         help_text=_("Function of the object."),
         null=True,
-        verbose_name=_("Function")
+        verbose_name=_("Function"),
     )
     state = models.IntegerField(
         blank=True,
         help_text=_("State of the object."),
         null=True,
-        verbose_name=_("State")
+        verbose_name=_("State"),
     )
     timer = models.SmallIntegerField(
         blank=True,
         help_text=_("Timer for the object."),
         null=True,
-        verbose_name=_("Timer")
+        verbose_name=_("Timer"),
     )
     enchant = models.ForeignKey(
         blank=True,
@@ -118,62 +119,62 @@ class Object(models.Model):
         related_name="+",
         to=Skill,
         to_field="id",
-        verbose_name=_("Enchant")
+        verbose_name=_("Enchant"),
     )
     item_type = models.IntegerField(
         blank=True,
         choices=ObjectType,
         help_text=_("Item type of the object."),
         null=True,
-        verbose_name=_("Item Type")
+        verbose_name=_("Item Type"),
     )
     equipped = models.PositiveIntegerField(
         blank=True,
         help_text=_("Equipped integer for the object."),
         null=True,
-        verbose_name=_("Equipped")
+        verbose_name=_("Equipped"),
     )
     size = models.SmallIntegerField(
         blank=True,
         help_text=_("Size of the object."),
         null=True,
-        verbose_name=_("Size")
+        verbose_name=_("Size"),
     )
     weight = models.IntegerField(
         blank=True,
         help_text=_("Weight of the object."),
         null=True,
-        verbose_name=_("Weight")
+        verbose_name=_("Weight"),
     )
     value = models.IntegerField(
         blank=True,
         help_text=_("Value of the object."),
         null=True,
-        verbose_name=_("Value")
+        verbose_name=_("Value"),
     )
     val0 = models.IntegerField(
         blank=True,
         help_text=_("Value zero (0) of the object."),
         null=True,
-        verbose_name=_("Value Zero (0)")
+        verbose_name=_("Value Zero (0)"),
     )
     val1 = models.IntegerField(
         blank=True,
         help_text=_("Value one (1) of the object."),
         null=True,
-        verbose_name=_("Value One (1)")
+        verbose_name=_("Value One (1)"),
     )
     val2 = models.IntegerField(
         blank=True,
         help_text=_("Value two (2) of the object."),
         null=True,
-        verbose_name=_("Value Two (2)")
+        verbose_name=_("Value Two (2)"),
     )
     val3 = models.IntegerField(
         blank=True,
         help_text=_("Value three (3) of the object."),
         null=True,
-        verbose_name=_("Value Three (3)")
+        verbose_name=_("Value Three (3)"),
     )
     deleted = models.BooleanField(
         help_text=_("Is the object deleted?"),
@@ -181,17 +182,17 @@ class Object(models.Model):
     )
     created_at = models.DateTimeField(
         help_text=_("Date and time when the object was created."),
-        verbose_name=_("Created At")
+        verbose_name=_("Created At"),
     )
     updated_at = models.DateTimeField(
         help_text=_("Date and time when the object was updated."),
-        verbose_name=_("Updated At")
+        verbose_name=_("Updated At"),
     )
     calculated_value = models.IntegerField(
         blank=True,
         null=True,
         help_text=_("Calculated value of the object."),
-        verbose_name=_("Calculated Value")
+        verbose_name=_("Calculated Value"),
     )
     grant_skill = models.ForeignKey(
         to=Skill,
@@ -202,7 +203,7 @@ class Object(models.Model):
         blank=True,
         null=True,
         help_text=_("Skill granted by the object."),
-        verbose_name=_("Grant Skill")
+        verbose_name=_("Grant Skill"),
     )
 
     class Meta:

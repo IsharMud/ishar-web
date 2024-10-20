@@ -10,7 +10,7 @@ class MobileStat(models.Model):
     mob_stats_id = models.AutoField(
         primary_key=True,
         help_text=_("Auto-generated primary key for mobile statistic ID."),
-        verbose_name=_("Mobile Statistics ID")
+        verbose_name=_("Mobile Statistics ID"),
     )
     mobile = models.OneToOneField(
         to=Mobile,
@@ -20,67 +20,67 @@ class MobileStat(models.Model):
         blank=True,
         null=True,
         help_text=_("Mobile associated with the statistic."),
-        verbose_name=_("Mobile")
+        verbose_name=_("Mobile"),
     )
     num_loaded_all = models.PositiveIntegerField(
         blank=True,
         null=True,
         help_text=_("Number loaded all time."),
-        verbose_name=_("Loaded All")
+        verbose_name=_("Loaded All"),
     )
     num_loaded_season = models.PositiveIntegerField(
         blank=True,
         null=True,
         help_text=_("Number loaded for season."),
-        verbose_name=_("Loaded Season")
+        verbose_name=_("Loaded Season"),
     )
     num_killed_all = models.PositiveIntegerField(
         blank=True,
         null=True,
         help_text=_("Number killed by the mobile all time."),
-        verbose_name=_("Killed All")
+        verbose_name=_("Killed All"),
     )
     num_killed_season = models.PositiveIntegerField(
         blank=True,
         null=True,
         help_text=_("Number killed by the mobile for the season."),
-        verbose_name=_("Killed Season")
+        verbose_name=_("Killed Season"),
     )
     num_pc_killed_all = models.PositiveIntegerField(
         blank=True,
         null=True,
         help_text=_("Number of players killed by the mobile all time."),
-        verbose_name=_("Players Killed Season")
+        verbose_name=_("Players Killed Season"),
     )
     num_pc_killed_season = models.PositiveIntegerField(
         blank=True,
         null=True,
         help_text=_("Number of players killed by the mobile in the season."),
-        verbose_name=_("Players Killed Season")
+        verbose_name=_("Players Killed Season"),
     )
     num_encountered_all = models.PositiveIntegerField(
         blank=True,
         null=True,
         help_text=_("Number encountered for the mobile all time."),
-        verbose_name=_("Encountered All")
+        verbose_name=_("Encountered All"),
     )
     num_encountered_season = models.PositiveIntegerField(
         blank=True,
         null=True,
         help_text=_("Number encountered for the mobile in the season."),
-        verbose_name=_("Encountered Season")
+        verbose_name=_("Encountered Season"),
     )
     num_fled_all = models.PositiveIntegerField(
         blank=True,
         null=True,
         help_text=_("Number fled for the mobile all time."),
-        verbose_name=_("Fled All")
+        verbose_name=_("Fled All"),
     )
     num_fled_season = models.PositiveIntegerField(
         blank=True,
         null=True,
         help_text=_("Number fled for the mobile in the season."),
-        verbose_name=_("Fled Season")
+        verbose_name=_("Fled Season"),
     )
 
     class Meta:

@@ -17,7 +17,7 @@ class MobileAffectFlag(models.Model):
         ),
         null=False,
         primary_key=True,
-        verbose_name="ID"
+        verbose_name="ID",
     )
     mobile = models.ForeignKey(
         db_column="mob_id",
@@ -27,7 +27,7 @@ class MobileAffectFlag(models.Model):
         blank=True,
         null=True,
         help_text=_("Mobile affected by the affect flag."),
-        verbose_name=_("Mobile")
+        verbose_name=_("Mobile"),
     )
     affect_flag = models.ForeignKey(
         db_column="flag_id",
@@ -38,11 +38,11 @@ class MobileAffectFlag(models.Model):
         null=True,
         help_text=_("Affect flag affecting the mobile."),
         related_name="+",
-        verbose_name=_("Affect Flag")
+        verbose_name=_("Affect Flag"),
     )
     value = models.IntegerField(
         help_text=_("Value of the affect flag affecting the mobile."),
-        verbose_name=_("Value")
+        verbose_name=_("Value"),
     )
 
     class Meta:
@@ -50,6 +50,12 @@ class MobileAffectFlag(models.Model):
         db_table = "mob_affect_flags"
         default_related_name = "affect_flag"
         ordering = ("-id",)
+        constraints = (
+            models.constraints.UniqueConstraint(
+                fields=("mobile", "affect_flag"),
+                name="one_affect_per_mobile"
+            ),
+        )
         unique_together = (("mobile", "affect_flag"),)
         verbose_name = _("Mobile Affect Flag")
         verbose_name_plural = _("Mobile Affect Flags")

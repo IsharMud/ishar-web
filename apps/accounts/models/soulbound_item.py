@@ -24,13 +24,13 @@ class AccountSoulboundItem(models.Model):
         blank=True,
         null=True,
         help_text=_("Item related to account."),
-        verbose_name=_("Item")
+        verbose_name=_("Item"),
     )
     cooldown = models.PositiveIntegerField(
         blank=True,
         null=True,
         help_text=_("Cool-down for the account soulbound item."),
-        verbose_name=_("Cooldown")
+        verbose_name=_("Cooldown"),
     )
     last_used = models.DateTimeField(
         blank=True,
@@ -44,7 +44,7 @@ class AccountSoulboundItem(models.Model):
         blank=True,
         null=True,
         help_text=_("Time gained for the account soulbound item."),
-        verbose_name=_("Time Gained")
+        verbose_name=_("Time Gained"),
     )
     updated_at = models.DateTimeField(
         blank=True,
@@ -60,14 +60,23 @@ class AccountSoulboundItem(models.Model):
         blank=True,
         null=True,
         help_text=_("Account related to the soulbound item."),
-        verbose_name=_("Account")
+        verbose_name=_("Account"),
     )
 
     class Meta:
         managed = False
         db_table = "account_soulbound_items"
         default_related_name = "soulbound_item"
-        ordering = ("item__vnum", "account",)
+        ordering = (
+            "item__vnum",
+            "account",
+        )
+        constraints = (
+            models.constraints.UniqueConstraint(
+                fields=("item", "account",),
+                name="soulbound_item_per_account"
+            ),
+        )
         unique_together = (("item", "account"),)
         verbose_name = "Account Soulbound Item"
         verbose_name_plural = "Account Soulbound Items"

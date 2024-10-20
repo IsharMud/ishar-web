@@ -13,5 +13,5 @@ class PlayerSearchForm(Form):
                 "aria-label": "Player Name",
                 "placeholder": "Player Name",
             }
-        )
+        ),
     )

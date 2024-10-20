@@ -1,7 +1,12 @@
 from django.contrib import admin
 
-from .inlines import ObjectAffectFlagInline, ObjectExtraInline, \
-    ObjectFlagInline, ObjectObjectModInline, ObjectWearableFlagInline
+from .inlines import (
+    ObjectAffectFlagInline,
+    ObjectExtraInline,
+    ObjectFlagInline,
+    ObjectObjectModInline,
+    ObjectWearableFlagInline,
+)
 
 from ..models.object import Object
 
@@ -13,23 +18,34 @@ class ObjectAdmin(admin.ModelAdmin):
     list_display = ("vnum", "display", "appearance", "description")
     list_display_links = ("vnum", "display")
     list_filter = (
-        "deleted", "item_type",
+        "deleted",
+        "item_type",
         ("enchant", admin.RelatedOnlyFieldListFilter),
         ("grant_skill", admin.RelatedOnlyFieldListFilter),
         ("appearance", admin.EmptyFieldListFilter),
         ("description", admin.EmptyFieldListFilter),
         ("func", admin.EmptyFieldListFilter),
         ("extra", admin.EmptyFieldListFilter),
-        "flag__artifact", "flag__relic",
-        "created_at", "updated_at"
+        "flag__artifact",
+        "flag__relic",
+        "created_at",
+        "updated_at",
     )
     inlines = (
-        ObjectAffectFlagInline, ObjectExtraInline, ObjectFlagInline,
-        ObjectObjectModInline, ObjectWearableFlagInline
+        ObjectAffectFlagInline,
+        ObjectExtraInline,
+        ObjectFlagInline,
+        ObjectObjectModInline,
+        ObjectWearableFlagInline,
     )
     readonly_fields = ("vnum", "display", "created_at", "updated_at")
     search_fields = (
-        "vnum", "name", "longname", "appearance", "description", "func",
+        "vnum",
+        "name",
+        "longname",
+        "appearance",
+        "description",
+        "func",
     )
     show_full_result_count = True
     show_facets = admin.ShowFacets.ALWAYS

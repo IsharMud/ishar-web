@@ -5,6 +5,7 @@ from apps.skills.models.mod import SkillMod
 
 class SkillModAdminInline(TabularInline):
     """Skill/spell mod inline administration."""
+
     extra = 1
     model = SkillMod
     verbose_name = "Mod"

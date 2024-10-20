@@ -4,9 +4,8 @@ from .skill import Skill
 
 
 class SkillComponent(models.Model):
-    """
-    Skill Component.
-    """
+    """Skill component."""
+
     skill_components_id = models.AutoField(
         blank=False,
         db_column="skill_components_id",
@@ -14,7 +13,7 @@ class SkillComponent(models.Model):
         null=False,
         help_text="Auto-generated ID number of the skill-component relation.",
         primary_key=True,
-        verbose_name="Skill Component ID"
+        verbose_name="Skill Component ID",
     )
     skill = models.ForeignKey(
         blank=False,
@@ -25,7 +24,7 @@ class SkillComponent(models.Model):
         related_name="components",
         related_query_name="component",
         to=Skill,
-        verbose_name="Skill"
+        verbose_name="Skill",
     )
     component_type = models.IntegerField(
         blank=False,
@@ -36,20 +35,20 @@ class SkillComponent(models.Model):
         ),
         help_text="Type of component.",
         null=False,
-        verbose_name="Component Type"
+        verbose_name="Component Type",
     )
     component_value = models.IntegerField(
         blank=False,
         help_text="Value of component.",
         null=False,
-        verbose_name="Component Value"
+        verbose_name="Component Value",
     )
     component_count = models.SmallIntegerField(
         blank=False,
         default=1,
         null=False,
         help_text="Count of components.",
-        verbose_name="Component Count"
+        verbose_name="Component Count",
     )
 
     class Meta:

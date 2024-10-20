@@ -34,7 +34,7 @@ class GlobalEvent(models.Model):
     )
     start_time = models.DateTimeField(
         help_text="Date and time when the global event starts.",
-        verbose_name="Start Time"
+        verbose_name="Start Time",
     )
     end_time = models.DateTimeField(
         help_text="Date and time when the global event ends.",
@@ -43,12 +43,12 @@ class GlobalEvent(models.Model):
     event_name = models.CharField(
         max_length=20,
         help_text="Internal name of the event.",
-        verbose_name="Event Name"
+        verbose_name="Event Name",
     )
     event_desc = models.CharField(
         max_length=40,
         help_text="Friendly description of the event.",
-        verbose_name="Event Description"
+        verbose_name="Event Description",
     )
     xp_bonus = models.IntegerField(
         help_text="Bonus experience (XP) percentage.",
@@ -56,11 +56,11 @@ class GlobalEvent(models.Model):
     )
     shop_bonus = models.IntegerField(
         help_text="Shop discount for items bought in-game during the event.",
-        verbose_name="Shop Bonus"
+        verbose_name="Shop Bonus",
     )
     celestial_luck = models.BooleanField(
         help_text="Boolean whether celestial luck applies during the event.",
-        verbose_name="Celestial Luck"
+        verbose_name="Celestial Luck",
     )
 
     class Meta:

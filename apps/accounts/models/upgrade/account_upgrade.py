@@ -6,6 +6,7 @@ from .upgrade import AccountUpgrade
 
 class AccountAccountUpgrade(models.Model):
     """Account upgrade relation to an account."""
+
     account = models.ForeignKey(
         db_column="account_id",
         editable=False,
@@ -15,7 +16,7 @@ class AccountAccountUpgrade(models.Model):
         related_name="all_upgrades",
         on_delete=models.DO_NOTHING,
         help_text="Account with the specified upgrade.",
-        verbose_name="Account"
+        verbose_name="Account",
     )
     upgrade = models.OneToOneField(
         db_column="account_upgrades_id",
@@ -26,12 +27,12 @@ class AccountAccountUpgrade(models.Model):
         related_query_name="+",
         on_delete=models.DO_NOTHING,
         help_text="Upgrade which the account has.",
-        verbose_name="Upgrade"
+        verbose_name="Upgrade",
     )
     amount = models.PositiveIntegerField(
         db_column="amount",
         help_text="Amount of the account upgrade.",
-        verbose_name="Amount"
+        verbose_name="Amount",
     )
 
     # The composite primary key (account_upgrades_id, account_id) found,
@@ -39,6 +40,12 @@ class AccountAccountUpgrade(models.Model):
     class Meta:
         managed = False
         db_table = "accounts_account_upgrades"
+        constraints = (
+            models.constraints.UniqueConstraint(
+                fields=("account", "upgrade"),
+                name="one_upgrade_per_account"
+            ),
+        )
         unique_together = (("account", "upgrade"),)
 
     def __repr__(self) -> str:

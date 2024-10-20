@@ -8,10 +8,23 @@ class AccountSoulboundItemAdmin(StackedInline):
 
     model = AccountSoulboundItem
     extra = 1
-    fields = ("item", "cooldown", "last_used", "time_gained", "updated_at")
-    ordering = ("-last_used", "-updated_at", "item__vnum",)
+    fields = (
+        "item",
+        "cooldown",
+        "last_used",
+        "time_gained",
+        "updated_at"
+    )
+    ordering = (
+        "-last_used",
+        "-updated_at",
+        "item__vnum",
+    )
     readonly_fields = (
-        "account_soulbound_id", "last_used", "time_gained", "updated_at",
+        "account_soulbound_id",
+        "last_used",
+        "time_gained",
+        "updated_at",
     )
     verbose_name = "Soulbound Item"
     verbose_name_plural = "Soulbound Items"

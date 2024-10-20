@@ -5,9 +5,8 @@ from .skill import Skill
 
 
 class SkillForce(models.Model):
-    """
-    Ishar skill force.
-    """
+    """Ishar skill force."""
+
     id = models.AutoField(
         blank=False,
         db_column="id",
@@ -15,7 +14,7 @@ class SkillForce(models.Model):
         null=False,
         help_text="Auto-generated ID number of the skill-force relation.",
         primary_key=True,
-        verbose_name="Skill Force ID"
+        verbose_name="Skill Force ID",
     )
     skill = models.ForeignKey(
         db_column="skill_id",
@@ -24,14 +23,14 @@ class SkillForce(models.Model):
         help_text="Skill/spell related to a force.",
         related_name="forces",
         related_query_name="force",
-        verbose_name="Skill"
+        verbose_name="Skill",
     )
     force = models.ForeignKey(
         db_column="force_id",
         to=Force,
         on_delete=models.DO_NOTHING,
         help_text="Force related to a skill/spell.",
-        verbose_name="Force"
+        verbose_name="Force",
     )
 
     class Meta:

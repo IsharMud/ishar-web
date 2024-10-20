@@ -5,6 +5,7 @@ from apps.patches.models import Patch
 
 class BasePatchView(ListView):
     """Patches base list view lists all patches."""
+
     context_object_name = "patches"
     model = Patch
     template_name = "patches.html"
@@ -15,6 +16,7 @@ class BasePatchView(ListView):
 
 class PatchesView(BasePatchView):
     """Main paginated view of patches."""
+
     paginate_by = 5
 
 

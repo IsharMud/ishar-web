@@ -9,34 +9,35 @@ class AffectFlagManager(models.Manager):
 
 class AffectFlag(models.Model):
     """Ishar affect flag, used by both mobiles and players."""
+
     flag_id = models.AutoField(
         blank=False,
         help_text="Auto-generated identification number of the affect flag.",
         null=False,
         primary_key=True,
-        verbose_name="Affect Flag ID"
+        verbose_name="Affect Flag ID",
     )
     name = models.CharField(
         unique=True,
         max_length=30,
         help_text="(Internal) name of the affect flag.",
-        verbose_name="Name"
+        verbose_name="Name",
     )
     display_name = models.CharField(
         max_length=100,
         help_text="Display name of the affect flag.",
-        verbose_name="Display Name"
+        verbose_name="Display Name",
     )
     is_beneficial = models.IntegerField(
         blank=True,
         null=True,
         help_text="Is the affect flag beneficial?",
-        verbose_name="Beneficial?"
+        verbose_name="Beneficial?",
     )
     item_description = models.CharField(
         max_length=100,
         help_text="Item description of the affect flag.",
-        verbose_name="Item Description"
+        verbose_name="Item Description",
     )
 
     class Meta:

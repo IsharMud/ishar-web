@@ -23,7 +23,7 @@ class HistoricSeasonStat(models.Model):
         null=True,
         help_text=_("Season related to the historic statistic."),
         verbose_name=_("Season"),
-        related_name="+"
+        related_name="+",
     )
     account = models.ForeignKey(
         to=Account,
@@ -33,20 +33,20 @@ class HistoricSeasonStat(models.Model):
         null=True,
         help_text=_("Account related to the historic statistic."),
         verbose_name=_("Account"),
-        related_name="+"
+        related_name="+",
     )
     player_name = models.CharField(
         max_length=100,
         blank=True,
         null=True,
         help_text=_("Player name related to the historic statistic."),
-        verbose_name=_("Player Name")
+        verbose_name=_("Player Name"),
     )
     remorts = models.PositiveIntegerField(
         blank=True,
         null=True,
         help_text=_("Remorts related to the historic statistic."),
-        verbose_name=_("Remorts")
+        verbose_name=_("Remorts"),
     )
     player_class = models.ForeignKey(
         to=Class,
@@ -57,7 +57,7 @@ class HistoricSeasonStat(models.Model):
         null=True,
         help_text=_("Player class related to the historic statistic."),
         verbose_name=_("Player Class"),
-        related_name="+"
+        related_name="+",
     )
     race = models.ForeignKey(
         to=Race,
@@ -67,50 +67,50 @@ class HistoricSeasonStat(models.Model):
         null=True,
         help_text=_("Player race related to the historic statistic."),
         verbose_name=_("Player Race"),
-        related_name="+"
+        related_name="+",
     )
     total_renown = models.PositiveIntegerField(
         blank=True,
         null=True,
         help_text=_("Total renown related to the historic statistic."),
-        verbose_name=_("Total Renown")
+        verbose_name=_("Total Renown"),
     )
     challenges_completed = models.PositiveIntegerField(
         blank=True,
         null=True,
         help_text=_("Challenges completed related to the historic statistic."),
-        verbose_name=_("Challenges Completed")
+        verbose_name=_("Challenges Completed"),
     )
     quests_completed = models.PositiveIntegerField(
         blank=True,
         null=True,
         help_text=_("Quests completed related to the historic statistic."),
-        verbose_name=_("Quests Completed")
+        verbose_name=_("Quests Completed"),
     )
     deaths = models.PositiveIntegerField(
         blank=True,
         null=True,
         help_text=_("Deaths related to the historic statistic."),
-        verbose_name=_("Deaths")
+        verbose_name=_("Deaths"),
     )
     game_type = models.PositiveIntegerField(
         blank=True,
         choices=GameType,
         null=True,
         help_text=_("Game type related to the historic statistic."),
-        verbose_name=_("Game Type")
+        verbose_name=_("Game Type"),
     )
     play_time = models.PositiveIntegerField(
         blank=True,
         null=True,
         help_text=_("Play time related to the historic statistic."),
-        verbose_name=_("Play Time")
+        verbose_name=_("Play Time"),
     )
     level = models.PositiveIntegerField(
         blank=True,
         null=True,
         help_text=_("Level related to the historic statistic."),
-        verbose_name=_("Level")
+        verbose_name=_("Level"),
     )
 
     class Meta:
@@ -123,7 +123,7 @@ class HistoricSeasonStat(models.Model):
             "-challenges_completed",
             "-quests_completed",
             "deaths",
-            "-level"
+            "-level",
         )
         verbose_name = "Season Statistic"
         verbose_name_plural = "Season Statistics"
@@ -132,7 +132,11 @@ class HistoricSeasonStat(models.Model):
         return f"{self.__class__.__name__}: {self.__str__()}"
 
     def __str__(self) -> str:
-        return f"{self.account} - {self.player_name} @ {self.season}"
+        return (
+            f"{self.account} -"
+            f" {self.player_name}"
+            f" @ {self.season}"
+        )
 
     def get_total_play_timedelta(self):
         return timedelta(seconds=self.play_time or 0)
@@ -142,5 +146,6 @@ class HistoricSeasonStat(models.Model):
 
     def display_total_play_time(self):
         return (
-            f"{self.get_total_play_time()} ({self.get_total_play_timedelta()})"
+            f"{self.get_total_play_time()}"
+            f" ({self.get_total_play_timedelta()})"
         )

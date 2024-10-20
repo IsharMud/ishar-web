@@ -14,7 +14,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         discord_url = (
-            f'https://discord.com/api/v10/applications/'
+            f"https://discord.com/api/v10/applications/"
             f'{settings.DISCORD["APPLICATION_ID"]}/guilds/'
             f'{settings.DISCORD["GUILD"]}/commands'
         )
@@ -74,7 +74,9 @@ class Command(BaseCommand):
             {
                 "type": 1,
                 "name": "feedback",
-                "description": "Link to feedback page to send bug report, idea, or suggestion.",
+                "description":
+                    "Link to feedback page to send bug report,"
+                    " idea, or suggestion.",
             },
             {
                 "name": "leader",
@@ -115,9 +117,9 @@ class Command(BaseCommand):
                         "name": "topic",
                         "description": "Name of the help topic to search for.",
                         "type": 3,
-                        "required": True
+                        "required": True,
                     }
-                ]
+                ],
             },
             {
                 "type": 1,
@@ -143,9 +145,9 @@ class Command(BaseCommand):
                         "name": "spell",
                         "description": "Name of the spell to search for.",
                         "type": 3,
-                        "required": True
+                        "required": True,
                     }
-                ]
+                ],
             },
             {
                 "type": 1,
@@ -156,7 +158,9 @@ class Command(BaseCommand):
         ]
 
         reg = requests.put(
-            url=discord_url, headers=discord_headers, json=all_commands
+            url=discord_url,
+            headers=discord_headers,
+            json=all_commands
         )
 
         if reg.status_code >= 400:

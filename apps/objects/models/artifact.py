@@ -9,6 +9,7 @@ class ArtifactManager(ObjectManager):
 
 class Artifact(Object):
     """Ishar Artifact (proxy model of Object, excludes regular objects)."""
+
     objects = ArtifactManager()
 
     class Meta:

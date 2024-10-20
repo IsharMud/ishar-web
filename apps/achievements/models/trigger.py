@@ -25,6 +25,7 @@ class AchievementTriggerType(models.IntegerChoices):
 
 class AchievementTrigger(models.Model):
     """Ishar achievement trigger."""
+
     achievement_triggers_id = models.AutoField(
         help_text=_("Achievement trigger identification number primary key."),
         primary_key=True,
@@ -37,7 +38,7 @@ class AchievementTrigger(models.Model):
         to_field="achievement_id",
         on_delete=models.DO_NOTHING,
         help_text=_("Achievement related to a trigger."),
-        verbose_name=_("Achievement")
+        verbose_name=_("Achievement"),
     )
     trigger_type = models.CharField(
         blank=True,
@@ -45,14 +46,17 @@ class AchievementTrigger(models.Model):
         max_length=18,
         null=True,
         help_text=_("Type of achievement trigger."),
-        verbose_name=_("Trigger Type")
+        verbose_name=_("Trigger Type"),
     )
 
     class Meta:
         managed = False
         db_table = "achievement_triggers"
         default_related_name = "trigger"
-        ordering = ("achievement", "trigger_type",)
+        ordering = (
+            "achievement",
+            "trigger_type",
+        )
         verbose_name = _("Achievement Trigger")
         verbose_name_plural = _("Achievement Triggers")
 

@@ -27,6 +27,7 @@ class PlayerBaseManager(models.Manager):
 
 class PlayerBase(models.Model):
     """Ishar player base model."""
+
     objects = PlayerBaseManager()
 
     account = models.ForeignKey(
@@ -35,41 +36,41 @@ class PlayerBase(models.Model):
         related_query_name="player",
         related_name="players",
         help_text="Account that owns the player character.",
-        verbose_name="Account"
+        verbose_name="Account",
     )
     id = models.AutoField(
         primary_key=True,
         help_text="Auto-generated permanent player identification number.",
-        verbose_name="(Player) ID"
+        verbose_name="(Player) ID",
     )
     name = models.SlugField(
         unique=True,
         max_length=15,
         help_text="Name of the player character.",
-        verbose_name="Name"
+        verbose_name="Name",
     )
     create_ident = models.CharField(
         max_length=10,
         help_text="Ident that created the player.",
-        verbose_name="Create IDENT"
+        verbose_name="Create IDENT",
     )
     last_isp = models.CharField(
         max_length=30,
         help_text="Last Internet Service Provider (ISP) to join as the player.",
-        verbose_name="Create IDENT"
+        verbose_name="Create IDENT",
     )
     description = models.CharField(
         max_length=240,
         blank=True,
         null=True,
         help_text="User-written in-game player description.",
-        verbose_name="Description"
+        verbose_name="Description",
     )
     title = models.CharField(
         db_column="title",
         max_length=45,
         help_text="User-selectable player title.",
-        verbose_name="Title"
+        verbose_name="Title",
     )
     title_id = models.ForeignKey(
         blank=True,
@@ -78,166 +79,166 @@ class PlayerBase(models.Model):
         to=Title,
         on_delete=models.DO_NOTHING,
         help_text=_("Title related to an account."),
-        verbose_name=_("Title")
+        verbose_name=_("Title"),
     )
     poofin = models.CharField(
         max_length=80,
         help_text="String displayed upon player poof in.",
-        verbose_name="Poof In"
+        verbose_name="Poof In",
     )
     poofout = models.CharField(
         max_length=80,
         help_text="String displayed upon player poof out.",
-        verbose_name="Poof In"
+        verbose_name="Poof In",
     )
     bankacc = models.PositiveIntegerField(
         help_text="Bank account balance.",
-        verbose_name="Bank Account"
+        verbose_name="Bank Account",
     )
     logon_delay = models.PositiveSmallIntegerField(
         help_text="Delay when logging on.",
-        verbose_name="Logon Delay"
+        verbose_name="Logon Delay",
     )
     true_level = models.PositiveIntegerField(
         help_text="True level of the player character.",
         validators=[
             MinValueValidator(limit_value=1),
-            MaxValueValidator(limit_value=settings.MAX_IMMORTAL_LEVEL)
+            MaxValueValidator(limit_value=settings.MAX_IMMORTAL_LEVEL),
         ],
-        verbose_name="True Level"
+        verbose_name="True Level",
     )
     renown = models.PositiveIntegerField(
         help_text="Amount of renown available for the player to spend.",
-        verbose_name="Renown"
+        verbose_name="Renown",
     )
     remorts = models.PositiveIntegerField(
         help_text="Number of times that the player has remorted.",
-        verbose_name="Remorts"
+        verbose_name="Remorts",
     )
     favors = models.PositiveIntegerField(
         help_text="Amount of favors for the player.",
-        verbose_name="Favors"
+        verbose_name="Favors",
     )
     online = models.IntegerField(
         blank=True,
         null=True,
         help_text="Amount of time spent logged in to the game, in seconds.",
-        verbose_name="Online"
+        verbose_name="Online",
     )
     bound_room = models.PositiveIntegerField(
         help_text="Room ID number where the player is bound.",
-        verbose_name="Bound Room"
+        verbose_name="Bound Room",
     )
     load_room = models.PositiveIntegerField(
         help_text="Room ID number where the player is loaded.",
-        verbose_name="Load Room"
+        verbose_name="Load Room",
     )
     invstart_level = models.IntegerField(
         blank=True,
         null=True,
         help_text="Invisible Start Level.",
-        verbose_name="Invisible Start Level"
+        verbose_name="Invisible Start Level",
     )
     login_failures = models.PositiveSmallIntegerField(
         help_text="Number of login failures.",
-        verbose_name="Login Failures"
+        verbose_name="Login Failures",
     )
     create_haddr = models.IntegerField(
         help_text="HADDR that created the player.",
-        verbose_name="Create HADDR"
+        verbose_name="Create HADDR",
     )
     login_fail_haddr = models.IntegerField(
         blank=True,
         null=True,
         help_text="HADDR that last failed to log in to the player.",
-        verbose_name="Login Fail HADDR"
+        verbose_name="Login Fail HADDR",
     )
     last_haddr = models.IntegerField(
         blank=True,
         null=True,
         help_text="Last HADDR to join as the player.",
-        verbose_name="Last HADDR"
+        verbose_name="Last HADDR",
     )
     last_ident = models.CharField(
         max_length=10,
         blank=True,
         null=True,
         help_text="Last ident to join as the player.",
-        verbose_name="Last IDENT"
+        verbose_name="Last IDENT",
     )
     load_room_next = models.PositiveIntegerField(
         blank=True,
         null=True,
         help_text="Load Room Next.",
-        verbose_name="Load Room Next"
+        verbose_name="Load Room Next",
     )
     load_room_next_expires = models.PositiveIntegerField(
         blank=True,
         null=True,
         help_text="Load Room Next Expires.",
-        verbose_name="Load Room Next Expires"
+        verbose_name="Load Room Next Expires",
     )
     aggro_until = models.PositiveIntegerField(
         blank=True,
         null=True,
         help_text="Aggro Until.",
-        verbose_name="Aggro Until"
+        verbose_name="Aggro Until",
     )
     inn_limit = models.PositiveSmallIntegerField(
         help_text="Inn Limit.",
-        verbose_name="Inn Limit"
+        verbose_name="Inn Limit",
     )
     held_xp = models.IntegerField(
         blank=True,
         null=True,
         help_text="Held XP.",
-        verbose_name="Held XP"
+        verbose_name="Held XP",
     )
     last_isp_change = models.PositiveIntegerField(
         blank=True,
         null=True,
         help_text="Last Internet Service Provider (ISP) change.",
-        verbose_name="Last ISP Change"
+        verbose_name="Last ISP Change",
     )
     is_deleted = models.PositiveIntegerField(
         blank=False,
         default=0,
         null=False,
         help_text="Is the player character deleted?",
-        verbose_name="Is Deleted?"
+        verbose_name="Is Deleted?",
     )
     deaths = models.PositiveSmallIntegerField(
         help_text="Number of times that the player has died.",
-        verbose_name="Deaths"
+        verbose_name="Deaths",
     )
     total_renown = models.PositiveSmallIntegerField(
         help_text="Total amount of renown earned by the player.",
-        verbose_name="Total Renown"
+        verbose_name="Total Renown",
     )
     quests_completed = models.PositiveSmallIntegerField(
         help_text="Total number of quests completed by the player.",
-        verbose_name="Quests Completed"
+        verbose_name="Quests Completed",
     )
     challenges_completed = models.PositiveSmallIntegerField(
         help_text="Total number of challenges completed by the player.",
-        verbose_name="Challenges Completed"
+        verbose_name="Challenges Completed",
     )
     game_type = models.IntegerField(
+        choices=GameType,
         help_text="Player game type.",
         verbose_name="Game Type",
-        choices=GameType
     )
     birth = models.DateTimeField(
         help_text="Date and time that the player was created.",
-        verbose_name="Birth"
+        verbose_name="Birth",
     )
     logon = models.DateTimeField(
         help_text="Date and time that the player last logged on.",
-        verbose_name="Log On"
+        verbose_name="Log On",
     )
     logout = models.DateTimeField(
         help_text="Date and time that the player last logged out.",
-        verbose_name="Log Out"
+        verbose_name="Log Out",
     )
 
     class Meta:
@@ -379,11 +380,10 @@ class PlayerBase(models.Model):
         # Boolean whether player is a "God".
         return self.is_immortal_type(immortal_type="God")
 
-    @display(description="Immortal?", ordering="-true_level")
+    @display(boolean=True, description="Immortal?", ordering="-true_level")
     def is_immortal(self) -> bool:
         # Boolean whether player is immortal, or above, but not consort.
         return self.is_immortal_type(immortal_type="Immortal")
-    is_immortal.boolean = True
 
     def is_immortal_type(self, immortal_type="Immortal") -> bool:
         # Boolean whether player is an immortal of a certain type, or above.
@@ -427,7 +427,10 @@ class PlayerBase(models.Model):
         # Player link, with CSS.
         return format_html(
             '<a class="{}" href="{}" title="{}">{}</a>',
-            self.player_css, self.get_absolute_url(), self.name, self.name
+            self.player_css,
+            self.get_absolute_url(),
+            self.name,
+            self.name,
         )
 
     @property
@@ -453,7 +456,7 @@ class PlayerBase(models.Model):
             "Focus": self.common.focus,
             "Perception": self.common.perception,
             "Strength": self.common.strength,
-            "Willpower": self.common.willpower
+            "Willpower": self.common.willpower,
         }
 
         # Put players stats in appropriate order, based on their class.

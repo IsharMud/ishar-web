@@ -6,6 +6,4 @@ def deadhead(request):
     who = Player.objects.order_by("-statistics__total_deaths").first()
     url = f"<{request.scheme}://{request.get_host()}{who.get_absolute_url()}>"
     deaths = who.statistics.total_deaths
-    return (
-        f"[{who.name}]({url}) :skull_crossbones: {deaths} deaths!"
-    )
+    return f"[{who.name}]({url}) :skull_crossbones: {deaths} deaths!"

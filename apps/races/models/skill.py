@@ -14,7 +14,7 @@ class RaceSkill(models.Model):
         help_text="Primary identification number of the race skill.",
         null=False,
         primary_key=True,
-        verbose_name="Race Skill ID"
+        verbose_name="Race Skill ID",
     )
     race = models.ForeignKey(
         db_column="race_id",
@@ -23,19 +23,19 @@ class RaceSkill(models.Model):
         help_text="Race related to a skill.",
         related_name="skills",
         related_query_name="skill",
-        verbose_name="Race"
+        verbose_name="Race",
     )
     skill = models.ForeignKey(
         db_column="skill_id",
         to=Skill,
         on_delete=models.DO_NOTHING,
         help_text="Skill (or spell) related to a race.",
-        verbose_name="Skill"
+        verbose_name="Skill",
     )
     level = models.IntegerField(
         db_column="level",
         help_text="Level of a skill related to a race.",
-        verbose_name="Skill Level"
+        verbose_name="Skill Level",
     )
 
     class Meta:

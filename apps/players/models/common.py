@@ -8,6 +8,7 @@ from apps.races.models.race import Race
 
 class PlayerCommon(models.Model):
     """Ishar player common attributes for class, race, level, etc."""
+
     player = models.OneToOneField(
         db_column="player_id",
         help_text="Player character with common attributes.",
@@ -17,7 +18,7 @@ class PlayerCommon(models.Model):
         related_query_name="common",
         to=PlayerBase,
         to_field="id",
-        verbose_name="Player"
+        verbose_name="Player",
     )
     player_class = models.ForeignKey(
         db_column="class_id",
@@ -25,7 +26,7 @@ class PlayerCommon(models.Model):
         on_delete=models.DO_NOTHING,
         related_query_name="+",
         to=Class,
-        verbose_name="Class"
+        verbose_name="Class",
     )
     race = models.ForeignKey(
         db_column="race_id",
@@ -33,124 +34,124 @@ class PlayerCommon(models.Model):
         on_delete=models.DO_NOTHING,
         related_query_name="+",
         to=Race,
-        verbose_name="Race"
+        verbose_name="Race",
     )
     sex = models.IntegerField(
         choices=Gender,
         help_text="Sex/gender of the player character.",
-        verbose_name="Sex/Gender"
+        verbose_name="Sex/Gender",
     )
     level = models.PositiveIntegerField(
         help_text="Level of the player character.",
-        verbose_name="Level"
+        verbose_name="Level",
     )
     weight = models.PositiveSmallIntegerField(
         help_text="Weight of the player character, in pounds.",
-        verbose_name="Weight"
+        verbose_name="Weight",
     )
     height = models.PositiveSmallIntegerField(
         help_text="Height of the player character, in inches.",
-        verbose_name="Height"
+        verbose_name="Height",
     )
     comm_points = models.SmallIntegerField(
         help_text="Communication points of the player character.",
-        verbose_name="Communication Points"
+        verbose_name="Communication Points",
     )
     alignment = models.SmallIntegerField(
         help_text="Alignment of the player character.",
-        verbose_name="Alignment"
+        verbose_name="Alignment",
     )
     strength = models.PositiveIntegerField(
         help_text="Strength of the player character.",
-        verbose_name="Strength"
+        verbose_name="Strength",
     )
     agility = models.PositiveIntegerField(
         help_text="Agility of the player character.",
-        verbose_name="Agility"
+        verbose_name="Agility",
     )
     endurance = models.PositiveIntegerField(
         help_text="Endurance of the player character.",
-        verbose_name="Endurance"
+        verbose_name="Endurance",
     )
     perception = models.PositiveIntegerField(
         help_text="Perception of the player character.",
-        verbose_name="Perception"
+        verbose_name="Perception",
     )
     focus = models.PositiveIntegerField(
         help_text="Focus of the player character.",
-        verbose_name="Focus"
+        verbose_name="Focus",
     )
     willpower = models.PositiveIntegerField(
         help_text="Willpower of the player character.",
-        verbose_name="Willpower"
+        verbose_name="Willpower",
     )
     init_strength = models.PositiveIntegerField(
         help_text="Initial strength of the player character.",
-        verbose_name="Initial Strength"
+        verbose_name="Initial Strength",
     )
     init_agility = models.PositiveIntegerField(
         help_text="Initial agility of the player character.",
-        verbose_name="Initial Agility"
+        verbose_name="Initial Agility",
     )
     init_endurance = models.PositiveIntegerField(
         help_text="Initial endurance of the player character.",
-        verbose_name="Initial Endurance"
+        verbose_name="Initial Endurance",
     )
     init_perception = models.PositiveIntegerField(
         help_text="Initial perception of the player character.",
-        verbose_name="Initial Perception"
+        verbose_name="Initial Perception",
     )
     init_focus = models.PositiveIntegerField(
         help_text="Initial focus of the player character.",
-        verbose_name="Initial Focus"
+        verbose_name="Initial Focus",
     )
     init_willpower = models.PositiveIntegerField(
         help_text="Initial willpower of the player character.",
-        verbose_name="Initial Willpower"
+        verbose_name="Initial Willpower",
     )
     perm_hit_pts = models.SmallIntegerField(
         help_text="Permanent hit points of the player character.",
-        verbose_name="Permanent Hit Points"
+        verbose_name="Permanent Hit Points",
     )
     perm_move_pts = models.SmallIntegerField(
         help_text="Permanent movement points of the player character.",
-        verbose_name="Permanent Movement Points"
+        verbose_name="Permanent Movement Points",
     )
     perm_spell_pts = models.SmallIntegerField(
         help_text="Permanent spell points of the player character.",
-        verbose_name="Permanent Spell Points"
+        verbose_name="Permanent Spell Points",
     )
     perm_favor_pts = models.SmallIntegerField(
         help_text="Permanent favor points of the player character.",
-        verbose_name="Permanent Favor Points"
+        verbose_name="Permanent Favor Points",
     )
     curr_hit_pts = models.SmallIntegerField(
         help_text="Current hit points of the player character.",
-        verbose_name="Current Hit Points"
+        verbose_name="Current Hit Points",
     )
     curr_move_pts = models.SmallIntegerField(
         help_text="Current movement points of the player character.",
-        verbose_name="Current Movement Points"
+        verbose_name="Current Movement Points",
     )
     curr_spell_pts = models.SmallIntegerField(
         help_text="Current spell points of the player character.",
-        verbose_name="Current Spell Points"
+        verbose_name="Current Spell Points",
     )
     curr_favor_pts = models.SmallIntegerField(
         help_text="Current favor points of the player character.",
-        verbose_name="Current Favor Points"
+        verbose_name="Current Favor Points",
     )
     experience = models.IntegerField(
         help_text="Experience points for the player character.",
-        verbose_name="Experience"
+        verbose_name="Experience",
     )
     gold = models.IntegerField(
         help_text="Value of gold that the player character has.",
-        verbose_name="Gold"
+        verbose_name="Gold",
     )
     karma = models.IntegerField(
         help_text="Karma value for the player character.",
-        verbose_name="Karma"
+        verbose_name="Karma",
     )
 
     class Meta:

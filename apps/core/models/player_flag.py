@@ -10,13 +10,16 @@ class PlayerFlagManager(models.Manager):
 
 class PlayerFlag(models.Model):
     """Ishar player flag, used by both mobiles and players."""
+
     objects = PlayerFlagManager()
 
     flag_id = models.AutoField(
         db_column="flag_id",
         primary_key=True,
-        help_text=_("Auto-generated identification number of the player flag."),
-        verbose_name=_("Player Flag ID")
+        help_text=_(
+            "Auto-generated identification number of the player flag."
+        ),
+        verbose_name=_("Player Flag ID"),
     )
     name = models.CharField(
         blank=False,
@@ -25,7 +28,7 @@ class PlayerFlag(models.Model):
         null=False,
         help_text=_("Name of the player flag."),
         unique=True,
-        verbose_name=_("Name")
+        verbose_name=_("Name"),
     )
 
     class Meta:

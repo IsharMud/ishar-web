@@ -5,6 +5,7 @@ from ...models.reward import AchievementReward
 
 class AchievementRewardTabularInline(TabularInline):
     """Achievement reward tabular inline administration."""
+
     extra = 0
     model = AchievementReward
     verbose_name = "Reward"

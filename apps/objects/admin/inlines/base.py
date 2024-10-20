@@ -3,6 +3,7 @@ from django.contrib.admin import StackedInline
 
 class ObjectBaseInline(StackedInline):
     """Object base stacked inline administration."""
+
     extra = 1
     model = None
     readonly_fields = ("created_at", "updated_at")

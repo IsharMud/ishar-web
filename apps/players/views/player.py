@@ -16,7 +16,7 @@ class PlayerView(LoginRequiredMixin, NeverCacheMixin, DetailView):
     template_name = "player.html"
 
     def dispatch(self, request, *args, **kwargs):
-    # Tell immortals if they are viewing a private profile.
+        # Tell immortals if they are viewing a private profile.
         if request.user:
             if request.user.is_authenticated and request.user.is_immortal():
                 obj = self.get_object()

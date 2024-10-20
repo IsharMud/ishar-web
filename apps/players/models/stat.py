@@ -10,10 +10,11 @@ from .player import PlayerBase
 
 class PlayerStat(models.Model):
     """Ishar player statistics."""
+
     player_stats_id = models.AutoField(
         primary_key=True,
         help_text=_("Player statistics primary key identification number."),
-        verbose_name=_("Player Stats ID")
+        verbose_name=_("Player Stats ID"),
     )
     player = models.OneToOneField(
         to=PlayerBase,
@@ -23,67 +24,69 @@ class PlayerStat(models.Model):
         related_name="statistics",
         related_query_name="statistics",
         help_text=_("Player related to the statistics"),
-        verbose_name=_("Player")
+        verbose_name=_("Player"),
     )
     total_play_time = models.PositiveIntegerField(
         blank=True,
         null=True,
         help_text=_("The total play time statistic for the player."),
-        verbose_name=_("Total Play Time")
+        verbose_name=_("Total Play Time"),
     )
     remort_play_time = models.PositiveIntegerField(
         blank=True,
         null=True,
         help_text=_("The remort play time statistic for the player."),
-        verbose_name=_("Remort Play Time")
+        verbose_name=_("Remort Play Time"),
     )
     total_deaths = models.PositiveIntegerField(
         blank=True,
         null=True,
         help_text=_("Total number of deaths statistic for the player."),
-        verbose_name=_("Total Deaths")
+        verbose_name=_("Total Deaths"),
     )
     remort_deaths = models.PositiveIntegerField(
         blank=True,
         null=True,
         help_text=_("The number of remort deaths statistic for the player."),
-        verbose_name=_("Remort Deaths")
+        verbose_name=_("Remort Deaths"),
     )
     total_renown = models.PositiveIntegerField(
         blank=True,
         null=True,
         help_text=_("The number of total renown statistic for the player."),
-        verbose_name=_("Total Renown")
+        verbose_name=_("Total Renown"),
     )
     remort_renown = models.PositiveIntegerField(
         blank=True,
         null=True,
         help_text=_("The number of remort renown statistic for the player."),
-        verbose_name=_("Remort Renown")
+        verbose_name=_("Remort Renown"),
     )
     total_challenges = models.PositiveIntegerField(
         blank=True,
         null=True,
         help_text=_("The number of total challenges statistic for the player."),
-        verbose_name=_("Total Challenges")
+        verbose_name=_("Total Challenges"),
     )
     remort_challenges = models.PositiveIntegerField(
         blank=True,
         null=True,
-        help_text=_("The number of remort challenges statistic for the player."),
-        verbose_name=_("Remort Challenges")
+        help_text=_(
+            "The number of remort challenges statistic for the player."
+        ),
+        verbose_name=_("Remort Challenges"),
     )
     total_quests = models.PositiveIntegerField(
         blank=True,
         null=True,
         help_text=_("The number of total quests statistic for the player."),
-        verbose_name=_("Total Quests")
+        verbose_name=_("Total Quests"),
     )
     remort_quests = models.PositiveIntegerField(
         blank=True,
         null=True,
         help_text=_("The number of remort quests statistic for the player."),
-        verbose_name=_("Remort Quests")
+        verbose_name=_("Remort Quests"),
     )
 
     class Meta:

@@ -14,38 +14,110 @@ class PlayerAdmin(admin.ModelAdmin):
 
     date_hierarchy = "birth"
     fieldsets = (
-        (None, {"fields": (
-            "id", "account", "name", "description", "true_level", "game_type",
-            "deaths", "is_deleted",
-        )}),
-        ("Points", {"fields": ("bankacc", "renown", "remorts", "favors")}),
-        ("Totals", {"fields": (
-            "total_renown", "quests_completed", "challenges_completed"
-        )}),
-        ("Rooms", {"fields": ("bound_room", "load_room", "inn_limit")}),
-        ("Time", {"fields": (
-            "birth", "logon", "logout", "online", "online_timedelta",
-            "online_time"
-        )}),
-        ("Titles", {"fields": ("title", "title_id")}),
+        (
+            None,
+            {
+                "fields": (
+                    "id",
+                    "account",
+                    "name",
+                    "description",
+                    "true_level",
+                    "game_type",
+                    "deaths",
+                    "is_deleted",
+                )
+            },
+        ),
+        (
+            "Points",
+            {
+                "fields": (
+                    "bankacc",
+                    "renown",
+                    "remorts",
+                    "favors"
+                )
+            }
+        ),
+        (
+            "Totals",
+            {
+                "fields": (
+                    "total_renown",
+                    "quests_completed",
+                    "challenges_completed"
+                )
+            },
+        ),
+        (
+            "Rooms",
+            {
+                "fields": (
+                    "bound_room",
+                    "load_room",
+                    "inn_limit"
+                )
+            }
+        ),
+        (
+            "Time",
+            {
+                "fields": (
+                    "birth",
+                    "logon",
+                    "logout",
+                    "online",
+                    "online_timedelta",
+                    "online_time",
+                )
+            },
+        ),
+        (
+            "Titles",
+            {
+                "fields": (
+                    "title",
+                    "title_id"
+                )
+            }
+        ),
     )
     inlines = (
-        PlayerCommonInlineAdmin, PlayerFlagsInlineAdmin,
-        PlayerObjectsInlineAdmin, PlayerRemortUpgradesInlineAdmin,
+        PlayerCommonInlineAdmin,
+        PlayerFlagsInlineAdmin,
+        PlayerObjectsInlineAdmin,
+        PlayerRemortUpgradesInlineAdmin,
         PlayerStatInlineAdmin,
     )
     list_display = (
-        "name", "get_account_link", "player_type", "is_hardcore", "is_survival",
-        "player_level", "renown"
+        "name",
+        "get_account_link",
+        "player_type",
+        "is_hardcore",
+        "is_survival",
+        "player_level",
+        "renown",
     )
     list_filter = (
         "game_type",
-        ("account", admin.RelatedOnlyFieldListFilter),
+        (
+            "account",
+            admin.RelatedOnlyFieldListFilter
+        ),
     )
     readonly_fields = (
-        "id", "birth", "game_type", "logon", "logout",
-        "player_type", "player_level", "online_timedelta",
-        "online_time", "title", "title_id",
+        "id",
+        "birth",
+        "game_type",
+        "logon",
+        "logout",
+        "player_type",
+        "player_level",
+        "online_timedelta",
+        "online_time",
+        "title",
+        "title_id",
     )
     search_fields = ("name", "account__account_name")
     show_facets = admin.ShowFacets.ALWAYS
@@ -59,14 +131,14 @@ class PlayerAdmin(admin.ModelAdmin):
 
     @admin.display(description="Account", ordering="account")
     def get_account_link(self, obj):
-        """Admin link for account display."""
+        # Admin link for account display.
         return format_html(
             '<a href="{}">{}</a>',
             reverse(
                 viewname="admin:accounts_account_change",
                 args=(obj.account.account_id,)
             ),
-            obj.account.account_name
+            obj.account.account_name,
         )
 
     def has_add_permission(self, request) -> bool:

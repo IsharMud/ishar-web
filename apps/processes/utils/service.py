@@ -1,4 +1,5 @@
 """Ishar MUD server systemctl service utilities."""
+
 from os import getlogin
 from subprocess import CalledProcessError, run
 

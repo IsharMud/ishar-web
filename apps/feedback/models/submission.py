@@ -26,7 +26,7 @@ class FeedbackSubmission(models.Model):
         ),
         null=False,
         primary_key=True,
-        verbose_name=_("Submission ID")
+        verbose_name=_("Submission ID"),
     )
     submission_type = models.IntegerField(
         blank=False,
@@ -35,7 +35,7 @@ class FeedbackSubmission(models.Model):
         default=FeedbackSubmissionType.OTHER,
         null=False,
         help_text=_("Type of the feedback submission."),
-        verbose_name=_("Type")
+        verbose_name=_("Type"),
     )
     subject = models.CharField(
         max_length=64,
@@ -45,16 +45,16 @@ class FeedbackSubmission(models.Model):
         null=False,
         validators=(
             MinLengthValidator(limit_value=1),
-            MaxLengthValidator(limit_value=64)
+            MaxLengthValidator(limit_value=64),
         ),
-        verbose_name=_("Subject")
+        verbose_name=_("Subject"),
     )
     body_text = models.TextField(
         blank=False,
         db_column="body_text",
         help_text=_("Body text of the feedback submission."),
         null=False,
-        verbose_name=_("Message")
+        verbose_name=_("Message"),
     )
     account = models.ForeignKey(
         db_column="account_id",
@@ -64,7 +64,7 @@ class FeedbackSubmission(models.Model):
         on_delete=models.DO_NOTHING,
         to=Account,
         to_field="account_id",
-        verbose_name=_("Account")
+        verbose_name=_("Account"),
     )
     submitted = models.DateTimeField(
         auto_now_add=True,
@@ -72,7 +72,7 @@ class FeedbackSubmission(models.Model):
         db_column="submitted",
         help_text=_("Date and time when the feedback was submitted."),
         null=False,
-        verbose_name=_("Submitted")
+        verbose_name=_("Submitted"),
     )
 
     class Meta:
@@ -107,6 +107,7 @@ class FeedbackSubmission(models.Model):
         if self.submission_type == FeedbackSubmissionType.BUG:
             return True
         return False
+
     is_bug_report = is_bug
 
     def is_complete(self) -> bool:

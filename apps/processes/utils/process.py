@@ -1,4 +1,5 @@
 """Ishar MUD server process utilities."""
+
 from datetime import datetime
 from django.utils.timezone import make_aware, now
 from os import getlogin
@@ -9,7 +10,7 @@ from ..models.process import MUDProcess
 
 
 def get_process(name="ishar", user=getlogin()):
-    """Get Ishar MUD process information for appropriate environment."""
+    # Get Ishar MUD process information for appropriate environment.
 
     # Find existing process in the database.
     current_process = MUDProcess.objects.filter(

@@ -20,7 +20,7 @@ class MUDClientCategory(models.Model):
         help_text="Auto-generated ID number of the MUD client category.",
         null=False,
         primary_key=True,
-        verbose_name="MUD Client Category ID"
+        verbose_name="MUD Client Category ID",
     )
     name = models.CharField(
         max_length=64,
@@ -28,7 +28,7 @@ class MUDClientCategory(models.Model):
         db_column="name",
         help_text="Name of the MUD client category.",
         null=False,
-        verbose_name="Category Name"
+        verbose_name="Category Name",
     )
     is_visible = models.BooleanField(
         blank=False,
@@ -36,7 +36,7 @@ class MUDClientCategory(models.Model):
         default=True,
         help_text="Should the MUD client category be visible publicly?",
         null=False,
-        verbose_name="Visible?"
+        verbose_name="Visible?",
     )
     display_order = models.PositiveIntegerField(
         db_column="display_order",

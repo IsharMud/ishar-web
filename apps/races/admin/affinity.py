@@ -1,6 +1,4 @@
-from django.contrib.admin import (
-    ModelAdmin, register, RelatedOnlyFieldListFilter
-)
+from django.contrib.admin import ModelAdmin, register, RelatedOnlyFieldListFilter
 
 from ..models.affinity import RaceAffinity
 
@@ -11,13 +9,44 @@ class RaceAffinityAdmin(ModelAdmin):
 
     model = RaceAffinity
     fieldsets = (
-        (None, {"fields": ("race_affinity_id",)}),
-        ("Race", {"fields": ("race",)}),
-        ("Force", {"fields": ("force",)}),
-        ("Affinity", {"fields": ("affinity_type",)})
+        (
+            None,
+            {
+                "fields": (
+                    "race_affinity_id",
+                )
+            }
+        ),
+        (
+            "Race",
+            {
+                "fields": (
+                    "race",
+                )
+            }
+        ),
+        (
+            "Force",
+            {
+                "fields": (
+                    "force",
+                )
+            }
+        ),
+        (
+            "Affinity",
+            {
+                "fields": (
+                    "affinity_type",
+                )
+            }
+        ),
     )
     list_display = list_display_links = (
-        "race_affinity_id", "race", "force", "affinity_type"
+        "race_affinity_id",
+        "race",
+        "force",
+        "affinity_type",
     )
     list_filter = (
         "affinity_type",
@@ -25,7 +54,11 @@ class RaceAffinityAdmin(ModelAdmin):
         ("race", RelatedOnlyFieldListFilter),
     )
     readonly_fields = ("race_affinity_id",)
-    search_fields = ("race", "force", "affinity_type")
+    search_fields = (
+        "race",
+        "force",
+        "affinity_type"
+    )
 
     def has_module_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:

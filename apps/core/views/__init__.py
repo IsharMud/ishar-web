@@ -7,8 +7,11 @@ from .upgrades import UpgradesView
 
 class StartView(TemplateView):
     """Getting started guide."""
+
     template_name = "start.html"
+
 
 class SupportView(TemplateView):
     """Information about how to offer support."""
+
     template_name = "support.html"

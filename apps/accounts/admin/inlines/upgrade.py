@@ -6,13 +6,18 @@ from ...models.upgrade import AccountAccountUpgrade
 
 
 class AccountUpgradesLinksAdmin(TabularInline):
-    """
-    Account upgrades links tabular inline administration.
-    """
+    """Account upgrades links tabular inline administration."""
+
     extra = 0
     model = AccountAccountUpgrade
-    fields = readonly_fields = ("get_upgrade_link", "amount")
-    ordering = ("-amount", "upgrade__name")
+    fields = readonly_fields = (
+        "get_upgrade_link",
+        "amount"
+    )
+    ordering = (
+        "-amount",
+        "upgrade__name"
+    )
     verbose_name = "Upgrade"
     verbose_name_plural = "Upgrades"
 
@@ -21,14 +26,14 @@ class AccountUpgradesLinksAdmin(TabularInline):
 
     @display(description="Upgrade", ordering="upgrade")
     def get_upgrade_link(self, obj) -> str:
-        """Admin link for account upgrade."""
+        # Admin link for account upgrade.
         return format_html(
             '<a href="{}">{}</a>',
             reverse(
                 viewname="admin:accounts_accountupgrade_change",
-                args=(obj.upgrade.id,)
+                args=(obj.upgrade.id,),
             ),
-            obj.upgrade.name
+            obj.upgrade.name,
         )
 
     def has_add_permission(self, request, obj) -> bool:

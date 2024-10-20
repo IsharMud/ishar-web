@@ -20,7 +20,7 @@ class ObjectObjectMod(models.Model):
         related_query_name="+",
         to=Object,
         to_field="vnum",
-        verbose_name=_('Object ID ("VNUM")')
+        verbose_name=_('Object ID ("VNUM")'),
     )
     mod_slot = models.PositiveIntegerField(
         help_text=_("Mod slot of the object mod."),
@@ -31,7 +31,7 @@ class ObjectObjectMod(models.Model):
         help_text=_("Mod relating to the object."),
         to=ObjectMod,
         on_delete=models.DO_NOTHING,
-        verbose_name=_("Object Mod")
+        verbose_name=_("Object Mod"),
     )
     value = models.IntegerField(
         help_text=_("Value of the object's object mod."),
@@ -43,7 +43,7 @@ class ObjectObjectMod(models.Model):
     )
     updated_at = models.DateTimeField(
         help_text=_("Date and time when the object mod relation was updated."),
-        verbose_name=_("Updated At")
+        verbose_name=_("Updated At"),
     )
 
     class Meta:
@@ -51,12 +51,21 @@ class ObjectObjectMod(models.Model):
         db_table = "object_object_mods"
         constraints = (
             models.constraints.UniqueConstraint(
-                fields=("object", "mod_slot"),
+                fields=(
+                    "object",
+                    "mod_slot"
+                ),
                 name="unique_object_mod_slot"
             ),
         )
         default_related_name = "object_mod"
         ordering = ("-object", "mod_slot")
+        constraints = (
+            models.constraints.UniqueConstraint(
+                fields=("object", "mod_slot",),
+                name="one_slot_per_object"
+            ),
+        )
         unique_together = (("object", "mod_slot"),)
         verbose_name = _("Object's Mod")
         verbose_name_plural = _("Object's Mods")

@@ -23,28 +23,33 @@ class MobileDescription(models.Model):
         blank=True,
         null=True,
         help_text="Mobile with an extra description.",
-        verbose_name="Mobile"
+        verbose_name="Mobile",
     )
     extra_name = models.CharField(
         max_length=100,
         blank=True,
         null=True,
         help_text="Extra name of the mobile.",
-        verbose_name="Extra Name"
+        verbose_name="Extra Name",
     )
     extra_description = models.CharField(
         max_length=1000,
         blank=True,
         null=True,
         help_text="Extra description of the mobile.",
-        verbose_name="Extra Description"
+        verbose_name="Extra Description",
     )
 
     class Meta:
         managed = False
-        db_table = 'mob_extra_descriptions'
-        # default_related_name = "description"
+        db_table = "mob_extra_descriptions"
         ordering = ("-id",)
+        constraints = (
+            models.constraints.UniqueConstraint(
+                fields=("mobile", "extra_name"),
+                name="one_extra_name_per_mobile"
+            ),
+        )
         unique_together = (("mobile", "extra_name"),)
         verbose_name = "Description"
         verbose_name_plural = "Descriptions"

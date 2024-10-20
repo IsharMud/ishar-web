@@ -5,9 +5,8 @@ from ..models.force import Force
 
 @register(Force)
 class ForceAdmin(ModelAdmin):
-    """
-    Force administration.
-    """
+    """Force administration."""
+
     fields = ("id", "force_name")
     list_display = list_display_links = search_fields = fields
     readonly_fields = ("id",)

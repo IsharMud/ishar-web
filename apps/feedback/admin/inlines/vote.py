@@ -5,6 +5,7 @@ from ...models.vote import FeedbackVote
 
 class FeedbackVoteAdminInline(TabularInline):
     """Feedback submission vote inline administration."""
+
     extra = 0
     model = FeedbackVote
     verbose_name = "Vote"

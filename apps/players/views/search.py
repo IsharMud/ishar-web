@@ -49,7 +49,7 @@ class PlayerSearchView(LoginRequiredMixin, NeverCacheMixin, FormView):
                     messages.add_message(
                         request=self.request,
                         level=messages.ERROR,
-                        message="Sorry, but no such player could be found."
+                        message="Sorry, but no such player could be found.",
                     )
 
         return self.render_to_response(context=context, status=self.status)

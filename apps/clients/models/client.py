@@ -20,7 +20,7 @@ class MUDClient(models.Model):
         help_text="Auto-generated ID number of the MUD client.",
         null=False,
         primary_key=True,
-        verbose_name="MUD Client ID"
+        verbose_name="MUD Client ID",
     )
     category = models.ForeignKey(
         db_column="category_id",
@@ -40,14 +40,14 @@ class MUDClient(models.Model):
         help_text="Name of the MUD client.",
         null=False,
         unique=True,
-        verbose_name="Name"
+        verbose_name="Name",
     )
     url = models.URLField(
         blank=False,
         db_column="url",
         help_text="URL of the MUD client.",
         null=False,
-        verbose_name="URL"
+        verbose_name="URL",
     )
     is_visible = models.BooleanField(
         blank=False,
@@ -55,7 +55,7 @@ class MUDClient(models.Model):
         default=True,
         help_text="Should the MUD client be visible publicly?",
         null=False,
-        verbose_name="Visible?"
+        verbose_name="Visible?",
     )
 
     class Meta:

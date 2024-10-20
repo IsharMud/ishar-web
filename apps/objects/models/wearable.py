@@ -17,125 +17,125 @@ class ObjectWearableFlag(models.Model):
         primary_key=True,
         to=Object,
         to_field="vnum",
-        verbose_name=_('Object ID ("VNUM")')
+        verbose_name=_('Object ID ("VNUM")'),
     )
     take = models.BooleanField(
-        db_column='TAKE',
+        db_column="TAKE",
         help_text=_('"TAKE" wearable flag of the object.'),
-        verbose_name=_("Take")
+        verbose_name=_("Take"),
     )
     wield = models.BooleanField(
-        db_column='WIELD',
+        db_column="WIELD",
         help_text=_('"WIELD" wearable flag of the object.'),
-        verbose_name=_("Wield")
+        verbose_name=_("Wield"),
     )
     hold = models.BooleanField(
-        db_column='HOLD',
+        db_column="HOLD",
         help_text=_('"HOLD" wearable flag of the object.'),
-        verbose_name=_("Hold")
+        verbose_name=_("Hold"),
     )
     two_hands = models.BooleanField(
-        db_column='TWO_HANDS',
+        db_column="TWO_HANDS",
         help_text=_('"Two Hands" wearable flag of the object.'),
-        verbose_name=_("Two Hands")
+        verbose_name=_("Two Hands"),
     )
     body = models.BooleanField(
-        db_column='BODY',
+        db_column="BODY",
         help_text=_('"BODY" wearable flag of the object.'),
-        verbose_name=_("Body")
+        verbose_name=_("Body"),
     )
     head = models.BooleanField(
-        db_column='HEAD',
+        db_column="HEAD",
         help_text=_('"HEAD" wearable flag of the object.'),
-        verbose_name=_("Head")
+        verbose_name=_("Head"),
     )
     neck = models.BooleanField(
-        db_column='NECK',
+        db_column="NECK",
         help_text=_('"NECK" wearable flag of the object.'),
-        verbose_name=_("Neck")
+        verbose_name=_("Neck"),
     )
     chest = models.BooleanField(
-        db_column='CHEST',
+        db_column="CHEST",
         help_text=_('"CHEST" wearable flag of the object.'),
-        verbose_name=_("Chest")
+        verbose_name=_("Chest"),
     )
     back = models.BooleanField(
-        db_column='BACK',
+        db_column="BACK",
         help_text=_('"WRIST" wearable flag of the object.'),
-        verbose_name=_("Wrist")
+        verbose_name=_("Wrist"),
     )
     arms = models.BooleanField(
-        db_column='ARMS',
+        db_column="ARMS",
         help_text=_('"ARMS" wearable flag of the object.'),
-        verbose_name=_("Arms")
+        verbose_name=_("Arms"),
     )
     wrist = models.BooleanField(
-        db_column='WRIST',
+        db_column="WRIST",
         help_text=_('"WRIST" wearable flag of the object.'),
-        verbose_name=_("Wrist")
+        verbose_name=_("Wrist"),
     )
     hands = models.BooleanField(
-        db_column='HANDS',
+        db_column="HANDS",
         help_text=_('"HANDS" wearable flag of the object.'),
-        verbose_name=_("Hands")
+        verbose_name=_("Hands"),
     )
     finger = models.BooleanField(
-        db_column='FINGER',
+        db_column="FINGER",
         help_text=_('"FINGER" wearable flag of the object.'),
-        verbose_name=_("Finger")
+        verbose_name=_("Finger"),
     )
     waist = models.BooleanField(
-        db_column='WAIST',
+        db_column="WAIST",
         help_text=_('"WAIST" wearable flag of the object.'),
-        verbose_name=_("Waist")
+        verbose_name=_("Waist"),
     )
     legs = models.BooleanField(
-        db_column='LEGS',
+        db_column="LEGS",
         help_text=_('"LEGS" wearable flag of the object.'),
-        verbose_name=_("Legs")
+        verbose_name=_("Legs"),
     )
     feet = models.BooleanField(
-        db_column='FEET',
+        db_column="FEET",
         help_text=_('"FEET" wearable flag of the object.'),
-        verbose_name=_("Feet")
+        verbose_name=_("Feet"),
     )
     about = models.BooleanField(
-        db_column='ABOUT',
+        db_column="ABOUT",
         help_text=_('"ABOUT" wearable flag of the object.'),
-        verbose_name=_("About")
+        verbose_name=_("About"),
     )
     shield = models.BooleanField(
-        db_column='SHIELD',
+        db_column="SHIELD",
         help_text=_('"SHIELD" wearable flag of the object.'),
-        verbose_name=_("Shield")
+        verbose_name=_("Shield"),
     )
     face = models.BooleanField(
-        db_column='FACE',
+        db_column="FACE",
         help_text=_('"FACE" wearable flag of the object.'),
-        verbose_name=_("Face")
+        verbose_name=_("Face"),
     )
     mouth = models.BooleanField(
-        db_column='MOUTH',
+        db_column="MOUTH",
         help_text=_('"MOUTH" wearable flag of the object.'),
-        verbose_name=_("Mouth")
+        verbose_name=_("Mouth"),
     )
     fore_mark = models.BooleanField(
-        db_column='FORE_MARK',
+        db_column="FORE_MARK",
         help_text=_('"FORE_MARK" wearable flag of the object.'),
-        verbose_name=_("Fore Mark")
+        verbose_name=_("Fore Mark"),
     )
     upper_body = models.BooleanField(
-        db_column='UPPER_BODY',
+        db_column="UPPER_BODY",
         help_text=_('"UPPER_BODY" wearable flag of the object.'),
-        verbose_name=_("Upper Body")
+        verbose_name=_("Upper Body"),
     )
     created_at = models.DateTimeField(
         help_text=_("Date and time when the object flag was created."),
-        verbose_name=_("Created At")
+        verbose_name=_("Created At"),
     )
     updated_at = models.DateTimeField(
         help_text=_("Date and time when the object flag was updated."),
-        verbose_name=_("Updated At")
+        verbose_name=_("Updated At"),
     )
 
     class Meta:

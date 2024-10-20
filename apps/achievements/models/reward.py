@@ -37,27 +37,30 @@ class AchievementReward(models.Model):
         to_field="achievement_id",
         on_delete=models.DO_NOTHING,
         help_text=_("Achievement related to the reward."),
-        verbose_name=_("Achievement")
+        verbose_name=_("Achievement"),
     )
     reward_type = models.PositiveIntegerField(
         blank=True,
         choices=AchievementRewardType,
         null=True,
         help_text=_("Type of the achievement reward."),
-        verbose_name=_("Type")
+        verbose_name=_("Type"),
     )
     reward_value = models.IntegerField(
         blank=True,
         null=True,
         help_text="Value of the achievement reward",
-        verbose_name=_("Value")
+        verbose_name=_("Value"),
     )
 
     class Meta:
         managed = False
         db_table = "achievement_rewards"
         default_related_name = "reward"
-        ordering = ("achievement", "reward_type",)
+        ordering = (
+            "achievement",
+            "reward_type",
+        )
         verbose_name = _("Achievement Reward")
         verbose_name_plural = _("Achievement Rewards")
 

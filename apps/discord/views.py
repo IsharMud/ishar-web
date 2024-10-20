@@ -17,6 +17,7 @@ logger = getLogger(__name__)
 
 class InteractionsView(NeverCacheMixin, View):
     """Interactions view."""
+
     http_method_names = ("post",)
 
     @csrf_exempt
@@ -91,4 +92,9 @@ class InteractionsView(NeverCacheMixin, View):
 
         # Unknown interaction type.
         logger.error(f"Unknown Discord interaction:\n{interaction}")
-        return JsonResponse(data={"error": "Unknown interaction."}, status=401)
+        return JsonResponse(
+            data={
+                "error": "Unknown interaction."
+            },
+            status=401
+        )

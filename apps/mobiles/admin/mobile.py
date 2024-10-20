@@ -14,13 +14,21 @@ class MobileAdmin(admin.ModelAdmin):
     list_display = ("id", "long_name", "level", "description", "is_challenge")
     list_display_links = ("id", "long_name")
     list_filter = (
-        "mob_class", "level", "race", "sex",
+        "mob_class",
+        "level",
+        "race",
+        "sex",
         ("spec_func", admin.EmptyFieldListFilter),
         ("challenge", admin.EmptyFieldListFilter),
     )
     readonly_fields = ("id",)
     search_fields = (
-        "id", "name", "long_name", "room_desc", "description", "spec_func"
+        "id",
+        "name",
+        "long_name",
+        "room_desc",
+        "description",
+        "spec_func",
     )
     inlines = (
         MobileDescriptionTabularInline,
@@ -59,7 +67,9 @@ class MobileAdmin(admin.ModelAdmin):
         return False
 
     @admin.display(
-        boolean=True, description="Challenge?", ordering="challenge"
+        boolean=True,
+        description="Challenge?",
+        ordering="challenge"
     )
     def is_challenge(self, obj=None) -> bool:
         return obj.is_challenge()
@@ -74,9 +84,11 @@ class MobileAdmin(admin.ModelAdmin):
                     'This mobile is a <a href="{}">challenge</a>.',
                     reverse(
                         viewname="admin:challenges_challenge_change",
-                        args=(obj.challenge.first().pk,)
-                    )
-                )
+                        args=(
+                            obj.challenge.first().pk,
+                        ),
+                    ),
+                ),
             )
         return super().render_change_form(
             request, context, add, change, form_url, obj

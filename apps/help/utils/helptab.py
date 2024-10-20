@@ -38,7 +38,7 @@ SEE_ALSO_REGEX = re.compile(
         r"^(see also|also see|also see help on|see help on|related)\s*\:"
         r"\s*(?P<topics>.+)$"
     ),
-    flags=re.IGNORECASE
+    flags=re.IGNORECASE,
 )
 
 # Compile regular expression to match sections for another level in content.
@@ -59,7 +59,7 @@ PLAYER_LEVEL_REGEX = re.compile(r"^Level\s*\:\s*(?P<level>.+)$")
 # Compile regular expressions to hyperlink body text "`help " references.
 HELP_CMD_REGEX = {
     "PATTERN": r"`help ([\w| ]+)'",
-    "SUB": r'`<a href="/help/\1\#topic" title="Help: \1">help \1</a>`'
+    "SUB": r'`<a href="/help/\1\#topic" title="Help: \1">help \1</a>`',
 }
 
 
@@ -94,7 +94,6 @@ class HelpTab:
     def __str__(self) -> str:
         # Show absolute path of "helptab" file with number of help topics.
         return f"{self.path.absolute()} ({len(self.help_topics)} topics)"
-
 
     class HelpTopic:
         """Help topic from "helptab" file."""
@@ -138,7 +137,6 @@ class HelpTab:
                 replace_me = "Spell"
             return self.name.replace(f"{replace_me} ", "")
 
-
         def get_absolute_url(self):
             # URL to help topic page, with anchor.
             return reverse(viewname="help_page", args=(self.name,)) + "#topic"
@@ -147,9 +145,7 @@ class HelpTab:
             # Parse header of a "helptab" section, to gather aliases.
             for header_line in header_lines:
                 if header_line.startswith("32 "):
-                    self.aliases.add(
-                        " ".join(header_line.split(" ")[1:]).strip()
-                    )
+                    self.aliases.add(" ".join(header_line.split(" ")[1:]).strip())
 
         def parse_content_line(self, content_line: str):
             # Parse single line from the content of a help section.
@@ -217,7 +213,6 @@ class HelpTab:
 
             # Finally, consider the line body text.
             return True
-
 
         def parse_content(self, content: str):
             # Parse the content (below "*") of a "helptab" section.
@@ -300,7 +295,7 @@ class HelpTab:
 
             # Replace HTML tags in body text.
             body = self.body
-            for (old, new) in ((">", "g"), ("<", "l")):
+            for old, new in ((">", "g"), ("<", "l")):
                 body = body.replace(old, f"&{new}t;")
 
             # Hyperlink "`help command'" in text within body text.
@@ -308,7 +303,7 @@ class HelpTab:
                 pattern=HELP_CMD_REGEX["PATTERN"],
                 repl=HELP_CMD_REGEX["SUB"],
                 string=body,
-                flags=re.MULTILINE
+                flags=re.MULTILINE,
             )
             return body
 
@@ -362,7 +357,7 @@ class HelpTab:
         def __lt__(self, other):
             return self.name < other.name
 
-    def parse(self, sections: list) -> dict[str: HelpTopic,]:
+    def parse(self, sections: list) -> dict[str:HelpTopic,]:
         # Parse "helptab" sections into dictionary of help topic objects.
         topics = {}
 
@@ -377,7 +372,7 @@ class HelpTab:
             except ValueError as val_err:
                 logger.error(f"Skipping: {section.__repr__()}")
                 logger.exception(val_err)
-                continue # Next section.
+                continue  # Next section.
 
             # Start with fresh topic to possibly add to returned list later.
             finally:
@@ -415,7 +410,7 @@ class HelpTab:
         # Return complete list of help topics parsed from "helptab" sections.
         return topics
 
-    def search(self, search_name: str) -> dict[str: HelpTopic,]:
+    def search(self, search_name: str) -> dict[str:HelpTopic,]:
         # Search help topic names and aliases for a string.
 
         # Immediately return exact match.
@@ -423,8 +418,12 @@ class HelpTab:
             return {search_name: self.help_topics[search_name]}
 
         # Set a variety of formats of the search string.
-        fmts = (search_name.title(), search_name.lower(),search_name.upper(),
-                search_name.strip(),)
+        fmts = (
+            search_name.title(),
+            search_name.lower(),
+            search_name.upper(),
+            search_name.strip(),
+        )
 
         # Iterate each help topic object to search their names and aliases.
         search_results = {}

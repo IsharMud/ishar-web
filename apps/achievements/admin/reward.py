@@ -3,9 +3,20 @@ from django.contrib.admin import ModelAdmin
 
 class AchievementRewardAdmin(ModelAdmin):
     """Ishar achievement reward administration."""
-    list_display = ("reward_id", "reward_type", "achievement",)
-    list_display_links = ("reward_id", "reward_type",)
-    list_filter = ("achievement", "reward_type",)
+
+    list_display = (
+        "reward_id",
+        "reward_type",
+        "achievement",
+    )
+    list_display_links = (
+        "reward_id",
+        "reward_type",
+    )
+    list_filter = (
+        "achievement",
+        "reward_type",
+    )
     readonly_fields = ("reward_id",)
     search_fields = ("reward_value",)
 

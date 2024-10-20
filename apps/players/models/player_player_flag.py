@@ -7,6 +7,7 @@ from .player import PlayerBase
 
 class PlayerPlayerFlag(models.Model):
     """Ishar player flag."""
+
     flag = models.OneToOneField(
         primary_key=True,
         to=PlayerFlag,
@@ -14,7 +15,7 @@ class PlayerPlayerFlag(models.Model):
         editable=False,
         related_query_name="+",
         help_text="Flag affecting a player.",
-        verbose_name="Flag"
+        verbose_name="Flag",
     )
     player = models.ForeignKey(
         to=PlayerBase,
@@ -23,12 +24,12 @@ class PlayerPlayerFlag(models.Model):
         related_name="flag",
         related_query_name="flags",
         help_text="Player affected by a flag.",
-        verbose_name="Player"
+        verbose_name="Player",
     )
     value = models.BooleanField(
         editable=False,
         help_text="Value of the flag affecting the player.",
-        verbose_name="Value"
+        verbose_name="Value",
     )
 
     class Meta:
@@ -36,8 +37,18 @@ class PlayerPlayerFlag(models.Model):
         db_table = "player_player_flags"
         # The composite primary key (flag_id, player_id) found,
         #   that is not supported. The first column is selected.
-        unique_together = (("flag", "player"),)
-        ordering = ("player", "flag", "-value")
+        constraints = (
+            models.constraints.UniqueConstraint(
+                fields=("flag", "player",),
+                name="pflag_per_player",
+            ),
+        )
+        unique_together = (("flag", "player",),)
+        ordering = (
+            "player",
+            "flag",
+            "-value"
+        )
         verbose_name = "Player's Flag"
         verbose_name_plural = "Player's Flags"
 

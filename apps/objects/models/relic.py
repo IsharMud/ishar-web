@@ -9,6 +9,7 @@ class RelicManager(ObjectManager):
 
 class Relic(Object):
     """Ishar Relic (proxy model of Object, excludes regular objects)."""
+
     objects = RelicManager()
 
     class Meta:

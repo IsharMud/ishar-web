@@ -6,6 +6,7 @@ from .player import PlayerBase
 
 class PositionType(models.IntegerChoices):
     """Ishar equipment position type choices."""
+
     NEGATIVE_ONE = -1
     EQUIPMENT = 0
     INVENTORY = 1
@@ -21,6 +22,7 @@ class PositionType(models.IntegerChoices):
 
 class PositionValue(models.IntegerChoices):
     """Ishar equipment position value choices."""
+
     NEGATIVE_ONE = -1
     ZERO = 0
     WIELDING = 1
@@ -61,8 +63,8 @@ class PlayerObject(models.Model):
 
     player_objects_id = models.AutoField(
         primary_key=True,
-        help_text = "Primary key player object identification number.",
-        verbose_name = "Player Object ID"
+        help_text="Primary key player object identification number.",
+        verbose_name="Player Object ID",
     )
     player = models.ForeignKey(
         to=PlayerBase,
@@ -70,82 +72,82 @@ class PlayerObject(models.Model):
         help_text="Player related to the object.",
         verbose_name="Player",
         blank=True,
-        null=True
+        null=True,
     )
     object = models.ForeignKey(
         help_text='Identification number ("VNUM") of the object.',
         on_delete=models.DO_NOTHING,
         to=Object,
         to_field="vnum",
-        verbose_name="Object"
+        verbose_name="Object",
     )
     enchant = models.PositiveIntegerField(
         blank=True,
         null=True,
         help_text="Enchantment of the player object.",
-        verbose_name="Enchant"
+        verbose_name="Enchant",
     )
     timer = models.IntegerField(
         blank=True,
         null=True,
         help_text="Timer of the player object.",
-        verbose_name="Timer"
+        verbose_name="Timer",
     )
     bound = models.PositiveIntegerField(
         blank=True,
         null=True,
         help_text="Bound (value) of the player object.",
-        verbose_name="Bound"
+        verbose_name="Bound",
     )
     state = models.PositiveIntegerField(
         blank=True,
         null=True,
         help_text="State of the player object.",
-        verbose_name="State"
+        verbose_name="State",
     )
     min_level = models.PositiveIntegerField(
         blank=True,
         null=True,
         help_text="Minimum level of the player object.",
-        verbose_name="Minimum Level"
+        verbose_name="Minimum Level",
     )
     val0 = models.IntegerField(
         blank=True,
         null=True,
         help_text="Value #0 of the player object.",
-        verbose_name="Value #0"
+        verbose_name="Value #0",
     )
     val1 = models.IntegerField(
         blank=True,
         null=True,
         help_text="Value #1 of the player object.",
-        verbose_name="Value #1"
+        verbose_name="Value #1",
     )
     val2 = models.IntegerField(
         blank=True,
         null=True,
         help_text="Value #2 of the player object.",
-        verbose_name="Value #2"
+        verbose_name="Value #2",
     )
     val3 = models.IntegerField(
         blank=True,
         null=True,
         help_text="Value #3 of the player object.",
-        verbose_name="Value #3"
+        verbose_name="Value #3",
     )
     position_type = models.PositiveIntegerField(
         blank=True,
         choices=PositionType,
         null=True,
         help_text="Position type of the player object.",
-        verbose_name="Position Type"
+        verbose_name="Position Type",
     )
     position_val = models.IntegerField(
         blank=True,
         choices=PositionValue,
         null=True,
         help_text="Position value of the player object.",
-        verbose_name="Position Value"
+        verbose_name="Position Value",
     )
     parent_player_object = models.ForeignKey(
         blank=False,
@@ -156,7 +158,7 @@ class PlayerObject(models.Model):
         on_delete=models.SET_DEFAULT,
         related_name="+",
         to="self",
-        verbose_name="Container"
+        verbose_name="Container",
     )
 
     def is_contained(self) -> bool:

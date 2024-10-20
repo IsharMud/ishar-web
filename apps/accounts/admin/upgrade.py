@@ -3,13 +3,38 @@ from django.contrib.admin import ModelAdmin
 
 class AccountUpgradeAdmin(ModelAdmin):
     """Account upgrade administration."""
+
     fieldsets = (
-        (None, {"fields": ("id", "name", "description", "is_disabled")}),
-        ("Values", {"fields": (
-            "amount", "cost", "increment", "max_value", "scale", "grants_memory"
-        )})
+        (
+            None,
+            {
+                "fields": (
+                    "id",
+                    "name",
+                    "description",
+                    "is_disabled"
+                )
+            }
+        ),
+        (
+            "Values",
+            {
+                "fields": (
+                    "amount",
+                    "cost",
+                    "increment",
+                    "max_value",
+                    "scale",
+                    "grants_memory",
+                )
+            },
+        ),
     )
-    list_display = ("name", "is_disabled", "description")
+    list_display = (
+        "name",
+        "is_disabled",
+        "description"
+    )
     list_filter = ("is_disabled",)
     search_fields = ("name", "description")
     readonly_fields = ("id",)

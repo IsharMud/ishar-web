@@ -2,9 +2,8 @@ from django.db import models
 
 
 class SpellFlag(models.Model):
-    """
-    Ishar spell flag.
-    """
+    """Ishar spell flag."""
+
     id = models.AutoField(
         blank=False,
         editable=False,
@@ -13,19 +12,19 @@ class SpellFlag(models.Model):
         ),
         null=False,
         primary_key=True,
-        verbose_name="Spell Flag ID"
+        verbose_name="Spell Flag ID",
     )
     name = models.CharField(
         max_length=50,
         help_text="Name of the spell flag.",
-        verbose_name="Spell Flag Name"
+        verbose_name="Spell Flag Name",
     )
     description = models.CharField(
         max_length=255,
         blank=True,
         null=True,
         help_text="Description of the spell flag.",
-        verbose_name="Spell Flag Description"
+        verbose_name="Spell Flag Description",
     )
 
     class Meta:

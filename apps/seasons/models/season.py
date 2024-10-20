@@ -8,14 +8,14 @@ from django.utils.timezone import now
 
 class Season(models.Model):
     """Ishar season."""
+
     season_id = models.AutoField(
         primary_key=True,
         help_text="Auto-generated permanent season (identification) number.",
-        verbose_name="Season ID"
+        verbose_name="Season ID",
     )
     is_active = models.BooleanField(
-        help_text="Is the season active?",
-        verbose_name="Is Active?"
+        help_text="Is the season active?", verbose_name="Is Active?"
     )
     effective_date = models.DateTimeField(
         help_text="Effective start date of the season.",
@@ -27,7 +27,7 @@ class Season(models.Model):
     )
     average_essence_gain = models.FloatField(
         help_text="Average essence gain in the season.",
-        verbose_name="Average Essence Gain"
+        verbose_name="Average Essence Gain",
     )
     average_remorts = models.FloatField(
         help_text="Average remorts in the season.",
@@ -45,25 +45,25 @@ class Season(models.Model):
         blank=True,
         null=True,
         help_text="Leader account in the season.",
-        verbose_name="Season Leader Account"
+        verbose_name="Season Leader Account",
     )
     seasonal_leader_name = models.TextField(
         blank=True,
         null=True,
         help_text="Leader name in the season.",
-        verbose_name="Seasonal Leader Name"
+        verbose_name="Seasonal Leader Name",
     )
     last_challenge_cycle = models.DateTimeField(
         help_text="Last date and time of challenges cycled in the season.",
-        verbose_name="Last Challenge Cycle"
+        verbose_name="Last Challenge Cycle",
     )
     max_renown = models.IntegerField(
         help_text="Max amount of renown gained in the season.",
-        verbose_name="Max Renown"
+        verbose_name="Max Renown",
     )
     avg_renown = models.FloatField(
         help_text="Average amount of renown gained in the season.",
-        verbose_name="Average Renown"
+        verbose_name="Average Renown",
     )
     total_remorts = models.IntegerField(
         help_text="Total number of remorts in the season.",
@@ -73,13 +73,13 @@ class Season(models.Model):
         blank=True,
         null=True,
         help_text="Game state of the season.",
-        verbose_name="Game State"
+        verbose_name="Game State",
     )
     multiplay_limit = models.PositiveSmallIntegerField(
         blank=True,
         null=True,
         help_text="Limit of players that one account can log in to.",
-        verbose_name="Multi-Play Limit"
+        verbose_name="Multi-Play Limit",
     )
 
     class Meta:
@@ -111,7 +111,7 @@ class Season(models.Model):
             '<a href="{}" title="{}">{}</a>',
             self.get_admin_url(),
             self.__repr__(),
-            self.__repr__()
+            self.__repr__(),
         )
 
     def get_admin_url(self) -> str:

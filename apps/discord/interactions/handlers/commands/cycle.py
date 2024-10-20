@@ -14,7 +14,7 @@ def cycle(request):
     until_next = timeuntil(next_cycle_dt)
 
     return (
-        f'[Challenges will next cycle]({cycle_url}) in {until_next}'
-        f' :hourglass_flowing_sand:'
-        f' {next_cycle_dt.strftime("%A, %B %d, %Y @ %I:%M:%S %p %Z")}.'
+        f"[Challenges will next cycle]({cycle_url}) in {until_next}"
+        " :hourglass_flowing_sand:"
+        f" {next_cycle_dt.strftime('%A, %B %d, %Y @ %I:%M:%S %p %Z')}."
     )

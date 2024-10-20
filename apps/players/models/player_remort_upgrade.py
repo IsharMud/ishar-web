@@ -7,6 +7,7 @@ from apps.players.models.remort_upgrade import RemortUpgrade
 
 class PlayerRemortUpgrade(models.Model):
     """Player relation to a remort upgrade."""
+
     player = models.ForeignKey(
         # primary_key=True,  # Fake it, just so reads work.
         db_column="player_id",
@@ -17,7 +18,7 @@ class PlayerRemortUpgrade(models.Model):
         to_field="id",
         on_delete=models.DO_NOTHING,
         help_text="Player with a remort upgrade.",
-        verbose_name="Player"
+        verbose_name="Player",
     )
     upgrade = models.OneToOneField(
         db_column="upgrade_id",
@@ -28,24 +29,30 @@ class PlayerRemortUpgrade(models.Model):
         related_query_name="+",
         on_delete=models.DO_NOTHING,
         help_text="Remort upgrade affecting a player.",
-        verbose_name="Remort Upgrade"
+        verbose_name="Remort Upgrade",
     )
     value = models.PositiveIntegerField(
         blank=False,
         default=0,
         null=False,
         help_text="Value of a player's remort upgrade.",
-        verbose_name="Value"
+        verbose_name="Value",
     )
     essence_perk = models.BooleanField(
         help_text="Is the player's remort upgrade an essence perk?",
-        verbose_name="Essence Perk?"
+        verbose_name="Essence Perk?",
     )
 
     class Meta:
         managed = False
         db_table = "player_remort_upgrades"
         ordering = ("upgrade", "player")
+        constraints = (
+            models.constraints.UniqueConstraint(
+                fields=("upgrade", "player"),
+                name="one_upgrade_per_player"
+            ),
+        )
         unique_together = (("upgrade", "player"),)
         verbose_name = _("Player's Remort Upgrade")
         verbose_name_plural = _("Player's Remort Upgrades")

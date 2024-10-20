@@ -6,10 +6,11 @@ from .flag import SpellFlag
 
 class SkillSpellFlag(models.Model):
     """Ishar skill relation to a spell flag."""
+
     id = models.AutoField(
         help_text="Auto-generated ID number of the skill-flag relation.",
         primary_key=True,
-        verbose_name="ID"
+        verbose_name="ID",
     )
     skill = models.ForeignKey(
         to=Skill,
@@ -18,20 +19,26 @@ class SkillSpellFlag(models.Model):
         help_text="Skill/spell affected by the flag.",
         related_name="flags",
         related_query_name="flag",
-        verbose_name="Skill"
+        verbose_name="Skill",
     )
     flag = models.ForeignKey(
         to=SpellFlag,
         on_delete=models.DO_NOTHING,
         db_column="flag_id",
         help_text="Flag affecting the skill/spell.",
-        verbose_name="Flag"
+        verbose_name="Flag",
     )
 
     class Meta:
         managed = False
         db_table = "skills_spell_flags"
         ordering = ("id", "skill", "flag")
+        constraints = (
+            models.constraints.UniqueConstraint(
+                fields=("skill", "flag",),
+                name="one_flag_per_skill"
+            ),
+        )
         unique_together = (("skill", "flag"),)
         verbose_name = "Skill Flag"
         verbose_name_plural = "Skill Flags"

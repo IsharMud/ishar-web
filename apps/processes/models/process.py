@@ -1,4 +1,5 @@
 """Ishar MUD server process model."""
+
 from django.db import models
 from django.utils.timesince import timesince
 from django.utils.timezone import now
@@ -9,26 +10,27 @@ from .manager import MUDProcessManager
 
 class MUDProcess(models.Model):
     """MUD server process."""
+
     objects = MUDProcessManager()
 
     process_id = models.PositiveIntegerField(
         db_column="process_id",
         primary_key=True,
         help_text="MUD process ID (PID) on the server.",
-        verbose_name="MUD Process ID (PID)"
+        verbose_name="MUD Process ID (PID)",
     )
     name = models.CharField(
         db_column="name",
         default="ishar",
         max_length=32,
         help_text="Name of the MUD process.",
-        verbose_name="Name"
+        verbose_name="Name",
     )
     user = models.CharField(
         db_column="user",
         max_length=32,
         help_text="User running the MUD process.",
-        verbose_name="User"
+        verbose_name="User",
     )
     last_updated = models.DateTimeField(
         db_column="last_updated",
@@ -43,7 +45,7 @@ class MUDProcess(models.Model):
         default=None,
         null=True,
         help_text="Date and time the MUD process was created (last restarted).",
-        verbose_name="Created"
+        verbose_name="Created",
     )
 
     def __repr__(self) -> str:

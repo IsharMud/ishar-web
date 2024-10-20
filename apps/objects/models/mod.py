@@ -9,21 +9,21 @@ class ObjectMod(models.Model):
     mod_id = models.AutoField(
         help_text=_("Primary key identification number of object mod."),
         primary_key=True,
-        verbose_name=_("Mod ID")
+        verbose_name=_("Mod ID"),
     )
     name = models.CharField(
         help_text=_("Name of the object mod."),
         max_length=30,
         unique=True,
-        verbose_name=_("Name")
+        verbose_name=_("Name"),
     )
     created_at = models.DateTimeField(
         help_text=_("Date and time when the object mod was created."),
-        verbose_name=_("Created At")
+        verbose_name=_("Created At"),
     )
     updated_at = models.DateTimeField(
         help_text=_("Date and time when the object mod was updated."),
-        verbose_name=_("Updated At")
+        verbose_name=_("Updated At"),
     )
 
     class Meta:

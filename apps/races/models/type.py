@@ -3,6 +3,7 @@ from django.db.models import IntegerChoices
 
 class AffinityType(IntegerChoices):
     """Affinity type choices."""
+
     VULNERABILITY = 0
     SUSCEPTIBILITY = 1
     RESISTANCE = 2

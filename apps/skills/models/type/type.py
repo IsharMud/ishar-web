@@ -3,6 +3,7 @@ from django.db.models import IntegerChoices
 
 class SkillType(IntegerChoices):
     """Skill type choices."""
+
     TYPE = 0
     SKILL = 1
     SPELL = 2

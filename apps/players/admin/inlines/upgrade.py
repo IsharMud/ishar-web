@@ -9,8 +9,16 @@ class PlayerRemortUpgradesInlineAdmin(TabularInline):
     """Player's remort upgrades tabular inline administration."""
 
     model = PlayerRemortUpgrade
-    fields = readonly_fields = ("get_upgrade_link", "value", "essence_perk")
-    ordering = ("-value", "-essence_perk", "upgrade__display_name")
+    fields = readonly_fields = (
+        "get_upgrade_link",
+        "value",
+        "essence_perk"
+    )
+    ordering = (
+        "-value",
+        "-essence_perk",
+        "upgrade__display_name"
+    )
     verbose_name = "Remort Upgrade"
     verbose_name_plural = "Remort Upgrades"
 
@@ -21,9 +29,9 @@ class PlayerRemortUpgradesInlineAdmin(TabularInline):
             '<a href="{}">{}</a>',
             reverse(
                 viewname="admin:players_remortupgrade_change",
-                args=(obj.upgrade.upgrade_id,)
+                args=(obj.upgrade.upgrade_id,),
             ),
-            obj.upgrade.display_name
+            obj.upgrade.display_name,
         )
 
     def get_queryset(self, request):

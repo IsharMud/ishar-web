@@ -8,24 +8,47 @@ class HistoryAdmin(admin.ModelAdmin):
     """Historic administration."""
 
     fields = readonly_fields = (
-        "season", "account", "player_name", "remorts", "player_class", "race",
-        "total_renown", "challenges_completed", "quests_completed", "deaths",
-        "game_type", "display_total_play_time", "level"
+        "season",
+        "account",
+        "player_name",
+        "remorts",
+        "player_class",
+        "race",
+        "total_renown",
+        "challenges_completed",
+        "quests_completed",
+        "deaths",
+        "game_type",
+        "display_total_play_time",
+        "level",
     )
     list_display = (
-        "season", "account", "player_name", "remorts",
-        "total_renown", "challenges_completed", "quests_completed", "deaths",
-        "display_total_play_time"
+        "season",
+        "account",
+        "player_name",
+        "remorts",
+        "total_renown",
+        "challenges_completed",
+        "quests_completed",
+        "deaths",
+        "display_total_play_time",
     )
-    list_display_links = ("season", "account", "player_name")
+    list_display_links = (
+        "season",
+        "account",
+        "player_name"
+    )
     list_filter = (
         ("season", admin.RelatedOnlyFieldListFilter),
         ("account", admin.RelatedOnlyFieldListFilter),
         ("player_class", admin.RelatedOnlyFieldListFilter),
         ("race", admin.RelatedOnlyFieldListFilter),
-        "game_type"
+        "game_type",
     )
-    search_fields = ("account__account_name", "player_name")
+    search_fields = (
+        "account__account_name",
+        "player_name",
+    )
     show_facets = admin.ShowFacets.ALWAYS
     show_full_result_count = True
 

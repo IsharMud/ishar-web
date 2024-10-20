@@ -11,21 +11,21 @@ class ClassRace(models.Model):
     classes_races_id = models.AutoField(
         primary_key=True,
         help_text="Auto-generated, primary key for class race identifier.",
-        verbose_name="Class Race ID"
+        verbose_name="Class Race ID",
     )
     race = models.ForeignKey(
         to=Race,
         db_column="race_id",
         on_delete=models.DO_NOTHING,
         help_text="Race of the class race relation.",
-        verbose_name="Race"
+        verbose_name="Race",
     )
     player_class = models.ForeignKey(
         to=Class,
         db_column="class_id",
         on_delete=models.DO_NOTHING,
         help_text="Class of the class race relation.",
-        verbose_name="Class"
+        verbose_name="Class",
     )
 
     class Meta:

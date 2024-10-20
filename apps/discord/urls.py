@@ -7,7 +7,7 @@ from .views import InteractionsView
 
 urlpatterns = [
     # Redirect to Discord invitation.
-    path("", RedirectView.as_view(url=settings.DISCORD['URL']), name="discord"),
+    path("", RedirectView.as_view(url=settings.DISCORD["URL"]), name="discord"),
     # Discord interactions view.
-    path("interactions/",  InteractionsView.as_view(), name="interactions"),
+    path("interactions/", InteractionsView.as_view(), name="interactions"),
 ]

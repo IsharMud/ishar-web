@@ -13,5 +13,5 @@ class HelpSearchForm(Form):
                 "aria-label": "Topic Name",
                 "placeholder": "Topic Name",
             }
-        )
+        ),
     )

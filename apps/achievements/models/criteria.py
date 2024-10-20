@@ -24,39 +24,42 @@ class AchievementCriteria(models.Model):
         to_field="achievement_id",
         on_delete=models.DO_NOTHING,
         help_text="Achievement related to a criteria.",
-        verbose_name="Achievement"
+        verbose_name="Achievement",
     )
     description = models.TextField(
         blank=True,
         null=True,
         help_text="Description of the achievement criteria.",
-        verbose_name="Description"
+        verbose_name="Description",
     )
     criteria_type = models.CharField(
         max_length=32,
         blank=True,
         null=True,
         help_text="Type of the achievement criteria.",
-        verbose_name="Type"
+        verbose_name="Type",
     )
     target_value = models.IntegerField(
         blank=True,
         null=True,
         help_text="Target value of the achievement criteria.",
-        verbose_name="Target"
+        verbose_name="Target",
     )
     group_id = models.PositiveIntegerField(
         blank=True,
         null=True,
         help_text="Group identification number of the achievement criteria.",
-        verbose_name="Group ID"
+        verbose_name="Group ID",
     )
 
     class Meta:
         managed = False
         db_table = "achievement_criteria"
         default_related_name = "criteria"
-        ordering = ("achievement", "criteria_type",)
+        ordering = (
+            "achievement",
+            "criteria_type",
+        )
         verbose_name = verbose_name_plural = "Achievement Criteria"
 
     def __repr__(self) -> str:
@@ -64,5 +67,6 @@ class AchievementCriteria(models.Model):
 
     def __str__(self) -> str:
         return (
-            f"{self.criteria_type} ({self.target_value}) @ {self.achievement}"
+            f"{self.criteria_type} ({self.target_value})"
+            f" @ {self.achievement}"
         )

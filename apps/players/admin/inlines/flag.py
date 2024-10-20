@@ -19,7 +19,7 @@ class PlayerFlagsInlineAdmin(TabularInline):
 
     @display(description="Player Flag", ordering="flag__name")
     def get_flag_link(self, obj) -> str:
-        """Admin link for player flag."""
+        # Admin link for player flag.
         return format_html(
             '<a href="{}">{}</a>',
             reverse(

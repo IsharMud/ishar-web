@@ -9,35 +9,90 @@ from .inlines.upgrade import AccountUpgradesLinksAdmin
 
 class AccountAdmin(UserAdmin):
     """Account administration."""
+
     model = get_user_model()
     date_hierarchy = "created_at"
     fieldsets = (
-        (None, {"fields": (
-            "account_id", model.USERNAME_FIELD, model.EMAIL_FIELD,
-            "immortal_level", "free_refresh"
-        )}),
-        ("Points", {"fields": (
-            "achievement_points", "current_essence", "earned_essence",
-            "bugs_reported"
-        )}),
-        ("Last", {"fields": ("last_ident", "last_ip", "last_isp")}),
-        ("Created", {"fields": ("create_ident", "create_ip", "create_isp")}),
-        ("Dates", {"fields": ("account_gift", "banned_until", "created_at")})
+        (
+            None,
+            {
+                "fields": (
+                    "account_id",
+                    model.USERNAME_FIELD,
+                    model.EMAIL_FIELD,
+                    "immortal_level",
+                    "free_refresh",
+                )
+            },
+        ),
+        (
+            "Points",
+            {
+                "fields": (
+                    "achievement_points",
+                    "current_essence",
+                    "earned_essence",
+                    "bugs_reported",
+                )
+            },
+        ),
+        (
+            "Last",
+            {
+                "fields": (
+                    "last_ident",
+                    "last_ip",
+                    "last_isp",
+                )
+            }
+        ),
+        (
+            "Created",
+            {
+                "fields": (
+                    "create_ident",
+                    "create_ip",
+                    "create_isp",
+                )
+            }
+        ),
+        (
+            "Dates",
+            {
+                "fields": (
+                    "account_gift",
+                    "banned_until",
+                    "created_at",
+                )
+            }
+        ),
     )
     filter_horizontal = ()
     list_filter = ("immortal_level",)
     inlines = (
-        AccountPlayersLinksAdmin, AccountSoulboundItemAdmin,
-        AccountTitleAdmin, AccountUpgradesLinksAdmin
+        AccountPlayersLinksAdmin,
+        AccountSoulboundItemAdmin,
+        AccountTitleAdmin,
+        AccountUpgradesLinksAdmin,
     )
     list_display = (
-        model.USERNAME_FIELD, model.EMAIL_FIELD, "player_count",
-        "current_essence", "immortal_level"
+        model.USERNAME_FIELD,
+        model.EMAIL_FIELD,
+        "player_count",
+        "current_essence",
+        "immortal_level",
     )
     ordering = ("account_id",)
     readonly_fields = (
-        "account_id", "created_at", "player_count", "create_ip", "create_isp",
-        "create_ident", "last_ip", "last_isp", "last_ident"
+        "account_id",
+        "created_at",
+        "player_count",
+        "create_ip",
+        "create_isp",
+        "create_ident",
+        "last_ip",
+        "last_isp",
+        "last_ident",
     )
     search_fields = (model.USERNAME_FIELD, model.EMAIL_FIELD)
 

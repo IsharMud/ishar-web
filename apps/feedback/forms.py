@@ -1,6 +1,11 @@
 from django.core import validators
 from django.forms import (
-    ModelForm, CharField, RadioSelect, Textarea, TextInput, TypedChoiceField
+    ModelForm,
+    CharField,
+    RadioSelect,
+    Textarea,
+    TextInput,
+    TypedChoiceField,
 )
 
 from .models.choices import FeedbackSubmissionTypePublic
@@ -12,7 +17,6 @@ class SubmitFeedbackForm(ModelForm):
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop("request")
-#        self.account_id = self.request.user.pk
         super().__init__(*args, **kwargs)
 
     submission_type = TypedChoiceField(
@@ -20,7 +24,7 @@ class SubmitFeedbackForm(ModelForm):
         coerce=int,
         # help_text="Type",
         label="",
-        widget=RadioSelect(attrs={"aria-label": "Type"})
+        widget=RadioSelect(attrs={"aria-label": "Type"}),
     )
     subject = CharField(
         # help_text="Subject / Title",
@@ -29,7 +33,7 @@ class SubmitFeedbackForm(ModelForm):
         max_length=64,
         validators=(
             validators.MinLengthValidator(limit_value=1),
-            validators.MaxLengthValidator(limit_value=64)
+            validators.MaxLengthValidator(limit_value=64),
         ),
         widget=TextInput(
             attrs={
@@ -37,23 +41,22 @@ class SubmitFeedbackForm(ModelForm):
                 "aria-label": "Subject",
                 "placeholder": "Subject / Title",
             }
-        )
+        ),
     )
     body_text = CharField(
-        # help_text="Message",
         label="",
         validators=(
             validators.MinLengthValidator(limit_value=1),
-            validators.MaxLengthValidator(limit_value=1024)
+            validators.MaxLengthValidator(limit_value=1024),
         ),
         widget=Textarea(
             attrs={
                 "class": "form-control rounded",
                 "aria-label": "Message",
                 "placeholder": "Message",
-                "rows": 4
+                "rows": 4,
             }
-        )
+        ),
     )
 
     class Meta:

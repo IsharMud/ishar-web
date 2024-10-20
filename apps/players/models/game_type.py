@@ -3,6 +3,7 @@ from django.db.models import IntegerChoices
 
 class GameType(IntegerChoices):
     """Ishar player game type choices."""
+
     CLASSIC = 0
     HARDCORE = 1
     SURVIVAL = 2

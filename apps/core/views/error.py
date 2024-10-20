@@ -3,6 +3,7 @@ from django.views.generic.base import TemplateView
 
 class ErrorView(TemplateView):
     """Template view for error handlers shows message with status code."""
+
     message = "Sorry, but unfortunately, there was an unknown error."
     status_code = 500
     template_name = "error.html"

@@ -3,6 +3,7 @@ from django.db.models import IntegerChoices
 
 class Gender(IntegerChoices):
     """Ishar gender choices (used by both players and mobiles.)"""
+
     MALE = 1
     FEMALE = 2
 

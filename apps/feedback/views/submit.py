@@ -26,14 +26,14 @@ class SubmitFeedbackView(LoginRequiredMixin, NeverCacheMixin, CreateView):
 
     def form_valid(self, form):
         if (
-            form.cleaned_data and
-            form.cleaned_data.get("submission_type") and
-            form.cleaned_data.get("subject") and
-            form.cleaned_data.get("body_text")
+            form.cleaned_data
+            and form.cleaned_data.get("submission_type")
+            and form.cleaned_data.get("subject")
+            and form.cleaned_data.get("body_text")
         ):
             form.instance.account = self.user
             messages.success(
                 request=self.request,
-                message="Thank you! Your feedback has been submitted."
+                message="Thank you! Your feedback has been submitted.",
             )
         return super().form_valid(form)

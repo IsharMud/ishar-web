@@ -5,4 +5,5 @@ from . import BaseRaceAdminInline
 
 class RaceSkillAdminInline(BaseRaceAdminInline):
     """Race skill inline administration."""
+
     model = RaceSkill

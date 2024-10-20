@@ -5,19 +5,67 @@ class RemortUpgradeAdmin(admin.ModelAdmin):
     """Remort upgrades administration."""
 
     fieldsets = (
-        (None, {"fields": ("upgrade_id", "name", "display_name")}),
-        ("Availability", {"fields": ("can_buy", "bonus", "max_value")}),
-        ("Amounts", {"fields": ("renown_cost", "scale")}),
-        ("Hardcore Amounts", {"fields": (
-            "survival_renown_cost", "survival_scale"
-        )}),
-        ("Skill", {"fields": ("reward_skill",)}),
+        (
+            None,
+            {
+                "fields": (
+                    "upgrade_id",
+                    "name",
+                    "display_name"
+                )
+            }
+        ),
+        (
+            "Availability",
+            {
+                "fields": (
+                    "can_buy",
+                    "bonus",
+                    "max_value"
+                )
+            }
+        ),
+        (
+            "Amounts",
+            {
+                "fields": (
+                    "renown_cost",
+                    "scale"
+                )
+            }
+        ),
+        (
+            "Hardcore Amounts",
+            {
+                "fields": (
+                    "survival_renown_cost",
+                    "survival_scale"
+                )
+            }
+        ),
+        (
+            "Skill",
+            {
+                "fields": (
+                    "reward_skill",
+                )
+            }
+        ),
     )
-    list_display = ("display_name", "can_buy", "bonus")
+    list_display = (
+        "display_name",
+        "can_buy",
+        "bonus",
+    )
     list_filter = (
-        "can_buy", "bonus", "max_value",
-        "renown_cost", "survival_renown_cost", "scale", "survival_scale",
-        ("reward_skill", admin.RelatedOnlyFieldListFilter)
+        "can_buy",
+        "bonus",
+        "max_value",
+        "renown_cost",
+        "survival_renown_cost",
+        "scale",
+        "survival_scale",
+        ("reward_skill", admin.RelatedOnlyFieldListFilter),
     )
     readonly_fields = ("upgrade_id",)
     search_fields = ("name", "display_name")

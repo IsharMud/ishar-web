@@ -14,6 +14,7 @@ class ChallengeManager(models.Manager):
 
 class Challenge(models.Model):
     """Ishar challenge."""
+
     objects = ChallengeManager()
 
     challenge_id = models.AutoField(
@@ -27,24 +28,24 @@ class Challenge(models.Model):
         to_field="id",
         on_delete=models.DO_NOTHING,
         help_text="Target mobile of the challenge.",
-        verbose_name="Mobile"
+        verbose_name="Mobile",
     )
     max_level = models.IntegerField(
         help_text="Maximum level of the challenge.",
-        verbose_name="Maximum Level"
+        verbose_name="Maximum Level",
     )
     max_people = models.IntegerField(
         help_text="Maximum number of people for the challenge.",
-        verbose_name="Maximum People"
+        verbose_name="Maximum People",
     )
     chall_tier = models.IntegerField(
         help_text="Tier of the challenge.",
-        verbose_name="Challenge Tier"
+        verbose_name="Challenge Tier",
     )
     challenge_desc = models.CharField(
         help_text="Friendly description of the challenge.",
         max_length=80,
-        verbose_name="Challenge Description"
+        verbose_name="Challenge Description",
     )
     winner_desc = models.CharField(
         blank=True,
@@ -54,23 +55,23 @@ class Challenge(models.Model):
         ),
         max_length=80,
         null=True,
-        verbose_name="Winner Description"
+        verbose_name="Winner Description",
     )
     is_active = models.BooleanField(
         help_text="Is the challenge currently active?",
-        verbose_name="Active?"
+        verbose_name="Active?",
     )
     last_completion = models.DateTimeField(
         help_text="Date and time when the challenge was last completed.",
-        verbose_name="Last Completion"
+        verbose_name="Last Completion",
     )
     num_completed = models.IntegerField(
         help_text="Number of times that the challenge has been completed.",
-        verbose_name="Number Completed"
+        verbose_name="Number Completed",
     )
     num_picked = models.IntegerField(
         help_text="Number of times that the challenge has been picked.",
-        verbose_name="Number Picked"
+        verbose_name="Number Picked",
     )
 
     class Meta:
@@ -107,8 +108,8 @@ class Challenge(models.Model):
         out = []
         winners = self.winner_desc
         if winners:
-            if ',' in winners:
-                for winner in winners.split(','):
+            if "," in winners:
+                for winner in winners.split(","):
                     out.append(winner.strip())
             else:
                 out.append(winners)

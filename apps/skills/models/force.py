@@ -9,6 +9,7 @@ class ForceManager(models.Manager):
 
 class Force(models.Model):
     """Ishar force."""
+
     objects = ForceManager()
 
     force_name = models.CharField(
@@ -17,7 +18,7 @@ class Force(models.Model):
         blank=True,
         null=True,
         help_text="Name of the force.",
-        verbose_name="Force Name"
+        verbose_name="Force Name",
     )
 
     class Meta:

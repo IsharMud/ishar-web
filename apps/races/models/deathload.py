@@ -6,11 +6,12 @@ from .race import Race
 
 class RaceDeathload(models.Model):
     """Ishar race deathload."""
+
     id = models.AutoField(
         db_column="racial_deathload_id",
         help_text="Primary identification number of the race deathload.",
         primary_key=True,
-        verbose_name="Race Deathload ID"
+        verbose_name="Race Deathload ID",
     )
     race = models.ForeignKey(
         blank=False,
@@ -21,13 +22,13 @@ class RaceDeathload(models.Model):
         help_text="Race related to the deathload.",
         related_name="deathloads",
         related_query_name="deathload",
-        verbose_name="Race"
+        verbose_name="Race",
     )
     vnum = models.PositiveIntegerField(
         blank=False,
         help_text="VNUM of the race deathload.",
         null=False,
-        verbose_name="VNUM"
+        verbose_name="VNUM",
     )
     percent_chance = models.PositiveIntegerField(
         blank=False,
@@ -36,9 +37,9 @@ class RaceDeathload(models.Model):
         null=False,
         validators=(
             MinValueValidator(limit_value=0),
-            MaxValueValidator(limit_value=100)
+            MaxValueValidator(limit_value=100),
         ),
-        verbose_name="Percent Chance"
+        verbose_name="Percent Chance",
     )
     min_level = models.PositiveIntegerField(
         blank=False,
@@ -47,9 +48,9 @@ class RaceDeathload(models.Model):
         null=False,
         validators=(
             MinValueValidator(limit_value=1),
-            MaxValueValidator(limit_value=30)
+            MaxValueValidator(limit_value=30),
         ),
-        verbose_name="Minimum Level"
+        verbose_name="Minimum Level",
     )
     max_level = models.PositiveIntegerField(
         blank=True,
@@ -58,16 +59,16 @@ class RaceDeathload(models.Model):
         null=True,
         validators=(
             MinValueValidator(limit_value=1),
-            MaxValueValidator(limit_value=30)
+            MaxValueValidator(limit_value=30),
         ),
-        verbose_name="Maximum Level"
+        verbose_name="Maximum Level",
     )
     max_load = models.PositiveIntegerField(
         blank=True,
         default=1,
         help_text="Maximum load number of the race deathload.",
         null=True,
-        verbose_name="Maximum Load"
+        verbose_name="Maximum Load",
     )
 
     class Meta:

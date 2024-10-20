@@ -1,8 +1,6 @@
-
 from django.core.cache import cache
 
 from ..models.season import Season
-
 
 
 def _get_current_season():

@@ -37,11 +37,7 @@ class VoteFeedbackView(LoginRequiredMixin, NeverCacheMixin, View):
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, *args, **kwargs):
-        data = {
-            "vote": self.vote,
-            "total": self.submission.vote_total
-        }
-        return JsonResponse(data=data)
+        return self._json_response()
 
     def post(self, request, *args, **kwargs):
         if isinstance(self.vote_obj, FeedbackVote):
@@ -52,10 +48,13 @@ class VoteFeedbackView(LoginRequiredMixin, NeverCacheMixin, View):
             self.vote_obj, created = FeedbackVote.objects.update_or_create(
                 feedback_submission=self.submission,
                 account=request.user,
-                defaults={"vote_value": True}
+                defaults={"vote_value": True},
             )
             self.vote = self.vote_obj.vote_value
 
+        return self._json_response()
+
+    def _json_response(self):
         return JsonResponse(
             data={
                 "vote": self.vote,

@@ -5,6 +5,7 @@ from django.utils.html import format_html
 
 class ChallengeCompletedListFilter(admin.SimpleListFilter):
     """Admin list filter to identify (in)complete challenges."""
+
     title = "Completed?"
     parameter_name = "completed"
 
@@ -25,26 +26,79 @@ class ChallengeCompletedListFilter(admin.SimpleListFilter):
 
 class ChallengeAdmin(admin.ModelAdmin):
     """Ishar challenge administration."""
+
     fieldsets = (
-        (None, {"fields": ("challenge_id", "is_active", "is_completed")}),
-        ("Details", {"fields": (
-            "challenge_desc", "winner_desc", "last_completion"
-        )}),
-        ("Target", {"fields": ("mobile",)}),
-        ("Maximums", {"fields": ("max_level", "max_people",)}),
-        ("Totals", {"fields": ("num_completed", "num_picked",)}),
+        (
+            None,
+            {
+                "fields": (
+                    "challenge_id",
+                    "is_active",
+                    "is_completed"
+                )
+            }
+        ),
+        (
+            "Details",
+            {
+                "fields": (
+                    "challenge_desc",
+                    "winner_desc",
+                    "last_completion"
+                )
+            }
+        ),
+        (
+            "Target",
+            {
+                "fields": ("mobile",)
+            }
+        ),
+        (
+            "Maximums",
+            {
+                "fields": (
+                    "max_level",
+                    "max_people",
+                )
+            },
+        ),
+        (
+            "Totals",
+            {
+                "fields": (
+                    "num_completed",
+                    "num_picked",
+                )
+            },
+        ),
     )
     list_display = (
-        "challenge_desc", "mobile_link", "is_active", "is_completed"
+        "challenge_desc",
+        "mobile_link",
+        "is_active",
+        "is_completed"
     )
     list_filter = (
-        "is_active", ChallengeCompletedListFilter, "mobile__level",
-        "max_level", "max_people", "num_completed", "num_picked"
+        "is_active",
+        ChallengeCompletedListFilter,
+        "mobile__level",
+        "max_level",
+        "max_people",
+        "num_completed",
+        "num_picked",
     )
-    readonly_fields = ("challenge_id", "is_completed", "last_completion")
+    readonly_fields = (
+        "challenge_id",
+        "is_completed",
+        "last_completion"
+    )
     search_fields = (
-        "challenge_desc", "winner_desc",
-        "mobile__long_name", "mobile__name", "mobile__id"
+        "challenge_desc",
+        "winner_desc",
+        "mobile__long_name",
+        "mobile__name",
+        "mobile__id",
     )
     show_facets = admin.ShowFacets.ALWAYS
     show_full_result_count = True

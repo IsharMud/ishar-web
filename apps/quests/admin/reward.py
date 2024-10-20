@@ -10,26 +10,36 @@ class QuestRewardAdmin(admin.ModelAdmin):
     """
     Quest reward administration.
     """
+
     fieldsets = (
         (None, {"fields": ("quest_reward_id",)}),
         ("Type", {"fields": ("reward_type",)}),
         ("Number", {"fields": ("reward_num",)}),
         ("Quest", {"fields": ("quest",)}),
-        ("Class", {"fields": ("class_restrict",)})
+        ("Class", {"fields": ("class_restrict",)}),
     )
     list_display = (
-        "quest_reward_id", "reward_type",
-        "get_quest_name_link", "get_quest_class_link"
+        "quest_reward_id",
+        "reward_type",
+        "get_quest_name_link",
+        "get_quest_class_link",
     )
-    list_display_links = ("quest_reward_id", "reward_type")
+    list_display_links = (
+        "quest_reward_id",
+        "reward_type"
+    )
     list_filter = (
-        "reward_type", "class_restrict",
-        ("quest", admin.RelatedOnlyFieldListFilter)
+        "reward_type",
+        "class_restrict",
+        ("quest", admin.RelatedOnlyFieldListFilter),
     )
     model = QuestReward
     readonly_fields = ("quest_reward_id",)
     search_fields = (
-        "reward_num", "reward_type", "quest__display_name", "class_restrict"
+        "reward_num",
+        "reward_type",
+        "quest__display_name",
+        "class_restrict",
     )
 
     @admin.display(description="Quest", ordering="quest__display_name")
@@ -41,7 +51,7 @@ class QuestRewardAdmin(admin.ModelAdmin):
                     viewname="admin:quests_quest_change",
                     args=(obj.quest.quest_id,)
                 ),
-                obj.quest.display_name
+                obj.quest.display_name,
             )
         return None
 
@@ -54,7 +64,7 @@ class QuestRewardAdmin(admin.ModelAdmin):
                     viewname="admin:classes_class_change",
                     args=(obj.class_restrict,)
                 ),
-                obj.get_class_restrict_display()
+                obj.get_class_restrict_display(),
             )
         return None
 

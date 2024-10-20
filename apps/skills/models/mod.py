@@ -1,4 +1,3 @@
-
 from django.db import models
 
 from .skill import Skill
@@ -6,33 +5,32 @@ from .type.mod import SkillModType
 
 
 class SkillMod(models.Model):
-    """
-    Ishar skill mod.
-    """
+    """Ishar skill mod."""
+
     skill_mod_id = models.AutoField(
         primary_key=True,
-        help_text = "Auto-generated permanent unique skill mod number.",
-        verbose_name="Skill Mod ID"
+        help_text="Auto-generated permanent unique skill mod number.",
+        verbose_name="Skill Mod ID",
     )
     skill = models.ForeignKey(
         db_column="skill_id",
         to=Skill,
         on_delete=models.DO_NOTHING,
         help_text="Skill/spell related to the mod.",
-        verbose_name="Skill"
+        verbose_name="Skill",
     )
     mod_location = models.SmallIntegerField(
         blank=True,
         choices=SkillModType,
         null=True,
         help_text="Location of the skill mod.",
-        verbose_name="Location"
+        verbose_name="Location",
     )
     mod_value = models.SmallIntegerField(
         blank=True,
         null=True,
         help_text="Value of the skill mod.",
-        verbose_name="Value"
+        verbose_name="Value",
     )
 
     class Meta:

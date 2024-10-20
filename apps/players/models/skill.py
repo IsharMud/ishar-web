@@ -6,13 +6,14 @@ from apps.skills.models.skill import Skill
 
 class PlayerSkill(models.Model):
     """Ishar player skill."""
+
     skill = models.ForeignKey(
         db_column="skill_id",
         to=Skill,
         to_field="id",
         on_delete=models.DO_NOTHING,
         help_text="Skill/spell related to a player.",
-        verbose_name="Skill"
+        verbose_name="Skill",
     )
     player = models.ForeignKey(
         db_column="player_id",
@@ -22,7 +23,7 @@ class PlayerSkill(models.Model):
         to_field="id",
         on_delete=models.DO_NOTHING,
         help_text="Player with a skill/spell.",
-        verbose_name="Player"
+        verbose_name="Player",
     )
     skill_level = models.PositiveIntegerField(
         help_text="Skill level of the player's skill.",
@@ -34,8 +35,18 @@ class PlayerSkill(models.Model):
         db_table = "player_skills"
         # The composite primary key (skill_id, player_id) found,
         #   that is not supported. The first column is selected.
+        constraints = (
+            models.constraints.UniqueConstraint(
+                fields=("skill", "player",),
+                name="one_skill_per_player"
+            ),
+        )
         unique_together = (("skill", "player"),)
-        ordering = ("player", "skill", "skill_level")
+        ordering = (
+            "player",
+            "skill",
+            "skill_level"
+        )
         verbose_name = "Player Skill"
         verbose_name_plural = "Player Skills"
 

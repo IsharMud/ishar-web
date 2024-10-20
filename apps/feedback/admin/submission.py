@@ -43,22 +43,35 @@ class FeedbackAdmin(admin.ModelAdmin):
     actions_on_bottom = actions_on_top = True
     date_hierarchy = "submitted"
     fields = (
-        "submission_id", "submission_type", "vote_total",
-        "account", "submitted", "subject", "body_text"
+        "submission_id",
+        "submission_type",
+        "vote_total",
+        "account",
+        "submitted",
+        "subject",
+        "body_text",
     )
     inlines = (FeedbackVoteAdminInline,)
     list_display = (
-        "__str__", "submission_type", "vote_total", "is_complete", "account",
-        "submitted"
+        "__str__",
+        "submission_type",
+        "vote_total",
+        "is_complete",
+        "account",
+        "submitted",
     )
     list_filter = (
         "submission_type",
         FeedbackCompleteListFilter,
         ("account", admin.RelatedOnlyFieldListFilter),
-        "submitted"
+        "submitted",
     )
     readonly_fields = (
-        "submission_id", "account", "submitted", "is_complete", "vote_total"
+        "submission_id",
+        "account",
+        "submitted",
+        "is_complete",
+        "vote_total",
     )
     search_fields = ("subject", "body_text", "account__account_name")
     show_facets = admin.ShowFacets.ALWAYS
@@ -74,7 +87,11 @@ class FeedbackAdmin(admin.ModelAdmin):
         fields = super().get_readonly_fields(request, obj=obj)
         if request.user and not request.user.is_anonymous:
             if not request.user.is_god():
-                fields = fields + ("submission_type", "subject", "body_text")
+                fields = fields + (
+                    "submission_type",
+                    "subject",
+                    "body_text"
+                )
         return fields
 
     def has_module_permission(self, request, obj=None) -> bool:
@@ -101,6 +118,7 @@ class FeedbackAdmin(admin.ModelAdmin):
     @admin.display(description="Complete?", ordering="-submission_type")
     def is_complete(self, obj) -> bool:
         return obj.is_complete()
+
     is_complete.boolean = True
 
     @admin.action(description=f"Mark selected {verbose_name_plural} complete")
@@ -108,7 +126,7 @@ class FeedbackAdmin(admin.ModelAdmin):
         for obj in queryset:
             obj_url = reverse(
                 viewname="admin:feedback_feedbacksubmission_change",
-                args=(obj.pk,)
+                args=(obj.pk,),
             )
             if obj.mark_complete():
                 level = messages.SUCCESS
@@ -125,8 +143,8 @@ class FeedbackAdmin(admin.ModelAdmin):
                     self.verbose_name,
                     obj_url,
                     obj.subject,
-                    obj.pk
-                )
+                    obj.pk,
+                ),
             )
         return redirect(
             reverse(viewname="admin:feedback_feedbacksubmission_changelist")

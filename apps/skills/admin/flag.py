@@ -5,10 +5,20 @@ from ..models.flag import SpellFlag
 
 @register(SpellFlag)
 class SpellFlagAdmin(ModelAdmin):
-    """
-    Spell flag administration.
-    """
-    fieldsets = ((None, {"fields": ("id", "name", "description")}),)
+    """Spell flag administration."""
+
+    fieldsets = (
+        (
+            None,
+            {
+                "fields": (
+                    "id",
+                    "name",
+                    "description"
+                )
+            }
+        ),
+    )
     list_display = search_fields = ("name", "description")
     model = SpellFlag
     readonly_fields = ("id",)

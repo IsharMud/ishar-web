@@ -3,6 +3,7 @@ from django.contrib.admin import TabularInline
 
 class BaseQuestTabularInline(TabularInline):
     """Base quest inline tabular administration."""
+
     extra = 1
     model = None
 

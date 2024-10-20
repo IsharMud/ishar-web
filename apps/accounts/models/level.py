@@ -3,6 +3,7 @@ from django.db.models import IntegerChoices
 
 class ImmortalLevel(IntegerChoices):
     """(Account) immortal level choices."""
+
     NONE = 0
     IMMORTAL = 1
     ARTISAN = 2

@@ -21,7 +21,6 @@ class FeedbackView(LoginRequiredMixin, NeverCacheMixin, ListView):
     submission_type = None
     template_name = "feedback.html"
 
-
     def setup(self, request, *args, **kwargs):
         if self.submission_type is not None:
             if self.submission_type not in FeedbackSubmissionTypePublic:

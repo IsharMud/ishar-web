@@ -1,15 +1,17 @@
 """isharmud.com authentication backend."""
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import ModelBackend
 
 
 class IsharUserAuthBackend(ModelBackend):
     """Ishar authentication backend."""
+
     create_unknown_user = False
     model = get_user_model()
 
     def authenticate(self, request, username=None, password=None, **kwargs):
-        # Compare against MD5Crypt hash from the database.
+        # Compare against database password hash.
         try:
             if "@" in username:
                 user = self.model.objects.get(email=username)

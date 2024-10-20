@@ -4,9 +4,8 @@ from ...models.title import AccountTitle
 
 
 class AccountTitleAdmin(TabularInline):
-    """
-    Account title tabular inline administration.
-    """
+    """Account title tabular inline administration."""
+
     extra = 1
     model = AccountTitle
     verbose_name = "Title"

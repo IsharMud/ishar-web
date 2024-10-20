@@ -20,5 +20,4 @@ urlpatterns = [
     path("who/", PlayerWhoView.as_view(), name="who"),
     path("areas/", WorldView.as_view(), name="areas"),
     path("world/", WorldView.as_view(), name="world"),
-
 ]

@@ -25,7 +25,7 @@ class FeedbackVote(models.Model):
         ),
         null=False,
         primary_key=True,
-        verbose_name=_("Vote ID")
+        verbose_name=_("Vote ID"),
     )
     feedback_submission = models.ForeignKey(
         db_column="submission_id",
@@ -35,7 +35,7 @@ class FeedbackVote(models.Model):
         on_delete=models.CASCADE,
         to=FeedbackSubmission,
         to_field="submission_id",
-        verbose_name=_("Feedback Submission")
+        verbose_name=_("Feedback Submission"),
     )
     vote_value = models.BooleanField(
         blank=False,
@@ -44,7 +44,7 @@ class FeedbackVote(models.Model):
             "Positive (True) or negative (False) boolean value of the vote."
         ),
         null=False,
-        verbose_name=_("Value")
+        verbose_name=_("Value"),
     )
     account = models.ForeignKey(
         db_column="account_id",
@@ -54,7 +54,7 @@ class FeedbackVote(models.Model):
         on_delete=models.CASCADE,
         to=Account,
         to_field="account_id",
-        verbose_name=_("Account")
+        verbose_name=_("Account"),
     )
     voted = models.DateTimeField(
         auto_now_add=True,
@@ -62,22 +62,22 @@ class FeedbackVote(models.Model):
         db_column="voted",
         help_text=_("Date and time of the vote."),
         null=False,
-        verbose_name=_("Voted")
+        verbose_name=_("Voted"),
     )
 
     class Meta:
         managed = True
-        constraints = (
-            models.constraints.UniqueConstraint(
-                fields=("account", "feedback_submission"),
-                name="one_vote_per"
-            ),
-        )
         db_table = "feedback_votes"
         default_related_name = "votes"
         get_latest_by = ("voted",)
         ordering = ("-voted",)
-        unique_together = ("account", "feedback_submission")
+        constraints = (
+            models.constraints.UniqueConstraint(
+                fields=("account", "feedback_submission"),
+                name="one_vote_per_feedback"
+            ),
+        )
+        unique_together = ("account", "feedback_submission",)
         verbose_name = "Vote"
         verbose_name_plural = "Votes"
 

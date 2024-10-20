@@ -3,11 +3,22 @@ from django.contrib.admin import ModelAdmin
 
 class AchievementCriteriaAdmin(ModelAdmin):
     """Ishar achievement criteria administration."""
-    list_display = ("criteria_id", "criteria_type", "achievement",)
-    list_display_links = ("criteria_id", "criteria_type",)
+
+    list_display = (
+        "criteria_id",
+        "criteria_type",
+        "achievement",
+    )
+    list_display_links = (
+        "criteria_id",
+        "criteria_type",
+    )
     list_filter = ("achievement", "criteria_type", "group_id")
     readonly_fields = ("criteria_id",)
-    search_fields = ("description", "target_value",)
+    search_fields = (
+        "description",
+        "target_value",
+    )
 
     def has_module_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:

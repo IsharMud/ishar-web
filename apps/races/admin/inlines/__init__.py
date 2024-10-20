@@ -3,6 +3,7 @@ from django.contrib.admin import TabularInline
 
 class BaseRaceAdminInline(TabularInline):
     """Base race inline administration."""
+
     extra = 1
     model = None
 

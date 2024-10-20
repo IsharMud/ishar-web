@@ -8,27 +8,27 @@ class Title(models.Model):
     title_id = models.AutoField(
         primary_key=True,
         help_text=_("Primary key identification number of the title."),
-        verbose_name=_("Title ID")
+        verbose_name=_("Title ID"),
     )
     male_text = models.CharField(
         blank=True,
         null=True,
         max_length=100,
         help_text=_("Male text of the title."),
-        verbose_name=_("Male Text")
+        verbose_name=_("Male Text"),
     )
     female_text = models.CharField(
         blank=True,
         null=True,
         max_length=100,
         help_text=_("Female text of the title."),
-        verbose_name=_("Female Text")
+        verbose_name=_("Female Text"),
     )
     prepend = models.BooleanField(
         blank=True,
         null=True,
         help_text=_("Should the title be prepended?"),
-        verbose_name=_("Prepend?")
+        verbose_name=_("Prepend?"),
     )
 
     class Meta:

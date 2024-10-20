@@ -46,7 +46,9 @@ def slash(interaction_json: dict, request) -> tuple[str, bool]:
     # "spell" command to search MUD help topics for "Spell ".
     if command_name == "spell":
         return mudhelp(
-            request=request, interaction=interaction_data, _spell=True
+            request=request,
+            interaction=interaction_data,
+            _spell=True
         )
 
     # "mudtime" command to show server (UTC) time.

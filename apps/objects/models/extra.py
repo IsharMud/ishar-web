@@ -17,25 +17,25 @@ class ObjectExtra(models.Model):
         primary_key=True,
         to=Object,
         to_field="vnum",
-        verbose_name=_('Object ID ("VNUM")')
+        verbose_name=_('Object ID ("VNUM")'),
     )
     keywords = models.CharField(
         help_text=_("Keywords of the object extra."),
         max_length=128,
-        verbose_name=_("Keywords")
+        verbose_name=_("Keywords"),
     )
     description = models.CharField(
         help_text=_("Description of the object extra."),
         max_length=4096,
-        verbose_name=_("Description")
+        verbose_name=_("Description"),
     )
     created_at = models.DateTimeField(
         help_text=_("Date and time when the object extra was created."),
-        verbose_name=_("Created At")
+        verbose_name=_("Created At"),
     )
     updated_at = models.DateTimeField(
         help_text=_("Date and time when the object extra was updated."),
-        verbose_name=_("Updated At")
+        verbose_name=_("Updated At"),
     )
 
     class Meta:
@@ -51,7 +51,6 @@ class ObjectExtra(models.Model):
 
     def __str__(self) -> str:
         return f"{self._meta.verbose_name} @ {self.object}"
-
 
     def save(
         self,
@@ -70,5 +69,5 @@ class ObjectExtra(models.Model):
             force_insert=False,
             force_update=False,
             using=None,
-            update_fields=None
+            update_fields=None,
         )

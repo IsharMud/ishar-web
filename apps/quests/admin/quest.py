@@ -12,39 +12,92 @@ from .inlines.step import QuestStepTabularInline
 
 @register(Quest)
 class QuestAdmin(ModelAdmin):
-    """
-    Quest administration.
-    """
+    """Quest administration."""
 
     fieldsets = (
-        (None, {"fields": ("quest_id", "name", "display_name", "repeatable")}),
-        ("Deprecated", {
-            "fields": ("deprecated_max_level", "deprecated_prerequisite")
-        }),
-        ("Players", {"fields": ("min_level", "class_restrict",)}),
-        ("Messages", {"fields": (
-            "description", "quest_intro", "completion_message"
-        )}),
-        ("Mobiles", {"fields": ("quest_source", "quest_return")}),
+        (
+            None,
+            {
+                "fields": (
+                    "quest_id",
+                    "name",
+                    "display_name",
+                    "repeatable"
+                )
+            }
+        ),
+        (
+            "Deprecated",
+            {
+                "fields": (
+                    "deprecated_max_level",
+                    "deprecated_prerequisite"
+                )
+            }
+        ),
+        (
+            "Players",
+            {
+                "fields": (
+                    "min_level",
+                    "class_restrict",
+                )
+            },
+        ),
+        (
+            "Messages",
+            {
+                "fields": (
+                    "description",
+                    "quest_intro",
+                    "completion_message"
+                )
+            }
+        ),
+        (
+            "Mobiles",
+            {
+                "fields": (
+                    "quest_source",
+                    "quest_return"
+                )
+            }
+        ),
         ("Items", {"fields": ("start_item",)}),
     )
     inlines = (
         QuestPrereqTabularInline,
         QuestStepTabularInline,
-        QuestRewardTabularInline
+        QuestRewardTabularInline,
     )
     list_display = (
-        "quest_id", "display_name", "repeatable", "num_steps",
-        "get_quest_class_link"
+        "quest_id",
+        "display_name",
+        "repeatable",
+        "num_steps",
+        "get_quest_class_link",
     )
-    list_display_links = ("quest_id", "display_name")
-    list_filter = ("repeatable", "class_restrict", "min_level")
+    list_display_links = (
+        "quest_id",
+        "display_name"
+    )
+    list_filter = (
+        "repeatable",
+        "class_restrict",
+        "min_level"
+    )
     readonly_fields = (
-        "quest_id", "deprecated_prerequisite", "deprecated_max_level"
+        "quest_id",
+        "deprecated_prerequisite",
+        "deprecated_max_level"
     )
     search_fields = (
-        "quest_id", "display_name", "name", "description",
-        "completion_message", "quest_intro",
+        "quest_id",
+        "display_name",
+        "name",
+        "description",
+        "completion_message",
+        "quest_intro",
     )
 
     def get_queryset(self, request):
@@ -61,7 +114,7 @@ class QuestAdmin(ModelAdmin):
                     viewname="admin:classes_class_change",
                     args=(obj.class_restrict,)
                 ),
-                obj.get_class_restrict_display()
+                obj.get_class_restrict_display(),
             )
         return None
 
@@ -71,8 +124,8 @@ class QuestAdmin(ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         if obj and not change:
-            obj.deprecated_prerequisite = '-1'
-            obj.deprecated_max_level = '20'
+            obj.deprecated_prerequisite = "-1"
+            obj.deprecated_max_level = "20"
         super().save_model(request, obj, form, change)
 
     def has_add_permission(self, request) -> bool:

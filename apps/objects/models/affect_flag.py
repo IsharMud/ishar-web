@@ -19,26 +19,26 @@ class ObjectAffectFlag(models.Model):
         primary_key=True,
         to=Object,
         to_field="vnum",
-        verbose_name=_('Object ID ("VNUM")')
+        verbose_name=_('Object ID ("VNUM")'),
     )
     affect_flag = models.OneToOneField(
         to=AffectFlag,
         on_delete=models.DO_NOTHING,
         help_text=_("Affect flag affecting the object."),
         related_name="+",
-        verbose_name=_("Affect Flag")
+        verbose_name=_("Affect Flag"),
     )
     value = models.IntegerField(
         help_text=_("Value of the object affect flag."),
-        verbose_name=_("Value")
+        verbose_name=_("Value"),
     )
     created_at = models.DateTimeField(
         help_text=_("Date and time when the object flag was created."),
-        verbose_name=_("Created At")
+        verbose_name=_("Created At"),
     )
     updated_at = models.DateTimeField(
         help_text=_("Date and time when the object flag was updated."),
-        verbose_name=_("Updated At")
+        verbose_name=_("Updated At"),
     )
 
     class Meta:
@@ -46,6 +46,12 @@ class ObjectAffectFlag(models.Model):
         db_table = "object_affect_flags"
         default_related_name = "affect_flag"
         ordering = ("object", "-value")
+        constraints = (
+            models.constraints.UniqueConstraint(
+                fields=("affect_flag", "object"),
+                name="affect_flag_per_obj"
+            ),
+        )
         unique_together = (("affect_flag", "object"),)
         verbose_name = "Object Affect Flag"
         verbose_name_plural = "Object Affect Flags"
@@ -55,7 +61,6 @@ class ObjectAffectFlag(models.Model):
 
     def __str__(self) -> str:
         return f"{self._meta.verbose_name} @ {self.object}"
-
 
     def save(
         self,
@@ -74,5 +79,5 @@ class ObjectAffectFlag(models.Model):
             force_insert=force_insert,
             force_update=force_update,
             using=using,
-            update_fields=update_fields
+            update_fields=update_fields,
         )

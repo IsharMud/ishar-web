@@ -8,16 +8,27 @@ from .inlines.trigger import AchievementTriggerTabularInline
 
 class AchievementAdmin(ModelAdmin):
     """Ishar achievement administration."""
+
     inlines = (
         AchievementClassRestrictTabularInline,
         AchievementCriteriaTabularInline,
         AchievementRewardTabularInline,
         AchievementTriggerTabularInline,
     )
-    list_display = ("achievement_id", "name", "description", "is_hidden")
+    list_display = (
+        "achievement_id",
+        "name",
+        "description",
+        "is_hidden",
+    )
     list_filter = (
-        "criteria_type", "category", "parent_category", "is_hidden",
-        "ordinal", "created_at", "updated_at",
+        "criteria_type",
+        "category",
+        "parent_category",
+        "is_hidden",
+        "ordinal",
+        "created_at",
+        "updated_at",
     )
     readonly_fields = ("achievement_id", "created_at", "updated_at")
     search_fields = ("name", "description")

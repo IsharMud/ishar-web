@@ -17,26 +17,26 @@ class News(models.Model):
     news_id = models.AutoField(
         primary_key=True,
         help_text=_("Auto-generated permanent ID number of the news post."),
-        verbose_name=_("News ID")
+        verbose_name=_("News ID"),
     )
     account = models.ForeignKey(
         db_column="account_id",
         to=Account,
         on_delete=models.DO_NOTHING,
         help_text=_("Account that created the news post."),
-        verbose_name=_("Account")
+        verbose_name=_("Account"),
     )
     created = models.DateTimeField(
         db_column="created",
         default=now,
         help_text=_("Date and time when the news post was created."),
-        verbose_name=_("Created")
+        verbose_name=_("Created"),
     )
     subject = models.CharField(
         db_column="subject",
         max_length=64,
         help_text=_("Subject of the news post."),
-        verbose_name=_("Subject")
+        verbose_name=_("Subject"),
     )
     body = models.TextField(
         db_column="body",
@@ -47,15 +47,21 @@ class News(models.Model):
         db_column="is_visible",
         default=True,
         help_text=_("Should the news post be visible publicly?"),
-        verbose_name=_("Visible?")
+        verbose_name=_("Visible?"),
     )
 
     class Meta:
         managed = True
         db_table = "news"
         default_related_name = "news"
-        get_latest_by = ("is_visible", "created")
-        ordering = ("-created", "-news_id")
+        get_latest_by = (
+            "is_visible",
+            "created",
+        )
+        ordering = (
+            "-created",
+            "-news_id",
+        )
         verbose_name = _("News Post")
         verbose_name_plural = _("News Posts")
 

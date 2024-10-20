@@ -3,8 +3,16 @@ from django.contrib.admin import ModelAdmin
 
 class AchievementClassRestrictAdmin(ModelAdmin):
     """Ishar achievement class restriction administration."""
-    list_display = ("acr_id", "player_class", "achievement",)
-    list_filter = ("achievement", "player_class",)
+
+    list_display = (
+        "acr_id",
+        "player_class",
+        "achievement",
+    )
+    list_filter = (
+        "achievement",
+        "player_class",
+    )
     readonly_fields = ("acr_id",)
     search_fields = ("achievement", "player_class")
 

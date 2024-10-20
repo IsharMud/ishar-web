@@ -56,11 +56,10 @@ class HelpView(TemplateView):
                 self.status = 404
                 messages.error(
                     request=request,
-                    message="Sorry, but no such help topic could be found."
+                    message="Sorry, but no such help topic could be found.",
                 )
 
         return super().dispatch(request, *args, **kwargs)
-
 
     def get_context_data(self, **kwargs):
         # Include search form, help topics, and any chosen topic in context.
@@ -84,6 +83,7 @@ class HelpView(TemplateView):
 
 class WorldView(TemplateView):
     """World (/world/) view."""
+
     helptab = HELPTAB
     template_name = "world.html"
     http_method_names = ("get",)

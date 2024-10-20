@@ -4,6 +4,7 @@ from django.utils.timezone import now
 
 class AchievementCriteriaType(models.TextChoices):
     """Achievement criteria type choices."""
+
     PLAYER_ONLY = "PlayerOnly", "Player Only"
     ACCOUNT = "Account"
     ACCOUNT_GROUPED = "AccountGrouped", "Account (Grouped)"
@@ -24,12 +25,13 @@ class AchievementManager(models.Manager):
 
 class Achievement(models.Model):
     """Ishar achievement."""
+
     objects = AchievementManager()
 
     achievement_id = models.AutoField(
         primary_key=True,
         help_text="Primary key identification number of the achievement.",
-        verbose_name="Achievement ID"
+        verbose_name="Achievement ID",
     )
     name = models.CharField(
         max_length=255,
@@ -40,39 +42,39 @@ class Achievement(models.Model):
         blank=True,
         null=True,
         help_text="Description of the achievement.",
-        verbose_name="Description"
+        verbose_name="Description",
     )
     is_hidden = models.BooleanField(
         help_text="Is the achievement hidden?",
-        verbose_name="Hidden?"
+        verbose_name="Hidden?",
     )
     created_at = models.DateTimeField(
         help_text="Creation time of the achievement.",
-        verbose_name="Created"
+        verbose_name="Created",
     )
     updated_at = models.DateTimeField(
         help_text="Updated time of the achievement.",
-        verbose_name="Updated"
+        verbose_name="Updated",
     )
     category = models.CharField(
         max_length=80,
         blank=True,
         null=True,
         help_text="Category of the achievement.",
-        verbose_name="Category"
+        verbose_name="Category",
     )
     parent_category = models.CharField(
         max_length=80,
         blank=True,
         null=True,
         help_text="Parent category of the achievement.",
-        verbose_name="Parent Category"
+        verbose_name="Parent Category",
     )
     ordinal = models.IntegerField(
         blank=True,
         null=True,
         help_text="Ordinal of the achievement.",
-        verbose_name="Ordinal"
+        verbose_name="Ordinal",
     )
     criteria_type = models.CharField(
         max_length=14,
@@ -80,7 +82,7 @@ class Achievement(models.Model):
         choices=AchievementCriteriaType,
         null=True,
         help_text="Criteria type of the achievement.",
-        verbose_name="Criteria Type"
+        verbose_name="Criteria Type",
     )
 
     class Meta:

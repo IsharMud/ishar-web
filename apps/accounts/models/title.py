@@ -8,10 +8,11 @@ from .account import Account
 
 class AccountTitle(models.Model):
     """Ishar account title."""
+
     account_titles_id = models.AutoField(
         primary_key=True,
         help_text=_("Primary key identification number for the account title."),
-        verbose_name=_("Account Title ID")
+        verbose_name=_("Account Title ID"),
     )
     account = models.ForeignKey(
         blank=True,
@@ -19,7 +20,7 @@ class AccountTitle(models.Model):
         to=Account,
         on_delete=models.DO_NOTHING,
         help_text=_("Account related to a title."),
-        verbose_name=_("Account")
+        verbose_name=_("Account"),
     )
     title = models.ForeignKey(
         blank=True,
@@ -27,13 +28,16 @@ class AccountTitle(models.Model):
         to=Title,
         on_delete=models.DO_NOTHING,
         help_text=_("Title related to an account."),
-        verbose_name=_("Title")
+        verbose_name=_("Title"),
     )
 
     class Meta:
         managed = False
         db_table = "account_titles"
-        ordering = ("title", "account",)
+        ordering = (
+            "title",
+            "account",
+        )
         verbose_name = _("Account Title")
         verbose_name_plural = _("Account Titles")
 

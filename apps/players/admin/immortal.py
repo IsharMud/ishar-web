@@ -6,6 +6,7 @@ from .player import PlayerAdmin
 
 class ImmortalTypeListFilter(admin.SimpleListFilter):
     """Find players of certain immortal type by "__common__level"."""
+
     title = "Immortal Type"
     parameter_name = "immortal_type"
 
@@ -27,7 +28,10 @@ class ImmortalAdmin(PlayerAdmin):
         ImmortalTypeListFilter,
         ("account", admin.RelatedOnlyFieldListFilter),
     )
-    ordering = ("true_level", "common__level",)
+    ordering = (
+        "true_level",
+        "common__level",
+    )
 
     @admin.display(description="Immortal Type", ordering="player_level")
     def immortal_type(self, obj) -> str:

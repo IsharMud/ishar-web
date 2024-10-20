@@ -10,9 +10,19 @@ class PlayerObjectsInlineAdmin(TabularInline):
 
     model = PlayerObject
     fields = readonly_fields = (
-        "object", "position_type", "position_val", "get_container_link",
-        "enchant", "timer", "state", "bound", "min_level",
-        "val0", "val1", "val2", "val3"
+        "object",
+        "position_type",
+        "position_val",
+        "get_container_link",
+        "enchant",
+        "timer",
+        "state",
+        "bound",
+        "min_level",
+        "val0",
+        "val1",
+        "val2",
+        "val3",
     )
     verbose_name = "Object"
 
@@ -22,9 +32,9 @@ class PlayerObjectsInlineAdmin(TabularInline):
             '<a href="{}">{}</a>',
             reverse(
                 viewname="admin:objects_object_change",
-                args=(obj.parent_player_object.object.pk,)
+                args=(obj.parent_player_object.object.pk,),
             ),
-            obj.parent_player_object.object
+            obj.parent_player_object.object,
         )
 
     def has_add_permission(self, request, obj) -> bool:

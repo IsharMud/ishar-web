@@ -32,7 +32,7 @@ class QuestReward(models.Model):
     quest_reward_id = models.AutoField(
         primary_key=True,
         help_text="Auto-generated, permanent quest reward ID number.",
-        verbose_name="Quest Reward ID"
+        verbose_name="Quest Reward ID",
     )
     reward_type = models.IntegerField(
         choices=QuestRewardType,
@@ -41,7 +41,7 @@ class QuestReward(models.Model):
     )
     reward_num = models.IntegerField(
         help_text="Amount/value/target number of the reward.",
-        verbose_name="Reward Number"
+        verbose_name="Reward Number",
     )
     quest = models.ForeignKey(
         to=Quest,
@@ -50,12 +50,12 @@ class QuestReward(models.Model):
         on_delete=models.DO_NOTHING,
         related_name="rewards",
         related_query_name="reward",
-        verbose_name="Quest"
+        verbose_name="Quest",
     )
     class_restrict = models.IntegerField(
         choices=PlayerClass,
         help_text="Player class which the reward is restricted to.",
-        verbose_name="Class Restrict"
+        verbose_name="Class Restrict",
     )
 
     # The composite primary key (reward_num, quest_id) found,

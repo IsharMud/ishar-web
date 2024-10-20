@@ -5,6 +5,7 @@ from .quest import Quest
 
 class QuestStepType(models.IntegerChoices):
     """Quest step type choices."""
+
     OBJECT = 0
     KILL = 1
     ROOM = 2
@@ -22,7 +23,7 @@ class QuestStep(models.Model):
     step_id = models.AutoField(
         primary_key=True,
         help_text="Quest step identification number",
-        verbose_name="Quest Step ID"
+        verbose_name="Quest Step ID",
     )
     step_type = models.IntegerField(
         choices=QuestStepType,
@@ -31,7 +32,7 @@ class QuestStep(models.Model):
     )
     target = models.IntegerField(
         help_text="Target of the quest step.",
-        verbose_name="Target"
+        verbose_name="Target",
     )
     num_required = models.IntegerField(
         help_text="Number required for the quest step.",
@@ -41,24 +42,24 @@ class QuestStep(models.Model):
         null=False,
         to=Quest,
         on_delete=models.DO_NOTHING,
-        related_name='steps',
-        related_query_name='step',
+        related_name="steps",
+        related_query_name="step",
         help_text="Quest related to the quest step.",
-        verbose_name="Quest"
+        verbose_name="Quest",
     )
     time_limit = models.IntegerField(
         help_text="Time limit for the quest step.",
-        verbose_name="Time Limit"
+        verbose_name="Time Limit",
     )
     mystify = models.BooleanField(
         help_text="Mystify Quest Step.",
-        verbose_name="Mystify"
+        verbose_name="Mystify",
     )
     mystify_text = models.CharField(
         blank=True,
         max_length=80,
         help_text="Mystify text for the quest step.",
-        verbose_name="Mystify Text"
+        verbose_name="Mystify Text",
     )
     auto_complete = models.BooleanField(
         blank=True,
@@ -79,5 +80,7 @@ class QuestStep(models.Model):
         return f"{self.__class__.__name__}: {self.__str__()} ({self.pk})"
 
     def __str__(self) -> str:
-        return f"{self.get_step_type_display()} {self.target}" \
-                f" ({self.num_required}) @ {self.quest}"
+        return (
+            f"{self.get_step_type_display()} {self.target}"
+            f" ({self.num_required}) @ {self.quest}"
+        )

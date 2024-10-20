@@ -12,11 +12,18 @@ from ..utils.service import restart_service
 @register(MUDProcess)
 class MUDProcessAdmin(ModelAdmin):
     """MUD process administration."""
+
     model = MUDProcess
-    actions = ("terminate", "kill",)
+    actions = (
+        "terminate",
+        "kill",
+    )
     change_list_template = "change_list.html"
     list_display = ("process_id", "name", "user", "runtime")
-    fields = readonly_fields = list_display + ("created", "last_updated",)
+    fields = readonly_fields = list_display + (
+        "created",
+        "last_updated",
+    )
     verbose_name = "MUD Process"
     verbose_name_plural = "MUD Processes"
 
@@ -65,7 +72,9 @@ class MUDProcessAdmin(ModelAdmin):
                 level=level,
                 message=_(message % (obj.process_id,))
             )
-        return redirect(reverse("admin:processes_mudprocess_changelist"))
+        return redirect(
+            reverse("admin:processes_mudprocess_changelist")
+        )
 
     def restart(self, request,):
         if restart_service():
@@ -78,7 +87,9 @@ class MUDProcessAdmin(ModelAdmin):
                 request=request,
                 message="Failed sending systemctl restart."
             )
-        return redirect(reverse("admin:processes_mudprocess_changelist"))
+        return redirect(
+            reverse("admin:processes_mudprocess_changelist")
+        )
 
     @action(description="Terminate")
     def terminate(self, request, queryset):
@@ -94,4 +105,6 @@ class MUDProcessAdmin(ModelAdmin):
                 level=level,
                 message=_(message % (obj.process_id,))
             )
-        return redirect(reverse("admin:processes_mudprocess_changelist"))
+        return redirect(
+            reverse("admin:processes_mudprocess_changelist")
+        )

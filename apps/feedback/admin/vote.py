@@ -9,7 +9,10 @@ class FeedbackVoteAdmin(admin.ModelAdmin):
     actions_on_bottom = actions_on_top = True
     date_hierarchy = "voted"
     fields = list_display = readonly_fields = (
-        "voted", "feedback_submission", "vote_value", "account"
+        "voted",
+        "feedback_submission",
+        "vote_value",
+        "account",
     )
     list_filter = (
         "vote_value",
@@ -17,7 +20,10 @@ class FeedbackVoteAdmin(admin.ModelAdmin):
         ("account", admin.RelatedOnlyFieldListFilter),
         "voted",
     )
-    search_fields = ("feedback_submission__subject", "account__account_name")
+    search_fields = (
+        "feedback_submission__subject",
+        "account__account_name"
+    )
     show_facets = admin.ShowFacets.ALWAYS
     show_full_result_count = True
     verbose_name = "Vote"
