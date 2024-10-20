@@ -5,7 +5,7 @@ from apps.players.models.player import PlayerBase
 
 
 class Command(BaseCommand):
-    """who command to find players online."""
+    """ "who" command to find online players. """
 
     help = "Find online players."
 

@@ -9,7 +9,7 @@ HELPTAB = HelpTab()
 
 
 class HelpView(TemplateView):
-    """Help (/help/(<topic|search>/)?> view."""
+    """Help view."""
 
     template_name = "help_page.html"
     helptab = HELPTAB
