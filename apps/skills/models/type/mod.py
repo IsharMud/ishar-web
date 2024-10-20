@@ -3,6 +3,7 @@ from django.db.models import IntegerChoices
 
 class SkillModType(IntegerChoices):
     """Skill mod type choices."""
+
     ZERO = 0
     NEGATIVE_ONE = -1
     STRENGTH = 1
@@ -47,7 +48,7 @@ class SkillModType(IntegerChoices):
     SAVE_FORTITUDE = 40
     SAVE_REFLEX = 41
     SAVE_RESILIENCE = 42
-    SPELL_POTENCY = 43,
+    SPELL_POTENCY = 43
     RESISTANCE = 44
     SPELL_DAMAGE = 45
     HEALING_POWER = 46
