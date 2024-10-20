@@ -75,9 +75,7 @@ def _discover_help(path: Path = settings.HELPTAB) -> list:
 
 
 class HelpTab:
-    """
-    Interact with MUD "helptab" file finding sections representing help topics.
-    """
+    """Interact with MUD "helptab" file sections representing topics."""
 
     help_topics: dict = {}
     path: Path = settings.HELPTAB

@@ -97,12 +97,27 @@ class Achievement(models.Model):
     def __str__(self) -> str:
         return self.name
 
-    def save(self, *args, **kwargs):
+    def save(
+        self,
+        *args,
+        force_insert=False,
+        force_update=False,
+        using=None,
+        update_fields=None,
+    ):
         # Update timestamps on save.
         if not self.pk:
             self.created_at = now()
+
         self.updated_at = now()
-        return super().save(*args, **kwargs)
+
+        return super().save(
+            *args,
+            force_insert=False,
+            force_update=False,
+            using=None,
+            update_fields=None,
+        )
 
     def natural_key(self) -> str:
         # Natural key of the achievement name.

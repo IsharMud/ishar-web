@@ -1,6 +1,8 @@
+from datetime import timedelta
+
 from django.db import models
 from django.utils.timesince import timesince
-from django.utils.timezone import localtime, timedelta
+from django.utils.timezone import localtime
 from django.utils.translation import gettext_lazy as _
 
 from .player import PlayerBase

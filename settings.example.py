@@ -290,6 +290,50 @@ MUD_LIB = Path(MUD_HOME, "lib")
 HELPTAB = Path(MUD_LIB, "Misc/helptab")
 MUD_PODIR = Path(MUD_LIB, "Podir")
 
+# Alignments.
+ALIGNMENTS = {
+    "Very Evil": (-1500, -1000),
+    "Evil": (-1000, -500),
+    "Slightly Evil": (-500, -250),
+    "Neutral": (-250, 250),
+    "Slightly Good": (250, 500),
+    "Good": (500, 1000),
+    "Very Good": (1000, 1500)
+}
+
+# Order of statistics for each player class.
+CLASS_STATISTICS = {
+    "Warrior": (
+        "Strength", "Agility", "Endurance", "Willpower", "Focus",
+        "Perception"
+    ),
+    "Rogue": (
+        "Agility", "Perception", "Strength", "Focus", "Endurance",
+        "Willpower"
+    ),
+    "Cleric": (
+        "Willpower", "Strength", "Perception", "Endurance", "Focus",
+        "Agility"
+    ),
+    "Magician": (
+        "Perception", "Focus", "Agility", "Willpower", "Endurance",
+        "Strength"
+    ),
+    "Necromancer": (
+        "Focus", "Willpower", "Perception", "Agility", "Strength",
+        "Endurance"
+    ),
+    "Shaman": (
+        "Willpower", "Agility", "Endurance", "Focus", "Perception",
+        "Strength",
+    ),
+    # Alphabetic as last resort
+    None: (
+        "Agility", "Endurance", "Focus", "Perception", "Strength",
+        "Willpower"
+    )
+}
+
 # Player immortal levels/types.
 IMMORTAL_LEVELS = (
     (26, "God"),

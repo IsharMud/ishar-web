@@ -9,9 +9,8 @@ from .inlines.skill import RaceSkillAdminInline
 
 @admin.register(Race)
 class RaceAdmin(admin.ModelAdmin):
-    """
-    Race administration.
-    """
+    """Race administration."""
+
     model = Race
     fieldsets = (
         (None, {"fields": ("race_id", "display_name", "symbol", "folk_name")}),

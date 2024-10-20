@@ -5,9 +5,8 @@ from .models import Season
 
 @register(Season)
 class SeasonAdmin(ModelAdmin):
-    """
-    Season administration.
-    """
+    """Season administration."""
+
     date_hierarchy = "effective_date"
     fieldsets = (
         (None, {"fields": ("season_id", "is_active", "game_state")}),

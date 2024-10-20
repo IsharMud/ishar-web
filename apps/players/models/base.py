@@ -21,7 +21,7 @@ from ..utils import get_immortal_level, get_immortal_type
 
 class PlayerBaseManager(models.Manager):
     def get_by_natural_key(self, name):
-        """Natural key is player name."""
+        # Natural key is player name.
         return self.get(name=name)
 
 
@@ -254,78 +254,67 @@ class PlayerBase(models.Model):
         return self.name
 
     def natural_key(self) -> str:
-        """Natural key is player name."""
+        # Natural key is player name.
         return self.name
 
     @property
     @display(description="Create IP", ordering="create_haddr")
     def _create_haddr(self) -> str:
-        """IP address that created the account."""
+        # IP address that created the account.
         return dec2ip(self.create_haddr)
 
     @property
     @display(description="Login Fail IP", ordering="login_fail_haddr")
     def _login_fail_haddr(self) -> str:
-        """Last IP address that failed to log in to the account."""
+        # Last IP address that failed to log in to the account.
         return dec2ip(self.login_fail_haddr)
 
     @property
     @display(description="Last IP", ordering="last_haddr")
     def _last_haddr(self) -> str:
-        """Last IP address that logged in to the account."""
+        # Last IP address that logged in to the account.
         return dec2ip(self.last_haddr)
 
     def get_absolute_url(self) -> str:
-        """URL to player page"""
+        # URL to player page
         return reverse(
             viewname="player",
             kwargs={"name": self.name}
         ) + "#player"
 
     def get_immortal_type(self) -> (str, None):
-        """
-        Type of immortal.
-        Returns one of settings.IMMORTAL_LEVELS tuple text values,
-            from settings.IMMORTAL_LEVELS, or None.
-        """
+        # Type of immortal.
+        #   Returns one of settings.IMMORTAL_LEVELS tuple text values, from
+        #    settings.IMMORTAL_LEVELS, or None.
         return get_immortal_type(level=self.true_level)
 
     def get_player_alignment(self) -> str:
-        """Player alignment."""
-        alignments = {
-            "Very Evil": (-1500, -1000),
-            "Evil": (-1000, -500),
-            "Slightly Evil": (-500, -250),
-            "Neutral": (-250, 250),
-            "Slightly Good": (250, 500),
-            "Good": (500, 1000),
-            "Very Good": (1000, 1500)
-        }
-        for align_text, (low, high) in alignments.items():
+        # Player alignment.
+        for align_text, (low, high) in settings.ALIGNMENTS.items():
             if low <= self.common.alignment <= high:
                 return align_text
         return "Unknown"
 
     def get_player_phrase(self) -> str:
-        """Player phrase."""
+        # Player phrase.
         if self.is_deleted > 0:
             return "was"
         return "is"
 
     def get_player_phrase_own(self) -> str:
-        """Player phrase for ownership."""
+        # Player phrase for ownership.
         if self.is_deleted > 0:
             return "were"
         return "are"
 
     def get_player_phrase_owns(self) -> str:
-        """Player phrase for plural ownership."""
+        # Player phrase for plural ownership.
         if self.is_deleted > 0:
             return "had"
         return "has"
 
     def get_player_gender(self) -> str:
-        """Player gender."""
+        # Player gender.
         if self.common.get_sex_display() == "Male":
             return "he"
 
@@ -335,7 +324,7 @@ class PlayerBase(models.Model):
         return "they"
 
     def get_player_gender_own(self) -> str:
-        """Player gender ownership."""
+        # Player gender ownership.
         if self.common.get_sex_display() == "Male":
             return "his"
 
@@ -345,7 +334,7 @@ class PlayerBase(models.Model):
         return "their"
 
     def get_player_gender_owns(self) -> str:
-        """Player gender ownership plural."""
+        # Player gender ownership plural.
         if self.common.get_sex_display() == "Male":
             return "his"
 
@@ -355,7 +344,7 @@ class PlayerBase(models.Model):
         return "have"
 
     def get_player_type(self) -> str:
-        """Get the type of player."""
+        # Get the type of player.
         if self.is_deleted > 0:
             return "Dead"
 
@@ -372,70 +361,70 @@ class PlayerBase(models.Model):
 
     @display(boolean=True, description="Consort?", ordering="-true_level")
     def is_consort(self) -> bool:
-        """Boolean whether player is consort, or above."""
+        # Boolean whether player is consort, or above.
         return self.is_immortal_type(immortal_type="Consort")
 
     @display(boolean=True, description="Eternal?", ordering="-true_level")
     def is_eternal(self) -> bool:
-        """Boolean whether player is eternal, or above."""
+        # Boolean whether player is eternal, or above.
         return self.is_immortal_type(immortal_type="Eternal")
 
     @display(boolean=True, description="Forger?", ordering="-true_level")
     def is_forger(self) -> bool:
-        """Boolean whether player is consort, or above."""
+        # Boolean whether player is consort, or above.
         return self.is_immortal_type(immortal_type="Forger")
 
     @display(boolean=True, description="God?", ordering="-true_level")
     def is_god(self) -> bool:
-        """Boolean whether player is a "God"."""
+        # Boolean whether player is a "God".
         return self.is_immortal_type(immortal_type="God")
 
     @display(description="Immortal?", ordering="-true_level")
     def is_immortal(self) -> bool:
-        """Boolean whether player is immortal, or above, but not consort."""
+        # Boolean whether player is immortal, or above, but not consort.
         return self.is_immortal_type(immortal_type="Immortal")
     is_immortal.boolean = True
 
     def is_immortal_type(self, immortal_type="Immortal") -> bool:
-        """Boolean whether player is an immortal of a certain type, or above."""
+        # Boolean whether player is an immortal of a certain type, or above.
         if self.common.level >= get_immortal_level(immortal_type=immortal_type):
             return True
         return False
 
-    @display(boolean=True, description="Hardcore?", ordering='-game_type')
+    @display(boolean=True, description="Hardcore?", ordering="-game_type")
     def is_hardcore(self) -> bool:
-        """Boolean whether player is "hardcore"."""
+        # Boolean whether player is "hardcore".
         if self.game_type == GameType.HARDCORE:
             return True
         return False
 
-    @display(boolean=True, description="Survival?", ordering='-game_type')
+    @display(boolean=True, description="Survival?", ordering="-game_type")
     def is_survival(self) -> bool:
-        """Boolean whether player is "survival"."""
+        # Boolean whether player is "survival".
         if self.game_type == GameType.SURVIVAL:
             return True
         return False
 
     @display(boolean=False, description="Online Timedelta")
     def online_timedelta(self) -> timedelta:
-        """Online timedelta."""
+        # Online timedelta.
         return timedelta(seconds=self.online)
 
     @display(boolean=False, description="Online Time")
     def online_time(self) -> str:
-        """Online time humanized string."""
+        # Online time humanized string.
         if self.online > 60:
             return timesince(now() - self.online_timedelta())
         return "%i seconds" % self.online
 
     @property
     def player_css(self) -> str:
-        """Player CSS class."""
+        # Player CSS class.
         return f"{self.get_player_type().lower()}-player"
 
     @property
     def player_link(self) -> str:
-        """Player link, with CSS."""
+        # Player link, with CSS.
         return format_html(
             '<a class="{}" href="{}" title="{}">{}</a>',
             self.player_css, self.get_absolute_url(), self.name, self.name
@@ -443,40 +432,7 @@ class PlayerBase(models.Model):
 
     @property
     def player_stats(self) -> dict:
-        """Player stats."""
-
-        # Set order of stats based upon each player class.
-        class_stats = {
-            "Warrior": (
-                "Strength", "Agility", "Endurance", "Willpower", "Focus",
-                "Perception"
-            ),
-            "Rogue": (
-                "Agility", "Perception", "Strength", "Focus", "Endurance",
-                "Willpower"
-            ),
-            "Cleric": (
-                "Willpower", "Strength", "Perception", "Endurance", "Focus",
-                "Agility"
-            ),
-            "Magician": (
-                "Perception", "Focus", "Agility", "Willpower", "Endurance",
-                "Strength"
-            ),
-            "Necromancer": (
-                "Focus", "Willpower", "Perception", "Agility", "Strength",
-                "Endurance"
-            ),
-            "Shaman": (
-                "Willpower", "Agility", "Endurance", "Focus", "Perception",
-                "Strength",
-            ),
-            # Alphabetic as last resort
-            None: (
-                "Agility", "Endurance", "Focus", "Perception", "Strength",
-                "Willpower"
-            )
-        }
+        # Player statistics.
 
         # Start with empty dictionary.
         stats = {}
@@ -501,10 +457,10 @@ class PlayerBase(models.Model):
         }
 
         # Put players stats in appropriate order, based on their class.
-        stats_order = class_stats.get(None)
+        stats_order = settings.CLASS_STATISTICS.get(None)
         class_name = self.common.player_class.class_name
-        if class_name in class_stats:
-            stats_order = class_stats.get(class_name)
+        if class_name in settings.CLASS_STATISTICS:
+            stats_order = settings.CLASS_STATISTICS.get(class_name)
 
         for stat_order in stats_order:
             stats[stat_order] = players_stats[stat_order]
@@ -514,29 +470,29 @@ class PlayerBase(models.Model):
     @property
     @display(boolean=False, description="Total Statistics")
     def get_total_statistics_count(self) -> int:
-        """Total number of player statistics."""
+        # Total number of player statistics.
         return sum(self.player_stats.values())
 
     @property
     @display(boolean=False, description="Title", ordering="title")
     def player_title(self):
-        """Player title."""
+        # Player title.
         return self.title % self.name
 
     @display(boolean=False, description="Type", ordering="game_type")
     def player_type(self) -> str:
-        """Player type."""
+        # Player type.
         return self.get_player_type()
 
     @property
-    def podir(self) -> str:
-        """Player "Podir" folder on disk."""
+    def podir(self) -> Path:
+        # Player "Podir" folder on disk.
         return Path(settings.MUD_PODIR, self.name)
 
     @property
     @display(description="Seasonal Earned", ordering="seasonal_earned")
     def seasonal_earned(self) -> int:
-        """Amount of essence earned for the player."""
+        # Amount of essence earned for the player.
 
         # Immortal players do not earn essence.
         if self.is_immortal() is True:
@@ -549,7 +505,7 @@ class PlayerBase(models.Model):
         return earned
 
     def upgrades(self):
-        """Method to find active remort upgrades for the player."""
+        # Method to find active remort upgrades for the player.
         return self.all_remort_upgrades.filter(
             player=self,
             value__gt=0

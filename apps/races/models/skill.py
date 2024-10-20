@@ -6,9 +6,8 @@ from .race import Race
 
 
 class RaceSkill(models.Model):
-    """
-    Race Skill.
-    """
+    """Race Skill."""
+
     race_skill_id = models.AutoField(
         blank=False,
         db_column="race_skill_id",

@@ -9,7 +9,7 @@ class IsharUserAuthBackend(ModelBackend):
     model = get_user_model()
 
     def authenticate(self, request, username=None, password=None, **kwargs):
-        """Compare against MD5Crypt hash from the database."""
+        # Compare against MD5Crypt hash from the database.
         try:
             if "@" in username:
                 user = self.model.objects.get(email=username)
@@ -23,5 +23,5 @@ class IsharUserAuthBackend(ModelBackend):
         return None
 
     def get_user(self, user_id=None):
-        """Get a user by account ID."""
+        # Get a user by account ID.
         return self.model.objects.get(account_id=user_id)

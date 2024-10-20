@@ -23,10 +23,6 @@ def events(request):
     num_events = global_events.count()
     if num_events and num_events > 0:
         ephemeral = False
-        events_url = (
-            f'<{request.scheme}://{request.get_host()}'
-            f'{reverse("events")}#events>'
-        )
         reply = (
             f'[{num_events} '
             f'{ngettext(singular="event", plural="events", number=num_events)}:'

@@ -25,7 +25,7 @@ class InteractionsView(NeverCacheMixin, View):
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs) -> JsonResponse:
-        """Handle incoming POST requests (slash commands)."""
+        # Handle incoming POST requests (slash commands).
 
         # Verify signature sent in the HTTPS request headers from Discord.
         try:

@@ -153,13 +153,22 @@ class ObjectWearableFlag(models.Model):
         return f"{self._meta.verbose_name} @ {self.object}"
 
     def save(
-            self,
-            force_insert=False, force_update=False, using=None,
-            update_fields=None
+        self,
+        *args,
+        force_insert=False,
+        force_update=False,
+        using=None,
+        update_fields=None,
     ):
         if not self.pk:
             self.created_at = now()
+
         self.updated_at = now()
+
         super().save(
-            force_insert=force_insert, using=using, update_fields=update_fields
+            *args,
+            force_insert=False,
+            force_update=False,
+            using=None,
+            update_fields=None,
         )

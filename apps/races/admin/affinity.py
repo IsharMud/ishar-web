@@ -7,9 +7,8 @@ from ..models.affinity import RaceAffinity
 
 @register(RaceAffinity)
 class RaceAffinityAdmin(ModelAdmin):
-    """
-    Ishar race affinity administration.
-    """
+    """Ishar race affinity administration."""
+
     model = RaceAffinity
     fieldsets = (
         (None, {"fields": ("race_affinity_id",)}),

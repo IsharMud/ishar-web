@@ -69,7 +69,7 @@ class Patch(models.Model):
         return self.patch_name
 
     def natural_key(self):
-        """Natural key is patch name."""
+        # Natural key is patch name.
         return self.patch_name
 
     def get_absolute_url(self) -> str:

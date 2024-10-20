@@ -29,6 +29,7 @@ class FAQAdmin(ModelAdmin):
         "slug", "question_text", "question_answer", "account", "is_visible"
     )
 
+
     def save_model(self, request, obj, form, change):
         if not change:
             obj.account = request.user
