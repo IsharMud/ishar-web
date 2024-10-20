@@ -61,11 +61,11 @@
         <tbody class="table-group-divider">
         {% for upgrade in upgrades %}
             <tr id="{{ upgrade.anchor }}" class="remort-upgrade-row">
-                <th scope="row" class="anchor-cell" data-order="" data-search="">
+                <td class="anchor-cell" data-order="" data-search="">
                     <a class="anchor-link" href="#{{ upgrade.anchor }}" aria-label="Link to this section: Remort Upgrade - {{ upgrade.display_name }} ({{ upgrade.anchor }})">
                         &#x23;
                     </a>
-                </th>
+                </td>
                 <td data-order="{{ upgrade.display_name }}" data-search="{{ upgrade.display_name }}" title="Name: {{ upgrade.display_name }}">
                     {{ upgrade.display_name }}
                 </td>
@@ -82,6 +82,9 @@
         </tbody>
         <tfoot>
             <tr>
+                <th scope="col" title="#">
+                    <span class="text-ishar">#</span>
+                </th>
                 <th scope="col" title="Name">
                     <span class="text-ishar">Name</span>
                 </th>
