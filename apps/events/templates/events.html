@@ -14,7 +14,7 @@
     <span class="bi bi-calendar-event"></span>
     <a href="{% url 'events' %}#events" title="Events" id="events">Events</a>
     {% if GLOBAL_EVENT_COUNT > 0 %}
-    <span class="badge text-bg-secondary" title="{{ GLOBAL_EVENT_COUNT }} event{{ GLOBAL_EVENT_COUNT|pluralize }} active">
+    <span class="badge bg-dark rounded-pill border border-secondary" title="{{ GLOBAL_EVENT_COUNT }} event{{ GLOBAL_EVENT_COUNT|pluralize }} active">
         {{ GLOBAL_EVENT_COUNT }}
     </span>
     {% endif %}
