@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block meta_title %}Search{% if results %} ({{ results.count }} result{{ results.count|pluralize }}){% endif %}{% endblock meta_title %}
 {% block meta_description %}Search{% if results %} ({{ results.count }} result{{ results.count|pluralize }}){% endif %}{% endblock meta_description %}
-{% block meta_url %}{% url 'players' %}{% endblock meta_url %}
+{% block meta_url %}{% url 'players' %}#search{% endblock meta_url %}
 {% block title %}Search{% if results %} ({{ results.count }} result{{ results.count|pluralize }}){% endif %}{% endblock title %}
 {% block header %}
 <nav aria-label="breadcrumb">

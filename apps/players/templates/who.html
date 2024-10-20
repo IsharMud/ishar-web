@@ -2,7 +2,7 @@
 {% load humanize %}
 {% block meta_title %}Who's Online?{% endblock meta_title %}
 {% block meta_description %}Number of players currently online.{% endblock meta_description %}
-{% block meta_url %}{% url 'who' %}{% endblock meta_url %}
+{% block meta_url %}{% url 'who' %}#who{% endblock meta_url %}
 {% block title %}Who's Online?{% if players %} ({{ players | length }} player{{ players|pluralize }}){% endif %}{% endblock title %}
 {% block header %}
 <nav aria-label="breadcrumb">

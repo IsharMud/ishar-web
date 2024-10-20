@@ -2,7 +2,7 @@
 {% load humanize %}
 {% block meta_title %}Season {{ season.season_id }}{% endblock meta_title %}
 {% block meta_description %}Season {{ season.season_id }} of {{ WEBSITE_TITLE }}.{% endblock meta_description %}
-{% block meta_url %}{% url 'season' season_id=season.season_id %}{% endblock meta_url %}
+{% block meta_url %}{% url 'season' season_id=season.season_id %}#season{% endblock meta_url %}
 {% block title %}Season {{ season.season_id }}{% endblock title %}
 {% block header %}
     <span class="bi bi-calendar"></span>

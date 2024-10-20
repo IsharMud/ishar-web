@@ -1,17 +1,17 @@
 {% extends "layout.html" %}
 {% block meta_title %}Remort Upgrades{% endblock meta_title %}
 {% block meta_description %}Remort upgrades available to players, and their costs.{% endblock meta_description %}
-{% block meta_url %}{% url 'upgrades' %}{% endblock meta_url %}
+{% block meta_url %}{% url 'upgrades' %}#upgrades{% endblock meta_url %}
 {% block title %}Remort Upgrades{% endblock title %}
 {% block includes %}
-    <link href="https://cdn.datatables.net/2.1.8/css/dataTables.bootstrap5.css" rel="stylesheet">
-    <link href="https://cdn.datatables.net/buttons/3.1.2/css/buttons.bootstrap5.css" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
-    <script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"></script>
-    <script src="https://cdn.datatables.net/2.1.8/js/dataTables.bootstrap5.js"></script>
-    <script src="https://cdn.datatables.net/buttons/3.1.2/js/dataTables.buttons.js"></script>
-    <script src="https://cdn.datatables.net/buttons/3.1.2/js/buttons.bootstrap5.js"></script>
-    <script src="https://cdn.datatables.net/buttons/3.1.2/js/buttons.colVis.js"></script>
+<link href="https://cdn.datatables.net/2.1.8/css/dataTables.bootstrap5.css" rel="stylesheet">
+<link href="https://cdn.datatables.net/buttons/3.1.2/css/buttons.bootstrap5.css" rel="stylesheet">
+<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+<script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"></script>
+<script src="https://cdn.datatables.net/2.1.8/js/dataTables.bootstrap5.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.1.2/js/dataTables.buttons.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.1.2/js/buttons.bootstrap5.js"></script>
+<script src="https://cdn.datatables.net/buttons/3.1.2/js/buttons.colVis.js"></script>
 {% endblock includes %}
 {% block header %}
 <nav aria-label="breadcrumb">
@@ -31,22 +31,22 @@
 </nav>
 {% endblock header %}
 {% block content %}
-<div class="p-3">
-    <div class="card">
-        <div class="card-body">
-            <p class="card-text lead">
-                Here are the remort upgrades available to players, and the
-                <a href="{% url 'help_page' help_topic='Renown' %}#topic">renown</a>
-                costs for each upgrade.
-            </p>
-        </div>
-    </div>
+<div class="m-3 alert alert-dark alert-dismissible fade show" role="alert">
+    <p class="lead">
+        Here are the remort upgrades available to players, and the
+        <a href="{% url 'help_page' help_topic='Renown' %}#topic">renown</a>
+        costs for each upgrade.
+    </p>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
 <div class="container-md">
     {% if upgrades %}
-    <table class="table table-borderless table-dark table-flush table-sm table-striped" id="upgradesTable">
+    <table class="table table-borderless table-dark table-striped table-sm" id="upgradesTable">
         <thead>
-            <tr class="border-ishar">
+            <tr>
+                <th scope="col" title="#">
+                    <span class="text-ishar">#</span>
+                </th>
                 <th scope="col" title="Name">
                     <span class="text-ishar">Name</span>
                 </th>
@@ -60,18 +60,20 @@
         </thead>
         <tbody class="table-group-divider">
         {% for upgrade in upgrades %}
-            <tr>
-                <td class="border anchor-cell" id="{{ upgrade.anchor }}" data-order="{{ upgrade.display_name }}" data-search="{{ upgrade.display_name }}" title="Name: {{ upgrade.display_name }}">
+            <tr id="{{ upgrade.anchor }}" class="remort-upgrade-row">
+                <th scope="row" class="anchor-cell" data-order="" data-search="">
                     <a class="anchor-link" href="#{{ upgrade.anchor }}" aria-label="Link to this section: Remort Upgrade - {{ upgrade.display_name }} ({{ upgrade.anchor }})">
                         &#x23;
                     </a>
+                </th>
+                <td data-order="{{ upgrade.display_name }}" data-search="{{ upgrade.display_name }}" title="Name: {{ upgrade.display_name }}">
                     {{ upgrade.display_name }}
                 </td>
-                <td class="border" data-order="{{ upgrade.renown_cost }}" data-search="" title="Tiers: {{ upgrade.tiers|join:', ' }} ({{ upgrade.tiers|length }} tier{{ upgrade.tiers|pluralize }})">
+                <td data-order="{{ upgrade.renown_cost }}" data-search="" title="Tiers: {{ upgrade.tiers|join:', ' }} ({{ upgrade.tiers|length }} tier{{ upgrade.tiers|pluralize }})">
                     {{ upgrade.tiers|join:", " }}
                     (<strong>{{ upgrade.tiers|length }}</strong>)
                 </td>
-                <td class="border" data-order="{{ upgrade.survival_renown_cost }}" data-search="" title="Hardcore Tiers: {{ upgrade.survival_tiers|join:', ' }} ({{ upgrade.survival_tiers|length }} tier{{ upgrade.survival_tiers|pluralize }})">
+                <td data-order="{{ upgrade.survival_renown_cost }}" data-search="" title="Hardcore Tiers: {{ upgrade.survival_tiers|join:', ' }} ({{ upgrade.survival_tiers|length }} tier{{ upgrade.survival_tiers|pluralize }})">
                     {{ upgrade.survival_tiers|join:", " }}
                     (<strong>{{ upgrade.survival_tiers|length }}</strong>)
                 </td>
@@ -79,7 +81,7 @@
         {% endfor %}
         </tbody>
         <tfoot>
-            <tr class="border-ishar">
+            <tr>
                 <th scope="col" title="Name">
                     <span class="text-ishar">Name</span>
                 </th>
@@ -98,6 +100,13 @@
     const searchLayout = { search: { placeholder: 'Upgrade Name' } }
     $('#upgradesTable').DataTable({
         buttons: ['colvis'],
+        columnDefs: [
+            {
+                orderable: false,
+                searchable: false,
+                targets: 0
+            },
+        ],
         language: {
             info: `Showing _START_ to _END_ of _TOTAL_ ${itemName}`,
             infoEmpty: `Showing 0 to 0 of 0 ${itemName}`,
@@ -124,7 +133,7 @@
             bottomStart: searchLayout
         },
         order: [
-            [0, 'asc']
+            [1, 'asc']
         ],
         paging: false,
         scrollX: true

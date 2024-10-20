@@ -5,5 +5,5 @@ from apps.patches.views import PatchesView, PatchesLatestView
 
 urlpatterns = [
     path("", PatchesView.as_view(), name="patches"),
-    path("latest/", PatchesLatestView.as_view(), name="latestpatch"),
+    path("latest/", PatchesLatestView.as_view(), name="latest_patch"),
 ]
