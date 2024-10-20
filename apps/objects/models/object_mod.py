@@ -49,15 +49,6 @@ class ObjectObjectMod(models.Model):
     class Meta:
         managed = False
         db_table = "object_object_mods"
-        constraints = (
-            models.constraints.UniqueConstraint(
-                fields=(
-                    "object",
-                    "mod_slot"
-                ),
-                name="unique_object_mod_slot"
-            ),
-        )
         default_related_name = "object_mod"
         ordering = ("-object", "mod_slot")
         constraints = (
