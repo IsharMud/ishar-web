@@ -39,41 +39,41 @@
     </p>
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
-<div class="container-md">
+<div class="container-sm w-auto">
     {% if upgrades %}
-    <table class="table table-borderless table-dark table-striped table-sm" id="upgradesTable">
+    <table class="table table-hover table-dark table-flush table-sm table-responsive table-striped" id="upgradesTable">
         <thead>
             <tr>
-                <th scope="col" title="#">
+                <th class="border" scope="col" title="#">
                     <span class="text-ishar">#</span>
                 </th>
-                <th scope="col" title="Name">
+                <th class="border" scope="col" title="Name">
                     <span class="text-ishar">Name</span>
                 </th>
-                <th scope="col" title="Tiers (#)">
+                <th class="border" scope="col" title="Tiers (#)">
                     <span class="text-ishar">Tiers (#)</span>
                 </th>
-                <th scope="col" title="Hardcore Tiers (#)">
+                <th class="border" scope="col" title="Hardcore Tiers (#)">
                     <span class="text-ishar">Hardcore Tiers (#)</span>
                 </th>
             </tr>
         </thead>
-        <tbody class="table-group-divider">
+        <tbody class="table-group-divider text-ishar">
         {% for upgrade in upgrades %}
             <tr id="{{ upgrade.anchor }}" class="remort-upgrade-row">
-                <td class="anchor-cell" data-order="" data-search="">
+                <td class="anchor-cell border" data-order="" data-search="">
                     <a class="anchor-link" href="#{{ upgrade.anchor }}" aria-label="Link to this section: Remort Upgrade - {{ upgrade.display_name }} ({{ upgrade.anchor }})">
                         &#x23;
                     </a>
                 </td>
-                <td data-order="{{ upgrade.display_name }}" data-search="{{ upgrade.display_name }}" title="Name: {{ upgrade.display_name }}">
+                <td class="border" data-order="{{ upgrade.display_name }}" data-search="{{ upgrade.display_name }}" title="Name: {{ upgrade.display_name }}">
                     {{ upgrade.display_name }}
                 </td>
-                <td data-order="{{ upgrade.renown_cost }}" data-search="" title="Tiers: {{ upgrade.tiers|join:', ' }} ({{ upgrade.tiers|length }} tier{{ upgrade.tiers|pluralize }})">
+                <td class="border" data-order="{{ upgrade.renown_cost }}" data-search="" title="Tiers: {{ upgrade.tiers|join:', ' }} ({{ upgrade.tiers|length }} tier{{ upgrade.tiers|pluralize }})">
                     {{ upgrade.tiers|join:", " }}
                     (<strong>{{ upgrade.tiers|length }}</strong>)
                 </td>
-                <td data-order="{{ upgrade.survival_renown_cost }}" data-search="" title="Hardcore Tiers: {{ upgrade.survival_tiers|join:', ' }} ({{ upgrade.survival_tiers|length }} tier{{ upgrade.survival_tiers|pluralize }})">
+                <td class="border" data-order="{{ upgrade.survival_renown_cost }}" data-search="" title="Hardcore Tiers: {{ upgrade.survival_tiers|join:', ' }} ({{ upgrade.survival_tiers|length }} tier{{ upgrade.survival_tiers|pluralize }})">
                     {{ upgrade.survival_tiers|join:", " }}
                     (<strong>{{ upgrade.survival_tiers|length }}</strong>)
                 </td>
@@ -81,17 +81,17 @@
         {% endfor %}
         </tbody>
         <tfoot>
-            <tr>
-                <th scope="col" title="#">
+            <tr class="table-group-divider text-ishar">
+                <th class="border" scope="col" title="#">
                     <span class="text-ishar">#</span>
                 </th>
-                <th scope="col" title="Name">
+                <th class="border" scope="col" title="Name">
                     <span class="text-ishar">Name</span>
                 </th>
-                <th scope="col" title="Tiers (#)">
+                <th class="border" scope="col" title="Tiers (#)">
                     <span class="text-ishar">Tiers (#)</span>
                 </th>
-                <th scope="col" title="Hardcore Tiers (#)">
+                <th class="border" scope="col" title="Hardcore Tiers (#)">
                     <span class="text-ishar">Hardcore Tiers (#)</span>
                 </th>
             </tr>
@@ -139,8 +139,7 @@
             [1, 'asc']
         ],
         paging: false,
-        scrollX: true
-    });
+    })
 </script>
     {% else %}
 <div class="p-3">

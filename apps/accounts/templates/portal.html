@@ -167,12 +167,12 @@
 {% endif %}
 <hr>
 <details open>
-    <summary id="essence" class="text-ishar" title="Essence ({{ request.user.account_name }})">
-        <a class="anchor-link h3" href="#essence" aria-label="Link to this section: Essence ({{ request.user.account_name }})">
+    <summary id="essence" class="text-ishar">
+        <a class="anchor-link h3" href="#essence" aria-label="Link to this section: Essence">
             &#x23;
         </a>
-        <h3>Essence</h3>
-        <span class="badge bg-dark rounded-pill border border-secondary">
+        <h3 title="Essence">Essence</h3>
+        <span class="badge bg-dark rounded-pill border border-secondary" title="{{ request.user.current_essence }} essence">
             {{ request.user.current_essence }}
         </span>
         <button
@@ -197,12 +197,12 @@
 </details>
 <hr>
 <details{% if request.user.upgrades.count > 0 %} open{% endif %}>
-    <summary id="upgrades" class="text-ishar" title="Account Upgrades ({{ request.user.account_name }}): {{ request.user.upgrades.count }}}">
-        <a class="anchor-link h3" href="#upgrades" aria-label="Link to this section: Account Upgrades ({{ request.user.account_name }})">
+    <summary id="upgrades" class="text-ishar">
+        <a class="anchor-link h3" href="#upgrades" aria-label="Link to this section: Account Upgrades">
             &#x23;
         </a>
-        <h3>Upgrades</h3>
-        <span class="badge bg-dark rounded-pill border border-secondary">
+        <h3 title="Upgrades">Upgrades</h3>
+        <span class="badge bg-dark rounded-pill border border-secondary" title="{{ request.user.upgrades.count }} upgrade{{ request.user.upgrades.count|pluralize }}">
             {{ request.user.upgrades.count }}
         </span>
         <button

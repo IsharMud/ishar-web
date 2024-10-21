@@ -61,7 +61,11 @@ a.hardcore-player:active, a.hardcore-player:visited
 .challenge-completed { text-decoration: line-through; text-decoration-color: #a00; text-decoration-thickness: 0.25rem; }
 .anchor-cell:target { color: var(--ishar-color); font-weight: bold; }
 
-.remort-upgrade-row:target { font-weight: bold; border: 0.1rem solid var(--ishar-color); }
+.remort-upgrade-row:target,
+.challenge-row:target
+{
+    font-weight: bold; border: 0.1rem solid var(--ishar-color);
+}
 
 .btn-ishar {
   --bs-btn-border-color: var(--bs-dark);

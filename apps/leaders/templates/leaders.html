@@ -6,12 +6,14 @@
 {% block includes %}
     <link href="https://cdn.datatables.net/2.1.8/css/dataTables.bootstrap5.css" rel="stylesheet">
     <link href="https://cdn.datatables.net/buttons/3.1.2/css/buttons.bootstrap5.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/responsive/3.0.3/css/responsive.dataTables.min.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
     <script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"></script>
     <script src="https://cdn.datatables.net/2.1.8/js/dataTables.bootstrap5.js"></script>
     <script src="https://cdn.datatables.net/buttons/3.1.2/js/dataTables.buttons.js"></script>
     <script src="https://cdn.datatables.net/buttons/3.1.2/js/buttons.bootstrap5.js"></script>
     <script src="https://cdn.datatables.net/buttons/3.1.2/js/buttons.colVis.js"></script>
+    <script src="https://cdn.datatables.net/responsive/3.0.3/js/dataTables.responsive.min.js"></script>
 {% endblock includes %}
 {% block header %}
 <nav aria-label="breadcrumb">
@@ -65,35 +67,35 @@
 
     {% if leaders %}
 <div class="container-sm w-auto">
-    <table class="table table-borderless table-dark table-flush table-sm table-striped" id="leadersTable">
+    <table class="table table-hover table-dark table-flush table-sm table-responsive table-striped" id="leadersTable">
         <thead>
-            <tr class="border-ishar text-ishar">
-                <th scope="col" title="Name">
+            <tr>
+                <th class="border" scope="col" title="Name">
                     <span class="text-ishar">Name</span>
                 </th>
-                <th scope="col" title="Level">
+                <th class="border" scope="col" title="Level">
                     <span class="text-ishar">Level</span>
                 </th>
-                <th scope="col" title="Remorts">
+                <th class="border" scope="col" title="Remorts">
                     <span class="text-ishar">Remorts</span>
                 </th>
-                <th scope="col" title="Renown">
+                <th class="border" scope="col" title="Renown">
                     <span class="text-ishar">Renown</span>
                 </th>
-                <th scope="col" title="Challenges">
+                <th class="border" scope="col" title="Challenges">
                     <span class="text-ishar">Challenges</span>
                 </th>
-                <th scope="col" title="Quests">
+                <th class="border" scope="col" title="Quests">
                     <span class="text-ishar">Quests</span>
                 </th>
-                <th scope="col" title="Deaths">
+                <th class="border" scope="col" title="Deaths">
                     <span class="text-ishar">Deaths</span>
                 </th>
             </tr>
         </thead>
-        <tbody class="table-group-divider">
+        <tbody class="table-group-divider text-ishar">
         {% for leader in leaders %}
-            <tr>
+            <tr id="leader-{{ forloop.counter }}" class="leader-row">
                 <td class="border" data-order="{{ leader.name }}" data-search="{{ leader.name }}" title="Player Name: {{ leader.name }}">
                     {{ leader.player_link }}
                 </td>
@@ -118,6 +120,31 @@
             </tr>
         {% endfor %}
         </tbody>
+        <tfoot>
+            <tr class="table-group-divider text-ishar">
+                <th class="border" scope="col" title="Name">
+                    <span class="text-ishar">Name</span>
+                </th>
+                <th class="border" scope="col" title="Level">
+                    <span class="text-ishar">Level</span>
+                </th>
+                <th class="border" scope="col" title="Remorts">
+                    <span class="text-ishar">Remorts</span>
+                </th>
+                <th class="border" scope="col" title="Renown">
+                    <span class="text-ishar">Renown</span>
+                </th>
+                <th class="border" scope="col" title="Challenges">
+                    <span class="text-ishar">Challenges</span>
+                </th>
+                <th class="border" scope="col" title="Quests">
+                    <span class="text-ishar">Quests</span>
+                </th>
+                <th class="border" scope="col" title="Deaths">
+                    <span class="text-ishar">Deaths</span>
+                </th>
+            </tr>
+        </tfoot>
     </table>
 </div>
 <script>
@@ -173,7 +200,7 @@
             [1, 'desc']
         ],
         pageLength: 10,
-        scrollX: true
+        responsive: true,
     });
 </script>
     {% else %}

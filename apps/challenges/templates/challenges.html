@@ -6,13 +6,9 @@
 {% block title %}Challenges{% endblock title %}
 {% block includes %}
     <link href="https://cdn.datatables.net/2.1.8/css/dataTables.bootstrap5.css" rel="stylesheet">
-    <link href="https://cdn.datatables.net/buttons/3.1.2/css/buttons.bootstrap5.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
     <script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"></script>
     <script src="https://cdn.datatables.net/2.1.8/js/dataTables.bootstrap5.js"></script>
-    <script src="https://cdn.datatables.net/buttons/3.1.2/js/dataTables.buttons.js"></script>
-    <script src="https://cdn.datatables.net/buttons/3.1.2/js/buttons.bootstrap5.js"></script>
-    <script src="https://cdn.datatables.net/buttons/3.1.2/js/buttons.colVis.js"></script>
 {% endblock includes %}
 {% block scripts %}let focusTo = 'challenges'{% endblock scripts %}
 {% block header %}
@@ -40,39 +36,42 @@
         Challenges will next cycle <strong>{{ CURRENT_SEASON.get_next_cycle | naturaltime }}</strong>.
     </p>
     <footer class="blockquote-footer" title="{{ CURRENT_SEASON.get_next_cycle }}">
-        <caption>
-            @
-            <time datetime="{{ CURRENT_SEASON.get_next_cycle|date:"c" }}">
-                {{ CURRENT_SEASON.get_next_cycle }}
-            </time>
-        </caption>
+        @
+        <time datetime="{{ CURRENT_SEASON.get_next_cycle|date:"c" }}">
+            {{ CURRENT_SEASON.get_next_cycle }}
+        </time>
     </footer>
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </blockquote>
     {% endif %}
-<div class="container-lg w-auto">
+<div class="container-sm w-auto">
     {% if challenges %}
-    <table class="table table-borderless table-dark table-flush table-responsive-lg table-striped" id="challengesTable">
+    <table class="table table-hover table-dark table-flush table-sm table-responsive table-striped" id="challengesTable">
         <thead>
-            <tr class="border-ishar text-ishar">
-                <th scope="col" title="Find & Kill">
+            <tr>
+                <th class="border" scope="col" title="#">
+                    <span class="text-ishar">#</span>
+                </th>
+                <th class="border" scope="col" title="Find & Kill">
                     <span class="text-ishar">Find & Kill</span>
                 </th>
-                <th scope="col" title="Max People">
+                <th class="border" scope="col" title="Max People">
                     <span class="text-ishar">Max People</span>
                 </th>
-                <th scope="col" title="Max Level">
+                <th class="border" scope="col" title="Max Level">
                     <span class="text-ishar">Max Level</span>
                 </th>
             </tr>
         </thead>
-        <tbody class="table-group-divider">
+        <tbody class="table-group-divider text-ishar">
         {% for challenge in challenges %}
-            <tr>
-                <td class="border anchor-cell" id="{{ challenge.anchor }}"  data-order="{{ challenge.mobile.long_name }}" data-search="{{ challenge.mobile.long_name }}" title="Mobile Name: {{ challenge.mobile.long_name }}">
+            <tr id="{{ challenge.anchor }}" class="challenge-row">
+                <td class="anchor-cell" data-order="" data-search="">
                     <a class="anchor-link" href="#{{ challenge.anchor }}" aria-label="Link to this section: Challenge - {{ challenge.mobile.long_name }} ({{ challenge.anchor }})">
                         &#x23;
                     </a>
+                </td>
+                <td data-order="{{ challenge.mobile.long_name }}" data-search="{{ challenge.mobile.long_name }}" title="Mobile Name: {{ challenge.mobile.long_name }}">
                     <span class="{% if challenge.is_completed %}challenge-completed{% endif %}">
                         {{ challenge.mobile.long_name }}
                     </span>
@@ -83,31 +82,52 @@
                     </span>
             {% endif %}
                 </td>
-                <td class="border" data-order="{{ challenge.max_people }}" data-search="" title="Max People: {{ challenge.max_people }}">
+                <td data-order="{{ challenge.max_people }}" data-search="" title="Max People: {{ challenge.max_people }}">
                     {{ challenge.max_people }}
                 </td>
-                <td class="border" data-order="{{ challenge.max_level }}" data-search="" title="Max Level: {{ challenge.max_level }}">
+                <td data-order="{{ challenge.max_level }}" data-search="" title="Max Level: {{ challenge.max_level }}">
                     {{ challenge.max_level }}
                 </td>
             </tr>
         {% endfor %}
         </tbody>
+        <tfoot>
+            <tr class="table-group-divider text-ishar">
+                <th class="border" scope="col" title="#">
+                    <span class="text-ishar">#</span>
+                </th>
+                <th class="border" scope="col" title="Find & Kill">
+                    <span class="text-ishar">Find & Kill</span>
+                </th>
+                <th class="border" scope="col" title="Max People">
+                    <span class="text-ishar">Max People</span>
+                </th>
+                <th class="border" scope="col" title="Max Level">
+                    <span class="text-ishar">Max Level</span>
+                </th>
+            </tr>
+        </tfoot>
     </table>
 </div>
 <script>
     const itemName = 'challenges'
     const searchLayout = { search: { placeholder: 'Mobile Name' } }
     $('#challengesTable').DataTable({
-        buttons: ['colvis'],
         columnDefs: [
             {
-                searchable: true,
+                orderable: false,
+                searchable: false,
                 targets: [0],
+                type: 'string'
+            },
+            {
+                searchable: true,
+                targets: [1],
                 type: 'html'
             },
             {
                 searchable: false,
-                targets: [1, 2],
+                targets: [2, 3],
                 type: 'num'
             }
         ],
@@ -119,31 +139,18 @@
             zeroRecords: `No matching ${itemName} found`
         },
         layout: {
-            top: 'info',
             topStart: searchLayout,
-            topEnd: {
-                buttons: [{
-                    extend: 'colvis',
-                    text: 'Columns'
-                }]
-            },
-            bottom: 'info',
+            topEnd: 'info',
             bottomStart: searchLayout,
-            bottomEnd: {
-                buttons: [{
-                    extend: 'colvis',
-                    text: 'Columns'
-                }]
-            }
+            bottomEnd: 'info',
         },
         order: [
+            [3, 'desc'],
             [2, 'desc'],
-            [1, 'desc'],
-            [0, 'asc']
+            [1, 'asc']
         ],
         paging: false,
-        scrollX: true
-    });
+    })
 </script>
     {% else %}
 <div class="p-3">
