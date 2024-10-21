@@ -17,7 +17,7 @@ class BasePatchView(ListView):
 class PatchesView(BasePatchView):
     """Main paginated view of patches."""
 
-    paginate_by = 5
+    paginate_by = 3
 
 
 class PatchesLatestView(BasePatchView):

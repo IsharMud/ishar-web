@@ -14,155 +14,58 @@
     </li>
 {% endblock breadcrumbs %}
 {% block content %}
-<div class="p-3">
-    <div class="alert alert-dark alert-dismissible fade show" role="alert" id="feedback-alert">
-        <p class="lead">
-            Please feel free to <a href="{% url 'submit_feedback' %}#submit">submit</a>
-            any bug reports, ideas, suggestions, or other feedback that you have about {{ WEBSITE_TITLE }}!
-        </p>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    <div class="card m-1">
-        <div class="card-body">
-            <ul class="list-group list-group-horizontal">
-                <li class="list-group-item bg-black card-text" title="All" id="all">
-    {% if submission_type is None %}
-                    <span class="text-ishar">All</span>
-    {% else %}
-                    <a class="list-group-item-text" href="{% url 'feedback' %}#all">All</a>
-    {% endif %}
-                </li>
-    {% for num, name in submission_types %}
-                <li class="list-group-item bg-black card-text" title="{{ name }}" id="{{ name|lower }}">
-        {% if submission_type == num %}
-                    <span class="text-ishar">{{ name }}</span>
-        {% else %}
-                    <a class="list-group-item-text" href="{% url 'feedback' %}{{ name|lower }}#{{ name|lower }}">
-                        {{ name }}
-                    </a>
-        {% endif %}
-                </li>
-    {% endfor %}
-            </ul>
-        </div>
-    </div>
+<div class="alert alert-dark alert-dismissible fade show" role="alert" id="feedback-alert">
+    <p class="lead">
+        Please feel free to <a href="{% url 'submit_feedback' %}#submit">submit</a>
+        any bug reports, ideas, suggestions, or other feedback that you have about {{ WEBSITE_TITLE }}!
+    </p>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
-
-
 {% if submissions %}
-        {% for submission in submissions %}
-<div class="p-3">
-    <div class="border bg-black card m-1">
-        <div class="card-header" title="{{ submission.get_submission_type_display }}: {{ submission.subject }} ({{ submission.vote_total }} vote{{ submission.vote_total|pluralize }})">
-            <a class="anchor-link" id="{{ submission.submission_id }}" href="#{{ submission.submission_id }}" aria-label="Link to this {{ submission.get_submission_type_display }}: {{ submission.subject }} ({{ submission.vote_total }} vote{{ submission.vote_total|pluralize }})">
-                <i class="bi bi-{{ submission.display_icon }} text-primary text-decoration-none"></i>
-            </a>
-            <strong class="card-title h5 mx-1" title="{{ submission.subject }}">
-                {{ submission.subject }}
-            </strong>
-            <span class="badge rounded-pill vote-count" id="voteCount-{{ submission.submission_id }}"></span>
-        </div>
-        <div class="card-body">
-            <blockquote class="blockquote mb-0">
-                <p class="card-text small">
-                    {{ submission.body_text }}
-                </p>
-                <footer class="blockquote-footer" title="{{ submission.submitted|naturaltime }}">
-                    <cite>{{ submission.submitted|naturaltime }}</cite>
-                </footer>
-            </blockquote>
-        </div>
-        <div class="card-footer" title="{{ submission.submitted }}">
-            <i class="text-secondary">
-                {{ submission.submitted }}
-            </i>
-            <button class="vote-button border-0 bg-transparent button px-1 bi bi-arrow-up-circle text-secondary" id="voteButton-{{ submission.submission_id }}" title="Vote up"></button>
-        </div>
+    {% include "feedback_pages.html" %}
+    {% for submission in submissions %}
+<div class="border bg-black card p-1 m-1">
+    <div class="card-header" title="{{ submission.get_submission_type_display }}: {{ submission.subject }} ({{ submission.vote_total }} vote{{ submission.vote_total|pluralize }})">
+        <a class="anchor-link" id="{{ submission.submission_id }}" href="#{{ submission.submission_id }}" aria-label="Link to this {{ submission.get_submission_type_display }}: {{ submission.subject }} ({{ submission.vote_total }} vote{{ submission.vote_total|pluralize }})">
+            <i class="bi bi-{{ submission.display_icon }} text-primary text-decoration-none"></i>
+        </a>
+        <strong class="card-title h5" title="{{ submission.subject }}">
+            {{ submission.subject }}
+        </strong>
+        <span class="badge rounded-pill vote-count" id="voteCount-{{ submission.submission_id }}"></span>
+    </div>
+    <div class="card-body">
+        <blockquote class="blockquote m-0">
+            <p class="card-text small">
+                {{ submission.body_text }}
+            </p>
+            <footer class="blockquote-footer" title="{{ submission.submitted|naturaltime }}">
+                <cite>{{ submission.submitted|naturaltime }}</cite>
+            </footer>
+        </blockquote>
+    </div>
+    <div class="card-footer" title="{{ submission.submitted }}">
+        <i class="text-secondary">
+            {{ submission.submitted }}
+        </i>
+        <button class="vote-button border-0 bg-transparent button px-1 bi bi-arrow-up-circle text-secondary" id="voteButton-{{ submission.submission_id }}" title="Vote up"></button>
     </div>
 </div>
-        {% endfor %}
-    {% if page_obj and page_obj.paginator.num_pages > 1 %}
-<div class="px-4 py-2">
-    <div class="card m-1 bg-black">
-        <div class="card-body">
-            <nav aria-label="Feedback submission pages navigation">
-                <ul class="pagination m-0">
-            {% if page_obj.number != 1 %}
-                    <li class="page-item">
-                        <a aria-label="First" class="page-link" href="?page=1#feedback" >
-                            &laquo;
-                        </a>
-            {% else %}
-                <li class="page-item disabled">
-                    <a aria-label="First" aria-hidden="true" class="page-link" href="#feedback">
-                        &laquo;
-                    </a>
-            {% endif %}
-                </li>
-            {% if page_obj.has_previous %}
-                <li class="page-item">
-                    <a aria-label="Previous" class="page-link" href="?page={{ page_obj.previous_page_number }}#feedback">
-                        &#8249;
-                    </a>
-            {% else %}
-                <li class="page-item disabled">
-                    <a aria-label="Previous" aria-hidden="true" class="page-link" href="#feedback">
-                        &#8249;
-                    </a>
-            {% endif %}
-                </li>
-            {% for item in page_obj.paginator.page_range %}
-                <li class="page-item{% if page_obj.number == item %} active" aria-current="page{% endif %}">
-                    <a aria-label="Page #{{ item }}" class="page-link" href="?page={{ item }}#feedback">
-                        {{ item }}
-                    </a>
-                </li>
-            {% endfor %}
-            {% if page_obj.has_next %}
-                <li class="page-item">
-                    <a aria-label="Next" class="page-link" href="?page={{ page_obj.next_page_number }}#feedback">
-                        &#8250;
-                    </a>
-            {% else %}
-                <li class="page-item disabled">
-                    <a aria-label="Next" aria-hidden="true" class="page-link" href="#feedback">
-                        &#8250;
-                    </a>
-            {% endif %}
-                </li>
-            {% if page_obj.number != page_obj.paginator.num_pages %}
-                <li class="page-item">
-                    <a aria-label="Last" class="page-link" href="?page={{ page_obj.paginator.num_pages }}#feedback">
-                        &raquo;
-                    </a>
-            {% else %}
-                <li class="page-item disabled">
-                    <a aria-label="Last" aria-hidden="true" class="page-link" href="#feedback">
-                        &raquo;
-                    </a>
-            {% endif %}
-                </li>
-            </ul>
-        </nav>
-        </div>
-    </div>
-</div>
-    {% endif %}
+    {% endfor %}
+    {% include "feedback_pages.html" %}
 {% else %}
-<div class="px-4 py-2">
-    <div class="card m-1">
-        <div class="card-body">
-            <p class="card-text fst-italic">
-                Sorry, but no feedback submissions were found at this time.
-            </p>
-            <p class="card-text">
-                Please check back again later or
-                <a href="{% url 'submit_feedback' %}#submit">submit your own feedback</a>.
-            </p>
-        </div>
+<div class="card p-1 m-1">
+    <div class="card-body">
+        <p class="card-text fst-italic">
+            Sorry, but no feedback submissions were found at this time.
+        </p>
+        <p class="card-text">
+            Please check back again later or
+            <a href="{% url 'submit_feedback' %}#submit">submit your own feedback</a>.
+        </p>
     </div>
 </div>
-    {% endif %}
+{% endif %}
 <div class="alert alert-dark alert-dismissible fade show m-3" role="alert" id="mail-alert">
     <p>
         Additionally, you are always more than welcome to reach out by e-mailing
