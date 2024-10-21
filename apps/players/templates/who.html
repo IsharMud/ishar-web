@@ -5,10 +5,10 @@
 {% block meta_url %}{% url 'who' %}#who{% endblock meta_url %}
 {% block title %}Who's Online?{% if players %} ({{ players | length }} player{{ players|pluralize }}){% endif %}{% endblock title %}
 {% block breadcrumbs %}
-    <li class="bi bi-people breadcrumb-item" title="Portal">
+    <li class="h2 bi bi-people breadcrumb-item" title="Portal">
         <a href="{% url 'portal' %}#portal" id="portal">Portal</a>
     </li>
-    <li class="breadcrumb-item active" aria-current="page" title="Who's Online?">
+    <li class="h2 breadcrumb-item active" aria-current="page" title="Who's Online?">
         <a href="{% url 'who' %}#who" id="who">Who's Online?</a>
     </li>
 {% endblock breadcrumbs %}

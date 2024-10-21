@@ -5,7 +5,7 @@
 {% block meta_url %}{% url 'news' %}{% if page_obj and page_obj.number %}?page={{ page_obj.number }}{% endif %}#news{% endblock meta_url %}
 {% block title %}{{ news_post.0.subject }} - {{ WEBSITE_TITLE }} News{% endblock title %}
 {% block breadcrumbs %}
-    <li class="bi bi-newspaper breadcrumb-item active" aria-current="page" id="news" title="{{ news_post.0.subject }}">
+    <li class="h2 bi bi-newspaper breadcrumb-item active" aria-current="page" id="news" title="{{ news_post.0.subject }}">
         {{ news_post.0.subject }}
     </li>
 {% endblock breadcrumbs %}

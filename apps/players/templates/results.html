@@ -4,19 +4,19 @@
 {% block meta_url %}{% url 'players' %}#search{% endblock meta_url %}
 {% block title %}Search{% if results %} ({{ results.count }} result{{ results.count|pluralize }}){% endif %}{% endblock title %}
 {% block breadcrumbs %}
-    <li class="bi bi-person breadcrumb-item" title="Portal">
+    <li class="h2 bi bi-person breadcrumb-item" title="Portal">
         <a href="{% url 'portal' %}#portal" id="portal">
             Portal
         </a>
     </li>
-    <li class="bi bi-search breadcrumb-item{% if not results %} active" aria-current="page{% endif %}" title="Search">
+    <li class="h2 bi bi-search breadcrumb-item{% if not results %} active" aria-current="page{% endif %}" title="Search">
         <span class="bi bi-search text-ishar"></span>
         <a href="{% url 'players' %}" id="search">
             Search
         </a>
     </li>
     {% if results %}
-    <li class="bi bi-people breadcrumb-item active" aria-current="page" title="{{ results.count }} result{{ results.count|pluralize }}">
+    <li class="h2 bi bi-people breadcrumb-item active" aria-current="page" title="{{ results.count }} result{{ results.count|pluralize }}">
         <a href="#results" id="results">
             {{ results.count }} result{{ results.count|pluralize }}
         </a>

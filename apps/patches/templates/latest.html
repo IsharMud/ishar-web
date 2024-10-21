@@ -5,10 +5,10 @@
 {% block meta_url %}{% url 'latest_patch' %}#latest{% endblock meta_url %}
 {% block title %}Latest Patch{% endblock title %}
 {% block breadcrumbs %}
-    <li class="bi bi-bandaid breadcrumb-item" title="Patches">
+    <li class="h2 bi bi-bandaid breadcrumb-item" title="Patches">
         <a href="{% url 'patches' %}#patches" id="patches">Patches</a>
     </li>
-    <li class="breadcrumb-item active" aria-current="page" title="Latest Patch">
+    <li class="h2 breadcrumb-item active" aria-current="page" title="Latest Patch">
         <a href="{% url 'latest_patch' %}#latest" id="latest">Latest</a>
     </li>
 {% endblock breadcrumbs %}
