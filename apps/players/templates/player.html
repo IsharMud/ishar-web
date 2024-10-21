@@ -4,27 +4,20 @@
 {% block meta_description %}{% if player %}Player: {{ player.name }}{% if player.player_type == 'Dead' %} ☠️{% endif %}{% else %}Player Not Found{% endif %}{% endblock meta_description %}
 {% block meta_url %}{% url 'players' %}{% endblock meta_url %}
 {% block title %}{% if player %}Player: {{ player.name }}{% if player.player_type == 'Dead' %} ☠️{% endif %}{% else %}Player Not Found{% endif %}{% endblock title %}
-{% block header %}
-<nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item" title="Portal">
-            <span class="bi bi-person text-ishar"></span>
-            <a href="{% url 'portal' %}#portal" id="portal">
-                Portal
-            </a>
-        </li>
-        <li class="breadcrumb-item active" aria-current="page">
+{% block breadcrumbs %}
+    <li class="bi bi-person breadcrumb-item h2" title="Portal">
+         <a href="{% url 'portal' %}#portal" id="portal">
+            Portal
+        </a>
+    </li>
+    <li class="breadcrumb-item active h2" aria-current="page">
     {% if player %}
-            {{ player.player_link }}
+        {{ player.player_link }}
     {% else %}
-            <span>
-                Player Not Found
-            </span>
+            Player Not Found
     {% endif %}
-        </li>
-    </ol>
-</nav>
-{% endblock header %}
+    </li>
+{% endblock breadcrumbs %}
 {% block content %}
     {% if player %}
 

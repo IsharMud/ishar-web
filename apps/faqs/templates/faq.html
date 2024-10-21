@@ -3,16 +3,13 @@
 {% block meta_description %}A few common questions that are asked about {{ WEBSITE_TITLE }}.{% endblock meta_description %}
 {% block meta_url %}{% url 'faq' %}#faq{% endblock meta_url %}
 {% block title %}Frequently Asked Questions{% endblock title %}
-{% block header %}
-<nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item active" aria-current="page" title="Portal">
-            <span class="bi bi-question-circle text-ishar"></span>
-            <a href="{% url 'faq' %}#faq" id="faq">Frequently Asked Questions</a>
-        </li>
-    </ol>
-</nav>
-{% endblock header %}
+{% block breadcrumbs %}
+    <li class="bi bi-question-circle breadcrumb-item active h2" aria-current="page" title="Frequently Asked Questions">
+        <a href="{% url 'faq' %}#faq" id="faq">
+            Frequently Asked Questions
+        </a>
+    </li>
+{% endblock breadcrumbs %}
 {% block scripts %}let focusTo = 'faq'{% endblock scripts %}
 {% block content %}
 <div class="p-3">

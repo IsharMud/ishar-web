@@ -11,21 +11,16 @@
     <script src="https://cdn.datatables.net/2.1.8/js/dataTables.bootstrap5.js"></script>
 {% endblock includes %}
 {% block scripts %}let focusTo = 'challenges'{% endblock scripts %}
-{% block header %}
-<nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item" title="Portal">
-            <span class="text-ishar bi bi-award"></span>
-            <a href="{% url 'portal' %}#portal" id="portal">Portal</a>
-        </li>
-        <li class="breadcrumb-item active" aria-current="page" title="Challenges">
-            <a href="{% url 'challenges' %}#challenges" id="challenges">
-                Challenges
-            </a>
-        </li>
-    </ol>
-</nav>
-{% endblock header %}
+{% block breadcrumbs %}
+    <li class="bi bi-award breadcrumb-item h2" title="Portal">
+        <a href="{% url 'portal' %}#portal" id="portal">Portal</a>
+    </li>
+    <li class="breadcrumb-item active h2" aria-current="page" title="Challenges">
+        <a href="{% url 'challenges' %}#challenges" id="challenges">
+            Challenges
+        </a>
+    </li>
+{% endblock breadcrumbs %}
 {% block content %}
     {% if CURRENT_SEASON and CURRENT_SEASON.get_next_cycle %}
 <blockquote class="alert alert-dark alert-dismissible fade show m-3" role="alert" id="cycle">

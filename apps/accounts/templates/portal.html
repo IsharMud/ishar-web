@@ -4,16 +4,11 @@
 {% block meta_description %}Portal for players to see information about their account and characters.{% endblock meta_description %}
 {% block meta_url %}{% url 'portal' %}#portal{% endblock meta_url %}
 {% block title %}Portal{% endblock title %}
-{% block header %}
-<nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item active" aria-current="page" title="Portal">
-            <span class="bi bi-person-lines-fill text-ishar"></span>
-            <a href="{% url 'portal' %}#portal" id="portal">Portal</a>
-        </li>
-    </ol>
-</nav>
-{% endblock header %}
+{% block breadcrumbs %}
+    <li class="bi bi-person-lines-fill breadcrumb-item active h2" aria-current="page" title="Portal">
+        <a href="{% url 'portal' %}#portal" id="portal">Portal</a>
+    </li>
+{% endblock breadcrumbs %}
 {% block content %}
 <div class="p-3">
 

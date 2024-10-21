@@ -4,18 +4,13 @@
 {% block meta_description %}Please consider supporting {{ WEBSITE_TITLE }} in any way that you can!{% endblock meta_description %}
 {% block meta_url %}{% url 'support' %}#support{% endblock meta_url %}
 {% block title %}Support {{ WEBSITE_TITLE }}{% endblock title %}
-{% block header %}
-<nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item active" aria-current="page" title="Support {{ WEBSITE_TITLE }}">
-            <span class="bi bi-heart"></span>
-            <a href="{% url 'support' %}#support" id="support">
-                Support {{ WEBSITE_TITLE }}
-            </a>
-        </li>
-    </ol>
-</nav>
-{% endblock header %}
+{% block breadcrumbs %}
+    <li class="bi bi-heart breadcrumb-item active h2" aria-current="page" title="Support {{ WEBSITE_TITLE }}">
+        <a href="{% url 'support' %}#support" id="support">
+            Support {{ WEBSITE_TITLE }}
+        </a>
+    </li>
+{% endblock breadcrumbs %}
 {% block content %}
     <p class="lead">
         While you are more than welcome to offer support, {{ WEBSITE_TITLE }} is free to use, play, and enjoy!

@@ -4,23 +4,18 @@
 {% block meta_description %}The latest patches to {{ WEBSITE_TITLE }}{% endblock meta_description %}
 {% block meta_url %}{% url 'patches' %}#patches{% endblock meta_url %}
 {% block title %}Patches{% endblock title %}
-{% block header %}
-<nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item active" aria-current="page" title="Patches">
-            <span class="bi bi-bandaid"></span>
-            <a href="{% url 'patches' %}#patches" id="patches">Patches</a>
-        </li>
+{% block breadcrumbs %}
+    <li class="bi bi-bandaid breadcrumb-item h2{% if page_obj.number and page_obj.number == 1 %} active" aria-current="page{% endif %}" title="Patches">
+        <a href="{% url 'patches' %}#patches" id="patches">Patches</a>
+    </li>
     {% if page_obj.number and page_obj.number != 1 %}
-        <li class="breadcrumb-item active" aria-current="page" title="Patches">
-            <a href="{% url 'patches' %}?page={{ page_obj.number }}#patches" id="page">
-                Page {{ page_obj.number }}
-            </a>
-        </li>
+    <li class="breadcrumb-item active h2" aria-current="page" title="Patches">
+        <a href="{% url 'patches' %}?page={{ page_obj.number }}#patches" id="page">
+            Page {{ page_obj.number }}
+        </a>
+    </li>
     {% endif %}
-    </ol>
-</nav>
-{% endblock header %}
+{% endblock breadcrumbs %}
 {% block scripts %}let focusTo = 'patches'{% endblock scripts %}
 {% block content %}
 <div class="p-3">

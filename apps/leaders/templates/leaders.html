@@ -15,28 +15,23 @@
     <script src="https://cdn.datatables.net/buttons/3.1.2/js/buttons.colVis.js"></script>
     <script src="https://cdn.datatables.net/responsive/3.0.3/js/dataTables.responsive.min.js"></script>
 {% endblock includes %}
-{% block header %}
-<nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item" title="Portal">
-            <span class="text-ishar bi bi-trophy"></span>
-            <a href="{% url 'portal' %}#portal" id="portal">Portal</a>
-        </li>
-        <li class="breadcrumb-item{% if not game_type %} active" aria-current="page{% endif %}" title="Leaders">
-            <a href="{% url 'leaders' %}#leaders" id="leaders">
-                Leaders
-            </a>
-        </li>
+{% block breadcrumbs %}
+    <li class="bi bi-trophy breadcrumb-item h2" title="Portal">
+        <a href="{% url 'portal' %}#portal" id="portal">Portal</a>
+    </li>
+    <li class="h2 breadcrumb-item{% if not game_type %} active" aria-current="page{% endif %}" title="Leaders">
+        <a href="{% url 'leaders' %}#leaders" id="leaders">
+            Leaders
+        </a>
+    </li>
     {% if game_type %}
-        <li class="breadcrumb-item active" aria-current="page" title="{{ game_type.label }} Leaders">
-            <a href="{% url 'leaders' %}{{ game_type.label|lower }}#{{ game_type.label|lower }}">
-                {{ game_type.label }}
-            </a>
-        </li>
+    <li class="breadcrumb-item active h2" aria-current="page" title="{{ game_type.label }} Leaders">
+        <a href="{% url 'leaders' %}{{ game_type.label|lower }}#{{ game_type.label|lower }}">
+            {{ game_type.label }}
+        </a>
+    </li>
     {% endif %}
-    </ol>
-</nav>
-{% endblock header %}
+{% endblock breadcrumbs %}
 {% block content %}
 <div class="p-3">
     <div class="card m-1">

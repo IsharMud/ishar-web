@@ -4,17 +4,11 @@
 {% block meta_description %}{{ news_post.0.subject }}{% endblock meta_description %}
 {% block meta_url %}{% url 'news' %}{% if page_obj and page_obj.number %}?page={{ page_obj.number }}{% endif %}#news{% endblock meta_url %}
 {% block title %}{{ news_post.0.subject }} - {{ WEBSITE_TITLE }} News{% endblock title %}
-{% block header %}
-<nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item active" aria-current="page" id="news" title="{{ news_post.0.subject }}">
-            <span class="bi bi-newspaper text-ishar">
-                {{ news_post.0.subject }}
-            </span>
-        </li>
-    </ol>
-</nav>
-{% endblock header %}
+{% block breadcrumbs %}
+    <li class="bi bi-newspaper breadcrumb-item active" aria-current="page" id="news" title="{{ news_post.0.subject }}">
+        {{ news_post.0.subject }}
+    </li>
+{% endblock breadcrumbs %}
 {% block content %}
 <blockquote class="blockquote">
     <div class="m-3 p-1">

@@ -3,12 +3,13 @@
 {% block meta_description %}A history of {{ WEBSITE_TITLE }}.{% endblock meta_description %}
 {% block meta_url %}{% url 'history' %}#history{% endblock meta_url %}
 {% block title %}History{% endblock title %}
-{% block header %}
-    <span class="bi bi-clock-history"></span>
-    <a href="{% url 'history' %}#history" title="History" id="history">
-        History
-    </a>
-{% endblock header %}
+{% block breadcrumbs %}
+    <li class="bi bi-clock-history breadcrumb-item h2 active" aria-current="page" title="History">
+        <a href="{% url 'history' %}#history" id="history">
+            History
+        </a>
+    </li>
+{% endblock breadcrumbs %}
 {% block content %}
     <div class="p-3">
         <div class="card m-1">

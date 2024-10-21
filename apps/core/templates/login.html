@@ -4,18 +4,13 @@
 {% block meta_url %}{% url 'login' %}#login{% endblock meta_url %}
 {% block title %}Log In{% endblock title %}
 {% block scripts %}let focusTo = 'id_username'{% endblock scripts %}
-{% block header %}
-<nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item active" aria-current="page" title="Log In">
-            <span class="text-ishar bi bi-door-open"></span>
-            <a href="{% url 'login' %}#login" id="login">
-                Log In
-            </a>
-        </li>
-    </ol>
-</nav>
-{% endblock header %}
+{% block breadcrumbs %}
+    <li class="bi bi-door-open breadcrumb-item active h2" aria-current="page" title="Log In">
+        <a href="{% url 'login' %}#login" id="login">
+            Log In
+        </a>
+    </li>
+{% endblock breadcrumbs %}
 {% block content %}
     {% if form %}
 <div class="p-3">

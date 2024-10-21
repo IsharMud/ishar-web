@@ -3,15 +3,11 @@
 {% block meta_description %}Welcome to {{ WEBSITE_TITLE }}{% endblock meta_description %}
 {% block meta_url %}{% url 'index' %}{% endblock meta_url %}
 {% block title %}Home{% endblock title %}
-{% block header %}
-    <span class="bi bi-house">
-    {% if news and news.subject %}
-        {{ news.subject }}
-    {% else %}
-        Welcome
-    {% endif %}
-    </span>
-{% endblock header %}
+{% block breadcrumbs %}
+    <li class="bi bi-house breadcrumb-item active h2" title="{{ news.subject|default:"Welcome" }}">
+        {{ news.subject|default:"Welcome" }}
+    </li>
+{% endblock breadcrumbs %}
 {% block content %}
     {% if news %}
     <blockquote class="blockquote">

@@ -3,34 +3,29 @@
 {% block meta_description %}Help pages for {{ WEBSITE_TITLE }}{% endblock meta_description %}
 {% block meta_url %}{% if help_topic %}{{ help_topic.get_absolute_url }}{% else %}{% url 'help' %}#help{% endif %}{% endblock meta_url %}
 {% block title %}Help{% if help_topic and help_topic.name %}: {{ help_topic.name }}{% endif %}{% endblock title %}
-{% block header %}
-<nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item{% if not help_topic %} active" aria-current="page{% endif %}" id="help" title="Help">
-            <span class="text-ishar bi bi-{% if help_topic and help_topic.is_area %}globe-asia-australia{% else %}info-circle{% endif %}"></span>
-            <a href="{% url 'help' %}#help">Help</a>
-        </li>
+{% block breadcrumbs %}
+    <li class="h2 breadcrumb-item bi bi-{% if help_topic and help_topic.is_area %}globe-asia-australia{% else %}info-circle{% endif %}" title="Help">
+        <a href="{% url 'help' %}#help" id="help">Help</a>
+    </li>
     {% if help_topic %}
         {% if help_topic.is_area %}
-        <li class="breadcrumb-item" title="World">
-            <a href="{% url 'world' %}#areas" id="world">World</a>
-        </li>
-        <li class="breadcrumb-item active" aria-current="page" title="{{ help_topic.display_name }}">
-             <a href="{{ help_topic.get_absolute_url }}" id="topic">
-                 {{ help_topic.display_name }}
-             </a>
-        </li>
+    <li class="breadcrumb-item h2" title="World">
+        <a href="{% url 'world' %}#areas" id="world">World</a>
+    </li>
+    <li class="breadcrumb-item active h2" aria-current="page" title="{{ help_topic.display_name }}">
+         <a href="{{ help_topic.get_absolute_url }}" id="topic">
+             {{ help_topic.display_name }}
+         </a>
+    </li>
         {% else %}
-        <li class="breadcrumb-item active" aria-current="page" title="{{ help_topic.name }}">
-             <a href="{{ help_topic.get_absolute_url }}" id="topic">
-                 {{ help_topic.name }}
-             </a>
-        </li>
+    <li class="breadcrumb-item active h2" aria-current="page" title="{{ help_topic.name }}">
+         <a href="{{ help_topic.get_absolute_url }}" id="topic">
+             {{ help_topic.name }}
+         </a>
+    </li>
         {% endif %}
     {% endif %}
-    </ol>
-</nav>
-{% endblock header %}
+{% endblock breadcrumbs %}
 {% block content %}
 
     {% if help_topic %}

@@ -10,15 +10,18 @@
 {% endblock meta_description %}
 {% block meta_url %}{% url 'events' %}#events{% endblock meta_url %}
 {% block title %}Events{% endblock title %}
-{% block header %}
-    <span class="bi bi-calendar-event"></span>
-    <a href="{% url 'events' %}#events" title="Events" id="events">Events</a>
-    {% if GLOBAL_EVENT_COUNT > 0 %}
-    <span class="badge bg-dark rounded-pill border border-secondary" title="{{ GLOBAL_EVENT_COUNT }} event{{ GLOBAL_EVENT_COUNT|pluralize }} active">
-        {{ GLOBAL_EVENT_COUNT }}
-    </span>
-    {% endif %}
-{% endblock header %}
+{% block breadcrumbs %}
+    <li class="bi bi-calendar-event breadcrumb-item h2" title="Events">
+        <a href="{% url 'events' %}#events" id="events">
+            Events
+        </a>
+    </li>
+    <li class="breadcrumb-item active h5" title="{{ GLOBAL_EVENT_COUNT }} event{{ GLOBAL_EVENT_COUNT|pluralize }}">
+        <span class="align- badge bg-dark rounded-pill border border-secondary">
+            {{ GLOBAL_EVENT_COUNT }}
+        </span>
+    </li>
+{% endblock breadcrumbs %}
 {% block content %}
     {% if global_events and GLOBAL_EVENT_COUNT > 0 %}
 <p class="lead" title="{{ GLOBAL_EVENT_COUNT }} event{{ GLOBAL_EVENT_COUNT|pluralize }} active.">

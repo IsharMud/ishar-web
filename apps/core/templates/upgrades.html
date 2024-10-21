@@ -13,23 +13,18 @@
 <script src="https://cdn.datatables.net/buttons/3.1.2/js/buttons.bootstrap5.js"></script>
 <script src="https://cdn.datatables.net/buttons/3.1.2/js/buttons.colVis.js"></script>
 {% endblock includes %}
-{% block header %}
-<nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item" title="Portal">
-            <span class="bi bi-shield text-ishar"></span>
-            <a href="{% url 'portal' %}#portal" id="portal">
-                Portal
-            </a>
-        </li>
-        <li class="breadcrumb-item active" aria-current="page" title="Remort Upgrades">
-            <a href="{% url 'upgrades' %}#upgrades" id="upgrades">
-                Remort Upgrades
-            </a>
-        </li>
-    </ol>
-</nav>
-{% endblock header %}
+{% block breadcrumbs %}
+    <li class="bi bi-shield breadcrumb-item h2" title="Portal">
+        <a href="{% url 'portal' %}#portal" id="portal">
+            Portal
+        </a>
+    </li>
+    <li class="breadcrumb-item active h2" aria-current="page" title="Remort Upgrades">
+        <a href="{% url 'upgrades' %}#upgrades" id="upgrades">
+            Remort Upgrades
+        </a>
+    </li>
+{% endblock breadcrumbs %}
 {% block content %}
 <div class="m-3 alert alert-dark alert-dismissible fade show" role="alert">
     <p class="lead">

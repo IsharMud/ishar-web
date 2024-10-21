@@ -3,12 +3,13 @@
 {% block meta_description %}A quick guide to start playing the game.{% endblock meta_description %}
 {% block meta_url %}{% url 'start' %}#start{% endblock meta_url %}
 {% block title %}Get Started{% endblock title %}
-{% block header %}
-    <span class="bi bi-rocket-takeoff"></span>
-    <a href="{% url 'start' %}#start" title="Get Started" id="start">
-        Get Started
-    </a>
-{% endblock header %}
+{% block breadcrumbs %}
+    <li class="bi bi-rocket-takeoff breadcrumb-item h2 active" aria-current="page" title="Get Started">
+        <a href="{% url 'start' %}#start" id="start">
+            Get Started
+        </a>
+    </li>
+{% endblock breadcrumbs %}
 {% block content %}
 <div class="card m-3">
     <div class="card-body">

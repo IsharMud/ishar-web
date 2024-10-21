@@ -226,7 +226,7 @@
                         </li>
 {% else %}
                         <li class="nav-item" title="Portal">
-                            <a class="bi bi-menu-button nav-link" href="{% url 'login' %}#login">
+                            <a class="bi bi-menu-button nav-link" href="{% url 'portal' %}#portal">
                                 Portal
                             </a>
                         </li>
@@ -247,8 +247,16 @@
 
         <main class="container-fluid p-1">
 
-            <div class="bg-black rounded border-ishar p-2 h2 text-ishar">
-                {% block header %}{% endblock header %}
+            <div class="bg-black rounded border-ishar p-2 text-ishar">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+{% block breadcrumbs %}
+                        <li class="bi bi-house breadcrumb-item h2" title="Welcome">
+                            Welcome
+                        </li>
+{% endblock breadcrumbs %}
+                    </ol>
+                </nav>
             </div>
 
 {% block messages %}
