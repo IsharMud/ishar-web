@@ -22,7 +22,7 @@
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
 {% if submissions %}
-    {% include "feedback_pages.html" %}
+    {% include "feedback_pages.html" with top_or_bottom='top' %}
     {% for submission in submissions %}
 <div class="border bg-black card p-1 m-1">
     <div class="card-header" title="{{ submission.get_submission_type_display }}: {{ submission.subject }} ({{ submission.vote_total }} vote{{ submission.vote_total|pluralize }})">
@@ -52,7 +52,7 @@
     </div>
 </div>
     {% endfor %}
-    {% include "feedback_pages.html" %}
+    {% include "feedback_pages.html" with top_or_bottom='bottom' %}
 {% else %}
 <div class="card">
     <div class="card-body">

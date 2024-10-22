@@ -4,19 +4,25 @@
     <div class="bg-black border-0 card">
         <div class="card-body">
             <ul class="list-group list-group-horizontal">
-                <li class="list-group-item bg-black card-text" title="All" id="all">
+                <li class="list-group-item bg-black card-text" title="All" id="all-{{ top_or_bottom }}">
     {% if submission_type is None %}
-                        <span class="text-ishar">All</span>
+                    <span class="text-ishar">
+                        All
+                    </span>
     {% else %}
-                        <a class="list-group-item-text" href="{% url 'feedback' %}#all">All</a>
+                    <a class="list-group-item-text" href="{% url 'feedback' %}#all-{{ top_or_bottom }}">
+                        All
+                    </a>
     {% endif %}
                 </li>
     {% for num, name in submission_types %}
-                    <li class="list-group-item bg-black card-text" title="{{ name }}" id="{{ name|lower }}">
+                    <li class="list-group-item bg-black card-text" title="{{ name }}" id="{{ name|lower }}-{{ top_or_bottom }}">
         {% if submission_type == num %}
-                            <span class="text-ishar active">{{ name }}</span>
+                            <span class="text-ishar active">
+                                {{ name }}
+                            </span>
         {% else %}
-                            <a class="list-group-item-text" href="{% url 'feedback' %}{{ name|lower }}#{{ name|lower }}">
+                            <a class="list-group-item-text" href="{% url 'feedback' %}{{ name|lower }}#{{ name|lower }}-{{ top_or_bottom }}">
                                 {{ name }}
                             </a>
         {% endif %}
