@@ -22,26 +22,20 @@
     </li>
 {% endblock breadcrumbs %}
 {% block content %}
-    {% if CURRENT_SEASON and CURRENT_SEASON.get_next_cycle %}
-<blockquote class="alert alert-dark alert-dismissible fade show m-3" role="alert" id="cycle">
-    <p class="lead">
-        <a class="anchor-link" href="#cycle" aria-label="Link to this section: Next Cycle: {{ CURRENT_SEASON.get_next_cycle | naturaltime }} ({{ CURRENT_SEASON.get_next_cycle }})">
-            &#x23;
-        </a>
-        Challenges will next cycle <strong>{{ CURRENT_SEASON.get_next_cycle | naturaltime }}</strong>.
-    </p>
-    <footer class="blockquote-footer" title="{{ CURRENT_SEASON.get_next_cycle }}">
-        @
-        <time datetime="{{ CURRENT_SEASON.get_next_cycle|date:"c" }}">
-            {{ CURRENT_SEASON.get_next_cycle }}
-        </time>
-    </footer>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-</blockquote>
-    {% endif %}
-<div class="container-sm w-auto">
+<div class="container-fluid">
     {% if challenges %}
     <table class="table table-hover table-dark table-flush table-sm table-responsive table-striped" id="challengesTable">
+        {% if CURRENT_SEASON %}
+        <caption class="caption-top" id="cycle">
+            <a class="anchor-link" href="#cycle" aria-label="Link to this section: Next Cycle: {{ CURRENT_SEASON.get_next_cycle | naturaltime }} ({{ CURRENT_SEASON.get_next_cycle }})">
+                &#x23;
+            </a>
+            Challenges will next cycle <strong>{{ CURRENT_SEASON.get_next_cycle | naturaltime }}</strong> at
+            <time class="fst-italic" datetime="{{ CURRENT_SEASON.get_next_cycle|date:"c" }}">
+                {{ CURRENT_SEASON.get_next_cycle }}
+            </time>
+        </caption>
+        {% endif %}
         <thead>
             <tr>
                 <th class="border" scope="col" title="#">

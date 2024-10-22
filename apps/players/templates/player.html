@@ -45,7 +45,7 @@
             Details
         </summary>
 
-        <ul class="bg-black list-group list-group-horizontal-md">
+        <ul class="bg-black list-group list-group-horizontal-sm">
 
             <li class="bg-black border-0 list-group-item list-group-item-text text-white" title="Name: {{ player.name | title }} / Class: {{ player.common.player_class.get_class_name }} / Race: {{ player.common.race.display_name }}">
                 <span class="bi bi-dot text-ishar"></span>
@@ -169,7 +169,7 @@
             </span>
                     {% endif %}
         </summary>
-        <ol class="list-group list-group-horizontal-md">
+        <ol class="list-group list-group-horizontal-sm">
                     {% for stat_name, stat_value in player.player_stats.items %}
             <li class="border border-secondary bg-black list-group-item list-group-item-dark" title="{{ stat_name }}: {{ stat_value }}">
                 <span class="list-group-item-text text-white{% if forloop.first %} fw-bold{% endif %}">
@@ -191,7 +191,7 @@
             </a>
             Time
         </summary>
-        <ul class="list-group list-group-horizontal-md">
+        <ul class="list-group list-group-horizontal-sm">
             <li class="bg-black border-0 list-group-item list-group-item-text text-white" title="Logged On: {{ player.logon | naturaltime }}, ({{ player.logon }})">
                 <span class="bi bi-dot text-ishar"></span>
                 {{ player.get_player_gender | title }} last logged
@@ -205,7 +205,7 @@
                 on {{ player.logon | date }}.
             </li>
         </ul>
-        <ul class="bg-black list-group list-group-horizontal-md">
+        <ul class="bg-black list-group list-group-horizontal-sm">
             <li class="bg-black border-0 list-group-item list-group-item-text text-white" title="Birth: {{ player.birth | naturaltime }}, ({{ player.birth }})">
                 <span class="bi bi-dot text-ishar"></span>
                 {{ player.get_player_gender | title }} was born

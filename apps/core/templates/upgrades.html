@@ -26,17 +26,14 @@
     </li>
 {% endblock breadcrumbs %}
 {% block content %}
-<div class="m-3 alert alert-dark alert-dismissible fade show" role="alert">
-    <p class="lead">
-        Here are the remort upgrades available to players, and the
-        <a href="{% url 'help_page' help_topic='Renown' %}#topic">renown</a>
-        costs for each upgrade.
-    </p>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-</div>
-<div class="container-sm w-auto">
+<div class="container-fluid">
     {% if upgrades %}
     <table class="table table-hover table-dark table-flush table-sm table-responsive table-striped" id="upgradesTable">
+        <caption class="caption-top">
+            Here are the remort upgrades available to players, and the
+            <a href="{% url 'help_page' help_topic='Renown' %}#topic">renown</a>
+            costs for each upgrade.
+        </caption>
         <thead>
             <tr>
                 <th class="border" scope="col" title="#">

@@ -10,39 +10,37 @@
     </li>
 {% endblock breadcrumbs %}
 {% block content %}
-<div class="p-3">
-
-    <div class="card m-1">
-        <div class="card-body">
-            <ul class="list-group list-group-horizontal-md">
+<div class="bg-black border-0 card">
+    <div class="card-body">
+        <ul class="list-group list-group-horizontal-sm">
     {% if user.is_staff %}
-                <li class="bg-black border border-secondary card-text list-group-item-dark list-group-item" title="Admin">
-                    <span class="bi bi-gear text-ishar"></span>
-                    <a class="list-group-item-text" href="{% url 'admin:index' %}" target="_blank">
-                        Admin
-                    </a>
-                </li>
+            <li class="bg-black border border-secondary card-text list-group-item-dark list-group-item" title="Admin">
+                <i class="bi bi-gear text-ishar"></i>
+                <a class="list-group-item-text" href="{% url 'admin:index' %}" target="_blank">
+                    Admin
+                </a>
+            </li>
     {% endif %}
                 <li class="bg-black border border-secondary card-text list-group-item-dark list-group-item" title="Challenges">
-                    <span class="bi bi-award text-ishar"></span>
+                    <i class="bi bi-award text-ishar"></i>
                     <a class="list-group-item-text" href="{% url 'challenges' %}#challenges">
                         Challenges
                     </a>
                 </li>
                 <li class="bg-black border border-secondary card-text list-group-item-dark list-group-item" title="Feedback">
-                    <span class="bi bi-flag text-ishar"></span>
+                    <i class="bi bi-flag text-ishar"></i>
                     <a class="list-group-item-text" href="{% url 'feedback' %}#feedback">
                         Feedback
                     </a>
                 </li>
                 <li class="bg-black border border-secondary card-text list-group-item-dark list-group-item" title="Leaders">
-                    <span class="bi bi-trophy text-ishar"></span>
+                    <i class="bi bi-trophy text-ishar"></i>
                     <a class="list-group-item-text" href="{% url 'leaders' %}#leaders">
                         Leaders
                     </a>
                 </li>
                 <li class="bg-black border border-secondary card-text list-group-item-dark list-group-item" title="Password">
-                    <span class="bi bi-key text-ishar"></span>
+                    <i class="bi bi-key text-ishar"></i>
                     <a class="list-group-item-text" href="{% url 'password' %}#password">
                         Password
                     </a>
@@ -52,19 +50,18 @@
                         <input class="form-check-input" type="checkbox" role="switch" name="isPrivate" id="privateSwitch" value="{% if request.user.is_private %}true{% else %}false{% endif %}" onclick="togglePrivate(this.id);"{% if request.user.is_private %} checked{% endif %}>
                         <label class="form-check-label" for="privateSwitch">Private</label>
                         <a href="#" data-bs-toggle="tooltip" id="privateInfo" data-bs-title="The &quot;private&quot; setting limits the amount of information shown on your player's profile pages.">
-                            <span class="bi p-1 bi-question-circle text-secondary"></span>
+                            <i class="bi p-1 bi-question-circle text-secondary"></i>
                         </a>
                     </div>
                 </li>
                 <li class="bg-black border border-secondary card-text list-group-item-dark list-group-item" title="Upgrades">
-                    <span class="bi bi-shield text-ishar"></span>
+                    <i class="bi bi-shield text-ishar"></i>
                     <a class="list-group-item-text" href="{% url 'upgrades' %}#upgrades">
                         Upgrades
                     </a>
                 </li>
             </ul>
         </div>
-    </div>
 
     <div class="card m-1" id="privateMsgDiv" style="display: none;">
         <div class="card-body">
@@ -98,7 +95,7 @@
         </h4>
 
         {% if not player.is_immortal %}
-        <ol class="bg-black list-group list-group-horizontal-md">
+        <ol class="bg-black list-group list-group-horizontal-sm">
             <li class="bg-black border border-secondary list-group-item list-group-item-text list-group-item-dark text-white" title="Level: {{ player.common.level }}">
                 <strong>Level</strong>:
                 {{ player.common.level }}
@@ -179,7 +176,7 @@
                 and can be spent by typing &quot;<code>shop</code>&quot; any time.">
         </button>
     </summary>
-    <ul class="bg-black list-group list-group-horizontal-md">
+    <ul class="bg-black list-group list-group-horizontal-sm">
         <li class="bg-black border border-secondary list-group-item list-group-item-text text-white" title="Current: {{ request.user.current_essence }} essence">
             <strong>Current</strong>:
             {{ request.user.current_essence }} essence

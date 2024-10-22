@@ -15,33 +15,24 @@
     </li>
 {% endblock breadcrumbs %}
 {% block content %}
-<div class ="p-3">
-    <div class="card m-1">
-        <div class="card-body">
-            <p class="card-text lead">
-                <strong>We truly thank you for your feedback!</strong>
-                We sincerely appreciate any input on how {{ WEBSITE_TITLE }} can be improved.
-            </p>
-            <p class="card-text lead">
-                When reporting a <a href="{% url 'help_page' help_topic='Bug' %}#topic">bug</a>,
-                please make sure to include specific details,
-                in order for administrators to fully reproduce the problem.
-            </p>
-        </div>
-    </div>
+<div class="alert alert-dark alert-dismissible fade show" role="alert" id="feedback-alert">
+    <p class="lead">
+        <strong>We truly thank you for your feedback!</strong>
+        We sincerely appreciate any input on how {{ WEBSITE_TITLE }} can be improved.
+    </p>
+    <p class="lead">
+        When reporting a <a href="{% url 'help_page' help_topic='Bug' %}#topic">bug</a>,
+        please make sure to include specific details,
+        in order for administrators to fully reproduce the problem.
+    </p>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
 <form method="post">
-    <div class="bg-black border-ishar card container-sm">
-        <div class="card-body">
-            <div class="bg-black card-text mb-3">
-                {{ form.as_p }}
-            </div>
-            {% csrf_token %}
-            <p class="card-text mb-3">
-                <button class="btn btn-outline-primary" type="submit">Send</button>
-                <button class="btn btn-outline-secondary" type="reset">Reset</button>
-            </p>
-        </div>
-    </div>
+    {{ form.as_p }}
+    {% csrf_token %}
+    <p>
+        <button class="btn btn-outline-primary" type="submit">Send</button>
+        <button class="btn btn-outline-secondary" type="reset">Reset</button>
+    </p>
 </form>
 {% endblock content %}
