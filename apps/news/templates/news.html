@@ -16,12 +16,12 @@
     </div>
     <footer class="mx-3 blockquote-footer" title="{{ news_post.0.account.get_username | title }} @ {{ news_post.0.created | naturaltime }} ({{ news_post.0.created | date:"l, F jS, Y" }})">
         <cite>{{ news_post.0.account.get_username | title }}</cite>
-        <span class="bi bi-pen"></span>
+        <i class="bi bi-pen"></i>
         {{ news_post.0.created | naturaltime }}
         ({{ news_post.0.created | date:"D. M. jS, Y" }})
     </footer>
 </blockquote>
-<div class="p-3 d-flex justify-content-end">
+<div class="d-flex justify-content-end">
     <div class="border-0 card bg-black">
         <div class="card-body">
             <nav aria-label="news submission pages navigation">

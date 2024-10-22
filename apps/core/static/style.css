@@ -74,7 +74,13 @@ a.hardcore-player:active, a.hardcore-player:visited
 }
 
 .btn-ishar {
-  --bs-btn-border-color: var(--bs-dark);
-  --bs-btn-hover-border-color: var(--ishar-color);
-  --bs-btn-active-border-color: var(--bs-secondary);
+    --bs-btn-bg: var(--bs-black);
+    --bs-btn-color: var(--ishar-color);
+    --bs-btn-border-color: var(--ishar-color);
+    --bs-btn-hover-color: var(--bs-white);
+    --bs-btn-hover-bg: var(--bs-dark);
+    --bs-btn-hover-border-color: var(--ishar-color);
+    --bs-btn-active-color: var(--ishar-color);
+    --bs-btn-active-bg: var(--bs-black);
+    --bs-btn-active-border-color: var(--ishar-color);
 }

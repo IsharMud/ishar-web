@@ -14,6 +14,12 @@
         <div class="m-1 p-1">
             {% autoescape off %}{{ news.body }}{% endautoescape %}
         </div>
+        <div class="d-flex justify-content-end">
+            <a class="btn btn-ishar" href="{% url 'news' %}?page=2#news">
+                <i class="bi bi-newspaper text-ishar"></i>
+                Past News
+            </a>
+        </div>
         <footer class="blockquote-footer" title="{{ news.created | date:"l, F jS, Y" }}">
             <cite>
                 {{ news.account.get_username | title }}
@@ -22,14 +28,6 @@
             {{ news.created | date:"l, F jS, Y" }}
         </footer>
     </blockquote>
-    <div class="container-fluid">
-        <p class="text-end">
-            <a class="btn btn-ishar" href="{% url 'news' %}?page=2#news">
-                <span class="bi bi-newspaper text-ishar"></span>
-                Past news
-            </a>
-        </p>
-    </div>
 </div>
 
 <div class="bg-black rounded border-ishar p-3 my-1">

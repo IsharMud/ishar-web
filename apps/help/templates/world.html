@@ -13,44 +13,45 @@
 {% endblock breadcrumbs %}
 {% block title %}World{% endblock title %}
 {% block content %}
-    <div class="p-3">
-        <div class="alert alert-dark alert-dismissible fade show" role="alert">
-            <p class="lead">
-                <strong>Ishar is a cohesive world with a living history.</strong>
-                The vast world areas of Ishar have been written to include a detailed past that intrudes on the present,
-                setting the scene for many of the adventures to be had here.
-            </p>
-            <p class="lead">
-                From the shattered ruins of <a href="{% url 'help_page' help_topic='Area Torm Sarvek' %}#topic" title="Help: Area Torm Sarvek">Torm Sarvek</a>
-                to the splendor of <a href="{% url 'help_page' help_topic='Area Mareldja' %}#topic" title="Help: Area Mareldja">Mareldja</a>,
-                the darkness of Hedros, the dense Talrynian Forest, all of these lands and more are open to you.
-                Whether treading across the barren wasteland of the Tundra or voyaging for the great Ocean, you will
-                never forget the sense of wonder and discovery to be experienced here.
-            </p>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
+    <div class="alert alert-dark alert-dismissible fade show" role="alert">
+        <p class="lead">
+            <strong>Ishar is a cohesive world with a living history.</strong>
+            The vast world areas of Ishar have been written to include a detailed past that intrudes on the present,
+            setting the scene for many of the adventures to be had here.
+        </p>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
     {% if areas %}
-        <div class="card m-2 bg-black">
-            <div class="card-header">
-                <h5 class="card-title" title="{{ areas|length }} areas" id="areas">
-                    <a class="anchor-link" href="#areas" aria-label="Link to this section: Areas">
-                        &#x23;
-                    </a>
-                    {{ areas|length }} Areas
-                </h5>
-            </div>
-            <div class="card-body">
-                <ul class="card-body two-col">
-        {% for area in areas %}
-                    <li class="card-text" title="{{ area.display_name }}">
-                        <a href="{{ area.get_absolute_url }}" title="{{ area.display_name }}">
-                            {{ area.display_name }}
-                        </a>
-                    </li>
-        {% endfor %}
-                </ul>
-            </div>
+    <div class="card bg-black">
+        <div class="bg-black card-header">
+            <h5 class="card-title" title="Areas ({{ areas|length }})" id="areas">
+                <a class="anchor-link" href="#areas" aria-label="Link to this section: Areas">
+                    &#x23;
+                </a>
+                Areas ({{ areas|length }})
+            </h5>
         </div>
+        <div class="card-body">
+            <ul class="card-body two-col">
+        {% for area in areas %}
+                <li class="card-text" title="{{ area.display_name }}">
+                    <a href="{{ area.get_absolute_url }}" title="{{ area.display_name }}">
+                        {{ area.display_name }}
+                    </a>
+                </li>
+        {% endfor %}
+            </ul>
+        </div>
+    </div>
     {% endif %}
+    <div class="alert alert-dark alert-dismissible fade show" role="alert">
+        <p class="lead">
+            From the shattered ruins of <a href="{% url 'help_page' help_topic='Area Torm Sarvek' %}#topic" title="Help: Area Torm Sarvek">Torm Sarvek</a>
+            to the splendor of <a href="{% url 'help_page' help_topic='Area Mareldja' %}#topic" title="Help: Area Mareldja">Mareldja</a>,
+            the darkness of Hedros, the dense Talrynian Forest, all of these lands and more are open to you.
+            Whether treading across the barren wasteland of the Tundra or voyaging for the great Ocean, you will
+            never forget the sense of wonder and discovery to be experienced here.
+        </p>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 {% endblock content %}

@@ -17,16 +17,13 @@
         </a>
     </li>
     <li class="breadcrumb-item active h5" title="{{ GLOBAL_EVENT_COUNT }} event{{ GLOBAL_EVENT_COUNT|pluralize }}">
-        <span class="align- badge bg-dark rounded-pill border border-secondary">
+        <span class="align-middle badge bg-dark rounded-pill border border-secondary">
             {{ GLOBAL_EVENT_COUNT }}
         </span>
     </li>
 {% endblock breadcrumbs %}
 {% block content %}
     {% if global_events and GLOBAL_EVENT_COUNT > 0 %}
-<p class="lead" title="{{ GLOBAL_EVENT_COUNT }} event{{ GLOBAL_EVENT_COUNT|pluralize }} active.">
-    {{ GLOBAL_EVENT_COUNT }} event{{ GLOBAL_EVENT_COUNT|pluralize }} active.
-</p>
         {% for global_event in global_events %}
 <details open>
     <summary class="h3 text-ishar" title="{{ global_event.event_desc }}">

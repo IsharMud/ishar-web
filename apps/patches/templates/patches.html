@@ -18,14 +18,11 @@
 {% endblock breadcrumbs %}
 {% block scripts %}let focusTo = 'patches'{% endblock scripts %}
 {% block content %}
-<div class="p-3">
-    <div class="alert alert-dark alert-dismissible fade show" role="alert" id="patch-alert">
-        <p class="lead">
-            {{ WEBSITE_TITLE }} is under regular development,
-            and constantly being improved!
-        </p>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
+<div class="alert alert-dark alert-dismissible fade show" role="alert" id="patch-alert">
+    <p class="lead">
+        {{ WEBSITE_TITLE }} is under regular development,  and constantly being improved!
+    </p>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
     {% if patches %}
         {% for patch in patches %}
@@ -54,77 +51,71 @@
 </details>
         {% endfor %}
         {% if page_obj %}
-<div class="p-3">
-    <div class="border-0 card bg-black">
-        <div class="card-body">
-            <nav aria-label="Patches pages navigation">
-                <ul class="pagination m-0">
+<hr>
+<nav aria-label="Patches pages navigation">
+    <ul class="pagination p-1">
 
             {% if page_obj.number != 1 %}
-                    <li class="page-item">
-                        <a aria-label="First" class="page-link" href="?page=1#patches" >
-                            &laquo;
-                        </a>
+        <li class="page-item">
+            <a aria-label="First" class="page-link" href="?page=1#patches" >
+                &laquo;
+            </a>
             {% else %}
-                    <li class="page-item disabled">
-                        <a aria-label="First" aria-hidden="true" class="page-link" href="#patches">
-                            &laquo;
-                        </a>
+        <li class="page-item disabled">
+            <a aria-label="First" aria-hidden="true" class="page-link" href="#patches">
+                &laquo;
+            </a>
             {% endif %}
-                    </li>
+        </li>
 
             {% if page_obj.has_previous %}
-                    <li class="page-item">
-                        <a aria-label="Previous" class="page-link" href="?page={{ page_obj.previous_page_number }}#patches">
-                            &#8249;
-                        </a>
+        <li class="page-item">
+            <a aria-label="Previous" class="page-link" href="?page={{ page_obj.previous_page_number }}#patches">
+                &#8249;
+            </a>
             {% else %}
-                    <li class="page-item disabled">
-                        <a aria-label="Previous" aria-hidden="true" class="page-link" href="#patches">
-                            &#8249;
-                        </a>
+        <li class="page-item disabled">
+            <a aria-label="Previous" aria-hidden="true" class="page-link" href="#patches">
+                &#8249;
+            </a>
             {% endif %}
-                    </li>
+        </li>
 
             {% for item in page_obj.paginator.page_range %}
-                    <li class="page-item{% if page_obj.number == item %} active" aria-current="page{% endif %}">
-                        <a aria-label="Page #{{ item }}" class="page-link" href="?page={{ item }}#patches">
-                            {{ item }}
-                        </a>
-                    </li>
+        <li class="page-item{% if page_obj.number == item %} active" aria-current="page{% endif %}">
+            <a aria-label="Page #{{ item }}" class="page-link" href="?page={{ item }}#patches">
+                {{ item }}
+            </a>
+        </li>
             {% endfor %}
 
             {% if page_obj.has_next %}
-                    <li class="page-item">
-                        <a aria-label="Next" class="page-link" href="?page={{ page_obj.next_page_number }}#patches">
-                            &#8250;
-                        </a>
+        <li class="page-item">
+            <a aria-label="Next" class="page-link" href="?page={{ page_obj.next_page_number }}#patches">
+                &#8250;
+            </a>
             {% else %}
-                    <li class="page-item disabled">
-                        <a aria-label="Next" aria-hidden="true" class="page-link" href="#patches">
-                            &#8250;
-                        </a>
+        <li class="page-item disabled">
+            <a aria-label="Next" aria-hidden="true" class="page-link" href="#patches">
+                &#8250;
+            </a>
             {% endif %}
-                    </li>
+        </li>
 
             {% if page_obj.number != page_obj.paginator.num_pages %}
-                    <li class="page-item">
-                        <a aria-label="Last" class="page-link" href="?page={{ page_obj.paginator.num_pages }}#patches">
-                            &raquo;
-                        </a>
+        <li class="page-item">
+            <a aria-label="Last" class="page-link" href="?page={{ page_obj.paginator.num_pages }}#patches">
+                &raquo;
+            </a>
             {% else %}
-                    <li class="page-item disabled">
-                        <a aria-label="Last" aria-hidden="true" class="page-link" href="#patches">
-                            &raquo;
-                        </a>
+        <li class="page-item disabled">
+            <a aria-label="Last" aria-hidden="true" class="page-link" href="#patches">
+                &raquo;
+            </a>
             {% endif %}
-                    </li>
-
-                </ul>
-            </nav>
-        </div>
-    </div>
-</div>
+        </li>
+    </ul>
+</nav>
         {% endif %}
     {% else %}
 <p class="lead">

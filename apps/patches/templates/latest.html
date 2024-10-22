@@ -13,20 +13,18 @@
     </li>
 {% endblock breadcrumbs %}
 {% block content %}
-<div class="p-3">
-    <div class="card">
-        <div class="card-body">
-            <div class="embed-responsive object-fit-scale border rounded">
-                <object data="{{ patches.0.get_absolute_url }}" type="application/pdf" style="height: 80vh; width: 100%"></object>
-            </div>
+<div class="card">
+    <div class="card-body">
+        <div class="embed-responsive object-fit-scale border rounded">
+            <object data="{{ patches.0.get_absolute_url }}" type="application/pdf" style="height: 80vh; width: 100%"></object>
         </div>
-        <div class="card-footer">
-            <span class="blockquote-footer">
-                <a href="{{ patches.0.get_absolute_url }}" target="_blank" title="Open: {{ patches.0.patch_file.name }}">
-                    {{ patches.0.patch_file.name }}
-                </a>
-            </span>
-        </div>
+    </div>
+    <div class="card-footer">
+        <span class="blockquote-footer">
+            <a href="{{ patches.0.get_absolute_url }}" target="_blank" title="Open: {{ patches.0.patch_file.name }}">
+                {{ patches.0.patch_file.name }}
+            </a>
+        </span>
     </div>
 </div>
 {% endblock content %}

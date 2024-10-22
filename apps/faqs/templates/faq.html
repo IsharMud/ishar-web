@@ -12,21 +12,19 @@
 {% endblock breadcrumbs %}
 {% block scripts %}let focusTo = 'faq'{% endblock scripts %}
 {% block content %}
-<div class="p-3">
-    <div class="alert alert-dark alert-dismissible fade show" role="alert" id="faq-alert">
-        <p class="lead">
-            Here are a few common questions that are asked about {{ WEBSITE_TITLE }}.
-        </p>
+<div class="alert alert-dark alert-dismissible fade show" role="alert" id="faq-alert">
+    <p class="lead">
+        Here are a few common questions that are asked about {{ WEBSITE_TITLE }}.
+    </p>
     {% if request.user.is_anonymous %}
-        <p class="lead">
-            You may also want to visit the
-            <a href="{% url 'help_page' help_topic='MUD Basics' %}#topic" title="Help: MUD Basics">MUD Basics help page</a>,
-            our <a href="{% url 'start' %}#start" title="Get Started">getting started guide</a>, and
-            <a href="{% url 'discord' %}" target="_blank" title="{{ WEBSITE_TITLE }} Discord">join us on Discord</a>!
-        </p>
+    <p class="lead">
+        You may also want to visit the
+        <a href="{% url 'help_page' help_topic='MUD Basics' %}#topic" title="Help: MUD Basics">MUD Basics help page</a>,
+        our <a href="{% url 'start' %}#start" title="Get Started">getting started guide</a>, and
+        <a href="{% url 'discord' %}" target="_blank" title="{{ WEBSITE_TITLE }} Discord">join us on Discord</a>!
+    </p>
     {% endif %}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
 {% if faqs %}
     {% for faq in faqs %}
@@ -47,16 +45,14 @@
     <i>No questions were found.</i>
 </p>
 {% endif %}
-<div class="p-3">
-    <div class="alert alert-dark alert-dismissible fade show" role="alert" id="faq-footer-alert">
-        <p class="lead">
-            If there is anything that you think is missing, please feel free to reach out, by e-mailing
-            <a class="code font-monospace" href="mailto:{{ ADMIN_EMAIL }}" target="_blank" style="" title="E-mail: {{ ADMIN_EMAIL }}">
-                {{ ADMIN_EMAIL }}
-                <i class="bi bi-envelope-at"></i>
-            </a>.
-        </p>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
+<div class="alert alert-dark alert-dismissible fade show" role="alert" id="faq-footer-alert">
+    <p class="lead">
+        If there is anything that you think is missing, please feel free to reach out, by e-mailing
+        <a class="code font-monospace" href="mailto:{{ ADMIN_EMAIL }}" target="_blank" style="" title="E-mail: {{ ADMIN_EMAIL }}">
+            {{ ADMIN_EMAIL }}
+            <i class="bi bi-envelope-at"></i>
+        </a>.
+    </p>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
 {% endblock content %}
