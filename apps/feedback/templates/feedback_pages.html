@@ -1,7 +1,7 @@
 <div class="card-group">
 
 {% if submission_types %}
-    <div class="bg-black border-0 card col">
+    <div class="bg-black border-0 card">
         <div class="card-body">
             <ul class="list-group list-group-horizontal">
                 <li class="list-group-item bg-black card-text" title="All" id="all">
@@ -28,7 +28,7 @@
 {% endif %}
 
 {% if page_obj and page_obj.paginator.num_pages > 1 %}
-    <div class="border-0 card col bg-black">
+    <div class="bg-black border-0 card">
         <div class="card-body">
             <nav aria-label="Feedback submission pages navigation">
                     <ul class="pagination">

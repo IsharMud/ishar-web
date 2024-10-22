@@ -213,7 +213,7 @@
                                 </li>
 
                                 <li class="nav-item" title="Log out">
-                                    <form action="{% url 'logout' %}" method="post">
+                                    <form action="{% url 'logout' %}#messages" method="post">
                                         {% csrf_token %}
                                         <button class="bg-black bi bi-door-closed nav-link dropdown-item" type="submit">
                                             Log Out ({{ request.user.get_username }})
@@ -261,25 +261,27 @@
 
 {% block messages %}
     {% if messages %}
+            <div id="messages">
         {% for message in messages %}
-            <div class="p-3 m-3 rounded border-ishar alert alert-dark bg-black alert-dismissible fade show" role="alert">
-                <p class="fw-bold lead message-{{ message.tags }}">
-                    {{ message }}
-                </p>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
+                <div class="m-2 p-3 rounded border-ishar alert alert-dark bg-black alert-dismissible fade show" role="alert">
+                    <p class="fw-bold lead message-{{ message.tags }}">
+                        {{ message }}
+                    </p>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
         {% endfor %}
+            </div>
     {% endif %}
 {% endblock messages %}
 
-            <div class="bg-black rounded border-ishar p-3">
+            <div class="bg-black rounded border-ishar p-2 my-2">
 {% block content %}
 {% endblock content %}
             </div>
             <script src="{% static 'js/alertRefocus.js' %}"></script>
 {% block player_search_form %}
         {% if user and user.is_authenticated and PLAYER_SEARCH_FORM %}
-            <div class="bg-black rounded border-ishar m-1 p-3">
+            <div class="bg-black rounded border-ishar p-3 my-2">
                 {% include "search_form.html" %}
             </div>
         {% endif %}
@@ -307,7 +309,7 @@
 
         <footer class="container-fluid px-2 text-center">
 
-            <div class="row border-ishar bg-black rounded align-items-center m-1 p-2">
+            <div class="row border-ishar bg-black rounded align-items-center m-1 p-3">
 
                 <div class="col">
                     <a class="bi bi-envelope-at" href="mailto:{{ ADMIN_EMAIL }}" target="_blank" title="E-mail Us! ({{ ADMIN_EMAIL }})">
