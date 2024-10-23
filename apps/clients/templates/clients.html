@@ -18,39 +18,41 @@
         <a href="{% url 'connect' %}" target="_blank" title="Mudslinger">the Mudslinger web client</a>,
         you might prefer to connect to the game with software designed specifically to help you play a MUD.
     </p>
-    <p class="lead">
-        Here are some of the MUD clients that we have heard good things about:
-    </p>
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
-{% for category in mud_client_categories %}
-<details open>
-    <summary id="category-{{ category.name | slugify }}" class="h3 text-ishar" title="{{ category.name }}">
-        <a class="anchor-link" href="#category-{{ category.name | slugify }}" aria-label="Link to this section: MUD Client Category {{ category.name }} ({{ category.name | slugify }})">&#x23;</a>
-        {{ category.name }}
-    </summary>
-   <ul class="border-0 border-secondary bg-black list-group list-group-dark">
-    {% for client in category.clients.all %}
-        {% if client.is_visible %}
-        <li class="border-0 bg-black list-group-item list-item-group-dark">
-        <span class="bi bi-dot text-ishar"></span>
-            <a class="list-group-item-text" href="{{ client.url }}" id="client-{{ client.name | slugify }}" target="_blank" title="{{ client.name }}">
-                {{ client.name }}
+
+<div class="container-fluid d-sm-flex">
+    {% for category in mud_client_categories %}
+    <details class="d-sm-flex px-3" open>
+        <summary id="category-{{ category.name | slugify }}" class="h4 text-ishar" title="{{ category.name }}">
+            <a class="anchor-link" href="#category-{{ category.name | slugify }}" aria-label="Link to this section: MUD Client Category {{ category.name }} ({{ category.name | slugify }})">
+                &#x23;
             </a>
-        </li>
-        {% endif %}
+            {{ category.name }}
+        </summary>
+        <ul class="border-0 border-secondary bg-black list-group list-group-dark">
+        {% for client in category.clients.all %}
+            {% if client.is_visible %}
+            <li class="bi bi-dot border-0 bg-black list-group-item list-item-group-dark">
+                <a class="list-group-item-text" href="{{ client.url }}" id="client-{{ client.name | slugify }}" target="_blank" title="{{ client.name }}">
+                    {{ client.name }}
+                </a>
+            </li>
+            {% endif %}
+        {% endfor %}
+        </ul>
+    </details>
     {% endfor %}
-    </ul>
-</details>
-{% endfor %}
+</div>
+
 <div class="alert alert-dark alert-dismissible fade show" role="alert" id="clients-footer-alert">
     <p class="lead">
         Do not be afraid to try a few, as they all have different strengths and weaknesses.
         After you download a client, tell it to connect to <code>isharmud.com</code> on
         port number <code>23</code> or <code>9999</code> to join the game.
-    </p>
-    <p class="lead">
-        Please check out our <a href="{% url 'start' %}#start" title="getting started guide">getting started guide</a> as well!
+        Please check out our
+        <a href="{% url 'start' %}#start" title="getting started guide">getting started guide</a>
+        as well!
     </p>
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
