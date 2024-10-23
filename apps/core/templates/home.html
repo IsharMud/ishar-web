@@ -14,12 +14,12 @@
         <div class="m-1 p-1">
             {% autoescape off %}{{ news.body }}{% endautoescape %}
         </div>
-        <div class="d-flex justify-content-end">
+        <p class="d-flex justify-content-end">
             <a class="btn btn-ishar" href="{% url 'news' %}?page=2#news">
                 <i class="bi bi-newspaper text-ishar"></i>
                 Past News
             </a>
-        </div>
+        </p>
         <footer class="blockquote-footer" title="{{ news.created | date:"l, F jS, Y" }}">
             <cite>
                 {{ news.account.get_username | title }}
