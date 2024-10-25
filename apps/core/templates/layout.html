@@ -72,6 +72,17 @@
                             </a>
                         </li>
 
+                        <li class="nav-item" title="Events ({{ GLOBAL_EVENT_COUNT }})">
+                            <a class="bg-black bi bi-calendar-event nav-link dropdown-item" href="{% url 'events' %}#events">
+                                Events
+{% if GLOBAL_EVENT_COUNT > 0 %}
+                                <span class="badge bg-dark rounded-pill border border-secondary">
+                                    {{ GLOBAL_EVENT_COUNT }}
+                                </span>
+{% endif %}
+                            </a>
+                        </li>
+
                         <li class="nav-item" title="Frequently Asked Questions">
                             <a class="bi-question-circle nav-link" href="{% url 'faq' %}#faq">
                                 FAQs
