@@ -1,11 +1,11 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils.timezone import now
 from django.views.generic.list import ListView
 
 from .models import GlobalEvent
+from apps.core.views.mixins import NeverCacheMixin
 
 
-class GlobalEventsView(LoginRequiredMixin, ListView):
+class GlobalEventsView(NeverCacheMixin, ListView):
     """Global events view."""
 
     context_object_name = "global_events"

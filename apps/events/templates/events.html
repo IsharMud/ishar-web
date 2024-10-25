@@ -26,37 +26,53 @@
     {% if global_events and GLOBAL_EVENT_COUNT > 0 %}
         {% for global_event in global_events %}
 <details open>
-    <summary class="h3 text-ishar" title="{{ global_event.event_desc }}">
-        {{ global_event.event_desc }}
+    <summary title="{{ global_event.event_desc }}">
+        <h4 class="d-inline-flex">{{ global_event.event_desc }}</h4>
     </summary>
-    <p>
-        <strong>Ends</strong>:
-        {{ global_event.end_time }}
-        ({{ global_event.end_time | naturaltime }})
-    </p>
-    <p title="Started: {{ global_event.start_time }} ({{ global_event.start_time | naturaltime }})">
-        <strong>Started</strong>:
-        {{ global_event.start_time }}
-        ({{ global_event.start_time | naturaltime }})
-    </p>
+    <ul style="list-style: none">
+        <li title="Ends">
+            <h5>Ends</h5>
+        </li>
+        <li class="blockquote" title="{{ global_event.end_time | naturaltime }}">
+            {{ global_event.end_time | naturaltime }}
+        </li>
+        <li class="blockquote-footer" title="{{ global_event.end_time|date:"l, F jS, Y" }}">
+            {{ global_event.end_time|date:"l, F jS, Y" }}
+        </li>
     {% if global_event.xp_bonus and global_event.xp_bonus != '' and global_event.xp_bonus != 0 %}
-    <p>
-        <strong>XP Bonus</strong>:
-        {% widthratio global_event.xp_bonus 1 1 %}%
-    </P>
+        <li title="XP Bonus: {% widthratio global_event.xp_bonus 1 1 %}%">
+            <h5>XP Bonus</h5>
+        </li>
+        <li class="m-3">
+            {% widthratio global_event.xp_bonus 1 1 %}%
+        </li>
     {% endif %}
     {% if global_event.shop_bonus and global_event.shop_bonus != '' and global_event.shop_bonus != 0 %}
-    <p>
-        <strong>Shop Bonus</strong>:
-        {% widthratio 100 global_event.shop_bonus 1 %}% off
-    </p>
+        <li title="Shop Bonus: {% widthratio 100 global_event.shop_bonus 1 %}% off">
+            <h5>Shop Bonus</h5>
+        </li>
+        <li class="m-3">
+            {% widthratio 100 global_event.shop_bonus 1 %}% off
+        </li>
     {% endif %}
     {% if global_event.is_luck %}
-    <p>
-        <strong>Shavar and Chenchir shine brightly</strong>:
-        +50 gold &amp; +25% moves!
-    </p>
+        <li title="Shavar and Chenchir shine brightly: +50 gold &amp; +25% moves!">
+            <h6>Shavar and Chenchir shine brightly</h6>
+        </li>
+        <li class="m-3">
+            +50 gold &amp; +25% moves!
+        </li>
     {% endif %}
+        <li title="Started">
+            <h5>Started</h5>
+        </li>
+        <li class="blockquote" title="{{ global_event.start_time | naturaltime }}">
+            {{ global_event.start_time | naturaltime }}
+        </li>
+        <li class="blockquote-footer" title="{{ global_event.start_time|date:"l, F jS, Y" }}">
+            {{ global_event.start_time|date:"l, F jS, Y" }}
+        </li>
+    </ul>
 </details>
         {% endfor %}
     {% else %}
