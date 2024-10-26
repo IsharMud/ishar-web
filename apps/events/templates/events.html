@@ -34,11 +34,12 @@
     <ul style="list-style: none">
 
         <li title="Ends">
+            <i class="bi bi-hourglass-split text-secondary"></i>
             <h5 class="d-inline-flex">
                 Ends
             </h5>
         </li>
-        <li class="bi bi-hourglass-split blockquote" title="{{ global_event.end_time | naturaltime }}">
+        <li class="blockquote" title="{{ global_event.end_time | naturaltime }}">
             {{ global_event.end_time | naturaltime }}
         </li>
         <li class="blockquote-footer" title="{{ global_event.end_time|date:"l, F jS, Y" }}">
@@ -46,11 +47,12 @@
         </li>
 
         <li title="Started">
+            <i class="bi bi-clock-history text-secondary"></i>
             <h5 class="d-inline-flex">
                 Started
             </h5>
         </li>
-        <li class="bi bi-clock-history blockquote" title="{{ global_event.start_time | naturaltime }}">
+        <li class="blockquote" title="{{ global_event.start_time | naturaltime }}">
             {{ global_event.start_time | naturaltime }}
         </li>
         <li class="blockquote-footer" title="{{ global_event.start_time|date:"l, F jS, Y" }}">
@@ -59,7 +61,7 @@
 
     {% if global_event.xp_bonus and global_event.xp_bonus != '' and global_event.xp_bonus != 0 %}
         <li title="XP Bonus: {% widthratio global_event.xp_bonus 1 1 %}%">
-            <i class="bi bi-fast-forward"></i>
+            <i class="bi bi-fast-forward text-secondary"></i>
             <h5 class="d-inline-flex">
                 XP Bonus
             </h5>
@@ -71,7 +73,7 @@
 
     {% if global_event.shop_bonus and global_event.shop_bonus != '' and global_event.shop_bonus != 0 %}
         <li title="Shop Bonus: {% widthratio 100 global_event.shop_bonus 1 %}% off">
-            <i class="bi bi-cart-plus"></i>
+            <i class="bi bi-cart-plus text-secondary"></i>
             <h5 class="d-inline-flex">
                 Shop Bonus
             </h5>
@@ -83,7 +85,7 @@
 
     {% if global_event.is_luck %}
         <li title="Shavar and Chenchir shine brightly: +50 gold &amp; +25% moves!">
-            <i class="bi bi-currency-exchange"></i>
+            <i class="bi bi-currency-exchange text-secondary"></i>
             <h5 class="d-inline-flex">
                 Shavar and Chenchir shine brightly
             </h5>
