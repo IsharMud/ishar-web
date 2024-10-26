@@ -1,14 +1,154 @@
-42d41
-<     is_private = models.IntegerField(blank=True, null=True)
-43a43
->     is_private = models.IntegerField(blank=True, null=True)
-591d590
-<         unique_together = (('player', 'kill_memory_set'),)
-701c700
+101c101
+<     grants_memory = models.ForeignKey('Objects', models.DO_NOTHING, db_column='grants_memory', blank=True, null=True)
+---
+>     grants_memory = models.PositiveIntegerField(blank=True, null=True)
+161,162c161,162
+<     achievement = models.ForeignKey('Achievements', models.DO_NOTHING, blank=True, null=True)
+<     class_field = models.ForeignKey('Classes', models.DO_NOTHING, db_column='class_id', blank=True, null=True)  # Field renamed because it was a Python reserved word.
+---
+>     achievement_id = models.IntegerField(blank=True, null=True)
+>     class_id = models.PositiveIntegerField(blank=True, null=True)
+171c171
+<     achievement = models.ForeignKey('Achievements', models.DO_NOTHING, blank=True, null=True)
+---
+>     achievement_id = models.IntegerField(blank=True, null=True)
+184c184
+<     achievement = models.ForeignKey('Achievements', models.DO_NOTHING, blank=True, null=True)
+---
+>     achievement_id = models.IntegerField(blank=True, null=True)
+359c359
+<     mob_vnum = models.ForeignKey('MobData', models.DO_NOTHING, db_column='mob_vnum')
+---
+>     mob_vnum = models.PositiveIntegerField()
+381c381
+<     class_field = models.ForeignKey('Classes', models.DO_NOTHING, db_column='class_id')  # Field renamed because it was a Python reserved word.
+---
+>     class_id = models.PositiveIntegerField()
+391,392c391,392
+<     class_field = models.ForeignKey('Classes', models.DO_NOTHING, db_column='class_id')  # Field renamed because it was a Python reserved word.
+<     skill = models.ForeignKey('Skills', models.DO_NOTHING)
+---
+>     class_id = models.PositiveIntegerField()
+>     skill_id = models.IntegerField()
+396c396
+<     require_renown_upgrade = models.ForeignKey('RemortUpgrades', models.DO_NOTHING, db_column='require_renown_upgrade', blank=True, null=True)
+---
+>     require_renown_upgrade = models.PositiveIntegerField(blank=True, null=True)
+433,434c433,434
+<     race = models.ForeignKey('Races', models.DO_NOTHING)
+<     class_field = models.ForeignKey(Classes, models.DO_NOTHING, db_column='class_id')  # Field renamed because it was a Python reserved word.
+---
+>     race_id = models.IntegerField()
+>     class_id = models.PositiveIntegerField()
+647,648c647,648
+<     mob = models.ForeignKey('MobData', models.DO_NOTHING, blank=True, null=True)
+<     flag = models.ForeignKey(AffectFlags, models.DO_NOTHING, blank=True, null=True)
+---
+>     mob_id = models.PositiveIntegerField(blank=True, null=True)
+>     flag_id = models.PositiveIntegerField(blank=True, null=True)
+654c654
+<         unique_together = (('mob', 'flag'),)
+---
+>         unique_together = (('mob_id', 'flag_id'),)
+678,679c678,679
+<     race = models.ForeignKey('Races', models.DO_NOTHING, blank=True, null=True)
+<     class_field = models.ForeignKey(Classes, models.DO_NOTHING, db_column='class_id', blank=True, null=True)  # Field renamed because it was a Python reserved word.
+---
+>     race_id = models.IntegerField(blank=True, null=True)
+>     class_id = models.PositiveIntegerField(blank=True, null=True)
+720c720
+<     mob = models.ForeignKey(MobData, models.DO_NOTHING, blank=True, null=True)
+---
+>     mob_id = models.PositiveIntegerField(blank=True, null=True)
+727c727
+<         unique_together = (('mob', 'extra_name'),)
+---
+>         unique_together = (('mob_id', 'extra_name'),)
+731,732c731,732
+<     mob = models.ForeignKey(MobData, models.DO_NOTHING, blank=True, null=True)
+<     flag = models.ForeignKey('PlayerFlags', models.DO_NOTHING, blank=True, null=True)
+---
+>     mob_id = models.PositiveIntegerField(blank=True, null=True)
+>     flag_id = models.PositiveIntegerField(blank=True, null=True)
+738c738
+<         unique_together = (('mob', 'flag'),)
+---
+>         unique_together = (('mob_id', 'flag_id'),)
+742c742
 <     mob_stats_id = models.PositiveIntegerField(primary_key=True)
 ---
 >     mob_stats_id = models.AutoField(primary_key=True)
-1027d1025
-<         unique_together = (('player', 'challenge'),)
-1203d1200
-<         unique_together = (('player', 'obj_vnum'),)
+1275c1275
+<     player = models.ForeignKey('Players', models.DO_NOTHING, blank=True, null=True)
+---
+>     player = models.OneToOneField('Players', models.DO_NOTHING, blank=True, null=True)
+1342,1343c1342,1343
+<     quest = models.ForeignKey('Quests', models.DO_NOTHING)
+<     required_quest = models.ForeignKey('Quests', models.DO_NOTHING, db_column='required_quest', related_name='questprereqs_required_quest_set')
+---
+>     quest_id = models.PositiveIntegerField()
+>     required_quest = models.PositiveIntegerField()
+1349c1349
+<         unique_together = (('quest', 'required_quest'),)
+---
+>         unique_together = (('quest_id', 'required_quest'),)
+1355c1355
+<     quest = models.ForeignKey('Quests', models.DO_NOTHING)
+---
+>     quest_id = models.PositiveIntegerField()
+1369c1369
+<     quest = models.ForeignKey('Quests', models.DO_NOTHING)
+---
+>     quest_id = models.PositiveIntegerField()
+1451,1452c1451,1452
+<     race = models.ForeignKey(Races, models.DO_NOTHING)
+<     skill = models.ForeignKey('Skills', models.DO_NOTHING)
+---
+>     race_id = models.IntegerField()
+>     skill_id = models.IntegerField()
+1462,1463c1462,1463
+<     race = models.ForeignKey(Races, models.DO_NOTHING)
+<     force = models.ForeignKey(Forces, models.DO_NOTHING)
+---
+>     race_id = models.IntegerField()
+>     force_id = models.IntegerField()
+1473c1473
+<     race = models.ForeignKey(Races, models.DO_NOTHING)
+---
+>     race_id = models.IntegerField()
+1479c1479
+<     class_restrict = models.ForeignKey(Classes, models.DO_NOTHING, db_column='class_restrict', blank=True, null=True)
+---
+>     class_restrict = models.PositiveIntegerField(blank=True, null=True)
+1497c1497
+<     reward_skill = models.ForeignKey('Skills', models.DO_NOTHING, db_column='reward_skill', blank=True, null=True)
+---
+>     reward_skill = models.IntegerField(blank=True, null=True)
+1533c1533
+<     enigma = models.ForeignKey(SeasonalEnigma, models.DO_NOTHING, blank=True, null=True)
+---
+>     enigma_id = models.PositiveIntegerField(blank=True, null=True)
+1542c1542
+<     skill = models.ForeignKey('Skills', models.DO_NOTHING)
+---
+>     skill_id = models.IntegerField()
+1553,1554c1553,1554
+<     skill = models.ForeignKey('Skills', models.DO_NOTHING)
+<     force = models.ForeignKey(Forces, models.DO_NOTHING)
+---
+>     skill_id = models.IntegerField()
+>     force_id = models.IntegerField()
+1559c1559
+<         unique_together = (('skill', 'force'),)
+---
+>         unique_together = (('skill_id', 'force_id'),)
+1592c1592
+<     parent_skill = models.ForeignKey('self', models.DO_NOTHING, db_column='parent_skill')
+---
+>     parent_skill = models.IntegerField()
+1608,1609c1608,1609
+<     skill = models.ForeignKey(Skills, models.DO_NOTHING)
+<     flag = models.ForeignKey('SpellFlags', models.DO_NOTHING)
+---
+>     skill_id = models.IntegerField()
+>     flag_id = models.PositiveIntegerField()

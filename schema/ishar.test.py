@@ -39,15 +39,28 @@ class AccountBackup(models.Model):
     banned_until = models.DateTimeField(blank=True, null=True)
     bugs_reported = models.IntegerField()
     earned_essence = models.IntegerField()
-    immortal_level = models.SmallIntegerField(blank=True, null=True)
     is_private = models.IntegerField(blank=True, null=True)
+    immortal_level = models.SmallIntegerField(blank=True, null=True)
     comm = models.IntegerField(blank=True, null=True)
     achievement_points = models.PositiveIntegerField(blank=True, null=True)
     beta_tester = models.IntegerField(blank=True, null=True)
+    free_refresh = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = 'account_backup'
+
+
+class AccountFatedSkills(models.Model):
+    account_fated_id = models.AutoField(primary_key=True)
+    account = models.ForeignKey('Accounts', models.DO_NOTHING, blank=True, null=True)
+    skill = models.ForeignKey('Skills', models.DO_NOTHING, blank=True, null=True)
+    skill_level = models.PositiveIntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'account_fated_skills'
+        unique_together = (('account', 'skill'),)
 
 
 class AccountSoulboundItems(models.Model):
@@ -85,7 +98,7 @@ class AccountUpgrades(models.Model):
     is_disabled = models.IntegerField()
     increment = models.IntegerField()
     amount = models.IntegerField()
-    grants_memory = models.ForeignKey('Objects', models.DO_NOTHING, db_column='grants_memory', blank=True, null=True)
+    grants_memory = models.PositiveIntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -145,8 +158,8 @@ class AccountsConfigurationOptions(models.Model):
 
 class AchievementClassRestrict(models.Model):
     acr_id = models.AutoField(primary_key=True)
-    achievement = models.ForeignKey('Achievements', models.DO_NOTHING, blank=True, null=True)
-    class_field = models.ForeignKey('Classes', models.DO_NOTHING, db_column='class_id', blank=True, null=True)  # Field renamed because it was a Python reserved word.
+    achievement_id = models.IntegerField(blank=True, null=True)
+    class_id = models.PositiveIntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -155,7 +168,7 @@ class AchievementClassRestrict(models.Model):
 
 class AchievementCriteria(models.Model):
     criteria_id = models.AutoField(primary_key=True)
-    achievement = models.ForeignKey('Achievements', models.DO_NOTHING, blank=True, null=True)
+    achievement_id = models.IntegerField(blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     criteria_type = models.CharField(max_length=32, blank=True, null=True)
     target_value = models.CharField(max_length=10, blank=True, null=True)
@@ -168,7 +181,7 @@ class AchievementCriteria(models.Model):
 
 class AchievementRewards(models.Model):
     reward_id = models.AutoField(primary_key=True)
-    achievement = models.ForeignKey('Achievements', models.DO_NOTHING, blank=True, null=True)
+    achievement_id = models.IntegerField(blank=True, null=True)
     reward_type = models.PositiveIntegerField(blank=True, null=True)
     reward_value = models.IntegerField(blank=True, null=True)
 
@@ -343,7 +356,7 @@ class Boards(models.Model):
 
 class Challenges(models.Model):
     challenge_id = models.SmallAutoField(primary_key=True)
-    mob_vnum = models.ForeignKey('MobData', models.DO_NOTHING, db_column='mob_vnum')
+    mob_vnum = models.PositiveIntegerField()
     max_level = models.IntegerField()
     max_people = models.IntegerField()
     chall_tier = models.IntegerField()
@@ -365,7 +378,7 @@ class ClassLevels(models.Model):
     level = models.IntegerField()
     male_title = models.CharField(max_length=80)
     female_title = models.CharField(max_length=80)
-    class_field = models.ForeignKey('Classes', models.DO_NOTHING, db_column='class_id')  # Field renamed because it was a Python reserved word.
+    class_id = models.PositiveIntegerField()
     experience = models.IntegerField()
 
     class Meta:
@@ -375,11 +388,13 @@ class ClassLevels(models.Model):
 
 class ClassSkills(models.Model):
     class_skills_id = models.AutoField(primary_key=True)
-    class_field = models.ForeignKey('Classes', models.DO_NOTHING, db_column='class_id')  # Field renamed because it was a Python reserved word.
-    skill = models.ForeignKey('Skills', models.DO_NOTHING)
+    class_id = models.PositiveIntegerField()
+    skill_id = models.IntegerField()
     min_level = models.IntegerField()
     max_learn = models.IntegerField()
     auto_learn = models.IntegerField(blank=True, null=True)
+    require_renown_upgrade = models.PositiveIntegerField(blank=True, null=True)
+    level_scale = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -415,8 +430,8 @@ class Classes(models.Model):
 
 class ClassesRaces(models.Model):
     classes_races_id = models.AutoField(primary_key=True)
-    race = models.ForeignKey('Races', models.DO_NOTHING)
-    class_field = models.ForeignKey(Classes, models.DO_NOTHING, db_column='class_id')  # Field renamed because it was a Python reserved word.
+    race_id = models.IntegerField()
+    class_id = models.PositiveIntegerField()
 
     class Meta:
         managed = False
@@ -535,6 +550,32 @@ class Faqs(models.Model):
         db_table = 'faqs'
 
 
+class Feedback(models.Model):
+    submission_id = models.AutoField(primary_key=True)
+    submission_type = models.IntegerField()
+    subject = models.CharField(max_length=64)
+    body_text = models.TextField()
+    submitted = models.DateTimeField()
+    account = models.ForeignKey(Accounts, models.DO_NOTHING)
+
+    class Meta:
+        managed = False
+        db_table = 'feedback'
+
+
+class FeedbackVotes(models.Model):
+    vote_id = models.AutoField(primary_key=True)
+    vote_value = models.IntegerField()
+    voted = models.DateTimeField()
+    account = models.ForeignKey(Accounts, models.DO_NOTHING)
+    submission = models.ForeignKey(Feedback, models.DO_NOTHING)
+
+    class Meta:
+        managed = False
+        db_table = 'feedback_votes'
+        unique_together = (('account', 'submission'), ('account', 'submission'),)
+
+
 class Forces(models.Model):
     force_name = models.CharField(unique=True, max_length=255, blank=True, null=True)
 
@@ -588,6 +629,7 @@ class KillMemory(models.Model):
     class Meta:
         managed = False
         db_table = 'kill_memory'
+        unique_together = (('player', 'kill_memory_set'),)
 
 
 class KillMemoryBuckets(models.Model):
@@ -602,14 +644,14 @@ class KillMemoryBuckets(models.Model):
 
 
 class MobAffectFlags(models.Model):
-    mob = models.ForeignKey('MobData', models.DO_NOTHING, blank=True, null=True)
-    flag = models.ForeignKey(AffectFlags, models.DO_NOTHING, blank=True, null=True)
+    mob_id = models.PositiveIntegerField(blank=True, null=True)
+    flag_id = models.PositiveIntegerField(blank=True, null=True)
     value = models.IntegerField()
 
     class Meta:
         managed = False
         db_table = 'mob_affect_flags'
-        unique_together = (('mob', 'flag'),)
+        unique_together = (('mob_id', 'flag_id'),)
 
 
 class MobData(models.Model):
@@ -633,8 +675,8 @@ class MobData(models.Model):
     armor = models.IntegerField(blank=True, null=True)
     attack = models.IntegerField(blank=True, null=True)
     sex = models.PositiveIntegerField(blank=True, null=True)
-    race = models.ForeignKey('Races', models.DO_NOTHING, blank=True, null=True)
-    class_field = models.ForeignKey(Classes, models.DO_NOTHING, db_column='class_id', blank=True, null=True)  # Field renamed because it was a Python reserved word.
+    race_id = models.IntegerField(blank=True, null=True)
+    class_id = models.PositiveIntegerField(blank=True, null=True)
     level = models.PositiveIntegerField(blank=True, null=True)
     weight = models.PositiveSmallIntegerField()
     height = models.PositiveSmallIntegerField()
@@ -675,25 +717,25 @@ class MobData(models.Model):
 
 
 class MobExtraDescriptions(models.Model):
-    mob = models.ForeignKey(MobData, models.DO_NOTHING, blank=True, null=True)
+    mob_id = models.PositiveIntegerField(blank=True, null=True)
     extra_name = models.CharField(max_length=100, blank=True, null=True)
     extra_description = models.CharField(max_length=1000, blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = 'mob_extra_descriptions'
-        unique_together = (('mob', 'extra_name'),)
+        unique_together = (('mob_id', 'extra_name'),)
 
 
 class MobPlayerFlags(models.Model):
-    mob = models.ForeignKey(MobData, models.DO_NOTHING, blank=True, null=True)
-    flag = models.ForeignKey('PlayerFlags', models.DO_NOTHING, blank=True, null=True)
+    mob_id = models.PositiveIntegerField(blank=True, null=True)
+    flag_id = models.PositiveIntegerField(blank=True, null=True)
     value = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = 'mob_player_flags'
-        unique_together = (('mob', 'flag'),)
+        unique_together = (('mob_id', 'flag_id'),)
 
 
 class MobStats(models.Model):
@@ -720,6 +762,7 @@ class MudClientCategories(models.Model):
     name = models.CharField(max_length=64)
     is_visible = models.IntegerField()
     display_order = models.PositiveIntegerField(unique=True)
+    display_icon = models.CharField(max_length=64, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -1023,6 +1066,7 @@ class PlayerChallenges(models.Model):
     class Meta:
         managed = False
         db_table = 'player_challenges'
+        unique_together = (('player', 'challenge'),)
 
 
 class PlayerCommon(models.Model):
@@ -1138,9 +1182,9 @@ class PlayerObjects(models.Model):
     player_objects_id = models.AutoField(primary_key=True)
     player = models.ForeignKey('Players', models.DO_NOTHING, blank=True, null=True)
     object = models.ForeignKey(Objects, models.DO_NOTHING, blank=True, null=True)
-    enchant = models.PositiveIntegerField(blank=True, null=True)
+    enchant = models.IntegerField(blank=True, null=True)
     timer = models.IntegerField(blank=True, null=True)
-    bound = models.PositiveIntegerField(blank=True, null=True)
+    bound = models.IntegerField(blank=True, null=True)
     state = models.PositiveIntegerField(blank=True, null=True)
     min_level = models.PositiveIntegerField(blank=True, null=True)
     val0 = models.IntegerField(blank=True, null=True)
@@ -1150,6 +1194,7 @@ class PlayerObjects(models.Model):
     position_type = models.PositiveIntegerField(blank=True, null=True)
     position_val = models.IntegerField(blank=True, null=True)
     parent_player_object = models.PositiveIntegerField(blank=True, null=True)
+    to_be_deleted = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -1198,6 +1243,7 @@ class PlayerRelics(models.Model):
     class Meta:
         managed = False
         db_table = 'player_relics'
+        unique_together = (('player', 'obj_vnum'),)
 
 
 class PlayerRemortUpgrades(models.Model):
@@ -1216,6 +1262,7 @@ class PlayerSkills(models.Model):
     skill = models.OneToOneField('Skills', models.DO_NOTHING, primary_key=True)  # The composite primary key (skill_id, player_id) found, that is not supported. The first column is selected.
     player = models.ForeignKey('Players', models.DO_NOTHING)
     skill_level = models.PositiveIntegerField()
+    fated_skill = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -1236,6 +1283,9 @@ class PlayerStats(models.Model):
     remort_challenges = models.PositiveIntegerField(blank=True, null=True)
     total_quests = models.PositiveIntegerField(blank=True, null=True)
     remort_quests = models.PositiveIntegerField(blank=True, null=True)
+    hardcore_deaths = models.PositiveIntegerField(blank=True, null=True)
+    hardcore_level = models.PositiveIntegerField(blank=True, null=True)
+    hardcore_remorts = models.PositiveIntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -1289,20 +1339,20 @@ class Players(models.Model):
 
 
 class QuestPrereqs(models.Model):
-    quest = models.ForeignKey('Quests', models.DO_NOTHING)
-    required_quest = models.ForeignKey('Quests', models.DO_NOTHING, db_column='required_quest', related_name='questprereqs_required_quest_set')
+    quest_id = models.PositiveIntegerField()
+    required_quest = models.PositiveIntegerField()
     quest_prereqs_id = models.AutoField(unique=True)
 
     class Meta:
         managed = False
         db_table = 'quest_prereqs'
-        unique_together = (('quest', 'required_quest'),)
+        unique_together = (('quest_id', 'required_quest'),)
 
 
 class QuestRewards(models.Model):
     reward_num = models.IntegerField()
     reward_type = models.IntegerField()
-    quest = models.ForeignKey('Quests', models.DO_NOTHING)
+    quest_id = models.PositiveIntegerField()
     class_restrict = models.IntegerField()
     quest_reward_id = models.AutoField(primary_key=True)
 
@@ -1316,7 +1366,7 @@ class QuestSteps(models.Model):
     step_type = models.IntegerField()
     target = models.IntegerField()
     num_required = models.IntegerField()
-    quest = models.ForeignKey('Quests', models.DO_NOTHING)
+    quest_id = models.PositiveIntegerField()
     time_limit = models.IntegerField()
     mystify = models.IntegerField()
     mystify_text = models.CharField(max_length=80)
@@ -1398,8 +1448,8 @@ class Races(models.Model):
 
 class RacesSkills(models.Model):
     race_skill_id = models.AutoField(primary_key=True)
-    race = models.ForeignKey(Races, models.DO_NOTHING)
-    skill = models.ForeignKey('Skills', models.DO_NOTHING)
+    race_id = models.IntegerField()
+    skill_id = models.IntegerField()
     level = models.IntegerField()
 
     class Meta:
@@ -1409,8 +1459,8 @@ class RacesSkills(models.Model):
 
 class RacialAffinities(models.Model):
     race_affinity_id = models.AutoField(primary_key=True)
-    race = models.ForeignKey(Races, models.DO_NOTHING)
-    force = models.ForeignKey(Forces, models.DO_NOTHING)
+    race_id = models.IntegerField()
+    force_id = models.IntegerField()
     affinity_type = models.IntegerField()
 
     class Meta:
@@ -1420,13 +1470,13 @@ class RacialAffinities(models.Model):
 
 class RacialDeathload(models.Model):
     racial_deathload_id = models.AutoField(primary_key=True)
-    race = models.ForeignKey(Races, models.DO_NOTHING)
+    race_id = models.IntegerField()
     vnum = models.IntegerField()
     percent_chance = models.IntegerField()
     min_level = models.IntegerField()
     max_level = models.PositiveSmallIntegerField(blank=True, null=True)
     max_load = models.PositiveIntegerField(blank=True, null=True)
-    class_restrict = models.ForeignKey(Classes, models.DO_NOTHING, db_column='class_restrict', blank=True, null=True)
+    class_restrict = models.PositiveIntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -1444,11 +1494,23 @@ class RemortUpgrades(models.Model):
     bonus = models.IntegerField()
     survival_scale = models.IntegerField()
     survival_renown_cost = models.IntegerField()
-    reward_skill = models.ForeignKey('Skills', models.DO_NOTHING, db_column='reward_skill', blank=True, null=True)
+    reward_skill = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = 'remort_upgrades'
+
+
+class SeasonalEnigma(models.Model):
+    seasonal_enigma_id = models.AutoField(primary_key=True)
+    enigma_name = models.CharField(max_length=100, blank=True, null=True)
+    enigma_welcome = models.CharField(max_length=216, blank=True, null=True)
+    enigma_intro_connect = models.CharField(max_length=2056, blank=True, null=True)
+    enigma_character_select = models.CharField(max_length=2056, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'seasonal_enigma'
 
 
 class Seasons(models.Model):
@@ -1468,6 +1530,7 @@ class Seasons(models.Model):
     total_remorts = models.IntegerField()
     game_state = models.SmallIntegerField(blank=True, null=True)
     multiplay_limit = models.PositiveSmallIntegerField(blank=True, null=True)
+    enigma_id = models.PositiveIntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -1476,7 +1539,7 @@ class Seasons(models.Model):
 
 class SkillComponents(models.Model):
     skill_components_id = models.AutoField(primary_key=True)
-    skill = models.ForeignKey('Skills', models.DO_NOTHING)
+    skill_id = models.IntegerField()
     component_type = models.IntegerField()
     component_value = models.IntegerField()
     component_count = models.SmallIntegerField(blank=True, null=True)
@@ -1487,13 +1550,13 @@ class SkillComponents(models.Model):
 
 
 class SkillForces(models.Model):
-    skill = models.ForeignKey('Skills', models.DO_NOTHING)
-    force = models.ForeignKey(Forces, models.DO_NOTHING)
+    skill_id = models.IntegerField()
+    force_id = models.IntegerField()
 
     class Meta:
         managed = False
         db_table = 'skill_forces'
-        unique_together = (('skill', 'force'),)
+        unique_together = (('skill_id', 'force_id'),)
 
 
 class SkillMods(models.Model):
@@ -1526,7 +1589,7 @@ class Skills(models.Model):
     mod_stat_2 = models.IntegerField(blank=True, null=True)
     decide_func = models.TextField()
     skill_type = models.IntegerField()
-    parent_skill = models.ForeignKey('self', models.DO_NOTHING, db_column='parent_skill')
+    parent_skill = models.IntegerField()
     special_int = models.IntegerField(blank=True, null=True)
     obj_display = models.CharField(max_length=80, blank=True, null=True)
     req_save = models.IntegerField(blank=True, null=True)
@@ -1534,6 +1597,7 @@ class Skills(models.Model):
     cooldown_size = models.PositiveSmallIntegerField(blank=True, null=True)
     ability_calc_func = models.TextField(blank=True, null=True)
     description = models.CharField(max_length=1080, blank=True, null=True)
+    passive_tiers = models.PositiveIntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -1541,8 +1605,8 @@ class Skills(models.Model):
 
 
 class SkillsSpellFlags(models.Model):
-    skill = models.ForeignKey(Skills, models.DO_NOTHING)
-    flag = models.ForeignKey('SpellFlags', models.DO_NOTHING)
+    skill_id = models.IntegerField()
+    flag_id = models.PositiveIntegerField()
 
     class Meta:
         managed = False

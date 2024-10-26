@@ -44,10 +44,23 @@ class AccountBackup(models.Model):
     comm = models.IntegerField(blank=True, null=True)
     achievement_points = models.PositiveIntegerField(blank=True, null=True)
     beta_tester = models.IntegerField(blank=True, null=True)
+    free_refresh = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = 'account_backup'
+
+
+class AccountFatedSkills(models.Model):
+    account_fated_id = models.AutoField(primary_key=True)
+    account = models.ForeignKey('Accounts', models.DO_NOTHING, blank=True, null=True)
+    skill = models.ForeignKey('Skills', models.DO_NOTHING, blank=True, null=True)
+    skill_level = models.PositiveIntegerField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'account_fated_skills'
+        unique_together = (('account', 'skill'),)
 
 
 class AccountSoulboundItems(models.Model):
@@ -380,6 +393,8 @@ class ClassSkills(models.Model):
     min_level = models.IntegerField()
     max_learn = models.IntegerField()
     auto_learn = models.IntegerField(blank=True, null=True)
+    require_renown_upgrade = models.ForeignKey('RemortUpgrades', models.DO_NOTHING, db_column='require_renown_upgrade', blank=True, null=True)
+    level_scale = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -533,6 +548,32 @@ class Faqs(models.Model):
     class Meta:
         managed = False
         db_table = 'faqs'
+
+
+class Feedback(models.Model):
+    submission_id = models.AutoField(primary_key=True)
+    submission_type = models.IntegerField()
+    subject = models.CharField(max_length=64)
+    body_text = models.TextField()
+    submitted = models.DateTimeField()
+    account = models.ForeignKey(Accounts, models.DO_NOTHING)
+
+    class Meta:
+        managed = False
+        db_table = 'feedback'
+
+
+class FeedbackVotes(models.Model):
+    vote_id = models.AutoField(primary_key=True)
+    vote_value = models.IntegerField()
+    voted = models.DateTimeField()
+    account = models.ForeignKey(Accounts, models.DO_NOTHING)
+    submission = models.ForeignKey(Feedback, models.DO_NOTHING)
+
+    class Meta:
+        managed = False
+        db_table = 'feedback_votes'
+        unique_together = (('account', 'submission'), ('account', 'submission'),)
 
 
 class Forces(models.Model):
@@ -721,6 +762,7 @@ class MudClientCategories(models.Model):
     name = models.CharField(max_length=64)
     is_visible = models.IntegerField()
     display_order = models.PositiveIntegerField(unique=True)
+    display_icon = models.CharField(max_length=64, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -1140,9 +1182,9 @@ class PlayerObjects(models.Model):
     player_objects_id = models.AutoField(primary_key=True)
     player = models.ForeignKey('Players', models.DO_NOTHING, blank=True, null=True)
     object = models.ForeignKey(Objects, models.DO_NOTHING, blank=True, null=True)
-    enchant = models.PositiveIntegerField(blank=True, null=True)
+    enchant = models.IntegerField(blank=True, null=True)
     timer = models.IntegerField(blank=True, null=True)
-    bound = models.PositiveIntegerField(blank=True, null=True)
+    bound = models.IntegerField(blank=True, null=True)
     state = models.PositiveIntegerField(blank=True, null=True)
     min_level = models.PositiveIntegerField(blank=True, null=True)
     val0 = models.IntegerField(blank=True, null=True)
@@ -1152,6 +1194,7 @@ class PlayerObjects(models.Model):
     position_type = models.PositiveIntegerField(blank=True, null=True)
     position_val = models.IntegerField(blank=True, null=True)
     parent_player_object = models.PositiveIntegerField(blank=True, null=True)
+    to_be_deleted = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -1219,6 +1262,7 @@ class PlayerSkills(models.Model):
     skill = models.OneToOneField('Skills', models.DO_NOTHING, primary_key=True)  # The composite primary key (skill_id, player_id) found, that is not supported. The first column is selected.
     player = models.ForeignKey('Players', models.DO_NOTHING)
     skill_level = models.PositiveIntegerField()
+    fated_skill = models.IntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -1228,7 +1272,7 @@ class PlayerSkills(models.Model):
 
 class PlayerStats(models.Model):
     player_stats_id = models.AutoField(primary_key=True)
-    player = models.OneToOneField('Players', models.DO_NOTHING, blank=True, null=True)
+    player = models.ForeignKey('Players', models.DO_NOTHING, blank=True, null=True)
     total_play_time = models.PositiveIntegerField(blank=True, null=True)
     remort_play_time = models.PositiveIntegerField(blank=True, null=True)
     total_deaths = models.PositiveIntegerField(blank=True, null=True)
@@ -1239,6 +1283,9 @@ class PlayerStats(models.Model):
     remort_challenges = models.PositiveIntegerField(blank=True, null=True)
     total_quests = models.PositiveIntegerField(blank=True, null=True)
     remort_quests = models.PositiveIntegerField(blank=True, null=True)
+    hardcore_deaths = models.PositiveIntegerField(blank=True, null=True)
+    hardcore_level = models.PositiveIntegerField(blank=True, null=True)
+    hardcore_remorts = models.PositiveIntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
@@ -1454,6 +1501,18 @@ class RemortUpgrades(models.Model):
         db_table = 'remort_upgrades'
 
 
+class SeasonalEnigma(models.Model):
+    seasonal_enigma_id = models.AutoField(primary_key=True)
+    enigma_name = models.CharField(max_length=100, blank=True, null=True)
+    enigma_welcome = models.CharField(max_length=216, blank=True, null=True)
+    enigma_intro_connect = models.CharField(max_length=2056, blank=True, null=True)
+    enigma_character_select = models.CharField(max_length=2056, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'seasonal_enigma'
+
+
 class Seasons(models.Model):
     season_id = models.AutoField(primary_key=True)
     is_active = models.IntegerField()
@@ -1471,6 +1530,7 @@ class Seasons(models.Model):
     total_remorts = models.IntegerField()
     game_state = models.SmallIntegerField(blank=True, null=True)
     multiplay_limit = models.PositiveSmallIntegerField(blank=True, null=True)
+    enigma = models.ForeignKey(SeasonalEnigma, models.DO_NOTHING, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -1537,6 +1597,7 @@ class Skills(models.Model):
     cooldown_size = models.PositiveSmallIntegerField(blank=True, null=True)
     ability_calc_func = models.TextField(blank=True, null=True)
     description = models.CharField(max_length=1080, blank=True, null=True)
+    passive_tiers = models.PositiveIntegerField(blank=True, null=True)
 
     class Meta:
         managed = False
