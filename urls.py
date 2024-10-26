@@ -80,7 +80,7 @@ handler501 = ErrorView.as_view(
 )
 
 if settings.DEBUG:
-    # Serve ,
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += path("400/", handler400, name="400"),
     urlpatterns += path("401/", handler401, name="401"),
