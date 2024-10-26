@@ -27,51 +27,74 @@
         {% for global_event in global_events %}
 <details open>
     <summary title="{{ global_event.event_desc }}">
-        <h4 class="d-inline-flex">{{ global_event.event_desc }}</h4>
+        <h4 class="d-inline-flex">
+            {{ global_event.event_desc }}
+        </h4>
     </summary>
     <ul style="list-style: none">
+
         <li title="Ends">
-            <h5>Ends</h5>
+            <h5 class="d-inline-flex">
+                Ends
+            </h5>
         </li>
-        <li class="blockquote" title="{{ global_event.end_time | naturaltime }}">
+        <li class="bi bi-hourglass-split blockquote" title="{{ global_event.end_time | naturaltime }}">
             {{ global_event.end_time | naturaltime }}
         </li>
         <li class="blockquote-footer" title="{{ global_event.end_time|date:"l, F jS, Y" }}">
             {{ global_event.end_time|date:"l, F jS, Y" }}
         </li>
-    {% if global_event.xp_bonus and global_event.xp_bonus != '' and global_event.xp_bonus != 0 %}
-        <li title="XP Bonus: {% widthratio global_event.xp_bonus 1 1 %}%">
-            <h5>XP Bonus</h5>
-        </li>
-        <li class="m-3">
-            {% widthratio global_event.xp_bonus 1 1 %}%
-        </li>
-    {% endif %}
-    {% if global_event.shop_bonus and global_event.shop_bonus != '' and global_event.shop_bonus != 0 %}
-        <li title="Shop Bonus: {% widthratio 100 global_event.shop_bonus 1 %}% off">
-            <h5>Shop Bonus</h5>
-        </li>
-        <li class="m-3">
-            {% widthratio 100 global_event.shop_bonus 1 %}% off
-        </li>
-    {% endif %}
-    {% if global_event.is_luck %}
-        <li title="Shavar and Chenchir shine brightly: +50 gold &amp; +25% moves!">
-            <h6>Shavar and Chenchir shine brightly</h6>
-        </li>
-        <li class="m-3">
-            +50 gold &amp; +25% moves!
-        </li>
-    {% endif %}
+
         <li title="Started">
-            <h5>Started</h5>
+            <h5 class="d-inline-flex">
+                Started
+            </h5>
         </li>
-        <li class="blockquote" title="{{ global_event.start_time | naturaltime }}">
+        <li class="bi bi-clock-history blockquote" title="{{ global_event.start_time | naturaltime }}">
             {{ global_event.start_time | naturaltime }}
         </li>
         <li class="blockquote-footer" title="{{ global_event.start_time|date:"l, F jS, Y" }}">
             {{ global_event.start_time|date:"l, F jS, Y" }}
         </li>
+
+    {% if global_event.xp_bonus and global_event.xp_bonus != '' and global_event.xp_bonus != 0 %}
+        <li title="XP Bonus: {% widthratio global_event.xp_bonus 1 1 %}%">
+            <i class="bi bi-fast-forward"></i>
+            <h5 class="d-inline-flex">
+                XP Bonus
+            </h5>
+            <span class="align-middle badge bg-dark rounded-pill border border-secondary">
+               {% widthratio global_event.xp_bonus 1 1 %}%
+           </span>
+        </li>
+    {% endif %}
+
+    {% if global_event.shop_bonus and global_event.shop_bonus != '' and global_event.shop_bonus != 0 %}
+        <li title="Shop Bonus: {% widthratio 100 global_event.shop_bonus 1 %}% off">
+            <i class="bi bi-cart-plus"></i>
+            <h5 class="d-inline-flex">
+                Shop Bonus
+            </h5>
+            <span class="align-middle badge bg-dark rounded-pill border border-secondary">
+                {% widthratio 100 global_event.shop_bonus 1 %}% off
+            </span>
+        </li>
+    {% endif %}
+
+    {% if global_event.is_luck %}
+        <li title="Shavar and Chenchir shine brightly: +50 gold &amp; +25% moves!">
+            <i class="bi bi-currency-exchange"></i>
+            <h5 class="d-inline-flex">
+                Shavar and Chenchir shine brightly
+            </h5>
+            <span class="align-middle badge bg-dark rounded-pill border border-secondary">
+                +50 gold
+            </span>
+            <span class="align-middle badge bg-dark rounded-pill border border-secondary">
+                +25% moves
+            </span>
+        </li>
+    {% endif %}
     </ul>
 </details>
         {% endfor %}
