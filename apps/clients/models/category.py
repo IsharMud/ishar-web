@@ -46,7 +46,15 @@ class MUDClientCategory(models.Model):
         help_text=(
             "What is the numeric display order of the MUD client category?"
         ),
-        verbose_name="Display Order"
+        verbose_name="(Display) Order"
+    )
+    display_icon = models.CharField(
+        max_length=64,
+        blank=True,
+        db_column="display_icon",
+        help_text="Bootstrap icon to display with the MUD client category.",
+        null=True,
+        verbose_name="(Display) Icon",
     )
 
     class Meta:
@@ -71,6 +79,17 @@ class MUDClientCategory(models.Model):
             viewname="admin:clients_mudclientcategory_change",
             args=(self.category_id,)
         )
+
+    @property
+    def icon(self) -> (None, str):
+        if self.display_icon:
+            return f"bi bi-{self.display_icon}"
+        return None
+
+    def get_display_icon(self) -> (None, str):
+        if self.icon:
+            return f'<i class="{self.icon}"></i>'
+        return None
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}: {self.__str__()} ({self.pk})"

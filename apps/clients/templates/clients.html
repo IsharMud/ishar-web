@@ -28,6 +28,9 @@
             <a class="anchor-link" href="#category-{{ category.name | slugify }}" aria-label="Link to this section: MUD Client Category {{ category.name }} ({{ category.name | slugify }})">
                 &#x23;
             </a>
+        {% if category.icon %}
+            {{ category.get_display_icon }}
+        {% endif %}
             {{ category.name }}
         </summary>
         <ul class="border-0 border-secondary bg-black list-group list-group-dark">
