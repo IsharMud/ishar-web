@@ -4,10 +4,12 @@ from django.contrib.admin import ModelAdmin
 class MUDClientCategoryAdmin(ModelAdmin):
     """MUD client category administration."""
 
-    fields = list_display = ("name", "is_visible", "display_order")
+    fields = list_display = (
+        "name", "is_visible", "display_icon", "display_order"
+    )
     list_filter = ("is_visible",)
     readonly_fields = ("category_id",)
-    search_fields = ("name",)
+    search_fields = ("name", "display_icon")
 
     def has_add_permission(self, request, obj=None) -> bool:
         if request.user and not request.user.is_anonymous:
