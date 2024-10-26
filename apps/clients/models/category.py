@@ -80,10 +80,13 @@ class MUDClientCategory(models.Model):
             args=(self.category_id,)
         )
 
-    def get_display_icon(self) -> (None, str):
+    def get_display_icon(self) -> str:
         if self.display_icon:
-            return f'<i class="bi bi-{self.display_icon}"></i>'
-        return None
+            return format_html(
+                '<i class="bi bi-{}"></i>',
+                self.display_icon
+            )
+        return ''
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}: {self.__str__()} ({self.pk})"

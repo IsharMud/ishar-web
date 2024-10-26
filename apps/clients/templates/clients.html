@@ -26,11 +26,12 @@
     <details class="d-sm-flex px-3" open>
         <summary id="category-{{ category.name | slugify }}" class="h4 text-ishar" title="{{ category.name }}">
             <a class="anchor-link" href="#category-{{ category.name | slugify }}" aria-label="Link to this section: MUD Client Category {{ category.name }} ({{ category.name | slugify }})">
+        {% if category.display_icon %}
+                {{ category.get_display_icon }}
+        {% else %}
                 &#x23;
-            </a>
-        {% if category.icon %}
-            {{ category.get_display_icon }}
         {% endif %}
+            </a>
             {{ category.name }}
         </summary>
         <ul class="border-0 border-secondary bg-black list-group list-group-dark">
