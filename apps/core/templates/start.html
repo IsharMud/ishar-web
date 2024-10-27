@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% load static %}
 {% block meta_title %}Get Started{% endblock meta_title %}
 {% block meta_description %}A quick guide to start playing the game.{% endblock meta_description %}
 {% block meta_url %}{% url 'start' %}#start{% endblock meta_url %}
@@ -40,7 +41,13 @@
 <div class="card m-1">
     <div class="card-body">
         <p class="card-text lead">
-            Playing Ishar starts by <a href="{% url 'connect' %}" target="_blank">connecting to the game</a>
+            Playing Ishar starts by
+            <a class="icon-link" href="{% url 'connect' %}" target="_blank" title="Connect to {{ WEBSITE_TITLE }} via Mudslinger">
+                connecting to the game
+                <svg class="bi text-secondary" aria-hidden="true">
+                    <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#box-arrow-up-right"></use>
+                </svg>
+            </a>
             and typing "<code>new</code>" at the login prompt.  The game walks you through the few steps of
             creating a new character, then drops you into the virtual world with a few meager possessions and
             the lowest standing in the game, level 1:

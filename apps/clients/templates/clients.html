@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% load static %}
 {% block meta_title %}MUD Clients{% endblock meta_title %}
 {% block meta_description %}A few MUD clients that we have heard good things about.{% endblock meta_description %}
 {% block meta_url %}{% url 'clients' %}#clients{% endblock meta_url %}
@@ -15,7 +16,12 @@
 <div class="alert alert-dark alert-dismissible fade show" role="alert" id="clients-alert">
     <p class="lead">
         While you can certainly enjoy the game via
-        <a href="{% url 'connect' %}" target="_blank" title="Mudslinger">the Mudslinger web client</a>,
+        <a class="icon-link" href="{% url 'connect' %}" target="_blank" title="Mudslinger">
+            the Mudslinger web client
+            <svg class="bi text-secondary" aria-hidden="true">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#box-arrow-up-right"></use>
+            </svg>
+        </a>,
         you might prefer to connect to the game with software designed specifically to help you play a MUD.
     </p>
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -37,9 +43,12 @@
         <ul class="border-0 border-secondary bg-black list-group list-group-dark">
         {% for client in category.clients.all %}
             {% if client.is_visible %}
-            <li class="bi bi-dot border-0 bg-black list-group-item list-item-group-dark">
-                <a class="list-group-item-text" href="{{ client.url }}" id="client-{{ client.name | slugify }}" target="_blank" title="{{ client.name }}">
+            <li class="bi bi-dot border-0 bg-black list-group-item list-item-group-dark" title="{{ client.name }}">
+                <a class="list-group-item-text icon-link" href="{{ client.url }}" id="client-{{ client.name|slugify }}" target="_blank">
                     {{ client.name }}
+                    <svg class="bi text-secondary" aria-hidden="true">
+                        <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#box-arrow-up-right"></use>
+                    </svg>
                 </a>
             </li>
             {% endif %}

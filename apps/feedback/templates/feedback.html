@@ -1,5 +1,6 @@
 {% extends "layout.html" %}
 {% load humanize %}
+{% load static %}
 {% block meta_title %}Feedback{% endblock meta_title %}
 {% block meta_description %}Feedback about {{ WEBSITE_TITLE }}.{% endblock meta_description %}
 {% block meta_url %}{% url 'feedback' %}#feedback{% endblock meta_url %}
@@ -69,9 +70,12 @@
 <div class="alert alert-dark alert-dismissible fade show m-3" role="alert" id="mail-alert">
     <p>
         Additionally, you are always more than welcome to reach out by e-mailing
-        <a class="code font-monospace" href="mailto:{{ ADMIN_EMAIL }}" target="_blank" style="" title="E-mail: {{ ADMIN_EMAIL }}">
-            {{ ADMIN_EMAIL }} <i class="bi bi-envelope-at"></i>
-        </a>.
+        <a class="code font-monospace icon-link" href="mailto:{{ ADMIN_EMAIL }}" target="_blank" style="" title="E-mail: {{ ADMIN_EMAIL }}">
+            {{ ADMIN_EMAIL }}
+            <svg class="bi" aria-hidden="true">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#envelope-at"></use>
+            </svg>
+        </a>
     </p>
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>

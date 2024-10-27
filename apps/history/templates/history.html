@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% load static %}
 {% block meta_title %}History{% endblock meta_title %}
 {% block meta_description %}A history of {{ WEBSITE_TITLE }}.{% endblock meta_description %}
 {% block meta_url %}{% url 'history' %}#history{% endblock meta_url %}
@@ -64,7 +65,12 @@
         <div class="card-body">
             <p class="card-text lead">
                 The original
-                <a href="http://www.ishar.com/" target="_blank">Ishar.com</a>
+                <a class="icon-link" href="http://www.ishar.com/" target="_blank" title="Ishar.com">
+                    Ishar.com
+                    <svg class="bi" aria-hidden="true">
+                        <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#box-arrow-up-right"></use>
+                    </svg>
+                </a>
                 is currently still owned by Aaron Hopkins.
             </p>
             <p class="card-text lead">

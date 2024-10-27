@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% load static %}
 {% block meta_title %}Help: {{ help_topic.name }}{% endblock meta_title %}
 {% block meta_description %}Help pages for {{ WEBSITE_TITLE }}{% endblock meta_description %}
 {% block meta_url %}{% if help_topic %}{{ help_topic.get_absolute_url }}{% else %}{% url 'help' %}#help{% endif %}{% endblock meta_url %}
@@ -104,8 +105,13 @@
         <p class="m-1 p-1 lead">
             <strong>If you are new here</strong>, you may want to download one of many
             <a href="{% url 'clients' %}#clients" title="MUD clients">MUD clients</a>,
-            see our <a href="{% url 'start' %}#start" title="getting started guide">getting started guide</a>,
-            and <a href="{% url 'discord' %}" target="_blank" title="{{ WEBSITE_TITLE }} Discord Invitation">join us on Discord!</a>
+            see our <a href="{% url 'start' %}#start" title="getting started guide">getting started guide</a>, and
+            <a class="icon-link" href="{% url 'discord' %}" target="_blank" title="{{ WEBSITE_TITLE }} Discord">
+                join us on Discord
+                <svg class="bi text-secondary" aria-hidden="true">
+                    <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#discord"></use>
+                </svg>
+            </a>
         </p>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>

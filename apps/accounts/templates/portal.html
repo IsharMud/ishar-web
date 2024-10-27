@@ -1,5 +1,6 @@
 {% extends "layout.html" %}
 {% load humanize %}
+{% load static %}
 {% block meta_title %}Portal{% endblock meta_title %}
 {% block meta_description %}Portal for players to see information about their account and characters.{% endblock meta_description %}
 {% block meta_url %}{% url 'portal' %}#portal{% endblock meta_url %}
@@ -16,8 +17,11 @@
     {% if user.is_staff %}
             <li class="bg-black border border-secondary card-text list-group-item-dark list-group-item" title="Admin">
                 <i class="bi bi-gear text-ishar"></i>
-                <a class="list-group-item-text" href="{% url 'admin:index' %}" target="_blank">
+                <a class="list-group-item-text icon-link" href="{% url 'admin:index' %}" target="_blank">
                     Admin
+                    <svg class="bi text-secondary" aria-hidden="true">
+                        <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#box-arrow-up-right"></use>
+                    </svg>
                 </a>
             </li>
     {% endif %}

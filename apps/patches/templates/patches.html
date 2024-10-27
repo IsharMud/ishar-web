@@ -35,8 +35,11 @@
     </summary>
     <blockquote class="blockquote">
         <p>
-            <a href="{{ patch.patch_file.url }}" target="_blank" title="{{ patch.patch_file.name }} &lt;https://{{ request.META.HTTP_HOST }}{{ patch.patch_file.url }}&gt;">
+            <a class="icon-link" href="{{ patch.patch_file.url }}" target="_blank" title="{{ patch.patch_file.name }} &lt;{{ request.scheme }}://{{ request.META.HTTP_HOST }}{{ patch.patch_file.url }}&gt;">
                 {{ patch.patch_file.name }}
+                <svg class="bi text-secondary" aria-hidden="true">
+                    <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#box-arrow-up-right"></use>
+                </svg>
             </a>
             <small>
                 <code title="{{ patch.patch_file.size | filesizeformat }}">

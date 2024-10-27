@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% load static %}
 {% block meta_title %}Frequently Asked Questions{% endblock meta_title %}
 {% block meta_description %}A few common questions that are asked about {{ WEBSITE_TITLE }}.{% endblock meta_description %}
 {% block meta_url %}{% url 'faq' %}#faq{% endblock meta_url %}
@@ -21,7 +22,12 @@
         You may also want to visit the
         <a href="{% url 'help_page' help_topic='MUD Basics' %}#topic" title="Help: MUD Basics">MUD Basics help page</a>,
         our <a href="{% url 'start' %}#start" title="Get Started">getting started guide</a>, and
-        <a href="{% url 'discord' %}" target="_blank" title="{{ WEBSITE_TITLE }} Discord">join us on Discord</a>!
+        <a class="icon-link" href="{% url 'discord' %}" target="_blank" title="{{ WEBSITE_TITLE }} Discord">
+            join us on Discord
+            <svg class="bi text-secondary" aria-hidden="true">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#discord"></use>
+            </svg>
+        </a>
     </p>
     {% endif %}
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -48,10 +54,12 @@
 <div class="alert alert-dark alert-dismissible fade show" role="alert" id="faq-footer-alert">
     <p class="lead">
         If there is anything that you think is missing, please feel free to reach out, by e-mailing
-        <a class="code font-monospace" href="mailto:{{ ADMIN_EMAIL }}" target="_blank" style="" title="E-mail: {{ ADMIN_EMAIL }}">
+        <a class="code font-monospace icon-link" href="mailto:{{ ADMIN_EMAIL }}" target="_blank" style="" title="E-mail: {{ ADMIN_EMAIL }}">
             {{ ADMIN_EMAIL }}
-            <i class="bi bi-envelope-at"></i>
-        </a>.
+            <svg class="bi" aria-hidden="true">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#envelope-at"></use>
+            </svg>
+        </a>
     </p>
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>

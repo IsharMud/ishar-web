@@ -5,7 +5,7 @@
 {% block meta_url %}{% url 'latest_patch' %}#latest{% endblock meta_url %}
 {% block title %}Latest Patch{% endblock title %}
 {% block breadcrumbs %}
-    <li class="h2 bi bi-bandaid breadcrumb-item" title="Patches">
+    <li class="h2 bi bi-file-earmark-pdf breadcrumb-item" title="Patches">
         <a href="{% url 'patches' %}#patches" id="patches">Patches</a>
     </li>
     <li class="h2 breadcrumb-item active" aria-current="page" title="Latest Patch">
@@ -21,8 +21,11 @@
     </div>
     <div class="card-footer">
         <span class="blockquote-footer">
-            <a href="{{ patches.0.get_absolute_url }}" target="_blank" title="Open: {{ patches.0.patch_file.name }}">
+            <a class="icon-link" href="{{ patches.0.get_absolute_url }}" target="_blank" title="{{ patches.0.patch_file.name }} &lt;{{ request.scheme }}://{{ request.META.HTTP_HOST }}{{ patches.0.patch_file.url }}&gt;">
                 {{ patches.0.patch_file.name }}
+                <svg class="bi" aria-hidden="true">
+                    <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#box-arrow-up-right"></use>
+                </svg>
             </a>
         </span>
     </div>
