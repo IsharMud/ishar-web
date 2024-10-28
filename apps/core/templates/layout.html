@@ -292,7 +292,10 @@
                         </li>
 {% else %}
                         <li class="nav-item" title="Portal">
-                            <a class="bi bi-menu-button nav-link" href="{% url 'portal' %}#portal">
+                            <a class="nav-link icon-link icon-link-hover" href="{% url 'portal' %}#portal" style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);">
+                                <svg class="bi text-primary" aria-hidden="true">
+                                    <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#menu-button"></use>
+                                </svg>
                                 Portal
                             </a>
                         </li>
@@ -384,24 +387,33 @@
             <div class="row border-ishar bg-black rounded align-items-center m-1 p-3">
 
                 <div class="col">
-                    <a class="bi bi-envelope-at icon-link" href="mailto:{{ ADMIN_EMAIL }}" target="_blank" title="E-mail Us! ({{ ADMIN_EMAIL }})">
+                    <a class="icon-link icon-link-hover" href="mailto:{{ ADMIN_EMAIL }}" target="_blank" title="E-mail Us! ({{ ADMIN_EMAIL }})">
+                        <svg class="bi text-primary" aria-hidden="true" style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);">
+                            <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#envelope-at"></use>
+                        </svg>
                         E-mail us!
-                        <svg class="bi text-secondary" aria-hidden="true">
+                        <svg class="bi text-secondary" aria-hidden="true" style="--bs-icon-link-transform: none;">
                             <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#box-arrow-up-right"></use>
                         </svg>
                     </a>
                 </div>
 
                 <div class="col">
-                    <a class="bi bi-heart" href="{% url 'support' %}#support" title="Support {{ WEBSITE_TITLE }}">
+                    <a class="icon-link icon-link-hover" href="{% url 'support' %}#support" title="Support {{ WEBSITE_TITLE }}">
+                        <svg class="bi text-primary" aria-hidden="true" style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);">
+                            <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#heart"></use>
+                        </svg>
                         Support {{ WEBSITE_TITLE }}
                     </a>
                 </div>
 
                 <div class="col">
-                    <a class="bi bi-discord icon-link" href="{% url 'discord' %}" target="_blank" title="Join us on Discord!">
+                    <a class="icon-link icon-link-hover" href="{% url 'discord' %}" target="_blank" title="Join us on Discord!">
+                        <svg class="bi text-primary" aria-hidden="true" style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);">
+                            <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#discord"></use>
+                        </svg>
                         Join us on Discord!
-                        <svg class="bi text-secondary" aria-hidden="true">
+                        <svg class="bi text-secondary" aria-hidden="true" style="--bs-icon-link-transform: none;">
                             <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#box-arrow-up-right"></use>
                         </svg>
                     </a>

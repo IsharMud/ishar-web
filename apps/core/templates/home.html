@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% load static %}
 {% block meta_title %}Home{% endblock meta_title %}
 {% block meta_description %}Welcome to {{ WEBSITE_TITLE }}{% endblock meta_description %}
 {% block meta_url %}{% url 'index' %}{% endblock meta_url %}
@@ -18,8 +19,10 @@
             {% autoescape off %}{{ news.body }}{% endautoescape %}
         </div>
         <p class="d-flex justify-content-end">
-            <a class="btn btn-ishar" href="{% url 'news' %}?page=2#news">
-                <i class="bi bi-newspaper text-ishar"></i>
+            <a class="btn btn-ishar icon-link icon-link-hover" href="{% url 'news' %}?page=2#news"  style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);">
+                <svg class="bi text-ishar" aria-hidden="true">
+                    <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#newspaper"></use>
+                </svg>
                 Past News
             </a>
         </p>
