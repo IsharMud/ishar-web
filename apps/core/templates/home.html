@@ -4,8 +4,11 @@
 {% block meta_url %}{% url 'index' %}{% endblock meta_url %}
 {% block title %}Home{% endblock title %}
 {% block breadcrumbs %}
-    <li class="bi bi-house breadcrumb-item active h2" title="{{ news.subject|default:"Welcome" }}">
-        {{ news.subject|default:"Welcome" }}
+    <li class="breadcrumb-item active">
+        <h2 title="{{ news.subject|default:'Welcome' }}">
+            <i class="text-primary bi bi-house"></i>
+            {{ news.subject|default:"Welcome" }}
+        </h2>
     </li>
 {% endblock breadcrumbs %}
 {% block content %}

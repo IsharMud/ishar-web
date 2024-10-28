@@ -57,22 +57,30 @@
                     <ul class="navbar-nav nav-underline">
 
                         <li class="nav-item" title="Home">
-                            <a class="bi bi-house nav-link" href="{% url 'index' %}">
+                            <a class="bg-black nav-link icon-link icon-link-hover" style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);" href="{% url 'index' %}">
+                                <svg class="bi text-primary" aria-hidden="true">
+                                    <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#house"></use>
+                                </svg>
                                 Home
                             </a>
                         </li>
-
                         <li class="nav-item" title="Connect to {{ WEBSITE_TITLE }}">
-                            <a class="bi bi-globe icon-link nav-link" href="{% url 'connect' %}" target="_blank">
+                            <a class="bg-black nav-link icon-link icon-link-hover" href="{% url 'connect' %}" target="_blank">
+                                <svg class="bi text-primary" aria-hidden="true" style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);">
+                                    <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#globe"></use>
+                                </svg>
                                 Connect
-                                <svg class="bi text-secondary" aria-hidden="true">
+                                <svg class="bi text-secondary" aria-hidden="true" style="--bs-icon-link-transform: none;">
                                     <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#box-arrow-up-right"></use>
                                 </svg>
                             </a>
                         </li>
 
                         <li class="nav-item" title="Events ({{ GLOBAL_EVENT_COUNT }})">
-                            <a class="bg-black bi bi-calendar-event nav-link dropdown-item" href="{% url 'events' %}#events">
+                            <a class="bg-black nav-link dropdown-item icon-link icon-link-hover" style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);" href="{% url 'events' %}#events">
+                                <svg class="bi text-primary" aria-hidden="true">
+                                    <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#calendar-event"></use>
+                                </svg>
                                 Events
 {% if GLOBAL_EVENT_COUNT > 0 %}
                                 <span class="badge bg-dark rounded-pill border border-secondary">
@@ -81,15 +89,20 @@
 {% endif %}
                             </a>
                         </li>
-
                         <li class="nav-item" title="Frequently Asked Questions">
-                            <a class="bi-question-circle nav-link" href="{% url 'faq' %}#faq">
+                            <a class="bg-black nav-link icon-link icon-link-hover" style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);" href="{% url 'faq' %}#faq">
+                                <svg class="bi text-primary" aria-hidden="true">
+                                    <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#question-circle"></use>
+                                </svg>
                                 FAQs
                             </a>
                         </li>
 
                         <li class="nav-item dropdown">
-                            <a class="bg-black bi bi-info-circle nav-link dropdown-toggle" href="{% url 'help' %}#help" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <a class="bg-black nav-link dropdown-toggle icon-link icon-link-hover" href="{% url 'help' %}#help" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);">
+                                <svg class="bi text-primary" aria-hidden="true">
+                                    <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#info-circle"></use>
+                                </svg>
                                 Help
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark bg-black border border-secondary p-3">
@@ -113,49 +126,76 @@
                                     <hr class="dropdown-divider border-secondary">
                                 </li>
                                 <li class="nav-item" title="All Help Topics">
-                                    <a class="bg-black bi bi-question-circle nav-link dropdown-item" href="{% url 'help' %}#topics">
+                                    <a class="bg-black nav-link dropdown-item icon-link icon-link-hover" style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);" href="{% url 'help' %}#topics">
+                                        <svg class="bi text-primary" aria-hidden="true">
+                                            <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#collection-play"></use>
+                                        </svg>
                                         All Topics
                                     </a>
                                 </li>
                                 <li class="nav-item" title="Basics">
-                                    <a class="bg-black bi bi-collection-play nav-link dropdown-item" href="{% url 'help_page' help_topic='MUD Basics' %}#topic">
+                                    <a class="bg-black nav-link dropdown-item icon-link icon-link-hover" style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);" href="{% url 'help_page' help_topic='MUD Basics' %}#topic">
+                                        <svg class="bi text-primary" aria-hidden="true">
+                                            <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#collection-play"></use>
+                                        </svg>
                                         Basics
                                     </a>
                                 </li>
                                 <li class="nav-item" title="Get Started">
-                                    <a class="bg-black bi bi-rocket-takeoff nav-link dropdown-item" href="{% url 'start' %}#start">
+                                    <a class="bg-black nav-link dropdown-item icon-link icon-link-hover" style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);" href="{% url 'start' %}#start">
+                                        <svg class="bi text-primary" aria-hidden="true">
+                                            <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#rocket-takeoff"></use>
+                                        </svg>
                                         Get Started
                                     </a>
                                 </li>
                                 <li class="nav-item" title="Get Started">
-                                    <a class="bg-black bi bi-info-circle nav-link dropdown-item" href="{% url 'help' %}#help">
+                                    <a class="bg-black nav-link dropdown-item icon-link icon-link-hover" style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);" href="{% url 'help' %}#help">
+                                        <svg class="bi text-primary" aria-hidden="true">
+                                            <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#info-circle"></use>
+                                        </svg>
                                         Help
                                     </a>
                                 </li>
                                 <li class="nav-item" title="History">
-                                    <a class="bg-black bi bi-clock-history nav-link dropdown-item" href="{% url 'history' %}#history">
+                                    <a class="bg-black nav-link dropdown-item icon-link icon-link-hover" style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);" href="{% url 'history' %}#history">
+                                        <svg class="bi text-primary" aria-hidden="true">
+                                            <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#clock-history"></use>
+                                        </svg>
                                         History
                                     </a>
                                 </li>
                                 <li class="nav-item" title="MUD Clients">
-                                    <a class="bg-black bi bi-terminal-split nav-link dropdown-item" href="{% url 'clients' %}#clients">
+                                    <a class="bg-black nav-link dropdown-item icon-link icon-link-hover" style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);" href="{% url 'clients' %}#clients">
+                                        <svg class="bi text-primary" aria-hidden="true">
+                                            <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#terminal-split"></use>
+                                        </svg>
                                         MUD Clients
                                     </a>
                                 </li>
                             </ul>
                         </li>
                         <li class="nav-item dropdown">
-                            <a class="bg-black bi bi-bandaid nav-link dropdown-toggle" href="{% url 'patches' %}#patches" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <a class="bg-black nav-link dropdown-toggle icon-link icon-link-hover" style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <svg class="bi text-primary" aria-hidden="true">
+                                    <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#bandaid"></use>
+                                </svg>
                                 Patches
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark bg-black border border-secondary p-3">
                                 <li class="nav-item" title="Admin">
-                                    <a class="bg-black bi bi-file-earmark-pdf nav-link dropdown-item" href="{% url 'latest_patch' %}#latest">
+                                    <a class="bg-black nav-link dropdown-item icon-link icon-link-hover" style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);" href="{% url 'latest_patch' %}#latest">
+                                        <svg class="bi text-primary" aria-hidden="true">
+                                            <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#file-earmark-pdf"></use>
+                                        </svg>
                                         Latest
                                     </a>
                                 </li>
                                 <li class="nav-item" title="Admin">
-                                    <a class="bg-black bi bi-collection nav-link dropdown-item" href="{% url 'patches' %}#patches">
+                                    <a class="bg-black nav-link dropdown-item icon-link icon-link-hover" style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);" href="{% url 'patches' %}#patches">
+                                        <svg class="bi text-primary" aria-hidden="true">
+                                            <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#collection"></use>
+                                        </svg>
                                         All
                                     </a>
                                 </li>
@@ -163,15 +203,21 @@
                         </li>
 {% if user and user.is_authenticated %}
                         <li class="nav-item dropdown">
-                            <a class="bg-black bi bi-menu-button nav-link dropdown-toggle" href="{% url 'portal' %}#portal" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <a class="bg-black nav-link dropdown-toggle icon-link icon-link-hover" href="{% url 'portal' %}#portal" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);">
+                                <svg class="bi text-primary" aria-hidden="true">
+                                    <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#menu-button"></use>
+                                </svg>
                                 Portal
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark bg-black border border-secondary p-3">
     {% if user.is_staff %}
                                 <li class="nav-item" title="Admin">
-                                    <a class="bg-black bi bi-gear nav-link dropdown-item icon-link" href="{% url 'admin:index' %}" target="_blank">
+                                    <a class="bg-black nav-link dropdown-item icon-link icon-link-hover" href="{% url 'admin:index' %}" target="_blank">
+                                        <svg class="bi text-primary" aria-hidden="true" style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);">
+                                            <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#gear"></use>
+                                        </svg>
                                         Admin
-                                        <svg class="bi text-secondary" aria-hidden="true">
+                                        <svg class="bi text-secondary" aria-hidden="true" style="--bs-icon-link-transform: none;">
                                             <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#box-arrow-up-right"></use>
                                         </svg>
                                     </a>
@@ -181,31 +227,46 @@
                                 </li>
     {% endif %}
                                 <li class="nav-item" title="Challenges">
-                                    <a class="bg-black bi bi-award nav-link dropdown-item" href="{% url 'challenges' %}#challenges">
+                                    <a class="bg-black nav-link dropdown-item icon-link icon-link-hover" href="{% url 'challenges' %}#challenges" style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);">
+                                        <svg class="bi text-primary" aria-hidden="true">
+                                            <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#award"></use>
+                                        </svg>
                                         Challenges
                                     </a>
                                 </li>
 
                                 <li class="nav-item" title="Feedback">
-                                    <a class="bg-black bi bi-flag nav-link dropdown-item" href="{% url 'feedback' %}#feedback">
+                                    <a class="bg-black nav-link dropdown-item icon-link icon-link-hover" href="{% url 'feedback' %}#feedback" style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);">
+                                        <svg class="bi text-primary" aria-hidden="true">
+                                            <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#flag"></use>
+                                        </svg>
                                         Feedback
                                     </a>
                                 </li>
 
                                 <li class="nav-item" title="Leaders">
-                                    <a class="bg-black bi bi-trophy nav-link dropdown-item" href="{% url 'leaders' %}#leaders">
+                                    <a class="bg-black nav-link dropdown-item icon-link icon-link-hover" href="{% url 'leaders' %}#leaders" style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);">
+                                        <svg class="bi text-primary" aria-hidden="true">
+                                            <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#trophy"></use>
+                                        </svg>
                                         Leaders
                                     </a>
                                 </li>
 
                                 <li class="nav-item" title="Portal">
-                                    <a class="bg-black bi bi-person-lines-fill nav-link dropdown-item" href="{% url 'portal' %}#portal">
+                                    <a class="bg-black nav-link dropdown-item icon-link icon-link-hover" href="{% url 'portal' %}#portal" style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);">
+                                        <svg class="bi text-primary" aria-hidden="true">
+                                            <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#person-lines-fill"></use>
+                                        </svg>
                                         Portal
                                     </a>
                                 </li>
 
                                 <li class="nav-item" title="Upgrades">
-                                    <a class="bg-black bi bi-shield nav-link dropdown-item" href="{% url 'upgrades' %}#upgrades">
+                                    <a class="bg-black nav-link dropdown-item icon-link icon-link-hover" href="{% url 'upgrades' %}#upgrades" style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);">
+                                        <svg class="bi text-primary" aria-hidden="true">
+                                            <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#shield"></use>
+                                        </svg>
                                         Upgrades
                                     </a>
                                 </li>
@@ -217,7 +278,10 @@
                                 <li class="nav-item" title="Log out">
                                     <form action="{% url 'logout' %}#messages" method="post">
                                         {% csrf_token %}
-                                        <button class="bg-black bi bi-door-closed nav-link dropdown-item" type="submit">
+                                        <button class="bg-black nav-link dropdown-item icon-link icon-link-hover" type="submit" style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);">
+                                            <svg class="bi text-primary" aria-hidden="true">
+                                                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#door-closed"></use>
+                                            </svg>
                                             Log Out ({{ request.user.get_username }})
                                         </button>
                                     </form>
@@ -234,7 +298,10 @@
                         </li>
 {% endif %}
                         <li class="nav-item" title="World">
-                            <a class="bi bi-globe-asia-australia nav-link" href="{% url 'world' %}#world">
+                            <a class="nav-link icon-link icon-link-hover" href="{% url 'world' %}#world" style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);">
+                                <svg class="bi text-primary" aria-hidden="true">
+                                    <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#globe-asia-australia"></use>
+                                </svg>
                                 World
                             </a>
                         </li>
@@ -253,7 +320,10 @@
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
 {% block breadcrumbs %}
-                        <li class="bi bi-house breadcrumb-item h2" title="Welcome">
+                        <li class="breadcrumb-item h2" title="Welcome">
+                            <svg class="bi text-primary" aria-hidden="true">
+                                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#house"></use>
+                            </svg>
                             Welcome
                         </li>
 {% endblock breadcrumbs %}
