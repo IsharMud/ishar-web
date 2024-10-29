@@ -5,8 +5,13 @@
 {% block meta_url %}{% url 'patches' %}#patches{% endblock meta_url %}
 {% block title %}Patches{% endblock title %}
 {% block breadcrumbs %}
-    <li class="bi bi-bandaid breadcrumb-item h2{% if page_obj.number and page_obj.number == 1 %} active" aria-current="page{% endif %}" title="Patches">
-        <a href="{% url 'patches' %}#patches" id="patches">Patches</a>
+    <li class="breadcrumb-item h2{% if page_obj.number and page_obj.number == 1 %} active" aria-current="page{% endif %}" title="Patches">
+        <a class="icon-link icon-link-hover" href="{% url 'patches' %}#patches" style="--bs-icon-link-transform: translate3d(0, -.3rem, 0);">
+            <svg class="bi text-ishar" aria-hidden="true">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#bandaid"></use>
+            </svg>
+            <span id="patches">Patches</span>
+        </a>
     </li>
     {% if page_obj.number and page_obj.number != 1 %}
     <li class="breadcrumb-item active h2" aria-current="page" title="Patches">
@@ -47,8 +52,14 @@
                 </code>
             </small>
         </p>
-        <footer class="blockquote-footer" title="-- {{ patch.account.get_username | title }} @ {{ patch.patch_date | date:"l, F jS, Y" }}">
-            <cite>{{ patch.account.get_username | title }}</cite> @ {{ patch.patch_date | date:"l, F jS, Y" }}
+        <footer class="blockquote-footer" title="-- {{ patch.account.get_username|title }} @ {{ patch.patch_date|date:"l, F jS, Y" }}">
+            <cite>
+                {{ patch.account.get_username|title }}
+            </cite>
+            @
+            <time datetime="{{ patch.patch_date|date:'c' }}">
+                {{ patch.patch_date|date:"l, F jS, Y" }}
+            </time>
         </footer>
     </blockquote>
 </details>

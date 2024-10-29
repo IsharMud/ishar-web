@@ -17,7 +17,7 @@
     {% if user.is_staff %}
             <li class="bg-black border border-secondary card-text list-group-item-dark list-group-item" title="Admin">
                 <a class="list-group-item-text icon-link icon-link-hover" href="{% url 'admin:index' %}" target="_blank">
-                    <svg class="bi text-ishar" aria-hidden="true" style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);">
+                    <svg class="bi text-ishar" aria-hidden="true" style="--bs-icon-link-transform: translate3d(0, -.3rem, 0);">
                         <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#gear"></use>
                     </svg>
                     Admin
@@ -29,7 +29,7 @@
     {% endif %}
                 <li class="bg-black border border-secondary card-text list-group-item-dark list-group-item" title="Challenges">
                     <a class="list-group-item-text icon-link icon-link-hover" href="{% url 'challenges' %}#challenges">
-                        <svg class="bi text-ishar" aria-hidden="true" style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);">
+                        <svg class="bi text-ishar" aria-hidden="true" style="--bs-icon-link-transform: translate3d(0, -.3rem, 0);">
                             <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#award"></use>
                         </svg>
                         Challenges
@@ -37,7 +37,7 @@
                 </li>
                 <li class="bg-black border border-secondary card-text list-group-item-dark list-group-item" title="Feedback">
                     <a class="list-group-item-text icon-link icon-link-hover" href="{% url 'feedback' %}#feedback">
-                        <svg class="bi text-ishar" aria-hidden="true" style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);">
+                        <svg class="bi text-ishar" aria-hidden="true" style="--bs-icon-link-transform: translate3d(0, -.3rem, 0);">
                             <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#flag"></use>
                         </svg>
                         Feedback
@@ -45,7 +45,7 @@
                 </li>
                 <li class="bg-black border border-secondary card-text list-group-item-dark list-group-item" title="Leaders">
                     <a class="list-group-item-text icon-link icon-link-hover" href="{% url 'leaders' %}#leaders">
-                        <svg class="bi text-ishar" aria-hidden="true" style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);">
+                        <svg class="bi text-ishar" aria-hidden="true" style="--bs-icon-link-transform: translate3d(0, -.3rem, 0);">
                             <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#trophy"></use>
                         </svg>
                         Leaders
@@ -53,7 +53,7 @@
                 </li>
                 <li class="bg-black border border-secondary card-text list-group-item-dark list-group-item" title="Password">
                     <a class="list-group-item-text icon-link icon-link-hover" href="{% url 'password' %}#password">
-                        <svg class="bi text-ishar" aria-hidden="true" style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);">
+                        <svg class="bi text-ishar" aria-hidden="true" style="--bs-icon-link-transform: translate3d(0, -.3rem, 0);">
                             <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#key"></use>
                         </svg>
                         Password
@@ -64,7 +64,7 @@
                         <input class="form-check-input" type="checkbox" role="switch" name="isPrivate" id="privateSwitch" value="{% if request.user.is_private %}true{% else %}false{% endif %}" onclick="togglePrivate(this.id);"{% if request.user.is_private %} checked{% endif %}>
                         <label class="form-check-label" for="privateSwitch">Private</label>
                         <a class="p-1 icon-link icon-link-hover" href="#" data-bs-toggle="tooltip" id="privateInfo" data-bs-title="The &quot;private&quot; setting limits the amount of information shown on your player's profile pages.">
-                            <svg class="bi text-secondary" aria-hidden="true" style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);">
+                            <svg class="bi text-secondary" aria-hidden="true" style="--bs-icon-link-transform: translate3d(0, -.3rem, 0);">
                                 <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#question-circle"></use>
                             </svg>
                         </a>
@@ -72,7 +72,7 @@
                 </li>
                 <li class="bg-black border border-secondary card-text list-group-item-dark list-group-item" title="Upgrades">
                     <a class="list-group-item-text icon-link icon-link-hover" href="{% url 'upgrades' %}#upgrades">
-                        <svg class="bi text-ishar" aria-hidden="true" style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);">
+                        <svg class="bi text-ishar" aria-hidden="true" style="--bs-icon-link-transform: translate3d(0, -.3rem, 0);">
                             <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#shield"></use>
                         </svg>
                         Upgrades
@@ -193,7 +193,7 @@
                 are the rewards points that you earn during each season! Essence is preserved across seasons,
                 and can be spent by typing &quot;<code>shop</code>&quot; any time."
         >
-            <svg class="bi text-secondary" aria-hidden="true" style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);">
+            <svg class="bi text-secondary" aria-hidden="true" style="--bs-icon-link-transform: translate3d(0, -.3rem, 0);">
                 <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#question-circle"></use>
             </svg>
         </button>
@@ -226,7 +226,7 @@
                 (<em>which can be &quot;bought&quot; with renown points in-game</em>)
                 <a href='{% url 'upgrades' %}#upgrades'>is available here</a>."
         >
-            <svg class="bi text-secondary" aria-hidden="true" style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);">
+            <svg class="bi text-secondary" aria-hidden="true" style="--bs-icon-link-transform: translate3d(0, -.3rem, 0);">
                 <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#question-circle"></use>
             </svg>
         </button>

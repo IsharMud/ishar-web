@@ -5,11 +5,21 @@
 {% block meta_url %}{% url 'latest_patch' %}#latest{% endblock meta_url %}
 {% block title %}Latest Patch{% endblock title %}
 {% block breadcrumbs %}
-    <li class="h2 bi bi-file-earmark-pdf breadcrumb-item" title="Patches">
-        <a href="{% url 'patches' %}#patches" id="patches">Patches</a>
+    <li class="breadcrumb-item h2" title="Patches">
+        <a class="icon-link icon-link-hover" href="{% url 'patches' %}#patches" style="--bs-icon-link-transform: translate3d(0, -.3rem, 0);">
+            <svg class="bi text-ishar" aria-hidden="true">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#bandaid"></use>
+            </svg>
+            <span id="patches">Patches</span>
+        </a>
     </li>
-    <li class="h2 breadcrumb-item active" aria-current="page" title="Latest Patch">
-        <a href="{% url 'latest_patch' %}#latest" id="latest">Latest</a>
+    <li class="h2 breadcrumb-item active" aria-current="page" title="Latest Patch" style="--bs-breadcrumb-divider: '';">
+        <a class="icon-link icon-link-hover" href="{% url 'latest_patch' %}#latest" style="--bs-icon-link-transform: translate3d(0, -.3rem, 0);">
+            <svg class="bi text-ishar" aria-hidden="true">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#file-earmark-pdf"></use>
+            </svg>
+            <span id="latest">Latest</span>
+        </a>
     </li>
 {% endblock breadcrumbs %}
 {% block content %}

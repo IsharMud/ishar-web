@@ -1,5 +1,6 @@
 {% extends "layout.html" %}
 {% load humanize %}
+{% load static %}
 {% block meta_title %}Events{% if GLOBAL_EVENT_COUNT > 0 %} ({{ GLOBAL_EVENT_COUNT }}){% endif %}{% endblock meta_title %}
 {% block meta_description %}
     {% if GLOBAL_EVENT_COUNT > 0 %}
@@ -11,13 +12,18 @@
 {% block meta_url %}{% url 'events' %}#events{% endblock meta_url %}
 {% block title %}Events{% endblock title %}
 {% block breadcrumbs %}
-    <li class="bi bi-calendar-event breadcrumb-item h2" title="Events">
-        <a href="{% url 'events' %}#events" id="events">
-            Events
+    <li class="breadcrumb-item h2" title="Events">
+        <a class="icon-link icon-link-hover" href="{% url 'events' %}#events" style="--bs-icon-link-transform: translate3d(0, -.3rem, 0);">
+            <svg class="bi text-ishar" aria-hidden="true">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#calendar-event"></use>
+            </svg>
+            <span id="events">
+                Events
+            </span>
         </a>
     </li>
-    <li class="breadcrumb-item active h5" title="{{ GLOBAL_EVENT_COUNT }} event{{ GLOBAL_EVENT_COUNT|pluralize }}">
-        <span class="align-middle badge bg-dark rounded-pill border border-secondary">
+    <li class="breadcrumb-item active h5" title="{{ GLOBAL_EVENT_COUNT }} event{{ GLOBAL_EVENT_COUNT|pluralize }}" style="--bs-breadcrumb-divider: '';">
+        <span class="badge bg-dark rounded-pill border border-secondary">
             {{ GLOBAL_EVENT_COUNT }}
         </span>
     </li>

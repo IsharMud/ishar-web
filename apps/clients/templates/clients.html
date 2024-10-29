@@ -6,8 +6,11 @@
 {% block title %}MUD Clients{% endblock title %}
 {% block scripts %}let focusTo = 'clients'{% endblock scripts %}
 {% block breadcrumbs %}
-    <li class="bi bi-terminal-split breadcrumb-item active h2" aria-current="page" title="MUD Clients">
-        <a href="{% url 'clients' %}#clients" id="clients">
+    <li class="breadcrumb-item active h2" aria-current="page" title="MUD Clients">
+        <a class="icon-link icon-link-hover" href="{% url 'clients' %}#clients" id="clients" style="--bs-icon-link-transform: translate3d(0, -.3rem, 0);">
+            <svg class="bi text-ishar" aria-hidden="true">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#terminal-split"></use>
+            </svg>
             MUD Clients
         </a>
     </li>
@@ -31,7 +34,7 @@
     {% for category in mud_client_categories %}
     <details class="d-sm-flex px-3" open>
         <summary id="category-{{ category.name | slugify }}" class="h4 text-ishar" title="{{ category.name }}">
-            <a class="anchor-link icon-link icon-link-hover" href="#category-{{ category.name | slugify }}" aria-label="Link to this section: MUD Client Category {{ category.name }} ({{ category.name | slugify }})" style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);">
+            <a class="anchor-link icon-link icon-link-hover" href="#category-{{ category.name | slugify }}" aria-label="Link to this section: MUD Client Category {{ category.name }} ({{ category.name | slugify }})" style="--bs-icon-link-transform: translate3d(0, -.3rem, 0);">
         {% if category.display_icon %}
                 {{ category.get_display_icon }}
         {% else %}
