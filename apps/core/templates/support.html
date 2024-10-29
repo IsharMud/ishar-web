@@ -5,9 +5,14 @@
 {% block meta_url %}{% url 'support' %}#support{% endblock meta_url %}
 {% block title %}Support {{ WEBSITE_TITLE }}{% endblock title %}
 {% block breadcrumbs %}
-    <li class="bi bi-heart breadcrumb-item active h2" aria-current="page" title="Support {{ WEBSITE_TITLE }}">
-        <a href="{% url 'support' %}#support" id="support">
-            Support {{ WEBSITE_TITLE }}
+    <li class="breadcrumb-item active h2" aria-current="page" title="Support {{ WEBSITE_TITLE }}">
+        <a class="icon-link icon-link-hover" href="{% url 'support' %}#support">
+            <svg class="bi text-ishar" aria-hidden="true" style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#heart"></use>
+            </svg>
+            <span id="support">
+                Support {{ WEBSITE_TITLE }}
+            </span>
         </a>
     </li>
 {% endblock breadcrumbs %}
@@ -16,18 +21,24 @@
         While you are more than welcome to offer support, {{ WEBSITE_TITLE }} is free to use, play, and enjoy!
     </p>
     <p class="lead">
-        Any contribution is simply for the development and maintenance of the game, and as a way to say "thank you".
+        Any contribution is simply for the development and maintenance of the game, and as a way to say &quot;<em>thank you</em>&quot;.
     </p>
-    <ul class="border-0 bg-black list-group list-group-vertical">
-        <li class="bg-black border-0 list-group-item">
-            <a href="https://www.patreon.com/bePatron?u=42650263" target="_blank" title="Become a Patron">
+    <div class="row">
+        <div class="col-md-auto">
+            <a class="icon-link icon-link-hover" href="https://www.patreon.com/bePatron?u=42650263" target="_blank" title="Become a Patron">
                 <img alt="Become A Patron" class="rounded" src="{% static "images/become-a-patron.png" %}" style="height: 3rem;">
+                <svg class="bi text-secondary" aria-hidden="true" style="--bs-icon-link-transform: none;">
+                    <use xlink:href="/static/bootstrap-icons/bootstrap-icons.svg#box-arrow-up-right"></use>
+                </svg>
             </a>
-        </li>
-        <li class="bg-black border-0 list-group-item">
-            <a href="https://www.buymeacoffee.com/ishar" target="_blank" title="Buy Me A Coffee">
+        </div>
+        <div class="col-md-auto">
+            <a class="icon-link icon-link-hover" href="https://www.buymeacoffee.com/ishar" target="_blank" title="Buy Me A Coffee">
                 <img alt="Buy Me A Coffee" class="rounded" src="{% static "images/buy-me-a-coffee.png" %}" style="height: 3rem;">
+                <svg class="bi text-secondary" aria-hidden="true" style="--bs-icon-link-transform: none;">
+                    <use xlink:href="/static/bootstrap-icons/bootstrap-icons.svg#box-arrow-up-right"></use>
+                </svg>
             </a>
-        </li>
-    </ul>
+        </div>
+    </div>
 {% endblock content %}

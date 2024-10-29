@@ -5,9 +5,14 @@
 {% block meta_url %}{% url 'faq' %}#faq{% endblock meta_url %}
 {% block title %}Frequently Asked Questions{% endblock title %}
 {% block breadcrumbs %}
-    <li class="bi bi-question-circle breadcrumb-item active h2" aria-current="page" title="Frequently Asked Questions">
-        <a href="{% url 'faq' %}#faq" id="faq">
-            Frequently Asked Questions
+    <li class="breadcrumb-item active h2" aria-current="page" title="Frequently Asked Questions">
+        <a class="icon-link icon-link-hover" href="{% url 'faq' %}#faq" style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);">
+            <svg class="bi text-ishar" aria-hidden="true">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#patch-question"></use>
+            </svg>
+            <span id="faq">
+                Frequently Asked Questions
+            </span>
         </a>
     </li>
 {% endblock breadcrumbs %}

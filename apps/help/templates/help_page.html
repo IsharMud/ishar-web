@@ -149,6 +149,9 @@
     <div class="m-1 p-1">
     {% if help_topics %}
         <h5 title="{{ help_topics|length }} topics" id="topics">
+            <a class="anchor-link" href="#topics" aria-label="Link to this section: Help Topics ({{ help_topics|length }} topics)">
+                &#x23;
+            </a>
             {{ help_topics|length }} topics
         </h5>
         <ul class="two-col">

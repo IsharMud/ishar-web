@@ -5,9 +5,14 @@
 {% block meta_url %}{% url 'history' %}#history{% endblock meta_url %}
 {% block title %}History{% endblock title %}
 {% block breadcrumbs %}
-    <li class="bi bi-clock-history breadcrumb-item h2 active" aria-current="page" title="History">
-        <a href="{% url 'history' %}#history" id="history">
-            History
+    <li class="breadcrumb-item active h2" aria-current="page" title="History">
+        <a class="icon-link icon-link-hover" href="{% url 'history' %}#history" style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);">
+            <svg class="bi text-ishar" aria-hidden="true">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#clock-history"></use>
+            </svg>
+            <span id="history">
+                History
+            </span>
         </a>
     </li>
 {% endblock breadcrumbs %}

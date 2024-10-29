@@ -177,8 +177,8 @@
 {% endif %}
 <hr>
 <details open>
-    <summary id="essence" class="text-ishar">
-        <a class="anchor-link h3" href="#essence" aria-label="Link to this section: Essence">
+    <summary class="text-ishar">
+        <a class="anchor-link h3" href="#essence" aria-label="Link to this section: Essence" id="essence">
             &#x23;
         </a>
         <h3 title="Essence">Essence</h3>
@@ -211,8 +211,8 @@
 </details>
 <hr>
 <details{% if request.user.upgrades.count > 0 %} open{% endif %}>
-    <summary id="upgrades" class="text-ishar">
-        <a class="anchor-link h3" href="#upgrades" aria-label="Link to this section: Account Upgrades">
+    <summary class="text-ishar">
+        <a class="anchor-link h3" href="#upgrades" aria-label="Link to this section: Account Upgrades" id="upgrades">
             &#x23;
         </a>
         <h3 title="Upgrades">Upgrades</h3>
@@ -256,20 +256,22 @@
 
 <hr>
 
-<details open>
-    <summary id="created" class="text-ishar" title="Account Created ({{ request.user.account_name }}): {{ request.user.created_at | naturaltime }}">
-        <a class="anchor-link h3" href="#created" aria-label="Link to this section: Account Created ({{ request.user.account_name }}): {{ request.user.created_at | naturaltime }}">
+<details class="row" open>
+    <summary class="text-ishar" title="Account Created ({{ request.user.account_name }}): {{ request.user.created_at | naturaltime }}">
+        <a class="anchor-link h3" href="#created" aria-label="Link to this section: Account Created ({{ request.user.account_name }}): {{ request.user.created_at | naturaltime }}" id="created">
             &#x23;
         </a>
         <h3>Created</h3>
     </summary>
-    <p>Your account was created:</p>
-    <blockquote class="blockquote">
+    <p class="col">Your account was created:</p>
+    <blockquote class="blockquote col">
         <p class="text-white" title="{{ request.user.created_at }}">
-            {{ request.user.created_at }}
+            <time datetime="{{ request.user.created_at|date:"c" }}">
+                {{ request.user.created_at }}
+            </time>
         </p>
         <footer class="blockquote-footer" title="{{ request.user.created_at | naturaltime }}">
-            {{ request.user.created_at | naturaltime }}
+            {{ request.user.created_at|naturaltime }}
         </footer>
     </blockquote>
 </details>

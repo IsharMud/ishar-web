@@ -42,8 +42,10 @@
         <li class="blockquote" title="{{ global_event.end_time | naturaltime }}">
             {{ global_event.end_time | naturaltime }}
         </li>
-        <li class="blockquote-footer" title="{{ global_event.end_time|date:"l, F jS, Y" }}">
-            {{ global_event.end_time|date:"l, F jS, Y" }}
+        <li class="blockquote-footer" title="{{ global_event.end_time }}">
+            <time datetime="{{ global_event.end_time|date:"c" }}">
+                {{ global_event.end_time }}
+            </time>
         </li>
 
         <li title="Started">
@@ -53,10 +55,12 @@
             </h5>
         </li>
         <li class="blockquote" title="{{ global_event.start_time | naturaltime }}">
-            {{ global_event.start_time | naturaltime }}
+            {{ global_event.start_time|naturaltime }}
         </li>
-        <li class="blockquote-footer" title="{{ global_event.start_time|date:"l, F jS, Y" }}">
-            {{ global_event.start_time|date:"l, F jS, Y" }}
+        <li class="blockquote-footer" title="{{ global_event.start_time }}">
+            <time datetime="{{ global_event.start_time|date:"c" }}">
+                {{ global_event.start_time }}
+            </time>
         </li>
 
     {% if global_event.xp_bonus and global_event.xp_bonus != '' and global_event.xp_bonus != 0 %}
@@ -98,7 +102,11 @@
         </li>
     {% endif %}
     </ul>
+
 </details>
+            {% if not forloop.last %}
+<hr>
+            {% endif %}
         {% endfor %}
     {% else %}
 <h3 title="Sorry!">

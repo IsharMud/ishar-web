@@ -27,8 +27,10 @@
     {% for submission in submissions %}
 <div class="border bg-black card p-1 m-1">
     <div class="card-header" title="{{ submission.get_submission_type_display }}: {{ submission.subject }} ({{ submission.vote_total }} vote{{ submission.vote_total|pluralize }})">
-        <a class="anchor-link" id="{{ submission.submission_id }}" href="#{{ submission.submission_id }}" aria-label="Link to this {{ submission.get_submission_type_display }}: {{ submission.subject }} ({{ submission.vote_total }} vote{{ submission.vote_total|pluralize }})">
-            <i class="bi bi-{{ submission.display_icon }} text-primary text-decoration-none"></i>
+        <a class="anchor-link icon-link icon-link-hover text-decoration-none" id="{{ submission.submission_id }}" href="#{{ submission.submission_id }}" aria-label="Link to this {{ submission.get_submission_type_display }}: {{ submission.subject }} ({{ submission.vote_total }} vote{{ submission.vote_total|pluralize }})">
+            <svg class="bi text-primary" aria-hidden="true" style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#{{ submission.display_icon }}"></use>
+            </svg>
         </a>
         <strong class="card-title h5" title="{{ submission.subject }}">
             {{ submission.subject }}
@@ -49,7 +51,15 @@
         <i class="text-secondary">
             {{ submission.submitted }}
         </i>
-        <button class="vote-button border-0 bg-transparent button px-1 bi bi-arrow-up-circle text-secondary" id="voteButton-{{ submission.submission_id }}" title="Vote up"></button>
+        <button
+            class="vote-button border-0 bg-transparent button icon-link icon-link-hover px-1 text-secondary"
+            id="voteButton-{{ submission.submission_id }}"
+            title="Vote up"
+        >
+            <svg class="bi" aria-hidden="true" style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#arrow-up-circle"></use>
+            </svg>
+        </button>
     </div>
 </div>
     {% endfor %}
@@ -70,12 +80,15 @@
 <div class="alert alert-dark alert-dismissible fade show m-3" role="alert" id="mail-alert">
     <p>
         Additionally, you are always more than welcome to reach out by e-mailing
-        <a class="code font-monospace icon-link" href="mailto:{{ ADMIN_EMAIL }}" target="_blank" style="" title="E-mail: {{ ADMIN_EMAIL }}">
-            {{ ADMIN_EMAIL }}
+        <a class="code font-monospace icon-link icon-link-hover" href="mailto:{{ ADMIN_EMAIL }}" target="_blank" style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);" title="E-mail: {{ ADMIN_EMAIL }}">
             <svg class="bi" aria-hidden="true">
                 <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#envelope-at"></use>
             </svg>
-        </a>
+            {{ ADMIN_EMAIL }}
+            <svg class="bi text-secondary" aria-hidden="true" style="--bs-icon-link-transform: none;">
+                <use xlink:href="/static/bootstrap-icons/bootstrap-icons.svg#box-arrow-up-right"></use>
+            </svg>
+        </a>.
     </p>
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>

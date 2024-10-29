@@ -20,18 +20,19 @@
         </div>
         <p class="d-flex justify-content-end">
             <a class="btn btn-ishar icon-link icon-link-hover" href="{% url 'news' %}?page=2#news"  style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);">
-                <svg class="bi text-ishar" aria-hidden="true">
+                <svg class="bi" aria-hidden="true">
                     <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#newspaper"></use>
                 </svg>
                 Past News
             </a>
         </p>
-        <footer class="blockquote-footer" title="{{ news.created | date:"l, F jS, Y" }}">
+        <footer class="blockquote-footer" title="{{ news.created|date:"l, F jS, Y" }} by {{ news.account.get_username | title }}">
             <cite>
                 {{ news.account.get_username | title }}
             </cite>
-            <span class="bi bi-pen"></span>
-            {{ news.created | date:"l, F jS, Y" }}
+            <time class="bi bi-pen" datetime="{{ news.created|date:"c" }}">
+                {{ news.created|date:"l, F jS, Y" }}
+            </time>
         </footer>
     </blockquote>
 </div>

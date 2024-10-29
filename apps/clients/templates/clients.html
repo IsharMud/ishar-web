@@ -31,7 +31,7 @@
     {% for category in mud_client_categories %}
     <details class="d-sm-flex px-3" open>
         <summary id="category-{{ category.name | slugify }}" class="h4 text-ishar" title="{{ category.name }}">
-            <a class="anchor-link" href="#category-{{ category.name | slugify }}" aria-label="Link to this section: MUD Client Category {{ category.name }} ({{ category.name | slugify }})">
+            <a class="anchor-link icon-link icon-link-hover" href="#category-{{ category.name | slugify }}" aria-label="Link to this section: MUD Client Category {{ category.name }} ({{ category.name | slugify }})" style="--bs-icon-link-transform: translate3d(0, -.125rem, 0);">
         {% if category.display_icon %}
                 {{ category.get_display_icon }}
         {% else %}
