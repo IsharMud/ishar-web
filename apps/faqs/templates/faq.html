@@ -46,10 +46,13 @@
         </a>
         {{ faq.question_text }}
     </summary>
-    <div class="mb-3 border-bottom">
+    <div class="mb-3">
         {% autoescape off %}{{ faq.question_answer }}{% endautoescape %}
     </div>
 </details>
+        {% if not forloop.last %}
+<hr>
+        {% endif %}
     {% endfor %}
 {% else %}
 <p class="lead">
@@ -59,12 +62,17 @@
 <div class="alert alert-dark alert-dismissible fade show" role="alert" id="faq-footer-alert">
     <p class="lead">
         If there is anything that you think is missing, please feel free to reach out, by e-mailing
-        <a class="code font-monospace icon-link" href="mailto:{{ ADMIN_EMAIL }}" target="_blank" style="" title="E-mail: {{ ADMIN_EMAIL }}">
-            {{ ADMIN_EMAIL }}
-            <svg class="bi" aria-hidden="true">
+        <a class="icon-link icon-link-hover" href="mailto:{{ ADMIN_EMAIL }}" target="_blank" title="E-mail: {{ ADMIN_EMAIL }}">
+            <svg class="bi text-primary" aria-hidden="true" style="--bs-icon-link-transform: translate3d(0, -.3rem, 0);">
                 <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#envelope-at"></use>
             </svg>
-        </a>
+            <span class="font-monospace small">
+                {{ ADMIN_EMAIL }}
+            </span>
+            <svg class="bi text-secondary" aria-hidden="true" style="--bs-icon-link-transform: none;">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#box-arrow-up-right"></use>
+            </svg>
+        </a>.
     </p>
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>

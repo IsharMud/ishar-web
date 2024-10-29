@@ -80,11 +80,13 @@
 <div class="alert alert-dark alert-dismissible fade show m-3" role="alert" id="mail-alert">
     <p>
         Additionally, you are always more than welcome to reach out by e-mailing
-        <a class="code font-monospace icon-link icon-link-hover" href="mailto:{{ ADMIN_EMAIL }}" target="_blank" style="--bs-icon-link-transform: translate3d(0, -.3rem, 0);" title="E-mail: {{ ADMIN_EMAIL }}">
+        <a class="icon-link icon-link-hover" href="mailto:{{ ADMIN_EMAIL }}" target="_blank" style="--bs-icon-link-transform: translate3d(0, -.3rem, 0);" title="E-mail: {{ ADMIN_EMAIL }}">
             <svg class="bi" aria-hidden="true">
                 <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#envelope-at"></use>
             </svg>
-            {{ ADMIN_EMAIL }}
+            <span class="font-monospace small">
+                {{ ADMIN_EMAIL }}
+            </span>
             <svg class="bi text-secondary" aria-hidden="true" style="--bs-icon-link-transform: none;">
                 <use xlink:href="/static/bootstrap-icons/bootstrap-icons.svg#box-arrow-up-right"></use>
             </svg>
