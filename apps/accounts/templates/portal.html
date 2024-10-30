@@ -105,9 +105,8 @@
 </div>
 
 {% if request.user.players and request.user.players.count > 0 %}
-    <p class="lead" title="You have {{ request.user.players.count }} character{{ request.user.players.count | pluralize }}.">
-        You have {{ request.user.players.count }}
-        character{{ request.user.players.count | pluralize }}:
+    <p class="lead" title="You have {{ request.user.players.count }} character{{ request.user.players.count|pluralize }}.">
+        You have {{ request.user.players.count }} character{{ request.user.players.count|pluralize }}:
     </p>
 
     {% for player in request.user.players.all %}
@@ -192,7 +191,7 @@
 {% endif %}
 <hr>
 <details open>
-    <summary class="text-ishar">
+    <summary>
         <a class="h4 icon-link icon-link-hover" href="#essence">
             <svg aria-hidden="false" class="bi" role="img" aria-label="Link to this section: Essence">
                 <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#link-45deg">
@@ -225,11 +224,11 @@
         </button>
     </summary>
     <ul class="bg-black list-group list-group-horizontal-sm">
-        <li class="bg-black border border-secondary list-group-item list-group-item-text text-white" title="Current: {{ request.user.current_essence }} essence">
+        <li class="bg-black list-group-item list-group-item-text" title="Current: {{ request.user.current_essence }} essence">
             <strong>Current</strong>:
             {{ request.user.current_essence }} essence
         </li>
-        <li class="bg-black border border-secondary list-group-item list-group-item-text text-white" title="Earned: {{ request.user.seasonal_earned }} essence">
+        <li class="bg-black list-group-item list-group-item-text" title="Earned: {{ request.user.seasonal_earned }} essence">
             <strong>Earned</strong>:
             {{ request.user.seasonal_earned }} essence
         </li>
@@ -237,7 +236,7 @@
 </details>
 <hr>
 <details{% if request.user.upgrades.count > 0 %} open{% endif %}>
-    <summary class="text-ishar">
+    <summary>
         <a class="h4 icon-link icon-link-hover" href="#upgrades">
             <svg aria-hidden="false" class="bi" role="img" aria-label="Link to this section: Upgrades ({{ request.user.upgrades.count }} upgrade{{ request.user.upgrades.count|pluralize }})">
                 <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#link-45deg">
@@ -265,7 +264,7 @@
         </button>
     </summary>
 {% if request.user.upgrades.all %}
-    <ul class="bg-black list-group list-group-unbordered border-0">
+    <ul class="bg-black list-group">
     {% for upgraded in request.user.upgrades.all %}
         <li class="bg-black list-group-item border-0" title="{{ upgraded.upgrade.name }} (x{{ upgraded.amount }})">
             <span class="text-secondary me-3">
@@ -290,21 +289,18 @@
 <hr>
 
 <details open>
-    <summary class="h4 text-ishar" title="Account Created ({{ request.user.account_name }}): {{ request.user.created_at|naturaltime }}">
-        <a class="icon-link icon-link-hover" href="#created">
+    <summary title="Account Created ({{ request.user.account_name }}): {{ request.user.created_at|naturaltime }}">
+        <a class="h4 icon-link icon-link-hover" href="#created">
             <svg aria-hidden="false" class="bi" role="img" aria-label="Link to this section: Account Created ({{ request.user.account_name }}): {{ request.user.created_at|naturaltime }}">
                 <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#link-45deg">
                 </use>
             </svg>
         </a>
-        <h4 id="created">
+        <h5 id="created">
             Created
-        </h4>
+        </h5>
     </summary>
-    <p>
-        <em>Your account was created:</em>
-    </p>
-    <blockquote class="blockquote">
+    <blockquote class="ms-3 blockquote">
         <p title="{{ request.user.created_at|naturaltime }}">
             {{ request.user.created_at|naturaltime }}
         </p>

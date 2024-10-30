@@ -39,7 +39,7 @@ button, textarea, select { border: 0.1rem solid var(--ishar-color); background-c
 textarea { white-space: break-spaces; background-color: #000; }
 input { border: 0.1rem solid var(--ishar-color); background-color: #000; color: var(--ishar-color); }
 h1, h2, h3, h4, h5, strong, th, label, th { color: var(--ishar-color); }
-summary h3, summary h4 { display: inline-block; }
+summary h3, summary h4, summary h5 { display: inline-block; }
 
 a { color: #09f; text-decoration: none; }
 a:active, a:visited { color: #6082b6; }
