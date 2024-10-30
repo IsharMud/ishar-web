@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% load static %}
 {% block meta_title %}Remort Upgrades{% endblock meta_title %}
 {% block meta_description %}Remort upgrades available to players, and their costs.{% endblock meta_description %}
 {% block meta_url %}{% url 'upgrades' %}#upgrades{% endblock meta_url %}
@@ -14,14 +15,24 @@
 <script src="https://cdn.datatables.net/buttons/3.1.2/js/buttons.colVis.js"></script>
 {% endblock includes %}
 {% block breadcrumbs %}
-    <li class="bi bi-shield breadcrumb-item h2" title="Portal">
-        <a href="{% url 'portal' %}#portal" id="portal">
-            Portal
+    <li class="breadcrumb-item h2" title="Portal">
+        <a class="icon-link icon-link-hover" href="{% url 'portal' %}#portal">
+            <svg class="bi" aria-hidden="true">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#person-lines-fill"></use>
+            </svg>
+            <span id="portal">
+                Portal
+            </span>
         </a>
     </li>
-    <li class="breadcrumb-item active h2" aria-current="page" title="Remort Upgrades">
-        <a href="{% url 'upgrades' %}#upgrades" id="upgrades">
-            Remort Upgrades
+    <li class="breadcrumb-item active h2" aria-current="page" title="Upgrades">
+        <a class="icon-link icon-link-hover" href="{% url 'upgrades' %}#upgrades">
+            <svg class="bi" aria-hidden="true">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#shield"></use>
+            </svg>
+            <span id="upgrades">
+                Upgrades
+            </span>
         </a>
     </li>
 {% endblock breadcrumbs %}

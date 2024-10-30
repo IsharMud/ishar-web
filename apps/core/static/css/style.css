@@ -1,14 +1,36 @@
-:root { --ishar-color: #fa7; }
+:root {--ishar-color: #fa7; }
+
 .border-ishar { border: 0.1rem solid var(--ishar-color); }
 .text-ishar { color: var(--ishar-color); }
-.navbar-expand-lg .navbar-nav .nav-link { color: var(--ishar-color); }
+
+.navbar, .navbar-expand-lg .navbar-nav .nav-link {
+    background-color: var(--bs-black);
+    color: var(--ishar-color);
+}
 
 .breadcrumb {
     --bs-breadcrumb-margin-bottom: 0;
     --bs-breadcrumb-divider: '•';
-    --bs-breadcrumb-divider-color: var(--ishar-color);
+    --bs-breadcrumb-divider-color: var(--bs-secondary);
 }
-.breadcrumb .bi { color: var(--ishar-color); }
+.icon-link-hover { --bs-icon-link-transform: translate3d(0, -.3rem, 0); }
+
+.breadcrumb-item .bi,
+.nav-link .bi,
+footer a .bi
+{
+    color: var(--bs-primary);
+}
+
+svg[role="img"] { color: var(--bs-primary); }
+svg[role="note"] { color: var(--bs-secondary); }
+
+a[target="_blank"] {
+    svg[role="img"] {
+        --bs-icon-link-transform: none;
+        color: var(--bs-secondary);
+    }
+}
 
 body { background-color: #323639; color: #d6d6d7; }
 .card-header, .card-title { color: var(--ishar-color); }
@@ -17,7 +39,7 @@ button, textarea, select { border: 0.1rem solid var(--ishar-color); background-c
 textarea { white-space: break-spaces; background-color: #000; }
 input { border: 0.1rem solid var(--ishar-color); background-color: #000; color: var(--ishar-color); }
 h1, h2, h3, h4, h5, strong, th, label, th { color: var(--ishar-color); }
-summary h3 { display: inline-block; }
+summary h3, summary h4 { display: inline-block; }
 
 a { color: #09f; text-decoration: none; }
 a:active, a:visited { color: #6082b6; }

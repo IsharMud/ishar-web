@@ -1,5 +1,6 @@
 from django.db import models
 from django.urls import reverse
+from django.templatetags.static import static
 from django.utils.html import format_html
 
 
@@ -83,7 +84,10 @@ class MUDClientCategory(models.Model):
     def get_display_icon(self) -> str:
         if self.display_icon:
             return format_html(
-                '<i class="bi bi-{}"></i>',
+                '<svg class="bi" aria-hidden="true">'
+                    '<use xlink:href="{}#{}"></use></svg>'
+                ,
+                static('bootstrap-icons/bootstrap-icons.svg'),
                 self.display_icon
             )
         return ''

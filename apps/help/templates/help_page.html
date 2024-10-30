@@ -104,14 +104,28 @@
     <div class="alert alert-dark alert-dismissible fade show" role="alert">
         <p class="m-1 p-1 lead">
             <strong>If you are new here</strong>, you may want to download one of many
-            <a href="{% url 'clients' %}#clients" title="MUD clients">MUD clients</a>,
-            see our <a href="{% url 'start' %}#start" title="getting started guide">getting started guide</a>, and
-            <a class="icon-link" href="{% url 'discord' %}" target="_blank" title="{{ WEBSITE_TITLE }} Discord">
-                join us on Discord
-                <svg class="bi text-secondary" aria-hidden="true">
+            <a class="icon-link icon-link-hover" href="{% url 'clients' %}#clients" title="MUD clients">
+                <svg class="bi" aria-hidden="true">
+                    <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#terminal-split"></use>
+                </svg>
+                MUD clients
+            </a>,
+            see our
+            <a class="icon-link icon-link-hover" href="{% url 'start' %}#start" title="getting started guide">
+                <svg class="bi" aria-hidden="true">
+                    <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#rocket-takeoff"></use>
+                </svg>
+                getting started guide
+            </a>, and
+            <a class="icon-link icon-link-hover" href="{% url 'discord' %}" target="_blank" title="Join us on Discord!">
+                <svg class="bi" aria-hidden="true">
                     <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#discord"></use>
                 </svg>
-            </a>
+                join us on Discord
+                <svg class="bi" aria-hidden="false" role="img" aria-label="Join {{ WEBSITE_TITLE }} Discord.">
+                    <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#box-arrow-up-right"></use>
+                </svg>
+            </a>.
         </p>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>

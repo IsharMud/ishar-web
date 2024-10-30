@@ -5,9 +5,14 @@
 {% block meta_url %}{% url 'start' %}#start{% endblock meta_url %}
 {% block title %}Get Started{% endblock title %}
 {% block breadcrumbs %}
-    <li class="bi bi-rocket-takeoff breadcrumb-item h2 active" aria-current="page" title="Get Started">
-        <a href="{% url 'start' %}#start" id="start">
-            Get Started
+    <li class="breadcrumb-item h2 active" aria-current="page" title="Get Started">
+        <a class="icon-link icon-link-hover" href="{% url 'start' %}#start">
+            <svg class="bi" aria-hidden="true">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#rocket-takeoff"></use>
+            </svg>
+            <span id="start">
+                Get Started
+            </span>
         </a>
     </li>
 {% endblock breadcrumbs %}
@@ -44,7 +49,7 @@
             Playing Ishar starts by
             <a class="icon-link" href="{% url 'connect' %}" target="_blank" title="Connect to {{ WEBSITE_TITLE }} via Mudslinger">
                 connecting to the game
-                <svg class="bi text-secondary" aria-hidden="true">
+                <svg class="bi" aria-hidden="false" role="img" aria-label="Open Mudslinger web client in a new window.">
                     <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#box-arrow-up-right"></use>
                 </svg>
             </a>

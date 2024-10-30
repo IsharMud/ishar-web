@@ -8,10 +8,18 @@
 {% block scripts %}let focusTo = 'feedback'{% endblock scripts %}
 {% block breadcrumbs %}
     <li class="bi bi-flag breadcrumb-item h2" title="Portal">
-        <a href="{% url 'portal' %}#portal" id="portal">Portal</a>
+        <a href="{% url 'portal' %}#portal">
+            <span id="portal">
+                Portal
+            </span>
+        </a>
     </li>
     <li class="breadcrumb-item active h2" aria-current="page" title="Feedback">
-        <a href="{% url 'feedback' %}#feedback" id="feedback">Feedback</a>
+        <a href="{% url 'feedback' %}#feedback">
+            <span id="feedback">
+                Feedback
+            </span>
+        </a>
     </li>
 {% endblock breadcrumbs %}
 {% block content %}
@@ -27,10 +35,8 @@
     {% for submission in submissions %}
 <div class="border bg-black card p-1 m-1">
     <div class="card-header" title="{{ submission.get_submission_type_display }}: {{ submission.subject }} ({{ submission.vote_total }} vote{{ submission.vote_total|pluralize }})">
-        <a class="anchor-link icon-link icon-link-hover text-decoration-none" id="{{ submission.submission_id }}" href="#{{ submission.submission_id }}" aria-label="Link to this {{ submission.get_submission_type_display }}: {{ submission.subject }} ({{ submission.vote_total }} vote{{ submission.vote_total|pluralize }})">
-            <svg class="bi text-primary" aria-hidden="true" style="--bs-icon-link-transform: translate3d(0, -.3rem, 0);">
-                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#{{ submission.display_icon }}"></use>
-            </svg>
+        <a class="anchor-link icon-link icon-link-hover" id="{{ submission.submission_id }}" href="#{{ submission.submission_id }}" aria-label="Link to this {{ submission.get_submission_type_display }}: {{ submission.subject }} ({{ submission.vote_total }} vote{{ submission.vote_total|pluralize }})">
+            {{ submission.get_display_icon }}
         </a>
         <strong class="card-title h5" title="{{ submission.subject }}">
             {{ submission.subject }}
@@ -56,7 +62,7 @@
             id="voteButton-{{ submission.submission_id }}"
             title="Vote up"
         >
-            <svg class="bi" aria-hidden="true" style="--bs-icon-link-transform: translate3d(0, -.3rem, 0);">
+            <svg class="bi" aria-hidden="true">
                 <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#arrow-up-circle"></use>
             </svg>
         </button>
@@ -78,16 +84,14 @@
 </div>
 {% endif %}
 <div class="alert alert-dark alert-dismissible fade show m-3" role="alert" id="mail-alert">
-    <p>
+    <p class="lead">
         Additionally, you are always more than welcome to reach out by e-mailing
-        <a class="icon-link icon-link-hover" href="mailto:{{ ADMIN_EMAIL }}" target="_blank" style="--bs-icon-link-transform: translate3d(0, -.3rem, 0);" title="E-mail: {{ ADMIN_EMAIL }}">
+        <a class="icon-link icon-link-hover" href="mailto:{{ ADMIN_EMAIL }}" target="_blank" title="E-mail: {{ ADMIN_EMAIL }}">
             <svg class="bi" aria-hidden="true">
                 <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#envelope-at"></use>
             </svg>
-            <span class="font-monospace small">
-                {{ ADMIN_EMAIL }}
-            </span>
-            <svg class="bi text-secondary" aria-hidden="true" style="--bs-icon-link-transform: none;">
+            <code><small>{{ ADMIN_EMAIL }}</small></code>
+            <svg class="bi" aria-hidden="false" role="img" aria-label="Send an e-mail to {{ ADMIN_EMAIL }}.">
                 <use xlink:href="/static/bootstrap-icons/bootstrap-icons.svg#box-arrow-up-right"></use>
             </svg>
         </a>.

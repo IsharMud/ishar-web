@@ -13,8 +13,8 @@
 {% block title %}Events{% endblock title %}
 {% block breadcrumbs %}
     <li class="breadcrumb-item h2" title="Events">
-        <a class="icon-link icon-link-hover" href="{% url 'events' %}#events" style="--bs-icon-link-transform: translate3d(0, -.3rem, 0);">
-            <svg class="bi text-ishar" aria-hidden="true">
+        <a class="icon-link icon-link-hover" href="{% url 'events' %}#events">
+            <svg class="bi" aria-hidden="true">
                 <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#calendar-event"></use>
             </svg>
             <span id="events">
@@ -32,7 +32,7 @@
     {% if global_events and GLOBAL_EVENT_COUNT > 0 %}
         {% for global_event in global_events %}
 <details open>
-    <summary title="{{ global_event.event_desc }}">
+    <summary class="text-secondary" title="{{ global_event.event_desc }}">
         <h4 class="d-inline-flex">
             {{ global_event.event_desc }}
         </h4>

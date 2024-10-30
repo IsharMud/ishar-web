@@ -1,18 +1,28 @@
 {% extends "layout.html" %}
+{% load static %}
 {% block meta_title %}Search{% if results %} ({{ results.count }} result{{ results.count|pluralize }}){% endif %}{% endblock meta_title %}
 {% block meta_description %}Search{% if results %} ({{ results.count }} result{{ results.count|pluralize }}){% endif %}{% endblock meta_description %}
 {% block meta_url %}{% url 'players' %}#search{% endblock meta_url %}
 {% block title %}Search{% if results %} ({{ results.count }} result{{ results.count|pluralize }}){% endif %}{% endblock title %}
 {% block breadcrumbs %}
-    <li class="h2 bi bi-person breadcrumb-item" title="Portal">
-        <a href="{% url 'portal' %}#portal" id="portal">
-            Portal
+    <li class="h2 breadcrumb-item" title="Portal">
+        <a class="icon-link icon-link-hover" href="{% url 'portal' %}#portal">
+            <svg class="bi" aria-hidden="true">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#person"></use>
+            </svg>
+            <span id="portal">
+                Portal
+            </span>
         </a>
     </li>
-    <li class="h2 bi bi-search breadcrumb-item{% if not results %} active" aria-current="page{% endif %}" title="Search">
-        <span class="bi bi-search text-ishar"></span>
-        <a href="{% url 'players' %}" id="search">
-            Search
+    <li class="h2 breadcrumb-item{% if not results %} active" aria-current="page{% endif %}" title="Search">
+        <a class="icon-link icon-link-hover" href="{% url 'players' %}">
+            <svg class="bi" aria-hidden="true">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#search"></use>
+            </svg>
+            <span id="search">
+                Search
+            </span>
         </a>
     </li>
     {% if results %}

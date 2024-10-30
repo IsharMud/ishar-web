@@ -6,17 +6,24 @@
 {% block title %}Patches{% endblock title %}
 {% block breadcrumbs %}
     <li class="breadcrumb-item h2{% if page_obj.number and page_obj.number == 1 %} active" aria-current="page{% endif %}" title="Patches">
-        <a class="icon-link icon-link-hover" href="{% url 'patches' %}#patches" style="--bs-icon-link-transform: translate3d(0, -.3rem, 0);">
-            <svg class="bi text-ishar" aria-hidden="true">
+        <a class="icon-link icon-link-hover" href="{% url 'patches' %}#patches">
+            <svg class="bi" aria-hidden="true">
                 <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#bandaid"></use>
             </svg>
-            <span id="patches">Patches</span>
+            <span id="patches">
+                Patches
+            </span>
         </a>
     </li>
     {% if page_obj.number and page_obj.number != 1 %}
     <li class="breadcrumb-item active h2" aria-current="page" title="Patches">
-        <a href="{% url 'patches' %}?page={{ page_obj.number }}#patches" id="page">
-            Page {{ page_obj.number }}
+        <a class="icon-link icon-link-hover" href="{% url 'patches' %}?page={{ page_obj.number }}#patches">
+            <svg class="bi" aria-hidden="true">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#file-earmark"></use>
+            </svg>
+            <span id="page">
+                Page {{ page_obj.number }}
+            </span>
         </a>
     </li>
     {% endif %}
@@ -41,8 +48,8 @@
     <blockquote class="blockquote">
         <p>
             <a class="icon-link" href="{{ patch.patch_file.url }}" target="_blank" title="{{ patch.patch_file.name }} &lt;{{ request.scheme }}://{{ request.META.HTTP_HOST }}{{ patch.patch_file.url }}&gt;">
-                {{ patch.patch_file.name }}
-                <svg class="bi text-secondary" aria-hidden="true">
+                <code>{{ patch.patch_file.name }}</code>
+                <svg class="bi" role="img" aria-hidden="false" aria-label="Open &quot;{{ patch.patch_name }}&quot; patch PDF in a new window.">
                     <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#box-arrow-up-right"></use>
                 </svg>
             </a>
@@ -63,6 +70,9 @@
         </footer>
     </blockquote>
 </details>
+            {% if not forloop.last%}
+<hr>
+            {% endif %}
         {% endfor %}
         {% if page_obj %}
 <hr>

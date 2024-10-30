@@ -7,11 +7,13 @@
 {% block scripts %}let focusTo = 'clients'{% endblock scripts %}
 {% block breadcrumbs %}
     <li class="breadcrumb-item active h2" aria-current="page" title="MUD Clients">
-        <a class="icon-link icon-link-hover" href="{% url 'clients' %}#clients" id="clients" style="--bs-icon-link-transform: translate3d(0, -.3rem, 0);">
-            <svg class="bi text-ishar" aria-hidden="true">
+        <a class="icon-link icon-link-hover" href="{% url 'clients' %}#clients">
+            <svg class="bi" aria-hidden="true">
                 <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#terminal-split"></use>
             </svg>
-            MUD Clients
+            <span id="clients">
+                MUD Clients
+            </span>
         </a>
     </li>
 {% endblock breadcrumbs %}
@@ -21,7 +23,7 @@
         While you can certainly enjoy the game via
         <a class="icon-link" href="{% url 'connect' %}" target="_blank" title="Mudslinger">
             the Mudslinger web client
-            <svg class="bi text-secondary" aria-hidden="true">
+            <svg class="bi" aria-hidden="false" role="img" aria-label="Open the Mudslinger web client in a new window.">
                 <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#box-arrow-up-right"></use>
             </svg>
         </a>,
@@ -34,7 +36,7 @@
     {% for category in mud_client_categories %}
     <details class="d-sm-flex px-3" open>
         <summary id="category-{{ category.name | slugify }}" class="h4 text-ishar" title="{{ category.name }}">
-            <a class="anchor-link icon-link icon-link-hover" href="#category-{{ category.name | slugify }}" aria-label="Link to this section: MUD Client Category {{ category.name }} ({{ category.name | slugify }})" style="--bs-icon-link-transform: translate3d(0, -.3rem, 0);">
+            <a class="anchor-link icon-link icon-link-hover" href="#category-{{ category.name | slugify }}" aria-label="Link to this section: MUD Client Category {{ category.name }} ({{ category.name | slugify }})">
         {% if category.display_icon %}
                 {{ category.get_display_icon }}
         {% else %}
@@ -49,7 +51,7 @@
             <li class="bi bi-dot border-0 bg-black list-group-item list-item-group-dark" title="{{ client.name }}">
                 <a class="list-group-item-text icon-link" href="{{ client.url }}" id="client-{{ client.name|slugify }}" target="_blank">
                     {{ client.name }}
-                    <svg class="bi text-secondary" aria-hidden="true">
+                    <svg class="bi" aria-hidden="false" role="img" aria-label="Open MUD client {{ client.name }} website in new window.">
                         <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#box-arrow-up-right"></use>
                     </svg>
                 </a>
@@ -66,9 +68,12 @@
         Do not be afraid to try a few, as they all have different strengths and weaknesses.
         After you download a client, tell it to connect to <code>isharmud.com</code> on
         port number <code>23</code> or <code>9999</code> to join the game.
-        Please check out our
-        <a href="{% url 'start' %}#start" title="getting started guide">getting started guide</a>
-        as well!
+        Please check out our <a class="icon-link icon-link-hover" href="{% url 'start' %}#start" title="getting started guide">
+            <svg class="bi" aria-hidden="true">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#rocket-takeoff"></use>
+            </svg>
+            getting started guide
+        </a> as well!
     </p>
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>

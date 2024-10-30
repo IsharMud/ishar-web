@@ -6,8 +6,15 @@
 {% block meta_url %}{% url 'portal' %}#portal{% endblock meta_url %}
 {% block title %}Portal{% endblock title %}
 {% block breadcrumbs %}
-    <li class="bi bi-person-lines-fill breadcrumb-item active h2" aria-current="page" title="Portal">
-        <a href="{% url 'portal' %}#portal" id="portal">Portal</a>
+    <li class="breadcrumb-item active h2" aria-current="page" title="Portal">
+        <a class="icon-link icon-link-hover" href="{% url 'portal' %}#portal">
+            <svg class="bi" aria-hidden="true">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#person-lines-fill"></use>
+            </svg>
+            <span id="portal">
+                Portal
+            </span>
+        </a>
     </li>
 {% endblock breadcrumbs %}
 {% block content %}
@@ -15,13 +22,13 @@
     <div class="card-body">
         <ul class="list-group list-group-horizontal-sm">
     {% if user.is_staff %}
-            <li class="bg-black border border-secondary card-text list-group-item-dark list-group-item" title="Admin">
+            <li class="bg-black border border-secondary card-text list-group-item-dark list-group-item" title="Administration">
                 <a class="list-group-item-text icon-link icon-link-hover" href="{% url 'admin:index' %}" target="_blank">
-                    <svg class="bi text-ishar" aria-hidden="true" style="--bs-icon-link-transform: translate3d(0, -.3rem, 0);">
+                    <svg class="bi" aria-hidden="true">
                         <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#gear"></use>
                     </svg>
-                    Admin
-                    <svg class="bi text-secondary" aria-hidden="true" style="--bs-icon-link-transform: none;">
+                    Administration
+                    <svg class="bi" aria-hidden="false" role="img" aria-label="Open {{ WEBSITE_TITLE }} Administration in a new window.">
                         <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#box-arrow-up-right"></use>
                     </svg>
                 </a>
@@ -29,7 +36,7 @@
     {% endif %}
                 <li class="bg-black border border-secondary card-text list-group-item-dark list-group-item" title="Challenges">
                     <a class="list-group-item-text icon-link icon-link-hover" href="{% url 'challenges' %}#challenges">
-                        <svg class="bi text-ishar" aria-hidden="true" style="--bs-icon-link-transform: translate3d(0, -.3rem, 0);">
+                        <svg class="bi" aria-hidden="true">
                             <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#award"></use>
                         </svg>
                         Challenges
@@ -37,7 +44,7 @@
                 </li>
                 <li class="bg-black border border-secondary card-text list-group-item-dark list-group-item" title="Feedback">
                     <a class="list-group-item-text icon-link icon-link-hover" href="{% url 'feedback' %}#feedback">
-                        <svg class="bi text-ishar" aria-hidden="true" style="--bs-icon-link-transform: translate3d(0, -.3rem, 0);">
+                        <svg class="bi" aria-hidden="true">
                             <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#flag"></use>
                         </svg>
                         Feedback
@@ -45,7 +52,7 @@
                 </li>
                 <li class="bg-black border border-secondary card-text list-group-item-dark list-group-item" title="Leaders">
                     <a class="list-group-item-text icon-link icon-link-hover" href="{% url 'leaders' %}#leaders">
-                        <svg class="bi text-ishar" aria-hidden="true" style="--bs-icon-link-transform: translate3d(0, -.3rem, 0);">
+                        <svg class="bi" aria-hidden="true">
                             <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#trophy"></use>
                         </svg>
                         Leaders
@@ -53,7 +60,7 @@
                 </li>
                 <li class="bg-black border border-secondary card-text list-group-item-dark list-group-item" title="Password">
                     <a class="list-group-item-text icon-link icon-link-hover" href="{% url 'password' %}#password">
-                        <svg class="bi text-ishar" aria-hidden="true" style="--bs-icon-link-transform: translate3d(0, -.3rem, 0);">
+                        <svg class="bi" aria-hidden="true">
                             <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#key"></use>
                         </svg>
                         Password
@@ -62,17 +69,25 @@
                 <li class="bg-black border border-secondary card-text list-group-item-dark list-group-item">
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" role="switch" name="isPrivate" id="privateSwitch" value="{% if request.user.is_private %}true{% else %}false{% endif %}" onclick="togglePrivate(this.id);"{% if request.user.is_private %} checked{% endif %}>
-                        <label class="form-check-label" for="privateSwitch">Private</label>
-                        <a class="p-1 icon-link icon-link-hover" href="#" data-bs-toggle="tooltip" id="privateInfo" data-bs-title="The &quot;private&quot; setting limits the amount of information shown on your player's profile pages.">
-                            <svg class="bi text-secondary" aria-hidden="true" style="--bs-icon-link-transform: translate3d(0, -.3rem, 0);">
+                        <label class="form-check-label" for="privateSwitch">
+                            Private
+                        </label>
+                        <button
+                            class="bg-black border-0 icon-link icon-link-hover p-1"
+                            data-bs-html="true"
+                            data-bs-title="<strong>Private?</strong>"
+                            data-bs-toggle="popover"
+                            data-bs-content="The &quot;<b>Private</b>&quot; setting hides your player's profile pages online."
+                            type="button">
+                            <svg class="bi" aria-hidden="false" role="note" aria-label="The &quot;private&quot; setting hides your player's profile pages online.">
                                 <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#question-circle"></use>
                             </svg>
-                        </a>
+                        </button>
                     </div>
                 </li>
                 <li class="bg-black border border-secondary card-text list-group-item-dark list-group-item" title="Upgrades">
                     <a class="list-group-item-text icon-link icon-link-hover" href="{% url 'upgrades' %}#upgrades">
-                        <svg class="bi text-ishar" aria-hidden="true" style="--bs-icon-link-transform: translate3d(0, -.3rem, 0);">
+                        <svg class="bi" aria-hidden="true">
                             <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#shield"></use>
                         </svg>
                         Upgrades
@@ -99,9 +114,9 @@
     <hr>
     <details>
 
-        <summary class="h3 text-ishar bg-black" title="Player: {{ player.name }}">
+        <summary class="h3 text-ishar" title="Player: {{ player.name }}">
             <span class="text-secondary">
-                {{  forloop.counter }}.
+                {{ forloop.counter }}.
             </span>
             <span class="{{ player.player_css }}">
                 {{ player.name }}
@@ -178,23 +193,34 @@
 <hr>
 <details open>
     <summary class="text-ishar">
-        <a class="anchor-link h3" href="#essence" aria-label="Link to this section: Essence" id="essence">
-            &#x23;
+        <a class="h4 icon-link icon-link-hover" href="#essence">
+            <svg aria-hidden="false" class="bi" role="img" aria-label="Link to this section: Essence">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#link-45deg">
+                </use>
+            </svg>
         </a>
-        <h3 title="Essence">Essence</h3>
+        <h3 id="essence" title="Essence">
+            Essence
+        </h3>
         <span class="badge bg-dark rounded-pill border border-secondary" title="{{ request.user.current_essence }} essence">
             {{ request.user.current_essence }}
         </span>
         <button
-            type="button" class="bg-black border-0 icon-link icon-link-hover p-1 text-secondary"
-            data-bs-toggle="popover" data-bs-html="true" data-bs-title="<strong>Essence?</strong>"
-            data-bs-content="&quot;<a title='Help: Essence'
-                href='{% url 'help_page' help_topic='Essence' %}#topic'>Essence</a>&quot;
-                are the rewards points that you earn during each season! Essence is preserved across seasons,
+            class="bg-black border-0 icon-link icon-link-hover p-1"
+            data-bs-toggle="popover"
+            data-bs-html="true"
+            data-bs-title="<strong>Essence?</strong>"
+            data-bs-content="&quot;<a title='Help: Essence' href='{% url 'help_page' help_topic='Essence' %}#topic'>Essence</a>&quot;
+                are rewards points earned each season. Essence is preserved across seasons,
                 and can be spent by typing &quot;<code>shop</code>&quot; any time."
-        >
-            <svg class="bi text-secondary" aria-hidden="true" style="--bs-icon-link-transform: translate3d(0, -.3rem, 0);">
-                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#question-circle"></use>
+            type="button">
+            <svg
+                aria-hidden="false"
+                aria-label="Essence are rewards points earned each season: {{ request.scheme }}://{{ request.META.HTTP_HOST }}{% url 'help_page' help_topic='Essence' %}#topic"
+                class="bi"
+                role="note">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#question-circle">
+                </use>
             </svg>
         </button>
     </summary>
@@ -212,21 +238,28 @@
 <hr>
 <details{% if request.user.upgrades.count > 0 %} open{% endif %}>
     <summary class="text-ishar">
-        <a class="anchor-link h3" href="#upgrades" aria-label="Link to this section: Account Upgrades" id="upgrades">
-            &#x23;
+        <a class="h4 icon-link icon-link-hover" href="#upgrades">
+            <svg aria-hidden="false" class="bi" role="img" aria-label="Link to this section: Upgrades ({{ request.user.upgrades.count }} upgrade{{ request.user.upgrades.count|pluralize }})">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#link-45deg">
+                </use>
+            </svg>
         </a>
-        <h3 title="Upgrades">Upgrades</h3>
-        <span class="badge bg-dark rounded-pill border border-secondary" title="{{ request.user.upgrades.count }} upgrade{{ request.user.upgrades.count|pluralize }}">
+        <h4 id="upgrades" title="Upgrades">
+            Upgrades
+        </h4>
+        <span class="badge bg-dark rounded-pill border border-secondary">
             {{ request.user.upgrades.count }}
         </span>
         <button
-            type="button" class="bg-black border-0 icon-link icon-link-hover p-1 text-secondary"
-            data-bs-toggle="popover" data-bs-html="true" data-bs-title="<strong>Remort Upgrades?</strong>"
-            data-bs-content="A list of player remort upgrades
-                (<em>which can be &quot;bought&quot; with renown points in-game</em>)
+            class="bg-black border-0 icon-link icon-link-hover p-1"
+            data-bs-toggle="popover"
+            data-bs-html="true"
+            data-bs-title="<strong>Upgrades?</strong>"
+            data-bs-content="A list of remort upgrades
+                (which can be &quot;bought&quot; with renown points in-game)
                 <a href='{% url 'upgrades' %}#upgrades'>is available here</a>."
-        >
-            <svg class="bi text-secondary" aria-hidden="true" style="--bs-icon-link-transform: translate3d(0, -.3rem, 0);">
+            type="button">
+            <svg class="bi" aria-hidden="false" role="note" aria-label="Remort Upgrades: {{ request.scheme }}://{{ request.META.HTTP_HOST }}{% url 'upgrades' %}#upgrades">
                 <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#question-circle"></use>
             </svg>
         </button>
@@ -236,19 +269,19 @@
     {% for upgraded in request.user.upgrades.all %}
         <li class="bg-black list-group-item border-0" title="{{ upgraded.upgrade.name }} (x{{ upgraded.amount }})">
             <span class="text-secondary me-3">
-                {{  forloop.counter }}.
+                {{ forloop.counter }}.
             </span>
-            <span class="list-group-item-text text-white">
+            <span class="list-group-item-text">
                 {{ upgraded.upgrade.name }}
             </span>
-            <span class="badge bg-dark text-ishar rounded-pill">
-                {{ upgraded.amount }}
+            <span class="badge bg-dark border border-secondary text-ishar rounded-pill">
+                x{{ upgraded.amount }}
             </span>
         </li>
     {% endfor %}
     </ul>
 {% else %}
-    <p class="fst-italic text-reset" title="You have not purchased any upgrades.">
+    <p class="fst-italic" title="You have not purchased any upgrades.">
         You have not purchased any upgrades.
     </p>
 {% endif %}
@@ -256,22 +289,29 @@
 
 <hr>
 
-<details class="row" open>
-    <summary class="text-ishar" title="Account Created ({{ request.user.account_name }}): {{ request.user.created_at | naturaltime }}">
-        <a class="anchor-link h3" href="#created" aria-label="Link to this section: Account Created ({{ request.user.account_name }}): {{ request.user.created_at | naturaltime }}" id="created">
-            &#x23;
+<details open>
+    <summary class="h4 text-ishar" title="Account Created ({{ request.user.account_name }}): {{ request.user.created_at|naturaltime }}">
+        <a class="icon-link icon-link-hover" href="#created">
+            <svg aria-hidden="false" class="bi" role="img" aria-label="Link to this section: Account Created ({{ request.user.account_name }}): {{ request.user.created_at|naturaltime }}">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#link-45deg">
+                </use>
+            </svg>
         </a>
-        <h3>Created</h3>
+        <h4 id="created">
+            Created
+        </h4>
     </summary>
-    <p class="col">Your account was created:</p>
-    <blockquote class="blockquote col">
-        <p class="text-white" title="{{ request.user.created_at }}">
+    <p>
+        <em>Your account was created:</em>
+    </p>
+    <blockquote class="blockquote">
+        <p title="{{ request.user.created_at|naturaltime }}">
+            {{ request.user.created_at|naturaltime }}
+        </p>
+        <footer class="blockquote-footer" title="{{ request.user.created_at }}">
             <time datetime="{{ request.user.created_at|date:"c" }}">
                 {{ request.user.created_at }}
             </time>
-        </p>
-        <footer class="blockquote-footer" title="{{ request.user.created_at | naturaltime }}">
-            {{ request.user.created_at|naturaltime }}
         </footer>
     </blockquote>
 </details>
@@ -290,26 +330,26 @@
         const item = document.getElementById(itemId);
 
         // Set up confirmation text.
-        var messageText = "";
+        let messageText = "";
         const msgDiv = document.getElementById("privateMsgDiv");
         const msgNode = document.getElementById("privateMsgNode");
 
         // Change value, and format text when either making...
 
         // Public.
-        if (item.value == "true") {
+        if (item.value === "true") {
             item.value = false;
-            var messageText = "public";
+            messageText = "public";
             msgNode.classList.remove("message-success");
             msgNode.classList.add("message-warning");
 
         // Private.
-        } else if (item.value == "false") {
+        } else if (item.value === "false") {
             item.value = true;
-            var messageText = "private";
+            messageText = "private";
             msgNode.classList.remove("message-warning");
             msgNode.classList.add("message-success");
-        };
+        }
 
         // POST request to HTTPS endpoint to toggle profile privacy.
         const xhr = new XMLHttpRequest();
@@ -320,9 +360,9 @@
         xhr.onreadystatechange = () => {
             if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
                 msgDiv.style.display = 'block';
-                msgNode.innerHTML = `Your profile has been made <b><em>${messageText}</em></b>.`
+                msgNode.innerHTML = `Your profile has been made <b>${messageText}</b>.`
                 setTimeout(function() { msgNode.innerHTML = ""; msgDiv.style.display = 'none'; }, 5*1000);
-            };
+            }
         };
 
         // Include CSRF token in the POST request.

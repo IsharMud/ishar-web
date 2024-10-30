@@ -19,7 +19,7 @@
             {% autoescape off %}{{ news.body }}{% endautoescape %}
         </div>
         <p class="d-flex justify-content-end">
-            <a class="btn btn-ishar icon-link icon-link-hover" href="{% url 'news' %}?page=2#news"  style="--bs-icon-link-transform: translate3d(0, -.3rem, 0);">
+            <a class="btn btn-ishar icon-link" href="{% url 'news' %}?page=2#news">
                 <svg class="bi" aria-hidden="true">
                     <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#newspaper"></use>
                 </svg>
@@ -77,7 +77,9 @@
         <div class="col">
             <p>
                 Play for free by connecting with any
-                <a href="{% url 'clients' %}#clients">MUD client</a> to:
+                <a class="icon-link icon-link-hover" href="{% url 'clients' %}#clients">
+                    MUD client
+                </a> to:
             </p>
         </div>
         <div class="col">

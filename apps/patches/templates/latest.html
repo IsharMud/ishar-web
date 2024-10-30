@@ -6,16 +6,16 @@
 {% block title %}Latest Patch{% endblock title %}
 {% block breadcrumbs %}
     <li class="breadcrumb-item h2" title="Patches">
-        <a class="icon-link icon-link-hover" href="{% url 'patches' %}#patches" style="--bs-icon-link-transform: translate3d(0, -.3rem, 0);">
-            <svg class="bi text-ishar" aria-hidden="true">
+        <a class="icon-link icon-link-hover" href="{% url 'patches' %}#patches">
+            <svg class="bi" aria-hidden="true">
                 <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#bandaid"></use>
             </svg>
             <span id="patches">Patches</span>
         </a>
     </li>
-    <li class="h2 breadcrumb-item active" aria-current="page" title="Latest Patch" style="--bs-breadcrumb-divider: '';">
-        <a class="icon-link icon-link-hover" href="{% url 'latest_patch' %}#latest" style="--bs-icon-link-transform: translate3d(0, -.3rem, 0);">
-            <svg class="bi text-ishar" aria-hidden="true">
+    <li class="h2 breadcrumb-item active" aria-current="page" title="Latest Patch">
+        <a class="icon-link icon-link-hover" href="{% url 'latest_patch' %}#latest">
+            <svg class="bi" aria-hidden="true">
                 <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#file-earmark-pdf"></use>
             </svg>
             <span id="latest">Latest</span>
@@ -32,7 +32,7 @@
     <div class="card-footer">
         <span class="blockquote-footer">
             <a class="icon-link" href="{{ patches.0.get_absolute_url }}" target="_blank" title="{{ patches.0.patch_file.name }} &lt;{{ request.scheme }}://{{ request.META.HTTP_HOST }}{{ patches.0.patch_file.url }}&gt;">
-                {{ patches.0.patch_file.name }}
+                <code>{{ patches.0.patch_file.name }}</code>
                 <svg class="bi" aria-hidden="true">
                     <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#box-arrow-up-right"></use>
                 </svg>

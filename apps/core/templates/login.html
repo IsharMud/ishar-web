@@ -1,13 +1,19 @@
 {% extends "layout.html" %}
+{% load static %}
 {% block meta_title %}Log In{% endblock meta_title %}
 {% block meta_description %}Log In{% endblock meta_description %}
 {% block meta_url %}{% url 'login' %}#login{% endblock meta_url %}
 {% block title %}Log In{% endblock title %}
 {% block scripts %}let focusTo = 'id_username'{% endblock scripts %}
 {% block breadcrumbs %}
-    <li class="bi bi-door-open breadcrumb-item active h2" aria-current="page" title="Log In">
-        <a href="{% url 'login' %}#portal" id="portal">
-            Log In
+    <li class="breadcrumb-item active h2" aria-current="page" title="Log In">
+        <a class="icon-link icon-link-hover" href="{% url 'login' %}#portal">
+            <svg class="bi" aria-hidden="true">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#door-open"></use>
+            </svg>
+            <span id="portal">
+                Log In
+            </span>
         </a>
     </li>
 {% endblock breadcrumbs %}
