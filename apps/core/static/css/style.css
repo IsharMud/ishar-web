@@ -3,7 +3,9 @@
 .border-ishar { border: 0.1rem solid var(--ishar-color); }
 .text-ishar { color: var(--ishar-color); }
 
-.navbar, .navbar-expand-lg .navbar-nav .nav-link {
+.navbar, .navbar-expand-lg .navbar-nav .nav-link,
+.list-group a .bi
+{
     background-color: var(--bs-black);
     color: var(--ishar-color);
 }
