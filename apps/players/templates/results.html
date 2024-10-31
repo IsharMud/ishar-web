@@ -8,7 +8,7 @@
     <li class="h2 breadcrumb-item" title="Portal">
         <a class="icon-link icon-link-hover" href="{% url 'portal' %}#portal">
             <svg class="bi" aria-hidden="true">
-                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#person"></use>
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#person-gear"></use>
             </svg>
             <span id="portal">
                 Portal
@@ -38,7 +38,7 @@
         <h5 title="{{ results.count }} result{{ results.count|pluralize }}">
             {{ results.count }} result{{ results.count|pluralize }}
         </h5>
-        <ul class="bg-dark list-group list-group-dark w-50">
+        <ul class="bg-dark list-group w-50">
         {% for player in results %}
             <li class="bg-black border border-secondary list-group-item list-group-item-text" title="Player: {{ player.name }}">
                 <strong>{{ forloop.counter }}.</strong>

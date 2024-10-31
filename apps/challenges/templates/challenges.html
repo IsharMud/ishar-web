@@ -1,5 +1,6 @@
 {% extends "layout.html" %}
 {% load humanize %}
+{% load static %}
 {% block meta_title %}Challenges{% endblock meta_title %}
 {% block meta_description %}Challenges currently available, A.{% endblock meta_description %}
 {% block meta_url %}{% url 'challenges' %}#challenges{% endblock meta_url %}
@@ -12,12 +13,24 @@
 {% endblock includes %}
 {% block scripts %}let focusTo = 'challenges'{% endblock scripts %}
 {% block breadcrumbs %}
-    <li class="bi bi-award breadcrumb-item h2" title="Portal">
-        <a href="{% url 'portal' %}#portal" id="portal">Portal</a>
+    <li class="breadcrumb-item h2" title="Portal">
+        <a class="icon-link icon-link-hover" href="{% url 'portal' %}#portal">
+            <svg class="bi" aria-hidden="true">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#person-gear"></use>
+            </svg>
+            <span id="portal">
+                Portal
+            </span>
+        </a>
     </li>
     <li class="breadcrumb-item active h2" aria-current="page" title="Challenges">
-        <a href="{% url 'challenges' %}#challenges" id="challenges">
-            Challenges
+        <a class="icon-link icon-link-hover" href="{% url 'challenges' %}#challenges">
+            <svg class="bi" aria-hidden="true">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#award"></use>
+            </svg>
+            <span id="challenges">
+                Challenges
+            </span>
         </a>
     </li>
 {% endblock breadcrumbs %}
@@ -27,7 +40,11 @@
     <table class="table table-hover table-dark table-flush table-sm table-responsive table-striped" id="challengesTable">
         {% if CURRENT_SEASON %}
         <caption class="caption-top" id="cycle">
-            <a class="bi bi-recycle anchor-link" href="#cycle" aria-label="Link to this section: Next Cycle: {{ CURRENT_SEASON.get_next_cycle | naturaltime }} ({{ CURRENT_SEASON.get_next_cycle }})"></a>
+            <a class="anchor-link icon-link icon-link-hover" href="#cycle">
+                <svg class="bi" aria-hidden="false" role="img" aria-label="Link to this section: Next Cycle: {{ CURRENT_SEASON.get_next_cycle|naturaltime }} ({{ CURRENT_SEASON.get_next_cycle }})">
+                    <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#recycle"></use>
+                </svg>
+            </a>
             Challenges will next cycle <strong>{{ CURRENT_SEASON.get_next_cycle | naturaltime }}</strong> at
             <time class="fst-italic" datetime="{{ CURRENT_SEASON.get_next_cycle|date:"c" }}">
                 {{ CURRENT_SEASON.get_next_cycle }}

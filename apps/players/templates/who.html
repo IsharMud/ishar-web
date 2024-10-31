@@ -18,7 +18,7 @@
         {{ players | length }} player{{ players|pluralize }} online
     </h3>
     <div class="m-3">
-        <ol class="bg-dark list-group list-group-dark list-group-striped w-50">
+        <ol class="bg-dark list-group list-group-striped w-50">
         {% for player in players.all %}
             <li class="bg-dark border-secondary list-group-item list-group-item-text text-white" title="{{ player.player_name }}">
                 <strong>{{ forloop.counter }}.</strong>
