@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% load static %}
 {% block meta_title %}Leaders{% if game_type %} / {{ game_type }}{% endif %}{% endblock meta_title %}
 {% block meta_description %}Leader board of top{% if game_type %} {{ game_type|lower }}{% endif %} players of the game and their achievements{% endblock meta_description %}
 {% block meta_url %}{% url 'leaders' %}{% endblock meta_url %}
@@ -16,12 +17,24 @@
     <script src="https://cdn.datatables.net/responsive/3.0.3/js/dataTables.responsive.min.js"></script>
 {% endblock includes %}
 {% block breadcrumbs %}
-    <li class="bi bi-trophy breadcrumb-item h2" title="Portal">
-        <a href="{% url 'portal' %}#portal" id="portal">Portal</a>
+    <li class="breadcrumb-item h2" title="Portal">
+        <a class="icon-link icon-link-hover" href="{% url 'portal' %}#portal">
+            <svg class="bi" aria-hidden="true">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#person-lines-fill"></use>
+            </svg>
+            <span id="portal">
+                Portal
+            </span>
+        </a>
     </li>
-    <li class="h2 breadcrumb-item{% if not game_type %} active" aria-current="page{% endif %}" title="Leaders">
-        <a href="{% url 'leaders' %}#leaders" id="leaders">
-            Leaders
+    <li class="breadcrumb-item h2{% if not game_type %} active" aria-current="page{% endif %}" title="Leaders">
+        <a class="icon-link icon-link-hover" href="{% url 'leaders' %}#leaders">
+            <svg class="bi" aria-hidden="true">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#trophy"></use>
+            </svg>
+            <span id="leaders">
+                Leaders
+            </span>
         </a>
     </li>
     {% if game_type %}
@@ -35,7 +48,7 @@
 {% block content %}
 <div class="container-fluid">
     <ul class="list-group list-group-horizontal-sm">
-        <li class="list-group-item bg-black card-text" title="All" id="all">
+        <li class="list-group-item card-text" title="All" id="all">
     {% if game_type is None %}
             <span class="text-ishar">All</span>
     {% else %}
@@ -43,7 +56,7 @@
     {% endif %}
         </li>
     {% for num, name in game_types %}
-        <li class="list-group-item bg-black card-text" title="{{ name }}" id="{{ name|lower }}">
+        <li class="list-group-item card-text" title="{{ name }}" id="{{ name|lower }}">
         {% if game_type == num %}
             <span class="text-ishar">{{ name }}</span>
         {% else %}

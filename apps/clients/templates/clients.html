@@ -45,10 +45,10 @@
             </a>
             {{ category.name }}
         </summary>
-        <ul class="border-0 border-secondary bg-black list-group list-group-dark">
+        <ul class="list-group pb-3 mb-3">
         {% for client in category.clients.all %}
             {% if client.is_visible %}
-            <li class="bi bi-dot border-0 bg-black list-group-item list-item-group-dark" title="{{ client.name }}">
+            <li class="list-group-item" title="{{ client.name }}">
                 <a class="list-group-item-text icon-link" href="{{ client.url }}" id="client-{{ client.name|slugify }}" target="_blank">
                     {{ client.name }}
                     <svg class="bi" aria-hidden="false" role="img" aria-label="Open MUD client {{ client.name }} website in new window.">

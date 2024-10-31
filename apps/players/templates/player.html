@@ -140,8 +140,8 @@
         </summary>
         <ol class="list-group list-group-vertical list-group-numbered">
                     {% for upgraded in player.upgrades.all %}
-            <li class="border-0 bg-black list-group-item list-group-item-dark" title="{{ upgraded.upgrade.display_name }}{% if upgraded.value > 1 %} (x{{ upgraded.value }}){% endif %}">
-                <span class="list-group-item-text text-white">
+            <li class="border-0 bg-black list-group-item" title="{{ upgraded.upgrade.display_name }}{% if upgraded.value > 1 %} (x{{ upgraded.value }}){% endif %}">
+                <span class="list-group-item-text">
                     {{ upgraded.upgrade.display_name }}
                 </span>
                         {% if upgraded.value > 1 %}
@@ -171,7 +171,7 @@
         </summary>
         <ol class="list-group list-group-horizontal-sm">
                     {% for stat_name, stat_value in player.player_stats.items %}
-            <li class="border border-secondary bg-black list-group-item list-group-item-dark" title="{{ stat_name }}: {{ stat_value }}">
+            <li class="bg-black list-group-item" title="{{ stat_name }}: {{ stat_value }}">
                 <span class="list-group-item-text text-white{% if forloop.first %} fw-bold{% endif %}">
                     <span class="text-ishar">
                         {{ stat_name }}

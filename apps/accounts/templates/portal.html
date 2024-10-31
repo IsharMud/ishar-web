@@ -18,11 +18,11 @@
     </li>
 {% endblock breadcrumbs %}
 {% block content %}
-<div class="bg-black border-0 card">
+<div class="card border-0">
     <div class="card-body">
         <ul class="list-group list-group-horizontal-sm">
     {% if user.is_staff %}
-            <li class="bg-black border border-secondary card-text list-group-item-dark list-group-item" title="Administration">
+            <li class="card-text list-group-item" title="Administration">
                 <a class="list-group-item-text icon-link icon-link-hover" href="{% url 'admin:index' %}" target="_blank">
                     <svg class="bi" aria-hidden="true">
                         <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#gear"></use>
@@ -34,7 +34,7 @@
                 </a>
             </li>
     {% endif %}
-                <li class="bg-black border border-secondary card-text list-group-item-dark list-group-item" title="Challenges">
+                <li class="card-text list-group-item" title="Challenges">
                     <a class="list-group-item-text icon-link icon-link-hover" href="{% url 'challenges' %}#challenges">
                         <svg class="bi" aria-hidden="true">
                             <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#award"></use>
@@ -42,7 +42,7 @@
                         Challenges
                     </a>
                 </li>
-                <li class="bg-black border border-secondary card-text list-group-item-dark list-group-item" title="Feedback">
+                <li class="card-text list-group-item" title="Feedback">
                     <a class="list-group-item-text icon-link icon-link-hover" href="{% url 'feedback' %}#feedback">
                         <svg class="bi" aria-hidden="true">
                             <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#flag"></use>
@@ -50,7 +50,7 @@
                         Feedback
                     </a>
                 </li>
-                <li class="bg-black border border-secondary card-text list-group-item-dark list-group-item" title="Leaders">
+                <li class="card-text list-group-item" title="Leaders">
                     <a class="list-group-item-text icon-link icon-link-hover" href="{% url 'leaders' %}#leaders">
                         <svg class="bi" aria-hidden="true">
                             <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#trophy"></use>
@@ -58,7 +58,7 @@
                         Leaders
                     </a>
                 </li>
-                <li class="bg-black border border-secondary card-text list-group-item-dark list-group-item" title="Password">
+                <li class="card-text list-group-item" title="Password">
                     <a class="list-group-item-text icon-link icon-link-hover" href="{% url 'password' %}#password">
                         <svg class="bi" aria-hidden="true">
                             <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#key"></use>
@@ -66,7 +66,7 @@
                         Password
                     </a>
                 </li>
-                <li class="bg-black border border-secondary card-text list-group-item-dark list-group-item">
+                <li class="card-text list-group-item">
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" role="switch" name="isPrivate" id="privateSwitch" value="{% if request.user.is_private %}true{% else %}false{% endif %}" onclick="togglePrivate(this.id);"{% if request.user.is_private %} checked{% endif %}>
                         <label class="form-check-label" for="privateSwitch">
@@ -85,7 +85,7 @@
                         </button>
                     </div>
                 </li>
-                <li class="bg-black border border-secondary card-text list-group-item-dark list-group-item" title="Upgrades">
+                <li class="card-text list-group-item" title="Upgrades">
                     <a class="list-group-item-text icon-link icon-link-hover" href="{% url 'upgrades' %}#upgrades">
                         <svg class="bi" aria-hidden="true">
                             <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#shield"></use>
@@ -110,7 +110,6 @@
     </p>
 
     {% for player in request.user.players.all %}
-    <hr>
     <details>
 
         <summary class="h3 text-ishar" title="Player: {{ player.name }}">
@@ -127,69 +126,70 @@
         </h4>
 
         {% if not player.is_immortal %}
-        <ol class="bg-black list-group list-group-horizontal-sm">
-            <li class="bg-black border border-secondary list-group-item list-group-item-text list-group-item-dark text-white" title="Level: {{ player.common.level }}">
+        <ol class="list-group list-group-horizontal-sm">
+            <li class="list-group-item list-group-item-text" title="Level: {{ player.common.level }}">
                 <strong>Level</strong>:
                 {{ player.common.level }}
             </li>
-            <li class="bg-black border border-secondary list-group-item list-group-item-dark list-group-item-text text-white" title="Class: {{ player.common.player_class.get_class_name }}">
+            <li class="list-group-item list-group-item-text" title="Class: {{ player.common.player_class.get_class_name }}">
                 <strong>Class</strong>:
                 {{ player.common.player_class.get_class_name }}
             </li>
-            <li class="bg-black border border-secondary list-group-item list-group-item-dark list-group-item-text text-white" title="Race: {{ player.common.race.display_name }}">
+            <li class="list-group-item list-group-item-text" title="Race: {{ player.common.race.display_name }}">
                 <strong>Race</strong>:
                 {{ player.common.race.display_name }}
             </li>
-            <li class="bg-black border border-secondary list-group-item list-group-item-dark list-group-item-text text-white" title="Alignment: {{ player.get_player_alignment }} ({{ player.common.alignment }})">
+            <li class="list-group-item list-group-item-text" title="Alignment: {{ player.get_player_alignment }} ({{ player.common.alignment }})">
                 <strong>Alignment</strong>:
                 {{ player.get_player_alignment }}
             </li>
             {% if player.remorts > 0 %}
-            <li class="bg-black border border-secondary list-group-item list-group-item-dark list-group-item-text text-white" title="Remorts: {{ player.remorts }}">
+            <li class="list-group-item list-group-item-text" title="Remorts: {{ player.remorts }}">
                 <strong>Remorts</strong>:
                 {{ player.remorts }}
             </li>
                 {% endif %}
                 {% if player.statistics.total_renown > 0 %}
-            <li class="bg-black border border-secondary list-group-item list-group-item-dark list-group-item-text text-white" title="Total Renown: {{ player.statistics.total_renown }}">
+            <li class="list-group-item list-group-item-text" title="Total Renown: {{ player.statistics.total_renown }}">
                 <strong>Total Renown</strong>:
                 {{ player.statistics.total_renown }}
             </li>
                 {% endif %}
                 {% if player.statistics.total_quests > 0 %}
-            <li class="bg-black border border-secondary list-group-item list-group-item-dark list-group-item-text text-white" title="Total Quests: {{ player.statistics.total_quests }}">
+            <li class="list-group-item list-group-item-text" title="Total Quests: {{ player.statistics.total_quests }}">
                 <strong>Total Quests</strong>:
                 {{ player.statistics.total_quests }}
             </li>
                 {% endif %}
                 {% if player.statistics.total_challenges > 0 %}
-            <li class="bg-black border border-secondary list-group-item list-group-item-dark list-group-item-text text-white" title="Total Challenges: {{ player.statistics.total_challenges }}">
+            <li class="list-group-item list-group-item-text" title="Total Challenges: {{ player.statistics.total_challenges }}">
                 <strong>Total Challenges</strong>:
                 {{ player.statistics.total_challenges }}
             </li>
                 {% endif %}
                 {% if player.statistics.total_deaths > 0 %}
-            <li class="bg-black border border-secondary list-group-item list-group-item-dark list-group-item-text text-white" title="Total Deaths: {{ player.statistics.total_deaths }}">
+            <li class="list-group-item list-group-item-text" title="Total Deaths: {{ player.statistics.total_deaths }}">
                 <strong>Total Deaths</strong>:
                 {{ player.statistics.total_deaths }}
             </li>
                 {% endif %}
         </ol>
         {% else %}
-        <p class="lead text-white">
-            {{ player.name | title }} {{ player.get_player_phrase }}
-            a <span class="{{ player.player_css }}">{{ player.player_type }}</span> character!
+        <p class="lead">
+            {{ player.name | title }} {{ player.get_player_phrase }} a
+            <span class="{{ player.player_css }}">{{ player.player_type }}</span> character!
         </p>
         {% endif %}
 
     </details>
+    <hr>
     {% endfor %}
 {% else %}
     <p class="lead" title="You have not created any players yet!">
         You have not created any players yet!
     </p>
 {% endif %}
-<hr>
+
 <details open>
     <summary>
         <a class="h4 icon-link icon-link-hover" href="#essence">
@@ -223,19 +223,19 @@
             </svg>
         </button>
     </summary>
-    <ul class="bg-black list-group list-group-horizontal-sm">
-        <li class="bg-black list-group-item list-group-item-text" title="Current: {{ request.user.current_essence }} essence">
+    <ul class="list-group list-group-unbordered">
+        <li class="border-0 list-group-item list-group-item-text" title="Current: {{ request.user.current_essence }} essence">
             <strong>Current</strong>:
             {{ request.user.current_essence }} essence
         </li>
-        <li class="bg-black list-group-item list-group-item-text" title="Earned: {{ request.user.seasonal_earned }} essence">
+        <li class="border-0 list-group-item list-group-item-text" title="Earned: {{ request.user.seasonal_earned }} essence">
             <strong>Earned</strong>:
             {{ request.user.seasonal_earned }} essence
         </li>
     </ul>
 </details>
 <hr>
-<details{% if request.user.upgrades.count > 0 %} open{% endif %}>
+<details {% if request.user.upgrades.count > 0 %} open{% endif %}>
     <summary>
         <a class="h4 icon-link icon-link-hover" href="#upgrades">
             <svg aria-hidden="false" class="bi" role="img" aria-label="Link to this section: Upgrades ({{ request.user.upgrades.count }} upgrade{{ request.user.upgrades.count|pluralize }})">
@@ -264,9 +264,9 @@
         </button>
     </summary>
 {% if request.user.upgrades.all %}
-    <ul class="bg-black list-group">
+    <ul class="list-group list-group-unbordered">
     {% for upgraded in request.user.upgrades.all %}
-        <li class="bg-black list-group-item border-0" title="{{ upgraded.upgrade.name }} (x{{ upgraded.amount }})">
+        <li class="list-group-item border-0" title="{{ upgraded.upgrade.name }} (x{{ upgraded.amount }})">
             <span class="text-secondary me-3">
                 {{ forloop.counter }}.
             </span>

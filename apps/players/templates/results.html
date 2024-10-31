@@ -40,7 +40,7 @@
         </h5>
         <ul class="bg-dark list-group list-group-dark w-50">
         {% for player in results %}
-            <li class="bg-black border border-secondary list-group-item list-group-item-dark list-group-item-text" title="Player: {{ player.name }}">
+            <li class="bg-black border border-secondary list-group-item list-group-item-text" title="Player: {{ player.name }}">
                 <strong>{{ forloop.counter }}.</strong>
                 {{ player.player_link }}
             </li>
