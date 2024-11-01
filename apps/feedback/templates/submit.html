@@ -1,17 +1,39 @@
 {% extends "feedback.html" %}
+{% load static %}
 {% block meta_title %}Submit Feedback{% endblock meta_title %}
 {% block meta_description %}Submit feedback about {{ WEBSITE_TITLE }}.{% endblock meta_description %}
 {% block meta_url %}{% url 'submit_feedback' %}#submit{% endblock meta_url %}
 {% block title %}Submit Feedback{% endblock title %}
 {% block breadcrumbs %}
-    <li class="bi bi-flag breadcrumb-item h2" title="Portal">
-        <a href="{% url 'portal' %}#portal" id="portal">Portal</a>
+    <li class="breadcrumb-item h2" title="Portal">
+        <a class="icon-link icon-link-hover" href="{% url 'portal' %}#portal">
+            <svg class="bi" aria-hidden="true">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#person-gear"></use>
+            </svg>
+            <span id="portal">
+                Portal
+            </span>
+        </a>
     </li>
     <li class="breadcrumb-item h2" title="Feedback">
-        <a href="{% url 'feedback' %}#feedback" id="feedback">Feedback</a>
+        <a class="icon-link icon-link-hover" href="{% url 'feedback' %}#feedback">
+            <svg class="bi" aria-hidden="true">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#mailbox-flag"></use>
+            </svg>
+            <span id="feedback">
+                Feedback
+            </span>
+        </a>
     </li>
-    <li class="breadcrumb-item active h2" aria-current="page" title="Feedback">
-        <a href="{% url 'submit_feedback' %}#submit" id="submit">Submit</a>
+    <li class="breadcrumb-item h2 active" aria-current="page" title="Submit">
+        <a class="icon-link icon-link-hover" href="{% url 'submit_feedback' %}#submit">
+            <svg class="bi" aria-hidden="true">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#send-plus"></use>
+            </svg>
+            <span id="submit">
+                Submit
+            </span>
+        </a>
     </li>
 {% endblock breadcrumbs %}
 {% block content %}

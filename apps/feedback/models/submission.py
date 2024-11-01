@@ -1,5 +1,7 @@
 from django.core.validators import MinLengthValidator, MaxLengthValidator
 from django.db import models
+from django.templatetags.static import static
+from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 
 from apps.accounts.models import Account
@@ -124,10 +126,21 @@ class FeedbackSubmission(models.Model):
             raise
 
     @property
-    def display_icon(self):
+    def display_icon(self) -> str:
         if self.is_bug():
             return "bug"
         return "person-raised-hand"
+
+    def get_display_icon(self) -> str:
+        if self.display_icon:
+            return format_html(
+                '<svg class="bi" aria-hidden="true">'
+                '<use xlink:href="{}#{}"></use></svg>'
+                ,
+                static('bootstrap-icons/bootstrap-icons.svg'),
+                self.display_icon
+            )
+        return ''
 
     @property
     def vote_total(self) -> (None, int):

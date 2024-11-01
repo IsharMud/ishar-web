@@ -5,9 +5,11 @@
 {% block meta_url %}{% url 'index' %}{% endblock meta_url %}
 {% block title %}Home{% endblock title %}
 {% block breadcrumbs %}
-    <li class="breadcrumb-item active">
-        <h2 title="{{ news.subject|default:'Welcome' }}">
-            <i class="text-primary bi bi-house"></i>
+    <li class="breadcrumb-item active" title="{{ news.subject|default:'Welcome' }}">
+        <h2 class="icon-link">
+            <svg class="bi" aria-hidden="true">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#house"></use>
+            </svg>
             {{ news.subject|default:"Welcome" }}
         </h2>
     </li>

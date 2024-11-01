@@ -39,20 +39,20 @@
         </script>
     </head>
 
-    <body class="m-1">
+    <body class="container-fluid">
 
-        <header class="container-fluid p-1">
+        <header class="mt-1 p-1">
 
-            <nav class="navbar navbar-dark navbar-expand-lg rounded border-ishar">
+            <nav class="border-ishar navbar navbar-dark navbar-expand-lg rounded">
 
                 <a href="{% url 'index' %}" title="{{ WEBSITE_TITLE }}">
                     <img class="navbar-brand" id="logo" alt="{{ WEBSITE_TITLE }}" src="{% static "images/logo.png" %}" style="height: 10rem;">
                 </a>
 
-                <button class="m-3 navbar-toggler navbar-dark border-ishar" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle Navigation">
-                    <span class="m-1 navbar-toggler-icon"></span>
+                <button class="border-ishar m-3 navbar-dark navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle Navigation">
+                    <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="collapse navbar-collapse p-3" id="navbarNavDropdown">
+                <div class="collapse navbar-collapse p-2" id="navbarNavDropdown">
 
                     <ul class="navbar-nav nav-underline">
 
@@ -77,7 +77,7 @@
                         </li>
 
                         <li class="nav-item" title="Events ({{ GLOBAL_EVENT_COUNT }})">
-                            <a class="nav-link dropdown-item icon-link icon-link-hover" href="{% url 'events' %}#events">
+                            <a class="nav-link icon-link icon-link-hover" href="{% url 'events' %}#events">
                                 <svg class="bi" aria-hidden="true">
                                     <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#calendar-event"></use>
                                 </svg>
@@ -105,25 +105,18 @@
                                 </svg>
                                 Help
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-dark bg-black border border-secondary p-3">
+                            <ul class="bg-black border border-secondary dropdown-menu dropdown-menu-dark p-1">
                                 <li class="nav-item" title="Search Help Topics">
-                                    <div class="d-flex form-control-dark input-group">
-                                        <div class="form-control-dark">
-                                            <form class="row g-3" method="post" action="{% url 'help' %}#search">
-                                                <div class="col-auto">
-                                                    {{ HELP_SEARCH_FORM }}
-                                                    {% csrf_token %}
-                                                </div>
-                                                <div class="col-auto">
-                                                    <button class="btn btn-outline-primary" type="submit">Search</button>
-                                                </div>
-                                            </form>
-                                        </div>
+                                    <div class="form-control-dark input-group">
+                                        <form method="post" action="{% url 'help' %}#search">
+                                                {{ HELP_SEARCH_FORM }}
+                                                {% csrf_token %}
+                                                <button class="btn btn-outline-primary m-1" type="submit">Search</button>
+                                        </form>
                                     </div>
-
                                 </li>
-                                <li class="nav-item text-ishar">
-                                    <hr class="dropdown-divider border-secondary">
+                                <li class="nav-item">
+                                    <hr class="dropdown-divider">
                                 </li>
                                 <li class="nav-item" title="All Help Topics">
                                     <a class="nav-link dropdown-item icon-link icon-link-hover" href="{% url 'help' %}#topics">
@@ -182,7 +175,7 @@
                                 </svg>
                                 Patches
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-dark bg-black border border-secondary p-3">
+                            <ul class="bg-black border border-secondary dropdown-menu dropdown-menu-dark p-1">
                                 <li class="nav-item" title="Latest Patch">
                                     <a class="nav-link dropdown-item icon-link icon-link-hover" href="{% url 'latest_patch' %}#latest">
                                         <svg class="bi" aria-hidden="true">
@@ -209,7 +202,7 @@
                                 </svg>
                                 Portal
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-dark bg-black border border-secondary p-3">
+                            <ul class="bg-black border border-secondary dropdown-menu dropdown-menu-dark p-1">
     {% if user.is_staff %}
                                 <li class="nav-item" title="Administration">
                                     <a class="nav-link dropdown-item icon-link icon-link-hover" href="{% url 'admin:index' %}" target="_blank">
@@ -222,8 +215,8 @@
                                         </svg>
                                     </a>
                                 </li>
-                                <li class="nav-item text-ishar">
-                                    <hr class="dropdown-divider border-secondary">
+                                <li class="nav-item">
+                                    <hr class="dropdown-divider">
                                 </li>
     {% endif %}
                                 <li class="nav-item" title="Challenges">
@@ -238,7 +231,7 @@
                                 <li class="nav-item" title="Feedback">
                                     <a class="nav-link dropdown-item icon-link icon-link-hover" href="{% url 'feedback' %}#feedback">
                                         <svg class="bi" aria-hidden="true">
-                                            <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#flag"></use>
+                                            <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#mailbox-flag"></use>
                                         </svg>
                                         Feedback
                                     </a>
@@ -280,18 +273,18 @@
                                     </a>
                                 </li>
 
-                                <li class="nav-item text-ishar">
-                                    <hr class="dropdown-divider border-secondary">
+                                <li class="nav-item">
+                                    <hr class="dropdown-divider">
                                 </li>
 
-                                <li class="nav-item" title="Log out">
+                                <li class="nav-item" title="Log out ({{ request.user.get_username }})">
                                     <form action="{% url 'logout' %}#messages" method="post">
                                         {% csrf_token %}
                                         <button class="nav-link dropdown-item icon-link icon-link-hover" type="submit">
                                             <svg class="bi" aria-hidden="true">
                                                 <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#door-closed"></use>
                                             </svg>
-                                            Log Out ({{ request.user.get_username }})
+                                            Log out ({{ request.user.get_username }})
                                         </button>
                                     </form>
                                 </li>
@@ -326,28 +319,26 @@
 
         </header>
 
-        <main class="container-fluid p-1">
+        <main class="p-1">
 
-            <div class="bg-black rounded border-ishar p-2 text-ishar">
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb">
+            <nav class="bg-black border-ishar ps-1 pt-1 rounded" aria-label="breadcrumb">
+                <ol class="breadcrumb gap-1 grid">
 {% block breadcrumbs %}
-                        <li class="breadcrumb-item h2" title="Welcome">
-                            <svg class="bi" aria-hidden="true">
-                                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#house"></use>
-                            </svg>
-                            Welcome
-                        </li>
+                    <li class="breadcrumb-item h2" title="Welcome">
+                        <svg class="bi" aria-hidden="true">
+                            <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#house"></use>
+                        </svg>
+                        Welcome
+                    </li>
 {% endblock breadcrumbs %}
-                    </ol>
-                </nav>
-            </div>
+                </ol>
+            </nav>
 
 {% block messages %}
     {% if messages %}
-            <div id="messages">
+            <div class="p-1" id="messages">
         {% for message in messages %}
-                <div class="m-2 p-3 rounded border-ishar alert alert-dark bg-black alert-dismissible fade show" role="alert">
+                <div class="alert alert-dark alert-dismissible bg-black border-ishar fade p-2 show" role="alert">
                     <p class="fw-bold lead message-{{ message.tags }}">
                         {{ message }}
                     </p>
@@ -358,14 +349,14 @@
     {% endif %}
 {% endblock messages %}
 
-            <div class="bg-black rounded border-ishar p-2 my-2">
+            <div class="bg-black border-ishar my-1 p-2 rounded" id="content">
 {% block content %}
 {% endblock content %}
             </div>
             <script src="{% static 'js/alertRefocus.js' %}"></script>
 {% block player_search_form %}
         {% if user and user.is_authenticated and PLAYER_SEARCH_FORM %}
-            <div class="bg-black rounded border-ishar p-3 my-2">
+            <div class="bg-black border-ishar my-1 p-2 rounded">
                 {% include "search_form.html" %}
             </div>
         {% endif %}
@@ -373,28 +364,28 @@
 
         </main>
 
+        <footer class="mx-3 text-center">
 {% if CURRENT_SEASON %}
-        <footer class="container-fluid px-2 text-center" title="Season {{ CURRENT_SEASON.season_id }} ends {{ CURRENT_SEASON.expiration_date | naturaltime }}">
-
-            <div class="row border-ishar bg-black rounded align-items-center m-1 p-2">
-
+            <div class="bg-black border-ishar my-1 p-1 rounded row">
                 <div class="col">
-                    <a href="{% url 'current_season' %}#season">Season {{ CURRENT_SEASON.season_id }}</a>
+                    <a class="icon-link icon-link-hover" href="{% url 'current_season' %}#season">
+                        <svg class="bi" aria-hidden="true">
+                            <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#calendar"></use>
+                        </svg>
+                        Season {{ CURRENT_SEASON.season_id }}
+                    </a>
                 </div>
-
-                <div class="col">
-                    Ends {{ CURRENT_SEASON.expiration_date | naturaltime }}
+                <div class="col p-1">
+                    <span class="icon-link">
+                        <svg class="bi text-secondary" aria-hidden="true">
+                            <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#hourglass-split"></use>
+                        </svg>
+                        Ends {{ CURRENT_SEASON.expiration_date | naturaltime }}
+                    </span>
                 </div>
-
             </div>
-
-        </footer>
 {% endif %}
-
-        <footer class="container-fluid px-2 text-center">
-
-            <div class="row border-ishar bg-black rounded align-items-center m-1 p-3">
-
+            <div class="bg-black border-ishar my-1 p-1 rounded row">
                 <div class="col">
                     <a class="icon-link icon-link-hover" href="mailto:{{ ADMIN_EMAIL }}" target="_blank" title="E-mail Us! ({{ ADMIN_EMAIL }})">
                         <svg class="bi" aria-hidden="true">

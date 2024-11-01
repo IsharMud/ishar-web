@@ -428,7 +428,7 @@ class PlayerBase(models.Model):
         # Private accounts show only styled name.
         if self.account.is_private is True or self.is_immortal():
             return format_html(
-                '<span class="{}" title="{}">{}</a>',
+                '<span class="{}" title="{}">{}</span>',
                 self.player_css,
                 self.name,
                 self.name,

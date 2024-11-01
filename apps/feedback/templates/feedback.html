@@ -7,15 +7,21 @@
 {% block title %}Feedback{% endblock title %}
 {% block scripts %}let focusTo = 'feedback'{% endblock scripts %}
 {% block breadcrumbs %}
-    <li class="bi bi-flag breadcrumb-item h2" title="Portal">
-        <a href="{% url 'portal' %}#portal">
+    <li class="breadcrumb-item h2" title="Portal">
+        <a class="icon-link icon-link-hover" href="{% url 'portal' %}#portal">
+            <svg class="bi" aria-hidden="true">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#person-gear"></use>
+            </svg>
             <span id="portal">
                 Portal
             </span>
         </a>
     </li>
     <li class="breadcrumb-item active h2" aria-current="page" title="Feedback">
-        <a href="{% url 'feedback' %}#feedback">
+        <a class="icon-link icon-link-hover" href="{% url 'feedback' %}#feedback">
+            <svg class="bi" aria-hidden="true">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#mailbox-flag"></use>
+            </svg>
             <span id="feedback">
                 Feedback
             </span>
@@ -41,7 +47,7 @@
         <strong class="card-title h5" title="{{ submission.subject }}">
             {{ submission.subject }}
         </strong>
-        <span class="badge rounded-pill vote-count" id="voteCount-{{ submission.submission_id }}"></span>
+        <span class="badge rounded-pill vote-count border border-light" id="voteCount-{{ submission.submission_id }}"></span>
     </div>
     <div class="card-body">
         <blockquote class="blockquote m-0">

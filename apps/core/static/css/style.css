@@ -1,10 +1,15 @@
 :root {--ishar-color: #fa7; }
 
 .border-ishar { border: 0.1rem solid var(--ishar-color); }
-.text-ishar { color: var(--ishar-color); }
 
 .navbar, .navbar-expand-lg .navbar-nav .nav-link, .list-group, .list-group-item, .card { background-color: #000; }
-.navbar, .navbar-expand-lg .navbar-nav .nav-link, .list-group a .bi, .blockquote-footer .bi {
+
+.list-group a .bi,
+.blockquote-footer .bi,
+.navbar,
+.navbar-expand-lg .navbar-nav .nav-link,
+.text-ishar
+{
     color: var(--ishar-color);
 }
 
