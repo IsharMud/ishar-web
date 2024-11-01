@@ -72,8 +72,10 @@ a.hardcore-player:active, a.hardcore-player:visited
 .challenge-completed { text-decoration: line-through; text-decoration-color: #a00; text-decoration-thickness: 0.25rem; }
 
 .caption-top:target,
-.anchor-cell:target
+.anchor-cell:target,
+.anchor-link:target
 {
+    font-size: 1.25rem;
     color: var(--ishar-color);
     font-weight: bold;
 }
@@ -95,3 +97,4 @@ a.hardcore-player:active, a.hardcore-player:visited
     --bs-btn-active-border-color: var(--ishar-color);
     --bs-btn-hover-border-color: var(--ishar-color);
 }
+.btn-ishar a, a:active, a:visited, a:hover { color: var(--ishar-color); }

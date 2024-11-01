@@ -45,8 +45,8 @@
                     <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#recycle"></use>
                 </svg>
             </a>
-            Challenges will next cycle <strong>{{ CURRENT_SEASON.get_next_cycle | naturaltime }}</strong> at
-            <time class="fst-italic" datetime="{{ CURRENT_SEASON.get_next_cycle|date:"c" }}">
+            Challenges will next cycle <strong>{{ CURRENT_SEASON.get_next_cycle|naturaltime }}</strong> -
+            at <time class="fst-italic" datetime="{{ CURRENT_SEASON.get_next_cycle|date:"c" }}">
                 {{ CURRENT_SEASON.get_next_cycle }}
             </time>
         </caption>
