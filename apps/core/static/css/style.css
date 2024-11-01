@@ -4,7 +4,7 @@
 .text-ishar { color: var(--ishar-color); }
 
 .navbar, .navbar-expand-lg .navbar-nav .nav-link, .list-group, .list-group-item, .card { background-color: #000; }
-.navbar, .navbar-expand-lg .navbar-nav .nav-link, .list-group a .bi {
+.navbar, .navbar-expand-lg .navbar-nav .nav-link, .list-group a .bi, .blockquote-footer .bi {
     color: var(--ishar-color);
 }
 

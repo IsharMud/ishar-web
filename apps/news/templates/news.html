@@ -1,5 +1,6 @@
 {% extends "layout.html" %}
 {% load humanize %}
+{% load static %}
 {% block meta_title %}News{% endblock meta_title %}
 {% block meta_description %}{{ news_post.0.subject }}{% endblock meta_description %}
 {% block meta_url %}{% url 'news' %}{% if page_obj and page_obj.number %}?page={{ page_obj.number }}{% endif %}#news{% endblock meta_url %}
@@ -17,11 +18,18 @@
     <div class="m-3 p-1">
         {% autoescape off %}{{ news_post.0.body }}{% endautoescape %}
     </div>
-    <footer class="mx-3 blockquote-footer" title="{{ news_post.0.account.get_username | title }} @ {{ news_post.0.created | naturaltime }} ({{ news_post.0.created | date:"l, F jS, Y" }})">
-        <cite>{{ news_post.0.account.get_username | title }}</cite>
-        <i class="bi bi-pen"></i>
-        {{ news_post.0.created | naturaltime }}
-        ({{ news_post.0.created | date:"D. M. jS, Y" }})
+    <footer class="blockquote-footer">
+        <cite title="{{ news_post.0.account.get_username|title }}">
+            {{ news_post.0.account.get_username|title }}
+        </cite>
+        <span class="icon-link" title="authored at">
+            <svg class="bi" aria-hidden="false" role="note" aria-label="authored at">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#pen"></use>
+            </svg>
+        </span>
+        <time datetime="{{ news_post.0.created|date:"c" }}" title="{{ news_post.0.created|date:"l, F jS, Y" }}">
+            {{ news_post.0.created|date:"l, F jS, Y" }}
+        </time>
     </footer>
 </blockquote>
 <div class="d-flex justify-content-end">
