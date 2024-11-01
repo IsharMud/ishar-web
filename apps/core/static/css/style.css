@@ -97,4 +97,10 @@ a.hardcore-player:active, a.hardcore-player:visited
     --bs-btn-active-border-color: var(--ishar-color);
     --bs-btn-hover-border-color: var(--ishar-color);
 }
-.btn-ishar a, a:active, a:visited, a:hover { color: var(--ishar-color); }
+.btn-ishar a,
+.btn-ishar a:active,
+.btn-ishar a:visited,
+.btn-ishar a:hover
+{
+    color: var(--ishar-color);
+}
