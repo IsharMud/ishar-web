@@ -424,7 +424,17 @@ class PlayerBase(models.Model):
 
     @property
     def player_link(self) -> str:
-        # Player link, with CSS.
+
+        # Private accounts show only styled name.
+        if self.account.is_private is True or self.is_immortal():
+            return format_html(
+                '<span class="{}" title="{}">{}</a>',
+                self.player_css,
+                self.name,
+                self.name,
+            )
+
+        # Otherwise, styled link to player profile.
         return format_html(
             '<a class="{}" href="{}" title="{}">{}</a>',
             self.player_css,
