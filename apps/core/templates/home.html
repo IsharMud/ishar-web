@@ -18,7 +18,7 @@
         <div class="m-1 p-1">
             {% autoescape off %}{{ news.body }}{% endautoescape %}
         </div>
-        <p class="d-flex justify-content-end">
+        <p class="d-flex justify-content-end past-news">
             <a class="btn btn-ishar icon-link" href="{% url 'news' %}?page=2#news">
                 <svg class="bi" aria-hidden="true">
                     <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#newspaper"></use>
@@ -26,11 +26,16 @@
                 Past News
             </a>
         </p>
-        <footer class="blockquote-footer" title="{{ news.created|date:"l, F jS, Y" }} by {{ news.account.get_username | title }}">
-            <cite>
-                {{ news.account.get_username | title }}
+        <footer class="blockquote-footer">
+            <cite class="text-secondary-emphasis" title="{{ news.account.get_username|title }}">
+                {{ news.account.get_username|title }}
             </cite>
-            <time class="bi bi-pen" datetime="{{ news.created|date:"c" }}">
+            <a class="icon-link" title="authored at">
+                <svg class="bi text-secondary" aria-hidden="false" role="note" aria-label="authored at">
+                    <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#pen"></use>
+                </svg>
+            </a>
+            <time class="text-secondary-emphasis" datetime="{{ news.created|date:"c" }}" title="{{ news.created|date:"l, F jS, Y" }}">
                 {{ news.created|date:"l, F jS, Y" }}
             </time>
         </footer>

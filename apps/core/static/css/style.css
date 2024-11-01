@@ -36,7 +36,29 @@ input { border: 0.1rem solid var(--ishar-color); background-color: #000; color: 
 h1, h2, h3, h4, h5, strong, th, label, th { color: var(--ishar-color); }
 summary h3, summary h4, summary h5 { display: inline-block; }
 
-a { color: #09f; text-decoration: none; }
+.btn-ishar {
+    --bs-btn-bg: var(--bs-black);
+    --bs-btn-border-color: var(--ishar-color);
+    --bs-btn-color: var(--ishar-color);
+
+    --bs-btn-active-bg: var(--ishar-color);
+    --bs-btn-active-border-color: var(--ishar-color);
+    --bs-btn-active-color: var(--bs-black);
+
+    --bs-btn-hover-bg: var(--ishar-color);
+    --bs-btn-hover-border-color: var(--ishar-color);
+    --bs-btn-hover-color: var(--bs-black);
+
+    --bs-btn-visited-bg: var(--bs-black);
+    --bs-btn-visited-border-color: var(--ishar-color);
+    --bs-btn-visited-color: var(--ishar-color);
+}
+.past-news {
+    a:link, a:visited { color: var(--ishar-color); }
+    a:active, a:hover { color: var(--bs-black); }
+}
+
+a:link { color: #09f; text-decoration: none; }
 a:active, a:visited { color: #6082b6; }
 a:hover { color: #d6d6d7; }
 
@@ -83,24 +105,6 @@ a.hardcore-player:active, a.hardcore-player:visited
 .remort-upgrade-row:target,
 .challenge-row:target
 {
-    font-weight: bold; border: 0.1rem solid var(--ishar-color);
-}
-
-.btn-ishar {
-    --bs-btn-bg: var(--bs-black);
-    --bs-btn-color: var(--ishar-color);
-    --bs-btn-active-bg: var(--ishar-color);
-    --bs-btn-active-color: var(--bs-black);
-    --bs-btn-hover-bg: var(--ishar-color);
-    --bs-btn-hover-color: var(--bs-black);
-    --bs-btn-border-color: var(--ishar-color);
-    --bs-btn-active-border-color: var(--ishar-color);
-    --bs-btn-hover-border-color: var(--ishar-color);
-}
-.btn-ishar a,
-.btn-ishar a:active,
-.btn-ishar a:visited,
-.btn-ishar a:hover
-{
-    color: var(--ishar-color);
+    font-weight: bold;
+    border: 0.1rem solid var(--ishar-color);
 }
