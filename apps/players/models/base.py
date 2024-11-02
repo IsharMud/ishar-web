@@ -498,11 +498,6 @@ class PlayerBase(models.Model):
         return self.get_player_type()
 
     @property
-    def podir(self) -> Path:
-        # Player "Podir" folder on disk.
-        return Path(settings.MUD_PODIR, self.name)
-
-    @property
     @display(description="Seasonal Earned", ordering="seasonal_earned")
     def seasonal_earned(self) -> int:
         # Amount of essence earned for the player.
