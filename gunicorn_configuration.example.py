@@ -8,5 +8,5 @@ threads = 2
 keepalive = 300
 capture_output = True
 access_log_format = '%({X-Forwarded-For}i)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"'
-accesslog = Path(Path(__file__).resolve().parent, "logs/gunicorn_access.log")
-errorlog = Path(Path(__file__).resolve().parent, "logs/gunicorn_error.log")
+accesslog = str(Path(Path(__file__).resolve().parent, "logs/gunicorn_access.log"))
+errorlog = str(Path(Path(__file__).resolve().parent, "logs/gunicorn_error.log"))
