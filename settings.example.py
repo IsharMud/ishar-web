@@ -149,6 +149,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "urls"
+SITE_ID = 0
 
 TEMPLATES = [
     {
