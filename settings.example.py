@@ -21,10 +21,10 @@ WEBSITE_TITLE = "Ishar MUD"
 DEBUG = bool(getenv("DJANGO_DEBUG", False))
 
 # Allowed hosts.
-ALLOWED_HOSTS = (str(Path(getenv("VIRTUAL_ENV")).parents[0].name),)
+ALLOWED_HOSTS = (BASE_DIR.name,)
 
 # Caching.
-DJANGO_CACHE_KEY = Path(getenv("VIRTUAL_ENV")).parents[0].stem
+DJANGO_CACHE_KEY = BASE_DIR.stem
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
