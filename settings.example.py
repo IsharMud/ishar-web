@@ -1,4 +1,4 @@
-"""isharmud.com Django settings."""
+"""isharmud Django settings."""
 from os import getenv
 from pathlib import Path
 from pymysql import install_as_MySQLdb
@@ -21,11 +21,10 @@ WEBSITE_TITLE = "Ishar MUD"
 DEBUG = bool(getenv("DJANGO_DEBUG", False))
 
 # Allowed hosts.
-DJANGO_HOSTS = getenv("DJANGO_HOSTS", "isharmud.com www.isharmud.com")
-ALLOWED_HOSTS = DJANGO_HOSTS.split()
+ALLOWED_HOSTS = (Path(getenv("VIRTUAL_ENV")).parents[0].name,)
 
 # Caching.
-DJANGO_CACHE_KEY = getenv("DJANGO_CACHE_KEY", "ishar")
+DJANGO_CACHE_KEY = Path(getenv("VIRTUAL_ENV")).parents[0].stem
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
@@ -42,12 +41,12 @@ CACHES = {
 }
 CACHE_MIDDLEWARE_ALIAS =  DJANGO_CACHE_KEY
 CACHE_MIDDLEWARE_SECONDS = 300
-CACHE_MIDDLEWARE_KEY_PREFIX =f"{DJANGO_CACHE_KEY}_"
+CACHE_MIDDLEWARE_KEY_PREFIX = f"{DJANGO_CACHE_KEY}_"
 
 # Database(s).
 DATABASES = {
     # Staging.
-    "ishar_test": {
+    "staging.isharmud.com": {
         "ENGINE": "apps.core.backends",
         "NAME": "ishar_test",
         "USER": "ishar_test",
@@ -56,7 +55,7 @@ DATABASES = {
         "PORT": 3306
     },
     # Production
-    "ishar": {
+    "isharmud.com": {
         "ENGINE": "apps.core.backends",
         "NAME": "ishar",
         "USER": "ishar",
@@ -65,8 +64,7 @@ DATABASES = {
         "PORT": 3306
     }
 }
-DEFAULT_DB = getenv("DJANGO_DATABASE", "ishar")
-DATABASES["default"] = DATABASES[DEFAULT_DB]
+DATABASES["default"] = DATABASES[ALLOWED_HOSTS[0]]
 
 # Default primary key field type.
 DEFAULT_AUTO_FIELD = "apps.core.models.unsigned.UnsignedAutoField"
@@ -76,17 +74,16 @@ CSRF_COOKIE_DOMAIN = SESSION_COOKIE_DOMAIN = ALLOWED_HOSTS[0]
 CSRF_COOKIE_HTTPONLY = SESSION_COOKIE_HTTPONLY = False
 CSRF_COOKIE_SAMESITE = SESSION_COOKIE_SAMESITE = "Strict"
 CSRF_COOKIE_SECURE = SESSION_COOKIE_SECURE = True
-DJANGO_ORIGINS = getenv(
-    "DJANGO_ORIGINS",
-    "https://isharmud.com https://www.isharmud.com"
-)
-CSRF_TRUSTED_ORIGINS = DJANGO_ORIGINS.split()
+CSRF_TRUSTED_ORIGINS = (f"https://{ALLOWED_HOSTS[0]}",)
 
 # E-mail.
-DEFAULT_FROM_EMAIL = SERVER_EMAIL = "admin@" + ALLOWED_HOSTS[0]
-ADMINS = MANAGERS = (("Example", SERVER_EMAIL),)
-EMAIL_SUBJECT_PREFIX = "[Django: " + WEBSITE_TITLE + "] "
-EMAIL_HOST = "smtp.example.com"
+ADMIN_EMAIL = f"admin@{ALLOWED_HOSTS[0]}"
+ADMINS = MANAGERS = (
+    (f"{WEBSITE_TITLE} Administrator", ADMIN_EMAIL),
+)
+DEFAULT_FROM_EMAIL = SERVER_EMAIL = ADMIN_EMAIL
+EMAIL_SUBJECT_PREFIX = f"{WEBSITE_TITLE} ({ALLOWED_HOSTS[0]}) [Django]: "
+EMAIL_HOST = "127.0.0.1"
 EMAIL_PORT = 25
 EMAIL_HOST_USER = EMAIL_HOST_PASSWORD = None
 
@@ -144,9 +141,7 @@ ROOT_URLCONF = "urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [
-            Path(BASE_DIR, "ishar/templates/base")
-        ],
+        "DIRS": (Path(BASE_DIR, "ishar/templates/base"),),
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -178,16 +173,13 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"}
 ]
 AUTH_USER_MODEL = "accounts.Account"
-AUTHENTICATION_BACKENDS = (
-    "apps.accounts.backends.IsharUserAuthBackend",
-)
+AUTHENTICATION_BACKENDS = ("apps.accounts.backends.IsharUserAuthBackend",)
 LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/portal/"
 LOGOUT_URL = "/logout/"
 
 # Logging.
-LOGGING_DIR = "logs/"
-LOGGING_ROOT = Path(BASE_DIR, LOGGING_DIR)
+LOGGING_ROOT = Path(BASE_DIR, "logs/")
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -284,11 +276,8 @@ DISCORD = {
 }
 
 # MUD files.
-MUD_HOME = getenv("DJANGO_MUD_HOME", "/home/ishar/ishar-mud")
-MUD_HOME_PATH = Path(MUD_HOME)
-MUD_LIB = Path(MUD_HOME, "lib")
-HELPTAB = Path(MUD_LIB, "Misc/helptab")
-MUD_PODIR = Path(MUD_LIB, "Podir")
+MUD_HOME = Path(Path.home(), "ishar-mud")
+HELPTAB = Path(MUD_HOME, "lib/Misc/helptab")
 
 # Alignments.
 ALIGNMENTS = {
@@ -424,7 +413,7 @@ JAZZMIN_SETTINGS = {
     "usermenu_links": [
         {"name": WEBSITE_TITLE, "url": "index", "new_window": True},
         {"name": "Source Code", "url": "https://github.com/IsharMud/ishar-web/", "new_window": True},
-        {"name": "Support Ishar MUD", "url": "support", "new_window": True},
+        {"name": f"Support {WEBSITE_TITLE}", "url": "support", "new_window": True},
         # {"model": "accounts.Account"}
     ],
 

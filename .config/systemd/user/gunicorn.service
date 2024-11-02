@@ -1,15 +1,15 @@
 [Unit]
-Description="isharmud.com django gunicorn"
-After=network.target syslog.target nss-lookup.target
+Description="isharmud django gunicorn"
+After=network.target syslog.target nss-lookup.target mariadb.service
 
 [Service]
 Restart=on-failure
-Environment="PYTHONPATH=$PYTHONPATH:$HOME:/var/www/isharmud.com/ishar-web/"
+# Environment="DJANGO_SECRET_KEY=abc123secret456example90xyz"
+Environment="PYTHONPATH=$PYTHONPATH"
 Environment="PYTHONUNBUFFERED=1"
-EnvironmentFile=/var/www/isharmud.com/django.env
-ExecStart=/var/www/isharmud.com/venv/bin/gunicorn --config /var/www/isharmud.com/gunicorn_configuration.py wsgi:application
-ExecReload=/bin/kill -s HUP $MAINPID
-ExecStop=/bin/kill -s TERM $MAINPID
+ExecStart="$ISHAR_WEB/venv/bin/gunicorn --config $ISHAR_WEB/gunicorn_configuration.py wsgi:application"
+ExecReload="/bin/kill -s HUP $MAINPID"
+ExecStop="/bin/kill -s TERM $MAINPID"
 PrivateTmp=true
 
 [Install]
