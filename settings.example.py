@@ -9,19 +9,31 @@ from django.core.management.utils import get_random_secret_key
 install_as_MySQLdb()
 
 # Build project path(s).
-BASE_DIR = Path(__file__).resolve().parent
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Django secret key.
 SECRET_KEY = getenv("DJANGO_SECRET_KEY", get_random_secret_key())
-
-# Website title.
-WEBSITE_TITLE = "Ishar MUD"
 
 # Debug.
 DEBUG = bool(getenv("DJANGO_DEBUG", False))
 
 # Allowed hosts.
 ALLOWED_HOSTS = (BASE_DIR.name,)
+
+# Website title.
+WEBSITE_TITLE = "Ishar MUD"
+WEBSITE_TITLES = {
+    "isharmud.com": "",
+    "staging.isharmud.com": " TEST",
+
+    "127.0.0.1": " LOCAL",
+    "::1": " LOCAL",
+    "[::1]": " LOCAL",
+    "localhost": " LOCAL",
+
+    None: " NONE"
+}
+WEBSITE_TITLE += WEBSITE_TITLES.get(ALLOWED_HOSTS[0], WEBSITE_TITLES[None])
 
 # Caching.
 DJANGO_CACHE_KEY = BASE_DIR.stem

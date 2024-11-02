@@ -4,12 +4,12 @@ After=network.target syslog.target nss-lookup.target mariadb.service
 
 [Service]
 Restart=on-failure
-# Environment="DJANGO_SECRET_KEY=abc123secret456example90xyz"
-Environment="PYTHONPATH=$PYTHONPATH"
 Environment="PYTHONUNBUFFERED=1"
-ExecStart="$ISHAR_WEB/venv/bin/gunicorn --config $ISHAR_WEB/gunicorn_configuration.py wsgi:application"
-ExecReload="/bin/kill -s HUP $MAINPID"
-ExecStop="/bin/kill -s TERM $MAINPID"
+# Environment="DJANGO_SECRET_KEY=abc123example456test789xyz"
+ExecStart=/var/www/isharmud.com/venv/bin/gunicorn --config /var/www/isharmud.com/gunicorn_configuration.py wsgi:application
+# ExecStart=/var/www/staging.isharmud.com/venv/bin/gunicorn --config /var/www/staging.isharmud.com/gunicorn_configuration.py wsgi:application
+ExecReload=/bin/kill -s HUP $MAINPID
+ExecStop=/bin/kill -s TERM $MAINPID
 PrivateTmp=true
 
 [Install]
