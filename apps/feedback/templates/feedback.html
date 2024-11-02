@@ -47,7 +47,7 @@
         <strong class="card-title h5" title="{{ submission.subject }}">
             {{ submission.subject }}
         </strong>
-        <span class="badge rounded-pill vote-count border border-light" id="voteCount-{{ submission.submission_id }}"></span>
+        <span class="badge border border-secondary rounded-pill" id="voteCount-{{ submission.submission_id }}"></span>
     </div>
     <div class="card-body">
         <blockquote class="blockquote m-0">
@@ -66,9 +66,8 @@
         <button
             class="vote-button border-0 bg-transparent button icon-link icon-link-hover px-1 text-secondary"
             id="voteButton-{{ submission.submission_id }}"
-            title="Vote up"
-        >
-            <svg class="bi" aria-hidden="true">
+            title="Vote up">
+            <svg class="bi" aria-hidden="false" role="form" aria-label="Vote submission up.">
                 <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#arrow-up-circle"></use>
             </svg>
         </button>
@@ -106,29 +105,32 @@
 </div>
 <script>
     async function displayVotes(submission) {
+
+        // Find current user voting status, and total votes, for a submission.
         let submissionId = submission.id.replace("voteButton-", "")
         let submissionCount = document.getElementById(`voteCount-${submissionId}`)
         let xhr = new XMLHttpRequest()
-        xhr.open("GET", `/feedback/vote/${submissionId}/`)
+        await xhr.open("GET", `/feedback/vote/${submissionId}/`)
         xhr.onreadystatechange = async () => {
             if (xhr.readyState === XMLHttpRequest.DONE && xhr.status >= 200) {
                 let voteResults = JSON.parse(xhr.responseText)
+
+                // Arrow ("vote") icon style.
                 if (voteResults.vote === true) {
-                    submission.classList.remove("text-secondary")
-                    submission.classList.add("text-ishar")
+                    await submission.classList.remove("text-secondary")
+                    await submission.classList.add("text-ishar")
                 } else {
-                    submission.classList.remove("text-ishar")
-                    submission.classList.add("text-secondary")
+                    await submission.classList.remove("text-ishar")
+                    await submission.classList.add("text-secondary")
                 }
-                submissionCount.classList.remove("text-bg-danger")
-                submissionCount.classList.remove("text-bg-success")
-                submissionCount.classList.remove("text-bg-secondary")
-                if (voteResults.total < 0) {
-                    submissionCount.classList.add("text-bg-danger")
-                } else if (voteResults.total  > 0) {
-                    submissionCount.classList.add("text-bg-success")
+
+                // Vote count badge style.
+                if (voteResults.total  > 0) {
+                    await submissionCount.classList.remove("text-bg-dark")
+                    await submissionCount.classList.add("text-bg-success")
                 } else {
-                    submissionCount.classList.add("text-bg-secondary")
+                    await submissionCount.classList.remove("text-bg-success")
+                    await submissionCount.classList.add("text-bg-dark")
                 }
                 submissionCount.textContent = voteResults.total
             }
@@ -139,11 +141,11 @@
     async function voteFeedback(submission) {
         let submissionId = submission.id.replace("voteButton-", "");
         let xhr = new XMLHttpRequest()
-        xhr.open("POST", `/feedback/vote/${submissionId}/`)
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
+        await xhr.open("POST", `/feedback/vote/${submissionId}/`)
+        await xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded")
         xhr.onreadystatechange = async () => {
             if (xhr.readyState === XMLHttpRequest.DONE && xhr.status >= 200) {
-                displayVotes(submission)
+                await displayVotes(submission)
             }
         }
         await xhr.send(`csrfmiddlewaretoken={{ csrf_token }}`)
