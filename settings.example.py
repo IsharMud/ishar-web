@@ -21,7 +21,7 @@ WEBSITE_TITLE = "Ishar MUD"
 DEBUG = bool(getenv("DJANGO_DEBUG", False))
 
 # Allowed hosts.
-ALLOWED_HOSTS = (Path(getenv("VIRTUAL_ENV")).parents[0].name,)
+ALLOWED_HOSTS = (str(Path(getenv("VIRTUAL_ENV")).parents[0].name),)
 
 # Caching.
 DJANGO_CACHE_KEY = Path(getenv("VIRTUAL_ENV")).parents[0].stem
