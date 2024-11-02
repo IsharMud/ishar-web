@@ -36,11 +36,11 @@ ${ISHAR_VENV}/pip3 install -r ${ISHAR_CONTENT}/requirements.txt
 ${ISHAR_VENV}/python3 ${ISHAR_CONTENT}/manage.py migrate
 
 # Delete all Django static content and re-collect it.
-rm -rf ${ISHAR_CONTENT}/static &&
+rm -rf ${ISHAR_WEB}/static &&
 ${ISHAR_VENV}/python3 ${ISHAR_CONTENT}/manage.py collectstatic --no-input
 
 # Clear the Django cache.
-find ${ISHAR_CONTENT}/cache/ -type f -name '*.djcache' -delete
+find ${ISHAR_WEB}/cache/ -type f -name '*.djcache' -delete
 
 # Restart gunicorn/Django.
 XDG_RUNTIME_DIR=/run/user/$UID systemctl --user restart gunicorn.service
