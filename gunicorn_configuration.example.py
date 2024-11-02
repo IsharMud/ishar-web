@@ -1,6 +1,8 @@
 from multiprocessing import cpu_count
 from pathlib import Path
 
+
+chdir = str(Path(Path(__file__).resolve().parent, "ishar-web"))
 bind = "127.0.0.1:8000"
 worker_class = "gthread"
 workers = cpu_count() * 2 + 1
