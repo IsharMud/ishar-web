@@ -47,7 +47,7 @@ class SeasonalEnigma(models.Model):
         managed = False
         db_table = "seasonal_enigma"
         default_related_name = "seasonal_enigma"
-        get_latest_by = ordering = ("seasonal_enigma_id",)
+        get_latest_by = ordering = ("-seasonal_enigma_id",)
         verbose_name = "Seasonal Enigma"
 
     def __repr__(self) -> str:
