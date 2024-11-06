@@ -25,13 +25,24 @@
     {% if request.user.is_anonymous %}
     <p class="lead">
         You may also want to visit the
-        <a href="{% url 'help_page' help_topic='MUD Basics' %}#topic" title="Help: MUD Basics">MUD Basics help page</a>,
-        our <a href="{% url 'start' %}#start" title="Get Started">getting started guide</a>, and
+        <a class="icon-link icon-link-hover" href="{% url 'help_page' help_topic='MUD Basics' %}#topic" title="MUD basics help page">
+            <svg class="bi" aria-hidden="true">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#collection-play"></use>
+            </svg>
+            MUD basics help page
+        </a>,
+        <a class="icon-link icon-link-hover" href="{% url 'start' %}#start" title="getting started guide">
+            <svg class="bi" aria-hidden="true">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#rocket-takeoff"></use>
+            </svg>
+            getting started guide
+        </a>,
+        and
         <a class="icon-link icon-link-hover" href="{% url 'discord' %}" target="_blank" title="{{ WEBSITE_TITLE }} Discord">
-            join us on Discord
             <svg class="bi" aria-hidden="true">
                 <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#discord"></use>
             </svg>
+            join us on Discord!
         </a>
     </p>
     {% endif %}

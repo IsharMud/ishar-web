@@ -1,14 +1,27 @@
 {% extends "layout.html" %}
+{% load static %}
 {% block meta_title %}World{% endblock meta_title %}
 {% block meta_description %}The World of Ishar is vast and very detailed with many areas.{% endblock meta_description %}
 {% block meta_url %}{% url 'world' %}#world{% endblock meta_url %}
 {% block scripts %}let focusTo = 'world'{% endblock scripts %}
 {% block breadcrumbs %}
-    <li class="bi bi-globe-asia-australia breadcrumb-item h2" title="Help">
-        <a href="{% url 'help' %}#help" id="help">Help</a>
+    <li class="h2 breadcrumb-item" title="Help">
+        <a class="icon-link icon-link-hover" href="{% url 'help' %}#help">
+            <svg class="bi" aria-hidden="true">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#info-circle">
+                    <span id="help">Help</span>
+                </use>
+            </svg>
+        </a>
     </li>
-    <li class="breadcrumb-item active h2" aria-current="page" title="World">
-        <a href="{% url 'world' %}#world" id="world">World</a>
+    <li aria-current="page" class="active breadcrumb-item h2" title="World">
+        <a class="icon-link icon-link-hover" href="{% url 'world' %}#world">
+            <svg class="bi" aria-hidden="true">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#globe-asia-australia">
+                    <span id="world">World</span>
+                </use>
+            </svg>
+        </a>
     </li>
 {% endblock breadcrumbs %}
 {% block title %}World{% endblock title %}

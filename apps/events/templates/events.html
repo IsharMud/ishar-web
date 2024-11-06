@@ -123,7 +123,12 @@
 </p>
 <p class="lead" title="Please check back later, or maybe try out some challenges!">
     Please check back later, or maybe try out some
-    <a href="{% url 'challenges' %}#challenges" title="challenges">challenges</a>!
+    <a class="icon-link icon-link-hover" href="{% url 'challenges' %}#challenges">
+        <svg class="bi" aria-hidden="true">
+            <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#award"></use>
+        </svg>
+        challenges!
+    </a>
 </p>
     {% endif %}
 {% endblock content %}
