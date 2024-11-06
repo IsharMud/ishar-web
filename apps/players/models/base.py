@@ -512,6 +512,14 @@ class PlayerBase(models.Model):
             earned += int(self.remorts / 5) * 3 + 1
         return earned
 
+    # Mostly the same - 2 for playing, 3 per 5 remorts.
+    # Besides that, instead of 1 for first remort and 1 / 100 renown,
+    #   I’m just going to give 1 essence per highest remort achieved.
+    # So if you make it to 5 remorts, you’ll give:
+    #   2 for playing, 3 for 5 remorts, then 1 per remort for an additional 5,
+    #   so a total of 10 essence.
+
+
     def upgrades(self):
         # Method to find active remort upgrades for the player.
         return self.all_remort_upgrades.filter(

@@ -1,6 +1,6 @@
 from django.contrib.admin import display, ModelAdmin, register
 
-from .models import Season
+from ..models.season import Season
 
 
 @register(Season)

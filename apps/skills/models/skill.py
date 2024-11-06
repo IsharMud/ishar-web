@@ -1,6 +1,6 @@
 from django.db import models
 
-from .fields.textarea import NoStripTextareaField
+from apps.core.models.textarea import NoStripTextareaField
 
 from .type.position import PlayerPosition
 from .type.save import SkillSaveType
