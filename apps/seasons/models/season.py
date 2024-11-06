@@ -5,6 +5,8 @@ from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.timezone import now
 
+from .enigma import SeasonalEnigma
+
 
 class Season(models.Model):
     """Ishar season."""
@@ -80,6 +82,15 @@ class Season(models.Model):
         null=True,
         help_text="Limit of players that one account can log in to.",
         verbose_name="Multi-Play Limit",
+    )
+    enigma = models.ForeignKey(
+        blank=True,
+        null=True,
+        to=SeasonalEnigma,
+        to_field="seasonal_enigma_id",
+        on_delete=models.DO_NOTHING,
+        help_text="Enigma related to the season.",
+        verbose_name="Enigma",
     )
 
     class Meta:

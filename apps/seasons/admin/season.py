@@ -16,6 +16,7 @@ class SeasonAdmin(ModelAdmin):
                     "season_id",
                     "is_active",
                     "game_state",
+                    "enigma",
                 )
             }
         ),
@@ -76,7 +77,8 @@ class SeasonAdmin(ModelAdmin):
     )
     list_filter = (
         "is_active",
-        "multiplay_limit"
+        "multiplay_limit",
+        "enigma",
     )
     readonly_fields = (
         "season_id",
