@@ -274,6 +274,7 @@ class Account(AbstractBaseUser, PermissionsMixin):
         return self.players.count()
 
     @property
+    @admin.display(description="Seasonal Earned", ordering="seasonal_earned")
     def seasonal_earned(self) -> int:
         """Amount of essence earned for the account."""
         # Start at zero (0), and return the points from

@@ -33,6 +33,7 @@ class AccountAdmin(UserAdmin):
                     "current_essence",
                     "earned_essence",
                     "bugs_reported",
+                    "seasonal_earned",
                 )
             },
         ),
@@ -93,6 +94,7 @@ class AccountAdmin(UserAdmin):
         "last_ip",
         "last_isp",
         "last_ident",
+        "seasonal_earned",
     )
     search_fields = (model.USERNAME_FIELD, model.EMAIL_FIELD)
 

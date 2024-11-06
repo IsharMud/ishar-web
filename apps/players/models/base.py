@@ -1,5 +1,4 @@
 from datetime import timedelta
-from pathlib import Path
 
 from django.db import models
 from django.conf import settings
@@ -14,6 +13,7 @@ from django.utils.translation import gettext_lazy as _
 from apps.accounts.models import Account
 from apps.core.models.title import Title
 from apps.core.utils.ip import dec2ip
+from apps.seasons.utils.current import get_current_season
 
 from .game_type import GameType
 from ..utils import get_immortal_level, get_immortal_type
@@ -498,9 +498,9 @@ class PlayerBase(models.Model):
         return self.get_player_type()
 
     @property
-    @display(description="Seasonal Earned", ordering="seasonal_earned")
-    def seasonal_earned(self) -> int:
-        # Amount of essence earned for the player.
+    @display(description="Old Seasonal Earned", ordering="old_seasonal_earned")
+    def old_seasonal_earned(self) -> int:
+        # Old amount of essence earned for the player.
 
         # Immortal players do not earn essence.
         if self.is_immortal() is True:
@@ -512,13 +512,36 @@ class PlayerBase(models.Model):
             earned += int(self.remorts / 5) * 3 + 1
         return earned
 
-    # Mostly the same - 2 for playing, 3 per 5 remorts.
+    @property
+    @display(description="New Seasonal Earned", ordering="new_seasonal_earned")
+    def new_seasonal_earned(self) -> int:
+        # New amount of essence earned for the player.
+
+        # Immortal players do not earn essence.
+        if self.is_immortal() is True:
+            return 0
+
+        # "Mostly the same - 2 for playing, 3 per 5 remorts."
+        earned = 2
+        if self.remorts > 0:
+            earned += int(self.remorts / 5) * 3
+
     # Besides that, instead of 1 for first remort and 1 / 100 renown,
     #   I’m just going to give 1 essence per highest remort achieved.
-    # So if you make it to 5 remorts, you’ll give:
-    #   2 for playing, 3 for 5 remorts, then 1 per remort for an additional 5,
-    #   so a total of 10 essence.
 
+    # Select max hardcore remort from player stats on account id.
+    # So if an account has multiple active characters,
+    #   it should only select the highest.
+    # It should also gather both current remort and hardcore remort
+    #   since I think remort is only rolled into hardcore_remort on a
+    #   death / restart? I can check that.
+
+    @property
+    @display(description="Seasonal Earned", ordering="seasonal_earned")
+    def seasonal_earned(self) -> int:
+#        if get_current_season().enigma.pk == 2:
+#            return self.new_seasonal_earned
+        return self.old_seasonal_earned
 
     def upgrades(self):
         # Method to find active remort upgrades for the player.
