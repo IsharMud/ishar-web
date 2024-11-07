@@ -292,6 +292,7 @@ class Account(AbstractBaseUser, PermissionsMixin):
                 max_remorts=models.Max("remorts")
             )["max_remorts"]
 
+            earned += max_remorts
             earned += int(max_remorts / 5) * 3
 
         return earned
