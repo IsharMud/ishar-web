@@ -1,4 +1,5 @@
 from datetime import datetime
+from django.conf import settings
 from django.db import models
 from django.contrib import admin
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
@@ -276,13 +277,23 @@ class Account(AbstractBaseUser, PermissionsMixin):
     @property
     @admin.display(description="Seasonal Earned", ordering="seasonal_earned")
     def seasonal_earned(self) -> int:
-        """Amount of essence earned for the account."""
-        # Start at zero (0), and return the points from
-        #   the player character within the account with the highest amount.
+        """Amount of essence earned for the account, based upon players."""
         earned = 0
-        for player in self.players.all():
-            if player.seasonal_earned > earned:
-                earned = player.seasonal_earned
+
+        # Only consider accounts with playable characters (non-Immortals).
+        chars = self.players.filter(true_level__lt=settings.MIN_IMMORTAL_LEVEL)
+        if chars and chars.count() > 0:
+
+            # "Mostly the same - 2 for playing, 3 per 5 remorts."
+            earned = 2
+
+            # Find maximum remorts of players within this account.
+            max_remorts = chars.aggregate(
+                max_remorts=models.Max("remorts")
+            )["max_remorts"]
+
+            earned += int(max_remorts / 5) * 3
+
         return earned
 
     def set_password(self, raw_password: str = None) -> bool:

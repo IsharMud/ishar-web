@@ -37,7 +37,6 @@ class PlayerAdmin(admin.ModelAdmin):
                     "renown",
                     "remorts",
                     "favors",
-                    "seasonal_earned",
                 )
             }
         ),
@@ -117,7 +116,6 @@ class PlayerAdmin(admin.ModelAdmin):
         "player_level",
         "online_timedelta",
         "online_time",
-        "seasonal_earned",
         "title",
         "title_id",
     )
