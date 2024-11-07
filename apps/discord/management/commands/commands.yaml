@@ -1,0 +1,80 @@
+---
+
+- name: "challenges"
+  description: "Link to the list of MUD challenges."
+  type: 1
+
+- name: "cycle"
+  description: "Show when challenges will cycle next."
+  type: 1
+
+- name: "deadhead"
+  description: "Show the player with the most deaths."
+  type: 1
+
+- description: "Show any active events."
+  name: "events"
+  type: 1
+
+- description: "Link to frequently asked questions (FAQs)."
+  name: "faq"
+  type: 1
+
+- description: "Link to feedback page to send bug report, idea, or suggestion."
+  name: "feedback"
+  type: 1
+
+- name: "leader"
+  description: "List the leading player, by game type."
+  options:
+    - name: "type"
+      choices:
+        - name: "Classic"
+          value: "0"
+        - name: "Hardcore"
+          value: "1"
+        - name: "Survival"
+          value: "2"
+      description: "Game type to find the leader of."
+      required: false
+      type: 3
+  type: 1
+
+- name: "leaders"
+  description: "Link to the list of leading MUD players."
+  type: 1
+
+- name: "mudhelp"
+  description: "Search MUD help for a topic."
+  options:
+    - name: "topic"
+      description: "Name of the help topic to search for."
+      required: true
+      type: 3
+  type: 1
+
+- name: "mudtime"
+  description: "Show current server time."
+  type: 1
+
+- name: "runtime"
+  description: "Show current server runtime."
+  type: 1
+
+- name: "season"
+  description: "Show the current season."
+  type: 1
+
+- name: "spell"
+  description: Search MUD help for a spell."
+  options:
+    - description: "Name of the spell to search for."
+      name: "spell"
+      required: true
+      type: 3
+  type: 1
+
+- name: "upgrades"
+  description: "Link to available remort upgrades and their renown costs."
+  type: 1
+
