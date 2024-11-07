@@ -281,16 +281,24 @@ class Account(AbstractBaseUser, PermissionsMixin):
         earned = 0
 
         # Only consider accounts with playable characters (non-Immortals).
-        chars = self.players.filter(true_level__lt=settings.MIN_IMMORTAL_LEVEL)
+        chars = self.players.filter(
+            true_level__lt=settings.MIN_IMMORTAL_LEVEL
+        )
         if chars and chars.count() > 0:
 
             # "Mostly the same - 2 for playing, 3 per 5 remorts."
             earned = 2
 
             # Find maximum remorts of players within this account.
-            max_remorts = chars.aggregate(
-                max_remorts=models.Max("remorts")
-            )["max_remorts"]
+            #   Get higher of either "remorts" or "hardcore_remorts".
+            max_remorts = max(
+                chars.aggregate(
+                    remorts=models.Max("remorts"),
+                    hardcore_remorts=models.Max(
+                        "statistics__hardcore_remorts"
+                    )
+                ).values()
+            )
 
             earned += max_remorts
             earned += int(max_remorts / 5) * 3
