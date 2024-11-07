@@ -294,9 +294,7 @@ class Account(AbstractBaseUser, PermissionsMixin):
             max_remorts = max(
                 chars.aggregate(
                     remorts=models.Max("remorts"),
-                    hardcore_remorts=models.Max(
-                        "statistics__hardcore_remorts"
-                    )
+                    hardcore_remorts=models.Max("statistics__hardcore_remorts")
                 ).values()
             )
 
