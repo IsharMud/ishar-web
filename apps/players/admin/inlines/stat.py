@@ -11,10 +11,13 @@ class PlayerStatInlineAdmin(StackedInline):
     model = PlayerStat
     fieldsets = (
         ("Time", {"fields": ("get_total_play_time", "get_remort_play_time")}),
-        ("Deaths", {"fields": ("total_deaths", "remort_deaths")}),
+        ("Deaths", {"fields": ("total_deaths", "remort_deaths",)}),
         ("Renown", {"fields": ("total_renown", "remort_renown")}),
         ("Challenges", {"fields": ("total_challenges", "remort_challenges")}),
         ("Quests", {"fields": ("total_quests", "remort_quests")}),
+        ("Hardcore", {"fields": (
+            "hardcore_deaths", "hardcore_remorts", "hardcore_level"
+        )}),
     )
     readonly_fields = ("get_remort_play_time", "get_total_play_time")
     verbose_name = verbose_name_plural = "Statistics"

@@ -88,6 +88,24 @@ class PlayerStat(models.Model):
         help_text=_("The number of remort quests statistic for the player."),
         verbose_name=_("Remort Quests"),
     )
+    hardcore_deaths = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+        help_text=_("The number of hardcore deaths statistic for the player."),
+        verbose_name=_("Hardcore Deaths"),
+    )
+    hardcore_level = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+        help_text=_("The hardcore level statistic for the player."),
+        verbose_name=_("Hardcore Level"),
+    )
+    hardcore_remorts = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+        help_text=_("The hardcore remorts number statistic for the player."),
+        verbose_name=_("Hardcore Remorts"),
+    )
 
     class Meta:
         managed = False
