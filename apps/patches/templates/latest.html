@@ -31,9 +31,9 @@
     </div>
     <div class="card-footer">
         <span class="blockquote-footer">
-            <a class="icon-link" href="{{ patches.0.get_absolute_url }}" target="_blank" title="{{ patches.0.patch_file.name }} &lt;{{ request.scheme }}://{{ request.META.HTTP_HOST }}{{ patches.0.patch_file.url }}&gt;">
+            <a class="icon-link" href="{{ patches.0.get_absolute_url }}" target="_blank" title="{{ patches.0.patch_file.name }} &lt;{{ request.scheme }}://{{ request.META.HTTP_HOST }}{{ patches.0.patch_file.url }}&gt;" aria-label="Open latest patch PDF, in a new window.">
                 <code>{{ patches.0.patch_file.name }}</code>
-                <svg class="bi" aria-hidden="true">
+                <svg class="bi" aria-hidden="false" role="img">
                     <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#box-arrow-up-right"></use>
                 </svg>
             </a>
