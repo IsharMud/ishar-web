@@ -3,6 +3,7 @@ from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 from apps.classes.models.type import PlayerClass
+from apps.core.models.char import NoStripCharField
 
 from .managers import QuestManager
 
@@ -28,7 +29,7 @@ class Quest(models.Model):
         help_text="Friendly display name of the quest.",
         verbose_name="Display Name",
     )
-    completion_message = models.CharField(
+    completion_message = NoStripCharField(
         blank=True,
         max_length=700,
         help_text="Message sent to the player upon completion of the quest.",
@@ -56,7 +57,7 @@ class Quest(models.Model):
     repeatable = models.BooleanField(
         help_text="Is the quest repeatable?", verbose_name="Repeatable?"
     )
-    description = models.CharField(
+    description = NoStripCharField(
         blank=True,
         max_length=512,
         null=True,
@@ -75,7 +76,7 @@ class Quest(models.Model):
         help_text="Player class which the quest is restricted to.",
         verbose_name="Class Restrict",
     )
-    quest_intro = models.CharField(
+    quest_intro = NoStripCharField(
         blank=True,
         max_length=2000,
         null=True,
