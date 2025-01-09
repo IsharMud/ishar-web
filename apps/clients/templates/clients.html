@@ -32,9 +32,9 @@
     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
 
-<div class="container-fluid d-sm-flex">
     {% for category in mud_client_categories %}
-    <details class="d-sm-flex px-3" open>
+<div class="container-fluid">
+    <details class="px-3" open>
         <summary id="category-{{ category.name | slugify }}" class="h4 text-ishar" title="{{ category.name }}">
             <a class="anchor-link icon-link icon-link-hover" href="#category-{{ category.name | slugify }}" aria-label="Link to this section: MUD Client Category {{ category.name }} ({{ category.name | slugify }})">
         {% if category.display_icon %}
@@ -45,10 +45,11 @@
             </a>
             {{ category.name }}
         </summary>
-        <ul class="list-group pb-3 mb-3">
+        <ul class="list-group list-group-horizontal-sm list-group-flush list-group-bordered pb-3 mb-3 border border-1 rounded">
         {% for client in category.clients.all %}
             {% if client.is_visible %}
-            <li class="list-group-item" title="{{ client.name }}">
+            <li class="list-group-item list-group-unbordered border-0" title="{{ client.name }}">
+                <strong class="bi bi-dot"></strong>
                 <a class="list-group-item-text icon-link" href="{{ client.url }}" id="client-{{ client.name|slugify }}" target="_blank">
                     {{ client.name }}
                     <svg class="bi" aria-hidden="false" role="img" aria-label="Open MUD client {{ client.name }} website in new window.">
@@ -60,8 +61,8 @@
         {% endfor %}
         </ul>
     </details>
-    {% endfor %}
 </div>
+    {% endfor %}
 
 <div class="alert alert-dark alert-dismissible fade show" role="alert" id="clients-footer-alert">
     <p class="lead">
