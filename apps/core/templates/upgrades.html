@@ -47,55 +47,57 @@
         </caption>
         <thead>
             <tr>
-                <th class="border" scope="col" title="#">
-                    <span class="text-ishar">#</span>
+                <th scope="col" title="Link to section">
+                    <strong class="bi bi-link-45deg"></strong>
                 </th>
-                <th class="border" scope="col" title="Name">
-                    <span class="text-ishar">Name</span>
+                <th scope="col" title="Name">
+                    Name
                 </th>
-                <th class="border" scope="col" title="Tiers (#)">
-                    <span class="text-ishar">Tiers (#)</span>
+                <th scope="col" title="Tiers (#)">
+                    Tiers (<span class="text-ishar">#</span>)
                 </th>
-                <th class="border" scope="col" title="Hardcore Tiers (#)">
-                    <span class="text-ishar">Hardcore Tiers (#)</span>
+                <th scope="col" title="Hardcore Tiers (#)">
+                    Hardcore Tiers (<span class="text-ishar">#</span>)
                 </th>
             </tr>
         </thead>
         <tbody class="table-group-divider text-ishar">
         {% for upgrade in upgrades %}
             <tr id="{{ upgrade.anchor }}" class="remort-upgrade-row">
-                <td class="anchor-cell border" data-order="" data-search="">
-                    <a class="anchor-link" href="#{{ upgrade.anchor }}" aria-label="Link to this section: Remort Upgrade - {{ upgrade.display_name }} ({{ upgrade.anchor }})">
-                        &#x23;
+                <td class="anchor-cell">
+                    <a class="anchor-link icon-link icon-link-hover" href="#{{ upgrade.anchor }}" aria-label="Link to this section: Remort Upgrade - {{ upgrade.display_name }} ({{ upgrade.anchor }})">
+                        <svg class="bi">
+                            <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#link-45deg"></use>
+                        </svg>
                     </a>
                 </td>
-                <td class="border" data-order="{{ upgrade.display_name }}" data-search="{{ upgrade.display_name }}" title="Name: {{ upgrade.display_name }}">
+                <td title="Name: {{ upgrade.display_name }}">
                     {{ upgrade.display_name }}
                 </td>
-                <td class="border" data-order="{{ upgrade.renown_cost }}" data-search="" title="Tiers: {{ upgrade.tiers|join:', ' }} ({{ upgrade.tiers|length }} tier{{ upgrade.tiers|pluralize }})">
+                <td data-order="{{ upgrade.renown_cost }}" title="Tiers: {{ upgrade.tiers|join:', ' }} ({{ upgrade.tiers|length }} tier{{ upgrade.tiers|pluralize }})">
                     {{ upgrade.tiers|join:", " }}
                     (<strong>{{ upgrade.tiers|length }}</strong>)
                 </td>
-                <td class="border" data-order="{{ upgrade.survival_renown_cost }}" data-search="" title="Hardcore Tiers: {{ upgrade.survival_tiers|join:', ' }} ({{ upgrade.survival_tiers|length }} tier{{ upgrade.survival_tiers|pluralize }})">
+                <td data-order="{{ upgrade.survival_renown_cost }}" title="Hardcore Tiers: {{ upgrade.survival_tiers|join:', ' }} ({{ upgrade.survival_tiers|length }} tier{{ upgrade.survival_tiers|pluralize }})">
                     {{ upgrade.survival_tiers|join:", " }}
                     (<strong>{{ upgrade.survival_tiers|length }}</strong>)
                 </td>
             </tr>
         {% endfor %}
         </tbody>
-        <tfoot>
-            <tr class="table-group-divider text-ishar">
-                <th class="border" scope="col" title="#">
+        <tfoot class="table-group-divider text-ishar">
+            <tr>
+                <th scope="col" title="#">
                     <span class="text-ishar">#</span>
                 </th>
-                <th class="border" scope="col" title="Name">
-                    <span class="text-ishar">Name</span>
+                <th scope="col" title="Name">
+                    Name
                 </th>
-                <th class="border" scope="col" title="Tiers (#)">
-                    <span class="text-ishar">Tiers (#)</span>
+                <th scope="col" title="Tiers (#)">
+                    Tiers (<span class="text-ishar">#</span>)
                 </th>
-                <th class="border" scope="col" title="Hardcore Tiers (#)">
-                    <span class="text-ishar">Hardcore Tiers (#)</span>
+                <th scope="col" title="Hardcore Tiers (#)">
+                    Hardcore Tiers (<span class="text-ishar">#</span>)
                 </th>
             </tr>
         </tfoot>
@@ -104,6 +106,7 @@
 <script>
     const itemName = 'upgrades'
     const searchLayout = { search: { placeholder: 'Upgrade Name' } }
+    const buttonLayout = { buttons: [{ extend: 'colvis', text: 'Columns' }] }
     $('#upgradesTable').DataTable({
         buttons: ['colvis'],
         columnDefs: [
@@ -112,6 +115,10 @@
                 searchable: false,
                 targets: 0
             },
+            {
+                searchable: false,
+                targets: [2, 3]
+            }
         ],
         language: {
             info: `Showing _START_ to _END_ of _TOTAL_ ${itemName}`,
@@ -122,20 +129,10 @@
         },
         layout: {
             top: 'info',
-            topEnd: {
-                buttons: [{
-                    extend: 'colvis',
-                    text: 'Columns'
-                }],
-            },
+            topEnd: buttonLayout,
             topStart: searchLayout,
             bottom: 'info',
-            bottomEnd: {
-                buttons: [{
-                    extend: 'colvis',
-                    text: 'Columns'
-                }],
-            },
+            bottomEnd: buttonLayout,
             bottomStart: searchLayout
         },
         order: [
