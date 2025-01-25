@@ -35,27 +35,30 @@
     {% for category in mud_client_categories %}
 <div class="container-fluid">
     <details class="px-3" open>
-        <summary id="category-{{ category.name|slugify }}" class="h4 text-ishar" title="{{ category.name }}">
-            <a class="anchor-link icon-link icon-link-hover" href="#category-{{ category.name|slugify }}" aria-label="Link to this section: MUD Client Category {{ category.name }} ({{ category.name|slugify }})">
+        <summary id="category-{{ category.name|slugify }}" class="h4" title="{{ category.name }}">
+            <a class="icon-link icon-link-hover text-decoration-none">
         {% if category.display_icon %}
                 {{ category.get_display_icon }}
         {% else %}
                 &#x23;
         {% endif %}
+                <span class="text-ishar">{{ category.name }}</span>
             </a>
-            {{ category.name }}
+            <a class="anchor-link" href="#category-{{ category.name|slugify }}" aria-label="Link to this section: MUD Client Category {{ category.name }} ({{ category.name|slugify }})"></a>
         </summary>
         <ul class="list-group list-group-horizontal-sm list-group-flush list-group-bordered pb-3 mb-3 border border-1 rounded">
         {% for client in category.clients.all %}
             {% if client.is_visible %}
-            <li class="list-group-item list-group-unbordered border-0" id="client-{{ client.name|slugify }}"  title="{{ client.name }}">
-                <a class="anchor-link icon-link icon-link-hover" href="#client-{{ client.name|slugify }}" aria-label="Link to this section: MUD Client {{ client.name }} ({{ client.name|slugify }})">
+            <li class="list-group-item list-group-unbordered border-0" id="client-{{ client.name|slugify }}" title="{{ client.name }}">
+
+                <a class="icon-link icon-link-hover" href="#client-{{ client.name|slugify }}" aria-label="Link to this section: MUD Client {{ client.name }} ({{ client.name|slugify }})">
                     <svg class="bi" aria-hidden="false" role="img" aria-label="Link to this MUD client section.">
                         <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#terminal"></use>
                     </svg>
-                </a>
-                <a class="list-group-item-text icon-link" href="{{ client.url }}" target="_blank">
                     {{ client.name }}
+                </a>
+
+                <a class="list-group-item-text icon-link" href="{{ client.url }}" target="_blank">
                     <svg class="bi" aria-hidden="false" role="img" aria-label="Open MUD client {{ client.name }} website in new window.">
                         <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#box-arrow-up-right"></use>
                     </svg>

@@ -41,7 +41,7 @@
     {% for submission in submissions %}
 <div class="border bg-black card p-1 m-1">
     <div class="card-header" title="{{ submission.get_submission_type_display }}: {{ submission.subject }} ({{ submission.vote_total }} vote{{ submission.vote_total|pluralize }})">
-        <a class="anchor-link icon-link icon-link-hover" id="{{ submission.submission_id }}" href="#{{ submission.submission_id }}" aria-label="Link to this {{ submission.get_submission_type_display }}: {{ submission.subject }} ({{ submission.vote_total }} vote{{ submission.vote_total|pluralize }})">
+        <a class="icon-link icon-link-hover" id="{{ submission.submission_id }}" href="#{{ submission.submission_id }}" aria-label="Link to this {{ submission.get_submission_type_display }}: {{ submission.subject }} ({{ submission.vote_total }} vote{{ submission.vote_total|pluralize }})">
             {{ submission.get_display_icon }}
         </a>
         <strong class="card-title h5" title="{{ submission.subject }}">

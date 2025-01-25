@@ -201,7 +201,7 @@
         <h3 id="essence" title="Essence">
             Essence
         </h3>
-        <span class="badge bg-dark rounded-pill border border-secondary" title="{{ request.user.current_essence }} essence">
+        <span class="badge bg-dark rounded-pill border border-secondary" title="{{ request.user.current_essence }} essence" data-bs-toggle="tooltip" data-bs-title="{{ request.user.current_essence }} essence">
             {{ request.user.current_essence }}
         </span>
         <button
@@ -246,7 +246,7 @@
         <h4 id="upgrades" title="Upgrades">
             Upgrades
         </h4>
-        <span class="badge bg-dark rounded-pill border border-secondary">
+        <span class="badge bg-dark rounded-pill border border-secondary" data-bs-toggle="tooltip" data-bs-title="{{ request.user.upgrades.count }} upgrades">
             {{ request.user.upgrades.count }}
         </span>
         <button

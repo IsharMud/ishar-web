@@ -35,11 +35,30 @@ a[target="_blank"] {
 body { background-color: #323639; color: #d6d6d7; }
 .card-header, .card-title { color: var(--ishar-color); }
 .card, .card-text, .card-footer { color: #d6d6d7; }
-button, textarea, select { border: 0.1rem solid var(--ishar-color); background-color: #323639; color: var(--ishar-color); }
-textarea { white-space: break-spaces; background-color: #000; }
-input { border: 0.1rem solid var(--ishar-color); background-color: #000; color: var(--ishar-color); }
-h1, h2, h3, h4, h5, strong, th, label, th { color: var(--ishar-color); }
-summary h3, summary h4, summary h5 { display: inline-block; }
+button, textarea, select {
+    border: 0.1rem solid var(--ishar-color);
+    background-color: #323639;
+    color: var(--ishar-color);
+}
+textarea {
+    white-space: break-spaces;
+    background-color: #000;
+}
+input {
+    border: 0.1rem solid var(--ishar-color);
+    background-color: #000;
+    color: var(--ishar-color);
+}
+h1, h2, h3, h4, h5,
+label, strong, th {
+    color: var(--ishar-color);
+}
+
+summary h3,
+summary h4,
+summary h5 {
+    display: inline-block;
+}
 
 .btn-ishar {
     --bs-btn-bg: var(--bs-black);
@@ -69,10 +88,23 @@ a:hover { color: #d6d6d7; }
 
 a img:hover{ opacity: 0.8; }
 
-.god-player, .forger-player, .eternal-player, .artisan-player, .immortal-player, .consort-player { color: #00b7eb; }
+.god-player,
+.forger-player,
+.eternal-player,
+.artisan-player,
+.immortal-player,
+.consort-player {
+    color: #00b7eb;
+}
 .nested-list { list-style: none; }
 .god-player::after { content: ' 😇'; }
-.forger-player::after, .eternal-player::after, .artisan-player::after, .immortal-player::after, .consort-player::after {  content: ' 👼'; }
+.forger-player::after,
+.eternal-player::after,
+.artisan-player::after,
+.immortal-player::after,
+.consort-player::after {
+    content: ' 👼';
+}
 
 .dead-player, .dead-player a,
 .survival-player, .survival-player a,
@@ -87,7 +119,12 @@ a.hardcore-player:active, a.hardcore-player:visited
 {
     color: #fa8072;
 }
-.dead-note, a.dead-player:hover, a.survival-player:hover, a.hardcore-player:hover { color: #f00; }
+.dead-note,
+a.dead-player:hover,
+a.survival-player:hover,
+a.hardcore-player:hover {
+    color: #f00;
+}
 .dead-player::after { content: ' ☠️'; }
 .dead-player::after { content: ' ☠️'; }
 
@@ -96,15 +133,35 @@ a.hardcore-player:active, a.hardcore-player:visited
 .message-warn, .message-warning  { color: #f80; }
 
 .two-col { column-count: 2; }
-.challenge-completed { text-decoration: line-through; text-decoration-color: #a00; text-decoration-thickness: 0.25rem; }
+.challenge-completed {
+    text-decoration: line-through;
+    text-decoration-color: #a00;
+    text-decoration-thickness: 0.25rem;
+}
 
-.caption-top:target,
-.anchor-cell:target,
-.anchor-link:target
-{
-    font-size: 1.25rem;
+.anchor-link {
+    padding: 0 .175rem;
+    font-weight: 400;
     color: var(--ishar-color);
-    font-weight: bold;
+    text-decoration: none;
+    opacity: 0;
+    transition: color 0.15s ease-in-out,opacity 0.15s ease-in-out
+}
+@media (prefers-reduced-motion: reduce) {
+    .anchor-link { transition:none }
+}
+.anchor-link::after {
+    color: var(--ishar-color);
+    content: "#"
+}
+.anchor-link:focus,
+.anchor-link:hover,
+:hover>.anchor-link,
+:target>.anchor-link
+{
+    color: #0d6efd;
+    text-decoration: none;
+    opacity: 1
 }
 
 .remort-upgrade-row:target,

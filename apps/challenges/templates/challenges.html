@@ -40,7 +40,7 @@
     <table class="table table-hover table-dark table-flush table-sm table-responsive table-striped" id="challengesTable">
         {% if CURRENT_SEASON %}
         <caption class="caption-top" id="cycle">
-            <a class="anchor-link icon-link icon-link-hover" href="#cycle">
+            <a class="icon-link" href="#cycle">
                 <svg class="bi" aria-hidden="false" role="img" aria-label="Link to this section: Next Cycle: {{ CURRENT_SEASON.get_next_cycle|naturaltime }} ({{ CURRENT_SEASON.get_next_cycle }})">
                     <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#recycle"></use>
                 </svg>
@@ -49,6 +49,7 @@
             at <time class="fst-italic" datetime="{{ CURRENT_SEASON.get_next_cycle|date:"c" }}">
                 {{ CURRENT_SEASON.get_next_cycle }}
             </time>
+            <a class="anchor-link" href="#cycle" aria-label="Link to this section: Next challenge cycle."></a>
         </caption>
         {% endif %}
         <thead>
@@ -70,11 +71,11 @@
         <tbody class="table-group-divider text-ishar">
         {% for challenge in challenges %}
             <tr id="{{ challenge.anchor }}" class="challenge-row">
-                <td class="anchor-cell" data-order="" data-search="">
-                    <a class="anchor-link" href="#{{ challenge.anchor }}" aria-label="Link to this section: Challenge - {{ challenge.mobile.long_name }} ({{ challenge.anchor }})">
+                <th data-order="" data-search="">
+                    <a href="#{{ challenge.anchor }}" aria-label="Link to this section: Challenge - {{ challenge.mobile.long_name }} ({{ challenge.anchor }})">
                         &#x23;
                     </a>
-                </td>
+                </th>
                 <td data-order="{{ challenge.mobile.long_name }}" data-search="{{ challenge.mobile.long_name }}" title="Mobile Name: {{ challenge.mobile.long_name }}">
                     <span class="{% if challenge.is_completed %}challenge-completed{% endif %}">
                         {{ challenge.mobile.long_name }}
