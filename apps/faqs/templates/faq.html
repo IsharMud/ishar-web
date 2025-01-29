@@ -52,10 +52,8 @@
     {% for faq in faqs %}
 <details open>
     <summary id="{{ faq.slug }}" class="h3 text-ishar" title="{{ faq.question_text }}">
-        <a class="anchor-link" href="#{{ faq.slug }}" aria-label="Link to this section: Frequently Asked Question: {{ faq.question_text }} ({{ faq.slug }})">
-            &#x23;
-        </a>
         {{ faq.question_text }}
+        <a class="anchor-link" href="#{{ faq.slug }}" aria-label="Link to this section: Frequently Asked Question: {{ faq.question_text }} ({{ faq.slug }})"></a>
     </summary>
     <div class="mb-3">
         {% autoescape off %}{{ faq.question_answer }}{% endautoescape %}

@@ -40,10 +40,8 @@
         {% for patch in patches %}
 <details {% if forloop.first %} open{% endif %}>
     <summary id="{{ patch.patch_name | slugify }}" class="h3 text-ishar" title="{{ patch.patch_name }}">
-        <a class="anchor-link" href="#{{ patch.patch_name | slugify }}" aria-label="Link to this section: Patch {{ patch.patch_name }} ({{ patch.patch_name | slugify }})">
-            &#x23;
-        </a>
         {{ patch.patch_name }}
+        <a class="anchor-link" href="#{{ patch.patch_name | slugify }}" aria-label="Link to this section: Patch {{ patch.patch_name }} ({{ patch.patch_name | slugify }})"></a>
     </summary>
     <blockquote class="blockquote">
         <p>

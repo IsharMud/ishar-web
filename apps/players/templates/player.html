@@ -34,10 +34,8 @@
     {% if player %}
 
     <h3 id="player" title="{{ player.player_title }}">
-        <a class="anchor-link" href="#player" aria-label="Link to this section: Player">
-            &#x23;
-        </a>
         {{ player.player_title }}
+        <a class="anchor-link" href="#player" aria-label="Link to this section: Player"></a>
     </h3>
 
         {% if player.description %}
@@ -51,10 +49,8 @@
     <details class="m-1" open>
 
         <summary id="details" class="h4 text-ishar" title="Details">
-            <a class="anchor-link" href="#details" aria-label="Link to this section: Details">
-                &#x23;
-            </a>
             Details
+            <a class="anchor-link" href="#details" aria-label="Link to this section: Details"></a>
         </summary>
 
         <ul class="bg-black list-group list-group-horizontal-sm">
@@ -138,9 +134,6 @@
     <hr>
     <details class="m-2"{% if not player.account.is_private %} open{% endif %}>
         <summary id="upgrades" class="h4 text-ishar" title="Remort Upgrades{% if player.upgrades.count > 0 %} ({{ player.upgrades.count }}){% endif %}">
-            <a class="anchor-link" href="#upgrades" aria-label="Link to this section: Remort Upgrades">
-                &#x23;
-            </a>
             Remort Upgrades
                     {% if player.upgrades.count > 0 %}
             <span class="badge bg-dark border border-secondary rounded-pill text-white ">
@@ -152,6 +145,7 @@
                     <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#question-circle"></use>
                 </svg>
             </button>
+            <a class="anchor-link" href="#upgrades" aria-label="Link to this section: Remort Upgrades"></a>
         </summary>
         <ol class="list-group list-group-vertical list-group-numbered">
                     {% for upgraded in player.upgrades.all %}
@@ -174,15 +168,13 @@
     <hr>
     <details class="m-2"{% if not player.account.is_private %} open{% endif %}>
         <summary id="stats" class="h4 text-ishar" title="Statistics{% if player.get_total_statistics_count %} ({{ player.get_total_statistics_count }}){% endif %}">
-            <a class="anchor-link" href="#stats" aria-label="Link to this section: Statistics">
-                &#x23;
-            </a>
             Statistics
                     {% if player.get_total_statistics_count %}
             <span class="badge bg-dark border border-secondary text-white rounded-pill">
                 {{ player.get_total_statistics_count }}
             </span>
                     {% endif %}
+            <a class="anchor-link" href="#stats" aria-label="Link to this section: Statistics"></a>
         </summary>
         <ol class="list-group list-group-horizontal-sm">
                     {% for stat_name, stat_value in player.player_stats.items %}
@@ -201,10 +193,8 @@
     <hr>
     <details class="m-2"{% if not player.account.is_private %} open{% endif %}>
         <summary id="time" class="h4 text-ishar" title="Time">
-            <a class="anchor-link" href="#time" aria-label="Link to this section: Time">
-                &#x23;
-            </a>
             Time
+            <a class="anchor-link" href="#time" aria-label="Link to this section: Time"></a>
         </summary>
         <ul class="list-group list-group-horizontal-sm">
             <li class="bg-black border-0 list-group-item list-group-item-text text-white" title="Logged On: {{ player.logon | naturaltime }}, ({{ player.logon }})">

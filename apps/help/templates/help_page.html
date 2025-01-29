@@ -151,7 +151,7 @@
         <div class="card bg-black">
             <div class="card-body d-flex form-control-dark input-group">
                 <div class="form-control-dark" id="help-search-form">
-                    <form class="row g-3" method="post" id="search" action="{% url 'help' %}#search">
+                    <form class="row g-3" method="post" id="search" action="{% url 'help' %}#help">
                         <div class="col-auto">
                             {{ HELP_SEARCH_FORM }}
                             {% csrf_token %}
@@ -179,10 +179,8 @@
     <div class="m-1 p-1">
     {% if help_topics %}
         <h5 title="{{ help_topics|length }} topics" id="topics">
-            <a class="anchor-link" href="#topics" aria-label="Link to this section: Help Topics ({{ help_topics|length }} topics)">
-                &#x23;
-            </a>
             {{ help_topics|length }} topics
+            <a class="anchor-link" href="#topics" aria-label="Link to this section: Help Topics ({{ help_topics|length }} topics)"></a>
         </h5>
         <ul class="two-col">
         {% for list_topic in help_topics.values %}
