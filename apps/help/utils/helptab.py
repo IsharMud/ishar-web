@@ -208,7 +208,8 @@ class HelpTab:
             # Check whether the line is for components, parsing if so.
             if not self.components and content_line.startswith("Component"):
                 component_match = COMPONENT_REGEX.fullmatch(string=content_line)
-                self.components = component_match.group("component").split(", ")
+                if component_match:
+                    self.components = component_match.group("component").split(", ")
                 return False
 
             # Finally, consider the line body text.
