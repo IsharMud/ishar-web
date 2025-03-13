@@ -17,10 +17,10 @@ def challenges(request, interaction=None):
     anchor = "challenges"
     base_url = f"{request.scheme}://{request.get_host()}"
     challenges_url = (f"[Challenges]"
-                      f"(<{base_url}{reverse(anchor)}{anchor}>)")
+                      f"(<{base_url}{reverse(anchor)}#{anchor}>)")
     complete_url = (f"[{num_complete} complete]"
-                    f"(<{base_url}{reverse('complete')}{anchor}>)")
+                    f"(<{base_url}{reverse('complete')}#{anchor}>)")
     incomplete_url = (f"[{num_incomplete} incomplete]"
-                      f"(<{base_url}{reverse('incomplete')}{anchor}>)")
+                      f"(<{base_url}{reverse('incomplete')}#{anchor}>)")
 
     return f"{icon} {challenges_url} / {complete_url} - {incomplete_url}."
