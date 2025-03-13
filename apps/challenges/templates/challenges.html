@@ -33,6 +33,18 @@
             </span>
         </a>
     </li>
+    {% if completed is not None %}
+    <li class="breadcrumb-item active h2" aria-current="page" title="">
+        <a class="icon-link icon-link-hover" href="{% if completed %}{% url 'complete' %}{% else %}{% url 'incomplete' %}{% endif %}#challenges">
+            <svg class="bi" aria-hidden="true">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#award-fill"></use>
+            </svg>
+            <span id="challenges">
+                {% if completed %}Complete{% else %}Incomplete{% endif %}
+            </span>
+        </a>
+    </li>
+    {% endif %}
 {% endblock breadcrumbs %}
 {% block content %}
 <div class="container-fluid">
