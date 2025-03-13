@@ -23,14 +23,12 @@
             </span>
         </a>
     </li>
-    <li class="breadcrumb-item active h2" aria-current="page" title="Challenges">
-        <a class="icon-link icon-link-hover" href="{% url 'challenges' %}#challenges">
+    <li class="breadcrumb-item active h2" title="Challenges"{% if completed is None %} aria-current="page"{% endif %}>
+        <a class="icon-link icon-link-hover" href="{% url 'challenges' %}#challenges" id="challenges">
             <svg class="bi" aria-hidden="true">
                 <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#award"></use>
             </svg>
-            <span id="challenges">
-                Challenges
-            </span>
+            Challenges
         </a>
     </li>
     {% if completed is not None %}
@@ -39,9 +37,7 @@
             <svg class="bi" aria-hidden="true">
                 <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#award-fill"></use>
             </svg>
-            <span id="challenges">
-                {% if completed %}Complete{% else %}Incomplete{% endif %}
-            </span>
+            {% if completed %}Complete{% else %}Incomplete{% endif %}
         </a>
     </li>
     {% endif %}
