@@ -7,9 +7,9 @@ def slash(interaction_json: dict, request) -> tuple[str, bool]:
     interaction_data = interaction_json.get("data")
     command_name = interaction_data.get("name")
 
-    # "challenges" command to link challenges page.
+    # "challenges" command to link challenges page, with counts.
     if command_name == "challenges":
-        return challenges(request=request, interaction=interaction_data), False
+        return challenges(request=request), False
 
     # "cycle" command to show when challenges will cycle next.
     if command_name == "cycle":
