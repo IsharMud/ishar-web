@@ -1,7 +1,7 @@
 ---
 
 - name: "challenges"
-  description: "Link to the list of MUD challenges."
+  description: "List link, and count, of MUD challenges."
   type: 1
 
 - name: "cycle"

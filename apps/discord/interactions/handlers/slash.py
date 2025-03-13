@@ -9,7 +9,7 @@ def slash(interaction_json: dict, request) -> tuple[str, bool]:
 
     # "challenges" command to link challenges page.
     if command_name == "challenges":
-        return challenges(request=request), False
+        return challenges(request=request, interaction=interaction_data), False
 
     # "cycle" command to show when challenges will cycle next.
     if command_name == "cycle":
