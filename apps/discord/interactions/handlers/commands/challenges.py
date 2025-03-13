@@ -19,8 +19,8 @@ def challenges(request, interaction=None):
     challenges_url = (f"[Challenges]"
                       f"(<{base_url}{reverse(anchor)}#{anchor}>)")
     complete_url = (f"[{num_complete} complete]"
-                    f"(<{base_url}{reverse('complete')}#{anchor}>)")
+                    f"(<{base_url}{reverse('complete')}#complete>)")
     incomplete_url = (f"[{num_incomplete} incomplete]"
-                      f"(<{base_url}{reverse('incomplete')}#{anchor}>)")
+                      f"(<{base_url}{reverse('incomplete')}#incomplete>)")
 
     return f"{challenges_url} {icon} {complete_url} - {incomplete_url}."
