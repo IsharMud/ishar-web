@@ -5,6 +5,15 @@
 {% block meta_url %}{% url 'leaders' %}{% endblock meta_url %}
 {% block title %}Leaders{% if game_type %} / {{ game_type.label }}{% endif %}{% endblock title %}
 {% block includes %}
+    <style>
+        .buttons-colvis,
+        .dt-buttons button,
+        .dt-buttons .btn-secondary button,
+        button.dt-button.active {
+            background: #000 !important;
+            color: var(--ishar-color) !important;
+        }
+    </style>
     <link href="{% static 'datatables/datatables.min.css' %}" rel="stylesheet">
     <script src="{% static 'jquery-3.7.1.min.js' %}"></script>
     <script src="{% static 'datatables/datatables.min.js' %}"></script>
