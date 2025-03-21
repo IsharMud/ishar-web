@@ -6,10 +6,9 @@
 {% block meta_url %}{% url 'challenges' %}#challenges{% endblock meta_url %}
 {% block title %}Challenges{% endblock title %}
 {% block includes %}
-    <link href="https://cdn.datatables.net/2.1.8/css/dataTables.bootstrap5.css" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
-    <script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"></script>
-    <script src="https://cdn.datatables.net/2.1.8/js/dataTables.bootstrap5.js"></script>
+    <link href="{% static 'datatables/datatables.min.css' %}" rel="stylesheet">
+    <script src="{% static 'jquery-3.7.1.min.js' %}"></script>
+    <script src="{% static 'datatables/datatables.min.js' %}"></script>
 {% endblock includes %}
 {% block scripts %}let focusTo = 'challenges'{% endblock scripts %}
 {% block breadcrumbs %}

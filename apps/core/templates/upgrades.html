@@ -5,14 +5,9 @@
 {% block meta_url %}{% url 'upgrades' %}#upgrades{% endblock meta_url %}
 {% block title %}Remort Upgrades{% endblock title %}
 {% block includes %}
-<link href="https://cdn.datatables.net/2.1.8/css/dataTables.bootstrap5.css" rel="stylesheet">
-<link href="https://cdn.datatables.net/buttons/3.1.2/css/buttons.bootstrap5.css" rel="stylesheet">
-<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
-<script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"></script>
-<script src="https://cdn.datatables.net/2.1.8/js/dataTables.bootstrap5.js"></script>
-<script src="https://cdn.datatables.net/buttons/3.1.2/js/dataTables.buttons.js"></script>
-<script src="https://cdn.datatables.net/buttons/3.1.2/js/buttons.bootstrap5.js"></script>
-<script src="https://cdn.datatables.net/buttons/3.1.2/js/buttons.colVis.js"></script>
+    <link href="{% static 'datatables/datatables.min.css' %}" rel="stylesheet">
+    <script src="{% static 'jquery-3.7.1.min.js' %}"></script>
+    <script src="{% static 'datatables/datatables.min.js' %}"></script>
 {% endblock includes %}
 {% block breadcrumbs %}
     <li class="breadcrumb-item h2" title="Portal">

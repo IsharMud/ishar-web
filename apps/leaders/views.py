@@ -37,9 +37,10 @@ class LeadersView(LoginRequiredMixin, NeverCacheMixin, ListView):
 
         for i in context[self.context_object_name]:
             i.challenges = i.statistics.total_challenges
-            i.quests = i.statistics.total_quests
             i.deaths = i.statistics.total_deaths
             i.level = i.common.level
+            i.player_class = i.common.player_class
+            i.quests = i.statistics.total_quests
             i.renown = i.statistics.total_renown
 
         return context

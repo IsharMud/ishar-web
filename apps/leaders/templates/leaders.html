@@ -5,16 +5,9 @@
 {% block meta_url %}{% url 'leaders' %}{% endblock meta_url %}
 {% block title %}Leaders{% if game_type %} / {{ game_type.label }}{% endif %}{% endblock title %}
 {% block includes %}
-    <link href="https://cdn.datatables.net/2.1.8/css/dataTables.bootstrap5.css" rel="stylesheet">
-    <link href="https://cdn.datatables.net/buttons/3.1.2/css/buttons.bootstrap5.css" rel="stylesheet">
-    <link href="https://cdn.datatables.net/responsive/3.0.3/css/responsive.dataTables.min.css" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
-    <script src="https://cdn.datatables.net/2.1.8/js/dataTables.js"></script>
-    <script src="https://cdn.datatables.net/2.1.8/js/dataTables.bootstrap5.js"></script>
-    <script src="https://cdn.datatables.net/buttons/3.1.2/js/dataTables.buttons.js"></script>
-    <script src="https://cdn.datatables.net/buttons/3.1.2/js/buttons.bootstrap5.js"></script>
-    <script src="https://cdn.datatables.net/buttons/3.1.2/js/buttons.colVis.js"></script>
-    <script src="https://cdn.datatables.net/responsive/3.0.3/js/dataTables.responsive.min.js"></script>
+    <link href="{% static 'datatables/datatables.min.css' %}" rel="stylesheet">
+    <script src="{% static 'jquery-3.7.1.min.js' %}"></script>
+    <script src="{% static 'datatables/datatables.min.js' %}"></script>
 {% endblock includes %}
 {% block breadcrumbs %}
     <li class="breadcrumb-item h2" title="Portal">
@@ -47,7 +40,7 @@
 {% endblock breadcrumbs %}
 {% block content %}
 <div class="container-fluid">
-    <ul class="list-group list-group-horizontal-sm">
+    <ul class="my-1 py-1 list-group list-group-horizontal-sm">
         <li class="list-group-item card-text" title="All" id="all">
     {% if game_type is None %}
             <span class="text-ishar">All</span>
@@ -60,9 +53,7 @@
         {% if game_type == num %}
             <span class="text-ishar">{{ name }}</span>
         {% else %}
-            <a class="list-group-item-text" href="{% url 'leaders' %}{{ name|lower }}#{{ name|lower }}">
-                    {{ name }}
-            </a>
+            <a class="list-group-item-text" href="{% url 'leaders' %}{{ name|lower }}#{{ name|lower }}">{{ name }}</a>
         {% endif %}
         </li>
     {% endfor %}
@@ -75,6 +66,9 @@
             <tr>
                 <th class="border" scope="col" title="Name">
                     <span class="text-ishar">Name</span>
+                </th>
+                <th class="border" scope="col" title="Class">
+                    <span class="text-ishar">Class</span>
                 </th>
                 <th class="border" scope="col" title="Level">
                     <span class="text-ishar">Level</span>
@@ -102,6 +96,9 @@
                 <td class="border" data-order="{{ leader.name }}" data-search="{{ leader.name }}" title="Player Name: {{ leader.name }}">
                     {{ leader.player_link }}
                 </td>
+                <td class="border" data-order="{{ leader.player_class }}" data-search="{{ leader.player_class }}" title="Class: {{ leader.player_class }}">
+                    {{ leader.player_class }}
+                </td>
                 <td class="border" data-order="{{ leader.level }}" data-search="" title="Level: {{ leader.level }}">
                     {{ leader.level }}
                 </td>
@@ -128,6 +125,9 @@
                 <th class="border" scope="col" title="Name">
                     <span class="text-ishar">Name</span>
                 </th>
+                <th class="border" scope="col" title="Class">
+                    <span class="text-ishar">Class</span>
+                </th>
                 <th class="border" scope="col" title="Level">
                     <span class="text-ishar">Level</span>
                 </th>
@@ -152,40 +152,35 @@
 </div>
 <script>
     const itemName = 'players'
-    const searchLayout = { search: { placeholder: 'Player Name' } }
     $('#leadersTable').DataTable({
         buttons: ['colvis'],
-        columnDefs: [
-            {
-                searchable: true,
-                targets: [0],
-                type: 'html'
-            },
-            {
-                searchable: false,
-                targets: [1, 2, 3, 4, 5, 6],
-                type: 'num'
-            }
-        ],
         language: {
             info: `Showing _START_ to _END_ of _TOTAL_ ${itemName}`,
             infoEmpty: `Showing 0 to 0 of 0 ${itemName}`,
             infoFiltered: `(filtered from _MAX_ total ${itemName})`,
-            lengthMenu: `Show _MENU_ ${itemName}`,
-            zeroRecords: `No matching ${itemName} found`
+            lengthMenu: `_MENU_ ${itemName}`,
+            zeroRecords: `No matching ${itemName} found`,
+            searchBuilder: {
+                button: {
+                    0: '<i class="bi bi-search" data-bs-toggle="tooltip" data-bs-title="Search" title="Search"></i> Search',
+                    1: '<i class="bi bi-search" data-bs-toggle="tooltip" data-bs-title="Search (1)" title="Search (1)"></i> Search (1)',
+                    _: '<i class="bi bi-search" data-bs-toggle="tooltip" data-bs-title="Search" title="Search"></i> Search (%d)',
+                },
+                title: '<i class="bi bi-search" data-bs-toggle="tooltip" data-bs-title="Search" title="Search"></i> Search',
+            },
         },
         layout: {
-            top: 'info',
-            topEnd: {
-                buttons: [{
-                    extend: 'colvis',
-                    text: 'Columns'
-                }],
+            topStart: {
+                buttons: [
+                    {
+                        extend: 'colvis',
+                        text: '<span data-bs-toggle="tooltip" data-bs-title="Columns visibility" class="bi bi-list-columns"> Columns</span>',
+                    },
+                ]
             },
-            topStart: searchLayout,
-            bottom: 'info',
-            bottomEnd: 'paging',
-            bottomStart: 'pageLength'
+            topEnd: 'pageLength',
+            bottomStart: 'paging',
+            bottomEnd: 'info',
         },
         lengthMenu: [
             5, 10, 15, 20, 25, 50, 75, 100,
@@ -195,15 +190,20 @@
             }
         ],
         order: [
-            [2, 'desc'],
             [3, 'desc'],
             [4, 'desc'],
             [5, 'desc'],
-            [6, 'asc'],
-            [1, 'desc']
+            [6, 'desc'],
+            [7, 'asc'],
+            [2, 'desc']
         ],
         pageLength: 10,
-        responsive: true,
+        responsive: {
+            responsive: true,
+        },
+        searchBuilder: {
+            depthLimit: 1,
+        },
     });
 </script>
     {% else %}
