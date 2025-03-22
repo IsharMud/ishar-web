@@ -7,11 +7,24 @@
 {% block includes %}
     <style>
         .buttons-colvis,
+        .dt-buttons,
         .dt-buttons button,
-        .dt-buttons .btn-secondary button,
-        button.dt-button.active {
-            background: #000 !important;
-            color: var(--ishar-color) !important;
+        .dt-buttons.button {
+            --bs-btn-bg: var(--bs-black);
+            --bs-btn-border-color: var(--ishar-color);
+            --bs-btn-color: var(--ishar-color);
+
+            --bs-btn-active-bg: var(--ishar-color);
+            --bs-btn-active-border-color: var(--ishar-color);
+            --bs-btn-active-color: var(--bs-black);
+
+            --bs-btn-hover-bg: var(--ishar-color);
+            --bs-btn-hover-border-color: var(--ishar-color);
+            --bs-btn-hover-color: var(--bs-black);
+
+            --bs-btn-visited-bg: var(--bs-black);
+            --bs-btn-visited-border-color: var(--ishar-color);
+            --bs-btn-visited-color: var(--ishar-color);
         }
     </style>
     <link href="{% static 'datatables/datatables.min.css' %}" rel="stylesheet">
