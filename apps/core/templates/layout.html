@@ -273,6 +273,18 @@
                                     </a>
                                 </li>
 
+                                <li class="nav-item" title="Who's Online?">
+                                    <a class="nav-link dropdown-item icon-link icon-link-hover" href="{% url 'who' %}#who">
+                                        <svg class="bi" aria-hidden="true">
+                                            <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#people"></use>
+                                        </svg>
+                                        Who's Online?
+                                        <span class="badge bg-dark rounded-pill border border-secondary" title="{{ PLAYERS_ONLINE }} player{{ PLAYERS_ONLINE|pluralize }} online">
+                                            {{ PLAYERS_ONLINE }}
+                                        </span>
+                                    </a>
+                                </li>
+
                                 <li class="nav-item">
                                     <hr class="dropdown-divider">
                                 </li>

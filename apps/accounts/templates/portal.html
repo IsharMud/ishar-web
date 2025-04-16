@@ -34,67 +34,78 @@
                 </a>
             </li>
     {% endif %}
-                <li class="card-text list-group-item" title="Challenges">
-                    <a class="list-group-item-text icon-link icon-link-hover" href="{% url 'challenges' %}#challenges">
-                        <svg class="bi" aria-hidden="true">
-                            <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#award"></use>
+            <li class="card-text list-group-item" title="Challenges">
+                <a class="list-group-item-text icon-link icon-link-hover" href="{% url 'challenges' %}#challenges">
+                    <svg class="bi" aria-hidden="true">
+                        <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#award"></use>
+                    </svg>
+                    Challenges
+                </a>
+            </li>
+            <li class="card-text list-group-item" title="Feedback">
+                <a class="list-group-item-text icon-link icon-link-hover" href="{% url 'feedback' %}#feedback">
+                    <svg class="bi" aria-hidden="true">
+                        <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#mailbox-flag"></use>
+                    </svg>
+                    Feedback
+                </a>
+            </li>
+            <li class="card-text list-group-item" title="Leaders">
+                <a class="list-group-item-text icon-link icon-link-hover" href="{% url 'leaders' %}#leaders">
+                    <svg class="bi" aria-hidden="true">
+                        <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#trophy"></use>
+                    </svg>
+                    Leaders
+                </a>
+            </li>
+            <li class="card-text list-group-item" title="Password">
+                <a class="list-group-item-text icon-link icon-link-hover" href="{% url 'password' %}#password">
+                    <svg class="bi" aria-hidden="true">
+                        <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#key"></use>
+                    </svg>
+                    Password
+                </a>
+            </li>
+            <li class="card-text list-group-item">
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" name="isPrivate" id="privateSwitch" value="{% if request.user.is_private %}true{% else %}false{% endif %}" onclick="togglePrivate(this.id);"{% if request.user.is_private %} checked{% endif %}>
+                    <label class="form-check-label" for="privateSwitch">
+                        Private
+                    </label>
+                    <button
+                        class="bg-black border-0 icon-link icon-link-hover p-1"
+                        data-bs-html="true"
+                        data-bs-title="<strong>Private?</strong>"
+                        data-bs-toggle="popover"
+                        data-bs-content="The &quot;<b>Private</b>&quot; setting hides your player's profile pages online."
+                        type="button">
+                        <svg class="bi" aria-hidden="false" role="note" aria-label="The &quot;private&quot; setting hides your player's profile pages online.">
+                            <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#question-circle"></use>
                         </svg>
-                        Challenges
-                    </a>
-                </li>
-                <li class="card-text list-group-item" title="Feedback">
-                    <a class="list-group-item-text icon-link icon-link-hover" href="{% url 'feedback' %}#feedback">
-                        <svg class="bi" aria-hidden="true">
-                            <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#mailbox-flag"></use>
-                        </svg>
-                        Feedback
-                    </a>
-                </li>
-                <li class="card-text list-group-item" title="Leaders">
-                    <a class="list-group-item-text icon-link icon-link-hover" href="{% url 'leaders' %}#leaders">
-                        <svg class="bi" aria-hidden="true">
-                            <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#trophy"></use>
-                        </svg>
-                        Leaders
-                    </a>
-                </li>
-                <li class="card-text list-group-item" title="Password">
-                    <a class="list-group-item-text icon-link icon-link-hover" href="{% url 'password' %}#password">
-                        <svg class="bi" aria-hidden="true">
-                            <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#key"></use>
-                        </svg>
-                        Password
-                    </a>
-                </li>
-                <li class="card-text list-group-item">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" name="isPrivate" id="privateSwitch" value="{% if request.user.is_private %}true{% else %}false{% endif %}" onclick="togglePrivate(this.id);"{% if request.user.is_private %} checked{% endif %}>
-                        <label class="form-check-label" for="privateSwitch">
-                            Private
-                        </label>
-                        <button
-                            class="bg-black border-0 icon-link icon-link-hover p-1"
-                            data-bs-html="true"
-                            data-bs-title="<strong>Private?</strong>"
-                            data-bs-toggle="popover"
-                            data-bs-content="The &quot;<b>Private</b>&quot; setting hides your player's profile pages online."
-                            type="button">
-                            <svg class="bi" aria-hidden="false" role="note" aria-label="The &quot;private&quot; setting hides your player's profile pages online.">
-                                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#question-circle"></use>
-                            </svg>
-                        </button>
-                    </div>
-                </li>
-                <li class="card-text list-group-item" title="Upgrades">
-                    <a class="list-group-item-text icon-link icon-link-hover" href="{% url 'upgrades' %}#upgrades">
-                        <svg class="bi" aria-hidden="true">
-                            <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#shield"></use>
-                        </svg>
-                        Upgrades
-                    </a>
-                </li>
-            </ul>
-        </div>
+                    </button>
+                </div>
+            </li>
+            <li class="card-text list-group-item" title="Upgrades">
+                <a class="list-group-item-text icon-link icon-link-hover" href="{% url 'upgrades' %}#upgrades">
+                    <svg class="bi" aria-hidden="true">
+                        <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#shield"></use>
+                    </svg>
+                    Upgrades
+                </a>
+            </li>
+            <li class="card-text list-group-item" title="Who's Online?">
+                <a class="list-group-item-text icon-link icon-link-hover" href="{% url 'who' %}#who">
+                    <svg class="bi" aria-hidden="true">
+                        <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#people"></use>
+                    </svg>
+                    Who's Online?
+                    <span class="badge bg-dark rounded-pill border border-secondary">
+                        {{ PLAYERS_ONLINE }}
+                    </span>
+                </a>
+            </li>
+        </ul>
+    </div>
 
     <div class="card m-1" id="privateMsgDiv" style="display: none;">
         <div class="card-body">
@@ -250,14 +261,14 @@
             {{ request.user.upgrades.count }}
         </span>
         <button
-            class="bg-black border-0 icon-link icon-link-hover p-1"
-            data-bs-toggle="popover"
-            data-bs-html="true"
-            data-bs-title="<strong>Upgrades?</strong>"
-            data-bs-content="A list of remort upgrades
+                class="bg-black border-0 icon-link icon-link-hover p-1"
+                data-bs-toggle="popover"
+                data-bs-html="true"
+                data-bs-title="<strong>Upgrades?</strong>"
+                data-bs-content="A list of remort upgrades
                 (which can be &quot;bought&quot; with renown points in-game)
                 <a href='{% url 'upgrades' %}#upgrades'>is available here</a>."
-            type="button">
+                type="button">
             <svg class="bi" aria-hidden="false" role="note" aria-label="Remort Upgrades: {{ request.scheme }}://{{ request.META.HTTP_HOST }}{% url 'upgrades' %}#upgrades">
                 <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#question-circle"></use>
             </svg>

@@ -1,15 +1,35 @@
 {% extends "layout.html" %}
 {% load humanize %}
+{% load static %}
 {% block meta_title %}Who's Online?{% endblock meta_title %}
 {% block meta_description %}Number of players currently online.{% endblock meta_description %}
 {% block meta_url %}{% url 'who' %}#who{% endblock meta_url %}
 {% block title %}Who's Online?{% if players %} ({{ players | length }} player{{ players|pluralize }}){% endif %}{% endblock title %}
 {% block breadcrumbs %}
-    <li class="h2 bi bi-people breadcrumb-item" title="Portal">
-        <a href="{% url 'portal' %}#portal" id="portal">Portal</a>
+    <li class="breadcrumb-item h2" title="Portal">
+        <a class="icon-link icon-link-hover" href="{% url 'portal' %}#portal">
+            <svg class="bi" aria-hidden="true">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#person-gear"></use>
+            </svg>
+            <span id="portal">
+                Portal
+            </span>
+        </a>
     </li>
-    <li class="h2 breadcrumb-item active" aria-current="page" title="Who's Online?">
-        <a href="{% url 'who' %}#who" id="who">Who's Online?</a>
+    <li class="breadcrumb-item active h2" aria-current="page" title="Who's Online?">
+        <a class="icon-link icon-link-hover" href="{% url 'who' %}#who">
+            <svg class="bi" aria-hidden="true">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#people"></use>
+            </svg>
+            <span id="who">
+                Who's Online?
+            </span>
+        </a>
+    </li>
+    <li class="breadcrumb-item active h5" title="{{ PLAYERS_ONLINE }} player{{ PLAYERS_ONLINE|pluralize }} online" style="--bs-breadcrumb-divider: '';">
+        <span class="badge bg-dark rounded-pill border border-secondary">
+            {{ PLAYERS_ONLINE }}
+        </span>
     </li>
 {% endblock breadcrumbs %}
 {% block content %}
@@ -31,8 +51,11 @@
         </ol>
     </div>
     {% else %}
-    <p class="lead m-3">
-        Sorry, but there are currently no players online.
-    </p>
+    <div class="m-3">
+        <h4 title="Sorry...">Sorry...</h4>
+        <p class="fst-italic lead">
+            There are currently no players online.
+        </p>
+    </div>
     {% endif %}
 {% endblock content %}

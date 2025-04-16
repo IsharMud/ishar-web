@@ -167,6 +167,7 @@ TEMPLATES = [
                 "apps.events.contexts.global_event_count",
                 "apps.help.contexts.help_search_form",
                 "apps.players.contexts.player_search_form",
+                "apps.players.contexts.players_online",
                 "apps.seasons.contexts.current_season",
             ],
 #            "libraries": {

@@ -15,4 +15,8 @@ class PlayerWhoView(LoginRequiredMixin, NeverCacheMixin, ListView):
     template_name = "who.html"
 
     def get_queryset(self):
-        return super().get_queryset().filter(logon__gte=F("logout"))
+        return super().get_queryset().filter(
+            logon__gte=F("logout"),
+            is_deleted=False,
+            online__gt=0
+        )
