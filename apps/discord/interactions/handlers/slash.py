@@ -67,5 +67,9 @@ def slash(interaction_json: dict, request) -> tuple[str, bool]:
     if command_name == "upgrades":
         return upgrades(request=request), False
 
+    # "who" command to list online players.
+    if command_name == "who":
+        return who(request=request), False
+
     # Raise ModuleNotFoundError as last resort.
     raise ModuleNotFoundError(f"No Discord slash command: {command_name}.")

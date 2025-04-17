@@ -25,9 +25,9 @@ def events(request):
         ephemeral = False
         reply = (
             f"[{num_events} "
-            f'{ngettext(singular="event", plural="events", number=num_events)}:'
-            f"](<{request.scheme}://{request.get_host()}"
-            f'{reverse("events")}#events>)\n'
+            f'{ngettext(singular="event", plural="events", number=num_events)}]'
+            f"(<{request.scheme}://{request.get_host()}"
+            f'{reverse("events")}#events>):\n'
         )
 
         # List the number, description, time left, and expiration of the event.

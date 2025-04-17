@@ -1,4 +1,4 @@
-from django.db.models import F
+from django.db.models.expressions import F
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.list import ListView
 

@@ -78,3 +78,6 @@
   description: "Link to available remort upgrades and their renown costs."
   type: 1
 
+- description: "List any online players."
+  name: "who"
+  type: 1
