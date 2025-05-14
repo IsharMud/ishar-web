@@ -1,13 +1,13 @@
 asgiref==3.8.1
-certifi==2025.1.31
+certifi==2025.4.26
 cffi==1.17.1
-charset-normalizer==3.4.1
-Django==5.2
+charset-normalizer==3.4.2
+Django==5.2.1
 django-jazzmin==3.0.1
 gunicorn==23.0.0
 idna==3.10
 libgravatar==1.0.4
-packaging==24.2
+packaging==25.0
 passlib==1.7.4
 psutil==7.0.0
 pycparser==2.22
