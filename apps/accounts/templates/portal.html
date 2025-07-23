@@ -220,7 +220,7 @@
             data-bs-toggle="popover"
             data-bs-html="true"
             data-bs-title="<strong>Essence?</strong>"
-            data-bs-content="&quot;<a title='Help: Essence' href='{% url 'help_page' help_topic='Essence' %}#topic'>Essence</a>&quot;
+            data-bs-content="&quot;<a title='Help: Essence' href='{% url 'help_page' help_topic='Essence' %}#topic' target='_blank'>Essence</a>&quot;
                 are rewards points earned each season. Essence is preserved across seasons,
                 and can be spent by typing &quot;<code>shop</code>&quot; any time."
             type="button">
@@ -267,7 +267,7 @@
                 data-bs-title="<strong>Upgrades?</strong>"
                 data-bs-content="A list of remort upgrades
                 (which can be &quot;bought&quot; with renown points in-game)
-                <a href='{% url 'upgrades' %}#upgrades'>is available here</a>."
+                <a href='{% url 'upgrades' %}#upgrades' target='_blank'>is available here</a>."
                 type="button">
             <svg class="bi" aria-hidden="false" role="note" aria-label="Remort Upgrades: {{ request.scheme }}://{{ request.META.HTTP_HOST }}{% url 'upgrades' %}#upgrades">
                 <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#question-circle"></use>
