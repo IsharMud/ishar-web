@@ -42,7 +42,7 @@ SEE_ALSO_REGEX = re.compile(
 )
 
 # Compile regular expression to match sections for another level in content.
-DIFF_LEVEL_REGEX = re.compile("^\%\%\s*(?P<diff_level>[0-9]{1,2})$")
+DIFF_LEVEL_REGEX = re.compile("^%%\s*(?P<diff_level>[0-9]{1,2})$")
 
 # Compile regular expressions for help command minimum and syntax.
 MINIMUM_REGEX = re.compile(r"^(Minimum|minimum|Min|min)\s*\:\s*(?P<min>.+)$")
