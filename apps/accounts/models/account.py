@@ -141,6 +141,7 @@ class Account(AbstractBaseUser, PermissionsMixin):
         verbose_name="Friend Code",
     )
     referrer_account = models.ForeignKey(
+        db_column="referrer_account_id",
         to='self',
         blank=True,
         null=True,
