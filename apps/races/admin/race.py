@@ -67,24 +67,6 @@ class RaceAdmin(admin.ModelAdmin):
             }
         ),
         (
-            "Weaknesses",
-            {
-                "fields": (
-                    "vulnerabilities",
-                    "susceptibilities"
-                )
-            }
-        ),
-        (
-            "Protections",
-            {
-                "fields": (
-                    "resistances",
-                    "immunities"
-                )
-            }
-        ),
-        (
             "Additional Statistics",
             {
                 "fields": (

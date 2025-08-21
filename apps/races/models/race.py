@@ -128,30 +128,6 @@ class Race(models.Model):
         help_text="Attack type for the race.",
         verbose_name="Attack Type",
     )
-    vulnerabilities = models.TextField(
-        blank=True,
-        null=True,
-        help_text="Vulnerabilities of the race.",
-        verbose_name="Vulnerabilities",
-    )
-    susceptibilities = models.TextField(
-        blank=True,
-        null=True,
-        help_text="Susceptibilities of the race.",
-        verbose_name="susceptibilities",
-    )
-    resistances = models.TextField(
-        blank=True,
-        null=True,
-        help_text="Resistances of the race.",
-        verbose_name="Resistances",
-    )
-    immunities = models.TextField(
-        blank=True,
-        null=True,
-        help_text="Immunities of the race.",
-        verbose_name="Immunities",
-    )
     additional_str = models.SmallIntegerField(
         blank=True,
         null=True,
