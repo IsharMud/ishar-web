@@ -67,6 +67,15 @@ class AccountAdmin(UserAdmin):
                 )
             }
         ),
+        (
+            "Refer",
+            {
+                "fields": (
+                    "friend_code",
+                    "referrer_account",
+                )
+            }
+        ),
     )
     filter_horizontal = ()
     list_filter = ("immortal_level",)
@@ -95,8 +104,10 @@ class AccountAdmin(UserAdmin):
         "last_isp",
         "last_ident",
         "seasonal_earned",
+        "friend_code",
+        "referrer_account"
     )
-    search_fields = (model.USERNAME_FIELD, model.EMAIL_FIELD)
+    search_fields = (model.USERNAME_FIELD, model.EMAIL_FIELD, "referrer_account")
 
     def has_add_permission(self, request) -> bool:
         return False

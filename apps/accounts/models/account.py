@@ -133,6 +133,21 @@ class Account(AbstractBaseUser, PermissionsMixin):
         help_text="Free refresh?",
         verbose_name="Free Refresh"
     )
+    friend_code = models.CharField(
+        blank=True,
+        max_length=12,
+        null=True,
+        help_text="Friend code of the account.",
+        verbose_name="Friend Code",
+    )
+    referrer_account = models.ForeignKey(
+        to='self',
+        blank=True,
+        null=True,
+        on_delete=models.DO_NOTHING,
+        help_text="Account which referred this account.",
+        verbose_name="Referrer Account",
+    )
 
     EMAIL_FIELD = "email"
     USERNAME_FIELD = "account_name"
