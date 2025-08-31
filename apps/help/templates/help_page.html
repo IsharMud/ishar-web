@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% load static %}
-{% block meta_title %}Help: {{ help_topic.name }}{% endblock meta_title %}
+{% block meta_title %}Help{% if help_topic and help_topic.name %}: {{ help_topic.name }}{% endif %}{% endblock meta_title %}
 {% block meta_description %}Help pages for {{ WEBSITE_TITLE }}{% endblock meta_description %}
 {% block meta_url %}{% if help_topic %}{{ help_topic.get_absolute_url }}{% else %}{% url 'help' %}#help{% endif %}{% endblock meta_url %}
 {% block title %}Help{% if help_topic and help_topic.name %}: {{ help_topic.name }}{% endif %}{% endblock title %}
