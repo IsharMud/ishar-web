@@ -14,7 +14,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         discord_url = (
-            f"https://discord.com/api/v10/applications/"
+            f"https://discord.com/api/applications/"
             f'{settings.DISCORD["APPLICATION_ID"]}/guilds/'
             f'{settings.DISCORD["GUILD"]}/commands'
         )
