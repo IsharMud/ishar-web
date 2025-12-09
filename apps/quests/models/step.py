@@ -9,6 +9,9 @@ class QuestStepType(models.IntegerChoices):
     OBJECT = 0
     KILL = 1
     ROOM = 2
+    DIALOGUE = 3
+    SPECIAL = 4
+    ESCORT = 5
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}: {self.__str__()} ({self.value})"
