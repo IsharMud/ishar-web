@@ -4,7 +4,6 @@ from django.db import models
 from django.contrib import admin
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.utils.timezone import now
-from libgravatar import Gravatar, sanitize_email
 from passlib.hash import md5_crypt
 
 from apps.core.models.unsigned import UnsignedAutoField

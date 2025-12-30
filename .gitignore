@@ -14,6 +14,5 @@ test.py
 venv
 /cache/
 /media/
-/static/
 /lib/
 /logs/
