@@ -13,6 +13,7 @@ class Condition(models.Model):
 
     objects = ConditionManager()
 
+# TODO: This column is not actually autoincrement.
 #    condition_id = models.AutoField(
 #        primary_key=True,
 #        help_text=_(
