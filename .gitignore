@@ -16,3 +16,4 @@ venv
 /media/
 /lib/
 /logs/
+models.generated.py
