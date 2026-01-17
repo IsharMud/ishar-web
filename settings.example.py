@@ -116,6 +116,7 @@ INSTALLED_APPS = [
     "apps.ChallengesConfig",
     "apps.ClassesConfig",
     "apps.ClientsConfig",
+    "apps.ConditionsConfig",
     "apps.DiscordConfig",
     "apps.EventsConfig",
     "apps.FAQsConfig",
@@ -490,6 +491,9 @@ JAZZMIN_SETTINGS = {
         "clients.MUDClient": "fas fa-terminal",
         "clients.MUDClientCategory": "fas fa-folder",
 
+        # conditions
+        "conditions.Condition": "fas fa-temperature-arrow-up",
+
         # core
         "core": "fas fa-flag",
         "core.PlayerFlag": "fas fa-flag",
@@ -557,6 +561,7 @@ JAZZMIN_SETTINGS = {
 
         # season
         "seasons.Season": "fas fa-tree",
+        "seasons.SeasonalEnigma": "fas fa-cube",
 
         # sites
         "django.contrib.sites": "fas fa-sitemap",

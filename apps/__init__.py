@@ -3,6 +3,7 @@ from .achievements import AchievementsConfig
 from .challenges import ChallengesConfig
 from .classes import ClassesConfig
 from .clients import ClientsConfig
+from .conditions import ConditionsConfig
 from .core import CoreConfig
 from .discord import DiscordConfig
 from .events import EventsConfig
