@@ -20,5 +20,6 @@ from .players import PlayersConfig
 from .processes import ProcessesConfig
 from .quests import QuestsConfig
 from .races import RacesConfig
+from .rooms import RoomsConfig
 from .seasons import SeasonsConfig
 from .skills import SkillsConfig

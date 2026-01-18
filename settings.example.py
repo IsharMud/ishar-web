@@ -132,6 +132,7 @@ INSTALLED_APPS = [
     "apps.ProcessesConfig",
     "apps.QuestsConfig",
     "apps.RacesConfig",
+    "apps.RoomsConfig",
     "apps.SeasonsConfig",
     "apps.SkillsConfig"
 ]
@@ -558,6 +559,11 @@ JAZZMIN_SETTINGS = {
         "races": "fas fa-people",
         "races.Race": "fas fa-user",
         "races.RaceAffinity": "fas fa-brain",
+
+        # rooms
+        "rooms": "fas fa-door-open",
+        "rooms.Room": "fas fa-door-open",
+        "rooms.RoomExit": "fas fa-door-open",
 
         # season
         "seasons.Season": "fas fa-tree",
