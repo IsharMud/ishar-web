@@ -89,7 +89,7 @@ class HelpTab:
 
     def __repr__(self) -> str:
         # Show the object type with absolute path and topic count string.
-        return f"<{self.__class__.__name__}> {self.__str__()}"
+        return f"{self.__class__.__name__}: {self.__str__()}"
 
     def __str__(self) -> str:
         # Show absolute path of "helptab" file with number of help topics.
@@ -346,7 +346,7 @@ class HelpTab:
 
         def __repr__(self) -> str:
             # Show object type with name string.
-            return f"<{self.__class__.__name__}> {self.__str__()}"
+            return f"{self.__class__.__name__}: {self.__str__()}"
 
         def __str__(self) -> str:
             # Show name of the help topic.
