@@ -2,7 +2,7 @@ from django.contrib.admin import StackedInline
 
 
 class ObjectBaseInline(StackedInline):
-    """Object base stacked inline administration."""
+    """Ishar in-game object base stacked inline administration."""
 
     extra = 1
     model = None

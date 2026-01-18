@@ -10,7 +10,7 @@ from .inlines import (
 
 
 class ObjectAdmin(admin.ModelAdmin):
-    """Ishar object administration."""
+    """Ishar in-game object administration."""
 
     date_hierarchy = "updated_at"
     list_display = (
