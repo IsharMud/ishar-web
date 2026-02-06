@@ -3,7 +3,6 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
-from django.views.generic import RedirectView
 
 from apps.core.views import ErrorView
 
@@ -12,10 +11,7 @@ urlpatterns = [
     path("", include("apps.core.urls"), name="ishar"),
     path("admin/", admin.site.urls, name="admin"),
     path("i18n/", include('django.conf.urls.i18n')),
-    path(
-        "connect/", RedirectView.as_view(url=settings.CONNECT_URL),
-        name="connect"
-    ),
+    path("connect/", include("apps.connect.urls"), name="connect"),
     path("challenges/", include("apps.challenges.urls"), name="challenges"),
     path("clients/", include("apps.clients.urls"), name="clients"),
     path("discord/", include("apps.discord.urls"), name="discord"),

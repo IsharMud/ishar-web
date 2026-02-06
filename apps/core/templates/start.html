@@ -47,11 +47,8 @@
     <div class="card-body">
         <p class="card-text lead">
             Playing Ishar starts by
-            <a class="icon-link" href="{% url 'connect' %}" target="_blank" title="Connect to {{ WEBSITE_TITLE }} via Mudslinger">
+            <a class="icon-link icon-link-hover" href="{% url 'connect' %}#connect" title="Connect to {{ WEBSITE_TITLE }}">
                 connecting to the game
-                <svg class="bi" aria-hidden="false" role="img" aria-label="Open Mudslinger web client in a new window.">
-                    <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#box-arrow-up-right"></use>
-                </svg>
             </a>
             and typing "<code>new</code>" at the login prompt.  The game walks you through the few steps of
             creating a new character, then drops you into the virtual world with a few meager possessions and

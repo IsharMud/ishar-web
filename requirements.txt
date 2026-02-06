@@ -3,11 +3,13 @@ aiohttp==3.13.3
 aiosignal==1.4.0
 asgiref==3.11.0
 attrs==25.4.0
+channels==4.2.0
 certifi==2026.1.4
 cffi==2.0.0
 charset-normalizer==3.4.4
 discord==2.3.2
 discord.py==2.6.4
+daphne==4.1.2
 Django==5.2.2
 django-jazzmin==3.0.1
 frozenlist==1.8.0

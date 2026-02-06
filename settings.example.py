@@ -134,7 +134,10 @@ INSTALLED_APPS = [
     "apps.RacesConfig",
     "apps.RoomsConfig",
     "apps.SeasonsConfig",
-    "apps.SkillsConfig"
+    "apps.SkillsConfig",
+    "apps.ConnectConfig",
+    "daphne",
+    "channels",
 ]
 
 MIDDLEWARE = [
@@ -180,6 +183,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "wsgi.application"
+ASGI_APPLICATION = "asgi.application"
 
 # Authentication.
 AUTH_PASSWORD_VALIDATORS = [
@@ -352,7 +356,16 @@ IMMORTAL_LEVELS = (
 MIN_IMMORTAL_LEVEL = min(IMMORTAL_LEVELS)[0]
 MAX_IMMORTAL_LEVEL = max(IMMORTAL_LEVELS)[0]
 
-CONNECT_URL = f"https://mudslinger.net/play/?host={ALLOWED_HOSTS[0]}&port=23"
+# MUD telnet connection (used by the web client WebSocket proxy).
+MUD_HOST = "127.0.0.1"
+MUD_PORT = 23
+
+# Django Channels layer (in-memory is fine for a single-server deployment).
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    },
+}
 
 X_FRAME_OPTIONS = "SAMEORIGIN"
 

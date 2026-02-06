@@ -1,0 +1,232 @@
+{% extends "layout.html" %}
+{% load static %}
+{% block meta_title %}Connect{% endblock meta_title %}
+{% block meta_description %}Connect to {{ WEBSITE_TITLE }} from your browser.{% endblock meta_description %}
+{% block meta_url %}{% url 'connect' %}#connect{% endblock meta_url %}
+{% block title %}Connect{% endblock title %}
+{% block includes %}
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/css/xterm.min.css">
+        <script src="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/lib/xterm.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@xterm/addon-fit@0.10.0/lib/addon-fit.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@xterm/addon-web-links@0.11.0/lib/addon-web-links.min.js"></script>
+        <style>
+            #terminal-container {
+                height: 60vh;
+                min-height: 300px;
+                background-color: #000;
+                border-radius: 0.25rem;
+            }
+            #terminal-container .xterm {
+                height: 100%;
+                padding: 0.25rem;
+            }
+            #command-form {
+                display: flex;
+                gap: 0.5rem;
+                align-items: center;
+            }
+            #command-input {
+                flex: 1;
+                font-family: monospace;
+                font-size: 1rem;
+                padding: 0.375rem 0.5rem;
+            }
+            #connection-status {
+                font-size: 0.875rem;
+                font-weight: bold;
+            }
+            .status-connected { color: #4cbb17; }
+            .status-disconnected { color: #d02b2b; }
+            .status-connecting { color: #fa7; }
+        </style>
+{% endblock includes %}
+{% block scripts %}let focusTo = 'command-input'{% endblock scripts %}
+{% block breadcrumbs %}
+    <li class="breadcrumb-item active h2" aria-current="page" title="Connect">
+        <a class="icon-link icon-link-hover" href="{% url 'connect' %}#connect">
+            <svg class="bi" aria-hidden="true">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#globe"></use>
+            </svg>
+            <span id="connect">
+                Connect
+            </span>
+        </a>
+    </li>
+{% endblock breadcrumbs %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <span id="connection-status" class="status-connecting">Connecting...</span>
+    <button type="button" class="btn btn-sm btn-ishar" id="reconnect-btn" style="display:none;" title="Reconnect to {{ WEBSITE_TITLE }}">
+        <svg class="bi" aria-hidden="true">
+            <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#arrow-clockwise"></use>
+        </svg>
+        Reconnect
+    </button>
+</div>
+<div id="terminal-container"></div>
+<form id="command-form" class="mt-2" autocomplete="off">
+    <label for="command-input" class="visually-hidden">Command</label>
+    <input type="text" id="command-input" class="form-control" placeholder="Enter command..." aria-label="MUD command input" autofocus>
+    <button type="submit" class="btn btn-ishar" title="Send command">
+        <svg class="bi" aria-hidden="true">
+            <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#send"></use>
+        </svg>
+    </button>
+</form>
+<script>
+(function() {
+    "use strict";
+
+    // --- Elements ---
+    const terminalContainer = document.getElementById("terminal-container");
+    const commandForm = document.getElementById("command-form");
+    const commandInput = document.getElementById("command-input");
+    const statusEl = document.getElementById("connection-status");
+    const reconnectBtn = document.getElementById("reconnect-btn");
+
+    // --- Terminal setup ---
+    const term = new Terminal({
+        cursorBlink: false,
+        cursorInactiveStyle: "none",
+        disableStdin: true,
+        scrollback: 5000,
+        fontSize: 14,
+        fontFamily: "monospace",
+        theme: {
+            background: "#000000",
+            foreground: "#d6d6d7",
+            cursor: "#d6d6d7",
+            selectionBackground: "#fa7",
+        },
+        convertEol: true,
+    });
+
+    const fitAddon = new FitAddon.FitAddon();
+    term.loadAddon(fitAddon);
+
+    const webLinksAddon = new WebLinksAddon.WebLinksAddon();
+    term.loadAddon(webLinksAddon);
+
+    term.open(terminalContainer);
+    fitAddon.fit();
+
+    // --- Command history ---
+    const history = [];
+    let historyIndex = -1;
+    let savedInput = "";
+    const MAX_HISTORY = 200;
+
+    // --- WebSocket ---
+    let ws = null;
+
+    function setStatus(text, cls) {
+        statusEl.textContent = text;
+        statusEl.className = cls;
+    }
+
+    function connect() {
+        if (ws && ws.readyState <= WebSocket.OPEN) {
+            ws.close();
+        }
+
+        const protocol = location.protocol === "https:" ? "wss:" : "ws:";
+        const url = protocol + "//" + location.host + "/ws/connect";
+
+        setStatus("Connecting...", "status-connecting");
+        reconnectBtn.style.display = "none";
+
+        ws = new WebSocket(url);
+
+        ws.onopen = function() {
+            setStatus("Connected", "status-connected");
+            commandInput.focus();
+        };
+
+        ws.onmessage = function(event) {
+            term.write(event.data);
+        };
+
+        ws.onclose = function() {
+            setStatus("Disconnected", "status-disconnected");
+            reconnectBtn.style.display = "";
+            term.writeln("\r\n\x1b[1;31m--- Disconnected ---\x1b[0m");
+        };
+
+        ws.onerror = function() {
+            setStatus("Disconnected", "status-disconnected");
+            reconnectBtn.style.display = "";
+        };
+    }
+
+    function sendCommand(cmd) {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(cmd + "\r\n");
+        }
+    }
+
+    // --- Event handlers ---
+    commandForm.addEventListener("submit", function(e) {
+        e.preventDefault();
+        const cmd = commandInput.value;
+        sendCommand(cmd);
+
+        // Add to history (avoid consecutive duplicates).
+        if (cmd && (history.length === 0 || history[history.length - 1] !== cmd)) {
+            history.push(cmd);
+            if (history.length > MAX_HISTORY) {
+                history.shift();
+            }
+        }
+        historyIndex = -1;
+        savedInput = "";
+        commandInput.value = "";
+        commandInput.focus();
+    });
+
+    commandInput.addEventListener("keydown", function(e) {
+        if (e.key === "ArrowUp") {
+            e.preventDefault();
+            if (history.length === 0) return;
+            if (historyIndex === -1) {
+                savedInput = commandInput.value;
+                historyIndex = history.length - 1;
+            } else if (historyIndex > 0) {
+                historyIndex--;
+            }
+            commandInput.value = history[historyIndex];
+        } else if (e.key === "ArrowDown") {
+            e.preventDefault();
+            if (historyIndex === -1) return;
+            if (historyIndex < history.length - 1) {
+                historyIndex++;
+                commandInput.value = history[historyIndex];
+            } else {
+                historyIndex = -1;
+                commandInput.value = savedInput;
+            }
+        }
+    });
+
+    reconnectBtn.addEventListener("click", function() {
+        term.clear();
+        connect();
+    });
+
+    // Keep terminal fitted on resize.
+    window.addEventListener("resize", function() {
+        fitAddon.fit();
+    });
+
+    // Click on terminal focuses the input.
+    terminalContainer.addEventListener("click", function() {
+        const selection = term.getSelection();
+        if (!selection) {
+            commandInput.focus();
+        }
+    });
+
+    // --- Start ---
+    connect();
+})();
+</script>
+{% endblock content %}
