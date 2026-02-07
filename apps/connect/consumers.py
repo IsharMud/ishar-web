@@ -68,12 +68,16 @@ class TelnetConsumer(AsyncWebsocketConsumer):
         if not self._writer or self._writer.is_closing():
             return
 
-        if text_data:
+        if bytes_data:
+            # Binary frames carry raw telnet data (e.g. NAWS updates).
+            self._writer.write(bytes_data)
+        elif text_data:
             self._writer.write(text_data.encode("utf-8", errors="replace"))
-            try:
-                await self._writer.drain()
-            except (ConnectionError, OSError):
-                await self.close()
+
+        try:
+            await self._writer.drain()
+        except (ConnectionError, OSError):
+            await self.close()
 
     # ------------------------------------------------------------------
     # Internal helpers

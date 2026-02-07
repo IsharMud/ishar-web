@@ -84,6 +84,33 @@
     const statusEl = document.getElementById("connection-status");
     const reconnectBtn = document.getElementById("reconnect-btn");
 
+    // --- ANSI color theme (all 16 standard colors) ---
+    const mudTheme = {
+        background: "#000000",
+        foreground: "#d6d6d7",
+        cursor: "#d6d6d7",
+        selectionBackground: "rgba(255, 170, 119, 0.4)",
+        selectionForeground: "#ffffff",
+        // Normal colors (SGR 30-37).
+        black:   "#000000",
+        red:     "#cc0000",
+        green:   "#4cbb17",
+        yellow:  "#cdcd00",
+        blue:    "#4a86cf",
+        magenta: "#cd00cd",
+        cyan:    "#00cdcd",
+        white:   "#c0c0c0",
+        // Bright / bold colors (SGR 90-97).
+        brightBlack:   "#666666",
+        brightRed:     "#ff5555",
+        brightGreen:   "#55ff55",
+        brightYellow:  "#ffff55",
+        brightBlue:    "#5599ff",
+        brightMagenta: "#ff55ff",
+        brightCyan:    "#55ffff",
+        brightWhite:   "#ffffff",
+    };
+
     // --- Terminal setup ---
     const term = new Terminal({
         cursorBlink: false,
@@ -91,13 +118,8 @@
         disableStdin: true,
         scrollback: 5000,
         fontSize: 14,
-        fontFamily: "monospace",
-        theme: {
-            background: "#000000",
-            foreground: "#d6d6d7",
-            cursor: "#d6d6d7",
-            selectionBackground: "#fa7",
-        },
+        fontFamily: "'Courier New', Courier, 'Liberation Mono', monospace",
+        theme: mudTheme,
         convertEol: true,
     });
 
@@ -137,8 +159,11 @@
 
         ws = new WebSocket(url);
 
+        ws.binaryType = "arraybuffer";
+
         ws.onopen = function() {
             setStatus("Connected", "status-connected");
+            sendNaws();
             commandInput.focus();
         };
 
@@ -161,6 +186,22 @@
     function sendCommand(cmd) {
         if (ws && ws.readyState === WebSocket.OPEN) {
             ws.send(cmd + "\r\n");
+        }
+    }
+
+    function sendNaws() {
+        // Send a telnet NAWS (window size) update to the MUD server.
+        // IAC SB NAWS <width-hi> <width-lo> <height-hi> <height-lo> IAC SE
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            var cols = term.cols || 80;
+            var rows = term.rows || 24;
+            var nawsBytes = new Uint8Array([
+                255, 250, 31,
+                (cols >> 8) & 0xff, cols & 0xff,
+                (rows >> 8) & 0xff, rows & 0xff,
+                255, 240
+            ]);
+            ws.send(nawsBytes.buffer);
         }
     }
 
@@ -212,9 +253,10 @@
         connect();
     });
 
-    // Keep terminal fitted on resize.
+    // Keep terminal fitted on resize and notify MUD of new dimensions.
     window.addEventListener("resize", function() {
         fitAddon.fit();
+        sendNaws();
     });
 
     // Click on terminal focuses the input.
