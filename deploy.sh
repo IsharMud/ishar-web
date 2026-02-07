@@ -42,11 +42,11 @@ ${ISHAR_VENV}/python3 ${ISHAR_CONTENT}/manage.py collectstatic --no-input
 # Clear the Django cache.
 find ${ISHAR_WEB}/cache/ -type f -name '*.djcache' -delete
 
-# Restart gunicorn/Django.
-XDG_RUNTIME_DIR=/run/user/$UID systemctl --user restart gunicorn.service
+# Restart daphne/Django.
+XDG_RUNTIME_DIR=/run/user/$UID systemctl --user restart daphne.service
 
-# Tail the end of the gunicorn log(s) and show systemd status.
+# Tail the end of the daphne log(s) and show systemd status.
 sleep 3 && tail -n 100 ${ISHAR_WEB}/logs/*
-XDG_RUNTIME_DIR=/run/user/$UID systemctl --user --no-pager status gunicorn
+XDG_RUNTIME_DIR=/run/user/$UID systemctl --user --no-pager status daphne
 
 exit 0
