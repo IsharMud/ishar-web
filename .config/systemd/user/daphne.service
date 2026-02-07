@@ -1,0 +1,21 @@
+[Unit]
+Description="isharweb test django staging daphne"
+After=network.target syslog.target nss-lookup.target mariadb.service
+
+[Service]
+Restart=on-failure
+Environment="PYTHONUNBUFFERED=1"
+#Environment="DJANGO_DEBUG=1"
+Environment="DJANGO_DEBUG=0"
+Environment="DJANGO_SECRET_KEY=<SECRET>"
+#WorkingDirectory=/var/www/staging.isharmud.com/ishar-web
+WorkingDirectory=/var/www/isharmud.com/ishar-web
+#ExecStart=/var/www/staging.isharmud.com/venv/bin/daphne -b 127.0.0.1 -v 2 --access-log /var/www/staging.isharmud.com/daphne.log -p 8001 asgi:application
+ExecStart=/var/www/isharmud.com/venv/bin/daphne -b 127.0.0.1 -v 2 --access-log /var/www/isharmud.com/daphne.log -p 8001 asgi:application
+
+ExecReload=/bin/kill -s HUP $MAINPID
+ExecStop=/bin/kill -s TERM $MAINPID
+PrivateTmp=true
+
+[Install]
+WantedBy=default.target
