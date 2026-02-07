@@ -4,12 +4,14 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 
+from apps.core.api.routers import api_router
 from apps.core.views import ErrorView
 
 
 urlpatterns = [
     path("", include("apps.core.urls"), name="ishar"),
     path("admin/", admin.site.urls, name="admin"),
+    path("api/", include(api_router.urls), name="api"),
     path("i18n/", include('django.conf.urls.i18n')),
     path("connect/", include("apps.connect.urls"), name="connect"),
     path("challenges/", include("apps.challenges.urls"), name="challenges"),
