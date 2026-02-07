@@ -305,7 +305,7 @@ HELPTAB = Path(MUD_HOME, "lib/Misc/helptab")
 
 # MUD connection.
 MUD_HOST = "isharmud.com"
-MUD_PORT = "23"
+MUD_PORT = 23
 
 # Alignments.
 ALIGNMENTS = {

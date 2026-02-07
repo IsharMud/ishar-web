@@ -1,10 +1,14 @@
-from django.urls import reverse
+from .base import SlashCommand
 
 
-def upgrades(request):
-    # Link to remort upgrades page.
-    return (
-        f":shield: [Remort Upgrades]"
-        f"(<{request.scheme}://{request.get_host()}"
-        f'{reverse("upgrades")}#upgrades>)'
-    )
+class UpgradesCommand(SlashCommand):
+    """Link to remort upgrades page."""
+
+    name = "upgrades"
+    ephemeral = False
+
+    def handle(self) -> tuple[str, bool]:
+        link = self.site_link(
+            "Remort Upgrades", "upgrades", fragment="upgrades",
+        )
+        return f":shield: {link}", self.ephemeral
