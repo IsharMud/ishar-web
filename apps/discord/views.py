@@ -2,6 +2,7 @@ import json
 from logging import getLogger
 
 from django.http import JsonResponse
+from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic.base import View
 from nacl.exceptions import BadSignatureError
@@ -26,14 +27,23 @@ RESPONSE_CHANNEL_MESSAGE = 4
 FLAG_EPHEMERAL = 64
 
 
+@method_decorator(csrf_exempt, name="dispatch")
 class InteractionsView(NeverCacheMixin, View):
-    """Handle inbound Discord interaction webhooks."""
+    """Handle inbound Discord interaction webhooks.
+
+    Discord sends HTTPS POST requests to this endpoint for slash-command
+    interactions and periodic PING health-checks.  Each request carries
+    an Ed25519 signature that is verified before any processing.
+
+    CSRF must be exempted because Discord does not (and cannot) provide
+    a Django CSRF token.  ``@method_decorator(csrf_exempt)`` is applied
+    at the class level so the attribute propagates to the view function
+    returned by ``as_view()`` — applying ``@csrf_exempt`` directly to
+    ``dispatch()`` does **not** work because Django's CSRF middleware
+    inspects the outer view callable, not the dispatch method.
+    """
 
     http_method_names = ("post",)
-
-    @csrf_exempt
-    def dispatch(self, request, *args, **kwargs):
-        return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs) -> JsonResponse:
         # Verify Ed25519 signature from Discord.
@@ -72,6 +82,10 @@ class InteractionsView(NeverCacheMixin, View):
             except LookupError:
                 logger.exception("Unknown Discord slash command")
                 message = "Unknown command."
+                ephemeral = True
+            except Exception:
+                logger.exception("Discord slash command failed")
+                message = "Something went wrong."
                 ephemeral = True
 
             response_data = {
