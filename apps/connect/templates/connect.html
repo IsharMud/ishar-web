@@ -10,9 +10,19 @@
         <script src="https://cdn.jsdelivr.net/npm/@xterm/addon-fit@0.10.0/lib/addon-fit.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/@xterm/addon-web-links@0.11.0/lib/addon-web-links.min.js"></script>
         <style>
+            /* Lock the page so only the terminal scrolls. */
+            html.connect-page,
+            html.connect-page body {
+                overflow: hidden;
+                overscroll-behavior: none;
+                height: 100%;
+            }
+            #terminal-wrapper {
+                position: relative;
+            }
             #terminal-container {
-                height: 60vh;
-                min-height: 200px;
+                /* Height is set dynamically by JS to fill the viewport. */
+                min-height: 120px;
                 background-color: #000;
                 border-radius: 0.25rem;
             }
@@ -40,13 +50,18 @@
             .status-disconnected { color: #d02b2b; }
             .status-connecting { color: #fa7; }
 
+            #scroll-bottom-btn {
+                position: absolute;
+                bottom: 0.5rem;
+                right: 0.75rem;
+                z-index: 10;
+                opacity: 0.85;
+                font-size: 0.8rem;
+                padding: 0.2rem 0.5rem;
+            }
+
             /* --- Mobile / small-screen --- */
             @media (max-width: 767px) {
-                #terminal-container {
-                    /* Use dynamic viewport height to account for browser chrome. */
-                    height: 55dvh;
-                    min-height: 150px;
-                }
                 #send-btn { display: none; }
             }
         </style>
@@ -65,7 +80,7 @@
     </li>
 {% endblock breadcrumbs %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-2">
+<div class="d-flex justify-content-between align-items-center mb-1">
     <span id="connection-status" class="status-connecting">Connecting...</span>
     <button type="button" class="btn btn-sm btn-ishar" id="reconnect-btn" style="display:none;" title="Reconnect to {{ WEBSITE_TITLE }}">
         <svg class="bi" aria-hidden="true">
@@ -74,8 +89,13 @@
         Reconnect
     </button>
 </div>
-<div id="terminal-container"></div>
-<form id="command-form" class="mt-2" autocomplete="off">
+<div id="terminal-wrapper">
+    <div id="terminal-container"></div>
+    <button type="button" class="btn btn-sm btn-ishar" id="scroll-bottom-btn" style="display:none;" title="Scroll to latest output">
+        &#x25BC; Latest
+    </button>
+</div>
+<form id="command-form" class="mt-1" autocomplete="off">
     <label for="command-input" class="visually-hidden">Command</label>
     <input type="text" id="command-input" class="form-control"
            placeholder="Enter command..."
@@ -96,12 +116,20 @@
 (function() {
     "use strict";
 
+    // --- Lock the page so only the terminal scrolls ---
+    document.documentElement.classList.add("connect-page");
+
+    // Hide the site footer to reclaim vertical space.
+    var siteFooter = document.querySelector("body > footer");
+    if (siteFooter) siteFooter.style.display = "none";
+
     // --- Elements ---
     var terminalContainer = document.getElementById("terminal-container");
     var commandForm = document.getElementById("command-form");
     var commandInput = document.getElementById("command-input");
     var statusEl = document.getElementById("connection-status");
     var reconnectBtn = document.getElementById("reconnect-btn");
+    var scrollBtn = document.getElementById("scroll-bottom-btn");
 
     // --- Mobile detection (touch-capable small screen) ---
     var isMobile = ("ontouchstart" in window) && window.innerWidth < 768;
@@ -152,7 +180,24 @@
     term.loadAddon(webLinksAddon);
 
     term.open(terminalContainer);
-    fitAddon.fit();
+
+    // --- Dynamic terminal sizing ---
+    // Measure the actual available space between the terminal's top edge
+    // and the bottom of the viewport, minus the input form, so the page
+    // never needs to scroll.
+    function fitTerminalHeight() {
+        var vh = window.visualViewport
+            ? window.visualViewport.height
+            : window.innerHeight;
+        var top = terminalContainer.getBoundingClientRect().top;
+        // Reserve space for the command form + a small bottom margin.
+        var formSpace = commandForm.offsetHeight + 12;
+        var available = vh - top - formSpace;
+        terminalContainer.style.height = Math.max(120, Math.floor(available)) + "px";
+        fitAddon.fit();
+    }
+
+    fitTerminalHeight();
 
     // --- Command history ---
     var history = [];
@@ -161,9 +206,34 @@
     var MAX_HISTORY = 200;
 
     // --- Local echo & server echo state ---
-    // When the MUD negotiates WILL ECHO it handles echoing (suppress local
-    // echo during password prompts).  Otherwise we always echo locally.
     var serverEcho = false;
+
+    // --- Scroll tracking ---
+    // Show a "scroll to bottom" button when the user has scrolled up.
+    var userScrolledUp = false;
+
+    function isAtBottom() {
+        var buf = term.buffer.active;
+        return buf.viewportY >= buf.baseY;
+    }
+
+    term.onScroll(function() {
+        var atBottom = isAtBottom();
+        if (atBottom && userScrolledUp) {
+            userScrolledUp = false;
+            scrollBtn.style.display = "none";
+        } else if (!atBottom && !userScrolledUp) {
+            userScrolledUp = true;
+            scrollBtn.style.display = "";
+        }
+    });
+
+    scrollBtn.addEventListener("click", function() {
+        term.scrollToBottom();
+        userScrolledUp = false;
+        scrollBtn.style.display = "none";
+        commandInput.focus();
+    });
 
     // --- WebSocket ---
     var ws = null;
@@ -196,7 +266,6 @@
 
         ws.onmessage = function(event) {
             if (typeof event.data === "string") {
-                // Check for echo-state control prefix from the consumer.
                 if (event.data === "\x00ECHO_ON") {
                     serverEcho = true;
                     commandInput.type = "password";
@@ -230,8 +299,6 @@
     }
 
     function sendNaws() {
-        // Send a telnet NAWS (window size) update to the MUD server.
-        // IAC SB NAWS <width-hi> <width-lo> <height-hi> <height-lo> IAC SE
         if (ws && ws.readyState === WebSocket.OPEN) {
             var cols = term.cols || 80;
             var rows = term.rows || 24;
@@ -250,7 +317,7 @@
     function onResize() {
         if (resizeTimer) clearTimeout(resizeTimer);
         resizeTimer = setTimeout(function() {
-            fitAddon.fit();
+            fitTerminalHeight();
             sendNaws();
         }, 150);
     }
@@ -260,17 +327,17 @@
         e.preventDefault();
         var cmd = commandInput.value;
 
-        // Echo the command locally (dim/muted so it is distinct from
-        // server output).  Skip echo when the server is handling it
-        // (e.g. password prompts where WILL ECHO suppresses display).
         if (!serverEcho && cmd) {
-            // SGR 90 = bright-black (dark gray), SGR 0 = reset.
             term.writeln("\x1b[90m" + cmd + "\x1b[0m");
         }
 
         sendCommand(cmd);
 
-        // Add to history (avoid consecutive duplicates).
+        // Snap to latest output after sending a command.
+        term.scrollToBottom();
+        userScrolledUp = false;
+        scrollBtn.style.display = "none";
+
         if (cmd && (history.length === 0 || history[history.length - 1] !== cmd)) {
             history.push(cmd);
             if (history.length > MAX_HISTORY) {
@@ -280,8 +347,7 @@
         historyIndex = -1;
         savedInput = "";
 
-        // Keep the last command highlighted so it can be re-sent by
-        // pressing Enter again, or replaced by typing a new command.
+        // Keep the last command highlighted for easy re-send.
         commandInput.value = cmd;
         commandInput.select();
     });
@@ -321,9 +387,10 @@
     window.addEventListener("resize", onResize);
     if (window.visualViewport) {
         window.visualViewport.addEventListener("resize", onResize);
+        window.visualViewport.addEventListener("scroll", onResize);
     }
 
-    // Click on terminal focuses the input.
+    // Click/tap on terminal focuses the input.
     terminalContainer.addEventListener("click", function() {
         var selection = term.getSelection();
         if (!selection) {
