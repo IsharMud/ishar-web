@@ -8,7 +8,7 @@ class BaseAPIModelViewSet(ReadOnlyModelViewSet):
     """
     fields = filterset_fields = "__all__"
     model = None
-    permission_classes = IsAdminUser
+    permission_classes = (IsAdminUser,)
     serializer_class = None
 
     def dispatch(self, request, *args, **kwargs):
