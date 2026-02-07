@@ -1,9 +1,14 @@
-from django.urls import reverse
+from .base import SlashCommand
 
 
-def faq(request):
-    # Link to frequently asked questions page.
-    return (
-        f":question: [Frequently Asked Questions]"
-        f'(<{request.scheme}://{request.get_host()}{reverse("faq")}#faq>)'
-    )
+class FaqCommand(SlashCommand):
+    """Link to frequently asked questions page."""
+
+    name = "faq"
+    ephemeral = False
+
+    def handle(self) -> tuple[str, bool]:
+        link = self.site_link(
+            "Frequently Asked Questions", "faq", fragment="faq",
+        )
+        return f":question: {link}", self.ephemeral

@@ -1,27 +1,40 @@
-from django.urls import reverse
-
 from apps.challenges.models import Challenge
 
+from .base import SlashCommand
 
-def challenges(request):
-    # Link to challenges, with counts of active, complete, and incomplete.
-    icon = ":crossed_swords:"
-    qs = Challenge.objects.filter(is_active__exact=1)
 
-    base_url = f"{request.scheme}://{request.get_host()}"
-    challenges_url = ("[Challenges]"
-                      f"(<{base_url}{reverse('challenges')}#challenges>)")
+class ChallengesCommand(SlashCommand):
+    """Link to challenges page with counts of active, complete, incomplete."""
 
-    num_complete = qs.exclude(winner_desc__exact="").count()
-    complete_url = f"{num_complete} complete"
-    if num_complete:
-        complete_url = (f"[{num_complete} complete]"
-                        f"(<{base_url}{reverse('complete')}#complete>)")
+    name = "challenges"
+    ephemeral = False
 
-    num_incomplete = qs.filter(winner_desc__exact="").count()
-    incomplete_url = f"{num_incomplete} incomplete"
-    if num_incomplete:
-        incomplete_url = (f"[{num_incomplete} incomplete]"
-                          f"(<{base_url}{reverse('incomplete')}#incomplete>)")
+    def handle(self) -> tuple[str, bool]:
+        active = Challenge.objects.filter(is_active__exact=1)
+        num_complete = active.exclude(winner_desc__exact="").count()
+        num_incomplete = active.filter(winner_desc__exact="").count()
 
-    return f"{challenges_url} {icon} {complete_url} - {incomplete_url}."
+        challenges_link = self.site_link(
+            "Challenges", "challenges", fragment="challenges",
+        )
+
+        if num_complete:
+            complete = self.site_link(
+                f"{num_complete} complete", "complete", fragment="complete",
+            )
+        else:
+            complete = f"{num_complete} complete"
+
+        if num_incomplete:
+            incomplete = self.site_link(
+                f"{num_incomplete} incomplete",
+                "incomplete",
+                fragment="incomplete",
+            )
+        else:
+            incomplete = f"{num_incomplete} incomplete"
+
+        return (
+            f"{challenges_link} :crossed_swords: {complete} - {incomplete}.",
+            self.ephemeral,
+        )

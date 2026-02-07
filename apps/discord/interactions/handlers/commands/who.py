@@ -1,40 +1,40 @@
-from django.urls import reverse
-from django.db.models.expressions import F
+from django.db.models import F
 from django.utils.translation import ngettext
 
 from apps.players.models.player import Player
 
+from .base import SlashCommand
 
-def who(request):
-    # List any online players.
 
-    # Default message assuming there are no active events.
+class WhoCommand(SlashCommand):
+    """List any online players."""
+
+    name = "who"
     ephemeral = True
-    reply = "Sorry - no players online."
 
-    # Find the online players in the database.
-    playing = Player.objects.filter(
-        logon__gte=F("logout"),
-        is_deleted=False,
-        online__gt=0
-    )
-
-    # Proceed if there are any players online.
-    num_play = playing.count()
-    if num_play and num_play > 0:
-        ephemeral = False
-        reply = (
-            f'[{num_play} '
-            f'{ngettext(singular="player", plural="players", number=num_play)}]'
-            f'(<{request.scheme}://{request.get_host()}'
-            f'{reverse("who")}#who>):\n'
+    def handle(self) -> tuple[str, bool]:
+        playing = Player.objects.filter(
+            logon__gte=F("logout"),
+            is_deleted=False,
+            online__gt=0,
         )
+        num_play = playing.count()
 
-        # List the name, level, and number of remorts for each player online.
-        for num, player in enumerate(playing.all(), start=1):
+        if not num_play:
+            return "Sorry - no players online.", True
+
+        label = ngettext(
+            singular="player", plural="players", number=num_play,
+        )
+        who_link = self.site_link(
+            f"{num_play} {label}", "who", fragment="who",
+        )
+        reply = f"{who_link}:\n"
+
+        for num, player in enumerate(playing, start=1):
             reply += (
-                f"{num}. {player.name} {player.true_level} ({player.remorts})"
+                f"{num}. {player.name}"
+                f" {player.true_level} ({player.remorts})\n"
             )
 
-    # Return the reply.
-    return reply, ephemeral
+        return reply, False

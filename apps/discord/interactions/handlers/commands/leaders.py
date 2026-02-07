@@ -1,10 +1,12 @@
-from django.urls import reverse
+from .base import SlashCommand
 
 
-def leaders(request):
-    # Link to leaders page.
-    return (
-        ":trophy: "
-        f"[Leaders](<{request.scheme}://{request.get_host()}"
-        f'{reverse("leaders")}#leaders>)'
-    )
+class LeadersCommand(SlashCommand):
+    """Link to leaders page."""
+
+    name = "leaders"
+    ephemeral = False
+
+    def handle(self) -> tuple[str, bool]:
+        link = self.site_link("Leaders", "leaders", fragment="leaders")
+        return f":trophy: {link}", self.ephemeral

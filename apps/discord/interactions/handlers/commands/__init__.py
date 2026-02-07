@@ -1,14 +1,26 @@
-from .challenges import challenges
-from .cycle import cycle
-from .deadhead import deadhead
-from .events import events
-from .faq import faq
-from .feedback import feedback
-from .leader import leader
-from .leaders import leaders
-from .mudhelp import mudhelp
-from .mudtime import mudtime
-from .runtime import runtime
-from .season import season
-from .upgrades import upgrades
-from .who import who
+"""Discord slash command handlers.
+
+Importing this package triggers auto-registration of every command class
+via the ``SlashCommand.__init_subclass__`` hook defined in ``base.py``.
+
+To add a new command, create a module in this package with a class that
+inherits from ``SlashCommand`` and set a ``name`` class attribute.
+"""
+
+# Import every command module so that subclass auto-registration fires.
+from . import (  # noqa: F401
+    challenges,
+    cycle,
+    deadhead,
+    events,
+    faq,
+    feedback,
+    leader,
+    leaders,
+    mudhelp,
+    mudtime,
+    runtime,
+    season,
+    upgrades,
+    who,
+)

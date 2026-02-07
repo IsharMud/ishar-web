@@ -2,54 +2,43 @@ from django.urls import reverse
 
 from apps.help.utils.helptab import HelpTab
 
+from .base import SlashCommand
 
-def mudhelp(
-    request,
-    interaction=None,
-    _spell: bool = False
-) -> tuple[str, bool]:
-    # Search and return links to help topics.
 
-    # Access and parse "helptab" file.
-    helptab = HelpTab()
+class MudhelpCommand(SlashCommand):
+    """Search MUD help for a topic."""
 
-    # Default message assuming no topics found.
+    name = "mudhelp"
     ephemeral = True
-    find_what = "help topic"
-    results = {}
+    option_name = "topic"
+    not_found_label = "help topic"
 
-    if _spell:
-        find_what = "spell"
+    def handle(self) -> tuple[str, bool]:
+        search = self.get_option(self.option_name, "")
+        if not search:
+            return f"Sorry, no such {self.not_found_label} could be found.", True
 
-    # Find help topics, based upon search query.
-    reply = f"Sorry no such {find_what} could be found."
-    search = interaction["options"][0]["value"]
-    if search:
+        helptab = HelpTab()
         results = helptab.search(search_name=search)
+        if not results:
+            return f"Sorry, no such {self.not_found_label} could be found.", True
 
-        # Proceed if any help topic results are found.
-        if results:
-            ephemeral = False
-            num_results = len(results)
+        num_results = len(results)
+        if num_results == 1:
+            result = next(iter(results.values()))
+            label = result.name
+            url = f"{self.base_url()}{result.get_absolute_url()}"
+        else:
+            label = f"{num_results} results"
+            path = reverse(viewname="help_page", args=(search,))
+            url = f"{self.base_url()}{path}#topics"
 
-            # Link to single result directly.
-            reply = ":information_source: ["
-            if num_results == 1:
-                result = next(iter(results.values()))
-                topic_name = result.name
-                topic_url = result.get_absolute_url()
-                reply += topic_name
+        return f":information_source: [{label}](<{url}>)", False
 
-            # Link to search for multiple results.
-            else:
-                topic_url = reverse(
-                    viewname="help_page",
-                    args=(search,)
-                ) + "#topics"
-                reply += f"{num_results} results"
 
-            # Append the URL to the Discord reply message.
-            reply += f"](<{request.scheme}://{request.get_host()}{topic_url}>)"
+class SpellCommand(MudhelpCommand):
+    """Search MUD help for a spell."""
 
-    # Return the reply, and boolean whether it should be ephemeral.
-    return reply, ephemeral
+    name = "spell"
+    option_name = "spell"
+    not_found_label = "spell"

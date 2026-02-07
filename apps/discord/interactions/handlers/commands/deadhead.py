@@ -1,9 +1,19 @@
 from apps.players.models.player import Player
 
+from .base import SlashCommand
 
-def deadhead(request):
-    # Player with the highest number of total deaths.
-    who = Player.objects.order_by("-statistics__total_deaths").first()
-    url = f"<{request.scheme}://{request.get_host()}{who.get_absolute_url()}>"
-    deaths = who.statistics.total_deaths
-    return f"[{who.name}]({url}) :skull_crossbones: {deaths} deaths!"
+
+class DeadheadCommand(SlashCommand):
+    """Show the player with the most total deaths."""
+
+    name = "deadhead"
+    ephemeral = False
+
+    def handle(self) -> tuple[str, bool]:
+        player = Player.objects.order_by("-statistics__total_deaths").first()
+        url = f"<{self.base_url()}{player.get_absolute_url()}>"
+        deaths = player.statistics.total_deaths
+        return (
+            f"[{player.name}]({url}) :skull_crossbones: {deaths} deaths!",
+            self.ephemeral,
+        )

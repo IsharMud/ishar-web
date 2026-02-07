@@ -1,28 +1,34 @@
 from django.conf import settings
-from django.urls import reverse
 
 from apps.leaders.models import Leader
-
 from apps.players.models.game_type import GameType
 
+from .base import SlashCommand
 
-def leader(request, interaction=None):
 
-    lead_label = settings.WEBSITE_TITLE
-    lead_url = f'{reverse("leaders")}#leaders'
-    qs = Leader.objects
+class LeaderCommand(SlashCommand):
+    """Show the leading player, optionally filtered by game type."""
 
-    interaction_options = interaction.get("options")
-    if interaction_options:
-        find_game_type = interaction_options[0]["value"]
-        game_type = GameType._value2member_map_[int(find_game_type)]
-        qs = qs.filter(game_type__exact=game_type.value)
-        lead_label = game_type.label
-        lead_url_path = f"{lead_label.lower()}_leaders"
-        lead_url = f"{reverse(lead_url_path)}#{lead_label.lower()}"
+    name = "leader"
+    ephemeral = False
 
-    lead_player = qs.first()
-    return (
-        f":trophy: {lead_player.name} is the [{lead_label} leader]"
-        f"(<{request.scheme}://{request.get_host()}{lead_url}>)!"
-    )
+    def handle(self) -> tuple[str, bool]:
+        label = settings.WEBSITE_TITLE
+        view_name = "leaders"
+        fragment = "leaders"
+        qs = Leader.objects
+
+        game_type_value = self.get_option("type")
+        if game_type_value is not None:
+            game_type = GameType(int(game_type_value))
+            qs = qs.filter(game_type__exact=game_type.value)
+            label = game_type.label
+            view_name = f"{label.lower()}_leaders"
+            fragment = label.lower()
+
+        lead_player = qs.first()
+        link = self.site_link(f"{label} leader", view_name, fragment=fragment)
+        return (
+            f":trophy: {lead_player.name} is the {link}!",
+            self.ephemeral,
+        )

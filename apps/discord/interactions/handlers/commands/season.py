@@ -2,16 +2,24 @@ from django.utils.timesince import timeuntil
 
 from apps.seasons.utils.current import get_current_season
 
+from .base import SlashCommand
 
-def season(request):
-    # Current season number, expiration, time until expiration, and URL.
-    current_season = get_current_season()
-    dt_fmt = "%A, %B %d, %Y @ %I:%M:%S %p %Z"
+DT_FMT = "%A, %B %d, %Y @ %I:%M:%S %p %Z"
 
-    return (
-        f"[Season {current_season.season_id}]"
-        f"(<{request.scheme}://{request.get_host()}"
-        f"{current_season.get_absolute_url()}>) :hourglass_flowing_sand:"
-        f" ends {timeuntil(current_season.expiration_date)} :alarm_clock:"
-        f" {current_season.expiration_date.strftime(dt_fmt)}"
-    )
+
+class SeasonCommand(SlashCommand):
+    """Show the current season number and expiration."""
+
+    name = "season"
+    ephemeral = False
+
+    def handle(self) -> tuple[str, bool]:
+        current = get_current_season()
+        url = f"<{self.base_url()}{current.get_absolute_url()}>"
+        expires = current.expiration_date
+        return (
+            f"[Season {current.season_id}]({url})"
+            f" :hourglass_flowing_sand: ends {timeuntil(expires)}"
+            f" :alarm_clock: {expires.strftime(DT_FMT)}",
+            self.ephemeral,
+        )

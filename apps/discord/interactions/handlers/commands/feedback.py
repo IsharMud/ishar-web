@@ -1,9 +1,12 @@
-from django.urls import reverse
+from .base import SlashCommand
 
 
-def feedback(request):
-    # Link to feedback page.
-    return (
-        ":mailbox_with_mail: [Feedback]"
-        f'(<{request.scheme}://{request.get_host()}{reverse("feedback")}#feedback>)'
-    )
+class FeedbackCommand(SlashCommand):
+    """Link to feedback page."""
+
+    name = "feedback"
+    ephemeral = False
+
+    def handle(self) -> tuple[str, bool]:
+        link = self.site_link("Feedback", "feedback", fragment="feedback")
+        return f":mailbox_with_mail: {link}", self.ephemeral
