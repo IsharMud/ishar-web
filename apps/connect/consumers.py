@@ -32,6 +32,7 @@ class TelnetConsumer(AsyncWebsocketConsumer):
         self._reader = None
         self._writer = None
         self._read_task = None
+        self._server_echo = False
 
         host = getattr(settings, "MUD_HOST", "localhost")
         port = getattr(settings, "MUD_PORT", 23)
@@ -92,7 +93,9 @@ class TelnetConsumer(AsyncWebsocketConsumer):
                     await self.close()
                     return
 
-                display_data, responses = self._process_telnet(data)
+                display_data, responses, echo_changed = (
+                    self._process_telnet(data)
+                )
 
                 # Send any telnet negotiation replies.
                 if responses and self._writer and not self._writer.is_closing():
@@ -102,6 +105,13 @@ class TelnetConsumer(AsyncWebsocketConsumer):
                     except (ConnectionError, OSError):
                         await self.close()
                         return
+
+                # Notify the client if the server ECHO state changed
+                # (used to toggle local echo and password masking).
+                if echo_changed is True:
+                    await self.send(text_data="\x00ECHO_ON")
+                elif echo_changed is False:
+                    await self.send(text_data="\x00ECHO_OFF")
 
                 # Forward displayable text to the browser.
                 if display_data:
@@ -117,9 +127,15 @@ class TelnetConsumer(AsyncWebsocketConsumer):
             await self.close()
 
     def _process_telnet(self, data):
-        """Strip telnet IAC sequences, returning (display_bytes, response_bytes)."""
+        """Strip telnet IAC sequences.
+
+        Returns (display_bytes, response_bytes, echo_changed) where
+        *echo_changed* is True/False if the server ECHO state toggled,
+        or None if unchanged.
+        """
         output = bytearray()
         responses = bytearray()
+        echo_changed = None
         i = 0
         length = len(data)
 
@@ -150,7 +166,9 @@ class TelnetConsumer(AsyncWebsocketConsumer):
                 if i + 2 >= length:
                     break  # Incomplete – wait for more data.
                 option = data[i + 2]
-                self._negotiate(next_byte, option, responses)
+                ec = self._negotiate(next_byte, option, responses)
+                if ec is not None:
+                    echo_changed = ec
                 i += 3
                 continue
 
@@ -166,15 +184,27 @@ class TelnetConsumer(AsyncWebsocketConsumer):
             # Any other IAC command (GA, NOP, etc.) – skip.
             i += 2
 
-        return bytes(output), bytes(responses)
+        return bytes(output), bytes(responses), echo_changed
 
     def _negotiate(self, command, option, responses):
-        """Handle WILL/WONT/DO/DONT negotiation."""
+        """Handle WILL/WONT/DO/DONT negotiation.
+
+        Returns True/False if the server ECHO state changed, else None.
+        """
+        echo_changed = None
         if command == WILL:
             if option in (OPT_ECHO, OPT_SGA):
                 responses.extend([IAC, DO, option])
             else:
                 responses.extend([IAC, DONT, option])
+            if option == OPT_ECHO and not self._server_echo:
+                self._server_echo = True
+                echo_changed = True
+        elif command == WONT:
+            responses.extend([IAC, DONT, option])
+            if option == OPT_ECHO and self._server_echo:
+                self._server_echo = False
+                echo_changed = False
         elif command == DO:
             if option == OPT_NAWS:
                 responses.extend([IAC, WILL, OPT_NAWS])
@@ -191,8 +221,7 @@ class TelnetConsumer(AsyncWebsocketConsumer):
                 responses.extend([IAC, WONT, option])
         elif command == DONT:
             responses.extend([IAC, WONT, option])
-        elif command == WONT:
-            responses.extend([IAC, DONT, option])
+        return echo_changed
 
     def _subnegotiate(self, payload, responses):
         """Handle telnet subnegotiation."""
