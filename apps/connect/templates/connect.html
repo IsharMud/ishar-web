@@ -12,7 +12,7 @@
         <style>
             #terminal-container {
                 height: 60vh;
-                min-height: 300px;
+                min-height: 200px;
                 background-color: #000;
                 border-radius: 0.25rem;
             }
@@ -28,7 +28,8 @@
             #command-input {
                 flex: 1;
                 font-family: monospace;
-                font-size: 1rem;
+                /* >= 16px prevents iOS auto-zoom on focus */
+                font-size: 16px;
                 padding: 0.375rem 0.5rem;
             }
             #connection-status {
@@ -38,6 +39,16 @@
             .status-connected { color: #4cbb17; }
             .status-disconnected { color: #d02b2b; }
             .status-connecting { color: #fa7; }
+
+            /* --- Mobile / small-screen --- */
+            @media (max-width: 767px) {
+                #terminal-container {
+                    /* Use dynamic viewport height to account for browser chrome. */
+                    height: 55dvh;
+                    min-height: 150px;
+                }
+                #send-btn { display: none; }
+            }
         </style>
 {% endblock includes %}
 {% block scripts %}let focusTo = 'command-input'{% endblock scripts %}
@@ -66,8 +77,16 @@
 <div id="terminal-container"></div>
 <form id="command-form" class="mt-2" autocomplete="off">
     <label for="command-input" class="visually-hidden">Command</label>
-    <input type="text" id="command-input" class="form-control" placeholder="Enter command..." aria-label="MUD command input" autofocus>
-    <button type="submit" class="btn btn-ishar" title="Send command">
+    <input type="text" id="command-input" class="form-control"
+           placeholder="Enter command..."
+           aria-label="MUD command input"
+           autocapitalize="off"
+           autocomplete="off"
+           autocorrect="off"
+           spellcheck="false"
+           enterkeyhint="send"
+           autofocus>
+    <button type="submit" class="btn btn-ishar" id="send-btn" title="Send command">
         <svg class="bi" aria-hidden="true">
             <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#send"></use>
         </svg>
@@ -78,14 +97,17 @@
     "use strict";
 
     // --- Elements ---
-    const terminalContainer = document.getElementById("terminal-container");
-    const commandForm = document.getElementById("command-form");
-    const commandInput = document.getElementById("command-input");
-    const statusEl = document.getElementById("connection-status");
-    const reconnectBtn = document.getElementById("reconnect-btn");
+    var terminalContainer = document.getElementById("terminal-container");
+    var commandForm = document.getElementById("command-form");
+    var commandInput = document.getElementById("command-input");
+    var statusEl = document.getElementById("connection-status");
+    var reconnectBtn = document.getElementById("reconnect-btn");
+
+    // --- Mobile detection (touch-capable small screen) ---
+    var isMobile = ("ontouchstart" in window) && window.innerWidth < 768;
 
     // --- ANSI color theme (all 16 standard colors) ---
-    const mudTheme = {
+    var mudTheme = {
         background: "#000000",
         foreground: "#d6d6d7",
         cursor: "#d6d6d7",
@@ -112,39 +134,39 @@
     };
 
     // --- Terminal setup ---
-    const term = new Terminal({
+    var term = new Terminal({
         cursorBlink: false,
         cursorInactiveStyle: "none",
         disableStdin: true,
         scrollback: 5000,
-        fontSize: 14,
+        fontSize: isMobile ? 13 : 14,
         fontFamily: "'Courier New', Courier, 'Liberation Mono', monospace",
         theme: mudTheme,
         convertEol: true,
     });
 
-    const fitAddon = new FitAddon.FitAddon();
+    var fitAddon = new FitAddon.FitAddon();
     term.loadAddon(fitAddon);
 
-    const webLinksAddon = new WebLinksAddon.WebLinksAddon();
+    var webLinksAddon = new WebLinksAddon.WebLinksAddon();
     term.loadAddon(webLinksAddon);
 
     term.open(terminalContainer);
     fitAddon.fit();
 
     // --- Command history ---
-    const history = [];
-    let historyIndex = -1;
-    let savedInput = "";
-    const MAX_HISTORY = 200;
+    var history = [];
+    var historyIndex = -1;
+    var savedInput = "";
+    var MAX_HISTORY = 200;
 
     // --- Local echo & server echo state ---
     // When the MUD negotiates WILL ECHO it handles echoing (suppress local
     // echo during password prompts).  Otherwise we always echo locally.
-    let serverEcho = false;
+    var serverEcho = false;
 
     // --- WebSocket ---
-    let ws = null;
+    var ws = null;
 
     function setStatus(text, cls) {
         statusEl.textContent = text;
@@ -156,8 +178,8 @@
             ws.close();
         }
 
-        const protocol = location.protocol === "https:" ? "wss:" : "ws:";
-        const url = protocol + "//" + location.host + "/ws/connect";
+        var protocol = location.protocol === "https:" ? "wss:" : "ws:";
+        var url = protocol + "//" + location.host + "/ws/connect";
 
         setStatus("Connecting...", "status-connecting");
         reconnectBtn.style.display = "none";
@@ -223,10 +245,20 @@
         }
     }
 
+    // --- Debounced resize handler ---
+    var resizeTimer = null;
+    function onResize() {
+        if (resizeTimer) clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function() {
+            fitAddon.fit();
+            sendNaws();
+        }, 150);
+    }
+
     // --- Event handlers ---
     commandForm.addEventListener("submit", function(e) {
         e.preventDefault();
-        const cmd = commandInput.value;
+        var cmd = commandInput.value;
 
         // Echo the command locally (dim/muted so it is distinct from
         // server output).  Skip echo when the server is handling it
@@ -247,8 +279,11 @@
         }
         historyIndex = -1;
         savedInput = "";
-        commandInput.value = "";
-        commandInput.focus();
+
+        // Keep the last command highlighted so it can be re-sent by
+        // pressing Enter again, or replaced by typing a new command.
+        commandInput.value = cmd;
+        commandInput.select();
     });
 
     commandInput.addEventListener("keydown", function(e) {
@@ -262,12 +297,14 @@
                 historyIndex--;
             }
             commandInput.value = history[historyIndex];
+            commandInput.select();
         } else if (e.key === "ArrowDown") {
             e.preventDefault();
             if (historyIndex === -1) return;
             if (historyIndex < history.length - 1) {
                 historyIndex++;
                 commandInput.value = history[historyIndex];
+                commandInput.select();
             } else {
                 historyIndex = -1;
                 commandInput.value = savedInput;
@@ -280,15 +317,15 @@
         connect();
     });
 
-    // Keep terminal fitted on resize and notify MUD of new dimensions.
-    window.addEventListener("resize", function() {
-        fitAddon.fit();
-        sendNaws();
-    });
+    // Resize: window and visual viewport (mobile keyboard show/hide).
+    window.addEventListener("resize", onResize);
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener("resize", onResize);
+    }
 
     // Click on terminal focuses the input.
     terminalContainer.addEventListener("click", function() {
-        const selection = term.getSelection();
+        var selection = term.getSelection();
         if (!selection) {
             commandInput.focus();
         }
@@ -299,3 +336,5 @@
 })();
 </script>
 {% endblock content %}
+{# Hide the player search form on the connect page to save vertical space. #}
+{% block player_search_form %}{% endblock player_search_form %}
