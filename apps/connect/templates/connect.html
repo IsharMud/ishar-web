@@ -138,6 +138,11 @@
     let savedInput = "";
     const MAX_HISTORY = 200;
 
+    // --- Local echo & server echo state ---
+    // When the MUD negotiates WILL ECHO it handles echoing (suppress local
+    // echo during password prompts).  Otherwise we always echo locally.
+    let serverEcho = false;
+
     // --- WebSocket ---
     let ws = null;
 
@@ -168,7 +173,20 @@
         };
 
         ws.onmessage = function(event) {
-            term.write(event.data);
+            if (typeof event.data === "string") {
+                // Check for echo-state control prefix from the consumer.
+                if (event.data === "\x00ECHO_ON") {
+                    serverEcho = true;
+                    commandInput.type = "password";
+                    return;
+                }
+                if (event.data === "\x00ECHO_OFF") {
+                    serverEcho = false;
+                    commandInput.type = "text";
+                    return;
+                }
+                term.write(event.data);
+            }
         };
 
         ws.onclose = function() {
@@ -209,6 +227,15 @@
     commandForm.addEventListener("submit", function(e) {
         e.preventDefault();
         const cmd = commandInput.value;
+
+        // Echo the command locally (dim/muted so it is distinct from
+        // server output).  Skip echo when the server is handling it
+        // (e.g. password prompts where WILL ECHO suppresses display).
+        if (!serverEcho && cmd) {
+            // SGR 90 = bright-black (dark gray), SGR 0 = reset.
+            term.writeln("\x1b[90m" + cmd + "\x1b[0m");
+        }
+
         sendCommand(cmd);
 
         // Add to history (avoid consecutive duplicates).
