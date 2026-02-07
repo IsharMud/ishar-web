@@ -28,7 +28,7 @@ the getting started guide, or even by downloading a MUD client!
 
 ### More Information
 
-The website is using a combination of Python, Django, MariaDB, nginx, and gunicorn,
+The website is using a combination of Python, Django, MariaDB, nginx, and daphne
 among other things.
 
 The MUD itself is written in C,
