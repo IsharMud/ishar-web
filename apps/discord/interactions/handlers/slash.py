@@ -1,75 +1,32 @@
-from .commands import *
+"""Dispatch incoming Discord slash commands to registered handlers."""
+
+from logging import getLogger
+
+from django.http import HttpRequest
+
+from .commands.base import get_command
+
+# Ensure all command modules are imported so they register themselves.
+import apps.discord.interactions.handlers.commands  # noqa: F401
 
 
-def slash(interaction_json: dict, request) -> tuple[str, bool]:
-    # Handle Discord slash commands.
+logger = getLogger(__name__)
 
-    interaction_data = interaction_json.get("data")
-    command_name = interaction_data.get("name")
 
-    # "challenges" command to link challenges page, with counts.
-    if command_name == "challenges":
-        return challenges(request=request), False
+def slash(interaction_json: dict, request: HttpRequest) -> tuple[str, bool]:
+    """Route an incoming slash command to the appropriate handler.
 
-    # "cycle" command to show when challenges will cycle next.
-    if command_name == "cycle":
-        return cycle(request=request), False
+    Returns a ``(message, ephemeral)`` tuple.
+    Raises ``LookupError`` for unknown commands.
+    """
+    interaction_data = interaction_json.get("data", {})
+    command_name = interaction_data.get("name", "")
 
-    # "deadhead" command - player with most deaths.
-    if command_name == "deadhead":
-        return deadhead(request=request), False
+    command_cls = get_command(command_name)
+    if command_cls is None:
+        raise LookupError(f"Unknown Discord slash command: {command_name!r}")
 
-    # "events" command - any active events and when they expire.
-    if command_name == "events":
-        return events(request=request)
-
-    # "faq" command to link frequently asked questions.
-    if command_name == "faq":
-        return faq(request=request), False
-
-    # "feedback" command to link feedback page.
-    if command_name == "feedback":
-        return feedback(request=request), False
-
-    # "leader" command to list leader, by game type.
-    if command_name == "leader":
-        return leader(request=request, interaction=interaction_data), False
-
-    # "leaders" command to link leaders page.
-    if command_name == "leaders":
-        return leaders(request=request), False
-
-    # "mudhelp" command to search MUD help topics.
-    if command_name == "mudhelp":
-        return mudhelp(request=request, interaction=interaction_data)
-
-    # "spell" command to search MUD help topics for "Spell ".
-    if command_name == "spell":
-        return mudhelp(
-            request=request,
-            interaction=interaction_data,
-            _spell=True
-        )
-
-    # "mudtime" command to show server (UTC) time.
-    if command_name == "mudtime":
-        return mudtime(), False
-
-    # "runtime" command to show server process runtime.
-    if command_name == "runtime":
-        return runtime(), False
-
-    # "season" command - shows season number and expiration.
-    if command_name == "season":
-        return season(request=request), False
-
-    # "upgrades" command to link remort upgrades page.
-    if command_name == "upgrades":
-        return upgrades(request=request), False
-
-    # "who" command to list online players.
-    if command_name == "who":
-        return who(request=request)
-
-    # Raise ModuleNotFoundError as last resort.
-    raise ModuleNotFoundError(f"No Discord slash command: {command_name}.")
+    return command_cls.execute(
+        request=request,
+        interaction_data=interaction_data,
+    )
