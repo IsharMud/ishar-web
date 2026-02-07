@@ -9,11 +9,11 @@ __pycache__
 *.pyc
 helptab
 settings.py
-gunicorn_configuration.py
 test.py
 venv
 /cache/
 /media/
 /lib/
 /logs/
+/static/
 models.generated.py
