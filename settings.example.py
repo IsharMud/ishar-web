@@ -117,6 +117,7 @@ INSTALLED_APPS = [
     "apps.ClassesConfig",
     "apps.ClientsConfig",
     "apps.ConditionsConfig",
+    "apps.ConnectConfig",
     "apps.DiscordConfig",
     "apps.EventsConfig",
     "apps.FAQsConfig",
@@ -136,7 +137,7 @@ INSTALLED_APPS = [
     "apps.SeasonsConfig",
     "apps.SkillsConfig",
     "apps.ConnectConfig",
-    "daphne",
+#    "daphne",
     "channels",
 ]
 
@@ -299,6 +300,10 @@ DISCORD = {
 MUD_HOME = Path(Path.home(), "ishar-mud")
 HELPTAB = Path(MUD_HOME, "lib/Misc/helptab")
 
+# MUD connection.
+MUD_HOST = "isharmud.com"
+MUD_PORT = "23"
+
 # Alignments.
 ALIGNMENTS = {
     "Very Evil": (-1500, -1000),
@@ -356,11 +361,7 @@ IMMORTAL_LEVELS = (
 MIN_IMMORTAL_LEVEL = min(IMMORTAL_LEVELS)[0]
 MAX_IMMORTAL_LEVEL = max(IMMORTAL_LEVELS)[0]
 
-# MUD telnet connection (used by the web client WebSocket proxy).
-MUD_HOST = "127.0.0.1"
-MUD_PORT = 23
-
-# Django Channels layer (in-memory is fine for a single-server deployment).
+# Channels.
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels.layers.InMemoryChannelLayer",
