@@ -57,10 +57,10 @@
 <div class="d-flex justify-content-between align-items-center mb-2">
     <span id="connection-status" class="status-connecting">Connecting...</span>
     <button class="icon-link icon-link-hover btn btn-ishar btn-sm p-2 rounded" type="button" id="reconnect-btn" style="display: none;" title="Reconnect to {{ WEBSITE_TITLE }}">
-        Reconnect
         <svg class="bi" aria-hidden="true">
             <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#arrow-clockwise"></use>
         </svg>
+        Reconnect
     </button>
 </div>
 <div id="terminal-container"></div>
@@ -68,10 +68,10 @@
     <label for="command-input" class="visually-hidden">Command</label>
     <input type="text" id="command-input" class="form-control" placeholder="Enter command..." aria-label="MUD command input" autofocus>
     <button type="submit" class="icon-link icon-link-hover btn btn-ishar btn-sm px-3 py-2 rounded" title="Send command">
-        Send
         <svg class="bi" aria-hidden="true">
             <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#send"></use>
         </svg>
+        Send
     </button>
 </form>
 <script>
