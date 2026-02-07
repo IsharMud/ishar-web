@@ -21,7 +21,7 @@
             {% autoescape off %}{{ news.body }}{% endautoescape %}
         </p>
         <p class="d-flex justify-content-end past-news">
-            <a class="btn btn-ishar icon-link" href="{% url 'news' %}?page=2#news">
+            <a class="btn btn-ishar icon-link icon-link-hover" href="{% url 'news' %}?page=2#news">
                 <svg class="bi" aria-hidden="true">
                     <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#newspaper"></use>
                 </svg>
