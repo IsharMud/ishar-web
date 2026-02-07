@@ -110,6 +110,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.sites",
     "django.contrib.staticfiles",
+    "rest_framework",
     "apps.CoreConfig",
     "apps.AccountsConfig",
     "apps.AchievementsConfig",
@@ -140,6 +141,8 @@ INSTALLED_APPS = [
 #    "daphne",
     "channels",
 ]
+
+REST_FRAMEWORK = {"COERCE_DECIMAL_TO_STRING": False,}
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
