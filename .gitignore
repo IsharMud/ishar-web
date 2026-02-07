@@ -15,5 +15,5 @@ venv
 /media/
 /lib/
 /logs/
-/static/
+static/
 models.generated.py
