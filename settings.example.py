@@ -371,6 +371,11 @@ CHANNEL_LAYERS = {
     },
 }
 
+REST_FRAMEWORK = {
+    'COERCE_DECIMAL_TO_STRING': False,
+    'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAdminUser',),
+}
+
 X_FRAME_OPTIONS = "SAMEORIGIN"
 
 JAZZMIN_SETTINGS = {
