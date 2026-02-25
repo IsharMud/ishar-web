@@ -128,6 +128,7 @@ INSTALLED_APPS = [
     "apps.LeadersConfig",
     "apps.MobilesConfig",
     "apps.NewsConfig",
+    "apps.NotesConfig",
     "apps.ObjectsConfig",
     "apps.PatchesConfig",
     "apps.PlayersConfig",
@@ -288,6 +289,7 @@ STATIC_ROOT = Path(BASE_DIR, STATIC_URL)
 # Media.
 MEDIA_URL = "media/"
 MEDIA_ROOT = Path(BASE_DIR, MEDIA_URL)
+NOTES_URL = "notes/"
 PATCHES_URL = "patches/"
 
 # Discord.
@@ -545,6 +547,11 @@ JAZZMIN_SETTINGS = {
         # news
         "news": "fas fa-newspaper",
         "news.News": "fas fa-newspaper",
+
+        # notes
+        "notes": "fas fa-note-sticky",
+        "notes.Note": "fas fa-note-sticky",
+        "notes.NoteCategory": "fas fa-folder",
 
         # objects
         "objects": "fas fa-object-group",
