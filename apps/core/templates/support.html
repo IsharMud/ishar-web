@@ -1,9 +1,9 @@
 {% extends "layout.html" %}
 {% load static %}
-{% block meta_title %}Support {{ WEBSITE_TITLE }}{% endblock meta_title %}
-{% block meta_description %}Please consider supporting {{ WEBSITE_TITLE }} in any way that you can!{% endblock meta_description %}
-{% block meta_url %}{% url 'support' %}#support{% endblock meta_url %}
-{% block title %}Support {{ WEBSITE_TITLE }}{% endblock title %}
+{% block meta_title %}Support {{ WEBSITE_TITLE }} - Help Keep This Free MUD Running{% endblock meta_title %}
+{% block meta_description %}Support {{ WEBSITE_TITLE }}, a free online MUD (Multi-User Dungeon). The game is free to play, but contributions help with development and maintenance of the server.{% endblock meta_description %}
+{% block meta_url %}{% url 'support' %}{% endblock meta_url %}
+{% block title %}Support {{ WEBSITE_TITLE }} - Help Keep This Free MUD Running{% endblock title %}
 {% block breadcrumbs %}
     <li class="breadcrumb-item active h2" aria-current="page" title="Support {{ WEBSITE_TITLE }}">
         <a class="icon-link icon-link-hover" href="{% url 'support' %}#support">

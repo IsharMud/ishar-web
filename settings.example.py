@@ -108,6 +108,7 @@ INSTALLED_APPS = [
     "django.contrib.humanize",
     "django.contrib.sessions",
     "django.contrib.messages",
+    "django.contrib.sitemaps",
     "django.contrib.sites",
     "django.contrib.staticfiles",
     "rest_framework",

@@ -1,9 +1,10 @@
 {% extends "layout.html" %}
 {% load static %}
-{% block meta_title %}Connect{% endblock meta_title %}
-{% block meta_description %}Connect to {{ WEBSITE_TITLE }} from your browser.{% endblock meta_description %}
-{% block meta_url %}{% url 'connect' %}#connect{% endblock meta_url %}
-{% block title %}Connect{% endblock title %}
+{% block meta_title %}Play {{ WEBSITE_TITLE }} Online - Browser MUD Client{% endblock meta_title %}
+{% block meta_description %}Play {{ WEBSITE_TITLE }} directly in your browser. No download required - connect instantly to this free online MUD (Multi-User Dungeon) and start your text-based RPG adventure.{% endblock meta_description %}
+{% block meta_url %}{% url 'connect' %}{% endblock meta_url %}
+{% block title %}Play {{ WEBSITE_TITLE }} Online - Browser MUD Client{% endblock title %}
+{% block page_heading %}Play {{ WEBSITE_TITLE }} Online in Your Browser{% endblock page_heading %}
 {% block includes %}
         <link rel="stylesheet" href="{% static 'css/xterm.min.css' %}">
         <script src="{% static 'js/xterm.min.js' %}"></script>

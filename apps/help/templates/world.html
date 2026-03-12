@@ -1,9 +1,10 @@
 {% extends "layout.html" %}
 {% load static %}
-{% block meta_title %}World{% endblock meta_title %}
-{% block meta_description %}The World of Ishar is vast and very detailed with many areas.{% endblock meta_description %}
-{% block meta_url %}{% url 'world' %}#world{% endblock meta_url %}
+{% block meta_title %}World of {{ WEBSITE_TITLE }} - Explore MUD Areas & Zones{% endblock meta_title %}
+{% block meta_description %}Explore the vast world of {{ WEBSITE_TITLE }}, a free online MUD. Discover detailed fantasy areas, from the ruins of Torm Sarvek to the splendor of Mareldja. A cohesive world with living history.{% endblock meta_description %}
+{% block meta_url %}{% url 'world' %}{% endblock meta_url %}
 {% block scripts %}let focusTo = 'world'{% endblock scripts %}
+{% block page_heading %}World of {{ WEBSITE_TITLE }} - Explore MUD Areas{% endblock page_heading %}
 {% block breadcrumbs %}
     <li class="h2 breadcrumb-item" title="Help">
         <a class="icon-link icon-link-hover" href="{% url 'help' %}#help">
@@ -24,7 +25,7 @@
         </a>
     </li>
 {% endblock breadcrumbs %}
-{% block title %}World{% endblock title %}
+{% block title %}World of {{ WEBSITE_TITLE }} - Explore MUD Areas & Zones{% endblock title %}
 {% block content %}
     <div class="alert alert-dark alert-dismissible fade show" role="alert">
         <p class="lead">

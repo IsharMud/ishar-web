@@ -1,9 +1,10 @@
 {% extends "layout.html" %}
 {% load static %}
-{% block meta_title %}Frequently Asked Questions{% endblock meta_title %}
-{% block meta_description %}A few common questions that are asked about {{ WEBSITE_TITLE }}.{% endblock meta_description %}
-{% block meta_url %}{% url 'faq' %}#faq{% endblock meta_url %}
-{% block title %}Frequently Asked Questions{% endblock title %}
+{% block meta_title %}{{ WEBSITE_TITLE }} FAQ - Common Questions About Playing a MUD{% endblock meta_title %}
+{% block meta_description %}Frequently asked questions about {{ WEBSITE_TITLE }}, a free online MUD (Multi-User Dungeon). Learn about character classes, gameplay, connecting, and getting started with text-based RPG gaming.{% endblock meta_description %}
+{% block meta_url %}{% url 'faq' %}{% endblock meta_url %}
+{% block title %}{{ WEBSITE_TITLE }} FAQ - Common MUD Questions{% endblock title %}
+{% block page_heading %}{{ WEBSITE_TITLE }} Frequently Asked Questions{% endblock page_heading %}
 {% block breadcrumbs %}
     <li class="breadcrumb-item active h2" aria-current="page" title="Frequently Asked Questions">
         <a class="icon-link icon-link-hover" href="{% url 'faq' %}#faq">
@@ -17,6 +18,28 @@
     </li>
 {% endblock breadcrumbs %}
 {% block scripts %}let focusTo = 'faq'{% endblock scripts %}
+{% block structured_data %}
+{% if faqs %}
+        <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+            {% for faq in faqs %}
+                {
+                    "@type": "Question",
+                    "name": "{{ faq.question_text|escapejs }}",
+                    "acceptedAnswer": {
+                        "@type": "Answer",
+                        "text": "{{ faq.question_answer|striptags|escapejs }}"
+                    }
+                }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+            ]
+        }
+        </script>
+{% endif %}
+{% endblock structured_data %}
 {% block content %}
 <div class="alert alert-dark alert-dismissible fade show" role="alert" id="faq-alert">
     <p class="lead">

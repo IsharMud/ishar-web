@@ -8,20 +8,27 @@
         <meta charset="UTF-8">
 
         <meta name="author" content="{{ WEBSITE_TITLE }}">
-        <meta name="description" content="{{ WEBSITE_TITLE }}">
-        <meta name="keywords" content="{{ WEBSITE_TITLE }}, Ishar, IsharMUD, MUD, Multi User Dungeon, Multi-User Dungeon, Game">
+        <meta name="description" content="{% block meta_description %}{{ WEBSITE_TITLE }} - A free online MUD (Multi-User Dungeon). Play a text-based RPG set in a high medieval fantasy world with hack-and-slash combat, strategic boss battles, and seasonal gameplay. Connect via telnet or your browser.{% endblock meta_description %}">
+        <meta name="keywords" content="{% block meta_keywords %}{{ WEBSITE_TITLE }}, Ishar, IsharMUD, MUD, Multi-User Dungeon, text-based RPG, online RPG, free MUD, telnet game, text adventure, fantasy MUD, hack and slash, medieval fantasy, multiplayer text game, play MUD online, MUD game, browser MUD{% endblock meta_keywords %}">
         <meta name="msapplication-TileColor" content="#ffaa77">
         <meta name="theme-color" content="#000000">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+        <link rel="canonical" href="https://{{ request.META.HTTP_HOST }}{% block meta_url %}{% url 'index' %}{% endblock meta_url %}">
+
         <meta property="og:type" content="website">
         <meta property="og:site_name" content="{{ WEBSITE_TITLE }}">
-        <meta property="og:title" content="{{ WEBSITE_TITLE }}: {% block meta_title %}Home{% endblock meta_title %}">
-        <meta property="og:description" content="{{ WEBSITE_TITLE }}: {% block meta_description %}a free online text-adventure RPG{% endblock meta_description %}">
+        <meta property="og:title" content="{% block meta_title %}{{ WEBSITE_TITLE }} - Free Online Text-Based RPG{% endblock meta_title %}">
+        <meta property="og:description" content="{% block meta_og_description %}{{ WEBSITE_TITLE }} - A free online MUD (Multi-User Dungeon). Explore a high medieval fantasy world with hack-and-slash combat, seasonal gameplay, and an active community.{% endblock meta_og_description %}">
         <meta property="og:image" content="https://{{ request.META.HTTP_HOST }}{% block meta_image %}{% static "images/logo.png" %}{% endblock meta_image %}">
-        <meta property="og:url" content="https://{{ request.META.HTTP_HOST }}{% block meta_url %}{% url 'index' %}{% endblock meta_url %}">
+        <meta property="og:url" content="https://{{ request.META.HTTP_HOST }}{{ request.path }}">
 
-        <title>{{ WEBSITE_TITLE }}: {% block title %}Home{% endblock title %}</title>
+        <meta name="twitter:card" content="summary">
+        <meta name="twitter:title" content="{% block meta_twitter_title %}{{ WEBSITE_TITLE }} - Free Online Text-Based RPG{% endblock meta_twitter_title %}">
+        <meta name="twitter:description" content="{% block meta_twitter_description %}A free online MUD (Multi-User Dungeon). Play a text-based RPG in a high medieval fantasy world.{% endblock meta_twitter_description %}">
+        <meta name="twitter:image" content="https://{{ request.META.HTTP_HOST }}{% static "images/logo.png" %}">
+
+        <title>{% block title %}{{ WEBSITE_TITLE }} - Free Online Text-Based RPG{% endblock title %}</title>
 
         <link rel="apple-touch-icon" sizes="180x180" href="{% static "images/apple-touch-icon.png" %}">
         <link rel="icon" type="image/png" sizes="32x32" href="{% static "images/favicon-32x32.png" %}">
@@ -37,6 +44,41 @@
         <script>
 {% block scripts %}let focusTo = null{% endblock scripts %}
         </script>
+
+{% block structured_data %}
+        <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "{{ WEBSITE_TITLE }}",
+            "url": "https://{{ request.META.HTTP_HOST }}/",
+            "description": "A free online MUD (Multi-User Dungeon) set in a high medieval fantasy world with hack-and-slash combat, seasonal gameplay, and an active community.",
+            "potentialAction": {
+                "@type": "SearchAction",
+                "target": "https://{{ request.META.HTTP_HOST }}/help/#search",
+                "query-input": "required name=search_term_string"
+            }
+        }
+        </script>
+        <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "VideoGame",
+            "name": "{{ WEBSITE_TITLE }}",
+            "url": "https://{{ request.META.HTTP_HOST }}/",
+            "description": "A free online text-based RPG (MUD) set in a high medieval fantasy world. Features hack-and-slash combat, strategic boss battles, seasonal gameplay with remorting, and multiple character classes.",
+            "genre": ["MUD", "Text-Based RPG", "Multi-User Dungeon", "Fantasy RPG"],
+            "gamePlatform": ["Web Browser", "Telnet"],
+            "applicationCategory": "Game",
+            "operatingSystem": "Any",
+            "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "USD"
+            }
+        }
+        </script>
+{% endblock structured_data %}
     </head>
 
     <body class="container-fluid">
@@ -46,7 +88,8 @@
             <nav class="border-ishar navbar navbar-dark navbar-expand-lg rounded">
 
                 <a href="{% url 'index' %}" title="{{ WEBSITE_TITLE }}">
-                    <img class="navbar-brand" id="logo" alt="{{ WEBSITE_TITLE }}" src="{% static "images/logo.png" %}" style="height: 10rem;">
+                    <h1 class="visually-hidden">{% block page_heading %}{{ WEBSITE_TITLE }} - Free Online MUD (Multi-User Dungeon){% endblock page_heading %}</h1>
+                    <img class="navbar-brand" id="logo" alt="{{ WEBSITE_TITLE }} - Free Online MUD" src="{% static "images/logo.png" %}" style="height: 10rem;">
                 </a>
 
                 <button class="border-ishar m-3 navbar-dark navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle Navigation">

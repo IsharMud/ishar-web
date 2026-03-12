@@ -1,9 +1,9 @@
 {% extends "layout.html" %}
 {% load static %}
-{% block meta_title %}History{% endblock meta_title %}
-{% block meta_description %}A history of {{ WEBSITE_TITLE }}.{% endblock meta_description %}
-{% block meta_url %}{% url 'history' %}#history{% endblock meta_url %}
-{% block title %}History{% endblock title %}
+{% block meta_title %}History of {{ WEBSITE_TITLE }} - A MUD Running Since 1994{% endblock meta_title %}
+{% block meta_description %}The history of {{ WEBSITE_TITLE }}, a MUD (Multi-User Dungeon) running since May 1994. From Cyberverse Inc. to the modern era, discover one of the longest-running online text-based RPGs.{% endblock meta_description %}
+{% block meta_url %}{% url 'history' %}{% endblock meta_url %}
+{% block title %}History of {{ WEBSITE_TITLE }} - A MUD Running Since 1994{% endblock title %}
 {% block breadcrumbs %}
     <li class="breadcrumb-item active h2" aria-current="page" title="History">
         <a class="icon-link icon-link-hover" href="{% url 'history' %}#history">

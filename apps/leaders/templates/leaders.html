@@ -1,9 +1,9 @@
 {% extends "layout.html" %}
 {% load static %}
-{% block meta_title %}Leaders{% if game_type %} / {{ game_type }}{% endif %}{% endblock meta_title %}
-{% block meta_description %}Leader board of top{% if game_type %} {{ game_type|lower }}{% endif %} players of the game and their achievements{% endblock meta_description %}
+{% block meta_title %}{{ WEBSITE_TITLE }} Leaderboard{% if game_type %} - {{ game_type }}{% endif %} | Top MUD Players{% endblock meta_title %}
+{% block meta_description %}Leaderboard of top{% if game_type %} {{ game_type|lower }}{% endif %} players in {{ WEBSITE_TITLE }}, a free online MUD. See player rankings, achievements, and stats in this text-based RPG.{% endblock meta_description %}
 {% block meta_url %}{% url 'leaders' %}{% endblock meta_url %}
-{% block title %}Leaders{% if game_type %} / {{ game_type.label }}{% endif %}{% endblock title %}
+{% block title %}{{ WEBSITE_TITLE }} Leaderboard{% if game_type %} - {{ game_type.label }}{% endif %}{% endblock title %}
 {% block includes %}
     <style>
         .buttons-colvis,

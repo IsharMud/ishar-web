@@ -2,15 +2,26 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.contrib.sitemaps.views import sitemap
 from django.urls import include, path
 
 from apps.core.api.routers import api_router
+from apps.core.sitemaps import StaticViewSitemap
 from apps.core.views import ErrorView
 
+sitemaps = {
+    "static": StaticViewSitemap,
+}
 
 urlpatterns = [
     path("", include("apps.core.urls"), name="ishar"),
     path("admin/", admin.site.urls, name="admin"),
+    path(
+        "sitemap.xml",
+        sitemap,
+        {"sitemaps": sitemaps},
+        name="django.contrib.sitemaps.views.sitemap",
+    ),
     path("api/", include(api_router.urls), name="api"),
     path("i18n/", include('django.conf.urls.i18n')),
     path("connect/", include("apps.connect.urls"), name="connect"),

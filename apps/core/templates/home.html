@@ -1,9 +1,10 @@
 {% extends "layout.html" %}
 {% load static %}
-{% block meta_title %}Home{% endblock meta_title %}
-{% block meta_description %}Welcome to {{ WEBSITE_TITLE }}{% endblock meta_description %}
+{% block meta_title %}{{ WEBSITE_TITLE }} - Free Online MUD | Text-Based Fantasy RPG{% endblock meta_title %}
+{% block meta_description %}{{ WEBSITE_TITLE }} is a free online MUD (Multi-User Dungeon) set in a high medieval fantasy world. Play as Warrior, Rogue, Magician, Necromancer, Cleric, or Shaman. Connect via browser or telnet to isharmud.com.{% endblock meta_description %}
 {% block meta_url %}{% url 'index' %}{% endblock meta_url %}
-{% block title %}Home{% endblock title %}
+{% block title %}{{ WEBSITE_TITLE }} - Free Online MUD | Text-Based Fantasy RPG{% endblock title %}
+{% block page_heading %}{{ WEBSITE_TITLE }} - Free Online MUD | Text-Based Fantasy RPG{% endblock page_heading %}
 {% block breadcrumbs %}
     <li class="breadcrumb-item active" title="{{ news.subject|default:'Welcome' }}">
         <h2 class="icon-link">

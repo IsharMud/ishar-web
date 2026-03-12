@@ -1,9 +1,10 @@
 {% extends "layout.html" %}
 {% load static %}
-{% block meta_title %}Help{% if help_topic and help_topic.name %}: {{ help_topic.name }}{% endif %}{% endblock meta_title %}
-{% block meta_description %}Help pages for {{ WEBSITE_TITLE }}{% endblock meta_description %}
-{% block meta_url %}{% if help_topic %}{{ help_topic.get_absolute_url }}{% else %}{% url 'help' %}#help{% endif %}{% endblock meta_url %}
-{% block title %}Help{% if help_topic and help_topic.name %}: {{ help_topic.name }}{% endif %}{% endblock title %}
+{% block meta_title %}{% if help_topic and help_topic.name %}{{ help_topic.name }} - {{ WEBSITE_TITLE }} Help{% else %}{{ WEBSITE_TITLE }} Help - MUD Commands, Spells & Game Guide{% endif %}{% endblock meta_title %}
+{% block meta_description %}{% if help_topic and help_topic.name %}Help page for {{ help_topic.name }} in {{ WEBSITE_TITLE }}, a free online MUD.{% else %}Browse help topics for {{ WEBSITE_TITLE }} - find MUD commands, spells, skills, classes, and game guides for this free online text-based RPG.{% endif %}{% endblock meta_description %}
+{% block meta_url %}{% if help_topic %}{{ help_topic.get_absolute_url }}{% else %}{% url 'help' %}{% endif %}{% endblock meta_url %}
+{% block title %}{% if help_topic and help_topic.name %}{{ help_topic.name }} - {{ WEBSITE_TITLE }} Help{% else %}{{ WEBSITE_TITLE }} Help - MUD Commands, Spells & Game Guide{% endif %}{% endblock title %}
+{% block page_heading %}{% if help_topic and help_topic.name %}{{ help_topic.name }} - {{ WEBSITE_TITLE }} Help{% else %}{{ WEBSITE_TITLE }} Help Topics{% endif %}{% endblock page_heading %}
 {% block breadcrumbs %}
     <li class="breadcrumb-item h2" title="Help">
         <a class="icon-link icon-link-hover" href="{% url 'help' %}#help">

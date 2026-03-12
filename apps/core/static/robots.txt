@@ -1,4 +1,9 @@
 User-agent: *
 Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /portal/
+Disallow: /login/
+Disallow: /logout/
 
 Sitemap: https://isharmud.com/sitemap.xml

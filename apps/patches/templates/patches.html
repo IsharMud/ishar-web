@@ -1,9 +1,9 @@
 {% extends "layout.html" %}
 {% load static %}
-{% block meta_title %}Patches{% endblock meta_title %}
-{% block meta_description %}The latest patches to {{ WEBSITE_TITLE }}{% endblock meta_description %}
-{% block meta_url %}{% url 'patches' %}#patches{% endblock meta_url %}
-{% block title %}Patches{% endblock title %}
+{% block meta_title %}{{ WEBSITE_TITLE }} Patch Notes - MUD Updates & Changes{% endblock meta_title %}
+{% block meta_description %}Browse all patch notes and updates for {{ WEBSITE_TITLE }}, a free online MUD. See the latest game changes, bug fixes, new features, and balance updates.{% endblock meta_description %}
+{% block meta_url %}{% url 'patches' %}{% endblock meta_url %}
+{% block title %}{{ WEBSITE_TITLE }} Patch Notes - MUD Updates & Changes{% endblock title %}
 {% block breadcrumbs %}
     <li class="breadcrumb-item h2{% if page_obj.number and page_obj.number == 1 %} active" aria-current="page{% endif %}" title="Patches">
         <a class="icon-link icon-link-hover" href="{% url 'patches' %}#patches">

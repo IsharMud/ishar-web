@@ -1,9 +1,10 @@
 {% extends "layout.html" %}
 {% load static %}
-{% block meta_title %}Get Started{% endblock meta_title %}
-{% block meta_description %}A quick guide to start playing the game.{% endblock meta_description %}
-{% block meta_url %}{% url 'start' %}#start{% endblock meta_url %}
-{% block title %}Get Started{% endblock title %}
+{% block meta_title %}Get Started Playing {{ WEBSITE_TITLE }} - Beginner's MUD Guide{% endblock meta_title %}
+{% block meta_description %}Learn how to play {{ WEBSITE_TITLE }}, a free text-based RPG (MUD). This beginner's guide covers connecting, creating a character, basic commands, and navigating the medieval fantasy world.{% endblock meta_description %}
+{% block meta_url %}{% url 'start' %}{% endblock meta_url %}
+{% block title %}Get Started Playing {{ WEBSITE_TITLE }} - Beginner's MUD Guide{% endblock title %}
+{% block page_heading %}Get Started Playing {{ WEBSITE_TITLE }}{% endblock page_heading %}
 {% block breadcrumbs %}
     <li class="breadcrumb-item h2 active" aria-current="page" title="Get Started">
         <a class="icon-link icon-link-hover" href="{% url 'start' %}#start">

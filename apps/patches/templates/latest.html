@@ -1,9 +1,9 @@
 {% extends "layout.html" %}
 {% load static %}
-{% block meta_title %}Latest Patch{% endblock meta_title %}
-{% block meta_description %}The latest patch to {{ WEBSITE_TITLE }}{% endblock meta_description %}
-{% block meta_url %}{% url 'latest_patch' %}#latest{% endblock meta_url %}
-{% block title %}Latest Patch{% endblock title %}
+{% block meta_title %}Latest {{ WEBSITE_TITLE }} Patch Notes{% endblock meta_title %}
+{% block meta_description %}The latest patch notes for {{ WEBSITE_TITLE }}, a free online MUD. See the most recent game updates, bug fixes, and new features.{% endblock meta_description %}
+{% block meta_url %}{% url 'latest_patch' %}{% endblock meta_url %}
+{% block title %}Latest {{ WEBSITE_TITLE }} Patch Notes{% endblock title %}
 {% block breadcrumbs %}
     <li class="breadcrumb-item h2" title="Patches">
         <a class="icon-link icon-link-hover" href="{% url 'patches' %}#patches">

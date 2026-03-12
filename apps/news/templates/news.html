@@ -1,9 +1,9 @@
 {% extends "layout.html" %}
 {% load humanize %}
 {% load static %}
-{% block meta_title %}News{% endblock meta_title %}
-{% block meta_description %}{{ news_post.0.subject }}{% endblock meta_description %}
-{% block meta_url %}{% url 'news' %}{% if page_obj and page_obj.number %}?page={{ page_obj.number }}{% endif %}#news{% endblock meta_url %}
+{% block meta_title %}{{ WEBSITE_TITLE }} News - MUD Announcements & Updates{% endblock meta_title %}
+{% block meta_description %}{% if news_post.0.subject %}{{ news_post.0.subject }} - {% endif %}Latest news and announcements from {{ WEBSITE_TITLE }}, a free online MUD (Multi-User Dungeon).{% endblock meta_description %}
+{% block meta_url %}{% url 'news' %}{% if page_obj and page_obj.number %}?page={{ page_obj.number }}{% endif %}{% endblock meta_url %}
 {% block title %}{{ news_post.0.subject }} - {{ WEBSITE_TITLE }} News{% endblock title %}
 {% block breadcrumbs %}
     <li class="breadcrumb-item active" aria-current="page" title="{{ news.subject|default:'Welcome' }}">

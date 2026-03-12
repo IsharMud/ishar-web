@@ -1,9 +1,10 @@
 {% extends "layout.html" %}
 {% load static %}
-{% block meta_title %}MUD Clients{% endblock meta_title %}
-{% block meta_description %}A few MUD clients that we have heard good things about.{% endblock meta_description %}
-{% block meta_url %}{% url 'clients' %}#clients{% endblock meta_url %}
-{% block title %}MUD Clients{% endblock title %}
+{% block meta_title %}Best MUD Clients - Software to Play {{ WEBSITE_TITLE }}{% endblock meta_title %}
+{% block meta_description %}Recommended MUD clients for playing {{ WEBSITE_TITLE }}. Find the best telnet clients and MUD software for Windows, Mac, Linux, Android, and iOS to connect to isharmud.com.{% endblock meta_description %}
+{% block meta_url %}{% url 'clients' %}{% endblock meta_url %}
+{% block title %}Best MUD Clients - Software to Play {{ WEBSITE_TITLE }}{% endblock title %}
+{% block page_heading %}Best MUD Clients for Playing {{ WEBSITE_TITLE }}{% endblock page_heading %}
 {% block scripts %}let focusTo = 'clients'{% endblock scripts %}
 {% block breadcrumbs %}
     <li class="breadcrumb-item active h2" aria-current="page" title="MUD Clients">
