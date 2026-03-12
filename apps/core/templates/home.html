@@ -18,9 +18,9 @@
 {% block content %}
     {% if news %}
     <blockquote class="blockquote">
-        <p class="m-1 p-1">
+        <div class="m-1 p-1">
             {% autoescape off %}{{ news.body }}{% endautoescape %}
-        </p>
+        </div>
         <p class="d-flex justify-content-end past-news">
             <a class="btn btn-ishar icon-link icon-link-hover" href="{% url 'news' %}?page=2#news">
                 <svg class="bi" aria-hidden="true">
