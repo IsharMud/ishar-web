@@ -30,10 +30,10 @@
 
         <title>{% block title %}{{ WEBSITE_TITLE }} - Free Online Text-Based RPG{% endblock title %}</title>
 
-        <link rel="apple-touch-icon" sizes="180x180" href="{% static "images/apple-touch-icon.png" %}">
-        <link rel="icon" type="image/png" sizes="32x32" href="{% static "images/favicon-32x32.png" %}">
-        <link rel="icon" type="image/png" sizes="16x16" href="{% static "images/favicon-16x16.png" %}">
-        <link rel="shortcut icon" href="{% static "images/favicon.ico" %}" type="image/x-icon">
+        <link rel="apple-touch-icon" sizes="180x180" href="https://{{ request.META.HTTP_HOST }}{% static "images/apple-touch-icon.png" %}">
+        <link rel="icon" type="image/png" sizes="32x32" href="https://{{ request.META.HTTP_HOST }}{% static "images/favicon-32x32.png" %}">
+        <link rel="icon" type="image/png" sizes="16x16" href="https://{{ request.META.HTTP_HOST }}{% static "images/favicon-16x16.png" %}">
+        <link rel="shortcut icon" href="https://{{ request.META.HTTP_HOST }}{% static "images/favicon.ico" %}" type="image/x-icon">
         <link href="{% static 'bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
         <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
         <link rel="stylesheet" href="{% static 'bootstrap-icons/bootstrap-icons.min.css' %}">
