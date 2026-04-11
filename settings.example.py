@@ -120,7 +120,6 @@ INSTALLED_APPS = [
     "apps.ClientsConfig",
     "apps.ConditionsConfig",
     "apps.ConnectConfig",
-    "apps.DiscordConfig",
     "apps.EventsConfig",
     "apps.FAQsConfig",
     "apps.FeedbackConfig",
@@ -203,78 +202,6 @@ AUTHENTICATION_BACKENDS = ("apps.accounts.backends.IsharUserAuthBackend",)
 LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/portal/"
 LOGOUT_URL = "/logout/"
-
-# Logging.
-LOGGING_ROOT = Path(BASE_DIR, "logs/")
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "filters": {
-        "require_debug_false": {
-            "()": "django.utils.log.RequireDebugFalse",
-        },
-        "require_debug_true": {
-            "()": "django.utils.log.RequireDebugTrue",
-        },
-    },
-    "formatters": {
-        "verbose": {
-            "datefmt": "%Y-%m-%d %H:%M:%S %Z",
-            "format": "{asctime} [{levelname}] {message}",
-            "style": "{",
-        },
-        "django.server": {
-            "()": "django.utils.log.ServerFormatter",
-            "format": "[{server_time}] {message}",
-            "style": "{",
-        }
-    },
-    "handlers": {
-        "console": {
-            "level": "INFO",
-            "class": "logging.StreamHandler",
-            "formatter": "verbose",
-        },
-        "discord": {
-            "level": "INFO",
-            "filters": ["require_debug_false"],
-            "class": "logging.FileHandler",
-            "filename": Path(LOGGING_ROOT, "discord.log"),
-            "formatter": "verbose",
-        },
-        "django.server": {
-            "level": "INFO",
-            "class": "logging.StreamHandler",
-            "formatter": "django.server",
-        },
-        "mail_admins": {
-            "level": "ERROR",
-            "filters": ["require_debug_false"],
-            "class": "django.utils.log.AdminEmailHandler",
-        },
-        "error_log": {
-            "level": "ERROR",
-            "class": "logging.FileHandler",
-            "filename": Path(LOGGING_ROOT, "errors.log"),
-            "formatter": "verbose",
-        },
-    },
-    "loggers": {
-        "discord": {
-            "handlers": ["console", "discord"],
-            "level": "INFO",
-        },
-        "django": {
-            "handlers": ["console", "mail_admins", "error_log"],
-            "level": "INFO",
-        },
-        "django.server": {
-            "handlers": ["django.server"],
-            "level": "INFO",
-            "propagate": False,
-        },
-    },
-}
 
 # Internationalization.
 LANGUAGE_CODE = "en-us"

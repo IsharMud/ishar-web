@@ -5,7 +5,6 @@ from .classes import ClassesConfig
 from .clients import ClientsConfig
 from .conditions import ConditionsConfig
 from .core import CoreConfig
-from .discord import DiscordConfig
 from .events import EventsConfig
 from .faqs import FAQsConfig
 from .feedback import FeedbackConfig
