@@ -4,10 +4,12 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.sitemaps.views import sitemap
 from django.urls import include, path
+from django.views.generic import RedirectView
 
 from apps.core.api.routers import api_router
 from apps.core.sitemaps import StaticViewSitemap
 from apps.core.views import ErrorView
+
 
 sitemaps = {
     "static": StaticViewSitemap,
@@ -27,7 +29,7 @@ urlpatterns = [
     path("connect/", include("apps.connect.urls"), name="connect"),
     path("challenges/", include("apps.challenges.urls"), name="challenges"),
     path("clients/", include("apps.clients.urls"), name="clients"),
-    path("discord/", include("apps.discord.urls"), name="discord"),
+    path("discord/", RedirectView.as_view(url=settings.DISCORD["URL"]), name="discord"),
     path("events/", include("apps.events.urls"), name="events"),
     path("faq/", include("apps.faqs.urls"), name="faq"),
     path("feedback/", include("apps.feedback.urls"), name="feedback"),
