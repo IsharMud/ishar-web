@@ -354,6 +354,18 @@
                             </a>
                         </li>
 {% endif %}
+                        <li class="nav-item" title="Wiki">
+                            <a class="nav-link icon-link icon-link-hover" href="https://isharmud.miraheze.org/wiki/Main_Page" target="_blank">
+                                <svg class="bi" aria-hidden="true">
+                                    <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#journals"></use>
+                                </svg>
+                                Wiki
+                                <svg class="bi" aria-hidden="false" role="img" aria-label="Open Ishar MUD wiki in a new window.">
+                                    <use xlink:href="/static/bootstrap-icons/bootstrap-icons.svg#box-arrow-up-right"></use>
+                                </svg>
+                            </a>
+                        </li>
+
                         <li class="nav-item" title="World">
                             <a class="nav-link icon-link icon-link-hover" href="{% url 'world' %}#world">
                                 <svg class="bi" aria-hidden="true">
