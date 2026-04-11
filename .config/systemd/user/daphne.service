@@ -1,5 +1,5 @@
 [Unit]
-Description="isharweb test django staging daphne"
+Description="isharweb django"
 After=network.target syslog.target nss-lookup.target mariadb.service
 
 [Service]

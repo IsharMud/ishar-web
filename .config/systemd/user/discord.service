@@ -1,0 +1,19 @@
+[Unit]
+Description="isharweb discord bot"
+After=network.target syslog.target nss-lookup.target mariadb.service
+
+[Service]
+Restart=on-failure
+Environment="PYTHONUNBUFFERED=1"
+Environment="DJANGO_DEBUG=0"
+Environment="DJANGO_SECRET_KEY=<SECRET>"
+Environment="DJANGO_SETTINGS_MODULE=settings"
+WorkingDirectory=/var/www/isharmud.com/ishar-web
+ExecStart=/var/www/isharmud.com/venv/bin/daphne -v 2 bot:__init__
+
+ExecReload=/bin/kill -s HUP $MAINPID
+ExecStop=/bin/kill -s TERM $MAINPID
+PrivateTmp=true
+
+[Install]
+WantedBy=default.target
