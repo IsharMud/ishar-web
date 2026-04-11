@@ -12,7 +12,7 @@ setup()
 bot = Client(intents=Intents.DEFAULT)
 
 from apps.leaders.models import Leader
-from apps.leaders.models import Player
+from apps.players.models import Player, PlayerStat
 
 
 @listen()
@@ -33,10 +33,10 @@ Commands.
 @slash_command(name="deadhead", description="Which player has died most?")
 async def deadhead_function(ctx: SlashContext):
     """List which player has the highest number of total deaths."""
-    death = await Player.objects.order_by("-statistics__total_deaths").afirst()
+    leader = await Player.objects.order_by("-statistics__total_deaths").afirst()
+    deaths = await PlayerStat.objects.aget(player_id=leader.id)
     await ctx.send(
-        f"_{death.player_title}_ has died :skull_crossbones: "
-        f" __{death.statistics.total_deaths}__ times!"
+        f"_{leader.player_title}_ has died {deaths.total_deaths} times. :skull_crossbones:"
     )
 
 
