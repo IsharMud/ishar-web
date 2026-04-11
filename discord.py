@@ -36,7 +36,7 @@ async def deadhead_function(ctx: SlashContext):
     leader = await Player.objects.order_by("-statistics__total_deaths").afirst()
     deaths = await PlayerStat.objects.aget(player_id=leader.id)
     await ctx.send(
-        f"_{leader.player_title}_ has died {deaths.total_deaths} times. :skull_crossbones:"
+        f"_{leader.player_name}_ has died {deaths.total_deaths} times. :skull_crossbones:"
     )
 
 
@@ -51,7 +51,7 @@ async def leader_function(ctx: SlashContext):
     """Leader."""
     leader = await Leader.objects.afirst()
     await ctx.send(
-        f"_{leader.player_title}_ is the leading player!"
+        f"_{leader.player_name}_ is the leading player!"
         f" :trophy: <https://isharmud.com/leaders/#leaders>"
     )
 
