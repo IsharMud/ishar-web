@@ -67,7 +67,7 @@ async def start_function(ctx: SlashContext):
 
 @slash_command(
     name="wiki",
-    description=f"{settings.WEBSITE_URL} Wiki"
+    description=f"{settings.WEBSITE_TITLE} Wiki"
 )
 async def wiki_function(ctx: SlashContext):
     """Link the wiki."""
