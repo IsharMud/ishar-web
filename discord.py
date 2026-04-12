@@ -65,6 +65,15 @@ async def start_function(ctx: SlashContext):
     await ctx.send("https://isharmud.com/start/#start :rocket:")
 
 
+@slash_command(
+    name="wiki",
+    description=f"{settings.WEBSITE_TITLE} Wiki"
+)
+async def start_function(ctx: SlashContext):
+    """Link the wiki."""
+    await ctx.send("{settings.WIKI_LINK} :globe_with_meridians: ")
+
+
 """
 Start.
 """

@@ -229,6 +229,9 @@ DISCORD = {
     "URL": "https://discord.com/invite/VBmMXUpeve"
 }
 
+# Wiki.
+WIKI_URL = "https://isharmud.miraheze.org/wiki/Main_Page"
+
 # MUD files.
 MUD_HOME = Path(Path.home(), "ishar-mud")
 HELPTAB = Path(MUD_HOME, "lib/Misc/helptab")

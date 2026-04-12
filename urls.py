@@ -41,6 +41,7 @@ urlpatterns = [
     path("player/", include("apps.players.urls"), name="player"),
     path("portal/", include("apps.accounts.urls"), name="portal"),
     path("season/", include("apps.seasons.urls"), name="season"),
+    path("wiki/", RedirectView.as_view(url=settings.WIKI_URL), name="wiki"),
 ]
 
 # Error handlers.
