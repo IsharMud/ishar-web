@@ -67,11 +67,11 @@ async def start_function(ctx: SlashContext):
 
 @slash_command(
     name="wiki",
-    description=f"{settings.WEBSITE_TITLE} Wiki"
+    description=f"{settings.WEBSITE_URL} Wiki"
 )
 async def wiki_function(ctx: SlashContext):
     """Link the wiki."""
-    await ctx.send(f"{settings.WIKI_LINK} :globe_with_meridians: ")
+    await ctx.send(f"{settings.WIKI_URL} :globe_with_meridians: ")
 
 
 """
