@@ -30,7 +30,13 @@ async def on_ready():
 Commands.
 """
 
-@slash_command(name="deadhead", description="Which player has died most?")
+@slash_command(name="challenges", description=f"{settings.WEBSITE_TITLE} Challenges")
+async def challenges_function(ctx: SlashContext):
+    """Link the website challenges page."""
+    await ctx.send("https://isharmud.com/challenges/#challenges :crossed_swords:")
+
+
+@slash_command(name="deadhead", description=f"Which {settings.WEBSITE_TITLE} player has died most?")
 async def deadhead_function(ctx: SlashContext):
     """List which player has the highest number of total deaths."""
     leader = await Player.objects.order_by("-statistics__total_deaths").afirst()
@@ -40,13 +46,16 @@ async def deadhead_function(ctx: SlashContext):
     )
 
 
-@slash_command(name="faq", description="Frequently Asked Questions")
+@slash_command(name="faq", description=f"{settings.WEBSITE_TITLE} Frequently Asked Questions")
 async def faq_function(ctx: SlashContext):
     """Link the website FAQ page."""
-    await ctx.send("https://isharmud.com/faq/#faq")
+    await ctx.send("https://isharmud.com/faq/#faq :question:")
 
 
-@slash_command(name="leader", description="Who is the leading player?")
+@slash_command(
+    name="leader",
+    description=f"Who is the leading {settings.WEBSITE_TITLE} player?"
+)
 async def leader_function(ctx: SlashContext):
     """Leader."""
     leader = await Leader.objects.afirst()
@@ -56,13 +65,21 @@ async def leader_function(ctx: SlashContext):
     )
 
 
+@slash_command(name="season", description=f"What {settings.WEBSITE_TITLE} season is it?")
+async def season_function(ctx: SlashContext):
+    """Link the website season page."""
+    # TODO: Avoid django.core.exceptions.SynchronousOnlyOperation
+    #   with Season utils.get_current_season.
+    await ctx.send(f"https://isharmud.com/season/#season :sunrise_over_mountains:")
+
+
 @slash_command(
     name="start",
     description=f"Get started playing {settings.WEBSITE_TITLE}!"
 )
 async def start_function(ctx: SlashContext):
     """Link the website getting started guide."""
-    await ctx.send("https://isharmud.com/start/#start :rocket:")
+    await ctx.send("https://isharmud.com/start/#start :rocket: :joystick:")
 
 
 @slash_command(
