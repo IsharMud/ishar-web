@@ -1,8 +1,8 @@
 {% extends "layout.html" %}
 {% load humanize %}
 {% load static %}
-{% block meta_title %}Challenges{% endblock meta_title %}
-{% block meta_description %}Challenges currently available, A.{% endblock meta_description %}
+{% block meta_title %}{{ WEBSITE_TITLE }} Challenges{% endblock meta_title %}
+{% block meta_description %}Current {{ WEBSITE_TITLE }} challenges available.{% endblock meta_description %}
 {% block meta_url %}{% url 'challenges' %}#challenges{% endblock meta_url %}
 {% block title %}{{ WEBSITE_TITLE }} Challenges{% endblock title %}
 {% block includes %}
