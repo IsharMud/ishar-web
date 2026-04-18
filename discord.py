@@ -43,6 +43,17 @@ async def challenges_function(ctx: SlashContext):
     )
 
 
+@slash_command(name="cycle", description=f"When will {settings.WEBSITE_TITLE} challenges cycle?")
+async def cycle_function(ctx: SlashContext):
+    """List when challenges next cycle."""
+    next_cycle = await aget_current_season().get_next_cycle()
+    timestamp = next_cycle.strftime("%A, %B %d, %%I:%M:%S %p %Z")
+    await ctx.send(
+        f"Challenges will cycle in :arrows_counterclockwise: [{timeuntil(next_cycle)}"
+        f" at {timestamp} :hourglass_flowing_sand:",
+    )
+
+
 @slash_command(name="deadhead", description=f"Which {settings.WEBSITE_TITLE} player has died most?")
 async def deadhead_function(ctx: SlashContext):
     """List which player has the highest number of total deaths."""
@@ -80,7 +91,7 @@ async def season_function(ctx: SlashContext):
     url = "https://isharmud.com/season/#season"
     await ctx.send(
         f"[Season {current.season_id}]({url})"
-        f" :hourglass_flowing_sand: ends {timeuntil(expires)}"
+        f" :hourglass_flowing_sand: ends in {timeuntil(expires)}"
         f" :alarm_clock: {expires.strftime('%A, %B %d, %Y')}"
     )
 
