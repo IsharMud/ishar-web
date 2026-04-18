@@ -81,7 +81,7 @@ async def season_function(ctx: SlashContext):
     await ctx.send(
         f"[Season {current.season_id}]({url})"
         f" :hourglass_flowing_sand: ends {timeuntil(expires)}"
-        f" :alarm_clock: {expires.strftime('%A, %B %d, %Y @ %I:%M:%S %p %Z')}"
+        f" :alarm_clock: {expires.strftime('%A, %B %d, %Y')}"
     )
 
 
