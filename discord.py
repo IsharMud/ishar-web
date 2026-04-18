@@ -12,6 +12,7 @@ Set up.
 setup()
 bot = Client(intents=Intents.DEFAULT)
 
+from apps.challenges.models import Challenge
 from apps.leaders.models import Leader
 from apps.players.models import Player, PlayerStat
 from apps.seasons.utils.current import aget_current_season
@@ -33,8 +34,13 @@ Commands.
 
 @slash_command(name="challenges", description=f"{settings.WEBSITE_TITLE} Challenges")
 async def challenges_function(ctx: SlashContext):
-    """Link the website challenges page. TODO: show counts/completions."""
-    await ctx.send("https://isharmud.com/challenges/#challenges :crossed_swords:")
+    """Link the website challenges page with count of complete/incomplete."""
+    complete = await Challenge.objects.filter(is_active__exact=1).exclude(winner_desc__exact="").acount()
+    incomplete = await Challenge.objects.filter(is_active__exact=1).filter(winner_desc__exact="").acount()
+    url = "https://isharmud.com/challenges/#challenges"
+    await ctx.send(
+        f" [Challenges]({url}) {complete} complete - {incomplete} incomplete :crossed_swords:"
+    )
 
 
 @slash_command(name="deadhead", description=f"Which {settings.WEBSITE_TITLE} player has died most?")
