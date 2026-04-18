@@ -2,6 +2,7 @@
 
 from django import setup
 from django.conf import settings
+from django.utils.timesince import timeuntil
 from interactions import Client, Intents, listen, slash_command, SlashContext
 
 
@@ -13,7 +14,7 @@ bot = Client(intents=Intents.DEFAULT)
 
 from apps.leaders.models import Leader
 from apps.players.models import Player, PlayerStat
-
+from apps.seasons.utils.current import aget_current_season
 
 @listen()
 async def on_ready():
@@ -32,7 +33,7 @@ Commands.
 
 @slash_command(name="challenges", description=f"{settings.WEBSITE_TITLE} Challenges")
 async def challenges_function(ctx: SlashContext):
-    """Link the website challenges page."""
+    """Link the website challenges page. TODO: show counts/completions."""
     await ctx.send("https://isharmud.com/challenges/#challenges :crossed_swords:")
 
 
@@ -67,10 +68,15 @@ async def leader_function(ctx: SlashContext):
 
 @slash_command(name="season", description=f"What {settings.WEBSITE_TITLE} season is it?")
 async def season_function(ctx: SlashContext):
-    """Link the website season page."""
-    # TODO: Avoid django.core.exceptions.SynchronousOnlyOperation
-    #   with Season utils.get_current_season.
-    await ctx.send(f"https://isharmud.com/season/#season :sunrise_over_mountains:")
+    """Season."""
+    current = await aget_current_season()
+    expires = current.expiration_date
+    url = "https://isharmud.com/season/#season"
+    await ctx.send(
+        f"[Season {current.season_id}]({url})"
+        f" :hourglass_flowing_sand: ends {timeuntil(expires)}"
+        f" :alarm_clock: {expires.strftime('%A, %B %d, %Y @ %I:%M:%S %p %Z')}"
+    )
 
 
 @slash_command(
