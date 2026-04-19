@@ -3,11 +3,11 @@ import traceback
 
 from django import setup
 from django.conf import settings
-from django.utils import timezone
 from django.utils.timesince import timeuntil
+from django.utils.timezone import now
+from django.utils.translation import ngettext
 from interactions import Client, Intents, listen, slash_command, SlashContext
 from interactions.api.events import CommandError
-
 
 """
 Set up.
@@ -74,9 +74,21 @@ async def deadhead_function(ctx: SlashContext):
 
     leader = await Player.objects.order_by("-statistics__total_deaths").afirst()
     deaths = await PlayerStat.objects.aget(player_id=leader.id)
-    await ctx.send(
-        f"_{leader.name}_ has died {deaths.total_deaths} times. :skull_crossbones:"
-    )
+    await ctx.send(f"_{leader.name}_ has died {deaths.total_deaths} times :skull_crossbones:")
+
+
+@slash_command(name="events", description=f"How many {settings.WEBSITE_TITLE} events are active?")
+async def events_function(ctx: SlashContext):
+    """List count of active in-game events."""
+    from apps.events.utils import aget_global_event_count
+
+    url = "<https://isharmud.com/events/#events>"
+    num_events = await aget_global_event_count()
+    word = ngettext("event", "events", num_events)
+    if num_events:
+        await ctx.send(f"[{num_events} {word}]({url}) :calendar_spiral:")
+    else:
+        await ctx.send("_Sorry, but there are no active events._")
 
 
 @slash_command(name="faq", description=f"{settings.WEBSITE_TITLE} Frequently Asked Questions")
@@ -100,7 +112,7 @@ async def leader_function(ctx: SlashContext):
 @slash_command(name="mudtime", description=f"What is the {settings.WEBSITE_TITLE} time?")
 async def mudtime_function(ctx: SlashContext):
     """Show the MUD time."""
-    timestamp = timezone.now().strftime("%A, %B %d, %Y @ %I:%M:%S %p %Z")
+    timestamp = now().strftime("%A, %B %d, %Y @ %I:%M:%S %p %Z")
     await ctx.send(
         f"The current {settings.WEBSITE_TITLE} time"
         f" is `{timestamp}` :clock:"
