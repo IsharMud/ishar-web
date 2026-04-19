@@ -132,17 +132,11 @@ async def wiki_function(ctx: SlashContext):
     await ctx.send(f"{settings.WIKI_URL} :globe_with_meridians: ")
 
 
-"""
-Start.
-"""
-
-bot_settings = {
-    intents=Intents.DEFAULT
-}
+"""Set up the Discord bug."""
+bot_settings = {"intents": Intents.DEFAULT}
 if settings.DEBUG:
     bot_settings["debug_scope"] = settings.DISCORD["GUILD"]
-
 bot = Client(**bot_settings)
 
-# Start the Discord bot.
+"""Start the Discord bot."""
 bot.start(settings.DISCORD["TOKEN"])
