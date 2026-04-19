@@ -10,3 +10,11 @@ def get_global_event_count():
         start_time__lt=now(),
         end_time__gt=now()
     ).count()
+
+def aget_global_event_count():
+    # Asynchronous number of current, active global events within the MUD.
+
+    return GlobalEvent.objects.filter(
+        start_time__lt=now(),
+        end_time__gt=now()
+    ).acount()
