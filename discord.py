@@ -88,7 +88,7 @@ async def events_function(ctx: SlashContext):
     if num_events:
         await ctx.send(f"[{num_events} {word}]({url}) :calendar_spiral:")
     else:
-        await ctx.send("_Sorry, but there are no active events._")
+        await ctx.send("_Sorry, but there are no active events._", ephemeral=True)
 
 
 @slash_command(name="faq", description=f"{settings.WEBSITE_TITLE} Frequently Asked Questions")
@@ -144,7 +144,7 @@ async def wiki_function(ctx: SlashContext):
     await ctx.send(f"{settings.WIKI_URL} :globe_with_meridians: ")
 
 
-"""Set up the Discord bug."""
+"""Set up the Discord bot."""
 bot_settings = {"intents": Intents.DEFAULT}
 if settings.DEBUG:
     bot_settings["debug_scope"] = settings.DISCORD["GUILD"]
