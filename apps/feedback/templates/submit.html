@@ -1,9 +1,9 @@
 {% extends "feedback.html" %}
 {% load static %}
-{% block meta_title %}Submit Feedback{% endblock meta_title %}
+{% block meta_title %}Submit {{ WEBSITE_TITLE }} Feedback{% endblock meta_title %}
 {% block meta_description %}Submit feedback about {{ WEBSITE_TITLE }}.{% endblock meta_description %}
 {% block meta_url %}{% url 'submit_feedback' %}#submit{% endblock meta_url %}
-{% block title %}Submit Feedback{% endblock title %}
+{% block title %}Submit {{ WEBSITE_TITLE }} Feedback{% endblock title %}
 {% block breadcrumbs %}
     <li class="breadcrumb-item h2" title="Portal">
         <a class="icon-link icon-link-hover" href="{% url 'portal' %}#portal">

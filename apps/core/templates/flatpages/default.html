@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
-{% block meta_title %}{{ flatpage.title }}{% endblock meta_title %}
-{% block title %}{{ flatpage.title }}{% endblock title %}
+{% block meta_title %}{{ WEBSITE_TITLE }} {{ flatpage.title }}{% endblock meta_title %}
+{% block title %}{{ WEBSITE_TITLE }} {{ flatpage.title }}{% endblock title %}
 {% block breadcrumbs %}
     <li class="bi bi-file-earmark breadcrumb-item active h2" aria-current="page" title="{{ flatpage.title }}">
         {{ flatpage.title }}

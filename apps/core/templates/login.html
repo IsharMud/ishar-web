@@ -1,9 +1,9 @@
 {% extends "layout.html" %}
 {% load static %}
-{% block meta_title %}Log In{% endblock meta_title %}
-{% block meta_description %}Log In{% endblock meta_description %}
+{% block meta_title %}{{ WEBSITE_TITLE }} Log In{% endblock meta_title %}
+{% block meta_description %}Log in to your {{ WEBSITE_TITLE }} account.{% endblock meta_description %}
 {% block meta_url %}{% url 'login' %}#login{% endblock meta_url %}
-{% block title %}Log In{% endblock title %}
+{% block title %}{{ WEBSITE_TITLE }} Log In{% endblock title %}
 {% block scripts %}let focusTo = 'id_username'{% endblock scripts %}
 {% block breadcrumbs %}
     <li class="breadcrumb-item active h2" aria-current="page" title="Log In">

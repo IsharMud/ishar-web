@@ -1,10 +1,10 @@
 {% extends "layout.html" %}
 {% load humanize %}
 {% load static %}
-{% block meta_title %}Who's Online?{% endblock meta_title %}
-{% block meta_description %}Number of players currently online.{% endblock meta_description %}
+{% block meta_title %}Who's online playing {{ WEBSITE_TITLE }}?{% endblock meta_title %}
+{% block meta_description %}Number of {{ WEBSITE_TITLE }} players currently online.{% endblock meta_description %}
 {% block meta_url %}{% url 'who' %}#who{% endblock meta_url %}
-{% block title %}Who's Online?{% if players %} ({{ players | length }} player{{ players|pluralize }}){% endif %}{% endblock title %}
+{% block title %}Who's Playing {{ WEBSITE_TITLE }}?{% if players %} ({{ players | length }} player{{ players|pluralize }}){% endif %}{% endblock title %}
 {% block breadcrumbs %}
     <li class="breadcrumb-item h2" title="Portal">
         <a class="icon-link icon-link-hover" href="{% url 'portal' %}#portal">

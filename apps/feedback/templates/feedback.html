@@ -1,10 +1,10 @@
 {% extends "layout.html" %}
 {% load humanize %}
 {% load static %}
-{% block meta_title %}Feedback{% endblock meta_title %}
+{% block meta_title %}{{ WEBSITE_TITLE }} Feedback{% endblock meta_title %}
 {% block meta_description %}Feedback about {{ WEBSITE_TITLE }}.{% endblock meta_description %}
 {% block meta_url %}{% url 'feedback' %}#feedback{% endblock meta_url %}
-{% block title %}Feedback{% endblock title %}
+{% block title %}{{ WEBSITE_TITLE }} Feedback{% endblock title %}
 {% block scripts %}let focusTo = 'feedback'{% endblock scripts %}
 {% block breadcrumbs %}
     <li class="breadcrumb-item h2" title="Portal">

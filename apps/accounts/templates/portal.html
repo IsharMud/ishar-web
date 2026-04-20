@@ -1,10 +1,10 @@
 {% extends "layout.html" %}
 {% load humanize %}
 {% load static %}
-{% block meta_title %}Portal{% endblock meta_title %}
-{% block meta_description %}Portal for players to see information about their account and characters.{% endblock meta_description %}
+{% block meta_title %}{{ WEBSITE_TITLE }} Account Portal{% endblock meta_title %}
+{% block meta_description %}Portal for players to see information about their {{ WEBSITE_TITLE }} account and characters.{% endblock meta_description %}
 {% block meta_url %}{% url 'portal' %}#portal{% endblock meta_url %}
-{% block title %}Portal{% endblock title %}
+{% block title %}{{ WEBSITE_TITLE }} Portal{% endblock title %}
 {% block breadcrumbs %}
     <li class="breadcrumb-item active h2" aria-current="page" title="Portal">
         <a class="icon-link icon-link-hover" href="{% url 'portal' %}#portal">

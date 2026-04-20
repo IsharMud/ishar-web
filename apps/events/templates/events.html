@@ -4,7 +4,7 @@
 {% block meta_title %}{{ WEBSITE_TITLE }} Events - In-Game MUD Events & Activities{% endblock meta_title %}
 {% block meta_description %}{% if GLOBAL_EVENT_COUNT > 0 %}{{ GLOBAL_EVENT_COUNT }} active event{{ GLOBAL_EVENT_COUNT|pluralize }} in {{ WEBSITE_TITLE }}.{% else %}No active events right now in {{ WEBSITE_TITLE }}.{% endif %} Check current and upcoming in-game events for this free online MUD.{% endblock meta_description %}
 {% block meta_url %}{% url 'events' %}{% endblock meta_url %}
-{% block title %}Events{% endblock title %}
+{% block title %}{{ WEBSITE_TITLE }} Events{% endblock title %}
 {% block breadcrumbs %}
     <li class="breadcrumb-item h2" title="Events">
         <a class="icon-link icon-link-hover" href="{% url 'events' %}#events">

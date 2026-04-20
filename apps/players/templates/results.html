@@ -1,9 +1,9 @@
 {% extends "layout.html" %}
 {% load static %}
-{% block meta_title %}Search{% if results %} ({{ results.count }} result{{ results.count|pluralize }}){% endif %}{% endblock meta_title %}
-{% block meta_description %}Search{% if results %} ({{ results.count }} result{{ results.count|pluralize }}){% endif %}{% endblock meta_description %}
+{% block meta_title %}{{ WEBSITE_TITLE }} Search{% if results %} ({{ results.count }} result{{ results.count|pluralize }}){% endif %}{% endblock meta_title %}
+{% block meta_description %}{{ WEBSITE_TITLE }} Search{% if results %} ({{ results.count }} result{{ results.count|pluralize }}){% endif %}{% endblock meta_description %}
 {% block meta_url %}{% url 'players' %}#search{% endblock meta_url %}
-{% block title %}Search{% if results %} ({{ results.count }} result{{ results.count|pluralize }}){% endif %}{% endblock title %}
+{% block title %}{{ WEBSITE_TITLE }} Search{% if results %} ({{ results.count }} result{{ results.count|pluralize }}){% endif %}{% endblock title %}
 {% block breadcrumbs %}
     <li class="h2 breadcrumb-item" title="Portal">
         <a class="icon-link icon-link-hover" href="{% url 'portal' %}#portal">

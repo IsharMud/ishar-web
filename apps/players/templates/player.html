@@ -1,10 +1,10 @@
 {% extends "layout.html" %}
 {% load humanize %}
 {% load static %}
-{% block meta_title %}Player: {{ player.name }}{% if player.player_type == 'Dead' %} ☠️{% endif %}{% endblock meta_title %}
-{% block meta_description %}Player: {{ player.name }}{% if player.player_type == 'Dead' %} ☠️{% endif %}{% endblock meta_description %}
+{% block meta_title %}{{ WEBSITE_TITLE }} Player: {{ player.name }}{% if player.player_type == 'Dead' %} ☠️{% endif %}{% endblock meta_title %}
+{% block meta_description %}{{ WEBSITE_TITLE }} Player: {{ player.name }}{% if player.player_type == 'Dead' %} ☠️{% endif %}{% endblock meta_description %}
 {% block meta_url %}{% url 'players' %}{% endblock meta_url %}
-{% block title %}Player: {{ player.name }}{% if player.player_type == 'Dead' %} ☠️{% endif %}{% endblock title %}
+{% block title %}{{ WEBSITE_TITLE }} Player: {{ player.name }}{% if player.player_type == 'Dead' %} ☠️{% endif %}{% endblock title %}
 {% block breadcrumbs %}
     <li class="breadcrumb-item h2" title="Portal">
         <a class="icon-link icon-link-hover" href="{% url 'portal' %}#portal">
