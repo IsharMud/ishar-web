@@ -138,6 +138,12 @@ async def start_function(ctx: SlashContext):
     await ctx.send("https://isharmud.com/start/#start :rocket: :joystick:")
 
 
+@slash_command(name="upgrades", description=f"What remort upgrades are available in {settings.WEBSITE_TITLE}?")
+async def upgrades_function(ctx: SlashContext):
+    """Link the website upgrades page."""
+    await ctx.send("https://isharmud.com/upgrades/#upgrades :shield:")
+
+
 @slash_command(name="wiki", description=f"{settings.WEBSITE_TITLE} Wiki")
 async def wiki_function(ctx: SlashContext):
     """Link the wiki."""

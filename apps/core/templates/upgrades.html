@@ -70,9 +70,6 @@
                 <th scope="col" title="Tiers (#)">
                     Tiers (<span class="text-ishar">#</span>)
                 </th>
-                <th scope="col" title="Hardcore Tiers (#)">
-                    Hardcore Tiers (<span class="text-ishar">#</span>)
-                </th>
             </tr>
         </thead>
         <tbody class="table-group-divider text-ishar">
@@ -90,10 +87,6 @@
                     {{ upgrade.tiers|join:", " }}
                     (<strong>{{ upgrade.tiers|length }}</strong>)
                 </td>
-                <td data-order="{{ upgrade.survival_renown_cost }}" title="Hardcore Tiers: {{ upgrade.survival_tiers|join:', ' }} ({{ upgrade.survival_tiers|length }} tier{{ upgrade.survival_tiers|pluralize }})">
-                    {{ upgrade.survival_tiers|join:", " }}
-                    (<strong>{{ upgrade.survival_tiers|length }}</strong>)
-                </td>
             </tr>
         {% endfor %}
         </tbody>
@@ -104,9 +97,6 @@
                 </th>
                 <th scope="col" title="Tiers (#)">
                     Tiers (<span class="text-ishar">#</span>)
-                </th>
-                <th scope="col" title="Hardcore Tiers (#)">
-                    Hardcore Tiers (<span class="text-ishar">#</span>)
                 </th>
             </tr>
         </tfoot>
