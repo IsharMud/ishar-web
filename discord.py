@@ -122,9 +122,9 @@ async def mudtime_function(ctx: SlashContext):
 @slash_command(name="runtime", description=f"How long has the {settings.WEBSITE_TITLE} process been running?")
 async def runtime_function(ctx: SlashContext):
     """Show the current MUD process runtime."""
-    from apps.processes.utils.process import get_process
+    from apps.processes.utils.aprocess import aget_process
 
-    process = get_process()
+    process = await aget_process()
     await ctx.send(
         "Running since"
         f" `{process.created.strftime('%A, %B %d, %Y @ %I:%M:%S %p %Z')}`"

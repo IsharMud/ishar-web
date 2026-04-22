@@ -1,4 +1,4 @@
-"""Ishar MUD server process utilities."""
+"""Ishar MUD asynchronous server process utilities."""
 
 from datetime import datetime
 from django.utils.timezone import make_aware, now
@@ -9,14 +9,14 @@ from subprocess import CalledProcessError, check_output
 from ..models.process import MUDProcess
 
 
-def get_process(name="ishar", user=getlogin()):
-    # Get Ishar MUD process information for environment.
+def aget_process(name="ishar", user=getlogin()):
+    # Asynchronously get Ishar MUD process information for environment.
 
     # Find existing process in the database.
     current_process = MUDProcess.objects.filter(
         name__exact=name,
         user__exact=user
-    ).order_by("-last_updated").first()
+    ).order_by("-last_updated").afirst()
 
     # Find the actual running Ishar process ID (PID).
     try:
@@ -29,7 +29,7 @@ def get_process(name="ishar", user=getlogin()):
             name=name,
             user=user,
             last_updated__lt=now()
-        ).delete()
+        ).adelete()
         return None
 
     # Use the existing database record, if it is correct.
@@ -45,7 +45,7 @@ def get_process(name="ishar", user=getlogin()):
         last_updated__lt=now()
     ).exclude(
         process_id__exact=current_pid
-    ).delete()
+    ).adelete()
 
     # Save and return the latest correct process ID information.
     new = MUDProcess(
@@ -59,5 +59,6 @@ def get_process(name="ishar", user=getlogin()):
             )
         )
     )
-    new.save()
+    new.asave()
+
     return new
