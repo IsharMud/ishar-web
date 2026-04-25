@@ -81,7 +81,9 @@
                             <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#link-45deg"></use>
                         </svg>
                     </a>
-                    {{ upgrade.display_name }}
+                    <a class="text-decoration-none" href="#{{ upgrade.anchor }}" aria-label="Link to this section: Remort Upgrade - {{ upgrade.display_name }} ({{ upgrade.anchor }})">
+                        {{ upgrade.display_name }}
+                    </a>
                 </td>
                 <td data-order="{{ upgrade.renown_cost }}" title="Tiers: {{ upgrade.tiers|join:', ' }} ({{ upgrade.tiers|length }} tier{{ upgrade.tiers|pluralize }})">
                     {{ upgrade.tiers|join:", " }}
