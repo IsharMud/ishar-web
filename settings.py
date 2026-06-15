@@ -9,7 +9,10 @@ from django.core.management.utils import get_random_secret_key
 install_as_MySQLdb()
 
 # Build project path(s).
-BASE_DIR = Path(__file__).resolve().parent.parent
+# settings.py lives at the repo root (flat layout), so BASE_DIR is its own
+# directory. (.parent.parent would overshoot to "/", making cache/static/media
+# resolve to unwritable filesystem-root paths in a container.)
+BASE_DIR = Path(__file__).resolve().parent
 
 # Django secret key.
 SECRET_KEY = getenv("DJANGO_SECRET_KEY", get_random_secret_key())
