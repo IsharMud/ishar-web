@@ -2,15 +2,20 @@
 
 from datetime import datetime
 from django.utils.timezone import make_aware, now
-from os import getlogin
+from getpass import getuser
 from psutil import Process
 from subprocess import CalledProcessError, check_output
 
 from ..models.process import MUDProcess
 
 
-def aget_process(name="ishar", user=getlogin()):
+def aget_process(name="ishar", user=None):
     # Asynchronously get Ishar MUD process information for environment.
+
+    # Resolve the user lazily (see get_process): os.getlogin() needs a tty and
+    # throws in a container; getpass.getuser() falls back to env/pwd.
+    if user is None:
+        user = getuser()
 
     # Find existing process in the database.
     current_process = MUDProcess.objects.filter(

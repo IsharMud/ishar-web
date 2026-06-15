@@ -1,5 +1,5 @@
 from django.db.models import Manager
-from os import getlogin
+from getpass import getuser
 
 
 class MUDProcessManager(Manager):
@@ -10,4 +10,4 @@ class MUDProcessManager(Manager):
 
     def get_queryset(self):
         # Limit to the current user account.
-        return super().get_queryset().filter(user__exact=getlogin())
+        return super().get_queryset().filter(user__exact=getuser())
