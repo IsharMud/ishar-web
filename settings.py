@@ -20,10 +20,12 @@ SECRET_KEY = getenv("DJANGO_SECRET_KEY", get_random_secret_key())
 # Debug.
 DEBUG = bool(getenv("DJANGO_DEBUG", False))
 
-# Allowed hosts. In a container, DJANGO_ALLOWED_HOST drives ALLOWED_HOSTS[0],
-# which the rest of this file keys off (website title, DB selection, cookie
-# domain, CSRF). Falls back to the checkout dir name for local/dev use.
-ALLOWED_HOSTS = (getenv("DJANGO_ALLOWED_HOST", BASE_DIR.name),)
+# Allowed hosts. DJANGO_ALLOWED_HOST drives ALLOWED_HOSTS[0], which the rest of
+# this file keys off (website title, DB selection, cookie domain, CSRF). We also
+# accept the "www." variant so both isharmud.com and www.isharmud.com serve.
+# Falls back to the checkout dir name for local/dev use.
+_PRIMARY_HOST = getenv("DJANGO_ALLOWED_HOST", BASE_DIR.name)
+ALLOWED_HOSTS = (_PRIMARY_HOST, f"www.{_PRIMARY_HOST}")
 
 # Website title.
 WEBSITE_TITLE = "Ishar MUD"
@@ -93,7 +95,7 @@ CSRF_COOKIE_DOMAIN = SESSION_COOKIE_DOMAIN = ALLOWED_HOSTS[0]
 CSRF_COOKIE_HTTPONLY = SESSION_COOKIE_HTTPONLY = False
 CSRF_COOKIE_SAMESITE = SESSION_COOKIE_SAMESITE = "Strict"
 CSRF_COOKIE_SECURE = SESSION_COOKIE_SECURE = True
-CSRF_TRUSTED_ORIGINS = (f"https://{ALLOWED_HOSTS[0]}",)
+CSRF_TRUSTED_ORIGINS = tuple(f"https://{h}" for h in ALLOWED_HOSTS)
 
 # E-mail.
 ADMIN_EMAIL = f"admin@{ALLOWED_HOSTS[0]}"
