@@ -8,7 +8,6 @@ __pycache__
 *.log
 *.pyc
 helptab
-settings.py
 test.py
 venv
 /cache/
