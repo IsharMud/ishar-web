@@ -138,7 +138,6 @@ INSTALLED_APPS = [
     "apps.RoomsConfig",
     "apps.SeasonsConfig",
     "apps.SkillsConfig",
-    "apps.ConnectConfig",
 #    "daphne",
     "channels",
 ]
