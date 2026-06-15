@@ -24,9 +24,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
         ca-certificates \
         curl \
+        default-libmysqlclient-dev \
         libffi-dev \
         libssl-dev \
         netcat-openbsd \
+        pkg-config \
         tini \
     && rm -rf /var/lib/apt/lists/*
 
