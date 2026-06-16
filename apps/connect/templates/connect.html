@@ -24,6 +24,19 @@
     </li>
 {% endblock breadcrumbs %}
 {% block content %}
+{# Season 15 pre-launch notice. Remove this banner (and flip the HUD default in hud.js) once the GMCP feeds are live on prod. #}
+<div id="s15-banner" role="status"
+     data-target="{% if CURRENT_SEASON and CURRENT_SEASON.expiration_date %}{{ CURRENT_SEASON.expiration_date|date:'c' }}{% else %}2026-06-25T00:00:00{% endif %}">
+    <svg class="bi s15-icon" aria-hidden="true" width="22" height="22">
+        <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#stars"></use>
+    </svg>
+    <span class="s15-text">
+        <strong>The full-featured browser client launches with Season&nbsp;15.</strong>
+        Live vitals, map, inventory and more arrive when the new season begins{% if CURRENT_SEASON and CURRENT_SEASON.expiration_date %} &mdash; around {{ CURRENT_SEASON.expiration_date|date:"l, F j, Y" }}{% else %} &mdash; around Thursday, June 25, 2026{% endif %}. For now you're in classic terminal mode.
+        <span id="s15-countdown"></span>
+    </span>
+    <button type="button" class="s15-close" id="s15-dismiss" aria-label="Dismiss this notice" title="Dismiss">&times;</button>
+</div>
 <div id="connect-app" class="hud-off">
 
     <div id="hud-topbar">
@@ -371,6 +384,37 @@
     terminalContainer.addEventListener("click", function() {
         if (!term.getSelection()) commandInput.focus();
     });
+
+    // --- Season 15 launch countdown ---
+    // Driven by the server-rendered current-season expiration date (GMCP is
+    // not used — those feeds aren't live yet), with a hardcoded fallback.
+    (function() {
+        var banner = document.getElementById("s15-banner");
+        if (!banner) return;
+        var out = document.getElementById("s15-countdown");
+        var target = new Date(banner.getAttribute("data-target"));
+        if (isNaN(target.getTime())) target = new Date("2026-06-25T00:00:00");
+
+        function tick() {
+            if (!out) return;
+            var diff = Math.floor((target.getTime() - Date.now()) / 1000);
+            if (diff <= 0) { out.textContent = "— launching now; reconnect to begin!"; return; }
+            var d = Math.floor(diff / 86400);
+            var h = Math.floor((diff % 86400) / 3600);
+            var m = Math.floor((diff % 3600) / 60);
+            var s = diff % 60;
+            out.textContent = "Season 15 in " + d + "d " + h + "h " + m + "m " + s + "s.";
+        }
+        tick();
+        setInterval(tick, 1000);
+
+        var dismiss = document.getElementById("s15-dismiss");
+        if (dismiss) dismiss.addEventListener("click", function() {
+            banner.style.display = "none";
+            fitAppHeight();
+            scheduleFit();
+        });
+    })();
 
     // --- Start ---
     fitAppHeight();

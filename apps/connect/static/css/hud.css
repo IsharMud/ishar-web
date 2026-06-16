@@ -230,6 +230,22 @@ html.connect-page body {
 .skill-pct { font-size: .64rem; color: var(--hud-dim); }
 .skill-cd { font-size: .7rem; font-weight: 700; color: var(--hud-accent); font-variant-numeric: tabular-nums; }
 
+/* ----- Season 15 launch banner ----- */
+#s15-banner {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    background: #1a1408; border: 1px solid var(--hud-accent); color: var(--hud-text);
+    border-radius: 4px; padding: 7px 12px; margin-bottom: 6px; font-size: .86rem; line-height: 1.35;
+}
+#s15-banner .s15-icon { color: var(--hud-accent); flex-shrink: 0; }
+#s15-banner .s15-text { flex: 1; min-width: 220px; }
+#s15-banner strong { color: var(--hud-accent); }
+#s15-countdown { font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--hud-accent); font-weight: 700; }
+#s15-banner .s15-close {
+    margin-left: auto; background: none; border: none; color: var(--hud-dim);
+    font-size: 1.3rem; line-height: 1; cursor: pointer; padding: 0 4px;
+}
+#s15-banner .s15-close:hover { color: var(--hud-text); }
+
 /* ----- Mobile ----- */
 @media (max-width: 767px) {
     #connect-app.hud-on {
@@ -241,4 +257,5 @@ html.connect-page body {
     #send-btn { display: none; }
     #hud-topbar { gap: 8px; }
     .v-bars { min-width: 140px; }
+    #s15-banner { font-size: .78rem; padding: 6px 9px; }
 }
