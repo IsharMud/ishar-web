@@ -33,6 +33,9 @@ class TelnetConsumer(AsyncWebsocketConsumer):
         self._writer = None
         self._read_task = None
         self._server_echo = False
+        # Holds telnet bytes that arrived mid-sequence so a command or GMCP
+        # subnegotiation split across socket reads is reassembled, not lost.
+        self._inbuf = bytearray()
 
         host = getattr(settings, "MUD_HOST", "localhost")
         port = getattr(settings, "MUD_PORT", 23)
@@ -93,8 +96,9 @@ class TelnetConsumer(AsyncWebsocketConsumer):
                     await self.close()
                     return
 
-                display_data, responses, echo_changed = (
-                    self._process_telnet(data)
+                self._inbuf.extend(data)
+                display_data, responses, echo_changed, gmcp_messages = (
+                    self._process_telnet()
                 )
 
                 # Send any telnet negotiation replies.
@@ -113,6 +117,12 @@ class TelnetConsumer(AsyncWebsocketConsumer):
                 elif echo_changed is False:
                     await self.send(text_data="\x00ECHO_OFF")
 
+                # Forward GMCP out-of-band data on a dedicated channel so the
+                # browser HUD can parse it without polluting the terminal text
+                # stream. Payload is "Package.Message {json}".
+                for message in gmcp_messages:
+                    await self.send(text_data="\x00GMCP " + message)
+
                 # Forward displayable text to the browser.
                 if display_data:
                     await self.send(
@@ -126,17 +136,26 @@ class TelnetConsumer(AsyncWebsocketConsumer):
             logger.error("Telnet read error: %s", exc)
             await self.close()
 
-    def _process_telnet(self, data):
-        """Strip telnet IAC sequences.
+    def _process_telnet(self):
+        """Parse buffered telnet data from ``self._inbuf``.
 
-        Returns (display_bytes, response_bytes, echo_changed) where
-        *echo_changed* is True/False if the server ECHO state toggled,
-        or None if unchanged.
+        Consumes as many complete telnet sequences as possible and leaves any
+        trailing partial sequence in ``self._inbuf`` for the next read, so a
+        large GMCP subnegotiation split across socket reads is reassembled
+        rather than dropped.
+
+        Returns ``(display_bytes, response_bytes, echo_changed,
+        gmcp_messages)`` where *echo_changed* is True/False if the server ECHO
+        state toggled (else None) and *gmcp_messages* is a list of decoded
+        GMCP payload strings ("Package.Message {json}").
         """
+        data = self._inbuf
         output = bytearray()
         responses = bytearray()
+        gmcp_messages = []
         echo_changed = None
         i = 0
+        consumed = 0
         length = len(data)
 
         while i < length:
@@ -145,13 +164,12 @@ class TelnetConsumer(AsyncWebsocketConsumer):
             if byte != IAC:
                 output.append(byte)
                 i += 1
+                consumed = i
                 continue
 
-            # IAC at end of buffer – treat as literal.
+            # IAC at end of buffer – incomplete, wait for more data.
             if i + 1 >= length:
-                output.append(byte)
-                i += 1
-                continue
+                break
 
             next_byte = data[i + 1]
 
@@ -159,6 +177,7 @@ class TelnetConsumer(AsyncWebsocketConsumer):
             if next_byte == IAC:
                 output.append(IAC)
                 i += 2
+                consumed = i
                 continue
 
             # Three-byte commands: WILL / WONT / DO / DONT.
@@ -170,21 +189,27 @@ class TelnetConsumer(AsyncWebsocketConsumer):
                 if ec is not None:
                     echo_changed = ec
                 i += 3
+                consumed = i
                 continue
 
             # Subnegotiation.
             if next_byte == SB:
                 end = data.find(bytes([IAC, SE]), i + 2)
                 if end == -1:
-                    break  # Incomplete subnegotiation.
-                self._subnegotiate(data[i + 2 : end], responses)
+                    break  # Incomplete subnegotiation – wait for more data.
+                self._subnegotiate(data[i + 2 : end], responses, gmcp_messages)
                 i = end + 2
+                consumed = i
                 continue
 
-            # Any other IAC command (GA, NOP, etc.) – skip.
+            # Any other IAC command (GA, EOR, NOP, etc.) – skip.
             i += 2
+            consumed = i
 
-        return bytes(output), bytes(responses), echo_changed
+        # Drop everything fully consumed; retain any partial trailing sequence.
+        del self._inbuf[:consumed]
+
+        return bytes(output), bytes(responses), echo_changed, gmcp_messages
 
     def _negotiate(self, command, option, responses):
         """Handle WILL/WONT/DO/DONT negotiation.
@@ -193,7 +218,7 @@ class TelnetConsumer(AsyncWebsocketConsumer):
         """
         echo_changed = None
         if command == WILL:
-            if option in (OPT_ECHO, OPT_SGA):
+            if option in (OPT_ECHO, OPT_SGA, OPT_GMCP):
                 responses.extend([IAC, DO, option])
             else:
                 responses.extend([IAC, DONT, option])
@@ -223,12 +248,19 @@ class TelnetConsumer(AsyncWebsocketConsumer):
             responses.extend([IAC, WONT, option])
         return echo_changed
 
-    def _subnegotiate(self, payload, responses):
+    def _subnegotiate(self, payload, responses, gmcp_messages):
         """Handle telnet subnegotiation."""
         if not payload:
             return
 
         option = payload[0]
+
+        if option == OPT_GMCP:
+            # GMCP body is "Package.Message <json>"; hand it to the HUD.
+            gmcp_messages.append(
+                payload[1:].decode("utf-8", errors="replace")
+            )
+            return
 
         if option == OPT_TTYPE and len(payload) >= 2 and payload[1] == 1:
             # TTYPE SEND request – reply with terminal type.
