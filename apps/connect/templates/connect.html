@@ -12,6 +12,18 @@
         <script src="{% static 'js/addon-fit.min.js' %}"></script>
         <script src="{% static 'js/addon-web-links.min.js' %}"></script>
         <script src="{% static 'js/hud.js' %}"></script>
+        <style>
+            /* Graceful degradation: served inline with the HTML, so even if
+               hud.css / hud.js fail to load (e.g. static not collected) the
+               page stays a clean terminal instead of dumping unstyled HUD
+               panels. The HUD scaffolding stays hidden until the HUD is
+               explicitly enabled (which requires hud.js). hud.css re-applies
+               the same rule in .hud-off, so this is a no-op when assets load. */
+            #connect-app.hud-off #hud-left,
+            #connect-app.hud-off #hud-right,
+            #connect-app.hud-off #hud-hotbar,
+            #connect-app.hud-off #vitals-bar { display: none; }
+        </style>
 {% endblock includes %}
 {% block breadcrumbs %}
     <li class="breadcrumb-item active h2" aria-current="page" title="Connect">
