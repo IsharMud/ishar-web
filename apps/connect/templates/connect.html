@@ -7,65 +7,11 @@
 {% block page_heading %}Play {{ WEBSITE_TITLE }} Online in Your Browser{% endblock page_heading %}
 {% block includes %}
         <link rel="stylesheet" href="{% static 'css/xterm.min.css' %}">
+        <link rel="stylesheet" href="{% static 'css/hud.css' %}">
         <script src="{% static 'js/xterm.min.js' %}"></script>
         <script src="{% static 'js/addon-fit.min.js' %}"></script>
         <script src="{% static 'js/addon-web-links.min.js' %}"></script>
-        <style>
-            /* Lock the page so only the terminal scrolls. */
-            html.connect-page,
-            html.connect-page body {
-                overflow: hidden;
-                overscroll-behavior: none;
-                height: 100%;
-            }
-            #terminal-wrapper {
-                position: relative;
-            }
-            #terminal-container {
-                /* Height is set dynamically by JS to fill the viewport. */
-                min-height: 120px;
-                background-color: #000;
-                border-radius: 0.25rem;
-            }
-            #terminal-container .xterm {
-                height: 100%;
-                padding: 0.25rem;
-            }
-            #command-form {
-                display: flex;
-                gap: 0.5rem;
-                align-items: center;
-            }
-            #command-input {
-                flex: 1;
-                font-family: monospace;
-                /* >= 16px prevents iOS auto-zoom on focus */
-                font-size: 16px;
-                padding: 0.375rem 0.5rem;
-            }
-            #connection-status {
-                font-size: 0.875rem;
-                font-weight: bold;
-            }
-            .status-connected { color: #4cbb17; }
-            .status-disconnected { color: #d02b2b; }
-            .status-connecting { color: #fa7; }
-
-            #scroll-bottom-btn {
-                position: absolute;
-                bottom: 0.5rem;
-                right: 0.75rem;
-                z-index: 10;
-                opacity: 0.85;
-                font-size: 0.8rem;
-                padding: 0.2rem 0.5rem;
-            }
-
-            /* --- Mobile / small-screen --- */
-            @media (max-width: 767px) {
-                #send-btn { display: none; }
-            }
-        </style>
+        <script src="{% static 'js/hud.js' %}"></script>
 {% endblock includes %}
 {% block breadcrumbs %}
     <li class="breadcrumb-item active h2" aria-current="page" title="Connect">
@@ -78,51 +24,93 @@
     </li>
 {% endblock breadcrumbs %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-1">
-    <span id="connection-status" class="status-connecting">Connecting...</span>
-    <button class="icon-link icon-link-hover btn btn-ishar btn-sm p-2 rounded" type="button" id="reconnect-btn" style="display: none;" title="Reconnect to {{ WEBSITE_TITLE }}">
-        <svg class="bi" aria-hidden="true">
-            <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#arrow-clockwise"></use>
-        </svg>
-        Reconnect
-    </button>
+{# Season 15 pre-launch notice. Remove this banner (and flip the HUD default in hud.js) once the GMCP feeds are live on prod. #}
+<div id="s15-banner" role="status"
+     data-target="{% if CURRENT_SEASON and CURRENT_SEASON.expiration_date %}{{ CURRENT_SEASON.expiration_date|date:'c' }}{% else %}2026-06-25T00:00:00{% endif %}">
+    <svg class="bi s15-icon" aria-hidden="true" width="22" height="22">
+        <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#stars"></use>
+    </svg>
+    <span class="s15-text">
+        <strong>The full-featured browser client launches with Season&nbsp;15.</strong>
+        Live vitals, map, inventory and more arrive when the new season begins{% if CURRENT_SEASON and CURRENT_SEASON.expiration_date %} &mdash; around {{ CURRENT_SEASON.expiration_date|date:"l, F j, Y" }}{% else %} &mdash; around Thursday, June 25, 2026{% endif %}. For now you're in classic terminal mode.
+        <span id="s15-countdown"></span>
+    </span>
+    <button type="button" class="s15-close" id="s15-dismiss" aria-label="Dismiss this notice" title="Dismiss">&times;</button>
 </div>
-<div id="terminal-wrapper">
-    <div id="terminal-container"></div>
-    <button type="button" class="btn btn-sm btn-ishar" id="scroll-bottom-btn" style="display:none;" title="Scroll to latest output">
-        &#x25BC; Latest
-    </button>
+<div id="connect-app" class="hud-off">
+
+    <div id="hud-topbar">
+        <span id="connection-status" class="status-connecting">Connecting...</span>
+        <div id="vitals-bar"></div>
+        <div class="topbar-actions">
+            <button class="btn btn-ishar btn-sm" type="button" id="ui-toggle" aria-pressed="false" title="Toggle the heads-up display">Show UI</button>
+            <button class="btn btn-ishar btn-sm" type="button" id="reconnect-btn" style="display: none;" title="Reconnect to {{ WEBSITE_TITLE }}">
+                <svg class="bi" aria-hidden="true">
+                    <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#arrow-clockwise"></use>
+                </svg>
+                Reconnect
+            </button>
+        </div>
+    </div>
+
+    <aside id="hud-left" class="hud-col">
+        <section id="panel-room" class="panel"></section>
+        <section id="panel-equipment" class="panel"></section>
+        <section id="panel-inventory" class="panel"></section>
+        <section id="panel-train" class="panel"></section>
+    </aside>
+
+    <main id="hud-center">
+        <div id="terminal-wrapper">
+            <div id="terminal-container"></div>
+            <button type="button" class="btn btn-sm btn-ishar" id="scroll-bottom-btn" style="display:none;" title="Scroll to latest output">
+                &#x25BC; Latest
+            </button>
+        </div>
+        <div id="hud-hotbar" class="empty"></div>
+        <form id="command-form" autocomplete="off">
+            <label for="command-input" class="visually-hidden">Command</label>
+            <input type="text" id="command-input" class="form-control"
+                   placeholder="Enter command..."
+                   aria-label="MUD command input"
+                   autocapitalize="off"
+                   autocomplete="off"
+                   autocorrect="off"
+                   spellcheck="false"
+                   enterkeyhint="send"
+                   autofocus>
+            <button type="submit" class="icon-link icon-link-hover btn btn-ishar btn-sm px-3 py-2 rounded" id="send-btn" title="Send command">
+                <svg class="bi" aria-hidden="true">
+                    <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#send"></use>
+                </svg>
+                Send
+            </button>
+        </form>
+    </main>
+
+    <aside id="hud-right">
+        <div id="hud-tabs">
+            <button type="button" data-tab="status">Status</button>
+            <button type="button" data-tab="chat">Chat</button>
+            <button type="button" data-tab="who">Who</button>
+        </div>
+        <section id="panel-status" class="panel tab"></section>
+        <section id="panel-chat" class="panel tab"></section>
+        <section id="panel-who" class="panel tab"></section>
+    </aside>
+
 </div>
-<form id="command-form" class="mt-1" autocomplete="off">
-    <label for="command-input" class="visually-hidden">Command</label>
-    <input type="text" id="command-input" class="form-control"
-           placeholder="Enter command..."
-           aria-label="MUD command input"
-           autocapitalize="off"
-           autocomplete="off"
-           autocorrect="off"
-           spellcheck="false"
-           enterkeyhint="send"
-           autofocus>
-    <button type="submit" class="icon-link icon-link-hover btn btn-ishar btn-sm px-3 py-2 rounded" id="send-btn" title="Send command">
-        <svg class="bi" aria-hidden="true">
-            <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#send"></use>
-        </svg>
-        Send
-    </button>
-</form>
 <script>
 (function() {
     "use strict";
 
-    // --- Lock the page so only the terminal scrolls ---
+    // --- Lock the page so only inner panels scroll ---
     document.documentElement.classList.add("connect-page");
-
-    // Hide the site footer to reclaim vertical space.
     var siteFooter = document.querySelector("body > footer");
     if (siteFooter) siteFooter.style.display = "none";
 
     // --- Elements ---
+    var app = document.getElementById("connect-app");
     var terminalContainer = document.getElementById("terminal-container");
     var commandForm = document.getElementById("command-form");
     var commandInput = document.getElementById("command-input");
@@ -130,7 +118,6 @@
     var reconnectBtn = document.getElementById("reconnect-btn");
     var scrollBtn = document.getElementById("scroll-bottom-btn");
 
-    // --- Mobile detection (touch-capable small screen) ---
     var isMobile = ("ontouchstart" in window) && window.innerWidth < 768;
 
     // --- ANSI color theme (all 16 standard colors) ---
@@ -140,24 +127,10 @@
         cursor: "#d6d6d7",
         selectionBackground: "rgba(255, 170, 119, 0.4)",
         selectionForeground: "#ffffff",
-        // Normal colors (SGR 30-37).
-        black:   "#000000",
-        red:     "#cc0000",
-        green:   "#4cbb17",
-        yellow:  "#cdcd00",
-        blue:    "#4a86cf",
-        magenta: "#cd00cd",
-        cyan:    "#00cdcd",
-        white:   "#c0c0c0",
-        // Bright / bold colors (SGR 90-97).
-        brightBlack:   "#666666",
-        brightRed:     "#ff5555",
-        brightGreen:   "#55ff55",
-        brightYellow:  "#ffff55",
-        brightBlue:    "#5599ff",
-        brightMagenta: "#ff55ff",
-        brightCyan:    "#55ffff",
-        brightWhite:   "#ffffff",
+        black:   "#000000", red:     "#cc0000", green:   "#4cbb17", yellow:  "#cdcd00",
+        blue:    "#4a86cf", magenta: "#cd00cd", cyan:    "#00cdcd", white:   "#c0c0c0",
+        brightBlack:   "#666666", brightRed:     "#ff5555", brightGreen:   "#55ff55", brightYellow:  "#ffff55",
+        brightBlue:    "#5599ff", brightMagenta: "#ff55ff", brightCyan:    "#55ffff", brightWhite:   "#ffffff"
     };
 
     // --- Terminal setup ---
@@ -169,53 +142,66 @@
         fontSize: isMobile ? 13 : 14,
         fontFamily: "'Courier New', Courier, 'Liberation Mono', monospace",
         theme: mudTheme,
-        convertEol: true,
+        convertEol: true
     });
 
     var fitAddon = new FitAddon.FitAddon();
     term.loadAddon(fitAddon);
-
-    var webLinksAddon = new WebLinksAddon.WebLinksAddon();
-    term.loadAddon(webLinksAddon);
-
+    term.loadAddon(new WebLinksAddon.WebLinksAddon());
     term.open(terminalContainer);
 
-    // --- Dynamic terminal sizing ---
-    // Measure the actual available space between the terminal's top edge
-    // and the bottom of the viewport, minus the input form, so the page
-    // never needs to scroll.
-    function fitTerminalHeight() {
-        var vh = window.visualViewport
-            ? window.visualViewport.height
-            : window.innerHeight;
-        var top = terminalContainer.getBoundingClientRect().top;
-        // Reserve space for the command form + a small bottom margin.
-        var formSpace = commandForm.offsetHeight + 12;
-        var available = vh - top - formSpace;
-        terminalContainer.style.height = Math.max(120, Math.floor(available)) + "px";
-        fitAddon.fit();
+    // --- Sizing ---
+    // The app gets an explicit, header-aware pixel height; the inner grid
+    // and flexbox distribute it, and a ResizeObserver refits the terminal
+    // whenever its cell changes (toggle UI, viewport, mobile keyboard).
+    function fitAppHeight() {
+        var vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+        var top = app.getBoundingClientRect().top;
+        app.style.height = Math.max(240, Math.floor(vh - top - 8)) + "px";
     }
 
-    fitTerminalHeight();
+    var nawsTimer = null;
+    function scheduleNaws() {
+        if (nawsTimer) clearTimeout(nawsTimer);
+        nawsTimer = setTimeout(sendNaws, 150);
+    }
+
+    var fitScheduled = false;
+    function scheduleFit() {
+        if (fitScheduled) return;
+        fitScheduled = true;
+        requestAnimationFrame(function() {
+            fitScheduled = false;
+            try { fitAddon.fit(); } catch (e) {}
+            scheduleNaws();
+        });
+    }
+
+    if (typeof ResizeObserver !== "undefined") {
+        new ResizeObserver(scheduleFit).observe(terminalContainer);
+    }
 
     // --- Command history ---
     var history = [];
     var historyIndex = -1;
     var savedInput = "";
     var MAX_HISTORY = 200;
+    function addHistory(cmd) {
+        if (cmd && (history.length === 0 || history[history.length - 1] !== cmd)) {
+            history.push(cmd);
+            if (history.length > MAX_HISTORY) history.shift();
+        }
+        historyIndex = -1;
+        savedInput = "";
+    }
 
-    // --- Local echo & server echo state ---
+    // --- Echo / scroll state ---
     var serverEcho = false;
-
-    // --- Scroll tracking ---
-    // Show a "scroll to bottom" button when the user has scrolled up.
     var userScrolledUp = false;
-
     function isAtBottom() {
         var buf = term.buffer.active;
         return buf.viewportY >= buf.baseY;
     }
-
     term.onScroll(function() {
         var atBottom = isAtBottom();
         if (atBottom && userScrolledUp) {
@@ -226,7 +212,6 @@
             scrollBtn.style.display = "";
         }
     });
-
     scrollBtn.addEventListener("click", function() {
         term.scrollToBottom();
         userScrolledUp = false;
@@ -236,16 +221,14 @@
 
     // --- WebSocket ---
     var ws = null;
-
     function setStatus(text, cls) {
         statusEl.textContent = text;
         statusEl.className = cls;
     }
 
     function connect() {
-        if (ws && ws.readyState <= WebSocket.OPEN) {
-            ws.close();
-        }
+        if (ws && ws.readyState <= WebSocket.OPEN) ws.close();
+        if (window.IsharHUD) window.IsharHUD.reset();
 
         var protocol = location.protocol === "https:" ? "wss:" : "ws:";
         var url = protocol + "//" + location.host + "/ws/connect";
@@ -254,7 +237,6 @@
         reconnectBtn.style.display = "none";
 
         ws = new WebSocket(url);
-
         ws.binaryType = "arraybuffer";
 
         ws.onopen = function() {
@@ -264,19 +246,24 @@
         };
 
         ws.onmessage = function(event) {
-            if (typeof event.data === "string") {
-                if (event.data === "\x00ECHO_ON") {
-                    serverEcho = true;
-                    commandInput.type = "password";
+            var d = event.data;
+            if (typeof d !== "string") return;
+
+            // Out-of-band control sentinels are prefixed with NUL.
+            if (d.charCodeAt(0) === 0) {
+                if (d === "\x00ECHO_ON") { serverEcho = true; commandInput.type = "password"; return; }
+                if (d === "\x00ECHO_OFF") { serverEcho = false; commandInput.type = "text"; return; }
+                if (d.indexOf("\x00GMCP ") === 0) {
+                    var rest = d.slice(6);
+                    var sp = rest.indexOf(" ");
+                    var pkg = sp === -1 ? rest : rest.slice(0, sp);
+                    var body = sp === -1 ? "" : rest.slice(sp + 1);
+                    if (window.IsharHUD) window.IsharHUD.onGmcp(pkg, body);
                     return;
                 }
-                if (event.data === "\x00ECHO_OFF") {
-                    serverEcho = false;
-                    commandInput.type = "text";
-                    return;
-                }
-                term.write(event.data);
+                return;
             }
+            term.write(d);
         };
 
         ws.onclose = function() {
@@ -292,61 +279,58 @@
     }
 
     function sendCommand(cmd) {
-        if (ws && ws.readyState === WebSocket.OPEN) {
-            ws.send(cmd + "\r\n");
-        }
+        if (ws && ws.readyState === WebSocket.OPEN) ws.send(cmd + "\r\n");
     }
 
     function sendNaws() {
         if (ws && ws.readyState === WebSocket.OPEN) {
             var cols = term.cols || 80;
             var rows = term.rows || 24;
-            var nawsBytes = new Uint8Array([
+            ws.send(new Uint8Array([
                 255, 250, 31,
                 (cols >> 8) & 0xff, cols & 0xff,
                 (rows >> 8) & 0xff, rows & 0xff,
                 255, 240
-            ]);
-            ws.send(nawsBytes.buffer);
+            ]).buffer);
         }
     }
 
-    // --- Debounced resize handler ---
-    var resizeTimer = null;
-    function onResize() {
-        if (resizeTimer) clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(function() {
-            fitTerminalHeight();
-            sendNaws();
-        }, 150);
+    // --- HUD integration ---
+    // HUD widgets act by sending plain-text commands (the server ignores
+    // inbound GMCP) or by pre-filling the input line for the player to edit.
+    if (window.IsharHUD) {
+        window.IsharHUD.init({
+            send: function(cmd) {
+                if (!cmd) return;
+                if (!serverEcho) term.writeln("\x1b[90m" + cmd + "\x1b[0m");
+                sendCommand(cmd);
+                addHistory(cmd);
+                term.scrollToBottom();
+                userScrolledUp = false;
+                scrollBtn.style.display = "none";
+                commandInput.focus();
+            },
+            prefill: function(text) {
+                commandInput.value = text;
+                commandInput.focus();
+            },
+            onLayoutChange: function() {
+                fitAppHeight();
+                scheduleFit();
+            }
+        });
     }
 
-    // --- Event handlers ---
+    // --- Form / input handlers ---
     commandForm.addEventListener("submit", function(e) {
         e.preventDefault();
         var cmd = commandInput.value;
-
-        if (!serverEcho && cmd) {
-            term.writeln("\x1b[90m" + cmd + "\x1b[0m");
-        }
-
+        if (!serverEcho && cmd) term.writeln("\x1b[90m" + cmd + "\x1b[0m");
         sendCommand(cmd);
-
-        // Snap to latest output after sending a command.
         term.scrollToBottom();
         userScrolledUp = false;
         scrollBtn.style.display = "none";
-
-        if (cmd && (history.length === 0 || history[history.length - 1] !== cmd)) {
-            history.push(cmd);
-            if (history.length > MAX_HISTORY) {
-                history.shift();
-            }
-        }
-        historyIndex = -1;
-        savedInput = "";
-
-        // Keep the last command highlighted for easy re-send.
+        addHistory(cmd);
         commandInput.value = cmd;
         commandInput.select();
     });
@@ -382,22 +366,59 @@
         connect();
     });
 
-    // Resize: window and visual viewport (mobile keyboard show/hide).
+    // --- Resize wiring ---
+    var resizeTimer = null;
+    function onResize() {
+        if (resizeTimer) clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function() {
+            fitAppHeight();
+            scheduleFit();
+        }, 150);
+    }
     window.addEventListener("resize", onResize);
     if (window.visualViewport) {
         window.visualViewport.addEventListener("resize", onResize);
         window.visualViewport.addEventListener("scroll", onResize);
     }
 
-    // Click/tap on terminal focuses the input.
     terminalContainer.addEventListener("click", function() {
-        var selection = term.getSelection();
-        if (!selection) {
-            commandInput.focus();
-        }
+        if (!term.getSelection()) commandInput.focus();
     });
 
+    // --- Season 15 launch countdown ---
+    // Driven by the server-rendered current-season expiration date (GMCP is
+    // not used — those feeds aren't live yet), with a hardcoded fallback.
+    (function() {
+        var banner = document.getElementById("s15-banner");
+        if (!banner) return;
+        var out = document.getElementById("s15-countdown");
+        var target = new Date(banner.getAttribute("data-target"));
+        if (isNaN(target.getTime())) target = new Date("2026-06-25T00:00:00");
+
+        function tick() {
+            if (!out) return;
+            var diff = Math.floor((target.getTime() - Date.now()) / 1000);
+            if (diff <= 0) { out.textContent = "— launching now; reconnect to begin!"; return; }
+            var d = Math.floor(diff / 86400);
+            var h = Math.floor((diff % 86400) / 3600);
+            var m = Math.floor((diff % 3600) / 60);
+            var s = diff % 60;
+            out.textContent = "Season 15 in " + d + "d " + h + "h " + m + "m " + s + "s.";
+        }
+        tick();
+        setInterval(tick, 1000);
+
+        var dismiss = document.getElementById("s15-dismiss");
+        if (dismiss) dismiss.addEventListener("click", function() {
+            banner.style.display = "none";
+            fitAppHeight();
+            scheduleFit();
+        });
+    })();
+
     // --- Start ---
+    fitAppHeight();
+    scheduleFit();
     connect();
 })();
 </script>

@@ -1,0 +1,261 @@
+/*
+ * Ishar browser-client HUD layout + widgets.
+ *
+ * Web-native approach: a responsive CSS grid that reflows around the
+ * terminal, instead of Mudlet's fixed Geyser zones. The whole app gets an
+ * explicit pixel height from JS (header-aware); everything inside flexes,
+ * and a ResizeObserver refits the terminal. In .hud-off the grid collapses
+ * to just the terminal (the mobile default).
+ */
+
+:root {
+    --hud-bg: #0c0c0d;
+    --hud-panel: #131316;
+    --hud-border: #2a2a30;
+    --hud-text: #d6d6d7;
+    --hud-dim: #8a8a92;
+    --hud-accent: #fa7;
+    --hud-hp: #cc3333;
+    --hud-mp: #4a86cf;
+    --hud-mv: #4cbb17;
+    --hud-gold: #cdcd00;
+}
+
+/* Lock the page so only inner panels scroll. */
+html.connect-page,
+html.connect-page body {
+    overflow: hidden;
+    overscroll-behavior: none;
+    height: 100%;
+}
+
+#connect-app {
+    display: grid;
+    gap: 6px;
+    color: var(--hud-text);
+    /* height is set by JS (fitAppHeight) */
+}
+
+#connect-app.hud-off {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    grid-template-areas: "topbar" "center";
+}
+
+#connect-app.hud-on {
+    grid-template-columns: minmax(200px, 240px) minmax(0, 1fr) minmax(220px, 280px);
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas:
+        "topbar topbar topbar"
+        "left   center right";
+}
+
+#hud-topbar { grid-area: topbar; }
+#hud-left   { grid-area: left; }
+#hud-center { grid-area: center; }
+#hud-right  { grid-area: right; }
+
+.hud-off #hud-left,
+.hud-off #hud-right,
+.hud-off #hud-hotbar,
+.hud-off #vitals-bar { display: none; }
+
+/* ----- Top bar ----- */
+#hud-topbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 2px 4px;
+}
+#connection-status { font-size: .8rem; font-weight: 700; white-space: nowrap; }
+.status-connected { color: var(--hud-mv); }
+.status-disconnected { color: var(--hud-hp); }
+.status-connecting { color: var(--hud-accent); }
+
+#vitals-bar { display: flex; align-items: center; gap: 14px; flex: 1; flex-wrap: wrap; min-width: 0; }
+.v-id { font-weight: 700; white-space: nowrap; }
+.v-bars { display: flex; gap: 8px; flex: 1; min-width: 200px; }
+.v-meta { display: flex; gap: 10px; }
+.v-meta .meta { color: var(--hud-dim); font-size: .8rem; white-space: nowrap; }
+.v-meta .meta:first-child { color: var(--hud-gold); }
+
+.topbar-actions { display: flex; gap: 6px; margin-left: auto; }
+
+/* ----- Vitals / XP bars ----- */
+.vbar { display: flex; align-items: center; gap: 5px; flex: 1; min-width: 120px; }
+.vbar-label { font-size: .7rem; font-weight: 700; color: var(--hud-dim); width: 26px; }
+.vbar-track {
+    position: relative; flex: 1; height: 16px;
+    background: #000; border: 1px solid var(--hud-border); border-radius: 3px; overflow: hidden;
+}
+.vbar-fill { position: absolute; inset: 0 auto 0 0; height: 100%; transition: width .2s ease; opacity: .85; }
+.vbar.hp .vbar-fill { background: var(--hud-hp); }
+.vbar.mp .vbar-fill { background: var(--hud-mp); }
+.vbar.mv .vbar-fill { background: var(--hud-mv); }
+.vbar.tgt .vbar-fill { background: #a0408a; }
+.vbar.xp .vbar-fill { background: var(--hud-gold); }
+.vbar-text {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-size: .68rem; font-weight: 700; text-shadow: 0 0 2px #000, 0 0 2px #000;
+}
+
+/* ----- Columns / panels ----- */
+.hud-col {
+    display: flex; flex-direction: column; gap: 6px;
+    overflow-y: auto; overflow-x: hidden; min-height: 0; padding-right: 2px;
+}
+.panel {
+    background: var(--hud-panel); border: 1px solid var(--hud-border);
+    border-radius: 4px; padding: 6px 8px;
+}
+.panel-h {
+    font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em;
+    color: var(--hud-accent); margin: 0 0 5px; border-bottom: 1px solid var(--hud-border); padding-bottom: 3px;
+}
+.sub-h { font-size: .68rem; font-weight: 700; color: var(--hud-dim); text-transform: uppercase; margin: 7px 0 3px; }
+.panel-empty { color: var(--hud-dim); font-size: .8rem; font-style: italic; padding: 2px 0; }
+.dim { color: var(--hud-dim); font-size: .82em; }
+
+/* ----- Center column ----- */
+#hud-center { display: flex; flex-direction: column; gap: 6px; min-height: 0; }
+#terminal-wrapper { position: relative; flex: 1; min-height: 0; }
+#terminal-container { height: 100%; background: #000; border-radius: 4px; }
+#terminal-container .xterm { height: 100%; padding: 4px; }
+#command-form { display: flex; gap: 8px; align-items: center; }
+#command-input {
+    flex: 1; font-family: monospace; font-size: 16px; padding: 6px 8px;
+}
+#scroll-bottom-btn { position: absolute; bottom: 8px; right: 12px; z-index: 10; opacity: .85; font-size: .8rem; }
+
+/* ----- Room / exits ----- */
+.room-area { font-size: .78rem; color: var(--hud-dim); margin-bottom: 6px; }
+.compass {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px;
+    max-width: 170px; margin: 0 auto;
+}
+.exit {
+    border: 1px solid var(--hud-border); background: #1c1c22; color: var(--hud-text);
+    border-radius: 3px; font-size: .72rem; font-weight: 700; padding: 5px 0; cursor: pointer;
+}
+.exit:hover { border-color: var(--hud-accent); color: var(--hud-accent); }
+.exit.none { border-color: transparent; background: transparent; }
+.exit.hub { color: var(--hud-dim); cursor: default; }
+.ud-row, .named-row { display: flex; gap: 4px; justify-content: center; margin-top: 5px; flex-wrap: wrap; }
+.exit.ud, .exit.named { padding: 4px 8px; }
+
+/* ----- Generic rows (equipment / inventory) ----- */
+.row-list { list-style: none; margin: 0; padding: 0; }
+.row-list.sub { margin: 1px 0 3px 12px; }
+.row {
+    display: flex; align-items: center; gap: 6px; padding: 3px 4px; border-radius: 3px;
+    cursor: pointer; font-size: .82rem;
+}
+.row:hover { background: #1c1c22; }
+.row.sub { font-size: .78rem; color: var(--hud-dim); }
+.row-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.slot { color: var(--hud-dim); font-size: .68rem; width: 56px; flex: none; text-transform: capitalize; }
+.tag { font-size: .68rem; color: var(--hud-dim); background: #000; border-radius: 3px; padding: 0 4px; }
+.coins { margin-top: 5px; font-size: .78rem; color: var(--hud-gold); }
+
+/* ----- Key/value lists (train / status) ----- */
+.kv { list-style: none; margin: 0; padding: 0; }
+.kv li { display: flex; justify-content: space-between; font-size: .8rem; padding: 2px 0; border-bottom: 1px dotted #222; }
+.kv li span:first-child { color: var(--hud-dim); }
+.action-btn {
+    display: block; width: 100%; margin: 5px 0; padding: 5px; cursor: pointer;
+    background: #2a2410; color: var(--hud-gold); border: 1px solid var(--hud-gold); border-radius: 3px; font-weight: 700; font-size: .78rem;
+}
+
+/* ----- Right column tabs ----- */
+#hud-right { display: flex; flex-direction: column; gap: 6px; min-height: 0; }
+#hud-tabs { display: flex; gap: 3px; flex: none; }
+#hud-tabs button {
+    flex: 1; padding: 5px; cursor: pointer; font-size: .74rem; font-weight: 700;
+    background: var(--hud-panel); color: var(--hud-dim); border: 1px solid var(--hud-border); border-radius: 4px 4px 0 0;
+}
+#hud-tabs button.active { color: var(--hud-accent); border-bottom-color: var(--hud-accent); background: #1c1c22; }
+#hud-right .panel.tab { display: none; flex: 1; min-height: 0; overflow-y: auto; }
+#hud-right .panel.tab.tab-active { display: block; }
+
+/* ----- Affects ----- */
+.aff-list { list-style: none; margin: 0; padding: 0; }
+.aff { display: flex; justify-content: space-between; align-items: center; font-size: .8rem; padding: 2px 5px; border-left: 3px solid; border-radius: 2px; margin-bottom: 2px; }
+.aff.buff { border-color: var(--hud-mv); }
+.aff.debuff { border-color: var(--hud-hp); }
+.aff.maint { border-color: var(--hud-mp); }
+.aff-time { color: var(--hud-dim); font-size: .72rem; font-variant-numeric: tabular-nums; }
+
+/* ----- Group ----- */
+.grp-list { list-style: none; margin: 0; padding: 0; }
+.grp { display: flex; justify-content: space-between; align-items: center; gap: 6px; padding: 3px 0; }
+.grp-name { font-size: .8rem; }
+.grp-bars { display: flex; gap: 2px; }
+.mini { width: 26px; height: 7px; background: #000; border: 1px solid var(--hud-border); border-radius: 2px; overflow: hidden; display: inline-block; }
+.mini span { display: block; height: 100%; }
+.mini.hp span { background: var(--hud-hp); }
+.mini.mp span { background: var(--hud-mp); }
+.mini.mv span { background: var(--hud-mv); }
+
+/* ----- Who ----- */
+.who-list { list-style: none; margin: 0; padding: 0; }
+.who-row { padding: 4px 2px; border-bottom: 1px solid #1c1c22; }
+.who-name { font-weight: 700; }
+.who-title { font-size: .76rem; color: var(--hud-dim); font-style: italic; }
+.who-act { display: flex; gap: 4px; margin-top: 3px; }
+.who-act button { font-size: .68rem; padding: 2px 7px; cursor: pointer; background: #1c1c22; color: var(--hud-text); border: 1px solid var(--hud-border); border-radius: 3px; }
+.who-act button:hover { border-color: var(--hud-accent); color: var(--hud-accent); }
+.who-hidden { color: var(--hud-dim); font-size: .74rem; padding: 4px 2px; }
+
+/* ----- Chat ----- */
+#panel-chat { font-size: .82rem; line-height: 1.35; }
+.chat-line { padding: 1px 0; word-wrap: break-word; }
+.chat-ch { color: var(--hud-accent); font-weight: 700; }
+.chat-txt { color: var(--hud-text); }
+
+/* ----- Hotbar ----- */
+#hud-hotbar { display: flex; flex-wrap: wrap; gap: 4px; flex: none; }
+#hud-hotbar.empty { display: none; }
+.skill {
+    position: relative; min-width: 64px; max-width: 110px; padding: 4px 8px; cursor: pointer;
+    background: #1c1c22; color: var(--hud-text); border: 1px solid var(--hud-border); border-radius: 4px;
+    font-size: .74rem; text-align: left; overflow: hidden;
+}
+.skill:hover { border-color: var(--hud-accent); }
+.skill.off { opacity: .42; cursor: not-allowed; }
+.skill.cat-damage { border-left: 3px solid var(--hud-hp); }
+.skill.cat-heal { border-left: 3px solid var(--hud-mv); }
+.skill.cat-misc { border-left: 3px solid var(--hud-mp); }
+.skill-name { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.skill-pct { font-size: .64rem; color: var(--hud-dim); }
+.skill-cd { font-size: .7rem; font-weight: 700; color: var(--hud-accent); font-variant-numeric: tabular-nums; }
+
+/* ----- Season 15 launch banner ----- */
+#s15-banner {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    background: #1a1408; border: 1px solid var(--hud-accent); color: var(--hud-text);
+    border-radius: 4px; padding: 7px 12px; margin-bottom: 6px; font-size: .86rem; line-height: 1.35;
+}
+#s15-banner .s15-icon { color: var(--hud-accent); flex-shrink: 0; }
+#s15-banner .s15-text { flex: 1; min-width: 220px; }
+#s15-banner strong { color: var(--hud-accent); }
+#s15-countdown { font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--hud-accent); font-weight: 700; }
+#s15-banner .s15-close {
+    margin-left: auto; background: none; border: none; color: var(--hud-dim);
+    font-size: 1.3rem; line-height: 1; cursor: pointer; padding: 0 4px;
+}
+#s15-banner .s15-close:hover { color: var(--hud-text); }
+
+/* ----- Mobile ----- */
+@media (max-width: 767px) {
+    #connect-app.hud-on {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto minmax(220px, 1fr) auto;
+        grid-template-areas: "topbar" "right" "center" "left";
+    }
+    #hud-left, #hud-right { max-height: 38vh; }
+    #send-btn { display: none; }
+    #hud-topbar { gap: 8px; }
+    .v-bars { min-width: 140px; }
+    #s15-banner { font-size: .78rem; padding: 6px 9px; }
+}
