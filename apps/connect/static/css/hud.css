@@ -73,12 +73,22 @@ html.connect-page body {
 .status-disconnected { color: var(--hud-hp); }
 .status-connecting { color: var(--hud-accent); }
 
-#vitals-bar { display: flex; align-items: center; gap: 14px; flex: 1; flex-wrap: wrap; min-width: 0; }
-.v-id { font-weight: 700; white-space: nowrap; }
-.v-bars { display: flex; gap: 8px; flex: 1; min-width: 200px; }
-.v-meta { display: flex; gap: 10px; }
-.v-meta .meta { color: var(--hud-dim); font-size: .8rem; white-space: nowrap; }
-.v-meta .meta:first-child { color: var(--hud-gold); }
+#vitals-bar { display: flex; align-items: center; gap: 16px; flex: 1; flex-wrap: wrap; min-width: 0; }
+.v-group { display: flex; align-items: center; gap: 8px; }
+.v-identity { flex-direction: column; align-items: flex-start; gap: 0; line-height: 1.1; }
+.v-name { font-weight: 700; white-space: nowrap; }
+.v-sub { font-size: .7rem; white-space: nowrap; }
+.v-bars { flex: 1; min-width: 220px; gap: 8px; }
+.v-res { gap: 14px; }
+.v-stat { display: flex; flex-direction: column; align-items: flex-end; line-height: 1.1; font-size: .82rem; font-weight: 700; color: var(--hud-gold); white-space: nowrap; }
+.v-stat-label { font-size: .56rem; text-transform: uppercase; letter-spacing: .06em; color: var(--hud-dim); font-weight: 600; }
+.v-world { flex-wrap: wrap; gap: 6px; font-size: .76rem; }
+.v-clock { color: var(--hud-text); white-space: nowrap; }
+.v-season { color: var(--hud-accent); font-weight: 700; white-space: nowrap; padding: 1px 8px; border: 1px solid #3a2f15; border-radius: 10px; }
+.v-event { color: #e8b04b; white-space: nowrap; }
+.v-moon { color: #9aa6c8; white-space: nowrap; }
+.vbar.mm .vbar-fill { background: #a05ad0; }
+.vbar.edge .vbar-fill { background: #d08a3a; }
 
 .topbar-actions { display: flex; gap: 6px; margin-left: auto; }
 

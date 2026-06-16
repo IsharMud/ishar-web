@@ -247,6 +247,7 @@
 
         ws.onopen = function() {
             setStatus("Connected", "status-connected");
+            if (window.IsharHUD) window.IsharHUD.setConnected(true);
             sendNaws();
             commandInput.focus();
         };
@@ -274,6 +275,7 @@
 
         ws.onclose = function() {
             setStatus("Disconnected", "status-disconnected");
+            if (window.IsharHUD) window.IsharHUD.setConnected(false);
             reconnectBtn.style.display = "";
             term.writeln("\r\n\x1b[1;31m--- Disconnected ---\x1b[0m");
         };
@@ -435,7 +437,17 @@
     // --- Start ---
     fitAppHeight();
     scheduleFit();
-    connect();
+
+    // Demo mode (/connect?demo=1): populate the HUD with sample data for design
+    // review without a GMCP-enabled server. Skips the live connection.
+    if (new URLSearchParams(location.search).has("demo")) {
+        if (window.IsharHUD) window.IsharHUD.demo();
+        term.writeln("\x1b[33m--- DEMO MODE: sample data, not connected to the game. ---\x1b[0m");
+        fitAppHeight();
+        scheduleFit();
+    } else {
+        connect();
+    }
 })();
 </script>
 {% endblock content %}
