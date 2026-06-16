@@ -230,21 +230,47 @@ html.connect-page body {
 .skill-pct { font-size: .64rem; color: var(--hud-dim); }
 .skill-cd { font-size: .7rem; font-weight: 700; color: var(--hud-accent); font-variant-numeric: tabular-nums; }
 
+/* ----- Shared topbar buttons ----- */
+.hud-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 12px; font-size: .8rem; font-weight: 600; cursor: pointer; white-space: nowrap;
+    background: #17171c; color: var(--hud-text);
+    border: 1px solid var(--hud-border); border-radius: 5px;
+    transition: border-color .15s ease, color .15s ease, background .15s ease;
+}
+.hud-btn:hover { border-color: var(--hud-accent); color: var(--hud-accent); background: #1c1c22; }
+.hud-btn .bi { flex-shrink: 0; }
+/* The toggle reads as a call-to-action (amber) while the HUD is off. */
+.hud-btn-accent[aria-pressed="false"] { border-color: var(--hud-accent); color: var(--hud-accent); }
+.hud-btn-accent[aria-pressed="false"]:hover { background: rgba(255, 170, 119, .1); }
+
 /* ----- Season 15 launch banner ----- */
 #s15-banner {
-    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-    background: #1a1408; border: 1px solid var(--hud-accent); color: var(--hud-text);
-    border-radius: 4px; padding: 7px 12px; margin-bottom: 6px; font-size: .86rem; line-height: 1.35;
+    display: flex; align-items: center; gap: 12px;
+    background: linear-gradient(90deg, #1c160a 0%, #131210 100%);
+    border: 1px solid #3a2f15; border-left: 3px solid var(--hud-accent);
+    color: var(--hud-text); border-radius: 6px; padding: 9px 12px; margin-bottom: 6px;
 }
-#s15-banner .s15-icon { color: var(--hud-accent); flex-shrink: 0; }
-#s15-banner .s15-text { flex: 1; min-width: 220px; }
-#s15-banner strong { color: var(--hud-accent); }
-#s15-countdown { font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--hud-accent); font-weight: 700; }
-#s15-banner .s15-close {
-    margin-left: auto; background: none; border: none; color: var(--hud-dim);
-    font-size: 1.3rem; line-height: 1; cursor: pointer; padding: 0 4px;
+.s15-badge {
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    width: 34px; height: 34px; border-radius: 50%;
+    background: rgba(255, 170, 119, .12); color: var(--hud-accent);
 }
-#s15-banner .s15-close:hover { color: var(--hud-text); }
+.s15-body { flex: 1; min-width: 0; line-height: 1.3; }
+.s15-title { font-size: .92rem; font-weight: 600; }
+.s15-accent { color: var(--hud-accent); font-weight: 700; }
+.s15-sub { font-size: .78rem; color: var(--hud-dim); margin-top: 1px; }
+.s15-count {
+    display: flex; flex-direction: column; align-items: center; flex-shrink: 0;
+    padding: 0 4px 0 14px; border-left: 1px solid #3a2f15; text-align: center;
+}
+.s15-count-val { font-size: 1rem; font-weight: 700; color: var(--hud-accent); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.s15-count-label { font-size: .6rem; text-transform: uppercase; letter-spacing: .08em; color: var(--hud-dim); }
+.s15-close {
+    flex-shrink: 0; align-self: flex-start; background: none; border: none; color: var(--hud-dim);
+    font-size: 1.4rem; line-height: 1; cursor: pointer; padding: 0 2px;
+}
+.s15-close:hover { color: var(--hud-text); }
 
 /* ----- Mobile ----- */
 @media (max-width: 767px) {
@@ -257,5 +283,9 @@ html.connect-page body {
     #send-btn { display: none; }
     #hud-topbar { gap: 8px; }
     .v-bars { min-width: 140px; }
-    #s15-banner { font-size: .78rem; padding: 6px 9px; }
+    #s15-banner { gap: 9px; padding: 8px 10px; }
+    .s15-badge { display: none; }
+    .s15-title { font-size: .84rem; }
+    .s15-count { padding: 0 2px 0 9px; }
+    .s15-count-val { font-size: .9rem; }
 }

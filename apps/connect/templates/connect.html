@@ -25,30 +25,36 @@
 {% endblock breadcrumbs %}
 {% block content %}
 {# Season 15 pre-launch notice. Remove this banner (and flip the HUD default in hud.js) once the GMCP feeds are live on prod. #}
-<div id="s15-banner" role="status"
-     data-target="{% if CURRENT_SEASON and CURRENT_SEASON.expiration_date %}{{ CURRENT_SEASON.expiration_date|date:'c' }}{% else %}2026-06-25T00:00:00{% endif %}">
-    <svg class="bi s15-icon" aria-hidden="true" width="22" height="22">
-        <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#stars"></use>
-    </svg>
-    <span class="s15-text">
-        <strong>The full-featured browser client launches with Season&nbsp;15.</strong>
-        Live vitals, map, inventory and more arrive when the new season begins{% if CURRENT_SEASON and CURRENT_SEASON.expiration_date %} &mdash; around {{ CURRENT_SEASON.expiration_date|date:"l, F j, Y" }}{% else %} &mdash; around Thursday, June 25, 2026{% endif %}. For now you're in classic terminal mode.
-        <span id="s15-countdown"></span>
+<aside id="s15-banner" role="status"
+       data-target="{% if CURRENT_SEASON and CURRENT_SEASON.expiration_date %}{{ CURRENT_SEASON.expiration_date|date:'c' }}{% else %}2026-06-25T00:00:00{% endif %}">
+    <span class="s15-badge" aria-hidden="true">
+        <svg class="bi" width="20" height="20"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#stars"></use></svg>
     </span>
+    <div class="s15-body">
+        <div class="s15-title">The full-featured client arrives with <span class="s15-accent">Season&nbsp;15</span></div>
+        <div class="s15-sub">Live vitals, map, inventory &amp; more &mdash; launching {% if CURRENT_SEASON and CURRENT_SEASON.expiration_date %}{{ CURRENT_SEASON.expiration_date|date:"F j, Y" }}{% else %}June 25, 2026{% endif %}. Classic terminal mode until then.</div>
+    </div>
+    <div class="s15-count">
+        <span id="s15-countdown" class="s15-count-val">&mdash;</span>
+        <span class="s15-count-label">until launch</span>
+    </div>
     <button type="button" class="s15-close" id="s15-dismiss" aria-label="Dismiss this notice" title="Dismiss">&times;</button>
-</div>
+</aside>
 <div id="connect-app" class="hud-off">
 
     <div id="hud-topbar">
         <span id="connection-status" class="status-connecting">Connecting...</span>
         <div id="vitals-bar"></div>
         <div class="topbar-actions">
-            <button class="btn btn-ishar btn-sm" type="button" id="ui-toggle" aria-pressed="false" title="Toggle the heads-up display">Show UI</button>
-            <button class="btn btn-ishar btn-sm" type="button" id="reconnect-btn" style="display: none;" title="Reconnect to {{ WEBSITE_TITLE }}">
-                <svg class="bi" aria-hidden="true">
-                    <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#arrow-clockwise"></use>
-                </svg>
-                Reconnect
+            <button class="hud-btn hud-btn-accent" type="button" id="ui-toggle" aria-pressed="false"
+                    data-label-on="Hide interface" data-label-off="Preview interface"
+                    title="Toggle the heads-up display">
+                <svg class="bi" aria-hidden="true" width="15" height="15"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#layout-sidebar-inset"></use></svg>
+                <span class="ui-toggle-label">Preview interface</span>
+            </button>
+            <button class="hud-btn" type="button" id="reconnect-btn" style="display: none;" title="Reconnect to {{ WEBSITE_TITLE }}">
+                <svg class="bi" aria-hidden="true" width="15" height="15"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#arrow-clockwise"></use></svg>
+                <span>Reconnect</span>
             </button>
         </div>
     </div>
@@ -391,6 +397,15 @@
     (function() {
         var banner = document.getElementById("s15-banner");
         if (!banner) return;
+
+        // Respect a prior dismissal so the notice doesn't nag every visit.
+        try {
+            if (localStorage.getItem("ishar.s15dismissed") === "1") {
+                banner.style.display = "none";
+                return;
+            }
+        } catch (e) {}
+
         var out = document.getElementById("s15-countdown");
         var target = new Date(banner.getAttribute("data-target"));
         if (isNaN(target.getTime())) target = new Date("2026-06-25T00:00:00");
@@ -398,12 +413,12 @@
         function tick() {
             if (!out) return;
             var diff = Math.floor((target.getTime() - Date.now()) / 1000);
-            if (diff <= 0) { out.textContent = "— launching now; reconnect to begin!"; return; }
+            if (diff <= 0) { out.textContent = "live now"; return; }
             var d = Math.floor(diff / 86400);
             var h = Math.floor((diff % 86400) / 3600);
             var m = Math.floor((diff % 3600) / 60);
             var s = diff % 60;
-            out.textContent = "Season 15 in " + d + "d " + h + "h " + m + "m " + s + "s.";
+            out.textContent = (d ? d + "d " : "") + h + "h " + m + "m " + s + "s";
         }
         tick();
         setInterval(tick, 1000);
@@ -411,6 +426,7 @@
         var dismiss = document.getElementById("s15-dismiss");
         if (dismiss) dismiss.addEventListener("click", function() {
             banner.style.display = "none";
+            try { localStorage.setItem("ishar.s15dismissed", "1"); } catch (e) {}
             fitAppHeight();
             scheduleFit();
         });
