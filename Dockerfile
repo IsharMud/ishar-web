@@ -47,15 +47,18 @@ RUN pip install -r /app/requirements.txt
 COPY --chown=ishar:ishar . /app
 
 # Pre-create writable directories the app expects at runtime. Volumes mount
-# over these in compose; empty seed is fine.
-RUN install -d -o ishar -g ishar /app/cache /app/logs /app/static /app/media
+# over these in compose; empty seed is fine. Also make the entrypoint executable
+# (it was copied in by `COPY . /app` above).
+RUN install -d -o ishar -g ishar /app/cache /app/logs /app/static /app/media \
+    && chmod +x /app/docker-entrypoint.sh
 
 USER ishar
 
 # Daphne port. Host nginx talks to 127.0.0.1:8000.
 EXPOSE 8000
 
-ENTRYPOINT ["/usr/bin/tini", "--"]
+# Entrypoint runs collectstatic on every start, then exec's the CMD (daphne).
+ENTRYPOINT ["/usr/bin/tini", "--", "/app/docker-entrypoint.sh"]
 
 # Daphne serves both HTTP and WebSocket via asgi.application.
 # DJANGO_SETTINGS_MODULE is set in the environment via the compose file.
