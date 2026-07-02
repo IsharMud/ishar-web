@@ -51,11 +51,19 @@
                     <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#box-arrow-up-right"></use>
                 </svg>
             </a>
+            {% if patch.file_size is not None %}
             <small>
-                <code title="{{ patch.patch_file.size | filesizeformat }}">
-                    {{ patch.patch_file.size | filesizeformat }}
+                <code title="{{ patch.file_size | filesizeformat }}">
+                    {{ patch.file_size | filesizeformat }}
                 </code>
             </small>
+            {% else %}
+            <small>
+                <code class="text-danger" title="Patch file is currently unavailable.">
+                    file unavailable
+                </code>
+            </small>
+            {% endif %}
         </p>
         <footer class="blockquote-footer" title="-- {{ patch.account.get_username|title }} @ {{ patch.patch_date|date:"l, F jS, Y" }}">
             <cite>
