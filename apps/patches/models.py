@@ -76,6 +76,15 @@ class Patch(models.Model):
     def get_absolute_url(self) -> str:
         return f"{settings.MEDIA_URL}{self.patch_file.name}"
 
+    @property
+    def file_size(self):
+        """Patch PDF size in bytes, or None when the file is missing on disk
+        so that one lost PDF cannot crash views that render every patch."""
+        try:
+            return self.patch_file.size
+        except (OSError, ValueError):
+            return None
+
 
 @receiver(models.signals.post_delete, sender=Patch)
 def auto_delete_file_on_delete(sender, instance, **kwargs):
