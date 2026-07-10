@@ -34,6 +34,16 @@
                 </a>
             </li>
     {% endif %}
+    {% if user.is_god %}
+            <li class="card-text list-group-item" title="Deploy">
+                <a class="list-group-item-text icon-link icon-link-hover" href="{% url 'deploy' %}#deploy">
+                    <svg class="bi" aria-hidden="true">
+                        <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#rocket-takeoff"></use>
+                    </svg>
+                    Deploy
+                </a>
+            </li>
+    {% endif %}
             <li class="card-text list-group-item" title="Challenges">
                 <a class="list-group-item-text icon-link icon-link-hover" href="{% url 'challenges' %}#challenges">
                     <svg class="bi" aria-hidden="true">
