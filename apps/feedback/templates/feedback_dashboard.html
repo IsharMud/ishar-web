@@ -198,7 +198,10 @@
                 badge.textContent = data.status_label
                 badge.className = `badge text-bg-${data.status_css}`
             }
-            button.outerHTML = `<span class="text-secondary small">✓ ${data.acknowledged_by || ""}</span>`
+            const done = document.createElement("span")
+            done.className = "text-secondary small"
+            done.textContent = `✓ ${data.acknowledged_by || ""}`  // textContent: no HTML injection
+            button.replaceWith(done)
         } else {
             button.disabled = false
             alert(data.message || "The action failed.")

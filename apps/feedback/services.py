@@ -54,12 +54,21 @@ def staff_name(account) -> str:
     return account.get_username()
 
 
+# Bidirectional/direction-override codepoints that can spoof displayed order —
+# stripped to match the Rust `sanitize_text` (feedback.rs).
+_BIDI_OVERRIDES = frozenset(
+    chr(cp) for cp in list(range(0x202A, 0x202F)) + list(range(0x2066, 0x206A))
+)
+
+
 def _clean(text, limit) -> str:
-    """Strip control characters and truncate — light mirror of `sanitize_text`."""
+    """Strip control + bidi-override characters and truncate — mirrors
+    `sanitize_text`."""
     if not text:
         return ""
     cleaned = "".join(
-        ch for ch in str(text) if ch in ("\n", "\t") or ord(ch) >= 0x20
+        ch for ch in str(text)
+        if (ch in ("\n", "\t") or ord(ch) >= 0x20) and ch not in _BIDI_OVERRIDES
     ).strip()
     if len(cleaned) > limit:
         cleaned = cleaned[:limit].rstrip()
@@ -158,6 +167,10 @@ def comment(feedback, actor, text) -> str:
 def set_progress(feedback, actor, note="") -> str:
     """`reports progress` — state → in_progress, clearing any closure fields."""
     note = _clean(note, NOTE_MAX)
+    # No-op guard (mirrors set_state_internal): an identical target only spams
+    # the timeline and re-fires side-effects, so short-circuit without writing.
+    if feedback.state == FeedbackState.IN_PROGRESS:
+        return f"Report #{feedback.pk} is already in progress."
     with transaction.atomic():
         _ack_if_needed(feedback, actor)
         # Mirror set_state_internal("in_progress"): clear all closure artifacts.
@@ -192,6 +205,15 @@ def close(feedback, actor, resolution, note="") -> str:
     note = _clean(note, NOTE_MAX)
     if resolution == FeedbackResolution.OTHER and not note:
         raise ValidationError("A generic close requires a reason.")
+    # No-op guard: re-closing with the SAME resolution is a no-op (re-closing
+    # with a different resolution, e.g. wontfix -> fixed, is a real change).
+    if feedback.state == FeedbackState.CLOSED and feedback.resolution == resolution:
+        labels = {
+            FeedbackResolution.FIXED: "resolved",
+            FeedbackResolution.WONTFIX: "wontfix",
+            FeedbackResolution.OTHER: "closed",
+        }
+        return f"Report #{feedback.pk} is already {labels[resolution]}."
     with transaction.atomic():
         _ack_if_needed(feedback, actor)
         feedback.state = FeedbackState.CLOSED
@@ -230,6 +252,14 @@ def mark_duplicate(feedback, actor, of_id) -> str:
         raise ValidationError("A report cannot be a duplicate of itself.")
     if not Feedback.objects.filter(pk=of_id).exists():
         raise ValidationError(f"Report #{of_id} does not exist.")
+    # No-op guard: already a duplicate of this same original (repointing to a
+    # different original is a real change and is allowed through).
+    if (
+        feedback.state == FeedbackState.CLOSED
+        and feedback.resolution == FeedbackResolution.DUPLICATE
+        and feedback.duplicate_of_id == of_id
+    ):
+        return f"Report #{feedback.pk} is already a duplicate of #{of_id}."
     with transaction.atomic():
         _ack_if_needed(feedback, actor)
         feedback.state = FeedbackState.CLOSED
@@ -250,6 +280,9 @@ def mark_duplicate(feedback, actor, of_id) -> str:
 def reopen(feedback, actor, note="") -> str:
     """`reports reopen` — state → open, wiping all closure artifacts."""
     note = _clean(note, NOTE_MAX)
+    # No-op guard: an already-open report has nothing to reopen.
+    if feedback.state == FeedbackState.OPEN:
+        return f"Report #{feedback.pk} is already open."
     with transaction.atomic():
         _ack_if_needed(feedback, actor)
         feedback.state = FeedbackState.OPEN
