@@ -92,7 +92,13 @@ DEFAULT_AUTO_FIELD = "apps.core.models.unsigned.UnsignedAutoField"
 
 # CSRF and session cookies.
 CSRF_COOKIE_DOMAIN = SESSION_COOKIE_DOMAIN = ALLOWED_HOSTS[0]
-CSRF_COOKIE_HTTPONLY = SESSION_COOKIE_HTTPONLY = False
+# HttpOnly on both cookies: no site JavaScript reads document.cookie for the
+# CSRF token (the templates emit {% csrf_token %} and XHR sends it via the
+# X-CSRFToken header / form field), so HttpOnly costs nothing and denies an XSS
+# payload direct cookie access. Hardened as part of the deploy-button threat
+# model (#1754); flip CSRF back to False only if a future JS client needs to
+# read the token from the cookie.
+CSRF_COOKIE_HTTPONLY = SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SAMESITE = SESSION_COOKIE_SAMESITE = "Strict"
 CSRF_COOKIE_SECURE = SESSION_COOKIE_SECURE = True
 CSRF_TRUSTED_ORIGINS = tuple(f"https://{h}" for h in ALLOWED_HOSTS)
@@ -248,6 +254,21 @@ HELPTAB = Path(MUD_HOME, "lib/Misc/helptab")
 # Docker network instead of looping out through the public hostname.
 MUD_HOST = getenv("MUD_HOST", "isharmud.com")
 MUD_PORT = int(getenv("MUD_PORT", 23))
+
+# Web deploy button (#1754). The God-gated deploy page (/portal/deploy/) POSTs
+# to an endpoint that talks to the host deploy agent over this bind-mounted unix
+# socket. DEPLOY_AGENT_SECRET must match ISHAR_DEPLOY_SECRET in the host agent's
+# /etc/ishar/deploy-agent.env. An empty secret disables the button — the
+# endpoint returns a clear "not configured" error rather than half-working.
+# NOTE: this secret is NOT a boundary against this container (both live here);
+# the agent's allowlist is. See docs/infrastructure/reboot_process.md §4.
+DEPLOY_AGENT_SOCKET = getenv("DEPLOY_AGENT_SOCKET", "/run/ishar-deploy/deploy-agent.sock")
+DEPLOY_AGENT_SECRET = getenv("DEPLOY_AGENT_SECRET", "")
+# Allowlist surfaced in the UI. The agent re-validates authoritatively; ishar-db
+# is intentionally absent (a phone-button DB rebuild under a live game is a
+# footgun).
+DEPLOY_AGENT_ENVS = ("test", "prod")
+DEPLOY_AGENT_SERVICES = ("ishar-app", "ishar-web", "ishar-feedback-bridge")
 
 # Alignments.
 ALIGNMENTS = {

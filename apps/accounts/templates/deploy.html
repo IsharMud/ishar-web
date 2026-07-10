@@ -1,0 +1,277 @@
+{% extends "layout.html" %}
+{% load static %}
+{% block meta_title %}{{ WEBSITE_TITLE }} Deploy{% endblock meta_title %}
+{% block meta_description %}God-only deploy controls for {{ WEBSITE_TITLE }}.{% endblock meta_description %}
+{% block meta_url %}{% url 'deploy' %}#deploy{% endblock meta_url %}
+{% block title %}{{ WEBSITE_TITLE }} Deploy{% endblock title %}
+{% block breadcrumbs %}
+    <li class="breadcrumb-item h2" title="Portal">
+        <a class="icon-link icon-link-hover" href="{% url 'portal' %}#portal">
+            <svg class="bi" aria-hidden="true">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#person-gear"></use>
+            </svg>
+            <span>Portal</span>
+        </a>
+    </li>
+    <li class="breadcrumb-item active h2" aria-current="page" title="Deploy">
+        <a class="icon-link icon-link-hover" href="{% url 'deploy' %}#deploy">
+            <svg class="bi" aria-hidden="true">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#rocket-takeoff"></use>
+            </svg>
+            <span id="deploy">Deploy</span>
+        </a>
+    </li>
+{% endblock breadcrumbs %}
+{% block content %}
+<div class="card border-0">
+    <div class="card-body">
+        <h2 class="text-ishar" title="Deploy">
+            <svg class="bi" aria-hidden="true" width="32" height="32">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#rocket-takeoff"></use>
+            </svg>
+            Deploy
+        </h2>
+        <p class="lead">
+            Rebuild and restart the game stack on the host. This runs
+            <code>deploy.sh</code> on the server &mdash; use with care.
+        </p>
+
+{% if not deploy_configured %}
+        <div class="alert alert-warning" role="alert">
+            The deploy agent is <strong>not configured</strong>
+            (<code>DEPLOY_AGENT_SECRET</code> is unset). Deploys are disabled.
+        </div>
+{% endif %}
+
+        <form id="deployForm" onsubmit="return false;">
+
+            <fieldset class="mb-3">
+                <legend class="h5">Environment</legend>
+    {% for env in deploy_envs %}
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="env"
+                           id="env-{{ env }}" value="{{ env }}"
+                           {% if env == "prod" %}checked{% endif %}>
+                    <label class="form-check-label" for="env-{{ env }}">{{ env }}</label>
+                </div>
+    {% endfor %}
+            </fieldset>
+
+            <fieldset class="mb-3">
+                <legend class="h5">Services</legend>
+                <p class="text-secondary small mb-2">
+                    Leave all unchecked to deploy every service
+                    (<code>ishar-db</code> is never touched).
+                </p>
+    {% for service in deploy_services %}
+                <div class="form-check">
+                    <input class="form-check-input service-check" type="checkbox"
+                           name="services" id="svc-{{ service }}" value="{{ service }}"
+                           {% if service == "ishar-app" %}checked{% endif %}>
+                    <label class="form-check-label" for="svc-{{ service }}">{{ service }}</label>
+                </div>
+    {% endfor %}
+            </fieldset>
+
+            <div class="alert alert-warning d-none" id="selfDeployWarning" role="alert">
+                <strong>Heads up:</strong> deploying <code>ishar-web</code> restarts the
+                container serving <em>this page</em>. The status panel will freeze
+                mid-deploy &mdash; the host audit log is the source of truth.
+            </div>
+
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" name="no_pull" id="no_pull" value="1">
+                <label class="form-check-label" for="no_pull">
+                    <code>--no-pull</code> (deploy the current checkout, skip <code>git pull</code>)
+                </label>
+            </div>
+
+            <div class="mb-3">
+                <label for="password" class="form-label h5">Confirm password</label>
+                <input class="form-control" type="password" name="password" id="password"
+                       autocomplete="current-password" placeholder="Re-enter your account password">
+                <div class="form-text">
+                    Re-authentication is required to trigger a deploy.
+                </div>
+            </div>
+
+            <button class="btn btn-danger btn-lg w-100" type="submit" id="deployBtn"
+                    {% if not deploy_configured %}disabled{% endif %}>
+                <svg class="bi" aria-hidden="true">
+                    <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#rocket-takeoff"></use>
+                </svg>
+                Deploy
+            </button>
+        </form>
+    </div>
+
+    <div class="card m-1 d-none" id="resultCard">
+        <div class="card-body">
+            <h3 class="h5">
+                Status:
+                <span class="badge bg-secondary" id="statusBadge">idle</span>
+                <span class="text-secondary small" id="deployMeta"></span>
+            </h3>
+            <pre class="bg-black text-light p-2 rounded" id="output"
+                 style="max-height: 24rem; overflow: auto; white-space: pre-wrap;"></pre>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    const form = document.getElementById("deployForm");
+    const btn = document.getElementById("deployBtn");
+    const resultCard = document.getElementById("resultCard");
+    const statusBadge = document.getElementById("statusBadge");
+    const outputEl = document.getElementById("output");
+    const metaEl = document.getElementById("deployMeta");
+    const warning = document.getElementById("selfDeployWarning");
+    const csrftoken = "{{ csrf_token }}";
+    let polling = null;
+
+    // Show the self-deploy caveat when ishar-web is selected.
+    function refreshWarning() {
+        const web = document.getElementById("svc-ishar-web");
+        warning.classList.toggle("d-none", !(web && web.checked));
+    }
+    document.querySelectorAll(".service-check").forEach(function (el) {
+        el.addEventListener("change", refreshWarning);
+    });
+    refreshWarning();
+
+    function setBadge(text, cls) {
+        statusBadge.textContent = text;
+        statusBadge.className = "badge " + cls;
+    }
+
+    function post(url, params) {
+        const body = new URLSearchParams(params);
+        body.append("csrfmiddlewaretoken", csrftoken);
+        return fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "X-CSRFToken": csrftoken,
+            },
+            body: body.toString(),
+        }).then(function (resp) {
+            return resp.json().then(function (data) {
+                return { status: resp.status, data: data };
+            });
+        });
+    }
+
+    function renderStatus(data) {
+        outputEl.textContent = data.output || "";
+        outputEl.scrollTop = outputEl.scrollHeight;
+        const parts = [];
+        if (data.env) { parts.push("env=" + data.env); }
+        if (data.services) { parts.push("services=" + data.services.join(",")); }
+        if (data.exit_code !== null && data.exit_code !== undefined) {
+            parts.push("exit=" + data.exit_code);
+        }
+        metaEl.textContent = parts.join("  ");
+        if (data.status === "success") {
+            setBadge("success", "bg-success");
+        } else if (data.status === "failed") {
+            setBadge("failed", "bg-danger");
+        } else {
+            setBadge("running…", "bg-warning text-dark");
+        }
+    }
+
+    function poll(deployId) {
+        post("{% url 'deploy_status' %}", { deploy_id: deployId })
+            .then(function (r) {
+                if (r.status !== 200) {
+                    setBadge("lost", "bg-danger");
+                    outputEl.textContent += "\n[status unavailable: " +
+                        (r.data.message || r.status) + "]";
+                    clearInterval(polling);
+                    btn.disabled = false;
+                    return;
+                }
+                renderStatus(r.data);
+                if (r.data.status !== "running") {
+                    clearInterval(polling);
+                    btn.disabled = false;
+                }
+            })
+            .catch(function () {
+                // A self-deploy of ishar-web drops this container; polling will
+                // fail. Say so rather than spinning forever.
+                outputEl.textContent += "\n[lost connection to the site — " +
+                    "if you deployed ishar-web this is expected; " +
+                    "check the host audit log]";
+                setBadge("disconnected", "bg-secondary");
+                clearInterval(polling);
+                btn.disabled = false;
+            });
+    }
+
+    form.addEventListener("submit", function () {
+        const env = (form.querySelector("input[name=env]:checked") || {}).value;
+        const services = Array.from(
+            form.querySelectorAll("input[name=services]:checked")
+        ).map(function (el) { return el.value; });
+        const password = document.getElementById("password").value;
+        const noPull = document.getElementById("no_pull").checked;
+
+        if (!password) {
+            alert("Enter your password to confirm.");
+            return;
+        }
+        const label = services.length ? services.join(", ") : "ALL services";
+        if (!confirm("Deploy " + label + " to " + env + "?")) {
+            return;
+        }
+
+        btn.disabled = true;
+        resultCard.classList.remove("d-none");
+        setBadge("starting…", "bg-warning text-dark");
+        outputEl.textContent = "";
+        metaEl.textContent = "";
+
+        // URLSearchParams needs repeated keys for the service list.
+        const body = new URLSearchParams();
+        body.append("env", env);
+        body.append("password", password);
+        if (noPull) { body.append("no_pull", "1"); }
+        services.forEach(function (s) { body.append("services", s); });
+        body.append("csrfmiddlewaretoken", csrftoken);
+
+        document.getElementById("password").value = "";
+
+        fetch("{% url 'deploy_run' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "X-CSRFToken": csrftoken,
+            },
+            body: body.toString(),
+        }).then(function (resp) {
+            return resp.json().then(function (data) {
+                return { status: resp.status, data: data };
+            });
+        }).then(function (r) {
+            if (r.status === 200 && r.data.deploy_id) {
+                renderStatus(r.data);
+                polling = setInterval(function () { poll(r.data.deploy_id); }, 2000);
+                poll(r.data.deploy_id);
+            } else {
+                setBadge("rejected", "bg-danger");
+                const msg = r.data.message || r.data.detail || r.data.error ||
+                    ("HTTP " + r.status);
+                outputEl.textContent = msg;
+                btn.disabled = false;
+            }
+        }).catch(function (err) {
+            setBadge("error", "bg-danger");
+            outputEl.textContent = "Request failed: " + err;
+            btn.disabled = false;
+        });
+    });
+})();
+</script>
+{% endblock content %}

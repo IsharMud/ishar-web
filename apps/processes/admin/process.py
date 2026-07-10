@@ -1,24 +1,29 @@
 from django.contrib.admin import action, ModelAdmin, register
 from django.contrib import messages
 from django.shortcuts import redirect, reverse
-from django.urls import path
 from django.utils.translation import gettext_lazy as _
 
 from ..models.process import MUDProcess
 from ..utils.process import get_process
-from ..utils.service import restart_service
 
 
 @register(MUDProcess)
 class MUDProcessAdmin(ModelAdmin):
     """MUD process administration."""
 
+    # The old "Restart" button here shelled out to `sudo systemctl restart` on
+    # the host (apps/processes/utils/service.py) — a bare-metal relic that is
+    # broken in the container model and was security-sensitive. It is retired in
+    # favour of the God-gated web deploy page (portal:deploy, #1754). The
+    # terminate/kill signal actions remain but only see this container's process
+    # table; the game runs in a separate container, so they are largely inert in
+    # prod too (tracked as follow-up cleanup, out of scope for #1754).
+
     model = MUDProcess
     actions = (
         "terminate",
         "kill",
     )
-    change_list_template = "change_list.html"
     list_display = ("process_id", "name", "user", "runtime")
     fields = readonly_fields = list_display + (
         "created",
@@ -35,11 +40,6 @@ class MUDProcessAdmin(ModelAdmin):
                 message=_("No MUD process found!")
             )
         return super().get_changelist(request, **kwargs)
-
-    def get_urls(self):
-        urls = super().get_urls()
-        custom_urls = [path("restart/", self.restart, name="restart"),]
-        return custom_urls + urls
 
     def has_add_permission(self, request) -> bool:
         return False
@@ -71,21 +71,6 @@ class MUDProcessAdmin(ModelAdmin):
                 request=request,
                 level=level,
                 message=_(message % (obj.process_id,))
-            )
-        return redirect(
-            reverse("admin:processes_mudprocess_changelist")
-        )
-
-    def restart(self, request,):
-        if restart_service():
-            messages.success(
-                request=request,
-                message="Successfully sent systemctl restart."
-            )
-        else:
-            messages.error(
-                request=request,
-                message="Failed sending systemctl restart."
             )
         return redirect(
             reverse("admin:processes_mudprocess_changelist")
