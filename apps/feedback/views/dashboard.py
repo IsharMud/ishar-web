@@ -71,7 +71,13 @@ class FeedbackDashboardView(StaffFeedbackMixin, ListView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(object_list=object_list, **kwargs)
-        base = Feedback.objects.all()
+        # One round trip for all four tiles instead of four COUNT queries.
+        counts = Feedback.objects.aggregate(
+            active=Count("pk", filter=SHOW_FILTERS["active"]),
+            unacked=Count("pk", filter=FLAG_FILTERS["unacked"]),
+            in_progress=Count("pk", filter=SHOW_FILTERS["in_progress"]),
+            bountied=Count("pk", filter=FLAG_FILTERS["bountied"]),
+        )
         context.update({
             "feedback_types": FeedbackType.choices,
             "show_filters": [
@@ -86,11 +92,6 @@ class FeedbackDashboardView(StaffFeedbackMixin, ListView):
                 "sort": self.request.GET.get("sort", "newest"),
                 "q": self.request.GET.get("q", ""),
             },
-            "counts": {
-                "active": base.filter(SHOW_FILTERS["active"]).count(),
-                "unacked": base.filter(FLAG_FILTERS["unacked"]).count(),
-                "in_progress": base.filter(SHOW_FILTERS["in_progress"]).count(),
-                "bountied": base.filter(FLAG_FILTERS["bountied"]).count(),
-            },
+            "counts": counts,
         })
         return context

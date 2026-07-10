@@ -19,6 +19,8 @@ The table is game/daemon-owned, so this model is `managed = False`. See
 """
 from django.db import models
 
+from apps.core.models.unsigned import UnsignedAutoField
+
 from .choices import SyncAction, SyncStatus
 from .feedback import Feedback
 
@@ -26,7 +28,7 @@ from .feedback import Feedback
 class FeedbackSyncTask(models.Model):
     """One queued side-effect intent for the host daemon to replay."""
 
-    id = models.BigAutoField(
+    id = UnsignedAutoField(
         primary_key=True,
         db_column="id",
         verbose_name="Task ID",

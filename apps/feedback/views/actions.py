@@ -8,6 +8,7 @@ import logging
 
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.http import Http404, JsonResponse
+from django.shortcuts import get_object_or_404
 from django.views.generic.base import View
 
 from .. import services
@@ -51,10 +52,7 @@ class FeedbackActionView(StaffFeedbackMixin, View):
 
     def post(self, request, *args, **kwargs):
         action = kwargs.get("action")
-        try:
-            feedback = Feedback.objects.get(pk=kwargs.get("pk"))
-        except Feedback.DoesNotExist as exc:
-            raise Http404("No such feedback report.") from exc
+        feedback = get_object_or_404(Feedback, pk=kwargs.get("pk"))
 
         # Gods-only verbs (mirrors the `reports claude` level gate).
         if requires_god(action) and not request.user.is_god():

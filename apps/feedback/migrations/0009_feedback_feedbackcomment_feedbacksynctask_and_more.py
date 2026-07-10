@@ -436,7 +436,7 @@ class Migration(migrations.Migration):
             fields=[
                 (
                     "id",
-                    models.BigAutoField(
+                    apps.core.models.unsigned.UnsignedAutoField(
                         db_column="id",
                         primary_key=True,
                         serialize=False,

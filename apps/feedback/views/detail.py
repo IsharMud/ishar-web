@@ -15,9 +15,6 @@ class FeedbackDetailView(StaffFeedbackMixin, DetailView):
     model = Feedback
     template_name = "feedback_detail.html"
 
-    def get_queryset(self):
-        return Feedback.objects.select_related("duplicate_of")
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["comments"] = (

@@ -4,10 +4,13 @@ command (ishar-mud `rust-interop/src/feedback.rs`).
 
 Each function performs the authoritative **DB** change (state, resolution,
 timestamps, timeline comment) exactly as the Rust `set_state_internal` /
-`rust_feedback_*` functions do, then enqueues the networked **side-effects**
-(Discord echo, GitHub sync / issue / `@claude`) onto the `feedback_sync_queue`
-outbox for the host daemon to replay. Enqueue is best-effort: if the queue table
-is not deployed yet, the DB change still lands and the dashboard stays usable.
+`rust_feedback_*` functions do, and — in the SAME transaction — enqueues the
+networked **side-effects** (Discord echo, GitHub sync / issue / `@claude`) onto
+the `feedback_sync_queue` outbox for the host daemon to replay. This is a
+transactional outbox: the intent commits atomically with the state change, so a
+side-effect is never silently lost. The queue table is a hard dependency — apply
+the game migration `2026-07-10-000000-0000_feedback_sync_queue` before deploying
+(the daemon *process* may lag; rows simply accumulate as `pending`).
 
 The state-machine semantics here must stay in lock-step with `feedback.rs`; the
 inline comments cite the Rust behaviour they mirror.
@@ -15,7 +18,7 @@ inline comments cite the Rust behaviour they mirror.
 import logging
 
 from django.core.exceptions import ValidationError
-from django.db import DatabaseError, transaction
+from django.db import transaction
 from django.utils import timezone
 
 from .models import (
@@ -116,25 +119,19 @@ def _ack_if_needed(feedback, actor) -> bool:
 
 def enqueue(feedback, action, actor, payload=None) -> None:
     """
-    Best-effort append of a side-effect intent to the outbox. Never raises: a
-    missing/locked queue table must not roll back the committed DB state change.
+    Append a side-effect intent to the outbox. Call inside the action's
+    transaction so the intent commits atomically with the state change
+    (transactional outbox): guaranteed delivery, no lost side-effects. Any DB
+    error propagates and rolls the whole action back, rather than committing a
+    state change whose side-effects silently vanished.
     """
-    try:
-        # Savepoint-isolate the insert so a missing/locked queue table can't
-        # poison an enclosing transaction (e.g. if ATOMIC_REQUESTS is enabled).
-        with transaction.atomic():
-            FeedbackSyncTask.objects.create(
-                feedback=feedback,
-                action=action,
-                actor=actor,
-                payload=payload or {},
-                created_at=_now(),
-            )
-    except DatabaseError as exc:
-        log.warning(
-            "feedback: could not enqueue %s for #%s (daemon queue unavailable?): %s",
-            action, feedback.pk, exc,
-        )
+    FeedbackSyncTask.objects.create(
+        feedback=feedback,
+        action=action,
+        actor=actor,
+        payload=payload or {},
+        created_at=_now(),
+    )
 
 
 # --------------------------------------------------------------------------- #
@@ -148,7 +145,7 @@ def acknowledge(feedback, actor) -> str:
         if not claimed:
             return f"Report #{feedback.pk} already acknowledged by {feedback.acknowledged_by}."
         add_system_comment(feedback, actor, "Acknowledged.")
-    enqueue(feedback, SyncAction.ACK, actor)
+        enqueue(feedback, SyncAction.ACK, actor)
     return f"Report #{feedback.pk} acknowledged."
 
 
@@ -160,7 +157,7 @@ def comment(feedback, actor, text) -> str:
     with transaction.atomic():
         _ack_if_needed(feedback, actor)
         _add_comment(feedback, CommentSource.GAME, actor, text, is_staff=True)
-    enqueue(feedback, SyncAction.COMMENT, actor, {"text": text})
+        enqueue(feedback, SyncAction.COMMENT, actor, {"text": text})
     return f"Comment added to report #{feedback.pk}."
 
 
@@ -186,7 +183,7 @@ def set_progress(feedback, actor, note="") -> str:
         ))
         label = "Marked in progress" + (f": {note}" if note else "")
         add_system_comment(feedback, actor, f"{label}.")
-    enqueue(feedback, SyncAction.PROGRESS, actor, {"note": note})
+        enqueue(feedback, SyncAction.PROGRESS, actor, {"note": note})
     return f"Report #{feedback.pk} marked in progress."
 
 
@@ -233,12 +230,12 @@ def close(feedback, actor, resolution, note="") -> str:
         }
         label = f"Marked {labels[resolution]}" + (f": {note}" if note else "")
         add_system_comment(feedback, actor, f"{label}.")
-    action = {
-        FeedbackResolution.FIXED: SyncAction.RESOLVE,
-        FeedbackResolution.WONTFIX: SyncAction.WONTFIX,
-        FeedbackResolution.OTHER: SyncAction.CLOSE,
-    }[resolution]
-    enqueue(feedback, action, actor, {"note": note})
+        action = {
+            FeedbackResolution.FIXED: SyncAction.RESOLVE,
+            FeedbackResolution.WONTFIX: SyncAction.WONTFIX,
+            FeedbackResolution.OTHER: SyncAction.CLOSE,
+        }[resolution]
+        enqueue(feedback, action, actor, {"note": note})
     return f"Report #{feedback.pk} {labels[resolution]}."
 
 
@@ -273,7 +270,7 @@ def mark_duplicate(feedback, actor, of_id) -> str:
             "resolution_note", "duplicate_of",
         ))
         add_system_comment(feedback, actor, f"Marked duplicate of #{of_id}.")
-    enqueue(feedback, SyncAction.DUPLICATE, actor, {"of_id": of_id})
+        enqueue(feedback, SyncAction.DUPLICATE, actor, {"of_id": of_id})
     return f"Report #{feedback.pk} marked duplicate of #{of_id}."
 
 
@@ -297,7 +294,7 @@ def reopen(feedback, actor, note="") -> str:
         ))
         label = "Reopened" + (f": {note}" if note else "")
         add_system_comment(feedback, actor, f"{label}.")
-    enqueue(feedback, SyncAction.REOPEN, actor, {"note": note})
+        enqueue(feedback, SyncAction.REOPEN, actor, {"note": note})
     return f"Report #{feedback.pk} reopened."
 
 
@@ -319,7 +316,7 @@ def bounty(feedback, actor, note="") -> str:
         feedback.bountied_by = actor
         label = "Bounty awarded" + (f": {note}" if note else "")
         add_system_comment(feedback, actor, f"{label}.")
-    enqueue(feedback, SyncAction.BOUNTY, actor, {"note": note})
+        enqueue(feedback, SyncAction.BOUNTY, actor, {"note": note})
     return f"Bounty awarded on report #{feedback.pk}."
 
 
@@ -338,7 +335,7 @@ def promote(feedback, actor) -> str:
         return f"Report #{feedback.pk} already has a GitHub issue: {feedback.github_issue_url}"
     with transaction.atomic():
         _ack_if_needed(feedback, actor)
-    enqueue(feedback, SyncAction.PROMOTE, actor)
+        enqueue(feedback, SyncAction.PROMOTE, actor)
     return f"Report #{feedback.pk} queued for GitHub promotion."
 
 
@@ -354,8 +351,8 @@ def assign_claude(feedback, actor, instructions="") -> str:
             "Private reports cannot be assigned to Claude on GitHub."
         )
     instructions = _clean(instructions, INSTRUCTIONS_MAX)
+    payload = {"instructions": instructions} if instructions else {}
     with transaction.atomic():
         _ack_if_needed(feedback, actor)
-    payload = {"instructions": instructions} if instructions else {}
-    enqueue(feedback, SyncAction.ASSIGN_CLAUDE, actor, payload)
+        enqueue(feedback, SyncAction.ASSIGN_CLAUDE, actor, payload)
     return f"Report #{feedback.pk} queued for Claude on GitHub."
