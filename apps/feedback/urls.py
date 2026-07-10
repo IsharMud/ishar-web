@@ -1,29 +1,18 @@
 from django.urls import path
 
-from .models.choices import FeedbackSubmissionTypePublic
-
-from .views.feedback import FeedbackView
-from .views.submit import SubmitFeedbackView
-from .views.vote import VoteFeedbackView
+from .views import (
+    FeedbackActionView,
+    FeedbackDashboardView,
+    FeedbackDetailView,
+)
 
 
 urlpatterns = [
-    path("", FeedbackView.as_view(), name="feedback"),
-    path("all/", FeedbackView.as_view(), name="all_feedback"),
-    path("submit/", SubmitFeedbackView.as_view(), name="submit_feedback"),
+    path("", FeedbackDashboardView.as_view(), name="feedback"),
+    path("<int:pk>/", FeedbackDetailView.as_view(), name="feedback_detail"),
     path(
-        "vote/<int:submission_id>/",
-        VoteFeedbackView.as_view(),
-         name="vote_feedback"
+        "<int:pk>/<str:action>/",
+        FeedbackActionView.as_view(),
+        name="feedback_action",
     ),
 ]
-
-for num, label in FeedbackSubmissionTypePublic.choices:
-    label = label.lower()
-    urlpatterns.append(
-        path(
-            f"{label}/",
-            FeedbackView.as_view(submission_type=num),
-            name=f"{label}_feedback"
-        )
-    )

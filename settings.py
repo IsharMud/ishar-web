@@ -492,10 +492,8 @@ JAZZMIN_SETTINGS = {
         # faqs
         "faqs.FAQ": "fas fa-question",
 
-        # feedback
+        # feedback (triage dashboard lives outside Django admin)
         "feedback": "fas fa-flag",
-        "feedback.FeedbackSubmission": "fas fa-flag",
-        "feedback.FeedbackVote": "fas fa-person-booth",
 
         # history
         "history": "fas fa-monument",
