@@ -18,6 +18,12 @@ If you're an agent or a human about to change any visual surface: skim the
 principles below, grab the right tokens/components, and if you introduce or
 change a convention, **record it in `decisions.md` and update the catalog.**
 
+> **Green-field mandate.** We design ishar-web as if it were green field — **no
+> concern with breakage or comms, just optimal, unhandcuffed design** (see
+> `decisions.md`, and `../../CLAUDE.md`). Where a cleaner design exists, rebuild
+> rather than patch. The roadmap below covers the whole site, public pages
+> included, not only staff tooling.
+
 ---
 
 ## The one-paragraph summary
@@ -69,12 +75,14 @@ tokens and converge over time.
 | **HUD** | The web telnet client (`/connect`) | Layered greys, colored vitals bars, gradient banner | `apps/connect/static/css/hud.css` |
 | **Admin Console** | Staff tooling (deploy console; feedback next) | Layered greys + amber accents, terminal panels, status pills | `apps/core/static/css/admin-console.css` |
 
-**Stance:** the **public shell keeps its amber-border identity** (it's
-recognizably Ishar), while **staff/admin tooling uses the Admin Console
-language** (it should feel like a purpose-built console). Both draw from **one
-shared token + semantic vocabulary** (tokens.md). The HUD predates the Admin
-Console layer but uses the same idea; over time its `--hud-*` tokens should be
-expressed in terms of the shared set.
+**Stance:** **staff/admin tooling uses the Admin Console language** (it should
+feel like a purpose-built console). The **public shell keeps its amber-border
+look for now** — but under the green-field mandate that's a starting point, not a
+protected identity: public pages are in scope for the same convergence, and the
+amber-border treatment stays only where it's genuinely the best design. All
+layers draw from **one shared token + semantic vocabulary** (tokens.md). The HUD
+predates the Admin Console layer but uses the same idea; over time its `--hud-*`
+tokens should be expressed in terms of the shared set.
 
 ---
 

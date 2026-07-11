@@ -9,6 +9,28 @@ Format: `## YYYY-MM-DD — Title` · **Decision** · **Why** · (optional) **Not
 
 ---
 
+## 2026-07-11 — Treat ishar-web as green field
+
+**Decision.** Design and refactor as if this were a green-field project: **no
+concern with breakage or comms — optimal, unhandcuffed design.** Where a cleaner
+design exists, rebuild rather than patch; don't preserve a pattern purely for
+backward compatibility. This supersedes prior compatibility hedging, including
+the "public shell keeps the amber-border identity *for recognizability*"
+framing — the amber-border look stays only where it's genuinely the best design,
+not because changing it would break continuity.
+
+**Why.** The audience is ~10–11 known players plus the developer; the impact zone
+is tiny, there are no external consumers, and no migration window to protect.
+Under those conditions, caution about change is pure drag on entropy reduction.
+The mandate is to converge the site's three ad-hoc visual layers into one
+coherent system, page by page, without hedging.
+
+**Notes.** "No concern with breakage" means no concern about *changing* things —
+not a license to ship broken, ugly, or inaccessible UI. Correctness, taste, and
+the verification bar (see `CLAUDE.md`) still hold. The facelift roadmap in
+`README.md` now covers the whole site, public pages included, not just staff
+tooling.
+
 ## 2026-07-11 — Establish the design system + Admin Console language
 
 **Decision.** Stand up `docs/design/` as the living source of truth (this doc,
@@ -20,9 +42,11 @@ implementation.
 **Why.** The site had grown three ad-hoc visual layers and no written
 conventions; a facelift needs a shared vocabulary or it fragments further.
 
-**Notes.** Public shell keeps the amber-border identity; staff tooling gets the
-richer layered-grey console look; both share one token/semantic set. Roadmap and
-enablers in `README.md`.
+**Notes.** Staff tooling gets the richer layered-grey console look; the public
+shell currently keeps the amber-border look. Both share one token/semantic set.
+Per the green-field decision above, the amber-border identity is kept only where
+it's the best design — public pages are in scope for the same convergence.
+Roadmap and enablers in `README.md`.
 
 ## 2026-07-11 — Dark-only, forced
 
