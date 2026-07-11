@@ -1,6 +1,11 @@
 from django.urls import path
 
-from .views.deploy import DeployActionView, DeployStatusView, DeployView
+from .views.deploy import (
+    DeployActionView,
+    DeployPingView,
+    DeployStatusView,
+    DeployView,
+)
 from .views.password import PasswordView
 from .views.portal import PortalView
 from .views.private import SetPrivateView
@@ -14,4 +19,5 @@ urlpatterns = [
     path("deploy/", DeployView.as_view(), name="deploy"),
     path("deploy/run/", DeployActionView.as_view(), name="deploy_run"),
     path("deploy/status/", DeployStatusView.as_view(), name="deploy_status"),
+    path("deploy/ping/", DeployPingView.as_view(), name="deploy_ping"),
 ]

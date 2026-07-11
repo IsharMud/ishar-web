@@ -1,9 +1,13 @@
 {% extends "layout.html" %}
 {% load static %}
-{% block meta_title %}{{ WEBSITE_TITLE }} Deploy{% endblock meta_title %}
-{% block meta_description %}God-only deploy controls for {{ WEBSITE_TITLE }}.{% endblock meta_description %}
+{% block meta_title %}{{ WEBSITE_TITLE }} Deploy Console{% endblock meta_title %}
+{% block meta_description %}God-only deploy console for {{ WEBSITE_TITLE }}.{% endblock meta_description %}
 {% block meta_url %}{% url 'deploy' %}#deploy{% endblock meta_url %}
-{% block title %}{{ WEBSITE_TITLE }} Deploy{% endblock title %}
+{% block title %}{{ WEBSITE_TITLE }} Deploy Console{% endblock title %}
+{% block scripts %}let focusTo = 'deploy'{% endblock scripts %}
+{% block includes %}
+        <link rel="stylesheet" type="text/css" href="{% static 'css/admin-console.css' %}">
+{% endblock includes %}
 {% block breadcrumbs %}
     <li class="breadcrumb-item h2" title="Portal">
         <a class="icon-link icon-link-hover" href="{% url 'portal' %}#portal">
@@ -23,99 +27,152 @@
     </li>
 {% endblock breadcrumbs %}
 {% block content %}
-<div class="card border-0">
-    <div class="card-body">
-        <h2 class="text-ishar" title="Deploy">
-            <svg class="bi" aria-hidden="true" width="32" height="32">
-                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#rocket-takeoff"></use>
-            </svg>
-            Deploy
-        </h2>
-        <p class="lead">
-            Rebuild and restart the game stack on the host. This runs
-            <code>deploy.sh</code> on the server &mdash; use with care.
-        </p>
+<div class="ac">
+
+    <!-- Hero -->
+    <header class="ac-hero">
+        <span class="ac-hero__badge">
+            <svg class="bi" aria-hidden="true"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#rocket-takeoff"></use></svg>
+        </span>
+        <div class="ac-hero__text">
+            <h2 class="ac-hero__title">Deploy Console</h2>
+            <p class="ac-hero__sub">
+                Rebuild &amp; restart the stack on the host — runs <code>deploy.sh</code> through the deploy agent.
+            </p>
+        </div>
+        <div class="ac-hero__status">
+{% if deploy_configured %}
+            <span class="ac-pill ac-pill--status ac-pill--muted ac-pill--live" id="agentPill" title="Deploy agent status">
+                checking agent…
+            </span>
+{% else %}
+            <span class="ac-pill ac-pill--status ac-pill--muted" id="agentPill" title="Deploy agent status">
+                not configured
+            </span>
+{% endif %}
+        </div>
+    </header>
 
 {% if not deploy_configured %}
-        <div class="alert alert-warning" role="alert">
-            The deploy agent is <strong>not configured</strong>
-            (<code>DEPLOY_AGENT_SECRET</code> is unset). Deploys are disabled.
-        </div>
+    <div class="ac-note ac-note--warn" role="alert">
+        <svg class="bi" aria-hidden="true"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#exclamation-triangle"></use></svg>
+        <span><strong>Agent not configured.</strong> <code>DEPLOY_AGENT_SECRET</code> is unset, so deploys are
+        disabled. Set it on the host agent (<code>/etc/ishar/deploy-agent.env</code>) and in this container's
+        environment to enable the console.</span>
+    </div>
 {% endif %}
 
-        <form id="deployForm" onsubmit="return false;">
+    <form id="deployForm" onsubmit="return false;">
 
-            <fieldset class="mb-3">
-                <legend class="h5">Environment</legend>
+        <!-- Environment -->
+        <div class="ac-panel">
+            <div class="ac-panel__h">
+                <svg class="bi" aria-hidden="true"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#hdd-network"></use></svg>
+                Environment
+            </div>
+            <div class="ac-seg" role="radiogroup" aria-label="Environment">
     {% for env in deploy_envs %}
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="env"
-                           id="env-{{ env }}" value="{{ env }}"
-                           {% if env == "prod" %}checked{% endif %}>
-                    <label class="form-check-label" for="env-{{ env }}">{{ env }}</label>
-                </div>
+                <input class="btn-check" type="radio" name="env" id="env-{{ env }}" value="{{ env }}" autocomplete="off"{% if env == "prod" %} checked{% endif %}>
+                <label class="ac-seg__item ac-seg__item--{{ env }}" for="env-{{ env }}">
+                    <svg class="bi" aria-hidden="true"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#{% if env == 'prod' %}hdd-stack{% else %}cone-striped{% endif %}"></use></svg>
+                    {{ env }}
+                </label>
     {% endfor %}
-            </fieldset>
+            </div>
+        </div>
 
-            <fieldset class="mb-3">
-                <legend class="h5">Services</legend>
-                <p class="text-secondary small mb-2">
-                    Leave all unchecked to deploy every service
-                    (<code>ishar-db</code> is never touched).
-                </p>
+        <!-- Services -->
+        <div class="ac-panel">
+            <div class="ac-panel__h">
+                <svg class="bi" aria-hidden="true"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#hdd-rack"></use></svg>
+                Services
+            </div>
+            <p class="ac-panel__hint">
+                Select what to (re)deploy. Nothing selected = <strong>all services</strong>.
+                <code>ishar-db</code> is never touched.
+            </p>
+            <div class="ac-grid">
     {% for service in deploy_services %}
-                <div class="form-check">
-                    <input class="form-check-input service-check" type="checkbox"
-                           name="services" id="svc-{{ service }}" value="{{ service }}"
-                           {% if service == "ishar-app" %}checked{% endif %}>
-                    <label class="form-check-label" for="svc-{{ service }}">{{ service }}</label>
-                </div>
+                <input class="btn-check service-check" type="checkbox" name="services" id="svc-{{ service }}" value="{{ service }}" autocomplete="off"{% if service == "ishar-app" %} checked{% endif %}>
+                <label class="ac-toggle" for="svc-{{ service }}">
+                    <span class="ac-toggle__icon">
+                        <svg class="bi" aria-hidden="true"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#{% if service == 'ishar-app' %}controller{% elif service == 'ishar-web' %}globe2{% elif service == 'ishar-feedback-bridge' %}chat-left-dots{% else %}box{% endif %}"></use></svg>
+                    </span>
+                    <span class="ac-toggle__body">
+                        <span class="ac-toggle__name">{{ service }}</span>
+                        <span class="ac-toggle__note">{% if service == 'ishar-app' %}Game server · blue-green, no player drop{% elif service == 'ishar-web' %}Website · restarts this page{% elif service == 'ishar-feedback-bridge' %}Discord → feedback bridge{% else %}Service{% endif %}</span>
+                    </span>
+                    <span class="ac-toggle__check">
+                        <svg class="bi" aria-hidden="true"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#check-circle-fill"></use></svg>
+                    </span>
+                </label>
     {% endfor %}
-            </fieldset>
-
-            <div class="alert alert-warning d-none" id="selfDeployWarning" role="alert">
-                <strong>Heads up:</strong> deploying <code>ishar-web</code> restarts the
-                container serving <em>this page</em>. The status panel will freeze
-                mid-deploy &mdash; the host audit log is the source of truth.
             </div>
 
-            <div class="form-check mb-3">
-                <input class="form-check-input" type="checkbox" name="no_pull" id="no_pull" value="1">
-                <label class="form-check-label" for="no_pull">
-                    <code>--no-pull</code> (deploy the current checkout, skip <code>git pull</code>)
+            <div class="ac-note ac-note--warn mt-3 d-none" id="selfDeployWarning" role="alert">
+                <svg class="bi" aria-hidden="true"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#exclamation-triangle"></use></svg>
+                <span><strong>Heads up —</strong> deploying <code>ishar-web</code> restarts the container serving <em>this page</em>. The console will freeze mid-deploy; the host audit log is the source of truth.</span>
+            </div>
+        </div>
+
+        <!-- Options + confirm -->
+        <div class="ac-panel">
+            <div class="ac-panel__h">
+                <svg class="bi" aria-hidden="true"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#sliders"></use></svg>
+                Options
+            </div>
+
+            <div class="form-check form-switch ac-switch mb-3">
+                <input class="form-check-input" type="checkbox" role="switch" name="no_pull" id="no_pull" value="1">
+                <label class="form-check-label ac-switch__text" for="no_pull">
+                    <code>--no-pull</code>
+                    <span class="ac-switch__note d-block">Deploy the current checkout, skip <code>git pull</code>.</span>
                 </label>
             </div>
 
-            <div class="mb-3">
-                <label for="password" class="form-label h5">Confirm password</label>
-                <input class="form-control" type="password" name="password" id="password"
+            <label class="ac-panel__h" for="password" style="margin-bottom:.4rem;">
+                <svg class="bi" aria-hidden="true"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#shield-lock"></use></svg>
+                Confirm password
+            </label>
+            <div class="ac-inputgroup">
+                <span class="ac-inputgroup__icon">
+                    <svg class="bi" aria-hidden="true"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#key"></use></svg>
+                </span>
+                <input class="ac-input" type="password" name="password" id="password"
                        autocomplete="current-password" placeholder="Re-enter your account password">
-                <div class="form-text">
-                    Re-authentication is required to trigger a deploy.
-                </div>
             </div>
-
-            <button class="btn btn-danger btn-lg w-100" type="submit" id="deployBtn"
-                    {% if not deploy_configured %}disabled{% endif %}>
-                <svg class="bi" aria-hidden="true">
-                    <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#rocket-takeoff"></use>
-                </svg>
-                Deploy
-            </button>
-        </form>
-    </div>
-
-    <div class="card m-1 d-none" id="resultCard">
-        <div class="card-body">
-            <h3 class="h5">
-                Status:
-                <span class="badge bg-secondary" id="statusBadge">idle</span>
-                <span class="text-secondary small" id="deployMeta"></span>
-            </h3>
-            <pre class="bg-black text-light p-2 rounded" id="output"
-                 style="max-height: 24rem; overflow: auto; white-space: pre-wrap;"></pre>
+            <p class="ac-panel__hint mt-2 mb-0">Re-authentication is required on every deploy.</p>
         </div>
-    </div>
+
+        <!-- CTA -->
+        <button class="ac-cta{% if deploy_configured %} ac-cta--ready{% endif %}" type="submit" id="deployBtn"{% if not deploy_configured %} disabled{% endif %}>
+            <svg class="bi" aria-hidden="true"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#rocket-takeoff"></use></svg>
+            Launch deploy
+        </button>
+    </form>
+
+    <!-- Console -->
+    <section class="ac-console d-none" id="resultCard" aria-live="polite">
+        <div class="ac-console__bar">
+            <span class="ac-console__dots" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="ac-console__title">deploy.sh</span>
+            <span class="ac-pill ac-pill--status ac-pill--muted" id="statusBadge">idle</span>
+            <span class="ac-console__spacer"></span>
+            <span class="ac-console__timer" id="deployTimer">0:00</span>
+            <button type="button" class="ac-copy" id="copyLog" title="Copy log to clipboard">
+                <svg class="bi" aria-hidden="true"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#clipboard"></use></svg>
+                <span id="copyLogText">Copy</span>
+            </button>
+        </div>
+        <div class="ac-console__step" id="deployStep" hidden>
+            <span class="ac-spin" id="deploySpin" aria-hidden="true"></span>
+            <span class="ac-console__step-text" id="deployStepText"></span>
+        </div>
+        <div class="ac-console__step" id="deployMetaRow" hidden style="min-height:auto; color: var(--ac-dim); font-size:.8rem;">
+            <span class="ac-console__step-text" id="deployMeta"></span>
+        </div>
+        <pre class="ac-console__body" id="output"></pre>
+    </section>
 </div>
 
 <script>
@@ -126,11 +183,61 @@
     const statusBadge = document.getElementById("statusBadge");
     const outputEl = document.getElementById("output");
     const metaEl = document.getElementById("deployMeta");
+    const metaRow = document.getElementById("deployMetaRow");
     const warning = document.getElementById("selfDeployWarning");
+    const agentPill = document.getElementById("agentPill");
+    const timerEl = document.getElementById("deployTimer");
+    const stepRow = document.getElementById("deployStep");
+    const stepText = document.getElementById("deployStepText");
+    const spin = document.getElementById("deploySpin");
+    const copyBtn = document.getElementById("copyLog");
+    const copyText = document.getElementById("copyLogText");
     const csrftoken = "{{ csrf_token }}";
+    const deployConfigured = {% if deploy_configured %}true{% else %}false{% endif %};
     let polling = null;
+    let timer = null;
+    let startedAt = 0;
 
-    // Show the self-deploy caveat when ishar-web is selected.
+    // ---- helpers ---------------------------------------------------------
+    // Set a status pill's label + intent without innerHTML (dot is ::before).
+    function setPill(el, text, kind, live) {
+        el.textContent = text;
+        el.className = "ac-pill ac-pill--status ac-pill--" + kind + (live ? " ac-pill--live" : "");
+    }
+    function setBadge(text, kind, live) { setPill(statusBadge, text, kind, live); }
+
+    function fmtElapsed(ms) {
+        const s = Math.floor(ms / 1000);
+        return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+    }
+    function startTimer() {
+        startedAt = Date.now();
+        timerEl.textContent = "0:00";
+        clearInterval(timer);
+        timer = setInterval(function () {
+            timerEl.textContent = fmtElapsed(Date.now() - startedAt);
+        }, 1000);
+    }
+    function stopTimer() { clearInterval(timer); timer = null; }
+
+    // Surface the most recent `==>` step line from deploy.sh as a headline.
+    function updateStep(output, running) {
+        const lines = (output || "").split("\n");
+        let last = "";
+        for (let i = lines.length - 1; i >= 0; i--) {
+            const m = lines[i].match(/^\s*==>\s*(.+?)\s*$/);
+            if (m) { last = m[1]; break; }
+        }
+        if (last) {
+            stepRow.hidden = false;
+            stepText.textContent = last;
+            spin.style.display = running ? "" : "none";
+        } else {
+            stepRow.hidden = true;
+        }
+    }
+
+    // ---- self-deploy caveat ---------------------------------------------
     function refreshWarning() {
         const web = document.getElementById("svc-ishar-web");
         warning.classList.toggle("d-none", !(web && web.checked));
@@ -140,11 +247,32 @@
     });
     refreshWarning();
 
-    function setBadge(text, cls) {
-        statusBadge.textContent = text;
-        statusBadge.className = "badge " + cls;
+    // ---- live agent health (hero pill) ----------------------------------
+    if (deployConfigured) {
+        post("{% url 'deploy_ping' %}", {})
+            .then(function (r) {
+                if (r.status === 200 && (r.data.ok === undefined || r.data.ok)) {
+                    setPill(agentPill, "agent online", "ok", true);
+                } else {
+                    setPill(agentPill, "agent unreachable", "danger", false);
+                }
+            })
+            .catch(function () { setPill(agentPill, "agent unreachable", "danger", false); });
     }
 
+    // ---- copy log --------------------------------------------------------
+    copyBtn.addEventListener("click", function () {
+        const text = outputEl.textContent || "";
+        const done = function () {
+            copyText.textContent = "Copied";
+            setTimeout(function () { copyText.textContent = "Copy"; }, 1500);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(done, function () {});
+        }
+    });
+
+    // ---- POST helper -----------------------------------------------------
     function post(url, params) {
         const body = new URLSearchParams(params);
         body.append("csrfmiddlewaretoken", csrftoken);
@@ -162,54 +290,64 @@
         });
     }
 
+    // ---- render a status payload ----------------------------------------
     function renderStatus(data) {
+        const running = data.status === "running";
         outputEl.textContent = data.output || "";
         outputEl.scrollTop = outputEl.scrollHeight;
+
         const parts = [];
         if (data.env) { parts.push("env=" + data.env); }
         if (data.services) { parts.push("services=" + data.services.join(",")); }
         if (data.exit_code !== null && data.exit_code !== undefined) {
             parts.push("exit=" + data.exit_code);
         }
-        metaEl.textContent = parts.join("  ");
+        if (parts.length) { metaRow.hidden = false; metaEl.textContent = parts.join("   ·   "); }
+
+        updateStep(data.output, running);
+
         if (data.status === "success") {
-            setBadge("success", "bg-success");
+            setBadge("success", "ok", false);
         } else if (data.status === "failed") {
-            setBadge("failed", "bg-danger");
+            setBadge("failed", "danger", false);
         } else {
-            setBadge("running…", "bg-warning text-dark");
+            setBadge("running", "warn", true);
         }
     }
 
+    function finish() { stopTimer(); btn.disabled = !deployConfigured; spin.style.display = "none"; }
+
+    // ---- poll ------------------------------------------------------------
     function poll(deployId) {
         post("{% url 'deploy_status' %}", { deploy_id: deployId })
             .then(function (r) {
                 if (r.status !== 200) {
-                    setBadge("lost", "bg-danger");
+                    setBadge("lost", "danger", false);
                     outputEl.textContent += "\n[status unavailable: " +
                         (r.data.message || r.status) + "]";
                     clearInterval(polling);
-                    btn.disabled = false;
+                    finish();
                     return;
                 }
                 renderStatus(r.data);
                 if (r.data.status !== "running") {
                     clearInterval(polling);
-                    btn.disabled = false;
+                    finish();
                 }
             })
             .catch(function () {
-                // A self-deploy of ishar-web drops this container; polling will
-                // fail. Say so rather than spinning forever.
+                // A self-deploy of ishar-web drops this container; polling fails.
                 outputEl.textContent += "\n[lost connection to the site — " +
                     "if you deployed ishar-web this is expected; " +
                     "check the host audit log]";
-                setBadge("disconnected", "bg-secondary");
+                setBadge("disconnected", "muted", false);
+                stepRow.hidden = true;
                 clearInterval(polling);
-                btn.disabled = false;
+                finish();
             });
     }
 
+    // ---- submit ----------------------------------------------------------
     form.addEventListener("submit", function () {
         const env = (form.querySelector("input[name=env]:checked") || {}).value;
         const services = Array.from(
@@ -229,9 +367,12 @@
 
         btn.disabled = true;
         resultCard.classList.remove("d-none");
-        setBadge("starting…", "bg-warning text-dark");
+        setBadge("starting", "warn", true);
         outputEl.textContent = "";
         metaEl.textContent = "";
+        metaRow.hidden = true;
+        stepRow.hidden = true;
+        startTimer();
 
         // URLSearchParams needs repeated keys for the service list.
         const body = new URLSearchParams();
@@ -260,16 +401,16 @@
                 polling = setInterval(function () { poll(r.data.deploy_id); }, 2000);
                 poll(r.data.deploy_id);
             } else {
-                setBadge("rejected", "bg-danger");
+                setBadge("rejected", "danger", false);
                 const msg = r.data.message || r.data.detail || r.data.error ||
                     ("HTTP " + r.status);
                 outputEl.textContent = msg;
-                btn.disabled = false;
+                finish();
             }
         }).catch(function (err) {
-            setBadge("error", "bg-danger");
+            setBadge("error", "danger", false);
             outputEl.textContent = "Request failed: " + err;
-            btn.disabled = false;
+            finish();
         });
     });
 })();

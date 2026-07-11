@@ -11,7 +11,7 @@ from django.views.generic.base import TemplateView, View
 
 from apps.core.views.mixins import GodRequiredMixin, NeverCacheMixin
 
-from ..utils.deploy_agent import DeployAgentError, deploy_status, start_deploy
+from ..utils.deploy_agent import DeployAgentError, deploy_status, ping, start_deploy
 
 
 class DeployView(GodRequiredMixin, NeverCacheMixin, TemplateView):
@@ -65,6 +65,27 @@ class DeployActionView(GodRequiredMixin, NeverCacheMixin, View):
         # sees the real accepted/rejected outcome (busy, cooldown, invalid, ...).
         status = int(result.get("http_status", 200 if result.get("ok") else 400))
         return JsonResponse(result, status=status)
+
+
+class DeployPingView(GodRequiredMixin, NeverCacheMixin, View):
+    """POST-only liveness probe for the host agent. Powers the console's live
+    agent-health pill. Read-only (no re-auth); God gate + CSRF still apply."""
+
+    http_method_names = ("post",)
+
+    def post(self, request, *args, **kwargs):
+        try:
+            result = ping()
+        except DeployAgentError as exc:
+            return JsonResponse(
+                {"ok": False, "message": f"Deploy agent unavailable: {exc}"},
+                status=503,
+            )
+        # Normalize: guarantee an `ok` flag for the pill regardless of the
+        # agent's own shape.
+        if "ok" not in result:
+            result = {"ok": True, **result}
+        return JsonResponse(result)
 
 
 class DeployStatusView(GodRequiredMixin, NeverCacheMixin, View):
