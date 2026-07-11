@@ -1,0 +1,14 @@
+{% load ishar %}
+<li class="breadcrumb-item{% if active %} active{% endif %} h2"{% if active %} aria-current="page"{% endif %} title="{{ label }}">
+{% if href %}
+    <a class="icon-link icon-link-hover" href="{{ href }}">
+        {% bi icon %}
+        <span{% if anchor %} id="{{ anchor }}"{% endif %}>{{ label }}</span>
+    </a>
+{% else %}
+    <span class="icon-link">
+        {% bi icon %}
+        <span{% if anchor %} id="{{ anchor }}"{% endif %}>{{ label }}</span>
+    </span>
+{% endif %}
+</li>

@@ -1,6 +1,52 @@
-:root {--ishar-color: #fa7; }
+/* ==========================================================================
+   style.css — Ishar global stylesheet + shared design tokens
+   --------------------------------------------------------------------------
+   The :root block below is the site-wide token base (design-system enabler
+   E1 — see docs/design/tokens.md). It is loaded on every page via layout.html,
+   so any stylesheet (admin-console.css, hud.css, per-page CSS) may reference
+   the --ac-* / --ishar-* custom properties without redefining them.
+   ========================================================================== */
+:root {
+    /* Brand */
+    --ishar-color:    #fa7;                      /* the Ishar amber (alias of --ac-accent) */
+    --ac-accent:      #fa7;                      /* brand amber */
+    --ac-accent-2:    #ffd7b0;                   /* lighter amber for text/marks on amber washes */
+
+    /* Surfaces (dark, layered — step up in lightness as they come forward) */
+    --ac-bg:          #0c0c0d;                   /* deepest surface */
+    --ac-panel:       #131316;                   /* panel surface */
+    --ac-elev:        #1c1c22;                   /* raised / hover surface */
+    --ac-border:      #2a2a30;                   /* hairline border */
+    --ac-border-2:    #3a3a44;                   /* stronger border (hover/active) */
+
+    /* Text */
+    --ac-text:        #d6d6d7;                   /* body text */
+    --ac-dim:         #8a8a92;                   /* muted / labels */
+
+    /* Semantics (fixed meanings — never decorative) */
+    --ac-ok:          #4cbb17;                   /* success / safe */
+    --ac-info:        #4a86cf;                   /* informational */
+    --ac-warn:        #f80;                      /* caution */
+    --ac-danger:      #d64b4b;                   /* destructive / error */
+
+    /* Translucent washes */
+    --ac-wash:        rgba(255, 170, 119, .12);  /* amber */
+    --ac-ok-wash:     rgba(76, 187, 23, .12);
+    --ac-info-wash:   rgba(74, 134, 207, .14);
+    --ac-warn-wash:   rgba(255, 136, 0, .12);
+    --ac-danger-wash: rgba(214, 75, 75, .14);
+
+    /* Radii */
+    --ac-radius:      .6rem;
+    --ac-radius-sm:   .4rem;
+}
 
 .border-ishar { border: 0.1rem solid var(--ishar-color); }
+
+/* Sprite icons ({% bi %}) default to text-size; explicit width/height
+   attributes (e.g. the connect HUD) still win via :not([width]). */
+svg.bi:not([width]) { width: 1em; height: 1em; }
+.bi { vertical-align: -.125em; fill: currentColor; }
 
 .navbar, .navbar-expand-lg .navbar-nav .nav-link, .list-group, .list-group-item, .card { background-color: #000; }
 
@@ -32,9 +78,9 @@ a[target="_blank"] {
     }
 }
 
-body { background-color: #323639; color: #d6d6d7; }
+body { background-color: #323639; color: var(--ac-text); }
 .card-header, .card-title { color: var(--ishar-color); }
-.card, .card-text, .card-footer { color: #d6d6d7; }
+.card, .card-text, .card-footer { color: var(--ac-text); }
 button, textarea, select {
     border: 0.1rem solid var(--ishar-color);
     background-color: #323639;
@@ -84,7 +130,7 @@ summary h5 {
 
 a:link { color: #09f; text-decoration: none; }
 a:active, a:visited { color: #6082b6; }
-a:hover { color: #d6d6d7; }
+a:hover { color: var(--ac-text); }
 
 a img:hover{ opacity: 0.8; }
 
@@ -129,8 +175,8 @@ a.hardcore-player:hover {
 .dead-player::after { content: ' ☠️'; }
 
 .message-info { color: #09f; }
-.message-success, .active-season td { color: #4cbb17; }
-.message-warn, .message-warning  { color: #f80; }
+.message-success, .active-season td { color: var(--ac-ok); }
+.message-warn, .message-warning  { color: var(--ac-warn); }
 
 .two-col { column-count: 2; }
 .challenge-completed {

@@ -12,6 +12,30 @@ For each: what it is, canonical markup, where it's used, and status.
 
 ---
 
+## Template tags & partials (`{% load ishar %}`)
+
+Enabler E2 — defined in `apps/core/templatetags/ishar.py`, partials under
+`apps/core/templates/partials/`. Use these in any new/touched template instead
+of pasting the markup.
+
+### `{% bi %}` — sprite icon
+```django
+{% bi "rocket-takeoff" %}                              {# decorative (aria-hidden) #}
+{% bi "lock-fill" css="text-warning" label="Private" %} {# meaningful (role=img) #}
+```
+Output is built with `format_html` (labels are escaped). Status: **formalized.**
+
+### `{% crumb %}` — breadcrumb item
+```django
+{% crumb "Portal" "person-gear" urlname="portal" anchor="portal" %}
+{% crumb "Deploy" "rocket-takeoff" urlname="deploy" anchor="deploy" active=True %}
+```
+Reverses `urlname` (+ `#anchor`), puts `id="{{ anchor }}"` on the label span so
+`focusTo` deep-linking works, sets `aria-current` when active. Omit `urlname`
+for an unlinked crumb. Status: **formalized.**
+
+---
+
 ## Admin Console components
 
 Defined in `apps/core/static/css/admin-console.css`; load per page via
@@ -109,11 +133,106 @@ spinner + a headline parsed from `==>` lines); a monospace `.ac-console__body`
 log. Status: **formalized.** Use for any long-running job with streamed output.
 
 ### `.ac-note` — callout
-`--warn`/`--danger` variants; icon + text. Use for inline warnings/heads-ups.
+`--ok`/`--warn`/`--danger` variants; icon + text. Use for inline
+warnings/heads-ups and JS-swapped action results (`textContent` + class swap).
 ```html
 <div class="ac-note ac-note--warn" role="alert">{# icon #} <span>…</span></div>
 ```
 Status: **formalized.**
+
+### `.ac-tiles` + `.ac-tile` — KPI stat tiles
+Grid of clickable count tiles that double as filters. Semantic number color via
+`--ok/--info/--warn/--danger/--accent`; pass `--muted` when the count is zero
+so only live numbers draw the eye; `--active` marks the currently-applied
+filter.
+```html
+<div class="ac-tiles">
+  <a class="ac-tile ac-tile--danger ac-tile--active" href="?flag=unacked">
+    <span class="ac-tile__n">3</span>
+    <span class="ac-tile__label">Unacknowledged</span>
+  </a>
+</div>
+```
+Used: feedback dashboard. Status: **formalized** (supersedes the classic
+`display-6` card tile on admin surfaces).
+
+### `.ac-filter` + `.ac-chip` — filter bar
+Wrapping rows of pill chip links (one row per dimension, `.ac-filter__sep` as a
+group divider); active chip gets `--active` (amber wash). Compose with an inline
+`role="search"` form of `.ac-field`s. Driven by `{% querystring %}`.
+```html
+<div class="ac-filter" role="group" aria-label="State filter">
+  <a class="ac-chip ac-chip--active" href="…">Active</a>
+  <a class="ac-chip" href="…">Closed</a>
+</div>
+```
+Used: feedback dashboard. Status: **formalized.**
+
+### `.ac-btn` — secondary action button
+Small, bordered action button (the page's one primary stays `.ac-cta`).
+Semantic variants `--ok/--info/--warn/--danger/--accent` color text/border and
+fill the matching wash on hover. Works on `<a>` too (link colors are pinned).
+```html
+<button class="ac-btn ac-btn--ok" data-action="ack">Ack</button>
+```
+Status: **formalized.**
+
+### `.ac-field` + `.ac-label` — bare form field
+Input/textarea/select without the icon cell (`.ac-inputgroup` is the icon
+variant). `--inline` for auto width. `.ac-label` is the uppercase dim label.
+Status: **formalized.**
+
+### `.ac-rows` + `.ac-row` — record list
+The console list surface (mobile-first replacement for data tables — see
+decisions.md): one bordered stack; each row is wrapping flex with an icon tile
+(`__icon`), a main cell (`__title` with an `a.ac-row__link`, then a `__meta`
+line), and a right-aligned `__side` for pills/actions.
+```html
+<div class="ac-rows">
+  <div class="ac-row" id="row-7">
+    <span class="ac-row__icon">{% bi "bug" %}</span>
+    <div class="ac-row__main">
+      <div class="ac-row__title"><a class="ac-row__link" href="…">Summary</a></div>
+      <div class="ac-row__meta"><span class="mono">#7</span> <span>Reporter</span></div>
+    </div>
+    <div class="ac-row__side">{# .ac-pill, .ac-btn #}</div>
+  </div>
+</div>
+```
+Used: feedback dashboard. Status: **formalized.**
+
+### `.ac-empty` — empty state
+Dashed, centered, dim: icon + one sentence.
+```html
+<div class="ac-empty">{% bi "inbox" %} <span>No reports match.</span></div>
+```
+Status: **formalized** (supersedes the classic italic-card empty states as
+pages are touched).
+
+### `.ac-pager` — pagination
+Centered `.ac-btn` prev/next around a tabular-nums `.ac-pager__info`. Status:
+**formalized.**
+
+### `.ac-timeline` + `.ac-tl` — comment/audit trail
+Stacked entries: round source-icon tile, head line (author — `--staff` renders
+info-blue — pills, right-aligned time), pre-wrapped text. `--system` entries
+recede (deepest surface, dashed border, dim italic text) so human conversation
+stays foreground.
+Used: feedback detail. Status: **formalized.**
+
+### `.ac-quote` — verbatim text block
+Monospace `pre` on the deepest surface with a strong left edge — for captured
+player/machine text (report bodies, pasted output). The terminal feel is
+deliberate. Status: **formalized.**
+
+### `.ac-kv` — key/value details
+Two-column `dl` grid; dim keys, right-aligned values. Used: feedback detail.
+Status: **formalized.**
+
+### Container variants
+`.ac` (60rem) is the default console width; `.ac--wide` (72rem) for list-heavy
+surfaces. `.ac-cta--accent` is the amber non-destructive primary (red stays
+destructive).
 
 ---
 
@@ -134,8 +253,8 @@ Every page reimplements:
   <a class="icon-link icon-link-hover" href="…">{# icon #} <span>Label</span></a>
 </li>
 ```
-Admin/portal pages lead with a Portal crumb. Divider is `•`. **Prime candidate
-for a partial.**
+Admin/portal pages lead with a Portal crumb. Divider is `•`. **Formalized as
+`{% crumb %}` (see above) — use the tag; migrate old templates as touched.**
 
 ### Count pill
 `<span class="badge bg-dark rounded-pill border border-secondary">{{ n }}</span>`
@@ -152,22 +271,24 @@ semantic number color, zero-suppressed emphasis:
   </div>
 </a>
 ```
-Used in `apps/feedback/templates/feedback_dashboard.html`. **Formalize; the
-Admin Console equivalent should become an `.ac-tile`.**
+**Superseded on admin surfaces by `.ac-tile` (see above);** the classic markup
+survives only on untouched pages.
 
 ### Filter bar
 Row of `btn btn-sm btn-outline-*` toggles (active = solid), driven by Django's
-`{% querystring %}` tag, with an inline `role="search"` form. See the feedback
-dashboard. Candidate to standardize as `.ac-filter`.
+`{% querystring %}` tag, with an inline `role="search"` form. **Superseded by
+`.ac-filter` + `.ac-chip` (see above).**
 
 ### Contextual badge
 `<span class="badge text-bg-{{ status_css }}">{{ status_label }}</span>` with the
-color map on the model. On admin surfaces, migrate to `.ac-pill--{ok|info|…}`.
+color map on the model. **On admin surfaces this is now `.ac-pill--{{
+status_pill }}`** — the model carries both maps (see `Feedback.status_pill` and
+decisions.md); classic badges survive only on untouched pages.
 
 ### Empty state
 `<div class="card"><div class="card-body"><p class="card-text fst-italic lead
-text-warning">No … found.</p></div></div>` (leaders/challenges) — or the feedback
-dashboard's `border bg-black card` italic variant. Standardize one.
+text-warning">No … found.</p></div></div>` (leaders/challenges). **Superseded by
+`.ac-empty` (see above)** as pages are touched.
 
 ### DataTable
 `table table-hover table-dark table-flush table-sm table-responsive
