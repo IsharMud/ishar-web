@@ -1,0 +1,214 @@
+{% extends "layout.html" %}
+{% load humanize %}
+{% load static %}
+{% block meta_title %}{{ WEBSITE_TITLE }} Feedback Triage{% endblock meta_title %}
+{% block meta_description %}Staff feedback triage for {{ WEBSITE_TITLE }}.{% endblock meta_description %}
+{% block meta_url %}{% url 'feedback' %}#feedback{% endblock meta_url %}
+{% block title %}{{ WEBSITE_TITLE }} Feedback Triage{% endblock title %}
+{% block scripts %}let focusTo = 'feedback'{% endblock scripts %}
+{% block breadcrumbs %}
+    <li class="breadcrumb-item h2" title="Portal">
+        <a class="icon-link icon-link-hover" href="{% url 'portal' %}#portal">
+            <svg class="bi" aria-hidden="true">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#person-gear"></use>
+            </svg>
+            <span id="portal">Portal</span>
+        </a>
+    </li>
+    <li class="breadcrumb-item active h2" aria-current="page" title="Feedback Triage">
+        <a class="icon-link icon-link-hover" href="{% url 'feedback' %}#feedback">
+            <svg class="bi" aria-hidden="true">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#flag"></use>
+            </svg>
+            <span id="feedback">Feedback Triage</span>
+        </a>
+    </li>
+{% endblock breadcrumbs %}
+{% block content %}
+
+{# ---- Summary tiles ------------------------------------------------------ #}
+<div class="row g-2 mb-3">
+    <div class="col-6 col-lg-3">
+        <a class="text-decoration-none" href="{% url 'feedback' %}?show=active">
+            <div class="border bg-black card text-center p-2 h-100">
+                <span class="display-6">{{ counts.active }}</span>
+                <span class="text-secondary small text-uppercase">Active</span>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-lg-3">
+        <a class="text-decoration-none" href="{% url 'feedback' %}?flag=unacked">
+            <div class="border border-danger-subtle bg-black card text-center p-2 h-100">
+                <span class="display-6 {% if counts.unacked %}text-danger{% endif %}">{{ counts.unacked }}</span>
+                <span class="text-secondary small text-uppercase">Unacknowledged</span>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-lg-3">
+        <a class="text-decoration-none" href="{% url 'feedback' %}?show=in_progress">
+            <div class="border bg-black card text-center p-2 h-100">
+                <span class="display-6 text-info">{{ counts.in_progress }}</span>
+                <span class="text-secondary small text-uppercase">In Progress</span>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-lg-3">
+        <a class="text-decoration-none" href="{% url 'feedback' %}?flag=bountied">
+            <div class="border bg-black card text-center p-2 h-100">
+                <span class="display-6 text-warning">{{ counts.bountied }}</span>
+                <span class="text-secondary small text-uppercase">Bountied</span>
+            </div>
+        </a>
+    </div>
+</div>
+
+{# ---- Filter bar --------------------------------------------------------- #}
+<div class="border bg-black card p-2 mb-3">
+    <div class="d-flex flex-wrap gap-1 mb-2" role="group" aria-label="State filter">
+        {% for key, label in show_filters %}
+        <a class="btn btn-sm {% if current.show == key %}btn-secondary{% else %}btn-outline-secondary{% endif %}"
+           href="{% querystring show=key page=None %}">{{ label }}</a>
+        {% endfor %}
+    </div>
+    <div class="d-flex flex-wrap gap-1 mb-2" role="group" aria-label="Type filter">
+        <a class="btn btn-sm {% if not current.type %}btn-primary{% else %}btn-outline-primary{% endif %}"
+           href="{% querystring type=None page=None %}">All types</a>
+        {% for value, label in feedback_types %}
+        <a class="btn btn-sm {% if current.type == value %}btn-primary{% else %}btn-outline-primary{% endif %}"
+           href="{% querystring type=value page=None %}">{{ label }}</a>
+        {% endfor %}
+    </div>
+    <div class="d-flex flex-wrap gap-1 align-items-center">
+        {% for f in flag_filters %}
+        <a class="btn btn-sm {% if current.flag == f %}btn-warning{% else %}btn-outline-warning{% endif %} text-capitalize"
+           href="{% querystring flag=f page=None %}">{{ f }}</a>
+        {% endfor %}
+        {% if current.flag %}
+        <a class="btn btn-sm btn-outline-light" href="{% querystring flag=None page=None %}">clear</a>
+        {% endif %}
+        <form class="d-flex ms-auto gap-1" method="get" role="search">
+            <input type="hidden" name="show" value="{{ current.show }}">
+            {% if current.type %}<input type="hidden" name="type" value="{{ current.type }}">{% endif %}
+            {% if current.flag %}<input type="hidden" name="flag" value="{{ current.flag }}">{% endif %}
+            <input class="form-control form-control-sm bg-dark text-light border-secondary" type="search"
+                   name="q" value="{{ current.q }}" placeholder="Search text, name, #id" aria-label="Search">
+            <select class="form-select form-select-sm bg-dark text-light border-secondary w-auto" name="sort" onchange="this.form.submit()" aria-label="Sort">
+                <option value="newest" {% if current.sort == "newest" %}selected{% endif %}>Newest</option>
+                <option value="oldest" {% if current.sort == "oldest" %}selected{% endif %}>Oldest</option>
+                <option value="level" {% if current.sort == "level" %}selected{% endif %}>Level</option>
+            </select>
+            <button class="btn btn-sm btn-outline-light" type="submit">Go</button>
+        </form>
+    </div>
+</div>
+
+{# ---- Reports table ------------------------------------------------------ #}
+{% if reports %}
+<div class="table-responsive">
+    <table class="table table-dark table-hover table-sm align-middle border">
+        <thead>
+            <tr class="text-secondary small text-uppercase">
+                <th scope="col">#</th>
+                <th scope="col">Type</th>
+                <th scope="col">Status</th>
+                <th scope="col">Summary</th>
+                <th scope="col">Reporter</th>
+                <th scope="col">Src</th>
+                <th scope="col">Age</th>
+                <th scope="col" class="text-end">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for report in reports %}
+            <tr id="row-{{ report.pk }}">
+                <td class="text-secondary">{{ report.pk }}</td>
+                <td title="{{ report.get_feedback_type_display }}">
+                    <svg class="bi" aria-hidden="true" width="16" height="16">
+                        <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#{{ report.type_icon }}"></use>
+                    </svg>
+                </td>
+                <td>
+                    <span class="badge text-bg-{{ report.status_css }}" data-role="status">{{ report.status_label }}</span>
+                </td>
+                <td>
+                    <a class="link-light text-decoration-none" href="{% url 'feedback_detail' report.pk %}">
+                        {{ report.summary }}
+                    </a>
+                    {% if report.is_private %}<svg class="bi text-warning" title="Private" aria-label="Private" width="14" height="14"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#lock-fill"></use></svg>{% endif %}
+                    {% if report.bountied %}<svg class="bi text-warning" title="Bountied" aria-label="Bountied" width="14" height="14"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#coin"></use></svg>{% endif %}
+                    {% if report.github_issue_url %}<a href="{{ report.github_issue_url }}" target="_blank" rel="noopener" title="GitHub issue"><svg class="bi text-info" aria-label="GitHub issue" width="14" height="14"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#github"></use></svg></a>{% endif %}
+                    {% if report.num_comments %}<span class="badge rounded-pill text-bg-dark border border-secondary" title="{{ report.num_comments }} comment{{ report.num_comments|pluralize }}">{{ report.num_comments }}</span>{% endif %}
+                </td>
+                <td class="small">
+                    {{ report.player_name|default:"—" }}{% if report.player_level %} <span class="text-secondary">({{ report.player_level }})</span>{% endif %}
+                </td>
+                <td class="small text-secondary text-capitalize">{{ report.source }}</td>
+                <td class="small text-secondary" title="{{ report.created_at }}">{{ report.created_at|naturaltime|default:"—" }}</td>
+                <td class="text-end text-nowrap">
+                    {% if report.is_unacknowledged %}
+                    <button class="btn btn-sm btn-outline-success fb-action" data-id="{{ report.pk }}" data-action="ack" title="Acknowledge">Ack</button>
+                    {% elif report.acknowledged_by %}
+                    <span class="text-secondary small" title="Acknowledged by {{ report.acknowledged_by }}">✓ {{ report.acknowledged_by }}</span>
+                    {% endif %}
+                    <a class="btn btn-sm btn-outline-light" href="{% url 'feedback_detail' report.pk %}">Open</a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if is_paginated %}
+<nav aria-label="Feedback pages">
+    <ul class="pagination pagination-sm justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item"><a class="page-link bg-dark text-light border-secondary" href="{% querystring page=page_obj.previous_page_number %}">Prev</a></li>
+        {% endif %}
+        <li class="page-item disabled"><span class="page-link bg-black text-secondary border-secondary">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+        {% if page_obj.has_next %}
+        <li class="page-item"><a class="page-link bg-dark text-light border-secondary" href="{% querystring page=page_obj.next_page_number %}">Next</a></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+{% else %}
+<div class="card bg-black border">
+    <div class="card-body">
+        <p class="card-text fst-italic">No feedback reports match the current filter.</p>
+    </div>
+</div>
+{% endif %}
+
+<script>
+    // Inline acknowledge from the triage list.
+    async function feedbackAction(button) {
+        const id = button.dataset.id
+        const action = button.dataset.action
+        button.disabled = true
+        const resp = await fetch(`/feedback/${id}/${action}/`, {
+            method: "POST",
+            headers: {"X-CSRFToken": "{{ csrf_token }}"},
+        })
+        const data = await resp.json().catch(() => ({ok: false, message: "Error"}))
+        if (data.ok) {
+            const row = document.getElementById(`row-${id}`)
+            const badge = row.querySelector('[data-role="status"]')
+            if (badge && data.status_label) {
+                badge.textContent = data.status_label
+                badge.className = `badge text-bg-${data.status_css}`
+            }
+            const done = document.createElement("span")
+            done.className = "text-secondary small"
+            done.textContent = `✓ ${data.acknowledged_by || ""}`  // textContent: no HTML injection
+            button.replaceWith(done)
+        } else {
+            button.disabled = false
+            alert(data.message || "The action failed.")
+        }
+    }
+    document.querySelectorAll(".fb-action").forEach((el) => {
+        el.addEventListener("click", () => feedbackAction(el))
+    })
+</script>
+{% endblock content %}

@@ -24,3 +24,19 @@ class GodRequiredMixin(View):
         if not (user and user.is_authenticated and user.is_god()):
             raise Http404
         return super().dispatch(request, *args, **kwargs)
+
+
+class EternalRequiredMixin(View):
+    """Restrict a view to Eternal-level accounts (immortal_level >= ETERNAL).
+
+    Same 404-for-everyone-else convention as GodRequiredMixin, so a staff
+    surface's existence is not disclosed to non-staff. Mirrors the in-game
+    `LEVEL_ETERNAL` gate on the `reports` command; game-DB immortal_level is the
+    sole source of truth (see apps/accounts/models/account.py: is_eternal()).
+    """
+
+    def dispatch(self, request, *args, **kwargs):
+        user = getattr(request, "user", None)
+        if not (user and user.is_authenticated and user.is_eternal()):
+            raise Http404
+        return super().dispatch(request, *args, **kwargs)

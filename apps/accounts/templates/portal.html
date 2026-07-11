@@ -52,14 +52,16 @@
                     Challenges
                 </a>
             </li>
-            <li class="card-text list-group-item" title="Feedback">
+            {% if user.is_eternal %}
+            <li class="card-text list-group-item" title="Feedback Triage">
                 <a class="list-group-item-text icon-link icon-link-hover" href="{% url 'feedback' %}#feedback">
                     <svg class="bi" aria-hidden="true">
-                        <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#mailbox-flag"></use>
+                        <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#flag"></use>
                     </svg>
-                    Feedback
+                    Feedback Triage
                 </a>
             </li>
+            {% endif %}
             <li class="card-text list-group-item" title="Leaders">
                 <a class="list-group-item-text icon-link icon-link-hover" href="{% url 'leaders' %}#leaders">
                     <svg class="bi" aria-hidden="true">
