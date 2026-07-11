@@ -4,8 +4,9 @@ Feedback triage dashboard — the filterable, sortable table of reports.
 from django.db.models import Count, Q
 from django.views.generic.list import ListView
 
+from apps.core.views.mixins import EternalRequiredMixin, NeverCacheMixin
+
 from ..models import Feedback, FeedbackState, FeedbackType
-from ..permissions import StaffFeedbackMixin
 
 
 # Which report subsets the "show" filter exposes, and how each scopes the query.
@@ -32,7 +33,7 @@ SORTS = {
 }
 
 
-class FeedbackDashboardView(StaffFeedbackMixin, ListView):
+class FeedbackDashboardView(EternalRequiredMixin, NeverCacheMixin, ListView):
     """Staff-facing list of feedback reports with filters and counts."""
 
     context_object_name = "reports"

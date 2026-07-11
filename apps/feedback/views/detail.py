@@ -3,11 +3,12 @@ Feedback report detail — full report, timeline, and the staff action panel.
 """
 from django.views.generic.detail import DetailView
 
+from apps.core.views.mixins import EternalRequiredMixin, NeverCacheMixin
+
 from ..models import Feedback
-from ..permissions import StaffFeedbackMixin
 
 
-class FeedbackDetailView(StaffFeedbackMixin, DetailView):
+class FeedbackDetailView(EternalRequiredMixin, NeverCacheMixin, DetailView):
     """Single report with its comment timeline and available staff actions."""
 
     context_object_name = "report"

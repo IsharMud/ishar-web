@@ -1,21 +1,26 @@
 """
 Staff action endpoint — one POST per `reports` verb, returned as JSON for the
-dashboard's AJAX buttons. Gods-only verbs (assign_claude) are gated here, the
-rest require Eternal via `StaffFeedbackMixin`.
+dashboard's AJAX buttons. Eternal is required for the surface (EternalRequiredMixin);
+the Gods-only verb (assign_claude) is additionally gated here, mirroring the
+in-game `reports claude` level gate.
 """
 import json
 import logging
 
-from django.core.exceptions import PermissionDenied, ValidationError
+from django.core.exceptions import ValidationError
 from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.generic.base import View
 
+from apps.core.views.mixins import EternalRequiredMixin, NeverCacheMixin
+
 from .. import services
 from ..models import Feedback, FeedbackResolution
-from ..permissions import StaffFeedbackMixin, requires_god
 
 log = logging.getLogger(__name__)
+
+# Verbs that require God level, beyond the Eternal gate on the whole surface.
+GOD_ONLY_ACTIONS = frozenset({"assign_claude"})
 
 
 def _run(action, feedback, actor, data):
@@ -45,7 +50,7 @@ def _run(action, feedback, actor, data):
     raise Http404(f"Unknown feedback action: {action}")
 
 
-class FeedbackActionView(StaffFeedbackMixin, View):
+class FeedbackActionView(EternalRequiredMixin, NeverCacheMixin, View):
     """Handle a single staff action against one report."""
 
     http_method_names = ("post",)
@@ -54,9 +59,13 @@ class FeedbackActionView(StaffFeedbackMixin, View):
         action = kwargs.get("action")
         feedback = get_object_or_404(Feedback, pk=kwargs.get("pk"))
 
-        # Gods-only verbs (mirrors the `reports claude` level gate).
-        if requires_god(action) and not request.user.is_god():
-            raise PermissionDenied("Only Gods may assign feedback to Claude.")
+        # Gods-only verbs (mirrors the `reports claude` level gate). The whole
+        # surface is already Eternal-gated, so a clear JSON 403 is right here.
+        if action in GOD_ONLY_ACTIONS and not request.user.is_god():
+            return JsonResponse(
+                {"ok": False, "message": "Only Gods may assign feedback to Claude."},
+                status=403,
+            )
 
         actor = services.staff_name(request.user)
 
