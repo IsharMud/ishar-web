@@ -1,0 +1,143 @@
+# Design Tokens
+
+The canonical palette and scales. Every color, surface, and radius on a
+faceflifted page should come from here — no ad-hoc hex.
+
+Two token sets exist today and are **cohesive by design** (same amber, same body
+text). The **Admin Console set (`--ac-*`) is the go-forward vocabulary**; the
+classic site currently hard-codes most of these values inline in `style.css`.
+The target (enabler E1) is one shared base that both express in terms of.
+
+Sources of truth:
+- `apps/core/static/css/admin-console.css` — the `--ac-*` tokens (defined as
+  `:root` custom properties; reference implementation).
+- `apps/core/static/css/style.css` — the classic values (only `--ishar-color` is
+  a variable today; the rest are literal).
+- `apps/connect/static/css/hud.css` — the HUD's `--hud-*` set (same idea, to be
+  aligned).
+
+---
+
+## Brand
+
+| Token | Value | Meaning |
+|---|---|---|
+| `--ac-accent` / `--ishar-color` | `#fa7` | The Ishar amber. Brand, focus, primary/live accents. Use sparingly. |
+| `--ac-accent-2` | `#ffd7b0` | Lighter amber for text/marks on amber washes (contrast). |
+
+The full hex of the brand amber is `#ffaa77` (that's what the `theme-color` /
+tile meta use); `#fa7` is the shorthand used in CSS.
+
+---
+
+## Surfaces (dark, layered)
+
+Surfaces step **up in lightness** as they come forward. Classic panels are pure
+black with an amber outline; Admin Console panels use the layered greys.
+
+| Token | Value | Use |
+|---|---|---|
+| `--ac-bg` | `#0c0c0d` | Deepest surface — page/console background, inset wells. |
+| `--ac-panel` | `#131316` | Panel / card surface. |
+| `--ac-elev` | `#1c1c22` | Raised / hover surface, chips, icon tiles. |
+| `--ac-border` | `#2a2a30` | Default hairline border. |
+| `--ac-border-2` | `#3a3a44` | Stronger border (hover/active/inputs). |
+| — (classic) | `#000` | Classic public panels (`.card`, `.navbar`, `.list-group`). |
+| — (classic) | `#323639` | Classic page background (`body`); also classic button/select bg. |
+
+The HUD equivalents: `--hud-bg #0c0c0d`, `--hud-panel #131316`, `--hud-border
+#2a2a30`, elevated `#1c1c22` — i.e. already the same values as `--ac-*`.
+
+---
+
+## Text
+
+| Token | Value | Use |
+|---|---|---|
+| `--ac-text` | `#d6d6d7` | Body text. The canonical foreground everywhere. |
+| `--ac-dim` | `#8a8a92` | Muted text: labels, hints, secondary meta. |
+| — | `#c7c7c9` | Console/log body text (slightly dimmer than body). |
+
+Headings, `<label>`, `<strong>`, `<th>`, `.card-header`, `.card-title`, and
+`.text-ishar` render in **amber** (`--ishar-color`) on the classic site — that's
+the site's "highlighted text" convention.
+
+---
+
+## Links (classic site)
+
+| State | Value |
+|---|---|
+| link | `#09f` (bright blue) |
+| active / visited | `#6082b6` (muted blue) |
+| hover | `#d6d6d7` (body text) |
+
+Admin Console surfaces generally avoid raw links in favor of buttons/pills; when
+a link is needed there, prefer `--ac-accent` on hover.
+
+---
+
+## Semantic colors (fixed meanings)
+
+Do not repurpose these. They mean the same thing on every surface.
+
+| Token | Value | Meaning |
+|---|---|---|
+| `--ac-ok` | `#4cbb17` | Success, healthy, safe, "moves" (HUD). Also `.message-success`, active season. |
+| `--ac-info` | `#4a86cf` | Informational, in-progress, "mana" (HUD). |
+| `--ac-warn` | `#f80` | Caution / heads-up. Also `.message-warn`/`.message-warning`. |
+| `--ac-danger` | `#d64b4b` | Destructive / error (Admin Console). |
+| — (classic danger) | `#d02b2b` | `.message-error`, dead/survival/hardcore players. |
+| — (immortal) | `#00b7eb` | Immortal accounts (god/forger/eternal/artisan/immortal/consort). Cyan. |
+| — (HUD gold) | `#cdcd00` | XP / currency in the HUD. |
+
+**Player-status vocabulary** (from `style.css`, used by `player_css`):
+- Immortals (`.god-player` … `.consort-player`): `#00b7eb`, with emoji affix
+  (`😇` god, `👼` other immortals).
+- Dead / survival / hardcore (`.dead-player`, …): `#d02b2b`; visited `#fa8072`;
+  hover `#f00`; affix `☠️`.
+
+**Status → color maps** (data-driven) live on the models, e.g. feedback's
+`status_css` (`apps/feedback/models/feedback.py`) emits Bootstrap contextual
+names (`success`/`danger`/`info`/`primary`/`warning`/`secondary`). Keep those in
+the model, render with Bootstrap `text-bg-*` or an `.ac-pill--*` modifier.
+
+---
+
+## Translucent washes
+
+Subtle tints for selected/active states and hero banners.
+
+| Token | Value |
+|---|---|
+| `--ac-wash` | `rgba(255,170,119,.12)` (amber) |
+| `--ac-ok-wash` | `rgba(76,187,23,.12)` |
+| `--ac-info-wash` | `rgba(74,134,207,.14)` |
+| `--ac-danger-wash` | `rgba(214,75,75,.14)` |
+
+---
+
+## Radii & motion
+
+| Token | Value | Use |
+|---|---|---|
+| `--ac-radius` | `.6rem` | Panels, hero, console. |
+| `--ac-radius-sm` | `.4rem` | Inputs, toggles, buttons, chips. |
+| pill radius | `999px` | Status pills, segmented control. |
+
+Motion: transitions are ~`.15s`; the few keyframes (`ac-pulse`, `ac-rotate`,
+`ac-glow`) live in `admin-console.css`. **All motion is disabled under**
+`@media (prefers-reduced-motion: reduce)` — match that whenever you add any.
+
+---
+
+## Typography
+
+- **No custom web fonts.** Body uses the Bootstrap system stack.
+- **Monospace** (`var(--bs-font-monospace, monospace)`) for logs, terminals,
+  service names, and code — anywhere "machine" text belongs.
+- **Section labels** are the dashboard signature: `UPPERCASE`, `font-weight:700`,
+  `letter-spacing:~.09em`, in `--ac-dim` (see `.ac-panel__h`). Use them for panel
+  headers on admin surfaces.
+- Numeric readouts that tick (timers, counts) use
+  `font-variant-numeric: tabular-nums` so they don't jitter.
