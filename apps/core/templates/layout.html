@@ -255,6 +255,16 @@
                                         </svg>
                                     </a>
                                 </li>
+        {% if user.is_god %}
+                                <li class="nav-item" title="Deploy">
+                                    <a class="nav-link dropdown-item icon-link icon-link-hover" href="{% url 'deploy' %}#deploy">
+                                        <svg class="bi" aria-hidden="true">
+                                            <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#rocket-takeoff"></use>
+                                        </svg>
+                                        Deploy
+                                    </a>
+                                </li>
+        {% endif %}
                                 <li class="nav-item">
                                     <hr class="dropdown-divider">
                                 </li>
