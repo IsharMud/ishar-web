@@ -1,0 +1,514 @@
+/* ==========================================================================
+   admin-console.css — Ishar "Admin Console" design language
+   --------------------------------------------------------------------------
+   A reusable token + component layer for first-class staff/admin tooling
+   (deploy console first; feedback triage & future admin surfaces next).
+
+   Built ON TOP of the site brand: the single amber accent (--ishar-color: #fa7)
+   and body text (#d6d6d7) carry over, but surfaces use the richer layered-grey
+   system pioneered by the connect HUD (hud.css) instead of flat black+amber.
+
+   Conventions (adopt these anywhere admin tooling is built):
+     - Surfaces step up in lightness: --ac-bg < --ac-panel < --ac-elev.
+     - Accent (amber) is used sparingly: headers, focus, primary/live state.
+     - Semantic colors are fixed: ok=green, info=blue, warn=orange, danger=red.
+     - Section headers are UPPERCASE, letter-spaced, dim (.ac-panel__h).
+     - Status is a .ac-pill; a live pill gets a pulsing dot.
+     - Selectable options are .btn-check inputs styled via sibling labels
+       (.ac-seg__item / .ac-toggle) so they stay accessible + keyboard-friendly.
+     - Motion is subtle and ALWAYS disabled under prefers-reduced-motion.
+   Load per-page via {% block includes %}, not globally.
+   ========================================================================== */
+
+:root {
+    --ac-accent:      #fa7;                      /* brand amber */
+    --ac-accent-2:    #ffd7b0;                   /* lighter amber for text-on-accent gradients */
+    --ac-bg:          #0c0c0d;                   /* deepest surface */
+    --ac-panel:       #131316;                   /* panel surface */
+    --ac-elev:        #1c1c22;                   /* raised / hover surface */
+    --ac-border:      #2a2a30;                   /* hairline border */
+    --ac-border-2:    #3a3a44;                   /* stronger border (hover/active) */
+    --ac-text:        #d6d6d7;                   /* body text */
+    --ac-dim:         #8a8a92;                   /* muted / labels */
+    --ac-ok:          #4cbb17;                   /* success / safe */
+    --ac-info:        #4a86cf;                   /* informational */
+    --ac-warn:        #f80;                      /* caution */
+    --ac-danger:      #d64b4b;                   /* destructive / error */
+    --ac-wash:        rgba(255, 170, 119, .12);  /* translucent amber wash */
+    --ac-ok-wash:     rgba(76, 187, 23, .12);
+    --ac-info-wash:   rgba(74, 134, 207, .14);
+    --ac-danger-wash: rgba(214, 75, 75, .14);
+    --ac-radius:      .6rem;
+    --ac-radius-sm:   .4rem;
+}
+
+/* Outer container so the console reads as one cohesive surface. */
+.ac {
+    color: var(--ac-text);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-width: 60rem;
+}
+
+/* ------------------------------------------------------------------ hero -- */
+.ac-hero {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.15rem 1.35rem;
+    border: 1px solid var(--ac-border);
+    border-left: 3px solid var(--ac-accent);
+    border-radius: var(--ac-radius);
+    background:
+        radial-gradient(120% 140% at 0% 0%, var(--ac-wash) 0%, transparent 55%),
+        linear-gradient(100deg, #1a1509 0%, var(--ac-panel) 42%, var(--ac-bg) 100%);
+    overflow: hidden;
+}
+.ac-hero__badge {
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    width: 3.25rem;
+    height: 3.25rem;
+    border-radius: 50%;
+    color: var(--ac-accent);
+    background: var(--ac-wash);
+    box-shadow: inset 0 0 0 1px rgba(255, 170, 119, .25);
+}
+.ac-hero__badge .bi { width: 1.6rem; height: 1.6rem; }
+.ac-hero__text { min-width: 0; flex: 1 1 auto; }
+.ac-hero__title {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: .01em;
+    color: var(--ac-accent);
+    line-height: 1.1;
+}
+.ac-hero__sub {
+    margin: .2rem 0 0;
+    color: var(--ac-dim);
+    font-size: .9rem;
+}
+.ac-hero__sub code {
+    color: var(--ac-accent-2);
+    background: rgba(255, 170, 119, .1);
+    padding: .05rem .3rem;
+    border-radius: .25rem;
+}
+.ac-hero__status { flex: 0 0 auto; align-self: flex-start; }
+
+/* --------------------------------------------------------------- pills --- */
+.ac-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .28rem .6rem;
+    border-radius: 999px;
+    font-size: .72rem;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--ac-dim);
+    background: var(--ac-elev);
+    border: 1px solid var(--ac-border);
+    transition: background .15s, border-color .15s, color .15s;
+}
+.ac-pill__dot {
+    width: .5rem;
+    height: .5rem;
+    border-radius: 50%;
+    background: currentColor;
+    flex: 0 0 auto;
+}
+.ac-pill--muted   { color: var(--ac-dim);    border-color: var(--ac-border); }
+.ac-pill--ok      { color: var(--ac-ok);     border-color: rgba(76,187,23,.4);  background: var(--ac-ok-wash); }
+.ac-pill--info    { color: var(--ac-info);   border-color: rgba(74,134,207,.4); background: var(--ac-info-wash); }
+.ac-pill--warn    { color: var(--ac-warn);   border-color: rgba(255,136,0,.4);  background: rgba(255,136,0,.12); }
+.ac-pill--danger  { color: var(--ac-danger); border-color: rgba(214,75,75,.45); background: var(--ac-danger-wash); }
+.ac-pill--accent  { color: var(--ac-accent); border-color: rgba(255,170,119,.45); background: var(--ac-wash); }
+/* Status pills carry a leading dot as a pseudo-element so JS may replace the
+   label via textContent (no innerHTML) without wiping the dot. */
+.ac-pill--status::before {
+    content: "";
+    width: .5rem; height: .5rem; border-radius: 50%;
+    background: currentColor; flex: 0 0 auto;
+}
+/* A live pill's dot breathes. */
+.ac-pill--live .ac-pill__dot,
+.ac-pill--status.ac-pill--live::before { animation: ac-pulse 1.4s ease-in-out infinite; }
+
+/* -------------------------------------------------------------- panels --- */
+.ac-panel {
+    border: 1px solid var(--ac-border);
+    border-radius: var(--ac-radius);
+    background: var(--ac-panel);
+    padding: 1.1rem 1.25rem;
+}
+.ac-panel__h {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin: 0 0 .2rem;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: var(--ac-dim);
+}
+.ac-panel__h .bi { width: .95rem; height: .95rem; color: var(--ac-accent); }
+.ac-panel__hint {
+    margin: 0 0 .85rem;
+    color: var(--ac-dim);
+    font-size: .85rem;
+}
+.ac-panel__hint code {
+    color: var(--ac-accent-2);
+    background: rgba(255,170,119,.1);
+    padding: .03rem .28rem;
+    border-radius: .25rem;
+}
+
+/* --------------------------------------------------- segmented control --- */
+.ac-seg {
+    display: inline-flex;
+    padding: .28rem;
+    gap: .28rem;
+    border-radius: 999px;
+    background: var(--ac-bg);
+    border: 1px solid var(--ac-border);
+}
+.ac-seg__item {
+    cursor: pointer;
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    padding: .4rem 1.1rem;
+    border-radius: 999px;
+    font-weight: 600;
+    color: var(--ac-dim);
+    border: 1px solid transparent;
+    transition: background .15s, color .15s, border-color .15s;
+    user-select: none;
+}
+.ac-seg__item .bi { width: 1rem; height: 1rem; }
+.ac-seg__item:hover { color: var(--ac-text); background: var(--ac-elev); }
+.btn-check:checked + .ac-seg__item {
+    color: var(--ac-text);
+    background: var(--ac-elev);
+    border-color: var(--ac-border-2);
+}
+/* Environment intent tints when selected. */
+.btn-check:checked + .ac-seg__item--prod {
+    color: #ffb3b3;
+    background: var(--ac-danger-wash);
+    border-color: rgba(214,75,75,.5);
+}
+.btn-check:checked + .ac-seg__item--test {
+    color: #bcd8ff;
+    background: var(--ac-info-wash);
+    border-color: rgba(74,134,207,.5);
+}
+.btn-check:focus-visible + .ac-seg__item {
+    outline: 2px solid var(--ac-accent);
+    outline-offset: 2px;
+}
+
+/* ------------------------------------------------------- toggle cards --- */
+.ac-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    gap: .6rem;
+}
+.ac-toggle {
+    cursor: pointer;
+    margin: 0;
+    display: flex;
+    align-items: flex-start;
+    gap: .7rem;
+    padding: .8rem .9rem;
+    border-radius: var(--ac-radius-sm);
+    background: var(--ac-bg);
+    border: 1px solid var(--ac-border);
+    transition: background .15s, border-color .15s, box-shadow .15s, transform .1s;
+}
+.ac-toggle:hover { border-color: var(--ac-border-2); background: var(--ac-elev); }
+.ac-toggle:active { transform: translateY(1px); }
+.ac-toggle__icon {
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    width: 2.1rem;
+    height: 2.1rem;
+    border-radius: var(--ac-radius-sm);
+    color: var(--ac-dim);
+    background: var(--ac-elev);
+    border: 1px solid var(--ac-border);
+    transition: color .15s, background .15s, border-color .15s;
+}
+.ac-toggle__icon .bi { width: 1.15rem; height: 1.15rem; }
+.ac-toggle__body { min-width: 0; }
+.ac-toggle__name {
+    font-weight: 600;
+    color: var(--ac-text);
+    font-family: var(--bs-font-monospace, monospace);
+    font-size: .92rem;
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+}
+.ac-toggle__note { color: var(--ac-dim); font-size: .78rem; margin-top: .1rem; }
+.ac-toggle__check {
+    margin-left: auto;
+    flex: 0 0 auto;
+    align-self: center;
+    color: var(--ac-border-2);
+    transition: color .15s, transform .15s;
+}
+.ac-toggle__check .bi { width: 1.25rem; height: 1.25rem; }
+/* Selected state. */
+.btn-check:checked + .ac-toggle {
+    border-color: rgba(255,170,119,.55);
+    background: var(--ac-wash);
+    box-shadow: inset 0 0 0 1px rgba(255,170,119,.25);
+}
+.btn-check:checked + .ac-toggle .ac-toggle__icon {
+    color: var(--ac-accent);
+    background: rgba(255,170,119,.14);
+    border-color: rgba(255,170,119,.4);
+}
+.btn-check:checked + .ac-toggle .ac-toggle__check { color: var(--ac-accent-2); transform: scale(1.05); }
+.btn-check:focus-visible + .ac-toggle { outline: 2px solid var(--ac-accent); outline-offset: 2px; }
+
+/* -------------------------------------------------------- callouts --- */
+.ac-note {
+    display: flex;
+    align-items: flex-start;
+    gap: .6rem;
+    padding: .75rem .9rem;
+    border-radius: var(--ac-radius-sm);
+    border: 1px solid var(--ac-border);
+    background: var(--ac-elev);
+    color: var(--ac-text);
+    font-size: .88rem;
+    line-height: 1.5;
+}
+.ac-note .bi { width: 1.15rem; height: 1.15rem; flex: 0 0 auto; margin-top: .12rem; }
+.ac-note code {
+    color: var(--ac-accent-2);
+    background: rgba(255,170,119,.1);
+    padding: .03rem .28rem; border-radius: .25rem;
+}
+.ac-note--warn   { border-color: rgba(255,136,0,.4);  background: rgba(255,136,0,.09); }
+.ac-note--warn   .bi { color: var(--ac-warn); }
+.ac-note--danger { border-color: rgba(214,75,75,.4);  background: var(--ac-danger-wash); }
+.ac-note--danger .bi { color: var(--ac-danger); }
+
+/* --------------------------------------------------------- form bits --- */
+/* Uses Bootstrap's native .form-switch shape; we only recolor + resize it. */
+.ac-switch .form-check-input {
+    width: 2.6em;
+    height: 1.3em;
+    margin-top: .1em;
+    background-color: var(--ac-bg);
+    border-color: var(--ac-border-2);
+    cursor: pointer;
+}
+.ac-switch .form-check-input:checked {
+    background-color: var(--ac-accent);
+    border-color: var(--ac-accent);
+}
+.ac-switch .form-check-input:focus {
+    border-color: var(--ac-accent);
+    box-shadow: 0 0 0 .2rem var(--ac-wash);
+}
+.ac-switch .form-check-label { color: var(--ac-text); cursor: pointer; }
+.ac-switch__text code {
+    color: var(--ac-accent-2);
+    background: rgba(255,170,119,.1);
+    padding: .03rem .28rem; border-radius: .25rem;
+}
+.ac-switch__note { color: var(--ac-dim); font-size: .8rem; }
+
+.ac-inputgroup {
+    display: flex;
+    align-items: stretch;
+    border: 1px solid var(--ac-border);
+    border-radius: var(--ac-radius-sm);
+    background: var(--ac-bg);
+    overflow: hidden;
+    transition: border-color .15s, box-shadow .15s;
+}
+.ac-inputgroup:focus-within {
+    border-color: var(--ac-accent);
+    box-shadow: 0 0 0 .2rem var(--ac-wash);
+}
+.ac-inputgroup__icon {
+    display: grid; place-items: center;
+    padding: 0 .8rem;
+    color: var(--ac-dim);
+    background: var(--ac-elev);
+    border-right: 1px solid var(--ac-border);
+}
+.ac-inputgroup__icon .bi { width: 1.05rem; height: 1.05rem; }
+.ac-input {
+    flex: 1 1 auto;
+    min-width: 0;
+    background: transparent;
+    border: 0;
+    color: var(--ac-text);
+    padding: .6rem .8rem;
+    font-size: 1rem;
+}
+.ac-input:focus { outline: none; }
+.ac-input::placeholder { color: #5b5b63; }
+
+/* ------------------------------------------------------------- CTA --- */
+.ac-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .6rem;
+    width: 100%;
+    padding: .85rem 1rem;
+    border-radius: var(--ac-radius-sm);
+    border: 1px solid rgba(214,75,75,.6);
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: .02em;
+    color: #fff;
+    background: linear-gradient(180deg, #b23b3b 0%, #8f2b2b 100%);
+    cursor: pointer;
+    transition: filter .15s, box-shadow .15s, transform .1s, opacity .15s;
+}
+.ac-cta .bi { width: 1.2rem; height: 1.2rem; }
+.ac-cta:hover:not(:disabled) { filter: brightness(1.12); box-shadow: 0 0 0 .2rem var(--ac-danger-wash); }
+.ac-cta:active:not(:disabled) { transform: translateY(1px); }
+.ac-cta:disabled { opacity: .5; cursor: not-allowed; filter: grayscale(.4); }
+/* Gentle "armed" glow when ready to fire. */
+.ac-cta--ready:not(:disabled) { animation: ac-glow 2.4s ease-in-out infinite; }
+
+/* -------------------------------------------------------- console --- */
+.ac-console {
+    border: 1px solid var(--ac-border);
+    border-radius: var(--ac-radius);
+    background: var(--ac-bg);
+    overflow: hidden;
+}
+.ac-console__bar {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    padding: .55rem .85rem;
+    background: var(--ac-panel);
+    border-bottom: 1px solid var(--ac-border);
+}
+.ac-console__dots { display: inline-flex; gap: .4rem; flex: 0 0 auto; }
+.ac-console__dots i {
+    width: .7rem; height: .7rem; border-radius: 50%;
+    background: #3a3a44; display: inline-block;
+}
+.ac-console__dots i:nth-child(1) { background: #e05c5c; }
+.ac-console__dots i:nth-child(2) { background: #e0b23c; }
+.ac-console__dots i:nth-child(3) { background: #4cbb17; }
+.ac-console__title {
+    font-family: var(--bs-font-monospace, monospace);
+    font-size: .8rem;
+    color: var(--ac-dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.ac-console__spacer { flex: 1 1 auto; }
+.ac-console__timer {
+    font-family: var(--bs-font-monospace, monospace);
+    font-variant-numeric: tabular-nums;
+    font-size: .8rem;
+    color: var(--ac-dim);
+}
+.ac-copy {
+    display: inline-flex; align-items: center; gap: .3rem;
+    padding: .2rem .5rem;
+    border-radius: .3rem;
+    font-size: .72rem;
+    color: var(--ac-dim);
+    background: var(--ac-elev);
+    border: 1px solid var(--ac-border);
+    cursor: pointer;
+    transition: color .15s, border-color .15s, background .15s;
+}
+.ac-copy .bi { width: .85rem; height: .85rem; }
+.ac-copy:hover { color: var(--ac-accent); border-color: rgba(255,170,119,.4); }
+.ac-console__step {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    padding: .55rem .85rem;
+    background: var(--ac-panel);
+    border-bottom: 1px solid var(--ac-border);
+    color: var(--ac-text);
+    font-size: .9rem;
+    min-height: 2.4rem;
+}
+.ac-console__step .ac-spin { flex: 0 0 auto; color: var(--ac-accent); }
+.ac-console__step-text {
+    font-family: var(--bs-font-monospace, monospace);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.ac-console__body {
+    margin: 0;
+    padding: .85rem 1rem;
+    max-height: 26rem;
+    overflow: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-family: var(--bs-font-monospace, monospace);
+    font-size: .82rem;
+    line-height: 1.5;
+    color: #c7c7c9;
+    background: var(--ac-bg);
+}
+.ac-console__body::-webkit-scrollbar { width: .6rem; }
+.ac-console__body::-webkit-scrollbar-thumb { background: var(--ac-border-2); border-radius: 999px; }
+
+/* Spinner used in the step readout. */
+.ac-spin {
+    display: inline-block;
+    width: 1rem; height: 1rem;
+    border: 2px solid var(--ac-border-2);
+    border-top-color: var(--ac-accent);
+    border-radius: 50%;
+    animation: ac-rotate .7s linear infinite;
+}
+
+/* ---------------------------------------------------------- motion --- */
+@keyframes ac-pulse {
+    0%, 100% { opacity: 1;   transform: scale(1); }
+    50%      { opacity: .35; transform: scale(.7); }
+}
+@keyframes ac-rotate { to { transform: rotate(360deg); } }
+@keyframes ac-glow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(214,75,75,0); }
+    50%      { box-shadow: 0 0 0 .25rem var(--ac-danger-wash); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ac-pill--live .ac-pill__dot,
+    .ac-pill--status.ac-pill--live::before,
+    .ac-cta--ready:not(:disabled),
+    .ac-spin { animation: none !important; }
+    .ac-spin { border-top-color: var(--ac-accent); }
+    * { transition: none !important; }
+}
+
+/* ----------------------------------------------------- responsive --- */
+@media (max-width: 575.98px) {
+    .ac-hero { flex-wrap: wrap; }
+    .ac-hero__status { align-self: stretch; }
+    .ac-seg { width: 100%; }
+    .ac-seg__item { flex: 1 1 0; justify-content: center; padding: .5rem .5rem; }
+}
