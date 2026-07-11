@@ -314,3 +314,18 @@ class Feedback(models.Model):
         if self.resolution == FeedbackResolution.DUPLICATE:
             return "warning"
         return "secondary"
+
+    @property
+    def status_pill(self) -> str:
+        """Admin Console pill modifier (.ac-pill--*) for the status."""
+        if self.is_open():
+            return "ok" if self.is_acknowledged() else "danger"
+        if self.is_in_progress():
+            return "info"
+        if self.resolution == FeedbackResolution.FIXED:
+            return "accent"
+        if self.resolution == FeedbackResolution.WONTFIX:
+            return "danger"
+        if self.resolution == FeedbackResolution.DUPLICATE:
+            return "warn"
+        return "muted"

@@ -90,15 +90,13 @@ tokens should be expressed in terms of the shared set.
 
 Incremental, page-by-page. Do the two enablers early so later pages are cheap.
 
-### Enablers (do these first)
-- **E1 · Shared token base.** Promote the Admin Console tokens (`--ac-*`) into a
-  small base stylesheet that any page can include (or fold into `style.css`), so
-  colors/surfaces/motion are defined once. Express `--hud-*` in terms of it.
-- **E2 · Shared components.** ishar-web has **no template partials or template
-  tags today** — markup is copy-pasted. Introduce `{% include %}` partials and a
-  `templatetags` module for the repeating pieces (icon, status pill, stat tile,
-  panel header, breadcrumb, empty state) so a component is defined once and
-  restyled once.
+### Enablers
+- **E1 · Shared token base.** ✅ **done** — the `--ac-*` tokens live in the
+  `:root` of `style.css` (loaded globally); `admin-console.css` is components
+  only. Still to do: express `--hud-*` in terms of the shared set.
+- **E2 · Shared components.** ✅ **started** — the `ishar` template tag library
+  (`{% bi %}` icons, `{% crumb %}` breadcrumbs) + `partials/` exist; new/touched
+  templates must use them. Old templates migrate as each page is facelifted.
 
 ### Page adoption order
 Staff surfaces first (highest value, lowest risk — few users, we control them):
@@ -106,8 +104,8 @@ Staff surfaces first (highest value, lowest risk — few users, we control them)
 | # | Surface | Status |
 |---|---|---|
 | 1 | Deploy console (`/portal/deploy`) | ✅ done — the reference implementation |
-| 2 | Feedback triage (`/feedback`) | next |
-| 3 | Processes / other Django-admin-adjacent staff pages | later |
+| 2 | Feedback triage (`/feedback`) | ✅ done — tiles, chips, rows, timeline |
+| 3 | Processes / other Django-admin-adjacent staff pages | next |
 | 4 | Portal (`/portal`) + global nav/layout shell | later |
 | 5 | Leaders, Challenges (DataTables pages) | later |
 | 6 | Connect HUD (align tokens) | later |

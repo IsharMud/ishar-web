@@ -100,6 +100,7 @@ class FeedbackActionView(EternalRequiredMixin, NeverCacheMixin, View):
             "state": feedback.state,
             "status_label": feedback.status_label,
             "status_css": feedback.status_css,
+            "status_pill": feedback.status_pill,
             "acknowledged_by": feedback.acknowledged_by,
             "bountied": feedback.bountied,
             "github_issue_url": feedback.github_issue_url,

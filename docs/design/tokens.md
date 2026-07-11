@@ -3,18 +3,18 @@
 The canonical palette and scales. Every color, surface, and radius on a
 faceflifted page should come from here — no ad-hoc hex.
 
-Two token sets exist today and are **cohesive by design** (same amber, same body
-text). The **Admin Console set (`--ac-*`) is the go-forward vocabulary**; the
-classic site currently hard-codes most of these values inline in `style.css`.
-The target (enabler E1) is one shared base that both express in terms of.
+**Enabler E1 is done:** the `--ac-*` set (plus `--ishar-color`) is defined once
+in the `:root` block of `apps/core/static/css/style.css`, which every page loads
+via `layout.html`. Any stylesheet may reference these tokens without redefining
+them.
 
 Sources of truth:
-- `apps/core/static/css/admin-console.css` — the `--ac-*` tokens (defined as
-  `:root` custom properties; reference implementation).
-- `apps/core/static/css/style.css` — the classic values (only `--ishar-color` is
-  a variable today; the rest are literal).
-- `apps/connect/static/css/hud.css` — the HUD's `--hud-*` set (same idea, to be
-  aligned).
+- `apps/core/static/css/style.css` — **the canonical `:root` token block**, plus
+  the classic-site rules (some still literal; they migrate as pages are touched).
+- `apps/core/static/css/admin-console.css` — the component layer built on the
+  tokens (no token definitions of its own).
+- `apps/connect/static/css/hud.css` — the HUD's `--hud-*` set (same values, to
+  be re-expressed in terms of the shared set).
 
 ---
 
@@ -113,6 +113,7 @@ Subtle tints for selected/active states and hero banners.
 | `--ac-wash` | `rgba(255,170,119,.12)` (amber) |
 | `--ac-ok-wash` | `rgba(76,187,23,.12)` |
 | `--ac-info-wash` | `rgba(74,134,207,.14)` |
+| `--ac-warn-wash` | `rgba(255,136,0,.12)` |
 | `--ac-danger-wash` | `rgba(214,75,75,.14)` |
 
 ---

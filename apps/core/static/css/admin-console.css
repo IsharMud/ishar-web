@@ -18,29 +18,11 @@
        (.ac-seg__item / .ac-toggle) so they stay accessible + keyboard-friendly.
      - Motion is subtle and ALWAYS disabled under prefers-reduced-motion.
    Load per-page via {% block includes %}, not globally.
-   ========================================================================== */
 
-:root {
-    --ac-accent:      #fa7;                      /* brand amber */
-    --ac-accent-2:    #ffd7b0;                   /* lighter amber for text-on-accent gradients */
-    --ac-bg:          #0c0c0d;                   /* deepest surface */
-    --ac-panel:       #131316;                   /* panel surface */
-    --ac-elev:        #1c1c22;                   /* raised / hover surface */
-    --ac-border:      #2a2a30;                   /* hairline border */
-    --ac-border-2:    #3a3a44;                   /* stronger border (hover/active) */
-    --ac-text:        #d6d6d7;                   /* body text */
-    --ac-dim:         #8a8a92;                   /* muted / labels */
-    --ac-ok:          #4cbb17;                   /* success / safe */
-    --ac-info:        #4a86cf;                   /* informational */
-    --ac-warn:        #f80;                      /* caution */
-    --ac-danger:      #d64b4b;                   /* destructive / error */
-    --ac-wash:        rgba(255, 170, 119, .12);  /* translucent amber wash */
-    --ac-ok-wash:     rgba(76, 187, 23, .12);
-    --ac-info-wash:   rgba(74, 134, 207, .14);
-    --ac-danger-wash: rgba(214, 75, 75, .14);
-    --ac-radius:      .6rem;
-    --ac-radius-sm:   .4rem;
-}
+   TOKENS LIVE IN style.css (enabler E1): the --ac-* custom properties are
+   defined once in the global stylesheet's :root, so this file is purely the
+   component layer and may be loaded on any page without redefining them.
+   ========================================================================== */
 
 /* Outer container so the console reads as one cohesive surface. */
 .ac {
@@ -50,6 +32,8 @@
     gap: 1rem;
     max-width: 60rem;
 }
+/* Wider variant for list/table-heavy consoles (triage dashboards). */
+.ac--wide { max-width: 72rem; }
 
 /* ------------------------------------------------------------------ hero -- */
 .ac-hero {
@@ -303,6 +287,8 @@
     background: rgba(255,170,119,.1);
     padding: .03rem .28rem; border-radius: .25rem;
 }
+.ac-note--ok     { border-color: rgba(76,187,23,.4);  background: var(--ac-ok-wash); }
+.ac-note--ok     .bi { color: var(--ac-ok); }
 .ac-note--warn   { border-color: rgba(255,136,0,.4);  background: rgba(255,136,0,.09); }
 .ac-note--warn   .bi { color: var(--ac-warn); }
 .ac-note--danger { border-color: rgba(214,75,75,.4);  background: var(--ac-danger-wash); }
@@ -484,6 +470,340 @@
     border-radius: 50%;
     animation: ac-rotate .7s linear infinite;
 }
+
+/* ------------------------------------------------------ stat tiles --- */
+/* Clickable KPI tiles (counts that filter a list). Semantic number color
+   comes from a modifier; pass --muted when the count is zero so only live
+   numbers draw the eye. --active marks the currently-applied filter. */
+.ac-tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+    gap: .6rem;
+}
+.ac-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: .2rem;
+    padding: .9rem .6rem;
+    border-radius: var(--ac-radius);
+    background: var(--ac-panel);
+    border: 1px solid var(--ac-border);
+    text-decoration: none;
+    transition: background .15s, border-color .15s, transform .1s;
+}
+a.ac-tile:hover { background: var(--ac-elev); border-color: var(--ac-border-2); transform: translateY(-1px); }
+.ac-tile__n {
+    font-size: 1.9rem;
+    font-weight: 700;
+    line-height: 1.05;
+    color: var(--ac-text);
+    font-variant-numeric: tabular-nums;
+}
+.ac-tile__label {
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: var(--ac-dim);
+    text-align: center;
+}
+.ac-tile--ok     .ac-tile__n { color: var(--ac-ok); }
+.ac-tile--info   .ac-tile__n { color: var(--ac-info); }
+.ac-tile--warn   .ac-tile__n { color: var(--ac-warn); }
+.ac-tile--danger .ac-tile__n { color: var(--ac-danger); }
+.ac-tile--accent .ac-tile__n { color: var(--ac-accent); }
+.ac-tile--muted  .ac-tile__n { color: var(--ac-dim); }
+.ac-tile--active {
+    border-color: rgba(255, 170, 119, .55);
+    background: var(--ac-wash);
+    box-shadow: inset 0 0 0 1px rgba(255, 170, 119, .25);
+}
+
+/* ------------------------------------------------------ filter bar --- */
+/* Rows of mutually exclusive chip links (active = amber wash), grouped per
+   dimension; compose with an inline role=search form for text/sort. */
+.ac-filter {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .35rem;
+}
+.ac-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    padding: .28rem .7rem;
+    border-radius: 999px;
+    font-size: .8rem;
+    font-weight: 600;
+    text-decoration: none;
+    background: var(--ac-bg);
+    border: 1px solid var(--ac-border);
+    transition: background .15s, border-color .15s, color .15s;
+}
+/* a.-qualified color rules: the global `a:link` rule outspecifies a bare
+   class, so chips/tiles/rows must pin their own link colors. */
+.ac-chip, a.ac-chip:link, a.ac-chip:visited { color: var(--ac-dim); }
+.ac-chip:hover, a.ac-chip:hover { color: var(--ac-text); background: var(--ac-elev); }
+.ac-chip--active,
+a.ac-chip--active:link, a.ac-chip--active:visited {
+    color: var(--ac-accent);
+    border-color: rgba(255, 170, 119, .45);
+    background: var(--ac-wash);
+}
+a.ac-chip--active:hover { color: var(--ac-accent-2); background: var(--ac-wash); }
+.ac-filter__sep {
+    width: 1px;
+    align-self: stretch;
+    background: var(--ac-border);
+    margin: .15rem .3rem;
+}
+
+/* --------------------------------------------------------- buttons --- */
+/* Small secondary action buttons (the .ac-cta stays the page's one primary).
+   Semantic variants color text/border; hover fills the matching wash. */
+.ac-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .35rem;
+    padding: .38rem .75rem;
+    border-radius: var(--ac-radius-sm);
+    font-size: .8rem;
+    font-weight: 600;
+    text-decoration: none;
+    color: var(--ac-text);
+    background: var(--ac-elev);
+    border: 1px solid var(--ac-border-2);
+    cursor: pointer;
+    transition: background .15s, border-color .15s, color .15s, transform .1s;
+}
+.ac-btn .bi { width: .95rem; height: .95rem; }
+a.ac-btn:link, a.ac-btn:visited { color: var(--ac-text); }
+.ac-btn:hover:not(:disabled), a.ac-btn:hover { color: var(--ac-accent); border-color: rgba(255, 170, 119, .45); }
+.ac-btn:active:not(:disabled) { transform: translateY(1px); }
+.ac-btn:disabled { opacity: .5; cursor: not-allowed; }
+.ac-btn:focus-visible { outline: 2px solid var(--ac-accent); outline-offset: 2px; }
+.ac-btn--ok     { color: var(--ac-ok);     border-color: rgba(76, 187, 23, .45); }
+.ac-btn--ok:hover:not(:disabled)     { color: var(--ac-ok);     border-color: var(--ac-ok);     background: var(--ac-ok-wash); }
+.ac-btn--info   { color: var(--ac-info);   border-color: rgba(74, 134, 207, .45); }
+.ac-btn--info:hover:not(:disabled)   { color: var(--ac-info);   border-color: var(--ac-info);   background: var(--ac-info-wash); }
+.ac-btn--warn   { color: var(--ac-warn);   border-color: rgba(255, 136, 0, .45); }
+.ac-btn--warn:hover:not(:disabled)   { color: var(--ac-warn);   border-color: var(--ac-warn);   background: var(--ac-warn-wash); }
+.ac-btn--danger { color: var(--ac-danger); border-color: rgba(214, 75, 75, .5); }
+.ac-btn--danger:hover:not(:disabled) { color: var(--ac-danger); border-color: var(--ac-danger); background: var(--ac-danger-wash); }
+.ac-btn--accent { color: var(--ac-accent); border-color: rgba(255, 170, 119, .45); }
+.ac-btn--accent:hover:not(:disabled) { color: var(--ac-accent); background: var(--ac-wash); }
+
+/* ---------------------------------------------------------- fields --- */
+/* Bare input/textarea/select on console surfaces (the icon-cell variant is
+   .ac-inputgroup). Class rules out-rank the classic element styles. */
+.ac-field {
+    display: block;
+    width: 100%;
+    padding: .5rem .7rem;
+    font-size: .9rem;
+    color: var(--ac-text);
+    background: var(--ac-bg);
+    border: 1px solid var(--ac-border);
+    border-radius: var(--ac-radius-sm);
+    transition: border-color .15s, box-shadow .15s;
+}
+.ac-field:focus {
+    outline: none;
+    border-color: var(--ac-accent);
+    box-shadow: 0 0 0 .2rem var(--ac-wash);
+}
+.ac-field::placeholder { color: #5b5b63; }
+.ac-field--inline { display: inline-block; width: auto; }
+select.ac-field { cursor: pointer; }
+.ac-label {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    margin: 0 0 .3rem;
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: var(--ac-dim);
+}
+
+/* ---------------------------------------------------------- row list --- */
+/* The console's list-of-records surface (mobile-first replacement for the
+   data table): one bordered stack, each record a wrapping flex row. */
+.ac-rows {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--ac-border);
+    border-radius: var(--ac-radius);
+    background: var(--ac-panel);
+    overflow: hidden;
+}
+.ac-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .35rem .75rem;
+    padding: .65rem .85rem;
+    border-bottom: 1px solid var(--ac-border);
+    transition: background .15s;
+}
+.ac-row:last-child { border-bottom: 0; }
+.ac-row:hover { background: var(--ac-elev); }
+.ac-row__icon {
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: var(--ac-radius-sm);
+    color: var(--ac-dim);
+    background: var(--ac-bg);
+    border: 1px solid var(--ac-border);
+}
+.ac-row__icon .bi { width: 1rem; height: 1rem; }
+.ac-row__main { flex: 1 1 14rem; min-width: 0; }
+.ac-row__title {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .35rem;
+    font-size: .95rem;
+}
+a.ac-row__link:link, a.ac-row__link:visited { color: var(--ac-text); text-decoration: none; }
+a.ac-row__link:hover { color: var(--ac-accent); }
+.ac-row__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .1rem .8rem;
+    margin-top: .1rem;
+    font-size: .78rem;
+    color: var(--ac-dim);
+}
+.ac-row__meta .mono { font-family: var(--bs-font-monospace, monospace); }
+.ac-row__side {
+    margin-left: auto;
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+
+/* ------------------------------------------------------ empty state --- */
+.ac-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .5rem;
+    padding: 2.2rem 1rem;
+    border: 1px dashed var(--ac-border-2);
+    border-radius: var(--ac-radius);
+    background: var(--ac-bg);
+    color: var(--ac-dim);
+    text-align: center;
+    font-size: .9rem;
+}
+.ac-empty .bi { width: 1.6rem; height: 1.6rem; opacity: .7; }
+
+/* ----------------------------------------------------------- pager --- */
+.ac-pager {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .6rem;
+}
+.ac-pager__info {
+    color: var(--ac-dim);
+    font-size: .8rem;
+    font-variant-numeric: tabular-nums;
+}
+
+/* -------------------------------------------------------- timeline --- */
+/* Comment/audit trail. System entries recede (dashed, dim, italic) so human
+   conversation stays foreground. */
+.ac-timeline { display: flex; flex-direction: column; gap: .55rem; }
+.ac-tl {
+    display: flex;
+    gap: .7rem;
+    padding: .7rem .85rem;
+    border: 1px solid var(--ac-border);
+    border-radius: var(--ac-radius-sm);
+    background: var(--ac-panel);
+}
+.ac-tl__icon {
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    width: 1.9rem;
+    height: 1.9rem;
+    border-radius: 50%;
+    color: var(--ac-dim);
+    background: var(--ac-elev);
+    border: 1px solid var(--ac-border);
+}
+.ac-tl__icon .bi { width: .95rem; height: .95rem; }
+.ac-tl__body { flex: 1 1 auto; min-width: 0; }
+.ac-tl__head {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: .2rem .6rem;
+    font-size: .78rem;
+    color: var(--ac-dim);
+}
+.ac-tl__author { font-weight: 600; color: var(--ac-text); }
+.ac-tl__author--staff { color: var(--ac-info); }
+.ac-tl__time { margin-left: auto; white-space: nowrap; }
+.ac-tl__text {
+    margin-top: .25rem;
+    font-size: .9rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+.ac-tl--system { background: var(--ac-bg); border-style: dashed; }
+.ac-tl--system .ac-tl__text { color: var(--ac-dim); font-style: italic; font-size: .82rem; }
+
+/* ------------------------------------------------------- quote body --- */
+/* Verbatim player/machine text (report bodies, pasted output): monospace on
+   the deepest surface, like a captured terminal excerpt. */
+.ac-quote {
+    margin: 0;
+    padding: .85rem 1rem;
+    border: 1px solid var(--ac-border);
+    border-left: 3px solid var(--ac-border-2);
+    border-radius: var(--ac-radius-sm);
+    background: var(--ac-bg);
+    color: var(--ac-text);
+    font-family: var(--bs-font-monospace, monospace);
+    font-size: .88rem;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* --------------------------------------------- key/value definition --- */
+.ac-kv {
+    margin: 0;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: .4rem 1rem;
+    font-size: .88rem;
+}
+.ac-kv dt { color: var(--ac-dim); font-weight: 500; }
+.ac-kv dd { margin: 0; text-align: right; min-width: 0; overflow-wrap: anywhere; }
+
+/* ----------------------------------------------------- CTA variants --- */
+/* Amber "go" primary for non-destructive consoles (the red default stays
+   for destructive actions like deploys). */
+.ac-cta--accent {
+    border-color: rgba(255, 170, 119, .6);
+    background: linear-gradient(180deg, #ffb385 0%, #dd8a52 100%);
+    color: #231005;
+}
+.ac-cta--accent:hover:not(:disabled) { box-shadow: 0 0 0 .2rem var(--ac-wash); }
 
 /* ---------------------------------------------------------- motion --- */
 @keyframes ac-pulse {
