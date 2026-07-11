@@ -31,5 +31,11 @@ the getting started guide, or even by downloading a MUD client!
 The website is using a combination of Python, Django, MariaDB, nginx, and daphne
 among other things.
 
+### Design
+
+Visual/UI work follows the living design system in
+[`docs/design/`](docs/design/README.md) — tokens, components, principles, and a
+running decisions log. Read it before changing any page's look.
+
 The MUD itself is written in C,
 while relying upon "[Mocha](https://old.isharmud.com/mocha/)".
