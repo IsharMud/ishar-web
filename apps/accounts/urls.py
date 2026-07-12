@@ -5,6 +5,7 @@ from .views.deploy import (
     DeployPingView,
     DeployStatusView,
     DeployView,
+    DeployWebClientsView,
 )
 from .views.password import PasswordView
 from .views.portal import PortalView
@@ -20,4 +21,9 @@ urlpatterns = [
     path("deploy/run/", DeployActionView.as_view(), name="deploy_run"),
     path("deploy/status/", DeployStatusView.as_view(), name="deploy_status"),
     path("deploy/ping/", DeployPingView.as_view(), name="deploy_ping"),
+    path(
+        "deploy/web-clients/",
+        DeployWebClientsView.as_view(),
+        name="deploy_web_clients",
+    ),
 ]
