@@ -38,9 +38,10 @@ This is the governing constraint. In practice:
   audience is tiny and known; there is no migration window to protect, no
   external consumers, no deprecation cycle to run. If a page, template, or
   convention is better rebuilt than patched, rebuild it.
-- **Reduce entropy, don't preserve it.** The site has accumulated three
-  coexisting visual layers and a lot of copy-pasted markup. The mandate is to
-  *converge*, not to keep old patterns alive out of caution.
+- **Reduce entropy, don't preserve it.** The site once carried three
+  coexisting visual layers and a lot of copy-pasted markup; the facelift
+  roadmap converged them into one console language (complete as of roadmap
+  #7). Keep it converged — a reintroduced legacy pattern is a bug.
 - **Set conventions, then apply them.** Where a decision improves the whole
   site, make it the standard (record it in `docs/design/decisions.md`) rather
   than scoping it to one page.
@@ -128,10 +129,11 @@ Dockerfile
 docker-entrypoint.sh  collectstatic then exec daphne
 ```
 
-There are **no template partials and no `templatetags`** today — repeating
-markup (breadcrumbs, stat tiles, pills, empty states) is copy-pasted. Introducing
-shared partials + a `templatetags` module is a named enabler in the design docs
-(E2); prefer creating the shared piece over pasting a fourth copy.
+Shared markup lives in the `ishar` template tag library
+(`apps/core/templatetags/ishar.py` — `{% bi %}` icons, `{% crumb %}`
+breadcrumbs) plus `apps/core/templates/partials/`, and the `.ac-*` component
+layer (`admin-console.css`, loaded globally). Prefer extending the shared
+piece over pasting markup — the catalog is `docs/design/components.md`.
 
 ---
 

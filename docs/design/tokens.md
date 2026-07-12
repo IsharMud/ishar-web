@@ -43,8 +43,10 @@ black with an amber outline; Admin Console panels use the layered greys.
 | `--ac-elev` | `#1c1c22` | Raised / hover surface, chips, icon tiles. |
 | `--ac-border` | `#2a2a30` | Default hairline border. |
 | `--ac-border-2` | `#3a3a44` | Stronger border (hover/active/inputs). |
-| — (classic) | `#000` | Classic public panels (`.card`, `.navbar`, `.list-group`). |
-| — (classic) | `#323639` | Classic page background (`body`); also classic button/select bg. |
+
+The classic pure-black panel surfaces (`.card`/`.list-group` on `#000`, the
+`#323639` element backgrounds) were retired with roadmap #7 — public pages now
+sit on the same layered greys.
 
 The HUD uses these `--ac-*` surfaces directly (the old duplicate `--hud-bg` /
 `--hud-panel` / `--hud-border` aliases are gone). The web terminal itself stays
@@ -61,9 +63,10 @@ not a surface token.
 | `--ac-dim` | `#8a8a92` | Muted text: labels, hints, secondary meta. |
 | — | `#c7c7c9` | Console/log body text (slightly dimmer than body). |
 
-Headings, `<label>`, `<strong>`, `<th>`, `.card-header`, `.card-title`, and
-`.text-ishar` render in **amber** (`--ishar-color`) on the classic site — that's
-the site's "highlighted text" convention.
+Headings, `<label>`, `<strong>`, `<th>`, and `.text-ishar` render in **amber**
+(`--ishar-color`) — the site's "highlighted text" convention. Bare (classless)
+form elements default to console-field styling (`--ac-bg` / `--ac-border-2` /
+`--ac-text`) so Django-rendered forms look native without markup changes.
 
 ---
 
@@ -91,7 +94,7 @@ Do not repurpose these. They mean the same thing on every surface.
 | `--ac-warn` | `#f80` | Caution / heads-up. Also `.message-warn`/`.message-warning`. |
 | `--ac-danger` | `#d64b4b` | Destructive / error (Admin Console). Also "health" (HUD). |
 | — (classic danger) | `#d02b2b` | `.message-error`, dead/survival/hardcore players. |
-| — (immortal) | `#00b7eb` | Immortal accounts (god/forger/eternal/artisan/immortal/consort). Cyan. |
+| `--ac-immortal` | `#00b7eb` | Immortal accounts (god/forger/eternal/artisan/immortal/consort). Cyan. Pill variant: `.ac-pill--immortal`. |
 
 **HUD-domain tokens** (`hud.css` `:root` — meanings that exist only in the web
 client). The vitals triple aliases the shared semantics: `--hud-hp:
@@ -108,8 +111,8 @@ rest have no site-wide equivalent:
 | `--hud-moon` | `#9aa6c8` | Moon phases. |
 
 **Player-status vocabulary** (from `style.css`, used by `player_css`):
-- Immortals (`.god-player` … `.consort-player`): `#00b7eb`, with emoji affix
-  (`😇` god, `👼` other immortals).
+- Immortals (`.god-player` … `.consort-player`): `var(--ac-immortal)`, with
+  emoji affix (`😇` god, `👼` other immortals).
 - Dead / survival / hardcore (`.dead-player`, …): `#d02b2b`; visited `#fa8072`;
   hover `#f00`; affix `☠️`.
 
