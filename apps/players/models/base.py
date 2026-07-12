@@ -23,6 +23,18 @@ class PlayerBaseManager(models.Manager):
         # Natural key is player name.
         return self.get(name=name)
 
+    def online(self):
+        # The single source of truth for "who is online". There is no live
+        # presence signal yet (isharmud/ishar-mud#1771): logon >= logout
+        # alone breaks once the game's 5-minute autosave refreshes logout
+        # mid-session, so a recent logout also counts. Just-quit players
+        # linger here for up to 10 minutes.
+        return self.filter(
+            models.Q(logon__gte=models.F("logout"))
+            | models.Q(logout__gte=now() - timedelta(minutes=10)),
+            is_deleted=False,
+        )
+
 
 class PlayerBase(models.Model):
     """Ishar player base model."""

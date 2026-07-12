@@ -9,6 +9,7 @@ from django.views.generic import RedirectView
 from apps.core.api.routers import api_router
 from apps.core.sitemaps import StaticViewSitemap
 from apps.core.views import ErrorView
+from apps.core.views.webadmin import WebAdminCancelView, WebAdminStatusView
 
 
 sitemaps = {
@@ -40,6 +41,16 @@ urlpatterns = [
     path("patches/", include("apps.patches.urls"), name="patches"),
     path("player/", include("apps.players.urls"), name="player"),
     path("portal/", include("apps.accounts.urls"), name="portal"),
+    path(
+        "portal/queue/status/",
+        WebAdminStatusView.as_view(),
+        name="webadmin_status",
+    ),
+    path(
+        "portal/queue/cancel/",
+        WebAdminCancelView.as_view(),
+        name="webadmin_cancel",
+    ),
     path("season/", include("apps.seasons.urls"), name="season"),
     path("wiki/", RedirectView.as_view(url=settings.WIKI_URL), name="wiki"),
 ]

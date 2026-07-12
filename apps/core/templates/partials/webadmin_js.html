@@ -1,0 +1,67 @@
+{% comment %}
+Shared console JS for the web_admin_queue outbox: form-encoded CSRF POSTs and
+a status-poll loop. Included by the events/season consoles; exposes
+window.WebAdminQueue = { post, watch, cancel }. All DOM writes by callers must
+use textContent/class swaps (never innerHTML) per the frontend rules.
+{% endcomment %}
+<script>
+(function () {
+    "use strict";
+
+    const csrftoken = "{{ csrf_token }}";
+    const statusUrl = "{% url 'webadmin_status' %}";
+    const cancelUrl = "{% url 'webadmin_cancel' %}";
+
+    // Commands execute on the game's next game-minute pulse; poll gently and
+    // flag "game may be down" after ~3 minutes of pending.
+    const POLL_MS = 2000;
+    const STALE_AFTER_MS = 3 * 60 * 1000;
+
+    function post(url, params) {
+        const body = new URLSearchParams(params);
+        body.append("csrfmiddlewaretoken", csrftoken);
+        return fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "X-CSRFToken": csrftoken,
+            },
+            body: body.toString(),
+        }).then(function (resp) {
+            return resp.json().then(function (data) {
+                return { status: resp.status, data: data };
+            }).catch(function () {
+                return { status: resp.status, data: {} };
+            });
+        });
+    }
+
+    // Poll one task until it leaves `pending`. Calls onUpdate(data, stale) on
+    // every poll and onDone(data) once terminal (done/error/cancelled).
+    function watch(taskId, onUpdate, onDone) {
+        const started = Date.now();
+        const timer = setInterval(function () {
+            post(statusUrl, { task_id: taskId }).then(function (r) {
+                if (r.status !== 200) {
+                    clearInterval(timer);
+                    onDone({ status: "error", result: r.data.message || ("HTTP " + r.status) });
+                    return;
+                }
+                const stale = (Date.now() - started) > STALE_AFTER_MS;
+                onUpdate(r.data, stale);
+                if (r.data.status !== "pending") {
+                    clearInterval(timer);
+                    onDone(r.data);
+                }
+            }).catch(function () { /* transient; keep polling */ });
+        }, POLL_MS);
+        return timer;
+    }
+
+    function cancel(taskId) {
+        return post(cancelUrl, { task_id: taskId });
+    }
+
+    window.WebAdminQueue = { post: post, watch: watch, cancel: cancel };
+})();
+</script>

@@ -2,25 +2,40 @@ from django.db import models
 
 
 class EventType(models.IntegerChoices):
-    """Ishar global event type choices."""
+    """Ishar global event type choices.
 
-    BONUS_XP = 0
-    TEST_SERVER = 1
-    CHALLENGE_XP = 2
-    CHALLENGE_CYCLE_XP = 3
-    CRASH_XP = 4
-    WINTER_FEST = 5
-    ST_PATRICK = 6
-    JULY_FOURTH = 7
-    HALLOWS_EVE = 8
-    HARVEST_FEST = 9
-    MAX_EVENT = 10
+    Mirrors the game's `enum global_event_t` (ishar-mud constants.h) — the
+    ordinals and display names must not drift. Types 10-13 are the automatic
+    season-end countdown events: the game starts those itself as the season
+    expiration approaches, so the events console offers to end but never to
+    start them (`WEB_STARTABLE_EVENTS`).
+    """
+
+    BONUS_XP = 0, "Bonus Experience"
+    TEST_SERVER = 1, "Test Server"
+    CHALLENGE_XP = 2, "Challenge Experience"
+    CHALLENGE_CYCLE_XP = 3, "Challenges Cycled"
+    CRASH_XP = 4, "Crash Experience"
+    WINTER_FEST = 5, "Festival of the Dancers"
+    ST_PATRICK = 6, "Fortune's Convergence"
+    JULY_FOURTH = 7, "July Fourth"
+    HALLOWS_EVE = 8, "Veilfall"
+    HARVEST_FEST = 9, "Harvest Fest"
+    FOUR_WEEK_CYCLE = 10, "Rymaras' Echo"
+    THREE_WEEK_CYCLE = 11, "The Comet's Wake"
+    TWO_WEEK_CYCLE = 12, "Twilight of Titans"
+    ONE_WEEK_CYCLE = 13, "Saorin's Reckoning"
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}: {self.__str__()} ({self.value})"
 
     def __str__(self) -> str:
-        return self.name.title()
+        return self.label
+
+
+# Event types staff may start/extend from the web. The four season-end cycle
+# events (10-13) are excluded: the game fires those automatically.
+WEB_STARTABLE_EVENTS = tuple(e for e in EventType if e.value < 10)
 
 
 class GlobalEvent(models.Model):
