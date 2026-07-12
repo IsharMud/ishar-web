@@ -9,6 +9,37 @@ Format: `## YYYY-MM-DD — Title` · **Decision** · **Why** · (optional) **Not
 
 ---
 
+## 2026-07-12 — Mobile friendliness is a gating requirement (with a checklist)
+
+**Decision.** Every shipped surface must pass this checklist at a true 390px
+viewport before it lands — it is a release gate, not an aspiration:
+
+1. **No horizontal overflow** — `document.scrollWidth == viewport width`.
+2. **Form fields ≥ 16px** (`1rem`) — sub-16px inputs make iOS Safari zoom-jump
+   on focus, the single most jarring mobile failure.
+3. **Comfortable tap targets on touch** — `@media (pointer: coarse)` bumps
+   `.ac-btn` / `.ac-chip` / `.ac-copy` padding; new interactive components must
+   join that block.
+4. **No hover-only affordances, no sticky lifts** — anything conveyed on hover
+   must also be visible statically, and hover `transform`s are suppressed under
+   `@media (hover: none)` so a tap doesn't leave a component stuck mid-"lift"
+   (`.icon-link-hover` included).
+5. **Shell rows stack, never squeeze** — multi-column rows (footer, season bar)
+   use `col-12 col-sm`-style stacking at phone width; columns must never
+   compress until words wrap letter-by-letter.
+6. **Compact chrome at `<576px`** — heroes, panels, and the logo shrink;
+   vertical space on a phone is content space.
+7. **Verification includes phone proof** — full-page screenshots at 390px plus
+   the scrollWidth assertion (the headless-Chromium/Playwright harness), and
+   when the owner reports feel-jank on a real device, that report wins over a
+   passing screenshot.
+
+**Why.** The playerbase and the developer drive the game from phones; this has
+always been principle #7, but round 2 of the facelift still shipped
+desktop-first regressions (iOS focus zoom, squeezed footer columns, sticky
+hover transforms). A vibe is not a gate; a checklist is. This entry supersedes
+"mobile-first" as prose — cite the numbered items in review.
+
 ## 2026-07-12 — The global shell moves to the console surfaces
 
 **Decision.** The frame every page sits in — body, navbar, breadcrumb,
