@@ -849,6 +849,20 @@ a.ac-link:link, a.ac-link:visited { color: var(--ac-text); }
 .ac-link__name { font-weight: 600; display: flex; align-items: center; gap: .4rem; flex-wrap: wrap; }
 .ac-link__note { color: var(--ac-dim); font-size: .78rem; margin-top: .1rem; }
 .ac-link__side { margin-left: auto; flex: 0 0 auto; align-self: center; }
+/* Featured variant: a first-class / officially-supported destination.
+   Amber-washed like a selected .ac-toggle, with an amber name. */
+.ac-link--featured {
+    border-color: rgba(255, 170, 119, .45);
+    background: var(--ac-wash);
+    box-shadow: inset 0 0 0 1px rgba(255, 170, 119, .18);
+}
+.ac-link--featured .ac-link__name,
+a.ac-link--featured:link .ac-link__name,
+a.ac-link--featured:visited .ac-link__name { color: var(--ac-accent); }
+.ac-link--featured:hover {
+    background: var(--ac-wash);
+    border-color: var(--ac-accent);
+}
 
 /* ------------------------------------------------------ empty state --- */
 .ac-empty {

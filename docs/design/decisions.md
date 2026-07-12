@@ -9,6 +9,26 @@ Format: `## YYYY-MM-DD — Title` · **Decision** · **Why** · (optional) **Not
 
 ---
 
+## 2026-07-12 — Featured clients (`.ac-link--featured`) and a browser-first clients page
+
+**Decision.** `/clients` now leads with an **In Your Browser** panel — hint
+copy naming the HUD's capabilities plus the amber `.ac-cta--accent` "Play in
+your browser" — before any downloadable client, and the client grid gains a
+**featured** treatment: `.ac-link--featured` (amber-washed card, amber name)
+with a `star-fill` icon tile, an accent "Ishar package" pill, and a note
+line. Featured status is **data-driven**: `MUDClient.is_featured` +
+`MUDClient.featured_note` (migration `clients.0008`, which also flags
+**Mudlet** with "install the Ishar package from Mudlet's package
+repository" and sorts featured clients first in their category). Both fields
+are editable in the admin.
+
+**Why.** The web client is now a first-class way to play (roadmap #6b) and
+deserves top billing on the "how to connect" page, and Mudlet ships an
+official Ishar package — that's a real support difference the grid of
+otherwise-equal cards was hiding. Keeping the flag on the model (not
+hardcoding "Mudlet" in the template) means the next specially-supported
+client is an admin edit, not a deploy.
+
 ## 2026-07-12 — Roadmap #7: the whole public site speaks the console language; the classic layer is retired
 
 **Decision.** The last mile of the facelift. Every remaining public template —

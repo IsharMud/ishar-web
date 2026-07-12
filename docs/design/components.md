@@ -235,7 +235,11 @@ Status: **formalized.**
 ### `.ac-link` — navigation card
 Anchor sibling of `.ac-toggle`: amber icon tile + name + note, optional
 trailing `__side` element (pill/badge). Lay out in `.ac-grid`. Link colors are
-pinned against the global `a:link` rule.
+pinned against the global `a:link` rule. **`--featured`** marks a first-class
+/ officially-supported destination: amber-washed card, amber name — pair it
+with a `star-fill` icon tile and an accent pill (e.g. Mudlet's "Ishar
+package" card on `/clients`, data-driven via `MUDClient.is_featured` +
+`featured_note`).
 ```html
 <a class="ac-link" href="…">
   <span class="ac-link__icon">{% bi "flag" %}</span>

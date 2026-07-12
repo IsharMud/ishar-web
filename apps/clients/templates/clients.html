@@ -17,12 +17,25 @@
         <div class="ac-hero__text">
             <h2 class="ac-hero__title">MUD Clients</h2>
             <p class="ac-hero__sub">
-                While you can certainly enjoy the game via
-                <a href="{% url 'connect' %}" title="Web Client">our web client</a>,
-                you might prefer software designed specifically to help you play a MUD.
+                Ways to connect to {{ WEBSITE_TITLE }} &mdash; right here in your
+                browser, or with software designed specifically to help you play a MUD.
             </p>
         </div>
     </header>
+
+    <!-- The in-browser client comes first: it's a fully supported way to play. -->
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "globe" %} In Your Browser</div>
+        <p class="ac-panel__hint">
+            No download needed &mdash; the {{ WEBSITE_TITLE }} web client is a fully
+            supported way to play, with a live game dashboard (vitals, room, gear,
+            chat) and a phone-first layout.
+        </p>
+        <a class="ac-cta ac-cta--accent" href="{% url 'connect' %}">
+            {% bi "globe" %}
+            Play in your browser
+        </a>
+    </div>
 
 {% for category in mud_client_categories %}
     <div class="ac-panel">
@@ -38,10 +51,24 @@
         <div class="ac-grid">
 {% for client in category.clients.all %}
 {% if client.is_visible %}
-            <a class="ac-link" href="{{ client.url }}" target="_blank" id="client-{{ client.name|slugify }}" title="Open the {{ client.name }} website in a new window.">
-                <span class="ac-link__icon">{% bi "terminal" %}</span>
+            <a class="ac-link{% if client.is_featured %} ac-link--featured{% endif %}" href="{{ client.url }}" target="_blank" id="client-{{ client.name|slugify }}" title="Open the {{ client.name }} website in a new window.">
+                <span class="ac-link__icon">
+{% if client.is_featured %}
+                    {% bi "star-fill" label="Specially supported" %}
+{% else %}
+                    {% bi "terminal" %}
+{% endif %}
+                </span>
                 <span class="ac-link__body">
-                    <span class="ac-link__name">{{ client.name }}</span>
+                    <span class="ac-link__name">
+                        {{ client.name }}
+{% if client.is_featured %}
+                        <span class="ac-pill ac-pill--accent">Ishar package</span>
+{% endif %}
+                    </span>
+{% if client.is_featured and client.featured_note %}
+                    <span class="ac-link__note d-block">{{ client.featured_note }}</span>
+{% endif %}
                 </span>
                 <span class="ac-link__side">
                     {% bi "box-arrow-up-right" label="Opens in a new window." %}
