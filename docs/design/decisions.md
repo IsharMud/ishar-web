@@ -17,7 +17,11 @@ token-aligned, horizontally scrollable inside its own container (the page
 never overflows), uppercase dim sortable headers as real `<button>`s with
 state on `th[aria-sort]`, tabular-nums numeric columns, an amber podium for
 the top three ranks, and the player's class as a sub-line under the name.
-Sorting and the name/class filter are ~40 lines of vanilla JS. **Challenges**
+Sorting and the name/class filter are ~40 lines of vanilla JS. There is **no
+game-type filter UI**: only one mode is live at a time (Classic in normal
+seasons, Hardcore in Fated), so chips for All/Classic/Hardcore/Survival were
+pure clutter — the per-type URLs (`/leaders/classic/`, …) stay routable for
+whenever that changes. **Challenges**
 drops its table entirely: eight-ish weekly kill targets are a checklist, not
 a matrix, so they render as `.ac-rows` — constraint meta (party size, level
 cap) with icons, an ok "slain" pill + winners when complete, and the new

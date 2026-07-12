@@ -38,25 +38,13 @@
         </div>
     </header>
 
-    <!-- Filters -->
-    <div class="ac-panel">
-        <div class="ac-panel__h">{% bi "funnel" %} Game type</div>
-        <div class="d-flex flex-wrap gap-2 align-items-center">
-            <div class="ac-filter" role="group" aria-label="Game type filter">
-                <a class="ac-chip{% if game_type is None %} ac-chip--active{% endif %}" href="{% url 'leaders' %}#leaders">All</a>
-{% for num, name in game_types %}
-    {% with urlname=name|lower|add:"_leaders" %}
-                <a class="ac-chip{% if game_type == num %} ac-chip--active{% endif %}" href="{% url urlname %}#leaders">{{ name }}</a>
-    {% endwith %}
-{% endfor %}
-            </div>
-            <input class="ac-field ac-field--inline flex-grow-1" style="min-width: 12rem;" type="search"
-                   id="leaderSearch" placeholder="Filter by name or class" aria-label="Filter players by name or class">
-        </div>
-    </div>
-
     <!-- Rankings -->
 {% if leaders %}
+    <div class="ac-inputgroup">
+        <span class="ac-inputgroup__icon">{% bi "search" %}</span>
+        <input class="ac-input" type="search" id="leaderSearch"
+               placeholder="Filter by name or class" aria-label="Filter players by name or class">
+    </div>
     <div class="ac-tablewrap">
         <table class="ac-table" id="leadersTable">
             <caption class="visually-hidden">
