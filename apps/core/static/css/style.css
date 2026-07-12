@@ -48,25 +48,54 @@
 svg.bi:not([width]) { width: 1em; height: 1em; }
 .bi { vertical-align: -.125em; fill: currentColor; }
 
-.navbar, .navbar-expand-lg .navbar-nav .nav-link, .list-group, .list-group-item, .card { background-color: #000; }
+/* --------------------------------------------------------------------------
+   Shell surfaces — the global frame every page sits in (nav, breadcrumb,
+   content, messages, footer). Layered-grey panels with restrained amber;
+   the heavy black+amber-outline boxes live on only in untouched page content.
+   -------------------------------------------------------------------------- */
+.shell-panel {
+    background: var(--ac-panel);
+    border: 1px solid var(--ac-border);
+    border-radius: var(--ac-radius);
+}
+.navbar.shell-panel { border-bottom: 2px solid rgba(255, 170, 119, .4); }
+.shell-menu {
+    background: var(--ac-elev);
+    border: 1px solid var(--ac-border-2);
+    border-radius: var(--ac-radius-sm);
+}
+.shell-menu .dropdown-item { border-radius: var(--ac-radius-sm); }
+#logo { height: 8rem; }
+@media (max-width: 575.98px) {
+    #logo { height: 5.5rem; }
+}
+
+.list-group, .list-group-item, .card { background-color: #000; }
 
 .list-group a .bi,
 .blockquote-footer .bi,
 .navbar,
-.navbar-expand-lg .navbar-nav .nav-link,
+.navbar .nav-link,
 .text-ishar
 {
     color: var(--ishar-color);
 }
 
+/* Breadcrumbs: a quiet page-title line, not a boxed banner. Old templates
+   still emit h2-sized crumbs — these rules size both patterns down. */
 .breadcrumb {
     --bs-breadcrumb-margin-bottom: 0;
     --bs-breadcrumb-divider: '•';
     --bs-breadcrumb-divider-color: var(--bs-secondary);
 }
-.breadcrumb-item .bi, .nav-link .bi, footer a .bi {
-    color: var(--bs-primary);
+.breadcrumb-item.h2, .breadcrumb .h2, .breadcrumb h2 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0;
 }
+.breadcrumb-item .bi { color: var(--ishar-color); }
+.nav-link .bi { color: var(--ishar-color); }
+footer a .bi { color: var(--ac-dim); }
 
 .icon-link-hover { --bs-icon-link-transform: translate3d(0, -.3rem, 0); }
 svg[role="img"] { color: var(--bs-primary); }
@@ -78,7 +107,7 @@ a[target="_blank"] {
     }
 }
 
-body { background-color: #323639; color: var(--ac-text); }
+body { background-color: var(--ac-bg); color: var(--ac-text); }
 .card-header, .card-title { color: var(--ishar-color); }
 .card, .card-text, .card-footer { color: var(--ac-text); }
 button, textarea, select {

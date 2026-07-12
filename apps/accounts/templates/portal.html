@@ -1,391 +1,297 @@
 {% extends "layout.html" %}
 {% load humanize %}
+{% load ishar %}
 {% load static %}
 {% block meta_title %}{{ WEBSITE_TITLE }} Account Portal{% endblock meta_title %}
 {% block meta_description %}Portal for players to see information about their {{ WEBSITE_TITLE }} account and characters.{% endblock meta_description %}
 {% block meta_url %}{% url 'portal' %}#portal{% endblock meta_url %}
 {% block title %}{{ WEBSITE_TITLE }} Portal{% endblock title %}
+{% block scripts %}let focusTo = 'portal'{% endblock scripts %}
+{% block includes %}
+        <link rel="stylesheet" type="text/css" href="{% static 'css/admin-console.css' %}">
+{% endblock includes %}
 {% block breadcrumbs %}
-    <li class="breadcrumb-item active h2" aria-current="page" title="Portal">
-        <a class="icon-link icon-link-hover" href="{% url 'portal' %}#portal">
-            <svg class="bi" aria-hidden="true">
-                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#person-gear"></use>
-            </svg>
-            <span id="portal">
-                Portal
-            </span>
-        </a>
-    </li>
+    {% crumb "Portal" "person-gear" urlname="portal" anchor="portal" active=True %}
 {% endblock breadcrumbs %}
 {% block content %}
-<div class="card border-0">
-    <div class="card-body">
-        <ul class="list-group list-group-horizontal-sm">
-    {% if user.is_staff %}
-            <li class="card-text list-group-item" title="Administration">
-                <a class="list-group-item-text icon-link icon-link-hover" href="{% url 'admin:index' %}" target="_blank">
-                    <svg class="bi" aria-hidden="true">
-                        <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#gear"></use>
-                    </svg>
-                    Administration
-                    <svg class="bi" aria-hidden="false" role="img" aria-label="Open {{ WEBSITE_TITLE }} Administration in a new window.">
-                        <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#box-arrow-up-right"></use>
-                    </svg>
-                </a>
-            </li>
-    {% endif %}
+<div class="ac ac--wide">
+
+    <!-- Hero -->
+    <header class="ac-hero">
+        <span class="ac-hero__badge">{% bi "person-gear" %}</span>
+        <div class="ac-hero__text">
+            <h2 class="ac-hero__title">{{ request.user.get_username }}</h2>
+            <p class="ac-hero__sub">
+                Account created {{ request.user.created_at|naturaltime }}
+                · {{ request.user.players.count }} character{{ request.user.players.count|pluralize }}
+                · {{ request.user.upgrades.count }} upgrade{{ request.user.upgrades.count|pluralize }}
+            </p>
+        </div>
+        <div class="ac-hero__status d-flex flex-wrap gap-1 justify-content-end">
+            <span class="ac-pill ac-pill--accent" title="{{ request.user.current_essence }} essence">
+                {% bi "gem" %} {{ request.user.current_essence }} essence
+            </span>
+            <span class="ac-pill {% if request.user.is_private %}ac-pill--warn{% else %}ac-pill--muted{% endif %}" id="privacyPill">
+                {% if request.user.is_private %}private{% else %}public{% endif %}
+            </span>
+        </div>
+    </header>
+
+    <!-- Tools -->
+{% if user.is_staff %}
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "wrench-adjustable" %} Staff Tools</div>
+        <div class="ac-grid">
+            <a class="ac-link" href="{% url 'admin:index' %}" target="_blank" title="Administration">
+                <span class="ac-link__icon">{% bi "gear" %}</span>
+                <span class="ac-link__body">
+                    <span class="ac-link__name">Administration {% bi "box-arrow-up-right" css="text-secondary" label="Opens in a new window." %}</span>
+                    <span class="ac-link__note d-block">Django admin — models &amp; data</span>
+                </span>
+            </a>
     {% if user.is_god %}
-            <li class="card-text list-group-item" title="Deploy">
-                <a class="list-group-item-text icon-link icon-link-hover" href="{% url 'deploy' %}#deploy">
-                    <svg class="bi" aria-hidden="true">
-                        <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#rocket-takeoff"></use>
-                    </svg>
-                    Deploy
-                </a>
-            </li>
+            <a class="ac-link" href="{% url 'deploy' %}#deploy" title="Deploy Console">
+                <span class="ac-link__icon">{% bi "rocket-takeoff" %}</span>
+                <span class="ac-link__body">
+                    <span class="ac-link__name">Deploy Console</span>
+                    <span class="ac-link__note d-block">Rebuild &amp; restart the stack</span>
+                </span>
+            </a>
     {% endif %}
-            <li class="card-text list-group-item" title="Challenges">
-                <a class="list-group-item-text icon-link icon-link-hover" href="{% url 'challenges' %}#challenges">
-                    <svg class="bi" aria-hidden="true">
-                        <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#award"></use>
-                    </svg>
-                    Challenges
-                </a>
-            </li>
-            {% if user.is_eternal %}
-            <li class="card-text list-group-item" title="Feedback Triage">
-                <a class="list-group-item-text icon-link icon-link-hover" href="{% url 'feedback' %}#feedback">
-                    <svg class="bi" aria-hidden="true">
-                        <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#flag"></use>
-                    </svg>
-                    Feedback Triage
-                </a>
-            </li>
-            {% endif %}
-            <li class="card-text list-group-item" title="Leaders">
-                <a class="list-group-item-text icon-link icon-link-hover" href="{% url 'leaders' %}#leaders">
-                    <svg class="bi" aria-hidden="true">
-                        <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#trophy"></use>
-                    </svg>
-                    Leaders
-                </a>
-            </li>
-            <li class="card-text list-group-item" title="Password">
-                <a class="list-group-item-text icon-link icon-link-hover" href="{% url 'password' %}#password">
-                    <svg class="bi" aria-hidden="true">
-                        <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#key"></use>
-                    </svg>
-                    Password
-                </a>
-            </li>
-            <li class="card-text list-group-item">
-                <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" role="switch" name="isPrivate" id="privateSwitch" value="{% if request.user.is_private %}true{% else %}false{% endif %}" onclick="togglePrivate(this.id);"{% if request.user.is_private %} checked{% endif %}>
-                    <label class="form-check-label" for="privateSwitch">
-                        Private
-                    </label>
-                    <button
-                        class="bg-black border-0 icon-link icon-link-hover p-1"
-                        data-bs-html="true"
-                        data-bs-title="<strong>Private?</strong>"
-                        data-bs-toggle="popover"
-                        data-bs-content="The &quot;<b>Private</b>&quot; setting hides your player's profile pages online."
-                        type="button">
-                        <svg class="bi" aria-hidden="false" role="note" aria-label="The &quot;private&quot; setting hides your player's profile pages online.">
-                            <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#question-circle"></use>
-                        </svg>
-                    </button>
-                </div>
-            </li>
-            <li class="card-text list-group-item" title="Upgrades">
-                <a class="list-group-item-text icon-link icon-link-hover" href="{% url 'upgrades' %}#upgrades">
-                    <svg class="bi" aria-hidden="true">
-                        <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#shield"></use>
-                    </svg>
-                    Upgrades
-                </a>
-            </li>
-            <li class="card-text list-group-item" title="Who's Online?">
-                <a class="list-group-item-text icon-link icon-link-hover" href="{% url 'who' %}#who">
-                    <svg class="bi" aria-hidden="true">
-                        <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#people"></use>
-                    </svg>
-                    Who's Online?
-                    <span class="badge bg-dark rounded-pill border border-secondary">
-                        {{ PLAYERS_ONLINE }}
-                    </span>
-                </a>
-            </li>
-        </ul>
+    {% if user.is_eternal %}
+            <a class="ac-link" href="{% url 'feedback' %}#feedback" title="Feedback Triage">
+                <span class="ac-link__icon">{% bi "flag" %}</span>
+                <span class="ac-link__body">
+                    <span class="ac-link__name">Feedback Triage</span>
+                    <span class="ac-link__note d-block">Player bug / typo / idea reports</span>
+                </span>
+            </a>
+            <a class="ac-link" href="{% url 'styleguide' %}#styleguide" title="Style Guide">
+                <span class="ac-link__icon">{% bi "palette" %}</span>
+                <span class="ac-link__body">
+                    <span class="ac-link__name">Style Guide</span>
+                    <span class="ac-link__note d-block">Design tokens &amp; components, live</span>
+                </span>
+            </a>
+    {% endif %}
+        </div>
+    </div>
+{% endif %}
+
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "compass" %} Game</div>
+        <div class="ac-grid">
+            <a class="ac-link" href="{% url 'who' %}#who" title="Who's Online?">
+                <span class="ac-link__icon">{% bi "people" %}</span>
+                <span class="ac-link__body">
+                    <span class="ac-link__name">Who's Online?</span>
+                    <span class="ac-link__note d-block">Players in the game right now</span>
+                </span>
+                <span class="ac-link__side ac-pill ac-pill--{% if PLAYERS_ONLINE %}ok{% else %}muted{% endif %}">{{ PLAYERS_ONLINE }}</span>
+            </a>
+            <a class="ac-link" href="{% url 'challenges' %}#challenges" title="Challenges">
+                <span class="ac-link__icon">{% bi "award" %}</span>
+                <span class="ac-link__body">
+                    <span class="ac-link__name">Challenges</span>
+                    <span class="ac-link__note d-block">Seasonal boss challenges</span>
+                </span>
+            </a>
+            <a class="ac-link" href="{% url 'leaders' %}#leaders" title="Leaders">
+                <span class="ac-link__icon">{% bi "trophy" %}</span>
+                <span class="ac-link__body">
+                    <span class="ac-link__name">Leaders</span>
+                    <span class="ac-link__note d-block">All-time leaderboard</span>
+                </span>
+            </a>
+            <a class="ac-link" href="{% url 'upgrades' %}#upgrades" title="Upgrades">
+                <span class="ac-link__icon">{% bi "shield" %}</span>
+                <span class="ac-link__body">
+                    <span class="ac-link__name">Upgrades</span>
+                    <span class="ac-link__note d-block">Remort upgrade catalog</span>
+                </span>
+            </a>
+            <a class="ac-link" href="{% url 'password' %}#password" title="Password">
+                <span class="ac-link__icon">{% bi "key" %}</span>
+                <span class="ac-link__body">
+                    <span class="ac-link__name">Password</span>
+                    <span class="ac-link__note d-block">Change your account password</span>
+                </span>
+            </a>
+        </div>
     </div>
 
-    <div class="card m-1" id="privateMsgDiv" style="display: none;">
-        <div class="card-body">
-            <p class="card-text lead" id="privateMsgNode"></p>
+    <!-- Characters -->
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "person-badge" %} Characters</div>
+{% if request.user.players and request.user.players.count > 0 %}
+        <div class="ac-rows">
+    {% for player in request.user.players.all %}
+            <div class="ac-row">
+                <span class="ac-row__icon">
+                    {% if player.is_immortal %}{% bi "stars" %}{% else %}{% bi "person" %}{% endif %}
+                </span>
+                <div class="ac-row__main">
+                    <div class="ac-row__title" title="{{ player.player_title }}">
+                        {{ player.player_link }}
+                    </div>
+                    <div class="ac-row__meta">
+        {% if not player.is_immortal %}
+                        <span>{{ player.common.player_class.get_class_name }}</span>
+                        <span>{{ player.common.race.display_name }}</span>
+                        <span>{{ player.get_player_alignment }}</span>
+            {% if player.remorts > 0 %}
+                        <span title="Remorts">{% bi "arrow-repeat" %} {{ player.remorts }}</span>
+            {% endif %}
+            {% if player.statistics.total_renown > 0 %}
+                        <span title="Total renown">{% bi "star" %} {{ player.statistics.total_renown }}</span>
+            {% endif %}
+            {% if player.statistics.total_quests > 0 %}
+                        <span title="Total quests">{% bi "signpost" %} {{ player.statistics.total_quests }}</span>
+            {% endif %}
+            {% if player.statistics.total_challenges > 0 %}
+                        <span title="Total challenges">{% bi "award" %} {{ player.statistics.total_challenges }}</span>
+            {% endif %}
+            {% if player.statistics.total_deaths > 0 %}
+                        <span title="Total deaths">{% bi "heartbreak" %} {{ player.statistics.total_deaths }}</span>
+            {% endif %}
+        {% else %}
+                        <span>{{ player.name|title }} {{ player.get_player_phrase }} a {{ player.player_type }} character.</span>
+        {% endif %}
+                    </div>
+                </div>
+                <div class="ac-row__side">
+        {% if player.is_immortal %}
+                    <span class="ac-pill ac-pill--info">{{ player.player_type }}</span>
+        {% else %}
+                    <span class="ac-pill ac-pill--accent" title="Level {{ player.common.level }}">lvl {{ player.common.level }}</span>
+        {% endif %}
+                </div>
+            </div>
+    {% endfor %}
         </div>
+{% else %}
+        <div class="ac-empty">
+            {% bi "person-plus" %}
+            <span>You have not created any players yet — connect and roll one!</span>
+        </div>
+{% endif %}
+    </div>
+
+    <div class="row g-3">
+        <!-- Essence -->
+        <div class="col-md-5 d-flex">
+            <div class="ac-panel flex-fill">
+                <div class="ac-panel__h">{% bi "gem" %} Essence</div>
+                <p class="ac-panel__hint">
+                    Reward points earned each season, preserved across seasons —
+                    spend them in-game with <code>shop</code>.
+                    <a href="{% url 'help_page' help_topic='Essence' %}#topic">More on essence.</a>
+                </p>
+                <div class="ac-tiles">
+                    <span class="ac-tile ac-tile--accent">
+                        <span class="ac-tile__n">{{ request.user.current_essence }}</span>
+                        <span class="ac-tile__label">Current</span>
+                    </span>
+                    <span class="ac-tile {% if request.user.seasonal_earned %}ac-tile--ok{% else %}ac-tile--muted{% endif %}">
+                        <span class="ac-tile__n">{{ request.user.seasonal_earned }}</span>
+                        <span class="ac-tile__label">Earned this season</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upgrades -->
+        <div class="col-md-7 d-flex">
+            <div class="ac-panel flex-fill">
+                <div class="ac-panel__h">{% bi "shield" %} Upgrades</div>
+                <p class="ac-panel__hint">
+                    Remort upgrades bought with renown in-game —
+                    <a href="{% url 'upgrades' %}#upgrades">see the full catalog</a>.
+                </p>
+{% if request.user.upgrades.all %}
+                <dl class="ac-kv">
+    {% for upgraded in request.user.upgrades.all %}
+                    <dt>{{ upgraded.upgrade.name }}</dt>
+                    <dd class="text-ishar">×{{ upgraded.amount }}</dd>
+    {% endfor %}
+                </dl>
+{% else %}
+                <div class="ac-empty">
+                    {% bi "shield" %}
+                    <span>You have not purchased any upgrades.</span>
+                </div>
+{% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Account -->
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "person-vcard" %} Account</div>
+        <dl class="ac-kv mb-3">
+            <dt>Account</dt><dd>{{ request.user.get_username }}</dd>
+            <dt>Created</dt>
+            <dd title="{{ request.user.created_at }}">
+                {{ request.user.created_at|naturaltime }}
+                (<time datetime="{{ request.user.created_at|date:'c' }}">{{ request.user.created_at|date:"N j, Y" }}</time>)
+            </dd>
+        </dl>
+        <div class="form-check form-switch ac-switch">
+            <input class="form-check-input" type="checkbox" role="switch" id="privateSwitch"{% if request.user.is_private %} checked{% endif %}>
+            <label class="form-check-label ac-switch__text" for="privateSwitch">
+                Private profile
+                <span class="ac-switch__note d-block">Hides your players' profile pages on the website.</span>
+            </label>
+        </div>
+        <div class="ac-note ac-note--ok mt-2 d-none" id="privateMsg" role="status"></div>
     </div>
 
 </div>
 
-{% if request.user.players and request.user.players.count > 0 %}
-    <p class="lead" title="You have {{ request.user.players.count }} character{{ request.user.players.count|pluralize }}.">
-        You have {{ request.user.players.count }} character{{ request.user.players.count|pluralize }}:
-    </p>
-
-    {% for player in request.user.players.all %}
-    <details>
-
-        <summary class="h3 text-ishar" title="Player: {{ player.name }}">
-            <span class="text-secondary">
-                {{ forloop.counter }}.
-            </span>
-            <span class="{{ player.player_css }}">
-                {{ player.name }}
-            </span>
-        </summary>
-
-        <h4 title="{{ player.player_title }}">
-            {{ player.player_link }}
-        </h4>
-
-        {% if not player.is_immortal %}
-        <ol class="list-group list-group-horizontal-sm">
-            <li class="list-group-item list-group-item-text" title="Level: {{ player.common.level }}">
-                <strong>Level</strong>:
-                {{ player.common.level }}
-            </li>
-            <li class="list-group-item list-group-item-text" title="Class: {{ player.common.player_class.get_class_name }}">
-                <strong>Class</strong>:
-                {{ player.common.player_class.get_class_name }}
-            </li>
-            <li class="list-group-item list-group-item-text" title="Race: {{ player.common.race.display_name }}">
-                <strong>Race</strong>:
-                {{ player.common.race.display_name }}
-            </li>
-            <li class="list-group-item list-group-item-text" title="Alignment: {{ player.get_player_alignment }} ({{ player.common.alignment }})">
-                <strong>Alignment</strong>:
-                {{ player.get_player_alignment }}
-            </li>
-            {% if player.remorts > 0 %}
-            <li class="list-group-item list-group-item-text" title="Remorts: {{ player.remorts }}">
-                <strong>Remorts</strong>:
-                {{ player.remorts }}
-            </li>
-                {% endif %}
-                {% if player.statistics.total_renown > 0 %}
-            <li class="list-group-item list-group-item-text" title="Total Renown: {{ player.statistics.total_renown }}">
-                <strong>Total Renown</strong>:
-                {{ player.statistics.total_renown }}
-            </li>
-                {% endif %}
-                {% if player.statistics.total_quests > 0 %}
-            <li class="list-group-item list-group-item-text" title="Total Quests: {{ player.statistics.total_quests }}">
-                <strong>Total Quests</strong>:
-                {{ player.statistics.total_quests }}
-            </li>
-                {% endif %}
-                {% if player.statistics.total_challenges > 0 %}
-            <li class="list-group-item list-group-item-text" title="Total Challenges: {{ player.statistics.total_challenges }}">
-                <strong>Total Challenges</strong>:
-                {{ player.statistics.total_challenges }}
-            </li>
-                {% endif %}
-                {% if player.statistics.total_deaths > 0 %}
-            <li class="list-group-item list-group-item-text" title="Total Deaths: {{ player.statistics.total_deaths }}">
-                <strong>Total Deaths</strong>:
-                {{ player.statistics.total_deaths }}
-            </li>
-                {% endif %}
-        </ol>
-        {% else %}
-        <p class="lead">
-            {{ player.name | title }} {{ player.get_player_phrase }} a
-            <span class="{{ player.player_css }}">{{ player.player_type }}</span> character!
-        </p>
-        {% endif %}
-
-    </details>
-    <hr>
-    {% endfor %}
-{% else %}
-    <p class="lead" title="You have not created any players yet!">
-        You have not created any players yet!
-    </p>
-{% endif %}
-
-<details open>
-    <summary>
-        <a class="h4 icon-link icon-link-hover" href="#essence">
-            <svg aria-hidden="false" class="bi" role="img" aria-label="Link to this section: Essence">
-                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#link-45deg">
-                </use>
-            </svg>
-        </a>
-        <h3 id="essence" title="Essence">
-            Essence
-        </h3>
-        <span class="badge bg-dark rounded-pill border border-secondary" title="{{ request.user.current_essence }} essence" data-bs-toggle="tooltip" data-bs-title="{{ request.user.current_essence }} essence">
-            {{ request.user.current_essence }}
-        </span>
-        <button
-            class="bg-black border-0 icon-link icon-link-hover p-1"
-            data-bs-toggle="popover"
-            data-bs-html="true"
-            data-bs-title="<strong>Essence?</strong>"
-            data-bs-content="&quot;<a title='Help: Essence' href='{% url 'help_page' help_topic='Essence' %}#topic' target='_blank'>Essence</a>&quot;
-                are rewards points earned each season. Essence is preserved across seasons,
-                and can be spent by typing &quot;<code>shop</code>&quot; any time."
-            type="button">
-            <svg
-                aria-hidden="false"
-                aria-label="Essence are rewards points earned each season: {{ request.scheme }}://{{ request.META.HTTP_HOST }}{% url 'help_page' help_topic='Essence' %}#topic"
-                class="bi"
-                role="note">
-                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#question-circle">
-                </use>
-            </svg>
-        </button>
-    </summary>
-    <ul class="list-group list-group-unbordered">
-        <li class="border-0 list-group-item list-group-item-text" title="Current: {{ request.user.current_essence }} essence">
-            <strong>Current</strong>:
-            {{ request.user.current_essence }} essence
-        </li>
-        <li class="border-0 list-group-item list-group-item-text" title="Earned: {{ request.user.seasonal_earned }} essence">
-            <strong>Earned</strong>:
-            {{ request.user.seasonal_earned }} essence
-        </li>
-    </ul>
-</details>
-<hr>
-<details {% if request.user.upgrades.count > 0 %} open{% endif %}>
-    <summary>
-        <a class="h4 icon-link icon-link-hover" href="#upgrades">
-            <svg aria-hidden="false" class="bi" role="img" aria-label="Link to this section: Upgrades ({{ request.user.upgrades.count }} upgrade{{ request.user.upgrades.count|pluralize }})">
-                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#link-45deg">
-                </use>
-            </svg>
-        </a>
-        <h4 id="upgrades" title="Upgrades">
-            Upgrades
-        </h4>
-        <span class="badge bg-dark rounded-pill border border-secondary" data-bs-toggle="tooltip" data-bs-title="{{ request.user.upgrades.count }} upgrades">
-            {{ request.user.upgrades.count }}
-        </span>
-        <button
-                class="bg-black border-0 icon-link icon-link-hover p-1"
-                data-bs-toggle="popover"
-                data-bs-html="true"
-                data-bs-title="<strong>Upgrades?</strong>"
-                data-bs-content="A list of remort upgrades
-                (which can be &quot;bought&quot; with renown points in-game)
-                <a href='{% url 'upgrades' %}#upgrades' target='_blank'>is available here</a>."
-                type="button">
-            <svg class="bi" aria-hidden="false" role="note" aria-label="Remort Upgrades: {{ request.scheme }}://{{ request.META.HTTP_HOST }}{% url 'upgrades' %}#upgrades">
-                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#question-circle"></use>
-            </svg>
-        </button>
-    </summary>
-{% if request.user.upgrades.all %}
-    <ul class="list-group list-group-unbordered">
-    {% for upgraded in request.user.upgrades.all %}
-        <li class="list-group-item border-0" title="{{ upgraded.upgrade.name }} (x{{ upgraded.amount }})">
-            <span class="text-secondary me-3">
-                {{ forloop.counter }}.
-            </span>
-            <span class="list-group-item-text">
-                {{ upgraded.upgrade.name }}
-            </span>
-            <span class="badge bg-dark border border-secondary text-ishar rounded-pill">
-                x{{ upgraded.amount }}
-            </span>
-        </li>
-    {% endfor %}
-    </ul>
-{% else %}
-    <p class="fst-italic" title="You have not purchased any upgrades.">
-        You have not purchased any upgrades.
-    </p>
-{% endif %}
-</details>
-
-<hr>
-
-<details open>
-    <summary title="Account Created ({{ request.user.account_name }}): {{ request.user.created_at|naturaltime }}">
-        <a class="h4 icon-link icon-link-hover" href="#created">
-            <svg aria-hidden="false" class="bi" role="img" aria-label="Link to this section: Account Created ({{ request.user.account_name }}): {{ request.user.created_at|naturaltime }}">
-                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#link-45deg">
-                </use>
-            </svg>
-        </a>
-        <h5 id="created">
-            Created
-        </h5>
-    </summary>
-    <blockquote class="ms-3 blockquote">
-        <p title="{{ request.user.created_at|naturaltime }}">
-            {{ request.user.created_at|naturaltime }}
-        </p>
-        <footer class="blockquote-footer" title="{{ request.user.created_at }}">
-            <time datetime="{{ request.user.created_at|date:"c" }}">
-                {{ request.user.created_at }}
-            </time>
-        </footer>
-    </blockquote>
-</details>
-
 <script>
-    // Enable Bootstrap tooltips and popovers.
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
-    const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
-    const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
+    // Toggle profile privacy; the endpoint flips the flag server-side and
+    // returns the new state. All DOM writes are textContent / class swaps.
+    (function () {
+        const sw = document.getElementById("privateSwitch");
+        const msg = document.getElementById("privateMsg");
+        const pill = document.getElementById("privacyPill");
 
-    /* Define function to let a user toggle their profile public/private. */
-    function togglePrivate(itemId) {
-
-        // Get toggle switch.
-        const item = document.getElementById(itemId);
-
-        // Set up confirmation text.
-        let messageText = "";
-        const msgDiv = document.getElementById("privateMsgDiv");
-        const msgNode = document.getElementById("privateMsgNode");
-
-        // Change value, and format text when either making...
-
-        // Public.
-        if (item.value === "true") {
-            item.value = false;
-            messageText = "public";
-            msgNode.classList.remove("message-success");
-            msgNode.classList.add("message-warning");
-
-        // Private.
-        } else if (item.value === "false") {
-            item.value = true;
-            messageText = "private";
-            msgNode.classList.remove("message-warning");
-            msgNode.classList.add("message-success");
+        function render(isPrivate) {
+            sw.checked = isPrivate;
+            pill.textContent = isPrivate ? "private" : "public";
+            pill.className = "ac-pill " + (isPrivate ? "ac-pill--warn" : "ac-pill--muted");
+            msg.textContent = "Your profile is now " + (isPrivate ? "private" : "public") + ".";
+            msg.className = "ac-note ac-note--ok mt-2";
+            setTimeout(function () { msg.className = "ac-note ac-note--ok mt-2 d-none"; }, 5000);
         }
 
-        // POST request to HTTPS endpoint to toggle profile privacy.
-        const xhr = new XMLHttpRequest();
-        xhr.open("POST", "{% url 'set_private' %}");
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-
-        // Show text five (5) seconds before clearing, upon successful request.
-        xhr.onreadystatechange = () => {
-            if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-                msgDiv.style.display = 'block';
-                msgNode.innerHTML = `Your profile has been made <b>${messageText}</b>.`
-                setTimeout(function() { msgNode.innerHTML = ""; msgDiv.style.display = 'none'; }, 5*1000);
-            }
-        };
-
-        // Include CSRF token in the POST request.
-        xhr.send(`csrfmiddlewaretoken={{ csrf_token }}`);
-    };
+        sw.addEventListener("change", function () {
+            sw.disabled = true;
+            fetch("{% url 'set_private' %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}",
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: "csrfmiddlewaretoken={{ csrf_token }}",
+            }).then(function (resp) {
+                return resp.json().then(function (data) { return { ok: resp.status === 200, data: data }; });
+            }).then(function (r) {
+                if (r.ok && r.data.message && typeof r.data.message.is_private === "boolean") {
+                    render(r.data.message.is_private);
+                } else {
+                    sw.checked = !sw.checked;
+                    msg.textContent = "Could not update your privacy setting.";
+                    msg.className = "ac-note ac-note--danger mt-2";
+                }
+            }).catch(function () {
+                sw.checked = !sw.checked;
+                msg.textContent = "Could not update your privacy setting.";
+                msg.className = "ac-note ac-note--danger mt-2";
+            }).finally(function () {
+                sw.disabled = false;
+            });
+        });
+    })();
 </script>
 {% endblock content %}

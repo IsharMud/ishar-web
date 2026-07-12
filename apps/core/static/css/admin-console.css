@@ -692,6 +692,45 @@ a.ac-row__link:hover { color: var(--ac-accent); }
     gap: .5rem;
 }
 
+/* ------------------------------------------------------- link cards --- */
+/* Navigation card (anchor sibling of .ac-toggle): icon tile + name + note,
+   optional trailing element (badge/pill). Lay out in .ac-grid. */
+.ac-link {
+    display: flex;
+    align-items: flex-start;
+    gap: .7rem;
+    padding: .8rem .9rem;
+    border-radius: var(--ac-radius-sm);
+    background: var(--ac-bg);
+    border: 1px solid var(--ac-border);
+    text-decoration: none;
+    transition: background .15s, border-color .15s, transform .1s;
+}
+a.ac-link:link, a.ac-link:visited { color: var(--ac-text); }
+.ac-link:hover {
+    background: var(--ac-elev);
+    border-color: rgba(255, 170, 119, .45);
+    color: var(--ac-text);
+    transform: translateY(-1px);
+}
+.ac-link:focus-visible { outline: 2px solid var(--ac-accent); outline-offset: 2px; }
+.ac-link__icon {
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    width: 2.1rem;
+    height: 2.1rem;
+    border-radius: var(--ac-radius-sm);
+    color: var(--ac-accent);
+    background: var(--ac-wash);
+    border: 1px solid rgba(255, 170, 119, .25);
+}
+.ac-link__icon .bi { width: 1.1rem; height: 1.1rem; }
+.ac-link__body { min-width: 0; flex: 1 1 auto; }
+.ac-link__name { font-weight: 600; display: flex; align-items: center; gap: .4rem; flex-wrap: wrap; }
+.ac-link__note { color: var(--ac-dim); font-size: .78rem; margin-top: .1rem; }
+.ac-link__side { margin-left: auto; flex: 0 0 auto; align-self: center; }
+
 /* ------------------------------------------------------ empty state --- */
 .ac-empty {
     display: flex;

@@ -105,17 +105,16 @@ Staff surfaces first (highest value, lowest risk — few users, we control them)
 |---|---|---|
 | 1 | Deploy console (`/portal/deploy`) | ✅ done — the reference implementation |
 | 2 | Feedback triage (`/feedback`) | ✅ done — tiles, chips, rows, timeline |
-| 3 | Processes / other Django-admin-adjacent staff pages | next |
-| 4 | Portal (`/portal`) + global nav/layout shell | later |
-| 5 | Leaders, Challenges (DataTables pages) | later |
+| 3 | Processes / other Django-admin-adjacent staff pages | ✖ closed — lives in Django admin, nothing to facelift (see decisions.md) |
+| 4 | Portal (`/portal`) + global nav/layout shell | ✅ done — shell on console surfaces, portal rebuilt |
+| 5 | Leaders, Challenges (DataTables pages) | next |
 | 6 | Connect HUD (align tokens) | later |
 | 7 | Home, help, errors, public content | last |
 
-### Recommended near-term addition
-- **A live `/styleguide` page** (staff-only) that renders every token and
-  component from this doc, with copy-paste markup. It becomes the fastest way to
-  build a consistent page and to eyeball regressions. Not built yet — a good
-  next step once E1/E2 land.
+### Near-term addition
+- **`/styleguide`** (Eternal+): ✅ built — renders every token and component
+  live, linked from the Portal dropdown. The fastest way to build a consistent
+  page and eyeball regressions.
 
 ---
 

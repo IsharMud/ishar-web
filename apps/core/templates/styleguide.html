@@ -1,0 +1,322 @@
+{% extends "layout.html" %}
+{% load ishar %}
+{% load static %}
+{% block meta_title %}{{ WEBSITE_TITLE }} Style Guide{% endblock meta_title %}
+{% block meta_description %}Live design-system reference for {{ WEBSITE_TITLE }}.{% endblock meta_description %}
+{% block meta_url %}{% url 'styleguide' %}#styleguide{% endblock meta_url %}
+{% block title %}{{ WEBSITE_TITLE }} Style Guide{% endblock title %}
+{% block scripts %}let focusTo = 'styleguide'{% endblock scripts %}
+{% block includes %}
+        <link rel="stylesheet" type="text/css" href="{% static 'css/admin-console.css' %}">
+        <style>
+            .sg-swatches { display: flex; flex-wrap: wrap; gap: .6rem; }
+            .sg-swatch {
+                display: flex; flex-direction: column; align-items: center; gap: .25rem;
+                font-size: .72rem; color: var(--ac-dim); min-width: 5.5rem;
+            }
+            .sg-swatch i {
+                display: block; width: 100%; height: 2.2rem;
+                border-radius: var(--ac-radius-sm); border: 1px solid var(--ac-border-2);
+                background: var(--sw);
+            }
+            .sg-swatch code { font-size: .72rem; color: var(--ac-text); background: none; padding: 0; }
+            .sg-cluster { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+            .sg-stack { display: flex; flex-direction: column; gap: .75rem; }
+        </style>
+{% endblock includes %}
+{% block breadcrumbs %}
+    {% crumb "Portal" "person-gear" urlname="portal" anchor="portal" %}
+    {% crumb "Style Guide" "palette" urlname="styleguide" anchor="styleguide" active=True %}
+{% endblock breadcrumbs %}
+{% block content %}
+<div class="ac ac--wide">
+
+    <header class="ac-hero">
+        <span class="ac-hero__badge">{% bi "palette" %}</span>
+        <div class="ac-hero__text">
+            <h2 class="ac-hero__title">Style Guide</h2>
+            <p class="ac-hero__sub">
+                The design system, live. Markup and rules in <code>docs/design/</code>;
+                components in <code>admin-console.css</code>, tokens in <code>style.css</code>.
+            </p>
+        </div>
+        <div class="ac-hero__status">
+            <span class="ac-pill ac-pill--status ac-pill--ok ac-pill--live">reference</span>
+        </div>
+    </header>
+
+    <!-- Tokens -->
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "droplet" %} Tokens — brand, surfaces, semantics</div>
+        <p class="ac-panel__hint">Every color on a faceflifted page comes from these custom properties.</p>
+        <div class="sg-swatches">
+            <span class="sg-swatch"><i style="--sw: var(--ac-accent)"></i><code>--ac-accent</code></span>
+            <span class="sg-swatch"><i style="--sw: var(--ac-accent-2)"></i><code>--ac-accent-2</code></span>
+            <span class="sg-swatch"><i style="--sw: var(--ac-bg)"></i><code>--ac-bg</code></span>
+            <span class="sg-swatch"><i style="--sw: var(--ac-panel)"></i><code>--ac-panel</code></span>
+            <span class="sg-swatch"><i style="--sw: var(--ac-elev)"></i><code>--ac-elev</code></span>
+            <span class="sg-swatch"><i style="--sw: var(--ac-border)"></i><code>--ac-border</code></span>
+            <span class="sg-swatch"><i style="--sw: var(--ac-border-2)"></i><code>--ac-border-2</code></span>
+            <span class="sg-swatch"><i style="--sw: var(--ac-text)"></i><code>--ac-text</code></span>
+            <span class="sg-swatch"><i style="--sw: var(--ac-dim)"></i><code>--ac-dim</code></span>
+            <span class="sg-swatch"><i style="--sw: var(--ac-ok)"></i><code>--ac-ok</code></span>
+            <span class="sg-swatch"><i style="--sw: var(--ac-info)"></i><code>--ac-info</code></span>
+            <span class="sg-swatch"><i style="--sw: var(--ac-warn)"></i><code>--ac-warn</code></span>
+            <span class="sg-swatch"><i style="--sw: var(--ac-danger)"></i><code>--ac-danger</code></span>
+            <span class="sg-swatch"><i style="--sw: #00b7eb"></i><code>immortal</code></span>
+        </div>
+    </div>
+
+    <!-- Pills -->
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "circle-fill" %} Status pills — <code>.ac-pill</code></div>
+        <div class="sg-cluster">
+            <span class="ac-pill ac-pill--muted">muted</span>
+            <span class="ac-pill ac-pill--ok">ok</span>
+            <span class="ac-pill ac-pill--info">info</span>
+            <span class="ac-pill ac-pill--warn">warn</span>
+            <span class="ac-pill ac-pill--danger">danger</span>
+            <span class="ac-pill ac-pill--accent">accent</span>
+            <span class="ac-pill ac-pill--status ac-pill--ok">with dot</span>
+            <span class="ac-pill ac-pill--status ac-pill--ok ac-pill--live">live</span>
+        </div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "hand-index" %} Buttons — <code>.ac-btn</code>, <code>.ac-cta</code></div>
+        <div class="sg-stack">
+            <div class="sg-cluster">
+                <button class="ac-btn" type="button">default</button>
+                <button class="ac-btn ac-btn--ok" type="button">{% bi "check-lg" %} ok</button>
+                <button class="ac-btn ac-btn--info" type="button">info</button>
+                <button class="ac-btn ac-btn--warn" type="button">warn</button>
+                <button class="ac-btn ac-btn--danger" type="button">danger</button>
+                <button class="ac-btn ac-btn--accent" type="button">accent</button>
+                <button class="ac-btn" type="button" disabled>disabled</button>
+            </div>
+            <div class="row g-2">
+                <div class="col-md-6">
+                    <button class="ac-cta" type="button">{% bi "rocket-takeoff" %} destructive primary</button>
+                </div>
+                <div class="col-md-6">
+                    <button class="ac-cta ac-cta--accent" type="button">{% bi "check-lg" %} accent primary</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter chips + fields -->
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "funnel" %} Filter bar — <code>.ac-filter</code>, <code>.ac-chip</code>, <code>.ac-field</code></div>
+        <div class="ac-filter mb-2">
+            <a class="ac-chip ac-chip--active" href="#styleguide">Active</a>
+            <a class="ac-chip" href="#styleguide">Open</a>
+            <a class="ac-chip" href="#styleguide">Closed</a>
+            <span class="ac-filter__sep" aria-hidden="true"></span>
+            <a class="ac-chip" href="#styleguide">Bug</a>
+            <a class="ac-chip" href="#styleguide">Idea</a>
+        </div>
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+            <input class="ac-field ac-field--inline flex-grow-1" style="min-width: 10rem;" type="search" placeholder="Search…" aria-label="Example search">
+            <select class="ac-field ac-field--inline" aria-label="Example sort">
+                <option>Newest</option>
+                <option>Oldest</option>
+            </select>
+            <button class="ac-btn" type="button">{% bi "search" %} Search</button>
+        </div>
+        <div class="mt-3">
+            <label class="ac-label" for="sg-input">Icon input — <code>.ac-inputgroup</code></label>
+            <div class="ac-inputgroup">
+                <span class="ac-inputgroup__icon">{% bi "key" %}</span>
+                <input class="ac-input" type="text" id="sg-input" placeholder="Placeholder text">
+            </div>
+        </div>
+    </div>
+
+    <!-- Tiles -->
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "grid" %} Stat tiles — <code>.ac-tiles</code>, <code>.ac-tile</code></div>
+        <div class="ac-tiles">
+            <a class="ac-tile ac-tile--accent ac-tile--active" href="#styleguide">
+                <span class="ac-tile__n">7</span><span class="ac-tile__label">Active filter</span>
+            </a>
+            <a class="ac-tile ac-tile--danger" href="#styleguide">
+                <span class="ac-tile__n">3</span><span class="ac-tile__label">Danger</span>
+            </a>
+            <a class="ac-tile ac-tile--info" href="#styleguide">
+                <span class="ac-tile__n">2</span><span class="ac-tile__label">Info</span>
+            </a>
+            <a class="ac-tile ac-tile--muted" href="#styleguide">
+                <span class="ac-tile__n">0</span><span class="ac-tile__label">Zero = muted</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Selection controls -->
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "ui-checks" %} Selection — <code>.ac-seg</code>, <code>.ac-toggle</code>, <code>.ac-switch</code></div>
+        <div class="sg-stack">
+            <div class="ac-seg" role="radiogroup" aria-label="Example environment">
+                <input class="btn-check" type="radio" name="sg-env" id="sg-env-prod" checked>
+                <label class="ac-seg__item ac-seg__item--prod" for="sg-env-prod">{% bi "hdd-stack" %} prod</label>
+                <input class="btn-check" type="radio" name="sg-env" id="sg-env-test">
+                <label class="ac-seg__item ac-seg__item--test" for="sg-env-test">{% bi "cone-striped" %} test</label>
+            </div>
+            <div class="ac-grid">
+                <input class="btn-check" type="checkbox" id="sg-svc-a" checked>
+                <label class="ac-toggle" for="sg-svc-a">
+                    <span class="ac-toggle__icon">{% bi "controller" %}</span>
+                    <span class="ac-toggle__body">
+                        <span class="ac-toggle__name">ishar-app</span>
+                        <span class="ac-toggle__note">Selected toggle card</span>
+                    </span>
+                    <span class="ac-toggle__check">{% bi "check-circle-fill" %}</span>
+                </label>
+                <input class="btn-check" type="checkbox" id="sg-svc-b">
+                <label class="ac-toggle" for="sg-svc-b">
+                    <span class="ac-toggle__icon">{% bi "globe2" %}</span>
+                    <span class="ac-toggle__body">
+                        <span class="ac-toggle__name">ishar-web</span>
+                        <span class="ac-toggle__note">Unselected toggle card</span>
+                    </span>
+                    <span class="ac-toggle__check">{% bi "check-circle-fill" %}</span>
+                </label>
+            </div>
+            <div class="form-check form-switch ac-switch">
+                <input class="form-check-input" type="checkbox" role="switch" id="sg-switch" checked>
+                <label class="form-check-label ac-switch__text" for="sg-switch">
+                    Labeled switch
+                    <span class="ac-switch__note d-block">With a supporting note.</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Link cards -->
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "link-45deg" %} Link cards — <code>.ac-link</code></div>
+        <div class="ac-grid">
+            <a class="ac-link" href="#styleguide">
+                <span class="ac-link__icon">{% bi "flag" %}</span>
+                <span class="ac-link__body">
+                    <span class="ac-link__name">Feedback Triage</span>
+                    <span class="ac-link__note d-block">Navigation card with a note</span>
+                </span>
+            </a>
+            <a class="ac-link" href="#styleguide">
+                <span class="ac-link__icon">{% bi "people" %}</span>
+                <span class="ac-link__body">
+                    <span class="ac-link__name">Who's Online?</span>
+                    <span class="ac-link__note d-block">With a trailing pill</span>
+                </span>
+                <span class="ac-link__side ac-pill ac-pill--ok">4</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Rows -->
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "list-ul" %} Record list — <code>.ac-rows</code>, <code>.ac-row</code></div>
+        <div class="ac-rows">
+            <div class="ac-row">
+                <span class="ac-row__icon">{% bi "bug" %}</span>
+                <div class="ac-row__main">
+                    <div class="ac-row__title"><a class="ac-row__link" href="#styleguide">A record title that links somewhere</a></div>
+                    <div class="ac-row__meta"><span class="mono">#214</span> <span>Meta</span> <span>wraps</span> <span>gracefully</span></div>
+                </div>
+                <div class="ac-row__side">
+                    <span class="ac-pill ac-pill--status ac-pill--danger">open</span>
+                    <button class="ac-btn ac-btn--ok" type="button">Ack</button>
+                </div>
+            </div>
+            <div class="ac-row">
+                <span class="ac-row__icon">{% bi "lightbulb" %}</span>
+                <div class="ac-row__main">
+                    <div class="ac-row__title"><a class="ac-row__link" href="#styleguide">Second row</a></div>
+                    <div class="ac-row__meta"><span class="mono">#209</span> <span>Hover raises the row</span></div>
+                </div>
+                <div class="ac-row__side"><span class="ac-pill ac-pill--status ac-pill--warn">duplicate</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Timeline + quote -->
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "chat-left-text" %} Timeline &amp; quote — <code>.ac-timeline</code>, <code>.ac-quote</code></div>
+        <div class="sg-stack">
+            <pre class="ac-quote">Verbatim player/machine text lives in an .ac-quote —
+monospace on the deepest surface, like a captured terminal excerpt.</pre>
+            <div class="ac-timeline">
+                <div class="ac-tl ac-tl--system">
+                    <span class="ac-tl__icon">{% bi "gear" %}</span>
+                    <div class="ac-tl__body">
+                        <div class="ac-tl__head">
+                            <span class="ac-tl__author">system</span>
+                            <span class="ac-tl__time">an hour ago</span>
+                        </div>
+                        <div class="ac-tl__text">System entries recede: dashed, dim, italic.</div>
+                    </div>
+                </div>
+                <div class="ac-tl">
+                    <span class="ac-tl__icon">{% bi "controller" %}</span>
+                    <div class="ac-tl__body">
+                        <div class="ac-tl__head">
+                            <span class="ac-tl__author ac-tl__author--staff">Ilistar</span>
+                            <span class="ac-pill ac-pill--info">staff</span>
+                            <span class="ac-tl__time">just now</span>
+                        </div>
+                        <div class="ac-tl__text">Human conversation stays foreground.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes, kv, empty, pager -->
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "card-list" %} Callouts, key/values, empty, pager</div>
+        <div class="sg-stack">
+            <div class="ac-note ac-note--ok" role="note">{% bi "check-circle" %} <span>An <strong>ok</strong> note.</span></div>
+            <div class="ac-note ac-note--warn" role="note">{% bi "exclamation-triangle" %} <span>A <strong>warn</strong> note with <code>code</code>.</span></div>
+            <div class="ac-note ac-note--danger" role="note">{% bi "x-octagon" %} <span>A <strong>danger</strong> note.</span></div>
+            <dl class="ac-kv">
+                <dt>Key</dt><dd>Right-aligned value</dd>
+                <dt>Another key</dt><dd>Another value</dd>
+            </dl>
+            <div class="ac-empty">
+                {% bi "inbox" %}
+                <span>The empty state: dashed, centered, one sentence.</span>
+            </div>
+            <nav class="ac-pager" aria-label="Example pager">
+                <a class="ac-btn" href="#styleguide">{% bi "chevron-left" %} Prev</a>
+                <span class="ac-pager__info">Page 2 of 3</span>
+                <a class="ac-btn" href="#styleguide">Next {% bi "chevron-right" %}</a>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Console -->
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "terminal" %} Job console — <code>.ac-console</code></div>
+        <section class="ac-console" aria-label="Example console">
+            <div class="ac-console__bar">
+                <span class="ac-console__dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                <span class="ac-console__title">deploy.sh</span>
+                <span class="ac-pill ac-pill--status ac-pill--warn ac-pill--live">running</span>
+                <span class="ac-console__spacer"></span>
+                <span class="ac-console__timer">1:23</span>
+                <button type="button" class="ac-copy">{% bi "clipboard" %} <span>Copy</span></button>
+            </div>
+            <div class="ac-console__step">
+                <span class="ac-spin" aria-hidden="true"></span>
+                <span class="ac-console__step-text">Building ishar-app (blue)…</span>
+            </div>
+            <pre class="ac-console__body">==> Pulling latest…
+==> Building ishar-app (blue)…
+Step 12/28 : COPY . /srv/ishar</pre>
+        </section>
+    </div>
+
+</div>
+{% endblock content %}
