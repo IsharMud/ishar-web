@@ -54,8 +54,22 @@
                     <span class="ac-link__note d-block">Rebuild &amp; restart the stack</span>
                 </span>
             </a>
+            <a class="ac-link" href="{% url 'season_console' %}#console" title="Season Console">
+                <span class="ac-link__icon">{% bi "hourglass-split" %}</span>
+                <span class="ac-link__body">
+                    <span class="ac-link__name">Season Console</span>
+                    <span class="ac-link__note d-block">Expiration, auto-cycle &amp; cycling</span>
+                </span>
+            </a>
     {% endif %}
     {% if user.is_eternal %}
+            <a class="ac-link" href="{% url 'events_console' %}#console" title="Events Console">
+                <span class="ac-link__icon">{% bi "stars" %}</span>
+                <span class="ac-link__body">
+                    <span class="ac-link__name">Events Console</span>
+                    <span class="ac-link__note d-block">Start, extend &amp; end in-game events</span>
+                </span>
+            </a>
             <a class="ac-link" href="{% url 'feedback' %}#feedback" title="Feedback Triage">
                 <span class="ac-link__icon">{% bi "flag" %}</span>
                 <span class="ac-link__body">

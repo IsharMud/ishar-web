@@ -230,9 +230,21 @@
                                         Deploy
                                     </a>
                                 </li>
+                                <li class="nav-item" title="Season Console">
+                                    <a class="nav-link dropdown-item icon-link icon-link-hover" href="{% url 'season_console' %}#console">
+                                        {% bi "hourglass-split" %}
+                                        Season Console
+                                    </a>
+                                </li>
         {% endif %}
     {% endif %}
     {% if user.is_eternal %}
+                                <li class="nav-item" title="Events Console">
+                                    <a class="nav-link dropdown-item icon-link icon-link-hover" href="{% url 'events_console' %}#console">
+                                        {% bi "stars" %}
+                                        Events Console
+                                    </a>
+                                </li>
                                 <li class="nav-item" title="Feedback Triage">
                                     <a class="nav-link dropdown-item icon-link icon-link-hover" href="{% url 'feedback' %}#feedback">
                                         {% bi "flag" %}

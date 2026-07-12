@@ -1,0 +1,330 @@
+{% extends "layout.html" %}
+{% load humanize %}
+{% load ishar %}
+{% block meta_title %}Season Console{% endblock meta_title %}
+{% block meta_description %}Staff console for {{ WEBSITE_TITLE }} season maintenance.{% endblock meta_description %}
+{% block meta_url %}{% url 'season_console' %}#console{% endblock meta_url %}
+{% block title %}Season Console{% endblock title %}
+{% block breadcrumbs %}
+    {% crumb "Portal" "person-gear" urlname="portal" anchor="portal" %}
+    {% crumb "Season Console" "hourglass-split" urlname="season_console" anchor="console" active=True %}
+{% endblock breadcrumbs %}
+{% block content %}
+<div class="ac">
+
+    <header class="ac-hero">
+        <span class="ac-hero__badge">{% bi "hourglass-split" %}</span>
+        <div class="ac-hero__text">
+            <h2 class="ac-hero__title">Season Console</h2>
+            <p class="ac-hero__sub">
+                Season {{ season.season_id }}
+                {% if season.enigma %}&middot; {{ season.enigma.enigma_name }}{% endif %}
+                &middot; commands run on the game's next minute pulse.
+            </p>
+        </div>
+        <div class="ac-hero__status">
+{% if game_state_normal %}
+            <span class="ac-pill ac-pill--status ac-pill--ok ac-pill--live">{{ game_state_label }}</span>
+{% elif game_state_mid_cycle %}
+            <span class="ac-pill ac-pill--status ac-pill--warn ac-pill--live">{{ game_state_label }}</span>
+{% else %}
+            <span class="ac-pill ac-pill--status ac-pill--muted">{{ game_state_label }}</span>
+{% endif %}
+        </div>
+    </header>
+
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "info-circle" %} Current season</div>
+        <dl class="ac-kv">
+            <dt>Started</dt>
+            <dd>
+                <time datetime="{{ season.effective_date|date:'c' }}">{{ season.effective_date|date:"l, F d, Y" }}</time>
+                ({{ season.effective_date|naturaltime }})
+            </dd>
+            <dt>Expires</dt>
+            <dd>
+                <time datetime="{{ season.expiration_date|date:'c' }}">{{ season.expiration_date|date:"l, F d, Y @ H:i e" }}</time>
+                ({{ season.expiration_date|naturaltime }})
+            </dd>
+            <dt>Auto-cycle</dt>
+            <dd>{% if season.auto_cycle %}on — the game cycles and starts the next season automatically at expiration{% else %}off — expiration passes without a cycle until one is requested{% endif %}</dd>
+            <dt>Next enigma</dt>
+            <dd>{% if season.next_enigma %}{{ season.next_enigma.enigma_name }}{% else %}not set{% endif %}</dd>
+        </dl>
+    </div>
+
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "calendar-week" %} Season-end events (automatic)</div>
+        <p class="ac-panel__hint">
+            The game fires these itself as expiration approaches; shown here
+            so date changes can be sanity-checked against them.
+        </p>
+        <div class="ac-rows">
+{% for step in season_end_ladder %}
+            <div class="ac-row">
+                <span class="ac-row__icon">{% bi "stars" %}</span>
+                <div class="ac-row__main">
+                    <div class="ac-row__title">{{ step.name }}</div>
+                    <div class="ac-row__meta">
+                        <span>{{ step.days }} days before season end</span>
+                        <span>
+                            {% bi "clock" %}
+                            <time datetime="{{ step.when|date:'c' }}">{{ step.when|date:"M d, Y" }}</time>
+                            ({{ step.when|naturaltime }})
+                        </span>
+                    </div>
+                </div>
+            </div>
+{% endfor %}
+        </div>
+    </div>
+
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "pencil-square" %} Adjust</div>
+        <form id="expirationForm" onsubmit="return false;">
+            <div class="row g-2 align-items-end">
+                <div class="col-12 col-sm">
+                    <label class="ac-label" for="expirationInput">
+                        Season expiration (your local time)
+                    </label>
+                    <input class="ac-field" id="expirationInput" type="datetime-local"
+                           data-iso="{{ season.expiration_date|date:'c' }}">
+                </div>
+                <div class="col-12 col-sm-auto">
+                    <button class="ac-btn ac-btn--accent" id="expirationBtn" type="submit">
+                        {% bi "calendar-check" %} Set expiration
+                    </button>
+                </div>
+            </div>
+        </form>
+        <hr>
+        <div class="ac-switch">
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" role="switch"
+                       id="autoCycleSwitch" {% if season.auto_cycle %}checked{% endif %}>
+                <label class="form-check-label" for="autoCycleSwitch">
+                    <span class="ac-switch__text">Auto-cycle at expiration</span>
+                    <span class="ac-switch__note d-block">
+                        When on, the game cycles and starts the next season on
+                        its own once the expiration date passes.
+                    </span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "exclamation-octagon" %} Danger zone</div>
+        <div class="ac-note ac-note--danger">
+            {% bi "exclamation-octagon" %}
+            <span>
+                <strong>Cycling the season deletes every mortal player.</strong>
+                The cycle archives stats and backups first, then wipes mortals
+                and creates the next season row; a separate <em>start</em>
+                reopens the game. Both require your password and a typed
+                confirmation.
+            </span>
+        </div>
+        <form id="dangerForm" onsubmit="return false;">
+            <div class="row g-2 align-items-end">
+                <div class="col-12 col-sm-4">
+                    <label class="ac-label" for="dangerPassword">Password</label>
+                    <input class="ac-field" id="dangerPassword" type="password"
+                           autocomplete="current-password">
+                </div>
+                <div class="col-12 col-sm-4">
+                    <label class="ac-label" for="dangerConfirm">
+                        Type <span class="mono" id="confirmWord">cycle</span> to confirm
+                    </label>
+                    <input class="ac-field" id="dangerConfirm" type="text"
+                           autocomplete="off" autocapitalize="none">
+                </div>
+                <div class="col-12 col-sm-auto">
+{% if game_state_normal %}
+                    <button class="ac-btn ac-btn--danger" id="cycleBtn" type="button" data-danger="cycle">
+                        {% bi "arrow-repeat" %} Cycle season
+                    </button>
+{% elif game_state_mid_cycle %}
+                    <button class="ac-btn ac-btn--ok" id="startBtn" type="button" data-danger="start">
+                        {% bi "play-circle" %} Start season
+                    </button>
+{% else %}
+                    <span class="ac-pill ac-pill--muted">unavailable in this game state</span>
+{% endif %}
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="ac-note d-none" id="queueNote" aria-live="polite">
+        <span id="queueNoteText"></span>
+    </div>
+
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "clock-history" %} Recent commands</div>
+{% if recent_tasks %}
+        <div class="ac-rows">
+{% for task in recent_tasks %}
+            <div class="ac-row">
+                <span class="ac-row__icon">{% bi "terminal" %}</span>
+                <div class="ac-row__main">
+                    <div class="ac-row__title">{{ task.get_command_display }}</div>
+                    <div class="ac-row__meta">
+                        <span>{% bi "person" %} {{ task.actor_name }}</span>
+                        <span>
+                            {% bi "clock" %}
+                            <time datetime="{{ task.created_at|date:'c' }}">{{ task.created_at|naturaltime }}</time>
+                        </span>
+{% if task.result %}
+                        <span class="mono">{{ task.result }}</span>
+{% endif %}
+                    </div>
+                </div>
+                <div class="ac-row__side">
+{% if task.status == "pending" %}
+                    <span class="ac-pill ac-pill--warn ac-pill--live">pending</span>
+                    <button class="ac-btn" type="button" data-cancel-task="{{ task.id }}">
+                        {% bi "x-circle" %} Cancel
+                    </button>
+{% elif task.status == "done" %}
+                    <span class="ac-pill ac-pill--ok">done</span>
+{% elif task.status == "cancelled" %}
+                    <span class="ac-pill ac-pill--muted">cancelled</span>
+{% else %}
+                    <span class="ac-pill ac-pill--danger">error</span>
+{% endif %}
+                </div>
+            </div>
+{% endfor %}
+        </div>
+{% else %}
+        <div class="ac-empty">
+            {% bi "terminal" %}
+            <span>No season commands have been queued yet.</span>
+        </div>
+{% endif %}
+    </div>
+
+</div>
+{% include "partials/webadmin_js.html" %}
+<script>
+(function () {
+    "use strict";
+
+    const queue = window.WebAdminQueue;
+    const runUrl = "{% url 'season_console_run' %}";
+    const note = document.getElementById("queueNote");
+    const noteText = document.getElementById("queueNoteText");
+
+    function showNote(text, kind) {
+        note.className = "ac-note" + (kind ? " ac-note--" + kind : "");
+        noteText.textContent = text;
+    }
+
+    function watchTask(taskId) {
+        showNote("Queued (#" + taskId + ") - waiting for the game's next minute pulse...", "");
+        queue.watch(taskId, function (data, stale) {
+            if (data.status === "pending" && stale) {
+                showNote("Still pending (#" + taskId + ") - the game may be down. " +
+                    "The command stays queued and runs when the game returns.", "warn");
+            }
+        }, function (data) {
+            if (data.status === "done") {
+                showNote("Done: " + (data.result || "command executed."), "ok");
+                setTimeout(function () { window.location.reload(); }, 1500);
+            } else {
+                showNote((data.status === "cancelled" ? "Cancelled: " : "Failed: ") +
+                    (data.result || "see recent commands."), "danger");
+            }
+        });
+    }
+
+    function run(params, onRejected) {
+        queue.post(runUrl, params).then(function (r) {
+            if (r.status === 200 && r.data.queued) {
+                watchTask(r.data.task_id);
+            } else {
+                showNote("Rejected: " + (r.data.message || ("HTTP " + r.status)), "danger");
+                if (onRejected) { onRejected(); }
+            }
+        }).catch(function () {
+            showNote("Network error - nothing was queued.", "danger");
+            if (onRejected) { onRejected(); }
+        });
+    }
+
+    // Prefill the datetime-local input from the season's ISO expiration,
+    // rendered in the viewer's local timezone.
+    const expirationInput = document.getElementById("expirationInput");
+    (function prefill() {
+        const iso = expirationInput.dataset.iso;
+        if (!iso) { return; }
+        const d = new Date(iso);
+        const pad = function (n) { return String(n).padStart(2, "0"); };
+        expirationInput.value = d.getFullYear() + "-" + pad(d.getMonth() + 1) +
+            "-" + pad(d.getDate()) + "T" + pad(d.getHours()) + ":" +
+            pad(d.getMinutes());
+    })();
+
+    document.getElementById("expirationForm").addEventListener("submit", function () {
+        const value = expirationInput.value;
+        if (!value) {
+            showNote("Pick a date and time first.", "warn");
+            return;
+        }
+        // datetime-local is naive browser-local time; send UTC ISO.
+        run({ action: "set_expiration", expiration: new Date(value).toISOString() });
+    });
+
+    document.getElementById("autoCycleSwitch").addEventListener("change", function () {
+        run(
+            { action: "set_auto_cycle", enabled: this.checked ? "1" : "0" },
+            function () { /* revert the switch on rejection */
+                const sw = document.getElementById("autoCycleSwitch");
+                sw.checked = !sw.checked;
+            }
+        );
+    });
+
+    document.querySelectorAll("[data-danger]").forEach(function (btn) {
+        document.getElementById("confirmWord").textContent = btn.dataset.danger;
+        btn.addEventListener("click", function () {
+            const action = btn.dataset.danger;
+            const passwordEl = document.getElementById("dangerPassword");
+            const confirmEl = document.getElementById("dangerConfirm");
+            if (!passwordEl.value) {
+                showNote("Password is required.", "warn");
+                return;
+            }
+            if (confirmEl.value.trim().toLowerCase() !== action) {
+                showNote('Type "' + action + '" in the confirmation box first.', "warn");
+                return;
+            }
+            btn.disabled = true;
+            const params = {
+                action: action,
+                password: passwordEl.value,
+                confirm: confirmEl.value,
+            };
+            passwordEl.value = "";
+            confirmEl.value = "";
+            run(params, function () { btn.disabled = false; });
+        });
+    });
+
+    document.querySelectorAll("[data-cancel-task]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            btn.disabled = true;
+            queue.cancel(btn.dataset.cancelTask).then(function (r) {
+                if (r.data.cancelled) {
+                    showNote("Cancelled #" + btn.dataset.cancelTask + ".", "ok");
+                    setTimeout(function () { window.location.reload(); }, 1000);
+                } else {
+                    showNote("Too late to cancel - the game already claimed it.", "warn");
+                }
+            });
+        });
+    });
+})();
+</script>
+{% endblock content %}

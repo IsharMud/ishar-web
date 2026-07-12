@@ -1,0 +1,251 @@
+{% extends "layout.html" %}
+{% load humanize %}
+{% load ishar %}
+{% block meta_title %}Events Console{% endblock meta_title %}
+{% block meta_description %}Staff console to start, extend, and end {{ WEBSITE_TITLE }} events.{% endblock meta_description %}
+{% block meta_url %}{% url 'events_console' %}#console{% endblock meta_url %}
+{% block title %}Events Console{% endblock title %}
+{% block breadcrumbs %}
+    {% crumb "Portal" "person-gear" urlname="portal" anchor="portal" %}
+    {% crumb "Events Console" "stars" urlname="events_console" anchor="console" active=True %}
+{% endblock breadcrumbs %}
+{% block content %}
+<div class="ac">
+
+    <header class="ac-hero">
+        <span class="ac-hero__badge">{% bi "stars" %}</span>
+        <div class="ac-hero__text">
+            <h2 class="ac-hero__title">Events Console</h2>
+            <p class="ac-hero__sub">
+                Start, extend, and end in-game events. Commands run on the
+                game's next minute pulse.
+            </p>
+        </div>
+        <div class="ac-hero__status">
+{% if active_count > 0 %}
+            <span class="ac-pill ac-pill--status ac-pill--ok ac-pill--live">{{ active_count }} active</span>
+{% else %}
+            <span class="ac-pill ac-pill--status ac-pill--muted">none active</span>
+{% endif %}
+        </div>
+    </header>
+
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "play-circle" %} Queue an event</div>
+        <p class="ac-panel__hint">
+            Starting an event that is already running extends it by the
+            duration instead.
+        </p>
+        <form id="startForm" onsubmit="return false;">
+            <div class="row g-2 align-items-end">
+                <div class="col-12 col-sm">
+                    <label class="ac-label" for="startEvent">Event</label>
+                    <select class="ac-field" id="startEvent">
+{% for event_type in startable_events %}
+                        <option value="{{ event_type.value }}">{{ event_type.label }}</option>
+{% endfor %}
+                    </select>
+                </div>
+                <div class="col-6 col-sm-2">
+                    <label class="ac-label" for="startAmount">Duration</label>
+                    <input class="ac-field" id="startAmount" type="number"
+                           inputmode="numeric" min="1" max="10080" value="4">
+                </div>
+                <div class="col-6 col-sm-3">
+                    <label class="ac-label" for="startUnit">Unit</label>
+                    <select class="ac-field" id="startUnit">
+                        <option value="minutes">minutes</option>
+                        <option value="hours" selected>hours</option>
+                        <option value="days">days</option>
+                        <option value="weeks">weeks</option>
+                    </select>
+                </div>
+                <div class="col-12 col-sm-auto">
+                    <button class="ac-cta" id="startBtn" type="submit">
+                        {% bi "play-circle" %} Queue start/extend
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "calendar-event" %} Events</div>
+        <div class="ac-rows">
+{% for row in event_rows %}
+            <div class="ac-row">
+                <span class="ac-row__icon">{% bi "stars" %}</span>
+                <div class="ac-row__main">
+                    <div class="ac-row__title">{{ row.type.label }}</div>
+                    <div class="ac-row__meta">
+{% if row.active %}
+                        <span title="Ends {{ row.active.end_time }}">
+                            {% bi "hourglass-split" %}
+                            ends
+                            <time datetime="{{ row.active.end_time|date:'c' }}">{{ row.active.end_time|naturaltime }}</time>
+                        </span>
+{% if row.active.xp_bonus %}
+                        <span>{% bi "graph-up-arrow" %} +{{ row.active.xp_bonus }}% XP</span>
+{% endif %}
+{% else %}
+                        <span class="text-secondary">inactive</span>
+{% endif %}
+                    </div>
+                </div>
+                <div class="ac-row__side">
+{% if not row.startable %}
+                    <span class="ac-pill ac-pill--muted" title="The game starts this event automatically as the season end approaches.">auto</span>
+{% endif %}
+{% if row.active %}
+                    <span class="ac-pill ac-pill--ok ac-pill--live">active</span>
+                    <button class="ac-btn ac-btn--danger" type="button"
+                            data-end-event="{{ row.type.value }}"
+                            data-event-label="{{ row.type.label }}">
+                        {% bi "stop-circle" %} End
+                    </button>
+{% endif %}
+                </div>
+            </div>
+{% endfor %}
+        </div>
+    </div>
+
+    <div class="ac-note d-none" id="queueNote" aria-live="polite">
+        <span id="queueNoteText"></span>
+    </div>
+
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "clock-history" %} Recent commands</div>
+        <p class="ac-panel__hint">
+            A command that stays pending for several minutes usually means the
+            game is down — it will run when the game returns, or it can be
+            cancelled.
+        </p>
+{% if recent_tasks %}
+        <div class="ac-rows">
+{% for task in recent_tasks %}
+            <div class="ac-row">
+                <span class="ac-row__icon">{% bi "terminal" %}</span>
+                <div class="ac-row__main">
+                    <div class="ac-row__title">{{ task.get_command_display }}</div>
+                    <div class="ac-row__meta">
+                        <span>{% bi "person" %} {{ task.actor_name }}</span>
+                        <span>
+                            {% bi "clock" %}
+                            <time datetime="{{ task.created_at|date:'c' }}">{{ task.created_at|naturaltime }}</time>
+                        </span>
+{% if task.result %}
+                        <span class="mono">{{ task.result }}</span>
+{% endif %}
+                    </div>
+                </div>
+                <div class="ac-row__side">
+{% if task.status == "pending" %}
+                    <span class="ac-pill ac-pill--warn ac-pill--live">pending</span>
+                    <button class="ac-btn" type="button" data-cancel-task="{{ task.id }}">
+                        {% bi "x-circle" %} Cancel
+                    </button>
+{% elif task.status == "done" %}
+                    <span class="ac-pill ac-pill--ok">done</span>
+{% elif task.status == "cancelled" %}
+                    <span class="ac-pill ac-pill--muted">cancelled</span>
+{% else %}
+                    <span class="ac-pill ac-pill--danger">error</span>
+{% endif %}
+                </div>
+            </div>
+{% endfor %}
+        </div>
+{% else %}
+        <div class="ac-empty">
+            {% bi "terminal" %}
+            <span>No event commands have been queued yet.</span>
+        </div>
+{% endif %}
+    </div>
+
+</div>
+{% include "partials/webadmin_js.html" %}
+<script>
+(function () {
+    "use strict";
+
+    const queue = window.WebAdminQueue;
+    const runUrl = "{% url 'events_console_run' %}";
+    const note = document.getElementById("queueNote");
+    const noteText = document.getElementById("queueNoteText");
+    const startBtn = document.getElementById("startBtn");
+
+    function showNote(text, kind) {
+        note.className = "ac-note" + (kind ? " ac-note--" + kind : "");
+        noteText.textContent = text;
+    }
+
+    function watchTask(taskId) {
+        showNote("Queued (#" + taskId + ") - waiting for the game's next minute pulse...", "");
+        queue.watch(taskId, function (data, stale) {
+            if (data.status === "pending" && stale) {
+                showNote("Still pending (#" + taskId + ") - the game may be down. " +
+                    "The command stays queued and runs when the game returns.", "warn");
+            }
+        }, function (data) {
+            if (data.status === "done") {
+                showNote("Done: " + (data.result || "command executed."), "ok");
+                setTimeout(function () { window.location.reload(); }, 1500);
+            } else {
+                showNote((data.status === "cancelled" ? "Cancelled: " : "Failed: ") +
+                    (data.result || "see recent commands."), "danger");
+                startBtn.disabled = false;
+            }
+        });
+    }
+
+    function run(params) {
+        startBtn.disabled = true;
+        queue.post(runUrl, params).then(function (r) {
+            if (r.status === 200 && r.data.queued) {
+                watchTask(r.data.task_id);
+            } else {
+                showNote("Rejected: " + (r.data.message || ("HTTP " + r.status)), "danger");
+                startBtn.disabled = false;
+            }
+        }).catch(function () {
+            showNote("Network error - nothing was queued.", "danger");
+            startBtn.disabled = false;
+        });
+    }
+
+    document.getElementById("startForm").addEventListener("submit", function () {
+        run({
+            action: "start",
+            event_type: document.getElementById("startEvent").value,
+            amount: document.getElementById("startAmount").value,
+            unit: document.getElementById("startUnit").value,
+        });
+    });
+
+    document.querySelectorAll("[data-end-event]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            if (!window.confirm("End \"" + btn.dataset.eventLabel + "\" now?")) {
+                return;
+            }
+            run({ action: "end", event_type: btn.dataset.endEvent });
+        });
+    });
+
+    document.querySelectorAll("[data-cancel-task]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            btn.disabled = true;
+            queue.cancel(btn.dataset.cancelTask).then(function (r) {
+                if (r.data.cancelled) {
+                    showNote("Cancelled #" + btn.dataset.cancelTask + ".", "ok");
+                    setTimeout(function () { window.location.reload(); }, 1000);
+                } else {
+                    showNote("Too late to cancel - the game already claimed it.", "warn");
+                }
+            });
+        });
+    });
+})();
+</script>
+{% endblock content %}
