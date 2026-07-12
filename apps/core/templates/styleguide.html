@@ -238,6 +238,49 @@
                 </div>
                 <div class="ac-row__side"><span class="ac-pill ac-pill--status ac-pill--warn">duplicate</span></div>
             </div>
+            <div class="ac-row ac-row--done">
+                <span class="ac-row__icon">{% bi "check-circle" %}</span>
+                <div class="ac-row__main">
+                    <div class="ac-row__title"><a class="ac-row__link" href="#styleguide">A checked-off record (--done)</a></div>
+                    <div class="ac-row__meta"><span>Struck through in ok-green; icon tile turns ok</span></div>
+                </div>
+                <div class="ac-row__side"><span class="ac-pill ac-pill--status ac-pill--ok">slain</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data table -->
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "table" %} Data table — <code>.ac-tablewrap</code>, <code>.ac-table</code></div>
+        <p class="ac-panel__hint">
+            For genuinely column-comparable data (leaderboards) — record lists use <code>.ac-rows</code>.
+            The wrap scrolls horizontally on phones; sortable headers are buttons whose state lives on <code>th[aria-sort]</code>.
+        </p>
+        <div class="ac-tablewrap">
+            <table class="ac-table">
+                <thead>
+                    <tr>
+                        <th class="ac-table__num" scope="col"><button class="ac-table__sort" type="button" title="Rank">#</button></th>
+                        <th scope="col"><button class="ac-table__sort" type="button">Player</button></th>
+                        <th class="ac-table__num" scope="col" aria-sort="descending"><button class="ac-table__sort" type="button">Renown</button></th>
+                        <th class="ac-table__num" scope="col"><button class="ac-table__sort" type="button">Deaths</button></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="ac-table__rank ac-table__rank--top">1</td>
+                        <td>Somebody <span class="ac-table__sub">Warrior</span></td>
+                        <td class="ac-table__num">4,210</td>
+                        <td class="ac-table__num">3</td>
+                    </tr>
+                    <tr>
+                        <td class="ac-table__rank">4</td>
+                        <td>Another <span class="ac-table__sub">Necromancer</span></td>
+                        <td class="ac-table__num">918</td>
+                        <td class="ac-table__num">12</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 

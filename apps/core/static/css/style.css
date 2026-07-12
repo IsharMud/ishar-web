@@ -213,11 +213,6 @@ a.hardcore-player:hover {
 .message-warn, .message-warning  { color: var(--ac-warn); }
 
 .two-col { column-count: 2; }
-.challenge-completed {
-    text-decoration: line-through;
-    text-decoration-color: #a00;
-    text-decoration-thickness: 0.25rem;
-}
 
 .anchor-link {
     padding: 0 .175rem;
@@ -244,9 +239,7 @@ a.hardcore-player:hover {
     opacity: 1
 }
 
-.remort-upgrade-row:target,
-.challenge-row:target
-{
+.remort-upgrade-row:target {
     font-weight: bold;
     border: 0.1rem solid var(--ishar-color);
 }

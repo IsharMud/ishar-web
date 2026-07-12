@@ -1,246 +1,176 @@
 {% extends "layout.html" %}
+{% load humanize %}
+{% load ishar %}
 {% load static %}
-{% block meta_title %}{{ WEBSITE_TITLE }} Leaderboard{% if game_type %} - {{ game_type }}{% endif %} | Top MUD Players{% endblock meta_title %}
-{% block meta_description %}Leaderboard of top{% if game_type %} {{ game_type|lower }}{% endif %} players in {{ WEBSITE_TITLE }}, a free online MUD. See player rankings, achievements, and stats in this text-based RPG.{% endblock meta_description %}
+{% block meta_title %}{{ WEBSITE_TITLE }} Leaderboard{% if game_type %} - {{ game_type.label }}{% endif %} | Top MUD Players{% endblock meta_title %}
+{% block meta_description %}Leaderboard of top{% if game_type %} {{ game_type.label|lower }}{% endif %} players in {{ WEBSITE_TITLE }}, a free online MUD. See player rankings, achievements, and stats in this text-based RPG.{% endblock meta_description %}
 {% block meta_url %}{% url 'leaders' %}{% endblock meta_url %}
 {% block title %}{{ WEBSITE_TITLE }} Leaderboard{% if game_type %} - {{ game_type.label }}{% endif %}{% endblock title %}
+{% block scripts %}let focusTo = 'leaders'{% endblock scripts %}
 {% block includes %}
-    <style>
-        .buttons-colvis,
-        .dt-buttons,
-        .dt-buttons button,
-        .dt-buttons.button {
-            --bs-btn-bg: var(--bs-black);
-            --bs-btn-border-color: var(--ishar-color);
-            --bs-btn-color: var(--ishar-color);
-
-            --bs-btn-active-bg: var(--ishar-color);
-            --bs-btn-active-border-color: var(--ishar-color);
-            --bs-btn-active-color: var(--bs-black);
-
-            --bs-btn-hover-bg: var(--ishar-color);
-            --bs-btn-hover-border-color: var(--ishar-color);
-            --bs-btn-hover-color: var(--bs-black);
-
-            --bs-btn-visited-bg: var(--bs-black);
-            --bs-btn-visited-border-color: var(--ishar-color);
-            --bs-btn-visited-color: var(--ishar-color);
-        }
-    </style>
-    <link href="{% static 'datatables/datatables.min.css' %}" rel="stylesheet">
-    <script src="{% static 'jquery-3.7.1.min.js' %}"></script>
-    <script src="{% static 'datatables/datatables.min.js' %}"></script>
+        <link rel="stylesheet" type="text/css" href="{% static 'css/admin-console.css' %}">
 {% endblock includes %}
 {% block breadcrumbs %}
-    <li class="breadcrumb-item h2" title="Portal">
-        <a class="icon-link icon-link-hover" href="{% url 'portal' %}#portal">
-            <svg class="bi" aria-hidden="true">
-                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#person-gear"></use>
-            </svg>
-            <span id="portal">
-                Portal
-            </span>
-        </a>
-    </li>
-    <li class="breadcrumb-item h2{% if not game_type %} active" aria-current="page{% endif %}" title="Leaders">
-        <a class="icon-link icon-link-hover" href="{% url 'leaders' %}#leaders">
-            <svg class="bi" aria-hidden="true">
-                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#trophy"></use>
-            </svg>
-            <span id="leaders">
-                Leaders
-            </span>
-        </a>
-    </li>
-    {% if game_type %}
-    <li class="breadcrumb-item active h2" aria-current="page" title="{{ game_type.label }} Leaders">
-        <a href="{% url 'leaders' %}{{ game_type.label|lower }}#{{ game_type.label|lower }}">
-            {{ game_type.label }}
-        </a>
-    </li>
-    {% endif %}
+    {% crumb "Portal" "person-gear" urlname="portal" anchor="portal" %}
+{% if game_type %}
+    {% crumb "Leaders" "trophy" urlname="leaders" anchor="leaders" %}
+    {% crumb game_type.label "trophy-fill" active=True %}
+{% else %}
+    {% crumb "Leaders" "trophy" urlname="leaders" anchor="leaders" active=True %}
+{% endif %}
 {% endblock breadcrumbs %}
 {% block content %}
-<div class="container-fluid">
-    <ul class="my-1 py-1 list-group list-group-horizontal-sm">
-        <li class="list-group-item card-text" title="All" id="all">
-    {% if game_type is None %}
-            <span class="text-ishar">All</span>
-    {% else %}
-            <a class="list-group-item-text" href="{% url 'leaders' %}#all">All</a>
-    {% endif %}
-        </li>
-    {% for num, name in game_types %}
-        <li class="list-group-item card-text" title="{{ name }}" id="{{ name|lower }}">
-        {% if game_type == num %}
-            <span class="text-ishar">{{ name }}</span>
-        {% else %}
-            <a class="list-group-item-text" href="{% url 'leaders' %}{{ name|lower }}#{{ name|lower }}">{{ name }}</a>
-        {% endif %}
-        </li>
-    {% endfor %}
-    </ul>
-</div>
-    {% if leaders %}
-<div class="container-fluid">
-    <table class="table table-hover table-dark table-flush table-sm table-responsive table-striped" id="leadersTable">
-        <thead>
-            <tr>
-                <th class="border" scope="col" title="Name">
-                    <span class="text-ishar">Name</span>
-                </th>
-                <th class="border" scope="col" title="Class">
-                    <span class="text-ishar">Class</span>
-                </th>
-                <th class="border" scope="col" title="Level">
-                    <span class="text-ishar">Level</span>
-                </th>
-                <th class="border" scope="col" title="Remorts">
-                    <span class="text-ishar">Remorts</span>
-                </th>
-                <th class="border" scope="col" title="Renown">
-                    <span class="text-ishar">Renown</span>
-                </th>
-                <th class="border" scope="col" title="Challenges">
-                    <span class="text-ishar">Challenges</span>
-                </th>
-                <th class="border" scope="col" title="Quests">
-                    <span class="text-ishar">Quests</span>
-                </th>
-                <th class="border" scope="col" title="Deaths">
-                    <span class="text-ishar">Deaths</span>
-                </th>
-            </tr>
-        </thead>
-        <tbody class="table-group-divider text-ishar">
-        {% for leader in leaders %}
-            <tr id="leader-{{ forloop.counter }}" class="leader-row">
-                <td class="border" data-order="{{ leader.name }}" data-search="{{ leader.name }}" title="Player Name: {{ leader.name }}">
-                    {{ leader.player_link }}
-                </td>
-                <td class="border" data-order="{{ leader.player_class }}" data-search="{{ leader.player_class }}" title="Class: {{ leader.player_class }}">
-                    {{ leader.player_class }}
-                </td>
-                <td class="border" data-order="{{ leader.level }}" data-search="" title="Level: {{ leader.level }}">
-                    {{ leader.level }}
-                </td>
-                <td class="border" data-order="{{ leader.remorts }}" data-search="" title="Remorts: {{ leader.remorts }}">
-                    {{ leader.remorts }}
-                </td>
-                <td class="border" data-order="{{ leader.renown }}" data-search="" title="Renown: {{ leader.renown }}">
-                    {{ leader.renown }}
-                </td>
-                <td class="border" data-order="{{ leader.challenges }}" data-search="" title="Challenges: {{ leader.challenges }}">
-                    {{ leader.challenges }}
-                </td>
-                <td class="border" data-order="{{ leader.quests }}" data-search="" title="Quests: {{ leader.quests }}">
-                    {{ leader.quests }}
-                </td>
-                <td class="border" data-order="{{ leader.deaths }}" data-search="" title="Deaths: {{ leader.deaths }}">
-                    {{ leader.deaths }}
-                </td>
-            </tr>
-        {% endfor %}
-        </tbody>
-        <tfoot>
-            <tr class="table-group-divider text-ishar">
-                <th class="border" scope="col" title="Name">
-                    <span class="text-ishar">Name</span>
-                </th>
-                <th class="border" scope="col" title="Class">
-                    <span class="text-ishar">Class</span>
-                </th>
-                <th class="border" scope="col" title="Level">
-                    <span class="text-ishar">Level</span>
-                </th>
-                <th class="border" scope="col" title="Remorts">
-                    <span class="text-ishar">Remorts</span>
-                </th>
-                <th class="border" scope="col" title="Renown">
-                    <span class="text-ishar">Renown</span>
-                </th>
-                <th class="border" scope="col" title="Challenges">
-                    <span class="text-ishar">Challenges</span>
-                </th>
-                <th class="border" scope="col" title="Quests">
-                    <span class="text-ishar">Quests</span>
-                </th>
-                <th class="border" scope="col" title="Deaths">
-                    <span class="text-ishar">Deaths</span>
-                </th>
-            </tr>
-        </tfoot>
-    </table>
-</div>
-<script>
-    const itemName = 'players'
-    $('#leadersTable').DataTable({
-        buttons: ['colvis'],
-        language: {
-            info: `Showing _START_ to _END_ of _TOTAL_ ${itemName}`,
-            infoEmpty: `Showing 0 to 0 of 0 ${itemName}`,
-            infoFiltered: `(filtered from _MAX_ total ${itemName})`,
-            lengthMenu: `_MENU_ ${itemName}`,
-            zeroRecords: `No matching ${itemName} found`,
-            searchBuilder: {
-                button: {
-                    0: '<i class="bi bi-search" data-bs-toggle="tooltip" data-bs-title="Search" title="Search"></i> Search',
-                    1: '<i class="bi bi-search" data-bs-toggle="tooltip" data-bs-title="Search (1)" title="Search (1)"></i> Search (1)',
-                    _: '<i class="bi bi-search" data-bs-toggle="tooltip" data-bs-title="Search" title="Search"></i> Search (%d)',
-                },
-                title: '<i class="bi bi-search" data-bs-toggle="tooltip" data-bs-title="Search" title="Search"></i> Search',
-            },
-        },
-        layout: {
-            topStart: {
-                buttons: [
-                    {
-                        extend: 'colvis',
-                        text: '<span data-bs-toggle="tooltip" data-bs-title="Columns visibility" class="bi bi-list-columns"> Columns</span>',
-                    },
-                    {
-                        extend: 'searchBuilder',
-                        depthLimit: 1,
-                    },
-                ]
-            },
-            topEnd: 'pageLength',
-            bottomStart: 'paging',
-            bottomEnd: 'info',
-        },
-        lengthMenu: [
-            5, 10, 15, 20, 25, 50, 75, 100,
-            {
-                label: 'all',
-                value: -1
-            }
-        ],
-        order: [
-            [3, 'desc'],
-            [4, 'desc'],
-            [5, 'desc'],
-            [6, 'desc'],
-            [7, 'asc'],
-            [2, 'desc']
-        ],
-        pageLength: 10,
-        responsive: {
-            responsive: true,
-        },
-        searchBuilder: {
-            depthLimit: 1,
-        },
-    });
-</script>
-    {% else %}
-<div class="p-3">
-    <div class="card">
-        <div class="card-body">
-            <p class="card-text fst-italic lead text-warning">
-                Sorry, but no players were found.
+<div class="ac ac--wide">
+
+    <!-- Hero -->
+    <header class="ac-hero">
+        <span class="ac-hero__badge">{% bi "trophy" %}</span>
+        <div class="ac-hero__text">
+            <h2 class="ac-hero__title">Leaderboard{% if game_type %} — {{ game_type.label }}{% endif %}</h2>
+            <p class="ac-hero__sub">
+                Players ranked by remorts, renown, challenge and quest wins — fewest deaths break ties.
             </p>
         </div>
+        <div class="ac-hero__status">
+            <span class="ac-pill ac-pill--accent" title="Players on this leaderboard">
+                {{ leaders|length }} player{{ leaders|length|pluralize }}
+            </span>
+        </div>
+    </header>
+
+    <!-- Filters -->
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "funnel" %} Game type</div>
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+            <div class="ac-filter" role="group" aria-label="Game type filter">
+                <a class="ac-chip{% if game_type is None %} ac-chip--active{% endif %}" href="{% url 'leaders' %}#leaders">All</a>
+{% for num, name in game_types %}
+    {% with urlname=name|lower|add:"_leaders" %}
+                <a class="ac-chip{% if game_type == num %} ac-chip--active{% endif %}" href="{% url urlname %}#leaders">{{ name }}</a>
+    {% endwith %}
+{% endfor %}
+            </div>
+            <input class="ac-field ac-field--inline flex-grow-1" style="min-width: 12rem;" type="search"
+                   id="leaderSearch" placeholder="Filter by name or class" aria-label="Filter players by name or class">
+        </div>
     </div>
+
+    <!-- Rankings -->
+{% if leaders %}
+    <div class="ac-tablewrap">
+        <table class="ac-table" id="leadersTable">
+            <caption class="visually-hidden">
+                {{ WEBSITE_TITLE }} player rankings{% if game_type %} for the {{ game_type.label|lower }} game type{% endif %}.
+            </caption>
+            <thead>
+                <tr>
+                    <th class="ac-table__num" scope="col" data-type="rank">
+                        <button class="ac-table__sort" type="button" title="Rank">#</button>
+                    </th>
+                    <th scope="col" data-type="text">
+                        <button class="ac-table__sort" type="button">Player</button>
+                    </th>
+                    <th class="ac-table__num" scope="col" data-type="num">
+                        <button class="ac-table__sort" type="button">Level</button>
+                    </th>
+                    <th class="ac-table__num" scope="col" data-type="num">
+                        <button class="ac-table__sort" type="button">Remorts</button>
+                    </th>
+                    <th class="ac-table__num" scope="col" data-type="num">
+                        <button class="ac-table__sort" type="button">Renown</button>
+                    </th>
+                    <th class="ac-table__num" scope="col" data-type="num">
+                        <button class="ac-table__sort" type="button">Challenges</button>
+                    </th>
+                    <th class="ac-table__num" scope="col" data-type="num">
+                        <button class="ac-table__sort" type="button">Quests</button>
+                    </th>
+                    <th class="ac-table__num" scope="col" data-type="num">
+                        <button class="ac-table__sort" type="button">Deaths</button>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+{% for leader in leaders %}
+                <tr data-search="{{ leader.name|lower }} {{ leader.player_class|lower }}">
+                    <td class="ac-table__rank{% if forloop.counter <= 3 %} ac-table__rank--top{% endif %}" data-key="{{ forloop.counter }}">{{ forloop.counter }}</td>
+                    <td data-key="{{ leader.name|lower }}" title="{{ leader.name }} ({{ leader.player_class }})">
+                        {{ leader.player_link }}
+                        <span class="ac-table__sub">{{ leader.player_class }}</span>
+                    </td>
+                    <td class="ac-table__num" data-key="{{ leader.level }}">{{ leader.level }}</td>
+                    <td class="ac-table__num" data-key="{{ leader.remorts }}">{{ leader.remorts }}</td>
+                    <td class="ac-table__num" data-key="{{ leader.renown }}">{{ leader.renown|intcomma }}</td>
+                    <td class="ac-table__num" data-key="{{ leader.challenges }}">{{ leader.challenges }}</td>
+                    <td class="ac-table__num" data-key="{{ leader.quests }}">{{ leader.quests }}</td>
+                    <td class="ac-table__num" data-key="{{ leader.deaths }}">{{ leader.deaths }}</td>
+                </tr>
+{% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="ac-empty" id="leadersEmpty" hidden>
+        {% bi "search" %}
+        <span>No players match that filter.</span>
+    </div>
+<script>
+    (() => {
+        const table = document.getElementById("leadersTable")
+        const tbody = table.tBodies[0]
+        const headers = Array.from(table.tHead.rows[0].cells)
+
+        // Column sorting: numeric columns open descending (top scores first),
+        // text columns ascending; a second press flips direction.
+        const cellKey = (row, index) => {
+            const cell = row.cells[index]
+            return cell.dataset.key ?? cell.textContent.trim()
+        }
+        headers.forEach((th, index) => {
+            const button = th.querySelector(".ac-table__sort")
+            if (!button) return
+            button.addEventListener("click", () => {
+                const numeric = th.dataset.type !== "text"
+                const current = th.getAttribute("aria-sort")
+                // Rank reads best low-to-high; other numbers, top scores first.
+                const first = th.dataset.type === "num" ? "descending" : "ascending"
+                const next = current
+                    ? (current === "descending" ? "ascending" : "descending")
+                    : first
+                headers.forEach((h) => h.removeAttribute("aria-sort"))
+                th.setAttribute("aria-sort", next)
+                const sign = next === "ascending" ? 1 : -1
+                Array.from(tbody.rows)
+                    .sort((a, b) => {
+                        const av = cellKey(a, index)
+                        const bv = cellKey(b, index)
+                        const cmp = numeric ? Number(av) - Number(bv) : av.localeCompare(bv)
+                        return sign * cmp
+                    })
+                    .forEach((row) => tbody.appendChild(row))
+            })
+        })
+
+        // Name/class filter: hides rows client-side; ranks stay with players.
+        const search = document.getElementById("leaderSearch")
+        const empty = document.getElementById("leadersEmpty")
+        search.addEventListener("input", () => {
+            const q = search.value.trim().toLowerCase()
+            let shown = 0
+            for (const row of tbody.rows) {
+                const hit = !q || row.dataset.search.includes(q)
+                row.hidden = !hit
+                if (hit) shown += 1
+            }
+            empty.hidden = shown > 0
+        })
+    })()
+</script>
+{% else %}
+    <div class="ac-empty">
+        {% bi "trophy" %}
+        <span>No players found{% if game_type %} for the {{ game_type.label|lower }} game type{% endif %}.</span>
+    </div>
+{% endif %}
+
 </div>
-    {% endif %}
 {% endblock content %}

@@ -691,6 +691,112 @@ a.ac-row__link:hover { color: var(--ac-accent); }
     align-items: center;
     gap: .5rem;
 }
+/* Rows addressed by URL fragment (deep links) light up when targeted. */
+.ac-row { scroll-margin-top: .75rem; }
+.ac-row:target {
+    background: var(--ac-wash);
+    box-shadow: inset 0 0 0 1px rgba(255, 170, 119, .35);
+}
+/* A completed/checked-off record: the title is struck through in ok-green
+   (done, not dead) and recedes; the icon tile turns ok. */
+.ac-row--done .ac-row__title,
+.ac-row--done .ac-row__title a.ac-row__link:link,
+.ac-row--done .ac-row__title a.ac-row__link:visited {
+    color: var(--ac-dim);
+    text-decoration: line-through;
+    text-decoration-color: rgba(76, 187, 23, .7);
+    text-decoration-thickness: .12rem;
+}
+.ac-row--done .ac-row__icon {
+    color: var(--ac-ok);
+    background: var(--ac-ok-wash);
+    border-color: rgba(76, 187, 23, .35);
+}
+
+/* ------------------------------------------------------- data table --- */
+/* Token-aligned table for genuinely column-comparable data (leaderboards);
+   list-of-records surfaces use .ac-rows instead (see decisions.md). Always
+   wrap in .ac-tablewrap: a wide table scrolls inside its own container, the
+   page itself never overflows horizontally (mobile checklist #1). */
+.ac-tablewrap {
+    border: 1px solid var(--ac-border);
+    border-radius: var(--ac-radius);
+    background: var(--ac-panel);
+    overflow-x: auto;
+}
+.ac-table {
+    width: 100%;
+    margin: 0;
+    border-collapse: collapse;
+    font-size: .9rem;
+    color: var(--ac-text);
+}
+.ac-table thead th {
+    padding: .55rem .75rem;
+    background: var(--ac-bg);
+    border-bottom: 1px solid var(--ac-border-2);
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: var(--ac-dim);
+    text-align: left;
+    white-space: nowrap;
+}
+.ac-table tbody td,
+.ac-table tbody th {
+    padding: .55rem .75rem;
+    border-top: 1px solid var(--ac-border);
+    font-weight: 400;
+    color: var(--ac-text);
+    vertical-align: middle;
+}
+.ac-table tbody tr:first-child td,
+.ac-table tbody tr:first-child th { border-top: 0; }
+.ac-table tbody tr { transition: background .15s; }
+.ac-table tbody tr:hover { background: var(--ac-elev); }
+/* Numeric columns: right-aligned, non-jittering digits. */
+.ac-table__num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+/* Rank column: narrow, dim; the podium (top three) reads amber. */
+.ac-table__rank {
+    width: 1%;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    color: var(--ac-dim);
+}
+.ac-table__rank--top { color: var(--ac-accent); font-weight: 700; }
+/* Secondary line under a cell's main value (e.g. class under player name). */
+.ac-table__sub {
+    display: block;
+    font-size: .75rem;
+    color: var(--ac-dim);
+}
+/* Sortable header: a real button (keyboard-reachable), reset against the
+   classic global button styling; the sort state lives on th[aria-sort]. */
+.ac-table__sort {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    cursor: pointer;
+    transition: color .15s;
+}
+.ac-table__sort:hover { color: var(--ac-text); }
+.ac-table__sort:focus-visible { outline: 2px solid var(--ac-accent); outline-offset: 2px; }
+.ac-table__sort::after { content: "↕"; opacity: .4; }
+.ac-table th[aria-sort] .ac-table__sort { color: var(--ac-accent); }
+.ac-table th[aria-sort="ascending"] .ac-table__sort::after { content: "↑"; opacity: 1; }
+.ac-table th[aria-sort="descending"] .ac-table__sort::after { content: "↓"; opacity: 1; }
 
 /* ------------------------------------------------------- link cards --- */
 /* Navigation card (anchor sibling of .ac-toggle): icon tile + name + note,
@@ -867,7 +973,9 @@ a.ac-link:link, a.ac-link:visited { color: var(--ac-text); }
 /* ----------------------------------------------------- responsive --- */
 @media (max-width: 575.98px) {
     .ac-hero { flex-wrap: wrap; padding: .9rem 1rem; }
-    .ac-hero__status { align-self: stretch; }
+    .ac-hero__status { align-self: stretch; min-width: 0; }
+    /* Never clip a hero pill on a phone — let its text wrap instead. */
+    .ac-hero__status .ac-pill { white-space: normal; }
     .ac-hero__badge { width: 2.6rem; height: 2.6rem; }
     .ac-hero__badge .bi { width: 1.25rem; height: 1.25rem; }
     .ac-hero__title { font-size: 1.3rem; }
@@ -886,10 +994,12 @@ a.ac-link:link, a.ac-link:visited { color: var(--ac-text); }
     .ac-chip { padding: .45rem .85rem; }
     .ac-copy { padding: .35rem .6rem; }
     .ac-pager .ac-btn { min-width: 5.5rem; }
+    .ac-table__sort { padding: .4rem .3rem; margin: -.4rem -.3rem; }
 }
 @media (hover: none) {
     a.ac-tile:hover,
     .ac-link:hover,
     .ac-toggle:hover { transform: none; }
     .ac-row:hover { background: transparent; }
+    .ac-table tbody tr:hover { background: transparent; }
 }

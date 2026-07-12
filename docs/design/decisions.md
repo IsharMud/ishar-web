@@ -9,6 +9,34 @@ Format: `## YYYY-MM-DD — Title` · **Decision** · **Why** · (optional) **Not
 
 ---
 
+## 2026-07-12 — Leaders & Challenges adopt the console language; DataTables retired page-by-page
+
+**Decision.** Roadmap #5. **Leaders** keeps a real table — it is genuinely
+column-comparable data — via the new `.ac-tablewrap` / `.ac-table` component:
+token-aligned, horizontally scrollable inside its own container (the page
+never overflows), uppercase dim sortable headers as real `<button>`s with
+state on `th[aria-sort]`, tabular-nums numeric columns, an amber podium for
+the top three ranks, and the player's class as a sub-line under the name.
+Sorting and the name/class filter are ~40 lines of vanilla JS. **Challenges**
+drops its table entirely: eight-ish weekly kill targets are a checklist, not
+a matrix, so they render as `.ac-rows` — constraint meta (party size, level
+cap) with icons, an ok "slain" pill + winners when complete, and the new
+`.ac-row--done` modifier (ok-green strike-through — done, not dead; the old
+red `.challenge-completed` is deleted). Completion tiles double as the
+All / Still Standing / Slain filters over the existing URLs, and the
+next-cycle time is a live hero pill. **jQuery + DataTables are gone from
+both pages**; the vendored assets stay only until `upgrades.html` (roadmap
+#7) migrates, then get deleted. `.ac-row:target` (amber wash) is the deep-link
+highlight for row anchors.
+
+**Why.** DataTables + jQuery was ~1MB of framework to sort ten players and
+search eight mobs, and its chrome (page-length menus, column-visibility,
+search builders) never matched either the design language or the data size.
+The row treatment tells the truth about challenges — a weekly hit-list players
+check off — while `.ac-table` gives the site one honest, token-aligned table
+for data that really is tabular. These are also the first *public* surfaces
+on the console language, per the green-field mandate.
+
 ## 2026-07-12 — Static assets are content-hashed (cache busting)
 
 **Decision.** `{% static %}` URLs carry a content hash
