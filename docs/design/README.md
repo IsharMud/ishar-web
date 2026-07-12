@@ -112,6 +112,7 @@ Staff surfaces first (highest value, lowest risk — few users, we control them)
 | 4 | Portal (`/portal`) + global nav/layout shell | ✅ done — shell on console surfaces, portal rebuilt |
 | 5 | Leaders, Challenges (DataTables pages) | ✅ done — `.ac-table` for leaders, challenge rows; jQuery/DataTables dropped from both |
 | 6 | Connect HUD (align tokens) | ✅ done — structural colors are `--ac-*`; only vitals/flavor stay `--hud-*` |
+| 6b | Connect HUD session UX (first-class mobile + premium desktop) | ✅ done — terminal-first phone dock/sheet, collapsible desktop columns, HUD on by default |
 | 7 | Home, help, errors, public content | next |
 
 ### Near-term addition

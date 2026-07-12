@@ -1,11 +1,13 @@
 /*
  * Ishar browser-client HUD layout + widgets.
  *
- * Web-native approach: a responsive CSS grid that reflows around the
- * terminal, instead of Mudlet's fixed Geyser zones. The whole app gets an
- * explicit pixel height from JS (header-aware); everything inside flexes,
- * and a ResizeObserver refits the terminal. In .hud-off the grid collapses
- * to just the terminal (the mobile default).
+ * The session owns the viewport. Desktop is a three-region dashboard —
+ * individually collapsible side columns around a terminal that always
+ * gets the leftover space. Phones are terminal-first: panels live behind
+ * a thumb-reach bottom dock and open one at a time as a bottom sheet
+ * over the terminal (hud.js re-parents the panel sections between the
+ * columns and the sheet on viewport change). In .hud-off the grid
+ * collapses to just the terminal everywhere.
  *
  * Colors come from the shared design tokens (--ac-*, defined in
  * apps/core/static/css/style.css and loaded on every page — see
@@ -26,16 +28,24 @@
     --hud-edge: #d08a3a;                    /* edge resource */
     --hud-event: #e8b04b;                   /* world event flags */
     --hud-moon: #9aa6c8;                    /* moon phases */
+    /* Layout */
+    --hud-dock-h: 3.5rem;
 }
 
-/* Lock the page so only inner panels scroll. */
+/* ----- Page chrome: compact the shell so the session gets the screen ----- */
 html.connect-page,
 html.connect-page body {
     overflow: hidden;
     overscroll-behavior: none;
     height: 100%;
 }
+body.connect-page #logo { height: 2.4rem; }
+body.connect-page .navbar { padding-top: .25rem; padding-bottom: .25rem; }
+body.connect-page main > nav[aria-label="breadcrumb"] { display: none; }
+body.connect-page footer { display: none; }
+body.connect-page #content { padding: .5rem !important; } /* the p-* utilities are !important */
 
+/* ----- App grid ----- */
 #connect-app {
     display: grid;
     gap: 6px;
@@ -45,62 +55,130 @@ html.connect-page body {
 
 #connect-app.hud-off {
     grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
     grid-template-areas: "topbar" "center";
 }
 
+/* Phone-first: terminal + dock; panels live in the bottom sheet. */
 #connect-app.hud-on {
-    grid-template-columns: minmax(200px, 240px) minmax(0, 1fr) minmax(220px, 280px);
-    grid-template-rows: auto minmax(0, 1fr);
-    grid-template-areas:
-        "topbar topbar topbar"
-        "left   center right";
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    grid-template-areas: "topbar" "center" "dock";
 }
 
 #hud-topbar { grid-area: topbar; }
 #hud-left   { grid-area: left; }
 #hud-center { grid-area: center; }
 #hud-right  { grid-area: right; }
+#hud-dock   { grid-area: dock; }
 
 .hud-off #hud-left,
 .hud-off #hud-right,
 .hud-off #hud-hotbar,
+.hud-off #hud-dock,
+.hud-off #hud-sheet,
+.hud-off .col-toggle,
 .hud-off #vitals-bar { display: none; }
 
+@media (max-width: 767.98px) {
+    #connect-app { gap: 4px; }
+    /* Columns are empty shells on phones (panels re-parent into the sheet). */
+    #connect-app.hud-on #hud-left,
+    #connect-app.hud-on #hud-right { display: none; }
+}
+
+/* Desktop: collapsible columns around the terminal. */
+@media (min-width: 768px) {
+    #hud-dock, #hud-sheet { display: none !important; }
+
+    #connect-app.hud-on {
+        grid-template-columns: minmax(190px, 225px) minmax(0, 1fr) minmax(210px, 250px);
+        grid-template-rows: auto minmax(0, 1fr);
+        grid-template-areas:
+            "topbar topbar topbar"
+            "left   center right";
+    }
+    #connect-app.hud-on.l-closed {
+        grid-template-columns: minmax(0, 1fr) minmax(210px, 250px);
+        grid-template-areas: "topbar topbar" "center right";
+    }
+    #connect-app.hud-on.r-closed {
+        grid-template-columns: minmax(190px, 225px) minmax(0, 1fr);
+        grid-template-areas: "topbar topbar" "left center";
+    }
+    #connect-app.hud-on.l-closed.r-closed {
+        grid-template-columns: 1fr;
+        grid-template-areas: "topbar" "center";
+    }
+    #connect-app.hud-on.l-closed #hud-left,
+    #connect-app.hud-on.r-closed #hud-right { display: none; }
+}
+@media (min-width: 1200px) {
+    #connect-app.hud-on {
+        grid-template-columns: minmax(205px, 250px) minmax(0, 1fr) minmax(230px, 290px);
+    }
+    #connect-app.hud-on.r-closed {
+        grid-template-columns: minmax(205px, 250px) minmax(0, 1fr);
+    }
+}
+
 /* ----- Top bar ----- */
+/* One non-wrapping status row; the world line is a full-width second row
+   (#vitals-bar is display:contents so renderVitals' groups order freely). */
 #hud-topbar {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     flex-wrap: wrap;
     padding: 2px 4px;
 }
-#connection-status { font-size: .8rem; font-weight: 700; white-space: nowrap; }
+#vitals-bar { display: contents; }
+
+#connection-status {
+    order: 1;
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: .8rem; font-weight: 700; white-space: nowrap;
+}
+.status-dot { width: .55rem; height: .55rem; border-radius: 50%; background: currentColor; flex: none; }
+.status-connecting .status-dot { animation: hud-pulse 1.2s ease-in-out infinite; }
 .status-connected { color: var(--ac-ok); }
 .status-disconnected { color: var(--ac-danger); }
 .status-connecting { color: var(--ac-accent); }
 
-#vitals-bar { display: flex; align-items: center; gap: 16px; flex: 1; flex-wrap: wrap; min-width: 0; }
-.v-group { display: flex; align-items: center; gap: 8px; }
-.v-identity { flex-direction: column; align-items: flex-start; gap: 0; line-height: 1.1; }
-.v-name { font-weight: 700; white-space: nowrap; }
+.v-identity { order: 2; display: flex; flex-direction: column; gap: 0; line-height: 1.1; min-width: 0; }
+.v-name { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 14rem; }
 .v-sub { font-size: .7rem; white-space: nowrap; }
-.v-bars { flex: 1; min-width: 220px; gap: 8px; }
-.v-res { gap: 14px; }
+
+.v-bars { order: 3; display: flex; align-items: center; flex-wrap: wrap; gap: 6px 8px; flex: 1 1 240px; min-width: 200px; }
+.v-res { order: 4; display: flex; align-items: center; gap: 14px; }
 .v-stat { display: flex; flex-direction: column; align-items: flex-end; line-height: 1.1; font-size: .82rem; font-weight: 700; color: var(--hud-gold); white-space: nowrap; }
 .v-stat-label { font-size: .56rem; text-transform: uppercase; letter-spacing: .06em; color: var(--ac-dim); font-weight: 600; }
-.v-world { flex-wrap: wrap; gap: 6px; font-size: .76rem; }
+
+.topbar-actions { order: 5; display: flex; gap: 6px; margin-left: auto; }
+
+.v-world {
+    order: 6; flex-basis: 100%;
+    display: flex; align-items: center; gap: 10px;
+    font-size: .76rem; white-space: nowrap;
+    overflow-x: auto; scrollbar-width: none;
+}
+.v-world::-webkit-scrollbar { display: none; }
 .v-clock { color: var(--ac-text); white-space: nowrap; }
 .v-season { color: var(--ac-accent); font-weight: 700; white-space: nowrap; padding: 1px 8px; border: 1px solid rgba(255, 170, 119, .45); background: var(--ac-wash); border-radius: 999px; }
 .v-event { color: var(--hud-event); white-space: nowrap; }
 .v-moon { color: var(--hud-moon); white-space: nowrap; }
-.vbar.mm .vbar-fill { background: var(--hud-mm); }
-.vbar.edge .vbar-fill { background: var(--hud-edge); }
 
-.topbar-actions { display: flex; gap: 6px; margin-left: auto; }
+@media (max-width: 767.98px) {
+    #hud-topbar { gap: 8px; }
+    .status-text, .v-res, .v-world, .ui-toggle-label,
+    .topbar-actions .col-toggle { display: none; }
+    .v-name { max-width: 9rem; }
+    /* Bars take their own compact full-width row under the identity row. */
+    .v-bars { order: 6; flex-basis: 100%; min-width: 0; flex-wrap: wrap; gap: 6px; }
+}
 
 /* ----- Vitals / XP bars ----- */
-.vbar { display: flex; align-items: center; gap: 5px; flex: 1; min-width: 120px; }
+.vbar { display: flex; align-items: center; gap: 5px; flex: 1 1 110px; min-width: 110px; max-width: 260px; }
 .vbar-label { font-size: .7rem; font-weight: 700; color: var(--ac-dim); width: 26px; }
 .vbar-track {
     position: relative; flex: 1; height: 16px;
@@ -112,9 +190,15 @@ html.connect-page body {
 .vbar.mv .vbar-fill { background: var(--hud-mv); }
 .vbar.tgt .vbar-fill { background: var(--hud-tgt); }
 .vbar.xp .vbar-fill { background: var(--hud-gold); }
+.vbar.mm .vbar-fill { background: var(--hud-mm); }
+.vbar.edge .vbar-fill { background: var(--hud-edge); }
 .vbar-text {
     position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
     font-size: .68rem; font-weight: 700; text-shadow: 0 0 2px #000, 0 0 2px #000;
+}
+@media (max-width: 767.98px) {
+    .vbar { min-width: 96px; }
+    .vbar-track { height: 14px; }
 }
 
 /* ----- Columns / panels ----- */
@@ -144,7 +228,12 @@ html.connect-page body {
 #command-input {
     flex: 1; font-family: monospace; font-size: 16px; padding: 6px 8px;
 }
-#scroll-bottom-btn { position: absolute; bottom: 8px; right: 12px; z-index: 10; opacity: .85; font-size: .8rem; }
+#send-btn { flex: none; }
+#scroll-bottom-btn { position: absolute; bottom: 8px; right: 12px; z-index: 10; opacity: .9; font-size: .8rem; }
+@media (max-width: 767.98px) {
+    #command-form { gap: 6px; }
+    .send-label { display: none; } /* icon-only send beside the keyboard */
+}
 
 /* ----- Room / exits ----- */
 .room-area { font-size: .78rem; color: var(--ac-dim); margin-bottom: 6px; }
@@ -185,10 +274,11 @@ html.connect-page body {
     background: var(--hud-gold-wash); color: var(--hud-gold); border: 1px solid var(--hud-gold); border-radius: 3px; font-weight: 700; font-size: .78rem;
 }
 
-/* ----- Right column tabs ----- */
+/* ----- Right column tabs (desktop) ----- */
 #hud-right { display: flex; flex-direction: column; gap: 6px; min-height: 0; }
 #hud-tabs { display: flex; gap: 3px; flex: none; }
 #hud-tabs button {
+    position: relative;
     flex: 1; padding: 5px; cursor: pointer; font-size: .74rem; font-weight: 700;
     background: var(--ac-panel); color: var(--ac-dim); border: 1px solid var(--ac-border); border-radius: var(--ac-radius-sm) var(--ac-radius-sm) 0 0;
 }
@@ -247,36 +337,140 @@ html.connect-page body {
 .skill-name { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .skill-pct { font-size: .64rem; color: var(--ac-dim); }
 .skill-cd { font-size: .7rem; font-weight: 700; color: var(--ac-accent); font-variant-numeric: tabular-nums; }
+@media (max-width: 767.98px) {
+    /* One thumb-scrollable row; never a growing stack above the keyboard. */
+    #hud-hotbar { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+    #hud-hotbar::-webkit-scrollbar { display: none; }
+    .skill { flex: 0 0 auto; }
+}
 
 /* ----- Shared topbar buttons (aligned with .ac-btn — see components.md) ----- */
 .hud-btn {
-    display: inline-flex; align-items: center; gap: 6px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
     padding: 5px 12px; font-size: .8rem; font-weight: 600; cursor: pointer; white-space: nowrap;
     background: var(--ac-elev); color: var(--ac-text);
     border: 1px solid var(--ac-border-2); border-radius: var(--ac-radius-sm);
     transition: border-color .15s ease, color .15s ease, background .15s ease;
 }
 .hud-btn:hover { border-color: rgba(255, 170, 119, .45); color: var(--ac-accent); }
-.hud-btn:focus-visible { outline: 2px solid var(--ac-accent); outline-offset: 2px; }
 .hud-btn .bi { flex-shrink: 0; }
+.hud-btn--icon { padding: 5px 8px; }
+.hud-btn--icon .bi { width: 1rem; height: 1rem; }
 /* The toggle reads as a call-to-action (amber) while the HUD is off. */
 .hud-btn-accent[aria-pressed="false"] { border-color: rgba(255, 170, 119, .45); color: var(--ac-accent); }
 .hud-btn-accent[aria-pressed="false"]:hover { background: var(--ac-wash); }
+/* Column toggles read pressed = open. */
+.col-toggle[aria-pressed="true"] { color: var(--ac-accent); background: var(--ac-wash); border-color: rgba(255, 170, 119, .45); }
 
-/* ----- Reduced motion ----- */
-@media (prefers-reduced-motion: reduce) {
-    .vbar-fill, .hud-btn { transition: none; }
+/* ----- Phone dock ----- */
+#hud-dock {
+    display: none;
+    min-height: var(--hud-dock-h);
+    gap: 2px;
+    padding: .25rem .25rem calc(.25rem + env(safe-area-inset-bottom, 0px));
+    background: var(--ac-panel);
+    border: 1px solid var(--ac-border);
+    border-radius: var(--ac-radius-sm);
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+#hud-dock::-webkit-scrollbar { display: none; }
+@media (max-width: 767.98px) {
+    #connect-app.hud-on #hud-dock { display: flex; }
+}
+#hud-dock button {
+    position: relative;
+    flex: 1 0 3.4rem;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+    padding: 4px 2px;
+    background: transparent; color: var(--ac-dim);
+    border: 0; border-radius: var(--ac-radius-sm);
+    font-size: .62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+    cursor: pointer;
+}
+#hud-dock button .bi { width: 1.15rem; height: 1.15rem; }
+#hud-dock button[aria-pressed="true"] { color: var(--ac-accent); background: var(--ac-elev); }
+
+/* Unread marker (chat) — dock button and desktop tab. */
+#hud-dock button.unread::after,
+#hud-tabs button.unread::after {
+    content: ""; position: absolute; top: 4px; right: 8px;
+    width: .45rem; height: .45rem; border-radius: 50%;
+    background: var(--ac-accent);
 }
 
-/* ----- Mobile ----- */
-@media (max-width: 767px) {
-    #connect-app.hud-on {
-        grid-template-columns: 1fr;
-        grid-template-rows: auto auto minmax(220px, 1fr) auto;
-        grid-template-areas: "topbar" "right" "center" "left";
-    }
-    #hud-left, #hud-right { max-height: 38vh; }
-    #send-btn { display: none; }
-    #hud-topbar { gap: 8px; }
-    .v-bars { min-width: 140px; }
+/* ----- Phone bottom sheet ----- */
+#hud-sheet {
+    position: fixed; z-index: 1035;
+    left: .4rem; right: .4rem;
+    bottom: calc(var(--hud-dock-h) + .8rem + env(safe-area-inset-bottom, 0px));
+    max-height: 55vh;
+    max-height: 55dvh;
+    display: flex; flex-direction: column;
+    background: var(--ac-panel);
+    border: 1px solid var(--ac-border-2);
+    border-radius: var(--ac-radius);
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, .55);
+}
+#hud-sheet[hidden] { display: none; }
+.sheet-head {
+    position: relative; flex: none;
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 10px 6px;
+    border-bottom: 1px solid var(--ac-border);
+}
+.sheet-grip {
+    position: absolute; top: 4px; left: 50%; transform: translateX(-50%);
+    width: 36px; height: 3px; border-radius: 999px; background: var(--ac-border-2);
+}
+.sheet-title {
+    font-size: .72rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .09em; color: var(--ac-dim);
+}
+.sheet-close {
+    margin-left: auto; padding: 4px 6px; cursor: pointer;
+    background: none; border: 0; color: var(--ac-dim);
+}
+.sheet-close:hover { color: var(--ac-text); }
+.sheet-close .bi { width: .9rem; height: .9rem; }
+#hud-sheet-body { overflow-y: auto; min-height: 0; padding: 2px 0 4px; }
+#hud-sheet-body .panel {
+    display: none;
+    background: transparent; border: 0; border-radius: 0;
+    padding: 8px 12px 12px;
+}
+#hud-sheet-body .panel.sheet-active { display: block; }
+
+/* ----- Focus (keyboard) ----- */
+.hud-btn:focus-visible, .exit:focus-visible, .skill:focus-visible,
+#hud-tabs button:focus-visible, #hud-dock button:focus-visible,
+.who-act button:focus-visible, .action-btn:focus-visible, .sheet-close:focus-visible {
+    outline: 2px solid var(--ac-accent); outline-offset: 2px;
+}
+
+/* ----- Touch ergonomics (mobile checklist item 3) ----- */
+@media (pointer: coarse) {
+    .hud-btn { padding: 8px 12px; }
+    .hud-btn--icon { padding: 8px 10px; }
+    .exit { padding: 10px 0; }
+    .exit.ud, .exit.named { padding: 9px 12px; }
+    #hud-tabs button { padding: 9px 5px; }
+    .who-act button { padding: 7px 12px; }
+    .skill { min-height: 44px; padding: 6px 10px; }
+    .row { padding: 8px 6px; }
+    .action-btn { padding: 10px; }
+    .sheet-close { padding: 8px 10px; }
+    #command-input { padding: 9px 10px; }
+    #send-btn { padding: 10px 12px; }
+    #hud-dock button { min-height: 2.9rem; }
+}
+
+/* ----- Reduced motion ----- */
+@keyframes hud-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: .35; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .vbar-fill, .hud-btn { transition: none; }
+    .status-connecting .status-dot { animation: none; }
 }

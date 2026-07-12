@@ -9,6 +9,49 @@ Format: `## YYYY-MM-DD — Title` · **Decision** · **Why** · (optional) **Not
 
 ---
 
+## 2026-07-12 — The connect session is a first-class surface: terminal-first phones, collapsible desktop columns
+
+**Decision.** Roadmap #6b. `/connect` is rebuilt as a fully supported product
+surface on both form factors, and the HUD is **on by default** (persisted
+opt-out via the toggle).
+
+*Phones are terminal-first.* The old stacked layout (topbar pile → tabs →
+terminal → panels, game below the fold) is gone. The grid is topbar /
+terminal / dock: panels live behind a thumb-reach **bottom dock** (Room, Gear,
+Bag, Char, Status, Chat, Who) and open one at a time as a **bottom sheet**
+over the terminal — acting from the sheet (an exit tap, a tell prefill)
+dismisses it, as does tapping outside; Chat gets an amber unread dot. Panel
+sections are single DOM nodes re-parented between their desktop columns and
+the sheet on the 768px flip, so the render layer is unchanged. The topbar
+collapses to status dot + name + wrapping vitals row; the world line and
+gold/TNL group hide (Status carries gold/TNL/bank there). The hotbar is one
+horizontally scrollable row; the send button is a 44px icon; all HUD controls
+get coarse-pointer sizes and `:focus-visible` rings.
+
+*Desktop is a session dashboard.* Side columns collapse **individually**
+(topbar toggles, persisted; pressed = open) so mid-width screens keep a
+full-width terminal — below 1200px the left column starts collapsed, and
+both-closed is a deliberate "zen" mode. The terminal always takes the
+leftover space. **Terminal font size** is user-adjustable (A−/A+, 10–22px,
+persisted).
+
+*The shell recedes on this page* (`body.connect-page` via a new layout
+`body_class` block): 2.4rem logo, no breadcrumb line, tight content frame,
+no footer. The session owns the viewport.
+
+**Why.** The playerbase drives the game from phones and the old HUD was
+desktop-first scaffolding — fixed columns that squeezed the terminal below 80
+columns on laptops, and a phone layout that buried the game under ~500px of
+chrome with 5px tap targets. A MUD client's one non-negotiable is that the
+terminal is primary; every mode above (dock/sheet, collapsible columns, zen)
+is that principle applied. Defaulting the HUD on makes the flagship
+experience the default one now that Season 15's GMCP feeds are live.
+
+**Notes.** Verified with the demo-mode harness (headless Chromium +
+Playwright): 1440/1024/390px screenshots across HUD-on/off, sheet open,
+columns collapsed; `scrollWidth == viewport` asserted at every size. The
+telnet/GMCP bridge internals are deliberately untouched (tracked separately).
+
 ## 2026-07-12 — The connect HUD runs on the shared tokens; `--hud-*` shrinks to HUD-domain meanings
 
 **Decision.** Roadmap #6. `hud.css` no longer defines its own copies of the

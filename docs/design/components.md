@@ -369,6 +369,31 @@ canonical place to surface a new staff tool (mirror the existing items).
 
 ---
 
+## Connect HUD components (page-specific, `apps/connect/static/css/hud.css`)
+
+The browser client's widget layer. Page-specific by design (it only loads on
+`/connect`), but it draws every color from the shared tokens and follows the
+same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
+
+- **Layout modes** — desktop: collapsible `#hud-left` / `#hud-right` columns
+  (`.l-closed` / `.r-closed` on `#connect-app`, persisted) around a
+  priority-width terminal; phone: terminal-first with `#hud-dock` (bottom tab
+  bar) + `#hud-sheet` (one-panel bottom sheet). `hud.js` re-parents the panel
+  sections between the columns and the sheet on the 768px media-query flip.
+- **`.panel` / `.panel-h`** — the HUD's compact panel + uppercase header
+  (denser cousins of `.ac-panel` / `.ac-panel__h`).
+- **`.vbar` / `.mini`** — labeled vitals bars (HP/MP/MV/Foe/XP/MM/Edge) and
+  the tiny group-member triple.
+- **`.hud-btn`(`--icon`)** — the topbar button, aligned with `.ac-btn`.
+- **`#hud-dock button`** — icon-over-label phone tabs; `.unread` renders an
+  amber dot (used by Chat).
+- **`.exit` compass, `.row` lists, `.kv`, `.aff`, `.skill` hotbar** — the
+  in-panel widgets; all have coarse-pointer bumps and `:focus-visible` rings.
+
+Verify with `/connect?demo=1` (sample GMCP feeds, no server needed).
+
+---
+
 ## When adding a component
 
 1. Check this catalog first — extend, don't fork.
