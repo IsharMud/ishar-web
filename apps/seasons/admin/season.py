@@ -17,6 +17,9 @@ class SeasonAdmin(ModelAdmin):
                     "is_active",
                     "game_state",
                     "enigma",
+                    "next_enigma",
+                    "new_features_on",
+                    "auto_cycle",
                 )
             }
         ),
@@ -80,9 +83,16 @@ class SeasonAdmin(ModelAdmin):
         "multiplay_limit",
         "enigma",
     )
+    # The game loads the seasons table at boot only — admin writes to these
+    # would silently diverge from the running game's in-memory season until
+    # a reboot, so they are surfaced read-only (mutations belong to the
+    # future season console, which routes through the game).
     readonly_fields = (
         "season_id",
-        "next_cycle"
+        "next_cycle",
+        "next_enigma",
+        "new_features_on",
+        "auto_cycle",
     )
     search_fields = (
         "seasonal_leader_name",
