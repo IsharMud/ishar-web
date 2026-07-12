@@ -98,6 +98,11 @@ svg.bi:not([width]) { width: 1em; height: 1em; }
 footer a .bi { color: var(--ac-dim); }
 
 .icon-link-hover { --bs-icon-link-transform: translate3d(0, -.3rem, 0); }
+/* Hover affordances are hover-only: on touch, taps must not leave icons
+   stuck mid-lift (mobile friendliness — see docs/design/decisions.md). */
+@media (hover: none) {
+    .icon-link-hover { --bs-icon-link-transform: none; }
+}
 svg[role="img"] { color: var(--bs-primary); }
 svg[role="note"] { color: var(--bs-secondary); }
 a[target="_blank"] {

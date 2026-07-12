@@ -93,7 +93,7 @@
                     <img class="navbar-brand" id="logo" alt="{{ WEBSITE_TITLE }} - Free Online MUD" src="{% static "images/logo.png" %}">
                 </a>
 
-                <button class="border-ishar m-3 navbar-dark navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle Navigation">
+                <button class="border-ishar m-2 navbar-dark navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle Navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse p-2" id="navbarNavDropdown">
@@ -370,7 +370,7 @@
     {% endif %}
 {% endblock messages %}
 
-            <div class="my-1 p-3 shell-panel" id="content">
+            <div class="my-1 p-2 p-md-3 shell-panel" id="content">
 {% block content %}
 {% endblock content %}
             </div>
@@ -388,13 +388,13 @@
         <footer class="mx-3 text-center">
 {% if CURRENT_SEASON %}
             <div class="my-1 p-1 row shell-panel">
-                <div class="col">
+                <div class="col-12 col-sm py-1">
                     <a class="icon-link icon-link-hover" href="{% url 'current_season' %}#season">
                         {% bi "calendar" %}
                         Season {{ CURRENT_SEASON.season_id }}
                     </a>
                 </div>
-                <div class="col p-1">
+                <div class="col-12 col-sm py-1">
                     <span class="icon-link">
                         {% bi "hourglass-split" css="text-secondary" %}
                         Ends {{ CURRENT_SEASON.expiration_date | naturaltime }}
@@ -403,7 +403,7 @@
             </div>
 {% endif %}
             <div class="my-1 p-1 row shell-panel">
-                <div class="col">
+                <div class="col-12 col-sm py-1">
                     <a class="icon-link icon-link-hover" href="mailto:{{ ADMIN_EMAIL }}" target="_blank" title="E-mail Us! ({{ ADMIN_EMAIL }})">
                         {% bi "envelope-at" %}
                         E-mail us!
@@ -411,14 +411,14 @@
                     </a>
                 </div>
 
-                <div class="col">
+                <div class="col-12 col-sm py-1">
                     <a class="icon-link icon-link-hover" href="{% url 'support' %}#support" title="Support {{ WEBSITE_TITLE }}">
                         {% bi "heart" %}
                         Support {{ WEBSITE_TITLE }}
                     </a>
                 </div>
 
-                <div class="col">
+                <div class="col-12 col-sm py-1">
                     <a class="icon-link icon-link-hover" href="{% url 'discord' %}" target="_blank" title="Join us on Discord!">
                         {% bi "discord" %}
                         Join us on Discord!

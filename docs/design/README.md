@@ -56,8 +56,11 @@ keeping the amber brand.
 6. **No new frontend libraries; self-host everything.** We ship Bootstrap +
    Bootstrap Icons and a little vanilla JS. Don't add a framework, a CDN
    dependency, or a web font without a decision entry.
-7. **Mobile-first.** The playerbase deploys and plays from phones. Every admin
-   tool and page must be usable at a phone width.
+7. **Mobile-first — a gating requirement, not a vibe.** The playerbase deploys
+   and plays from phones. Every surface must pass the **mobile checklist** in
+   `decisions.md` (no horizontal overflow, ≥16px form fields, coarse-pointer
+   tap targets, no hover-only affordances or sticky lifts, stacked shell rows,
+   compact chrome, 390px screenshot proof) before it ships.
 8. **Icons via the SVG sprite.** Prefer
    `<svg class="bi"><use href="…bootstrap-icons.svg#name"></svg>` over the font
    classes — it inherits `currentColor` and scales cleanly.

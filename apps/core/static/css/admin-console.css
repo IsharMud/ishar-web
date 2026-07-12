@@ -604,7 +604,7 @@ a.ac-btn:link, a.ac-btn:visited { color: var(--ac-text); }
     display: block;
     width: 100%;
     padding: .5rem .7rem;
-    font-size: .9rem;
+    font-size: 1rem; /* never below 16px: sub-16px inputs make iOS zoom-jump on focus */
     color: var(--ac-text);
     background: var(--ac-bg);
     border: 1px solid var(--ac-border);
@@ -866,8 +866,30 @@ a.ac-link:link, a.ac-link:visited { color: var(--ac-text); }
 
 /* ----------------------------------------------------- responsive --- */
 @media (max-width: 575.98px) {
-    .ac-hero { flex-wrap: wrap; }
+    .ac-hero { flex-wrap: wrap; padding: .9rem 1rem; }
     .ac-hero__status { align-self: stretch; }
+    .ac-hero__badge { width: 2.6rem; height: 2.6rem; }
+    .ac-hero__badge .bi { width: 1.25rem; height: 1.25rem; }
+    .ac-hero__title { font-size: 1.3rem; }
     .ac-seg { width: 100%; }
     .ac-seg__item { flex: 1 1 0; justify-content: center; padding: .5rem .5rem; }
+    .ac-panel { padding: .9rem .9rem; }
+}
+
+/* ------------------------------------------------- touch ergonomics --- */
+/* Mobile friendliness is a gating requirement (docs/design/decisions.md).
+   On coarse pointers: comfortable tap targets; and hover transforms are
+   suppressed everywhere hover isn't real, so taps don't leave components
+   stuck mid-"lift" (sticky :hover). */
+@media (pointer: coarse) {
+    .ac-btn { padding: .55rem .9rem; }
+    .ac-chip { padding: .45rem .85rem; }
+    .ac-copy { padding: .35rem .6rem; }
+    .ac-pager .ac-btn { min-width: 5.5rem; }
+}
+@media (hover: none) {
+    a.ac-tile:hover,
+    .ac-link:hover,
+    .ac-toggle:hover { transform: none; }
+    .ac-row:hover { background: transparent; }
 }
