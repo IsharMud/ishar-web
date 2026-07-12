@@ -9,6 +9,34 @@ Format: `## YYYY-MM-DD — Title` · **Decision** · **Why** · (optional) **Not
 
 ---
 
+## 2026-07-12 — The connect HUD runs on the shared tokens; `--hud-*` shrinks to HUD-domain meanings
+
+**Decision.** Roadmap #6. `hud.css` no longer defines its own copies of the
+structural palette — surfaces, borders, text, dim, and accent reference
+`--ac-*` directly (the duplicate `--hud-bg/panel/border/text/dim/accent`
+aliases are deleted, along with every ad-hoc grey: `#1c1c22`→`--ac-elev`,
+`#17171c`→`--ac-elev`, `#000` wells→`--ac-bg`, `#222`→`--ac-border`). The
+`--hud-*` set now covers only HUD-domain meanings: the vitals triple aliases
+the shared semantics (`--hud-hp: var(--ac-danger)`, `--hud-mp: var(--ac-info)`,
+`--hud-mv: var(--ac-ok)` — one red site-wide; the old `#cc3333` hp is gone) and
+the flavor colors with no site-wide equivalent get named tokens
+(`--hud-gold/-gold-wash/-tgt/-mm/-edge/-event/-moon`). Along the way the HUD
+joins the shared conventions: radii from the token scale (`--ac-radius-sm`
+panels/tabs/buttons/skills, `--ac-radius` banner, `999px` season pill),
+`.hud-btn` aligned with `.ac-btn` (elev surface, `--ac-border-2`, amber
+hover, `:focus-visible` outline), amber-tinted borders as `rgba(255,170,119,…)`
+per the console idiom, the season-15 banner on `--ac-wash` over `--ac-panel`
+instead of hardcoded browns, and the previously missing
+`prefers-reduced-motion` guard. Affect/skill category edges use the semantic
+tokens (ok/danger/info). Two deliberate true-blacks remain: the terminal
+canvas (matches the xterm theme) and the bar-text shadow.
+
+**Why.** The HUD predates E1 and carried a parallel token set with identical
+values — pure entropy once the shared base existed. Re-expressing it makes a
+palette change a one-line edit that reaches all three visual layers, and the
+remaining `--hud-*` names now say something true: "this color means a
+HUD-domain thing," not "this is the HUD's copy of the same grey."
+
 ## 2026-07-12 — Leaders & Challenges adopt the console language; DataTables retired page-by-page
 
 **Decision.** Roadmap #5. **Leaders** keeps a real table — it is genuinely

@@ -13,8 +13,9 @@ Sources of truth:
   the classic-site rules (some still literal; they migrate as pages are touched).
 - `apps/core/static/css/admin-console.css` — the component layer built on the
   tokens (no token definitions of its own).
-- `apps/connect/static/css/hud.css` — the HUD's `--hud-*` set (same values, to
-  be re-expressed in terms of the shared set).
+- `apps/connect/static/css/hud.css` — HUD-domain tokens only (vitals,
+  resources, world flavor — see below); everything structural references the
+  shared `--ac-*` set directly.
 
 ---
 
@@ -45,8 +46,10 @@ black with an amber outline; Admin Console panels use the layered greys.
 | — (classic) | `#000` | Classic public panels (`.card`, `.navbar`, `.list-group`). |
 | — (classic) | `#323639` | Classic page background (`body`); also classic button/select bg. |
 
-The HUD equivalents: `--hud-bg #0c0c0d`, `--hud-panel #131316`, `--hud-border
-#2a2a30`, elevated `#1c1c22` — i.e. already the same values as `--ac-*`.
+The HUD uses these `--ac-*` surfaces directly (the old duplicate `--hud-bg` /
+`--hud-panel` / `--hud-border` aliases are gone). The web terminal itself stays
+true black (`#000`) to match the xterm theme background — that's game canvas,
+not a surface token.
 
 ---
 
@@ -86,10 +89,23 @@ Do not repurpose these. They mean the same thing on every surface.
 | `--ac-ok` | `#4cbb17` | Success, healthy, safe, "moves" (HUD). Also `.message-success`, active season. |
 | `--ac-info` | `#4a86cf` | Informational, in-progress, "mana" (HUD). |
 | `--ac-warn` | `#f80` | Caution / heads-up. Also `.message-warn`/`.message-warning`. |
-| `--ac-danger` | `#d64b4b` | Destructive / error (Admin Console). |
+| `--ac-danger` | `#d64b4b` | Destructive / error (Admin Console). Also "health" (HUD). |
 | — (classic danger) | `#d02b2b` | `.message-error`, dead/survival/hardcore players. |
 | — (immortal) | `#00b7eb` | Immortal accounts (god/forger/eternal/artisan/immortal/consort). Cyan. |
-| — (HUD gold) | `#cdcd00` | XP / currency in the HUD. |
+
+**HUD-domain tokens** (`hud.css` `:root` — meanings that exist only in the web
+client). The vitals triple aliases the shared semantics: `--hud-hp:
+var(--ac-danger)`, `--hud-mp: var(--ac-info)`, `--hud-mv: var(--ac-ok)`. The
+rest have no site-wide equivalent:
+
+| Token | Value | Meaning |
+|---|---|---|
+| `--hud-gold` | `#cdcd00` | XP / currency (plus `--hud-gold-wash` `rgba(205,205,0,.1)`). |
+| `--hud-tgt` | `#a0408a` | Opponent health bar. |
+| `--hud-mm` | `#a05ad0` | Metamagic bar. |
+| `--hud-edge` | `#d08a3a` | Edge resource bar. |
+| `--hud-event` | `#e8b04b` | World event flags. |
+| `--hud-moon` | `#9aa6c8` | Moon phases. |
 
 **Player-status vocabulary** (from `style.css`, used by `player_css`):
 - Immortals (`.god-player` … `.consort-player`): `#00b7eb`, with emoji affix
