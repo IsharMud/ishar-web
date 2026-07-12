@@ -1,10 +1,12 @@
 {% extends "layout.html" %}
+{% load ishar %}
 {% load static %}
 {% block meta_title %}Play {{ WEBSITE_TITLE }} Online - Browser MUD Client{% endblock meta_title %}
 {% block meta_description %}Play {{ WEBSITE_TITLE }} directly in your browser. No download required - connect instantly to this free online MUD (Multi-User Dungeon) and start your text-based RPG adventure.{% endblock meta_description %}
 {% block meta_url %}{% url 'connect' %}{% endblock meta_url %}
 {% block title %}Play {{ WEBSITE_TITLE }} Online - Browser MUD Client{% endblock title %}
 {% block page_heading %}Play {{ WEBSITE_TITLE }} Online in Your Browser{% endblock page_heading %}
+{% block body_class %} connect-page{% endblock body_class %}
 {% block includes %}
         <link rel="stylesheet" href="{% static 'css/xterm.min.css' %}">
         <link rel="stylesheet" href="{% static 'css/hud.css' %}">
@@ -22,50 +24,47 @@
             #connect-app.hud-off #hud-left,
             #connect-app.hud-off #hud-right,
             #connect-app.hud-off #hud-hotbar,
+            #connect-app.hud-off #hud-dock,
+            #connect-app.hud-off #hud-sheet,
             #connect-app.hud-off #vitals-bar { display: none; }
         </style>
 {% endblock includes %}
-{% block breadcrumbs %}
-    <li class="breadcrumb-item active h2" aria-current="page" title="Connect">
-        <a class="icon-link icon-link-hover" href="{% url 'connect' %}">
-            <svg class="bi" aria-hidden="true">
-                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#globe"></use>
-            </svg>
-            Connect
-        </a>
-    </li>
-{% endblock breadcrumbs %}
+{# The session owns the viewport: no breadcrumb line on this page. #}
+{% block breadcrumbs %}{% endblock breadcrumbs %}
 {% block content %}
-{# Season 15 pre-launch notice. Remove this banner (and flip the HUD default in hud.js) once the GMCP feeds are live on prod. #}
-<aside id="s15-banner" role="status"
-       data-target="{% if CURRENT_SEASON and CURRENT_SEASON.expiration_date %}{{ CURRENT_SEASON.expiration_date|date:'c' }}{% else %}2026-06-25T00:00:00{% endif %}">
-    <span class="s15-badge" aria-hidden="true">
-        <svg class="bi" width="20" height="20"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#stars"></use></svg>
-    </span>
-    <div class="s15-body">
-        <div class="s15-title">The full-featured client arrives with <span class="s15-accent">Season&nbsp;15</span></div>
-        <div class="s15-sub">Live vitals, map, inventory &amp; more &mdash; launching {% if CURRENT_SEASON and CURRENT_SEASON.expiration_date %}{{ CURRENT_SEASON.expiration_date|date:"F j, Y" }}{% else %}June 25, 2026{% endif %}. Classic terminal mode until then.</div>
-    </div>
-    <div class="s15-count">
-        <span id="s15-countdown" class="s15-count-val">&mdash;</span>
-        <span class="s15-count-label">until launch</span>
-    </div>
-    <button type="button" class="s15-close" id="s15-dismiss" aria-label="Dismiss this notice" title="Dismiss">&times;</button>
-</aside>
 <div id="connect-app" class="hud-off">
 
     <div id="hud-topbar">
-        <span id="connection-status" class="status-connecting">Connecting...</span>
+        <span id="connection-status" class="status-connecting" role="status">
+            <span class="status-dot" aria-hidden="true"></span>
+            <span class="status-text">Connecting&hellip;</span>
+        </span>
         <div id="vitals-bar"></div>
         <div class="topbar-actions">
+            <button class="hud-btn hud-btn--icon" type="button" id="font-dec"
+                    title="Smaller terminal text" aria-label="Smaller terminal text">
+                {% bi "zoom-out" %}
+            </button>
+            <button class="hud-btn hud-btn--icon" type="button" id="font-inc"
+                    title="Larger terminal text" aria-label="Larger terminal text">
+                {% bi "zoom-in" %}
+            </button>
+            <button class="hud-btn hud-btn--icon col-toggle" type="button" id="col-left" aria-pressed="true"
+                    title="Toggle the left panels" aria-label="Toggle the left panels">
+                {% bi "layout-sidebar" %}
+            </button>
+            <button class="hud-btn hud-btn--icon col-toggle" type="button" id="col-right" aria-pressed="true"
+                    title="Toggle the right panels" aria-label="Toggle the right panels">
+                {% bi "layout-sidebar-reverse" %}
+            </button>
             <button class="hud-btn hud-btn-accent" type="button" id="ui-toggle" aria-pressed="false"
-                    data-label-on="Hide interface" data-label-off="Preview interface"
+                    data-label-on="Hide interface" data-label-off="Show interface"
                     title="Toggle the heads-up display">
-                <svg class="bi" aria-hidden="true" width="15" height="15"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#layout-sidebar-inset"></use></svg>
-                <span class="ui-toggle-label">Preview interface</span>
+                {% bi "layout-sidebar-inset" %}
+                <span class="ui-toggle-label">Show interface</span>
             </button>
             <button class="hud-btn" type="button" id="reconnect-btn" style="display: none;" title="Reconnect to {{ WEBSITE_TITLE }}">
-                <svg class="bi" aria-hidden="true" width="15" height="15"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#arrow-clockwise"></use></svg>
+                {% bi "arrow-clockwise" %}
                 <span>Reconnect</span>
             </button>
         </div>
@@ -81,7 +80,7 @@
     <main id="hud-center">
         <div id="terminal-wrapper">
             <div id="terminal-container"></div>
-            <button type="button" class="btn btn-sm btn-ishar" id="scroll-bottom-btn" style="display:none;" title="Scroll to latest output">
+            <button type="button" class="hud-btn" id="scroll-bottom-btn" style="display:none;" title="Scroll to latest output">
                 &#x25BC; Latest
             </button>
         </div>
@@ -97,11 +96,9 @@
                    spellcheck="false"
                    enterkeyhint="send"
                    autofocus>
-            <button type="submit" class="icon-link icon-link-hover btn btn-ishar btn-sm px-3 py-2 rounded" id="send-btn" title="Send command">
-                <svg class="bi" aria-hidden="true">
-                    <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#send"></use>
-                </svg>
-                Send
+            <button type="submit" class="hud-btn" id="send-btn" title="Send command" aria-label="Send command">
+                {% bi "send" %}
+                <span class="send-label">Send</span>
             </button>
         </form>
     </main>
@@ -117,6 +114,49 @@
         <section id="panel-who" class="panel tab"></section>
     </aside>
 
+    {# Phone dock: one thumb-reach tab bar over all panels; opens the sheet. #}
+    <nav id="hud-dock" aria-label="Game panels">
+        <button type="button" data-panel="room" aria-pressed="false">
+            {% bi "compass" %}
+            <span>Room</span>
+        </button>
+        <button type="button" data-panel="equipment" aria-pressed="false">
+            {% bi "shield" %}
+            <span>Gear</span>
+        </button>
+        <button type="button" data-panel="inventory" aria-pressed="false">
+            {% bi "backpack2" %}
+            <span>Bag</span>
+        </button>
+        <button type="button" data-panel="train" aria-pressed="false">
+            {% bi "person-up" %}
+            <span>Char</span>
+        </button>
+        <button type="button" data-panel="status" aria-pressed="false">
+            {% bi "activity" %}
+            <span>Status</span>
+        </button>
+        <button type="button" data-panel="chat" aria-pressed="false">
+            {% bi "chat-dots" %}
+            <span>Chat</span>
+        </button>
+        <button type="button" data-panel="who" aria-pressed="false">
+            {% bi "people" %}
+            <span>Who</span>
+        </button>
+    </nav>
+
+    <div id="hud-sheet" hidden>
+        <div class="sheet-head">
+            <span class="sheet-grip" aria-hidden="true"></span>
+            <span id="hud-sheet-title" class="sheet-title"></span>
+            <button type="button" class="sheet-close" id="hud-sheet-close" aria-label="Close panel">
+                {% bi "x-lg" %}
+            </button>
+        </div>
+        <div id="hud-sheet-body"></div>
+    </div>
+
 </div>
 <script>
 (function() {
@@ -124,8 +164,6 @@
 
     // --- Lock the page so only inner panels scroll ---
     document.documentElement.classList.add("connect-page");
-    var siteFooter = document.querySelector("body > footer");
-    if (siteFooter) siteFooter.style.display = "none";
 
     // --- Elements ---
     var app = document.getElementById("connect-app");
@@ -133,6 +171,7 @@
     var commandForm = document.getElementById("command-form");
     var commandInput = document.getElementById("command-input");
     var statusEl = document.getElementById("connection-status");
+    var statusText = statusEl.querySelector(".status-text");
     var reconnectBtn = document.getElementById("reconnect-btn");
     var scrollBtn = document.getElementById("scroll-bottom-btn");
 
@@ -151,13 +190,21 @@
         brightBlue:    "#5599ff", brightMagenta: "#ff55ff", brightCyan:    "#55ffff", brightWhite:   "#ffffff"
     };
 
+    // --- Terminal font size (persisted) ---
+    var FONT_MIN = 10, FONT_MAX = 22;
+    var fontSize = isMobile ? 13 : 14;
+    try {
+        var savedFont = parseInt(localStorage.getItem("ishar.fontsize"), 10);
+        if (savedFont >= FONT_MIN && savedFont <= FONT_MAX) fontSize = savedFont;
+    } catch (e) {}
+
     // --- Terminal setup ---
     var term = new Terminal({
         cursorBlink: false,
         cursorInactiveStyle: "none",
         disableStdin: true,
         scrollback: 5000,
-        fontSize: isMobile ? 13 : 14,
+        fontSize: fontSize,
         fontFamily: "'Courier New', Courier, 'Liberation Mono', monospace",
         theme: mudTheme,
         convertEol: true
@@ -167,6 +214,15 @@
     term.loadAddon(fitAddon);
     term.loadAddon(new WebLinksAddon.WebLinksAddon());
     term.open(terminalContainer);
+
+    function adjustFont(delta) {
+        fontSize = Math.max(FONT_MIN, Math.min(FONT_MAX, fontSize + delta));
+        term.options.fontSize = fontSize;
+        try { localStorage.setItem("ishar.fontsize", String(fontSize)); } catch (e) {}
+        scheduleFit();
+    }
+    document.getElementById("font-dec").addEventListener("click", function() { adjustFont(-1); });
+    document.getElementById("font-inc").addEventListener("click", function() { adjustFont(1); });
 
     // --- Sizing ---
     // The app gets an explicit, header-aware pixel height; the inner grid
@@ -240,7 +296,7 @@
     // --- WebSocket ---
     var ws = null;
     function setStatus(text, cls) {
-        statusEl.textContent = text;
+        statusText.textContent = text;
         statusEl.className = cls;
     }
 
@@ -402,49 +458,11 @@
     }
 
     terminalContainer.addEventListener("click", function() {
+        // While the phone sheet is open, a terminal tap just dismisses it
+        // (the HUD's outside-tap handler) — don't also pop the keyboard.
+        if (app.classList.contains("sheet-open")) return;
         if (!term.getSelection()) commandInput.focus();
     });
-
-    // --- Season 15 launch countdown ---
-    // Driven by the server-rendered current-season expiration date (GMCP is
-    // not used — those feeds aren't live yet), with a hardcoded fallback.
-    (function() {
-        var banner = document.getElementById("s15-banner");
-        if (!banner) return;
-
-        // Respect a prior dismissal so the notice doesn't nag every visit.
-        try {
-            if (localStorage.getItem("ishar.s15dismissed") === "1") {
-                banner.style.display = "none";
-                return;
-            }
-        } catch (e) {}
-
-        var out = document.getElementById("s15-countdown");
-        var target = new Date(banner.getAttribute("data-target"));
-        if (isNaN(target.getTime())) target = new Date("2026-06-25T00:00:00");
-
-        function tick() {
-            if (!out) return;
-            var diff = Math.floor((target.getTime() - Date.now()) / 1000);
-            if (diff <= 0) { out.textContent = "live now"; return; }
-            var d = Math.floor(diff / 86400);
-            var h = Math.floor((diff % 86400) / 3600);
-            var m = Math.floor((diff % 3600) / 60);
-            var s = diff % 60;
-            out.textContent = (d ? d + "d " : "") + h + "h " + m + "m " + s + "s";
-        }
-        tick();
-        setInterval(tick, 1000);
-
-        var dismiss = document.getElementById("s15-dismiss");
-        if (dismiss) dismiss.addEventListener("click", function() {
-            banner.style.display = "none";
-            try { localStorage.setItem("ishar.s15dismissed", "1"); } catch (e) {}
-            fitAppHeight();
-            scheduleFit();
-        });
-    })();
 
     // --- Start ---
     fitAppHeight();

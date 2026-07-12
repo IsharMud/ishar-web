@@ -83,9 +83,9 @@ feel like a purpose-built console). The **public shell keeps its amber-border
 look for now** — but under the green-field mandate that's a starting point, not a
 protected identity: public pages are in scope for the same convergence, and the
 amber-border treatment stays only where it's genuinely the best design. All
-layers draw from **one shared token + semantic vocabulary** (tokens.md). The HUD
-predates the Admin Console layer but uses the same idea; over time its `--hud-*`
-tokens should be expressed in terms of the shared set.
+layers draw from **one shared token + semantic vocabulary** (tokens.md). The
+HUD's structural colors now reference `--ac-*` directly; its remaining `--hud-*`
+tokens cover only HUD-domain meanings (vitals, resources, world flavor).
 
 ---
 
@@ -96,7 +96,7 @@ Incremental, page-by-page. Do the two enablers early so later pages are cheap.
 ### Enablers
 - **E1 · Shared token base.** ✅ **done** — the `--ac-*` tokens live in the
   `:root` of `style.css` (loaded globally); `admin-console.css` is components
-  only. Still to do: express `--hud-*` in terms of the shared set.
+  only, and `hud.css` keeps only HUD-domain tokens on top of the shared set.
 - **E2 · Shared components.** ✅ **started** — the `ishar` template tag library
   (`{% bi %}` icons, `{% crumb %}` breadcrumbs) + `partials/` exist; new/touched
   templates must use them. Old templates migrate as each page is facelifted.
@@ -111,8 +111,9 @@ Staff surfaces first (highest value, lowest risk — few users, we control them)
 | 3 | Processes / other Django-admin-adjacent staff pages | ✖ closed — lives in Django admin, nothing to facelift (see decisions.md) |
 | 4 | Portal (`/portal`) + global nav/layout shell | ✅ done — shell on console surfaces, portal rebuilt |
 | 5 | Leaders, Challenges (DataTables pages) | ✅ done — `.ac-table` for leaders, challenge rows; jQuery/DataTables dropped from both |
-| 6 | Connect HUD (align tokens) | next |
-| 7 | Home, help, errors, public content | last |
+| 6 | Connect HUD (align tokens) | ✅ done — structural colors are `--ac-*`; only vitals/flavor stay `--hud-*` |
+| 6b | Connect HUD session UX (first-class mobile + premium desktop) | ✅ done — terminal-first phone dock/sheet, collapsible desktop columns, HUD on by default |
+| 7 | Home, help, errors, public content | next |
 
 ### Near-term addition
 - **`/styleguide`** (Eternal+): ✅ built — renders every token and component

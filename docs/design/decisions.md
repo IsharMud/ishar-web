@@ -9,6 +9,77 @@ Format: `## YYYY-MM-DD — Title` · **Decision** · **Why** · (optional) **Not
 
 ---
 
+## 2026-07-12 — The connect session is a first-class surface: terminal-first phones, collapsible desktop columns
+
+**Decision.** Roadmap #6b. `/connect` is rebuilt as a fully supported product
+surface on both form factors, and the HUD is **on by default** (persisted
+opt-out via the toggle).
+
+*Phones are terminal-first.* The old stacked layout (topbar pile → tabs →
+terminal → panels, game below the fold) is gone. The grid is topbar /
+terminal / dock: panels live behind a thumb-reach **bottom dock** (Room, Gear,
+Bag, Char, Status, Chat, Who) and open one at a time as a **bottom sheet**
+over the terminal — acting from the sheet (an exit tap, a tell prefill)
+dismisses it, as does tapping outside; Chat gets an amber unread dot. Panel
+sections are single DOM nodes re-parented between their desktop columns and
+the sheet on the 768px flip, so the render layer is unchanged. The topbar
+collapses to status dot + name + wrapping vitals row; the world line and
+gold/TNL group hide (Status carries gold/TNL/bank there). The hotbar is one
+horizontally scrollable row; the send button is a 44px icon; all HUD controls
+get coarse-pointer sizes and `:focus-visible` rings.
+
+*Desktop is a session dashboard.* Side columns collapse **individually**
+(topbar toggles, persisted; pressed = open) so mid-width screens keep a
+full-width terminal — below 1200px the left column starts collapsed, and
+both-closed is a deliberate "zen" mode. The terminal always takes the
+leftover space. **Terminal font size** is user-adjustable (A−/A+, 10–22px,
+persisted).
+
+*The shell recedes on this page* (`body.connect-page` via a new layout
+`body_class` block): 2.4rem logo, no breadcrumb line, tight content frame,
+no footer. The session owns the viewport.
+
+**Why.** The playerbase drives the game from phones and the old HUD was
+desktop-first scaffolding — fixed columns that squeezed the terminal below 80
+columns on laptops, and a phone layout that buried the game under ~500px of
+chrome with 5px tap targets. A MUD client's one non-negotiable is that the
+terminal is primary; every mode above (dock/sheet, collapsible columns, zen)
+is that principle applied. Defaulting the HUD on makes the flagship
+experience the default one now that Season 15's GMCP feeds are live.
+
+**Notes.** Verified with the demo-mode harness (headless Chromium +
+Playwright): 1440/1024/390px screenshots across HUD-on/off, sheet open,
+columns collapsed; `scrollWidth == viewport` asserted at every size. The
+telnet/GMCP bridge internals are deliberately untouched (tracked separately).
+
+## 2026-07-12 — The connect HUD runs on the shared tokens; `--hud-*` shrinks to HUD-domain meanings
+
+**Decision.** Roadmap #6. `hud.css` no longer defines its own copies of the
+structural palette — surfaces, borders, text, dim, and accent reference
+`--ac-*` directly (the duplicate `--hud-bg/panel/border/text/dim/accent`
+aliases are deleted, along with every ad-hoc grey: `#1c1c22`→`--ac-elev`,
+`#17171c`→`--ac-elev`, `#000` wells→`--ac-bg`, `#222`→`--ac-border`). The
+`--hud-*` set now covers only HUD-domain meanings: the vitals triple aliases
+the shared semantics (`--hud-hp: var(--ac-danger)`, `--hud-mp: var(--ac-info)`,
+`--hud-mv: var(--ac-ok)` — one red site-wide; the old `#cc3333` hp is gone) and
+the flavor colors with no site-wide equivalent get named tokens
+(`--hud-gold/-gold-wash/-tgt/-mm/-edge/-event/-moon`). Along the way the HUD
+joins the shared conventions: radii from the token scale (`--ac-radius-sm`
+panels/tabs/buttons/skills, `--ac-radius` banner, `999px` season pill),
+`.hud-btn` aligned with `.ac-btn` (elev surface, `--ac-border-2`, amber
+hover, `:focus-visible` outline), amber-tinted borders as `rgba(255,170,119,…)`
+per the console idiom, the season-15 banner on `--ac-wash` over `--ac-panel`
+instead of hardcoded browns, and the previously missing
+`prefers-reduced-motion` guard. Affect/skill category edges use the semantic
+tokens (ok/danger/info). Two deliberate true-blacks remain: the terminal
+canvas (matches the xterm theme) and the bar-text shadow.
+
+**Why.** The HUD predates E1 and carried a parallel token set with identical
+values — pure entropy once the shared base existed. Re-expressing it makes a
+palette change a one-line edit that reaches all three visual layers, and the
+remaining `--hud-*` names now say something true: "this color means a
+HUD-domain thing," not "this is the HUD's copy of the same grey."
+
 ## 2026-07-12 — Leaders & Challenges adopt the console language; DataTables retired page-by-page
 
 **Decision.** Roadmap #5. **Leaders** keeps a real table — it is genuinely
