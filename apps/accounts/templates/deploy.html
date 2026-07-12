@@ -113,6 +113,13 @@
                 <svg class="bi" aria-hidden="true"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#exclamation-triangle"></use></svg>
                 <span><strong>Heads up —</strong> deploying <code>ishar-web</code> restarts the container serving <em>this page</em>. The console will freeze mid-deploy; the host audit log is the source of truth.</span>
             </div>
+
+            <div class="ac-note ac-note--danger mt-3 d-none" id="webClientsWarning" role="alert">
+                <svg class="bi" aria-hidden="true"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#people-fill"></use></svg>
+                <span><strong>Players are in the game via the web client —</strong>
+                <span id="webClientsText">checking…</span>
+                Deploying <code>ishar-web</code> will cut their connection mid-session.</span>
+            </div>
         </div>
 
         <!-- Options + confirm -->
@@ -237,15 +244,59 @@
         }
     }
 
-    // ---- self-deploy caveat ---------------------------------------------
-    function refreshWarning() {
+    // ---- self-deploy caveat + live web-client count ----------------------
+    // "Nothing selected = all services" includes ishar-web, so an empty
+    // selection gets the same warnings as an explicit ishar-web check.
+    function deployIncludesWeb() {
         const web = document.getElementById("svc-ishar-web");
-        warning.classList.toggle("d-none", !(web && web.checked));
+        const anyChecked = form.querySelector(".service-check:checked") !== null;
+        return (web && web.checked) || !anyChecked;
+    }
+
+    // Live count of /connect sessions proxied through this container — an
+    // ishar-web deploy severs every one of them mid-game.
+    const webClientsWarning = document.getElementById("webClientsWarning");
+    const webClientsText = document.getElementById("webClientsText");
+    let webClientCount = 0;
+
+    function fmtAge(s) {
+        if (s < 60) { return s + "s"; }
+        if (s < 3600) { return Math.floor(s / 60) + "m"; }
+        return Math.floor(s / 3600) + "h " + (Math.floor(s / 60) % 60) + "m";
+    }
+
+    function refreshWarning() {
+        const includesWeb = deployIncludesWeb();
+        warning.classList.toggle("d-none", !includesWeb);
+        webClientsWarning.classList.toggle(
+            "d-none", !(includesWeb && webClientCount > 0)
+        );
     }
     document.querySelectorAll(".service-check").forEach(function (el) {
         el.addEventListener("change", refreshWarning);
     });
+
+    function pollWebClients() {
+        post("{% url 'deploy_web_clients' %}", {})
+            .then(function (r) {
+                if (r.status !== 200) { return; }
+                webClientCount = r.data.count || 0;
+                if (webClientCount > 0) {
+                    let text = webClientCount + " live session" +
+                        (webClientCount === 1 ? "" : "s");
+                    if (r.data.ages && r.data.ages.length) {
+                        text += " (longest connected " +
+                            fmtAge(r.data.ages[0]) + ")";
+                    }
+                    webClientsText.textContent = text + ".";
+                }
+                refreshWarning();
+            })
+            .catch(function () { /* keep last known count */ });
+    }
     refreshWarning();
+    pollWebClients();
+    setInterval(pollWebClients, 10000);
 
     // ---- live agent health (hero pill) ----------------------------------
     if (deployConfigured) {
@@ -361,7 +412,13 @@
             return;
         }
         const label = services.length ? services.join(", ") : "ALL services";
-        if (!confirm("Deploy " + label + " to " + env + "?")) {
+        let prompt = "Deploy " + label + " to " + env + "?";
+        if (deployIncludesWeb() && webClientCount > 0) {
+            prompt += "\n\nWARNING: " + webClientCount +
+                " player session" + (webClientCount === 1 ? "" : "s") +
+                " on the web client will be disconnected mid-game.";
+        }
+        if (!confirm(prompt)) {
             return;
         }
 

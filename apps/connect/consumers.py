@@ -5,6 +5,8 @@ import logging
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.conf import settings
 
+from . import tracker
+
 
 logger = logging.getLogger(__name__)
 
@@ -53,11 +55,13 @@ class TelnetConsumer(AsyncWebsocketConsumer):
             return
 
         await self.accept()
+        tracker.register(self)
 
         # Read from the MUD in the background.
         self._read_task = asyncio.create_task(self._read_telnet())
 
     async def disconnect(self, code):
+        tracker.unregister(self)
         if self._read_task:
             self._read_task.cancel()
         if self._writer:

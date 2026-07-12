@@ -9,6 +9,7 @@ from django.conf import settings
 from django.http import JsonResponse
 from django.views.generic.base import TemplateView, View
 
+from apps.connect import tracker as connect_tracker
 from apps.core.views.mixins import GodRequiredMixin, NeverCacheMixin
 
 from ..utils.deploy_agent import DeployAgentError, deploy_status, ping, start_deploy
@@ -86,6 +87,22 @@ class DeployPingView(GodRequiredMixin, NeverCacheMixin, View):
         if "ok" not in result:
             result = {"ok": True, **result}
         return JsonResponse(result)
+
+
+class DeployWebClientsView(GodRequiredMixin, NeverCacheMixin, View):
+    """POST-only count of live web-client (/connect) game sessions.
+
+    Deploying ishar-web restarts Daphne, which severs every browser player's
+    telnet proxy mid-game — the console polls this to warn before that happens.
+    Reads an in-process registry (Daphne is a single process; see
+    apps.connect.tracker), so it costs nothing and needs no agent or DB.
+    Read-only (no re-auth); God gate + CSRF still apply.
+    """
+
+    http_method_names = ("post",)
+
+    def post(self, request, *args, **kwargs):
+        return JsonResponse(connect_tracker.snapshot())
 
 
 class DeployStatusView(GodRequiredMixin, NeverCacheMixin, View):
