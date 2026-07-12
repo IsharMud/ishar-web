@@ -92,6 +92,30 @@ class Season(models.Model):
         help_text="Enigma related to the season.",
         verbose_name="Enigma",
     )
+    new_features_on = models.BooleanField(
+        blank=True,
+        null=True,
+        help_text="Are the season's gated new features enabled?",
+        verbose_name="New Features On?",
+    )
+    next_enigma = models.ForeignKey(
+        blank=True,
+        null=True,
+        to=SeasonalEnigma,
+        to_field="seasonal_enigma_id",
+        on_delete=models.DO_NOTHING,
+        related_name="+",
+        help_text="Enigma that will run in the next season.",
+        verbose_name="Next Enigma",
+    )
+    auto_cycle = models.BooleanField(
+        default=True,
+        help_text=(
+            "Automatically cycle and start the next season"
+            " when the expiration date is reached?"
+        ),
+        verbose_name="Auto-Cycle?",
+    )
 
     class Meta:
         managed = False

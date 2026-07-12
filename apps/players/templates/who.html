@@ -31,7 +31,7 @@
 {% if players %}
     <div class="ac-rows">
 {% for player in players.all %}
-        <div class="ac-row" title="{{ player.player_name }}">
+        <div class="ac-row" title="{{ player.name }}">
             <span class="ac-row__icon">
 {% if player.is_immortal %}
                 {% bi "star" label="Immortal" %}
