@@ -39,6 +39,7 @@
         <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
         <link rel="stylesheet" href="{% static 'bootstrap-icons/bootstrap-icons.min.css' %}">
         <link rel="stylesheet" type="text/css" href="{% static "css/style.css" %}">
+        <link rel="stylesheet" type="text/css" href="{% static "css/admin-console.css" %}">
 {% block includes %}
 {% endblock includes %}
 
@@ -119,9 +120,7 @@
                                 {% bi "calendar-event" %}
                                 Events
 {% if GLOBAL_EVENT_COUNT > 0 %}
-                                <span class="badge bg-dark rounded-pill border border-secondary">
-                                    {{ GLOBAL_EVENT_COUNT }}
-                                </span>
+                                <span class="ac-pill">{{ GLOBAL_EVENT_COUNT }}</span>
 {% endif %}
                             </a>
                         </li>
@@ -138,14 +137,15 @@
                                 Help
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark p-1 shell-menu">
-                                <li class="nav-item" title="Search Help Topics">
-                                    <div class="form-control-dark input-group">
-                                        <form method="post" action="{% url 'help' %}#search">
-                                                {{ HELP_SEARCH_FORM }}
-                                                {% csrf_token %}
-                                                <button class="btn btn-outline-primary m-1" type="submit">Search</button>
-                                        </form>
-                                    </div>
+                                <li class="nav-item p-1" title="Search Help Topics">
+                                    <form class="d-flex gap-1" method="post" action="{% url 'help' %}#search" role="search">
+                                        {% csrf_token %}
+                                        <div class="ac-inputgroup flex-grow-1">
+                                            <span class="ac-inputgroup__icon">{% bi "search" %}</span>
+                                            {{ HELP_SEARCH_FORM.search_topic }}
+                                        </div>
+                                        <button class="ac-btn ac-btn--accent" type="submit">Search</button>
+                                    </form>
                                 </li>
                                 <li class="nav-item">
                                     <hr class="dropdown-divider">
@@ -292,7 +292,7 @@
                                     <a class="nav-link dropdown-item icon-link icon-link-hover" href="{% url 'who' %}#who">
                                         {% bi "people" %}
                                         Who's Online?
-                                        <span class="badge bg-dark rounded-pill border border-secondary" title="{{ PLAYERS_ONLINE }} player{{ PLAYERS_ONLINE|pluralize }} online">
+                                        <span class="ac-pill" title="{{ PLAYERS_ONLINE }} player{{ PLAYERS_ONLINE|pluralize }} online">
                                             {{ PLAYERS_ONLINE }}
                                         </span>
                                     </a>

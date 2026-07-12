@@ -114,6 +114,7 @@
 .ac-pill--warn    { color: var(--ac-warn);   border-color: rgba(255,136,0,.4);  background: rgba(255,136,0,.12); }
 .ac-pill--danger  { color: var(--ac-danger); border-color: rgba(214,75,75,.45); background: var(--ac-danger-wash); }
 .ac-pill--accent  { color: var(--ac-accent); border-color: rgba(255,170,119,.45); background: var(--ac-wash); }
+.ac-pill--immortal { color: var(--ac-immortal); border-color: rgba(0,183,235,.4); background: rgba(0,183,235,.1); }
 /* Status pills carry a leading dot as a pseudo-element so JS may replace the
    label via textContent (no innerHTML) without wiping the dot. */
 .ac-pill--status::before {
@@ -372,6 +373,9 @@
     transition: filter .15s, box-shadow .15s, transform .1s, opacity .15s;
 }
 .ac-cta .bi { width: 1.2rem; height: 1.2rem; }
+/* Pin anchor CTAs against the global a:link rule. */
+a.ac-cta:link, a.ac-cta:visited { color: #fff; text-decoration: none; }
+a.ac-cta--accent:link, a.ac-cta--accent:visited { color: #231005; }
 .ac-cta:hover:not(:disabled) { filter: brightness(1.12); box-shadow: 0 0 0 .2rem var(--ac-danger-wash); }
 .ac-cta:active:not(:disabled) { transform: translateY(1px); }
 .ac-cta:disabled { opacity: .5; cursor: not-allowed; filter: grayscale(.4); }
@@ -596,6 +600,12 @@ a.ac-btn:link, a.ac-btn:visited { color: var(--ac-text); }
 .ac-btn--danger:hover:not(:disabled) { color: var(--ac-danger); border-color: var(--ac-danger); background: var(--ac-danger-wash); }
 .ac-btn--accent { color: var(--ac-accent); border-color: rgba(255, 170, 119, .45); }
 .ac-btn--accent:hover:not(:disabled) { color: var(--ac-accent); background: var(--ac-wash); }
+/* Variant anchors: pin against both a:link and the a.ac-btn base pin. */
+a.ac-btn--ok:link,     a.ac-btn--ok:visited     { color: var(--ac-ok); }
+a.ac-btn--info:link,   a.ac-btn--info:visited   { color: var(--ac-info); }
+a.ac-btn--warn:link,   a.ac-btn--warn:visited   { color: var(--ac-warn); }
+a.ac-btn--danger:link, a.ac-btn--danger:visited { color: var(--ac-danger); }
+a.ac-btn--accent:link, a.ac-btn--accent:visited { color: var(--ac-accent); }
 
 /* ---------------------------------------------------------- fields --- */
 /* Bare input/textarea/select on console surfaces (the icon-cell variant is
@@ -686,10 +696,13 @@ a.ac-row__link:hover { color: var(--ac-accent); }
 .ac-row__meta .mono { font-family: var(--bs-font-monospace, monospace); }
 .ac-row__side {
     margin-left: auto;
-    flex: 0 0 auto;
+    flex: 0 1 auto;
+    min-width: 0;
     display: flex;
     align-items: center;
-    gap: .5rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: .35rem .5rem;
 }
 /* Rows addressed by URL fragment (deep links) light up when targeted. */
 .ac-row { scroll-margin-top: .75rem; }
@@ -836,6 +849,20 @@ a.ac-link:link, a.ac-link:visited { color: var(--ac-text); }
 .ac-link__name { font-weight: 600; display: flex; align-items: center; gap: .4rem; flex-wrap: wrap; }
 .ac-link__note { color: var(--ac-dim); font-size: .78rem; margin-top: .1rem; }
 .ac-link__side { margin-left: auto; flex: 0 0 auto; align-self: center; }
+/* Featured variant: a first-class / officially-supported destination.
+   Amber-washed like a selected .ac-toggle, with an amber name. */
+.ac-link--featured {
+    border-color: rgba(255, 170, 119, .45);
+    background: var(--ac-wash);
+    box-shadow: inset 0 0 0 1px rgba(255, 170, 119, .18);
+}
+.ac-link--featured .ac-link__name,
+a.ac-link--featured:link .ac-link__name,
+a.ac-link--featured:visited .ac-link__name { color: var(--ac-accent); }
+.ac-link--featured:hover {
+    background: var(--ac-wash);
+    border-color: var(--ac-accent);
+}
 
 /* ------------------------------------------------------ empty state --- */
 .ac-empty {
@@ -978,6 +1005,8 @@ a.ac-link:link, a.ac-link:visited { color: var(--ac-text); }
     .ac-hero__status .ac-pill { white-space: normal; }
     .ac-hero__badge { width: 2.6rem; height: 2.6rem; }
     .ac-hero__badge .bi { width: 1.25rem; height: 1.25rem; }
+    /* Same rule for row pills: wrap, never clip, on a phone. */
+    .ac-row__side .ac-pill { white-space: normal; }
     .ac-hero__title { font-size: 1.3rem; }
     .ac-seg { width: 100%; }
     .ac-seg__item { flex: 1 1 0; justify-content: center; padding: .5rem .5rem; }

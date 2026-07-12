@@ -1,95 +1,88 @@
 {% extends "layout.html" %}
-{% load static %}
+{% load ishar %}
 {% block meta_title %}{{ WEBSITE_TITLE }} - Free Online MUD | Text-Based Fantasy RPG{% endblock meta_title %}
 {% block meta_description %}{{ WEBSITE_TITLE }} is a free online MUD (Multi-User Dungeon) set in a high medieval fantasy world. Play as Warrior, Rogue, Magician, Necromancer, Cleric, or Shaman. Connect via browser or telnet to isharmud.com.{% endblock meta_description %}
 {% block meta_url %}{% url 'index' %}{% endblock meta_url %}
 {% block title %}{{ WEBSITE_TITLE }} - Free Online MUD | Text-Based Fantasy RPG{% endblock title %}
 {% block page_heading %}{{ WEBSITE_TITLE }} - Free Online MUD | Text-Based Fantasy RPG{% endblock page_heading %}
-{% block breadcrumbs %}
-    <li class="breadcrumb-item active" title="{{ news.subject|default:'Welcome' }}">
-        <h2 class="icon-link">
-            <svg class="bi" aria-hidden="true">
-                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#house"></use>
-            </svg>
-            {{ news.subject|default:"Welcome" }}
-        </h2>
-    </li>
-{% endblock breadcrumbs %}
 {% block content %}
-    {% if news %}
-    <blockquote class="blockquote">
-        <div class="m-1 p-1">
-            {% autoescape off %}{{ news.body }}{% endautoescape %}
+<div class="ac">
+
+    <!-- Latest news -->
+    <header class="ac-hero">
+        <span class="ac-hero__badge">{% bi "newspaper" %}</span>
+        <div class="ac-hero__text">
+            <h2 class="ac-hero__title">{{ news.subject|default:"Welcome" }}</h2>
+{% if news %}
+            <p class="ac-hero__sub">
+                {{ news.account.get_username|title }} &mdash;
+                <time datetime="{{ news.created|date:'c' }}" title="{{ news.created|date:'l, F jS, Y' }}">
+                    {{ news.created|date:"l, F jS, Y" }}
+                </time>
+            </p>
+{% else %}
+            <p class="ac-hero__sub">The world ends, and then it begins again.</p>
+{% endif %}
         </div>
-        <p class="d-flex justify-content-end past-news">
-            <a class="btn btn-ishar icon-link icon-link-hover" href="{% url 'news' %}?page=2#news">
-                <svg class="bi" aria-hidden="true">
-                    <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#newspaper"></use>
-                </svg>
+        <div class="ac-hero__status">
+            <a class="ac-btn ac-btn--accent" href="{% url 'news' %}?page=2#news">
+                {% bi "newspaper" %}
                 Past News
             </a>
-        </p>
-        <footer class="blockquote-footer">
-            <cite title="{{ news.account.get_username|title }}">
-                {{ news.account.get_username|title }}
-            </cite>
-            <span class="icon-link" title="authored at">
-                <svg class="bi" aria-hidden="false" role="note" aria-label="authored at">
-                    <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#pen"></use>
-                </svg>
-            </span>
-            <time datetime="{{ news.created|date:"c" }}" title="{{ news.created|date:"l, F jS, Y" }}">
-                {{ news.created|date:"l, F jS, Y" }}
-            </time>
-        </footer>
-    </blockquote>
-</div>
+        </div>
+    </header>
 
-<div class="bg-black rounded border-ishar p-3 my-1">
-    {% endif %}
-    <p>
-        <strong>Ishar</strong> is a high medieval fantasy MUD built on one idea:
-        the world ends, and then it begins again. Each season the goddess
-        <strong>Varenya</strong> turns the wheel &mdash; the map resets, old legends are
-        wiped, and everyone starts from nothing. Whatever you make of yourself before
-        the next turning is what you get.
-    </p>
-    <p>
-        Six classes, each with its own way of staying alive:
-        <strong>Warrior, Rogue, Magician, Necromancer, Cleric, Shaman</strong>.
-        You'll fight down through catacombs, snowbound forests where angels and daemons
-        hunt each other, and swamps that don't intend to let you back out.
-        Combat is hack-and-slash, but the bosses reward players who think rather than
-        players who grind.
-    </p>
-    <p class="card-text">
-        The community is active in-game and on Discord, and new content arrives with
-        every season.
-    </p>
-    <p class="card-text">
-        Come make your mark before the wheel turns again.
-    </p>
-    <hr>
-    <div class="row">
-        <div class="col">
-            <p>
-                Play for free by connecting with any
-                <a class="icon-link icon-link-hover" href="{% url 'clients' %}#clients">
-                    MUD client
-                </a> to:
-            </p>
-        </div>
-        <div class="col">
-            <strong>Host</strong>
-            <span class="bi bi-dot"></span>
-            <code>isharmud.com</code>
-        </div>
-        <div class="col">
-            <strong>Port(s)</strong>
-            <ul>
-                <li><code>23</code></li>
-                <li><code>9999</code></li>
-            </ul>
-        </div>
+{% if news %}
+    <div class="ac-panel">
+        {% autoescape off %}{{ news.body }}{% endautoescape %}
     </div>
+{% endif %}
+
+    <!-- The pitch -->
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "book" %} The World</div>
+        <p>
+            <strong>Ishar</strong> is a high medieval fantasy MUD built on one idea:
+            the world ends, and then it begins again. Each season the goddess
+            <strong>Varenya</strong> turns the wheel &mdash; the map resets, old legends are
+            wiped, and everyone starts from nothing. Whatever you make of yourself before
+            the next turning is what you get.
+        </p>
+        <p>
+            Six classes, each with its own way of staying alive:
+            <strong>Warrior, Rogue, Magician, Necromancer, Cleric, Shaman</strong>.
+            You'll fight down through catacombs, snowbound forests where angels and daemons
+            hunt each other, and swamps that don't intend to let you back out.
+            Combat is hack-and-slash, but the bosses reward players who think rather than
+            players who grind.
+        </p>
+        <p>
+            The community is active in-game and on Discord, and new content arrives with
+            every season.
+        </p>
+        <p class="mb-0">
+            Come make your mark before the wheel turns again.
+        </p>
+    </div>
+
+    <!-- Play now -->
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "controller" %} Play Now</div>
+        <p class="ac-panel__hint">
+            Free to play &mdash; right here in your browser, or with any
+            <a href="{% url 'clients' %}#clients">MUD client</a> pointed at the game server.
+        </p>
+        <a class="ac-cta ac-cta--accent" href="{% url 'connect' %}">
+            {% bi "globe" %}
+            Play in your browser
+        </a>
+        <dl class="ac-kv mt-3 mb-0">
+            <dt>Host</dt>
+            <dd><code>isharmud.com</code></dd>
+            <dt>Ports</dt>
+            <dd><code>23</code> or <code>9999</code></dd>
+        </dl>
+    </div>
+
+</div>
 {% endblock content %}

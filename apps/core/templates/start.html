@@ -1,40 +1,41 @@
 {% extends "layout.html" %}
-{% load static %}
+{% load ishar %}
 {% block meta_title %}Get Started Playing {{ WEBSITE_TITLE }} - Beginner's MUD Guide{% endblock meta_title %}
 {% block meta_description %}Learn how to play {{ WEBSITE_TITLE }}, a free text-based RPG (MUD). This beginner's guide covers connecting, creating a character, basic commands, and navigating the medieval fantasy world.{% endblock meta_description %}
 {% block meta_url %}{% url 'start' %}{% endblock meta_url %}
 {% block title %}Get Started Playing {{ WEBSITE_TITLE }} - Beginner's MUD Guide{% endblock title %}
 {% block page_heading %}Get Started Playing {{ WEBSITE_TITLE }}{% endblock page_heading %}
 {% block breadcrumbs %}
-    <li class="breadcrumb-item h2 active" aria-current="page" title="Get Started">
-        <a class="icon-link icon-link-hover" href="{% url 'start' %}#start">
-            <svg class="bi" aria-hidden="true">
-                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#rocket-takeoff"></use>
-            </svg>
-            <span id="start">
-                Get Started
-            </span>
-        </a>
-    </li>
+    {% crumb "Get Started" "rocket-takeoff" urlname="start" anchor="start" active=True %}
 {% endblock breadcrumbs %}
 {% block content %}
-<div class="card m-1">
-    <div class="card-body">
-        <p class="card-text lead">
+<div class="ac">
+
+    <header class="ac-hero">
+        <span class="ac-hero__badge">{% bi "rocket-takeoff" %}</span>
+        <div class="ac-hero__text">
+            <h2 class="ac-hero__title">Get Started</h2>
+            <p class="ac-hero__sub">A beginner's guide to playing {{ WEBSITE_TITLE }}.</p>
+        </div>
+    </header>
+
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "book" %} What is Ishar?</div>
+        <p class="lead">
             Ishar is an interactive, multi-user, text adventure game -- also known as a
             MUD -- where players do battle with fearsome foes and sometimes each other
             so they can win great wealth and wrest rare prizes from the treasure hoards
             or bloody corpses of their enemies.  Victories also give the player
             experience and advancement in game standing.
         </p>
-        <p class="card-text">
+        <p>
             I can hear some people groaning out there.  'A TEXT game?  *yawn*  Where's
             the graphics?  Where's the flash?  Must be booooooring.'  Wrong.  Wrong,
             wrong, wrong, wrong and wrong again.  I have known players of many different
             types of games and have played many of them myself.  I have never seen a
             game, or even heard of one, that inspires the emotional highs and lows a MUD does.
         </p>
-        <p>
+        <p class="mb-0">
             This is at least partly due to the fact that it is a long game.  You start a
             character at level 1 with very little money and only the meagerest of
             possessions.  As you play the character, it gets stronger.  You accumulate
@@ -43,23 +44,19 @@
             probably also make bitter enemies who will kill you if they get a chance.
         </p>
     </div>
-</div>
-<div class="card m-1">
-    <div class="card-body">
-        <p class="card-text lead">
+
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "door-open" %} Your First Steps</div>
+        <p>
             Playing Ishar starts by
-            <a class="icon-link icon-link-hover" href="{% url 'connect' %}" title="Connect to {{ WEBSITE_TITLE }}">
-                connecting to the game
-            </a>
+            <a href="{% url 'connect' %}" title="Connect to {{ WEBSITE_TITLE }}">connecting to the game</a>
             and typing "<code>new</code>" at the login prompt.  The game walks you through the few steps of
             creating a new character, then drops you into the virtual world with a few meager possessions and
             the lowest standing in the game, level 1:
         </p>
-        <blockquote>
-            <pre class="bg-black text-white border border-secondary p-3" style="max-width: 80ch;">
-Central Plaza
+        <pre class="ac-quote">Central Plaza
 You stand in the center of a spacious plaza, its periphery adorned
-ith potted plants and carved stone benches.  People stroll about you,
+with potted plants and carved stone benches.  People stroll about you,
 clad in bright silks and chatting amongst themselves.  A bronze seal at
 your feet declares you to be in Mareldja, Crown on the Water.  A breeze
 tinged with salt and brine blows eastward, and shorebirds wheel and dive
@@ -68,11 +65,10 @@ the compass points.
 A noticeboard is mounted here.  (100 unread)
 An alert young guard patrols the city streets.
 100H 100M 0X Exits:NWES&gt;</pre>
-            <footer class="blockquote-footer">
-                You enter the game in the center of Mareldja, the largest city.
-            </footer>
-        </blockquote>
-        <p class="card-text">
+        <p class="ac-panel__hint mt-2 mb-3">
+            You enter the game in the center of Mareldja, the largest city.
+        </p>
+        <p class="mb-0">
             In this example, "Central Plaza" is the name of the room or place you are
             currently located.  Following that is a paragraph with a detailed
             description of Central Plaza.  Below that is list of people or objects that
@@ -83,19 +79,17 @@ An alert young guard patrols the city streets.
             you a quick overview of your current status.
         </p>
     </div>
-</div>
 
-<div class="card m-1">
-    <div class="card-body">
-        <p class="card-text lead">
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "terminal" %} Commands</div>
+        <p>
             Commands are how you interact with the virtual world through your character.
             For example, typing "<code>north</code>" moves you into the room north of your current
             location, or "<code>look</code>" will describe your surroundings again.
             Most commands allow you to be more specific, such as "<code>look at young guard</code>".
             Assuming one is in the room with you, it would offer:
         </p>
-<pre class="bg-black text-white border border-secondary p-3" style="max-width: 80ch;">
-The guard is clad in grey and deep turquoise livery.  He radiates
+        <pre class="ac-quote">The guard is clad in grey and deep turquoise livery.  He radiates
 order and benevolence as he wanders the city streets, protecting the
 innocent and keeping the peace.
 A city guard is a mighty warrior standing here in very good
@@ -104,7 +98,7 @@ taller than you.
 Wearing:
 Legs-&gt; leather pants
 Wielding-&gt; a long sword</pre>
-        <p class="card-text">
+        <p class="mt-3">
             You do not need to use the full names of most commands.  As you are learning
             new commands, try to learn the short version.  Instead of typing "<code>north</code>",
             you can just hit "<code>n</code>" and the Enter key.  "<code>Look</code>" can be shortened to
@@ -112,33 +106,33 @@ Wielding-&gt; a long sword</pre>
             To find the short form of any command, look for <code>Minimum</code> in the help for that command,
             available at any time with "<code>help &lt;command&gt;</code>".
         </p>
-        <p class="card-text">
+        <p class="mb-0">
             Similarly, you can use just the first three letters of the names of mobs and
             players and leave out unnecessary words.  So "<code>look at young guard</code>" could
             actually be shortened to "<code>l gua</code>".
         </p>
     </div>
-</div>
 
-<div class="card m-1">
-    <div class="card-body">
-        <p class="card-text">
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "info-circle" %} Finding Help</div>
+        <p>
             The first hour you are in the game is the hardest.  It takes a little while
             to get used to the command syntax and get a feel for moving around in the
             world and interacting with everything in it.  Don't be afraid of typing
-            &quot;<a href="/help/Help/#topic"><code>help help</code></a>&quot;,
+            &quot;<a href="{% url 'help_page' help_topic='Help' %}#topic"><code>help help</code></a>&quot;,
             which offers a list of commands, or &quot;<code>help &lt;command&gt;&quot;</code>, which will
             offer detailed information about any command.
         </p>
-        <p class="card-text">
+        <p>
             You will quickly run into other players who talk to you; see
-            &quot;<a href="/help/Communication/#topic"><code>help communication</code></a>&quot;
+            &quot;<a href="{% url 'help_page' help_topic='Communication' %}#topic"><code>help communication</code></a>&quot;
             on how to reply.
         </p>
-        <p>
+        <p class="mb-0">
             Once you make it past the first few hours and want to advance your standing in the game, see
-            &quot;<a href="/help/Levelling/#topic"><code>help levelling</code></a>&quot;.
+            &quot;<a href="{% url 'help_page' help_topic='Levelling' %}#topic"><code>help levelling</code></a>&quot;.
         </p>
     </div>
+
 </div>
 {% endblock content %}

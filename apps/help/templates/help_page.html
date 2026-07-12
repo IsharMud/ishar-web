@@ -1,201 +1,162 @@
 {% extends "layout.html" %}
-{% load static %}
+{% load ishar %}
 {% block meta_title %}{% if help_topic and help_topic.name %}{{ help_topic.name }} - {{ WEBSITE_TITLE }} Help{% else %}{{ WEBSITE_TITLE }} Help - MUD Commands, Spells & Game Guide{% endif %}{% endblock meta_title %}
 {% block meta_description %}{% if help_topic and help_topic.name %}Help page for {{ help_topic.name }} in {{ WEBSITE_TITLE }}, a free online MUD.{% else %}Browse help topics for {{ WEBSITE_TITLE }} - find MUD commands, spells, skills, classes, and game guides for this free online text-based RPG.{% endif %}{% endblock meta_description %}
 {% block meta_url %}{% if help_topic %}{{ help_topic.get_absolute_url }}{% else %}{% url 'help' %}{% endif %}{% endblock meta_url %}
 {% block title %}{% if help_topic and help_topic.name %}{{ help_topic.name }} - {{ WEBSITE_TITLE }} Help{% else %}{{ WEBSITE_TITLE }} Help - MUD Commands, Spells & Game Guide{% endif %}{% endblock title %}
 {% block page_heading %}{% if help_topic and help_topic.name %}{{ help_topic.name }} - {{ WEBSITE_TITLE }} Help{% else %}{{ WEBSITE_TITLE }} Help Topics{% endif %}{% endblock page_heading %}
 {% block breadcrumbs %}
-    <li class="breadcrumb-item h2" title="Help">
-        <a class="icon-link icon-link-hover" href="{% url 'help' %}#help">
-            <svg class="bi" aria-hidden="true">
-                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#info-circle"></use>
-            </svg>
-            <span id="help">Help</span>
-        </a>
-    </li>
-    {% if help_topic %}
-        {% if help_topic.is_area %}
-    <li aria-current="page" class="breadcrumb-item h2" title="World">
-        <a class="icon-link icon-link-hover" href="{% url 'world' %}#world">
-            <svg class="bi" aria-hidden="true">
-                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#globe-asia-australia"></use>
-            </svg>
-            <span id="world">World</span>
-        </a>
-    </li>
-    <li aria-current="page" class="breadcrumb-item active h2" title="{{ help_topic.display_name }}">
-        <a class="icon-link icon-link-hover" href="{{ help_topic.get_absolute_url }}">
-            <svg class="bi" aria-hidden="true">
-                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#compass"></use>
-            </svg>
-            <span id="topic">{{ help_topic.display_name }}</span>
-        </a>
-    </li>
-        {% else %}
-    <li aria-current="page" class="breadcrumb-item active h2" title="{{ help_topic.name }}">
-        <a class="icon-link icon-link-hover" href="{{ help_topic.get_absolute_url }}">
-            <svg class="bi" aria-hidden="true">
-                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#{% if help_topic.is_spell %}magic{% else %}card-text{% endif %}"></use>
-            </svg>
-            <span id="topic">{{ help_topic.name }}</span>
-        </a>
-    </li>
-        {% endif %}
+{% if help_topic %}
+    {% crumb "Help" "info-circle" urlname="help" anchor="help" %}
+    {% if help_topic.is_area %}
+    {% crumb "World" "globe-asia-australia" urlname="world" anchor="world" %}
+    {% crumb help_topic.display_name "compass" anchor="topic" active=True %}
+    {% else %}
+    {% crumb help_topic.name help_topic.is_spell|yesno:"magic,card-text" anchor="topic" active=True %}
     {% endif %}
+{% else %}
+    {% crumb "Help" "info-circle" urlname="help" anchor="help" active=True %}
+{% endif %}
 {% endblock breadcrumbs %}
 {% block content %}
+<div class="ac">
 
-    {% if help_topic %}
-    <div class="bg-black">
-        <div class="rounded m-1 p-1">
-            <ul class="two-col">
-        {% if help_topic.syntax %}
-                <li>
-                    <strong>Syntax</strong>: <code>{{ help_topic.syntax }}</code>
-                </li>
-        {% endif %}
-        {% if help_topic.minimum %}
-                <li>
-                    <strong>Minimum</strong>: <code>{{ help_topic.minimum }}</code>
-                </li>
-        {% endif %}
-        {% if help_topic.player_level %}
-                <li>
-                    <strong>Level</strong>: <code>{{ help_topic.player_level }}</code>
-                </li>
-        {% endif %}
-        {% if help_topic.player_class %}
-                <li>
-                    <strong>Class{{ help_topic.player_class|pluralize:"es" }}</strong>:
-                    <code>{{ help_topic.player_class_html|safe }}</code>
-                </li>
-        {% endif %}
-        {% if help_topic.position %}
-                <li>
-                    <strong>Position</strong>: <code>{{ help_topic.position }}</code>
-                </li>
-        {% endif %}
-        {% if help_topic.save %}
-                <li>
-                    <strong>Save</strong>: <code>{{ help_topic.save }}</code>
-                </li>
-        {% endif %}
-        {% if help_topic.stats %}
-                <li>
-                    <strong>Stat{{ help_topic.stats|pluralize }}</strong>:
-            {% for stat in help_topic.stats %}
-                    <code>{{ stat }}</code>{% if not forloop.last %}, {% endif %}
-            {% endfor %}
-                </li>
-        {% endif %}
-        {% if help_topic.components %}
-                <li>
-                    <strong>Component{{ help_topic.components|pluralize }}</strong>:
-            {% for component in help_topic.components %}
-                    <code>{{ component }}</code>{% if not forloop.last %}, {% endif %}
-            {% endfor %}
-                </li>
-        {% endif %}
-            </ul>
+{% if help_topic %}
+    <!-- Topic -->
+    <header class="ac-hero">
+        <span class="ac-hero__badge">
+{% if help_topic.is_area %}
+            {% bi "compass" %}
+{% elif help_topic.is_spell %}
+            {% bi "magic" %}
+{% else %}
+            {% bi "card-text" %}
+{% endif %}
+        </span>
+        <div class="ac-hero__text">
+            <h2 class="ac-hero__title">{% if help_topic.is_area %}{{ help_topic.display_name }}{% else %}{{ help_topic.name }}{% endif %}</h2>
+{% if help_topic.syntax %}
+            <p class="ac-hero__sub">Syntax: <code>{{ help_topic.syntax }}</code></p>
+{% endif %}
         </div>
-        <blockquote>
-        {% if help_topic.body_html %}
-            <pre class="bg-black text-white border border-secondary px-1">
-                {% autoescape off %}{{ help_topic.body_html }}{% endautoescape %}
-            </pre>
-        {% endif %}
-        {% if help_topic.see_also %}
-            <footer class="blockquote-footer">
-                <strong id="see-also">See Also</strong>:
-            {% for also_topic in help_topic.see_also %}
-                <a href="{% url 'help_page' help_topic=also_topic %}#topic" title="Help: {{ also_topic }}">{{ also_topic }}</a>{% if not forloop.last %}, {% endif %}
-            {% endfor %}
-            </footer>
-        {% endif %}
-        </blockquote>
-    </div>
-    {% endif %}
+{% if help_topic.is_area %}
+        <div class="ac-hero__status">
+            <span class="ac-pill ac-pill--accent">area</span>
+        </div>
+{% elif help_topic.is_spell %}
+        <div class="ac-hero__status">
+            <span class="ac-pill">spell</span>
+        </div>
+{% endif %}
+    </header>
 
-    {% if request.user.is_anonymous and not help_topic %}
-    <div class="alert alert-dark alert-dismissible fade show" role="alert">
-        <p class="m-1 p-1 lead">
+{% if help_topic.minimum or help_topic.player_level or help_topic.player_class or help_topic.position or help_topic.save or help_topic.stats or help_topic.components %}
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "list-ul" %} Details</div>
+        <dl class="ac-kv mb-0">
+{% if help_topic.minimum %}
+            <dt>Minimum</dt>
+            <dd><code>{{ help_topic.minimum }}</code></dd>
+{% endif %}
+{% if help_topic.player_level %}
+            <dt>Level</dt>
+            <dd><code>{{ help_topic.player_level }}</code></dd>
+{% endif %}
+{% if help_topic.player_class %}
+            <dt>Class{{ help_topic.player_class|pluralize:"es" }}</dt>
+            <dd>{{ help_topic.player_class_html|safe }}</dd>
+{% endif %}
+{% if help_topic.position %}
+            <dt>Position</dt>
+            <dd><code>{{ help_topic.position }}</code></dd>
+{% endif %}
+{% if help_topic.save %}
+            <dt>Save</dt>
+            <dd><code>{{ help_topic.save }}</code></dd>
+{% endif %}
+{% if help_topic.stats %}
+            <dt>Stat{{ help_topic.stats|pluralize }}</dt>
+            <dd>{% for stat in help_topic.stats %}<code>{{ stat }}</code>{% if not forloop.last %}, {% endif %}{% endfor %}</dd>
+{% endif %}
+{% if help_topic.components %}
+            <dt>Component{{ help_topic.components|pluralize }}</dt>
+            <dd>{% for component in help_topic.components %}<code>{{ component }}</code>{% if not forloop.last %}, {% endif %}{% endfor %}</dd>
+{% endif %}
+        </dl>
+    </div>
+{% endif %}
+
+{% if help_topic.body_html %}
+    <pre class="ac-quote">{% autoescape off %}{{ help_topic.body_html }}{% endautoescape %}</pre>
+{% endif %}
+
+{% if help_topic.see_also %}
+    <div class="ac-panel">
+        <div class="ac-panel__h" id="see-also">{% bi "signpost-split" %} See Also</div>
+        <nav class="ac-filter" aria-label="Related help topics">
+{% for also_topic in help_topic.see_also %}
+            <a class="ac-chip" href="{% url 'help_page' help_topic=also_topic %}#topic" title="Help: {{ also_topic }}">{{ also_topic }}</a>
+{% endfor %}
+        </nav>
+    </div>
+{% endif %}
+{% endif %}
+
+{% if request.user.is_anonymous and not help_topic %}
+    <div class="ac-note">
+        {% bi "rocket-takeoff" %}
+        <span>
             <strong>If you are new here</strong>, you may want to download one of many
-            <a class="icon-link icon-link-hover" href="{% url 'clients' %}#clients" title="MUD clients">
-                <svg class="bi" aria-hidden="true">
-                    <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#terminal-split"></use>
-                </svg>
-                MUD clients
-            </a>,
+            <a href="{% url 'clients' %}#clients" title="MUD clients">MUD clients</a>,
             see our
-            <a class="icon-link icon-link-hover" href="{% url 'start' %}#start" title="getting started guide">
-                <svg class="bi" aria-hidden="true">
-                    <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#rocket-takeoff"></use>
-                </svg>
-                getting started guide
-            </a>, and
-            <a class="icon-link icon-link-hover" href="{% url 'discord' %}" target="_blank" title="Join us on Discord!">
-                <svg class="bi" aria-hidden="true">
-                    <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#discord"></use>
-                </svg>
-                join us on Discord
-                <svg class="bi" aria-hidden="false" role="img" aria-label="Join {{ WEBSITE_TITLE }} Discord.">
-                    <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#box-arrow-up-right"></use>
-                </svg>
-            </a>.
+            <a href="{% url 'start' %}#start" title="getting started guide">getting started guide</a>,
+            and
+            <a href="{% url 'discord' %}" target="_blank" title="Join us on Discord!">join us on Discord</a>.
+        </span>
+    </div>
+{% endif %}
+
+    <!-- Search -->
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "search" %} Search Help</div>
+        <form class="d-flex gap-1" method="post" id="search" action="{% url 'help' %}#help" role="search">
+            {% csrf_token %}
+            <div class="ac-inputgroup flex-grow-1">
+                <span class="ac-inputgroup__icon">{% bi "search" %}</span>
+                {{ HELP_SEARCH_FORM.search_topic }}
+            </div>
+            <button class="ac-btn ac-btn--accent" type="submit">Search</button>
+        </form>
+        <p class="ac-panel__hint mb-0 mt-2">
+            <em>
+                such as &quot;<a href="{% url 'help_page' help_topic='spell' %}#topics" title="Help: Spell">spell</a>&quot; or
+                &quot;<a href="{% url 'help_page' help_topic='MUD Basics' %}#topic" title="Help: MUD Basics">MUD Basics</a>&quot;
+            </em>
         </p>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    {% endif %}
-
-    <div class="m-1 p-1">
-        <div class="card bg-black">
-            <div class="card-body d-flex form-control-dark input-group">
-                <div class="form-control-dark" id="help-search-form">
-                    <form class="row g-3" method="post" id="search" action="{% url 'help' %}#help">
-                        <div class="col-auto">
-                            {{ HELP_SEARCH_FORM }}
-                            {% csrf_token %}
-                        </div>
-                        <div class="col-auto">
-                            <button class="btn btn-outline-primary" type="submit">Search</button>
-                        </div>
-                        <div class="col-auto">
-                            <button class="btn btn-outline-secondary" type="reset">Clear</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-            <div class="card-footer">
-                <span class="blockquote-footer">
-                    <em>
-                        such as &quot;<a href="{% url 'help_page' help_topic='spell' %}#topics" title="Help: Spell">spell</a>&quot; or
-                        &quot;<a href="{% url 'help_page' help_topic='MUD Basics' %}#topic" title="Help: MUD Basics">MUD Basics</a>&quot;
-                    </em>
-                </span>
-            </div>
-        </div>
     </div>
 
-    <div class="m-1 p-1">
-    {% if help_topics %}
-        <h5 title="{{ help_topics|length }} topics" id="topics">
-            {{ help_topics|length }} topics
+    <!-- Topics -->
+{% if help_topics %}
+    <div class="ac-panel">
+        <div class="ac-panel__h" id="topics">
+            {% bi "collection" %}
+            {{ help_topics|length }} topic{{ help_topics|length|pluralize }}
             <a class="anchor-link" href="#topics" aria-label="Link to this section: Help Topics ({{ help_topics|length }} topics)"></a>
-        </h5>
-        <ul class="two-col">
-        {% for list_topic in help_topics.values %}
+        </div>
+        <ul class="two-col list-unstyled mb-0">
+{% for list_topic in help_topics.values %}
             <li title="Help: {{ list_topic.name }}">
-                <a href="{{ list_topic.get_absolute_url }}">
-                    {{ list_topic.name }}
-                </a>
+                <a href="{{ list_topic.get_absolute_url }}">{{ list_topic.name }}</a>
             </li>
-        {% endfor %}
+{% endfor %}
         </ul>
-    {% else %}
-        <p class="lead">
-            <strong>Sorry, but no help topics were found.</strong>
-        </p>
-    {% endif %}
     </div>
+{% else %}
+    <div class="ac-empty">
+        {% bi "search" %}
+        <span>Sorry, but no help topics were found.</span>
+    </div>
+{% endif %}
+
+</div>
 {% endblock content %}

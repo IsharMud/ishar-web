@@ -28,6 +28,7 @@
     --ac-info:        #4a86cf;                   /* informational */
     --ac-warn:        #f80;                      /* caution */
     --ac-danger:      #d64b4b;                   /* destructive / error */
+    --ac-immortal:    #00b7eb;                   /* immortal / staff cyan */
 
     /* Translucent washes */
     --ac-wash:        rgba(255, 170, 119, .12);  /* amber */
@@ -70,10 +71,6 @@ svg.bi:not([width]) { width: 1em; height: 1em; }
     #logo { height: 5.5rem; }
 }
 
-.list-group, .list-group-item, .card { background-color: #000; }
-
-.list-group a .bi,
-.blockquote-footer .bi,
 .navbar,
 .navbar .nav-link,
 .text-ishar
@@ -113,22 +110,15 @@ a[target="_blank"] {
 }
 
 body { background-color: var(--ac-bg); color: var(--ac-text); }
-.card-header, .card-title { color: var(--ishar-color); }
-.card, .card-text, .card-footer { color: var(--ac-text); }
-button, textarea, select {
-    border: 0.1rem solid var(--ishar-color);
-    background-color: #323639;
-    color: var(--ishar-color);
+/* Bare (classless) form elements — e.g. Django-rendered forms — read as
+   console fields by default; .ac-* classes refine from here. */
+button, textarea, select, input {
+    border: 1px solid var(--ac-border-2);
+    background-color: var(--ac-bg);
+    color: var(--ac-text);
 }
-textarea {
-    white-space: break-spaces;
-    background-color: #000;
-}
-input {
-    border: 0.1rem solid var(--ishar-color);
-    background-color: #000;
-    color: var(--ishar-color);
-}
+button { background-color: var(--ac-elev); }
+textarea { white-space: break-spaces; }
 h1, h2, h3, h4, h5,
 label, strong, th {
     color: var(--ishar-color);
@@ -138,28 +128,6 @@ summary h3,
 summary h4,
 summary h5 {
     display: inline-block;
-}
-
-.btn-ishar {
-    --bs-btn-bg: var(--bs-black);
-    --bs-btn-border-color: var(--ishar-color);
-    --bs-btn-color: var(--ishar-color);
-
-    --bs-btn-active-bg: var(--ishar-color);
-    --bs-btn-active-border-color: var(--ishar-color);
-    --bs-btn-active-color: var(--bs-black);
-
-    --bs-btn-hover-bg: var(--ishar-color);
-    --bs-btn-hover-border-color: var(--ishar-color);
-    --bs-btn-hover-color: var(--bs-black);
-
-    --bs-btn-visited-bg: var(--bs-black);
-    --bs-btn-visited-border-color: var(--ishar-color);
-    --bs-btn-visited-color: var(--ishar-color);
-}
-.past-news {
-    a:link, a:visited { color: var(--ishar-color); }
-    a:active, a:hover { color: var(--bs-black); }
 }
 
 a:link { color: #09f; text-decoration: none; }
@@ -174,9 +142,8 @@ a img:hover{ opacity: 0.8; }
 .artisan-player,
 .immortal-player,
 .consort-player {
-    color: #00b7eb;
+    color: var(--ac-immortal);
 }
-.nested-list { list-style: none; }
 .god-player::after { content: ' 😇'; }
 .forger-player::after,
 .eternal-player::after,
@@ -206,13 +173,13 @@ a.hardcore-player:hover {
     color: #f00;
 }
 .dead-player::after { content: ' ☠️'; }
-.dead-player::after { content: ' ☠️'; }
 
 .message-info { color: #09f; }
 .message-success, .active-season td { color: var(--ac-ok); }
 .message-warn, .message-warning  { color: var(--ac-warn); }
 
-.two-col { column-count: 2; }
+.two-col { column-count: 2; column-gap: 2rem; }
+.two-col li { break-inside: avoid; }
 
 .anchor-link {
     padding: 0 .175rem;
@@ -234,12 +201,7 @@ a.hardcore-player:hover {
 :hover>.anchor-link,
 :target>.anchor-link
 {
-    color: #0d6efd;
+    color: var(--ac-accent-2);
     text-decoration: none;
     opacity: 1
-}
-
-.remort-upgrade-row:target {
-    font-weight: bold;
-    border: 0.1rem solid var(--ishar-color);
 }

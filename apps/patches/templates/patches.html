@@ -1,155 +1,105 @@
 {% extends "layout.html" %}
-{% load static %}
+{% load ishar %}
 {% block meta_title %}{{ WEBSITE_TITLE }} Patch Notes - MUD Updates & Changes{% endblock meta_title %}
 {% block meta_description %}Browse all patch notes and updates for {{ WEBSITE_TITLE }}, a free online MUD. See the latest game changes, bug fixes, new features, and balance updates.{% endblock meta_description %}
 {% block meta_url %}{% url 'patches' %}{% endblock meta_url %}
 {% block title %}{{ WEBSITE_TITLE }} Patch Notes - MUD Updates & Changes{% endblock title %}
 {% block breadcrumbs %}
-    <li class="breadcrumb-item h2{% if page_obj.number and page_obj.number == 1 %} active" aria-current="page{% endif %}" title="Patches">
-        <a class="icon-link icon-link-hover" href="{% url 'patches' %}#patches">
-            <svg class="bi" aria-hidden="true">
-                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#bandaid"></use>
-            </svg>
-            <span id="patches">
-                Patches
-            </span>
-        </a>
-    </li>
-    {% if page_obj.number and page_obj.number != 1 %}
-    <li class="breadcrumb-item active h2" aria-current="page" title="Patches">
-        <a class="icon-link icon-link-hover" href="{% url 'patches' %}?page={{ page_obj.number }}#patches">
-            <svg class="bi" aria-hidden="true">
-                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#file-earmark"></use>
-            </svg>
-            <span id="page">
-                Page {{ page_obj.number }}
-            </span>
-        </a>
-    </li>
-    {% endif %}
+    {% crumb "Patches" "bandaid" urlname="patches" anchor="patches" active=True %}
 {% endblock breadcrumbs %}
 {% block scripts %}let focusTo = 'patches'{% endblock scripts %}
 {% block content %}
-<div class="alert alert-dark alert-dismissible fade show" role="alert" id="patch-alert">
-    <p class="lead">
-        {{ WEBSITE_TITLE }} is under regular development,  and constantly being improved!
-    </p>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-</div>
-    {% if patches %}
-        {% for patch in patches %}
-<details {% if forloop.first %} open{% endif %}>
-    <summary id="{{ patch.patch_name | slugify }}" class="h3 text-ishar" title="{{ patch.patch_name }}">
-        {{ patch.patch_name }}
-        <a class="anchor-link" href="#{{ patch.patch_name | slugify }}" aria-label="Link to this section: Patch {{ patch.patch_name }} ({{ patch.patch_name | slugify }})"></a>
-    </summary>
-    <blockquote class="blockquote">
-        <p>
-            <a class="icon-link" href="{{ patch.patch_file.url }}" target="_blank" title="{{ patch.patch_file.name }} &lt;{{ request.scheme }}://{{ request.META.HTTP_HOST }}{{ patch.patch_file.url }}&gt;">
-                <code>{{ patch.patch_file.name }}</code>
-                <svg class="bi" role="img" aria-hidden="false" aria-label="Open &quot;{{ patch.patch_name }}&quot; patch PDF in a new window.">
-                    <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#box-arrow-up-right"></use>
-                </svg>
-            </a>
-            {% if patch.file_size is not None %}
-            <small>
-                <code title="{{ patch.file_size | filesizeformat }}">
-                    {{ patch.file_size | filesizeformat }}
-                </code>
-            </small>
-            {% else %}
-            <small>
-                <code class="text-danger" title="Patch file is currently unavailable.">
+<div class="ac">
+
+    <header class="ac-hero">
+        <span class="ac-hero__badge">{% bi "bandaid" %}</span>
+        <div class="ac-hero__text">
+            <h2 class="ac-hero__title">Patches</h2>
+            <p class="ac-hero__sub">
+                {{ WEBSITE_TITLE }} is under regular development, and constantly being improved!
+            </p>
+        </div>
+{% if page_obj %}
+        <div class="ac-hero__status">
+            <span class="ac-pill" title="Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}">
+                page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+            </span>
+        </div>
+{% endif %}
+    </header>
+
+{% if patches %}
+    <div class="ac-rows">
+{% for patch in patches %}
+        <div class="ac-row" id="{{ patch.patch_name|slugify }}">
+            <span class="ac-row__icon">{% bi "file-earmark-pdf" %}</span>
+            <div class="ac-row__main">
+                <div class="ac-row__title">
+                    <a class="ac-row__link" href="{{ patch.patch_file.url }}" target="_blank"
+                       title="Open the &quot;{{ patch.patch_name }}&quot; patch PDF in a new window.">
+                        {{ patch.patch_name }}
+                    </a>
+                    {% bi "box-arrow-up-right" css="text-secondary" label="Opens in a new window." %}
+                </div>
+                <div class="ac-row__meta">
+                    <span title="{{ patch.account.get_username|title }}">
+                        {% bi "pen" %} {{ patch.account.get_username|title }}
+                    </span>
+                    <span title="{{ patch.patch_date|date:'l, F jS, Y' }}">
+                        {% bi "calendar" %}
+                        <time datetime="{{ patch.patch_date|date:'c' }}">{{ patch.patch_date|date:"F jS, Y" }}</time>
+                    </span>
+                </div>
+            </div>
+            <div class="ac-row__side">
+{% if patch.file_size is not None %}
+                <span class="ac-pill" title="{{ patch.patch_file.name }} ({{ patch.file_size|filesizeformat }})">
+                    {{ patch.file_size|filesizeformat }}
+                </span>
+{% else %}
+                <span class="ac-pill ac-pill--danger" title="Patch file is currently unavailable.">
                     file unavailable
-                </code>
-            </small>
-            {% endif %}
-        </p>
-        <footer class="blockquote-footer" title="-- {{ patch.account.get_username|title }} @ {{ patch.patch_date|date:"l, F jS, Y" }}">
-            <cite>
-                {{ patch.account.get_username|title }}
-            </cite>
-            @
-            <time datetime="{{ patch.patch_date|date:'c' }}">
-                {{ patch.patch_date|date:"l, F jS, Y" }}
-            </time>
-        </footer>
-    </blockquote>
-</details>
-            {% if not forloop.last%}
-<hr>
-            {% endif %}
-        {% endfor %}
-        {% if page_obj %}
-<hr>
-<nav aria-label="Patches pages navigation">
-    <ul class="pagination p-1">
+                </span>
+{% endif %}
+            </div>
+        </div>
+{% endfor %}
+    </div>
 
-            {% if page_obj.number != 1 %}
-        <li class="page-item">
-            <a aria-label="First" class="page-link" href="?page=1#patches" >
-                &laquo;
-            </a>
-            {% else %}
-        <li class="page-item disabled">
-            <a aria-label="First" aria-hidden="true" class="page-link" href="#patches">
-                &laquo;
-            </a>
-            {% endif %}
-        </li>
+{% if page_obj %}
+    <nav class="ac-pager" aria-label="Patch pages navigation">
+{% if page_obj.number != 1 %}
+        <a class="ac-btn" href="?page=1#patches" aria-label="First page" title="First page">
+            {% bi "chevron-double-left" %}
+        </a>
+{% endif %}
+{% if page_obj.has_previous %}
+        <a class="ac-btn" href="?page={{ page_obj.previous_page_number }}#patches" aria-label="Previous page">
+            {% bi "chevron-left" %}
+            Newer
+        </a>
+{% endif %}
+        <span class="ac-pager__info">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+{% if page_obj.has_next %}
+        <a class="ac-btn" href="?page={{ page_obj.next_page_number }}#patches" aria-label="Next page">
+            Older
+            {% bi "chevron-right" %}
+        </a>
+{% endif %}
+{% if page_obj.number != page_obj.paginator.num_pages %}
+        <a class="ac-btn" href="?page={{ page_obj.paginator.num_pages }}#patches" aria-label="Last page" title="Last page">
+            {% bi "chevron-double-right" %}
+        </a>
+{% endif %}
+    </nav>
+{% endif %}
 
-            {% if page_obj.has_previous %}
-        <li class="page-item">
-            <a aria-label="Previous" class="page-link" href="?page={{ page_obj.previous_page_number }}#patches">
-                &#8249;
-            </a>
-            {% else %}
-        <li class="page-item disabled">
-            <a aria-label="Previous" aria-hidden="true" class="page-link" href="#patches">
-                &#8249;
-            </a>
-            {% endif %}
-        </li>
+{% else %}
+    <div class="ac-empty">
+        {% bi "bandaid" %}
+        <span>No patches found.</span>
+    </div>
+{% endif %}
 
-            {% for item in page_obj.paginator.page_range %}
-        <li class="page-item{% if page_obj.number == item %} active" aria-current="page{% endif %}">
-            <a aria-label="Page #{{ item }}" class="page-link" href="?page={{ item }}#patches">
-                {{ item }}
-            </a>
-        </li>
-            {% endfor %}
-
-            {% if page_obj.has_next %}
-        <li class="page-item">
-            <a aria-label="Next" class="page-link" href="?page={{ page_obj.next_page_number }}#patches">
-                &#8250;
-            </a>
-            {% else %}
-        <li class="page-item disabled">
-            <a aria-label="Next" aria-hidden="true" class="page-link" href="#patches">
-                &#8250;
-            </a>
-            {% endif %}
-        </li>
-
-            {% if page_obj.number != page_obj.paginator.num_pages %}
-        <li class="page-item">
-            <a aria-label="Last" class="page-link" href="?page={{ page_obj.paginator.num_pages }}#patches">
-                &raquo;
-            </a>
-            {% else %}
-        <li class="page-item disabled">
-            <a aria-label="Last" aria-hidden="true" class="page-link" href="#patches">
-                &raquo;
-            </a>
-            {% endif %}
-        </li>
-    </ul>
-</nav>
-        {% endif %}
-    {% else %}
-<p class="lead">
-    No patches found.
-</p>
-    {% endif %}
+</div>
 {% endblock content %}

@@ -1,69 +1,66 @@
 {% extends "layout.html" %}
-{% load static %}
+{% load ishar %}
 {% block meta_title %}World of {{ WEBSITE_TITLE }} - Explore MUD Areas & Zones{% endblock meta_title %}
 {% block meta_description %}Explore the vast world of {{ WEBSITE_TITLE }}, a free online MUD. Discover detailed fantasy areas, from the ruins of Torm Sarvek to the splendor of Mareldja. A cohesive world with living history.{% endblock meta_description %}
 {% block meta_url %}{% url 'world' %}{% endblock meta_url %}
 {% block scripts %}let focusTo = 'world'{% endblock scripts %}
 {% block page_heading %}World of {{ WEBSITE_TITLE }} - Explore MUD Areas{% endblock page_heading %}
 {% block breadcrumbs %}
-    <li class="h2 breadcrumb-item" title="Help">
-        <a class="icon-link icon-link-hover" href="{% url 'help' %}#help">
-            <svg class="bi" aria-hidden="true">
-                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#info-circle">
-                    <span id="help">Help</span>
-                </use>
-            </svg>
-        </a>
-    </li>
-    <li aria-current="page" class="active breadcrumb-item h2" title="World">
-        <a class="icon-link icon-link-hover" href="{% url 'world' %}#world">
-            <svg class="bi" aria-hidden="true">
-                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#globe-asia-australia">
-                    <span id="world">World</span>
-                </use>
-            </svg>
-        </a>
-    </li>
+    {% crumb "Help" "info-circle" urlname="help" anchor="help" %}
+    {% crumb "World" "globe-asia-australia" urlname="world" anchor="world" active=True %}
 {% endblock breadcrumbs %}
 {% block title %}World of {{ WEBSITE_TITLE }}{% endblock title %}
 {% block content %}
-    <div class="alert alert-dark alert-dismissible fade show" role="alert">
-        <p class="lead">
-            <strong>Ishar is a cohesive world with a living history.</strong>
-            The vast world areas of Ishar have been written to include a detailed past that intrudes on the present,
-            setting the scene for many of the adventures to be had here.
+<div class="ac">
+
+    <header class="ac-hero">
+        <span class="ac-hero__badge">{% bi "globe-asia-australia" %}</span>
+        <div class="ac-hero__text">
+            <h2 class="ac-hero__title">World of {{ WEBSITE_TITLE }}</h2>
+            <p class="ac-hero__sub">A cohesive world with a living history.</p>
+        </div>
+{% if areas %}
+        <div class="ac-hero__status">
+            <span class="ac-pill ac-pill--accent" title="{{ areas|length }} area{{ areas|length|pluralize }}">
+                {{ areas|length }} area{{ areas|length|pluralize }}
+            </span>
+        </div>
+{% endif %}
+    </header>
+
+    <div class="ac-panel">
+        <p>
+            The vast world areas of Ishar have been written to include a detailed past
+            that intrudes on the present, setting the scene for many of the adventures
+            to be had here.
         </p>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    {% if areas %}
-    <div class="card bg-black">
-        <div class="bg-black card-header">
-            <h5 class="card-title" title="Areas ({{ areas|length }})" id="areas">
-                Areas (<span class="font-monospace">{{ areas|length }}</span>)
-                <a class="anchor-link" href="#areas" aria-label="Link to this section: Areas"></a>
-            </h5>
-        </div>
-        <div class="card-body">
-            <ul class="card-body two-col">
-        {% for area in areas %}
-                <li class="card-text" title="{{ area.display_name }}">
-                    <a href="{{ area.get_absolute_url }}" title="{{ area.display_name }}">
-                        {{ area.display_name }}
-                    </a>
-                </li>
-        {% endfor %}
-            </ul>
-        </div>
-    </div>
-    {% endif %}
-    <div class="alert alert-dark alert-dismissible fade show" role="alert">
-        <p class="lead">
+        <p class="mb-0">
             From the shattered ruins of <a href="{% url 'help_page' help_topic='Area Torm Sarvek' %}#topic" title="Help: Area Torm Sarvek">Torm Sarvek</a>
             to the splendor of <a href="{% url 'help_page' help_topic='Area Mareldja' %}#topic" title="Help: Area Mareldja">Mareldja</a>,
             the darkness of Hedros, the dense Talrynian Forest, all of these lands and more are open to you.
             Whether treading across the barren wasteland of the Tundra or voyaging for the great Ocean, you will
             never forget the sense of wonder and discovery to be experienced here.
         </p>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
+
+{% if areas %}
+    <div class="ac-panel">
+        <div class="ac-panel__h" id="areas">
+            {% bi "compass" %}
+            Areas ({{ areas|length }})
+            <a class="anchor-link" href="#areas" aria-label="Link to this section: Areas"></a>
+        </div>
+        <ul class="two-col list-unstyled mb-0">
+{% for area in areas %}
+            <li title="{{ area.display_name }}">
+                <a href="{{ area.get_absolute_url }}" title="{{ area.display_name }}">
+                    {{ area.display_name }}
+                </a>
+            </li>
+{% endfor %}
+        </ul>
+    </div>
+{% endif %}
+
+</div>
 {% endblock content %}

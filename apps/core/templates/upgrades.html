@@ -1,148 +1,96 @@
 {% extends "layout.html" %}
-{% load static %}
+{% load ishar %}
 {% block meta_title %}{{ WEBSITE_TITLE }} Remort Upgrades{% endblock meta_title %}
 {% block meta_description %}Remort upgrades available to {{ WEBSITE_TITLE }} players, and their costs.{% endblock meta_description %}
 {% block meta_url %}{% url 'upgrades' %}#upgrades{% endblock meta_url %}
 {% block title %}{{ WEBSITE_TITLE }} Remort Upgrades{% endblock title %}
-{% block includes %}
-    <style>
-        .buttons-colvis,
-        .dt-buttons,
-        .dt-buttons button,
-        .dt-buttons.button {
-            --bs-btn-bg: var(--bs-black);
-            --bs-btn-border-color: var(--ishar-color);
-            --bs-btn-color: var(--ishar-color);
-
-            --bs-btn-active-bg: var(--ishar-color);
-            --bs-btn-active-border-color: var(--ishar-color);
-            --bs-btn-active-color: var(--bs-black);
-
-            --bs-btn-hover-bg: var(--ishar-color);
-            --bs-btn-hover-border-color: var(--ishar-color);
-            --bs-btn-hover-color: var(--bs-black);
-
-            --bs-btn-visited-bg: var(--bs-black);
-            --bs-btn-visited-border-color: var(--ishar-color);
-            --bs-btn-visited-color: var(--ishar-color);
-        }
-    </style>
-    <link href="{% static 'datatables/datatables.min.css' %}" rel="stylesheet">
-    <script src="{% static 'jquery-3.7.1.min.js' %}"></script>
-    <script src="{% static 'datatables/datatables.min.js' %}"></script>
-{% endblock includes %}
+{% block scripts %}let focusTo = 'upgrades'{% endblock scripts %}
 {% block breadcrumbs %}
-    <li class="breadcrumb-item h2" title="Portal">
-        <a class="icon-link icon-link-hover" href="{% url 'portal' %}#portal">
-            <svg class="bi" aria-hidden="true">
-                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#person-gear"></use>
-            </svg>
-            <span id="portal">
-                Portal
-            </span>
-        </a>
-    </li>
-    <li class="breadcrumb-item active h2" aria-current="page" title="Upgrades">
-        <a class="icon-link icon-link-hover" href="{% url 'upgrades' %}#upgrades">
-            <svg class="bi" aria-hidden="true">
-                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#shield"></use>
-            </svg>
-            <span id="upgrades">
-                Upgrades
-            </span>
-        </a>
-    </li>
+    {% crumb "Portal" "person-gear" urlname="portal" anchor="portal" %}
+    {% crumb "Upgrades" "shield" urlname="upgrades" anchor="upgrades" active=True %}
 {% endblock breadcrumbs %}
 {% block content %}
-<div class="container-fluid">
-    {% if upgrades %}
-    <table class="table table-hover table-dark table-flush table-sm table-responsive table-striped" id="upgradesTable">
-        <caption class="caption-top">
-            Here are the remort upgrades available to players, and the
-            <a href="{% url 'help_page' help_topic='Renown' %}#topic">renown</a>
-            costs for each upgrade.
-        </caption>
-        <thead>
-            <tr>
-                <th scope="col" title="Name">
-                    Name
-                </th>
-                <th scope="col" title="Tiers (#)">
-                    Tiers (<span class="text-ishar">#</span>)
-                </th>
-            </tr>
-        </thead>
-        <tbody class="table-group-divider text-ishar">
-        {% for upgrade in upgrades %}
-            <tr id="{{ upgrade.anchor }}" class="remort-upgrade-row">
-                <td class="anchor-cell" title="Name: {{ upgrade.display_name }}">
-                    <a class="anchor-link icon-link icon-link-hover" href="#{{ upgrade.anchor }}" aria-label="Link to this section: Remort Upgrade - {{ upgrade.display_name }} ({{ upgrade.anchor }})">
-                        <svg class="bi">
-                            <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#link-45deg"></use>
-                        </svg>
-                    </a>
-                    <a class="text-decoration-none" href="#{{ upgrade.anchor }}" aria-label="Link to this section: Remort Upgrade - {{ upgrade.display_name }} ({{ upgrade.anchor }})">
-                        {{ upgrade.display_name }}
-                    </a>
-                </td>
-                <td data-order="{{ upgrade.renown_cost }}" title="Tiers: {{ upgrade.tiers|join:', ' }} ({{ upgrade.tiers|length }} tier{{ upgrade.tiers|pluralize }})">
-                    {{ upgrade.tiers|join:", " }}
-                    (<strong>{{ upgrade.tiers|length }}</strong>)
-                </td>
-            </tr>
-        {% endfor %}
-        </tbody>
-        <tfoot class="table-group-divider text-ishar">
-            <tr>
-                <th scope="col" title="Name">
-                    Name
-                </th>
-                <th scope="col" title="Tiers (#)">
-                    Tiers (<span class="text-ishar">#</span>)
-                </th>
-            </tr>
-        </tfoot>
-    </table>
-</div>
-<script>
-    const itemName = 'upgrades'
-    const searchLayout = { search: { placeholder: 'Upgrade Name' } }
-    const buttonLayout = {
-        buttons: [{
-            extend: 'colvis',
-            text: '<i class="bi bi-list-columns"></i> Columns'
-        }]
-    }
-    $('#upgradesTable').DataTable({
-        buttons: ['colvis'],
-        language: {
-            info: `Showing _START_ to _END_ of _TOTAL_ ${itemName}`,
-            infoEmpty: `Showing 0 to 0 of 0 ${itemName}`,
-            infoFiltered: `(filtered from _MAX_ total ${itemName})`,
-            lengthMenu: `Show _MENU_ ${itemName}`,
-            zeroRecords: `No matching ${itemName} found`
-        },
-        layout: {
-            topStart: searchLayout,
-            top: 'info',
-            topEnd: buttonLayout,
-            bottomStart: searchLayout,
-            bottom: 'info',
-            bottomEnd: buttonLayout,
-        },
-        order: [[0, 'asc'],],
-        paging: false,
-    })
-</script>
-    {% else %}
-<div class="p-3">
-    <div class="card">
-        <div class="card-body">
-            <p class="card-text fst-italic lead text-warning">
-                Sorry, but no upgrades were found.
+<div class="ac">
+
+    <!-- Hero -->
+    <header class="ac-hero">
+        <span class="ac-hero__badge">{% bi "shield" %}</span>
+        <div class="ac-hero__text">
+            <h2 class="ac-hero__title">Remort Upgrades</h2>
+            <p class="ac-hero__sub">
+                Bought in-game with
+                <a href="{% url 'help_page' help_topic='Renown' %}#topic">renown</a>
+                &mdash; each tier of an upgrade costs more than the last.
             </p>
         </div>
+{% if upgrades %}
+        <div class="ac-hero__status">
+            <span class="ac-pill ac-pill--accent" title="Upgrades available">
+                {{ upgrades|length }} upgrade{{ upgrades|length|pluralize }}
+            </span>
+        </div>
+{% endif %}
+    </header>
+
+{% if upgrades %}
+    <div class="ac-inputgroup">
+        <span class="ac-inputgroup__icon">{% bi "search" %}</span>
+        <input class="ac-input" type="search" id="upgradeSearch"
+               placeholder="Filter by upgrade name" aria-label="Filter upgrades by name">
     </div>
+
+    <div class="ac-rows" id="upgradeRows">
+{% for upgrade in upgrades %}
+        <div class="ac-row" id="{{ upgrade.anchor }}" data-search="{{ upgrade.display_name|lower }}">
+            <span class="ac-row__icon">{% bi "shield" %}</span>
+            <div class="ac-row__main">
+                <div class="ac-row__title">
+                    <a class="ac-row__link" href="#{{ upgrade.anchor }}"
+                       title="Link to this upgrade: {{ upgrade.display_name }}">
+                        {{ upgrade.display_name }}
+                    </a>
+                </div>
+                <div class="ac-row__meta">
+                    <span title="Renown cost of each tier: {{ upgrade.tiers|join:', ' }}">
+                        {% bi "coin" %} {{ upgrade.tiers|join:" › " }}
+                    </span>
+                </div>
+            </div>
+            <div class="ac-row__side">
+                <span class="ac-pill" title="{{ upgrade.tiers|length }} tier{{ upgrade.tiers|length|pluralize }}">
+                    {{ upgrade.tiers|length }} tier{{ upgrade.tiers|length|pluralize }}
+                </span>
+            </div>
+        </div>
+{% endfor %}
+    </div>
+    <div class="ac-empty" id="upgradesEmpty" hidden>
+        {% bi "search" %}
+        <span>No upgrades match that filter.</span>
+    </div>
+<script>
+    (() => {
+        const rows = Array.from(document.querySelectorAll("#upgradeRows .ac-row"))
+        const search = document.getElementById("upgradeSearch")
+        const empty = document.getElementById("upgradesEmpty")
+        search.addEventListener("input", () => {
+            const q = search.value.trim().toLowerCase()
+            let shown = 0
+            for (const row of rows) {
+                const hit = !q || row.dataset.search.includes(q)
+                row.hidden = !hit
+                if (hit) shown += 1
+            }
+            empty.hidden = shown > 0
+        })
+    })()
+</script>
+{% else %}
+    <div class="ac-empty">
+        {% bi "shield" %}
+        <span>Sorry, but no upgrades were found.</span>
+    </div>
+{% endif %}
+
 </div>
-    {% endif %}
 {% endblock content %}

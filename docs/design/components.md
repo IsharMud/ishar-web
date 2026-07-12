@@ -1,9 +1,9 @@
 # Component Catalog
 
-The building blocks. Two groups: **de-facto** patterns copy-pasted across the
-classic site (formalize these into partials as we go — enabler E2), and the
-**Admin Console** components (`.ac-*`), which are the reference for new staff
-tooling.
+The building blocks: the template tags/partials (enabler E2) and the
+**console components** (`.ac-*`) — since roadmap #7 these are the whole
+site's language, public pages included, not just staff tooling. The old
+classic patterns are retired (see the last section).
 
 For each: what it is, canonical markup, where it's used, and status.
 
@@ -36,11 +36,12 @@ for an unlinked crumb. Status: **formalized.**
 
 ---
 
-## Admin Console components
+## Console components
 
-Defined in `apps/core/static/css/admin-console.css`; load per page via
-`{% block includes %}`. Reference implementation:
-`apps/accounts/templates/deploy.html`.
+Defined in `apps/core/static/css/admin-console.css`, **loaded globally by
+`layout.html`** (no per-page include — see decisions.md 2026-07-12).
+Reference implementations: `deploy.html` (staff console), `home.html` /
+`help_page.html` (public pages), and `/styleguide` live.
 
 ### `.ac-hero` — page header banner
 Gradient + 3px amber left edge, circular badge, title, subtitle, optional status
@@ -58,7 +59,8 @@ pill on the right.
 Status: **formalized.** Use as the top of any admin page.
 
 ### `.ac-pill` — status pill
-Uppercase pill; `--muted/--ok/--info/--warn/--danger/--accent` modifiers. Add
+Uppercase pill; `--muted/--ok/--info/--warn/--danger/--accent/--immortal`
+modifiers (`--immortal` is the cyan account-status pill). Add
 `.ac-pill--status` to get a leading dot (a `::before`, so JS may swap the label
 via `textContent`), and `.ac-pill--live` to make that dot pulse.
 ```html
@@ -206,12 +208,12 @@ Dashed, centered, dim: icon + one sentence.
 ```html
 <div class="ac-empty">{% bi "inbox" %} <span>No reports match.</span></div>
 ```
-Status: **formalized** (supersedes the classic italic-card empty states as
-pages are touched).
+Status: **formalized** (the classic italic-card empty states are gone).
 
 ### `.ac-pager` — pagination
-Centered `.ac-btn` prev/next around a tabular-nums `.ac-pager__info`. Status:
-**formalized.**
+Centered `.ac-btn` prev/next around a tabular-nums `.ac-pager__info`;
+first/last are icon-only `.ac-btn`s (`chevron-double-*`). Used: news,
+patches. Status: **formalized** (supersedes Bootstrap `.pagination`).
 
 ### `.ac-timeline` + `.ac-tl` — comment/audit trail
 Stacked entries: round source-icon tile, head line (author — `--staff` renders
@@ -222,8 +224,9 @@ Used: feedback detail. Status: **formalized.**
 
 ### `.ac-quote` — verbatim text block
 Monospace `pre` on the deepest surface with a strong left edge — for captured
-player/machine text (report bodies, pasted output). The terminal feel is
-deliberate. Status: **formalized.**
+player/machine text (report bodies, help-file bodies, game excerpts). The
+terminal feel is deliberate. Used: feedback detail, help topics, get-started.
+Status: **formalized.**
 
 ### `.ac-kv` — key/value details
 Two-column `dl` grid; dim keys, right-aligned values. Used: feedback detail.
@@ -232,7 +235,11 @@ Status: **formalized.**
 ### `.ac-link` — navigation card
 Anchor sibling of `.ac-toggle`: amber icon tile + name + note, optional
 trailing `__side` element (pill/badge). Lay out in `.ac-grid`. Link colors are
-pinned against the global `a:link` rule.
+pinned against the global `a:link` rule. **`--featured`** marks a first-class
+/ officially-supported destination: amber-washed card, amber name — pair it
+with a `star-fill` icon tile and an accent pill (e.g. Mudlet's "Ishar
+package" card on `/clients`, data-driven via `MUDClient.is_featured` +
+`featured_note`).
 ```html
 <a class="ac-link" href="…">
   <span class="ac-link__icon">{% bi "flag" %}</span>
@@ -297,75 +304,45 @@ destructive).
 
 ---
 
-## Classic / de-facto patterns (formalize into partials)
+## Still-live shared patterns (outside `.ac-*`)
 
-These are copy-pasted across templates today. Catalogued so we can extract them
-into `{% include %}` partials / template tags (E2) and, later, restyle once.
-
-### Panel (classic)
-`<div class="bg-black border-ishar my-1 p-2 rounded">` — the universal black +
-amber-outline container (`#content`, footer, messages, search form). The classic
-site's card idiom.
-
-### Breadcrumb item
-Every page reimplements:
-```html
-<li class="breadcrumb-item h2" title="…">
-  <a class="icon-link icon-link-hover" href="…">{# icon #} <span>Label</span></a>
-</li>
-```
-Admin/portal pages lead with a Portal crumb. Divider is `•`. **Formalized as
-`{% crumb %}` (see above) — use the tag; migrate old templates as touched.**
-
-### Count pill
-`<span class="badge bg-dark rounded-pill border border-secondary">{{ n }}</span>`
-— the standard "stat count" chip (events, players-online, essence, upgrades).
-
-### Stat / KPI tile
-The feedback dashboard's clickable tile — big number + uppercase secondary label,
-semantic number color, zero-suppressed emphasis:
-```html
-<a class="text-decoration-none" href="?filter=…">
-  <div class="border bg-black card text-center p-2 h-100">
-    <span class="display-6 {% if n %}text-danger{% endif %}">{{ n }}</span>
-    <span class="text-secondary small text-uppercase">Label</span>
-  </div>
-</a>
-```
-**Superseded on admin surfaces by `.ac-tile` (see above);** the classic markup
-survives only on untouched pages.
-
-### Filter bar
-Row of `btn btn-sm btn-outline-*` toggles (active = solid), driven by Django's
-`{% querystring %}` tag, with an inline `role="search"` form. **Superseded by
-`.ac-filter` + `.ac-chip` (see above).**
-
-### Contextual badge
-`<span class="badge text-bg-{{ status_css }}">{{ status_label }}</span>` with the
-color map on the model. **On admin surfaces this is now `.ac-pill--{{
-status_pill }}`** — the model carries both maps (see `Feedback.status_pill` and
-decisions.md); classic badges survive only on untouched pages.
-
-### Empty state
-`<div class="card"><div class="card-body"><p class="card-text fst-italic lead
-text-warning">No … found.</p></div></div>`. **Superseded by `.ac-empty` (see
-above)** as pages are touched (leaders & challenges migrated).
-
-### DataTable
-`table table-hover table-dark table-flush table-sm table-responsive
-table-striped` with `text-ishar` headers + `table-group-divider` over the
-jQuery DataTables include. **Superseded by `.ac-table` (see above);** survives
-only on `upgrades.html` — when that page is facelifted (roadmap #7), delete the
-vendored `datatables/` + `jquery-3.7.1` assets with it.
+### Breadcrumb item — `{% crumb %}`
+Every page's title line. Use the tag (see above); no template hand-writes
+crumb markup anymore.
 
 ### `<details>/<summary>` section
-Collapsible with an `.anchor-link` "#" affordance + `h3/h4/h5` + count badge —
-the portal's section pattern.
+Collapsible with an amber `summary` (`.h5 text-ishar`) + `.anchor-link` "#"
+affordance, inside an `.ac-panel`. Used: FAQ. Fine to reuse where content is
+genuinely collapsible; don't use it as a section header substitute.
 
 ### Global nav "Portal" dropdown
 `apps/core/templates/layout.html` — the staff/admin menu (Administration,
 Deploy, Feedback Triage, …), gated by `is_staff`/`is_god`/`is_eternal`. The
 canonical place to surface a new staff tool (mirror the existing items).
+Count badges in the nav are plain `.ac-pill`s.
+
+---
+
+## Retired classic patterns (roadmap #7 — do not reintroduce)
+
+Gone from live templates and (where they had CSS) from `style.css`:
+
+- **Black+amber panel** (`bg-black border-ishar rounded`), Bootstrap
+  `.card`/`.list-group` stacks → `.ac-panel` / `.ac-rows`.
+- **Count pill** (`badge bg-dark rounded-pill border-secondary`) → `.ac-pill`.
+- **Stat tile** (`display-6` card) → `.ac-tile`.
+- **Filter bar** (`btn-outline-*` toggles) → `.ac-filter` + `.ac-chip`.
+- **Contextual badge** (`badge text-bg-*`) → `.ac-pill--*` (color map stays on
+  the model, e.g. `Feedback.status_pill`).
+- **Empty state** (italic warning card) → `.ac-empty`.
+- **DataTable** (jQuery DataTables) → `.ac-table` (leaders) / filterable
+  `.ac-rows` (upgrades); the vendored `datatables/` + `jquery-3.7.1` assets
+  are deleted.
+- **Bootstrap `.pagination`** → `.ac-pager`.
+- **Dismissible `alert-dark` info boxes** on static content → hero subs,
+  panel prose, or `.ac-note`.
+- **Tooltips/popovers for help text** → `.ac-panel__hint` prose (portal
+  decision, applied site-wide).
 
 ---
 

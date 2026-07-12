@@ -1,88 +1,96 @@
 {% extends "layout.html" %}
-{% load static %}
+{% load ishar %}
 {% block meta_title %}History of {{ WEBSITE_TITLE }} - A MUD Running Since 1994{% endblock meta_title %}
 {% block meta_description %}The history of {{ WEBSITE_TITLE }}, a MUD (Multi-User Dungeon) running since May 1994. From Cyberverse Inc. to the modern era, discover one of the longest-running online text-based RPGs.{% endblock meta_description %}
 {% block meta_url %}{% url 'history' %}{% endblock meta_url %}
 {% block title %}History of {{ WEBSITE_TITLE }} - A MUD Running Since 1994{% endblock title %}
 {% block breadcrumbs %}
-    <li class="breadcrumb-item active h2" aria-current="page" title="History">
-        <a class="icon-link icon-link-hover" href="{% url 'history' %}#history">
-            <svg class="bi" aria-hidden="true">
-                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#clock-history"></use>
-            </svg>
-            <span id="history">
-                History
-            </span>
-        </a>
-    </li>
+    {% crumb "History" "clock-history" urlname="history" anchor="history" active=True %}
 {% endblock breadcrumbs %}
 {% block content %}
-    <div class="card m-1">
-        <div class="card-body">
-            <p class="card-text lead">
-                Ishar has been open since May 1994 and has dozens of
-                players connected during peak hours.
+<div class="ac">
+
+    <header class="ac-hero">
+        <span class="ac-hero__badge">{% bi "clock-history" %}</span>
+        <div class="ac-hero__text">
+            <h2 class="ac-hero__title">History</h2>
+            <p class="ac-hero__sub">
+                Ishar has been open since May 1994 and has dozens of players
+                connected during peak hours.
             </p>
         </div>
+        <div class="ac-hero__status">
+            <span class="ac-pill ac-pill--accent">est. 1994</span>
+        </div>
+    </header>
+
+    <div class="ac-timeline">
+
+        <div class="ac-tl">
+            <span class="ac-tl__icon">{% bi "lightbulb" %}</span>
+            <div class="ac-tl__body">
+                <div class="ac-tl__head">
+                    <span class="ac-tl__author">The idea</span>
+                    <span class="ac-tl__time">1992</span>
+                </div>
+                <div class="ac-tl__text">Back in his mortal days in 1992, when he and his friends bashed cityguards on Adversary Diku, Buckaroo conceived the idea of using a MUD interface for transactions on a BBS. The world would be split into two areas: the BBS area where everyone would be immortal and have access to upload and download functions, a virtual cafe, a virtual mall, and a recreational game area, which would be reminiscent of Diku.</div>
+            </div>
+        </div>
+
+        <div class="ac-tl">
+            <span class="ac-tl__icon">{% bi "buildings" %}</span>
+            <div class="ac-tl__body">
+                <div class="ac-tl__head">
+                    <span class="ac-tl__author">Cyberverse, Inc.</span>
+                    <span class="ac-tl__time">1993 &ndash; 1994</span>
+                </div>
+                <div class="ac-tl__text">So Buckaroo talked to some people, haggled with various companies, and formed Cyberverse, Inc. He hired Abaddon of Adversary Diku to code the foundations for his world and invited some of the Adversary admins to create and set up shop there. Work continued throughout 1993 and the company opened in Los Angeles in May 1994. There was much rejoicing.</div>
+            </div>
+        </div>
+
+        <div class="ac-tl">
+            <span class="ac-tl__icon">{% bi "globe" %}</span>
+            <div class="ac-tl__body">
+                <div class="ac-tl__head">
+                    <span class="ac-tl__author">Ishar opens to the Internet</span>
+                    <span class="ac-tl__time">1995</span>
+                </div>
+                <div class="ac-tl__text">The Internet started becoming popular a year later, and the company was reshaped as an Internet Service Provider. The MUD, no longer the main focus of the business, was renamed Ishar and opened freely to the Internet.</div>
+            </div>
+        </div>
+
+        <div class="ac-tl">
+            <span class="ac-tl__icon">{% bi "arrow-left-right" %}</span>
+            <div class="ac-tl__body">
+                <div class="ac-tl__head">
+                    <span class="ac-tl__author">The handover</span>
+                    <span class="ac-tl__time">the dot-com bubble</span>
+                </div>
+                <div class="ac-tl__text">Later, in the middle of the dot-com bubble, someone with a lot of Monopoly money was trying to buy Cyberverse, and Ishar was officially handed over to Aaron Hopkins, who had been managing it for a few years, to make sure it wasn't included in any deal. It continued to run on Cyberverse's network, but the company no longer owns it or is involved in running it at all.</div>
+            </div>
+        </div>
+
+        <div class="ac-tl">
+            <span class="ac-tl__icon">{% bi "cloud-arrow-up" %}</span>
+            <div class="ac-tl__body">
+                <div class="ac-tl__head">
+                    <span class="ac-tl__author">IsharMUD.com</span>
+                    <span class="ac-tl__time">2022</span>
+                </div>
+                <div class="ac-tl__text">In 2022, Tyler and Eric created IsharMUD.com in the cloud to take advantage of new technology while doing their best to continually improve the environment!</div>
+            </div>
+        </div>
+
     </div>
 
-    <div class="bg-black card m-2">
-        <div class="card-body">
-            <p class="card-text">
-                Back in his mortal days in 1992, when he and his friends
-                bashed cityguards on Adversary Diku, Buckaroo conceived the
-                idea of using a MUD interface for transactions on a BBS.
-                The world would be split into two areas: the BBS area where
-                everyone would be immortal and have access to upload and
-                download functions, a virtual cafe, a virtual mall, and a
-                recreational game area, which would be reminiscent of Diku.
-            </p>
-            <p class="card-text">
-                So Buckaroo talked to some people, haggled with various
-                companies, and formed Cyberverse, Inc. He hired Abaddon of
-                Adversary Diku to code the foundations for his world and
-                invited some of the Adversary admins to create and set up
-                shop there.
-            </p>
-            <p class="card-text">
-                Work continued throughout 1993 and the company opened in
-                Los Angeles in May 1994. There was much rejoicing.
-            </p>
-            <p class="card-text">
-                The Internet started becoming popular a year later, and the
-                company was reshaped as an Internet Service Provider.
-                The MUD, no longer the main focus of the business, was
-                renamed Ishar and opened freely to the Internet.
-            </p>
-            <p class="card-text">
-                Later, in the middle of the dot-com bubble, someone with a
-                lot of Monopoly money was trying to buy Cyberverse, and
-                Ishar was officially handed over to Aaron Hopkins, who had
-                been managing it for a few years, to make sure it wasn't
-                included in any deal. It has continued to run on
-                Cyberverse's network, but the company is no longer owns it
-                or is involved in running it at all.
-            </p>
-        </div>
+    <div class="ac-note">
+        {% bi "globe" %}
+        <span>
+            The original
+            <a href="http://www.ishar.com/" target="_blank" title="Ishar.com">Ishar.com</a>
+            is currently still owned by Aaron Hopkins.
+        </span>
     </div>
 
-    <div class="card m-1">
-        <div class="card-body">
-            <p class="card-text lead">
-                The original
-                <a class="icon-link" href="http://www.ishar.com/" target="_blank" title="Ishar.com">
-                    Ishar.com
-                    <svg class="bi" aria-hidden="true">
-                        <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#box-arrow-up-right"></use>
-                    </svg>
-                </a>
-                is currently still owned by Aaron Hopkins.
-            </p>
-            <p class="card-text lead">
-                In 2022, Tyler and Eric created IsharMUD.com in the cloud
-                to take advantage of new technology while doing their best
-                to continually improve the environment!
-            </p>
-        </div>
-    </div>
+</div>
 {% endblock content %}

@@ -57,12 +57,35 @@ class MUDClient(models.Model):
         null=False,
         verbose_name="Visible?",
     )
+    is_featured = models.BooleanField(
+        blank=False,
+        db_column="is_featured",
+        default=False,
+        help_text=(
+            "Is the MUD client specially supported by Ishar "
+            "(featured card, listed first in its category)?"
+        ),
+        null=False,
+        verbose_name="Featured?",
+    )
+    featured_note = models.CharField(
+        max_length=128,
+        blank=True,
+        db_column="featured_note",
+        default="",
+        help_text=(
+            "Short note shown on the featured card, e.g. where to find "
+            "the official Ishar package."
+        ),
+        null=False,
+        verbose_name="Featured Note",
+    )
 
     class Meta:
         managed = True
         db_table = "mud_clients"
         default_related_name = "mud_clients"
-        ordering = ("category__display_order", "name")
+        ordering = ("category__display_order", "-is_featured", "name")
         verbose_name = "MUD Client"
         verbose_name_plural = "MUD Clients"
 

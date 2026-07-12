@@ -1,128 +1,86 @@
 {% extends "layout.html" %}
 {% load humanize %}
-{% load static %}
+{% load ishar %}
 {% block meta_title %}{{ WEBSITE_TITLE }} Events - In-Game MUD Events & Activities{% endblock meta_title %}
 {% block meta_description %}{% if GLOBAL_EVENT_COUNT > 0 %}{{ GLOBAL_EVENT_COUNT }} active event{{ GLOBAL_EVENT_COUNT|pluralize }} in {{ WEBSITE_TITLE }}.{% else %}No active events right now in {{ WEBSITE_TITLE }}.{% endif %} Check current and upcoming in-game events for this free online MUD.{% endblock meta_description %}
 {% block meta_url %}{% url 'events' %}{% endblock meta_url %}
 {% block title %}{{ WEBSITE_TITLE }} Events{% endblock title %}
 {% block breadcrumbs %}
-    <li class="breadcrumb-item h2" title="Events">
-        <a class="icon-link icon-link-hover" href="{% url 'events' %}#events">
-            <svg class="bi" aria-hidden="true">
-                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#calendar-event"></use>
-            </svg>
-            <span id="events">
-                Events
-            </span>
-        </a>
-    </li>
-    <li class="breadcrumb-item active h5" title="{{ GLOBAL_EVENT_COUNT }} event{{ GLOBAL_EVENT_COUNT|pluralize }}" style="--bs-breadcrumb-divider: '';">
-        <span class="badge bg-dark rounded-pill border border-secondary">
-            {{ GLOBAL_EVENT_COUNT }}
-        </span>
-    </li>
+    {% crumb "Events" "calendar-event" urlname="events" anchor="events" active=True %}
 {% endblock breadcrumbs %}
 {% block content %}
-    {% if global_events and GLOBAL_EVENT_COUNT > 0 %}
-        {% for global_event in global_events %}
-<details open>
-    <summary class="text-secondary" title="{{ global_event.event_desc }}">
-        <h4 class="d-inline-flex">
-            {{ global_event.event_desc }}
-        </h4>
-    </summary>
-    <ul style="list-style: none">
+<div class="ac">
 
-        <li title="Ends">
-            <i class="bi bi-hourglass-split text-secondary"></i>
-            <h5 class="d-inline-flex">
-                Ends
-            </h5>
-        </li>
-        <li class="blockquote" title="{{ global_event.end_time | naturaltime }}">
-            {{ global_event.end_time | naturaltime }}
-        </li>
-        <li class="blockquote-footer" title="{{ global_event.end_time }}">
-            <time datetime="{{ global_event.end_time|date:"c" }}">
-                {{ global_event.end_time }}
-            </time>
-        </li>
-
-        <li title="Started">
-            <i class="bi bi-clock-history text-secondary"></i>
-            <h5 class="d-inline-flex">
-                Started
-            </h5>
-        </li>
-        <li class="blockquote" title="{{ global_event.start_time | naturaltime }}">
-            {{ global_event.start_time|naturaltime }}
-        </li>
-        <li class="blockquote-footer" title="{{ global_event.start_time }}">
-            <time datetime="{{ global_event.start_time|date:"c" }}">
-                {{ global_event.start_time }}
-            </time>
-        </li>
-
-    {% if global_event.xp_bonus and global_event.xp_bonus != '' and global_event.xp_bonus != 0 %}
-        <li title="XP Bonus: {% widthratio global_event.xp_bonus 1 1 %}%">
-            <i class="bi bi-fast-forward text-secondary"></i>
-            <h5 class="d-inline-flex">
-                XP Bonus
-            </h5>
-            <span class="align-middle badge bg-dark rounded-pill border border-secondary">
-               {% widthratio global_event.xp_bonus 1 1 %}%
-           </span>
-        </li>
-    {% endif %}
-
-    {% if global_event.shop_bonus and global_event.shop_bonus != '' and global_event.shop_bonus != 0 %}
-        <li title="Shop Bonus: {% widthratio 100 global_event.shop_bonus 1 %}% off">
-            <i class="bi bi-cart-plus text-secondary"></i>
-            <h5 class="d-inline-flex">
-                Shop Bonus
-            </h5>
-            <span class="align-middle badge bg-dark rounded-pill border border-secondary">
-                {% widthratio 100 global_event.shop_bonus 1 %}% off
+    <header class="ac-hero">
+        <span class="ac-hero__badge">{% bi "calendar-event" %}</span>
+        <div class="ac-hero__text">
+            <h2 class="ac-hero__title">Events</h2>
+            <p class="ac-hero__sub">In-game events with limited-time bonuses.</p>
+        </div>
+        <div class="ac-hero__status">
+{% if GLOBAL_EVENT_COUNT > 0 %}
+            <span class="ac-pill ac-pill--status ac-pill--ok ac-pill--live" title="{{ GLOBAL_EVENT_COUNT }} event{{ GLOBAL_EVENT_COUNT|pluralize }} active">
+                {{ GLOBAL_EVENT_COUNT }} active
             </span>
-        </li>
-    {% endif %}
+{% else %}
+            <span class="ac-pill ac-pill--status ac-pill--muted">none active</span>
+{% endif %}
+        </div>
+    </header>
 
-    {% if global_event.is_luck %}
-        <li title="Shavar and Chenchir shine brightly: +50 gold &amp; +25% moves!">
-            <i class="bi bi-currency-exchange text-secondary"></i>
-            <h5 class="d-inline-flex">
-                Shavar and Chenchir shine brightly
-            </h5>
-            <span class="align-middle badge bg-dark rounded-pill border border-secondary">
-                +50 gold
-            </span>
-            <span class="align-middle badge bg-dark rounded-pill border border-secondary">
-                +25% moves
-            </span>
-        </li>
-    {% endif %}
-    </ul>
+{% if global_events and GLOBAL_EVENT_COUNT > 0 %}
+    <div class="ac-rows">
+{% for global_event in global_events %}
+        <div class="ac-row">
+            <span class="ac-row__icon">{% bi "stars" %}</span>
+            <div class="ac-row__main">
+                <div class="ac-row__title">{{ global_event.event_desc }}</div>
+                <div class="ac-row__meta">
+                    <span title="Started {{ global_event.start_time|naturaltime }} ({{ global_event.start_time }})">
+                        {% bi "clock-history" %}
+                        started
+                        <time datetime="{{ global_event.start_time|date:'c' }}">{{ global_event.start_time|naturaltime }}</time>
+                    </span>
+                    <span title="Ends {{ global_event.end_time|naturaltime }} ({{ global_event.end_time }})">
+                        {% bi "hourglass-split" %}
+                        ends
+                        <time datetime="{{ global_event.end_time|date:'c' }}">{{ global_event.end_time|naturaltime }}</time>
+                    </span>
+                </div>
+            </div>
+            <div class="ac-row__side">
+{% if global_event.xp_bonus and global_event.xp_bonus != '' and global_event.xp_bonus != 0 %}
+                <span class="ac-pill ac-pill--accent" title="XP Bonus: {% widthratio global_event.xp_bonus 1 1 %}%">
+                    +{% widthratio global_event.xp_bonus 1 1 %}% XP
+                </span>
+{% endif %}
+{% if global_event.shop_bonus and global_event.shop_bonus != '' and global_event.shop_bonus != 0 %}
+                <span class="ac-pill ac-pill--accent" title="Shop Bonus: {% widthratio 100 global_event.shop_bonus 1 %}% off">
+                    {% widthratio 100 global_event.shop_bonus 1 %}% off shops
+                </span>
+{% endif %}
+{% if global_event.is_luck %}
+                <span class="ac-pill ac-pill--accent" title="Shavar and Chenchir shine brightly: +50 gold!">
+                    +50 gold
+                </span>
+                <span class="ac-pill ac-pill--accent" title="Shavar and Chenchir shine brightly: +25% moves!">
+                    +25% moves
+                </span>
+{% endif %}
+            </div>
+        </div>
+{% endfor %}
+    </div>
+{% else %}
+    <div class="ac-empty">
+        {% bi "calendar-event" %}
+        <span>Unfortunately, there are no active events right now.</span>
+        <span>
+            Please check back later, or maybe try out some
+            <a href="{% url 'challenges' %}#challenges">challenges</a>!
+        </span>
+    </div>
+{% endif %}
 
-</details>
-            {% if not forloop.last %}
-<hr>
-            {% endif %}
-        {% endfor %}
-    {% else %}
-<h3 title="Sorry!">
-    Sorry!
-</h3>
-<p class="lead" title="Unfortunately, there are no active events right now.">
-    Unfortunately, there are no active events right now.
-</p>
-<p class="lead" title="Please check back later, or maybe try out some challenges!">
-    Please check back later, or maybe try out some
-    <a class="icon-link icon-link-hover" href="{% url 'challenges' %}#challenges">
-        <svg class="bi" aria-hidden="true">
-            <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#award"></use>
-        </svg>
-        challenges!
-    </a>
-</p>
-    {% endif %}
+</div>
 {% endblock content %}

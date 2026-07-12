@@ -9,6 +9,86 @@ Format: `## YYYY-MM-DD — Title` · **Decision** · **Why** · (optional) **Not
 
 ---
 
+## 2026-07-12 — Featured clients (`.ac-link--featured`) and a browser-first clients page
+
+**Decision.** `/clients` now leads with an **In Your Browser** panel — hint
+copy naming the HUD's capabilities plus the amber `.ac-cta--accent` "Play in
+your browser" — before any downloadable client, and the client grid gains a
+**featured** treatment: `.ac-link--featured` (amber-washed card, amber name)
+with a `star-fill` icon tile, an accent "Ishar package" pill, and a note
+line. Featured status is **data-driven**: `MUDClient.is_featured` +
+`MUDClient.featured_note` (migration `clients.0008`, which also flags
+**Mudlet** with "install the Ishar package from Mudlet's package
+repository" and sorts featured clients first in their category). Both fields
+are editable in the admin.
+
+**Why.** The web client is now a first-class way to play (roadmap #6b) and
+deserves top billing on the "how to connect" page, and Mudlet ships an
+official Ishar package — that's a real support difference the grid of
+otherwise-equal cards was hiding. Keeping the flag on the model (not
+hardcoding "Mudlet" in the template) means the next specially-supported
+client is an admin edit, not a deploy.
+
+## 2026-07-12 — Roadmap #7: the whole public site speaks the console language; the classic layer is retired
+
+**Decision.** The last mile of the facelift. Every remaining public template —
+home, error, help (topic + index), world, upgrades, FAQ, get-started, clients,
+support, history, events, news, patches (+ latest), who, player profile,
+search results, season, login, password, flatpages — is rebuilt on the shared
+components: `{% crumb %}` breadcrumbs, `.ac` containers, `.ac-hero` page
+headers, `.ac-panel` prose sections, `.ac-rows` record lists (events, patches,
+who, upgrades, results), `.ac-quote` for captured game text (help bodies, the
+get-started excerpts), `.ac-kv` details, `.ac-note` callouts, `.ac-empty`
+empty states, and a shared `.ac-pager` treatment for news/patches paging.
+Along the way:
+
+- **The classic layer is gone.** The black `.card`/`.list-group` overrides,
+  `.btn-ishar`, `.past-news`, `.nested-list`, and `.remort-upgrade-row` CSS
+  are deleted; no template renders Bootstrap cards, list-groups, contextual
+  badges, page-link pagination, or dismissible info alerts anymore. Bare
+  (classless) form elements now default to console-field styling so
+  Django-rendered forms (password change) look native.
+- **Dismissible alerts are retired on info pages** — static page copy is not
+  a notification; it renders as hero subs, panel prose, or `.ac-note`s.
+- **jQuery + DataTables are deleted** (`static/datatables/`,
+  `jquery-3.7.1.min.js`) now that `upgrades.html` renders as filterable
+  `.ac-rows` (same vanilla-JS filter pattern as leaders).
+- **`--ac-immortal` (`#00b7eb`)** joins the token set with an
+  `.ac-pill--immortal` variant (player profile); the `.god-player` family
+  references it.
+- **Component hardening:** anchor CTAs/buttons pin their colors against the
+  global `a:link` rule (`a.ac-cta`, `a.ac-btn--*`); `.ac-row__side` wraps its
+  pills instead of clipping on phones; `.two-col` gets a column gap.
+- **Home is rebuilt as a real front door:** latest news hero + body, the
+  pitch, and a Play Now panel with an amber browser-client CTA and host/port
+  details (also fixes the long-standing unbalanced `</div>` in the old
+  template). The popover on the player profile is replaced with panel-hint
+  prose, per the portal decision.
+
+**Why.** This was the point of the green-field mandate: one visual system,
+not three. Public pages were the last holdouts of copy-pasted breadcrumbs,
+black-outline boxes, and a ~1MB framework tax for one sortable table. The
+site now draws every surface from one token + component layer, so a palette
+or component change reaches everything.
+
+**Notes.** Verified with the stub-settings render harness (32 page/context
+combinations), `node --check` on inline scripts, and headless-Chromium
+screenshots at 1280 px and 390 px with `scrollWidth == innerWidth` asserted on
+every page (mobile checklist #1). Left to on-prod eyes: real data volumes
+(long help bodies, huge topic lists) and the PDF `<object>` embed on phones.
+
+## 2026-07-12 — admin-console.css loads globally
+
+**Decision.** `layout.html` now loads `admin-console.css` on every page,
+right after `style.css`; the per-page `{% block includes %}` links are gone.
+This supersedes the "load per page via `{% block includes %}`" convention in
+the component catalog.
+
+**Why.** With roadmap #7 the console components are the site's language, not
+a staff-tooling dialect — every page uses them. One content-hashed, cached
+stylesheet is cheaper than per-page include boilerplate, and it removes a
+whole class of "forgot the include" bugs on new pages.
+
 ## 2026-07-12 — The connect session is a first-class surface: terminal-first phones, collapsible desktop columns
 
 **Decision.** Roadmap #6b. `/connect` is rebuilt as a fully supported product
@@ -368,6 +448,7 @@ swapped safely. **Why.** Removes an XSS foot-gun class and keeps updates cheap.
 
 ## Open decisions / to record when made
 
-- **Live styleguide page:** whether to build a staff-only `/styleguide`.
-- **Public-shell facelift:** how far the layered-grey console surfaces replace
-  the black+amber-outline look on public pages (roadmap #4–#7).
+- ~~**Live styleguide page**~~ — built (`/styleguide`, Eternal+; see entry above).
+- ~~**Public-shell facelift**~~ — resolved by roadmap #4–#7: the console
+  surfaces are the whole site's language now; the amber-border look survives
+  only as brand accents (navbar edge, hero edges), not as panel chrome.

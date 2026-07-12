@@ -1,14 +1,9 @@
-<div class="form-control-dark" id="player-search-form">
-    <form class="row g-3" method="post" action="{% url 'players' %}#search">
-        <div class="col-auto">
-            {{ PLAYER_SEARCH_FORM }}
-            {% csrf_token %}
-        </div>
-        <div class="col-auto">
-            <button class="btn btn-outline-primary" type="submit">Search</button>
-        </div>
-        <div class="col-auto">
-            <button class="btn btn-outline-secondary" type="reset">Clear</button>
-        </div>
-    </form>
-</div>
+{% load ishar %}
+<form class="d-flex gap-1" method="post" action="{% url 'players' %}#search" role="search" id="player-search-form" aria-label="Player search">
+    {% csrf_token %}
+    <div class="ac-inputgroup flex-grow-1">
+        <span class="ac-inputgroup__icon">{% bi "search" %}</span>
+        {{ PLAYER_SEARCH_FORM.name }}
+    </div>
+    <button class="ac-btn ac-btn--accent" type="submit">Search</button>
+</form>

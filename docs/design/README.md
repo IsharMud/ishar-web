@@ -30,11 +30,11 @@ change a convention, **record it in `decisions.md` and update the catalog.**
 
 Ishar is **dark-only**, built on **Bootstrap 5.3.8** + **Bootstrap Icons 1.13.1**
 (both self-hosted), with a **single amber accent** (`#fa7`) on light-grey text
-(`#d6d6d7`). The public site's identity is **black panels outlined in amber**
-(`.border-ishar`). Newer, richer surfaces (the connect HUD, the deploy console)
-use a **layered-grey token system** that reads more like a premium dashboard.
-The direction is to unify these behind one shared token + component layer while
-keeping the amber brand.
+(`#d6d6d7`). The whole site — public pages and staff tooling alike — speaks one
+**layered-grey token + component language** (the `--ac-*` tokens and `.ac-*`
+components, loaded globally), with amber reserved for brand, focus, and live
+state. The old black+amber-outline "classic" layer is retired; only the web
+client keeps an extra HUD-domain vocabulary on top of the shared tokens.
 
 ---
 
@@ -69,23 +69,18 @@ keeping the amber brand.
 
 ## Visual layers (and where each applies)
 
-Three visual layers coexist today. This is deliberate, but they should share
-tokens and converge over time.
+The convergence is done: one language, one page-specific dialect.
 
 | Layer | Where | Look | Source |
 |---|---|---|---|
-| **Classic** | Public site (home, portal, leaders, help, …) | Black panels, amber `.border-ishar` outline, blue links | `apps/core/static/css/style.css` |
-| **HUD** | The web telnet client (`/connect`) | Layered greys, colored vitals bars, gradient banner | `apps/connect/static/css/hud.css` |
-| **Admin Console** | Staff tooling (deploy console; feedback next) | Layered greys + amber accents, terminal panels, status pills | `apps/core/static/css/admin-console.css` |
+| **Console** (site-wide) | Every page — public content, portal, staff tooling, the shell | Layered greys + restrained amber, heroes, panels, rows, pills | `apps/core/static/css/style.css` (tokens + shell) + `apps/core/static/css/admin-console.css` (components, loaded globally) |
+| **HUD** (dialect) | The web telnet client (`/connect`) | The console tokens plus HUD-domain colors (vitals, gold, edge, moons) and denser panels | `apps/connect/static/css/hud.css` |
 
-**Stance:** **staff/admin tooling uses the Admin Console language** (it should
-feel like a purpose-built console). The **public shell keeps its amber-border
-look for now** — but under the green-field mandate that's a starting point, not a
-protected identity: public pages are in scope for the same convergence, and the
-amber-border treatment stays only where it's genuinely the best design. All
-layers draw from **one shared token + semantic vocabulary** (tokens.md). The
-HUD's structural colors now reference `--ac-*` directly; its remaining `--hud-*`
-tokens cover only HUD-domain meanings (vitals, resources, world flavor).
+**Stance:** there is no separate "classic" public look anymore (retired with
+roadmap #7 — see decisions.md). Amber-border remnants survive only as brand
+accents (navbar bottom edge, hero left edges, the navbar toggler). The HUD's
+structural colors reference `--ac-*` directly; its `--hud-*` tokens cover only
+HUD-domain meanings.
 
 ---
 
@@ -113,7 +108,12 @@ Staff surfaces first (highest value, lowest risk — few users, we control them)
 | 5 | Leaders, Challenges (DataTables pages) | ✅ done — `.ac-table` for leaders, challenge rows; jQuery/DataTables dropped from both |
 | 6 | Connect HUD (align tokens) | ✅ done — structural colors are `--ac-*`; only vitals/flavor stay `--hud-*` |
 | 6b | Connect HUD session UX (first-class mobile + premium desktop) | ✅ done — terminal-first phone dock/sheet, collapsible desktop columns, HUD on by default |
-| 7 | Home, help, errors, public content | next |
+| 7 | Home, help, errors, public content | ✅ done — every remaining public template rebuilt on the console components; jQuery/DataTables deleted; classic CSS retired |
+
+**The page-adoption roadmap is complete.** Future design work is incremental:
+keep new surfaces on the tokens/components, extend the catalog deliberately
+(decision entry + styleguide + catalog update), and treat any reappearance of
+a retired pattern as a bug.
 
 ### Near-term addition
 - **`/styleguide`** (Eternal+): ✅ built — renders every token and component

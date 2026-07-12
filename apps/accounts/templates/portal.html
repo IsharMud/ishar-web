@@ -7,9 +7,6 @@
 {% block meta_url %}{% url 'portal' %}#portal{% endblock meta_url %}
 {% block title %}{{ WEBSITE_TITLE }} Portal{% endblock title %}
 {% block scripts %}let focusTo = 'portal'{% endblock scripts %}
-{% block includes %}
-        <link rel="stylesheet" type="text/css" href="{% static 'css/admin-console.css' %}">
-{% endblock includes %}
 {% block breadcrumbs %}
     {% crumb "Portal" "person-gear" urlname="portal" anchor="portal" active=True %}
 {% endblock breadcrumbs %}

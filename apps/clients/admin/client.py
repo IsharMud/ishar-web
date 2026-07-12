@@ -8,16 +8,20 @@ class MUDClientAdmin(ModelAdmin):
         "name",
         "category",
         "url",
-        "is_visible"
+        "is_visible",
+        "is_featured",
+        "featured_note"
     )
     list_display = (
         "name",
         "get_category_link",
-        "is_visible"
+        "is_visible",
+        "is_featured"
     )
     list_filter = (
         "category",
-        "is_visible"
+        "is_visible",
+        "is_featured"
     )
     list_select_related = ("category",)
     readonly_fields = ("client_id",)
