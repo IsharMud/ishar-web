@@ -7,9 +7,6 @@
 {% block meta_url %}{% url 'feedback_detail' report.pk %}{% endblock meta_url %}
 {% block title %}{{ WEBSITE_TITLE }} Feedback #{{ report.pk }}{% endblock title %}
 {% block scripts %}let focusTo = 'report'{% endblock scripts %}
-{% block includes %}
-        <link rel="stylesheet" type="text/css" href="{% static 'css/admin-console.css' %}">
-{% endblock includes %}
 {% block breadcrumbs %}
     {% crumb "Portal" "person-gear" urlname="portal" anchor="portal" %}
     {% crumb "Feedback" "flag" urlname="feedback" anchor="feedback" %}

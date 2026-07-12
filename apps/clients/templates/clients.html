@@ -1,5 +1,5 @@
 {% extends "layout.html" %}
-{% load static %}
+{% load ishar %}
 {% block meta_title %}Best MUD Clients - Software to Play {{ WEBSITE_TITLE }}{% endblock meta_title %}
 {% block meta_description %}Recommended MUD clients for playing {{ WEBSITE_TITLE }}. Find the best telnet clients and MUD software for Windows, Mac, Linux, Android, and iOS to connect to isharmud.com.{% endblock meta_description %}
 {% block meta_url %}{% url 'clients' %}{% endblock meta_url %}
@@ -7,80 +7,62 @@
 {% block page_heading %}Best MUD Clients for Playing {{ WEBSITE_TITLE }}{% endblock page_heading %}
 {% block scripts %}let focusTo = 'clients'{% endblock scripts %}
 {% block breadcrumbs %}
-    <li class="breadcrumb-item active h2" aria-current="page" title="MUD Clients">
-        <a class="icon-link icon-link-hover" href="{% url 'clients' %}#clients">
-            <svg class="bi" aria-hidden="true">
-                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#terminal-split"></use>
-            </svg>
-            <span id="clients">
-                MUD Clients
-            </span>
-        </a>
-    </li>
+    {% crumb "MUD Clients" "terminal-split" urlname="clients" anchor="clients" active=True %}
 {% endblock breadcrumbs %}
 {% block content %}
-<div class="alert alert-dark alert-dismissible fade show" role="alert" id="clients-alert">
-    <p class="lead">
-        While you can certainly enjoy the game via
-        <a class="icon-link icon-link-hover" href="{% url 'connect' %}" title="Web Client">
-            our web client
-        </a>,
-        you might prefer to connect to the game with software designed specifically to help you play a MUD.
-    </p>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-</div>
+<div class="ac">
 
-    {% for category in mud_client_categories %}
-<div class="container-fluid">
-    <details class="px-3" open>
-        <summary id="category-{{ category.name|slugify }}" class="h4" title="{{ category.name }}">
-            <a class="icon-link icon-link-hover text-decoration-none">
-        {% if category.display_icon %}
-                {{ category.get_display_icon }}
-        {% else %}
-                &#x23;
-        {% endif %}
-                <span class="text-ishar">{{ category.name }}</span>
-            </a>
+    <header class="ac-hero">
+        <span class="ac-hero__badge">{% bi "terminal-split" %}</span>
+        <div class="ac-hero__text">
+            <h2 class="ac-hero__title">MUD Clients</h2>
+            <p class="ac-hero__sub">
+                While you can certainly enjoy the game via
+                <a href="{% url 'connect' %}" title="Web Client">our web client</a>,
+                you might prefer software designed specifically to help you play a MUD.
+            </p>
+        </div>
+    </header>
+
+{% for category in mud_client_categories %}
+    <div class="ac-panel">
+        <div class="ac-panel__h" id="category-{{ category.name|slugify }}">
+{% if category.display_icon %}
+            {{ category.get_display_icon }}
+{% else %}
+            {% bi "terminal" %}
+{% endif %}
+            {{ category.name }}
             <a class="anchor-link" href="#category-{{ category.name|slugify }}" aria-label="Link to this section: MUD Client Category {{ category.name }} ({{ category.name|slugify }})"></a>
-        </summary>
-        <ul class="list-group list-group-horizontal-sm list-group-flush list-group-bordered pb-3 mb-3 border border-1 rounded">
-        {% for client in category.clients.all %}
-            {% if client.is_visible %}
-            <li class="list-group-item list-group-unbordered border-0" id="client-{{ client.name|slugify }}" title="{{ client.name }}">
+        </div>
+        <div class="ac-grid">
+{% for client in category.clients.all %}
+{% if client.is_visible %}
+            <a class="ac-link" href="{{ client.url }}" target="_blank" id="client-{{ client.name|slugify }}" title="Open the {{ client.name }} website in a new window.">
+                <span class="ac-link__icon">{% bi "terminal" %}</span>
+                <span class="ac-link__body">
+                    <span class="ac-link__name">{{ client.name }}</span>
+                </span>
+                <span class="ac-link__side">
+                    {% bi "box-arrow-up-right" label="Opens in a new window." %}
+                </span>
+            </a>
+{% endif %}
+{% endfor %}
+        </div>
+    </div>
+{% endfor %}
 
-                <a class="icon-link icon-link-hover" href="#client-{{ client.name|slugify }}" aria-label="Link to this section: MUD Client {{ client.name }} ({{ client.name|slugify }})">
-                    <svg class="bi" aria-hidden="false" role="img" aria-label="Link to this MUD client section.">
-                        <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#terminal"></use>
-                    </svg>
-                    {{ client.name }}
-                </a>
+    <div class="ac-note">
+        {% bi "plug" %}
+        <span>
+            Do not be afraid to try a few, as they all have different strengths and weaknesses.
+            After you download a client, tell it to connect to <code>isharmud.com</code> on
+            port number <code>23</code> or <code>9999</code> to join the game &mdash;
+            and check out our
+            <a href="{% url 'start' %}#start" title="getting started guide">getting started guide</a> as well!
+        </span>
+    </div>
 
-                <a class="list-group-item-text icon-link" href="{{ client.url }}" target="_blank">
-                    <svg class="bi" aria-hidden="false" role="img" aria-label="Open MUD client {{ client.name }} website in new window.">
-                        <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#box-arrow-up-right"></use>
-                    </svg>
-                </a>
-            </li>
-            {% endif %}
-        {% endfor %}
-        </ul>
-    </details>
-</div>
-    {% endfor %}
-
-<div class="alert alert-dark alert-dismissible fade show" role="alert" id="clients-footer-alert">
-    <p class="lead">
-        Do not be afraid to try a few, as they all have different strengths and weaknesses.
-        After you download a client, tell it to connect to <code>isharmud.com</code> on
-        port number <code>23</code> or <code>9999</code> to join the game.
-        Please check out our <a class="icon-link icon-link-hover" href="{% url 'start' %}#start" title="getting started guide">
-            <svg class="bi" aria-hidden="true">
-                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#rocket-takeoff"></use>
-            </svg>
-            getting started guide
-        </a> as well!
-    </p>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 </div>
 {% endblock content %}

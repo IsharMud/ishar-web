@@ -1,51 +1,48 @@
 {% extends "layout.html" %}
-{% load static %}
+{% load ishar %}
 {% block meta_title %}{{ WEBSITE_TITLE }} Log In{% endblock meta_title %}
 {% block meta_description %}Log in to your {{ WEBSITE_TITLE }} account.{% endblock meta_description %}
 {% block meta_url %}{% url 'login' %}#login{% endblock meta_url %}
 {% block title %}{{ WEBSITE_TITLE }} Log In{% endblock title %}
 {% block scripts %}let focusTo = 'id_username'{% endblock scripts %}
 {% block breadcrumbs %}
-    <li class="breadcrumb-item active h2" aria-current="page" title="Log In">
-        <a class="icon-link icon-link-hover" href="{% url 'login' %}#portal">
-            <svg class="bi" aria-hidden="true">
-                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#door-open"></use>
-            </svg>
-            <span id="portal">
-                Log In
-            </span>
-        </a>
-    </li>
+    {% crumb "Log In" "door-open" urlname="login" anchor="portal" active=True %}
 {% endblock breadcrumbs %}
 {% block content %}
-    {% if form %}
-        {% if form.errors %}
-<div class="alert alert-dark alert-dismissible fade show m-3" role="alert">
-            {% for item, err_msg in form.errors.items %}
-    <p class="text-danger">
-        <b>{{ err_msg }}</b>
-    </p>
-            {% endfor %}
+{% if form %}
+<div class="ac">
+    <div class="ac-panel mx-auto w-100" style="max-width: 28rem;">
+        <div class="ac-panel__h">{% bi "door-open" %} Log In</div>
+        <p class="ac-panel__hint" id="usernameInline">
+            Please use your <strong>account name</strong>
+            or <strong>e-mail address</strong> to log in &mdash; <em>thank you</em>!
+        </p>
+{% if form.errors %}
+{% for item, err_msg in form.errors.items %}
+        <div class="ac-note ac-note--danger mb-3" role="alert">
+            {% bi "exclamation-circle" %}
+            <span>{{ err_msg }}</span>
+        </div>
+{% endfor %}
+{% endif %}
+        <form method="post" id="login-form">
+            {% csrf_token %}
+            <label for="id_username" class="ac-label">Account Name / E-mail Address</label>
+            <div class="ac-inputgroup mb-3">
+                <span class="ac-inputgroup__icon">{% bi "person" %}</span>
+                <input aria-describedby="usernameInline" class="ac-input" type="text" name="username" autocapitalize="none" autocomplete="username" maxlength="25" required id="id_username">
+            </div>
+            <label for="id_password" class="ac-label">Password</label>
+            <div class="ac-inputgroup mb-3">
+                <span class="ac-inputgroup__icon">{% bi "key" %}</span>
+                <input class="ac-input" type="password" name="password" autocomplete="current-password" required id="id_password">
+            </div>
+            <button class="ac-cta ac-cta--accent" type="submit">
+                {% bi "door-open" %}
+                Log In
+            </button>
+        </form>
+    </div>
 </div>
-        {% endif %}
-<form class="m-3" method="post" id="login-form">
-    <p class="form-text" id="usernameInline">
-        Please use your <strong>account name</strong>
-        or <strong>e-mail address</strong> to log in - <em>thank you</em>!
-    </p>
-    <p>
-        <label for="id_username" class="form-label fw-bold">Account Name / E-mail Address</label>
-        <input aria-describedby="usernameInline" class="bg-black form-control rounded" type="text" name="username" autocapitalize="none" autocomplete="username" maxlength="25" required="" id="id_username">
-    </p>
-    <p>
-        <label for="id_password" class="form-label fw-bold">Password</label>
-        <input class="bg-black form-control rounded" type="password" name="password" autocomplete="current-password" required="" id="id_password">
-    </p>
-    {% csrf_token %}
-    <p>
-        <button class="btn btn-outline-primary" type="submit">Log In</button>
-        <button class="btn btn-outline-secondary" type="reset">Clear</button>
-    </p>
-</form>
-    {% endif %}
+{% endif %}
 {% endblock content %}

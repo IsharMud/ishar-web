@@ -1,51 +1,39 @@
 {% extends "layout.html" %}
+{% load ishar %}
 {% load static %}
 {% block meta_title %}Support {{ WEBSITE_TITLE }} - Help Keep This Free MUD Running{% endblock meta_title %}
 {% block meta_description %}Support {{ WEBSITE_TITLE }}, a free online MUD (Multi-User Dungeon). The game is free to play, but contributions help with development and maintenance of the server.{% endblock meta_description %}
 {% block meta_url %}{% url 'support' %}{% endblock meta_url %}
 {% block title %}Support {{ WEBSITE_TITLE }} - Help Keep This Free MUD Running{% endblock title %}
 {% block breadcrumbs %}
-    <li class="breadcrumb-item active h2" aria-current="page" title="Support {{ WEBSITE_TITLE }}">
-        <a class="icon-link icon-link-hover" href="{% url 'support' %}#support">
-            <svg class="bi" aria-hidden="true">
-                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#heart"></use>
-            </svg>
-            <span id="support">
-                Support {{ WEBSITE_TITLE }}
-            </span>
-        </a>
-    </li>
+    {% crumb "Support" "heart" urlname="support" anchor="support" active=True %}
 {% endblock breadcrumbs %}
 {% block content %}
-    <div class="alert alert-dark alert-dismissible fade show" role="alert" id="support-alert">
-        <p class="lead">
-            <strong>
-                While you are more than welcome to offer support,
-                {{ WEBSITE_TITLE }} is free to use, play, and enjoy!
-            </strong>
-        </p>
-        <p class="lead">
-            Any contributions are for the development and maintenance of the game,
-            and as a way to say &quot;<em>thank you</em>&quot;.
-        </p>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    <div class="row p-3">
-        <div class="col-md-auto p-3">
-            <a class="icon-link icon-link-hover" href="https://www.patreon.com/bePatron?u=42650263" target="_blank" title="Become a Patron">
+<div class="ac">
+
+    <header class="ac-hero">
+        <span class="ac-hero__badge">{% bi "heart" %}</span>
+        <div class="ac-hero__text">
+            <h2 class="ac-hero__title">Support {{ WEBSITE_TITLE }}</h2>
+            <p class="ac-hero__sub">
+                {{ WEBSITE_TITLE }} is free to use, play, and enjoy &mdash; contributions
+                go to the development and maintenance of the game, as a way to say
+                &quot;<em>thank you</em>&quot;.
+            </p>
+        </div>
+    </header>
+
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "piggy-bank" %} Ways to Contribute</div>
+        <div class="d-flex flex-wrap gap-3 align-items-center">
+            <a class="d-inline-block" href="https://www.patreon.com/bePatron?u=42650263" target="_blank" title="Become a Patron (opens Patreon.com in a new window)">
                 <img alt="Become A Patron" class="rounded" loading="lazy" src="{% static "images/become-a-patron.png" %}" style="height: 3rem;">
-                <svg class="bi" aria-hidden="false" role="img" aria-label="Open Patreon.com in a new window.">
-                    <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#box-arrow-up-right"></use>
-                </svg>
             </a>
-        </div>
-        <div class="col-md-auto p-3">
-            <a class="icon-link icon-link-hover" href="https://www.buymeacoffee.com/ishar" target="_blank" title="Buy Me A Coffee">
+            <a class="d-inline-block" href="https://www.buymeacoffee.com/ishar" target="_blank" title="Buy Me A Coffee (opens BuyMeACoffee.com in a new window)">
                 <img alt="Buy Me A Coffee" class="rounded" loading="lazy" src="{% static "images/buy-me-a-coffee.png" %}" style="height: 3rem;">
-                <svg class="bi" aria-hidden="false" role="img" aria-label="Open BuyMeACoffee.com in a new window.">
-                    <use xlink:href="{% static '/bootstrap-icons/bootstrap-icons.svg' %}#box-arrow-up-right"></use>
-                </svg>
             </a>
         </div>
     </div>
+
+</div>
 {% endblock content %}

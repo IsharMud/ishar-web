@@ -9,7 +9,7 @@ class HelpSearchForm(Form):
         label="",
         widget=TextInput(
             attrs={
-                "class": "form-control rounded",
+                "class": "ac-input",
                 "aria-label": "Topic Name",
                 "placeholder": "Topic Name",
             }

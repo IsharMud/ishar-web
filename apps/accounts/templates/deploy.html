@@ -5,9 +5,6 @@
 {% block meta_url %}{% url 'deploy' %}#deploy{% endblock meta_url %}
 {% block title %}{{ WEBSITE_TITLE }} Deploy Console{% endblock title %}
 {% block scripts %}let focusTo = 'deploy'{% endblock scripts %}
-{% block includes %}
-        <link rel="stylesheet" type="text/css" href="{% static 'css/admin-console.css' %}">
-{% endblock includes %}
 {% block breadcrumbs %}
     <li class="breadcrumb-item h2" title="Portal">
         <a class="icon-link icon-link-hover" href="{% url 'portal' %}#portal">

@@ -1,241 +1,203 @@
 {% extends "layout.html" %}
 {% load humanize %}
-{% load static %}
+{% load ishar %}
 {% block meta_title %}{{ WEBSITE_TITLE }} Player: {{ player.name }}{% if player.player_type == 'Dead' %} ☠️{% endif %}{% endblock meta_title %}
 {% block meta_description %}{{ WEBSITE_TITLE }} Player: {{ player.name }}{% if player.player_type == 'Dead' %} ☠️{% endif %}{% endblock meta_description %}
 {% block meta_url %}{% url 'players' %}{% endblock meta_url %}
 {% block title %}{{ WEBSITE_TITLE }} Player: {{ player.name }}{% if player.player_type == 'Dead' %} ☠️{% endif %}{% endblock title %}
 {% block breadcrumbs %}
-    <li class="breadcrumb-item h2" title="Portal">
-        <a class="icon-link icon-link-hover" href="{% url 'portal' %}#portal">
-            <svg class="bi" aria-hidden="true">
-                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#person-gear"></use>
-            </svg>
-            <span id="portal">
-                Portal
-            </span>
-        </a>
-    </li>
-    <li class="breadcrumb-item active h2" aria-current="page">
-    {% if player %}
-        {{ player.player_link }}
-    {% else %}
-        <span id="portal">
-            <svg class="bi" aria-hidden="true">
-                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#person-slash">
-                    Player Not Found
-                </use>
-            </svg>
-        </span>
-    {% endif %}
-    </li>
+    {% crumb "Portal" "person-gear" urlname="portal" anchor="portal" %}
+{% if player %}
+    {% crumb player.name|title "person" anchor="player" active=True %}
+{% else %}
+    {% crumb "Player Not Found" "person-slash" anchor="player" active=True %}
+{% endif %}
 {% endblock breadcrumbs %}
 {% block content %}
-    {% if player %}
+<div class="ac">
 
-    <h3 id="player" title="{{ player.player_title }}">
-        {{ player.player_title }}
-        <a class="anchor-link" href="#player" aria-label="Link to this section: Player"></a>
-    </h3>
+{% if player %}
+    <header class="ac-hero">
+        <span class="ac-hero__badge">{% bi "person" %}</span>
+        <div class="ac-hero__text">
+            <h2 class="ac-hero__title">{{ player.name|title }}</h2>
+            <p class="ac-hero__sub" title="{{ player.player_title }}">{{ player.player_title }}</p>
+        </div>
+        <div class="ac-hero__status">
+{% if player.is_immortal %}
+            <span class="ac-pill ac-pill--immortal">immortal</span>
+{% elif player.player_type == 'Dead' %}
+            <span class="ac-pill ac-pill--status ac-pill--danger">dead</span>
+{% elif player.player_type == 'Survival' or player.player_type == 'Hardcore' %}
+            <span class="ac-pill ac-pill--status ac-pill--warn">{{ player.player_type|lower }}</span>
+{% else %}
+            <span class="ac-pill ac-pill--status ac-pill--muted">{{ player.player_type|default:"unknown"|lower }} player</span>
+{% endif %}
+        </div>
+    </header>
 
-        {% if player.description %}
-    <p class="lead">
-        {{ player.description }}
-    </p>
-        {% endif %}
+{% if player.description %}
+    <div class="ac-panel">
+        <p class="lead mb-0">{{ player.description }}</p>
+    </div>
+{% endif %}
 
-        {% if not player.is_immortal %}
-    <hr>
-    <details class="m-1" open>
-
-        <summary id="details" class="h4 text-ishar" title="Details">
+{% if not player.is_immortal %}
+    <div class="ac-panel">
+        <div class="ac-panel__h" id="details">
+            {% bi "person-vcard" %}
             Details
             <a class="anchor-link" href="#details" aria-label="Link to this section: Details"></a>
-        </summary>
-
-        <ul class="bg-black list-group list-group-horizontal-sm">
-
-            <li class="bg-black border-0 list-group-item list-group-item-text text-white" title="Name: {{ player.name | title }} / Class: {{ player.common.player_class.get_class_name }} / Race: {{ player.common.race.display_name }}">
-                <span class="bi bi-dot text-ishar"></span>
-                {{ player.name | title }} {{ player.get_player_phrase }} a
+        </div>
+        <ul class="list-unstyled mb-0">
+            <li class="mb-1" title="Name: {{ player.name|title }} / Class: {{ player.common.player_class.get_class_name }} / Race: {{ player.common.race.display_name }}">
+                {% bi "dot" css="text-ishar" %}
+                {{ player.name|title }} {{ player.get_player_phrase }} a
                 {{ player.common.player_class.class_display }} of
-                {{ player.common.race.folk_name | lower }} origin.
+                {{ player.common.race.folk_name|lower }} origin.
             </li>
-
-            <li class="bg-black border-0 list-group-item list-group-item-text text-white" title="Level: {{ player.common.level }} {% if player.remorts > 0 %} / Remorts: {{ player.remorts }}{% endif %}">
-                <span class="bi bi-dot text-ishar"></span>
-                {{ player.get_player_gender | title }} {{ player.get_player_phrase }}
+            <li class="mb-1" title="Level: {{ player.common.level }}{% if player.remorts > 0 %} / Remorts: {{ player.remorts }}{% endif %}">
+                {% bi "dot" css="text-ishar" %}
+                {{ player.get_player_gender|title }} {{ player.get_player_phrase }}
                 level {{ player.common.level }}{% if player.remorts > 0 %} and {{ player.get_player_phrase_owns }} remorted {{ player.remorts }} time{{ player.remorts|pluralize }}{% endif %}.
             </li>
-
-            {% if player.total_renown > 0 %}
-            <li class="bg-black border-0 list-group-item list-group-item-text text-white" title="Total Renown: {{ player.total_renown }}">
-                <span class="bi bi-dot text-ishar"></span>
-                {{ player.get_player_gender | title }} {{ player.get_player_phrase_owns }}
+{% if player.total_renown > 0 %}
+            <li class="mb-1" title="Total Renown: {{ player.total_renown }}">
+                {% bi "dot" css="text-ishar" %}
+                {{ player.get_player_gender|title }} {{ player.get_player_phrase_owns }}
                 accumulated {{ player.total_renown }} renown.
             </li>
-            {% endif %}
-
-            {% if player.quests_completed > 0 %}
-            <li class="bg-black border-0 list-group-item list-group-item-text text-white" title="Quests Completed: {{ player.quests_completed }}">
-                <span class="bi bi-dot text-ishar"></span>
-                {{ player.get_player_gender | title }} {{ player.get_player_phrase_owns }}
-                completed {{ player.quests_completed }} quest{{ player.quests_completed | pluralize }}.
+{% endif %}
+{% if player.quests_completed > 0 %}
+            <li class="mb-1" title="Quests Completed: {{ player.quests_completed }}">
+                {% bi "dot" css="text-ishar" %}
+                {{ player.get_player_gender|title }} {{ player.get_player_phrase_owns }}
+                completed {{ player.quests_completed }} quest{{ player.quests_completed|pluralize }}.
             </li>
-            {% endif %}
-
-            {% if player.challenges_completed > 0 %}
-            <li class="bg-black border-0 list-group-item list-group-item-text text-white" title="Challenges Completed: {{ player.challenges_completed }}">
-                <span class="bi bi-dot text-ishar"></span>
-                {{ player.get_player_gender | title }} {{ player.get_player_phrase_owns }}
-                completed {{ player.challenges_completed }} challenge{{ player.challenges_completed | pluralize }}.
+{% endif %}
+{% if player.challenges_completed > 0 %}
+            <li class="mb-1" title="Challenges Completed: {{ player.challenges_completed }}">
+                {% bi "dot" css="text-ishar" %}
+                {{ player.get_player_gender|title }} {{ player.get_player_phrase_owns }}
+                completed {{ player.challenges_completed }} challenge{{ player.challenges_completed|pluralize }}.
             </li>
-            {% endif %}
-
-            <li class="bg-black border-0 list-group-item list-group-item-text text-white" title="Alignment: {{ player.get_player_alignment }} ({{ player.common.alignment }})">
-            <span class="bi bi-dot text-ishar"></span>
-                {{ player.get_player_gender_own | title }} alignment {{ player.get_player_phrase }}
-                {{ player.get_player_alignment | lower }}.
+{% endif %}
+            <li class="mb-1" title="Alignment: {{ player.get_player_alignment }} ({{ player.common.alignment }})">
+                {% bi "dot" css="text-ishar" %}
+                {{ player.get_player_gender_own|title }} alignment {{ player.get_player_phrase }}
+                {{ player.get_player_alignment|lower }}.
             </li>
-
-            <li class="bg-black border-0 list-group-item list-group-item-text text-white" title="{{ player.name | title }} is a {{ player.player_type|default:"unknown"|lower }} player!">
-                <span class="bi bi-dot text-ishar"></span>
-            {% if player.player_type == 'Dead' %}
-                {{ player.name | title }} is <span class="dead-note">DEAD</span>!
-                <ul id="dead">
-                    <li title="{{ player.name | title }} died too often. {{ player.get_player_gender | title }} can not be resurrected!">
-                        {{ player.name | title }} died too often.
-                        {{ player.get_player_gender | title }} can not be resurrected!
-                    </li>
-                </ul>
-            {% else %}
-                {{ player.name | title }} {{ player.get_player_phrase }} a
+{% if player.player_type != 'Dead' %}
+            <li class="mb-1" title="{{ player.name|title }} is a {{ player.player_type|default:'unknown'|lower }} player!">
+                {% bi "dot" css="text-ishar" %}
+                {{ player.name|title }} {{ player.get_player_phrase }} a
                 <span class="{{ player.player_css }}">{{ player.player_type|default:"unknown"|lower }}</span> player.
-            {% endif %}
             </li>
-
-        {% if player.player_type != 'Dead' %}
-            <li class="bg-black border-0 list-group-item list-group-item-text text-white">
-                <span class="bi bi-dot text-ishar"></span>
-            {% if player.statistics.total_deaths > 0 %}
-                {{ player.get_player_gender | title }} {{ player.get_player_phrase_owns }}
+            <li class="mb-1">
+                {% bi "dot" css="text-ishar" %}
+{% if player.statistics.total_deaths > 0 %}
+                {{ player.get_player_gender|title }} {{ player.get_player_phrase_owns }}
                 died {{ player.statistics.total_deaths }} time{{ player.statistics.total_deaths|pluralize }}.
-            {% else %}
-                {{ player.get_player_gender | title }} {{ player.get_player_phrase_owns }} never died!
-            {% endif %}
+{% else %}
+                {{ player.get_player_gender|title }} {{ player.get_player_phrase_owns }} never died!
+{% endif %}
             </li>
-        {% endif %}
+{% endif %}
         </ul>
-    </details>
-
-            {% if not player.account.is_private or request.user.is_immortal %}
-
-                {% if player.upgrades %}
-    <hr>
-    <details class="m-2"{% if not player.account.is_private %} open{% endif %}>
-        <summary id="upgrades" class="h4 text-ishar" title="Remort Upgrades{% if player.upgrades.count > 0 %} ({{ player.upgrades.count }}){% endif %}">
-            Remort Upgrades
-                    {% if player.upgrades.count > 0 %}
-            <span class="badge bg-dark border border-secondary rounded-pill text-white ">
-                {{ player.upgrades.count }}
+{% if player.player_type == 'Dead' %}
+        <div class="ac-note ac-note--danger mt-2" title="{{ player.name|title }} died too often. {{ player.get_player_gender|title }} can not be resurrected!">
+            {% bi "exclamation-circle" %}
+            <span>
+                {{ player.name|title }} is <span class="dead-note">DEAD</span>!
+                {{ player.name|title }} died too often.
+                {{ player.get_player_gender|title }} can not be resurrected!
             </span>
-                    {% endif %}
-            <button type="button" class="bg-black border-0 p-1 icon-link icon-link-hover text-secondary" data-bs-toggle="popover" data-bs-html="true" data-bs-title="<strong>Remort Upgrades?</strong>" data-bs-content="A list of player remort upgrades (<em>which can be &quot;bought&quot; with renown points in-game</em>) <a href='{% url 'upgrades' %}#upgrades' target='_blank'>is available here</a>.">
-                <svg class="bi" aria-hidden="true">
-                    <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#question-circle"></use>
-                </svg>
-            </button>
+        </div>
+{% endif %}
+    </div>
+
+{% if not player.account.is_private or request.user.is_immortal %}
+
+{% if player.upgrades %}
+    <div class="ac-panel">
+        <div class="ac-panel__h" id="upgrades">
+            {% bi "shield" %}
+            Remort Upgrades{% if player.upgrades.count > 0 %} ({{ player.upgrades.count }}){% endif %}
             <a class="anchor-link" href="#upgrades" aria-label="Link to this section: Remort Upgrades"></a>
-        </summary>
-        <ol class="list-group list-group-vertical list-group-numbered">
-                    {% for upgraded in player.upgrades.all %}
-            <li class="border-0 bg-black list-group-item" title="{{ upgraded.upgrade.display_name }}{% if upgraded.value > 1 %} (x{{ upgraded.value }}){% endif %}">
-                <span class="list-group-item-text">
-                    {{ upgraded.upgrade.display_name }}
-                </span>
-                        {% if upgraded.value > 1 %}
-                <span class="badge bg-dark text-ishar rounded-pill">
-                    x{{ upgraded.value }}
-                </span>
-                        {% endif %}
-            </li>
-                    {% endfor %}
-        </ol>
-    </details>
-                {% endif %}
-
-                {% if player.player_stats %}
-    <hr>
-    <details class="m-2"{% if not player.account.is_private %} open{% endif %}>
-        <summary id="stats" class="h4 text-ishar" title="Statistics{% if player.get_total_statistics_count %} ({{ player.get_total_statistics_count }}){% endif %}">
-            Statistics
-                    {% if player.get_total_statistics_count %}
-            <span class="badge bg-dark border border-secondary text-white rounded-pill">
-                {{ player.get_total_statistics_count }}
+        </div>
+        <p class="ac-panel__hint">
+            Remort upgrades are &quot;bought&quot; with renown points in-game &mdash;
+            the full list of upgrades and costs
+            <a href="{% url 'upgrades' %}#upgrades">is available here</a>.
+        </p>
+        <div class="ac-filter">
+{% for upgraded in player.upgrades.all %}
+            <span class="ac-pill ac-pill--accent" title="{{ upgraded.upgrade.display_name }}{% if upgraded.value > 1 %} (x{{ upgraded.value }}){% endif %}">
+                {{ upgraded.upgrade.display_name }}{% if upgraded.value > 1 %} ×{{ upgraded.value }}{% endif %}
             </span>
-                    {% endif %}
+{% endfor %}
+        </div>
+    </div>
+{% endif %}
+
+{% if player.player_stats %}
+    <div class="ac-panel">
+        <div class="ac-panel__h" id="stats">
+            {% bi "graph-up-arrow" %}
+            Statistics{% if player.get_total_statistics_count %} ({{ player.get_total_statistics_count }}){% endif %}
             <a class="anchor-link" href="#stats" aria-label="Link to this section: Statistics"></a>
-        </summary>
-        <ol class="list-group list-group-horizontal-sm">
-                    {% for stat_name, stat_value in player.player_stats.items %}
-            <li class="bg-black list-group-item" title="{{ stat_name }}: {{ stat_value }}">
-                <span class="list-group-item-text text-white{% if forloop.first %} fw-bold{% endif %}">
-                    <span class="text-ishar">
-                        {{ stat_name }}
-                    </span>:
-                    {{ stat_value }}
-                </span>
-            </li>
-                    {% endfor %}
-        </ol>
-    </details>
-            {% endif %}
-    <hr>
-    <details class="m-2"{% if not player.account.is_private %} open{% endif %}>
-        <summary id="time" class="h4 text-ishar" title="Time">
+        </div>
+        <dl class="ac-kv mb-0">
+{% for stat_name, stat_value in player.player_stats.items %}
+            <dt>{{ stat_name }}</dt>
+            <dd>{{ stat_value }}</dd>
+{% endfor %}
+        </dl>
+    </div>
+{% endif %}
+
+    <div class="ac-panel">
+        <div class="ac-panel__h" id="time">
+            {% bi "hourglass-split" %}
             Time
             <a class="anchor-link" href="#time" aria-label="Link to this section: Time"></a>
-        </summary>
-        <ul class="list-group list-group-horizontal-sm">
-            <li class="bg-black border-0 list-group-item list-group-item-text text-white" title="Logged On: {{ player.logon | naturaltime }}, ({{ player.logon }})">
-                <span class="bi bi-dot text-ishar"></span>
-                {{ player.get_player_gender | title }} last logged
-                on {{ player.logon | naturaltime }},
-                on {{ player.logon | date }}.
+        </div>
+        <ul class="list-unstyled mb-0">
+            <li class="mb-1" title="Logged On: {{ player.logon|naturaltime }} ({{ player.logon }})">
+                {% bi "door-open" css="text-ishar" %}
+                {{ player.get_player_gender|title }} last logged on
+                <time datetime="{{ player.logon|date:'c' }}">{{ player.logon|naturaltime }}</time>,
+                on {{ player.logon|date }}.
             </li>
-            <li class="bg-black border-0 list-group-item list-group-item-text text-white" title="Logged Out: {{ player.logout | naturaltime }}, ({{ player.logout }})">
-                <span class="bi bi-dot text-ishar"></span>
-                {{ player.get_player_gender | title }} last logged out
-                {{ player.logout | naturaltime }},
-                on {{ player.logon | date }}.
+            <li class="mb-1" title="Logged Out: {{ player.logout|naturaltime }} ({{ player.logout }})">
+                {% bi "door-closed" css="text-ishar" %}
+                {{ player.get_player_gender|title }} last logged out
+                <time datetime="{{ player.logout|date:'c' }}">{{ player.logout|naturaltime }}</time>,
+                on {{ player.logout|date }}.
             </li>
-        </ul>
-        <ul class="bg-black list-group list-group-horizontal-sm">
-            <li class="bg-black border-0 list-group-item list-group-item-text text-white" title="Birth: {{ player.birth | naturaltime }}, ({{ player.birth }})">
-                <span class="bi bi-dot text-ishar"></span>
-                {{ player.get_player_gender | title }} was born
-                {{ player.birth | naturaltime }},
-                on {{ player.birth | date }}.
+            <li class="mb-1" title="Birth: {{ player.birth|naturaltime }} ({{ player.birth }})">
+                {% bi "sunrise" css="text-ishar" %}
+                {{ player.get_player_gender|title }} was born
+                <time datetime="{{ player.birth|date:'c' }}">{{ player.birth|naturaltime }}</time>,
+                on {{ player.birth|date }}.
             </li>
-            <li class="bg-black border-0 list-group-item list-group-item-text text-white" title="Played For: {{ player.statistics.get_total_play_time }} ({{ player.statistics.total_play_time }} seconds)">
-                <span class="bi bi-dot text-ishar"></span>
-                {{ player.get_player_gender | title }} {{ player.get_player_phrase_owns }}
+            <li class="mb-1" title="Played For: {{ player.statistics.get_total_play_time }} ({{ player.statistics.total_play_time }} seconds)">
+                {% bi "hourglass" css="text-ishar" %}
+                {{ player.get_player_gender|title }} {{ player.get_player_phrase_owns }}
                 played for {{ player.statistics.get_total_play_time }}.
             </li>
         </ul>
-    </details>
+    </div>
 
-    <script>
-        const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
-        const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
-    </script>
-            {% endif %}
+{% endif %}
+{% endif %}
 
-        {% else %}
-    <p class="lead">
-        {{ player.name | title }} {{ player.get_player_phrase }} a
-        <span class="{{ player.player_css }}">{{ player.player_type }}</span> character!
-    </p>
-        {% endif %}
-    {% endif %}
+{% else %}
+    <div class="ac-empty">
+        {% bi "person-slash" %}
+        <span>Sorry, but that player could not be found.</span>
+    </div>
+{% endif %}
+
+</div>
 {% endblock content %}

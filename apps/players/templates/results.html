@@ -1,54 +1,48 @@
 {% extends "layout.html" %}
-{% load static %}
+{% load ishar %}
 {% block meta_title %}{{ WEBSITE_TITLE }} Search{% if results %} ({{ results.count }} result{{ results.count|pluralize }}){% endif %}{% endblock meta_title %}
 {% block meta_description %}{{ WEBSITE_TITLE }} Search{% if results %} ({{ results.count }} result{{ results.count|pluralize }}){% endif %}{% endblock meta_description %}
 {% block meta_url %}{% url 'players' %}#search{% endblock meta_url %}
 {% block title %}{{ WEBSITE_TITLE }} Search{% if results %} ({{ results.count }} result{{ results.count|pluralize }}){% endif %}{% endblock title %}
 {% block breadcrumbs %}
-    <li class="h2 breadcrumb-item" title="Portal">
-        <a class="icon-link icon-link-hover" href="{% url 'portal' %}#portal">
-            <svg class="bi" aria-hidden="true">
-                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#person-gear"></use>
-            </svg>
-            <span id="portal">
-                Portal
-            </span>
-        </a>
-    </li>
-    <li class="h2 breadcrumb-item{% if not results %} active" aria-current="page{% endif %}" title="Search">
-        <a class="icon-link icon-link-hover" href="{% url 'players' %}">
-            <svg class="bi" aria-hidden="true">
-                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#search"></use>
-            </svg>
-            <span id="search">
-                Search
-            </span>
-        </a>
-    </li>
-    {% if results %}
-    <li class="h2 bi bi-people breadcrumb-item active" aria-current="page" title="{{ results.count }} result{{ results.count|pluralize }}">
-        <a href="#results" id="results">
-            {{ results.count }} result{{ results.count|pluralize }}
-        </a>
-    </li>
-    {% endif %}
+    {% crumb "Portal" "person-gear" urlname="portal" anchor="portal" %}
+    {% crumb "Search" "search" urlname="players" anchor="search" active=True %}
 {% endblock breadcrumbs %}
 {% block content %}
-    {% if results %}
-        <h5 title="{{ results.count }} result{{ results.count|pluralize }}">
-            {{ results.count }} result{{ results.count|pluralize }}
-        </h5>
-        <ul class="bg-dark list-group w-50">
-        {% for player in results %}
-            <li class="bg-black border border-secondary list-group-item list-group-item-text" title="Player: {{ player.name }}">
-                <strong>{{ forloop.counter }}.</strong>
-                {{ player.player_link }}
-            </li>
-        {% endfor %}
-        </ul>
-    {% else %}
-        <p class="lead fst-italic">
-            Please perform a search for a player name using the form below.
-        </p>
-    {% endif %}
+<div class="ac">
+
+    <header class="ac-hero">
+        <span class="ac-hero__badge">{% bi "search" %}</span>
+        <div class="ac-hero__text">
+            <h2 class="ac-hero__title">Player Search</h2>
+            <p class="ac-hero__sub">Look up any {{ WEBSITE_TITLE }} player by name.</p>
+        </div>
+{% if results %}
+        <div class="ac-hero__status">
+            <span class="ac-pill ac-pill--accent" id="results" title="{{ results.count }} result{{ results.count|pluralize }}">
+                {{ results.count }} result{{ results.count|pluralize }}
+            </span>
+        </div>
+{% endif %}
+    </header>
+
+{% if results %}
+    <div class="ac-rows">
+{% for player in results %}
+        <div class="ac-row" title="Player: {{ player.name }}">
+            <span class="ac-row__icon">{% bi "person" %}</span>
+            <div class="ac-row__main">
+                <div class="ac-row__title">{{ player.player_link }}</div>
+            </div>
+        </div>
+{% endfor %}
+    </div>
+{% else %}
+    <div class="ac-empty">
+        {% bi "search" %}
+        <span>Please perform a search for a player name using the form below.</span>
+    </div>
+{% endif %}
+
+</div>
 {% endblock content %}

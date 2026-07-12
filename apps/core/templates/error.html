@@ -1,15 +1,18 @@
 {% extends "layout.html" %}
+{% load ishar %}
 {% block title %}{{ WEBSITE_TITLE }} {{ title }}{% endblock title %}
 {% block breadcrumbs %}
-    <li class="bi bi-exclamation-circle breadcrumb-item active h2" aria-current="page" title="{{ title }}" id="error">
-        {{ title }}
-    </li>
+    {% crumb title "exclamation-circle" anchor="error" active=True %}
 {% endblock breadcrumbs %}
 {% block content %}
-    <p class="lead">
-        {{ message }}
-    </p>
-    <p class="lead">
-        You may want to return to the <a href="{% url 'index' %}" title="home page">home page</a>.
-    </p>
+<div class="ac">
+    <div class="ac-empty py-5">
+        {% bi "exclamation-circle" %}
+        <span class="lead">{{ message }}</span>
+        <a class="ac-btn ac-btn--accent mt-2" href="{% url 'index' %}">
+            {% bi "house" %}
+            Return to the home page
+        </a>
+    </div>
+</div>
 {% endblock content %}

@@ -9,7 +9,7 @@ class PlayerSearchForm(Form):
         label="",
         widget=TextInput(
             attrs={
-                "class": "form-control rounded",
+                "class": "ac-input",
                 "aria-label": "Player Name",
                 "placeholder": "Player Name",
             }

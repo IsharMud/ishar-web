@@ -7,9 +7,6 @@
 {% block meta_url %}{% url 'challenges' %}#challenges{% endblock meta_url %}
 {% block title %}{{ WEBSITE_TITLE }} Challenges{% endblock title %}
 {% block scripts %}let focusTo = 'challenges'{% endblock scripts %}
-{% block includes %}
-        <link rel="stylesheet" type="text/css" href="{% static 'css/admin-console.css' %}">
-{% endblock includes %}
 {% block breadcrumbs %}
     {% crumb "Portal" "person-gear" urlname="portal" anchor="portal" %}
 {% if completed is None %}

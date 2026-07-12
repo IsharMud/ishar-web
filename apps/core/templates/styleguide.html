@@ -7,7 +7,6 @@
 {% block title %}{{ WEBSITE_TITLE }} Style Guide{% endblock title %}
 {% block scripts %}let focusTo = 'styleguide'{% endblock scripts %}
 {% block includes %}
-        <link rel="stylesheet" type="text/css" href="{% static 'css/admin-console.css' %}">
         <style>
             .sg-swatches { display: flex; flex-wrap: wrap; gap: .6rem; }
             .sg-swatch {
@@ -63,7 +62,7 @@
             <span class="sg-swatch"><i style="--sw: var(--ac-info)"></i><code>--ac-info</code></span>
             <span class="sg-swatch"><i style="--sw: var(--ac-warn)"></i><code>--ac-warn</code></span>
             <span class="sg-swatch"><i style="--sw: var(--ac-danger)"></i><code>--ac-danger</code></span>
-            <span class="sg-swatch"><i style="--sw: #00b7eb"></i><code>immortal</code></span>
+            <span class="sg-swatch"><i style="--sw: var(--ac-immortal)"></i><code>--ac-immortal</code></span>
         </div>
     </div>
 
@@ -77,6 +76,7 @@
             <span class="ac-pill ac-pill--warn">warn</span>
             <span class="ac-pill ac-pill--danger">danger</span>
             <span class="ac-pill ac-pill--accent">accent</span>
+            <span class="ac-pill ac-pill--immortal">immortal</span>
             <span class="ac-pill ac-pill--status ac-pill--ok">with dot</span>
             <span class="ac-pill ac-pill--status ac-pill--ok ac-pill--live">live</span>
         </div>

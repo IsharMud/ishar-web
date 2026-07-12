@@ -1,21 +1,12 @@
 {% extends "layout.html" %}
-{% load static %}
+{% load ishar %}
 {% block meta_title %}{{ WEBSITE_TITLE }} FAQ - Common Questions About Playing a MUD{% endblock meta_title %}
 {% block meta_description %}Frequently asked questions about {{ WEBSITE_TITLE }}, a free online MUD (Multi-User Dungeon). Learn about character classes, gameplay, connecting, and getting started with text-based RPG gaming.{% endblock meta_description %}
 {% block meta_url %}{% url 'faq' %}{% endblock meta_url %}
 {% block title %}{{ WEBSITE_TITLE }} FAQ - Common MUD Questions{% endblock title %}
 {% block page_heading %}{{ WEBSITE_TITLE }} Frequently Asked Questions{% endblock page_heading %}
 {% block breadcrumbs %}
-    <li class="breadcrumb-item active h2" aria-current="page" title="Frequently Asked Questions">
-        <a class="icon-link icon-link-hover" href="{% url 'faq' %}#faq">
-            <svg class="bi" aria-hidden="true">
-                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#patch-question"></use>
-            </svg>
-            <span id="faq">
-                Frequently Asked Questions
-            </span>
-        </a>
-    </li>
+    {% crumb "Frequently Asked Questions" "patch-question" urlname="faq" anchor="faq" active=True %}
 {% endblock breadcrumbs %}
 {% block scripts %}let focusTo = 'faq'{% endblock scripts %}
 {% block structured_data %}
@@ -41,69 +32,66 @@
 {% endif %}
 {% endblock structured_data %}
 {% block content %}
-<div class="alert alert-dark alert-dismissible fade show" role="alert" id="faq-alert">
-    <p class="lead">
-        Here are a few common questions that are asked about {{ WEBSITE_TITLE }}.
-    </p>
-    {% if request.user.is_anonymous %}
-    <p class="lead">
-        You may also want to visit the
-        <a class="icon-link icon-link-hover" href="{% url 'help_page' help_topic='MUD Basics' %}#topic" title="MUD basics help page">
-            <svg class="bi" aria-hidden="true">
-                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#collection-play"></use>
-            </svg>
-            MUD basics help page
-        </a>,
-        <a class="icon-link icon-link-hover" href="{% url 'start' %}#start" title="getting started guide">
-            <svg class="bi" aria-hidden="true">
-                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#rocket-takeoff"></use>
-            </svg>
-            getting started guide
-        </a>,
-        and
-        <a class="icon-link icon-link-hover" href="{% url 'discord' %}" target="_blank" title="{{ WEBSITE_TITLE }} Discord">
-            <svg class="bi" aria-hidden="true">
-                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#discord"></use>
-            </svg>
-            join us on Discord!
-        </a>
-    </p>
-    {% endif %}
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-</div>
+<div class="ac">
+
+    <header class="ac-hero">
+        <span class="ac-hero__badge">{% bi "patch-question" %}</span>
+        <div class="ac-hero__text">
+            <h2 class="ac-hero__title">Frequently Asked Questions</h2>
+            <p class="ac-hero__sub">
+                A few common questions that are asked about {{ WEBSITE_TITLE }}.
+            </p>
+        </div>
 {% if faqs %}
-    {% for faq in faqs %}
-<details open>
-    <summary id="{{ faq.slug }}" class="h3 text-ishar" title="{{ faq.question_text }}">
-        {{ faq.question_text }}
-        <a class="anchor-link" href="#{{ faq.slug }}" aria-label="Link to this section: Frequently Asked Question: {{ faq.question_text }} ({{ faq.slug }})"></a>
-    </summary>
-    <div class="mb-3">
-        {% autoescape off %}{{ faq.question_answer }}{% endautoescape %}
-    </div>
-</details>
-        {% if not forloop.last %}
-<hr>
-        {% endif %}
-    {% endfor %}
-{% else %}
-<p class="lead">
-    <i>No questions were found.</i>
-</p>
+        <div class="ac-hero__status">
+            <span class="ac-pill ac-pill--accent">{{ faqs|length }} question{{ faqs|length|pluralize }}</span>
+        </div>
 {% endif %}
-<div class="alert alert-dark alert-dismissible fade show" role="alert" id="faq-footer-alert">
-    <p class="lead">
-        If there is anything that you think is missing, please feel free to reach out, by e-mailing
-        <a class="icon-link icon-link-hover" href="mailto:{{ ADMIN_EMAIL }}" target="_blank" title="E-mail: {{ ADMIN_EMAIL }}">
-            <svg class="bi" aria-hidden="true">
-                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#envelope-at"></use>
-            </svg>
-            <code><small>{{ ADMIN_EMAIL }}</small></code>
-            <svg class="bi" aria-hidden="false" role="img" aria-label="Send an e-mail to {{ ADMIN_EMAIL }}.">
-                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#box-arrow-up-right"></use>
-            </svg>
-        </a>.
-    </p>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </header>
+
+{% if request.user.is_anonymous %}
+    <div class="ac-note">
+        {% bi "rocket-takeoff" %}
+        <span>
+            You may also want to visit the
+            <a href="{% url 'help_page' help_topic='MUD Basics' %}#topic" title="MUD basics help page">MUD basics help page</a>
+            and the
+            <a href="{% url 'start' %}#start" title="getting started guide">getting started guide</a>,
+            or
+            <a href="{% url 'discord' %}" target="_blank" title="{{ WEBSITE_TITLE }} Discord">join us on Discord</a>.
+        </span>
+    </div>
+{% endif %}
+
+{% if faqs %}
+{% for faq in faqs %}
+    <div class="ac-panel">
+        <details open>
+            <summary id="{{ faq.slug }}" class="h5 text-ishar" title="{{ faq.question_text }}">
+                {{ faq.question_text }}
+                <a class="anchor-link" href="#{{ faq.slug }}" aria-label="Link to this section: Frequently Asked Question: {{ faq.question_text }} ({{ faq.slug }})"></a>
+            </summary>
+            <div class="mt-2">
+                {% autoescape off %}{{ faq.question_answer }}{% endautoescape %}
+            </div>
+        </details>
+    </div>
+{% endfor %}
+{% else %}
+    <div class="ac-empty">
+        {% bi "patch-question" %}
+        <span>No questions were found.</span>
+    </div>
+{% endif %}
+
+    <div class="ac-note">
+        {% bi "envelope-at" %}
+        <span>
+            If there is anything that you think is missing, please feel free to reach out
+            by e-mailing
+            <a href="mailto:{{ ADMIN_EMAIL }}" target="_blank" title="E-mail: {{ ADMIN_EMAIL }}"><code>{{ ADMIN_EMAIL }}</code></a>.
+        </span>
+    </div>
+
 </div>
 {% endblock content %}
