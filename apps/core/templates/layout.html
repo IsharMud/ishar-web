@@ -90,7 +90,8 @@
 
                 <a href="{% url 'index' %}" title="{{ WEBSITE_TITLE }}">
                     <h1 class="visually-hidden">{% block page_heading %}{{ WEBSITE_TITLE }} - Free Online MUD (Multi-User Dungeon){% endblock page_heading %}</h1>
-                    <img class="navbar-brand" id="logo" alt="{{ WEBSITE_TITLE }} - Free Online MUD" src="{% static "images/logo.png" %}">
+                    {# height attribute = stale-CSS fallback; the #logo CSS rule overrides it responsively #}
+                    <img class="navbar-brand" id="logo" height="128" alt="{{ WEBSITE_TITLE }} - Free Online MUD" src="{% static "images/logo.png" %}">
                 </a>
 
                 <button class="border-ishar m-2 navbar-dark navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle Navigation">

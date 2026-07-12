@@ -228,6 +228,20 @@ USE_TZ = True
 STATIC_URL = "static/"
 STATIC_ROOT = Path(BASE_DIR, STATIC_URL)
 
+# Content-hashed static filenames (cache busting): {% static %} URLs change
+# whenever a file's content changes, so browsers can never serve a stale
+# stylesheet against new templates. Non-strict variant degrades to plain
+# names if the manifest is missing (see apps/core/storage.py).
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "apps.core.storage.IsharManifestStaticFilesStorage",
+    },
+}
+
+
 # Media.
 MEDIA_URL = "media/"
 MEDIA_ROOT = Path(BASE_DIR, MEDIA_URL)
