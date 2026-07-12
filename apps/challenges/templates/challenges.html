@@ -1,178 +1,124 @@
 {% extends "layout.html" %}
 {% load humanize %}
+{% load ishar %}
 {% load static %}
 {% block meta_title %}{{ WEBSITE_TITLE }} Challenges{% endblock meta_title %}
-{% block meta_description %}Current {{ WEBSITE_TITLE }} challenges available.{% endblock meta_description %}
+{% block meta_description %}This week's {{ WEBSITE_TITLE }} challenges — a fresh set of targets to hunt down every week for special rewards.{% endblock meta_description %}
 {% block meta_url %}{% url 'challenges' %}#challenges{% endblock meta_url %}
 {% block title %}{{ WEBSITE_TITLE }} Challenges{% endblock title %}
-{% block includes %}
-    <link href="{% static 'datatables/datatables.min.css' %}" rel="stylesheet">
-    <script src="{% static 'jquery-3.7.1.min.js' %}"></script>
-    <script src="{% static 'datatables/datatables.min.js' %}"></script>
-{% endblock includes %}
 {% block scripts %}let focusTo = 'challenges'{% endblock scripts %}
+{% block includes %}
+        <link rel="stylesheet" type="text/css" href="{% static 'css/admin-console.css' %}">
+{% endblock includes %}
 {% block breadcrumbs %}
-    <li class="breadcrumb-item h2" title="Portal">
-        <a class="icon-link icon-link-hover" href="{% url 'portal' %}#portal">
-            <svg class="bi" aria-hidden="true">
-                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#person-gear"></use>
-            </svg>
-            <span id="portal">
-                Portal
-            </span>
-        </a>
-    </li>
-    <li class="breadcrumb-item active h2" title="Challenges"{% if completed is None %} aria-current="page"{% endif %}>
-        <a class="icon-link icon-link-hover" href="{% url 'challenges' %}#challenges" id="challenges">
-            <svg class="bi" aria-hidden="true">
-                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#award"></use>
-            </svg>
-            Challenges
-        </a>
-    </li>
-    {% if completed is not None %}
-    <li class="breadcrumb-item active h2" aria-current="page" title="{% if completed %}Complete{% else %}Incomplete{% endif %}">
-        <a class="icon-link icon-link-hover" href="{% if completed %}{% url 'complete' %}#complete{% else %}{% url 'incomplete' %}#incomplete{% endif %}" id="{% if completed %}complete{% else %}incomplete{% endif %}">
-            <svg class="bi" aria-hidden="true">
-                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#award-fill"></use>
-            </svg>
-            {% if completed %}Complete{% else %}Incomplete{% endif %}
-        </a>
-    </li>
-    {% endif %}
+    {% crumb "Portal" "person-gear" urlname="portal" anchor="portal" %}
+{% if completed is None %}
+    {% crumb "Challenges" "award" urlname="challenges" anchor="challenges" active=True %}
+{% elif completed %}
+    {% crumb "Challenges" "award" urlname="challenges" anchor="challenges" %}
+    {% crumb "Complete" "award-fill" urlname="complete" anchor="complete" active=True %}
+{% else %}
+    {% crumb "Challenges" "award" urlname="challenges" anchor="challenges" %}
+    {% crumb "Incomplete" "award-fill" urlname="incomplete" anchor="incomplete" active=True %}
+{% endif %}
 {% endblock breadcrumbs %}
 {% block content %}
-<div class="container-fluid">
-    {% if challenges %}
-    <table class="table table-hover table-dark table-flush table-sm table-responsive table-striped" id="challengesTable">
-        {% if CURRENT_SEASON %}
-        <caption class="caption-top" id="cycle">
-            <a class="icon-link" href="#cycle">
-                <svg class="bi" aria-hidden="false" role="img" aria-label="Link to this section: Next Cycle: {{ CURRENT_SEASON.get_next_cycle|naturaltime }} ({{ CURRENT_SEASON.get_next_cycle }})">
-                    <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#recycle"></use>
-                </svg>
-            </a>
-            Challenges will next cycle <strong>{{ CURRENT_SEASON.get_next_cycle|naturaltime }}</strong> -
-            at <time class="fst-italic" datetime="{{ CURRENT_SEASON.get_next_cycle|date:"c" }}">
-                {{ CURRENT_SEASON.get_next_cycle }}
-            </time>
-            <a class="anchor-link" href="#cycle" aria-label="Link to this section: Next challenge cycle."></a>
-        </caption>
-        {% endif %}
-        <thead>
-            <tr>
-                <th class="border" scope="col" title="#">
-                    <span class="text-ishar">#</span>
-                </th>
-                <th class="border" scope="col" title="Find & Kill">
-                    <span class="text-ishar">Find & Kill</span>
-                </th>
-                <th class="border" scope="col" title="Max People">
-                    <span class="text-ishar">Max People</span>
-                </th>
-                <th class="border" scope="col" title="Max Level">
-                    <span class="text-ishar">Max Level</span>
-                </th>
-            </tr>
-        </thead>
-        <tbody class="table-group-divider text-ishar">
-        {% for challenge in challenges %}
-            <tr id="{{ challenge.anchor }}" class="challenge-row">
-                <th data-order="" data-search="">
-                    <a href="#{{ challenge.anchor }}" aria-label="Link to this section: Challenge - {{ challenge.mobile.long_name }} ({{ challenge.anchor }})">
-                        &#x23;
-                    </a>
-                </th>
-                <td data-order="{{ challenge.mobile.long_name }}" data-search="{{ challenge.mobile.long_name }}" title="Mobile Name: {{ challenge.mobile.long_name }}">
-                    <span class="{% if challenge.is_completed %}challenge-completed{% endif %}">
-                        {{ challenge.mobile.long_name }}
-                    </span>
-            {% if challenge.is_completed %}
-                    <span class="fw-normal text-ishar">
-                        <b>Completed</b> by
-                        {{ challenge.winners_links|join:", " }}
-                    </span>
-            {% endif %}
-                </td>
-                <td data-order="{{ challenge.max_people }}" data-search="" title="Max People: {{ challenge.max_people }}">
-                    {{ challenge.max_people }}
-                </td>
-                <td data-order="{{ challenge.max_level }}" data-search="" title="Max Level: {{ challenge.max_level }}">
-                    {{ challenge.max_level }}
-                </td>
-            </tr>
-        {% endfor %}
-        </tbody>
-        <tfoot>
-            <tr class="table-group-divider text-ishar">
-                <th class="border" scope="col" title="#">
-                    <span class="text-ishar">#</span>
-                </th>
-                <th class="border" scope="col" title="Find & Kill">
-                    <span class="text-ishar">Find & Kill</span>
-                </th>
-                <th class="border" scope="col" title="Max People">
-                    <span class="text-ishar">Max People</span>
-                </th>
-                <th class="border" scope="col" title="Max Level">
-                    <span class="text-ishar">Max Level</span>
-                </th>
-            </tr>
-        </tfoot>
-    </table>
-</div>
-<script>
-    const itemName = 'challenges'
-    const searchLayout = { search: { placeholder: 'Mobile Name' } }
-    $('#challengesTable').DataTable({
-        columnDefs: [
-            {
-                orderable: false,
-                searchable: false,
-                targets: [0],
-                type: 'string'
-            },
-            {
-                searchable: true,
-                targets: [1],
-                type: 'html'
-            },
-            {
-                searchable: false,
-                targets: [2, 3],
-                type: 'num'
-            }
-        ],
-        language: {
-            info: `Showing _START_ to _END_ of _TOTAL_ ${itemName}`,
-            infoEmpty: `Showing 0 to 0 of 0 ${itemName}`,
-            infoFiltered: `(filtered from _MAX_ total ${itemName})`,
-            lengthMenu: `Show _MENU_ ${itemName}`,
-            zeroRecords: `No matching ${itemName} found`
-        },
-        layout: {
-            topStart: searchLayout,
-            topEnd: 'info',
-            bottomStart: searchLayout,
-            bottomEnd: 'info',
-        },
-        order: [
-            [3, 'desc'],
-            [2, 'desc'],
-            [1, 'asc']
-        ],
-        paging: false,
-    })
-</script>
-    {% else %}
-<div class="p-3">
-    <div class="card">
-        <div class="card-body">
-            <p class="card-text fst-italic lead text-warning">
-                Sorry, but no challenges were found.
+<div class="ac">
+
+    <!-- Hero -->
+    <header class="ac-hero">
+        <span class="ac-hero__badge">{% bi "award" %}</span>
+        <div class="ac-hero__text">
+            <h2 class="ac-hero__title">Weekly Challenges</h2>
+            <p class="ac-hero__sub">
+                A fresh set of targets every week — defeat them within each
+                party-size and level limit to earn special rewards.
             </p>
         </div>
+{% if CURRENT_SEASON and CURRENT_SEASON.get_next_cycle %}
+        <div class="ac-hero__status">
+            <span class="ac-pill ac-pill--status ac-pill--accent ac-pill--live"
+                  title="New targets arrive {{ CURRENT_SEASON.get_next_cycle|naturaltime }} — at {{ CURRENT_SEASON.get_next_cycle }}">
+                cycles in {{ CURRENT_SEASON.get_next_cycle|timeuntil }}
+            </span>
+        </div>
+{% endif %}
+    </header>
+
+    <!-- Progress tiles (double as completion filters) -->
+    <div class="ac-tiles">
+        <a class="ac-tile ac-tile--accent{% if completed is None %} ac-tile--active{% endif %}"
+           href="{% url 'challenges' %}#challenges">
+            <span class="ac-tile__n">{{ count_total }}</span>
+            <span class="ac-tile__label">This Week's Targets</span>
+        </a>
+        <a class="ac-tile {% if count_incomplete %}ac-tile--info{% else %}ac-tile--muted{% endif %}{% if completed is False %} ac-tile--active{% endif %}"
+           href="{% url 'incomplete' %}#challenges">
+            <span class="ac-tile__n">{{ count_incomplete }}</span>
+            <span class="ac-tile__label">Still Standing</span>
+        </a>
+        <a class="ac-tile {% if count_complete %}ac-tile--ok{% else %}ac-tile--muted{% endif %}{% if completed is True %} ac-tile--active{% endif %}"
+           href="{% url 'complete' %}#challenges">
+            <span class="ac-tile__n">{{ count_complete }}</span>
+            <span class="ac-tile__label">Slain</span>
+        </a>
     </div>
+
+    <!-- Targets -->
+{% if challenges %}
+    <div class="ac-rows">
+{% for challenge in challenges %}
+        <div class="ac-row{% if challenge.is_completed %} ac-row--done{% endif %}" id="{{ challenge.anchor }}">
+            <span class="ac-row__icon">
+{% if challenge.is_completed %}
+                {% bi "check-circle" label="Completed" %}
+{% else %}
+                {% bi "crosshair" label="Still standing" %}
+{% endif %}
+            </span>
+            <div class="ac-row__main">
+                <div class="ac-row__title">
+                    <a class="ac-row__link" href="#{{ challenge.anchor }}"
+                       title="Link to this challenge: {{ challenge.mobile.long_name }}">
+                        {{ challenge.mobile.long_name }}
+                    </a>
+                </div>
+                <div class="ac-row__meta">
+                    <span title="Party limit: up to {{ challenge.max_people }} {{ challenge.max_people|pluralize:'person,people' }}">
+                        {% bi "people" %} up to {{ challenge.max_people }}
+                    </span>
+                    <span title="Level limit: {{ challenge.max_level }} and below">
+                        {% bi "bar-chart" %} level {{ challenge.max_level }} max
+                    </span>
+{% if challenge.is_completed %}
+                    <span title="Slain by {{ challenge.winner_desc }}">
+                        {% bi "trophy" %} {{ challenge.winners_links|join:", " }}
+                    </span>
+{% endif %}
+                </div>
+            </div>
+            <div class="ac-row__side">
+{% if challenge.is_completed %}
+                <span class="ac-pill ac-pill--status ac-pill--ok">slain</span>
+{% else %}
+                <span class="ac-pill ac-pill--status ac-pill--muted">still standing</span>
+{% endif %}
+            </div>
+        </div>
+{% endfor %}
+    </div>
+{% else %}
+    <div class="ac-empty">
+        {% bi "award" %}
+{% if completed is True %}
+        <span>No challenges have been completed yet this week.</span>
+{% elif completed is False %}
+        <span>Every challenge has been completed this week — new targets arrive on the next cycle.</span>
+{% else %}
+        <span>No challenges are currently active.</span>
+{% endif %}
+    </div>
+{% endif %}
+
 </div>
-    {% endif %}
 {% endblock content %}

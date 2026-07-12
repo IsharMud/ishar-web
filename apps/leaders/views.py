@@ -31,9 +31,11 @@ class LeadersView(LoginRequiredMixin, NeverCacheMixin, ListView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
 
+        # One game mode is live at a time (Classic normally, Hardcore for
+        # Fated seasons), so the page shows no game-type filter UI — the
+        # per-type URLs stay routable for whenever that changes.
         context = super().get_context_data(object_list=None, **kwargs)
         context["game_type"] = self.game_type
-        context["game_types"] = GameType.choices
 
         for i in context[self.context_object_name]:
             i.challenges = i.statistics.total_challenges

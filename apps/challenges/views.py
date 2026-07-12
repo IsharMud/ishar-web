@@ -29,4 +29,16 @@ class ChallengesView(NeverCacheMixin, ListView):
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(object_list=None, **kwargs)
         context["completed"] = self.completed
+
+        # Counts for the stat tiles, using the same completion predicates
+        # as the filtered querysets so the numbers always match the lists.
+        active = Challenge.objects.filter(is_active__exact=1)
+        context["count_total"] = active.count()
+        context["count_complete"] = active.exclude(
+            winner_desc__exact=""
+        ).count()
+        context["count_incomplete"] = active.filter(
+            winner_desc__exact=""
+        ).count()
+
         return context

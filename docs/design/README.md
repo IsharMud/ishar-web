@@ -110,8 +110,8 @@ Staff surfaces first (highest value, lowest risk — few users, we control them)
 | 2 | Feedback triage (`/feedback`) | ✅ done — tiles, chips, rows, timeline |
 | 3 | Processes / other Django-admin-adjacent staff pages | ✖ closed — lives in Django admin, nothing to facelift (see decisions.md) |
 | 4 | Portal (`/portal`) + global nav/layout shell | ✅ done — shell on console surfaces, portal rebuilt |
-| 5 | Leaders, Challenges (DataTables pages) | next |
-| 6 | Connect HUD (align tokens) | later |
+| 5 | Leaders, Challenges (DataTables pages) | ✅ done — `.ac-table` for leaders, challenge rows; jQuery/DataTables dropped from both |
+| 6 | Connect HUD (align tokens) | next |
 | 7 | Home, help, errors, public content | last |
 
 ### Near-term addition

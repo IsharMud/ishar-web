@@ -245,6 +245,38 @@ pinned against the global `a:link` rule.
 ```
 Used: portal tool grids. Status: **formalized.**
 
+### `.ac-tablewrap` + `.ac-table` — data table
+The token-aligned table for **genuinely column-comparable data** (leaderboards);
+record lists use `.ac-rows` instead. The wrap owns the border/radius and
+scrolls horizontally on phones so the page never overflows. Headers are
+uppercase/dim; sortable ones wrap their label in an `.ac-table__sort`
+`<button>` — sort state lives on `th[aria-sort]` (arrow via `::after`, amber
+when active), applied by a small vanilla-JS sorter (see `leaders.html`).
+Numeric cells take `.ac-table__num` (right-aligned, tabular-nums); the rank
+column is `.ac-table__rank` (`--top` = amber podium); `.ac-table__sub` is a
+dim second line inside a cell (class under player name).
+```html
+<div class="ac-tablewrap">
+  <table class="ac-table">
+    <thead><tr>
+      <th class="ac-table__num" scope="col" data-type="num">
+        <button class="ac-table__sort" type="button">Renown</button>
+      </th>
+    </tr></thead>
+    <tbody><tr>
+      <td class="ac-table__num" data-key="4210">4,210</td>
+    </tr></tbody>
+  </table>
+</div>
+```
+Used: leaders. Status: **formalized** (supersedes the DataTables treatment —
+see decisions.md).
+
+### `.ac-row--done` / `.ac-row:target` — row states
+`--done` checks a record off: title struck through in ok-green, icon tile
+turns ok (challenges). `:target` washes a deep-linked row amber (row `id`s +
+fragment links). Status: **formalized.**
+
 ### Container variants
 `.ac` (60rem) is the default console width; `.ac--wide` (72rem) for list-heavy
 surfaces. `.ac-cta--accent` is the amber non-destructive primary (red stays
@@ -316,14 +348,15 @@ decisions.md); classic badges survive only on untouched pages.
 
 ### Empty state
 `<div class="card"><div class="card-body"><p class="card-text fst-italic lead
-text-warning">No … found.</p></div></div>` (leaders/challenges). **Superseded by
-`.ac-empty` (see above)** as pages are touched.
+text-warning">No … found.</p></div></div>`. **Superseded by `.ac-empty` (see
+above)** as pages are touched (leaders & challenges migrated).
 
 ### DataTable
 `table table-hover table-dark table-flush table-sm table-responsive
-table-striped` with `text-ishar` headers + `table-group-divider`. Used on
-leaders & challenges (needs the DataTables include). Keep, but align header/hover
-colors to tokens.
+table-striped` with `text-ishar` headers + `table-group-divider` over the
+jQuery DataTables include. **Superseded by `.ac-table` (see above);** survives
+only on `upgrades.html` — when that page is facelifted (roadmap #7), delete the
+vendored `datatables/` + `jquery-3.7.1` assets with it.
 
 ### `<details>/<summary>` section
 Collapsible with an `.anchor-link` "#" affordance + `h3/h4/h5` + count badge —
