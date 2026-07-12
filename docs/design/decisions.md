@@ -9,6 +9,24 @@ Format: `## YYYY-MM-DD — Title` · **Decision** · **Why** · (optional) **Not
 
 ---
 
+## 2026-07-12 — Static assets are content-hashed (cache busting)
+
+**Decision.** `{% static %}` URLs carry a content hash
+(`style.2aed1762….css`) via `ManifestStaticFilesStorage` — subclassed in
+`apps/core/storage.py` as non-strict, with dangling third-party references
+(jazzmin's unshipped sourcemaps) left unhashed instead of failing
+collectstatic. Consequences for design work: **never rely on a same-name CSS
+edit reaching users** (that's now guaranteed by the hash), templates must
+reference assets through `{% static %}` (or `{% bi %}`), and load-bearing
+presentation must not live only in a stylesheet a stale cache could hold —
+the shell's logo keeps a `height` attribute fallback for exactly that reason.
+
+**Why.** Round 2 shipped new templates whose logo sizing lived only in
+`style.css`; phones holding the cached old sheet rendered a full-size logo
+(and blue oversized breadcrumbs) — new markup styled by old CSS. With hashed
+filenames a stylesheet change changes its URL, so templates and styles always
+arrive as a matched set.
+
 ## 2026-07-12 — Mobile friendliness is a gating requirement (with a checklist)
 
 **Decision.** Every shipped surface must pass this checklist at a true 390px
