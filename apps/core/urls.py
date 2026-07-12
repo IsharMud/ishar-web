@@ -5,10 +5,12 @@ from apps.players.views.who import PlayerWhoView
 
 from .views import HomeView, StartView, UpgradesView, SupportView
 from .views.auth import IsharLoginView, IsharLogoutView
+from .views.styleguide import StyleGuideView
 
 
 urlpatterns = [
     path("", HomeView.as_view(), name="index"),
+    path("styleguide/", StyleGuideView.as_view(), name="styleguide"),
 
     # Authentication.
     path("login/", IsharLoginView.as_view(), name="login"),

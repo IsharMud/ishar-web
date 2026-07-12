@@ -229,10 +229,39 @@ deliberate. Status: **formalized.**
 Two-column `dl` grid; dim keys, right-aligned values. Used: feedback detail.
 Status: **formalized.**
 
+### `.ac-link` — navigation card
+Anchor sibling of `.ac-toggle`: amber icon tile + name + note, optional
+trailing `__side` element (pill/badge). Lay out in `.ac-grid`. Link colors are
+pinned against the global `a:link` rule.
+```html
+<a class="ac-link" href="…">
+  <span class="ac-link__icon">{% bi "flag" %}</span>
+  <span class="ac-link__body">
+    <span class="ac-link__name">Feedback Triage</span>
+    <span class="ac-link__note d-block">Player bug / typo / idea reports</span>
+  </span>
+  <span class="ac-link__side ac-pill ac-pill--ok">4</span>
+</a>
+```
+Used: portal tool grids. Status: **formalized.**
+
 ### Container variants
 `.ac` (60rem) is the default console width; `.ac--wide` (72rem) for list-heavy
 surfaces. `.ac-cta--accent` is the amber non-destructive primary (red stays
 destructive).
+
+---
+
+## Shell components (global frame, `style.css`)
+
+- **`.shell-panel`** — the frame surface (nav, messages, `#content`, footer,
+  search): `--ac-panel` bg, `--ac-border` hairline, `--ac-radius`. The navbar
+  variant adds a 2px amber bottom edge.
+- **`.shell-menu`** — dropdown menus: `--ac-elev` bg, `--ac-border-2` hairline,
+  small radius.
+- **Breadcrumbs** are a quiet page-title line (no box); h2-sized crumbs from
+  old templates are downsized by CSS. Crumb/nav icons are amber; footer icons
+  dim.
 
 ---
 

@@ -9,6 +9,61 @@ Format: `## YYYY-MM-DD — Title` · **Decision** · **Why** · (optional) **Not
 
 ---
 
+## 2026-07-12 — The global shell moves to the console surfaces
+
+**Decision.** The frame every page sits in — body, navbar, breadcrumb,
+messages, `#content`, footer — now uses the layered-grey token surfaces:
+`body` on `--ac-bg`, panels via the new `.shell-panel` (panel bg, hairline
+border, `--ac-radius`), dropdown menus via `.shell-menu` (elev bg). Amber is
+restrained to brand: nav text/icons, a 2px amber bottom edge on the navbar,
+headings. Breadcrumbs become a quiet page-title line (no box; h2-sized crumbs
+downsized by CSS so untouched templates inherit the fix). The logo slims to
+8rem (5.5rem on phones). The heavy black + `.border-ishar` outline boxes are no
+longer part of the shell — they live on only inside untouched page content, and
+`.border-ishar` remains defined for them.
+
+**Why.** The shell is the highest-leverage surface (every page, every visit).
+Nesting the console pages inside a black+amber frame produced two competing
+visual systems on one screen; one quiet frame lets both console surfaces and
+classic content read well while pages migrate. Icons also converge on amber
+(nav/breadcrumb) and dim (footer), replacing the blue/amber mishmash.
+
+## 2026-07-12 — Portal adopts the console language; popovers retired there
+
+**Decision.** `/portal` is rebuilt: hero (account, created, counts, essence +
+privacy pills), gated tool grids using the new `.ac-link` navigation card,
+characters as `.ac-rows` (immortals get an info pill and recede to a phrase;
+mortals show class/race/alignment and nonzero lifetime stats as icon+number
+meta), essence as `.ac-tile`s, upgrades as `.ac-kv`, and the private-profile
+toggle as an `.ac-switch` whose result renders in an `.ac-note` via
+`textContent` (the old `innerHTML` write is gone). Bootstrap tooltip/popover
+help-icons are replaced by `.ac-panel__hint` prose with links — fewer JS
+behaviors, better on phones.
+
+**Why.** The portal is the account hub and the template other pages copy; it
+was the largest remaining pile of pasted list-group/details markup.
+
+## 2026-07-12 — Live style guide at /styleguide (Eternal+)
+
+**Decision.** A staff-only page (`apps/core/views/styleguide.py`, linked from
+the Portal dropdown and portal grid) renders every token and component live.
+Page-specific demo CSS stays in the template's `<style>` block, not the shared
+layer.
+
+**Why.** The component set is now large enough that a copy-paste reference and
+one-glance regression check pays for itself.
+
+## 2026-07-12 — Roadmap #3 (Processes) is closed as not-a-surface
+
+**Decision.** The "Processes" staff pages live in Django admin (jazzmin), not
+in this site's template layer, and the admin's own notes mark its actions as
+container-model relics (the Deploy Console replaced the actionable part).
+There is nothing to facelift; removing the app entirely is tracked as game-repo
+follow-up cleanup, not design work.
+
+**Why.** Honest roadmap: a facelift line item that would restyle a dead surface
+is entropy, not progress.
+
 ## 2026-07-11 — E1: shared tokens live in style.css
 
 **Decision.** The `--ac-*` design tokens (plus `--ishar-color`) are defined once
