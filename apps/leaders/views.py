@@ -24,7 +24,18 @@ class LeadersView(LoginRequiredMixin, NeverCacheMixin, ListView):
         return super().setup(request, *args, **kwargs)
 
     def get_queryset(self):
-        qs = super().get_queryset()
+        # Pull every related row the table reads — class/level (`common`),
+        # renown/challenges/quests/deaths (`statistics`) and privacy
+        # (`account`) — in one query, instead of a lookup per player per
+        # column. The template reads these relations directly; flattening
+        # them onto each instance is avoided because those attribute names
+        # (e.g. `quests`) collide with model fields and reverse relations.
+        qs = super().get_queryset().select_related(
+            "account",
+            "common",
+            "common__player_class",
+            "statistics",
+        )
         if self.game_type is not None:
             qs = qs.filter(game_type__exact=self.game_type.value)
         return qs
@@ -36,13 +47,4 @@ class LeadersView(LoginRequiredMixin, NeverCacheMixin, ListView):
         # per-type URLs stay routable for whenever that changes.
         context = super().get_context_data(object_list=None, **kwargs)
         context["game_type"] = self.game_type
-
-        for i in context[self.context_object_name]:
-            i.challenges = i.statistics.total_challenges
-            i.deaths = i.statistics.total_deaths
-            i.level = i.common.level
-            i.player_class = i.common.player_class
-            i.quests = i.statistics.total_quests
-            i.renown = i.statistics.total_renown
-
         return context
