@@ -1,6 +1,7 @@
 from logging import getLogger
 from pathlib import Path
 import re
+import threading
 
 from django.conf import settings
 from django.urls import reverse
@@ -362,8 +363,22 @@ class HelpTab:
         # Parse "helptab" sections into dictionary of help topic objects.
         topics = {}
 
+        # Parse report: silently-dropped topics are a recurring "why is X
+        # missing?" source (see #51/#84), so tally every skip reason and log a
+        # one-line summary — a topic that never shows up is now diagnosable.
+        counts = {
+            "sections": 0, "kept": 0, "unsplittable": 0,
+            "immortal": 0, "not_playing": 0, "headerless": 0,
+        }
+        dropped_playing = []  # (level, first header line) for non-"32 " drops
+
         # Iterate each "helptab" section in the list provided.
         for section in sections:
+
+            # Ignore blank trailing chunks left by the section split.
+            if not section.strip():
+                continue
+            counts["sections"] += 1
 
             # Sections contain a header, and a body, separated by "*".
             try:
@@ -371,7 +386,8 @@ class HelpTab:
 
             # Log any skipped "helptab" sections which could not be split.
             except ValueError as val_err:
-                logger.error(f"Skipping: {section.__repr__()}")
+                counts["unsplittable"] += 1
+                logger.error(f"Skipping unsplittable section: {section.__repr__()}")
                 logger.exception(val_err)
                 continue  # Next section.
 
@@ -379,82 +395,194 @@ class HelpTab:
             finally:
                 help_topic = None
 
-            # First header line is player level to which the section applies.
+            # First header line is the player level the section applies to.
             header_lines = header.split("\n")
-            topic_level = int(header_lines[0])
+            try:
+                topic_level = int(header_lines[0])
+            except (ValueError, IndexError):
+                counts["headerless"] += 1
+                logger.error(f"Skipping section with no level: {header.__repr__()}")
+                continue
 
             # Only consider helptab sections that are meant for mortal players.
-            if topic_level < settings.MIN_IMMORTAL_LEVEL:
+            if topic_level >= settings.MIN_IMMORTAL_LEVEL:
+                counts["immortal"] += 1
+                continue
 
-                # Only consider helptab sections for "32 " ("Playing") state.
-                first_line = header_lines[1].strip()
-                if first_line.startswith("32 "):
+            # Only consider helptab sections for "32 " ("Playing") state.
+            first_line = header_lines[1].strip() if len(header_lines) > 1 else ""
+            if not first_line.startswith("32 "):
+                counts["not_playing"] += 1
+                if first_line:
+                    dropped_playing.append((topic_level, first_line))
+                continue
 
-                    # Use anything after first space (after "32 ") as name.
-                    name = " ".join(first_line.split(" ")[1:]).strip()
+            # Use anything after first space (after "32 ") as name.
+            name = " ".join(first_line.split(" ")[1:]).strip()
 
-                    # Create a help topic object using the level and name.
-                    help_topic = self.HelpTopic()
-                    help_topic.level = topic_level
-                    help_topic.name = name
+            # Create a help topic object using the level and name.
+            help_topic = self.HelpTopic()
+            help_topic.level = topic_level
+            help_topic.name = name
 
-                    # Parse the rest of the help topic header, to get aliases.
-                    help_topic.parse_header(header_lines=header_lines[2:])
+            # Parse the rest of the help topic header, to get aliases.
+            help_topic.parse_header(header_lines=header_lines[2:])
 
-                    # Parse the content (below "*") within the topic section.
-                    help_topic.parse_content(content=content)
+            # Parse the content (below "*") within the topic section.
+            help_topic.parse_content(content=content)
 
             # Append newly created help topic object to list of help topics.
-            if help_topic is not None and help_topic.name:
+            if help_topic.name:
                 topics[help_topic.name] = help_topic
+                counts["kept"] += 1
+
+        # Emit the parse report so silently-dropped topics are diagnosable.
+        logger.info(
+            "helptab parse: %d topics kept from %d sections "
+            "(%d immortal, %d non-playing, %d unsplittable, %d headerless)",
+            counts["kept"], counts["sections"], counts["immortal"],
+            counts["not_playing"], counts["unsplittable"], counts["headerless"],
+        )
+        if dropped_playing:
+            logger.debug(
+                "helptab non-playing drops (level, first line): %s",
+                "; ".join(f"[{lvl}] {line}" for lvl, line in dropped_playing[:50]),
+            )
 
         # Return complete list of help topics parsed from "helptab" sections.
         return topics
 
     def search(self, search_name: str) -> dict[str:HelpTopic,]:
-        # Search help topic names and aliases for a string.
+        # Search help topic names and aliases via a deterministic ladder.
+        #
+        # The old search was a single substring sweep over every name and
+        # alias, so "heal" dragged in "Score" (whose "Health" alias contains
+        # "heal") and results had no relevance order. Instead, sort every
+        # topic into the *best* tier it matches and return the first non-empty
+        # tier, so a cleaner match always wins over a looser one. Name matches
+        # rank above alias matches, then exact > prefix > substring within each:
+        #
+        #   1. exact topic name      (case-insensitive)
+        #   2. exact alias           (case-insensitive)
+        #   3. topic-name prefix
+        #   4. topic-name substring
+        #   5. alias prefix
+        #   6. alias substring
+        #
+        # Name-before-alias is what fully fixes "heal" -> "Score": "Health" is
+        # a *prefix* of "heal", so a name/alias-blind ladder still surfaces
+        # Score at the alias tier; ranking name-substring (4) above alias-prefix
+        # (5) returns the actual "Spell Heal*" topics and drops Score entirely.
+        # Verified against the live helptab (see the PR / decisions.md).
+        query = (search_name or "").strip()
+        if not query:
+            return {}
+        q = query.casefold()
 
-        # Immediately return exact match.
-        if search_name in self.help_topics:
-            return {search_name: self.help_topics[search_name]}
-
-        # Set a variety of formats of the search string.
-        fmts = (
-            search_name.title(),
-            search_name.lower(),
-            search_name.upper(),
-            search_name.strip(),
-        )
-
-        # Iterate each help topic object to search their names and aliases.
-        search_results = {}
+        tiers = ({}, {}, {}, {}, {}, {})
+        exact_name, exact_alias, name_pfx, name_sub, alias_pfx, alias_sub = tiers
         for topic_name, topic in self.help_topics.items():
+            name_cf = topic_name.casefold()
+            aliases_cf = [alias.casefold() for alias in topic.aliases]
 
-            # Return direct alias match.
-            if search_name in topic.aliases:
-                return {topic_name: topic}
+            if name_cf == q:
+                exact_name[topic_name] = topic
+            elif q in aliases_cf:
+                exact_alias[topic_name] = topic
+            elif name_cf.startswith(q):
+                name_pfx[topic_name] = topic
+            elif q in name_cf:
+                name_sub[topic_name] = topic
+            elif any(alias.startswith(q) for alias in aliases_cf):
+                alias_pfx[topic_name] = topic
+            elif any(q in alias for alias in aliases_cf):
+                alias_sub[topic_name] = topic
 
-            # Iterate variety of formats of the string.
-            do_add = False
-            for name_fmt in fmts:
+        # Return the strongest non-empty tier, name-sorted for stable output.
+        for tier in tiers:
+            if tier:
+                return dict(sorted(tier.items()))
+        return {}
 
-                # Check if the topic name contains the string.
-                if name_fmt in topic_name:
-                    do_add = True
+    def suggest(self, search_name: str, limit: int = 6) -> list[str]:
+        # "Did you mean" fallback for a 404: closest topic names/aliases.
+        #
+        # difflib (stdlib) gives fuzzy suggestions for typos the prefix/
+        # substring tiers miss ("metero" -> "Meteor Swarm"), with no new
+        # dependency. Match against names *and* aliases but only ever suggest
+        # canonical topic names.
+        from difflib import get_close_matches
 
-                # Check for any alias exact matches.
-                elif name_fmt in topic.aliases:
-                    do_add = True
+        query = (search_name or "").strip().casefold()
+        if not query:
+            return []
 
-                # Check if the topic aliases contain the string.
-                else:
-                    for alias in topic.aliases:
-                        if name_fmt in alias:
-                            do_add = True
+        # Map every searchable handle (name or alias, folded) to its topic.
+        handles: dict[str, str] = {}
+        for topic_name, topic in self.help_topics.items():
+            handles.setdefault(topic_name.casefold(), topic_name)
+            for alias in topic.aliases:
+                handles.setdefault(alias.casefold(), topic_name)
 
-            #  Add the help topic to the search results, if necessary.
-            if do_add is True:
-                search_results[topic_name] = topic
+        # Ordered, de-duplicated topic names from the closest handles.
+        suggestions: list[str] = []
+        for handle in get_close_matches(query, handles.keys(), n=limit * 2, cutoff=0.6):
+            topic_name = handles[handle]
+            if topic_name not in suggestions:
+                suggestions.append(topic_name)
+            if len(suggestions) >= limit:
+                break
+        return suggestions
 
-        # Return the dictionary of any found help topics.
-        return search_results
+
+# Module-level cache so the helptab is parsed once and re-parsed only when the
+# file changes. The file is a live mount from the game, so the old
+# ``HELPTAB = HelpTab()`` at import pinned the parse to Daphne start — helptab
+# edits only appeared after the next web deploy. Now each request re-stats the
+# file and re-parses on mtime change, keeping the last good parse if a re-parse
+# ever fails (a bad edit degrades to stale, never to a 500).
+_helptab_lock = threading.Lock()
+_helptab_cache = {"helptab": None, "mtime": None, "path": None}
+
+
+def get_helptab(path: (Path, str) = None) -> HelpTab:
+    """Return a cached HelpTab, re-parsing when the file's mtime changes."""
+    if path is None:
+        path = settings.HELPTAB
+    path = Path(path)
+
+    # Stat the file; if it's momentarily unreadable (e.g. mid-deploy remount),
+    # serve the last good parse rather than erroring.
+    try:
+        mtime = path.stat().st_mtime
+    except OSError as os_err:
+        with _helptab_lock:
+            if _helptab_cache["helptab"] is not None:
+                logger.error("Could not stat helptab %s: %s", path, os_err)
+                return _helptab_cache["helptab"]
+        raise
+
+    with _helptab_lock:
+        cached = _helptab_cache["helptab"]
+        if (
+            cached is not None
+            and _helptab_cache["mtime"] == mtime
+            and _helptab_cache["path"] == path
+        ):
+            return cached
+
+        # Parse under the lock so a burst of concurrent requests doesn't each
+        # re-parse the same ~550KB file; the parse is fast and help traffic is
+        # light, so serializing is cheaper than a thundering herd.
+        try:
+            parsed = HelpTab(path=path)
+        except Exception:
+            if cached is not None:
+                logger.exception(
+                    "Re-parsing helptab %s failed; serving last good parse", path
+                )
+                return cached
+            raise
+
+        _helptab_cache.update(helptab=parsed, mtime=mtime, path=path)
+        return parsed

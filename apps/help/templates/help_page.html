@@ -116,6 +116,18 @@
     </div>
 {% endif %}
 
+    <!-- Did you mean (shown on a 404 with near-matches) -->
+{% if suggestions %}
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "signpost-split" %} Did you mean</div>
+        <nav class="ac-filter" aria-label="Suggested topics">
+{% for label, url in suggestions %}
+            <a class="ac-chip" href="{{ url }}">{{ label }}</a>
+{% endfor %}
+        </nav>
+    </div>
+{% endif %}
+
     <!-- Search -->
     <div class="ac-panel">
         <div class="ac-panel__h">{% bi "search" %} Search Help</div>

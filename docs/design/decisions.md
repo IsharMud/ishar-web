@@ -9,6 +9,49 @@ Format: `## YYYY-MM-DD — Title` · **Decision** · **Why** · (optional) **Not
 
 ---
 
+## 2026-07-13 — DB-driven skill/spell pages (`/skills`) and the help→skill merge
+
+**Decision.** The dormant `apps/skills` app is now a public surface: `/skills/`
+(a searchable index grouped by class, plus a "Racial" bucket) and
+`/skills/<name>/` (one skill/spell), built entirely on existing `.ac-*`
+components — `.ac-hero`, `.ac-panel`, `.ac-tablewrap`/`.ac-table` for the
+"Learnable By" class/race levels, `.ac-kv` for details, `.ac-filter`/`.ac-chip`
+for forces + the class jump-nav, `.ac-quote` for the description, `.ac-empty` +
+a did-you-mean chip row for 404s. No new CSS. Wired into the Help nav dropdown.
+The detail page mirrors the in-game `skill` command (`display_skill_full`),
+minus per-player state: type, classes/races with learn levels, stat pairing,
+quick/standard action, position, save, cooldown, category, forces, description.
+
+Help and skills are **merged** the way the game's `help` does
+(`ishar-mud src/dbase/help.c`): a help lookup with no helptab topic falls back
+to a skill-name match and redirects to `/skills/<name>/`, and deprecated
+`Spell *`-prefixed helptab topics redirect to their live skill page instead of
+rendering stale text. **Why.** The game retired per-skill helpfiles for the
+dynamic `skill` command; the website only ever parsed `helptab`, so skill-only
+topics (Earthquake, Meteor Swarm — issue #51) were simply missing. Reading the
+shared DB the game already owns closes that gap with no bridge, and routing
+deprecated spell topics to the live data reduces entropy (one source of truth).
+
+**Notes.** Flag-derived fields (quick/standard action, movement) read
+`spell_flags` names heuristically and should be spot-checked on prod. Managed
+= False models; two harmless read-only field additions (`Force.display_name`,
+skill display helpers).
+
+## 2026-07-13 — Deterministic help search ladder (name before alias)
+
+**Decision.** `HelpTab.search` sorts each topic into the single strongest tier
+it matches and returns the first non-empty tier: **exact name → exact alias →
+name prefix → name substring → alias prefix → alias substring** (all
+case-insensitive), name matches ranked above alias matches. This supersedes the
+old single substring sweep over every name and alias. **Why.** The old sweep
+had no relevance order and over-matched: searching "heal" returned "Score"
+because its "Health" alias *contains* (and even prefixes) "heal". Ranking
+name-substring above alias-prefix returns the actual `Spell Heal*` topics and
+drops Score entirely — verified against the live 563 KB helptab. The ladder
+also gives 404s "did you mean" suggestions (stdlib `difflib`) drawn from both
+topic names and skill names. Deliberately one tier finer than the original
+5-tier sketch, because real data showed a 5-tier ladder still surfaced Score.
+
 ## 2026-07-12 — Featured clients (`.ac-link--featured`) and a browser-first clients page
 
 **Decision.** `/clients` now leads with an **In Your Browser** panel — hint
