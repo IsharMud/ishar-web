@@ -1,5 +1,6 @@
 from django.urls import path
 
+from .views.dashboard import DashboardView
 from .views.deploy import (
     DeployActionView,
     DeployPingView,
@@ -15,6 +16,7 @@ from .views.private import SetPrivateView
 urlpatterns = [
     path("", PortalView.as_view(), name="portal"),
     path("account/", PortalView.as_view(), name="account"),
+    path("dashboard/", DashboardView.as_view(), name="dashboard"),
     path("password/", PasswordView.as_view(), name="password"),
     path("private/", SetPrivateView.as_view(), name="set_private"),
     path("deploy/", DeployView.as_view(), name="deploy"),
