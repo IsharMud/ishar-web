@@ -35,11 +35,17 @@
             <span class="ac-row__icon">{% bi "file-earmark-pdf" %}</span>
             <div class="ac-row__main">
                 <div class="ac-row__title">
+{% if patch.file_size is not None %}
                     <a class="ac-row__link" href="{{ patch.patch_file.url }}" target="_blank"
                        title="Open the &quot;{{ patch.patch_name }}&quot; patch PDF in a new window.">
                         {{ patch.patch_name }}
                     </a>
                     {% bi "box-arrow-up-right" css="text-secondary" label="Opens in a new window." %}
+{% else %}
+                    <span class="ac-row__link" title="The &quot;{{ patch.patch_name }}&quot; patch PDF is currently unavailable.">
+                        {{ patch.patch_name }}
+                    </span>
+{% endif %}
                 </div>
                 <div class="ac-row__meta">
                     <span title="{{ patch.account.get_username|title }}">
