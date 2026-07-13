@@ -7,7 +7,7 @@ from apps.classes.models.skill import ClassSkill
 from apps.races.models.skill import RaceSkill
 
 from .models import Skill
-from .utils import find_skill_by_name
+from .utils import find_skill_by_name, visible_skills
 
 
 class SkillIndexView(TemplateView):
@@ -19,12 +19,22 @@ class SkillIndexView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # Group learnable skills under each playable class, ordered by the
-        # level a member of that class first learns them.
+        # The set of skills a mortal is allowed to see: Skill/Spell/Passive,
+        # learnable by a playable class or race, not season-gated.
+        visible_ids = set(visible_skills().values_list("id", flat=True))
+
+        # Group them under each playable class, ordered by learn level, using
+        # only non-deprecated class rows (min_level >= 0, max_learn > 0) so the
+        # game's hidden/deprecated skills stay out of the lists.
         class_skills = (
             ClassSkill.objects
             .select_related("skill", "player_class")
-            .filter(player_class__is_playable=True, skill__skill_name__isnull=False)
+            .filter(
+                player_class__is_playable=True,
+                min_level__gte=0,
+                max_learn__gt=0,
+                skill_id__in=visible_ids,
+            )
             .order_by("player_class__class_name", "min_level", "skill__skill_name")
         )
         groups: dict = {}
@@ -45,19 +55,22 @@ class SkillIndexView(TemplateView):
 
         class_groups = sorted(groups.values(), key=lambda g: g["name"].lower())
 
-        # A "Racial" bucket for skills a race grants but no playable class does,
-        # so racial abilities are still discoverable by browsing.
-        class_skill_ids = set(
-            ClassSkill.objects.values_list("skill_id", flat=True)
-        )
+        # A "Racial" bucket for skills a *playable* race grants but no playable
+        # class does, so racial abilities are still discoverable by browsing.
+        # Non-playable (immortal / mob-only) races are excluded, matching the
+        # mortal view of the game.
         racial_ids = (
-            set(RaceSkill.objects.values_list("skill_id", flat=True))
-            - class_skill_ids
+            set(
+                RaceSkill.objects
+                .filter(
+                    race__is_playable=True, level__gte=0, skill_id__in=visible_ids,
+                )
+                .values_list("skill_id", flat=True)
+            )
+            - shown_ids
         )
         racial_skills = list(
-            Skill.objects
-            .filter(id__in=racial_ids, skill_name__isnull=False)
-            .order_by("skill_name")
+            Skill.objects.filter(id__in=racial_ids).order_by("skill_name")
         )
         if racial_skills:
             class_groups.append(
@@ -106,9 +119,7 @@ class SkillDetailView(TemplateView):
     def _suggest(name: str) -> list:
         if not name:
             return []
-        names = Skill.objects.filter(
-            skill_name__isnull=False
-        ).values_list("skill_name", flat=True)
+        names = visible_skills().values_list("skill_name", flat=True)
         folded = {n.casefold(): n for n in names}
         return [
             folded[match]
@@ -124,15 +135,22 @@ class SkillDetailView(TemplateView):
         context["suggestions"] = self.suggestions
 
         if self.skill is not None:
+            # Only playable classes/races that can actually learn it, mirroring
+            # display_skill_full's mortal view: it hides non-playable (immortal
+            # / mob-only) classes/races and deprecated rows (can_learn == -1,
+            # i.e. min_level < 0 or max_learn <= 0).
             context["class_skills"] = (
                 ClassSkill.objects
-                .filter(skill=self.skill)
+                .filter(
+                    skill=self.skill, player_class__is_playable=True,
+                    min_level__gte=0, max_learn__gt=0,
+                )
                 .select_related("player_class")
                 .order_by("min_level", "player_class__class_name")
             )
             context["race_skills"] = (
                 RaceSkill.objects
-                .filter(skill=self.skill)
+                .filter(skill=self.skill, race__is_playable=True, level__gte=0)
                 .select_related("race")
                 .order_by("level", "race__display_name")
             )

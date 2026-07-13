@@ -100,13 +100,12 @@ class HelpView(TemplateView):
 
         # Skill-name suggestions (link to their skill pages) — the way
         # skill-only topics like "Earthquake" become findable from Help.
-        from apps.skills.models import Skill
+        # Restricted to mortal-visible skills so we never suggest a hidden one.
+        from apps.skills.utils import visible_skills
 
         folded = {
             name.casefold(): name
-            for name in Skill.objects.filter(
-                skill_name__isnull=False
-            ).values_list("skill_name", flat=True)
+            for name in visible_skills().values_list("skill_name", flat=True)
         }
         for match in get_close_matches(q, folded.keys(), n=6, cutoff=0.6):
             name = folded[match]

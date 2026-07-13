@@ -9,6 +9,30 @@ Format: `## YYYY-MM-DD — Title` · **Decision** · **Why** · (optional) **Not
 
 ---
 
+## 2026-07-13 — `/skills` shows only what a mortal may see (visibility gate)
+
+**Decision.** The public skill pages replicate the game's mortal-visibility
+predicate (ishar-mud `info.c` `stack_skills_by_type` mort_only path), not a raw
+read of `class_skills`. A skill is shown only if **(1)** its `skill_type` is
+Skill / Spell / Passive — Craft, Enchant, and the internal Type marker are
+excluded (`skill_types_t` enum: TYPE=0, SKILL=1, SPELL=2, CRAFT=3, ENCHANT=4,
+PASSIVE=5 → show 1/2/5); **(2)** some **playable** class can learn it
+(`class_skills.min_level >= 0 AND max_learn > 0`) or some **playable** race can
+(`races_skills.level >= 0`) — mirroring `can_class/race_learn_skill >= 0`; and
+**(3)** it isn't gated to a not-yet-live season (`seasons.new_features_on` off
+→ the 13 gated `enum_symbol`s are hidden). One predicate,
+`apps/skills/utils.visible_skills()`, gates the index, the detail page,
+`find_skill_by_name` (so the `help <skill>` fallback and direct URLs 404 for
+hidden skills), and every "did you mean" suggestion. Class/race associations on
+a detail page are likewise filtered to playable + learnable, mirroring
+`display_skill_full`'s mortal loops.
+
+**Why.** A public, crawlable page must not surface deprecated enchants,
+immortal / mob-only skills, or unreleased-season content the game deliberately
+hides from mortals (they were cluttering the Mage/Necromancer lists). Reading
+raw join rows exposed all of it; the centralized predicate is the single source
+of truth so the four entry points can't drift.
+
 ## 2026-07-13 — DB-driven skill/spell pages (`/skills`) and the help→skill merge
 
 **Decision.** The dormant `apps/skills` app is now a public surface: `/skills/`
