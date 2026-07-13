@@ -77,18 +77,18 @@
             </thead>
             <tbody>
 {% for leader in leaders %}
-                <tr data-search="{{ leader.name|lower }} {{ leader.player_class|lower }}">
+                <tr data-search="{{ leader.name|lower }} {{ leader.common.player_class|lower }}">
                     <td class="ac-table__rank{% if forloop.counter <= 3 %} ac-table__rank--top{% endif %}" data-key="{{ forloop.counter }}">{{ forloop.counter }}</td>
-                    <td data-key="{{ leader.name|lower }}" title="{{ leader.name }} ({{ leader.player_class }})">
+                    <td data-key="{{ leader.name|lower }}" title="{{ leader.name }} ({{ leader.common.player_class }})">
                         {{ leader.player_link }}
-                        <span class="ac-table__sub">{{ leader.player_class }}</span>
+                        <span class="ac-table__sub">{{ leader.common.player_class }}</span>
                     </td>
-                    <td class="ac-table__num" data-key="{{ leader.level }}">{{ leader.level }}</td>
+                    <td class="ac-table__num" data-key="{{ leader.common.level }}">{{ leader.common.level }}</td>
                     <td class="ac-table__num" data-key="{{ leader.remorts }}">{{ leader.remorts }}</td>
-                    <td class="ac-table__num" data-key="{{ leader.renown }}">{{ leader.renown|intcomma }}</td>
-                    <td class="ac-table__num" data-key="{{ leader.challenges }}">{{ leader.challenges }}</td>
-                    <td class="ac-table__num" data-key="{{ leader.quests }}">{{ leader.quests }}</td>
-                    <td class="ac-table__num" data-key="{{ leader.deaths }}">{{ leader.deaths }}</td>
+                    <td class="ac-table__num" data-key="{{ leader.statistics.total_renown }}">{{ leader.statistics.total_renown|intcomma }}</td>
+                    <td class="ac-table__num" data-key="{{ leader.statistics.total_challenges }}">{{ leader.statistics.total_challenges }}</td>
+                    <td class="ac-table__num" data-key="{{ leader.statistics.total_quests }}">{{ leader.statistics.total_quests }}</td>
+                    <td class="ac-table__num" data-key="{{ leader.statistics.total_deaths }}">{{ leader.statistics.total_deaths }}</td>
                 </tr>
 {% endfor %}
             </tbody>
