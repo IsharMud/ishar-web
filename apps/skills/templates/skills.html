@@ -1,0 +1,102 @@
+{% extends "layout.html" %}
+{% load ishar %}
+{% block meta_title %}{{ WEBSITE_TITLE }} Skills &amp; Spells | MUD Abilities Guide{% endblock meta_title %}
+{% block meta_description %}Browse every skill and spell in {{ WEBSITE_TITLE }}, a free online MUD — grouped by class, with the classes, races, levels, and details for each ability.{% endblock meta_description %}
+{% block meta_url %}{% url 'skills' %}{% endblock meta_url %}
+{% block title %}{{ WEBSITE_TITLE }} Skills &amp; Spells{% endblock title %}
+{% block page_heading %}{{ WEBSITE_TITLE }} Skills &amp; Spells{% endblock page_heading %}
+{% block scripts %}let focusTo = 'skills'{% endblock scripts %}
+{% block breadcrumbs %}
+    {% crumb "Skills" "mortarboard" anchor="skills" active=True %}
+{% endblock breadcrumbs %}
+{% block content %}
+<div class="ac ac--wide">
+
+    <header class="ac-hero" id="skills">
+        <span class="ac-hero__badge">{% bi "mortarboard" %}</span>
+        <div class="ac-hero__text">
+            <h2 class="ac-hero__title">Skills &amp; Spells</h2>
+            <p class="ac-hero__sub">Every skill and spell in {{ WEBSITE_TITLE }}, grouped by class — the same facts the in-game <code>skill</code> command shows.</p>
+        </div>
+        <div class="ac-hero__status">
+            <span class="ac-pill ac-pill--accent">{{ skill_count }}</span>
+        </div>
+    </header>
+
+{% if groups %}
+    <!-- Filter + jump nav -->
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "search" %} Find a Skill</div>
+        <div class="ac-inputgroup">
+            <span class="ac-inputgroup__icon">{% bi "search" %}</span>
+            <input class="ac-input" type="search" id="skill-filter" autocomplete="off" aria-label="Filter skills by name" placeholder="Filter by name…">
+        </div>
+        <nav class="ac-filter mt-2" aria-label="Jump to class">
+{% for group in groups %}
+            <a class="ac-chip" href="#{{ group.id }}" data-group="{{ group.id }}">{{ group.name }} <span class="text-body-secondary">{{ group.skills|length }}</span></a>
+{% endfor %}
+        </nav>
+    </div>
+
+    <!-- Groups -->
+{% for group in groups %}
+    <div class="ac-panel" id="{{ group.id }}" data-group-panel>
+        <div class="ac-panel__h">
+            {% bi "mortarboard" %} {{ group.name }}
+            <span class="text-body-secondary" data-group-count>{{ group.skills|length }}</span>
+        </div>
+        <ul class="two-col list-unstyled mb-0">
+{% for row in group.skills %}
+            <li data-name="{{ row.skill.skill_name|lower }}" title="{{ row.skill.skill_name }}">
+                <a href="{{ row.skill.get_absolute_url }}">{{ row.skill.skill_name }}</a>{% if row.level %} <small class="text-body-secondary">Lv&nbsp;{{ row.level }}</small>{% endif %}
+            </li>
+{% endfor %}
+        </ul>
+    </div>
+{% endfor %}
+
+    <div class="ac-empty" id="skills-empty" hidden>
+        {% bi "search" %}
+        <span>No skills match your filter.</span>
+    </div>
+{% else %}
+    <div class="ac-empty">
+        {% bi "search" %}
+        <span>No skills were found.</span>
+    </div>
+{% endif %}
+
+</div>
+
+<script>
+(() => {
+    const filter = document.getElementById("skill-filter")
+    if (!filter) return
+    const panels = [...document.querySelectorAll("[data-group-panel]")]
+    const chips = [...document.querySelectorAll("[data-group]")]
+    const empty = document.getElementById("skills-empty")
+
+    filter.addEventListener("input", () => {
+        const q = filter.value.trim().toLowerCase()
+        let total = 0
+        for (const panel of panels) {
+            let shown = 0
+            for (const item of panel.querySelectorAll("li[data-name]")) {
+                const hit = !q || item.dataset.name.includes(q)
+                item.hidden = !hit
+                if (hit) shown += 1
+            }
+            panel.hidden = shown === 0
+            const count = panel.querySelector("[data-group-count]")
+            if (count) count.textContent = shown
+            total += shown
+        }
+        for (const chip of chips) {
+            const panel = document.getElementById(chip.dataset.group)
+            chip.hidden = panel ? panel.hidden : false
+        }
+        if (empty) empty.hidden = total > 0
+    })
+})()
+</script>
+{% endblock content %}

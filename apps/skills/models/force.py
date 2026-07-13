@@ -20,6 +20,13 @@ class Force(models.Model):
         help_text="Name of the force.",
         verbose_name="Force Name",
     )
+    display_name = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        help_text="Friendly display name of the force.",
+        verbose_name="Display Name",
+    )
 
     class Meta:
         managed = False
@@ -31,7 +38,7 @@ class Force(models.Model):
         return f"{self.__class__.__name__}: {self.__str__()} ({self.pk})"
 
     def __str__(self) -> str:
-        return self.force_name
+        return self.display_name or self.force_name
 
     def natural_key(self) -> str:
         """Natural key by force name."""

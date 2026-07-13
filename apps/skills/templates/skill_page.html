@@ -1,0 +1,177 @@
+{% extends "layout.html" %}
+{% load ishar %}
+{% block meta_title %}{% if skill %}{{ skill.skill_name }} - {{ WEBSITE_TITLE }} {{ skill.type_name }}{% else %}Skill Not Found - {{ WEBSITE_TITLE }}{% endif %}{% endblock meta_title %}
+{% block meta_description %}{% if skill %}{{ skill.skill_name }} is a {{ skill.type_name|lower }} in {{ WEBSITE_TITLE }}, a free online MUD. See which classes and races learn it, at what level, and its full details.{% else %}That skill could not be found in {{ WEBSITE_TITLE }}.{% endif %}{% endblock meta_description %}
+{% block meta_url %}{% if skill %}{{ skill.get_absolute_url }}{% else %}{% url 'skills' %}{% endif %}{% endblock meta_url %}
+{% block title %}{% if skill %}{{ skill.skill_name }} - {{ WEBSITE_TITLE }} {{ skill.type_name }}{% else %}Skill Not Found{% endif %}{% endblock title %}
+{% block page_heading %}{% if skill %}{{ skill.skill_name }}{% else %}Skill Not Found{% endif %}{% endblock page_heading %}
+{% block scripts %}let focusTo = 'skill'{% endblock scripts %}
+{% block breadcrumbs %}
+    {% crumb "Skills" "mortarboard" urlname="skills" anchor="skills" %}
+{% if skill %}
+    {% crumb skill.skill_name skill.is_spell|yesno:"magic,lightning-charge" anchor="skill" active=True %}
+{% else %}
+    {% crumb "Not Found" "question-circle" anchor="skill" active=True %}
+{% endif %}
+{% endblock breadcrumbs %}
+{% block content %}
+<div class="ac">
+
+{% if skill %}
+    <header class="ac-hero" id="skill">
+        <span class="ac-hero__badge">
+{% if skill.is_spell %}{% bi "magic" %}{% elif skill.skill_type == 3 %}{% bi "hammer" %}{% else %}{% bi "lightning-charge" %}{% endif %}
+        </span>
+        <div class="ac-hero__text">
+            <h2 class="ac-hero__title">{{ skill.skill_name }}</h2>
+{% if skill.command %}
+            <p class="ac-hero__sub">Command: <code>{{ skill.command }}</code></p>
+{% endif %}
+        </div>
+{% if skill.type_name %}
+        <div class="ac-hero__status">
+            <span class="ac-pill{% if skill.is_spell %} ac-pill--accent{% endif %}">{{ skill.type_name }}</span>
+        </div>
+{% endif %}
+    </header>
+
+    <!-- Learnable by -->
+{% if class_skills or race_skills %}
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "mortarboard" %} Learnable By</div>
+{% if class_skills %}
+        <div class="ac-tablewrap">
+            <table class="ac-table">
+                <thead><tr>
+                    <th scope="col">Class</th>
+                    <th class="ac-table__num" scope="col">Level</th>
+                    <th class="ac-table__num" scope="col">Max</th>
+                </tr></thead>
+                <tbody>
+{% for class_skill in class_skills %}
+                    <tr>
+                        <td>{{ class_skill.player_class }}</td>
+                        <td class="ac-table__num">{{ class_skill.min_level }}</td>
+                        <td class="ac-table__num">{{ class_skill.max_learn }}</td>
+                    </tr>
+{% endfor %}
+                </tbody>
+            </table>
+        </div>
+{% endif %}
+{% if race_skills %}
+        <div class="ac-tablewrap{% if class_skills %} mt-2{% endif %}">
+            <table class="ac-table">
+                <thead><tr>
+                    <th scope="col">Race</th>
+                    <th class="ac-table__num" scope="col">Level</th>
+                </tr></thead>
+                <tbody>
+{% for race_skill in race_skills %}
+                    <tr>
+                        <td>{{ race_skill.race.display_name|default:race_skill.race.folk_name }}</td>
+                        <td class="ac-table__num">{{ race_skill.level }}</td>
+                    </tr>
+{% endfor %}
+                </tbody>
+            </table>
+        </div>
+{% endif %}
+    </div>
+{% endif %}
+
+    <!-- Details -->
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "list-ul" %} Details</div>
+        <dl class="ac-kv mb-0">
+            <dt>Type</dt>
+            <dd>{{ skill.type_name }}</dd>
+{% if skill.stat_pairing %}
+            <dt>Stat Pairing</dt>
+            <dd>{{ skill.stat_pairing.0 }} / {{ skill.stat_pairing.1 }}</dd>
+{% endif %}
+{% if skill.action_display %}
+            <dt>Action</dt>
+            <dd>{{ skill.action_display }}</dd>
+{% endif %}
+{% if min_posn_display %}
+            <dt>Position</dt>
+            <dd><code>{{ min_posn_display }}</code></dd>
+{% endif %}
+{% if skill.movement_restricted %}
+            <dt>Movement</dt>
+            <dd>Restricted</dd>
+{% endif %}
+{% if save_display %}
+            <dt>Save</dt>
+            <dd><code>{{ save_display }}</code></dd>
+{% endif %}
+{% if skill.cooldown_display %}
+            <dt>Cooldown</dt>
+            <dd><code>{{ skill.cooldown_display }}</code></dd>
+{% endif %}
+{% if parent_skill %}
+            <dt>Category</dt>
+            <dd><a href="{{ parent_skill.get_absolute_url }}">{{ parent_skill.skill_name }}</a></dd>
+{% endif %}
+        </dl>
+    </div>
+
+    <!-- Forces -->
+{% if forces %}
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "fire" %} Forces</div>
+        <nav class="ac-filter" aria-label="Damage forces">
+{% for force in forces %}
+            <span class="ac-chip">{{ force }}</span>
+{% endfor %}
+        </nav>
+    </div>
+{% endif %}
+
+    <!-- Components -->
+{% if components %}
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "box-seam" %} Components</div>
+        <ul class="list-unstyled mb-0">
+{% for component in components %}
+{% if component.component_type %}
+            <li>{{ component.component_count }}&times; <code>{{ component.get_component_type_display }}</code></li>
+{% endif %}
+{% endfor %}
+        </ul>
+    </div>
+{% endif %}
+
+    <!-- Description -->
+{% if skill.description_display %}
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "card-text" %} Description</div>
+        <pre class="ac-quote">{{ skill.description_display }}</pre>
+    </div>
+{% endif %}
+
+{% else %}
+    <!-- Not found -->
+    <div class="ac-empty">
+        {% bi "search" %}
+        <span>No skill named &quot;{{ query }}&quot; could be found.</span>
+    </div>
+{% if suggestions %}
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "signpost-split" %} Did you mean</div>
+        <nav class="ac-filter" aria-label="Suggested skills">
+{% for suggestion in suggestions %}
+            <a class="ac-chip" href="{% url 'skill_page' skill_name=suggestion %}#skill">{{ suggestion }}</a>
+{% endfor %}
+        </nav>
+    </div>
+{% endif %}
+    <div class="ac-note">
+        {% bi "mortarboard" %}
+        <span>Browse <a href="{% url 'skills' %}#skills">all skills &amp; spells</a> or search the <a href="{% url 'help' %}#help">help files</a>.</span>
+    </div>
+{% endif %}
+
+</div>
+{% endblock content %}
