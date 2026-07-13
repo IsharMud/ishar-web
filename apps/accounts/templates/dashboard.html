@@ -81,8 +81,8 @@
                         <span title="{{ player.remorts }} remort{{ player.remorts|pluralize }}">
                             {% bi "arrow-repeat" %} {{ player.remorts }} remort{{ player.remorts|pluralize }}
                         </span>
-                        <span title="Online {{ player.online_time }}">
-                            {% bi "clock" %} {{ player.online_time }}
+                        <span title="Logged in {{ player.logon }}">
+                            {% bi "clock" %} on for {{ player.logon|timesince }}
                         </span>
                     </div>
                 </div>
@@ -168,8 +168,12 @@
     </div>
 
     <!-- Quest completions -->
-    <div class="ac-panel">
+    <div class="ac-panel" id="quests">
         <div class="ac-panel__h">{% bi "bullseye" %} Quest completions <span class="text-secondary fw-normal">· 7 days</span></div>
+        <div class="ac-filter" role="group" aria-label="Quest filter">
+            <a class="ac-chip{% if not show_all_quests %} ac-chip--active{% endif %}" href="?quests=endgame#quests">End-game</a>
+            <a class="ac-chip{% if show_all_quests %} ac-chip--active{% endif %}" href="?quests=all#quests">All quests{% if quest_group_total %} ({{ quest_group_total }}){% endif %}</a>
+        </div>
 {% if quest_groups %}
         <div class="ac-rows">
     {% for group in quest_groups %}
@@ -184,7 +188,7 @@
                     </div>
                 </div>
                 <div class="ac-row__side">
-    {% if group.endgame %}
+    {% if group.endgame and show_all_quests %}
                     <span class="ac-pill ac-pill--accent" title="One of the end-game quests the weekly report tracks.">end-game</span>
     {% endif %}
                     <span class="ac-pill ac-pill--muted">×{{ group.players|length }}</span>
@@ -195,7 +199,11 @@
 {% else %}
         <div class="ac-empty">
             {% bi "bullseye" %}
+{% if not show_all_quests and quest_group_total %}
+            <span>No end-game quest completions in the last week.</span>
+{% else %}
             <span>No quest completions in the last week.</span>
+{% endif %}
         </div>
 {% endif %}
     </div>
@@ -267,8 +275,10 @@
     <div class="ac-panel">
         <div class="ac-panel__h">{% bi "clock-history" %} Season history</div>
         <p class="ac-panel__hint">
-            Snapshots the game takes as each season cycles. Returning counts
-            participants who also played the season before.
+            Snapshots the game takes as each season cycles. Participants are
+            accounts with a character that reached level 10 or remorted —
+            throwaway registrations don't count. Returning counts participants
+            who also played the season before.
         </p>
 {% if season_history %}
         <div class="ac-bars mb-3">

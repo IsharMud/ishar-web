@@ -11,7 +11,7 @@ dependency, no bridge, just the shared database.
 """
 from datetime import timedelta
 
-from django.db.models import Avg, Count, Max, Sum
+from django.db.models import Avg, Count, Max, Q, Sum
 from django.utils.timezone import now
 from django.views.generic.base import TemplateView
 
@@ -30,6 +30,11 @@ from apps.seasons.utils.current import get_current_season
 # with the quest id list in `run_weekly_summary_report` (ishar-mud
 # src/server/server.c).
 ENDGAME_QUEST_IDS = (6, 7, 43, 52, 53)
+
+# A season "participant" is an account with a character that got somewhere:
+# reached this level or remorted. Filters out bot/throwaway registrations
+# that rolled a character and never played it.
+PARTICIPANT_MIN_LEVEL = 10
 
 WEEK = timedelta(days=7)
 MONTH = timedelta(days=30)
@@ -99,8 +104,10 @@ class DashboardView(EternalRequiredMixin, NeverCacheMixin, TemplateView):
             })
         context["new_players"] = new_players
 
-        # Quest completions this week — every quest, not just the five the
-        # Discord report has room for; the end-game five get flagged.
+        # Quest completions this week. End-game quests are the quests of
+        # consequence, so the panel defaults to them; ?quests=all folds the
+        # minor-quest noise back in.
+        show_all_quests = self.request.GET.get("quests") == "all"
         quest_groups = {}
         for completion in (
             PlayerQuest.objects.filter(last_completed_at__gte=week_ago)
@@ -116,13 +123,19 @@ class DashboardView(EternalRequiredMixin, NeverCacheMixin, TemplateView):
                 },
             )
             group["players"].append(completion.player)
-        context["quest_groups"] = sorted(
+        all_groups = sorted(
             quest_groups.values(),
             key=lambda g: (g["endgame"], len(g["players"])),
             reverse=True,
         )
+        context["show_all_quests"] = show_all_quests
+        context["quest_group_total"] = len(all_groups)
+        context["quest_groups"] = (
+            all_groups if show_all_quests
+            else [g for g in all_groups if g["endgame"]]
+        )
         context["endgame_completions"] = sum(
-            len(g["players"]) for g in quest_groups.values() if g["endgame"]
+            len(g["players"]) for g in all_groups if g["endgame"]
         )
 
         # Season engagement funnel: of the accounts seen this season, how
@@ -174,10 +187,15 @@ class DashboardView(EternalRequiredMixin, NeverCacheMixin, TemplateView):
 
         # Season-by-season history from the cycle-time snapshots, plus
         # cross-season retention: how many of a season's participants also
-        # played the season before.
+        # played the season before. The snapshot has a row for every player
+        # that existed at cycle time — including bot/throwaway registrations
+        # that never progressed — so only characters that got somewhere count.
+        participated = HistoricSeasonStat.objects.filter(
+            Q(level__gte=PARTICIPANT_MIN_LEVEL) | Q(remorts__gte=1)
+        )
         participant_sets = {}
         for season_id, account_id in (
-            HistoricSeasonStat.objects.exclude(account_id=None)
+            participated.exclude(account_id=None)
             .values_list("season_id", "account_id")
             .distinct()
         ):
@@ -185,7 +203,7 @@ class DashboardView(EternalRequiredMixin, NeverCacheMixin, TemplateView):
 
         history = []
         for row in (
-            HistoricSeasonStat.objects.values("season_id")
+            participated.values("season_id")
             .annotate(
                 participants=Count("account_id", distinct=True),
                 characters=Count("id"),
