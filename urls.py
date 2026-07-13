@@ -52,6 +52,7 @@ urlpatterns = [
         name="webadmin_cancel",
     ),
     path("season/", include("apps.seasons.urls"), name="season"),
+    path("skills/", include("apps.skills.urls"), name="skills"),
     path("wiki/", RedirectView.as_view(url=settings.WIKI_URL), name="wiki"),
 ]
 

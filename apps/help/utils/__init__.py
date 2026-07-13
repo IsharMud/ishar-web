@@ -1,1 +1,1 @@
-from .helptab import HelpTab
+from .helptab import HelpTab, get_helptab

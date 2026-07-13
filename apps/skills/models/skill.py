@@ -1,6 +1,9 @@
 from django.db import models
+from django.urls import reverse
+from django.utils.functional import cached_property
 
 from apps.core.models.textarea import NoStripTextareaField
+from apps.skills.utils import SKILL_TYPE_NAMES, stat_name, strip_color
 
 from .type.position import PlayerPosition
 from .type.save import SkillSaveType
@@ -208,3 +211,102 @@ class Skill(models.Model):
     def natural_key(self) -> str:
         """Natural key by skill name or ENUM symbol."""
         return self.skill_name
+
+    def get_absolute_url(self) -> str:
+        """URL to this skill's public page (anchored)."""
+        return reverse("skill_page", args=(self.skill_name,)) + "#skill"
+
+    # --- Display helpers (mirror the in-game ``skill`` command) -------------
+    # These reproduce the non-player-specific facts from display_skill_full
+    # (ishar-mud src/kernel/info.c) so the web page and the game agree.
+
+    @property
+    def type_name(self) -> str:
+        """Game-faithful skill-type label (``skill_types[]``)."""
+        return SKILL_TYPE_NAMES.get(self.skill_type, "")
+
+    @property
+    def is_spell(self) -> bool:
+        return self.skill_type == SkillType.SPELL
+
+    @property
+    def is_skill(self) -> bool:
+        return self.skill_type == SkillType.SKILL
+
+    @property
+    def description_display(self) -> str:
+        """Description with game color codes stripped for web display."""
+        return strip_color(self.description)
+
+    @property
+    def stat_pairing(self):
+        """``(stat1, stat2)`` names when the skill pairs two distinct stats,
+        else ``None`` — mirrors the 'Stat Pairing' line (skills only)."""
+        if not self.is_skill:
+            return None
+        first, second = stat_name(self.mod_stat_1), stat_name(self.mod_stat_2)
+        if first and second and first != second:
+            return (first, second)
+        return None
+
+    @property
+    def cooldown_display(self) -> str:
+        """Cooldown text, mirroring display_skill_full: 'N seconds' when the
+        size is 1, else 'NdM seconds'. Empty when there is no cooldown."""
+        num = self.cooldown_num or 0
+        if not num:
+            return ""
+        size = self.cooldown_size or 0
+        if size == 1:
+            return f"{num} second{'' if num == 1 else 's'}"
+        return f"{num}d{size} seconds"
+
+    @property
+    def spell_flag_names(self) -> list:
+        """Names of this skill's spell flags (via ``skills_spell_flags``)."""
+        return [
+            skill_flag.flag.name
+            for skill_flag in self.flags.select_related("flag")
+            if skill_flag.flag_id
+        ]
+
+    @cached_property
+    def _flag_haystack(self) -> str:
+        # Normalized (A-Z only) flag names joined for tolerant token checks —
+        # spell_flags.name is game-seeded and its exact casing/spacing varies.
+        import re
+
+        return " ".join(
+            re.sub(r"[^A-Z]", "", name.upper()) for name in self.spell_flag_names
+        )
+
+    @property
+    def is_quick_action(self) -> bool:
+        return "MELEE" in self._flag_haystack  # ALLOW_MELEE
+
+    @property
+    def movement_restricted(self) -> bool:
+        return "NOMOVEMENT" in self._flag_haystack
+
+    @property
+    def is_breath(self) -> bool:
+        return "BREATH" in self._flag_haystack
+
+    @property
+    def action_display(self) -> str:
+        """'Quick Action' / 'Standard Action' for skills; '' otherwise."""
+        if not self.is_skill:
+            return ""
+        return "Quick Action" if self.is_quick_action else "Standard Action"
+
+    @property
+    def command(self) -> str:
+        """The command to invoke this ability, mirroring display_skill_full."""
+        name = self.skill_name or ""
+        if self.is_spell:
+            return f"cast '{name}'"
+        if self.is_breath:
+            return f"breathe '{name}'"
+        if self.is_skill:
+            return f"action '{name}'"
+        return ""
