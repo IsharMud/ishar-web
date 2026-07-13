@@ -158,6 +158,24 @@ filter.
 Used: feedback dashboard. Status: **formalized** (supersedes the classic
 `display-6` card tile on admin surfaces).
 
+### `.ac-bars` + `.ac-bar` — single-series magnitude bars
+Server-rendered horizontal bar rows: label · track+fill · value. One hue per
+group (`--ac-info` default; `.ac-bar--accent` for a second *group* on the same
+panel, never per-row rainbow); identity lives in the row label, the value in a
+text token at the tip — the fill is the only colored ink. Width is a
+server-computed percentage of the group's max. Rounded data-end, square
+baseline. Pair with a table when the data deserves exact columns.
+```html
+<div class="ac-bars">
+  <div class="ac-bar" title="12 accounts: today">
+    <span class="ac-bar__label">Today</span>
+    <span class="ac-bar__track"><span class="ac-bar__fill" style="width: 100%;"></span></span>
+    <span class="ac-bar__n">12</span>
+  </div>
+</div>
+```
+Used: staff dashboard. Status: **formalized.**
+
 ### `.ac-filter` + `.ac-chip` — filter bar
 Wrapping rows of pill chip links (one row per dimension, `.ac-filter__sep` as a
 group divider); active chip gets `--active` (amber wash). Compose with an inline

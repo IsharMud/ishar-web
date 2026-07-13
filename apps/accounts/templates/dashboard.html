@@ -1,0 +1,323 @@
+{% extends "layout.html" %}
+{% load humanize %}
+{% load ishar %}
+{% block meta_title %}Staff Dashboard{% endblock meta_title %}
+{% block meta_description %}Staff activity dashboard for {{ WEBSITE_TITLE }}.{% endblock meta_description %}
+{% block meta_url %}{% url 'dashboard' %}#dashboard{% endblock meta_url %}
+{% block title %}Staff Dashboard{% endblock title %}
+{% block breadcrumbs %}
+    {% crumb "Portal" "person-gear" urlname="portal" anchor="portal" %}
+    {% crumb "Dashboard" "speedometer2" urlname="dashboard" anchor="dashboard" active=True %}
+{% endblock breadcrumbs %}
+{% block content %}
+<div class="ac ac--wide">
+
+    <header class="ac-hero">
+        <span class="ac-hero__badge">{% bi "speedometer2" %}</span>
+        <div class="ac-hero__text">
+            <h2 class="ac-hero__title">Staff Dashboard</h2>
+            <p class="ac-hero__sub">
+                Who's playing, what they're doing, and how Season
+                {{ season.season_id }} compares — straight from the game's
+                tables, untruncated.
+            </p>
+        </div>
+        <div class="ac-hero__status">
+{% if online_players %}
+            <span class="ac-pill ac-pill--status ac-pill--ok ac-pill--live">{{ online_players|length }} online</span>
+{% else %}
+            <span class="ac-pill ac-pill--status ac-pill--muted">0 online</span>
+{% endif %}
+        </div>
+    </header>
+
+    <!-- Pulse -->
+    <div class="ac-tiles">
+        <div class="ac-tile {% if active_accounts %}ac-tile--ok{% else %}ac-tile--muted{% endif %}">
+            <span class="ac-tile__n">{{ active_accounts|length }}<small class="text-secondary fs-6">/{{ total_accounts }}</small></span>
+            <span class="ac-tile__label">Accounts this week</span>
+        </div>
+        <div class="ac-tile {% if active_player_count %}ac-tile--info{% else %}ac-tile--muted{% endif %}">
+            <span class="ac-tile__n">{{ active_player_count }}</span>
+            <span class="ac-tile__label">Characters this week</span>
+        </div>
+        <div class="ac-tile {% if new_players %}ac-tile--accent{% else %}ac-tile--muted{% endif %}">
+            <span class="ac-tile__n">{{ new_players|length }}</span>
+            <span class="ac-tile__label">New players this week</span>
+        </div>
+        <div class="ac-tile {% if endgame_completions %}ac-tile--warn{% else %}ac-tile--muted{% endif %}">
+            <span class="ac-tile__n">{{ endgame_completions }}</span>
+            <span class="ac-tile__label">End-game quests this week</span>
+        </div>
+        <div class="ac-tile {% if season_accounts %}ac-tile--info{% else %}ac-tile--muted{% endif %}">
+            <span class="ac-tile__n">{{ season_accounts }}</span>
+            <span class="ac-tile__label">Accounts this season</span>
+        </div>
+        <div class="ac-tile {% if season.total_remorts %}ac-tile--info{% else %}ac-tile--muted{% endif %}">
+            <span class="ac-tile__n">{{ season.total_remorts }}</span>
+            <span class="ac-tile__label">Remorts this season</span>
+        </div>
+    </div>
+
+    <!-- Live now -->
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "broadcast" %} Live now</div>
+        <p class="ac-panel__hint">
+            Inferred from logon/logout until the game publishes its presence
+            heartbeat (ishar-mud#1771) — just-quit players can linger for up
+            to ten minutes.
+        </p>
+{% if online_players %}
+        <div class="ac-rows">
+    {% for player in online_players %}
+            <div class="ac-row">
+                <span class="ac-row__icon">{% bi "person" %}</span>
+                <div class="ac-row__main">
+                    <div class="ac-row__title">{{ player.player_link }}</div>
+                    <div class="ac-row__meta">
+                        <span title="Level {{ player.common.level }}">
+                            {% bi "bar-chart" %} level {{ player.common.level }}
+                        </span>
+                        <span title="{{ player.remorts }} remort{{ player.remorts|pluralize }}">
+                            {% bi "arrow-repeat" %} {{ player.remorts }} remort{{ player.remorts|pluralize }}
+                        </span>
+                        <span title="Online {{ player.online_time }}">
+                            {% bi "clock" %} {{ player.online_time }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+    {% endfor %}
+        </div>
+{% else %}
+        <div class="ac-empty">
+            {% bi "broadcast" %}
+            <span>No mortals in the game right now.</span>
+        </div>
+{% endif %}
+    </div>
+
+    <!-- This week -->
+    <div class="row g-3">
+        <div class="col-12 col-lg-6 d-flex flex-column">
+            <div class="ac-panel flex-grow-1">
+                <div class="ac-panel__h">{% bi "people" %} Active players <span class="text-secondary fw-normal">· 7 days</span></div>
+{% if active_accounts %}
+                <div class="ac-rows">
+    {% for entry in active_accounts %}
+                    <div class="ac-row">
+                        <span class="ac-row__icon">{% bi "person-badge" %}</span>
+                        <div class="ac-row__main">
+                            <div class="ac-row__title">{{ entry.account.account_name }}</div>
+                            <div class="ac-row__meta">
+        {% for player in entry.players %}
+                                <span>{{ player.player_link }} <small class="text-secondary">L{{ player.common.level }} R{{ player.remorts }}</small></span>
+        {% endfor %}
+                            </div>
+                        </div>
+                        <div class="ac-row__side">
+                            <span class="text-secondary" title="{{ entry.last_logon }}">
+                                <time datetime="{{ entry.last_logon|date:'c' }}">{{ entry.last_logon|naturaltime }}</time>
+                            </span>
+                        </div>
+                    </div>
+    {% endfor %}
+                </div>
+{% else %}
+                <div class="ac-empty">
+                    {% bi "people" %}
+                    <span>No mortal logins in the last week.</span>
+                </div>
+{% endif %}
+            </div>
+        </div>
+        <div class="col-12 col-lg-6 d-flex flex-column">
+            <div class="ac-panel flex-grow-1">
+                <div class="ac-panel__h">{% bi "person-plus" %} New players <span class="text-secondary fw-normal">· 7 days</span></div>
+{% if new_players %}
+                <div class="ac-rows">
+    {% for entry in new_players %}
+                    <div class="ac-row">
+                        <span class="ac-row__icon">{% bi "person-plus" %}</span>
+                        <div class="ac-row__main">
+                            <div class="ac-row__title">{{ entry.player.player_link }}</div>
+                            <div class="ac-row__meta">
+                                <span title="Account">{% bi "person-badge" %} {{ entry.player.account.account_name }}</span>
+                                <span title="Hours played">{% bi "clock" %} {{ entry.hours }}h played</span>
+        {% if entry.referrer %}
+                                <span title="Referred by {{ entry.referrer.account_name }}">{% bi "share" %} ref: {{ entry.referrer.account_name }}</span>
+        {% endif %}
+                            </div>
+                        </div>
+                        <div class="ac-row__side">
+                            <span class="text-secondary" title="{{ entry.player.birth }}">
+                                <time datetime="{{ entry.player.birth|date:'c' }}">{{ entry.player.birth|naturaltime }}</time>
+                            </span>
+                        </div>
+                    </div>
+    {% endfor %}
+                </div>
+{% else %}
+                <div class="ac-empty">
+                    {% bi "person-plus" %}
+                    <span>No new characters in the last week.</span>
+                </div>
+{% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Quest completions -->
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "bullseye" %} Quest completions <span class="text-secondary fw-normal">· 7 days</span></div>
+{% if quest_groups %}
+        <div class="ac-rows">
+    {% for group in quest_groups %}
+            <div class="ac-row">
+                <span class="ac-row__icon">{% bi "bullseye" %}</span>
+                <div class="ac-row__main">
+                    <div class="ac-row__title">{{ group.quest }}</div>
+                    <div class="ac-row__meta">
+        {% for player in group.players %}
+                        <span>{{ player.player_link }}</span>
+        {% endfor %}
+                    </div>
+                </div>
+                <div class="ac-row__side">
+    {% if group.endgame %}
+                    <span class="ac-pill ac-pill--accent" title="One of the end-game quests the weekly report tracks.">end-game</span>
+    {% endif %}
+                    <span class="ac-pill ac-pill--muted">×{{ group.players|length }}</span>
+                </div>
+            </div>
+    {% endfor %}
+        </div>
+{% else %}
+        <div class="ac-empty">
+            {% bi "bullseye" %}
+            <span>No quest completions in the last week.</span>
+        </div>
+{% endif %}
+    </div>
+
+    <!-- Engagement + roster mix -->
+    <div class="row g-3">
+        <div class="col-12 col-lg-6 d-flex flex-column">
+            <div class="ac-panel flex-grow-1">
+                <div class="ac-panel__h">{% bi "activity" %} Season engagement</div>
+                <p class="ac-panel__hint">
+                    The {{ season_accounts }} account{{ season_accounts|pluralize }}
+                    seen this season, by most recent login.
+                </p>
+{% if season_accounts %}
+                <div class="ac-bars">
+    {% for bar in recency_bars %}
+                    <div class="ac-bar" title="{{ bar.n }} account{{ bar.n|pluralize }}: {{ bar.label|lower }}">
+                        <span class="ac-bar__label">{{ bar.label }}</span>
+                        <span class="ac-bar__track"><span class="ac-bar__fill" style="width: {{ bar.pct }}%;{% if not bar.n %} display: none;{% endif %}"></span></span>
+                        <span class="ac-bar__n">{{ bar.n }}</span>
+                    </div>
+    {% endfor %}
+                </div>
+{% else %}
+                <div class="ac-empty">
+                    {% bi "activity" %}
+                    <span>No accounts seen this season yet.</span>
+                </div>
+{% endif %}
+            </div>
+        </div>
+        <div class="col-12 col-lg-6 d-flex flex-column">
+            <div class="ac-panel flex-grow-1">
+                <div class="ac-panel__h">{% bi "pie-chart" %} Active roster <span class="text-secondary fw-normal">· 30 days</span></div>
+                <p class="ac-panel__hint">
+                    The {{ roster_count }} mortal{{ roster_count|pluralize }}
+                    seen in the last month, by class and game type.
+                </p>
+{% if roster_count %}
+                <div class="ac-bars mb-3">
+    {% for bar in class_bars %}
+                    <div class="ac-bar" title="{{ bar.n }} {{ bar.label }}{{ bar.n|pluralize }}">
+                        <span class="ac-bar__label">{{ bar.label }}</span>
+                        <span class="ac-bar__track"><span class="ac-bar__fill" style="width: {{ bar.pct }}%;"></span></span>
+                        <span class="ac-bar__n">{{ bar.n }}</span>
+                    </div>
+    {% endfor %}
+                </div>
+                <div class="ac-bars">
+    {% for bar in type_bars %}
+                    <div class="ac-bar ac-bar--accent" title="{{ bar.n }} {{ bar.label }} character{{ bar.n|pluralize }}">
+                        <span class="ac-bar__label">{{ bar.label }}</span>
+                        <span class="ac-bar__track"><span class="ac-bar__fill" style="width: {{ bar.pct }}%;"></span></span>
+                        <span class="ac-bar__n">{{ bar.n }}</span>
+                    </div>
+    {% endfor %}
+                </div>
+{% else %}
+                <div class="ac-empty">
+                    {% bi "pie-chart" %}
+                    <span>No mortals seen in the last month.</span>
+                </div>
+{% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Season history -->
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "clock-history" %} Season history</div>
+        <p class="ac-panel__hint">
+            Snapshots the game takes as each season cycles. Returning counts
+            participants who also played the season before.
+        </p>
+{% if season_history %}
+        <div class="ac-bars mb-3">
+    {% for bar in participation_bars %}
+            <div class="ac-bar" title="{{ bar.n }} participant{{ bar.n|pluralize }} in {{ bar.label|lower }}">
+                <span class="ac-bar__label">{{ bar.label }}</span>
+                <span class="ac-bar__track"><span class="ac-bar__fill" style="width: {{ bar.pct }}%;"></span></span>
+                <span class="ac-bar__n">{{ bar.n }}</span>
+            </div>
+    {% endfor %}
+        </div>
+        <div class="ac-tablewrap">
+            <table class="ac-table">
+                <caption class="visually-hidden">
+                    Per-season participation, remorts, and play time.
+                </caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Season</th>
+                        <th class="ac-table__num" scope="col">Participants</th>
+                        <th class="ac-table__num" scope="col">Returning</th>
+                        <th class="ac-table__num" scope="col">Characters</th>
+                        <th class="ac-table__num" scope="col">Avg remorts</th>
+                        <th class="ac-table__num" scope="col">Max remorts</th>
+                        <th class="ac-table__num" scope="col">Hours played</th>
+                    </tr>
+                </thead>
+                <tbody>
+    {% for row in season_history %}
+                    <tr>
+                        <td>{{ row.season_id }}</td>
+                        <td class="ac-table__num">{{ row.participants }}</td>
+                        <td class="ac-table__num">{% if row.returning == None %}<span class="text-secondary">—</span>{% else %}{{ row.returning }}{% endif %}</td>
+                        <td class="ac-table__num">{{ row.characters }}</td>
+                        <td class="ac-table__num">{{ row.avg_remorts|floatformat:1 }}</td>
+                        <td class="ac-table__num">{{ row.max_remorts }}</td>
+                        <td class="ac-table__num">{{ row.hours|intcomma }}</td>
+                    </tr>
+    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+{% else %}
+        <div class="ac-empty">
+            {% bi "clock-history" %}
+            <span>No cycled seasons recorded yet.</span>
+        </div>
+{% endif %}
+    </div>
+
+</div>
+{% endblock content %}

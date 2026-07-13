@@ -63,6 +63,13 @@
             </a>
     {% endif %}
     {% if user.is_eternal %}
+            <a class="ac-link" href="{% url 'dashboard' %}#dashboard" title="Dashboard">
+                <span class="ac-link__icon">{% bi "speedometer2" %}</span>
+                <span class="ac-link__body">
+                    <span class="ac-link__name">Dashboard</span>
+                    <span class="ac-link__note d-block">Activity, engagement &amp; season history</span>
+                </span>
+            </a>
             <a class="ac-link" href="{% url 'events_console' %}#console" title="Events Console">
                 <span class="ac-link__icon">{% bi "stars" %}</span>
                 <span class="ac-link__body">

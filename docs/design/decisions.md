@@ -487,6 +487,20 @@ Accessibility and taste — the UI must be fully usable and calm without motion.
 `innerHTML`. Status pills carry their dot as a `::before` so labels can be
 swapped safely. **Why.** Removes an XSS foot-gun class and keeps updates cheap.
 
+## 2026-07-13 — Data visualization: single-hue server-rendered bars
+
+**Decision.** Charts on staff surfaces are server-rendered `.ac-bars` —
+single-series horizontal magnitude bars, one hue per group (`--ac-info`
+default, amber only as a deliberate second group), widths computed
+server-side, values as text-token labels at the tip, always accompanied by
+the exact numbers (inline or a paired `.ac-table`). No charting library, no
+canvas, no client-side rendering. **Why.** The site's no-new-frontend-library
+rule already forbids chart libs; single-hue bars with direct labels are the
+one chart form that stays honest at this data scale (~10 players, ~14
+seasons), works at phone width, needs no legend, and degrades to nothing —
+the numbers are always present as text. Color encodes nothing per-row
+(identity is the label), so colorblindness cannot cost information.
+
 ---
 
 ## Open decisions / to record when made

@@ -245,6 +245,12 @@
         {% endif %}
     {% endif %}
     {% if user.is_eternal %}
+                                <li class="nav-item" title="Dashboard">
+                                    <a class="nav-link dropdown-item icon-link icon-link-hover" href="{% url 'dashboard' %}#dashboard">
+                                        {% bi "speedometer2" %}
+                                        Dashboard
+                                    </a>
+                                </li>
                                 <li class="nav-item" title="Events Console">
                                     <a class="nav-link dropdown-item icon-link icon-link-hover" href="{% url 'events_console' %}#console">
                                         {% bi "stars" %}
