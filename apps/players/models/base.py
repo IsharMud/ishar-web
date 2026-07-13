@@ -500,8 +500,15 @@ class PlayerBase(models.Model):
     @property
     @display(boolean=False, description="Title", ordering="title")
     def player_title(self):
-        # Player title.
-        return self.title % self.name
+        # Player title. The game stores titles with a "%s" placeholder for
+        #   the player's name, but the column is free-form game data: a title
+        #   may carry a bare "%", omit the "%s", or hold extra conversions,
+        #   any of which makes "%"-formatting raise (TypeError/ValueError) and,
+        #   uncaught, 500s the player page. Fall back to the raw title.
+        try:
+            return self.title % self.name
+        except (TypeError, ValueError):
+            return self.title
 
     @display(boolean=False, description="Type", ordering="game_type")
     def player_type(self) -> str:
