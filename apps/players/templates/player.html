@@ -42,7 +42,6 @@
     </div>
 {% endif %}
 
-{% if not player.account.is_private or request.user.is_artisan %}
 {% if player.account.account_name %}
     <div class="ac-panel">
         <div class="ac-panel__h" id="account">
@@ -57,7 +56,6 @@
             </li>
         </ul>
     </div>
-{% endif %}
 {% endif %}
 
 {% if not player.is_immortal %}
@@ -134,8 +132,6 @@
 {% endif %}
     </div>
 
-{% if not player.account.is_private or request.user.is_artisan %}
-
 {% if player.upgrades %}
     <div class="ac-panel">
         <div class="ac-panel__h" id="upgrades">
@@ -207,7 +203,6 @@
         </ul>
     </div>
 
-{% endif %}
 {% endif %}
 
 {% else %}

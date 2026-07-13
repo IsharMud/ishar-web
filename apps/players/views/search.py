@@ -23,12 +23,10 @@ class PlayerSearchView(LoginRequiredMixin, NeverCacheMixin, FormView):
         if form.cleaned_data:
             search = form.cleaned_data.get("name")
             if search:
-                results = self.model.objects.filter(
-                    name__icontains=search,
-                    account__is_private__exact=False
-                ).order_by(
-                    "name"
-                )
+                results = self.model.objects.filter(name__icontains=search)
+                if not self.request.user.is_artisan():
+                    results = results.filter(account__is_private__exact=False)
+                results = results.order_by("name")
 
                 # Count any results.
                 if results:
