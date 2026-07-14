@@ -3,7 +3,10 @@ from django.urls import path
 from .views.dashboard import DashboardView
 from .views.deploy import (
     DeployActionView,
+    DeployCancelScheduledView,
+    DeployGameStatusView,
     DeployPingView,
+    DeployScheduleView,
     DeployStatusView,
     DeployView,
     DeployWebClientsView,
@@ -21,11 +24,22 @@ urlpatterns = [
     path("private/", SetPrivateView.as_view(), name="set_private"),
     path("deploy/", DeployView.as_view(), name="deploy"),
     path("deploy/run/", DeployActionView.as_view(), name="deploy_run"),
+    path("deploy/schedule/", DeployScheduleView.as_view(), name="deploy_schedule"),
+    path(
+        "deploy/cancel-scheduled/",
+        DeployCancelScheduledView.as_view(),
+        name="deploy_cancel_scheduled",
+    ),
     path("deploy/status/", DeployStatusView.as_view(), name="deploy_status"),
     path("deploy/ping/", DeployPingView.as_view(), name="deploy_ping"),
     path(
         "deploy/web-clients/",
         DeployWebClientsView.as_view(),
         name="deploy_web_clients",
+    ),
+    path(
+        "deploy/game-status/",
+        DeployGameStatusView.as_view(),
+        name="deploy_game_status",
     ),
 ]

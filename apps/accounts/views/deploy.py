@@ -5,14 +5,32 @@ services and triggers scripts/deploy.sh on the host via the deploy agent. The
 deploy POST requires password re-entry (re-auth), so a driven/XSS'd session
 cannot fire a deploy on its own — see docs/infrastructure/reboot_process.md §4.
 """
+from datetime import timedelta
+
 from django.conf import settings
+from django.db import DatabaseError
 from django.http import JsonResponse
+from django.utils.timezone import now
 from django.views.generic.base import TemplateView, View
 
 from apps.connect import tracker as connect_tracker
+from apps.core.models.webadmin import WebAdminCommand
+from apps.core.utils import webadmin
+from apps.core.utils.staff import staff_name
 from apps.core.views.mixins import GodRequiredMixin, NeverCacheMixin
 
-from ..utils.deploy_agent import DeployAgentError, deploy_status, ping, start_deploy
+from ..utils.deploy_agent import (
+    DeployAgentError,
+    cancel_deploy,
+    deploy_status,
+    ping,
+    start_deploy,
+)
+
+# Scheduled-reboot delay bounds (seconds): 1 minute .. 1 hour. Mirrored by the
+# host agent (0..3600) and the game-side clamp/validation.
+SCHEDULE_DELAY_MIN = 60
+SCHEDULE_DELAY_MAX = 3600
 
 
 class DeployView(GodRequiredMixin, NeverCacheMixin, TemplateView):
@@ -103,6 +121,163 @@ class DeployWebClientsView(GodRequiredMixin, NeverCacheMixin, View):
 
     def post(self, request, *args, **kwargs):
         return JsonResponse(connect_tracker.snapshot())
+
+
+class DeployScheduleView(GodRequiredMixin, NeverCacheMixin, View):
+    """POST-only: schedule a deploy after a delay, warning players first.
+
+    One action, two effects, in this order:
+      1. Ask the host agent to schedule the deploy (it holds the timer and fires
+         deploy.sh itself after the delay — surviving this container restarting).
+      2. Only if that was accepted, enqueue a `reboot_notice` so the game counts
+         the reboot down to the world. Agent-first means we never announce a
+         reboot that the agent then refuses (busy/cooldown).
+
+    Requires re-auth (password), exactly like an immediate deploy — scheduling
+    commits to an unattended run, so it is gated just as hard.
+    """
+
+    http_method_names = ("post",)
+
+    def post(self, request, *args, **kwargs):
+        # Re-auth: password re-entry, same as an immediate deploy.
+        password = request.POST.get("password", "")
+        if not password or not request.user.check_password(password):
+            return JsonResponse(
+                {"message": "Re-authentication failed."}, status=403
+            )
+
+        delay_raw = request.POST.get("delay_seconds", "")
+        if not delay_raw.isdigit():
+            return JsonResponse({"message": "Invalid delay."}, status=400)
+        delay_seconds = int(delay_raw)
+        if not SCHEDULE_DELAY_MIN <= delay_seconds <= SCHEDULE_DELAY_MAX:
+            return JsonResponse(
+                {"message": "Delay must be between 1 and 60 minutes."}, status=400
+            )
+
+        env = request.POST.get("env", "")
+        services = request.POST.getlist("services")
+        no_pull = request.POST.get("no_pull") in ("1", "true", "on")
+
+        # 1. Schedule the deploy on the host agent (the part that can be refused).
+        try:
+            result = start_deploy(
+                actor=request.user.get_username(),
+                env=env,
+                services=services,
+                no_pull=no_pull,
+                delay_seconds=delay_seconds,
+            )
+        except DeployAgentError as exc:
+            return JsonResponse(
+                {"message": f"Deploy agent unavailable: {exc}"}, status=503
+            )
+
+        status = int(result.get("http_status", 200 if result.get("ok") else 400))
+        if status != 200 or not result.get("ok"):
+            # Busy / cooldown / invalid — nothing announced to players.
+            return JsonResponse(result, status=status)
+
+        # 2. Deploy is scheduled — now warn the world via the game.
+        task = webadmin.enqueue(
+            command=WebAdminCommand.REBOOT_NOTICE,
+            payload={"delay_seconds": delay_seconds},
+            actor_account=request.user.account_id,
+            actor_name=staff_name(request.user),
+        )
+        return JsonResponse({**result, "notice_task_id": task.id}, status=200)
+
+
+class DeployCancelScheduledView(GodRequiredMixin, NeverCacheMixin, View):
+    """POST-only: cancel a still-scheduled deploy and tell players it's off.
+
+    Cancels the host agent's pending deploy (a no-op once it has started
+    running), then — if the cancel landed — enqueues a `reboot_cancel` so the
+    game announces the stand-down. No re-auth: cancelling is the safe direction.
+    God gate + CSRF still apply.
+    """
+
+    http_method_names = ("post",)
+
+    def post(self, request, *args, **kwargs):
+        deploy_id = request.POST.get("deploy_id", "")
+        if not deploy_id:
+            return JsonResponse({"message": "Missing deploy_id."}, status=400)
+
+        try:
+            result = cancel_deploy(deploy_id)
+        except DeployAgentError as exc:
+            return JsonResponse(
+                {"message": f"Deploy agent unavailable: {exc}"}, status=503
+            )
+
+        if result.get("ok"):
+            webadmin.enqueue(
+                command=WebAdminCommand.REBOOT_CANCEL,
+                payload={},
+                actor_account=request.user.account_id,
+                actor_name=staff_name(request.user),
+            )
+
+        status = int(result.get("http_status", 200 if result.get("ok") else 409))
+        return JsonResponse(result, status=status)
+
+
+class DeployGameStatusView(GodRequiredMixin, NeverCacheMixin, View):
+    """POST-only read of the game's presence heartbeat (Contract 2, #1771).
+
+    Powers the console's live "Game" pill and the pre-deploy warning when
+    ishar-app is selected with players in-game (closes the game-side half of
+    #77). The game publishes game_status (a singleton heartbeat) and
+    game_presence (one row per in-game character); we report whether the game
+    is up (heartbeat within the staleness window), the live player count, and
+    the heartbeat age. Degrades gracefully before the game ships the heartbeat
+    (tables absent / no row). Read-only (no re-auth); God gate + CSRF apply.
+    """
+
+    http_method_names = ("post",)
+
+    def post(self, request, *args, **kwargs):
+        # Imported here so a web deploy that predates the game migration can't
+        # break module import; the query itself is guarded below.
+        from apps.players.models.presence import (
+            GamePresence,
+            GameStatus,
+            PRESENCE_STALE_SECONDS,
+        )
+
+        cutoff = now() - timedelta(seconds=PRESENCE_STALE_SECONDS)
+        try:
+            status = GameStatus.objects.filter(pk=1).first()
+        except DatabaseError:
+            # Tables not created yet (web deployed before the game migration).
+            return JsonResponse({"integrated": False, "up": False, "player_count": 0})
+
+        if status is None:
+            # Migration ran but the game hasn't booted with presence yet.
+            return JsonResponse({"integrated": False, "up": False, "player_count": 0})
+
+        beat_age = max(0, int((now() - status.heartbeat_at).total_seconds()))
+        up = beat_age <= PRESENCE_STALE_SECONDS
+
+        player_count = 0
+        if up:
+            try:
+                player_count = GamePresence.objects.filter(
+                    last_seen__gte=cutoff
+                ).count()
+            except DatabaseError:
+                player_count = 0
+
+        return JsonResponse(
+            {
+                "integrated": True,
+                "up": up,
+                "player_count": player_count,
+                "beat_age": beat_age,
+            }
+        )
 
 
 class DeployStatusView(GodRequiredMixin, NeverCacheMixin, View):

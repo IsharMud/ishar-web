@@ -30,6 +30,8 @@ class WebAdminCommand(models.TextChoices):
     SEASON_SET_AUTO_CYCLE = "season_set_auto_cycle", _("Set Season Auto-Cycle")
     SEASON_CYCLE = "season_cycle", _("Cycle Season")
     SEASON_START = "season_start", _("Start Season")
+    REBOOT_NOTICE = "reboot_notice", _("Announce Scheduled Reboot")
+    REBOOT_CANCEL = "reboot_cancel", _("Cancel Scheduled Reboot")
 
 
 class WebAdminStatus(models.TextChoices):
