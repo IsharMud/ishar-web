@@ -31,7 +31,7 @@
         <div class="ac-hero__status d-flex flex-wrap gap-1 justify-content-end">
             <span class="ac-pill ac-pill--status ac-pill--{{ report.status_pill }}" id="status-badge">{{ report.status_label }}</span>
 {% if report.is_private %}
-            <span class="ac-pill ac-pill--warn" title="Never reaches Discord; not promotable to GitHub">{% bi "lock-fill" %} private</span>
+            <span class="ac-pill ac-pill--warn" title="Never reaches Discord; promotes only to the private GitHub tracker">{% bi "lock-fill" %} private</span>
 {% endif %}
 {% if report.bountied %}
             <span class="ac-pill ac-pill--warn" title="Bounty awarded by {{ report.bountied_by }}">{% bi "coin" %} bounty</span>
@@ -141,7 +141,12 @@
                         <button class="ac-btn" data-action="dupe">Mark&nbsp;Duplicate</button>
                     </div>
 
-{% if can_promote %}
+{% if report.is_private %}
+                    <div class="ac-note ac-note--warn" role="note">
+                        {% bi "lock-fill" %}
+                        <span>Private report — promotes only to the private GitHub tracker, where the issue stays admin-only.</span>
+                    </div>
+{% endif %}
                     <button class="ac-btn ac-btn--info" data-action="promote" {% if report.github_issue_url %}disabled title="Already promoted"{% endif %}>
                         {% bi "github" %} Promote to GitHub
                     </button>
@@ -149,12 +154,6 @@
                     <div class="d-flex gap-1">
                         <input class="ac-field" id="instructions" placeholder="Claude instructions (optional)" aria-label="Claude instructions">
                         <button class="ac-btn ac-btn--warn" data-action="assign_claude">{% bi "robot" %} Assign&nbsp;Claude</button>
-                    </div>
-{% endif %}
-{% else %}
-                    <div class="ac-note ac-note--warn" role="note">
-                        {% bi "lock-fill" %}
-                        <span>Private report — not promotable to a public GitHub issue.</span>
                     </div>
 {% endif %}
 

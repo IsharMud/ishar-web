@@ -312,13 +312,10 @@ def promote(feedback, actor) -> str:
     """
     `reports promote` — file a GitHub issue. The website has no GitHub token, so
     it enqueues the intent for the daemon (which creates the issue and writes
-    back `github_issue_url`). Private reports are hard-blocked, matching
-    `promote_internal`.
+    back `github_issue_url`). Private reports promote too: the tracker repo is
+    private, so its issues are admin-only. The daemon's `build_issue_body`
+    flags the private origin on the issue.
     """
-    if feedback.is_private:
-        raise ValidationError(
-            "Private reports are not promoted to public GitHub issues."
-        )
     if feedback.is_promoted():
         return f"Report #{feedback.pk} already has a GitHub issue: {feedback.github_issue_url}"
     with transaction.atomic():
@@ -332,12 +329,9 @@ def assign_claude(feedback, actor, instructions="") -> str:
     `reports claude` — ensure a GitHub issue exists and post the `@claude`
     assignment comment. Gods-only (enforced by the caller). Enqueued for the
     daemon, which owns the token, the issue creation, and the injection-guarded
-    comment body (`assign_claude_comment`).
+    comment body (`assign_claude_comment`). Private reports are eligible — the
+    tracker repo is private, so the issue and the `@claude` run stay admin-only.
     """
-    if feedback.is_private:
-        raise ValidationError(
-            "Private reports cannot be assigned to Claude on GitHub."
-        )
     instructions = _clean(instructions, INSTRUCTIONS_MAX)
     payload = {"instructions": instructions} if instructions else {}
     with transaction.atomic():

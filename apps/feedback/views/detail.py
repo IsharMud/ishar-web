@@ -23,6 +23,5 @@ class FeedbackDetailView(EternalRequiredMixin, NeverCacheMixin, DetailView):
         )
         # Reports this one has been marked a duplicate of / by.
         context["duplicates"] = self.object.duplicates.all().order_by("-id")
-        context["can_promote"] = not self.object.is_private
         context["is_god"] = self.request.user.is_god()
         return context
