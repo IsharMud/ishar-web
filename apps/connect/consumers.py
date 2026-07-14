@@ -2,13 +2,28 @@
 import asyncio
 import logging
 
+from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.conf import settings
 
 from . import tracker
+from .models import WebLoginToken
 
 
 logger = logging.getLogger(__name__)
+
+# Application close codes, so the browser can tell a *bridge* problem (retry
+# with backoff, the game or bridge may be mid-deploy) from the game cleanly
+# ending the session (a quit — don't fight it with an auto-reconnect loop).
+# 4000-4999 is the private-use range of RFC 6455.
+CLOSE_BRIDGE_FAILURE = 4502
+
+# The WAIT_ACCOUNT_NAME prompt the game prints when it is ready for a login
+# (src/server/output.c, send_prompt_other). Auto-login waits for it because
+# input sent while the game is still in its pre-login states (ident/proxy
+# lookups) is silently discarded — and minting on the prompt means none of
+# the token's 90 s TTL is spent on that latency.
+ACCOUNT_PROMPT = "please enter your account email"
 
 # Telnet protocol constants.
 IAC = 255    # Interpret As Command
@@ -38,6 +53,29 @@ class TelnetConsumer(AsyncWebsocketConsumer):
         # Holds telnet bytes that arrived mid-sequence so a command or GMCP
         # subnegotiation split across socket reads is reassembled, not lost.
         self._inbuf = bytearray()
+        # Latest window size reported by the browser (cols, rows); used to
+        # answer the server's DO NAWS with the real terminal size.
+        self._naws = None
+        # Auto-login (#85 / ishar-mud#1773): a portal-authenticated player is
+        # logged in by this consumer writing `webauth <token>` into the telnet
+        # stream when the game shows its account prompt. The token is minted
+        # here and never sent to the browser. AuthMiddlewareStack has already
+        # resolved scope["user"] by this point.
+        user = self.scope.get("user")
+        account_id = (
+            getattr(user, "account_id", None)
+            if user is not None and user.is_authenticated
+            else None
+        )
+        # States: account id set = waiting for the account prompt;
+        # None = guest, already sent, or minting failed — leave manual login.
+        self._autologin_account_id = account_id
+        self._prompt_tail = ""
+
+        # Accept before dialing the game: a close code sent on a never-accepted
+        # socket surfaces in the browser as a bare handshake failure (1006),
+        # which would be indistinguishable from a network drop.
+        await self.accept()
 
         host = getattr(settings, "MUD_HOST", "localhost")
         port = getattr(settings, "MUD_PORT", 23)
@@ -51,10 +89,9 @@ class TelnetConsumer(AsyncWebsocketConsumer):
             logger.error(
                 "Failed to connect to MUD at %s:%s: %s", host, port, exc
             )
-            await self.close()
+            await self.close(code=CLOSE_BRIDGE_FAILURE)
             return
 
-        await self.accept()
         tracker.register(self)
 
         # Read from the MUD in the background.
@@ -73,11 +110,17 @@ class TelnetConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data=None, bytes_data=None):
         """Forward user input from WebSocket to telnet."""
+        if bytes_data:
+            # Binary frames carry raw telnet data (e.g. NAWS updates). Cache
+            # the reported size — even before the telnet side is up, since the
+            # browser sends its first NAWS the moment the socket opens — so a
+            # later server DO NAWS gets the real terminal size.
+            self._cache_naws(bytes_data)
+
         if not self._writer or self._writer.is_closing():
             return
 
         if bytes_data:
-            # Binary frames carry raw telnet data (e.g. NAWS updates).
             self._writer.write(bytes_data)
         elif text_data:
             self._writer.write(text_data.encode("utf-8", errors="replace"))
@@ -85,11 +128,67 @@ class TelnetConsumer(AsyncWebsocketConsumer):
         try:
             await self._writer.drain()
         except (ConnectionError, OSError):
-            await self.close()
+            await self.close(code=CLOSE_BRIDGE_FAILURE)
 
     # ------------------------------------------------------------------
     # Internal helpers
     # ------------------------------------------------------------------
+
+    def _cache_naws(self, frame):
+        """Remember the window size from a browser NAWS subnegotiation.
+
+        The client only sends one kind of binary frame — ``IAC SB NAWS w1 w0
+        h1 h0 IAC SE`` — so a strict shape check is enough. Anything else is
+        ignored (and still forwarded verbatim by the caller).
+        """
+        if (
+            len(frame) == 9
+            and frame[0] == IAC and frame[1] == SB and frame[2] == OPT_NAWS
+            and frame[7] == IAC and frame[8] == SE
+        ):
+            cols = (frame[3] << 8) | frame[4]
+            rows = (frame[5] << 8) | frame[6]
+            if 0 < cols < 1024 and 0 < rows < 1024:
+                self._naws = (cols, rows)
+
+    async def _maybe_autologin(self, display_data):
+        """Send ``webauth <token>`` once the game shows its account prompt.
+
+        The prompt is watched for in the displayable stream (with a small
+        carry-over tail so a prompt split across socket reads still matches).
+        On the first sighting, mint a single-use 90-second token for the
+        authenticated account and answer the prompt from here — the token
+        never reaches the browser. Any failure just leaves the player at the
+        normal manual prompt.
+        """
+        text = self._prompt_tail + display_data.decode(
+            "utf-8", errors="replace"
+        ).lower()
+        if ACCOUNT_PROMPT not in text:
+            self._prompt_tail = text[-(len(ACCOUNT_PROMPT) - 1):]
+            return
+
+        account_id = self._autologin_account_id
+        self._autologin_account_id = None  # one attempt per connection
+        self._prompt_tail = ""
+
+        try:
+            token = await database_sync_to_async(WebLoginToken.mint)(
+                account_id
+            )
+        except Exception as exc:
+            # E.g. the game-side migration hasn't run yet. Manual login works.
+            logger.warning(
+                "Auto-login mint failed for account %s: %s", account_id, exc
+            )
+            return
+
+        if self._writer and not self._writer.is_closing():
+            self._writer.write(b"webauth " + token.encode("ascii") + b"\r\n")
+            try:
+                await self._writer.drain()
+            except (ConnectionError, OSError):
+                await self.close(code=CLOSE_BRIDGE_FAILURE)
 
     async def _read_telnet(self):
         """Continuously read from the MUD and forward to the WebSocket."""
@@ -97,7 +196,9 @@ class TelnetConsumer(AsyncWebsocketConsumer):
             while True:
                 data = await self._reader.read(4096)
                 if not data:
-                    await self.close()
+                    # The game ended the session (quit, kick, or shutdown):
+                    # a clean close, not a bridge failure.
+                    await self.close(code=1000)
                     return
 
                 self._inbuf.extend(data)
@@ -134,11 +235,15 @@ class TelnetConsumer(AsyncWebsocketConsumer):
                             "utf-8", errors="replace"
                         )
                     )
+                    # Auto-login: when the game reaches its account prompt,
+                    # mint a token and answer for the authenticated player.
+                    if self._autologin_account_id is not None:
+                        await self._maybe_autologin(display_data)
         except asyncio.CancelledError:
             pass
         except Exception as exc:
             logger.error("Telnet read error: %s", exc)
-            await self.close()
+            await self.close(code=CLOSE_BRIDGE_FAILURE)
 
     def _process_telnet(self):
         """Parse buffered telnet data from ``self._inbuf``.
@@ -237,11 +342,14 @@ class TelnetConsumer(AsyncWebsocketConsumer):
         elif command == DO:
             if option == OPT_NAWS:
                 responses.extend([IAC, WILL, OPT_NAWS])
-                # Send default window size 80x24.
+                # Answer with the browser's actual terminal size (cached from
+                # its NAWS frames, the first of which is sent the moment the
+                # websocket opens). 80x24 only as a last-resort default.
+                cols, rows = self._naws or (80, 24)
                 responses.extend([
                     IAC, SB, OPT_NAWS,
-                    0, 80,
-                    0, 24,
+                    (cols >> 8) & 0xFF, cols & 0xFF,
+                    (rows >> 8) & 0xFF, rows & 0xFF,
                     IAC, SE,
                 ])
             elif option == OPT_TTYPE:

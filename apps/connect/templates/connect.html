@@ -294,14 +294,55 @@
     });
 
     // --- WebSocket ---
+    // Reconnect-with-backoff is the primary recovery path (#85): the bridge
+    // re-authenticates each new socket server-side, so a reconnect lands a
+    // signed-in player back at character select without retyping anything.
+    // Only a clean close (code 1000 — the game ended the session, e.g. a
+    // quit) is left to the manual button; everything else retries on a
+    // 1s/2s/5s/10s ladder until the game comes back.
     var ws = null;
+    var BACKOFF_MS = [1000, 2000, 5000, 10000];
+    var CLOSE_BRIDGE_FAILURE = 4502;  // matches apps/connect/consumers.py
+    var reconnectAttempt = 0;
+    var reconnectTimer = null;
+    var countdownTimer = null;
+    var openedAt = 0;
+
     function setStatus(text, cls) {
         statusText.textContent = text;
         statusEl.className = cls;
     }
 
+    function clearReconnect() {
+        if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
+        if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+    }
+
+    function scheduleReconnect(reason) {
+        clearReconnect();
+        var delay = BACKOFF_MS[Math.min(reconnectAttempt, BACKOFF_MS.length - 1)];
+        reconnectAttempt++;
+        var until = Date.now() + delay;
+        reconnectBtn.style.display = "";
+        term.writeln("\r\n\x1b[1;33m--- " + reason + " — reconnecting in "
+            + Math.round(delay / 1000) + "s ---\x1b[0m");
+        function tick() {
+            var left = Math.max(0, Math.ceil((until - Date.now()) / 1000));
+            setStatus("Reconnecting in " + left + "s…", "status-connecting");
+        }
+        tick();
+        countdownTimer = setInterval(tick, 500);
+        reconnectTimer = setTimeout(connect, delay);
+    }
+
     function connect() {
-        if (ws && ws.readyState <= WebSocket.OPEN) ws.close();
+        clearReconnect();
+        if (ws) {
+            // Deliberate replacement: a stale socket's close must not race
+            // the new one into the reconnect scheduler.
+            ws.onopen = ws.onmessage = ws.onclose = ws.onerror = null;
+            if (ws.readyState <= WebSocket.OPEN) ws.close();
+        }
         if (window.IsharHUD) window.IsharHUD.reset();
 
         var protocol = location.protocol === "https:" ? "wss:" : "ws:";
@@ -314,6 +355,7 @@
         ws.binaryType = "arraybuffer";
 
         ws.onopen = function() {
+            openedAt = Date.now();
             setStatus("Connected", "status-connected");
             if (window.IsharHUD) window.IsharHUD.setConnected(true);
             sendNaws();
@@ -341,17 +383,28 @@
             term.write(d);
         };
 
-        ws.onclose = function() {
+        ws.onclose = function(event) {
             setStatus("Disconnected", "status-disconnected");
             if (window.IsharHUD) window.IsharHUD.setConnected(false);
-            reconnectBtn.style.display = "";
-            term.writeln("\r\n\x1b[1;31m--- Disconnected ---\x1b[0m");
+            // A session that lived a while proves the path works — restart
+            // the backoff ladder instead of climbing it forever.
+            if (openedAt && Date.now() - openedAt > 30000) reconnectAttempt = 0;
+            openedAt = 0;
+            if (event.code === 1000) {
+                // The game ended the session (e.g. quit) — don't fight a
+                // deliberate exit with an auto-reconnect loop.
+                reconnectBtn.style.display = "";
+                term.writeln("\r\n\x1b[1;31m--- Disconnected ---\x1b[0m");
+                return;
+            }
+            scheduleReconnect(event.code === CLOSE_BRIDGE_FAILURE
+                ? "Game server unreachable"
+                : "Connection lost");
         };
 
-        ws.onerror = function() {
-            setStatus("Disconnected", "status-disconnected");
-            reconnectBtn.style.display = "";
-        };
+        // A failed handshake also fires onclose (with a non-1000 code), so
+        // the reconnect scheduling lives there alone.
+        ws.onerror = function() {};
     }
 
     function sendCommand(cmd) {
