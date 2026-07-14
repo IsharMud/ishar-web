@@ -3,6 +3,7 @@ from django.urls import path
 from .views.dashboard import DashboardView
 from .views.deploy import (
     DeployActionView,
+    DeployGameStatusView,
     DeployPingView,
     DeployStatusView,
     DeployView,
@@ -27,5 +28,10 @@ urlpatterns = [
         "deploy/web-clients/",
         DeployWebClientsView.as_view(),
         name="deploy_web_clients",
+    ),
+    path(
+        "deploy/game-status/",
+        DeployGameStatusView.as_view(),
+        name="deploy_game_status",
     ),
 ]

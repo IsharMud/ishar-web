@@ -38,6 +38,9 @@
             </p>
         </div>
         <div class="ac-hero__status">
+            <span class="ac-pill ac-pill--status ac-pill--muted ac-pill--live" id="gamePill" title="Game server status (presence heartbeat)">
+                checking game…
+            </span>
 {% if deploy_configured %}
             <span class="ac-pill ac-pill--status ac-pill--muted ac-pill--live" id="agentPill" title="Deploy agent status">
                 checking agent…
@@ -116,6 +119,13 @@
                 <span><strong>Players are in the game via the web client —</strong>
                 <span id="webClientsText">checking…</span>
                 Deploying <code>ishar-web</code> will cut their connection mid-session.</span>
+            </div>
+
+            <div class="ac-note ac-note--warn mt-3 d-none" id="gamePlayersWarning" role="alert">
+                <svg class="bi" aria-hidden="true"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#controller"></use></svg>
+                <span><strong>Players are in the game —</strong>
+                <span id="gamePlayersText">checking…</span>
+                <code>ishar-app</code> deploys are blue-green (no player drop), but consider holding a risky change while the game is busy.</span>
             </div>
         </div>
 
@@ -250,11 +260,25 @@
         return (web && web.checked) || !anyChecked;
     }
 
+    // Same "empty selection = all services" rule for the game server.
+    function deployIncludesApp() {
+        const app = document.getElementById("svc-ishar-app");
+        const anyChecked = form.querySelector(".service-check:checked") !== null;
+        return (app && app.checked) || !anyChecked;
+    }
+
     // Live count of /connect sessions proxied through this container — an
     // ishar-web deploy severs every one of them mid-game.
     const webClientsWarning = document.getElementById("webClientsWarning");
     const webClientsText = document.getElementById("webClientsText");
     let webClientCount = 0;
+
+    // Players in the game via any path (presence heartbeat) — context for an
+    // ishar-app deploy (#77). Blue-green, so informational rather than a cut.
+    const gamePill = document.getElementById("gamePill");
+    const gamePlayersWarning = document.getElementById("gamePlayersWarning");
+    const gamePlayersText = document.getElementById("gamePlayersText");
+    let gamePlayerCount = 0;
 
     function fmtAge(s) {
         if (s < 60) { return s + "s"; }
@@ -267,6 +291,9 @@
         warning.classList.toggle("d-none", !includesWeb);
         webClientsWarning.classList.toggle(
             "d-none", !(includesWeb && webClientCount > 0)
+        );
+        gamePlayersWarning.classList.toggle(
+            "d-none", !(deployIncludesApp() && gamePlayerCount > 0)
         );
     }
     document.querySelectorAll(".service-check").forEach(function (el) {
@@ -294,6 +321,37 @@
     refreshWarning();
     pollWebClients();
     setInterval(pollWebClients, 10000);
+
+    // Live game-server status via the presence heartbeat (#1771): drives the
+    // hero "Game" pill and the ishar-app in-game warning (#77).
+    function pollGameStatus() {
+        post("{% url 'deploy_game_status' %}", {})
+            .then(function (r) {
+                if (r.status !== 200) { return; }
+                const d = r.data || {};
+                if (!d.integrated) {
+                    setPill(gamePill, "game status n/a", "muted", false);
+                    gamePlayerCount = 0;
+                } else if (d.up) {
+                    const n = d.player_count || 0;
+                    gamePlayerCount = n;
+                    setPill(gamePill,
+                        "game up · " + n + " player" + (n === 1 ? "" : "s"),
+                        "ok", true);
+                    if (n > 0) {
+                        gamePlayersText.textContent = n + " player" +
+                            (n === 1 ? " is" : "s are") + " in the game.";
+                    }
+                } else {
+                    gamePlayerCount = 0;
+                    setPill(gamePill, "game down", "danger", false);
+                }
+                refreshWarning();
+            })
+            .catch(function () { /* keep last known state */ });
+    }
+    pollGameStatus();
+    setInterval(pollGameStatus, 10000);
 
     // ---- live agent health (hero pill) ----------------------------------
     if (deployConfigured) {
@@ -414,6 +472,12 @@
             prompt += "\n\nWARNING: " + webClientCount +
                 " player session" + (webClientCount === 1 ? "" : "s") +
                 " on the web client will be disconnected mid-game.";
+        }
+        if (deployIncludesApp() && gamePlayerCount > 0) {
+            prompt += "\n\nNote: " + gamePlayerCount + " player" +
+                (gamePlayerCount === 1 ? " is" : "s are") +
+                " in the game. ishar-app is blue-green (no drop), but the game" +
+                " is live right now.";
         }
         if (!confirm(prompt)) {
             return;

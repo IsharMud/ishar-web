@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from django.db import models
+from django.db import DatabaseError, models
 from django.conf import settings
 from django.contrib.admin import display
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -24,11 +24,40 @@ class PlayerBaseManager(models.Manager):
         return self.get(name=name)
 
     def online(self):
-        # The single source of truth for "who is online". There is no live
-        # presence signal yet (isharmud/ishar-mud#1771): logon >= logout
-        # alone breaks once the game's 5-minute autosave refreshes logout
-        # mid-session, so a recent logout also counts. Just-quit players
-        # linger here for up to 10 minutes.
+        # The single source of truth for "who is online".
+        #
+        # Preferred signal: the game's presence heartbeat (Contract 2,
+        # isharmud/ishar-mud#1771) — game_presence carries one row per
+        # character actually in the PLAYING state, refreshed every game-minute.
+        # A row is live if last_seen is within PRESENCE_STALE_SECONDS (two
+        # missed pulses ⇒ the game died without cleanup). Once the game_status
+        # singleton exists, presence is authoritative: a stale heartbeat means
+        # the game is down, so no presence rows are fresh and nobody is online
+        # (correctly distinct from "game up, zero players").
+        #
+        # Fallback: before the game ships the heartbeat (no game_status row, or
+        # the tables don't exist yet during rollout) we degrade to the legacy
+        # logon/logout heuristic. That heuristic is lossy — the 5-minute
+        # autosave rewrites logout mid-session (online players vanish) and a
+        # crash freezes logon >= logout forever (ghosts persist) — so a recent
+        # logout also counts, letting just-quit players linger up to 10 minutes.
+        from .presence import GamePresence, GameStatus, PRESENCE_STALE_SECONDS
+
+        cutoff = now() - timedelta(seconds=PRESENCE_STALE_SECONDS)
+        try:
+            integrated = GameStatus.objects.filter(pk=1).exists()
+        except DatabaseError:
+            # Tables absent (web deployed before the game migration).
+            integrated = False
+
+        if integrated:
+            return self.filter(
+                id__in=GamePresence.objects.filter(
+                    last_seen__gte=cutoff
+                ).values("player_id"),
+                is_deleted=False,
+            )
+
         return self.filter(
             models.Q(logon__gte=models.F("logout"))
             | models.Q(logout__gte=now() - timedelta(minutes=10)),

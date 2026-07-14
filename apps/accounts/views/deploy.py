@@ -5,8 +5,12 @@ services and triggers scripts/deploy.sh on the host via the deploy agent. The
 deploy POST requires password re-entry (re-auth), so a driven/XSS'd session
 cannot fire a deploy on its own — see docs/infrastructure/reboot_process.md §4.
 """
+from datetime import timedelta
+
 from django.conf import settings
+from django.db import DatabaseError
 from django.http import JsonResponse
+from django.utils.timezone import now
 from django.views.generic.base import TemplateView, View
 
 from apps.connect import tracker as connect_tracker
@@ -103,6 +107,62 @@ class DeployWebClientsView(GodRequiredMixin, NeverCacheMixin, View):
 
     def post(self, request, *args, **kwargs):
         return JsonResponse(connect_tracker.snapshot())
+
+
+class DeployGameStatusView(GodRequiredMixin, NeverCacheMixin, View):
+    """POST-only read of the game's presence heartbeat (Contract 2, #1771).
+
+    Powers the console's live "Game" pill and the pre-deploy warning when
+    ishar-app is selected with players in-game (closes the game-side half of
+    #77). The game publishes game_status (a singleton heartbeat) and
+    game_presence (one row per in-game character); we report whether the game
+    is up (heartbeat within the staleness window), the live player count, and
+    the heartbeat age. Degrades gracefully before the game ships the heartbeat
+    (tables absent / no row). Read-only (no re-auth); God gate + CSRF apply.
+    """
+
+    http_method_names = ("post",)
+
+    def post(self, request, *args, **kwargs):
+        # Imported here so a web deploy that predates the game migration can't
+        # break module import; the query itself is guarded below.
+        from apps.players.models.presence import (
+            GamePresence,
+            GameStatus,
+            PRESENCE_STALE_SECONDS,
+        )
+
+        cutoff = now() - timedelta(seconds=PRESENCE_STALE_SECONDS)
+        try:
+            status = GameStatus.objects.filter(pk=1).first()
+        except DatabaseError:
+            # Tables not created yet (web deployed before the game migration).
+            return JsonResponse({"integrated": False, "up": False, "player_count": 0})
+
+        if status is None:
+            # Migration ran but the game hasn't booted with presence yet.
+            return JsonResponse({"integrated": False, "up": False, "player_count": 0})
+
+        beat_age = max(0, int((now() - status.heartbeat_at).total_seconds()))
+        up = beat_age <= PRESENCE_STALE_SECONDS
+
+        player_count = 0
+        if up:
+            try:
+                player_count = GamePresence.objects.filter(
+                    last_seen__gte=cutoff
+                ).count()
+            except DatabaseError:
+                player_count = 0
+
+        return JsonResponse(
+            {
+                "integrated": True,
+                "up": up,
+                "player_count": player_count,
+                "beat_age": beat_age,
+            }
+        )
 
 
 class DeployStatusView(GodRequiredMixin, NeverCacheMixin, View):
