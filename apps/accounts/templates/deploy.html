@@ -156,6 +156,29 @@
                        autocomplete="current-password" placeholder="Re-enter your account password">
             </div>
             <p class="ac-panel__hint mt-2 mb-0">Re-authentication is required on every deploy.</p>
+
+            <label class="ac-panel__h" style="margin-top:1.25rem; margin-bottom:.35rem;">
+                <svg class="bi" aria-hidden="true"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#clock-history"></use></svg>
+                Or schedule &amp; warn players
+            </label>
+            <p class="ac-panel__hint mt-0">
+                Announce a reboot in-game, count it down, then deploy after the delay.
+                The game does the countdown — you don't need to keep this page open.
+            </p>
+            <div class="ac-seg" role="radiogroup" aria-label="Reboot delay">
+                <input class="btn-check" type="radio" name="delay_min" id="delay-2" value="2" autocomplete="off">
+                <label class="ac-seg__item" for="delay-2">2 min</label>
+                <input class="btn-check" type="radio" name="delay_min" id="delay-5" value="5" autocomplete="off" checked>
+                <label class="ac-seg__item" for="delay-5">5 min</label>
+                <input class="btn-check" type="radio" name="delay_min" id="delay-10" value="10" autocomplete="off">
+                <label class="ac-seg__item" for="delay-10">10 min</label>
+                <input class="btn-check" type="radio" name="delay_min" id="delay-15" value="15" autocomplete="off">
+                <label class="ac-seg__item" for="delay-15">15 min</label>
+            </div>
+            <button class="ac-btn ac-btn--accent mt-3" type="button" id="scheduleBtn"{% if not deploy_configured %} disabled{% endif %}>
+                <svg class="bi" aria-hidden="true"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#alarm"></use></svg>
+                Schedule &amp; warn players
+            </button>
         </div>
 
         <!-- CTA -->
@@ -176,6 +199,10 @@
             <button type="button" class="ac-copy" id="copyLog" title="Copy log to clipboard">
                 <svg class="bi" aria-hidden="true"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#clipboard"></use></svg>
                 <span id="copyLogText">Copy</span>
+            </button>
+            <button type="button" class="ac-copy d-none" id="cancelScheduledBtn" title="Cancel the scheduled deploy">
+                <svg class="bi" aria-hidden="true"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#x-circle"></use></svg>
+                <span>Cancel</span>
             </button>
         </div>
         <div class="ac-console__step" id="deployStep" hidden>
@@ -206,11 +233,18 @@
     const spin = document.getElementById("deploySpin");
     const copyBtn = document.getElementById("copyLog");
     const copyText = document.getElementById("copyLogText");
+    const scheduleBtn = document.getElementById("scheduleBtn");
+    const cancelScheduledBtn = document.getElementById("cancelScheduledBtn");
     const csrftoken = "{{ csrf_token }}";
     const deployConfigured = {% if deploy_configured %}true{% else %}false{% endif %};
     let polling = null;
     let timer = null;
     let startedAt = 0;
+    // A scheduled (delayed) deploy the host agent is holding: its id, when it
+    // fires (epoch seconds), and the client-side countdown interval.
+    let scheduledDeployId = null;
+    let scheduledFiresAt = 0;
+    let scheduleCountdown = null;
 
     // ---- helpers ---------------------------------------------------------
     // Set a status pill's label + intent without innerHTML (dot is ::before).
@@ -416,6 +450,8 @@
             setBadge("success", "ok", false);
         } else if (data.status === "failed") {
             setBadge("failed", "danger", false);
+        } else if (data.status === "cancelled") {
+            setBadge("cancelled", "muted", false);
         } else {
             setBadge("running", "warn", true);
         }
@@ -434,6 +470,16 @@
                     clearInterval(polling);
                     finish();
                     return;
+                }
+                if (r.data.status === "scheduled") {
+                    // Still waiting to fire — the client-side countdown owns the
+                    // display; just keep polling until it flips to running.
+                    return;
+                }
+                if (scheduledDeployId) {
+                    // It fired: tear down the scheduled UI, fall through to the
+                    // normal running/finished rendering below.
+                    endScheduleUI();
                 }
                 renderStatus(r.data);
                 if (r.data.status !== "running") {
@@ -529,6 +575,130 @@
             setBadge("error", "danger", false);
             outputEl.textContent = "Request failed: " + err;
             finish();
+        });
+    });
+
+    // ---- scheduled (delayed) deploy --------------------------------------
+    function endScheduleUI() {
+        clearInterval(scheduleCountdown);
+        scheduleCountdown = null;
+        scheduledDeployId = null;
+        cancelScheduledBtn.classList.add("d-none");
+        scheduleBtn.disabled = !deployConfigured;
+        btn.disabled = !deployConfigured;
+    }
+
+    function tickSchedule() {
+        if (!scheduledDeployId) { return; }
+        const remain = Math.max(0, Math.round(scheduledFiresAt - Date.now() / 1000));
+        const label = Math.floor(remain / 60) + ":" +
+            String(remain % 60).padStart(2, "0");
+        setBadge("fires in " + label, "info", true);
+        outputEl.textContent =
+            "Reboot scheduled — the deploy fires in " + label + ".\n" +
+            "Players are being warned in the game and counted down.\n" +
+            "You can leave this page; the host runs the deploy on time. " +
+            "Use Cancel above to call it off.";
+    }
+
+    scheduleBtn.addEventListener("click", function () {
+        const env = (form.querySelector("input[name=env]:checked") || {}).value;
+        const services = Array.from(
+            form.querySelectorAll("input[name=services]:checked")
+        ).map(function (el) { return el.value; });
+        const password = document.getElementById("password").value;
+        const noPull = document.getElementById("no_pull").checked;
+        const delayMin = parseInt(
+            (form.querySelector("input[name=delay_min]:checked") || {}).value || "0", 10
+        );
+
+        if (!password) { alert("Enter your password to confirm."); return; }
+        if (!delayMin) { alert("Pick a delay."); return; }
+
+        const label = services.length ? services.join(", ") : "ALL services";
+        let prompt = "Schedule a deploy of " + label + " to " + env +
+            " in " + delayMin + " minute" + (delayMin === 1 ? "" : "s") + "?\n\n" +
+            "Players in the game will be warned now and counted down.";
+        if (deployIncludesWeb() && webClientCount > 0) {
+            prompt += "\n\nNote: " + webClientCount + " web-client session" +
+                (webClientCount === 1 ? "" : "s") + " will be cut when it fires.";
+        }
+        if (!confirm(prompt)) { return; }
+
+        const body = new URLSearchParams();
+        body.append("env", env);
+        body.append("password", password);
+        if (noPull) { body.append("no_pull", "1"); }
+        services.forEach(function (s) { body.append("services", s); });
+        body.append("delay_seconds", String(delayMin * 60));
+        body.append("csrfmiddlewaretoken", csrftoken);
+        document.getElementById("password").value = "";
+
+        scheduleBtn.disabled = true;
+        btn.disabled = true;
+        resultCard.classList.remove("d-none");
+        setBadge("scheduling", "warn", true);
+        stepRow.hidden = true;
+        metaRow.hidden = true;
+
+        // Direct fetch (not the post() helper): the body has repeated
+        // `services` keys, which an object param would collapse.
+        fetch("{% url 'deploy_schedule' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "X-CSRFToken": csrftoken,
+            },
+            body: body.toString(),
+        }).then(function (resp) {
+            return resp.json().then(function (data) {
+                return { status: resp.status, data: data };
+            });
+        }).then(function (r) {
+            if (r.status === 200 && r.data.deploy_id && r.data.status === "scheduled") {
+                scheduledDeployId = r.data.deploy_id;
+                scheduledFiresAt = r.data.fires_at ||
+                    (Date.now() / 1000 + delayMin * 60);
+                cancelScheduledBtn.classList.remove("d-none");
+                tickSchedule();
+                clearInterval(scheduleCountdown);
+                scheduleCountdown = setInterval(tickSchedule, 1000);
+                clearInterval(polling);
+                polling = setInterval(function () { poll(scheduledDeployId); }, 5000);
+            } else {
+                scheduleBtn.disabled = !deployConfigured;
+                btn.disabled = !deployConfigured;
+                setBadge("rejected", "danger", false);
+                outputEl.textContent = r.data.message || r.data.detail ||
+                    r.data.error || ("HTTP " + r.status);
+            }
+        }).catch(function (err) {
+            scheduleBtn.disabled = !deployConfigured;
+            btn.disabled = !deployConfigured;
+            setBadge("error", "danger", false);
+            outputEl.textContent = "Request failed: " + err;
+        });
+    });
+
+    cancelScheduledBtn.addEventListener("click", function () {
+        if (!scheduledDeployId) { return; }
+        if (!confirm("Cancel the scheduled deploy? Players will be told it's off.")) {
+            return;
+        }
+        const id = scheduledDeployId;
+        post("{% url 'deploy_cancel_scheduled' %}", { deploy_id: id }).then(function (r) {
+            if (r.status === 200 && r.data.ok) {
+                clearInterval(polling);
+                endScheduleUI();
+                setBadge("cancelled", "muted", false);
+                outputEl.textContent =
+                    "Scheduled deploy cancelled. Players have been told it's off.";
+            } else {
+                outputEl.textContent += "\n[cancel failed: " +
+                    (r.data.message || r.data.detail || r.data.error || r.status) + "]";
+            }
+        }).catch(function () {
+            outputEl.textContent += "\n[cancel request failed]";
         });
     });
 })();

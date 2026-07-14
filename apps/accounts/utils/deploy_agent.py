@@ -52,18 +52,30 @@ def ping():
     return _call({"action": "ping"})
 
 
-def start_deploy(actor, env, services, no_pull=False):
+def start_deploy(actor, env, services, no_pull=False, delay_seconds=0):
     """Ask the agent to start a deploy. Returns the agent's JSON (deploy_id on
-    success, or a rejection with an `error` key)."""
+    success, or a rejection with an `error` key).
+
+    With delay_seconds > 0 the agent *schedules* the deploy: it reserves the
+    single-flight slot immediately (status "scheduled") and fires deploy.sh
+    itself after the delay — surviving this container restarting. Cancel a
+    scheduled deploy with cancel_deploy()."""
     return _call({
         "action": "deploy",
         "actor": actor,
         "env": env,
         "services": services,
         "no_pull": no_pull,
+        "delay_seconds": int(delay_seconds),
     })
 
 
+def cancel_deploy(deploy_id):
+    """Cancel a still-scheduled deploy before it fires. No-op (409) once it has
+    started running. Returns the agent's JSON."""
+    return _call({"action": "cancel", "deploy_id": deploy_id})
+
+
 def deploy_status(deploy_id):
-    """Poll a running/finished deploy by id."""
+    """Poll a running/finished/scheduled deploy by id."""
     return _call({"action": "status", "deploy_id": deploy_id})
