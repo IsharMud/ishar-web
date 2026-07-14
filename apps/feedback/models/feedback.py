@@ -202,8 +202,9 @@ class Feedback(models.Model):
         db_column="is_private",
         default=False,
         help_text=(
-            "Private reports never reach Discord and cannot be promoted to a "
-            "public GitHub issue (likely-exploit reports)."
+            "Private reports never reach Discord (likely-exploit reports). They "
+            "can still be promoted to the private GitHub tracker, where issues "
+            "stay admin-only."
         ),
         verbose_name="Private?",
     )
