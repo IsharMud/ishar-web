@@ -64,7 +64,6 @@ class TelnetConsumer(AsyncWebsocketConsumer):
     """Proxy WebSocket connections to the MUD telnet server."""
 
     async def connect(self):
-        from .models import WebLoginToken
         self._reader = None
         self._writer = None
         self._read_task = None
@@ -216,6 +215,15 @@ class TelnetConsumer(AsyncWebsocketConsumer):
         account_id = self._autologin_account_id
         self._autologin_account_id = None  # one attempt per connection
         self._prompt_tail = ""
+
+        # Imported at point of use, not module level: consumers.py is imported
+        # during ASGI startup, where a top-level model import can hit the app
+        # registry before it is ready. The earlier fix moved this import into
+        # connect()'s *local* scope — but the mint happens here, in a different
+        # method that never saw that name, so every attempt raised NameError,
+        # was swallowed by the except below as a "mint failed", and auto-login
+        # silently never fired. Import it where it is actually used.
+        from .models import WebLoginToken
 
         try:
             token = await database_sync_to_async(WebLoginToken.mint)(
