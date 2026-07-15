@@ -38,6 +38,7 @@ urlpatterns = [
     path("history/", include("apps.history.urls"), name="history"),
     path("leaders/", include("apps.leaders.urls"), name="leaders"),
     path("news/", include("apps.news.urls"), name="news"),
+    path("patch-notes/", include("apps.patchnotes.urls"), name="patchnotes"),
     path("patches/", include("apps.patches.urls"), name="patches"),
     path("player/", include("apps.players.urls"), name="player"),
     path("portal/", include("apps.accounts.urls"), name="portal"),

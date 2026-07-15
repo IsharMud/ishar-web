@@ -16,6 +16,7 @@ from .news import NewsConfig
 from .notes import NotesConfig
 from .objects import ObjectsConfig
 from .patches import PatchesConfig
+from .patchnotes import PatchNotesConfig
 from .players import PlayersConfig
 from .processes import ProcessesConfig
 from .quests import QuestsConfig

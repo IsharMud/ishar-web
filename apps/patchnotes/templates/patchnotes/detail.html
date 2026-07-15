@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+{% load ishar %}
+{% block meta_title %}{{ note.title }} - {{ WEBSITE_TITLE }} Patch Notes{% endblock meta_title %}
+{% block meta_description %}{{ note.title }} - a patch note for {{ WEBSITE_TITLE }}, a free online MUD (Multi-User Dungeon).{% endblock meta_description %}
+{% block meta_url %}{% url 'patch_note' note.pk %}{% endblock meta_url %}
+{% block title %}{{ note.title }} - {{ WEBSITE_TITLE }} Patch Notes{% endblock title %}
+{% block breadcrumbs %}
+    {% crumb "Patch Notes" "megaphone" urlname="patch_notes" %}
+    {% crumb note.title "file-text" anchor="patch-note" active=True %}
+{% endblock breadcrumbs %}
+{% block content %}
+<style>
+    .pn-body__h { font-size: 1.1rem; margin: 1.25rem 0 .5rem; }
+    .pn-body__h:first-child { margin-top: 0; }
+    .pn-body__list { margin: .25rem 0 .75rem 1.25rem; }
+    .pn-body p { margin: 0 0 .75rem; }
+    .pn-body p:last-child { margin-bottom: 0; }
+</style>
+<div class="ac" id="patch-note">
+
+    <header class="ac-hero">
+        <span class="ac-hero__badge">{% bi "megaphone" %}</span>
+        <div class="ac-hero__text">
+            <h2 class="ac-hero__title">{{ note.title }}</h2>
+            <p class="ac-hero__sub">
+                {{ note.author }} &mdash;
+                <time datetime="{{ note.published_at|date:'c' }}" title="{{ note.published_at|date:'l, F jS, Y' }}">
+                    {{ note.published_at|date:"l, F jS, Y" }}
+                </time>
+                {% if note.season_id %}&middot; Season {{ note.season_id }}{% endif %}
+            </p>
+        </div>
+    </header>
+
+    <div class="ac-panel pn-body">
+        {{ body_html }}
+    </div>
+
+    <nav class="ac-pager" aria-label="Patch note navigation">
+        <a class="ac-btn" href="{% url 'patch_notes' %}">
+            {% bi "chevron-left" %} All patch notes
+        </a>
+    </nav>
+
+</div>
+{% endblock content %}

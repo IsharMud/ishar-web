@@ -84,6 +84,13 @@
                     <span class="ac-link__note d-block">Player bug / typo / idea reports</span>
                 </span>
             </a>
+            <a class="ac-link" href="{% url 'patch_notes_console' %}#pn-console" title="Patch Note Editor">
+                <span class="ac-link__icon">{% bi "megaphone" %}</span>
+                <span class="ac-link__body">
+                    <span class="ac-link__name">Patch Note Editor</span>
+                    <span class="ac-link__note d-block">Write, publish &amp; delete patch notes</span>
+                </span>
+            </a>
             <a class="ac-link" href="{% url 'styleguide' %}#styleguide" title="Style Guide">
                 <span class="ac-link__icon">{% bi "palette" %}</span>
                 <span class="ac-link__body">
@@ -106,6 +113,16 @@
                     <span class="ac-link__note d-block">Players in the game right now</span>
                 </span>
                 <span class="ac-link__side ac-pill ac-pill--{% if PLAYERS_ONLINE %}ok{% else %}muted{% endif %}">{{ PLAYERS_ONLINE }}</span>
+            </a>
+            <a class="ac-link" href="{% url 'patch_notes' %}#patch-notes" title="Patch Notes">
+                <span class="ac-link__icon">{% bi "megaphone" %}</span>
+                <span class="ac-link__body">
+                    <span class="ac-link__name">Patch Notes</span>
+                    <span class="ac-link__note d-block">Game updates, changes &amp; fixes</span>
+                </span>
+{% if PATCH_NOTES_UNREAD %}
+                <span class="ac-link__side ac-pill ac-pill--warn" title="{{ PATCH_NOTES_UNREAD }} unread">{{ PATCH_NOTES_UNREAD }}</span>
+{% endif %}
             </a>
             <a class="ac-link" href="{% url 'challenges' %}#challenges" title="Challenges">
                 <span class="ac-link__icon">{% bi "award" %}</span>

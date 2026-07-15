@@ -1,0 +1,117 @@
+{% extends "layout.html" %}
+{% load ishar %}
+{% block meta_title %}{{ WEBSITE_TITLE }} Patch Notes - Game Updates & Changes{% endblock meta_title %}
+{% block meta_description %}Patch notes for {{ WEBSITE_TITLE }}, a free online MUD (Multi-User Dungeon) - the latest game updates, changes, and fixes.{% endblock meta_description %}
+{% block meta_url %}{% url 'patch_notes' %}{% if page_obj and page_obj.number %}?page={{ page_obj.number }}{% endif %}{% endblock meta_url %}
+{% block title %}Patch Notes - {{ WEBSITE_TITLE }}{% endblock title %}
+{% block breadcrumbs %}
+    {% crumb "Patch Notes" "megaphone" urlname="patch_notes" anchor="patch-notes" active=True %}
+{% endblock breadcrumbs %}
+{% block content %}
+<style>
+    .pn-row--unread .ac-row__link { font-weight: 600; }
+    .pn-actions { display: flex; justify-content: flex-end; margin-bottom: .75rem; }
+</style>
+<div class="ac" id="patch-notes">
+
+    <header class="ac-hero">
+        <span class="ac-hero__badge">{% bi "megaphone" %}</span>
+        <div class="ac-hero__text">
+            <h2 class="ac-hero__title">Patch Notes</h2>
+            <p class="ac-hero__sub">Updates, changes, and fixes to the game.</p>
+        </div>
+{% if show_read_state and PATCH_NOTES_UNREAD %}
+        <div class="ac-hero__status">
+            <span class="ac-pill ac-pill--warn" id="unreadPill" title="Unread patch notes">
+                {{ PATCH_NOTES_UNREAD }} unread
+            </span>
+        </div>
+{% endif %}
+    </header>
+
+{% if show_read_state and PATCH_NOTES_UNREAD %}
+    <div class="pn-actions">
+        <button class="ac-btn" type="button" id="markAllBtn">
+            {% bi "check2-all" %} Mark all read
+        </button>
+    </div>
+{% endif %}
+
+    <div class="ac-panel">
+{% for note in notes %}
+        <a class="ac-row{% if not note.is_read %} pn-row--unread{% endif %}" href="{% url 'patch_note' note.pk %}">
+            <span class="ac-row__icon" aria-hidden="true">
+                {% if note.is_read %}{% bi "check-circle" %}{% else %}{% bi "circle-fill" %}{% endif %}
+            </span>
+            <div class="ac-row__main">
+                <span class="ac-row__link">{{ note.title }}</span>
+                <span class="ac-row__meta">
+                    {{ note.author }} &mdash;
+                    <time datetime="{{ note.published_at|date:'c' }}" title="{{ note.published_at|date:'l, F jS, Y' }}">
+                        {{ note.published_at|date:"F jS, Y"|default:"Draft" }}
+                    </time>
+                    {% if note.season_id %}&middot; Season {{ note.season_id }}{% endif %}
+                </span>
+            </div>
+            {% if show_read_state and not note.is_read %}
+            <span class="ac-pill ac-pill--warn ac-row__meta">New</span>
+            {% endif %}
+        </a>
+{% empty %}
+        <p class="ac-empty">No patch notes have been published yet.</p>
+{% endfor %}
+    </div>
+
+{% if page_obj and page_obj.paginator.num_pages > 1 %}
+    <nav class="ac-pager" aria-label="Patch note navigation">
+{% if page_obj.has_previous %}
+        <a class="ac-btn" href="?page={{ page_obj.previous_page_number }}#patch-notes" aria-label="Newer patch notes">
+            {% bi "chevron-left" %} Newer
+        </a>
+{% endif %}
+        <span class="ac-pager__info">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+{% if page_obj.has_next %}
+        <a class="ac-btn" href="?page={{ page_obj.next_page_number }}#patch-notes" aria-label="Older patch notes">
+            Older {% bi "chevron-right" %}
+        </a>
+{% endif %}
+    </nav>
+{% endif %}
+
+</div>
+
+{% if show_read_state and PATCH_NOTES_UNREAD %}
+<script>
+    (function () {
+        const btn = document.getElementById("markAllBtn");
+        const pill = document.getElementById("unreadPill");
+        const csrftoken = "{{ csrf_token }}";
+        if (!btn) { return; }
+        btn.addEventListener("click", function () {
+            btn.disabled = true;
+            const body = new URLSearchParams({ csrfmiddlewaretoken: csrftoken });
+            fetch("{% url 'patch_notes_mark_all_read' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-CSRFToken": csrftoken,
+                },
+                body: body.toString(),
+            }).then(function (resp) {
+                if (!resp.ok) { throw new Error("request failed"); }
+                // Clear the unread affordances without a reload.
+                document.querySelectorAll(".pn-row--unread").forEach(function (row) {
+                    row.classList.remove("pn-row--unread");
+                    const badge = row.querySelector(".ac-pill--warn");
+                    if (badge) { badge.remove(); }
+                });
+                if (pill) { pill.remove(); }
+                btn.remove();
+            }).catch(function () {
+                btn.disabled = false;
+            });
+        });
+    })();
+</script>
+{% endif %}
+{% endblock content %}
