@@ -928,17 +928,20 @@
         kids.push(el("div", { class: "ab-controls" }, [search]));
 
         var typeChips = el("div", { class: "ab-chips" });
-        var counts = { all: 0, spell: 0, skill: 0, craft: 0 };
+        var counts = { all: 0, fav: 0, spell: 0, skill: 0, craft: 0 };
         all.forEach(function (s) {
             counts.all++;
+            if (favorites[nameOf(s.name).toLowerCase()]) counts.fav++;
             if (s.type === "spell") counts.spell++;
             else if (s.type === "skill") counts.skill++;
             else if (s.type === "craft" || s.type === "enchant") counts.craft++;
         });
-        [["all", "All"], ["spell", "Spells"], ["skill", "Skills"], ["craft", "Crafts"]].forEach(function (tc) {
-            if (tc[0] !== "all" && !counts[tc[0]]) return;
+        // "All" and "★ Fav" always show (Fav invites pinning even at 0); the
+        // type chips appear only when they have members.
+        [["all", "All"], ["fav", "★"], ["spell", "Spells"], ["skill", "Skills"], ["craft", "Crafts"]].forEach(function (tc) {
+            if (tc[0] !== "all" && tc[0] !== "fav" && !counts[tc[0]]) return;
             typeChips.appendChild(el("button", {
-                type: "button", class: "ab-chip" + (abilityFilter.type === tc[0] ? " on" : ""),
+                type: "button", class: "ab-chip" + (tc[0] === "fav" ? " ab-fav" : "") + (abilityFilter.type === tc[0] ? " on" : ""),
                 "data-abtype": tc[0], text: tc[1] + " " + counts[tc[0]]
             }));
         });
@@ -951,6 +954,7 @@
         // Filtered list.
         var q = abilityFilter.q.trim().toLowerCase();
         var rows = all.filter(function (s) {
+            if (abilityFilter.type === "fav" && !favorites[nameOf(s.name).toLowerCase()]) return false;
             if (abilityFilter.type === "spell" && s.type !== "spell") return false;
             if (abilityFilter.type === "skill" && s.type !== "skill") return false;
             if (abilityFilter.type === "craft" && s.type !== "craft" && s.type !== "enchant") return false;
@@ -967,7 +971,10 @@
 
         var scroller = el("div", { class: "ab-scroll" });
         if (!rows.length) {
-            scroller.appendChild(el("div", { class: "panel-empty", text: all.length ? "No abilities match." : "—" }));
+            var emptyMsg = !all.length ? "—"
+                : abilityFilter.type === "fav" ? "No favorites yet — tap ☆ (or right-click an ability) to add one."
+                : "No abilities match.";
+            scroller.appendChild(el("div", { class: "panel-empty", text: emptyMsg }));
         } else {
             var ul = el("ul", { class: "ab-list" });
             rows.forEach(function (s) {
@@ -976,7 +983,7 @@
                 var right = [];
                 if (blk) right.push(el("span", { class: "ab-block", text: blk.cd > 0 ? blk.cd + "s" : blk.reason }));
                 right.push(el("span", { class: "ab-pct", text: s.percent + "%" }));
-                right.push(el("button", { type: "button", class: "ab-star" + (fav ? " on" : ""), "data-fav": nameOf(s.name), "aria-label": fav ? "Unpin" : "Pin", title: fav ? "Unpin from quick bar" : "Pin to quick bar", text: fav ? "★" : "☆" }));
+                right.push(el("button", { type: "button", class: "ab-star" + (fav ? " on" : ""), "data-fav": nameOf(s.name), "aria-label": fav ? "Remove from favorites" : "Add to favorites", title: fav ? "Remove from favorites" : "Add to favorites", text: fav ? "★" : "☆" }));
                 ul.appendChild(el("li", {
                     class: "ab-row " + catClass(s) + (blk ? " off" : ""),
                     "data-ability": s.id, "data-menu": "ability", title: castHint(s)
@@ -1071,19 +1078,45 @@
         m.style.top = Math.max(8, y) + "px";
     }
 
+    // Person-target spells to offer as one-off casts AT a specific occupant —
+    // independent of the default ⚔/✚ targets. Favorited spells first (so the
+    // menu stays your curated set), else usable ones; biased by disposition.
+    function occupantCastActions(o) {
+        var spells = (S.skills || []).filter(function (s) {
+            return s.type === "spell" && (s.target_type === "offensive" || s.target_type === "defensive");
+        });
+        var fav = spells.filter(function (s) { return favorites[nameOf(s.name).toLowerCase()]; });
+        var pick = fav.length ? fav : spells.filter(function (s) { return !abilityBlock(s); });
+        var wantOff = o.hostile_hint !== "friendly";   // enemies → offensive first
+        pick.sort(function (a, b) {
+            var ao = a.target_type === "offensive" ? 0 : 1, bo = b.target_type === "offensive" ? 0 : 1;
+            if (!wantOff) { ao = 1 - ao; bo = 1 - bo; }
+            return ao - bo;
+        });
+        return pick.slice(0, 6).map(function (s) {
+            return { label: "Cast " + s.name, cmd: "cast '" + nameOf(s.name) + "' " + o.handle };
+        });
+    }
+
     function occupantActions(o) {
         if (!o) return [];
         var acts = [];
         acts.push({ label: "Look", cmd: "look " + o.handle });
         if (o.is_dead) return acts;   // slain — nothing else round-trips
         acts.push({ label: "Consider", cmd: "consider " + o.handle });
-        if (o.is_player) {
+        // Cast a chosen spell straight at THIS occupant (not the default target).
+        occupantCastActions(o).forEach(function (a) { acts.push(a); });
+        acts.push({ label: "Attack", cmd: "kill " + o.handle, danger: true });
+        if (!o.is_player) {
+            // Shops answer "list <keyword>" (their command_list Mocha func);
+            // a non-shop mob just no-ops, so this is safe to always offer.
+            acts.push({ label: "List wares", cmd: "list " + firstWord(o.keyword) });
+        } else {
             var nm = firstWord(o.keyword);
             acts.push({ label: "Tell…", prefill: "tell " + nm + " " });
             acts.push({ label: "Follow", cmd: "follow " + nm });
             acts.push({ label: "Group", cmd: "group " + nm });
         }
-        acts.push({ label: "Attack", cmd: "kill " + o.handle, danger: true });
         acts.push({ label: (S.tgtHostile && S.tgtHostile.handle === o.handle ? "✓ " : "") + "Target ⚔ (offensive)", fn: function () { setTarget("tgtHostile", o); } });
         acts.push({ label: (S.tgtFriendly && S.tgtFriendly.handle === o.handle ? "✓ " : "") + "Target ✚ (beneficial)", fn: function () { setTarget("tgtFriendly", o); } });
         return acts;
@@ -1141,7 +1174,7 @@
         return [
             { label: s.type === "spell" ? "Cast" : "Use", fn: function () { sendCmd(abilityCommand(s)); } },
             { label: "Look up", cmd: "skill search " + nameOf(s.name) },
-            { label: fav ? "Unpin from quick bar" : "Pin to quick bar", fn: function () { toggleFavorite(s.name); } }
+            { label: fav ? "★ Remove from favorites" : "☆ Add to favorites", fn: function () { toggleFavorite(s.name); } }
         ];
     }
 

@@ -454,6 +454,8 @@ body.connect-page #content { padding: .5rem !important; }
 }
 .ab-chip:hover { border-color: var(--ac-accent); color: var(--ac-accent); }
 .ab-chip.on { color: var(--ac-accent); border-color: var(--ac-accent); background: var(--ac-wash); }
+.ab-chip.ab-fav { color: var(--hud-gold); }
+.ab-chip.ab-fav.on { color: var(--hud-gold); border-color: var(--hud-gold); background: var(--hud-gold-wash); }
 .ab-chip.ab-usable.on { color: var(--ac-ok); border-color: rgba(76, 187, 23, .5); background: var(--ac-ok-wash); }
 .ab-scroll { flex: 1; min-height: 0; overflow-y: auto; }
 .ab-list { list-style: none; margin: 0; padding: 0; }
