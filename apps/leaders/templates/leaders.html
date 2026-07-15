@@ -83,12 +83,12 @@
                         {{ leader.player_link }}
                         <span class="ac-table__sub">{{ leader.common.player_class }}</span>
                     </td>
-                    <td class="ac-table__num" data-key="{{ leader.common.level }}">{{ leader.common.level }}</td>
-                    <td class="ac-table__num" data-key="{{ leader.remorts }}">{{ leader.remorts }}</td>
+                    <td class="ac-table__num" data-key="{{ leader.display_level }}">{{ leader.display_level }}</td>
+                    <td class="ac-table__num" data-key="{{ leader.display_remorts }}">{{ leader.display_remorts }}</td>
                     <td class="ac-table__num" data-key="{{ leader.statistics.total_renown }}">{{ leader.statistics.total_renown|intcomma }}</td>
                     <td class="ac-table__num" data-key="{{ leader.statistics.total_challenges }}">{{ leader.statistics.total_challenges }}</td>
                     <td class="ac-table__num" data-key="{{ leader.statistics.total_quests }}">{{ leader.statistics.total_quests }}</td>
-                    <td class="ac-table__num" data-key="{{ leader.statistics.total_deaths }}">{{ leader.statistics.total_deaths }}</td>
+                    <td class="ac-table__num" data-key="{{ leader.display_deaths }}">{{ leader.display_deaths }}</td>
                 </tr>
 {% endfor %}
             </tbody>

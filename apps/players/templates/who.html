@@ -46,8 +46,8 @@
                     <span title="Level {{ player.true_level }}">
                         {% bi "bar-chart" %} level {{ player.true_level }}
                     </span>
-                    <span title="{{ player.remorts }} remort{{ player.remorts|pluralize }}">
-                        {% bi "arrow-repeat" %} {{ player.remorts }} remort{{ player.remorts|pluralize }}
+                    <span title="{{ player.display_remorts }} remort{{ player.display_remorts|pluralize }}">
+                        {% bi "arrow-repeat" %} {{ player.display_remorts }} remort{{ player.display_remorts|pluralize }}
                     </span>
                 </div>
 {% endif %}

@@ -1,4 +1,6 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Case, F, IntegerField, When
+from django.db.models.functions import Coalesce
 from django.http import Http404
 from django.views.generic.list import ListView
 
@@ -38,6 +40,47 @@ class LeadersView(LoginRequiredMixin, NeverCacheMixin, ListView):
         )
         if self.game_type is not None:
             qs = qs.filter(game_type__exact=self.game_type.value)
+
+        # Rank hardcore characters by their "player_stats" hardcore record
+        # (`hardcore_level`/`hardcore_remorts`/`hardcore_deaths`) rather than
+        # the live `common`/`remorts`/`statistics.total_deaths` fields, which
+        # reset on a hardcore character's permadeath. Mirrors the display
+        # properties on `Player` (`display_level`/`display_remorts`/
+        # `display_deaths`), expressed in SQL so ordering stays a single query.
+        int_field = IntegerField()
+        qs = qs.annotate(
+            rank_level=Case(
+                When(
+                    game_type=GameType.HARDCORE,
+                    then=Coalesce("statistics__hardcore_level", "common__level"),
+                ),
+                default=F("common__level"),
+                output_field=int_field,
+            ),
+            rank_remorts=Case(
+                When(
+                    game_type=GameType.HARDCORE,
+                    then=Coalesce("statistics__hardcore_remorts", "remorts"),
+                ),
+                default=F("remorts"),
+                output_field=int_field,
+            ),
+            rank_deaths=Case(
+                When(
+                    game_type=GameType.HARDCORE,
+                    then=Coalesce("statistics__hardcore_deaths", "statistics__total_deaths"),
+                ),
+                default=F("statistics__total_deaths"),
+                output_field=int_field,
+            ),
+        ).order_by(
+            "-rank_remorts",
+            "-statistics__total_renown",
+            "-statistics__total_challenges",
+            "-statistics__total_quests",
+            "rank_deaths",
+            "-rank_level",
+        )
         return qs
 
     def get_context_data(self, *, object_list=None, **kwargs):
