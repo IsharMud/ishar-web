@@ -13,6 +13,8 @@
         <script src="{% static 'js/xterm.min.js' %}"></script>
         <script src="{% static 'js/addon-fit.min.js' %}"></script>
         <script src="{% static 'js/addon-web-links.min.js' %}"></script>
+        <script src="{% static 'js/addon-serialize.min.js' %}"></script>
+        <script src="{% static 'js/addon-search.min.js' %}"></script>
         <script src="{% static 'js/hud.js' %}"></script>
         <style>
             /* Graceful degradation: served inline with the HTML, so even if
@@ -41,6 +43,15 @@
         </span>
         <div id="vitals-bar"></div>
         <div class="topbar-actions">
+            <button class="hud-btn hud-btn--icon" type="button" id="search-btn" aria-pressed="false"
+                    title="Search the scrollback" aria-label="Search the scrollback">
+                {% bi "search" %}
+            </button>
+            <button class="hud-btn hud-btn--icon" type="button" id="settings-btn"
+                    aria-expanded="false" aria-controls="settings-pop"
+                    title="Client settings" aria-label="Client settings">
+                {% bi "gear" %}
+            </button>
             <button class="hud-btn hud-btn--icon" type="button" id="font-dec"
                     title="Smaller terminal text" aria-label="Smaller terminal text">
                 {% bi "zoom-out" %}
@@ -68,6 +79,25 @@
                 <span>Reconnect</span>
             </button>
         </div>
+        {# Client settings (persisted per device; mirrored by /settings). #}
+        <div id="settings-pop" hidden>
+            <label class="setting-row">
+                <input type="checkbox" data-setting="keepInput">
+                <span>Keep command in input after send</span>
+            </label>
+            <label class="setting-row">
+                <input type="checkbox" data-setting="stack">
+                <span>Chain commands with ; (see /help)</span>
+            </label>
+            <label class="setting-row setting-notify">
+                <input type="checkbox" data-setting="notifyTells">
+                <span>Notify on tells while the tab is hidden</span>
+            </label>
+            <label class="setting-row">
+                <input type="checkbox" data-setting="titleBadge">
+                <span>Unread count in the tab title</span>
+            </label>
+        </div>
     </div>
 
     <aside id="hud-left" class="hud-col">
@@ -80,12 +110,38 @@
     <main id="hud-center">
         <div id="terminal-wrapper">
             <div id="terminal-container"></div>
+            <div id="term-search" hidden>
+                <label for="term-search-input" class="visually-hidden">Search scrollback</label>
+                <input type="text" id="term-search-input" placeholder="Search scrollback&hellip;"
+                       autocomplete="off" autocapitalize="off" spellcheck="false">
+                <button type="button" class="hud-btn hud-btn--icon" id="search-prev"
+                        title="Previous match" aria-label="Previous match">
+                    {% bi "chevron-up" %}
+                </button>
+                <button type="button" class="hud-btn hud-btn--icon" id="search-next"
+                        title="Next match" aria-label="Next match">
+                    {% bi "chevron-down" %}
+                </button>
+                <button type="button" class="hud-btn hud-btn--icon" id="search-close"
+                        title="Close search" aria-label="Close search">
+                    {% bi "x-lg" %}
+                </button>
+            </div>
             <button type="button" class="hud-btn" id="scroll-bottom-btn" style="display:none;" title="Scroll to latest output">
                 &#x25BC; Latest
             </button>
         </div>
         <div id="hud-hotbar" class="empty"></div>
         <form id="command-form" autocomplete="off">
+            {# Recent-commands popover for touch screens (Arrow keys have no
+               thumb equivalent). The button is revealed by JS on coarse
+               pointers so the no-assets fallback stays a clean terminal. #}
+            <button type="button" class="hud-btn hud-btn--icon" id="history-btn" hidden
+                    aria-expanded="false" aria-controls="history-pop"
+                    title="Command history" aria-label="Command history">
+                {% bi "clock-history" %}
+            </button>
+            <div id="history-pop" hidden></div>
             <label for="command-input" class="visually-hidden">Command</label>
             <input type="text" id="command-input" class="form-control"
                    placeholder="Enter command..."
@@ -213,6 +269,18 @@
     var fitAddon = new FitAddon.FitAddon();
     term.loadAddon(fitAddon);
     term.loadAddon(new WebLinksAddon.WebLinksAddon());
+    // Feature-checked: a missing addon file degrades to no scrollback
+    // persistence, matching the page's graceful-degradation stance.
+    var serializeAddon = null;
+    if (window.SerializeAddon) {
+        serializeAddon = new SerializeAddon.SerializeAddon();
+        term.loadAddon(serializeAddon);
+    }
+    var searchAddon = null;
+    if (window.SearchAddon) {
+        searchAddon = new SearchAddon.SearchAddon();
+        term.loadAddon(searchAddon);
+    }
     term.open(terminalContainer);
 
     function adjustFont(delta) {
@@ -255,18 +323,59 @@
         new ResizeObserver(scheduleFit).observe(terminalContainer);
     }
 
-    // --- Command history ---
+    // --- Command history (persisted across page loads) ---
     var history = [];
     var historyIndex = -1;
     var savedInput = "";
     var MAX_HISTORY = 200;
+    try {
+        var savedHist = JSON.parse(localStorage.getItem("ishar.history"));
+        if (Array.isArray(savedHist)) {
+            history = savedHist.filter(function(c) {
+                return typeof c === "string";
+            }).slice(-MAX_HISTORY);
+        }
+    } catch (e) {}
     function addHistory(cmd) {
         if (cmd && (history.length === 0 || history[history.length - 1] !== cmd)) {
             history.push(cmd);
             if (history.length > MAX_HISTORY) history.shift();
+            try { localStorage.setItem("ishar.history", JSON.stringify(history)); } catch (e) {}
         }
         historyIndex = -1;
         savedInput = "";
+    }
+
+    // --- Client settings (persisted; surfaced in the gear menu) ---
+    var settings = { keepInput: true, stack: true, notifyTells: false, titleBadge: true };
+    try {
+        var savedSettings = JSON.parse(localStorage.getItem("ishar.settings"));
+        if (savedSettings && typeof savedSettings === "object") {
+            Object.keys(settings).forEach(function(k) {
+                if (typeof savedSettings[k] === "boolean") settings[k] = savedSettings[k];
+            });
+        }
+    } catch (e) {}
+    function saveSettings() {
+        try { localStorage.setItem("ishar.settings", JSON.stringify(settings)); } catch (e) {}
+    }
+
+    // --- Aliases (persisted) ---
+    var ALIAS_NAME_RE = /^[a-z0-9_-]{1,20}$/;
+    var ALIAS_MAX = 400;
+    var aliases = {};
+    try {
+        var savedAliases = JSON.parse(localStorage.getItem("ishar.aliases"));
+        if (savedAliases && typeof savedAliases === "object" && !Array.isArray(savedAliases)) {
+            Object.keys(savedAliases).forEach(function(k) {
+                if (ALIAS_NAME_RE.test(k) && typeof savedAliases[k] === "string") {
+                    aliases[k] = savedAliases[k].slice(0, ALIAS_MAX);
+                }
+            });
+        }
+    } catch (e) {}
+    function saveAliases() {
+        try { localStorage.setItem("ishar.aliases", JSON.stringify(aliases)); } catch (e) {}
     }
 
     // --- Echo / scroll state ---
@@ -307,6 +416,9 @@
     var reconnectTimer = null;
     var countdownTimer = null;
     var openedAt = 0;
+    var pongTimer = null;     // in-flight liveness probe deadline
+    var quitClean = false;    // game ended the session — don't auto-revive
+    var isDemo = new URLSearchParams(location.search).has("demo");
 
     function setStatus(text, cls) {
         statusText.textContent = text;
@@ -316,6 +428,44 @@
     function clearReconnect() {
         if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
         if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+    }
+
+    function clearProbe() {
+        if (pongTimer) { clearTimeout(pongTimer); pongTimer = null; }
+    }
+
+    // --- Liveness ---
+    // A phone that switches networks (or sleeps through a websocket death)
+    // often keeps a half-open socket that looks OPEN but goes nowhere. The
+    // probe sends a NUL-prefixed PING that the bridge answers with PONG
+    // only while its telnet leg is healthy; no answer in 5s means the
+    // socket is dead — tear it down and reconnect immediately.
+    function probe() {
+        if (isDemo || pongTimer || !ws || ws.readyState !== WebSocket.OPEN) return;
+        try { ws.send("\x00PING"); } catch (e) { return; }
+        pongTimer = setTimeout(function () {
+            pongTimer = null;
+            forceReconnect();
+        }, 5000);
+    }
+
+    // Reconnect *now*: a wake/online event is a fresh network situation, so
+    // skip any pending backoff wait and restart the ladder.
+    function forceReconnect() {
+        clearReconnect();
+        reconnectAttempt = 0;
+        connect();
+    }
+
+    // On waking (tab visible again, network back, bfcache restore): revive
+    // a pending or parked reconnect immediately, otherwise just probe.
+    function wake() {
+        if (isDemo || quitClean) return;
+        if (reconnectTimer || !ws || ws.readyState > WebSocket.OPEN) {
+            forceReconnect();
+        } else {
+            probe();
+        }
     }
 
     function scheduleReconnect(reason) {
@@ -337,6 +487,8 @@
 
     function connect() {
         clearReconnect();
+        clearProbe();
+        quitClean = false;
         if (ws) {
             // Deliberate replacement: a stale socket's close must not race
             // the new one into the reconnect scheduler.
@@ -368,6 +520,7 @@
 
             // Out-of-band control sentinels are prefixed with NUL.
             if (d.charCodeAt(0) === 0) {
+                if (d === "\x00PONG") { clearProbe(); return; }
                 if (d === "\x00ECHO_ON") { serverEcho = true; commandInput.type = "password"; return; }
                 if (d === "\x00ECHO_OFF") { serverEcho = false; commandInput.type = "text"; return; }
                 if (d.indexOf("\x00GMCP ") === 0) {
@@ -384,6 +537,7 @@
         };
 
         ws.onclose = function(event) {
+            clearProbe();
             setStatus("Disconnected", "status-disconnected");
             if (window.IsharHUD) window.IsharHUD.setConnected(false);
             // A session that lived a while proves the path works — restart
@@ -393,8 +547,16 @@
             if (event.code === 1000) {
                 // The game ended the session (e.g. quit) — don't fight a
                 // deliberate exit with an auto-reconnect loop.
+                quitClean = true;
                 reconnectBtn.style.display = "";
                 term.writeln("\r\n\x1b[1;31m--- Disconnected ---\x1b[0m");
+                return;
+            }
+            if (navigator.onLine === false) {
+                // No network: retries would fail instantly and burn the
+                // backoff ladder. Park; the "online" handler revives us.
+                reconnectBtn.style.display = "";
+                setStatus("Offline — waiting for network", "status-disconnected");
                 return;
             }
             scheduleReconnect(event.code === CLOSE_BRIDGE_FAILURE
@@ -424,6 +586,210 @@
         }
     }
 
+    // --- Command pipeline ---
+    // A typed line runs through: client "/" command? → ";" stacking →
+    // alias expansion → per-command echo + send. Password entry (server
+    // ECHO suppressed) bypasses the whole pipeline — no echo, no history,
+    // no splitting. HUD widget sends also bypass it (machine-built).
+
+    // Write a local, dim client message; strips control chars from
+    // interpolated user text so nothing can smuggle escape sequences.
+    function cleanText(s) { return String(s).replace(/[\x00-\x1f\x7f]/g, " "); }
+    function sysln(text) { term.writeln("\x1b[90m" + cleanText(text) + "\x1b[0m"); }
+
+    // Final guard before anything goes to the game (mirror of hud.js
+    // safeCmd, with a longer cap for alias output).
+    function safeCmd(c) {
+        if (c == null) return "";
+        return String(c).replace(/[\r\n\t\x00]/g, " ").replace(/\s+/g, " ").trim().slice(0, ALIAS_MAX);
+    }
+
+    // ";" stacking guard: never split a line that reads as communication.
+    // A first token of 2+ chars that prefix-matches a comm verb (MUD verbs
+    // abbreviate: "gos hi;)" is gossip) or a leading say-quote "'" makes
+    // the whole line exempt. Single letters stay splittable — "e;n;w" is
+    // movement, not "emote".
+    var COMM_VERBS = ["say", "tell", "reply", "gossip", "shout", "yell",
+        "whisper", "emote", "gt", "gtell", "chat", "auction", "newbie", "ask"];
+    function isCommLine(line) {
+        var first = (line.match(/^\S+/) || [""])[0].toLowerCase();
+        if (!first) return false;
+        if (first.charAt(0) === "'") return true;
+        if (first.length < 2) return false;
+        return COMM_VERBS.some(function(v) { return v.indexOf(first) === 0; });
+    }
+
+    // Split on ";" (";;" is a literal ";"). Returns [line] untouched when
+    // stacking is off or the line is comm-guarded.
+    function splitStack(line) {
+        if (!settings.stack || line.indexOf(";") === -1 || isCommLine(line)) return [line];
+        var parts = [], cur = "";
+        for (var i = 0; i < line.length; i++) {
+            var ch = line.charAt(i);
+            if (ch === ";") {
+                if (line.charAt(i + 1) === ";") { cur += ";"; i++; }
+                else { parts.push(cur); cur = ""; }
+            } else cur += ch;
+        }
+        parts.push(cur);
+        return parts.map(function(p) { return p.trim(); }).filter(Boolean);
+    }
+
+    // Expand a leading alias once (no recursion). "$1"–"$9"/"$*" substitute
+    // arguments when present; otherwise trailing arguments are appended.
+    function expandAlias(line) {
+        var m = line.match(/^(\S+)(?:\s+([\s\S]*))?$/);
+        if (!m) return line;
+        var name = m[1].toLowerCase();
+        if (!Object.prototype.hasOwnProperty.call(aliases, name)) return line;
+        var exp = aliases[name];
+        var argstr = (m[2] || "").trim();
+        var args = argstr ? argstr.split(/\s+/) : [];
+        if (/\$[1-9*]/.test(exp)) {
+            exp = exp.replace(/\$([1-9*])/g, function(_, d) {
+                return d === "*" ? argstr : (args[d - 1] || "");
+            });
+        } else if (argstr) {
+            exp += " " + argstr;
+        }
+        return exp.slice(0, ALIAS_MAX);
+    }
+
+    function sendOne(cmd) {
+        cmd = cmd ? safeCmd(cmd) : "";
+        if (!serverEcho && cmd) term.writeln("\x1b[90m" + cmd + "\x1b[0m");
+        sendCommand(cmd);
+    }
+
+    // Stack, expand each segment, and honor stacking inside expansions
+    // (that's how an alias chains commands). One expansion pass per typed
+    // segment — expansions are never re-expanded, so no recursion.
+    function dispatchGame(line) {
+        var cmds = [];
+        splitStack(line).forEach(function(seg) {
+            splitStack(expandAlias(seg)).forEach(function(c) { cmds.push(c); });
+        });
+        if (!cmds.length) cmds = [""];  // bare Enter still goes through
+        cmds.slice(0, 20).forEach(sendOne);
+    }
+
+    function listAliases() {
+        var names = Object.keys(aliases).sort();
+        if (!names.length) {
+            sysln("No aliases. /alias <name> <commands> defines one.");
+            return;
+        }
+        names.forEach(function(n) { sysln("  " + n + " = " + aliases[n]); });
+    }
+
+    // Local "/" commands — handled in the browser, never sent to the game.
+    function runClientCommand(line) {
+        var argv = line.slice(1).trim().split(/\s+/);
+        var cmd = (argv.shift() || "").toLowerCase();
+        switch (cmd) {
+            case "help":
+                sysln("Client commands (handled in the browser):");
+                sysln("  /alias                    list aliases");
+                sysln("  /alias <name>             show one alias");
+                sysln("  /alias <name> <commands>  define ($1-$9/$* for args, ; to chain)");
+                sysln("  /unalias <name>           remove an alias");
+                sysln("  /stack on|off             ; command stacking (now " + (settings.stack ? "on" : "off") + ")");
+                sysln("      say/tell/gossip-style lines and lines starting with ' never split;");
+                sysln("      ;; sends a literal ;");
+                sysln("  /settings                 show client settings (also: the gear menu)");
+                sysln("  /clear                    clear the terminal");
+                sysln("  //<text>                  send <text> that starts with a literal /");
+                sysln("Tab completes from your history and the game (exits, skills, names);");
+                sysln("Shift+Tab cycles backward. Arrows recall history (clock button on touch).");
+                sysln("Ctrl+L clears. PageUp/PageDown scroll. Ctrl+Shift+F searches scrollback.");
+                break;
+            case "clear":
+                term.clear();
+                break;
+            case "aliases":
+                listAliases();
+                break;
+            case "alias": {
+                if (!argv.length) { listAliases(); break; }
+                var name = argv.shift().toLowerCase();
+                if (!ALIAS_NAME_RE.test(name)) {
+                    sysln("Alias names are 1-20 characters of a-z 0-9 _ -");
+                    break;
+                }
+                if (!argv.length) {
+                    sysln(Object.prototype.hasOwnProperty.call(aliases, name)
+                        ? "  " + name + " = " + aliases[name]
+                        : "No alias '" + name + "'.");
+                    break;
+                }
+                aliases[name] = argv.join(" ").slice(0, ALIAS_MAX);
+                saveAliases();
+                sysln("Alias set: " + name + " = " + aliases[name]);
+                break;
+            }
+            case "unalias": {
+                var dead = (argv.shift() || "").toLowerCase();
+                if (Object.prototype.hasOwnProperty.call(aliases, dead)) {
+                    delete aliases[dead];
+                    saveAliases();
+                    sysln("Alias removed: " + dead);
+                } else {
+                    sysln("No alias '" + dead + "'.");
+                }
+                break;
+            }
+            case "stack": {
+                var arg = (argv.shift() || "").toLowerCase();
+                if (arg === "on" || arg === "off") {
+                    settings.stack = arg === "on";
+                    saveSettings();
+                    syncSettingsPop();
+                }
+                sysln("Command stacking is " + (settings.stack ? "on" : "off")
+                    + " (\"open door;n;look\" sends three commands).");
+                break;
+            }
+            case "settings":
+                sysln("Client settings (change via the gear menu):");
+                sysln("  keep input after send: " + (settings.keepInput ? "on" : "off"));
+                sysln("  ; command stacking:    " + (settings.stack ? "on" : "off"));
+                sysln("  notify on tells:       " + (settings.notifyTells ? "on" : "off"));
+                sysln("  unread title badge:    " + (settings.titleBadge ? "on" : "off"));
+                break;
+            default:
+                sysln("Unknown client command /" + cleanText(cmd) + " — try /help.");
+        }
+    }
+
+    // Everything a submitted line does, in one place (form submit + Enter).
+    function submitLine(raw) {
+        closeHistoryPop();
+        if (serverEcho) {
+            // Password entry: send verbatim — no echo, no history, no
+            // alias/stacking (a password may legally contain ";" or "/").
+            sendCommand(raw);
+            commandInput.value = "";
+            return;
+        }
+        var line = raw.trim();
+        if (line.charAt(0) === "/") {
+            if (line.charAt(1) === "/") dispatchGame(line.slice(1));
+            else runClientCommand(line);
+        } else {
+            dispatchGame(line);
+        }
+        if (line) addHistory(line);
+        term.scrollToBottom();
+        userScrolledUp = false;
+        scrollBtn.style.display = "none";
+        if (settings.keepInput && line) {
+            commandInput.value = line;
+            commandInput.select();
+        } else {
+            commandInput.value = "";
+        }
+    }
+
     // --- HUD integration ---
     // HUD widgets act by sending plain-text commands (the server ignores
     // inbound GMCP) or by pre-filling the input line for the player to edit.
@@ -446,25 +812,74 @@
             onLayoutChange: function() {
                 fitAppHeight();
                 scheduleFit();
-            }
+            },
+            onComm: onComm
         });
     }
 
     // --- Form / input handlers ---
     commandForm.addEventListener("submit", function(e) {
         e.preventDefault();
-        var cmd = commandInput.value;
-        if (!serverEcho && cmd) term.writeln("\x1b[90m" + cmd + "\x1b[0m");
-        sendCommand(cmd);
-        term.scrollToBottom();
-        userScrolledUp = false;
-        scrollBtn.style.display = "none";
-        addHistory(cmd);
-        commandInput.value = cmd;
-        commandInput.select();
+        submitLine(commandInput.value);
     });
 
+    // --- Tab completion ---
+    // Candidates come from command-history words, alias names, and whatever
+    // the HUD's GMCP state knows (exits, skills, players, item keywords).
+    // Tab cycles forward through prefix matches, Shift+Tab backward; any
+    // other key ends the cycle.
+    var tabState = null;
+    function collectCandidates(prefix) {
+        var seen = {}, out = [];
+        function add(w) {
+            if (!w || w.length < 2) return;
+            var lw = String(w).toLowerCase();
+            if (lw.indexOf(prefix) !== 0 || lw === prefix || seen[lw]) return;
+            seen[lw] = true;
+            out.push(String(w));
+        }
+        for (var i = history.length - 1; i >= 0; i--) {
+            history[i].split(/\s+/).forEach(add);
+        }
+        Object.keys(aliases).forEach(add);
+        if (window.IsharHUD && window.IsharHUD.completions) {
+            window.IsharHUD.completions().forEach(add);
+        }
+        return out;
+    }
+
+    function tabComplete(backward) {
+        if (!tabState) {
+            var caret = commandInput.selectionStart;
+            var upto = commandInput.value.slice(0, caret);
+            var m = upto.match(/(\S+)$/);
+            if (!m) return;
+            var matches = collectCandidates(m[1].toLowerCase());
+            if (!matches.length) return;
+            tabState = {
+                start: caret - m[1].length,
+                tail: commandInput.value.slice(caret),
+                matches: matches,
+                index: -1
+            };
+        }
+        var len = tabState.matches.length;
+        tabState.index = backward
+            ? (tabState.index - 1 + len) % len
+            : (tabState.index + 1) % len;
+        var pick = tabState.matches[tabState.index];
+        commandInput.value = commandInput.value.slice(0, tabState.start) + pick + tabState.tail;
+        var pos = tabState.start + pick.length;
+        commandInput.setSelectionRange(pos, pos);
+    }
+
     commandInput.addEventListener("keydown", function(e) {
+        if (e.key === "Tab") {
+            e.preventDefault();
+            tabComplete(e.shiftKey);
+            return;
+        }
+        tabState = null;
         if (e.key === "ArrowUp") {
             e.preventDefault();
             if (history.length === 0) return;
@@ -491,8 +906,235 @@
     });
 
     reconnectBtn.addEventListener("click", function() {
-        term.clear();
+        // Keep the scrollback — what happened before the drop is exactly
+        // what a returning player wants to reread. A dim divider marks
+        // the seam.
+        term.writeln("\r\n\x1b[90m--- reconnecting ---\x1b[0m");
         connect();
+    });
+
+    // --- Touch history popover ---
+    // Arrow-key history has no thumb equivalent; on coarse pointers a
+    // clock button opens the recent distinct commands above the input.
+    // Rows are built with createElement/textContent only — commands are
+    // user data.
+    var historyBtn = document.getElementById("history-btn");
+    var historyPop = document.getElementById("history-pop");
+    if (window.matchMedia("(pointer: coarse)").matches) historyBtn.hidden = false;
+
+    function closeHistoryPop() {
+        if (historyPop.hidden) return;
+        historyPop.hidden = true;
+        historyBtn.setAttribute("aria-expanded", "false");
+    }
+
+    function openHistoryPop() {
+        while (historyPop.firstChild) historyPop.removeChild(historyPop.firstChild);
+        var seen = {}, count = 0;
+        for (var i = history.length - 1; i >= 0 && count < 30; i--) {
+            var cmd = history[i];
+            if (!cmd || seen[cmd]) continue;
+            seen[cmd] = true;
+            count++;
+            var b = document.createElement("button");
+            b.type = "button";
+            b.className = "hist-item";
+            b.textContent = cmd;
+            historyPop.appendChild(b);
+        }
+        if (!count) {
+            var empty = document.createElement("div");
+            empty.className = "hist-empty";
+            empty.textContent = "No commands yet.";
+            historyPop.appendChild(empty);
+        }
+        historyPop.hidden = false;
+        historyBtn.setAttribute("aria-expanded", "true");
+    }
+
+    historyBtn.addEventListener("click", function() {
+        if (historyPop.hidden) openHistoryPop();
+        else closeHistoryPop();
+    });
+    historyPop.addEventListener("click", function(e) {
+        var b = e.target.closest("button.hist-item");
+        if (!b) return;
+        commandInput.value = b.textContent;
+        closeHistoryPop();
+        commandInput.focus();
+    });
+    document.addEventListener("click", function(e) {
+        if (historyPop.hidden) return;
+        if (historyPop.contains(e.target) || historyBtn.contains(e.target)) return;
+        closeHistoryPop();
+    });
+
+    // --- Scrollback search ---
+    var searchBar = document.getElementById("term-search");
+    var searchInput = document.getElementById("term-search-input");
+    var searchBtn = document.getElementById("search-btn");
+    // Amber accent, matching the HUD's highlight idiom (CSS vars aren't
+    // readable from the addon, so the hexes live here).
+    var SEARCH_DECOR = {
+        matchBackground: "#553311",
+        matchBorder: "#996633",
+        matchOverviewRuler: "#ffaa77",
+        activeMatchBackground: "#a05a20",
+        activeMatchBorder: "#ffaa77",
+        activeMatchColorOverviewRuler: "#ffaa77"
+    };
+    function doSearch(dir, incremental) {
+        if (!searchAddon) return;
+        var q = searchInput.value;
+        if (!q) { searchAddon.clearDecorations(); return; }
+        var opts = { decorations: SEARCH_DECOR, incremental: !!incremental };
+        try {
+            if (dir < 0) searchAddon.findPrevious(q, opts);
+            else searchAddon.findNext(q, opts);
+        } catch (e) {
+            // Decorations need APIs an older vendored xterm may lack —
+            // degrade to plain find-and-select.
+            if (dir < 0) searchAddon.findPrevious(q);
+            else searchAddon.findNext(q);
+        }
+    }
+    function openSearch() {
+        if (!searchAddon) return;
+        searchBar.hidden = false;
+        searchBtn.setAttribute("aria-pressed", "true");
+        searchInput.focus();
+        searchInput.select();
+    }
+    function closeSearch() {
+        if (searchBar.hidden) return;
+        searchBar.hidden = true;
+        searchBtn.setAttribute("aria-pressed", "false");
+        if (searchAddon) {
+            try { searchAddon.clearDecorations(); } catch (e) {}
+        }
+        commandInput.focus();
+    }
+    if (!searchAddon) searchBtn.style.display = "none";
+    searchBtn.addEventListener("click", function() {
+        if (searchBar.hidden) openSearch();
+        else closeSearch();
+    });
+    searchInput.addEventListener("input", function() { doSearch(1, true); });
+    searchInput.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            doSearch(e.shiftKey ? -1 : 1);
+        }
+    });
+    document.getElementById("search-prev").addEventListener("click", function() { doSearch(-1); });
+    document.getElementById("search-next").addEventListener("click", function() { doSearch(1); });
+    document.getElementById("search-close").addEventListener("click", closeSearch);
+
+    // --- Settings (gear) popover ---
+    var settingsBtn = document.getElementById("settings-btn");
+    var settingsPop = document.getElementById("settings-pop");
+    if (!("Notification" in window)) {
+        // No Notification API (e.g. iOS Safari outside a PWA): hide the row.
+        var notifyRow = settingsPop.querySelector(".setting-notify");
+        if (notifyRow) notifyRow.style.display = "none";
+    }
+    function syncSettingsPop() {
+        settingsPop.querySelectorAll("input[data-setting]").forEach(function(cb) {
+            cb.checked = !!settings[cb.getAttribute("data-setting")];
+        });
+    }
+    function closeSettingsPop() {
+        if (settingsPop.hidden) return;
+        settingsPop.hidden = true;
+        settingsBtn.setAttribute("aria-expanded", "false");
+    }
+    settingsBtn.addEventListener("click", function() {
+        if (settingsPop.hidden) {
+            syncSettingsPop();
+            settingsPop.hidden = false;
+            settingsBtn.setAttribute("aria-expanded", "true");
+        } else {
+            closeSettingsPop();
+        }
+    });
+    settingsPop.addEventListener("change", function(e) {
+        var cb = e.target.closest("input[data-setting]");
+        if (!cb) return;
+        var key = cb.getAttribute("data-setting");
+        if (key === "notifyTells" && cb.checked && Notification.permission !== "granted") {
+            // Flip on only once the browser actually grants permission.
+            settings.notifyTells = false;
+            cb.checked = false;
+            Notification.requestPermission().then(function(p) {
+                settings.notifyTells = p === "granted";
+                saveSettings();
+                syncSettingsPop();
+            });
+            return;
+        }
+        settings[key] = cb.checked;
+        saveSettings();
+        if (key === "titleBadge" && !cb.checked) clearTitleBadge();
+    });
+    document.addEventListener("click", function(e) {
+        if (settingsPop.hidden) return;
+        if (settingsPop.contains(e.target) || settingsBtn.contains(e.target)) return;
+        closeSettingsPop();
+    });
+
+    // --- Unread title badge + tell notifications ---
+    var baseTitle = document.title;
+    var unread = 0;
+    function clearTitleBadge() {
+        unread = 0;
+        document.title = baseTitle;
+    }
+    document.addEventListener("visibilitychange", function() {
+        if (!document.hidden) clearTitleBadge();
+    });
+    // Called by the HUD for every Comm.Channel message (text already
+    // color-stripped there).
+    function onComm(channel, text) {
+        if (!document.hidden) return;
+        if (settings.titleBadge) {
+            unread++;
+            document.title = "(" + unread + ") " + baseTitle;
+        }
+        if (settings.notifyTells && "Notification" in window
+                && Notification.permission === "granted"
+                && /^(tell|reply|whisper)/i.test(channel || "")) {
+            try {
+                var n = new Notification("Ishar MUD", {
+                    body: String(text || "").slice(0, 140),
+                    tag: "ishar-tell"
+                });
+                n.onclick = function() { window.focus(); this.close(); };
+            } catch (e) {}
+        }
+    }
+
+    // --- Keyboard shortcuts (documented in /help) ---
+    document.addEventListener("keydown", function(e) {
+        if (e.key === "Escape") {
+            if (!searchBar.hidden) { closeSearch(); return; }
+            if (!settingsPop.hidden) { closeSettingsPop(); return; }
+            if (!historyPop.hidden) { closeHistoryPop(); commandInput.focus(); return; }
+            return;
+        }
+        if (e.ctrlKey && e.shiftKey && !e.altKey && (e.key === "F" || e.key === "f")) {
+            e.preventDefault();
+            openSearch();
+            return;
+        }
+        if (e.ctrlKey && !e.shiftKey && !e.altKey && (e.key === "l" || e.key === "L")) {
+            e.preventDefault();
+            term.clear();
+            return;
+        }
+        if ((e.key === "PageUp" || e.key === "PageDown") && e.target !== searchInput) {
+            e.preventDefault();
+            term.scrollPages(e.key === "PageUp" ? -1 : 1);
+        }
     });
 
     // --- Resize wiring ---
@@ -510,6 +1152,56 @@
         window.visualViewport.addEventListener("scroll", onResize);
     }
 
+    // --- Liveness wiring ---
+    document.addEventListener("visibilitychange", function() {
+        if (!document.hidden) wake();
+    });
+    window.addEventListener("online", wake);
+    window.addEventListener("pageshow", function(e) {
+        // bfcache restore: the page returns with a socket that died while
+        // it was frozen.
+        if (e.persisted) wake();
+    });
+    window.addEventListener("offline", function() {
+        if (isDemo) return;
+        clearReconnect();
+        clearProbe();
+        if (!quitClean) setStatus("Offline — waiting for network", "status-disconnected");
+    });
+    // Idle keepalive: catches half-open sockets promptly and keeps
+    // intermediate proxies from reaping a quiet connection. Visible tabs
+    // only — a hidden tab gets probed by the visibilitychange wake instead.
+    setInterval(function() {
+        if (!document.hidden) probe();
+    }, 45000);
+
+    // --- Scrollback persistence (per tab) ---
+    // The buffer is re-encoded to clean ANSI and stashed in sessionStorage
+    // whenever the page might be going away (pagehide, or hidden — iOS
+    // Safari doesn't reliably fire pagehide). sessionStorage on purpose:
+    // per-tab (no multi-tab clobber) and gone when the tab closes.
+    var SCROLLBACK_KEY = "ishar.term";
+    var SCROLLBACK_MAX = 512 * 1024;
+    function saveScrollback() {
+        if (!serializeAddon || isDemo) return;
+        try {
+            var s = serializeAddon.serialize({ scrollback: 1500 });
+            if (s.length > SCROLLBACK_MAX) {
+                // Front-truncate at a line break, never mid-escape-sequence.
+                var cut = s.indexOf("\n", s.length - SCROLLBACK_MAX);
+                s = cut === -1 ? "" : s.slice(cut + 1);
+            }
+            if (s) sessionStorage.setItem(SCROLLBACK_KEY, s);
+            else sessionStorage.removeItem(SCROLLBACK_KEY);
+        } catch (e) {
+            try { sessionStorage.removeItem(SCROLLBACK_KEY); } catch (e2) {}
+        }
+    }
+    window.addEventListener("pagehide", saveScrollback);
+    document.addEventListener("visibilitychange", function() {
+        if (document.hidden) saveScrollback();
+    });
+
     terminalContainer.addEventListener("click", function() {
         // While the phone sheet is open, a terminal tap just dismisses it
         // (the HUD's outside-tap handler) — don't also pop the keyboard.
@@ -521,9 +1213,21 @@
     fitAppHeight();
     scheduleFit();
 
+    // Restore the previous scrollback (same tab) before connecting, so the
+    // session picks up where the last page load left off.
+    if (!isDemo) {
+        try {
+            var savedTerm = sessionStorage.getItem(SCROLLBACK_KEY);
+            if (savedTerm) {
+                term.write(savedTerm);
+                term.writeln("\r\n\x1b[90m--- earlier output restored after reload ---\x1b[0m");
+            }
+        } catch (e) {}
+    }
+
     // Demo mode (/connect?demo=1): populate the HUD with sample data for design
     // review without a GMCP-enabled server. Skips the live connection.
-    if (new URLSearchParams(location.search).has("demo")) {
+    if (isDemo) {
         if (window.IsharHUD) window.IsharHUD.demo();
         term.writeln("\x1b[33m--- DEMO MODE: sample data, not connected to the game. ---\x1b[0m");
         fitAppHeight();

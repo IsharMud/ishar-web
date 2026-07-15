@@ -224,15 +224,75 @@ body.connect-page #content { padding: .5rem !important; } /* the p-* utilities a
 /* True black on purpose — matches the xterm theme background, not a surface token. */
 #terminal-container { height: 100%; background: #000; border-radius: var(--ac-radius-sm); }
 #terminal-container .xterm { height: 100%; padding: 4px; }
-#command-form { display: flex; gap: 8px; align-items: center; }
+#command-form { display: flex; gap: 8px; align-items: center; position: relative; }
 #command-input {
     flex: 1; font-family: monospace; font-size: 16px; padding: 6px 8px;
 }
 #send-btn { flex: none; }
+#history-btn { flex: none; }
 #scroll-bottom-btn { position: absolute; bottom: 8px; right: 12px; z-index: 10; opacity: .9; font-size: .8rem; }
 @media (max-width: 767.98px) {
     #command-form { gap: 6px; }
     .send-label { display: none; } /* icon-only send beside the keyboard */
+}
+
+/* Recent-commands popover (touch history) + the gear settings popover:
+   anchored above the input line / topbar, skinned like the phone sheet. */
+#history-pop {
+    position: absolute; left: 0; right: 0; bottom: calc(100% + 6px);
+    max-height: 40vh; overflow-y: auto; z-index: 1030; padding: 4px;
+    background: var(--ac-panel); border: 1px solid var(--ac-border-2);
+    border-radius: var(--ac-radius); box-shadow: 0 -10px 30px rgba(0, 0, 0, .55);
+}
+.hist-item {
+    display: block; width: 100%; text-align: left; cursor: pointer;
+    background: none; border: 0; color: var(--ac-text);
+    font-family: monospace; font-size: .9rem; padding: 8px 10px;
+    border-radius: var(--ac-radius-sm);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.hist-item:hover { background: var(--ac-elev); }
+.hist-item:focus-visible { outline: 2px solid var(--ac-accent); outline-offset: -2px; }
+.hist-empty { color: var(--ac-dim); font-size: .8rem; font-style: italic; padding: 8px 10px; }
+@media (pointer: coarse) {
+    .hist-item { min-height: 44px; }
+}
+
+/* Scrollback search bar: floats over the top edge of the terminal. */
+#term-search {
+    position: absolute; top: 8px; right: 12px; z-index: 20;
+    display: flex; gap: 4px; align-items: center; padding: 4px;
+    background: var(--ac-panel); border: 1px solid var(--ac-border-2);
+    border-radius: var(--ac-radius-sm); box-shadow: 0 6px 20px rgba(0, 0, 0, .55);
+    max-width: calc(100% - 24px);
+}
+#term-search[hidden] { display: none; }
+#term-search-input {
+    width: 200px; max-width: 40vw; min-width: 0;
+    font-family: monospace; font-size: 16px; padding: 4px 8px;
+    background: var(--ac-bg); color: var(--ac-text);
+    border: 1px solid var(--ac-border); border-radius: var(--ac-radius-sm);
+}
+#term-search-input:focus-visible { outline: 2px solid var(--ac-accent); outline-offset: -1px; }
+
+/* Settings (gear) popover: anchored under the topbar's right edge. */
+#hud-topbar { position: relative; }
+#settings-pop {
+    position: absolute; top: calc(100% + 4px); right: 0; z-index: 1030;
+    min-width: 260px; padding: 6px;
+    background: var(--ac-panel); border: 1px solid var(--ac-border-2);
+    border-radius: var(--ac-radius); box-shadow: 0 10px 30px rgba(0, 0, 0, .55);
+}
+.setting-row {
+    display: flex; gap: 10px; align-items: center; cursor: pointer;
+    padding: 8px 10px; border-radius: var(--ac-radius-sm);
+    font-size: .85rem; color: var(--ac-text);
+}
+.setting-row:hover { background: var(--ac-elev); }
+.setting-row input { flex: none; margin: 0; }
+.setting-row input:focus-visible { outline: 2px solid var(--ac-accent); outline-offset: 2px; }
+@media (pointer: coarse) {
+    .setting-row { min-height: 44px; }
 }
 
 /* ----- Room / exits ----- */
@@ -337,6 +397,11 @@ body.connect-page #content { padding: .5rem !important; } /* the p-* utilities a
 .skill-name { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .skill-pct { font-size: .64rem; color: var(--ac-dim); }
 .skill-cd { font-size: .7rem; font-weight: 700; color: var(--ac-accent); font-variant-numeric: tabular-nums; }
+/* Buttons always carry both spans; .cooling picks which one shows
+   (hud.js flips the class instead of rebuilding the hotbar every tick). */
+.skill .skill-cd { display: none; }
+.skill.cooling .skill-cd { display: inline; }
+.skill.cooling .skill-pct { display: none; }
 @media (max-width: 767.98px) {
     /* One thumb-scrollable row; never a growing stack above the keyboard. */
     #hud-hotbar { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
@@ -345,6 +410,8 @@ body.connect-page #content { padding: .5rem !important; } /* the p-* utilities a
 }
 
 /* ----- Shared topbar buttons (aligned with .ac-btn — see components.md) ----- */
+/* An explicit display beats the UA's [hidden] rule — restore it. */
+.hud-btn[hidden] { display: none; }
 .hud-btn {
     display: inline-flex; align-items: center; justify-content: center; gap: 6px;
     padding: 5px 12px; font-size: .8rem; font-weight: 600; cursor: pointer; white-space: nowrap;
