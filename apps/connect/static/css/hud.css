@@ -397,6 +397,11 @@ body.connect-page #content { padding: .5rem !important; } /* the p-* utilities a
 .skill-name { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .skill-pct { font-size: .64rem; color: var(--ac-dim); }
 .skill-cd { font-size: .7rem; font-weight: 700; color: var(--ac-accent); font-variant-numeric: tabular-nums; }
+/* Buttons always carry both spans; .cooling picks which one shows
+   (hud.js flips the class instead of rebuilding the hotbar every tick). */
+.skill .skill-cd { display: none; }
+.skill.cooling .skill-cd { display: inline; }
+.skill.cooling .skill-pct { display: none; }
 @media (max-width: 767.98px) {
     /* One thumb-scrollable row; never a growing stack above the keyboard. */
     #hud-hotbar { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
