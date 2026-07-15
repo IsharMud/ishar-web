@@ -62,6 +62,14 @@
     </div>
 {% endif %}
 
+    <!-- Populated by loadStatus() when the agent status probe fails, so the
+         failure carries the agent's own detail (e.g. an outdated agent) instead
+         of just a red "agent error" pill. -->
+    <div class="ac-note ac-note--warn" id="agentDiag" role="alert" hidden>
+        <svg class="bi" aria-hidden="true"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#exclamation-triangle"></use></svg>
+        <span id="agentDiagText"></span>
+    </div>
+
     <!-- Source + color + size -->
     <div class="ac-panel">
         <div class="ac-panel__h">
@@ -169,6 +177,8 @@
 
     const livePill = document.getElementById("livePill");
     const agentPill = document.getElementById("agentPill");
+    const agentDiag = document.getElementById("agentDiag");
+    const agentDiagText = document.getElementById("agentDiagText");
     const colorRow = document.getElementById("colorRow");
     const linesSel = document.getElementById("linesSel");
     const refreshBtn = document.getElementById("refreshBtn");
@@ -237,6 +247,14 @@
         });
     }
 
+    // Show/hide the diagnostic note that carries the agent's own error detail,
+    // so an agent failure explains itself rather than showing a bare red pill.
+    function setDiag(text) {
+        if (!agentDiag) { return; }
+        if (text) { agentDiagText.textContent = text; agentDiag.hidden = false; }
+        else { agentDiagText.textContent = ""; agentDiag.hidden = true; }
+    }
+
     function loadStatus() {
         if (!configured) { return; }
         post("{% url 'logs_status' %}", {}).then(function (r) {
@@ -250,12 +268,19 @@
                     markLive(null);
                 }
                 setPill(agentPill, "agent ok", "ok", false);
+                agentPill.title = "Log agent status";
+                setDiag("");
             } else {
+                const detail = (r.data && (r.data.message || r.data.detail)) ||
+                    ("Log agent returned HTTP " + r.status + ".");
                 setPill(livePill, "live color unknown", "muted", false);
                 setPill(agentPill, "agent error", "danger", false);
+                agentPill.title = detail;
+                setDiag(detail);
             }
         }, function () {
             setPill(agentPill, "agent unreachable", "danger", false);
+            setDiag("Could not reach the log agent — the status probe failed.");
         });
     }
 

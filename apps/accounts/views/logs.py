@@ -24,6 +24,25 @@ LINE_CHOICES = (200, 500, 1000, 2000, 5000)
 DEFAULT_LINES = 500
 COLORS = ("live", "blue", "green")
 
+# The host agent is a long-lived process that a deploy does NOT restart (it can't
+# deploy itself — see scripts/deploy-agent.py and the systemd unit). So a checkout
+# that has the log actions but a still-running old agent process answers `bad-action`
+# to log-status/log-tail. Turn that opaque rejection into an actionable message
+# instead of a bare "agent error", so the failure is self-diagnosing.
+_OUTDATED_AGENT_HINT = (
+    "The host log agent doesn't recognize the log actions — it's running an "
+    "outdated deploy-agent.py. On the host, update the checkout and restart it: "
+    "sudo systemctl restart ishar-deploy-agent"
+)
+
+
+def _agent_version_hint(payload):
+    """Return an actionable message when the agent rejected the action as unknown
+    (an outdated agent), else None."""
+    if isinstance(payload, dict) and payload.get("error") == "bad-action":
+        return _OUTDATED_AGENT_HINT
+    return None
+
 
 class LogViewerView(EternalRequiredMixin, NeverCacheMixin, TemplateView):
     """Render the log viewer. Eternal-gated (staff); unauthorized -> 404."""
@@ -55,6 +74,9 @@ class LogStatusView(EternalRequiredMixin, NeverCacheMixin, View):
                 status=503,
             )
         status = int(result.get("http_status", 200 if result.get("ok") else 400))
+        hint = _agent_version_hint(result)
+        if hint:
+            result = {**result, "message": hint}
         return JsonResponse(result, status=status)
 
 
@@ -93,8 +115,9 @@ class LogFetchView(EternalRequiredMixin, NeverCacheMixin, View):
 
         if not data.get("ok"):
             status = int(data.get("http_status", 502))
+            hint = _agent_version_hint(data)
             return JsonResponse(
-                {"message": data.get("detail") or "Log unavailable.", **data},
+                {**data, "message": hint or data.get("detail") or "Log unavailable."},
                 status=status,
             )
 
