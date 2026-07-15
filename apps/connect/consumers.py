@@ -7,7 +7,6 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from django.conf import settings
 
 from . import tracker
-from .models import WebLoginToken
 
 
 logger = logging.getLogger(__name__)
@@ -65,6 +64,7 @@ class TelnetConsumer(AsyncWebsocketConsumer):
     """Proxy WebSocket connections to the MUD telnet server."""
 
     async def connect(self):
+        from .models import WebLoginToken
         self._reader = None
         self._writer = None
         self._read_task = None
