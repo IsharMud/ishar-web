@@ -18,6 +18,25 @@ logger = logging.getLogger(__name__)
 # 4000-4999 is the private-use range of RFC 6455.
 CLOSE_BRIDGE_FAILURE = 4502
 
+# NUL-prefixed websocket text frames are the bridge's out-of-band control
+# channel (the browser's terminal stream never legitimately starts with NUL).
+# Server→client: \x00ECHO_ON/OFF, \x00GMCP <msg>, and PONG below.
+# Client→server: PING — a liveness probe; the consumer answers PONG only
+# while its telnet leg is healthy, so a probe doubles as a bridge health
+# check. Control frames are never forwarded into the game.
+PING = "\x00PING"
+PONG = "\x00PONG"
+
+# GMCP handshake sent to the game once it offers GMCP (IAC WILL GMCP → we
+# reply IAC DO GMCP plus these two subnegotiations). Identifies the web
+# client and declares the packages the HUD consumes, so the game's
+# per-package gating (GmcpClient.set_client_info / supported_packages) has
+# real data to work with when it starts using it.
+GMCP_HELLO = b'Core.Hello {"client": "IsharWeb", "version": "1.0"}'
+GMCP_SUPPORTS = (
+    b'Core.Supports.Set ["Char 1", "Room 1", "Group 1", "Game 1", "Comm 1"]'
+)
+
 # The WAIT_ACCOUNT_NAME prompt the game prints when it is ready for a login
 # (src/server/output.c, send_prompt_other). Auto-login waits for it because
 # input sent while the game is still in its pre-login states (ident/proxy
@@ -56,6 +75,9 @@ class TelnetConsumer(AsyncWebsocketConsumer):
         # Latest window size reported by the browser (cols, rows); used to
         # answer the server's DO NAWS with the real terminal size.
         self._naws = None
+        # The Core.Hello/Core.Supports.Set handshake is sent once per
+        # connection, even if the game repeats IAC WILL GMCP.
+        self._gmcp_hello_sent = False
         # Auto-login (#85 / ishar-mud#1773): a portal-authenticated player is
         # logged in by this consumer writing `webauth <token>` into the telnet
         # stream when the game shows its account prompt. The token is minted
@@ -101,6 +123,15 @@ class TelnetConsumer(AsyncWebsocketConsumer):
         tracker.unregister(self)
         if self._read_task:
             self._read_task.cancel()
+            # Await the cancellation so the reader can't still be mid-send
+            # while the writer is torn down below. disconnect() may be
+            # dispatched *from* the read task's own close() — don't await
+            # ourselves in that case.
+            if self._read_task is not asyncio.current_task():
+                try:
+                    await self._read_task
+                except (asyncio.CancelledError, Exception):
+                    pass
         if self._writer:
             try:
                 self._writer.close()
@@ -110,6 +141,20 @@ class TelnetConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data=None, bytes_data=None):
         """Forward user input from WebSocket to telnet."""
+        if text_data and text_data.startswith("\x00"):
+            # Control channel — never forwarded into the game. PING is
+            # answered with PONG only while the telnet leg is healthy;
+            # otherwise the probe surfaces the dead bridge as a 4502 close
+            # so the browser reconnects immediately. (Channels dispatches
+            # events sequentially, so receive() cannot run mid-connect():
+            # no writer here means the dial already failed.)
+            if text_data == PING:
+                if self._writer and not self._writer.is_closing():
+                    await self.send(text_data=PONG)
+                else:
+                    await self.close(code=CLOSE_BRIDGE_FAILURE)
+            return
+
         if bytes_data:
             # Binary frames carry raw telnet data (e.g. NAWS updates). Cache
             # the reported size — even before the telnet side is up, since the
@@ -212,7 +257,11 @@ class TelnetConsumer(AsyncWebsocketConsumer):
                     try:
                         await self._writer.drain()
                     except (ConnectionError, OSError):
-                        await self.close()
+                        # The telnet leg died mid-negotiation: a bridge
+                        # failure the browser should retry, not a clean
+                        # quit (a bare close() would read as code 1000 and
+                        # suppress the auto-reconnect).
+                        await self.close(code=CLOSE_BRIDGE_FAILURE)
                         return
 
                 # Notify the client if the server ECHO state changed
@@ -301,7 +350,11 @@ class TelnetConsumer(AsyncWebsocketConsumer):
                 consumed = i
                 continue
 
-            # Subnegotiation.
+            # Subnegotiation. Scanning for the literal IAC SE pair assumes
+            # no raw 0xFF inside the payload — safe here: the game's SB
+            # traffic is GMCP (UTF-8 JSON, where 0xFF cannot occur) and
+            # TTYPE. A spec-strict escaped IAC IAC would need a stateful
+            # scan; not needed for this game.
             if next_byte == SB:
                 end = data.find(bytes([IAC, SE]), i + 2)
                 if end == -1:
@@ -329,6 +382,12 @@ class TelnetConsumer(AsyncWebsocketConsumer):
         if command == WILL:
             if option in (OPT_ECHO, OPT_SGA, OPT_GMCP):
                 responses.extend([IAC, DO, option])
+                if option == OPT_GMCP and not self._gmcp_hello_sent:
+                    self._gmcp_hello_sent = True
+                    for payload in (GMCP_HELLO, GMCP_SUPPORTS):
+                        responses.extend([IAC, SB, OPT_GMCP])
+                        responses.extend(payload)
+                        responses.extend([IAC, SE])
             else:
                 responses.extend([IAC, DONT, option])
             if option == OPT_ECHO and not self._server_echo:
