@@ -166,6 +166,7 @@ body.connect-page #content { padding: .5rem !important; }
 .v-season { color: var(--ac-accent); font-weight: 700; white-space: nowrap; padding: 1px 8px; border: 1px solid rgba(255, 170, 119, .45); background: var(--ac-wash); border-radius: 999px; }
 .v-event { color: var(--hud-event); white-space: nowrap; }
 .v-moon { color: var(--hud-moon); white-space: nowrap; }
+.v-moon-icon { font-weight: 700; }
 
 @media (max-width: 767.98px) {
     #hud-topbar { gap: 8px; }
@@ -342,9 +343,13 @@ body.connect-page #content { padding: .5rem !important; }
     border-radius: 3px; font-size: .72rem; font-weight: 700; padding: 5px 0; cursor: pointer;
 }
 .exit:hover { border-color: var(--ac-accent); color: var(--ac-accent); }
-.exit.none { border-color: transparent; background: transparent; cursor: default; }
+/* Absent exit: still drawn (fixed layout) but clearly inactive. */
+.exit.none { color: var(--ac-dim); background: var(--ac-bg); border-color: var(--ac-border); cursor: default; opacity: .4; }
 .exit.hub { color: var(--ac-dim); cursor: default; }
 .ud-row, .named-row { display: flex; gap: 4px; justify-content: center; margin-top: 5px; flex-wrap: wrap; }
+/* Reserve the named-exit row's height so its presence/absence doesn't move the
+   fixed compass above it (the panel is pinned to the column bottom). */
+.named-row { min-height: 1.9rem; align-items: center; }
 .exit.ud, .exit.named { padding: 4px 8px; }
 
 /* ----- Mobile tap-to-move rose overlay ----- */
@@ -362,7 +367,7 @@ body.connect-page #content { padding: .5rem !important; }
     padding: 6px 0; font-size: .68rem; background: rgba(28, 28, 34, .8);
     border-color: rgba(255, 255, 255, .12);
 }
-#rose-overlay .exit.none { background: transparent; border-color: transparent; }
+#rose-overlay .exit.none { color: var(--ac-dim); background: rgba(28, 28, 34, .4); border-color: rgba(255, 255, 255, .06); opacity: .5; }
 #rose-overlay .exit.hub { background: transparent; border-color: transparent; }
 #rose-overlay .ud-row { margin-top: 2px; gap: 2px; }
 #rose-overlay .exit.ud { padding: 5px 8px; font-size: .64rem; }
@@ -482,6 +487,9 @@ body.connect-page #content { padding: .5rem !important; }
 .ab-star { background: none; border: 0; color: var(--ac-dim); cursor: pointer; font-size: .9rem; padding: 0 2px; line-height: 1; }
 .ab-star.on { color: var(--hud-gold); }
 .ab-star:hover { color: var(--ac-accent); }
+/* Passive / craft / enchant abilities: tagged and visibly non-activatable. */
+.ab-type { font-size: .58rem; text-transform: uppercase; letter-spacing: .04em; color: var(--ac-dim); background: var(--ac-bg); border-radius: 3px; padding: 0 5px; }
+.ab-row.ab-passive .ab-name { color: var(--ac-dim); font-style: italic; }
 
 /* ----- Affects ----- */
 .aff-list { list-style: none; margin: 0; padding: 0; }
