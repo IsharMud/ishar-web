@@ -199,6 +199,20 @@
         return { n: "N", s: "S", e: "E", w: "W", ne: "NE", nw: "NW", se: "SE", sw: "SW" }[d] || String(d);
     }
 
+    // Moons: per-moon colour (matching the game's @c tints) + an illumination
+    // glyph by phase. Ready for a richer Game.Time.moons feed
+    // ({name, phase 0-7, phase_name, up}); degrades to a plain glyph for the
+    // current name-only payload.
+    var MOON_COLOR = { shavar: "#cfd6e6", tregalien: "#e8c14b", fandaro: "#6fce7a", chenchir: "#d05a5a" };
+    var MOON_GLYPH = ["○", "◔", "◑", "◕", "●", "◕", "◑", "◔"];   // new → waning crescent
+    function moonColor(m) {
+        var key = String(m.name || "").toLowerCase().replace(/[^a-z].*$/, "");
+        return MOON_COLOR[key] || "var(--hud-moon)";
+    }
+    function moonGlyph(m) {
+        return (typeof m.phase === "number" && m.phase >= 0 && m.phase <= 7) ? MOON_GLYPH[m.phase] : "☽";
+    }
+
     function completions() {
         var out = [];
         function add(w) { if (w) out.push(String(w)); }
@@ -394,7 +408,11 @@
                 world.appendChild(el("span", { class: "v-event", title: "Global event", text: "⚑ " + e.name + (e.seconds ? " (" + fmtDur(e.seconds) + ")" : "") }));
             });
             (tm.moons || []).forEach(function (m) {
-                world.appendChild(el("span", { class: "v-moon", title: "Moon", text: "☽ " + m.name }));
+                var span = el("span", { class: "v-moon", title: "Moon" + (m.phase_name ? " — " + m.phase_name : "") }, [
+                    el("span", { class: "v-moon-icon", style: "color:" + moonColor(m), text: moonGlyph(m) }),
+                    " " + m.name + (m.phase_name ? " (" + m.phase_name + ")" : "")
+                ]);
+                world.appendChild(span);
             });
         } else {
             world.appendChild(el("span", { class: "v-clock dim", text: "☾ —" }));
@@ -443,32 +461,39 @@
         // single-word name would be misread as a command and silently fail.
         return "go " + dir;
     }
+    // Every cardinal cell is always drawn — a live button when the exit exists,
+    // a greyed label when it doesn't — so the click target for a direction sits
+    // at a fixed spot and never moves as you travel (Mudlet-style stable rose).
     function roseGrid(exits, overlay) {
         function cell(dir) {
-            if (exits[dir] == null) return el("span", { class: "exit none" });
+            if (exits[dir] == null) return el("span", { class: "exit none", text: dirLabel(dir) });
             return el("button", { class: "exit", "data-cmd": dir, title: dir + " → " + exits[dir], text: dirLabel(dir) });
         }
-        var grid = el("div", { class: "compass" + (overlay ? " overlay" : "") }, [
+        return el("div", { class: "compass" + (overlay ? " overlay" : "") }, [
             cell("nw"), cell("n"), cell("ne"),
             cell("w"), el("span", { class: "exit hub", text: "◈" }), cell("e"),
             cell("sw"), cell("s"), cell("se")
         ]);
-        return grid;
     }
     function renderRose(container, overlay) {
         var r = S.room, exits = (r && r.exits) || {};
-        var kids = [roseGrid(exits, overlay)];
-        var ud = [];
-        ["u", "d"].forEach(function (dir) {
-            if (exits[dir] != null) ud.push(el("button", { class: "exit ud", "data-cmd": dir, text: dir === "u" ? "↑ Up" : "↓ Down" }));
+        // Up/Down are also always drawn (greyed when absent), same stability
+        // guarantee as the cardinal grid.
+        var ud = ["u", "d"].map(function (dir) {
+            var lbl = dir === "u" ? "↑ Up" : "↓ Down";
+            if (exits[dir] != null) return el("button", { class: "exit ud", "data-cmd": dir, text: lbl });
+            return el("span", { class: "exit ud none", text: lbl });
         });
-        if (ud.length) kids.push(el("div", { class: "ud-row" }, ud));
+        var kids = [roseGrid(exits, overlay), el("div", { class: "ud-row" }, ud)];
         if (!overlay) {
             var named = [];
             Object.keys(exits).forEach(function (k) {
                 if (!STD_DIRS[k]) named.push(el("button", { class: "exit named", "data-cmd": exitCmd(k), text: k }));
             });
-            if (named.length) kids.push(el("div", { class: "named-row" }, named));
+            // Always present (a reserved, min-height strip) so a room with named
+            // exits and one without don't change the pane height and shift the
+            // fixed compass on the bottom-pinned desktop layout.
+            kids.push(el("div", { class: "named-row" }, named));
         }
         fill(container, kids);
     }
@@ -1586,7 +1611,7 @@
         var feeds = {
             "Char.Status": { name: "Aelwyn", "class": "Magician", race: "Elf", position: "Standing", level: 45, align: 350, xp: 1250000, tnl: 48000, gold: 18230, bank: 500000, remort: 3 },
             "Char.Vitals": { hp: 412, maxhp: 480, mp: 255, maxmp: 300, move: 198, maxmove: 240, position: "Standing", opponent_hp_pct: 35, metamagic: 60, metamagic_max: 100, metamagic_regen: 5 },
-            "Game.Time": { hour: 21, hour12: 9, ampm: "pm", day: 14, day_name: "Sunday", month: 6, month_name: "the Long Shadows", year: 1247, night: true, season_id: 15, season_end: 0, events: [{ name: "Double Essence", seconds: 5400 }, { name: "Festival of Flames" }], moons: [{ name: "Lune (waxing)" }, { name: "Sable (full)" }] },
+            "Game.Time": { hour: 21, hour12: 9, ampm: "pm", day: 14, day_name: "Sunday", month: 6, month_name: "the Long Shadows", year: 1247, night: true, season_id: 15, season_end: 0, events: [{ name: "Double Essence", seconds: 5400 }, { name: "Festival of Flames" }], moons: [{ name: "Shavar", phase: 4, phase_name: "full", up: true }, { name: "Chenchir", phase: 6, phase_name: "last quarter", up: true }] },
             "Room.Info": { num: 3001, name: "The Grand Concourse", area: "Ishar Nexus", environment: "City", exits: { n: 3002, e: 3005, s: 3008, w: 3010, u: 3100, d: 3200, into: 3500 } },
             "Room.Occupants": { occupants: [
                 { keyword: "guard", short_desc: "a towering city guard", handle: "1.guard", is_player: false, is_dead: false, is_shopkeeper: false, hostile_hint: "neutral" },
