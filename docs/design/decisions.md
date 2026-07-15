@@ -632,6 +632,32 @@ volumes, run docker, or read the proxy's live color, so the viewer reads through
 (`ishar-mud` `scripts/deploy-agent.py`) — the same allowlisted, argv-exec'd
 boundary as the deploy button (see `ishar-mud/docs/infrastructure/deploy_agent.md`).
 
+## 2026-07-15 — Patch Notes web surface (distinct from front-page News)
+
+**Decision.** The game's in-game `news` command (the `patch_notes` system) gets a
+web face — a public viewer (`/patch-notes/`) and an Eternal+ editor/publisher
+(`/patch-notes/console/`) — built in a new `apps/patchnotes` app in the console
+`.ac-*` language. It is kept **separate** from the existing front-page **News**
+(`apps/news`), which stays as-is: front-page announcements are a different use
+case (a News redesign is deferred). To avoid two things called "News," the game
+system is labeled **"Patch Notes"** everywhere on the web (its real identity).
+**Why.** Green-field entropy control cuts both ways — these are genuinely two
+concepts (site announcements vs. game patch notes with per-account read state),
+so we name them apart rather than force a merge.
+
+**Bridge.** Reads and per-account read state (`account_patch_notes_read`) are
+direct on the shared DB. Publishing writes `patch_notes` state directly (note is
+live on the site instantly) and enqueues one `patch_notes_sync_queue` row the
+game drains to post the Discord announcement — the web container holds no
+webhooks. This mirrors the feedback side-effect-replay outbox; contract in
+`ishar-mud/docs/patch_notes_web_contract.md`.
+
+**Body rendering.** Note bodies use the game's markdown subset (`## head`,
+`- bullet`, `**bold**`). Server-side `apps/patchnotes/markdown.py` escapes then
+emits that subset (safer than the News page's `autoescape off`); the editor's
+live preview builds the same DOM client-side with `textContent` only — no
+`innerHTML`, honoring the XSS rule above.
+
 ---
 
 ## Open decisions / to record when made

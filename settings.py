@@ -146,6 +146,7 @@ INSTALLED_APPS = [
     "apps.NotesConfig",
     "apps.ObjectsConfig",
     "apps.PatchesConfig",
+    "apps.PatchNotesConfig",
     "apps.PlayersConfig",
     "apps.ProcessesConfig",
     "apps.QuestsConfig",
@@ -192,6 +193,7 @@ TEMPLATES = [
                 "apps.help.contexts.help_search_form",
                 "apps.players.contexts.player_search_form",
                 "apps.players.contexts.players_online",
+                "apps.patchnotes.contexts.patch_notes_unread",
                 "apps.seasons.contexts.current_season",
             ],
 #            "libraries": {
