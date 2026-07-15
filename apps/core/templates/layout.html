@@ -214,6 +214,17 @@
                                 </li>
                             </ul>
                         </li>
+                        <li class="nav-item" title="Patch Notes">
+                            <a class="nav-link icon-link icon-link-hover" href="{% url 'patch_notes' %}#patch-notes">
+                                {% bi "megaphone" %}
+                                Patch Notes
+{% if user.is_authenticated and PATCH_NOTES_UNREAD %}
+                                <span class="ac-pill ac-pill--warn" title="{{ PATCH_NOTES_UNREAD }} unread patch note{{ PATCH_NOTES_UNREAD|pluralize }}">
+                                    {{ PATCH_NOTES_UNREAD }}
+                                </span>
+{% endif %}
+                            </a>
+                        </li>
 {% if user and user.is_authenticated %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle icon-link icon-link-hover" href="{% url 'portal' %}#portal" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -263,6 +274,12 @@
                                         Feedback Triage
                                     </a>
                                 </li>
+                                <li class="nav-item" title="Patch Note Editor">
+                                    <a class="nav-link dropdown-item icon-link icon-link-hover" href="{% url 'patch_notes_console' %}#pn-console">
+                                        {% bi "megaphone" %}
+                                        Patch Note Editor
+                                    </a>
+                                </li>
                                 <li class="nav-item" title="Style Guide">
                                     <a class="nav-link dropdown-item icon-link icon-link-hover" href="{% url 'styleguide' %}#styleguide">
                                         {% bi "palette" %}
@@ -288,6 +305,18 @@
                                     <a class="nav-link dropdown-item icon-link icon-link-hover" href="{% url 'leaders' %}#leaders">
                                         {% bi "trophy" %}
                                         Leaders
+                                    </a>
+                                </li>
+
+                                <li class="nav-item" title="Patch Notes">
+                                    <a class="nav-link dropdown-item icon-link icon-link-hover" href="{% url 'patch_notes' %}#patch-notes">
+                                        {% bi "megaphone" %}
+                                        Patch Notes
+{% if PATCH_NOTES_UNREAD %}
+                                        <span class="ac-pill ac-pill--warn" title="{{ PATCH_NOTES_UNREAD }} unread patch note{{ PATCH_NOTES_UNREAD|pluralize }}">
+                                            {{ PATCH_NOTES_UNREAD }}
+                                        </span>
+{% endif %}
                                     </a>
                                 </li>
 

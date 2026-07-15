@@ -1,0 +1,263 @@
+{% extends "layout.html" %}
+{% load ishar %}
+{% block meta_title %}Patch Note Editor - {{ WEBSITE_TITLE }}{% endblock meta_title %}
+{% block title %}Patch Note Editor - {{ WEBSITE_TITLE }}{% endblock title %}
+{% block breadcrumbs %}
+    {% crumb "Portal" "grid-1x2" urlname="portal" %}
+    {% crumb "Patch Note Editor" "megaphone" urlname="patch_notes_console" anchor="pn-console" active=True %}
+{% endblock breadcrumbs %}
+{% block content %}
+<style>
+    .pn-body__h { font-size: 1.05rem; margin: 1rem 0 .4rem; }
+    .pn-body__h:first-child { margin-top: 0; }
+    .pn-body__list { margin: .25rem 0 .6rem 1.25rem; }
+    .pn-body p { margin: 0 0 .6rem; }
+    .pn-formbtns, .pn-rowbtns { display: flex; flex-wrap: wrap; gap: .5rem; }
+    .pn-rowbtns { margin: 0 0 1rem; }
+    .pn-preview { min-height: 2.5rem; }
+    textarea.ac-input { width: 100%; font-family: inherit; resize: vertical; }
+</style>
+<div class="ac" id="pn-console">
+
+    <header class="ac-hero">
+        <span class="ac-hero__badge">{% bi "megaphone" %}</span>
+        <div class="ac-hero__text">
+            <h2 class="ac-hero__title">Patch Note Editor</h2>
+            <p class="ac-hero__sub">Draft, edit, publish, and delete the game's patch notes (in-game <code>news</code>).</p>
+        </div>
+    </header>
+
+    <div class="ac-note" id="pnStatus" role="status" hidden></div>
+
+    <div class="ac-panel">
+        <h3 class="ac-panel__h">{% bi "pencil-square" %} <span id="pnFormTitle">New patch note</span></h3>
+        <form id="pnForm" onsubmit="return false;">
+            <input type="hidden" id="pnId" value="">
+            <div class="ac-field">
+                <label class="ac-label" for="pnTitle">Title</label>
+                <input class="ac-input" type="text" id="pnTitle" maxlength="80" autocomplete="off" placeholder="Short, descriptive title">
+            </div>
+            <div class="ac-field">
+                <label class="ac-label" for="pnSeason">Season <span class="ac-panel__hint">(optional)</span></label>
+                <input class="ac-input" type="text" id="pnSeason" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="e.g. {{ CURRENT_SEASON.id|default:'14' }}">
+            </div>
+            <div class="ac-field">
+                <label class="ac-label" for="pnBody">Body</label>
+                <textarea class="ac-input" id="pnBody" rows="10" placeholder="## Heading&#10;- a bullet point&#10;Some **bold** text."></textarea>
+                <span class="ac-panel__hint">Markdown subset: <code>## Heading</code>, <code>- bullet</code>, <code>**bold**</code> &mdash; matches the in-game render.</span>
+            </div>
+            <div class="ac-field">
+                <span class="ac-label">Live preview</span>
+                <div class="ac-note pn-body pn-preview" id="pnPreview"></div>
+            </div>
+            <div class="pn-formbtns">
+                <button class="ac-cta ac-cta--accent" type="submit" id="pnSaveBtn">Save draft</button>
+                <button class="ac-btn" type="button" id="pnResetBtn">New / clear</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="ac-panel">
+        <h3 class="ac-panel__h">{% bi "list-ul" %} All patch notes</h3>
+{% for note in notes %}
+        <div class="ac-row" data-id="{{ note.pk }}">
+            <span class="ac-row__icon" aria-hidden="true">
+                {% if note.is_published %}{% bi "check-circle" %}{% else %}{% bi "pencil" %}{% endif %}
+            </span>
+            <div class="ac-row__main">
+                <span class="ac-row__link">{{ note.title }}</span>
+                <span class="ac-row__meta">
+                    <span class="ac-pill {% if note.is_published %}ac-pill--ok{% else %}ac-pill--muted{% endif %}">
+                        {% if note.is_published %}Published{% else %}Draft{% endif %}</span>
+                    #{{ note.pk }} &middot; {{ note.author }} &middot; {{ note.created_at|date:"M j, Y" }}
+                    {% if note.season_id %}&middot; S{{ note.season_id }}{% endif %}
+                </span>
+            </div>
+        </div>
+        <div class="pn-rowbtns">
+            <button class="ac-btn" type="button" data-act="edit" data-id="{{ note.pk }}">{% bi "pencil-square" %} Edit</button>
+{% if note.is_published %}
+            <button class="ac-btn ac-btn--warn" type="button" data-act="unpublish" data-id="{{ note.pk }}">{% bi "eye-slash" %} Unpublish</button>
+{% else %}
+            <button class="ac-btn ac-btn--ok" type="button" data-act="publish" data-id="{{ note.pk }}">{% bi "send" %} Publish</button>
+{% endif %}
+            <button class="ac-btn ac-btn--danger" type="button" data-act="delete" data-id="{{ note.pk }}">{% bi "trash" %} Delete</button>
+        </div>
+{% empty %}
+        <p class="ac-empty">No patch notes yet. Create one above.</p>
+{% endfor %}
+    </div>
+
+</div>
+
+{{ note_data|json_script:"pnData" }}
+<script>
+    (function () {
+        const csrftoken = "{{ csrf_token }}";
+        const URLS = {
+            create: "{% url 'patch_note_create' %}",
+            update: "{% url 'patch_note_update' %}",
+            publish: "{% url 'patch_note_publish' %}",
+            unpublish: "{% url 'patch_note_unpublish' %}",
+            delete: "{% url 'patch_note_delete' %}",
+        };
+
+        const notes = {};
+        (JSON.parse(document.getElementById("pnData").textContent) || []).forEach(function (n) {
+            notes[String(n.id)] = n;
+        });
+
+        const idEl = document.getElementById("pnId");
+        const titleEl = document.getElementById("pnTitle");
+        const seasonEl = document.getElementById("pnSeason");
+        const bodyEl = document.getElementById("pnBody");
+        const previewEl = document.getElementById("pnPreview");
+        const formTitleEl = document.getElementById("pnFormTitle");
+        const saveBtn = document.getElementById("pnSaveBtn");
+        const statusEl = document.getElementById("pnStatus");
+
+        // ---- status banner ---------------------------------------------------
+        function showStatus(msg, kind) {
+            statusEl.textContent = msg;
+            statusEl.className = "ac-note" + (kind ? " ac-note--" + kind : "");
+            statusEl.hidden = false;
+        }
+
+        // ---- live preview: build DOM with textContent (never innerHTML) ------
+        function appendInline(parent, text) {
+            const parts = text.split("**");
+            parts.forEach(function (part, i) {
+                if (i % 2 === 1) {
+                    const strong = document.createElement("strong");
+                    strong.textContent = part;
+                    parent.appendChild(strong);
+                } else if (part) {
+                    parent.appendChild(document.createTextNode(part));
+                }
+            });
+        }
+        function renderPreview() {
+            const text = bodyEl.value || "";
+            previewEl.textContent = "";
+            let list = null;
+            text.split("\n").forEach(function (raw) {
+                const line = raw.replace(/\s+$/, "");
+                if (line.indexOf("## ") === 0) {
+                    list = null;
+                    const h = document.createElement("h3");
+                    h.className = "pn-body__h";
+                    appendInline(h, line.slice(3));
+                    previewEl.appendChild(h);
+                } else if (line.indexOf("- ") === 0) {
+                    if (!list) {
+                        list = document.createElement("ul");
+                        list.className = "pn-body__list";
+                        previewEl.appendChild(list);
+                    }
+                    const li = document.createElement("li");
+                    appendInline(li, line.slice(2));
+                    list.appendChild(li);
+                } else if (line === "") {
+                    list = null;
+                } else {
+                    list = null;
+                    const p = document.createElement("p");
+                    appendInline(p, line);
+                    previewEl.appendChild(p);
+                }
+            });
+        }
+        bodyEl.addEventListener("input", renderPreview);
+
+        // ---- form state ------------------------------------------------------
+        function loadForm(note) {
+            if (note) {
+                idEl.value = note.id;
+                titleEl.value = note.title || "";
+                seasonEl.value = note.season === null ? "" : String(note.season || "");
+                bodyEl.value = note.body || "";
+                formTitleEl.textContent = "Editing note #" + note.id;
+                saveBtn.textContent = "Save changes";
+            } else {
+                idEl.value = "";
+                titleEl.value = "";
+                seasonEl.value = "";
+                bodyEl.value = "";
+                formTitleEl.textContent = "New patch note";
+                saveBtn.textContent = "Save draft";
+            }
+            renderPreview();
+        }
+
+        document.getElementById("pnResetBtn").addEventListener("click", function () {
+            loadForm(null);
+            titleEl.focus();
+        });
+
+        // ---- POST helper -----------------------------------------------------
+        function post(url, params) {
+            const body = new URLSearchParams(params);
+            body.append("csrfmiddlewaretoken", csrftoken);
+            return fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-CSRFToken": csrftoken,
+                },
+                body: body.toString(),
+            }).then(function (resp) {
+                return resp.json().then(function (data) {
+                    return { status: resp.status, data: data };
+                });
+            });
+        }
+
+        function handle(result) {
+            const ok = result.status >= 200 && result.status < 300 && result.data.ok;
+            showStatus(result.data.message || (ok ? "Done." : "Something went wrong."),
+                       ok ? "ok" : "danger");
+            if (ok) {
+                // Reload so the list, statuses, and unread pill all reflect reality.
+                setTimeout(function () { window.location.reload(); }, 500);
+            }
+            return ok;
+        }
+
+        // ---- save (create or update) ----------------------------------------
+        document.getElementById("pnForm").addEventListener("submit", function () {
+            const params = {
+                id: idEl.value,
+                title: titleEl.value.trim(),
+                body: bodyEl.value,
+                season_id: seasonEl.value.trim(),
+            };
+            if (!params.title) { showStatus("Title is required.", "warn"); return; }
+            if (!params.body.trim()) { showStatus("Body is required.", "warn"); return; }
+            saveBtn.disabled = true;
+            const url = idEl.value ? URLS.update : URLS.create;
+            post(url, params).then(handle).finally(function () { saveBtn.disabled = false; });
+        });
+
+        // ---- row actions (edit / publish / unpublish / delete) --------------
+        document.querySelectorAll(".pn-rowbtns [data-act]").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                const act = btn.getAttribute("data-act");
+                const id = btn.getAttribute("data-id");
+                if (act === "edit") {
+                    loadForm(notes[String(id)]);
+                    document.getElementById("pnForm").scrollIntoView({ behavior: "smooth", block: "start" });
+                    return;
+                }
+                if (act === "publish" &&
+                    !window.confirm("Publish note #" + id + " and announce it to Discord?")) { return; }
+                if (act === "delete" &&
+                    !window.confirm("Delete note #" + id + "? This cannot be undone.")) { return; }
+                btn.disabled = true;
+                post(URLS[act], { id: id }).then(handle).finally(function () { btn.disabled = false; });
+            });
+        });
+
+        renderPreview();
+    })();
+</script>
+{% endblock content %}
