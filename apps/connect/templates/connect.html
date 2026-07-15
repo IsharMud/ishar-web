@@ -307,6 +307,9 @@
     var reconnectTimer = null;
     var countdownTimer = null;
     var openedAt = 0;
+    var pongTimer = null;     // in-flight liveness probe deadline
+    var quitClean = false;    // game ended the session — don't auto-revive
+    var isDemo = new URLSearchParams(location.search).has("demo");
 
     function setStatus(text, cls) {
         statusText.textContent = text;
@@ -316,6 +319,44 @@
     function clearReconnect() {
         if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
         if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+    }
+
+    function clearProbe() {
+        if (pongTimer) { clearTimeout(pongTimer); pongTimer = null; }
+    }
+
+    // --- Liveness ---
+    // A phone that switches networks (or sleeps through a websocket death)
+    // often keeps a half-open socket that looks OPEN but goes nowhere. The
+    // probe sends a NUL-prefixed PING that the bridge answers with PONG
+    // only while its telnet leg is healthy; no answer in 5s means the
+    // socket is dead — tear it down and reconnect immediately.
+    function probe() {
+        if (isDemo || pongTimer || !ws || ws.readyState !== WebSocket.OPEN) return;
+        try { ws.send("\x00PING"); } catch (e) { return; }
+        pongTimer = setTimeout(function () {
+            pongTimer = null;
+            forceReconnect();
+        }, 5000);
+    }
+
+    // Reconnect *now*: a wake/online event is a fresh network situation, so
+    // skip any pending backoff wait and restart the ladder.
+    function forceReconnect() {
+        clearReconnect();
+        reconnectAttempt = 0;
+        connect();
+    }
+
+    // On waking (tab visible again, network back, bfcache restore): revive
+    // a pending or parked reconnect immediately, otherwise just probe.
+    function wake() {
+        if (isDemo || quitClean) return;
+        if (reconnectTimer || !ws || ws.readyState > WebSocket.OPEN) {
+            forceReconnect();
+        } else {
+            probe();
+        }
     }
 
     function scheduleReconnect(reason) {
@@ -337,6 +378,8 @@
 
     function connect() {
         clearReconnect();
+        clearProbe();
+        quitClean = false;
         if (ws) {
             // Deliberate replacement: a stale socket's close must not race
             // the new one into the reconnect scheduler.
@@ -368,6 +411,7 @@
 
             // Out-of-band control sentinels are prefixed with NUL.
             if (d.charCodeAt(0) === 0) {
+                if (d === "\x00PONG") { clearProbe(); return; }
                 if (d === "\x00ECHO_ON") { serverEcho = true; commandInput.type = "password"; return; }
                 if (d === "\x00ECHO_OFF") { serverEcho = false; commandInput.type = "text"; return; }
                 if (d.indexOf("\x00GMCP ") === 0) {
@@ -384,6 +428,7 @@
         };
 
         ws.onclose = function(event) {
+            clearProbe();
             setStatus("Disconnected", "status-disconnected");
             if (window.IsharHUD) window.IsharHUD.setConnected(false);
             // A session that lived a while proves the path works — restart
@@ -393,8 +438,16 @@
             if (event.code === 1000) {
                 // The game ended the session (e.g. quit) — don't fight a
                 // deliberate exit with an auto-reconnect loop.
+                quitClean = true;
                 reconnectBtn.style.display = "";
                 term.writeln("\r\n\x1b[1;31m--- Disconnected ---\x1b[0m");
+                return;
+            }
+            if (navigator.onLine === false) {
+                // No network: retries would fail instantly and burn the
+                // backoff ladder. Park; the "online" handler revives us.
+                reconnectBtn.style.display = "";
+                setStatus("Offline — waiting for network", "status-disconnected");
                 return;
             }
             scheduleReconnect(event.code === CLOSE_BRIDGE_FAILURE
@@ -510,6 +563,29 @@
         window.visualViewport.addEventListener("scroll", onResize);
     }
 
+    // --- Liveness wiring ---
+    document.addEventListener("visibilitychange", function() {
+        if (!document.hidden) wake();
+    });
+    window.addEventListener("online", wake);
+    window.addEventListener("pageshow", function(e) {
+        // bfcache restore: the page returns with a socket that died while
+        // it was frozen.
+        if (e.persisted) wake();
+    });
+    window.addEventListener("offline", function() {
+        if (isDemo) return;
+        clearReconnect();
+        clearProbe();
+        if (!quitClean) setStatus("Offline — waiting for network", "status-disconnected");
+    });
+    // Idle keepalive: catches half-open sockets promptly and keeps
+    // intermediate proxies from reaping a quiet connection. Visible tabs
+    // only — a hidden tab gets probed by the visibilitychange wake instead.
+    setInterval(function() {
+        if (!document.hidden) probe();
+    }, 45000);
+
     terminalContainer.addEventListener("click", function() {
         // While the phone sheet is open, a terminal tap just dismisses it
         // (the HUD's outside-tap handler) — don't also pop the keyboard.
@@ -523,7 +599,7 @@
 
     // Demo mode (/connect?demo=1): populate the HUD with sample data for design
     // review without a GMCP-enabled server. Skips the live connection.
-    if (new URLSearchParams(location.search).has("demo")) {
+    if (isDemo) {
         if (window.IsharHUD) window.IsharHUD.demo();
         term.writeln("\x1b[33m--- DEMO MODE: sample data, not connected to the game. ---\x1b[0m");
         fitAppHeight();
