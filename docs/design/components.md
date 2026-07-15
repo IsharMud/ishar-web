@@ -384,6 +384,20 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
   amber dot (used by Chat).
 - **`.exit` compass, `.row` lists, `.kv`, `.aff`, `.skill` hotbar** — the
   in-panel widgets; all have coarse-pointer bumps and `:focus-visible` rings.
+  Hotbar buttons always contain both `.skill-cd` and `.skill-pct`; the
+  `.cooling` class (flipped by JS each tick) picks which one shows.
+- **`#history-pop` / `.hist-item`** — the touch command-history popover,
+  anchored above the input inside `#command-form` (works with the HUD off;
+  rows are `textContent`-built, 44px on coarse pointers). Revealed via
+  `#history-btn`, which JS un-hides on `(pointer: coarse)`.
+- **`#settings-pop` / `.setting-row`** — the gear menu under the topbar's
+  right edge: checkbox rows persisted in `ishar.settings`, mirrored by the
+  `/settings` client command.
+- **`#term-search`** — the scrollback find bar floating over the terminal's
+  top-right (input + prev/next/close); opened by `#search-btn` or
+  Ctrl+Shift+F, closed by Esc. Match decorations use the amber accent.
+- Note `.hud-btn[hidden] { display: none; }` — the button's explicit
+  `display` would otherwise defeat the `hidden` attribute.
 
 Verify with `/connect?demo=1` (sample GMCP feeds, no server needed).
 

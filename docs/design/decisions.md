@@ -9,6 +9,87 @@ Format: `## YYYY-MM-DD — Title` · **Decision** · **Why** · (optional) **Not
 
 ---
 
+## 2026-07-15 — Web client: NUL-sentinel control channel and liveness policy
+
+**Decision.** Issue #74. Websocket text frames starting with NUL (`\x00`) are
+formally the telnet bridge's out-of-band **control channel**: server→client
+`\x00ECHO_ON/OFF`, `\x00GMCP <msg>`, `\x00PONG`; client→server `\x00PING`.
+The consumer answers PING with PONG only while its telnet leg is healthy (a
+dead bridge answers with a 4502 close), and **never forwards a NUL-prefixed
+frame into the game**. Client liveness policy: a 45 s visible-tab probe
+interval plus probe-or-force-reconnect on wake events (tab visible, `online`,
+bfcache `pageshow`); going offline **parks** reconnection until the network
+returns instead of burning the backoff ladder; a clean close (code 1000, the
+game ended the session) is never auto-revived. The consumer also introduces
+itself to the game on GMCP negotiation (`Core.Hello` "IsharWeb" +
+`Core.Supports.Set` naming the packages the HUD consumes).
+
+**Why.** Phones switch networks and freeze tabs; a half-open socket looks
+OPEN and goes nowhere, and the #85 reconnect ladder only fires when the
+browser *knows* the socket closed. The probe closes that gap; the offline
+park keeps the ladder meaningful; the never-forward rule closes a latent
+injection hole where crafted control frames could reach the telnet stream.
+
+## 2026-07-15 — Web client: session continuity lives in web storage; xterm addons are within the xterm decision
+
+**Decision.** Issue #74. Continuity storage is split by scope: **localStorage**
+for device-level state — `ishar.history` (command history, last 200),
+`ishar.aliases`, `ishar.settings` (gear-menu toggles) — joining the existing
+`ishar.fontsize/hud/tab/colL/colR`; **sessionStorage** for per-tab session
+state — `ishar.term`, the terminal scrollback re-encoded to clean ANSI
+(last 1500 lines, ≤512 KB, front-truncated at a line break) on
+pagehide/tab-hidden and replayed with a dim divider on the next load.
+Reconnects (manual included) no longer clear the terminal, and the HUD's
+`reset()` keeps the chat log — chat is history, not game state. Chat does
+*not* persist across page loads. Vendoring `@xterm/addon-serialize` and
+`@xterm/addon-search` (0.13.0/0.15.0, the pairs for the vendored xterm
+5.5.0) is ruled **within the existing xterm decision**, not new frontend
+libraries: same package family, same self-hosted minified-UMD form as the
+fit/web-links addons, feature-checked so a missing file degrades cleanly.
+
+**Why.** The one thing a player wants after a drop or a fat-fingered reload
+is what just happened. sessionStorage is deliberately per-tab (no multi-tab
+clobber, no stale week-old logs); passwords never enter history (the
+pipeline bypasses password mode — also fixed retroactively).
+
+## 2026-07-15 — Web client: the `/` client-command namespace; stacking on by default with a comm guard
+
+**Decision.** Issue #74. Input lines starting with `/` are handled in the
+browser (`/alias`, `/unalias`, `/stack`, `/settings`, `/clear`, `/help`;
+`//text` escapes a literal `/`). Aliases expand once (no recursion), support
+`$1`–`$9`/`$*`, and pass a safeCmd-style guard. **`;` command stacking is on
+by default** (owner's call) with the hazard managed two ways: a line whose
+first token (2+ chars) prefix-matches a comm verb (say/tell/gossip/…) or
+starts with the say-quote `'` never splits — so `say hi; how are you` stays
+one command while `e;n;w` walks (single letters stay splittable: `e` is
+east, not emote) — and `;;` sends a literal `;`. Password entry (server
+ECHO suppressed) bypasses the entire pipeline. Touch history is a popover
+(`#history-pop`) anchored to the input, not the HUD sheet: it must work with
+the HUD off, and the sheet is mobile-only and re-parents panels.
+
+**Why.** These are the ergonomics every desktop MUD client ships; doing them
+client-side keeps the game's parser untouched. The comm guard + `;;` escape
+kill the classic "split my sentence" misfire without hiding the feature
+behind a setting nobody finds.
+
+## 2026-07-15 — HUD hot paths are DOM-built; cold panels keep esc()+innerHTML
+
+**Decision.** Issue #74. The HUD's rendering splits by frequency. **Hot
+paths** — chat (per message), the hotbar cooldown tick (per second), the
+vitals bars (every game pulse) — build/update real DOM nodes
+(`createElement`/`textContent`, cached refs, in-place width/text updates,
+identical-payload skip for `Char.Vitals`). **Cold panels** — room, equipment,
+inventory, train, status, who, re-rendered at human-action frequency — keep
+their `esc()`+innerHTML templates as a documented, scoped exception to the
+site-wide "textContent, never innerHTML" rule. Hotbar buttons always carry
+both the countdown and percent spans; a `.cooling` class picks which shows.
+
+**Why.** Rebuilding 200 chat lines per message and every hotbar button every
+second is real waste on a phone on battery; rewriting six cold panels to DOM
+building buys nothing measurable and doubles the markup surface. The esc()
+discipline in the cold templates is centralized and audited — the exception
+is a boundary, not an erosion.
+
 ## 2026-07-13 — `/skills` shows only what a mortal may see (visibility gate)
 
 **Decision.** The public skill pages replicate the game's mortal-visibility
