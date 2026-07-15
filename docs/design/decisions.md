@@ -606,6 +606,32 @@ seasons), works at phone width, needs no legend, and degrades to nothing —
 the numbers are always present as text. Color encodes nothing per-row
 (identity is the label), so colorblindness cannot cost information.
 
+## 2026-07-15 — Log viewer: severity-tinted stream + wrapping segmented control
+
+**Decision.** The staff log viewer (`/portal/logs/`, Eternal+) renders logs as a
+severity-colored monospace stream (`.ac-log` / `.ac-log__line--{error,warn,info,
+debug,log}`) inside an `.ac-console__body`, driven by a server-side parser that
+classifies each line's level/tag/timestamp. Level is set only from an **explicit
+token** (`ERROR`, `[WARN]`, `BUG:`, `SYSERR:` …), never guessed from prose;
+indented lines are treated as continuations of the entry above. The blue-green
+**live color is highlighted** (a `.ac-live-dot` on the toggle + a `LIVE: <color>`
+hero pill) while **both colors stay viewable**. Added two reusable pieces:
+`.ac-seg--wrap` (a block-level, wrapping segmented control — the base `.ac-seg`
+is `inline-flex` and sizes to content, so a 3+ item control overflows a phone;
+the wrap variant is width-constrained and wraps) and `.ac-subrow` (an inline
+label + control row). **Why.** Severity tint + parsed facets make a 5000-line
+tail scannable on a phone; token-only level classification avoids false-positive
+coloring; the wrapping seg fixes an overflow the 2-item deploy console never hit.
+Also guarded `.ac-empty[hidden]` / `.ac-filter[hidden]` — both set `display`,
+which defeats a plain `el.hidden = true` (same gotcha already noted for
+`.hud-btn`), and the viewer toggles them from JS.
+
+**Architecture note (cross-repo).** The web container can't see the per-color log
+volumes, run docker, or read the proxy's live color, so the viewer reads through
+**read-only** `log-status` / `log-tail` actions added to the host agent
+(`ishar-mud` `scripts/deploy-agent.py`) — the same allowlisted, argv-exec'd
+boundary as the deploy button (see `ishar-mud/docs/infrastructure/deploy_agent.md`).
+
 ---
 
 ## Open decisions / to record when made

@@ -403,6 +403,37 @@ Verify with `/connect?demo=1` (sample GMCP feeds, no server needed).
 
 ---
 
+## Log viewer (staff) — status: shipped (ishar-web#104)
+
+The `/portal/logs/` page (Eternal+). Reuses the console language; adds:
+
+- **`.ac-log` / `.ac-log__line`** — the severity-colored monospace stream,
+  rendered inside an `.ac-console__body` (which already scrolls). One line per
+  entry; `--error/--warn/--info/--debug/--log` set a left rule + text tint.
+  Lines are `textContent`-built from parsed entries (XSS-safe). `.ac-log__note`
+  is the amber banner above the stream (e.g. "this color isn't live").
+- **`.ac-seg--wrap`** — a **wrapping** segmented control: block-level
+  (`display:flex; flex-wrap:wrap`) so it's constrained to its container and
+  wraps instead of overflowing. Use for a control with more/longer items than
+  fit a phone row (the log viewer's source picker); the plain `.ac-seg` stays
+  inline for short 2–3 item controls (deploy console envs).
+- **`.ac-subrow`** — an inline `.ac-label` beside its control(s); a lighter row
+  than a full `.ac-field`. Hides with `[hidden]`.
+- **`.ac-live-dot`** — a small ok-colored dot shown on the blue/green toggle
+  label carrying `.ac-seg__item--live`, marking the live color.
+- **`.ac-chip__n`** + **`.ac-chip--{danger,warn,info}`** — count suffix and
+  semantic tints for the severity filter chips (base `.ac-chip` is neutral).
+- Guard: **`.ac-empty[hidden]`, `.ac-filter[hidden]` { display: none; }** — both
+  set `display`, so a plain `el.hidden = true` wouldn't hide them (same gotcha
+  as `.hud-btn`); the viewer toggles both from JS.
+
+Data comes from the host agent's read-only `log-status` / `log-tail` actions
+(see `ishar-mud/docs/infrastructure/deploy_agent.md`); the viewer can't render
+end-to-end without that agent, but the markup/CSS eyeball via a `preview.html`
+with simulated entries (how this was verified).
+
+---
+
 ## When adding a component
 
 1. Check this catalog first — extend, don't fork.

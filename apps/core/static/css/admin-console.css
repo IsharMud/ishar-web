@@ -202,6 +202,13 @@
     outline: 2px solid var(--ac-accent);
     outline-offset: 2px;
 }
+/* Wrapping variant: for a control with more/longer items than fit one phone row
+   (the deploy console's 2 short envs never need it; the log viewer's 3 sources
+   do). Block-level (`display:flex`) so it's constrained to its container width —
+   base .ac-seg is inline-flex and sizes to content, so flex-wrap alone would
+   never trigger. Items grow to fill and wrap to the next line on overflow. */
+.ac-seg--wrap { display: flex; flex-wrap: wrap; }
+.ac-seg--wrap .ac-seg__item { flex: 1 1 auto; justify-content: center; }
 
 /* ------------------------------------------------------- toggle cards --- */
 .ac-grid {
@@ -1021,6 +1028,68 @@ a.ac-link--featured:visited .ac-link__name { color: var(--ac-accent); }
     color: #231005;
 }
 .ac-cta--accent:hover:not(:disabled) { box-shadow: 0 0 0 .2rem var(--ac-wash); }
+
+/* ------------------------------------------------------ log viewer --- */
+/* Staff log viewer (ishar-web#104): a severity-colored monospace stream inside
+   an .ac-console__body, plus a live-color marker on the color toggle and an
+   inline-label control row. */
+
+/* An inline label beside its control(s) — a lighter row than a full field. */
+.ac-subrow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .5rem .75rem;
+    margin-top: .8rem;
+}
+.ac-subrow > .ac-label { margin: 0; }
+.ac-subrow[hidden] { display: none; }
+
+/* Live-color marker on the blue/green toggle labels. */
+.ac-live-dot { display: none; }
+.ac-seg__item--live .ac-live-dot {
+    display: inline-block;
+    width: .5rem; height: .5rem; margin-left: .12rem;
+    border-radius: 50%;
+    background: var(--ac-ok);
+    box-shadow: 0 0 0 3px rgba(76, 187, 23, .22);
+}
+
+/* Count suffix + semantic tints for the severity filter chips (base is neutral). */
+.ac-chip__n { font-variant-numeric: tabular-nums; font-weight: 700; opacity: .7; }
+.ac-chip--danger { color: var(--ac-danger); }
+.ac-chip--warn   { color: var(--ac-warn); }
+.ac-chip--info   { color: var(--ac-info); }
+.ac-empty-inline { color: var(--ac-dim); font-size: .82rem; }
+/* These components set `display`, which out-ranks the UA `[hidden]` rule — so a
+   plain `el.hidden = true` wouldn't hide them. Restore hideability for the JS
+   that toggles the empty state and the (optional) tag-filter row. */
+.ac-empty[hidden], .ac-filter[hidden] { display: none; }
+
+/* The stream. Each line keeps its source formatting (pre-wrap); severity sets a
+   left rule + text tint. Lives inside .ac-console__body, which already scrolls. */
+.ac-log { display: block; }
+.ac-log__line {
+    display: block;
+    padding: .02rem .5rem .02rem .55rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+    border-left: 2px solid transparent;
+}
+.ac-log__line--error { color: #f0b7b7; border-left-color: var(--ac-danger); background: var(--ac-danger-wash); }
+.ac-log__line--warn  { color: #f3c88b; border-left-color: var(--ac-warn); }
+.ac-log__line--info  { color: #a9c9ee; }
+.ac-log__line--debug { color: var(--ac-dim); }
+.ac-log__line--log   { color: #c7c7c9; }
+.ac-log__note {
+    margin: 0 0 .45rem;
+    padding: .4rem .6rem;
+    border-left: 2px solid var(--ac-warn);
+    background: rgba(255, 136, 0, .08);
+    color: var(--ac-warn);
+    font-size: .8rem;
+    white-space: normal;
+}
 
 /* ---------------------------------------------------------- motion --- */
 @keyframes ac-pulse {

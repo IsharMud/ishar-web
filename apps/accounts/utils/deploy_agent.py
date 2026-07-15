@@ -79,3 +79,33 @@ def cancel_deploy(deploy_id):
 def deploy_status(deploy_id):
     """Poll a running/finished/scheduled deploy by id."""
     return _call({"action": "status", "deploy_id": deploy_id})
+
+
+# ── Read-only log access (ishar-web#104) ─────────────────────────────────────
+# Same agent, socket, and secret as the deploy actions above — the log actions
+# are read-only additions. The agent is still the boundary: it allowlists env /
+# source / color and argv-execs docker with no shell.
+
+
+def log_status(env):
+    """Live-color + which colors/web containers are up, plus the source/color
+    allowlists. Powers the viewer's LIVE badge and control state."""
+    return _call({"action": "log-status", "env": env})
+
+
+def fetch_log(actor, env, source, color="live", lines=500, timeout=25):
+    """Return a byte-capped tail of one log source. `source` is runlog|stderr|web;
+    `color` is live|blue|green (ignored for web). The agent re-validates all of
+    it. A slightly longer timeout than deploy calls: reading an idle color's
+    runlog spins up a throwaway container host-side."""
+    return _call(
+        {
+            "action": "log-tail",
+            "actor": actor,
+            "env": env,
+            "source": source,
+            "color": color,
+            "lines": int(lines),
+        },
+        timeout=timeout,
+    )
