@@ -66,7 +66,7 @@ class DashboardView(EternalRequiredMixin, NeverCacheMixin, TemplateView):
         # the game's presence heartbeat lands: isharmud/ishar-mud#1771).
         context["online_players"] = (
             Player.objects.online()
-            .select_related("common")
+            .select_related("common", "statistics")
             .order_by("-logon")
         )
 
@@ -75,7 +75,7 @@ class DashboardView(EternalRequiredMixin, NeverCacheMixin, TemplateView):
         active_player_count = 0
         for player in (
             Player.objects.filter(logon__gte=week_ago)
-            .select_related("account", "common")
+            .select_related("account", "common", "statistics")
             .order_by("-logon")
         ):
             entry = active_accounts.setdefault(

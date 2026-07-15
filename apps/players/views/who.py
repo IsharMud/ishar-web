@@ -14,4 +14,4 @@ class PlayerWhoView(LoginRequiredMixin, NeverCacheMixin, ListView):
     template_name = "who.html"
 
     def get_queryset(self):
-        return Player.objects.online()
+        return Player.objects.online().select_related("statistics")

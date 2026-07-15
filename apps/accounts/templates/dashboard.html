@@ -75,11 +75,11 @@
                 <div class="ac-row__main">
                     <div class="ac-row__title">{{ player.player_link }}</div>
                     <div class="ac-row__meta">
-                        <span title="Level {{ player.common.level }}">
-                            {% bi "bar-chart" %} level {{ player.common.level }}
+                        <span title="Level {{ player.display_level }}">
+                            {% bi "bar-chart" %} level {{ player.display_level }}
                         </span>
-                        <span title="{{ player.remorts }} remort{{ player.remorts|pluralize }}">
-                            {% bi "arrow-repeat" %} {{ player.remorts }} remort{{ player.remorts|pluralize }}
+                        <span title="{{ player.display_remorts }} remort{{ player.display_remorts|pluralize }}">
+                            {% bi "arrow-repeat" %} {{ player.display_remorts }} remort{{ player.display_remorts|pluralize }}
                         </span>
                         <span title="Logged in {{ player.logon }}">
                             {% bi "clock" %} on for {{ player.logon|timesince }}
@@ -111,7 +111,7 @@
                             <div class="ac-row__title">{{ entry.account.account_name }}</div>
                             <div class="ac-row__meta">
         {% for player in entry.players %}
-                                <span>{{ player.player_link }} <small class="text-secondary">L{{ player.common.level }} R{{ player.remorts }}</small></span>
+                                <span>{{ player.player_link }} <small class="text-secondary">L{{ player.display_level }} R{{ player.display_remorts }}</small></span>
         {% endfor %}
                             </div>
                         </div>

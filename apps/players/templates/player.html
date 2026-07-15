@@ -72,10 +72,10 @@
                 {{ player.common.player_class.class_display }} of
                 {{ player.common.race.folk_name|lower }} origin.
             </li>
-            <li class="mb-1" title="Level: {{ player.common.level }}{% if player.remorts > 0 %} / Remorts: {{ player.remorts }}{% endif %}">
+            <li class="mb-1" title="Level: {{ player.display_level }}{% if player.display_remorts > 0 %} / Remorts: {{ player.display_remorts }}{% endif %}">
                 {% bi "dot" css="text-ishar" %}
                 {{ player.get_player_gender|title }} {{ player.get_player_phrase }}
-                level {{ player.common.level }}{% if player.remorts > 0 %} and {{ player.get_player_phrase_owns }} remorted {{ player.remorts }} time{{ player.remorts|pluralize }}{% endif %}.
+                level {{ player.display_level }}{% if player.display_remorts > 0 %} and {{ player.get_player_phrase_owns }} remorted {{ player.display_remorts }} time{{ player.display_remorts|pluralize }}{% endif %}.
             </li>
 {% if player.total_renown > 0 %}
             <li class="mb-1" title="Total Renown: {{ player.total_renown }}">
@@ -111,9 +111,9 @@
             </li>
             <li class="mb-1">
                 {% bi "dot" css="text-ishar" %}
-{% if player.statistics.total_deaths > 0 %}
+{% if player.display_deaths > 0 %}
                 {{ player.get_player_gender|title }} {{ player.get_player_phrase_owns }}
-                died {{ player.statistics.total_deaths }} time{{ player.statistics.total_deaths|pluralize }}.
+                died {{ player.display_deaths }} time{{ player.display_deaths|pluralize }}.
 {% else %}
                 {{ player.get_player_gender|title }} {{ player.get_player_phrase_owns }} never died!
 {% endif %}

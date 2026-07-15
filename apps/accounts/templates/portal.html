@@ -157,8 +157,8 @@
                         <span>{{ player.common.player_class.get_class_name }}</span>
                         <span>{{ player.common.race.display_name }}</span>
                         <span>{{ player.get_player_alignment }}</span>
-            {% if player.remorts > 0 %}
-                        <span title="Remorts">{% bi "arrow-repeat" %} {{ player.remorts }}</span>
+            {% if player.display_remorts > 0 %}
+                        <span title="Remorts">{% bi "arrow-repeat" %} {{ player.display_remorts }}</span>
             {% endif %}
             {% if player.statistics.total_renown > 0 %}
                         <span title="Total renown">{% bi "star" %} {{ player.statistics.total_renown }}</span>
@@ -169,8 +169,8 @@
             {% if player.statistics.total_challenges > 0 %}
                         <span title="Total challenges">{% bi "award" %} {{ player.statistics.total_challenges }}</span>
             {% endif %}
-            {% if player.statistics.total_deaths > 0 %}
-                        <span title="Total deaths">{% bi "heartbreak" %} {{ player.statistics.total_deaths }}</span>
+            {% if player.display_deaths > 0 %}
+                        <span title="Total deaths">{% bi "heartbreak" %} {{ player.display_deaths }}</span>
             {% endif %}
         {% else %}
                         <span>{{ player.name|title }} {{ player.get_player_phrase }} a {{ player.player_type }} character.</span>
@@ -181,7 +181,7 @@
         {% if player.is_immortal %}
                     <span class="ac-pill ac-pill--info">{{ player.player_type }}</span>
         {% else %}
-                    <span class="ac-pill ac-pill--accent" title="Level {{ player.common.level }}">lvl {{ player.common.level }}</span>
+                    <span class="ac-pill ac-pill--accent" title="Level {{ player.display_level }}">lvl {{ player.display_level }}</span>
         {% endif %}
                 </div>
             </div>

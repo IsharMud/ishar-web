@@ -445,6 +445,41 @@ class PlayerBase(models.Model):
             return True
         return False
 
+    @property
+    @display(description="Level", ordering="common__level")
+    def display_level(self) -> int:
+        # Level to display. Hardcore characters keep their record level in
+        #   "player_stats" (their live/"common" level resets on permadeath),
+        #   so read "hardcore_level" for them instead.
+        if self.is_hardcore():
+            stats = getattr(self, "statistics", None)
+            if stats is not None and stats.hardcore_level:
+                return stats.hardcore_level
+        return self.common.level
+
+    @property
+    @display(description="Remorts", ordering="remorts")
+    def display_remorts(self) -> int:
+        # Remorts to display. Hardcore characters' live "remorts" resets on
+        #   permadeath, so read their "player_stats" record, "hardcore_remorts".
+        if self.is_hardcore():
+            stats = getattr(self, "statistics", None)
+            if stats is not None and stats.hardcore_remorts:
+                return stats.hardcore_remorts
+        return self.remorts
+
+    @property
+    @display(description="Deaths")
+    def display_deaths(self) -> int:
+        # Deaths to display, from "player_stats" — "hardcore_deaths" for
+        #   hardcore characters, "total_deaths" otherwise.
+        stats = getattr(self, "statistics", None)
+        if stats is None:
+            return 0
+        if self.is_hardcore() and stats.hardcore_deaths:
+            return stats.hardcore_deaths
+        return stats.total_deaths or 0
+
     @display(boolean=False, description="Online Timedelta")
     def online_timedelta(self) -> timedelta:
         # Online timedelta.
