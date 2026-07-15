@@ -28,7 +28,9 @@
     "use strict";
 
     var CHAT_MAX = 200;
-    var QUICKBAR_MAX = 12;   // hard cap on the bounded bottom quick-bar
+    var QUICKBAR_MAX = 12;   // backfill target for the auto quick-bar
+    var FAV_CAP = 30;        // ceiling on pinned favorites shown in the quick-bar
+    // (the bar is single-row horizontal-scroll, so it never grows vertically)
 
     // ------------------------------------------------------------------
     // State
@@ -187,11 +189,14 @@
 
     function safeCmd(c) {
         if (c == null) return "";
-        return String(c).replace(/[\r\n\t\x00]/g, " ").replace(/\s+/g, " ").trim().slice(0, 200);
+        // Strip the whole C0 range + DEL (not just newlines): a game-controlled
+        // field (mob keyword, handle, skill name) could otherwise carry an ESC
+        // that the terminal echo would interpret as an escape sequence.
+        return String(c).replace(/[\x00-\x1f\x7f]/g, " ").replace(/\s+/g, " ").trim().slice(0, 200);
     }
 
     function dirLabel(d) {
-        return { n: "N", s: "S", e: "E", w: "W", ne: "NE", nw: "NW", se: "SE", sw: "SW", u: "Up", d: "Down" }[d] || String(d);
+        return { n: "N", s: "S", e: "E", w: "W", ne: "NE", nw: "NW", se: "SE", sw: "SW" }[d] || String(d);
     }
 
     function completions() {
@@ -237,7 +242,7 @@
             case "Char.Equipment": S.equipment = (data && data.items) || []; renderEquipment(); renderInventory(); break;
             case "Char.Inventory": S.inventory = data; renderInventory(); renderEquipment(); break;
             case "Char.Train": S.train = data; renderTrain(); break;
-            case "Char.Affects": S.affects = data; renderStatus(); break;
+            case "Char.Affects": S.affects = data; stampAffectExpiry(data); renderStatus(); break;
             case "Group.Update": S.group = data; renderStatus(); break;
             case "Char.Who": S.who = data; renderWho(); break;
             case "Char.Skills": S.skills = (data && data.skills) || []; renderHotbar(); renderAbilities(); break;
@@ -268,6 +273,15 @@
         for (var i = 0; i < list.length; i++) {
             S.cooldownExpiry[list[i].id] = t + (Number(list[i].remaining) || 0);
         }
+    }
+
+    // Stamp each affect's absolute expiry once, when the feed arrives.
+    function stampAffectExpiry(a) {
+        if (!a) return;
+        var t = now();
+        ["buffs", "maintained", "debuffs"].forEach(function (k) {
+            (a[k] || []).forEach(function (x) { x._expiry = t + (Number(x.duration) || 0); });
+        });
     }
 
     function pushChat(d) {
@@ -361,6 +375,13 @@
                 el("span", { class: "v-stat" }, [el("span", { class: "v-stat-label", text: "To level" }), String(Number(st.tnl || 0).toLocaleString())])
             ]));
         }
+        // Active default targets, so target-aware casting is legible at a glance.
+        if (S.tgtHostile || S.tgtFriendly) {
+            var tk = [];
+            if (S.tgtHostile) tk.push(el("span", { class: "v-tgt hostile", title: "Offensive spells target this", text: "⚔ " + S.tgtHostile.desc }));
+            if (S.tgtFriendly) tk.push(el("span", { class: "v-tgt friendly", title: "Beneficial spells target this", text: "✚ " + S.tgtFriendly.desc }));
+            groups.push(el("div", { class: "v-group v-targets" }, tk));
+        }
         var world = el("div", { class: "v-group v-world" });
         if (tm) {
             world.appendChild(el("span", { class: "v-clock", text:
@@ -416,10 +437,11 @@
     // phones). One renderer feeds both surfaces from Room.Info.exits.
     // ------------------------------------------------------------------
     var STD_DIRS = { n: 1, s: 1, e: 1, w: 1, ne: 1, nw: 1, se: 1, sw: 1, u: 1, d: 1 };
-    function exitCmd(dir, dest) {
-        // Single-token compass dirs are bare commands (keep mapper tracking);
-        // multi-word named exits only resolve via "go".
-        return /\s/.test(dir) ? "go " + dir : dir;
+    function exitCmd(dir) {
+        // Only named exits reach here (compass cells send the bare direction).
+        // "go" resolves single- and multi-word custom exit names alike; a bare
+        // single-word name would be misread as a command and silently fail.
+        return "go " + dir;
     }
     function roseGrid(exits, overlay) {
         function cell(dir) {
@@ -453,8 +475,8 @@
     function renderRoom() {
         var r = S.room;
         var head = el("div", { class: "rose-head" }, [
-            el("span", { class: "rose-name", text: (r && r.name) || "Somewhere" }),
-            r && r.area ? el("span", { class: "rose-area dim", text: r.area + (r.environment ? " · " + r.environment : "") }) : null
+            el("span", { class: "rose-name", text: stripColor((r && r.name) || "Somewhere") }),
+            r && r.area ? el("span", { class: "rose-area dim", text: stripColor(r.area) + (r.environment ? " · " + stripColor(r.environment) : "") }) : null
         ]);
         var body = el("div", { class: "rose-body" });
         renderRose(body, false);
@@ -484,7 +506,7 @@
             for (var i = 0; i < S.occupants.length; i++) {
                 if (S.occupants[i].handle === t.handle && !S.occupants[i].is_dead) { found = S.occupants[i]; break; }
             }
-            if (found) t.desc = found.short_desc || t.desc;
+            if (found) t.desc = stripColor(found.short_desc || t.desc);
             else S[slot] = null;
         });
         renderOccupants();
@@ -496,7 +518,7 @@
         // Toggle off if re-selecting the same handle.
         var cur = S[slot];
         if (cur && cur.handle === occ.handle) S[slot] = null;
-        else S[slot] = { handle: occ.handle, desc: occ.short_desc || occ.keyword };
+        else S[slot] = { handle: occ.handle, desc: stripColor(occ.short_desc || occ.keyword) };
         renderOccupants();
         renderVitals();
         tickHotbar();
@@ -539,7 +561,7 @@
                         title: o.is_dead ? "Slain — not targetable" : "Tap for actions"
                     }, [
                         el("span", { class: "occ-icon", "aria-hidden": "true", text: o.is_player ? "☻" : "•" }),
-                        el("span", { class: "occ-name", text: o.short_desc || o.keyword }),
+                        el("span", { class: "occ-name", text: stripColor(o.short_desc || o.keyword) }),
                         o.is_shopkeeper ? el("span", { class: "occ-shop", title: "Sells wares — List", text: "$" }) : null,
                         marks ? el("span", { class: "occ-marks", "aria-hidden": "true", text: marks }) : null,
                         el("button", { type: "button", class: "row-more", "data-menu": "occupant", "data-idx": i, "aria-label": "Actions", text: "⋯" })
@@ -571,7 +593,7 @@
             "data-menu": "item", "data-kind": kind || "item",
             "data-target": targetOf(it.keywords || it.name),
             "data-otype": it.type || "",
-            "data-name": it.name || "",
+            "data-name": stripColor(it.name || ""),
             "data-container": container || "",
             "data-closeable": it.closeable ? "1" : "",
             "data-closed": it.closed ? "1" : ""
@@ -581,7 +603,7 @@
         var ds = itemDataset(it, kind, container);
         var kids = [];
         if (kind === "equip") kids.push(el("span", { class: "slot", text: it.location || it.slot || "" }));
-        kids.push(el("span", { class: "row-name", text: it.name }));
+        kids.push(el("span", { class: "row-name", text: stripColor(it.name) }));
         if (it.count && it.count > 1) kids.push(el("span", { class: "tag", text: "×" + it.count }));
         if (kind === "equip") { var cn = conditionNode(it.condition); if (cn) kids.push(cn); }
         if (it.type === "container") kids.push(el("span", { class: "dim", "aria-hidden": "true", text: it.closed ? " 🔒" : " 📦" }));
@@ -663,17 +685,26 @@
         if (!isCol) {
             var list = el("ul", { class: "row-list" });
             comps.forEach(function (c) {
-                var ds = {
-                    class: "row comp", "data-menu": "component",
-                    "data-target": targetOf(c.keywords || c.name),
-                    "data-name": c.name || "",
-                    title: "Withdraw from component pouch"
-                };
-                list.appendChild(el("li", ds, [
-                    el("span", { class: "row-name", text: c.name }),
-                    c.count > 1 ? el("span", { class: "tag", text: "×" + c.count }) : null,
-                    el("button", { type: "button", class: "row-more", "aria-label": "Actions", text: "⋯" })
-                ]));
+                var name = stripColor(c.name);
+                var li;
+                if (c.keywords) {
+                    // Real keyword: a tap withdraws from the pouch directly (the
+                    // requested behaviour); ⋯ opens deposit/examine.
+                    var tgt = targetOf(c.keywords);
+                    li = el("li", { class: "row comp", "data-cmd": "get " + tgt + " pouch", title: "Withdraw from pouch — ⋯ for more" }, [
+                        el("span", { class: "row-name", text: name }),
+                        c.count > 1 ? el("span", { class: "tag", text: "×" + c.count }) : null,
+                        el("button", { type: "button", class: "row-more", "data-menu": "component", "data-target": tgt, "data-name": name, "aria-label": "Actions", text: "⋯" })
+                    ]);
+                } else {
+                    // No keywords (pre-deploy of the game field): a name-derived
+                    // withdraw wouldn't resolve, so offer examine only.
+                    li = el("li", { class: "row comp", "data-cmd": "examine " + targetOf(c.name), title: "Examine" }, [
+                        el("span", { class: "row-name", text: name }),
+                        c.count > 1 ? el("span", { class: "tag", text: "×" + c.count }) : null
+                    ]);
+                }
+                list.appendChild(li);
             });
             out.push(list);
         }
@@ -736,12 +767,16 @@
         var a = S.affects;
         function affItems(arr, cls) {
             return (arr || []).map(function (x) {
-                var right = [el("span", { class: "aff-time", "data-expiry": now() + (Number(x.duration) || 0), text: fmtDur(x.duration) })];
+                // Absolute expiry is stamped once when Char.Affects arrives, so
+                // unrelated re-renders (Char.Status, Group.Update) don't snap the
+                // countdown back to its full original duration.
+                var exp = x._expiry != null ? x._expiry : now() + (Number(x.duration) || 0);
+                var right = [el("span", { class: "aff-time", "data-expiry": exp, text: fmtDur(exp - now()) })];
                 if (x.releasable && x.skill) {
                     right.unshift(el("button", { type: "button", class: "aff-release", "data-cmd": "release spell " + nameOf(x.skill) + " " + (x.handle || ""), title: "Release", text: "release" }));
                 }
                 return el("li", { class: "aff " + cls }, [
-                    el("span", { class: "aff-name" }, [x.name, x.target ? el("span", { class: "dim", text: " › " + x.target }) : null]),
+                    el("span", { class: "aff-name" }, [stripColor(x.name), x.target ? el("span", { class: "dim", text: " › " + stripColor(x.target) }) : null]),
                     el("span", { class: "aff-right" }, right)
                 ]);
             });
@@ -857,22 +892,20 @@
     var hotbarNodes = {};
     function quickbarSkills() {
         var skills = (S.skills || []).filter(function (s) { return s.type === "spell" || s.type === "skill"; });
-        var favNames = Object.keys(favorites);
-        if (favNames.length) {
-            var picked = skills.filter(function (s) { return favorites[nameOf(s.name).toLowerCase()]; });
-            if (picked.length) return picked.slice(0, 40);   // favorites are user-chosen; generous cap
+        var out = [], seen = {};
+        function push(s, cap) { if (s && !seen[s.id] && out.length < cap) { seen[s.id] = true; out.push(s); } }
+        // Favorites first (user-chosen, shown in full up to FAV_CAP)...
+        skills.forEach(function (s) { if (favorites[nameOf(s.name).toLowerCase()]) push(s, FAV_CAP); });
+        // ...then backfill toward QUICKBAR_MAX with usable damage/heal, so a few
+        // pins don't wipe the auto set — the bar stays useful, not empty...
+        if (out.length < QUICKBAR_MAX) {
+            var rank = { damage: 0, heal: 1, misc: 2 };
+            skills.filter(function (s) { return !abilityBlock(s); })
+                  .sort(function (a, b) { return (rank[a.category] == null ? 3 : rank[a.category]) - (rank[b.category] == null ? 3 : rank[b.category]); })
+                  .forEach(function (s) { push(s, QUICKBAR_MAX); });
         }
-        // Default: usable, damage/heal first, capped — plus anything cooling
-        // (so timers stay visible) up to the cap.
-        var rank = { damage: 0, heal: 1, misc: 2 };
-        var usable = skills.filter(function (s) { return !abilityBlock(s); });
-        usable.sort(function (a, b) { return (rank[a.category] == null ? 3 : rank[a.category]) - (rank[b.category] == null ? 3 : rank[b.category]); });
-        var out = usable.slice(0, QUICKBAR_MAX);
-        var seen = {}; out.forEach(function (s) { seen[s.id] = true; });
-        skills.forEach(function (s) {
-            if (out.length >= QUICKBAR_MAX + 6) return;
-            if (!seen[s.id] && S.cooldownExpiry[s.id] > now()) out.push(s);
-        });
+        // ...and always surface anything cooling so its timer stays visible.
+        skills.forEach(function (s) { if (S.cooldownExpiry[s.id] > now()) push(s, FAV_CAP); });
         return out;
     }
     function renderHotbar() {
@@ -896,16 +929,22 @@
         tickHotbar();
     }
     function tickHotbar() {
-        var t = now();
         Object.keys(hotbarNodes).forEach(function (id) {
             var n = hotbarNodes[id];
             var s = skillById(id);
             if (!s || !n) return;
             var blk = abilityBlock(s);
             var cd = blk ? blk.cd : 0;
+            // Surface a non-cooldown block reason (mana / min-position) in the
+            // button and title, so a blocked skill isn't a silent dead tap.
+            var reason = (blk && cd === 0)
+                ? (blk.reason === "low mana" ? "mana" : blk.reason === "unavailable" ? "" : blk.reason)
+                : "";
             n.btn.classList.toggle("off", !!blk);
             n.btn.classList.toggle("cooling", cd > 0);
-            n.cdEl.textContent = cd > 0 ? String(cd) : "";
+            n.btn.classList.toggle("blocked", !!(blk && cd === 0 && reason));
+            n.cdEl.textContent = cd > 0 ? String(cd) : reason;
+            n.btn.title = s.name + " (" + s.percent + "%)" + (blk && cd === 0 ? " — " + blk.reason : "");
         });
     }
     function skillById(id) {
@@ -923,6 +962,10 @@
         // runs on every keystroke, and on cooldown/skill feeds).
         var hadFocus = document.activeElement && document.activeElement.id === "ab-search";
         var caret = hadFocus ? document.activeElement.selectionStart : null;
+        // Preserve scroll position — this rebuilds on every cooldown/skill feed
+        // while the tab is open, and would otherwise snap a 400-row list to top.
+        var prevScroll = dom.abilities.querySelector(".ab-scroll");
+        var savedTop = prevScroll ? prevScroll.scrollTop : 0;
         var kids = [];
         // Controls row.
         var search = el("input", {
@@ -989,6 +1032,7 @@
                 if (blk) right.push(el("span", { class: "ab-block", text: blk.cd > 0 ? blk.cd + "s" : blk.reason }));
                 right.push(el("span", { class: "ab-pct", text: s.percent + "%" }));
                 right.push(el("button", { type: "button", class: "ab-star" + (fav ? " on" : ""), "data-fav": nameOf(s.name), "aria-label": fav ? "Remove from favorites" : "Add to favorites", title: fav ? "Remove from favorites" : "Add to favorites", text: fav ? "★" : "☆" }));
+                right.push(el("button", { type: "button", class: "row-more", "aria-label": "More actions", text: "⋯" }));
                 ul.appendChild(el("li", {
                     class: "ab-row " + catClass(s) + (blk ? " off" : ""),
                     "data-ability": s.id, "data-menu": "ability", title: castHint(s)
@@ -1001,6 +1045,7 @@
         }
         kids.push(scroller);
         fill(dom.abilities, kids);
+        scroller.scrollTop = savedTop;
         if (hadFocus) {
             var again = document.getElementById("ab-search");
             if (again) { again.focus(); if (caret != null) again.setSelectionRange(caret, caret); }
@@ -1170,7 +1215,7 @@
             { label: "Examine", cmd: "examine " + ds.target }
         ];
     }
-    function abilityActions(s, anchorName) {
+    function abilityActions(s) {
         if (!s) return [];
         var fav = !!favorites[nameOf(s.name).toLowerCase()];
         return [
@@ -1244,7 +1289,7 @@
         var kind = host.getAttribute("data-menu");
         if (kind === "occupant") {
             var o = (S.occupants || [])[Number(host.getAttribute("data-idx"))];
-            if (o) openMenu(o.short_desc || o.keyword, occupantActions(o), anchor);
+            if (o) openMenu(stripColor(o.short_desc || o.keyword), occupantActions(o), anchor);
         } else if (kind === "item") {
             var ds = readDataset(host);
             openMenu(ds.name || ds.target, itemActions(ds), anchor);

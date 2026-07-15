@@ -833,7 +833,11 @@
                 term.scrollToBottom();
                 userScrolledUp = false;
                 scrollBtn.style.display = "none";
-                commandInput.focus();
+                // On phones a fire-and-forget HUD tap (tap-to-move rose, hotbar
+                // cast, context-menu action) must NOT re-raise the virtual
+                // keyboard — that would cover the terminal the overlay exists to
+                // keep visible. Prefill still focuses: there the player types.
+                if (!isMobile) commandInput.focus();
             },
             prefill: function(text) {
                 commandInput.value = text;

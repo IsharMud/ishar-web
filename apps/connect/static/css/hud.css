@@ -25,8 +25,8 @@
     --hud-edge: #d08a3a;
     --hud-event: #e8b04b;
     --hud-moon: #9aa6c8;
-    --hud-hostile: #d64b4b;
-    --hud-friendly: #4cbb17;
+    --hud-hostile: var(--ac-danger);
+    --hud-friendly: var(--ac-ok);
     --hud-dock-h: 3.5rem;
 }
 
@@ -148,6 +148,11 @@ body.connect-page #content { padding: .5rem !important; }
 .v-stat { display: flex; flex-direction: column; align-items: flex-end; line-height: 1.1; font-size: .82rem; font-weight: 700; color: var(--hud-gold); white-space: nowrap; }
 .v-stat-label { font-size: .56rem; text-transform: uppercase; letter-spacing: .06em; color: var(--ac-dim); font-weight: 600; }
 
+.v-targets { order: 4; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.v-tgt { font-size: .7rem; font-weight: 700; padding: 1px 8px; border-radius: 999px; border: 1px solid; max-width: 12rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v-tgt.hostile { color: var(--hud-hostile); border-color: rgba(214, 75, 75, .5); background: var(--ac-danger-wash); }
+.v-tgt.friendly { color: var(--hud-friendly); border-color: rgba(76, 187, 23, .5); background: var(--ac-ok-wash); }
+
 .topbar-actions { order: 5; display: flex; gap: 6px; margin-left: auto; }
 
 .v-world {
@@ -164,7 +169,7 @@ body.connect-page #content { padding: .5rem !important; }
 
 @media (max-width: 767.98px) {
     #hud-topbar { gap: 8px; }
-    .status-text, .v-res, .v-world, .ui-toggle-label,
+    .status-text, .v-res, .v-world, .v-targets, .ui-toggle-label,
     .topbar-actions .col-toggle { display: none; }
     .v-name { max-width: 9rem; }
     .v-bars { order: 6; flex-basis: 100%; min-width: 0; flex-wrap: wrap; gap: 6px; }
@@ -522,10 +527,13 @@ body.connect-page #content { padding: .5rem !important; }
 .chat-txt { color: var(--ac-text); }
 
 /* ----- Hotbar (bounded quick bar) ----- */
-#hud-hotbar { display: flex; flex-wrap: wrap; gap: 4px; flex: none; }
+/* Always a single horizontally-scrolling row — favorites can exceed the auto
+   count, and the bar must never wrap into extra rows and eat terminal height. */
+#hud-hotbar { display: flex; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; gap: 4px; flex: none; }
+#hud-hotbar::-webkit-scrollbar { display: none; }
 #hud-hotbar.empty { display: none; }
 .skill {
-    position: relative; min-width: 64px; max-width: 110px; padding: 4px 8px; cursor: pointer;
+    position: relative; flex: 0 0 auto; min-width: 64px; max-width: 110px; padding: 4px 8px; cursor: pointer;
     background: var(--ac-elev); color: var(--ac-text); border: 1px solid var(--ac-border); border-radius: var(--ac-radius-sm);
     font-size: .74rem; text-align: left; overflow: hidden;
 }
@@ -541,15 +549,14 @@ body.connect-page #content { padding: .5rem !important; }
 .skill .skill-cd { display: none; }
 .skill.cooling .skill-cd { display: inline; }
 .skill.cooling .skill-pct { display: none; }
-@media (max-width: 767.98px) {
-    #hud-hotbar { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
-    #hud-hotbar::-webkit-scrollbar { display: none; }
-    .skill { flex: 0 0 auto; }
-}
+/* A non-cooldown block (mana / min-position) shows its reason instead of %. */
+.skill.blocked .skill-cd { display: inline; color: var(--ac-danger); }
+.skill.blocked .skill-pct { display: none; }
 
 /* ----- Context / action menu ----- */
 #hud-menu {
     position: fixed; z-index: 1040; min-width: 172px; max-width: min(80vw, 260px);
+    max-height: calc(100dvh - 16px); overflow-y: auto;
     padding: 4px; background: var(--ac-panel);
     border: 1px solid var(--ac-border-2); border-radius: var(--ac-radius);
     box-shadow: 0 10px 30px rgba(0, 0, 0, .6);
@@ -605,15 +612,18 @@ body.connect-page #content { padding: .5rem !important; }
 }
 #hud-dock button {
     position: relative;
-    flex: 1 0 3.1rem;
+    flex: 1 1 2.3rem; min-width: 0;
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
     padding: 4px 2px;
     background: transparent; color: var(--ac-dim);
     border: 0; border-radius: var(--ac-radius-sm);
-    font-size: .6rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em;
+    font-size: .58rem; font-weight: 700; text-transform: uppercase; letter-spacing: .02em;
     cursor: pointer;
 }
-#hud-dock button .bi { width: 1.15rem; height: 1.15rem; }
+/* Shrink to fit all tabs on narrow phones instead of pushing Chat/Who off the
+   scroll edge; labels ellipsize rather than overflow. */
+#hud-dock button span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+#hud-dock button .bi { width: 1.1rem; height: 1.1rem; }
 #hud-dock button[aria-pressed="true"] { color: var(--ac-accent); background: var(--ac-elev); }
 
 #hud-dock button.unread::after,
@@ -666,6 +676,12 @@ body.connect-page #content { padding: .5rem !important; }
 #hud-sheet-body .panel.sheet-active { display: block; }
 /* In the sheet the panel header is always expanded context; keep it readable. */
 #hud-sheet-body .panel-h { border-bottom-color: var(--ac-border); }
+/* The sheet body is the scroll container (not .ab-scroll), so pin the ability
+   search + filter chips to the top instead of letting them scroll out of view. */
+#hud-sheet-body .ab-controls,
+#hud-sheet-body .ab-chips {
+    position: sticky; top: 0; z-index: 1; background: var(--ac-panel);
+}
 
 /* ----- Focus (keyboard) ----- */
 .hud-btn:focus-visible, .exit:focus-visible, .skill:focus-visible,
@@ -686,16 +702,16 @@ body.connect-page #content { padding: .5rem !important; }
     #hud-tabs button { padding: 9px 3px; }
     .who-act button { padding: 7px 12px; }
     .skill { min-height: 44px; padding: 6px 10px; }
-    .row, .occ-row, .ab-row { padding: 8px 6px; }
-    .row-more { padding: 6px 8px; }
+    .row, .occ-row, .ab-row { min-height: 44px; padding: 8px 6px; }
+    .row-more { min-width: 40px; min-height: 40px; padding: 6px 8px; }
     .action-btn { padding: 10px; }
     .sheet-close { padding: 8px 10px; }
     .panel-h-toggle { padding: 10px 8px; }
     #command-input { padding: 9px 10px; }
     #send-btn { padding: 10px 12px; }
     #hud-dock button { min-height: 2.9rem; }
-    #rose-overlay .exit { padding: 9px 0; }
-    #rose-overlay .compass.overlay { grid-template-columns: repeat(3, 38px); }
+    #rose-overlay .exit { min-height: 44px; padding: 0; }
+    #rose-overlay .compass.overlay { grid-template-columns: repeat(3, 44px); }
 }
 
 /* ----- Reduced motion ----- */
