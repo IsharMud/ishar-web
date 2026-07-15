@@ -224,15 +224,38 @@ body.connect-page #content { padding: .5rem !important; } /* the p-* utilities a
 /* True black on purpose — matches the xterm theme background, not a surface token. */
 #terminal-container { height: 100%; background: #000; border-radius: var(--ac-radius-sm); }
 #terminal-container .xterm { height: 100%; padding: 4px; }
-#command-form { display: flex; gap: 8px; align-items: center; }
+#command-form { display: flex; gap: 8px; align-items: center; position: relative; }
 #command-input {
     flex: 1; font-family: monospace; font-size: 16px; padding: 6px 8px;
 }
 #send-btn { flex: none; }
+#history-btn { flex: none; }
 #scroll-bottom-btn { position: absolute; bottom: 8px; right: 12px; z-index: 10; opacity: .9; font-size: .8rem; }
 @media (max-width: 767.98px) {
     #command-form { gap: 6px; }
     .send-label { display: none; } /* icon-only send beside the keyboard */
+}
+
+/* Recent-commands popover (touch history) + the gear settings popover:
+   anchored above the input line / topbar, skinned like the phone sheet. */
+#history-pop {
+    position: absolute; left: 0; right: 0; bottom: calc(100% + 6px);
+    max-height: 40vh; overflow-y: auto; z-index: 1030; padding: 4px;
+    background: var(--ac-panel); border: 1px solid var(--ac-border-2);
+    border-radius: var(--ac-radius); box-shadow: 0 -10px 30px rgba(0, 0, 0, .55);
+}
+.hist-item {
+    display: block; width: 100%; text-align: left; cursor: pointer;
+    background: none; border: 0; color: var(--ac-text);
+    font-family: monospace; font-size: .9rem; padding: 8px 10px;
+    border-radius: var(--ac-radius-sm);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.hist-item:hover { background: var(--ac-elev); }
+.hist-item:focus-visible { outline: 2px solid var(--ac-accent); outline-offset: -2px; }
+.hist-empty { color: var(--ac-dim); font-size: .8rem; font-style: italic; padding: 8px 10px; }
+@media (pointer: coarse) {
+    .hist-item { min-height: 44px; }
 }
 
 /* ----- Room / exits ----- */

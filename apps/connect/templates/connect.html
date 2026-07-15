@@ -87,6 +87,15 @@
         </div>
         <div id="hud-hotbar" class="empty"></div>
         <form id="command-form" autocomplete="off">
+            {# Recent-commands popover for touch screens (Arrow keys have no
+               thumb equivalent). The button is revealed by JS on coarse
+               pointers so the no-assets fallback stays a clean terminal. #}
+            <button type="button" class="hud-btn hud-btn--icon" id="history-btn" hidden
+                    aria-expanded="false" aria-controls="history-pop"
+                    title="Command history" aria-label="Command history">
+                {% bi "clock-history" %}
+            </button>
+            <div id="history-pop" hidden></div>
             <label for="command-input" class="visually-hidden">Command</label>
             <input type="text" id="command-input" class="form-control"
                    placeholder="Enter command..."
@@ -284,6 +293,38 @@
         }
         historyIndex = -1;
         savedInput = "";
+    }
+
+    // --- Client settings (persisted; surfaced in the gear menu) ---
+    var settings = { keepInput: true, stack: true, notifyTells: false, titleBadge: true };
+    try {
+        var savedSettings = JSON.parse(localStorage.getItem("ishar.settings"));
+        if (savedSettings && typeof savedSettings === "object") {
+            Object.keys(settings).forEach(function(k) {
+                if (typeof savedSettings[k] === "boolean") settings[k] = savedSettings[k];
+            });
+        }
+    } catch (e) {}
+    function saveSettings() {
+        try { localStorage.setItem("ishar.settings", JSON.stringify(settings)); } catch (e) {}
+    }
+
+    // --- Aliases (persisted) ---
+    var ALIAS_NAME_RE = /^[a-z0-9_-]{1,20}$/;
+    var ALIAS_MAX = 400;
+    var aliases = {};
+    try {
+        var savedAliases = JSON.parse(localStorage.getItem("ishar.aliases"));
+        if (savedAliases && typeof savedAliases === "object" && !Array.isArray(savedAliases)) {
+            Object.keys(savedAliases).forEach(function(k) {
+                if (ALIAS_NAME_RE.test(k) && typeof savedAliases[k] === "string") {
+                    aliases[k] = savedAliases[k].slice(0, ALIAS_MAX);
+                }
+            });
+        }
+    } catch (e) {}
+    function saveAliases() {
+        try { localStorage.setItem("ishar.aliases", JSON.stringify(aliases)); } catch (e) {}
     }
 
     // --- Echo / scroll state ---
@@ -494,6 +535,209 @@
         }
     }
 
+    // --- Command pipeline ---
+    // A typed line runs through: client "/" command? → ";" stacking →
+    // alias expansion → per-command echo + send. Password entry (server
+    // ECHO suppressed) bypasses the whole pipeline — no echo, no history,
+    // no splitting. HUD widget sends also bypass it (machine-built).
+
+    // Write a local, dim client message; strips control chars from
+    // interpolated user text so nothing can smuggle escape sequences.
+    function cleanText(s) { return String(s).replace(/[\x00-\x1f\x7f]/g, " "); }
+    function sysln(text) { term.writeln("\x1b[90m" + cleanText(text) + "\x1b[0m"); }
+
+    // Final guard before anything goes to the game (mirror of hud.js
+    // safeCmd, with a longer cap for alias output).
+    function safeCmd(c) {
+        if (c == null) return "";
+        return String(c).replace(/[\r\n\t\x00]/g, " ").replace(/\s+/g, " ").trim().slice(0, ALIAS_MAX);
+    }
+
+    // ";" stacking guard: never split a line that reads as communication.
+    // A first token of 2+ chars that prefix-matches a comm verb (MUD verbs
+    // abbreviate: "gos hi;)" is gossip) or a leading say-quote "'" makes
+    // the whole line exempt. Single letters stay splittable — "e;n;w" is
+    // movement, not "emote".
+    var COMM_VERBS = ["say", "tell", "reply", "gossip", "shout", "yell",
+        "whisper", "emote", "gt", "gtell", "chat", "auction", "newbie", "ask"];
+    function isCommLine(line) {
+        var first = (line.match(/^\S+/) || [""])[0].toLowerCase();
+        if (!first) return false;
+        if (first.charAt(0) === "'") return true;
+        if (first.length < 2) return false;
+        return COMM_VERBS.some(function(v) { return v.indexOf(first) === 0; });
+    }
+
+    // Split on ";" (";;" is a literal ";"). Returns [line] untouched when
+    // stacking is off or the line is comm-guarded.
+    function splitStack(line) {
+        if (!settings.stack || line.indexOf(";") === -1 || isCommLine(line)) return [line];
+        var parts = [], cur = "";
+        for (var i = 0; i < line.length; i++) {
+            var ch = line.charAt(i);
+            if (ch === ";") {
+                if (line.charAt(i + 1) === ";") { cur += ";"; i++; }
+                else { parts.push(cur); cur = ""; }
+            } else cur += ch;
+        }
+        parts.push(cur);
+        return parts.map(function(p) { return p.trim(); }).filter(Boolean);
+    }
+
+    // Expand a leading alias once (no recursion). "$1"–"$9"/"$*" substitute
+    // arguments when present; otherwise trailing arguments are appended.
+    function expandAlias(line) {
+        var m = line.match(/^(\S+)(?:\s+([\s\S]*))?$/);
+        if (!m) return line;
+        var name = m[1].toLowerCase();
+        if (!Object.prototype.hasOwnProperty.call(aliases, name)) return line;
+        var exp = aliases[name];
+        var argstr = (m[2] || "").trim();
+        var args = argstr ? argstr.split(/\s+/) : [];
+        if (/\$[1-9*]/.test(exp)) {
+            exp = exp.replace(/\$([1-9*])/g, function(_, d) {
+                return d === "*" ? argstr : (args[d - 1] || "");
+            });
+        } else if (argstr) {
+            exp += " " + argstr;
+        }
+        return exp.slice(0, ALIAS_MAX);
+    }
+
+    function sendOne(cmd) {
+        cmd = cmd ? safeCmd(cmd) : "";
+        if (!serverEcho && cmd) term.writeln("\x1b[90m" + cmd + "\x1b[0m");
+        sendCommand(cmd);
+    }
+
+    // Stack, expand each segment, and honor stacking inside expansions
+    // (that's how an alias chains commands). One expansion pass per typed
+    // segment — expansions are never re-expanded, so no recursion.
+    function dispatchGame(line) {
+        var cmds = [];
+        splitStack(line).forEach(function(seg) {
+            splitStack(expandAlias(seg)).forEach(function(c) { cmds.push(c); });
+        });
+        if (!cmds.length) cmds = [""];  // bare Enter still goes through
+        cmds.slice(0, 20).forEach(sendOne);
+    }
+
+    function listAliases() {
+        var names = Object.keys(aliases).sort();
+        if (!names.length) {
+            sysln("No aliases. /alias <name> <commands> defines one.");
+            return;
+        }
+        names.forEach(function(n) { sysln("  " + n + " = " + aliases[n]); });
+    }
+
+    // Local "/" commands — handled in the browser, never sent to the game.
+    function runClientCommand(line) {
+        var argv = line.slice(1).trim().split(/\s+/);
+        var cmd = (argv.shift() || "").toLowerCase();
+        switch (cmd) {
+            case "help":
+                sysln("Client commands (handled in the browser):");
+                sysln("  /alias                    list aliases");
+                sysln("  /alias <name>             show one alias");
+                sysln("  /alias <name> <commands>  define ($1-$9/$* for args, ; to chain)");
+                sysln("  /unalias <name>           remove an alias");
+                sysln("  /stack on|off             ; command stacking (now " + (settings.stack ? "on" : "off") + ")");
+                sysln("      say/tell/gossip-style lines and lines starting with ' never split;");
+                sysln("      ;; sends a literal ;");
+                sysln("  /settings                 show client settings (also: the gear menu)");
+                sysln("  /clear                    clear the terminal");
+                sysln("  //<text>                  send <text> that starts with a literal /");
+                sysln("Tab completes from your history and the game (exits, skills, names);");
+                sysln("Shift+Tab cycles backward. Arrows recall history (clock button on touch).");
+                sysln("Ctrl+L clears. PageUp/PageDown scroll. Ctrl+Shift+F searches scrollback.");
+                break;
+            case "clear":
+                term.clear();
+                break;
+            case "aliases":
+                listAliases();
+                break;
+            case "alias": {
+                if (!argv.length) { listAliases(); break; }
+                var name = argv.shift().toLowerCase();
+                if (!ALIAS_NAME_RE.test(name)) {
+                    sysln("Alias names are 1-20 characters of a-z 0-9 _ -");
+                    break;
+                }
+                if (!argv.length) {
+                    sysln(Object.prototype.hasOwnProperty.call(aliases, name)
+                        ? "  " + name + " = " + aliases[name]
+                        : "No alias '" + name + "'.");
+                    break;
+                }
+                aliases[name] = argv.join(" ").slice(0, ALIAS_MAX);
+                saveAliases();
+                sysln("Alias set: " + name + " = " + aliases[name]);
+                break;
+            }
+            case "unalias": {
+                var dead = (argv.shift() || "").toLowerCase();
+                if (Object.prototype.hasOwnProperty.call(aliases, dead)) {
+                    delete aliases[dead];
+                    saveAliases();
+                    sysln("Alias removed: " + dead);
+                } else {
+                    sysln("No alias '" + dead + "'.");
+                }
+                break;
+            }
+            case "stack": {
+                var arg = (argv.shift() || "").toLowerCase();
+                if (arg === "on" || arg === "off") {
+                    settings.stack = arg === "on";
+                    saveSettings();
+                }
+                sysln("Command stacking is " + (settings.stack ? "on" : "off")
+                    + " (\"open door;n;look\" sends three commands).");
+                break;
+            }
+            case "settings":
+                sysln("Client settings (change via the gear menu):");
+                sysln("  keep input after send: " + (settings.keepInput ? "on" : "off"));
+                sysln("  ; command stacking:    " + (settings.stack ? "on" : "off"));
+                sysln("  notify on tells:       " + (settings.notifyTells ? "on" : "off"));
+                sysln("  unread title badge:    " + (settings.titleBadge ? "on" : "off"));
+                break;
+            default:
+                sysln("Unknown client command /" + cleanText(cmd) + " — try /help.");
+        }
+    }
+
+    // Everything a submitted line does, in one place (form submit + Enter).
+    function submitLine(raw) {
+        closeHistoryPop();
+        if (serverEcho) {
+            // Password entry: send verbatim — no echo, no history, no
+            // alias/stacking (a password may legally contain ";" or "/").
+            sendCommand(raw);
+            commandInput.value = "";
+            return;
+        }
+        var line = raw.trim();
+        if (line.charAt(0) === "/") {
+            if (line.charAt(1) === "/") dispatchGame(line.slice(1));
+            else runClientCommand(line);
+        } else {
+            dispatchGame(line);
+        }
+        if (line) addHistory(line);
+        term.scrollToBottom();
+        userScrolledUp = false;
+        scrollBtn.style.display = "none";
+        if (settings.keepInput && line) {
+            commandInput.value = line;
+            commandInput.select();
+        } else {
+            commandInput.value = "";
+        }
+    }
+
     // --- HUD integration ---
     // HUD widgets act by sending plain-text commands (the server ignores
     // inbound GMCP) or by pre-filling the input line for the player to edit.
@@ -523,18 +767,66 @@
     // --- Form / input handlers ---
     commandForm.addEventListener("submit", function(e) {
         e.preventDefault();
-        var cmd = commandInput.value;
-        if (!serverEcho && cmd) term.writeln("\x1b[90m" + cmd + "\x1b[0m");
-        sendCommand(cmd);
-        term.scrollToBottom();
-        userScrolledUp = false;
-        scrollBtn.style.display = "none";
-        addHistory(cmd);
-        commandInput.value = cmd;
-        commandInput.select();
+        submitLine(commandInput.value);
     });
 
+    // --- Tab completion ---
+    // Candidates come from command-history words, alias names, and whatever
+    // the HUD's GMCP state knows (exits, skills, players, item keywords).
+    // Tab cycles forward through prefix matches, Shift+Tab backward; any
+    // other key ends the cycle.
+    var tabState = null;
+    function collectCandidates(prefix) {
+        var seen = {}, out = [];
+        function add(w) {
+            if (!w || w.length < 2) return;
+            var lw = String(w).toLowerCase();
+            if (lw.indexOf(prefix) !== 0 || lw === prefix || seen[lw]) return;
+            seen[lw] = true;
+            out.push(String(w));
+        }
+        for (var i = history.length - 1; i >= 0; i--) {
+            history[i].split(/\s+/).forEach(add);
+        }
+        Object.keys(aliases).forEach(add);
+        if (window.IsharHUD && window.IsharHUD.completions) {
+            window.IsharHUD.completions().forEach(add);
+        }
+        return out;
+    }
+
+    function tabComplete(backward) {
+        if (!tabState) {
+            var caret = commandInput.selectionStart;
+            var upto = commandInput.value.slice(0, caret);
+            var m = upto.match(/(\S+)$/);
+            if (!m) return;
+            var matches = collectCandidates(m[1].toLowerCase());
+            if (!matches.length) return;
+            tabState = {
+                start: caret - m[1].length,
+                tail: commandInput.value.slice(caret),
+                matches: matches,
+                index: -1
+            };
+        }
+        var len = tabState.matches.length;
+        tabState.index = backward
+            ? (tabState.index - 1 + len) % len
+            : (tabState.index + 1) % len;
+        var pick = tabState.matches[tabState.index];
+        commandInput.value = commandInput.value.slice(0, tabState.start) + pick + tabState.tail;
+        var pos = tabState.start + pick.length;
+        commandInput.setSelectionRange(pos, pos);
+    }
+
     commandInput.addEventListener("keydown", function(e) {
+        if (e.key === "Tab") {
+            e.preventDefault();
+            tabComplete(e.shiftKey);
+            return;
+        }
+        tabState = null;
         if (e.key === "ArrowUp") {
             e.preventDefault();
             if (history.length === 0) return;
@@ -566,6 +858,62 @@
         // the seam.
         term.writeln("\r\n\x1b[90m--- reconnecting ---\x1b[0m");
         connect();
+    });
+
+    // --- Touch history popover ---
+    // Arrow-key history has no thumb equivalent; on coarse pointers a
+    // clock button opens the recent distinct commands above the input.
+    // Rows are built with createElement/textContent only — commands are
+    // user data.
+    var historyBtn = document.getElementById("history-btn");
+    var historyPop = document.getElementById("history-pop");
+    if (window.matchMedia("(pointer: coarse)").matches) historyBtn.hidden = false;
+
+    function closeHistoryPop() {
+        if (historyPop.hidden) return;
+        historyPop.hidden = true;
+        historyBtn.setAttribute("aria-expanded", "false");
+    }
+
+    function openHistoryPop() {
+        while (historyPop.firstChild) historyPop.removeChild(historyPop.firstChild);
+        var seen = {}, count = 0;
+        for (var i = history.length - 1; i >= 0 && count < 30; i--) {
+            var cmd = history[i];
+            if (!cmd || seen[cmd]) continue;
+            seen[cmd] = true;
+            count++;
+            var b = document.createElement("button");
+            b.type = "button";
+            b.className = "hist-item";
+            b.textContent = cmd;
+            historyPop.appendChild(b);
+        }
+        if (!count) {
+            var empty = document.createElement("div");
+            empty.className = "hist-empty";
+            empty.textContent = "No commands yet.";
+            historyPop.appendChild(empty);
+        }
+        historyPop.hidden = false;
+        historyBtn.setAttribute("aria-expanded", "true");
+    }
+
+    historyBtn.addEventListener("click", function() {
+        if (historyPop.hidden) openHistoryPop();
+        else closeHistoryPop();
+    });
+    historyPop.addEventListener("click", function(e) {
+        var b = e.target.closest("button.hist-item");
+        if (!b) return;
+        commandInput.value = b.textContent;
+        closeHistoryPop();
+        commandInput.focus();
+    });
+    document.addEventListener("click", function(e) {
+        if (historyPop.hidden) return;
+        if (historyPop.contains(e.target) || historyBtn.contains(e.target)) return;
+        closeHistoryPop();
     });
 
     // --- Resize wiring ---
