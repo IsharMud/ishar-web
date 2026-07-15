@@ -28,6 +28,9 @@
             #connect-app.hud-off #hud-hotbar,
             #connect-app.hud-off #hud-dock,
             #connect-app.hud-off #hud-sheet,
+            #connect-app.hud-off #hud-menu,
+            #connect-app.hud-off #rose-overlay,
+            #connect-app.hud-off #rose-toggle,
             #connect-app.hud-off #vitals-bar { display: none; }
         </style>
 {% endblock includes %}
@@ -100,16 +103,28 @@
         </div>
     </div>
 
+    {# Left column: a scrolling panel stack with the compass rose pinned to the
+       bottom-left (near the input, Mudlet-style). #}
     <aside id="hud-left" class="hud-col">
-        <section id="panel-room" class="panel"></section>
-        <section id="panel-equipment" class="panel"></section>
-        <section id="panel-inventory" class="panel"></section>
-        <section id="panel-train" class="panel"></section>
+        <div id="hud-left-scroll">
+            <section id="panel-occupants" class="panel"></section>
+            <section id="panel-equipment" class="panel"></section>
+            <section id="panel-inventory" class="panel"></section>
+            <section id="panel-train" class="panel"></section>
+        </div>
+        <section id="panel-room" class="panel panel-rose"></section>
     </aside>
 
     <main id="hud-center">
         <div id="terminal-wrapper">
             <div id="terminal-container"></div>
+            {# Phone tap-to-move: a translucent compass overlaid on the terminal,
+               so a thumb can move without hiding the view. Toggleable. #}
+            <div id="rose-overlay" hidden aria-label="Tap-to-move compass"></div>
+            <button type="button" class="hud-btn hud-btn--icon" id="rose-toggle" aria-pressed="true"
+                    title="Toggle the tap-to-move compass" aria-label="Toggle the tap-to-move compass">
+                {% bi "compass" %}
+            </button>
             <div id="term-search" hidden>
                 <label for="term-search-input" class="visually-hidden">Search scrollback</label>
                 <input type="text" id="term-search-input" placeholder="Search scrollback&hellip;"
@@ -162,19 +177,26 @@
     <aside id="hud-right">
         <div id="hud-tabs">
             <button type="button" data-tab="status">Status</button>
+            <button type="button" data-tab="abilities">Abilities</button>
             <button type="button" data-tab="chat">Chat</button>
             <button type="button" data-tab="who">Who</button>
         </div>
         <section id="panel-status" class="panel tab"></section>
+        <section id="panel-abilities" class="panel tab"></section>
         <section id="panel-chat" class="panel tab"></section>
         <section id="panel-who" class="panel tab"></section>
     </aside>
 
-    {# Phone dock: one thumb-reach tab bar over all panels; opens the sheet. #}
+    {# Phone dock: one thumb-reach tab bar over all panels; opens the sheet.
+       Horizontally scrollable, so extra panels are fine. #}
     <nav id="hud-dock" aria-label="Game panels">
         <button type="button" data-panel="room" aria-pressed="false">
             {% bi "compass" %}
             <span>Room</span>
+        </button>
+        <button type="button" data-panel="occupants" aria-pressed="false">
+            {% bi "people-fill" %}
+            <span>Here</span>
         </button>
         <button type="button" data-panel="equipment" aria-pressed="false">
             {% bi "shield" %}
@@ -183,6 +205,10 @@
         <button type="button" data-panel="inventory" aria-pressed="false">
             {% bi "backpack2" %}
             <span>Bag</span>
+        </button>
+        <button type="button" data-panel="abilities" aria-pressed="false">
+            {% bi "stars" %}
+            <span>Skills</span>
         </button>
         <button type="button" data-panel="train" aria-pressed="false">
             {% bi "person-up" %}
@@ -212,6 +238,10 @@
         </div>
         <div id="hud-sheet-body"></div>
     </div>
+
+    {# Context/action menu (inventory, equipment, occupants). Built on demand
+       by hud.js; positioned near the tapped row. Works on mouse and touch. #}
+    <div id="hud-menu" hidden role="menu"></div>
 
 </div>
 <script>
@@ -803,7 +833,11 @@
                 term.scrollToBottom();
                 userScrolledUp = false;
                 scrollBtn.style.display = "none";
-                commandInput.focus();
+                // On phones a fire-and-forget HUD tap (tap-to-move rose, hotbar
+                // cast, context-menu action) must NOT re-raise the virtual
+                // keyboard — that would cover the terminal the overlay exists to
+                // keep visible. Prefill still focuses: there the player types.
+                if (!isMobile) commandInput.focus();
             },
             prefill: function(text) {
                 commandInput.value = text;
