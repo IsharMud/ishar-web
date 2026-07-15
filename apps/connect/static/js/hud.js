@@ -3,21 +3,32 @@
  *
  * A small vanilla state store fed by GMCP messages (forwarded by the telnet
  * bridge on the "\x00GMCP <Package.Message> {json}" channel) that renders a
- * Mudlet-style heads-up display around the xterm terminal.
+ * heads-up display around the xterm terminal. It consumes the same GMCP feeds
+ * the Mudlet package does, but leans on the browser to go past what Lua/Geyser
+ * can offer: touch-first context menus, a scroll-bounded Abilities browser (so
+ * an immortal's 400-skill list can't bury the screen), a room-Occupants panel
+ * with click-to-attack and default hostile/beneficial targets that make the
+ * hotbar target-aware, collapsible panels, and a translucent tap-to-move
+ * compass rose on phones.
  *
  * All player actions remain plain-text commands sent over the existing
- * WebSocket — the game server ignores inbound GMCP — so widgets only ever
- * call api.send()/api.prefill(). The terminal stream is never touched here.
+ * WebSocket — the game server ignores inbound GMCP — so widgets only ever call
+ * api.send()/api.prefill(). The terminal stream is never touched here.
+ *
+ * XSS discipline: every data-derived node is built with createElement +
+ * textContent (the el() helper). No innerHTML anywhere in this file.
  *
  * Public surface (window.IsharHUD):
- *   init({ send, prefill, onLayoutChange })  wire to the connect page
- *   onGmcp(name, jsonBody)                   feed a GMCP message
- *   reset()                                  clear state on (re)connect
+ *   init({ send, prefill, onLayoutChange, onComm })  wire to the connect page
+ *   onGmcp(name, jsonBody)                            feed a GMCP message
+ *   reset()                                           clear state on (re)connect
+ *   setConnected(bool) / completions() / demo()
  */
 (function () {
     "use strict";
 
     var CHAT_MAX = 200;
+    var QUICKBAR_MAX = 12;   // hard cap on the bounded bottom quick-bar
 
     // ------------------------------------------------------------------
     // State
@@ -25,48 +36,126 @@
     var S = {
         vitals: null, status: null, time: null, room: null,
         equipment: [], inventory: null, train: null,
-        affects: null, group: null, who: null,
+        affects: null, group: null, who: null, occupants: [],
         skills: [], cooldownExpiry: {}, usable: {},
-        chat: [], connected: false
+        chat: [], connected: false,
+        // Default targets (from Room.Occupants) that make the hotbar
+        // target-aware: offensive spells → hostile, defensive → beneficial.
+        tgtHostile: null, tgtFriendly: null
     };
+
+    // Persisted client prefs (localStorage): pinned abilities + collapsed
+    // panels + Abilities-browser filters.
+    var favorites = loadSet("ishar.favs");
+    var collapsed = loadSet("ishar.collapsed");
+    var abilityFilter = { q: "", type: "all", usableOnly: false };
+    try {
+        var af = JSON.parse(localStorage.getItem("ishar.abilityFilter"));
+        if (af && typeof af === "object") {
+            if (typeof af.type === "string") abilityFilter.type = af.type;
+            if (typeof af.usableOnly === "boolean") abilityFilter.usableOnly = af.usableOnly;
+        }
+    } catch (e) {}
 
     var api = { send: function () {}, prefill: function () {}, onLayoutChange: function () {}, onComm: function () {} };
     var dom = {};
     var hudOn = false;
     var activeTab = "status";
     var sheetName = null;
+    var roseOverlayOn = true;
 
     // Phone layout = dock + bottom sheet; desktop = columns + tabs.
     var mqMobile = window.matchMedia("(max-width: 767.98px)");
     var mqWide = window.matchMedia("(min-width: 1200px)");
 
     // Panel homes for desktop; sheet order for phones (matches the dock).
-    var PANELS = ["room", "equipment", "inventory", "train", "status", "chat", "who"];
+    // The compass rose (room) is pinned to the bottom of the left column, so
+    // its desktop home is #hud-left itself (a flex footer) while the scrolling
+    // panels live in #hud-left-scroll.
+    var PANELS = ["occupants", "equipment", "inventory", "train", "room",
+                  "status", "abilities", "chat", "who"];
     var PANEL_HOME = {
-        room: "hud-left", equipment: "hud-left", inventory: "hud-left", train: "hud-left",
-        status: "hud-right", chat: "hud-right", who: "hud-right"
+        occupants: "hud-left-scroll", equipment: "hud-left-scroll",
+        inventory: "hud-left-scroll", train: "hud-left-scroll",
+        room: "hud-left",
+        status: "hud-right", abilities: "hud-right", chat: "hud-right", who: "hud-right"
+    };
+
+    // Position capability ranking (index = capability), from the game's
+    // posn_names[] (constants.c). Higher rank = more capable; a skill whose
+    // min_position outranks the player's current position is greyed.
+    var POS_RANK = {
+        dead: 0, mortal: 1, stunned: 2, paralyzed: 3, sleeping: 4,
+        grappled: 5, resting: 6, sitting: 7, riding: 8, standing: 10,
+        fighting: 10   // upright in combat: treat as Standing
+    };
+    function posRank(name) {
+        var r = POS_RANK[String(name || "").toLowerCase()];
+        return r == null ? 10 : r;   // unknown → lenient (server re-validates)
+    }
+
+    // Item type → "use" verb (mirrors the Mudlet itemVerb table). A null verb
+    // means the type has no primary use action (only examine/drop).
+    var TYPE_VERB = {
+        potion: "quaff", scroll: "recite", food: "eat", drink: "drink",
+        weapon: "wield", armor: "wear", wand: "use", staff: "use", light: "hold"
+    };
+    var TYPE_VERB_LABEL = {
+        quaff: "Quaff", recite: "Recite", eat: "Eat", drink: "Drink",
+        wield: "Wield", wear: "Wear", use: "Use", hold: "Hold"
     };
 
     // ------------------------------------------------------------------
     // Helpers
     // ------------------------------------------------------------------
-    function esc(s) {
-        if (s == null) return "";
-        return String(s).replace(/[&<>"']/g, function (c) {
-            return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
-        });
+    function loadSet(key) {
+        var s = {};
+        try {
+            var arr = JSON.parse(localStorage.getItem(key));
+            if (Array.isArray(arr)) arr.forEach(function (k) { if (typeof k === "string") s[k] = true; });
+        } catch (e) {}
+        return s;
+    }
+    function saveSet(key, s) {
+        try { localStorage.setItem(key, JSON.stringify(Object.keys(s))); } catch (e) {}
     }
 
-    // Strip Ishar "@x" color codes for plain HUD panels (the full-color
-    // version still renders in the terminal). @@ is a literal @.
+    // DOM builder — the ONLY way data-derived nodes are created here. Values
+    // reach the DOM as text/attributes, never parsed as markup.
+    function el(tag, attrs, kids) {
+        var n = document.createElement(tag);
+        if (attrs) Object.keys(attrs).forEach(function (k) {
+            var v = attrs[k];
+            if (v == null || v === false) return;
+            if (k === "class") n.className = v;
+            else if (k === "text") n.textContent = v;
+            else if (k.indexOf("on") === 0 && typeof v === "function") n.addEventListener(k.slice(2), v);
+            else n.setAttribute(k, v === true ? "" : v);
+        });
+        if (kids != null) {
+            if (!Array.isArray(kids)) kids = [kids];
+            kids.forEach(function (c) {
+                if (c == null || c === false) return;
+                n.appendChild(typeof c === "object" ? c : document.createTextNode(String(c)));
+            });
+        }
+        return n;
+    }
+    // Replace a container's children with new nodes in one shot.
+    function fill(container, kids) {
+        while (container.firstChild) container.removeChild(container.firstChild);
+        if (kids == null) return;
+        if (!Array.isArray(kids)) kids = [kids];
+        kids.forEach(function (c) { if (c != null && c !== false) container.appendChild(c); });
+    }
+
+    // Strip Ishar "@x" color codes for plain HUD panels. @@ is a literal @.
     function stripColor(s) {
         if (s == null) return "";
         return String(s).replace(/@@/g, "\x00").replace(/@./g, "").replace(/\x00/g, "@");
     }
-
     function clamp(n, a, b) { n = Number(n) || 0; return Math.max(a, Math.min(b, n)); }
     function pct(cur, max) { max = Number(max) || 0; if (max <= 0) return 0; return clamp(Math.round((Number(cur) || 0) / max * 100), 0, 100); }
-    function fmtGold(n) { return (Number(n) || 0).toLocaleString() + "g"; }
     function now() { return Date.now() / 1000; }
 
     function fmtDur(s) {
@@ -82,32 +171,29 @@
     }
 
     // Build a dotted keyword target ("leather cap" -> "leather.cap"), the
-    // conjunction syntax the game accepts for examine/remove/etc.
+    // conjunction syntax the game accepts for examine/wear/get/etc.
     function targetOf(kw) {
         if (!kw) return "";
         return String(kw).toLowerCase().split(/\s+/)
             .map(function (w) { return w.replace(/[^a-z0-9]/g, ""); })
             .filter(Boolean).join(".");
     }
-
-    // Spell/skill name for a "cast '<name>'" command: no quotes/newlines.
+    // First keyword token only (for follow/group/tell, which take a bare name).
+    function firstWord(kw) {
+        var t = String(kw || "").trim().split(/\s+/)[0] || "";
+        return t.replace(/[^A-Za-z0-9]/g, "");
+    }
     function nameOf(n) { return n == null ? "" : String(n).replace(/[\r\n']/g, "").trim(); }
 
-    // Final guard before anything is sent: no embedded newlines (which would
-    // smuggle extra commands), collapse whitespace, cap length.
     function safeCmd(c) {
         if (c == null) return "";
         return String(c).replace(/[\r\n\t\x00]/g, " ").replace(/\s+/g, " ").trim().slice(0, 200);
     }
 
     function dirLabel(d) {
-        return { n: "N", s: "S", e: "E", w: "W", ne: "NE", nw: "NW", se: "SE", sw: "SW" }[d] || esc(d);
+        return { n: "N", s: "S", e: "E", w: "W", ne: "NE", nw: "NW", se: "SE", sw: "SW", u: "Up", d: "Down" }[d] || String(d);
     }
 
-    // Candidate words for the input line's tab-completion: whatever the
-    // GMCP state currently knows about — exits, skill/spell names, players
-    // online, and carried/worn item keywords. The page merges these with
-    // command-history words and dedupes; order here doesn't matter.
     function completions() {
         var out = [];
         function add(w) { if (w) out.push(String(w)); }
@@ -118,9 +204,8 @@
         }
         if (S.room && S.room.exits) Object.keys(S.room.exits).forEach(add);
         (S.skills || []).forEach(function (s) { add(nameOf(s.name)); });
-        if (S.who && S.who.players) {
-            S.who.players.forEach(function (p) { add(stripColor(p.name)); });
-        }
+        if (S.who && S.who.players) S.who.players.forEach(function (p) { add(stripColor(p.name)); });
+        (S.occupants || []).forEach(function (o) { add(o.keyword); });
         (S.equipment || []).forEach(addKeywords);
         if (S.inventory) {
             (S.inventory.items || []).forEach(addKeywords);
@@ -139,35 +224,39 @@
         }
         switch (name) {
             case "Char.Vitals":
-                // The highest-frequency feed: skip identical payloads and
-                // take the in-place fast path when the bar set is unchanged.
                 if (body === lastVitalsBody) break;
                 lastVitalsBody = body;
                 S.vitals = data;
                 updateVitals();
+                tickHotbar();          // mana gate re-evaluates each pulse
                 break;
             case "Char.Status": S.status = data; renderVitals(); renderStatus(); break;
             case "Game.Time": S.time = data; renderVitals(); break;
             case "Room.Info": S.room = data; renderRoom(); break;
-            case "Char.Equipment": S.equipment = (data && data.items) || []; renderEquipment(); break;
-            case "Char.Inventory": S.inventory = data; renderInventory(); break;
+            case "Room.Occupants": applyOccupants(data); break;
+            case "Char.Equipment": S.equipment = (data && data.items) || []; renderEquipment(); renderInventory(); break;
+            case "Char.Inventory": S.inventory = data; renderInventory(); renderEquipment(); break;
             case "Char.Train": S.train = data; renderTrain(); break;
             case "Char.Affects": S.affects = data; renderStatus(); break;
             case "Group.Update": S.group = data; renderStatus(); break;
             case "Char.Who": S.who = data; renderWho(); break;
-            case "Char.Skills": S.skills = (data && data.skills) || []; renderHotbar(); break;
-            case "Char.Cooldowns": applyCooldowns(data); tickHotbar(); break;
+            case "Char.Skills": S.skills = (data && data.skills) || []; renderHotbar(); renderAbilities(); break;
+            case "Char.Cooldowns":
+                applyCooldowns(data); tickHotbar();
+                // The Abilities browser can be ~400 rows; only rebuild it for a
+                // cooldown tick when it's actually on screen.
+                if (abilitiesVisible()) renderAbilities();
+                break;
             case "Comm.Channel": {
                 var entry = pushChat(data);
                 if (entry) {
                     appendChat(entry);
                     if (!chatVisible()) markChatUnread(true);
-                    // Page-level hook (unread title badge, notifications).
                     api.onComm(entry.channel, entry.text);
                 }
                 break;
             }
-            default: break; // Core.Hello, Client.GUI, etc. — not needed here.
+            default: break;
         }
     }
 
@@ -190,44 +279,26 @@
     }
 
     // ------------------------------------------------------------------
-    // Widgets
+    // Vitals (hot path — kept in-place, unchanged behaviour)
     // ------------------------------------------------------------------
-    // Rendering policy: the *hot* paths — vitals bars (every game pulse),
-    // chat (every message), hotbar cooldowns (every second) — update real
-    // DOM nodes in place. The cold panels (room/equipment/inventory/train/
-    // status/who, re-rendered at human-action frequency) keep the audited
-    // esc()+innerHTML templates.
-
-    var lastVitalsBody = null;  // raw Char.Vitals JSON, for the skip
-    var vitalsCache = null;     // { shape, bars: {hp: {fill,text}, …} }
+    var lastVitalsBody = null;
+    var vitalsCache = null;
 
     function vitalsShape(v) {
         return (v && v.opponent_hp_pct != null ? "t" : "")
             + (v && v.metamagic != null ? "m" : "")
             + (v && v.edge != null ? "e" : "");
     }
-
     function cacheVitalsRefs() {
         vitalsCache = { shape: vitalsShape(S.vitals), bars: {} };
         ["hp", "mp", "mv", "tgt", "mm", "edge"].forEach(function (cls) {
-            var el = dom.vitals.querySelector(".vbar." + cls);
-            if (el) {
-                vitalsCache.bars[cls] = {
-                    fill: el.querySelector(".vbar-fill"),
-                    text: el.querySelector(".vbar-text")
-                };
-            }
+            var e = dom.vitals.querySelector(".vbar." + cls);
+            if (e) vitalsCache.bars[cls] = { fill: e.querySelector(".vbar-fill"), text: e.querySelector(".vbar-text") };
         });
     }
-
-    // In-place update for a Char.Vitals tick. Falls back to the full
-    // rebuild when the bar set changes (a foe bar appearing, etc.).
     function updateVitals() {
         var v = S.vitals;
-        if (!vitalsCache || vitalsCache.shape !== vitalsShape(v)) {
-            renderVitals();
-            return;
-        }
+        if (!vitalsCache || vitalsCache.shape !== vitalsShape(v)) { renderVitals(); return; }
         var bars = vitalsCache.bars;
         function upd(cls, cur, max) {
             var n = bars[cls];
@@ -246,371 +317,954 @@
         upd("mm", v && v.metamagic != null ? v.metamagic : null, v ? v.metamagic_max : 0);
         upd("edge", v && v.edge != null ? v.edge : null, v ? v.edge_max : 0);
     }
-
-    function bar(label, cur, max, cls) {
+    function vbar(label, cur, max, cls) {
         var has = cur !== null && cur !== undefined;
-        return '<div class="vbar ' + cls + '"><span class="vbar-label">' + label + "</span>"
-            + '<span class="vbar-track"><span class="vbar-fill" style="width:' + (has ? pct(cur, max) : 0) + '%"></span>'
-            + '<span class="vbar-text">' + (has ? esc(cur) + " / " + esc(max) : "—") + "</span></span></div>";
+        return el("div", { class: "vbar " + cls }, [
+            el("span", { class: "vbar-label", text: label }),
+            el("span", { class: "vbar-track" }, [
+                el("span", { class: "vbar-fill", style: "width:" + (has ? pct(cur, max) : 0) + "%" }),
+                el("span", { class: "vbar-text", text: has ? cur + " / " + max : "—" })
+            ])
+        ]);
     }
-
     function renderVitals() {
         var v = S.vitals, st = S.status, tm = S.time;
+        var name = st ? String(st.name) : "—";
+        var sub = st ? ("L" + st.level + " " + st.race + " " + st["class"])
+                     : (S.connected ? "awaiting character data" : "not connected");
 
-        // Identity (always shown as scaffold so the layout reads on prod even
-        // before the GMCP feeds are live).
-        var name = st ? esc(st.name) : "—";
-        var sub = st
-            ? ("L" + esc(st.level) + " " + esc(st.race) + " " + esc(st["class"]))
-            : (S.connected ? "awaiting character data" : "not connected");
-
-        // Vital bars (HP/MP/MV always present; "—" until data arrives).
-        var bars = bar("HP", v ? v.hp : null, v ? v.maxhp : 0, "hp")
-                 + bar("MP", v ? v.mp : null, v ? v.maxmp : 0, "mp")
-                 + bar("MV", v ? v.move : null, v ? v.maxmove : 0, "mv");
+        var barKids = [vbar("HP", v ? v.hp : null, v ? v.maxhp : 0, "hp"),
+                       vbar("MP", v ? v.mp : null, v ? v.maxmp : 0, "mp"),
+                       vbar("MV", v ? v.move : null, v ? v.maxmove : 0, "mv")];
         if (v && v.opponent_hp_pct != null) {
-            bars += '<div class="vbar tgt"><span class="vbar-label">Foe</span>'
-                + '<span class="vbar-track"><span class="vbar-fill" style="width:' + clamp(v.opponent_hp_pct, 0, 100) + '%"></span>'
-                + '<span class="vbar-text">' + esc(v.opponent_hp_pct) + "%</span></span></div>";
+            barKids.push(el("div", { class: "vbar tgt" }, [
+                el("span", { class: "vbar-label", text: "Foe" }),
+                el("span", { class: "vbar-track" }, [
+                    el("span", { class: "vbar-fill", style: "width:" + clamp(v.opponent_hp_pct, 0, 100) + "%" }),
+                    el("span", { class: "vbar-text", text: v.opponent_hp_pct + "%" })
+                ])
+            ]));
         }
-        // Class resource pips: Magician metamagic, Rogue edge.
-        if (v && v.metamagic != null) bars += bar("MM", v.metamagic, v.metamagic_max, "mm");
-        if (v && v.edge != null) bars += bar("Edge", v.edge, v.edge_max, "edge");
+        if (v && v.metamagic != null) barKids.push(vbar("MM", v.metamagic, v.metamagic_max, "mm"));
+        if (v && v.edge != null) barKids.push(vbar("Edge", v.edge, v.edge_max, "edge"));
 
-        // Gold / experience to next level.
-        var res = "";
+        var groups = [
+            el("div", { class: "v-group v-identity" }, [
+                el("span", { class: "v-name", text: name }),
+                el("span", { class: "v-sub dim", text: sub })
+            ]),
+            el("div", { class: "v-group v-bars" }, barKids)
+        ];
         if (st) {
-            res += '<span class="v-stat"><span class="v-stat-label">Gold</span>' + esc(Number(st.gold || 0).toLocaleString()) + "</span>";
-            res += '<span class="v-stat"><span class="v-stat-label">To level</span>' + esc(Number(st.tnl || 0).toLocaleString()) + "</span>";
+            groups.push(el("div", { class: "v-group v-res" }, [
+                el("span", { class: "v-stat" }, [el("span", { class: "v-stat-label", text: "Gold" }), String(Number(st.gold || 0).toLocaleString())]),
+                el("span", { class: "v-stat" }, [el("span", { class: "v-stat-label", text: "To level" }), String(Number(st.tnl || 0).toLocaleString())])
+            ]));
         }
-
-        // World: clock, season, global events, moons.
-        var world = "";
+        var world = el("div", { class: "v-group v-world" });
         if (tm) {
-            world += '<span class="v-clock">' + (tm.night ? "☾" : "☀") + " " + esc(tm.hour12) + esc(tm.ampm)
-                + (tm.day_name ? " · " + esc(tm.day_name) : "")
-                + (tm.month_name ? ", " + esc(tm.month_name) : "")
-                + (tm.year != null ? " · Yr " + esc(tm.year) : "") + "</span>";
-            if (tm.season_id != null) world += '<span class="v-season">Season ' + esc(tm.season_id) + "</span>";
+            world.appendChild(el("span", { class: "v-clock", text:
+                (tm.night ? "☾ " : "☀ ") + tm.hour12 + tm.ampm
+                + (tm.day_name ? " · " + tm.day_name : "")
+                + (tm.month_name ? ", " + tm.month_name : "")
+                + (tm.year != null ? " · Yr " + tm.year : "") }));
+            if (tm.season_id != null) world.appendChild(el("span", { class: "v-season", text: "Season " + tm.season_id }));
             (tm.events || []).forEach(function (e) {
-                world += '<span class="v-event" title="Global event">⚑ ' + esc(e.name)
-                    + (e.seconds ? ' <span class="dim">' + fmtDur(e.seconds) + "</span>" : "") + "</span>";
+                world.appendChild(el("span", { class: "v-event", title: "Global event", text: "⚑ " + e.name + (e.seconds ? " (" + fmtDur(e.seconds) + ")" : "") }));
             });
             (tm.moons || []).forEach(function (m) {
-                world += '<span class="v-moon" title="Moon">☽ ' + esc(m.name) + "</span>";
+                world.appendChild(el("span", { class: "v-moon", title: "Moon", text: "☽ " + m.name }));
             });
         } else {
-            world += '<span class="v-clock dim">☾ —</span>';
+            world.appendChild(el("span", { class: "v-clock dim", text: "☾ —" }));
         }
-
-        dom.vitals.innerHTML =
-            '<div class="v-group v-identity"><span class="v-name">' + name + '</span><span class="v-sub dim">' + sub + "</span></div>"
-            + '<div class="v-group v-bars">' + bars + "</div>"
-            + (res ? '<div class="v-group v-res">' + res + "</div>" : "")
-            + '<div class="v-group v-world">' + world + "</div>";
+        groups.push(world);
+        fill(dom.vitals, groups);
         cacheVitalsRefs();
     }
 
+    // ------------------------------------------------------------------
+    // Collapsible panel header
+    // ------------------------------------------------------------------
+    // Every side panel opens with a header that toggles its collapsed state
+    // (persisted). Optional trailing action nodes sit on the header's right.
+    function panelHeader(key, title, defaultCollapsed, actions) {
+        if (collapsed[key] === undefined && defaultCollapsed) collapsed[key] = true;
+        var isCol = !!collapsed[key];
+        // The collapse control is its own button; action buttons sit beside it
+        // (never nested inside — that would be invalid, reflowed markup).
+        var toggle = el("button", {
+            type: "button", class: "panel-h-toggle" + (isCol ? " collapsed" : ""),
+            "data-collapse": key, "aria-expanded": isCol ? "false" : "true"
+        }, [
+            el("span", { class: "panel-caret", "aria-hidden": "true", text: isCol ? "▸" : "▾" }),
+            el("span", { class: "panel-h-title", text: title })
+        ]);
+        var head = el("div", { class: "panel-h" }, [toggle]);
+        if (actions && actions.length) head.appendChild(el("span", { class: "panel-h-actions" }, actions));
+        return head;
+    }
+    function isCollapsed(key) { return !!collapsed[key]; }
+    function bodyIf(key, node) {
+        // Return the body node, or a hidden placeholder when collapsed.
+        if (isCollapsed(key)) return null;
+        return node;
+    }
+
+    // ------------------------------------------------------------------
+    // Room / compass rose (bottom-left on desktop; translucent overlay on
+    // phones). One renderer feeds both surfaces from Room.Info.exits.
+    // ------------------------------------------------------------------
+    var STD_DIRS = { n: 1, s: 1, e: 1, w: 1, ne: 1, nw: 1, se: 1, sw: 1, u: 1, d: 1 };
+    function exitCmd(dir, dest) {
+        // Single-token compass dirs are bare commands (keep mapper tracking);
+        // multi-word named exits only resolve via "go".
+        return /\s/.test(dir) ? "go " + dir : dir;
+    }
+    function roseGrid(exits, overlay) {
+        function cell(dir) {
+            if (exits[dir] == null) return el("span", { class: "exit none" });
+            return el("button", { class: "exit", "data-cmd": dir, title: dir + " → " + exits[dir], text: dirLabel(dir) });
+        }
+        var grid = el("div", { class: "compass" + (overlay ? " overlay" : "") }, [
+            cell("nw"), cell("n"), cell("ne"),
+            cell("w"), el("span", { class: "exit hub", text: "◈" }), cell("e"),
+            cell("sw"), cell("s"), cell("se")
+        ]);
+        return grid;
+    }
+    function renderRose(container, overlay) {
+        var r = S.room, exits = (r && r.exits) || {};
+        var kids = [roseGrid(exits, overlay)];
+        var ud = [];
+        ["u", "d"].forEach(function (dir) {
+            if (exits[dir] != null) ud.push(el("button", { class: "exit ud", "data-cmd": dir, text: dir === "u" ? "↑ Up" : "↓ Down" }));
+        });
+        if (ud.length) kids.push(el("div", { class: "ud-row" }, ud));
+        if (!overlay) {
+            var named = [];
+            Object.keys(exits).forEach(function (k) {
+                if (!STD_DIRS[k]) named.push(el("button", { class: "exit named", "data-cmd": exitCmd(k), text: k }));
+            });
+            if (named.length) kids.push(el("div", { class: "named-row" }, named));
+        }
+        fill(container, kids);
+    }
     function renderRoom() {
         var r = S.room;
-        if (!r) { dom.room.innerHTML = '<h3 class="panel-h">Room</h3><div class="panel-empty">—</div>'; return; }
-        var exits = r.exits || {};
-        var std = { n: 1, s: 1, e: 1, w: 1, ne: 1, nw: 1, se: 1, sw: 1, u: 1, d: 1 };
-
-        function cell(dir) {
-            if (exits[dir] == null) return '<span class="exit none"></span>';
-            return '<button class="exit" data-cmd="' + esc(dir) + '" title="' + esc(dir) + " → " + esc(exits[dir]) + '">' + dirLabel(dir) + "</button>";
+        var head = el("div", { class: "rose-head" }, [
+            el("span", { class: "rose-name", text: (r && r.name) || "Somewhere" }),
+            r && r.area ? el("span", { class: "rose-area dim", text: r.area + (r.environment ? " · " + r.environment : "") }) : null
+        ]);
+        var body = el("div", { class: "rose-body" });
+        renderRose(body, false);
+        fill(dom.room, [head, body]);
+        if (dom.roseOverlay) {
+            renderRose(dom.roseOverlay, true);
+            updateRoseOverlay();
         }
-
-        var compass = '<div class="compass">'
-            + cell("nw") + cell("n") + cell("ne")
-            + cell("w") + '<span class="exit hub">◈</span>' + cell("e")
-            + cell("sw") + cell("s") + cell("se")
-            + "</div>";
-
-        var ud = "";
-        ["u", "d"].forEach(function (dir) {
-            if (exits[dir] != null) ud += '<button class="exit ud" data-cmd="' + dir + '">' + (dir === "u" ? "↑ Up" : "↓ Down") + "</button>";
-        });
-
-        var named = "";
-        Object.keys(exits).forEach(function (k) {
-            if (!std[k]) named += '<button class="exit named" data-cmd="' + esc(k) + '">' + esc(k) + "</button>";
-        });
-
-        dom.room.innerHTML =
-            '<h3 class="panel-h">' + esc(r.name || "Somewhere") + "</h3>"
-            + (r.area ? '<div class="room-area">' + esc(r.area) + (r.environment ? " · " + esc(r.environment) : "") + "</div>" : "")
-            + compass
-            + (ud ? '<div class="ud-row">' + ud + "</div>" : "")
-            + (named ? '<div class="named-row">' + named + "</div>" : "");
     }
+    function updateRoseOverlay() {
+        if (!dom.roseOverlay) return;
+        var show = hudOn && roseOverlayOn && mqMobile.matches;
+        dom.roseOverlay.hidden = !show;
+    }
+
+    // ------------------------------------------------------------------
+    // Occupants (Room.Occupants) — the room's targetable persons.
+    // ------------------------------------------------------------------
+    function applyOccupants(data) {
+        S.occupants = (data && data.occupants) || [];
+        // Keep default targets valid: drop any that left the room; refresh
+        // their display name if still present.
+        ["tgtHostile", "tgtFriendly"].forEach(function (slot) {
+            var t = S[slot];
+            if (!t) return;
+            var found = null;
+            for (var i = 0; i < S.occupants.length; i++) {
+                if (S.occupants[i].handle === t.handle && !S.occupants[i].is_dead) { found = S.occupants[i]; break; }
+            }
+            if (found) t.desc = found.short_desc || t.desc;
+            else S[slot] = null;
+        });
+        renderOccupants();
+        renderVitals();      // target chip may live near the foe bar
+        tickHotbar();        // target-aware labels
+    }
+
+    function setTarget(slot, occ) {
+        // Toggle off if re-selecting the same handle.
+        var cur = S[slot];
+        if (cur && cur.handle === occ.handle) S[slot] = null;
+        else S[slot] = { handle: occ.handle, desc: occ.short_desc || occ.keyword };
+        renderOccupants();
+        renderVitals();
+        tickHotbar();
+    }
+
+    function occHostileClass(o) {
+        if (o.is_dead) return "dead";
+        return o.hostile_hint === "hostile" ? "hostile"
+             : o.hostile_hint === "friendly" ? "friendly" : "neutral";
+    }
+
+    function renderOccupants() {
+        var occ = S.occupants || [];
+        var actions = [el("button", { type: "button", class: "panel-h-btn", "data-cmd": "list", title: "List a shopkeeper's wares", text: "List" })];
+        var head = panelHeader("occupants", "Room (" + occ.length + ")", false, actions);
+        var kids = [head];
+        if (!isCollapsed("occupants")) {
+            if (!occ.length) {
+                kids.push(el("div", { class: "panel-empty", text: "No one else here." }));
+            } else {
+                // Target chips (current defaults) so they're visible at a glance.
+                if (S.tgtHostile || S.tgtFriendly) {
+                    var chips = [];
+                    if (S.tgtHostile) chips.push(el("span", { class: "tgt-chip hostile", title: "Offensive spells target this", text: "⚔ " + S.tgtHostile.desc }));
+                    if (S.tgtFriendly) chips.push(el("span", { class: "tgt-chip friendly", title: "Beneficial spells target this", text: "✚ " + S.tgtFriendly.desc }));
+                    kids.push(el("div", { class: "tgt-chips" }, chips));
+                }
+                var list = el("ul", { class: "occ-list" });
+                occ.forEach(function (o, i) {
+                    var marks = "";
+                    if (S.tgtHostile && S.tgtHostile.handle === o.handle) marks += " ⚔";
+                    if (S.tgtFriendly && S.tgtFriendly.handle === o.handle) marks += " ✚";
+                    var row = el("li", {
+                        class: "occ-row " + occHostileClass(o) + (o.is_dead ? " is-dead" : ""),
+                        "data-menu": "occupant", "data-idx": i,
+                        title: o.is_dead ? "Slain — not targetable" : "Tap for actions"
+                    }, [
+                        el("span", { class: "occ-icon", "aria-hidden": "true", text: o.is_player ? "☻" : "•" }),
+                        el("span", { class: "occ-name", text: o.short_desc || o.keyword }),
+                        marks ? el("span", { class: "occ-marks", "aria-hidden": "true", text: marks }) : null,
+                        el("button", { type: "button", class: "row-more", "data-menu": "occupant", "data-idx": i, "aria-label": "Actions", text: "⋯" })
+                    ]);
+                    list.appendChild(row);
+                });
+                kids.push(list);
+            }
+        }
+        fill(dom.occupants, kids);
+    }
+
+    // ------------------------------------------------------------------
+    // Equipment
+    // ------------------------------------------------------------------
+    function conditionNode(c) {
+        if (c == null) return null;
+        // Real feed: int 0-100. Older/demo: a word. Colour numeric by value.
+        var n = Number(c);
+        if (!isNaN(n) && String(c).match(/^\s*\d/)) {
+            var cls = n >= 90 ? "cond-ok" : n >= 50 ? "cond-mid" : "cond-low";
+            var lbl = n >= 95 ? "pristine" : n >= 75 ? "good" : n >= 40 ? "worn" : n > 0 ? "battered" : "ruined";
+            return el("span", { class: "tag " + cls, title: "Condition " + n + "%", text: lbl });
+        }
+        return el("span", { class: "tag", text: String(c) });
+    }
+    function itemDataset(it, kind, container) {
+        return {
+            "data-menu": "item", "data-kind": kind || "item",
+            "data-target": targetOf(it.keywords || it.name),
+            "data-otype": it.type || "",
+            "data-name": it.name || "",
+            "data-container": container || "",
+            "data-closeable": it.closeable ? "1" : "",
+            "data-closed": it.closed ? "1" : ""
+        };
+    }
+    function itemRow(it, kind, container) {
+        var ds = itemDataset(it, kind, container);
+        var kids = [];
+        if (kind === "equip") kids.push(el("span", { class: "slot", text: it.location || it.slot || "" }));
+        kids.push(el("span", { class: "row-name", text: it.name }));
+        if (it.count && it.count > 1) kids.push(el("span", { class: "tag", text: "×" + it.count }));
+        if (kind === "equip") { var cn = conditionNode(it.condition); if (cn) kids.push(cn); }
+        if (it.type === "container") kids.push(el("span", { class: "dim", "aria-hidden": "true", text: it.closed ? " 🔒" : " 📦" }));
+        kids.push(el("button", { type: "button", class: "row-more", "aria-label": "Actions", text: "⋯" }));
+        ds.class = "row" + (kind === "content" ? " sub" : "");
+        return el("li", assign(ds, {}), kids);
+    }
+    function assign(a, b) { Object.keys(b).forEach(function (k) { a[k] = b[k]; }); return a; }
 
     function renderEquipment() {
         var items = S.equipment || [];
-        var body;
-        if (!items.length) {
-            body = '<div class="panel-empty">Nothing worn.</div>';
-        } else {
-            body = '<ul class="row-list">' + items.map(function (it) {
-                var tgt = targetOf(it.keywords || it.name);
-                var cond = it.condition != null ? '<span class="tag">' + esc(it.condition) + "</span>" : "";
-                return '<li class="row" data-cmd="examine ' + tgt + '">'
-                    + '<span class="slot">' + esc(it.location || it.slot || "") + "</span>"
-                    + '<span class="row-name">' + esc(it.name) + "</span>" + cond + "</li>";
-            }).join("") + "</ul>";
+        var head = panelHeader("equipment", "Equipment", false);
+        var kids = [head];
+        if (!isCollapsed("equipment")) {
+            if (!items.length) kids.push(el("div", { class: "panel-empty", text: "Nothing worn." }));
+            else {
+                var list = el("ul", { class: "row-list" });
+                items.forEach(function (it) { list.appendChild(itemRow(it, "equip")); });
+                kids.push(list);
+            }
         }
-        dom.equipment.innerHTML = '<h3 class="panel-h">Equipment</h3>' + body;
+        fill(dom.equipment, kids);
     }
 
+    // ------------------------------------------------------------------
+    // Inventory (items + containers + components + coins)
+    // ------------------------------------------------------------------
     function renderInventory() {
         var inv = S.inventory;
-        var html = '<h3 class="panel-h">Inventory</h3>';
-        if (!inv) { dom.inventory.innerHTML = html + '<div class="panel-empty">Empty.</div>'; return; }
-
-        var items = inv.items || [], coins = inv.coins || [], comps = inv.components || [];
-
-        if (items.length) {
-            html += '<ul class="row-list">' + items.map(function (it) {
-                var tgt = targetOf(it.keywords || it.name);
-                var cnt = (it.count && it.count > 1) ? '<span class="tag">×' + esc(it.count) + "</span>" : "";
-                var lock = it.closed ? " 🔒" : (it.closeable ? " 📦" : "");
-                var sub = "";
-                if (it.contents && it.contents.length) {
-                    sub = '<ul class="row-list sub">' + it.contents.map(function (c) {
-                        return '<li class="row sub" data-cmd="examine ' + targetOf(c.keywords || c.name) + '">'
-                            + esc(c.name) + (c.count > 1 ? " ×" + esc(c.count) : "") + "</li>";
-                    }).join("") + "</ul>";
+        var head = panelHeader("inventory", "Inventory", false);
+        var kids = [head];
+        if (!isCollapsed("inventory")) {
+            if (!inv) {
+                kids.push(el("div", { class: "panel-empty", text: "Empty." }));
+            } else {
+                var items = inv.items || [], coins = inv.coins || [], comps = inv.components || [];
+                if (items.length) {
+                    var list = el("ul", { class: "row-list" });
+                    items.forEach(function (it) {
+                        list.appendChild(itemRow(it, "item"));
+                        if (it.contents && it.contents.length) {
+                            var sub = el("ul", { class: "row-list sub" });
+                            var ct = targetOf(it.keywords || it.name);
+                            it.contents.forEach(function (c) { sub.appendChild(itemRow(c, "content", ct)); });
+                            list.appendChild(sub);
+                        }
+                    });
+                    kids.push(list);
+                } else {
+                    kids.push(el("div", { class: "panel-empty", text: "Empty." }));
                 }
-                return '<li class="row" data-cmd="examine ' + tgt + '"><span class="row-name">'
-                    + esc(it.name) + "</span>" + cnt + '<span class="dim">' + lock + "</span></li>" + sub;
-            }).join("") + "</ul>";
-        } else {
-            html += '<div class="panel-empty">Empty.</div>';
-        }
 
-        if (comps.length) {
-            html += '<div class="sub-h">Components</div><ul class="row-list">' + comps.map(function (c) {
-                return '<li class="row" data-cmd="examine ' + targetOf(c.keywords || c.name) + '"><span class="row-name">'
-                    + esc(c.name) + "</span>" + (c.count > 1 ? '<span class="tag">×' + esc(c.count) + "</span>" : "") + "</li>";
-            }).join("") + "</ul>";
+                // Components — collapsible on its own and default-collapsed,
+                // since a crafter's pouch gets very long. Clicking a component
+                // withdraws it from the pouch.
+                if (comps.length) {
+                    kids.push(componentsSection(comps));
+                }
+                if (coins.length) {
+                    kids.push(el("div", { class: "coins", text: coins.map(function (c) { return c.count + " " + c.name; }).join(" · ") }));
+                }
+            }
         }
-
-        if (coins.length) {
-            html += '<div class="coins">' + coins.map(function (c) { return esc(c.count) + " " + esc(c.name); }).join(" · ") + "</div>";
-        }
-
-        dom.inventory.innerHTML = html;
+        fill(dom.inventory, kids);
     }
 
+    function componentsSection(comps) {
+        var key = "components";
+        if (collapsed[key] === undefined) collapsed[key] = true;   // default collapsed
+        var isCol = !!collapsed[key];
+        var head = el("button", {
+            type: "button", class: "sub-h collapse" + (isCol ? " collapsed" : ""),
+            "data-collapse": key, "aria-expanded": isCol ? "false" : "true"
+        }, [
+            el("span", { class: "panel-caret", "aria-hidden": "true", text: isCol ? "▸" : "▾" }),
+            "Components (" + comps.length + ")"
+        ]);
+        var out = [head];
+        if (!isCol) {
+            var list = el("ul", { class: "row-list" });
+            comps.forEach(function (c) {
+                var ds = {
+                    class: "row comp", "data-menu": "component",
+                    "data-target": targetOf(c.keywords || c.name),
+                    "data-name": c.name || "",
+                    title: "Withdraw from component pouch"
+                };
+                list.appendChild(el("li", ds, [
+                    el("span", { class: "row-name", text: c.name }),
+                    c.count > 1 ? el("span", { class: "tag", text: "×" + c.count }) : null,
+                    el("button", { type: "button", class: "row-more", "aria-label": "Actions", text: "⋯" })
+                ]));
+            });
+            out.push(list);
+        }
+        return el("div", { class: "comp-section" }, out);
+    }
+
+    // ------------------------------------------------------------------
+    // Character (train)
+    // ------------------------------------------------------------------
     function renderTrain() {
         var t = S.train;
-        if (!t) { dom.train.innerHTML = '<h3 class="panel-h">Character</h3><div class="panel-empty">—</div>'; return; }
-        var xp = (t.xp_pct != null)
-            ? '<div class="vbar xp"><span class="vbar-label">XP</span><span class="vbar-track"><span class="vbar-fill" style="width:'
-              + clamp(t.xp_pct, 0, 100) + '%"></span><span class="vbar-text">' + clamp(t.xp_pct, 0, 100) + "%</span></span></div>"
-            : "";
-        var adv = t.can_advance ? '<button class="action-btn" data-cmd="advance">⬆ Advance available</button>' : "";
-        function kv(arr, fmt) { return (arr || []).map(fmt).join(""); }
-        var stats = kv(t.stats, function (s) { return "<li><span>" + esc(s.name) + "</span><span>" + esc(s.value) + (s.add ? " (+" + esc(s.add) + ")" : "") + "</span></li>"; });
-        var res = kv(t.resources, function (r) { return "<li><span>" + esc(r.label) + "</span><span>" + esc(r.value) + " / " + esc(r.max) + "</span></li>"; });
-        var aux = kv(t.aux, function (a) { return "<li><span>" + esc(a.label) + "</span><span>" + esc(a.value) + "</span></li>"; });
-        dom.train.innerHTML = '<h3 class="panel-h">Character</h3>' + xp + adv + '<ul class="kv">' + stats + res + aux + "</ul>";
+        var head = panelHeader("train", "Character", false);
+        var kids = [head];
+        if (!isCollapsed("train")) {
+            if (!t) kids.push(el("div", { class: "panel-empty", text: "—" }));
+            else {
+                if (t.xp_pct != null) {
+                    kids.push(el("div", { class: "vbar xp" }, [
+                        el("span", { class: "vbar-label", text: "XP" }),
+                        el("span", { class: "vbar-track" }, [
+                            el("span", { class: "vbar-fill", style: "width:" + clamp(t.xp_pct, 0, 100) + "%" }),
+                            el("span", { class: "vbar-text", text: clamp(t.xp_pct, 0, 100) + "%" })
+                        ])
+                    ]));
+                }
+                if (t.can_advance) kids.push(el("button", { class: "action-btn", "data-cmd": "advance", text: "⬆ Advance available" }));
+                var ul = el("ul", { class: "kv" });
+                (t.stats || []).forEach(function (s) {
+                    ul.appendChild(el("li", {}, [el("span", { text: s.name }), el("span", { text: s.value + (s.add ? " (+" + s.add + ")" : "") })]));
+                });
+                (t.resources || []).forEach(function (r) {
+                    ul.appendChild(el("li", {}, [el("span", { text: r.label || r.name }), el("span", { text: r.value + " / " + r.max })]));
+                });
+                (t.aux || []).forEach(function (a) {
+                    ul.appendChild(el("li", {}, [el("span", { text: a.label || a.name }), el("span", { text: a.value })]));
+                });
+                kids.push(ul);
+            }
+        }
+        fill(dom.train, kids);
     }
 
-    function mini(p, cls) { return '<span class="mini ' + cls + '"><span style="width:' + clamp(p, 0, 100) + '%"></span></span>'; }
-
+    // ------------------------------------------------------------------
+    // Status (resources + affects + group)
+    // ------------------------------------------------------------------
+    function mini(p, cls) {
+        return el("span", { class: "mini " + cls }, el("span", { style: "width:" + clamp(p, 0, 100) + "%" }));
+    }
     function renderStatus() {
-        var html = "", st = S.status;
+        var kids = [], st = S.status;
         if (st) {
-            // Gold/TNL also live here: the topbar hides its resource group
-            // on phones, so the Status panel is their canonical home there.
-            html += '<ul class="kv">'
-                + "<li><span>Align</span><span>" + esc(st.align) + "</span></li>"
-                + "<li><span>Gold</span><span>" + esc(Number(st.gold || 0).toLocaleString()) + "</span></li>"
-                + "<li><span>To level</span><span>" + esc(Number(st.tnl || 0).toLocaleString()) + "</span></li>"
-                + "<li><span>Bank</span><span>" + esc(Number(st.bank || 0).toLocaleString()) + "</span></li>"
-                + "<li><span>Remort</span><span>" + esc(st.remort) + "</span></li>"
-                + "</ul>";
+            var ul = el("ul", { class: "kv" });
+            [["Align", st.align], ["Gold", Number(st.gold || 0).toLocaleString()],
+             ["To level", Number(st.tnl || 0).toLocaleString()], ["Bank", Number(st.bank || 0).toLocaleString()],
+             ["Remort", st.remort]].forEach(function (kvp) {
+                ul.appendChild(el("li", {}, [el("span", { text: kvp[0] }), el("span", { text: String(kvp[1]) })]));
+            });
+            kids.push(ul);
         }
-
         var a = S.affects;
-        function affList(arr, cls) {
+        function affItems(arr, cls) {
             return (arr || []).map(function (x) {
-                return '<li class="aff ' + cls + '"><span class="aff-name">' + esc(x.name)
-                    + (x.target ? ' <span class="dim">› ' + esc(x.target) + "</span>" : "") + "</span>"
-                    + '<span class="aff-time" data-expiry="' + (now() + (Number(x.duration) || 0)) + '">' + fmtDur(x.duration) + "</span></li>";
-            }).join("");
+                var right = [el("span", { class: "aff-time", "data-expiry": now() + (Number(x.duration) || 0), text: fmtDur(x.duration) })];
+                if (x.releasable && x.skill) {
+                    right.unshift(el("button", { type: "button", class: "aff-release", "data-cmd": "release spell " + nameOf(x.skill) + " " + (x.handle || ""), title: "Release", text: "release" }));
+                }
+                return el("li", { class: "aff " + cls }, [
+                    el("span", { class: "aff-name" }, [x.name, x.target ? el("span", { class: "dim", text: " › " + x.target }) : null]),
+                    el("span", { class: "aff-right" }, right)
+                ]);
+            });
         }
         if (a) {
-            var buffs = affList(a.buffs, "buff"), maint = affList(a.maintained, "maint"), debuffs = affList(a.debuffs, "debuff");
-            html += '<div class="sub-h">Affects</div>';
-            html += (buffs || maint || debuffs) ? '<ul class="aff-list">' + buffs + maint + debuffs + "</ul>" : '<div class="panel-empty">None.</div>';
+            kids.push(el("div", { class: "sub-h", text: "Affects" }));
+            var affNodes = affItems(a.buffs, "buff").concat(affItems(a.maintained, "maint"), affItems(a.debuffs, "debuff"));
+            kids.push(affNodes.length ? el("ul", { class: "aff-list" }, affNodes) : el("div", { class: "panel-empty", text: "None." }));
         }
-
         var g = S.group;
         if (g && g.members && g.members.length) {
-            html += '<div class="sub-h">Group (' + esc(g.size) + ")</div>";
-            html += '<ul class="grp-list">' + g.members.map(function (m) {
-                return '<li class="grp"><span class="grp-name">' + esc(m.name) + (m.leader ? " ★" : "") + "</span>"
-                    + '<span class="grp-bars">' + mini(m.hp_pct, "hp") + mini(m.mp_pct, "mp") + mini(m.mv_pct, "mv") + "</span></li>";
-            }).join("") + "</ul>";
+            kids.push(el("div", { class: "sub-h", text: "Group (" + g.size + ")" }));
+            var gl = el("ul", { class: "grp-list" });
+            g.members.forEach(function (m) {
+                gl.appendChild(el("li", { class: "grp" }, [
+                    el("span", { class: "grp-name", text: m.name + (m.leader ? " ★" : "") }),
+                    el("span", { class: "grp-bars" }, [mini(m.hp_pct, "hp"), mini(m.mp_pct, "mp"), mini(m.mv_pct, "mv")])
+                ]));
+            });
+            kids.push(gl);
         }
-
-        dom.status.innerHTML = html || '<div class="panel-empty">—</div>';
+        fill(dom.status, kids.length ? kids : [el("div", { class: "panel-empty", text: "—" })]);
     }
 
+    // ------------------------------------------------------------------
+    // Who (global online players)
+    // ------------------------------------------------------------------
     function renderWho() {
         var w = S.who;
-        if (!w || !w.players) { dom.who.innerHTML = '<div class="panel-empty">—</div>'; return; }
-        var rows = w.players.map(function (p) {
-            var nm = targetOf(p.name);
+        if (!w || !w.players) { fill(dom.who, el("div", { class: "panel-empty", text: "—" })); return; }
+        var list = el("ul", { class: "who-list" });
+        w.players.forEach(function (p) {
+            var nm = firstWord(p.name);
             var flags = (p.is_my_leader ? " ◂leader" : "") + (p.following_me ? " follower▸" : "");
-            return '<li class="who-row"><div class="who-main">'
-                + '<span class="who-name">' + esc(p.name) + '</span> <span class="dim">L' + esc(p.level) + " " + esc(p.race) + " " + esc(p["class"]) + "</span>"
-                + (p.title ? '<div class="who-title">' + esc(p.title) + "</div>" : "")
-                + (flags ? '<span class="dim">' + esc(flags) + "</span>" : "")
-                + "</div><div class=\"who-act\">"
-                + '<button data-prefill="tell ' + nm + ' ">Tell</button>'
-                + '<button data-cmd="follow ' + nm + '">Follow</button>'
-                + '<button data-cmd="group ' + nm + '">Group</button>'
-                + "</div></li>";
-        }).join("");
-        var hidden = w.hidden ? '<div class="who-hidden">+' + esc(w.hidden) + " hidden</div>" : "";
-        dom.who.innerHTML = '<ul class="who-list">' + rows + "</ul>" + hidden;
+            list.appendChild(el("li", { class: "who-row" }, [
+                el("div", { class: "who-main" }, [
+                    el("span", { class: "who-name", text: p.name }),
+                    el("span", { class: "dim", text: " L" + p.level + " " + p.race + " " + p["class"] }),
+                    p.title ? el("div", { class: "who-title", text: p.title }) : null,
+                    flags ? el("span", { class: "dim", text: flags }) : null
+                ]),
+                el("div", { class: "who-act" }, [
+                    el("button", { "data-prefill": "tell " + nm + " ", text: "Tell" }),
+                    el("button", { "data-cmd": "follow " + nm, text: "Follow" }),
+                    el("button", { "data-cmd": "group " + nm, text: "Group" })
+                ])
+            ]));
+        });
+        var kids = [list];
+        if (w.hidden) kids.push(el("div", { class: "who-hidden", text: "+" + w.hidden + " hidden" }));
+        fill(dom.who, kids);
     }
 
-    // Chat is a hot path: one node built (textContent — chat is user data)
-    // and appended per message, DOM trimmed to CHAT_MAX from the front.
+    // ------------------------------------------------------------------
+    // Chat (hot path)
+    // ------------------------------------------------------------------
     function chatLine(c) {
-        var div = document.createElement("div");
-        div.className = "chat-line";
-        var ch = document.createElement("span");
-        ch.className = "chat-ch";
-        ch.textContent = "[" + c.channel + "]";
-        var txt = document.createElement("span");
-        txt.className = "chat-txt";
-        txt.textContent = c.text;
-        div.appendChild(ch);
-        div.appendChild(document.createTextNode(" "));
-        div.appendChild(txt);
-        return div;
+        return el("div", { class: "chat-line" }, [
+            el("span", { class: "chat-ch", text: "[" + c.channel + "]" }), " ",
+            el("span", { class: "chat-txt", text: c.text })
+        ]);
     }
-
     function appendChat(c) {
         var empty = dom.chat.querySelector(".panel-empty");
         if (empty) dom.chat.removeChild(empty);
-        // Stick to the bottom unless the reader has scrolled up into
-        // older messages (measured before the append moves the end).
-        var stick = dom.chat.scrollTop + dom.chat.clientHeight
-            >= dom.chat.scrollHeight - 40;
+        var stick = dom.chat.scrollTop + dom.chat.clientHeight >= dom.chat.scrollHeight - 40;
         dom.chat.appendChild(chatLine(c));
-        while (dom.chat.children.length > CHAT_MAX) {
-            dom.chat.removeChild(dom.chat.firstChild);
-        }
+        while (dom.chat.children.length > CHAT_MAX) dom.chat.removeChild(dom.chat.firstChild);
         if (stick) dom.chat.scrollTop = dom.chat.scrollHeight;
     }
-
-    // Full rebuild (init/reset only) — same node builder, one code path
-    // for the markup.
     function renderChat() {
-        while (dom.chat.firstChild) dom.chat.removeChild(dom.chat.firstChild);
-        if (!S.chat.length) {
-            var empty = document.createElement("div");
-            empty.className = "panel-empty";
-            empty.textContent = "No messages yet.";
-            dom.chat.appendChild(empty);
-        } else {
-            S.chat.forEach(function (c) { dom.chat.appendChild(chatLine(c)); });
-        }
+        if (!S.chat.length) fill(dom.chat, el("div", { class: "panel-empty", text: "No messages yet." }));
+        else fill(dom.chat, S.chat.map(chatLine));
         dom.chat.scrollTop = dom.chat.scrollHeight;
     }
 
-    // The hotbar rebuilds structure only when Char.Skills changes; the 1s
-    // ticker and Char.Cooldowns just flip classes and a countdown number
-    // on cached nodes. Buttons always carry both the cooldown and percent
-    // spans — .cooling decides which one shows (hud.css).
-    var hotbarNodes = {};  // skill id -> { btn, cdEl }
+    // ------------------------------------------------------------------
+    // Abilities: the target-aware command + shared usability logic.
+    // ------------------------------------------------------------------
+    function abilityCommand(s) {
+        var nm = nameOf(s.name);
+        if (s.type === "spell") {
+            var base = "cast '" + nm + "'";
+            if (s.target_type === "offensive" && S.tgtHostile) return base + " " + S.tgtHostile.handle;
+            if (s.target_type === "defensive" && S.tgtFriendly) return base + " " + S.tgtFriendly.handle;
+            return base;
+        }
+        return nm;   // non-spell skills are bare verbs (target auto/optional)
+    }
+    // Why a skill is unusable right now (or null). cd in seconds.
+    function abilityBlock(s) {
+        var t = now();
+        var exp = S.cooldownExpiry[s.id];
+        var cd = (exp && exp > t) ? Math.ceil(exp - t) : 0;
+        if (cd > 0) return { cd: cd, reason: cd + "s" };
+        if (s.usable === false || S.usable[s.id] === false) return { cd: 0, reason: "unavailable" };
+        var v = S.vitals;
+        if (s.type === "spell" && v && v.maxmp > 0 && s.mana_pct != null) {
+            var manaPct = Math.round((Number(v.mp) || 0) / v.maxmp * 100);
+            if (s.mana_pct > manaPct) return { cd: 0, reason: "low mana" };
+        }
+        if (v && v.position && s.min_position && posRank(v.position) < posRank(s.min_position)) {
+            return { cd: 0, reason: s.min_position };
+        }
+        return null;
+    }
+    function catClass(s) {
+        return "cat-" + String(s.category || (s.type === "spell" ? "misc" : "skill")).replace(/[^a-zA-Z0-9_-]/g, "");
+    }
+
+    // The bounded bottom quick-bar. Favorites if any; else a capped default of
+    // usable damage/heal so it's useful out-of-box and NEVER unbounded.
+    var hotbarNodes = {};
+    function quickbarSkills() {
+        var skills = (S.skills || []).filter(function (s) { return s.type === "spell" || s.type === "skill"; });
+        var favNames = Object.keys(favorites);
+        if (favNames.length) {
+            var picked = skills.filter(function (s) { return favorites[nameOf(s.name).toLowerCase()]; });
+            if (picked.length) return picked.slice(0, 40);   // favorites are user-chosen; generous cap
+        }
+        // Default: usable, damage/heal first, capped — plus anything cooling
+        // (so timers stay visible) up to the cap.
+        var rank = { damage: 0, heal: 1, misc: 2 };
+        var usable = skills.filter(function (s) { return !abilityBlock(s); });
+        usable.sort(function (a, b) { return (rank[a.category] == null ? 3 : rank[a.category]) - (rank[b.category] == null ? 3 : rank[b.category]); });
+        var out = usable.slice(0, QUICKBAR_MAX);
+        var seen = {}; out.forEach(function (s) { seen[s.id] = true; });
+        skills.forEach(function (s) {
+            if (out.length >= QUICKBAR_MAX + 6) return;
+            if (!seen[s.id] && S.cooldownExpiry[s.id] > now()) out.push(s);
+        });
+        return out;
+    }
     function renderHotbar() {
-        var skills = S.skills || [];
+        var skills = quickbarSkills();
         hotbarNodes = {};
         while (dom.hotbar.firstChild) dom.hotbar.removeChild(dom.hotbar.firstChild);
         if (!skills.length) { dom.hotbar.classList.add("empty"); return; }
         dom.hotbar.classList.remove("empty");
         skills.forEach(function (s) {
-            var cmd = (s.type === "spell") ? ("cast '" + nameOf(s.name) + "'") : nameOf(s.name);
-            var btn = document.createElement("button");
-            btn.className = "skill cat-" + String(s.category || "misc").replace(/[^a-zA-Z0-9_-]/g, "");
-            btn.setAttribute("data-cmd", cmd);
-            btn.setAttribute("data-id", s.id);
-            btn.title = s.name + " (" + s.percent + "%)";
-            var nameEl = document.createElement("span");
-            nameEl.className = "skill-name";
-            nameEl.textContent = s.name;
-            var cdEl = document.createElement("span");
-            cdEl.className = "skill-cd";
-            var pctEl = document.createElement("span");
-            pctEl.className = "skill-pct";
-            pctEl.textContent = s.percent;
-            btn.appendChild(nameEl);
-            btn.appendChild(cdEl);
-            btn.appendChild(pctEl);
+            var btn = el("button", {
+                class: "skill " + catClass(s), "data-ability": s.id, "data-menu": "ability",
+                title: s.name + " (" + s.percent + "%)"
+            }, [
+                el("span", { class: "skill-name", text: s.name }),
+                el("span", { class: "skill-cd" }),
+                el("span", { class: "skill-pct", text: String(s.percent) })
+            ]);
             dom.hotbar.appendChild(btn);
-            hotbarNodes[s.id] = { btn: btn, cdEl: cdEl };
+            hotbarNodes[s.id] = { btn: btn, cdEl: btn.querySelector(".skill-cd") };
         });
         tickHotbar();
     }
-
     function tickHotbar() {
         var t = now();
-        (S.skills || []).forEach(function (s) {
-            var n = hotbarNodes[s.id];
-            if (!n) return;
-            var exp = S.cooldownExpiry[s.id];
-            var cd = (exp && exp > t) ? Math.ceil(exp - t) : 0;
-            var off = (s.usable === false) || cd > 0 || (S.usable[s.id] === false);
-            n.btn.classList.toggle("off", off);
+        Object.keys(hotbarNodes).forEach(function (id) {
+            var n = hotbarNodes[id];
+            var s = skillById(id);
+            if (!s || !n) return;
+            var blk = abilityBlock(s);
+            var cd = blk ? blk.cd : 0;
+            n.btn.classList.toggle("off", !!blk);
             n.btn.classList.toggle("cooling", cd > 0);
             n.cdEl.textContent = cd > 0 ? String(cd) : "";
         });
     }
+    function skillById(id) {
+        id = String(id);
+        var list = S.skills || [];
+        for (var i = 0; i < list.length; i++) if (String(list[i].id) === id) return list[i];
+        return null;
+    }
+
+    // The full, scroll-bounded Abilities browser: search + type filter +
+    // usable-only, so hundreds of skills never grow the layout.
+    function renderAbilities() {
+        var all = S.skills || [];
+        // Preserve the search box's focus + caret across the rebuild (this
+        // runs on every keystroke, and on cooldown/skill feeds).
+        var hadFocus = document.activeElement && document.activeElement.id === "ab-search";
+        var caret = hadFocus ? document.activeElement.selectionStart : null;
+        var kids = [];
+        // Controls row.
+        var search = el("input", {
+            type: "text", class: "ab-search", id: "ab-search",
+            placeholder: "Filter abilities…", autocomplete: "off", spellcheck: "false", value: abilityFilter.q
+        });
+        search.addEventListener("input", function () { abilityFilter.q = search.value; renderAbilities(); persistAbilityFilter(); });
+        kids.push(el("div", { class: "ab-controls" }, [search]));
+
+        var typeChips = el("div", { class: "ab-chips" });
+        var counts = { all: 0, spell: 0, skill: 0, craft: 0 };
+        all.forEach(function (s) {
+            counts.all++;
+            if (s.type === "spell") counts.spell++;
+            else if (s.type === "skill") counts.skill++;
+            else if (s.type === "craft" || s.type === "enchant") counts.craft++;
+        });
+        [["all", "All"], ["spell", "Spells"], ["skill", "Skills"], ["craft", "Crafts"]].forEach(function (tc) {
+            if (tc[0] !== "all" && !counts[tc[0]]) return;
+            typeChips.appendChild(el("button", {
+                type: "button", class: "ab-chip" + (abilityFilter.type === tc[0] ? " on" : ""),
+                "data-abtype": tc[0], text: tc[1] + " " + counts[tc[0]]
+            }));
+        });
+        typeChips.appendChild(el("button", {
+            type: "button", class: "ab-chip ab-usable" + (abilityFilter.usableOnly ? " on" : ""),
+            "data-abusable": "1", text: "✓ Usable"
+        }));
+        kids.push(typeChips);
+
+        // Filtered list.
+        var q = abilityFilter.q.trim().toLowerCase();
+        var rows = all.filter(function (s) {
+            if (abilityFilter.type === "spell" && s.type !== "spell") return false;
+            if (abilityFilter.type === "skill" && s.type !== "skill") return false;
+            if (abilityFilter.type === "craft" && s.type !== "craft" && s.type !== "enchant") return false;
+            if (q && String(s.name).toLowerCase().indexOf(q) === -1) return false;
+            if (abilityFilter.usableOnly && abilityBlock(s)) return false;
+            return true;
+        });
+        // Usable first, then alpha.
+        rows.sort(function (a, b) {
+            var ba = abilityBlock(a) ? 1 : 0, bb = abilityBlock(b) ? 1 : 0;
+            if (ba !== bb) return ba - bb;
+            return String(a.name).localeCompare(String(b.name));
+        });
+
+        var scroller = el("div", { class: "ab-scroll" });
+        if (!rows.length) {
+            scroller.appendChild(el("div", { class: "panel-empty", text: all.length ? "No abilities match." : "—" }));
+        } else {
+            var ul = el("ul", { class: "ab-list" });
+            rows.forEach(function (s) {
+                var blk = abilityBlock(s);
+                var fav = !!favorites[nameOf(s.name).toLowerCase()];
+                var right = [];
+                if (blk) right.push(el("span", { class: "ab-block", text: blk.cd > 0 ? blk.cd + "s" : blk.reason }));
+                right.push(el("span", { class: "ab-pct", text: s.percent + "%" }));
+                right.push(el("button", { type: "button", class: "ab-star" + (fav ? " on" : ""), "data-fav": nameOf(s.name), "aria-label": fav ? "Unpin" : "Pin", title: fav ? "Unpin from quick bar" : "Pin to quick bar", text: fav ? "★" : "☆" }));
+                ul.appendChild(el("li", {
+                    class: "ab-row " + catClass(s) + (blk ? " off" : ""),
+                    "data-ability": s.id, "data-menu": "ability", title: castHint(s)
+                }, [
+                    el("span", { class: "ab-name", text: s.name }),
+                    el("span", { class: "ab-right" }, right)
+                ]));
+            });
+            scroller.appendChild(ul);
+        }
+        kids.push(scroller);
+        fill(dom.abilities, kids);
+        if (hadFocus) {
+            var again = document.getElementById("ab-search");
+            if (again) { again.focus(); if (caret != null) again.setSelectionRange(caret, caret); }
+        }
+    }
+    function castHint(s) {
+        var tt = s.type === "spell" ? "cast" : "use";
+        var arrow = "";
+        if (s.type === "spell" && s.target_type === "offensive") arrow = S.tgtHostile ? " → " + S.tgtHostile.desc : " (set a ⚔ target)";
+        if (s.type === "spell" && s.target_type === "defensive") arrow = S.tgtFriendly ? " → " + S.tgtFriendly.desc : " (set a ✚ target)";
+        return tt + " " + s.name + arrow;
+    }
+    function persistAbilityFilter() {
+        try { localStorage.setItem("ishar.abilityFilter", JSON.stringify({ type: abilityFilter.type, usableOnly: abilityFilter.usableOnly })); } catch (e) {}
+    }
+    function toggleFavorite(name) {
+        var k = nameOf(name).toLowerCase();
+        if (favorites[k]) delete favorites[k]; else favorites[k] = true;
+        saveSet("ishar.favs", favorites);
+        renderHotbar(); renderAbilities();
+    }
 
     // ------------------------------------------------------------------
-    // Interaction
+    // Context / action menu (works with mouse + touch)
+    // ------------------------------------------------------------------
+    // Single guarded exit for every game command a widget builds — strips
+    // control chars / newlines so a keyword or server handle can never smuggle
+    // a second command onto the line.
+    function sendCmd(c) { c = safeCmd(c); if (c) api.send(c); }
+
+    var menuOpen = false;
+    function closeMenu() {
+        if (!menuOpen) return;
+        menuOpen = false;
+        dom.menu.hidden = true;
+        while (dom.menu.firstChild) dom.menu.removeChild(dom.menu.firstChild);
+    }
+    // actions: [{label, cmd|prefill|fn, danger}]. Anchored near `anchor`.
+    function openMenu(title, actions, anchor) {
+        closeMenu();
+        actions = actions.filter(Boolean);
+        if (!actions.length) return;
+        var kids = [el("div", { class: "menu-title", text: title })];
+        actions.forEach(function (a) {
+            // No data-cmd/data-prefill here on purpose: the delegated app-click
+            // handler would fire the command a *second* time. The onclick owns
+            // the action outright.
+            kids.push(el("button", {
+                type: "button", class: "menu-item" + (a.danger ? " danger" : ""),
+                text: a.label,
+                onclick: function () {
+                    if (a.fn) a.fn();
+                    else if (a.prefill != null) api.prefill(a.prefill);
+                    else if (a.cmd) sendCmd(a.cmd);
+                    closeMenu();
+                    if (sheetName && mqMobile.matches) setSheet(null);
+                }
+            }));
+        });
+        fill(dom.menu, kids);
+        dom.menu.hidden = false;
+        menuOpen = true;
+        positionMenu(anchor);
+    }
+    function positionMenu(anchor) {
+        var m = dom.menu;
+        m.style.left = "0px"; m.style.top = "0px";
+        var mw = m.offsetWidth, mh = m.offsetHeight;
+        var vw = window.innerWidth, vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+        var x, y;
+        if (anchor && anchor.getBoundingClientRect) {
+            var r = anchor.getBoundingClientRect();
+            x = Math.min(r.left, vw - mw - 8);
+            y = r.bottom + 4;
+            if (y + mh > vh - 8) y = Math.max(8, r.top - mh - 4);
+        } else {
+            x = (vw - mw) / 2; y = (vh - mh) / 2;
+        }
+        m.style.left = Math.max(8, x) + "px";
+        m.style.top = Math.max(8, y) + "px";
+    }
+
+    function occupantActions(o) {
+        if (!o) return [];
+        var acts = [];
+        acts.push({ label: "Look", cmd: "look " + o.handle });
+        if (o.is_dead) return acts;   // slain — nothing else round-trips
+        acts.push({ label: "Consider", cmd: "consider " + o.handle });
+        if (o.is_player) {
+            var nm = firstWord(o.keyword);
+            acts.push({ label: "Tell…", prefill: "tell " + nm + " " });
+            acts.push({ label: "Follow", cmd: "follow " + nm });
+            acts.push({ label: "Group", cmd: "group " + nm });
+        }
+        acts.push({ label: "Attack", cmd: "kill " + o.handle, danger: true });
+        acts.push({ label: (S.tgtHostile && S.tgtHostile.handle === o.handle ? "✓ " : "") + "Target ⚔ (offensive)", fn: function () { setTarget("tgtHostile", o); } });
+        acts.push({ label: (S.tgtFriendly && S.tgtFriendly.handle === o.handle ? "✓ " : "") + "Target ✚ (beneficial)", fn: function () { setTarget("tgtFriendly", o); } });
+        return acts;
+    }
+
+    function itemActions(ds) {
+        var t = ds.target, name = ds.name || t, otype = ds.otype, kind = ds.kind, container = ds.container;
+        var acts = [{ label: "Examine", cmd: "examine " + t }];
+        if (kind === "content") {
+            acts.push({ label: "Get", cmd: "get " + t + " from " + container });
+            return acts;
+        }
+        if (otype === "container") {
+            if (ds.closeable) acts.push(ds.closed ? { label: "Open", cmd: "open " + t } : { label: "Close", cmd: "close " + t });
+            if (!ds.closed) acts.push({ label: "Get all from", cmd: "get all from " + t });
+        } else {
+            var verb = TYPE_VERB[otype];
+            if (verb) acts.push({ label: TYPE_VERB_LABEL[verb], cmd: verb + " " + t });
+        }
+        if (kind === "equip") {
+            acts.push({ label: "Remove", cmd: "remove " + t });
+        } else {
+            // Put into any open, carried container.
+            openContainers().forEach(function (c) {
+                if (c.target !== t) acts.push({ label: "Put in " + c.shortName, cmd: "put " + t + " into " + c.target });
+            });
+            acts.push({ label: "Drop", cmd: "drop " + t });
+            acts.push({ label: "Sacrifice", cmd: "sacrifice " + t, danger: true });
+        }
+        return acts;
+    }
+    function openContainers() {
+        var out = [];
+        function scan(list) {
+            (list || []).forEach(function (it) {
+                if (it.type === "container" && !it.closed) {
+                    out.push({ target: targetOf(it.keywords || it.name), shortName: (String(it.name).split(/\s+/).pop() || "bag").slice(0, 10) });
+                }
+            });
+        }
+        if (S.inventory) scan(S.inventory.items);
+        scan(S.equipment);
+        return out;
+    }
+    function componentActions(ds) {
+        return [
+            { label: "Withdraw from pouch", cmd: "get " + ds.target + " pouch" },
+            { label: "Deposit to pouch", cmd: "put " + ds.target + " pouch" },
+            { label: "Examine", cmd: "examine " + ds.target }
+        ];
+    }
+    function abilityActions(s, anchorName) {
+        if (!s) return [];
+        var fav = !!favorites[nameOf(s.name).toLowerCase()];
+        return [
+            { label: s.type === "spell" ? "Cast" : "Use", fn: function () { sendCmd(abilityCommand(s)); } },
+            { label: "Look up", cmd: "skill search " + nameOf(s.name) },
+            { label: fav ? "Unpin from quick bar" : "Pin to quick bar", fn: function () { toggleFavorite(s.name); } }
+        ];
+    }
+
+    // ------------------------------------------------------------------
+    // Interaction (delegated)
     // ------------------------------------------------------------------
     function onAppClick(e) {
+        // 1) Collapse toggles.
+        var col = e.target.closest("[data-collapse]");
+        if (col && dom.app.contains(col)) {
+            var key = col.getAttribute("data-collapse");
+            collapsed[key] = !collapsed[key];
+            saveSet("ishar.collapsed", collapsed);
+            rerenderPanel(key);
+            e.preventDefault();
+            return;
+        }
+        // 2) Ability chip filters + star.
+        var chip = e.target.closest("[data-abtype],[data-abusable]");
+        if (chip && dom.app.contains(chip)) {
+            if (chip.hasAttribute("data-abtype")) abilityFilter.type = chip.getAttribute("data-abtype");
+            else abilityFilter.usableOnly = !abilityFilter.usableOnly;
+            persistAbilityFilter();
+            renderAbilities();
+            return;
+        }
+        var star = e.target.closest("[data-fav]");
+        if (star && dom.app.contains(star)) { toggleFavorite(star.getAttribute("data-fav")); return; }
+
+        // 3) Ability cast (hotbar button or abilities row) — not the star.
+        var ab = e.target.closest("[data-ability]");
+        if (ab && dom.app.contains(ab) && !e.target.closest("[data-fav]") && !e.target.closest(".row-more")) {
+            var s = skillById(ab.getAttribute("data-ability"));
+            if (s) {
+                if (abilityBlock(s) && ab.classList.contains("skill")) return;   // hotbar: inert when blocked
+                sendCmd(abilityCommand(s));
+            }
+            return;
+        }
+
+        // 4) Context-menu openers (row body or its ⋯ button).
+        var more = e.target.closest(".row-more");
+        var menuHost = e.target.closest("[data-menu]");
+        if (menuHost && dom.app.contains(menuHost)) {
+            var anchor = more || menuHost;
+            openHostMenu(menuHost, anchor);
+            e.preventDefault();
+            return;
+        }
+
+        // 5) Plain data-cmd / data-prefill (exits, group buttons, header List…).
         var t = e.target.closest("[data-cmd],[data-prefill]");
         if (!t || !dom.app.contains(t)) return;
-        // Acting from the phone sheet dismisses it — the result of the tap
-        // (a move, a tell prefill) is in the terminal / input underneath.
         var fromSheet = sheetName && dom.sheetBody && dom.sheetBody.contains(t);
-        if (t.hasAttribute("data-prefill")) {
+        if (t.hasAttribute("data-prefill") && t.getAttribute("data-prefill")) {
             api.prefill(t.getAttribute("data-prefill"));
             if (fromSheet) setSheet(null);
             return;
         }
         var cmd = safeCmd(t.getAttribute("data-cmd"));
-        if (cmd) {
-            api.send(cmd);
-            if (fromSheet) setSheet(null);
+        if (cmd) { api.send(cmd); if (fromSheet) setSheet(null); }
+    }
+
+    function openHostMenu(host, anchor) {
+        var kind = host.getAttribute("data-menu");
+        if (kind === "occupant") {
+            var o = (S.occupants || [])[Number(host.getAttribute("data-idx"))];
+            if (o) openMenu(o.short_desc || o.keyword, occupantActions(o), anchor);
+        } else if (kind === "item") {
+            var ds = readDataset(host);
+            openMenu(ds.name || ds.target, itemActions(ds), anchor);
+        } else if (kind === "component") {
+            var cds = readDataset(host);
+            openMenu(cds.name || cds.target, componentActions(cds), anchor);
+        } else if (kind === "ability") {
+            var s2 = skillById(host.getAttribute("data-ability"));
+            if (s2) openMenu(s2.name, abilityActions(s2), anchor);
         }
+    }
+    function readDataset(host) {
+        return {
+            target: host.getAttribute("data-target") || "",
+            name: host.getAttribute("data-name") || "",
+            otype: host.getAttribute("data-otype") || "",
+            kind: host.getAttribute("data-kind") || "item",
+            container: host.getAttribute("data-container") || "",
+            closeable: host.getAttribute("data-closeable") === "1",
+            closed: host.getAttribute("data-closed") === "1"
+        };
+    }
+    // Right-click opens the same menu on desktop.
+    function onAppContext(e) {
+        var host = e.target.closest("[data-menu]");
+        if (!host || !dom.app.contains(host)) return;
+        e.preventDefault();
+        openHostMenu(host, host);
+    }
+
+    // Re-render just the panel that owns a collapse key.
+    function rerenderPanel(key) {
+        switch (key) {
+            case "occupants": renderOccupants(); break;
+            case "equipment": renderEquipment(); break;
+            case "inventory": case "components": renderInventory(); break;
+            case "train": renderTrain(); break;
+            default: renderAll();
+        }
+        api.onLayoutChange();
     }
 
     // ------------------------------------------------------------------
     // Layout modes: panel placement, phone sheet, desktop columns
     // ------------------------------------------------------------------
-
-    // Panels are single DOM nodes (render functions target them by id);
-    // they move between their desktop column and the phone sheet.
     function placePanels() {
         var mobile = mqMobile.matches;
         PANELS.forEach(function (n) {
             var p = document.getElementById("panel-" + n);
             if (!p) return;
             var home = mobile ? dom.sheetBody : document.getElementById(PANEL_HOME[n]);
-            if (p.parentNode !== home) home.appendChild(p);
+            if (home && p.parentNode !== home) home.appendChild(p);
         });
         if (!mobile && sheetName) setSheet(null);
+        updateRoseOverlay();
     }
 
     function setSheet(name) {
@@ -628,26 +1282,23 @@
         if (dom.sheet) dom.sheet.hidden = !name;
         if (dom.sheetTitle) dom.sheetTitle.textContent = title;
         dom.app.classList.toggle("sheet-open", !!name);
-        if (name === "chat") {
-            markChatUnread(false);
-            dom.chat.scrollTop = dom.chat.scrollHeight;
-        }
+        if (name === "chat") { markChatUnread(false); dom.chat.scrollTop = dom.chat.scrollHeight; }
+        if (name === "abilities") renderAbilities();   // refresh cooldown/mana greying on open
     }
-
     function chatVisible() {
         if (!hudOn) return false;
         return mqMobile.matches ? sheetName === "chat" : activeTab === "chat";
     }
-
-    function markChatUnread(on) {
-        ["#hud-dock button[data-panel=\"chat\"]", "#hud-tabs button[data-tab=\"chat\"]"]
-            .forEach(function (sel) {
-                var b = document.querySelector(sel);
-                if (b) b.classList.toggle("unread", !!on);
-            });
+    function abilitiesVisible() {
+        if (!hudOn) return false;
+        return mqMobile.matches ? sheetName === "abilities" : activeTab === "abilities";
     }
-
-    // Desktop column collapse (persisted). Pressed = open.
+    function markChatUnread(on) {
+        ['#hud-dock button[data-panel="chat"]', '#hud-tabs button[data-tab="chat"]'].forEach(function (sel) {
+            var b = document.querySelector(sel);
+            if (b) b.classList.toggle("unread", !!on);
+        });
+    }
     function setCol(side, open, persist) {
         dom.app.classList.toggle(side === "left" ? "l-closed" : "r-closed", !open);
         var btn = document.getElementById(side === "left" ? "col-left" : "col-right");
@@ -657,22 +1308,18 @@
         }
         api.onLayoutChange();
     }
-
     function setTab(name) {
         activeTab = name;
-        ["status", "chat", "who"].forEach(function (n) {
+        ["status", "abilities", "chat", "who"].forEach(function (n) {
             var p = document.getElementById("panel-" + n);
             if (p) p.classList.toggle("tab-active", n === name);
             var b = document.querySelector('#hud-tabs button[data-tab="' + n + '"]');
             if (b) b.classList.toggle("active", n === name);
         });
-        if (name === "chat") {
-            markChatUnread(false);
-            dom.chat.scrollTop = dom.chat.scrollHeight;
-        }
+        if (name === "chat") { markChatUnread(false); dom.chat.scrollTop = dom.chat.scrollHeight; }
+        if (name === "abilities") renderAbilities();   // refresh cooldown/mana greying on open
         try { localStorage.setItem("ishar.tab", name); } catch (e) {}
     }
-
     function setHud(on, persist) {
         hudOn = on;
         dom.app.classList.toggle("hud-on", on);
@@ -680,38 +1327,28 @@
         var btn = document.getElementById("ui-toggle");
         if (btn) {
             btn.setAttribute("aria-pressed", on ? "true" : "false");
-            // Swap only the label so the button's icon survives.
             var label = btn.querySelector(".ui-toggle-label") || btn;
-            label.textContent = on
-                ? (btn.getAttribute("data-label-on") || "Hide UI")
-                : (btn.getAttribute("data-label-off") || "Show UI");
+            label.textContent = on ? (btn.getAttribute("data-label-on") || "Hide UI") : (btn.getAttribute("data-label-off") || "Show UI");
         }
-        if (persist !== false) {
-            try { localStorage.setItem("ishar.hud", on ? "1" : "0"); } catch (e) {}
-        }
+        if (persist !== false) { try { localStorage.setItem("ishar.hud", on ? "1" : "0"); } catch (e) {} }
+        updateRoseOverlay();
         api.onLayoutChange();
     }
-
-    function setConnected(on) {
-        S.connected = !!on;
-        renderVitals();
-    }
+    function setConnected(on) { S.connected = !!on; renderVitals(); }
 
     function restorePrefs() {
-        var saved = null, tab = null, colL = null, colR = null;
+        var saved = null, tab = null, colL = null, colR = null, rose = null;
         try {
             saved = localStorage.getItem("ishar.hud");
             tab = localStorage.getItem("ishar.tab");
             colL = localStorage.getItem("ishar.colL");
             colR = localStorage.getItem("ishar.colR");
+            rose = localStorage.getItem("ishar.roseOverlay");
         } catch (e) {}
-        if (tab) activeTab = tab;
-        // The HUD is a first-class default; opting out via the toggle is
-        // honored and persisted.
+        if (tab && ["status", "abilities", "chat", "who"].indexOf(tab) !== -1) activeTab = tab;
+        roseOverlayOn = rose !== "0";
         setHud(saved !== "0");
         setTab(activeTab);
-        // Columns: on mid-width screens the left column starts collapsed so
-        // the terminal keeps its width; explicit choices win over defaults.
         setCol("left", colL != null ? colL === "1" : mqWide.matches, false);
         setCol("right", colR != null ? colR === "1" : true, false);
     }
@@ -720,18 +1357,15 @@
     // Lifecycle
     // ------------------------------------------------------------------
     function renderAll() {
-        renderVitals(); renderRoom(); renderEquipment(); renderInventory();
-        renderTrain(); renderStatus(); renderWho(); renderChat(); renderHotbar();
+        renderVitals(); renderRoom(); renderOccupants(); renderEquipment(); renderInventory();
+        renderTrain(); renderStatus(); renderWho(); renderChat(); renderHotbar(); renderAbilities();
     }
-
     function reset() {
-        // S.chat deliberately survives: chat is *history*, not game state —
-        // a reconnect re-feeds everything else via GMCP but can't replay
-        // what people said.
         S.vitals = null; S.status = null; S.time = null; S.room = null;
         S.equipment = []; S.inventory = null; S.train = null;
-        S.affects = null; S.group = null; S.who = null;
+        S.affects = null; S.group = null; S.who = null; S.occupants = [];
         S.skills = []; S.cooldownExpiry = {}; S.usable = {};
+        S.tgtHostile = null; S.tgtFriendly = null;
         lastVitalsBody = null;
         renderAll();
     }
@@ -746,10 +1380,12 @@
         dom.app = document.getElementById("connect-app");
         dom.vitals = document.getElementById("vitals-bar");
         dom.room = document.getElementById("panel-room");
+        dom.occupants = document.getElementById("panel-occupants");
         dom.equipment = document.getElementById("panel-equipment");
         dom.inventory = document.getElementById("panel-inventory");
         dom.train = document.getElementById("panel-train");
         dom.status = document.getElementById("panel-status");
+        dom.abilities = document.getElementById("panel-abilities");
         dom.chat = document.getElementById("panel-chat");
         dom.who = document.getElementById("panel-who");
         dom.hotbar = document.getElementById("hud-hotbar");
@@ -757,8 +1393,11 @@
         dom.sheet = document.getElementById("hud-sheet");
         dom.sheetBody = document.getElementById("hud-sheet-body");
         dom.sheetTitle = document.getElementById("hud-sheet-title");
+        dom.menu = document.getElementById("hud-menu");
+        dom.roseOverlay = document.getElementById("rose-overlay");
 
         dom.app.addEventListener("click", onAppClick);
+        dom.app.addEventListener("contextmenu", onAppContext);
 
         var tabs = document.getElementById("hud-tabs");
         if (tabs) tabs.addEventListener("click", function (e) {
@@ -772,25 +1411,31 @@
             setHud(!hudOn);
         });
 
-        // Phone dock: tap opens that panel's sheet; tapping again closes it.
         if (dom.dock) dom.dock.addEventListener("click", function (e) {
             var b = e.target.closest("button[data-panel]");
-            if (b) {
-                var n = b.getAttribute("data-panel");
-                setSheet(n === sheetName ? null : n);
-            }
+            if (b) { var n = b.getAttribute("data-panel"); setSheet(n === sheetName ? null : n); }
         });
         var sheetClose = document.getElementById("hud-sheet-close");
         if (sheetClose) sheetClose.addEventListener("click", function () { setSheet(null); });
 
-        // A tap outside the sheet (e.g. on the terminal) dismisses it.
+        // Mobile rose overlay toggle button.
+        var roseBtn = document.getElementById("rose-toggle");
+        if (roseBtn) roseBtn.addEventListener("click", function () {
+            roseOverlayOn = !roseOverlayOn;
+            try { localStorage.setItem("ishar.roseOverlay", roseOverlayOn ? "1" : "0"); } catch (e) {}
+            roseBtn.setAttribute("aria-pressed", roseOverlayOn ? "true" : "false");
+            updateRoseOverlay();
+        });
+
+        // Outside tap dismisses the sheet and any open menu.
         document.addEventListener("click", function (e) {
+            if (menuOpen && !dom.menu.contains(e.target) && !e.target.closest("[data-menu],.row-more")) closeMenu();
             if (!sheetName || !mqMobile.matches) return;
             if (dom.sheet.contains(e.target) || dom.dock.contains(e.target)) return;
+            if (dom.menu.contains(e.target)) return;
             setSheet(null);
         });
 
-        // Desktop column toggles.
         var colBtns = { left: document.getElementById("col-left"), right: document.getElementById("col-right") };
         ["left", "right"].forEach(function (side) {
             if (colBtns[side]) colBtns[side].addEventListener("click", function () {
@@ -798,7 +1443,6 @@
             });
         });
 
-        // Move panels between the columns and the sheet on viewport change.
         placePanels();
         var onMq = function () { placePanels(); api.onLayoutChange(); };
         if (mqMobile.addEventListener) mqMobile.addEventListener("change", onMq);
@@ -807,51 +1451,72 @@
         restorePrefs();
         renderAll();
 
-        // One ticker drives countdowns (affects) and cooldown/usability
-        // refresh on the hotbar without per-message churn.
         setInterval(function () {
             var t = now();
             var times = dom.status.querySelectorAll(".aff-time[data-expiry]");
-            if (times.forEach) times.forEach(function (el) {
-                el.textContent = fmtDur(parseFloat(el.getAttribute("data-expiry")) - t);
+            if (times.forEach) times.forEach(function (e) {
+                e.textContent = fmtDur(parseFloat(e.getAttribute("data-expiry")) - t);
             });
             if (S.skills.length) tickHotbar();
         }, 1000);
     }
 
     // ------------------------------------------------------------------
-    // Demo mode — inject representative sample feeds so the full UX can be
-    // reviewed without a GMCP-enabled server. Triggered by /connect?demo=1.
+    // Demo mode (/connect?demo=1)
     // ------------------------------------------------------------------
     function demo() {
         setHud(true, false);
+        var bigSkills = [
+            { id: 1, name: "fireball", type: "spell", percent: 91, usable: true, category: "damage", target_type: "offensive", mana_pct: 30, min_position: "Standing" },
+            { id: 2, name: "heal", type: "spell", percent: 78, usable: true, category: "heal", target_type: "defensive", mana_pct: 40, min_position: "Standing" },
+            { id: 3, name: "kick", type: "skill", percent: 65, usable: false, category: "damage", target_type: "none", min_position: "Fighting" },
+            { id: 4, name: "meditate", type: "skill", percent: 50, usable: true, category: "misc", target_type: "none", min_position: "Sitting" },
+            { id: 5, name: "lightning bolt", type: "spell", percent: 88, usable: true, category: "damage", target_type: "offensive", mana_pct: 25, min_position: "Standing" },
+            { id: 6, name: "cure serious", type: "spell", percent: 82, usable: true, category: "heal", target_type: "defensive", mana_pct: 20, min_position: "Standing" },
+            { id: 7, name: "bless", type: "spell", percent: 70, usable: true, category: "misc", target_type: "defensive", mana_pct: 15, min_position: "Standing" },
+            { id: 8, name: "sanctuary", type: "spell", percent: 60, usable: true, category: "misc", target_type: "defensive", mana_pct: 50, min_position: "Standing" },
+            { id: 9, name: "disarm", type: "skill", percent: 45, usable: true, category: "damage", target_type: "none", min_position: "Fighting" },
+            { id: 10, name: "second attack", type: "passive", percent: 75, usable: false, category: "misc", target_type: "none", min_position: "Standing" }
+        ];
+        // Pad to demonstrate the immortal overflow the browser now bounds.
+        for (var i = 11; i <= 90; i++) bigSkills.push({ id: i, name: "spell " + i, type: (i % 3 ? "spell" : "skill"), percent: 40 + (i % 60), usable: (i % 4 !== 0), category: ["damage", "heal", "misc"][i % 3], target_type: ["offensive", "defensive", "none"][i % 3], mana_pct: 20 + (i % 40), min_position: "Standing" });
+
         var feeds = {
             "Char.Status": { name: "Aelwyn", "class": "Magician", race: "Elf", position: "Standing", level: 45, align: 350, xp: 1250000, tnl: 48000, gold: 18230, bank: 500000, remort: 3 },
             "Char.Vitals": { hp: 412, maxhp: 480, mp: 255, maxmp: 300, move: 198, maxmove: 240, position: "Standing", opponent_hp_pct: 35, metamagic: 60, metamagic_max: 100, metamagic_regen: 5 },
             "Game.Time": { hour: 21, hour12: 9, ampm: "pm", day: 14, day_name: "Sunday", month: 6, month_name: "the Long Shadows", year: 1247, night: true, season_id: 15, season_end: 0, events: [{ name: "Double Essence", seconds: 5400 }, { name: "Festival of Flames" }], moons: [{ name: "Lune (waxing)" }, { name: "Sable (full)" }] },
             "Room.Info": { num: 3001, name: "The Grand Concourse", area: "Ishar Nexus", environment: "City", exits: { n: 3002, e: 3005, s: 3008, w: 3010, u: 3100, d: 3200, into: 3500 } },
+            "Room.Occupants": { occupants: [
+                { keyword: "guard", short_desc: "a towering city guard", handle: "1.guard", is_player: false, is_dead: false, hostile_hint: "neutral" },
+                { keyword: "pigeon", short_desc: "a small grey pigeon", handle: "1.pigeon", is_player: false, is_dead: false, hostile_hint: "neutral" },
+                { keyword: "thug", short_desc: "a scarred alley thug", handle: "1.thug", is_player: false, is_dead: false, hostile_hint: "hostile" },
+                { keyword: "merchant", short_desc: "Hadeon the curio merchant", handle: "1.merchant", is_player: false, is_dead: false, hostile_hint: "neutral" },
+                { keyword: "Boric", short_desc: "Boric, Shield of the Dawn", handle: "1.Boric", is_player: true, is_dead: false, hostile_hint: "friendly" },
+                { keyword: "rat", short_desc: "the corpse of a sewer rat", handle: "1.rat", is_player: false, is_dead: true, hostile_hint: "neutral" }
+            ] },
             "Char.Equipment": { items: [
-                { name: "a magnificent helmet of red dragonscales", keywords: "helmet dragonscales", type: "armor", vnum: 1, location: "Head", condition: "pristine" },
-                { name: "emberforged gauntlets", keywords: "gauntlets emberforged", type: "armor", vnum: 2, location: "Hands", condition: "worn" },
-                { name: "a talon-barbed whip", keywords: "whip talon", type: "weapon", vnum: 3, location: "Wielding" }
+                { name: "a magnificent helmet of red dragonscales", keywords: "helmet dragonscales", type: "armor", vnum: 1, location: "Head", condition: 100 },
+                { name: "emberforged gauntlets", keywords: "gauntlets emberforged", type: "armor", vnum: 2, location: "Hands", condition: 62 },
+                { name: "a talon-barbed whip", keywords: "whip talon", type: "weapon", vnum: 3, location: "Wielding", condition: 35 }
             ] },
             "Char.Inventory": { items: [
                 { name: "a glowing potion", keywords: "potion glowing", type: "potion", vnum: 10, count: 3 },
+                { name: "a scroll of recall", keywords: "scroll recall", type: "scroll", vnum: 12, count: 1 },
                 { name: "a leather sack", keywords: "sack leather", type: "container", vnum: 11, count: 1, closeable: true, closed: false, contents: [{ name: "a brass key", keywords: "key brass", count: 1 }] }
-            ], coins: [{ name: "gold", vnum: 0, count: 18230 }], components: [{ name: "a pinch of sulfur", keywords: "sulfur pinch", count: 7 }] },
-            "Char.Affects": { buffs: [{ name: "Stoneskin", id: 101, duration: 1800 }, { name: "Haste", id: 102, duration: 240 }], debuffs: [{ name: "Poison", id: 201, duration: 45 }], maintained: [{ name: "Detect Invisibility", id: 301, duration: 600, target: "self" }] },
+            ], coins: [{ name: "gold", vnum: 0, count: 18230 }], components: [
+                { name: "a pinch of sulfur", keywords: "sulfur pinch", count: 7 },
+                { name: "a vial of powdered silver", keywords: "silver vial powdered", count: 3 },
+                { name: "a sprig of nightshade", keywords: "nightshade sprig", count: 12 },
+                { name: "a shard of frost quartz", keywords: "quartz frost shard", count: 5 }
+            ] },
+            "Char.Affects": { buffs: [{ name: "Stoneskin", id: 101, duration: 1800 }, { name: "Haste", id: 102, duration: 240 }], debuffs: [{ name: "Poison", id: 201, duration: 45 }], maintained: [{ name: "Detect Invisibility", id: 301, duration: 600, target: "self" }, { name: "Shroud", id: 302, duration: 900, target: "Boric", skill: "shroud", handle: "1.boric", releasable: true }] },
             "Group.Update": { leader: "Aelwyn", size: 2, members: [
                 { name: "Aelwyn", level: 45, hp_pct: 86, mp_pct: 85, mv_pct: 82, position: "Standing", race: "Elf", "class": "Magician", leader: true },
                 { name: "Boric", level: 43, hp_pct: 60, mp_pct: 40, mv_pct: 75, position: "Fighting", race: "Dwarf", "class": "Warrior", leader: false }
             ] },
-            "Char.Skills": { skills: [
-                { id: 1, name: "fireball", type: "spell", percent: 91, usable: true, category: "damage" },
-                { id: 2, name: "heal", type: "spell", percent: 78, usable: true, category: "heal" },
-                { id: 3, name: "kick", type: "skill", percent: 65, usable: false, category: "damage" },
-                { id: 4, name: "meditate", type: "skill", percent: 50, usable: true, category: "misc" }
-            ] },
+            "Char.Skills": { skills: bigSkills },
             "Char.Cooldowns": { cooldowns: [{ id: 3, remaining: 8 }], usable: { "3": false } },
-            "Char.Train": { stats: [{ name: "Str", value: 18, add: 2 }, { name: "Int", value: 25 }, { name: "Wis", value: 20 }], xp: 1250000, xp_pct: 62, can_advance: true, aux: [{ label: "Crit", value: "12.5% (+2%)" }], resources: [{ label: "Practices", value: 5, max: 10 }, { label: "Trains", value: 2, max: 2 }] }
+            "Char.Train": { stats: [{ name: "Str", value: 18, add: 2 }, { name: "Int", value: 25 }, { name: "Wis", value: 20 }], xp: 1250000, xp_pct: 62, can_advance: true, aux: [{ name: "Crit", value: "12.5% (+2%)" }], resources: [{ name: "Practices", value: 5, max: 10 }, { name: "Trains", value: 2, max: 2 }] }
         };
         Object.keys(feeds).forEach(function (k) { onGmcp(k, JSON.stringify(feeds[k])); });
         [

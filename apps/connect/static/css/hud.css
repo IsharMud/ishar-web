@@ -2,12 +2,11 @@
  * Ishar browser-client HUD layout + widgets.
  *
  * The session owns the viewport. Desktop is a three-region dashboard —
- * individually collapsible side columns around a terminal that always
- * gets the leftover space. Phones are terminal-first: panels live behind
- * a thumb-reach bottom dock and open one at a time as a bottom sheet
- * over the terminal (hud.js re-parents the panel sections between the
- * columns and the sheet on viewport change). In .hud-off the grid
- * collapses to just the terminal everywhere.
+ * individually collapsible side columns around a terminal that always gets the
+ * leftover space; the compass rose is pinned to the bottom of the left column.
+ * Phones are terminal-first: panels live behind a thumb-reach bottom dock and
+ * open one at a time as a bottom sheet, plus a translucent tap-to-move rose
+ * overlaid on the terminal. In .hud-off the grid collapses to just the terminal.
  *
  * Colors come from the shared design tokens (--ac-*, defined in
  * apps/core/static/css/style.css and loaded on every page — see
@@ -16,19 +15,18 @@
  */
 
 :root {
-    /* Vitals — the classic MUD triple, mapped onto the shared semantics. */
     --hud-hp: var(--ac-danger);
     --hud-mp: var(--ac-info);
     --hud-mv: var(--ac-ok);
-    /* Resources & world flavor (HUD-only hues). */
-    --hud-gold: #cdcd00;                    /* XP / currency */
+    --hud-gold: #cdcd00;
     --hud-gold-wash: rgba(205, 205, 0, .1);
-    --hud-tgt: #a0408a;                     /* opponent health */
-    --hud-mm: #a05ad0;                      /* metamagic */
-    --hud-edge: #d08a3a;                    /* edge resource */
-    --hud-event: #e8b04b;                   /* world event flags */
-    --hud-moon: #9aa6c8;                    /* moon phases */
-    /* Layout */
+    --hud-tgt: #a0408a;
+    --hud-mm: #a05ad0;
+    --hud-edge: #d08a3a;
+    --hud-event: #e8b04b;
+    --hud-moon: #9aa6c8;
+    --hud-hostile: #d64b4b;
+    --hud-friendly: #4cbb17;
     --hud-dock-h: 3.5rem;
 }
 
@@ -43,7 +41,7 @@ body.connect-page #logo { height: 2.4rem; }
 body.connect-page .navbar { padding-top: .25rem; padding-bottom: .25rem; }
 body.connect-page main > nav[aria-label="breadcrumb"] { display: none; }
 body.connect-page footer { display: none; }
-body.connect-page #content { padding: .5rem !important; } /* the p-* utilities are !important */
+body.connect-page #content { padding: .5rem !important; }
 
 /* ----- App grid ----- */
 #connect-app {
@@ -52,20 +50,16 @@ body.connect-page #content { padding: .5rem !important; } /* the p-* utilities a
     color: var(--ac-text);
     /* height is set by JS (fitAppHeight) */
 }
-
 #connect-app.hud-off {
     grid-template-columns: 1fr;
     grid-template-rows: auto minmax(0, 1fr);
     grid-template-areas: "topbar" "center";
 }
-
-/* Phone-first: terminal + dock; panels live in the bottom sheet. */
 #connect-app.hud-on {
     grid-template-columns: 1fr;
     grid-template-rows: auto minmax(0, 1fr) auto;
     grid-template-areas: "topbar" "center" "dock";
 }
-
 #hud-topbar { grid-area: topbar; }
 #hud-left   { grid-area: left; }
 #hud-center { grid-area: center; }
@@ -77,33 +71,34 @@ body.connect-page #content { padding: .5rem !important; } /* the p-* utilities a
 .hud-off #hud-hotbar,
 .hud-off #hud-dock,
 .hud-off #hud-sheet,
+.hud-off #hud-menu,
+.hud-off #rose-overlay,
+.hud-off #rose-toggle,
 .hud-off .col-toggle,
 .hud-off #vitals-bar { display: none; }
 
 @media (max-width: 767.98px) {
     #connect-app { gap: 4px; }
-    /* Columns are empty shells on phones (panels re-parent into the sheet). */
     #connect-app.hud-on #hud-left,
     #connect-app.hud-on #hud-right { display: none; }
 }
 
 /* Desktop: collapsible columns around the terminal. */
 @media (min-width: 768px) {
-    #hud-dock, #hud-sheet { display: none !important; }
-
+    #hud-dock, #hud-sheet, #rose-overlay, #rose-toggle { display: none !important; }
     #connect-app.hud-on {
-        grid-template-columns: minmax(190px, 225px) minmax(0, 1fr) minmax(210px, 250px);
+        grid-template-columns: minmax(200px, 235px) minmax(0, 1fr) minmax(220px, 260px);
         grid-template-rows: auto minmax(0, 1fr);
         grid-template-areas:
             "topbar topbar topbar"
             "left   center right";
     }
     #connect-app.hud-on.l-closed {
-        grid-template-columns: minmax(0, 1fr) minmax(210px, 250px);
+        grid-template-columns: minmax(0, 1fr) minmax(220px, 260px);
         grid-template-areas: "topbar topbar" "center right";
     }
     #connect-app.hud-on.r-closed {
-        grid-template-columns: minmax(190px, 225px) minmax(0, 1fr);
+        grid-template-columns: minmax(200px, 235px) minmax(0, 1fr);
         grid-template-areas: "topbar topbar" "left center";
     }
     #connect-app.hud-on.l-closed.r-closed {
@@ -115,22 +110,21 @@ body.connect-page #content { padding: .5rem !important; } /* the p-* utilities a
 }
 @media (min-width: 1200px) {
     #connect-app.hud-on {
-        grid-template-columns: minmax(205px, 250px) minmax(0, 1fr) minmax(230px, 290px);
+        grid-template-columns: minmax(215px, 260px) minmax(0, 1fr) minmax(240px, 300px);
     }
     #connect-app.hud-on.r-closed {
-        grid-template-columns: minmax(205px, 250px) minmax(0, 1fr);
+        grid-template-columns: minmax(215px, 260px) minmax(0, 1fr);
     }
 }
 
 /* ----- Top bar ----- */
-/* One non-wrapping status row; the world line is a full-width second row
-   (#vitals-bar is display:contents so renderVitals' groups order freely). */
 #hud-topbar {
     display: flex;
     align-items: center;
     gap: 10px;
     flex-wrap: wrap;
     padding: 2px 4px;
+    position: relative;
 }
 #vitals-bar { display: contents; }
 
@@ -173,7 +167,6 @@ body.connect-page #content { padding: .5rem !important; } /* the p-* utilities a
     .status-text, .v-res, .v-world, .ui-toggle-label,
     .topbar-actions .col-toggle { display: none; }
     .v-name { max-width: 9rem; }
-    /* Bars take their own compact full-width row under the identity row. */
     .v-bars { order: 6; flex-basis: 100%; min-width: 0; flex-wrap: wrap; gap: 6px; }
 }
 
@@ -201,43 +194,85 @@ body.connect-page #content { padding: .5rem !important; } /* the p-* utilities a
     .vbar-track { height: 14px; }
 }
 
-/* ----- Columns / panels ----- */
-.hud-col {
+/* ----- Left column: scrolling stack + pinned compass rose ----- */
+#hud-left {
     display: flex; flex-direction: column; gap: 6px;
-    overflow-y: auto; overflow-x: hidden; min-height: 0; padding-right: 2px;
+    min-height: 0; overflow: hidden;
 }
+#hud-left-scroll {
+    flex: 1 1 auto; min-height: 0;
+    overflow-y: auto; overflow-x: hidden;
+    display: flex; flex-direction: column; gap: 6px; padding-right: 2px;
+}
+#panel-room.panel-rose { flex: 0 0 auto; }
+
+/* ----- Panels ----- */
 .panel {
     background: var(--ac-panel); border: 1px solid var(--ac-border);
-    border-radius: var(--ac-radius-sm); padding: 6px 8px;
+    border-radius: var(--ac-radius-sm); padding: 0;
 }
+/* Collapsible header: a container row with a toggle button + optional actions. */
 .panel-h {
-    font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em;
-    color: var(--ac-accent); margin: 0 0 5px; border-bottom: 1px solid var(--ac-border); padding-bottom: 3px;
+    display: flex; align-items: center; gap: 4px; width: 100%;
+    border-bottom: 1px solid var(--ac-border);
 }
-.sub-h { font-size: .68rem; font-weight: 700; color: var(--ac-dim); text-transform: uppercase; margin: 7px 0 3px; }
+.panel-h-toggle {
+    flex: 1; min-width: 0;
+    display: flex; align-items: center; gap: 5px;
+    font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em;
+    color: var(--ac-accent);
+    background: none; border: 0; padding: 6px 8px; margin: 0; cursor: pointer; text-align: left;
+}
+.panel-h-toggle:hover { color: var(--ac-accent-2); }
+.panel-caret { flex: none; width: .8rem; font-size: .7rem; color: var(--ac-dim); }
+.panel-h-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.panel-h-actions { flex: none; display: flex; gap: 4px; padding-right: 6px; }
+.panel-h-btn {
+    font-size: .64rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+    padding: 2px 7px; cursor: pointer;
+    background: var(--ac-elev); color: var(--ac-text);
+    border: 1px solid var(--ac-border); border-radius: 3px;
+}
+.panel-h-btn:hover { border-color: var(--ac-accent); color: var(--ac-accent); }
+/* Panel bodies get the inner padding the header spans full-bleed over. */
+.panel > *:not(.panel-h):not(.rose-head):not(.rose-body) { margin-left: 8px; margin-right: 8px; }
+.panel > ul.row-list, .panel > ul.kv, .panel > ul.aff-list, .panel > ul.grp-list,
+.panel > ul.who-list, .panel > ul.occ-list { margin-top: 5px; margin-bottom: 6px; }
+.panel > .panel-empty { margin: 6px 8px; }
+
+.sub-h { font-size: .68rem; font-weight: 700; color: var(--ac-dim); text-transform: uppercase; margin: 7px 8px 3px; }
+.sub-h.collapse {
+    display: flex; align-items: center; gap: 4px; width: calc(100% - 16px);
+    background: none; border: 0; cursor: pointer; text-align: left; padding: 4px 0;
+}
+.sub-h.collapse:hover { color: var(--ac-text); }
 .panel-empty { color: var(--ac-dim); font-size: .8rem; font-style: italic; padding: 2px 0; }
 .dim { color: var(--ac-dim); font-size: .82em; }
+.tag { font-size: .68rem; color: var(--ac-dim); background: var(--ac-bg); border-radius: 3px; padding: 0 4px; }
+.tag.cond-ok { color: var(--ac-ok); }
+.tag.cond-mid { color: var(--hud-edge); }
+.tag.cond-low { color: var(--ac-danger); }
 
 /* ----- Center column ----- */
-#hud-center { display: flex; flex-direction: column; gap: 6px; min-height: 0; }
-#terminal-wrapper { position: relative; flex: 1; min-height: 0; }
-/* True black on purpose — matches the xterm theme background, not a surface token. */
-#terminal-container { height: 100%; background: #000; border-radius: var(--ac-radius-sm); }
+/* min-width:0 stops the terminal cell from being sized by its content's
+   intrinsic width (grid/flex children default to min-width:auto), which would
+   let a wide line push the whole column past the viewport and drag the
+   tap-to-move overlay off-screen with it. */
+#hud-center { display: flex; flex-direction: column; gap: 6px; min-height: 0; min-width: 0; }
+#terminal-wrapper { position: relative; flex: 1; min-height: 0; min-width: 0; overflow: hidden; }
+#terminal-container { height: 100%; background: #000; border-radius: var(--ac-radius-sm); overflow: hidden; }
 #terminal-container .xterm { height: 100%; padding: 4px; }
 #command-form { display: flex; gap: 8px; align-items: center; position: relative; }
-#command-input {
-    flex: 1; font-family: monospace; font-size: 16px; padding: 6px 8px;
-}
+#command-input { flex: 1; font-family: monospace; font-size: 16px; padding: 6px 8px; }
 #send-btn { flex: none; }
 #history-btn { flex: none; }
 #scroll-bottom-btn { position: absolute; bottom: 8px; right: 12px; z-index: 10; opacity: .9; font-size: .8rem; }
 @media (max-width: 767.98px) {
     #command-form { gap: 6px; }
-    .send-label { display: none; } /* icon-only send beside the keyboard */
+    .send-label { display: none; }
 }
 
-/* Recent-commands popover (touch history) + the gear settings popover:
-   anchored above the input line / topbar, skinned like the phone sheet. */
+/* Recent-commands popover + gear settings popover. */
 #history-pop {
     position: absolute; left: 0; right: 0; bottom: calc(100% + 6px);
     max-height: 40vh; overflow-y: auto; z-index: 1030; padding: 4px;
@@ -254,11 +289,8 @@ body.connect-page #content { padding: .5rem !important; } /* the p-* utilities a
 .hist-item:hover { background: var(--ac-elev); }
 .hist-item:focus-visible { outline: 2px solid var(--ac-accent); outline-offset: -2px; }
 .hist-empty { color: var(--ac-dim); font-size: .8rem; font-style: italic; padding: 8px 10px; }
-@media (pointer: coarse) {
-    .hist-item { min-height: 44px; }
-}
+@media (pointer: coarse) { .hist-item { min-height: 44px; } }
 
-/* Scrollback search bar: floats over the top edge of the terminal. */
 #term-search {
     position: absolute; top: 8px; right: 12px; z-index: 20;
     display: flex; gap: 4px; align-items: center; padding: 4px;
@@ -275,8 +307,6 @@ body.connect-page #content { padding: .5rem !important; } /* the p-* utilities a
 }
 #term-search-input:focus-visible { outline: 2px solid var(--ac-accent); outline-offset: -1px; }
 
-/* Settings (gear) popover: anchored under the topbar's right edge. */
-#hud-topbar { position: relative; }
 #settings-pop {
     position: absolute; top: calc(100% + 4px); right: 0; z-index: 1030;
     min-width: 260px; padding: 6px;
@@ -291,12 +321,13 @@ body.connect-page #content { padding: .5rem !important; } /* the p-* utilities a
 .setting-row:hover { background: var(--ac-elev); }
 .setting-row input { flex: none; margin: 0; }
 .setting-row input:focus-visible { outline: 2px solid var(--ac-accent); outline-offset: 2px; }
-@media (pointer: coarse) {
-    .setting-row { min-height: 44px; }
-}
+@media (pointer: coarse) { .setting-row { min-height: 44px; } }
 
-/* ----- Room / exits ----- */
-.room-area { font-size: .78rem; color: var(--ac-dim); margin-bottom: 6px; }
+/* ----- Compass rose (bottom-left desktop) ----- */
+.rose-head { display: flex; flex-direction: column; padding: 6px 8px 2px; line-height: 1.2; }
+.rose-name { font-size: .74rem; font-weight: 700; color: var(--ac-accent); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rose-area { font-size: .68rem; }
+.rose-body { padding: 2px 8px 8px; }
 .compass {
     display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px;
     max-width: 170px; margin: 0 auto;
@@ -306,10 +337,69 @@ body.connect-page #content { padding: .5rem !important; } /* the p-* utilities a
     border-radius: 3px; font-size: .72rem; font-weight: 700; padding: 5px 0; cursor: pointer;
 }
 .exit:hover { border-color: var(--ac-accent); color: var(--ac-accent); }
-.exit.none { border-color: transparent; background: transparent; }
+.exit.none { border-color: transparent; background: transparent; cursor: default; }
 .exit.hub { color: var(--ac-dim); cursor: default; }
 .ud-row, .named-row { display: flex; gap: 4px; justify-content: center; margin-top: 5px; flex-wrap: wrap; }
 .exit.ud, .exit.named { padding: 4px 8px; }
+
+/* ----- Mobile tap-to-move rose overlay ----- */
+#rose-overlay {
+    position: absolute; top: 6px; left: 50%; transform: translateX(-50%);
+    z-index: 15; padding: 4px;
+    background: rgba(12, 12, 13, .35);
+    border: 1px solid rgba(255, 170, 119, .25); border-radius: var(--ac-radius-sm);
+    opacity: .42; transition: opacity .15s ease;
+}
+#rose-overlay[hidden] { display: none; }
+#rose-overlay:focus-within, #rose-overlay:active { opacity: .96; }
+#rose-overlay .compass.overlay { max-width: none; grid-template-columns: repeat(3, 30px); gap: 2px; }
+#rose-overlay .exit {
+    padding: 6px 0; font-size: .68rem; background: rgba(28, 28, 34, .8);
+    border-color: rgba(255, 255, 255, .12);
+}
+#rose-overlay .exit.none { background: transparent; border-color: transparent; }
+#rose-overlay .exit.hub { background: transparent; border-color: transparent; }
+#rose-overlay .ud-row { margin-top: 2px; gap: 2px; }
+#rose-overlay .exit.ud { padding: 5px 8px; font-size: .64rem; }
+#rose-toggle {
+    position: absolute; top: 6px; right: 6px; z-index: 16;
+    display: none; opacity: .6;
+}
+#rose-toggle[aria-pressed="true"] { color: var(--ac-accent); opacity: .85; }
+@media (max-width: 767.98px) {
+    #connect-app.hud-on #rose-toggle { display: inline-flex; }
+}
+
+/* ----- Occupants ----- */
+.occ-list { list-style: none; margin: 0; padding: 0; }
+.occ-row {
+    display: flex; align-items: center; gap: 6px; padding: 4px 4px; border-radius: 3px;
+    cursor: pointer; font-size: .82rem; border-left: 3px solid transparent;
+}
+.occ-row:hover { background: var(--ac-elev); }
+.occ-row.hostile { border-left-color: var(--hud-hostile); }
+.occ-row.friendly { border-left-color: var(--hud-friendly); }
+.occ-row.neutral { border-left-color: var(--ac-border-2); }
+.occ-row.is-dead { opacity: .5; cursor: default; }
+.occ-icon { flex: none; width: 1rem; text-align: center; color: var(--ac-dim); }
+.occ-row.hostile .occ-icon { color: var(--hud-hostile); }
+.occ-row.friendly .occ-icon { color: var(--hud-friendly); }
+.occ-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.occ-marks { flex: none; color: var(--ac-accent); font-size: .78rem; }
+.tgt-chips { display: flex; flex-wrap: wrap; gap: 4px; margin: 5px 0 2px; }
+.tgt-chip {
+    font-size: .68rem; font-weight: 700; padding: 1px 7px; border-radius: 999px;
+    border: 1px solid; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.tgt-chip.hostile { color: var(--hud-hostile); border-color: rgba(214, 75, 75, .5); background: var(--ac-danger-wash); }
+.tgt-chip.friendly { color: var(--hud-friendly); border-color: rgba(76, 187, 23, .5); background: var(--ac-ok-wash); }
+
+/* Trailing "⋯" actions button on any interactive row. */
+.row-more {
+    flex: none; background: none; border: 0; color: var(--ac-dim);
+    font-weight: 700; cursor: pointer; padding: 0 4px; line-height: 1; border-radius: 3px;
+}
+.row-more:hover { color: var(--ac-accent); background: var(--ac-bg); }
 
 /* ----- Generic rows (equipment / inventory) ----- */
 .row-list { list-style: none; margin: 0; padding: 0; }
@@ -320,17 +410,18 @@ body.connect-page #content { padding: .5rem !important; } /* the p-* utilities a
 }
 .row:hover { background: var(--ac-elev); }
 .row.sub { font-size: .78rem; color: var(--ac-dim); }
+.row.comp { color: var(--ac-text); }
 .row-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .slot { color: var(--ac-dim); font-size: .68rem; width: 56px; flex: none; text-transform: capitalize; }
-.tag { font-size: .68rem; color: var(--ac-dim); background: var(--ac-bg); border-radius: 3px; padding: 0 4px; }
-.coins { margin-top: 5px; font-size: .78rem; color: var(--hud-gold); }
+.coins { margin: 5px 8px; font-size: .78rem; color: var(--hud-gold); }
+.comp-section { margin-top: 2px; }
 
 /* ----- Key/value lists (train / status) ----- */
 .kv { list-style: none; margin: 0; padding: 0; }
 .kv li { display: flex; justify-content: space-between; font-size: .8rem; padding: 2px 0; border-bottom: 1px dotted var(--ac-border); }
 .kv li span:first-child { color: var(--ac-dim); }
 .action-btn {
-    display: block; width: 100%; margin: 5px 0; padding: 5px; cursor: pointer;
+    display: block; width: calc(100% - 16px); margin: 5px 8px; padding: 5px; cursor: pointer;
     background: var(--hud-gold-wash); color: var(--hud-gold); border: 1px solid var(--hud-gold); border-radius: 3px; font-weight: 700; font-size: .78rem;
 }
 
@@ -339,20 +430,66 @@ body.connect-page #content { padding: .5rem !important; } /* the p-* utilities a
 #hud-tabs { display: flex; gap: 3px; flex: none; }
 #hud-tabs button {
     position: relative;
-    flex: 1; padding: 5px; cursor: pointer; font-size: .74rem; font-weight: 700;
+    flex: 1; padding: 5px 3px; cursor: pointer; font-size: .72rem; font-weight: 700;
     background: var(--ac-panel); color: var(--ac-dim); border: 1px solid var(--ac-border); border-radius: var(--ac-radius-sm) var(--ac-radius-sm) 0 0;
 }
 #hud-tabs button.active { color: var(--ac-accent); border-bottom-color: var(--ac-accent); background: var(--ac-elev); }
 #hud-right .panel.tab { display: none; flex: 1; min-height: 0; overflow-y: auto; }
-#hud-right .panel.tab.tab-active { display: block; }
+#hud-right .panel.tab.tab-active { display: flex; flex-direction: column; }
+
+/* ----- Abilities browser (bounded, searchable) ----- */
+#panel-abilities { padding: 6px; }
+.ab-controls { flex: none; margin-bottom: 5px; }
+.ab-search {
+    width: 100%; font-size: 16px; padding: 5px 8px;
+    background: var(--ac-bg); color: var(--ac-text);
+    border: 1px solid var(--ac-border); border-radius: var(--ac-radius-sm);
+}
+.ab-search:focus-visible { outline: 2px solid var(--ac-accent); outline-offset: -1px; }
+.ab-chips { flex: none; display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
+.ab-chip {
+    font-size: .66rem; font-weight: 700; padding: 3px 9px; cursor: pointer;
+    background: var(--ac-panel); color: var(--ac-dim);
+    border: 1px solid var(--ac-border); border-radius: 999px;
+}
+.ab-chip:hover { border-color: var(--ac-accent); color: var(--ac-accent); }
+.ab-chip.on { color: var(--ac-accent); border-color: var(--ac-accent); background: var(--ac-wash); }
+.ab-chip.ab-usable.on { color: var(--ac-ok); border-color: rgba(76, 187, 23, .5); background: var(--ac-ok-wash); }
+.ab-scroll { flex: 1; min-height: 0; overflow-y: auto; }
+.ab-list { list-style: none; margin: 0; padding: 0; }
+.ab-row {
+    display: flex; align-items: center; gap: 6px; padding: 5px 6px; border-radius: 3px;
+    cursor: pointer; font-size: .82rem; border-left: 3px solid transparent;
+}
+.ab-row:hover { background: var(--ac-elev); }
+.ab-row.off { opacity: .5; }
+.ab-row.cat-damage { border-left-color: var(--ac-danger); }
+.ab-row.cat-heal { border-left-color: var(--ac-ok); }
+.ab-row.cat-misc { border-left-color: var(--ac-info); }
+.ab-row.cat-skill { border-left-color: var(--ac-border-2); }
+.ab-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ab-right { flex: none; display: flex; align-items: center; gap: 6px; }
+.ab-block { font-size: .66rem; color: var(--ac-danger); font-variant-numeric: tabular-nums; }
+.ab-pct { font-size: .68rem; color: var(--ac-dim); font-variant-numeric: tabular-nums; }
+.ab-star { background: none; border: 0; color: var(--ac-dim); cursor: pointer; font-size: .9rem; padding: 0 2px; line-height: 1; }
+.ab-star.on { color: var(--hud-gold); }
+.ab-star:hover { color: var(--ac-accent); }
 
 /* ----- Affects ----- */
 .aff-list { list-style: none; margin: 0; padding: 0; }
-.aff { display: flex; justify-content: space-between; align-items: center; font-size: .8rem; padding: 2px 5px; border-left: 3px solid; border-radius: 2px; margin-bottom: 2px; }
+.aff { display: flex; justify-content: space-between; align-items: center; gap: 6px; font-size: .8rem; padding: 2px 5px; border-left: 3px solid; border-radius: 2px; margin-bottom: 2px; }
 .aff.buff { border-color: var(--ac-ok); }
 .aff.debuff { border-color: var(--ac-danger); }
 .aff.maint { border-color: var(--ac-info); }
+.aff-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.aff-right { flex: none; display: flex; align-items: center; gap: 5px; }
 .aff-time { color: var(--ac-dim); font-size: .72rem; font-variant-numeric: tabular-nums; }
+.aff-release {
+    font-size: .62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em;
+    padding: 1px 6px; cursor: pointer; color: var(--ac-info);
+    background: var(--ac-info-wash); border: 1px solid rgba(74, 134, 207, .4); border-radius: 3px;
+}
+.aff-release:hover { color: var(--ac-accent); border-color: var(--ac-accent); }
 
 /* ----- Group ----- */
 .grp-list { list-style: none; margin: 0; padding: 0; }
@@ -376,12 +513,12 @@ body.connect-page #content { padding: .5rem !important; } /* the p-* utilities a
 .who-hidden { color: var(--ac-dim); font-size: .74rem; padding: 4px 2px; }
 
 /* ----- Chat ----- */
-#panel-chat { font-size: .82rem; line-height: 1.35; }
+#panel-chat { font-size: .82rem; line-height: 1.35; padding: 6px 8px; }
 .chat-line { padding: 1px 0; word-wrap: break-word; }
 .chat-ch { color: var(--ac-accent); font-weight: 700; }
 .chat-txt { color: var(--ac-text); }
 
-/* ----- Hotbar ----- */
+/* ----- Hotbar (bounded quick bar) ----- */
 #hud-hotbar { display: flex; flex-wrap: wrap; gap: 4px; flex: none; }
 #hud-hotbar.empty { display: none; }
 .skill {
@@ -394,23 +531,43 @@ body.connect-page #content { padding: .5rem !important; } /* the p-* utilities a
 .skill.cat-damage { border-left: 3px solid var(--ac-danger); }
 .skill.cat-heal { border-left: 3px solid var(--ac-ok); }
 .skill.cat-misc { border-left: 3px solid var(--ac-info); }
+.skill.cat-skill { border-left: 3px solid var(--ac-border-2); }
 .skill-name { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .skill-pct { font-size: .64rem; color: var(--ac-dim); }
 .skill-cd { font-size: .7rem; font-weight: 700; color: var(--ac-accent); font-variant-numeric: tabular-nums; }
-/* Buttons always carry both spans; .cooling picks which one shows
-   (hud.js flips the class instead of rebuilding the hotbar every tick). */
 .skill .skill-cd { display: none; }
 .skill.cooling .skill-cd { display: inline; }
 .skill.cooling .skill-pct { display: none; }
 @media (max-width: 767.98px) {
-    /* One thumb-scrollable row; never a growing stack above the keyboard. */
     #hud-hotbar { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
     #hud-hotbar::-webkit-scrollbar { display: none; }
     .skill { flex: 0 0 auto; }
 }
 
+/* ----- Context / action menu ----- */
+#hud-menu {
+    position: fixed; z-index: 1040; min-width: 172px; max-width: min(80vw, 260px);
+    padding: 4px; background: var(--ac-panel);
+    border: 1px solid var(--ac-border-2); border-radius: var(--ac-radius);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .6);
+}
+#hud-menu[hidden] { display: none; }
+.menu-title {
+    font-size: .7rem; font-weight: 700; color: var(--ac-dim);
+    padding: 5px 8px 6px; border-bottom: 1px solid var(--ac-border);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.menu-item {
+    display: block; width: 100%; text-align: left; cursor: pointer;
+    background: none; border: 0; color: var(--ac-text);
+    font-size: .82rem; padding: 8px 10px; border-radius: var(--ac-radius-sm);
+}
+.menu-item:hover { background: var(--ac-elev); color: var(--ac-accent); }
+.menu-item.danger { color: var(--ac-danger); }
+.menu-item.danger:hover { background: var(--ac-danger-wash); color: var(--ac-danger); }
+@media (pointer: coarse) { .menu-item { min-height: 44px; } }
+
 /* ----- Shared topbar buttons (aligned with .ac-btn — see components.md) ----- */
-/* An explicit display beats the UA's [hidden] rule — restore it. */
 .hud-btn[hidden] { display: none; }
 .hud-btn {
     display: inline-flex; align-items: center; justify-content: center; gap: 6px;
@@ -423,10 +580,8 @@ body.connect-page #content { padding: .5rem !important; } /* the p-* utilities a
 .hud-btn .bi { flex-shrink: 0; }
 .hud-btn--icon { padding: 5px 8px; }
 .hud-btn--icon .bi { width: 1rem; height: 1rem; }
-/* The toggle reads as a call-to-action (amber) while the HUD is off. */
 .hud-btn-accent[aria-pressed="false"] { border-color: rgba(255, 170, 119, .45); color: var(--ac-accent); }
 .hud-btn-accent[aria-pressed="false"]:hover { background: var(--ac-wash); }
-/* Column toggles read pressed = open. */
 .col-toggle[aria-pressed="true"] { color: var(--ac-accent); background: var(--ac-wash); border-color: rgba(255, 170, 119, .45); }
 
 /* ----- Phone dock ----- */
@@ -447,18 +602,17 @@ body.connect-page #content { padding: .5rem !important; } /* the p-* utilities a
 }
 #hud-dock button {
     position: relative;
-    flex: 1 0 3.4rem;
+    flex: 1 0 3.1rem;
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
     padding: 4px 2px;
     background: transparent; color: var(--ac-dim);
     border: 0; border-radius: var(--ac-radius-sm);
-    font-size: .62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+    font-size: .6rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em;
     cursor: pointer;
 }
 #hud-dock button .bi { width: 1.15rem; height: 1.15rem; }
 #hud-dock button[aria-pressed="true"] { color: var(--ac-accent); background: var(--ac-elev); }
 
-/* Unread marker (chat) — dock button and desktop tab. */
 #hud-dock button.unread::after,
 #hud-tabs button.unread::after {
     content: ""; position: absolute; top: 4px; right: 8px;
@@ -504,32 +658,41 @@ body.connect-page #content { padding: .5rem !important; } /* the p-* utilities a
 #hud-sheet-body .panel {
     display: none;
     background: transparent; border: 0; border-radius: 0;
-    padding: 8px 12px 12px;
+    padding: 2px 4px 12px;
 }
 #hud-sheet-body .panel.sheet-active { display: block; }
+/* In the sheet the panel header is always expanded context; keep it readable. */
+#hud-sheet-body .panel-h { border-bottom-color: var(--ac-border); }
 
 /* ----- Focus (keyboard) ----- */
 .hud-btn:focus-visible, .exit:focus-visible, .skill:focus-visible,
 #hud-tabs button:focus-visible, #hud-dock button:focus-visible,
-.who-act button:focus-visible, .action-btn:focus-visible, .sheet-close:focus-visible {
+.who-act button:focus-visible, .action-btn:focus-visible, .sheet-close:focus-visible,
+.panel-h-toggle:focus-visible, .row-more:focus-visible, .menu-item:focus-visible,
+.ab-chip:focus-visible, .ab-star:focus-visible, .panel-h-btn:focus-visible,
+.aff-release:focus-visible, .occ-row:focus-visible, .sub-h.collapse:focus-visible {
     outline: 2px solid var(--ac-accent); outline-offset: 2px;
 }
 
-/* ----- Touch ergonomics (mobile checklist item 3) ----- */
+/* ----- Touch ergonomics ----- */
 @media (pointer: coarse) {
     .hud-btn { padding: 8px 12px; }
     .hud-btn--icon { padding: 8px 10px; }
     .exit { padding: 10px 0; }
     .exit.ud, .exit.named { padding: 9px 12px; }
-    #hud-tabs button { padding: 9px 5px; }
+    #hud-tabs button { padding: 9px 3px; }
     .who-act button { padding: 7px 12px; }
     .skill { min-height: 44px; padding: 6px 10px; }
-    .row { padding: 8px 6px; }
+    .row, .occ-row, .ab-row { padding: 8px 6px; }
+    .row-more { padding: 6px 8px; }
     .action-btn { padding: 10px; }
     .sheet-close { padding: 8px 10px; }
+    .panel-h-toggle { padding: 10px 8px; }
     #command-input { padding: 9px 10px; }
     #send-btn { padding: 10px 12px; }
     #hud-dock button { min-height: 2.9rem; }
+    #rose-overlay .exit { padding: 9px 0; }
+    #rose-overlay .compass.overlay { grid-template-columns: repeat(3, 38px); }
 }
 
 /* ----- Reduced motion ----- */
@@ -538,6 +701,6 @@ body.connect-page #content { padding: .5rem !important; } /* the p-* utilities a
     50% { opacity: .35; }
 }
 @media (prefers-reduced-motion: reduce) {
-    .vbar-fill, .hud-btn { transition: none; }
+    .vbar-fill, .hud-btn, #rose-overlay { transition: none; }
     .status-connecting .status-dot { animation: none; }
 }

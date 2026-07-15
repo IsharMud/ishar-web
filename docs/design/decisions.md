@@ -658,6 +658,68 @@ emits that subset (safer than the News page's `autoescape off`); the editor's
 live preview builds the same DOM client-side with `textContent` only — no
 `innerHTML`, honoring the XSS rule above.
 
+## 2026-07-15 — Web client HUD overhaul: occupants, target-aware abilities, action menus
+
+**Decision.** The `/connect` HUD (`apps/connect`) is reworked to consume the
+game feeds it was ignoring and to lead — not trail — the Mudlet package, on
+desktop and phone alike. Concretely:
+
+- **Occupants (`Room.Occupants`).** A new left-column panel lists the room's
+  targetable persons, colored by `hostile_hint` (hostile = danger red, friendly
+  = ok green, neutral = grey border), corpses (`is_dead`) greyed and
+  non-targetable. Every occupant carries a server-computed `handle`
+  (`"N.keyword"`) that round-trips through the game's own parser, so a right-
+  click / tap opens an action menu — Look / Consider / **Attack** (`kill
+  <handle>`), plus Tell/Follow/Group for players — and a room-level **List
+  wares** (`list`). Mudlet has none of this.
+- **Default targets → target-aware casting.** An occupant can be set as the
+  default **⚔ hostile** or **✚ beneficial** target (shown as chips). The hotbar
+  and Abilities browser then route by each ability's `target_type`: offensive
+  spells append the hostile handle, defensive the beneficial one, self/area
+  none. Targets self-clear when the occupant leaves the room.
+- **Abilities: bounded, not a wall.** An immortal's `Char.Skills` is 400+ rows;
+  the old flat hotbar rendered *all* of them and buried the screen. Now a
+  **bounded quick-bar** (favorites, else a capped default of usable damage/heal,
+  hard-capped) sits above the input, and a scroll-bounded **Abilities** browser
+  tab (search + type chips + "usable only", pin-to-quickbar stars, cooldown/
+  mana/position greying) holds the full list without ever growing the layout.
+- **Action menus (mouse + touch).** Inventory/equipment/occupant rows open a
+  single popover menu (`#hud-menu`, built with `textContent` only) with type-
+  aware verbs (wear/wield/quaff/recite/…, open/close, put-into-container, drop,
+  sacrifice, remove). Tap-to-open works where Mudlet's right-click can't.
+- **Collapsible panels + component pouch.** Every side panel collapses (state
+  persisted); the Inventory **Components** sub-section defaults collapsed and
+  each component is **click-to-withdraw** (`get <comp> pouch`).
+- **Compass rose.** Pinned bottom-left on desktop (near the input, in its own
+  flex footer below a scrolling panel stack); on phones a **translucent tap-to-
+  move overlay** floats over the top of the terminal (dismissible via a toggle)
+  so a thumb can move without hiding the view.
+
+**Why.** The feeds already existed; the client was the gap. Reducing entropy
+here meant *consuming* `Room.Occupants` and `target_type` rather than inventing
+UI, and bounding the one surface (skills) that scaled with an immortal's grant.
+
+**Discipline.** No new libraries. Every data-derived node is built by an `el()`
+helper that only ever sets `textContent`/attributes — no `innerHTML` anywhere in
+`hud.js`. Every command a widget builds passes a single `safeCmd()` guard
+(strips newlines/control chars) before send, so a hostile mob name or player
+title can't smuggle a second command. Colors are `--ac-*` / `--hud-*` tokens;
+motion is under `prefers-reduced-motion`; touch targets ≥44px. Panel header is a
+container with a separate toggle button (never a button nested in a button).
+
+**Cross-repo.** One additive game-side change (ishar-mud #1792): `Char.Inventory`
+`components[]` now emits `keywords` (mirroring `items[]`) so click-to-withdraw
+builds a real target. The client degrades to a name-derived target when the
+field is absent, so it works before and after that deploys.
+
+**Verification.** Template compiles; `node --check` on `hud.js` and the inline
+script; the real `hud.js` driven in headless Chromium via `/connect?demo=1` with
+expanded demo feeds (occupants, 90-skill list, pouched components) — desktop +
+phone, including an open context menu and a scripted end-to-end pass proving
+single-dispatch (`kill 1.thug` once), target-aware casting (`cast 'fireball'
+1.thug`), and pouch withdraw (`get sulfur.pinch pouch`). Not exercised against
+the live game — the owner's on-prod test still owns that.
+
 ---
 
 ## Open decisions / to record when made
