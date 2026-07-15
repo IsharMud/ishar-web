@@ -14,6 +14,7 @@
         <script src="{% static 'js/addon-fit.min.js' %}"></script>
         <script src="{% static 'js/addon-web-links.min.js' %}"></script>
         <script src="{% static 'js/addon-serialize.min.js' %}"></script>
+        <script src="{% static 'js/addon-search.min.js' %}"></script>
         <script src="{% static 'js/hud.js' %}"></script>
         <style>
             /* Graceful degradation: served inline with the HTML, so even if
@@ -42,6 +43,15 @@
         </span>
         <div id="vitals-bar"></div>
         <div class="topbar-actions">
+            <button class="hud-btn hud-btn--icon" type="button" id="search-btn" aria-pressed="false"
+                    title="Search the scrollback" aria-label="Search the scrollback">
+                {% bi "search" %}
+            </button>
+            <button class="hud-btn hud-btn--icon" type="button" id="settings-btn"
+                    aria-expanded="false" aria-controls="settings-pop"
+                    title="Client settings" aria-label="Client settings">
+                {% bi "gear" %}
+            </button>
             <button class="hud-btn hud-btn--icon" type="button" id="font-dec"
                     title="Smaller terminal text" aria-label="Smaller terminal text">
                 {% bi "zoom-out" %}
@@ -69,6 +79,25 @@
                 <span>Reconnect</span>
             </button>
         </div>
+        {# Client settings (persisted per device; mirrored by /settings). #}
+        <div id="settings-pop" hidden>
+            <label class="setting-row">
+                <input type="checkbox" data-setting="keepInput">
+                <span>Keep command in input after send</span>
+            </label>
+            <label class="setting-row">
+                <input type="checkbox" data-setting="stack">
+                <span>Chain commands with ; (see /help)</span>
+            </label>
+            <label class="setting-row setting-notify">
+                <input type="checkbox" data-setting="notifyTells">
+                <span>Notify on tells while the tab is hidden</span>
+            </label>
+            <label class="setting-row">
+                <input type="checkbox" data-setting="titleBadge">
+                <span>Unread count in the tab title</span>
+            </label>
+        </div>
     </div>
 
     <aside id="hud-left" class="hud-col">
@@ -81,6 +110,23 @@
     <main id="hud-center">
         <div id="terminal-wrapper">
             <div id="terminal-container"></div>
+            <div id="term-search" hidden>
+                <label for="term-search-input" class="visually-hidden">Search scrollback</label>
+                <input type="text" id="term-search-input" placeholder="Search scrollback&hellip;"
+                       autocomplete="off" autocapitalize="off" spellcheck="false">
+                <button type="button" class="hud-btn hud-btn--icon" id="search-prev"
+                        title="Previous match" aria-label="Previous match">
+                    {% bi "chevron-up" %}
+                </button>
+                <button type="button" class="hud-btn hud-btn--icon" id="search-next"
+                        title="Next match" aria-label="Next match">
+                    {% bi "chevron-down" %}
+                </button>
+                <button type="button" class="hud-btn hud-btn--icon" id="search-close"
+                        title="Close search" aria-label="Close search">
+                    {% bi "x-lg" %}
+                </button>
+            </div>
             <button type="button" class="hud-btn" id="scroll-bottom-btn" style="display:none;" title="Scroll to latest output">
                 &#x25BC; Latest
             </button>
@@ -229,6 +275,11 @@
     if (window.SerializeAddon) {
         serializeAddon = new SerializeAddon.SerializeAddon();
         term.loadAddon(serializeAddon);
+    }
+    var searchAddon = null;
+    if (window.SearchAddon) {
+        searchAddon = new SearchAddon.SearchAddon();
+        term.loadAddon(searchAddon);
     }
     term.open(terminalContainer);
 
@@ -692,6 +743,7 @@
                 if (arg === "on" || arg === "off") {
                     settings.stack = arg === "on";
                     saveSettings();
+                    syncSettingsPop();
                 }
                 sysln("Command stacking is " + (settings.stack ? "on" : "off")
                     + " (\"open door;n;look\" sends three commands).");
@@ -760,7 +812,8 @@
             onLayoutChange: function() {
                 fitAppHeight();
                 scheduleFit();
-            }
+            },
+            onComm: onComm
         });
     }
 
@@ -914,6 +967,174 @@
         if (historyPop.hidden) return;
         if (historyPop.contains(e.target) || historyBtn.contains(e.target)) return;
         closeHistoryPop();
+    });
+
+    // --- Scrollback search ---
+    var searchBar = document.getElementById("term-search");
+    var searchInput = document.getElementById("term-search-input");
+    var searchBtn = document.getElementById("search-btn");
+    // Amber accent, matching the HUD's highlight idiom (CSS vars aren't
+    // readable from the addon, so the hexes live here).
+    var SEARCH_DECOR = {
+        matchBackground: "#553311",
+        matchBorder: "#996633",
+        matchOverviewRuler: "#ffaa77",
+        activeMatchBackground: "#a05a20",
+        activeMatchBorder: "#ffaa77",
+        activeMatchColorOverviewRuler: "#ffaa77"
+    };
+    function doSearch(dir, incremental) {
+        if (!searchAddon) return;
+        var q = searchInput.value;
+        if (!q) { searchAddon.clearDecorations(); return; }
+        var opts = { decorations: SEARCH_DECOR, incremental: !!incremental };
+        try {
+            if (dir < 0) searchAddon.findPrevious(q, opts);
+            else searchAddon.findNext(q, opts);
+        } catch (e) {
+            // Decorations need APIs an older vendored xterm may lack —
+            // degrade to plain find-and-select.
+            if (dir < 0) searchAddon.findPrevious(q);
+            else searchAddon.findNext(q);
+        }
+    }
+    function openSearch() {
+        if (!searchAddon) return;
+        searchBar.hidden = false;
+        searchBtn.setAttribute("aria-pressed", "true");
+        searchInput.focus();
+        searchInput.select();
+    }
+    function closeSearch() {
+        if (searchBar.hidden) return;
+        searchBar.hidden = true;
+        searchBtn.setAttribute("aria-pressed", "false");
+        if (searchAddon) {
+            try { searchAddon.clearDecorations(); } catch (e) {}
+        }
+        commandInput.focus();
+    }
+    if (!searchAddon) searchBtn.style.display = "none";
+    searchBtn.addEventListener("click", function() {
+        if (searchBar.hidden) openSearch();
+        else closeSearch();
+    });
+    searchInput.addEventListener("input", function() { doSearch(1, true); });
+    searchInput.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            doSearch(e.shiftKey ? -1 : 1);
+        }
+    });
+    document.getElementById("search-prev").addEventListener("click", function() { doSearch(-1); });
+    document.getElementById("search-next").addEventListener("click", function() { doSearch(1); });
+    document.getElementById("search-close").addEventListener("click", closeSearch);
+
+    // --- Settings (gear) popover ---
+    var settingsBtn = document.getElementById("settings-btn");
+    var settingsPop = document.getElementById("settings-pop");
+    if (!("Notification" in window)) {
+        // No Notification API (e.g. iOS Safari outside a PWA): hide the row.
+        var notifyRow = settingsPop.querySelector(".setting-notify");
+        if (notifyRow) notifyRow.style.display = "none";
+    }
+    function syncSettingsPop() {
+        settingsPop.querySelectorAll("input[data-setting]").forEach(function(cb) {
+            cb.checked = !!settings[cb.getAttribute("data-setting")];
+        });
+    }
+    function closeSettingsPop() {
+        if (settingsPop.hidden) return;
+        settingsPop.hidden = true;
+        settingsBtn.setAttribute("aria-expanded", "false");
+    }
+    settingsBtn.addEventListener("click", function() {
+        if (settingsPop.hidden) {
+            syncSettingsPop();
+            settingsPop.hidden = false;
+            settingsBtn.setAttribute("aria-expanded", "true");
+        } else {
+            closeSettingsPop();
+        }
+    });
+    settingsPop.addEventListener("change", function(e) {
+        var cb = e.target.closest("input[data-setting]");
+        if (!cb) return;
+        var key = cb.getAttribute("data-setting");
+        if (key === "notifyTells" && cb.checked && Notification.permission !== "granted") {
+            // Flip on only once the browser actually grants permission.
+            settings.notifyTells = false;
+            cb.checked = false;
+            Notification.requestPermission().then(function(p) {
+                settings.notifyTells = p === "granted";
+                saveSettings();
+                syncSettingsPop();
+            });
+            return;
+        }
+        settings[key] = cb.checked;
+        saveSettings();
+        if (key === "titleBadge" && !cb.checked) clearTitleBadge();
+    });
+    document.addEventListener("click", function(e) {
+        if (settingsPop.hidden) return;
+        if (settingsPop.contains(e.target) || settingsBtn.contains(e.target)) return;
+        closeSettingsPop();
+    });
+
+    // --- Unread title badge + tell notifications ---
+    var baseTitle = document.title;
+    var unread = 0;
+    function clearTitleBadge() {
+        unread = 0;
+        document.title = baseTitle;
+    }
+    document.addEventListener("visibilitychange", function() {
+        if (!document.hidden) clearTitleBadge();
+    });
+    // Called by the HUD for every Comm.Channel message (text already
+    // color-stripped there).
+    function onComm(channel, text) {
+        if (!document.hidden) return;
+        if (settings.titleBadge) {
+            unread++;
+            document.title = "(" + unread + ") " + baseTitle;
+        }
+        if (settings.notifyTells && "Notification" in window
+                && Notification.permission === "granted"
+                && /^(tell|reply|whisper)/i.test(channel || "")) {
+            try {
+                var n = new Notification("Ishar MUD", {
+                    body: String(text || "").slice(0, 140),
+                    tag: "ishar-tell"
+                });
+                n.onclick = function() { window.focus(); this.close(); };
+            } catch (e) {}
+        }
+    }
+
+    // --- Keyboard shortcuts (documented in /help) ---
+    document.addEventListener("keydown", function(e) {
+        if (e.key === "Escape") {
+            if (!searchBar.hidden) { closeSearch(); return; }
+            if (!settingsPop.hidden) { closeSettingsPop(); return; }
+            if (!historyPop.hidden) { closeHistoryPop(); commandInput.focus(); return; }
+            return;
+        }
+        if (e.ctrlKey && e.shiftKey && !e.altKey && (e.key === "F" || e.key === "f")) {
+            e.preventDefault();
+            openSearch();
+            return;
+        }
+        if (e.ctrlKey && !e.shiftKey && !e.altKey && (e.key === "l" || e.key === "L")) {
+            e.preventDefault();
+            term.clear();
+            return;
+        }
+        if ((e.key === "PageUp" || e.key === "PageDown") && e.target !== searchInput) {
+            e.preventDefault();
+            term.scrollPages(e.key === "PageUp" ? -1 : 1);
+        }
     });
 
     // --- Resize wiring ---
