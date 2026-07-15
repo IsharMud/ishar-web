@@ -13,6 +13,7 @@
         <script src="{% static 'js/xterm.min.js' %}"></script>
         <script src="{% static 'js/addon-fit.min.js' %}"></script>
         <script src="{% static 'js/addon-web-links.min.js' %}"></script>
+        <script src="{% static 'js/addon-serialize.min.js' %}"></script>
         <script src="{% static 'js/hud.js' %}"></script>
         <style>
             /* Graceful degradation: served inline with the HTML, so even if
@@ -213,6 +214,13 @@
     var fitAddon = new FitAddon.FitAddon();
     term.loadAddon(fitAddon);
     term.loadAddon(new WebLinksAddon.WebLinksAddon());
+    // Feature-checked: a missing addon file degrades to no scrollback
+    // persistence, matching the page's graceful-degradation stance.
+    var serializeAddon = null;
+    if (window.SerializeAddon) {
+        serializeAddon = new SerializeAddon.SerializeAddon();
+        term.loadAddon(serializeAddon);
+    }
     term.open(terminalContainer);
 
     function adjustFont(delta) {
@@ -255,15 +263,24 @@
         new ResizeObserver(scheduleFit).observe(terminalContainer);
     }
 
-    // --- Command history ---
+    // --- Command history (persisted across page loads) ---
     var history = [];
     var historyIndex = -1;
     var savedInput = "";
     var MAX_HISTORY = 200;
+    try {
+        var savedHist = JSON.parse(localStorage.getItem("ishar.history"));
+        if (Array.isArray(savedHist)) {
+            history = savedHist.filter(function(c) {
+                return typeof c === "string";
+            }).slice(-MAX_HISTORY);
+        }
+    } catch (e) {}
     function addHistory(cmd) {
         if (cmd && (history.length === 0 || history[history.length - 1] !== cmd)) {
             history.push(cmd);
             if (history.length > MAX_HISTORY) history.shift();
+            try { localStorage.setItem("ishar.history", JSON.stringify(history)); } catch (e) {}
         }
         historyIndex = -1;
         savedInput = "";
@@ -544,7 +561,10 @@
     });
 
     reconnectBtn.addEventListener("click", function() {
-        term.clear();
+        // Keep the scrollback — what happened before the drop is exactly
+        // what a returning player wants to reread. A dim divider marks
+        // the seam.
+        term.writeln("\r\n\x1b[90m--- reconnecting ---\x1b[0m");
         connect();
     });
 
@@ -586,6 +606,33 @@
         if (!document.hidden) probe();
     }, 45000);
 
+    // --- Scrollback persistence (per tab) ---
+    // The buffer is re-encoded to clean ANSI and stashed in sessionStorage
+    // whenever the page might be going away (pagehide, or hidden — iOS
+    // Safari doesn't reliably fire pagehide). sessionStorage on purpose:
+    // per-tab (no multi-tab clobber) and gone when the tab closes.
+    var SCROLLBACK_KEY = "ishar.term";
+    var SCROLLBACK_MAX = 512 * 1024;
+    function saveScrollback() {
+        if (!serializeAddon || isDemo) return;
+        try {
+            var s = serializeAddon.serialize({ scrollback: 1500 });
+            if (s.length > SCROLLBACK_MAX) {
+                // Front-truncate at a line break, never mid-escape-sequence.
+                var cut = s.indexOf("\n", s.length - SCROLLBACK_MAX);
+                s = cut === -1 ? "" : s.slice(cut + 1);
+            }
+            if (s) sessionStorage.setItem(SCROLLBACK_KEY, s);
+            else sessionStorage.removeItem(SCROLLBACK_KEY);
+        } catch (e) {
+            try { sessionStorage.removeItem(SCROLLBACK_KEY); } catch (e2) {}
+        }
+    }
+    window.addEventListener("pagehide", saveScrollback);
+    document.addEventListener("visibilitychange", function() {
+        if (document.hidden) saveScrollback();
+    });
+
     terminalContainer.addEventListener("click", function() {
         // While the phone sheet is open, a terminal tap just dismisses it
         // (the HUD's outside-tap handler) — don't also pop the keyboard.
@@ -596,6 +643,18 @@
     // --- Start ---
     fitAppHeight();
     scheduleFit();
+
+    // Restore the previous scrollback (same tab) before connecting, so the
+    // session picks up where the last page load left off.
+    if (!isDemo) {
+        try {
+            var savedTerm = sessionStorage.getItem(SCROLLBACK_KEY);
+            if (savedTerm) {
+                term.write(savedTerm);
+                term.writeln("\r\n\x1b[90m--- earlier output restored after reload ---\x1b[0m");
+            }
+        } catch (e) {}
+    }
 
     // Demo mode (/connect?demo=1): populate the HUD with sample data for design
     // review without a GMCP-enabled server. Skips the live connection.
