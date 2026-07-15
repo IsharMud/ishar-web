@@ -386,6 +386,7 @@ body.connect-page #content { padding: .5rem !important; }
 .occ-row.friendly .occ-icon { color: var(--hud-friendly); }
 .occ-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .occ-marks { flex: none; color: var(--ac-accent); font-size: .78rem; }
+.occ-shop { flex: none; color: var(--hud-gold); font-weight: 700; font-size: .78rem; }
 .tgt-chips { display: flex; flex-wrap: wrap; gap: 4px; margin: 5px 0 2px; }
 .tgt-chip {
     font-size: .68rem; font-weight: 700; padding: 1px 7px; border-radius: 999px;

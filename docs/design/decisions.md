@@ -707,10 +707,19 @@ title can't smuggle a second command. Colors are `--ac-*` / `--hud-*` tokens;
 motion is under `prefers-reduced-motion`; touch targets ≥44px. Panel header is a
 container with a separate toggle button (never a button nested in a button).
 
-**Cross-repo.** One additive game-side change (ishar-mud #1792): `Char.Inventory`
-`components[]` now emits `keywords` (mirroring `items[]`) so click-to-withdraw
-builds a real target. The client degrades to a name-derived target when the
-field is absent, so it works before and after that deploys.
+**Cross-repo.** Two additive, backward-compatible game-side fields: `Char.Inventory`
+`components[]` now emits `keywords` (ishar-mud #1792, mirroring `items[]`) so
+click-to-withdraw builds a real target; and `Room.Occupants` now emits
+`is_shopkeeper` (ishar-mud #1794, = the mob handles the `list` command) so the
+"List wares" action and shop marker key off real metadata instead of a no-op on
+every mob. The client degrades gracefully when either field is absent, so it
+works before and after those deploy.
+
+**Disposition-aware casting.** The per-occupant "Cast …" menu is filtered by
+`hostile_hint`: an allied (friendly) target offers only beneficial (defensive)
+spells, everyone else only offensive — you can't accidentally buff an enemy or
+blast an ally from the menu. The default ⚔/✚ targets and target-aware hotbar
+routing are unchanged.
 
 **Verification.** Template compiles; `node --check` on `hud.js` and the inline
 script; the real `hud.js` driven in headless Chromium via `/connect?demo=1` with

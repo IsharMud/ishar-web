@@ -510,7 +510,11 @@
 
     function renderOccupants() {
         var occ = S.occupants || [];
-        var actions = [el("button", { type: "button", class: "panel-h-btn", "data-cmd": "list", title: "List a shopkeeper's wares", text: "List" })];
+        var hasShop = occ.some(function (o) { return o.is_shopkeeper; });
+        // Room-level List (every shop here) only when there's a shop to list.
+        var actions = hasShop
+            ? [el("button", { type: "button", class: "panel-h-btn", "data-cmd": "list", title: "List every shopkeeper's wares here", text: "List" })]
+            : null;
         var head = panelHeader("occupants", "Room (" + occ.length + ")", false, actions);
         var kids = [head];
         if (!isCollapsed("occupants")) {
@@ -536,6 +540,7 @@
                     }, [
                         el("span", { class: "occ-icon", "aria-hidden": "true", text: o.is_player ? "☻" : "•" }),
                         el("span", { class: "occ-name", text: o.short_desc || o.keyword }),
+                        o.is_shopkeeper ? el("span", { class: "occ-shop", title: "Sells wares — List", text: "$" }) : null,
                         marks ? el("span", { class: "occ-marks", "aria-hidden": "true", text: marks }) : null,
                         el("button", { type: "button", class: "row-more", "data-menu": "occupant", "data-idx": i, "aria-label": "Actions", text: "⋯" })
                     ]);
@@ -1079,20 +1084,17 @@
     }
 
     // Person-target spells to offer as one-off casts AT a specific occupant —
-    // independent of the default ⚔/✚ targets. Favorited spells first (so the
-    // menu stays your curated set), else usable ones; biased by disposition.
+    // independent of the default ⚔/✚ targets. Filtered by disposition: an
+    // allied (friendly) target only gets beneficial (defensive) spells, everyone
+    // else only offensive ones. Favorited spells first (keeps it your curated
+    // set), else usable ones.
     function occupantCastActions(o) {
+        var want = o.hostile_hint === "friendly" ? "defensive" : "offensive";
         var spells = (S.skills || []).filter(function (s) {
-            return s.type === "spell" && (s.target_type === "offensive" || s.target_type === "defensive");
+            return s.type === "spell" && s.target_type === want;
         });
         var fav = spells.filter(function (s) { return favorites[nameOf(s.name).toLowerCase()]; });
         var pick = fav.length ? fav : spells.filter(function (s) { return !abilityBlock(s); });
-        var wantOff = o.hostile_hint !== "friendly";   // enemies → offensive first
-        pick.sort(function (a, b) {
-            var ao = a.target_type === "offensive" ? 0 : 1, bo = b.target_type === "offensive" ? 0 : 1;
-            if (!wantOff) { ao = 1 - ao; bo = 1 - bo; }
-            return ao - bo;
-        });
         return pick.slice(0, 6).map(function (s) {
             return { label: "Cast " + s.name, cmd: "cast '" + nameOf(s.name) + "' " + o.handle };
         });
@@ -1108,9 +1110,9 @@
         occupantCastActions(o).forEach(function (a) { acts.push(a); });
         acts.push({ label: "Attack", cmd: "kill " + o.handle, danger: true });
         if (!o.is_player) {
-            // Shops answer "list <keyword>" (their command_list Mocha func);
-            // a non-shop mob just no-ops, so this is safe to always offer.
-            acts.push({ label: "List wares", cmd: "list " + firstWord(o.keyword) });
+            // Only actual vendors get a list action (is_shopkeeper = the mob
+            // handles the `list` command, per Room.Occupants).
+            if (o.is_shopkeeper) acts.push({ label: "List wares", cmd: "list " + firstWord(o.keyword) });
         } else {
             var nm = firstWord(o.keyword);
             acts.push({ label: "Tell…", prefill: "tell " + nm + " " });
@@ -1520,12 +1522,12 @@
             "Game.Time": { hour: 21, hour12: 9, ampm: "pm", day: 14, day_name: "Sunday", month: 6, month_name: "the Long Shadows", year: 1247, night: true, season_id: 15, season_end: 0, events: [{ name: "Double Essence", seconds: 5400 }, { name: "Festival of Flames" }], moons: [{ name: "Lune (waxing)" }, { name: "Sable (full)" }] },
             "Room.Info": { num: 3001, name: "The Grand Concourse", area: "Ishar Nexus", environment: "City", exits: { n: 3002, e: 3005, s: 3008, w: 3010, u: 3100, d: 3200, into: 3500 } },
             "Room.Occupants": { occupants: [
-                { keyword: "guard", short_desc: "a towering city guard", handle: "1.guard", is_player: false, is_dead: false, hostile_hint: "neutral" },
-                { keyword: "pigeon", short_desc: "a small grey pigeon", handle: "1.pigeon", is_player: false, is_dead: false, hostile_hint: "neutral" },
-                { keyword: "thug", short_desc: "a scarred alley thug", handle: "1.thug", is_player: false, is_dead: false, hostile_hint: "hostile" },
-                { keyword: "merchant", short_desc: "Hadeon the curio merchant", handle: "1.merchant", is_player: false, is_dead: false, hostile_hint: "neutral" },
-                { keyword: "Boric", short_desc: "Boric, Shield of the Dawn", handle: "1.Boric", is_player: true, is_dead: false, hostile_hint: "friendly" },
-                { keyword: "rat", short_desc: "the corpse of a sewer rat", handle: "1.rat", is_player: false, is_dead: true, hostile_hint: "neutral" }
+                { keyword: "guard", short_desc: "a towering city guard", handle: "1.guard", is_player: false, is_dead: false, is_shopkeeper: false, hostile_hint: "neutral" },
+                { keyword: "pigeon", short_desc: "a small grey pigeon", handle: "1.pigeon", is_player: false, is_dead: false, is_shopkeeper: false, hostile_hint: "neutral" },
+                { keyword: "thug", short_desc: "a scarred alley thug", handle: "1.thug", is_player: false, is_dead: false, is_shopkeeper: false, hostile_hint: "hostile" },
+                { keyword: "merchant", short_desc: "Hadeon the curio merchant", handle: "1.merchant", is_player: false, is_dead: false, is_shopkeeper: true, hostile_hint: "neutral" },
+                { keyword: "Boric", short_desc: "Boric, Shield of the Dawn", handle: "1.Boric", is_player: true, is_dead: false, is_shopkeeper: false, hostile_hint: "friendly" },
+                { keyword: "rat", short_desc: "the corpse of a sewer rat", handle: "1.rat", is_player: false, is_dead: true, is_shopkeeper: false, hostile_hint: "neutral" }
             ] },
             "Char.Equipment": { items: [
                 { name: "a magnificent helmet of red dragonscales", keywords: "helmet dragonscales", type: "armor", vnum: 1, location: "Head", condition: 100 },
