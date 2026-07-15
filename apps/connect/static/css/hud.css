@@ -410,6 +410,8 @@ body.connect-page #content { padding: .5rem !important; } /* the p-* utilities a
 }
 
 /* ----- Shared topbar buttons (aligned with .ac-btn — see components.md) ----- */
+/* An explicit display beats the UA's [hidden] rule — restore it. */
+.hud-btn[hidden] { display: none; }
 .hud-btn {
     display: inline-flex; align-items: center; justify-content: center; gap: 6px;
     padding: 5px 12px; font-size: .8rem; font-weight: 600; cursor: pointer; white-space: nowrap;
