@@ -1,0 +1,473 @@
+{% extends "layout.html" %}
+{% load static %}
+{% block meta_title %}{{ WEBSITE_TITLE }} Log Viewer{% endblock meta_title %}
+{% block meta_description %}Staff log viewer for {{ WEBSITE_TITLE }}.{% endblock meta_description %}
+{% block meta_url %}{% url 'logs' %}#logs{% endblock meta_url %}
+{% block title %}{{ WEBSITE_TITLE }} Log Viewer{% endblock title %}
+{% block scripts %}let focusTo = 'logs'{% endblock scripts %}
+{% block breadcrumbs %}
+    <li class="breadcrumb-item h2" title="Portal">
+        <a class="icon-link icon-link-hover" href="{% url 'portal' %}#portal">
+            <svg class="bi" aria-hidden="true">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#person-gear"></use>
+            </svg>
+            <span>Portal</span>
+        </a>
+    </li>
+    <li class="breadcrumb-item active h2" aria-current="page" title="Logs">
+        <a class="icon-link icon-link-hover" href="{% url 'logs' %}#logs">
+            <svg class="bi" aria-hidden="true">
+                <use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#journal-text"></use>
+            </svg>
+            <span id="logs">Logs</span>
+        </a>
+    </li>
+{% endblock breadcrumbs %}
+{% block content %}
+<div class="ac ac--wide">
+
+    <!-- Hero -->
+    <header class="ac-hero">
+        <span class="ac-hero__badge">
+            <svg class="bi" aria-hidden="true"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#journal-text"></use></svg>
+        </span>
+        <div class="ac-hero__text">
+            <h2 class="ac-hero__title">Log Viewer</h2>
+            <p class="ac-hero__sub">
+                Read the game &amp; web logs through the host agent — the live color is highlighted; both are viewable.
+            </p>
+        </div>
+        <div class="ac-hero__status">
+            <span class="ac-pill ac-pill--status ac-pill--muted ac-pill--live" id="livePill" title="Blue-green live color">
+                checking…
+            </span>
+{% if log_configured %}
+            <span class="ac-pill ac-pill--status ac-pill--muted ac-pill--live" id="agentPill" title="Log agent status">
+                checking agent…
+            </span>
+{% else %}
+            <span class="ac-pill ac-pill--status ac-pill--muted" id="agentPill" title="Log agent status">
+                not configured
+            </span>
+{% endif %}
+        </div>
+    </header>
+
+{% if not log_configured %}
+    <div class="ac-note ac-note--warn" role="alert">
+        <svg class="bi" aria-hidden="true"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#exclamation-triangle"></use></svg>
+        <span><strong>Agent not configured.</strong> <code>DEPLOY_AGENT_SECRET</code> is unset, so the log agent is
+        unreachable. Set it on the host agent (<code>/etc/ishar/deploy-agent.env</code>) and in this container's
+        environment to enable the viewer.</span>
+    </div>
+{% endif %}
+
+    <!-- Source + color + size -->
+    <div class="ac-panel">
+        <div class="ac-panel__h">
+            <svg class="bi" aria-hidden="true"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#collection"></use></svg>
+            Source
+        </div>
+        <div class="ac-seg ac-seg--wrap" role="radiogroup" aria-label="Log source" id="sourceSeg">
+    {% for src in log_sources %}
+            <input class="btn-check" type="radio" name="source" id="src-{{ src }}" value="{{ src }}" autocomplete="off"{% if forloop.first %} checked{% endif %}>
+            <label class="ac-seg__item" for="src-{{ src }}">
+                <svg class="bi" aria-hidden="true"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#{% if src == 'runlog' %}journal-code{% elif src == 'stderr' %}terminal{% else %}globe2{% endif %}"></use></svg>
+        {% if src == 'web' %}web{% else %}{{ src }}{% endif %}
+            </label>
+    {% endfor %}
+        </div>
+        <p class="ac-panel__hint" id="sourceHint">
+            <strong>runlog</strong> is the game's primary log file · <strong>stderr</strong> is the game container's
+            Rust/panic output · <strong>Daphne / web</strong> is this site's server log.
+        </p>
+
+        <!-- Color (per-color sources only) -->
+        <div id="colorRow" class="ac-subrow">
+            <span class="ac-label">Color</span>
+            <div class="ac-seg ac-seg--wrap" role="radiogroup" aria-label="Game color" id="colorSeg">
+                <input class="btn-check" type="radio" name="color" id="color-live" value="live" autocomplete="off" checked>
+                <label class="ac-seg__item" for="color-live" id="color-label-live">
+                    <svg class="bi" aria-hidden="true"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#broadcast-pin"></use></svg>
+                    Live
+                </label>
+                <input class="btn-check" type="radio" name="color" id="color-blue" value="blue" autocomplete="off">
+                <label class="ac-seg__item ac-seg__item--blue" for="color-blue" id="color-label-blue">
+                    Blue<span class="ac-live-dot" aria-hidden="true"></span>
+                </label>
+                <input class="btn-check" type="radio" name="color" id="color-green" value="green" autocomplete="off">
+                <label class="ac-seg__item ac-seg__item--green" for="color-green" id="color-label-green">
+                    Green<span class="ac-live-dot" aria-hidden="true"></span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Size + refresh -->
+        <div class="ac-subrow">
+            <span class="ac-label">Lines</span>
+            <select class="ac-field ac-field--inline" id="linesSel" aria-label="Number of lines">
+    {% for n in log_line_choices %}
+                <option value="{{ n }}"{% if n == log_default_lines %} selected{% endif %}>{{ n }}</option>
+    {% endfor %}
+            </select>
+            <button type="button" class="ac-btn ac-btn--info" id="refreshBtn">
+                <svg class="bi" aria-hidden="true"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#arrow-clockwise"></use></svg>
+                Refresh
+            </button>
+            <div class="ac-switch form-check form-switch" title="Refresh every 10 seconds">
+                <input class="form-check-input" type="checkbox" role="switch" id="autoRefresh">
+                <label class="form-check-label" for="autoRefresh">Auto</label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="ac-panel">
+        <div class="ac-panel__h">
+            <svg class="bi" aria-hidden="true"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#funnel"></use></svg>
+            Filter &amp; search
+        </div>
+        <div class="ac-filter" role="group" aria-label="Severity" id="levelFilter">
+            <span class="ac-empty-inline" id="levelFilterEmpty">No severities parsed.</span>
+        </div>
+        <div class="ac-filter" role="group" aria-label="Tags" id="tagFilter" hidden></div>
+        <div class="ac-inputgroup">
+            <span class="ac-inputgroup__icon">
+                <svg class="bi" aria-hidden="true"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#search"></use></svg>
+            </span>
+            <input type="search" class="ac-input" id="searchBox" placeholder="Search log text…" autocomplete="off" spellcheck="false">
+        </div>
+    </div>
+
+    <!-- Output -->
+    <div class="ac-console" aria-live="polite">
+        <div class="ac-console__bar">
+            <span class="ac-console__title" id="outTitle">runlog</span>
+            <span class="ac-console__timer" id="outMeta"></span>
+            <button type="button" class="ac-copy" id="copyBtn">
+                <svg class="bi" aria-hidden="true"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#clipboard"></use></svg>
+                <span id="copyText">Copy</span>
+            </button>
+        </div>
+        <div class="ac-console__body">
+            <div class="ac-log__note" id="logNote" hidden></div>
+            <div class="ac-log" id="logBody"></div>
+            <div class="ac-empty" id="logEmpty" hidden>
+                <svg class="bi" aria-hidden="true"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#inbox"></use></svg>
+                <span id="logEmptyText">No log lines.</span>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+(function () {
+    "use strict";
+    const csrftoken = "{{ csrf_token }}";
+    const configured = {% if log_configured %}true{% else %}false{% endif %};
+
+    const livePill = document.getElementById("livePill");
+    const agentPill = document.getElementById("agentPill");
+    const colorRow = document.getElementById("colorRow");
+    const linesSel = document.getElementById("linesSel");
+    const refreshBtn = document.getElementById("refreshBtn");
+    const autoRefresh = document.getElementById("autoRefresh");
+    const levelFilter = document.getElementById("levelFilter");
+    const levelFilterEmpty = document.getElementById("levelFilterEmpty");
+    const tagFilter = document.getElementById("tagFilter");
+    const searchBox = document.getElementById("searchBox");
+    const outTitle = document.getElementById("outTitle");
+    const outMeta = document.getElementById("outMeta");
+    const logBody = document.getElementById("logBody");
+    const logNote = document.getElementById("logNote");
+    const logEmpty = document.getElementById("logEmpty");
+    const logEmptyText = document.getElementById("logEmptyText");
+    const copyBtn = document.getElementById("copyBtn");
+    const copyText = document.getElementById("copyText");
+
+    const LEVELS = ["error", "warn", "info", "debug", "log"];
+    const SOURCE_LABEL = { runlog: "runlog", stderr: "stderr", web: "Daphne / web" };
+
+    let entries = [];            // last fetched parsed entries
+    let activeLevels = new Set(); // empty = all levels
+    let activeTag = null;         // null = all tags
+    let autoTimer = null;
+    let searchTimer = null;
+    let inFlight = false;
+
+    // ---- helpers ---------------------------------------------------------
+    function setPill(el, text, kind, live) {
+        el.textContent = text;
+        el.className = "ac-pill ac-pill--status ac-pill--" + kind + (live ? " ac-pill--live" : "");
+    }
+    function currentSource() {
+        const el = document.querySelector('input[name="source"]:checked');
+        return el ? el.value : "runlog";
+    }
+    function currentColor() {
+        const el = document.querySelector('input[name="color"]:checked');
+        return el ? el.value : "live";
+    }
+
+    function post(url, params) {
+        const body = new URLSearchParams(params);
+        body.append("csrfmiddlewaretoken", csrftoken);
+        return fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "X-CSRFToken": csrftoken,
+            },
+            body: body.toString(),
+        }).then(function (resp) {
+            return resp.json().then(function (data) {
+                return { status: resp.status, data: data };
+            }, function () {
+                return { status: resp.status, data: {} };
+            });
+        });
+    }
+
+    // ---- live-color status ----------------------------------------------
+    function markLive(color) {
+        ["blue", "green"].forEach(function (c) {
+            const label = document.getElementById("color-label-" + c);
+            if (label) { label.classList.toggle("ac-seg__item--live", c === color); }
+        });
+    }
+
+    function loadStatus() {
+        if (!configured) { return; }
+        post("{% url 'logs_status' %}", {}).then(function (r) {
+            if (r.status === 200 && r.data && r.data.ok) {
+                const live = r.data.live_color;
+                if (live) {
+                    setPill(livePill, "LIVE: " + live, live === "blue" ? "info" : "ok", true);
+                    markLive(live);
+                } else {
+                    setPill(livePill, "live color unknown", "warn", false);
+                    markLive(null);
+                }
+                setPill(agentPill, "agent ok", "ok", false);
+            } else {
+                setPill(livePill, "live color unknown", "muted", false);
+                setPill(agentPill, "agent error", "danger", false);
+            }
+        }, function () {
+            setPill(agentPill, "agent unreachable", "danger", false);
+        });
+    }
+
+    // ---- fetch + render --------------------------------------------------
+    function levelKind(level) {
+        return { error: "danger", warn: "warn", info: "info", debug: "muted", log: "muted" }[level] || "muted";
+    }
+
+    function buildLevelChips(levelCounts) {
+        // Clear (no innerHTML on data) and rebuild.
+        levelFilter.textContent = "";
+        const present = LEVELS.filter(function (l) { return levelCounts[l]; });
+        if (!present.length) {
+            levelFilter.appendChild(levelFilterEmpty);
+            levelFilterEmpty.hidden = false;
+            return;
+        }
+        present.forEach(function (level) {
+            const chip = document.createElement("button");
+            chip.type = "button";
+            chip.className = "ac-chip ac-chip--" + levelKind(level) +
+                (activeLevels.has(level) ? " ac-chip--active" : "");
+            chip.dataset.level = level;
+            chip.textContent = level + " ";
+            const n = document.createElement("span");
+            n.className = "ac-chip__n";
+            n.textContent = levelCounts[level];
+            chip.appendChild(n);
+            chip.addEventListener("click", function () {
+                if (activeLevels.has(level)) { activeLevels.delete(level); }
+                else { activeLevels.add(level); }
+                chip.classList.toggle("ac-chip--active");
+                applyFilter();
+            });
+            levelFilter.appendChild(chip);
+        });
+    }
+
+    function buildTagChips(tags) {
+        tagFilter.textContent = "";
+        if (!tags || !tags.length) { tagFilter.hidden = true; activeTag = null; return; }
+        tagFilter.hidden = false;
+        // "all" reset chip.
+        const all = document.createElement("button");
+        all.type = "button";
+        all.className = "ac-chip" + (activeTag === null ? " ac-chip--active" : "");
+        all.textContent = "all tags";
+        all.addEventListener("click", function () { activeTag = null; buildTagChips(tags); applyFilter(); });
+        tagFilter.appendChild(all);
+        tags.slice(0, 40).forEach(function (t) {
+            const chip = document.createElement("button");
+            chip.type = "button";
+            chip.className = "ac-chip" + (activeTag === t.name ? " ac-chip--active" : "");
+            chip.textContent = t.name + " ";
+            const n = document.createElement("span");
+            n.className = "ac-chip__n";
+            n.textContent = t.count;
+            chip.appendChild(n);
+            chip.addEventListener("click", function () {
+                activeTag = (activeTag === t.name) ? null : t.name;
+                buildTagChips(tags);
+                applyFilter();
+            });
+            tagFilter.appendChild(chip);
+        });
+    }
+
+    function applyFilter() {
+        const q = searchBox.value.trim().toLowerCase();
+        const frag = document.createDocumentFragment();
+        let shown = 0;
+        for (let k = 0; k < entries.length; k++) {
+            const e = entries[k];
+            if (activeLevels.size && !activeLevels.has(e.level)) { continue; }
+            if (activeTag !== null && e.tag !== activeTag) { continue; }
+            if (q && e.text.toLowerCase().indexOf(q) === -1) { continue; }
+            const line = document.createElement("div");
+            line.className = "ac-log__line ac-log__line--" + e.level;
+            line.textContent = e.text.length ? e.text : " ";
+            frag.appendChild(line);
+            shown++;
+        }
+        logBody.textContent = "";
+        logBody.appendChild(frag);
+        const total = entries.length;
+        if (!total) {
+            logEmpty.hidden = false;
+            logEmptyText.textContent = "No log lines returned.";
+        } else if (!shown) {
+            logEmpty.hidden = false;
+            logEmptyText.textContent = "No lines match the current filters.";
+        } else {
+            logEmpty.hidden = true;
+        }
+        updateMeta(shown, total);
+        // Newest lines are at the bottom; keep the view pinned there.
+        const bodyEl = logBody.parentElement;
+        bodyEl.scrollTop = bodyEl.scrollHeight;
+    }
+
+    let lastFrame = { start: null, end: null, truncated: false };
+    function updateMeta(shown, total) {
+        const parts = [];
+        if (shown === total) { parts.push(total + " lines"); }
+        else { parts.push(shown + " / " + total + " lines"); }
+        if (lastFrame.start && lastFrame.end) {
+            parts.push(lastFrame.start + " → " + lastFrame.end);
+        }
+        if (lastFrame.truncated) { parts.push("truncated"); }
+        outMeta.textContent = parts.join("   ·   ");
+    }
+
+    function setNote(text) {
+        if (text) { logNote.hidden = false; logNote.textContent = text; }
+        else { logNote.hidden = true; logNote.textContent = ""; }
+    }
+
+    function fetchLogs() {
+        if (!configured || inFlight) { return; }
+        const source = currentSource();
+        inFlight = true;
+        refreshBtn.disabled = true;
+        outTitle.textContent = SOURCE_LABEL[source] || source;
+        post("{% url 'logs_fetch' %}", {
+            source: source,
+            color: currentColor(),
+            lines: linesSel.value,
+        }).then(function (r) {
+            inFlight = false;
+            refreshBtn.disabled = false;
+            const d = r.data || {};
+            if (r.status !== 200 || !d.ok) {
+                entries = [];
+                setNote("");
+                logBody.textContent = "";
+                buildLevelChips({});
+                buildTagChips([]);
+                logEmpty.hidden = false;
+                logEmptyText.textContent = d.message || d.detail || ("Could not load logs (HTTP " + r.status + ").");
+                outMeta.textContent = "";
+                return;
+            }
+            entries = d.entries || [];
+            lastFrame = {
+                start: d.timeframe ? d.timeframe.start : null,
+                end: d.timeframe ? d.timeframe.end : null,
+                truncated: !!d.truncated,
+            };
+            let title = SOURCE_LABEL[source] || source;
+            if (d.color) { title += " · " + d.color; }
+            if (source !== "web" && d.color && d.color === d.live_color) { title += " (LIVE)"; }
+            outTitle.textContent = title;
+            setNote(d.note || "");
+            buildLevelChips(d.levels || {});
+            buildTagChips(d.tags || []);
+            applyFilter();
+        }, function () {
+            inFlight = false;
+            refreshBtn.disabled = false;
+            logEmpty.hidden = false;
+            logEmptyText.textContent = "Network error fetching logs.";
+        });
+    }
+
+    // ---- source/color interplay -----------------------------------------
+    function syncColorVisibility() {
+        colorRow.hidden = currentSource() === "web";
+    }
+
+    document.querySelectorAll('input[name="source"]').forEach(function (el) {
+        el.addEventListener("change", function () { syncColorVisibility(); fetchLogs(); });
+    });
+    document.querySelectorAll('input[name="color"]').forEach(function (el) {
+        el.addEventListener("change", fetchLogs);
+    });
+    linesSel.addEventListener("change", fetchLogs);
+    refreshBtn.addEventListener("click", fetchLogs);
+    searchBox.addEventListener("input", function () {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(applyFilter, 120);
+    });
+    autoRefresh.addEventListener("change", function () {
+        clearInterval(autoTimer);
+        if (autoRefresh.checked) {
+            autoTimer = setInterval(function () { loadStatus(); fetchLogs(); }, 10000);
+        }
+    });
+
+    copyBtn.addEventListener("click", function () {
+        // Copy the currently-visible (filtered) lines.
+        const text = Array.prototype.map.call(logBody.children, function (n) {
+            return n.textContent;
+        }).join("\n");
+        const done = function () {
+            copyText.textContent = "Copied";
+            setTimeout(function () { copyText.textContent = "Copy"; }, 1500);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(done, function () {});
+        }
+    });
+
+    // ---- init ------------------------------------------------------------
+    syncColorVisibility();
+    if (configured) {
+        loadStatus();
+        fetchLogs();
+    } else {
+        logEmpty.hidden = false;
+        logEmptyText.textContent = "Log agent is not configured.";
+        setPill(livePill, "unavailable", "muted", false);
+    }
+})();
+</script>
+{% endblock content %}

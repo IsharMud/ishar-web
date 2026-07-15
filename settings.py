@@ -286,6 +286,13 @@ DEPLOY_AGENT_SECRET = getenv("DEPLOY_AGENT_SECRET", "")
 DEPLOY_AGENT_ENVS = ("test", "prod")
 DEPLOY_AGENT_SERVICES = ("ishar-app", "ishar-web", "ishar-feedback-bridge")
 
+# Staff log viewer (/portal/logs/, ishar-web#104). Reuses the same host agent,
+# socket, and secret as the deploy button — the log actions are read-only
+# additions to that agent. LOG_VIEWER_ENV is which deploy env the viewer reads
+# (prod in production); the agent still re-validates it against its own allowlist.
+LOG_VIEWER_ENV = getenv("LOG_VIEWER_ENV", "prod")
+LOG_VIEWER_SOURCES = ("runlog", "stderr", "web")
+
 # Alignments.
 ALIGNMENTS = {
     "Very Evil": (-1500, -1000),

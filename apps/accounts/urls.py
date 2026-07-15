@@ -11,6 +11,7 @@ from .views.deploy import (
     DeployView,
     DeployWebClientsView,
 )
+from .views.logs import LogFetchView, LogStatusView, LogViewerView
 from .views.password import PasswordView
 from .views.portal import PortalView
 from .views.private import SetPrivateView
@@ -42,4 +43,7 @@ urlpatterns = [
         DeployGameStatusView.as_view(),
         name="deploy_game_status",
     ),
+    path("logs/", LogViewerView.as_view(), name="logs"),
+    path("logs/status/", LogStatusView.as_view(), name="logs_status"),
+    path("logs/fetch/", LogFetchView.as_view(), name="logs_fetch"),
 ]
