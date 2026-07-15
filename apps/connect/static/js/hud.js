@@ -856,16 +856,28 @@
     // ------------------------------------------------------------------
     // Abilities: the target-aware command + shared usability logic.
     // ------------------------------------------------------------------
+    // The exact command to invoke an ability, or null if it can't be actively
+    // used (passive / craft / enchant). Mirrors the game's real syntax rather
+    // than reconstructing a bare verb from the name.
     function abilityCommand(s) {
         var nm = nameOf(s.name);
+        // Metamagic modes: the skill is named "Metamagic: Clarity" but invoked
+        // as "metamagic clarity".
+        var mm = nm.match(/^Metamagic:\s*(.+)$/i);
+        if (mm) return "metamagic " + mm[1].toLowerCase();
+        if (s.type === "passive" || s.type === "craft" || s.type === "enchant") return null;
         if (s.type === "spell") {
             var base = "cast '" + nm + "'";
             if (s.target_type === "offensive" && S.tgtHostile) return base + " " + S.tgtHostile.handle;
             if (s.target_type === "defensive" && S.tgtFriendly) return base + " " + S.tgtFriendly.handle;
             return base;
         }
-        return nm;   // non-spell skills are bare verbs (target auto/optional)
+        // Multi-word skills ("Shield Slam") must go through the "action" parser
+        // (the one spells use) or they're misread as command "shield" + arg
+        // "slam"; single-word skills work as a bare verb.
+        return /\s/.test(nm) ? "action " + nm : nm;
     }
+    function abilityUsable(s) { return abilityCommand(s) != null; }
     // Why a skill is unusable right now (or null). cd in seconds.
     function abilityBlock(s) {
         var t = now();
@@ -1026,16 +1038,19 @@
         } else {
             var ul = el("ul", { class: "ab-list" });
             rows.forEach(function (s) {
-                var blk = abilityBlock(s);
+                var passive = !abilityUsable(s);   // passive / craft / enchant
+                var blk = passive ? null : abilityBlock(s);
                 var fav = !!favorites[nameOf(s.name).toLowerCase()];
                 var right = [];
                 if (blk) right.push(el("span", { class: "ab-block", text: blk.cd > 0 ? blk.cd + "s" : blk.reason }));
+                if (passive) right.push(el("span", { class: "ab-type", text: s.type }));
                 right.push(el("span", { class: "ab-pct", text: s.percent + "%" }));
                 right.push(el("button", { type: "button", class: "ab-star" + (fav ? " on" : ""), "data-fav": nameOf(s.name), "aria-label": fav ? "Remove from favorites" : "Add to favorites", title: fav ? "Remove from favorites" : "Add to favorites", text: fav ? "★" : "☆" }));
                 right.push(el("button", { type: "button", class: "row-more", "aria-label": "More actions", text: "⋯" }));
                 ul.appendChild(el("li", {
-                    class: "ab-row " + catClass(s) + (blk ? " off" : ""),
-                    "data-ability": s.id, "data-menu": "ability", title: castHint(s)
+                    class: "ab-row " + catClass(s) + (blk ? " off" : "") + (passive ? " ab-passive" : ""),
+                    "data-ability": s.id, "data-menu": "ability",
+                    title: passive ? s.name + " — " + s.type + " (not usable)" : castHint(s)
                 }, [
                     el("span", { class: "ab-name", text: s.name }),
                     el("span", { class: "ab-right" }, right)
@@ -1218,11 +1233,12 @@
     function abilityActions(s) {
         if (!s) return [];
         var fav = !!favorites[nameOf(s.name).toLowerCase()];
-        return [
-            { label: s.type === "spell" ? "Cast" : "Use", fn: function () { sendCmd(abilityCommand(s)); } },
-            { label: "Look up", cmd: "skill search " + nameOf(s.name) },
-            { label: fav ? "★ Remove from favorites" : "☆ Add to favorites", fn: function () { toggleFavorite(s.name); } }
-        ];
+        var acts = [];
+        var cmd = abilityCommand(s);
+        if (cmd) acts.push({ label: s.type === "spell" ? "Cast" : "Use", fn: function () { sendCmd(cmd); } });
+        acts.push({ label: "Look up", cmd: "skill search " + nameOf(s.name) });
+        acts.push({ label: fav ? "★ Remove from favorites" : "☆ Add to favorites", fn: function () { toggleFavorite(s.name); } });
+        return acts;
     }
 
     // ------------------------------------------------------------------
@@ -1257,9 +1273,13 @@
             var s = skillById(ab.getAttribute("data-ability"));
             if (s) {
                 if (abilityBlock(s) && ab.classList.contains("skill")) return;   // hotbar: inert when blocked
-                sendCmd(abilityCommand(s));
+                var acmd = abilityCommand(s);
+                if (acmd) { sendCmd(acmd); return; }
+                // Not invocable (passive/craft/enchant): fall through to the
+                // context menu below rather than firing a dead command.
+            } else {
+                return;
             }
-            return;
         }
 
         // 4) Context-menu openers (row body or its ⋯ button).
@@ -1556,7 +1576,9 @@
             { id: 7, name: "bless", type: "spell", percent: 70, usable: true, category: "misc", target_type: "defensive", mana_pct: 15, min_position: "Standing" },
             { id: 8, name: "sanctuary", type: "spell", percent: 60, usable: true, category: "misc", target_type: "defensive", mana_pct: 50, min_position: "Standing" },
             { id: 9, name: "disarm", type: "skill", percent: 45, usable: true, category: "damage", target_type: "none", min_position: "Fighting" },
-            { id: 10, name: "second attack", type: "passive", percent: 75, usable: false, category: "misc", target_type: "none", min_position: "Standing" }
+            { id: 10, name: "second attack", type: "passive", percent: 75, usable: false, category: "misc", target_type: "none", min_position: "Standing" },
+            { id: 91, name: "Metamagic: Clarity", type: "skill", percent: 100, usable: true, category: "misc", target_type: "none", min_position: "Standing" },
+            { id: 92, name: "Shield Slam", type: "skill", percent: 72, usable: true, category: "damage", target_type: "none", min_position: "Fighting" }
         ];
         // Pad to demonstrate the immortal overflow the browser now bounds.
         for (var i = 11; i <= 90; i++) bigSkills.push({ id: i, name: "spell " + i, type: (i % 3 ? "spell" : "skill"), percent: 40 + (i % 60), usable: (i % 4 !== 0), category: ["damage", "heal", "misc"][i % 3], target_type: ["offensive", "defensive", "none"][i % 3], mana_pct: 20 + (i % 40), min_position: "Standing" });

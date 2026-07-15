@@ -482,6 +482,9 @@ body.connect-page #content { padding: .5rem !important; }
 .ab-star { background: none; border: 0; color: var(--ac-dim); cursor: pointer; font-size: .9rem; padding: 0 2px; line-height: 1; }
 .ab-star.on { color: var(--hud-gold); }
 .ab-star:hover { color: var(--ac-accent); }
+/* Passive / craft / enchant abilities: tagged and visibly non-activatable. */
+.ab-type { font-size: .58rem; text-transform: uppercase; letter-spacing: .04em; color: var(--ac-dim); background: var(--ac-bg); border-radius: 3px; padding: 0 5px; }
+.ab-row.ab-passive .ab-name { color: var(--ac-dim); font-style: italic; }
 
 /* ----- Affects ----- */
 .aff-list { list-style: none; margin: 0; padding: 0; }
