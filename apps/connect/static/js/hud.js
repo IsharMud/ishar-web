@@ -77,11 +77,12 @@
     // Occupants sits last in the scroll — directly above the pinned rose — so
     // the movement (rose) and interaction (occupants) surfaces are together at
     // the bottom, nearest the input.
-    var PANELS = ["equipment", "inventory", "train", "occupants", "room",
+    var PANELS = ["equipment", "inventory", "train", "group", "occupants", "room",
                   "status", "abilities", "chat", "who"];
     var PANEL_HOME = {
         occupants: "hud-left-scroll", equipment: "hud-left-scroll",
         inventory: "hud-left-scroll", train: "hud-left-scroll",
+        group: "hud-left-scroll",
         room: "hud-left",
         status: "hud-right", abilities: "hud-right", chat: "hud-right", who: "hud-right"
     };
@@ -261,7 +262,7 @@
                 // path uses to avoid rebuilding a ~400-row list off-screen.
                 if (abilitiesVisible()) renderAbilities();
                 break;
-            case "Char.Status": S.status = data; renderVitals(); renderStatus(); break;
+            case "Char.Status": S.status = data; renderVitals(); renderStatus(); renderGroup(); break;
             case "Game.Time": S.time = data; renderVitals(); break;
             case "Room.Info": S.room = data; renderRoom(); break;
             case "Room.Occupants": applyOccupants(data); break;
@@ -269,7 +270,7 @@
             case "Char.Inventory": S.inventory = data; renderInventory(); renderEquipment(); break;
             case "Char.Train": S.train = data; renderTrain(); break;
             case "Char.Affects": S.affects = data; stampAffectExpiry(data); renderStatus(); break;
-            case "Group.Update": S.group = data; renderStatus(); break;
+            case "Group.Update": S.group = data; renderGroup(); break;
             case "Char.Who": S.who = data; renderWho(); break;
             case "Char.Skills": S.skills = (data && data.skills) || []; renderHotbar(); renderAbilities(); break;
             case "Char.Cooldowns":
@@ -384,6 +385,32 @@
                     el("span", { class: "vbar-text", text: v.opponent_hp_pct + "%" })
                 ])
             ]));
+            // Target-of-target, derived from the Room.Occupants combat graph:
+            // whether your foe is swinging at YOU or someone else is holding
+            // it (the tank). Re-rendered by applyOccupants whenever an edge
+            // changes; the cheap updateVitals path never touches it.
+            var foe = null, onYou = 0;
+            for (var fi = 0; fi < (S.occupants || []).length; fi++) {
+                if (S.occupants[fi].is_your_target) foe = S.occupants[fi];
+                if (S.occupants[fi].fighting_you && !S.occupants[fi].is_dead) onYou++;
+            }
+            if (foe) {
+                if (foe.fighting_you) {
+                    barKids.push(el("span", { class: "v-foe-tgt you", title: "Your target is attacking you", text: "◎ on you" }));
+                } else if (foe.fighting) {
+                    var tk2 = occByHandle(foe.fighting);
+                    if (tk2) {
+                        var tname = tk2.is_player ? firstWord(tk2.keyword) : stripColor(tk2.short_desc || tk2.keyword);
+                        barKids.push(el("span", { class: "v-foe-tgt", title: "Your target is attacking them (they tank)", text: "◎ tank: " + tname }));
+                    }
+                }
+            }
+            // Attacker count — the multi-combatant tally the row-by-row "⚔
+            // you" tags don't add up for you. Skipped when it would repeat
+            // the "on you" chip's information (exactly one attacker = foe).
+            if (onYou > 0 && !(onYou === 1 && foe && foe.fighting_you)) {
+                barKids.push(el("span", { class: "v-foe-tgt you", title: "Enemies attacking you", text: "⚠ " + onYou + " on you" }));
+            }
         }
         if (v && v.metamagic != null) barKids.push(vbar("MM", v.metamagic, v.metamagic_max, "mm"));
         if (v && v.edge != null) barKids.push(vbar("Edge", v.edge, v.edge_max, "edge"));
@@ -543,7 +570,8 @@
             else S[slot] = null;
         });
         renderOccupants();
-        renderVitals();      // target chip may live near the foe bar
+        renderGroup();       // member menus map onto occupant handles
+        renderVitals();      // target chip + tank line live near the foe bar
         tickHotbar();        // target-aware labels
     }
 
@@ -561,6 +589,45 @@
         if (o.is_dead) return "dead";
         return o.hostile_hint === "hostile" ? "hostile"
              : o.hostile_hint === "friendly" ? "friendly" : "neutral";
+    }
+
+    // Relationship/position predicates over the Room.Occupants fields
+    // (position, is_loyal_follower, is_my_follower, fighting_you,
+    // is_your_target, fighting — GMCP 11.2.0). All degrade gracefully when
+    // the fields are absent: predicates just return false and the new menu
+    // options don't appear.
+    function posLower(o) { return String((o && o.position) || "").toLowerCase(); }
+    function occSleeping(o) { return posLower(o) === "sleeping"; }
+    function occSeated(o) { var p = posLower(o); return p === "sitting" || p === "resting"; }
+    function occByHandle(h) {
+        if (!h) return null;
+        for (var i = 0; i < (S.occupants || []).length; i++) {
+            if (S.occupants[i].handle === h) return S.occupants[i];
+        }
+        return null;
+    }
+    function anyLoyalFollowerHere() {
+        // Sleeping followers can't hear an order — offering "Order attack"
+        // with only a sleeping pet present would send a command the game
+        // rejects ("None of your loyal followers can hear you.").
+        return (S.occupants || []).some(function (o) {
+            return o.is_loyal_follower && !o.is_dead && !occSleeping(o);
+        });
+    }
+    // Triage tint for a group member's hp readout — the game's condition-
+    // color breakpoints (get_condition_color), coarsened to three tiers:
+    // ≤40 danger, ≤60 warn, else ok.
+    function hpTintClass(p) {
+        if (p == null) return "";
+        return p <= 40 ? " cond-low" : p <= 60 ? " cond-mid" : " cond-ok";
+    }
+    // Terse label for a fight edge ("⚔ guard"): the keyword reads better in a
+    // cramped row than a full short_desc.
+    function occFightLabel(o) {
+        if (o.fighting_you) return "⚔ you";
+        if (!o.fighting) return "";
+        var t = occByHandle(o.fighting);
+        return "⚔ " + (t ? firstWord(t.keyword) : "…");
     }
 
     function renderOccupants() {
@@ -588,6 +655,11 @@
                     var marks = "";
                     if (S.tgtHostile && S.tgtHostile.handle === o.handle) marks += " ⚔";
                     if (S.tgtFriendly && S.tgtFriendly.handle === o.handle) marks += " ✚";
+                    // Position tag for anyone not simply standing (the same
+                    // cue the room text gives: "is sleeping here").
+                    var ptag = (!o.is_dead && o.position && posLower(o) !== "standing")
+                        ? posLower(o) : "";
+                    var fight = o.is_dead ? "" : occFightLabel(o);
                     var row = el("li", {
                         class: "occ-row " + occHostileClass(o) + (o.is_dead ? " is-dead" : ""),
                         "data-menu": "occupant", "data-idx": i,
@@ -595,7 +667,10 @@
                     }, [
                         el("span", { class: "occ-icon", "aria-hidden": "true", text: o.is_player ? "☻" : "•" }),
                         el("span", { class: "occ-name", text: stripColor(o.short_desc || o.keyword) }),
+                        o.is_loyal_follower ? el("span", { class: "occ-loyal", title: "Loyal follower — takes your orders", text: "⚑" }) : null,
                         o.is_shopkeeper ? el("span", { class: "occ-shop", title: "Sells wares — List", text: "$" }) : null,
+                        ptag ? el("span", { class: "occ-pos", text: ptag }) : null,
+                        fight ? el("span", { class: "occ-fight" + (o.fighting_you ? " you" : ""), title: o.fighting_you ? "Fighting YOU" : "In combat", text: fight }) : null,
                         marks ? el("span", { class: "occ-marks", "aria-hidden": "true", text: marks }) : null,
                         el("button", { type: "button", class: "row-more", "data-menu": "occupant", "data-idx": i, "aria-label": "Actions", text: "⋯" })
                     ]);
@@ -829,19 +904,127 @@
             var affNodes = affItems(a.buffs, "buff").concat(affItems(a.maintained, "maint"), affItems(a.debuffs, "debuff"));
             kids.push(affNodes.length ? el("ul", { class: "aff-list" }, affNodes) : el("div", { class: "panel-empty", text: "None." }));
         }
-        var g = S.group;
-        if (g && g.members && g.members.length) {
-            kids.push(el("div", { class: "sub-h", text: "Group (" + g.size + ")" }));
-            var gl = el("ul", { class: "grp-list" });
-            g.members.forEach(function (m) {
-                gl.appendChild(el("li", { class: "grp" }, [
-                    el("span", { class: "grp-name", text: m.name + (m.leader ? " ★" : "") }),
-                    el("span", { class: "grp-bars" }, [mini(m.hp_pct, "hp"), mini(m.mp_pct, "mp"), mini(m.mv_pct, "mv")])
-                ]));
-            });
-            kids.push(gl);
-        }
         fill(dom.status, kids.length ? kids : [el("div", { class: "panel-empty", text: "—" })]);
+    }
+
+    // ------------------------------------------------------------------
+    // Group (Group.Update) — the party pane. Members and allies with live
+    // vitals, tank/threat state and fight edges; rows map onto Room.Occupants
+    // entries (players by name, allies by loyal-follower short_desc) so one
+    // tap opens the same action menu the occupants panel uses — heals, wake,
+    // yank, orders — without duplicating a menu system.
+    // ------------------------------------------------------------------
+    function groupMemberOcc(m) {
+        // A player member's occupant entry: players' keyword IS their name.
+        for (var i = 0; i < (S.occupants || []).length; i++) {
+            var o = S.occupants[i];
+            if (o.is_player && !o.is_dead
+                && firstWord(o.keyword).toLowerCase() === String(m.name || "").toLowerCase()) return o;
+        }
+        return null;
+    }
+    function groupAllyOcc(a) {
+        // An ally row maps to a loyal-follower occupant with the same display
+        // name; prefer own loyal followers so the menu's orders land on OUR
+        // wolf when two identical wolves share the room.
+        var name = stripColor(String(a.name || ""));
+        var loose = null;
+        for (var i = 0; i < (S.occupants || []).length; i++) {
+            var o = S.occupants[i];
+            if (o.is_player || o.is_dead) continue;
+            if (stripColor(o.short_desc || "") !== name) continue;
+            if (o.is_loyal_follower) return o;
+            if (!loose) loose = o;
+        }
+        return loose;
+    }
+    function threatChip(x) {
+        if (x.threat == null) return null;
+        var lvl = x.threat_level || "";
+        var txt = "T:" + x.threat + (x.tank_threat != null ? "/" + x.tank_threat : "");
+        var title = x.tank_threat != null
+            ? "Threat vs the tank's (" + x.tank_threat + ") on their target"
+            : "Threat on their target";
+        return el("span", { class: "grp-threat" + (lvl ? " threat-" + lvl : ""), title: title, text: txt });
+    }
+    function groupRow(x, kind, idx, extraName, hasMenu) {
+        var chips = [];
+        if (x.is_tank) chips.push(el("span", { class: "grp-tank", title: "Tanking — enemies are targeting them", text: "TANK" }));
+        var tc = threatChip(x);
+        if (tc) chips.push(tc);
+        if (x.fighting_name) chips.push(el("span", { class: "grp-fight", title: "Fighting", text: "⚔ " + stripColor(x.fighting_name) }));
+        var p = String(x.position || "").toLowerCase();
+        if (p && p !== "standing") chips.push(el("span", { class: "grp-pos", text: p }));
+        if (x.in_room === false) chips.push(el("span", { class: "grp-away", title: "Not in your room", text: "away" }));
+        var main = el("div", { class: "grp-main" }, [
+            el("div", { class: "grp-line" }, [
+                el("span", { class: "grp-name", text: stripColor(String(x.name || "")) + (x.leader ? " ★" : "") }),
+                extraName ? el("span", { class: "dim", text: " " + extraName }) : null,
+                el("span", { class: "grp-hp-num" + hpTintClass(x.hp_pct), text: (x.hp_pct != null ? x.hp_pct + "%" : "") })
+            ]),
+            chips.length ? el("div", { class: "grp-chips" }, chips) : null,
+            el("span", { class: "grp-bars" }, [mini(x.hp_pct, "hp"), mini(x.mp_pct, "mp"), mini(x.mv_pct, "mv")])
+        ]);
+        // A row with nothing to offer (your own row; an out-of-room ally) is
+        // information, not a control — no menu affordances, no dead taps.
+        if (!hasMenu) return el("li", { class: "grp grp-self" + (x.is_tank ? " tanking" : "") }, [main]);
+        return el("li", {
+            class: "grp" + (x.is_tank ? " tanking" : ""),
+            "data-menu": "grp", "data-gkind": kind, "data-gidx": idx,
+            title: "Tap for actions"
+        }, [
+            main,
+            el("button", { type: "button", class: "row-more", "data-menu": "grp", "data-gkind": kind, "data-gidx": idx, "aria-label": "Actions", text: "⋯" })
+        ]);
+    }
+    function renderGroup() {
+        if (!dom.group) return;
+        var g = S.group;
+        var members = (g && g.members) || [];
+        var allies = (g && g.allies) || [];
+        var head = panelHeader("group", "Group" + (members.length ? " (" + (g.size != null ? g.size : members.length) + ")" : ""), false);
+        var kids = [head];
+        if (!isCollapsed("group")) {
+            if (!members.length && !allies.length) {
+                kids.push(el("div", { class: "panel-empty", text: "Not grouped." }));
+            } else {
+                var gl = el("ul", { class: "grp-list" });
+                var selfName = S.status ? String(S.status.name || "").toLowerCase() : "";
+                members.forEach(function (m, i) {
+                    // Your own row never has actions; other members always
+                    // have at least Tell.
+                    var isSelf = selfName && String(m.name || "").toLowerCase() === selfName;
+                    gl.appendChild(groupRow(m, "member", i, "", !isSelf));
+                });
+                kids.push(gl);
+                if (allies.length) {
+                    kids.push(el("div", { class: "sub-h", text: "Allies" }));
+                    var al = el("ul", { class: "grp-list" });
+                    allies.forEach(function (a, i) {
+                        // An ally row is only actionable through its occupant
+                        // entry — out of the room there's nothing to offer.
+                        al.appendChild(groupRow(a, "ally", i, a.owner ? "(" + a.owner + ")" : "", !!groupAllyOcc(a)));
+                    });
+                    kids.push(al);
+                }
+            }
+        }
+        fill(dom.group, kids);
+    }
+    function groupRowActions(x, kind) {
+        if (!x) return [];
+        var occ = kind === "ally" ? groupAllyOcc(x) : groupMemberOcc(x);
+        // In your room: the row is just another face of the occupant — same
+        // menu, same handles (heals, wake, yank, orders, targets).
+        if (occ) return occupantActions(occ);
+        // Out of room (or unseen): only name-keyed, cross-room actions work.
+        var acts = [];
+        if (kind === "member") {
+            var nm = firstWord(String(x.name || ""));
+            var self = S.status && String(S.status.name || "").toLowerCase() === nm.toLowerCase();
+            if (nm && !self) acts.push({ label: "Tell…", prefill: "tell " + nm + " " });
+        }
+        return acts;
     }
 
     // ------------------------------------------------------------------
@@ -1201,14 +1384,14 @@
     // allied (friendly) target only gets beneficial (defensive) spells, everyone
     // else only offensive ones. Favorited spells first (keeps it your curated
     // set), else usable ones.
-    function occupantCastActions(o) {
+    function occupantCastActions(o, max) {
         var want = o.hostile_hint === "friendly" ? "defensive" : "offensive";
         var spells = (S.skills || []).filter(function (s) {
             return s.type === "spell" && s.target_type === want;
         });
         var fav = spells.filter(function (s) { return favorites[nameOf(s.name).toLowerCase()]; });
         var pick = fav.length ? fav : spells.filter(function (s) { return !abilityBlock(s); });
-        return pick.slice(0, 6).map(function (s) {
+        return pick.slice(0, max || 6).map(function (s) {
             return { label: "Cast " + s.name, cmd: "cast '" + nameOf(s.name) + "' " + o.handle };
         });
     }
@@ -1216,12 +1399,48 @@
     function occupantActions(o) {
         if (!o) return [];
         var acts = [];
+        var friendly = o.hostile_hint === "friendly";
         acts.push({ label: "Look", cmd: "look " + o.handle });
         if (o.is_dead) return acts;   // slain — nothing else round-trips
         acts.push({ label: "Consider", cmd: "consider " + o.handle });
-        // Cast a chosen spell straight at THIS occupant (not the default target).
-        occupantCastActions(o).forEach(function (a) { acts.push(a); });
-        acts.push({ label: "Attack", cmd: "kill " + o.handle, danger: true });
+        // State-contingent verbs FIRST — they exist because of the target's
+        // current posture, so they outrank the evergreen casts. They key off
+        // the relationship fields, NOT the friendly hint: a player following
+        // you while un-grouped reads "neutral" but is exactly who yank is
+        // for. The game re-validates everything.
+        if (occSleeping(o) && (friendly || o.is_my_follower)) {
+            acts.push({ label: "Wake", cmd: "wake " + o.handle });
+        }
+        if (o.is_my_follower && occSeated(o)) {
+            acts.push({ label: "Yank to feet", cmd: "yank " + o.handle });
+        }
+        // Posture orders for a loyal follower — only ones that change
+        // anything, and none while it sleeps (can't hear you; Wake first).
+        if (o.is_loyal_follower && !occSleeping(o)) {
+            ["stand", "rest", "sleep"].forEach(function (p) {
+                var current = posLower(o) === (p === "stand" ? "standing" : p === "rest" ? "resting" : "sleeping");
+                if (!current) acts.push({ label: "Order: " + p, cmd: "order " + o.handle + " " + p });
+            });
+        }
+        // Cast a chosen spell straight at THIS occupant (not the default
+        // target). Capped tighter on allies, whose menus carry state verbs.
+        occupantCastActions(o, friendly ? 4 : 6).forEach(function (a) { acts.push(a); });
+        if (!friendly) {
+            acts.push({ label: "Attack", cmd: "kill " + o.handle, danger: true });
+            // Sic your loyal followers on it. Bare keyword, not the handle:
+            // each follower resolves ordinals from its OWN perspective, so a
+            // viewer-relative "2.thug" could hit the wrong one for them —
+            // and with duplicate keywords in the room, say so on the label.
+            if (anyLoyalFollowerHere()) {
+                var kw = firstWord(o.keyword);
+                var dupes = (S.occupants || []).some(function (x) {
+                    return x !== o && !x.is_dead && x.hostile_hint !== "friendly"
+                        && firstWord(x.keyword).toLowerCase() === kw.toLowerCase();
+                });
+                acts.push({ label: dupes ? "Order attack (any " + kw + ")" : "Order attack",
+                            cmd: "order followers kill " + kw, danger: true });
+            }
+        }
         if (!o.is_player) {
             // Only actual vendors get a list action (is_shopkeeper = the mob
             // handles the `list` command, per Room.Occupants).
@@ -1234,6 +1453,12 @@
         }
         acts.push({ label: (S.tgtHostile && S.tgtHostile.handle === o.handle ? "✓ " : "") + "Target ⚔ (offensive)", fn: function () { setTarget("tgtHostile", o); } });
         acts.push({ label: (S.tgtFriendly && S.tgtFriendly.handle === o.handle ? "✓ " : "") + "Target ✚ (beneficial)", fn: function () { setTarget("tgtFriendly", o); } });
+        if (friendly) {
+            // Attack on an ally stays possible (PK duels, charm gone wrong)
+            // but dead last — never adjacent to Wake/Yank/heals a shaky
+            // thumb is aiming for.
+            acts.push({ label: "Attack", cmd: "kill " + o.handle, danger: true });
+        }
         return acts;
     }
 
@@ -1372,6 +1597,11 @@
         } else if (kind === "ability") {
             var s2 = skillById(host.getAttribute("data-ability"));
             if (s2) openMenu(s2.name, abilityActions(s2), anchor);
+        } else if (kind === "grp") {
+            var gkind = host.getAttribute("data-gkind");
+            var arr = gkind === "ally" ? (S.group && S.group.allies) : (S.group && S.group.members);
+            var x = (arr || [])[Number(host.getAttribute("data-gidx"))];
+            if (x) openMenu(stripColor(String(x.name || "")), groupRowActions(x, gkind), anchor);
         }
     }
     function readDataset(host) {
@@ -1397,6 +1627,7 @@
     function rerenderPanel(key) {
         switch (key) {
             case "occupants": renderOccupants(); break;
+            case "group": renderGroup(); break;
             case "equipment": renderEquipment(); break;
             case "inventory": case "components": renderInventory(); break;
             case "train": renderTrain(); break;
@@ -1510,7 +1741,7 @@
     // Lifecycle
     // ------------------------------------------------------------------
     function renderAll() {
-        renderVitals(); renderRoom(); renderOccupants(); renderEquipment(); renderInventory();
+        renderVitals(); renderRoom(); renderOccupants(); renderGroup(); renderEquipment(); renderInventory();
         renderTrain(); renderStatus(); renderWho(); renderChat(); renderHotbar(); renderAbilities();
     }
     function reset() {
@@ -1535,6 +1766,7 @@
         dom.vitals = document.getElementById("vitals-bar");
         dom.room = document.getElementById("panel-room");
         dom.occupants = document.getElementById("panel-occupants");
+        dom.group = document.getElementById("panel-group");
         dom.equipment = document.getElementById("panel-equipment");
         dom.inventory = document.getElementById("panel-inventory");
         dom.train = document.getElementById("panel-train");
@@ -1646,12 +1878,15 @@
             "Game.Time": { hour: 21, hour12: 9, ampm: "pm", day: 14, day_name: "Sunday", month: 6, month_name: "the Long Shadows", year: 1247, night: true, season_id: 15, season_end: 0, events: [{ name: "Double Essence", seconds: 5400 }, { name: "Festival of Flames" }], moons: [{ name: "Shavar", phase: 4, phase_name: "full", up: true }, { name: "Chenchir", phase: 6, phase_name: "last quarter", up: true }] },
             "Room.Info": { num: 3001, name: "The Grand Concourse", area: "Ishar Nexus", environment: "City", exits: { n: 3002, e: 3005, s: 3008, w: 3010, u: 3100, d: 3200, into: 3500 } },
             "Room.Occupants": { occupants: [
-                { keyword: "guard", short_desc: "a towering city guard", handle: "1.guard", is_player: false, is_dead: false, is_shopkeeper: false, hostile_hint: "neutral" },
-                { keyword: "pigeon", short_desc: "a small grey pigeon", handle: "1.pigeon", is_player: false, is_dead: false, is_shopkeeper: false, hostile_hint: "neutral" },
-                { keyword: "thug", short_desc: "a scarred alley thug", handle: "1.thug", is_player: false, is_dead: false, is_shopkeeper: false, hostile_hint: "hostile" },
-                { keyword: "merchant", short_desc: "Hadeon the curio merchant", handle: "1.merchant", is_player: false, is_dead: false, is_shopkeeper: true, hostile_hint: "neutral" },
-                { keyword: "Boric", short_desc: "Boric, Shield of the Dawn", handle: "1.Boric", is_player: true, is_dead: false, is_shopkeeper: false, hostile_hint: "friendly" },
-                { keyword: "rat", short_desc: "the corpse of a sewer rat", handle: "1.rat", is_player: false, is_dead: true, is_shopkeeper: false, hostile_hint: "neutral" }
+                { keyword: "guard", short_desc: "a towering city guard", handle: "1.guard", is_player: false, is_dead: false, is_shopkeeper: false, hostile_hint: "neutral", position: "Standing", is_loyal_follower: false, is_my_follower: false, fighting_you: false, is_your_target: false },
+                { keyword: "pigeon", short_desc: "a small grey pigeon", handle: "1.pigeon", is_player: false, is_dead: false, is_shopkeeper: false, hostile_hint: "neutral", position: "Standing", is_loyal_follower: false, is_my_follower: false, fighting_you: false, is_your_target: false },
+                { keyword: "thug", short_desc: "a scarred alley thug", handle: "1.thug", is_player: false, is_dead: false, is_shopkeeper: false, hostile_hint: "hostile", position: "Standing", is_loyal_follower: false, is_my_follower: false, fighting_you: false, is_your_target: true, fighting: "1.Boric" },
+                { keyword: "bandit", short_desc: "a wiry crossroads bandit", handle: "1.bandit", is_player: false, is_dead: false, is_shopkeeper: false, hostile_hint: "hostile", position: "Standing", is_loyal_follower: false, is_my_follower: false, fighting_you: true, is_your_target: false },
+                { keyword: "merchant", short_desc: "Hadeon the curio merchant", handle: "1.merchant", is_player: false, is_dead: false, is_shopkeeper: true, hostile_hint: "neutral", position: "Standing", is_loyal_follower: false, is_my_follower: false, fighting_you: false, is_your_target: false },
+                { keyword: "Boric", short_desc: "Boric, Shield of the Dawn", handle: "1.Boric", is_player: true, is_dead: false, is_shopkeeper: false, hostile_hint: "friendly", position: "Standing", is_loyal_follower: false, is_my_follower: false, fighting_you: false, is_your_target: false, fighting: "1.thug" },
+                { keyword: "Selra", short_desc: "Selra the Quiet", handle: "1.Selra", is_player: true, is_dead: false, is_shopkeeper: false, hostile_hint: "friendly", position: "Sleeping", is_loyal_follower: false, is_my_follower: false, fighting_you: false, is_your_target: false },
+                { keyword: "wolf", short_desc: "a large timber wolf", handle: "1.wolf", is_player: false, is_dead: false, is_shopkeeper: false, hostile_hint: "friendly", position: "Resting", is_loyal_follower: true, is_my_follower: true, fighting_you: false, is_your_target: false },
+                { keyword: "rat", short_desc: "the corpse of a sewer rat", handle: "1.rat", is_player: false, is_dead: true, is_shopkeeper: false, hostile_hint: "neutral", position: "Dead", is_loyal_follower: false, is_my_follower: false, fighting_you: false, is_your_target: false }
             ] },
             "Char.Equipment": { items: [
                 { name: "a magnificent helmet of red dragonscales", keywords: "helmet dragonscales", type: "armor", vnum: 1, location: "Head", condition: 100 },
@@ -1674,9 +1909,12 @@
                 { name: "a shard of frost quartz", keywords: "quartz frost shard", count: 5 }
             ] },
             "Char.Affects": { buffs: [{ name: "Stoneskin", id: 101, duration: 1800 }, { name: "Haste", id: 102, duration: 240 }], debuffs: [{ name: "Poison", id: 201, duration: 45 }], maintained: [{ name: "Detect Invisibility", id: 301, duration: 600, target: "self" }, { name: "Shroud", id: 302, duration: 900, target: "Boric", skill: "shroud", handle: "1.boric", releasable: true }] },
-            "Group.Update": { leader: "Aelwyn", size: 2, members: [
-                { name: "Aelwyn", level: 45, hp_pct: 86, mp_pct: 85, mv_pct: 82, position: "Standing", race: "Elf", "class": "Magician", leader: true },
-                { name: "Boric", level: 43, hp_pct: 60, mp_pct: 40, mv_pct: 75, position: "Fighting", race: "Dwarf", "class": "Warrior", leader: false }
+            "Group.Update": { leader: "Aelwyn", size: 3, members: [
+                { name: "Aelwyn", level: 45, hp_pct: 86, mp_pct: 85, mv_pct: 82, position: "Standing", race: "Elf", "class": "Magician", leader: true, in_room: true, is_tank: false, fighting_name: "a scarred alley thug", threat: 40, tank_threat: 120, threat_level: "low" },
+                { name: "Boric", level: 43, hp_pct: 30, mp_pct: 40, mv_pct: 75, position: "Standing", race: "Dwarf", "class": "Warrior", leader: false, in_room: true, is_tank: true, fighting_name: "a scarred alley thug", threat: 120 },
+                { name: "Selra", level: 41, hp_pct: 95, mp_pct: 90, mv_pct: 88, position: "Sleeping", race: "Human", "class": "Cleric", leader: false, in_room: true, is_tank: false }
+            ], allies: [
+                { name: "a large timber wolf", owner: "Aelwyn", hp_pct: 55, mp_pct: 100, mv_pct: 95, position: "Resting", in_room: true, is_tank: false }
             ] },
             "Char.Skills": { skills: bigSkills },
             "Char.Cooldowns": { cooldowns: [{ id: 3, remaining: 8 }], usable: { "3": false } },
