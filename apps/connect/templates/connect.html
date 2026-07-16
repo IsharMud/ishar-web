@@ -92,14 +92,35 @@
                 <input type="checkbox" data-setting="stack">
                 <span>Chain commands with ; (see /help)</span>
             </label>
-            <label class="setting-row setting-notify">
-                <input type="checkbox" data-setting="notifyTells">
-                <span>Notify on tells while the tab is hidden</span>
-            </label>
             <label class="setting-row">
                 <input type="checkbox" data-setting="titleBadge">
                 <span>Unread count in the tab title</span>
             </label>
+            {# Desktop notifications — the whole group hides when the browser
+               has no Notification API (e.g. iOS Safari outside a PWA). #}
+            <div class="setting-group setting-notify-group">
+                <div class="setting-group-h">Notify while the tab is hidden</div>
+                <label class="setting-row setting-notify">
+                    <input type="checkbox" data-setting="notifyTells">
+                    <span>On a tell, reply, or whisper</span>
+                </label>
+                <label class="setting-row setting-notify">
+                    <input type="checkbox" data-setting="notifyBeep">
+                    <span>On a game beep</span>
+                </label>
+                <label class="setting-row setting-notify">
+                    <input type="checkbox" data-setting="notifyHit">
+                    <span>When you take damage</span>
+                </label>
+                <div class="setting-row setting-notify setting-row-inline">
+                    <input type="checkbox" id="set-notifyHealth" data-setting="notifyHealth">
+                    <label for="set-notifyHealth">When HP falls below</label>
+                    <input type="number" class="setting-num" id="set-healthThreshold"
+                           data-setting-num="healthThreshold" min="1" max="99" step="5"
+                           inputmode="numeric" aria-label="Low-health notify threshold, percent">
+                    <label for="set-healthThreshold" class="setting-suffix">%</label>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -314,6 +335,21 @@
     }
     term.open(terminalContainer);
 
+    // Game beep → notification (while hidden). xterm parses the BEL (\x07) out
+    // of the stream for us, so this is independent of the HUD/GMCP and works
+    // even if hud.js failed to load. Throttled so a chatty prompt-bell can't
+    // machine-gun notifications.
+    var lastBeepAt = 0;
+    if (term.onBell) {
+        term.onBell(function() {
+            if (!settings.notifyBeep || !document.hidden) return;
+            var t = Date.now();
+            if (t - lastBeepAt < 15000) return;
+            lastBeepAt = t;
+            notify("Ishar MUD", "The game beeped you.", "ishar-beep");
+        });
+    }
+
     // Clicking the terminal returns focus to the command input, so you can get
     // straight back to typing without aiming for the small input bar. The
     // terminal is display-only (disableStdin), so nothing competes for focus.
@@ -391,15 +427,31 @@
     }
 
     // --- Client settings (persisted; surfaced in the gear menu) ---
-    var settings = { keepInput: true, stack: true, notifyTells: false, titleBadge: true };
+    // notify* fire a desktop Notification only while the tab is hidden (the HUD
+    // already surfaces this state when the tab is focused). healthThreshold is
+    // the percent for the low-health notify, stored as a number.
+    var HEALTH_MIN = 1, HEALTH_MAX = 99, HEALTH_DEFAULT = 25;
+    function clampThreshold(n) {
+        n = parseInt(n, 10);
+        if (isNaN(n)) return HEALTH_DEFAULT;
+        return Math.max(HEALTH_MIN, Math.min(HEALTH_MAX, n));
+    }
+    var settings = {
+        keepInput: true, stack: true, titleBadge: true,
+        notifyTells: false, notifyBeep: false, notifyHit: false,
+        notifyHealth: false, healthThreshold: HEALTH_DEFAULT
+    };
     try {
         var savedSettings = JSON.parse(localStorage.getItem("ishar.settings"));
         if (savedSettings && typeof savedSettings === "object") {
+            // Restore any saved key whose type matches the default (booleans and
+            // the numeric threshold alike).
             Object.keys(settings).forEach(function(k) {
-                if (typeof savedSettings[k] === "boolean") settings[k] = savedSettings[k];
+                if (typeof savedSettings[k] === typeof settings[k]) settings[k] = savedSettings[k];
             });
         }
     } catch (e) {}
+    settings.healthThreshold = clampThreshold(settings.healthThreshold);
     function saveSettings() {
         try { localStorage.setItem("ishar.settings", JSON.stringify(settings)); } catch (e) {}
     }
@@ -795,10 +847,15 @@
             }
             case "settings":
                 sysln("Client settings (change via the gear menu):");
-                sysln("  keep input after send: " + (settings.keepInput ? "on" : "off"));
-                sysln("  ; command stacking:    " + (settings.stack ? "on" : "off"));
-                sysln("  notify on tells:       " + (settings.notifyTells ? "on" : "off"));
-                sysln("  unread title badge:    " + (settings.titleBadge ? "on" : "off"));
+                sysln("  keep input after send:  " + (settings.keepInput ? "on" : "off"));
+                sysln("  ; command stacking:     " + (settings.stack ? "on" : "off"));
+                sysln("  unread title badge:     " + (settings.titleBadge ? "on" : "off"));
+                sysln("  notify (while hidden):");
+                sysln("    tells/replies:        " + (settings.notifyTells ? "on" : "off"));
+                sysln("    game beeps:           " + (settings.notifyBeep ? "on" : "off"));
+                sysln("    taking damage:        " + (settings.notifyHit ? "on" : "off"));
+                sysln("    low health:           " + (settings.notifyHealth
+                    ? "below " + settings.healthThreshold + "%" : "off"));
                 break;
             default:
                 sysln("Unknown client command /" + cleanText(cmd) + " — try /help.");
@@ -861,7 +918,8 @@
                 fitAppHeight();
                 scheduleFit();
             },
-            onComm: onComm
+            onComm: onComm,
+            onVitals: onVitals
         });
     }
 
@@ -1081,14 +1139,19 @@
     // --- Settings (gear) popover ---
     var settingsBtn = document.getElementById("settings-btn");
     var settingsPop = document.getElementById("settings-pop");
+    var NOTIFY_KEYS = ["notifyTells", "notifyBeep", "notifyHit", "notifyHealth"];
     if (!("Notification" in window)) {
-        // No Notification API (e.g. iOS Safari outside a PWA): hide the row.
-        var notifyRow = settingsPop.querySelector(".setting-notify");
-        if (notifyRow) notifyRow.style.display = "none";
+        // No Notification API (e.g. iOS Safari outside a PWA): hide the whole
+        // notifications group — none of it can work.
+        var notifyGroup = settingsPop.querySelector(".setting-notify-group");
+        if (notifyGroup) notifyGroup.style.display = "none";
     }
     function syncSettingsPop() {
         settingsPop.querySelectorAll("input[data-setting]").forEach(function(cb) {
             cb.checked = !!settings[cb.getAttribute("data-setting")];
+        });
+        settingsPop.querySelectorAll("input[data-setting-num]").forEach(function(num) {
+            num.value = String(settings[num.getAttribute("data-setting-num")]);
         });
     }
     function closeSettingsPop() {
@@ -1106,15 +1169,26 @@
         }
     });
     settingsPop.addEventListener("change", function(e) {
+        // The numeric threshold input.
+        var num = e.target.closest("input[data-setting-num]");
+        if (num) {
+            var nkey = num.getAttribute("data-setting-num");
+            var val = clampThreshold(num.value);
+            settings[nkey] = val;
+            num.value = String(val);   // reflect any clamping back to the field
+            saveSettings();
+            return;
+        }
         var cb = e.target.closest("input[data-setting]");
         if (!cb) return;
         var key = cb.getAttribute("data-setting");
-        if (key === "notifyTells" && cb.checked && Notification.permission !== "granted") {
+        if (NOTIFY_KEYS.indexOf(key) !== -1 && cb.checked
+                && "Notification" in window && Notification.permission !== "granted") {
             // Flip on only once the browser actually grants permission.
-            settings.notifyTells = false;
+            settings[key] = false;
             cb.checked = false;
             Notification.requestPermission().then(function(p) {
-                settings.notifyTells = p === "granted";
+                settings[key] = p === "granted";
                 saveSettings();
                 syncSettingsPop();
             });
@@ -1130,16 +1204,25 @@
         closeSettingsPop();
     });
 
-    // --- Unread title badge + tell notifications ---
+    // --- Desktop notifications (title badge + tells/beep/damage/low-health) ---
+    // Every trigger below fires only while the tab is hidden: when it's focused
+    // the HUD already shows tells, vitals, and the terminal directly.
     var baseTitle = document.title;
     var unread = 0;
     function clearTitleBadge() {
         unread = 0;
         document.title = baseTitle;
     }
-    document.addEventListener("visibilitychange", function() {
-        if (!document.hidden) clearTitleBadge();
-    });
+    // One guarded path for raising a Notification. tag lets the OS collapse
+    // repeats of the same kind (a second low-health note replaces the first).
+    function notify(title, body, tag) {
+        if (!("Notification" in window) || Notification.permission !== "granted") return;
+        try {
+            var n = new Notification(title, { body: String(body || "").slice(0, 140), tag: tag });
+            n.onclick = function() { window.focus(); this.close(); };
+        } catch (e) {}
+    }
+
     // Called by the HUD for every Comm.Channel message (text already
     // color-stripped there).
     function onComm(channel, text) {
@@ -1148,18 +1231,65 @@
             unread++;
             document.title = "(" + unread + ") " + baseTitle;
         }
-        if (settings.notifyTells && "Notification" in window
-                && Notification.permission === "granted"
-                && /^(tell|reply|whisper)/i.test(channel || "")) {
-            try {
-                var n = new Notification("Ishar MUD", {
-                    body: String(text || "").slice(0, 140),
-                    tag: "ishar-tell"
-                });
-                n.onclick = function() { window.focus(); this.close(); };
-            } catch (e) {}
+        if (settings.notifyTells && /^(tell|reply|whisper)/i.test(channel || "")) {
+            notify("Ishar MUD", text, "ishar-tell");
         }
     }
+
+    // HP-based notifications, fed Char.Vitals by the HUD. Two independent
+    // triggers, each one-shot and re-armed on tab-return (see visibilitychange):
+    //   • notifyHit    — HP dropped below where it stood when you tabbed out.
+    //   • notifyHealth — HP fell to/under the configured percent.
+    var lastVitals = null;      // most recent vitals, for the visibility handler
+    var hitAnchorHp = null;     // HP captured when the tab went hidden
+    var hitNotified = false;    // damage note already sent this hidden stretch
+    var lowHealthNotified = false;
+    function onVitals(v) {
+        lastVitals = v;
+        if (!v || v.hp == null) return;
+        var hp = Number(v.hp), maxhp = Number(v.maxhp) || 0;
+        var pctHp = maxhp > 0 ? (hp / maxhp * 100) : null;
+
+        // Low health: fire once when at/under the threshold; re-arm above it.
+        if (pctHp != null && pctHp <= settings.healthThreshold) {
+            if (settings.notifyHealth && document.hidden && !lowHealthNotified) {
+                notify("Ishar MUD — low health",
+                    "HP " + hp + " / " + maxhp + " (" + Math.round(pctHp) + "%)", "ishar-health");
+                lowHealthNotified = true;
+            }
+        } else if (pctHp != null) {
+            lowHealthNotified = false;
+        }
+
+        // Took damage while hidden: anchor at the hide, fire once on any dip
+        // below it. Lazily anchor if the toggle was flipped on mid-stretch.
+        if (settings.notifyHit && document.hidden) {
+            if (hitAnchorHp == null) hitAnchorHp = hp;
+            else if (!hitNotified && hp < hitAnchorHp) {
+                notify("Ishar MUD — taking damage",
+                    "HP " + hp + " / " + maxhp, "ishar-hit");
+                hitNotified = true;
+            }
+        }
+    }
+
+    document.addEventListener("visibilitychange", function() {
+        if (!document.hidden) {
+            clearTitleBadge();
+            // Returning to the tab acknowledges everything — re-arm so the next
+            // time you tab out, a fresh event can alert again.
+            hitAnchorHp = null;
+            hitNotified = false;
+            lowHealthNotified = false;
+        } else {
+            // Tabbing out: anchor "took damage" at the HP we're leaving on, and
+            // evaluate low-health right now in case we're already hurt (no new
+            // Char.Vitals may arrive while idle).
+            hitAnchorHp = (lastVitals && lastVitals.hp != null) ? Number(lastVitals.hp) : null;
+            hitNotified = false;
+            if (settings.notifyHealth && lastVitals) onVitals(lastVitals);
+        }
+    });
 
     // --- Keyboard shortcuts (documented in /help) ---
     document.addEventListener("keydown", function(e) {

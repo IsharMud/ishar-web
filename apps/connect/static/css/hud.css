@@ -329,6 +329,25 @@ body.connect-page #content { padding: .5rem !important; }
 .setting-row input:focus-visible { outline: 2px solid var(--ac-accent); outline-offset: 2px; }
 @media (pointer: coarse) { .setting-row { min-height: 44px; } }
 
+/* Grouped settings (e.g. the notifications cluster) under a small heading. */
+.setting-group { margin-top: 4px; padding-top: 2px; border-top: 1px solid var(--ac-border); }
+.setting-group-h {
+    padding: 6px 10px 2px; font-size: .7rem; font-weight: 700;
+    letter-spacing: .04em; text-transform: uppercase; color: var(--ac-dim);
+}
+/* A row that mixes a checkbox with an inline numeric control — not a single
+   label, so its own cursor stays a default and each control labels itself. */
+.setting-row-inline { cursor: default; flex-wrap: wrap; }
+.setting-row-inline label { cursor: pointer; }
+.setting-num {
+    width: 3.6em; flex: none; text-align: right;
+    font-family: monospace; font-size: .85rem; padding: 3px 6px;
+    background: var(--ac-bg); color: var(--ac-text);
+    border: 1px solid var(--ac-border); border-radius: var(--ac-radius-sm);
+}
+.setting-num:focus-visible { outline: 2px solid var(--ac-accent); outline-offset: 1px; }
+.setting-suffix { color: var(--ac-dim); }
+
 /* ----- Compass rose (bottom-left desktop) ----- */
 .rose-head { display: flex; flex-direction: column; padding: 6px 8px 2px; line-height: 1.2; }
 .rose-name { font-size: .74rem; font-weight: 700; color: var(--ac-accent); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
