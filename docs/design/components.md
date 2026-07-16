@@ -382,10 +382,21 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
 - **`.hud-btn`(`--icon`)** — the topbar button, aligned with `.ac-btn`.
 - **`#hud-dock button`** — icon-over-label phone tabs; `.unread` renders an
   amber dot (used by Chat).
-- **`.exit` compass, `.row` lists, `.kv`, `.aff`, `.skill` hotbar** — the
+- **`.exit` compass, `.item-row` lists, `.kv`, `.aff`, `.skill` hotbar** — the
   in-panel widgets; all have coarse-pointer bumps and `:focus-visible` rings.
   Hotbar buttons always contain both `.skill-cd` and `.skill-pct`; the
   `.cooling` class (flipped by JS each tick) picks which one shows.
+- **`.item-row`** — the equipment/inventory row (NB: **not** `.row` — that's
+  Bootstrap's grid class, loaded globally; see decisions.md). One nowrap flex
+  line: an optional lead cell (a `.row-caret` on an expandable container, else
+  a `.cond-dot`), `.row-name` (ellipsized), a `.tag` ×count, an optional
+  `.row-glyph` (🔒/📦) for a closed container, and the trailing `.row-more` ⋯.
+  Item condition is a **colour-coded `.cond-dot`** (● ok/mid/low, exact % in
+  the `title`), never a word on its own line. Worn containers expand inline
+  to a `.row-list.sub`; **packs start collapsed** and toggle via the caret
+  (`data-expand`, persisted in `ishar.itemsExpanded`). Identical stackable
+  rows are folded to one `×N` (the game emits duplicate rows; the HUD
+  defaults to stacking).
 - **`#history-pop` / `.hist-item`** — the touch command-history popover,
   anchored above the input inside `#command-form` (works with the HUD off;
   rows are `textContent`-built, 44px on coarse pointers). Revealed via
