@@ -59,7 +59,7 @@
         }
     } catch (e) {}
 
-    var api = { send: function () {}, prefill: function () {}, onLayoutChange: function () {}, onComm: function () {} };
+    var api = { send: function () {}, prefill: function () {}, onLayoutChange: function () {}, onComm: function () {}, onVitals: function () {} };
     var dom = {};
     var hudOn = false;
     var activeTab = "status";
@@ -250,6 +250,9 @@
                 lastVitalsBody = body;
                 S.vitals = data;
                 updateVitals();
+                // Let the page decide on HP-based notifications (damage taken /
+                // low-health) — it owns the tab-visibility + settings state.
+                api.onVitals(data);
                 tickHotbar();          // mana gate re-evaluates each pulse
                 // The Abilities browser bakes the mana/position block state into
                 // each row, so it must rebuild when mana changes (combat regen)
@@ -1526,6 +1529,7 @@
         if (opts.prefill) api.prefill = opts.prefill;
         if (opts.onLayoutChange) api.onLayoutChange = opts.onLayoutChange;
         if (opts.onComm) api.onComm = opts.onComm;
+        if (opts.onVitals) api.onVitals = opts.onVitals;
 
         dom.app = document.getElementById("connect-app");
         dom.vitals = document.getElementById("vitals-bar");
