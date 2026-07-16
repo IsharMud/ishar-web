@@ -792,8 +792,12 @@ never adjacent to Wake/Yank/heals (misclick hazard on phones); "Order
 attack" is suppressed when the only loyal follower present is asleep (the
 order would be heard by no one) and labels itself "(any thug)" when
 duplicate keywords make the bare-keyword command ambiguous; the group hp%
-readout triage-tints with the game's condition-color bands instead of flat
-red; your own group row drops its menu affordances (it had none to offer);
+readout triage-tints with the game's condition-color breakpoints (coarsened
+to three tiers) instead of flat red; rows with no actions to offer — your
+own, and allies out of your room — drop their menu affordances; Wake/Yank
+key off the relationship fields rather than the friendly hint (an
+un-grouped player following you reads "neutral" but is exactly who yank is
+for);
 and the vitals bar gains a "⚠ N on you" attacker tally so multi-combatant
 pressure is a number, not a count-the-red-tags exercise. Feed-side renames
 ride along: the group feed's opponent field is `fighting_name` (display
