@@ -803,3 +803,47 @@ pressure is a number, not a count-the-red-tags exercise. Feed-side renames
 ride along: the group feed's opponent field is `fighting_name` (display
 name, redacted to "someone" when the recipient couldn't see them) — distinct
 on purpose from the occupants feed's `fighting` handle.
+
+---
+
+## 2026-07-16 — HUD equipment/inventory rows: one line, dot condition, collapsed packs, auto-stack
+
+**Decision.** The equipment and inventory rows are rebuilt around a single
+class, **`.item-row`** (renamed from `.row`), and four rules:
+
+- **One nowrap line per item.** The row is `display:flex; flex-wrap:nowrap`;
+  `.row-name` carries `min-width:0` so it ellipsizes instead of forcing wraps.
+- **Condition is a colour dot, not a word.** `conditionNode` → `conditionDot`:
+  a single `.cond-dot` (● ok/mid/low, same breakpoints as the group hp tint),
+  with the exact "N% — pristine/worn/…" in the `title`. It no longer consumes
+  a whole line.
+- **The ⋯ actions button and container glyph stay inline** (they were only ever
+  wrapping because of the bug below), and a closed/locked container shows a
+  `.row-glyph` (🔒/📦) instead of an expand affordance.
+- **Worn/carried containers start collapsed.** An open container gets a
+  `.row-caret` (`data-expand`, keyed by vnum, persisted in
+  `ishar.itemsExpanded`); its contents (`.row-list.sub`) render only when
+  expanded. Opening your bag no longer dumps its whole contents into the view.
+- **Identical stackables auto-fold to `×N`.** The game emits duplicate rows
+  rather than a count (two "a glyph of teleportation"); `groupStackables`
+  merges same name+type+condition into one row with a summed count. Worn gear
+  is never stacked (slots are distinct); containers are never merged.
+
+**Why.** The visible symptom — every cell (slot, name, condition, ⋯, glyph)
+stacked onto its own line, packs force-expanded — was a **class-name
+collision**: the HUD's `.row` is also **Bootstrap's grid `.row`**, loaded
+globally on every page, whose `.row > * { width:100%; flex-shrink:0 }` and
+`flex-wrap:wrap` forced each child to a full-width line. Renaming to
+`.item-row` escapes the grid entirely (the correct green-field fix, not a
+`!important` patch). The remaining three changes are the density win the
+collision was hiding: a 30-year item list on a phone wants a colour tick, an
+inline menu handle, and bags you open on purpose — not a three-line block per
+item.
+
+**Notes.** Discipline unchanged: `el()`/textContent only, tokens for every
+colour (`--ac-ok`/`--hud-edge`/`--ac-danger` for the dot), ≥44px touch targets
+(the caret gets a full-row-height tap zone without widening the lead column).
+Condition detail now lives in the `title`/Examine rather than on-screen text —
+an accepted trade for the tiny known audience, consistent with the game's own
+condition-colour language. Verify with `/connect?demo=1` (the demo feed now
+carries duplicate rows and a multi-item pack to exercise stacking + expand).

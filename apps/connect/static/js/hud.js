@@ -50,6 +50,10 @@
     // panels + Abilities-browser filters.
     var favorites = loadSet("ishar.favs");
     var collapsed = loadSet("ishar.collapsed");
+    // Which containers the player has expanded to view. Packs start COLLAPSED
+    // (default absent = closed): a carried bag shouldn't spill its whole
+    // contents into the inventory view unasked.
+    var expanded = loadSet("ishar.itemsExpanded");
     var abilityFilter = { q: "", type: "all", usableOnly: false };
     try {
         var af = JSON.parse(localStorage.getItem("ishar.abilityFilter"));
@@ -685,16 +689,43 @@
     // ------------------------------------------------------------------
     // Equipment
     // ------------------------------------------------------------------
-    function conditionNode(c) {
+    // Condition as one colour-coded dot — the numeric % and its word
+    // ("pristine"/"worn"/…) ride in the title rather than eating a whole row.
+    function conditionDot(c) {
         if (c == null) return null;
         // Real feed: int 0-100. Older/demo: a word. Colour numeric by value.
         var n = Number(c);
         if (!isNaN(n) && String(c).match(/^\s*\d/)) {
             var cls = n >= 90 ? "cond-ok" : n >= 50 ? "cond-mid" : "cond-low";
             var lbl = n >= 95 ? "pristine" : n >= 75 ? "good" : n >= 40 ? "worn" : n > 0 ? "battered" : "ruined";
-            return el("span", { class: "tag " + cls, title: "Condition " + n + "%", text: lbl });
+            return el("span", { class: "cond-dot " + cls, title: "Condition " + n + "% — " + lbl, "aria-hidden": "true", text: "●" });
         }
-        return el("span", { class: "tag", text: String(c) });
+        return el("span", { class: "cond-dot", title: "Condition " + String(c), "aria-hidden": "true", text: "●" });
+    }
+    // A stable key for a container's expand state (vnum when the game sends
+    // one, else its target keyword).
+    function containerKey(it) {
+        return it.vnum != null ? "v" + it.vnum : "k" + targetOf(it.keywords || it.name);
+    }
+    // Fold identical stackable items into one row with a ×count. The game
+    // often emits duplicate rows instead of a count (two "a glyph of
+    // teleportation"), so we default to stacking: same name + type +
+    // condition merges. Containers are always distinct (each may hold
+    // different things) and are never merged.
+    function groupStackables(items) {
+        var out = [], seen = {};
+        (items || []).forEach(function (it) {
+            if (it.type === "container" || (it.contents && it.contents.length)) { out.push(it); return; }
+            var key = stripColor(it.name || "") + "\x1f" + (it.type || "") + "\x1f" + (it.condition == null ? "" : it.condition);
+            var qty = Number(it.count) || 1;
+            if (seen[key] != null) { out[seen[key]].count += qty; return; }
+            var copy = {};
+            for (var k in it) if (Object.prototype.hasOwnProperty.call(it, k)) copy[k] = it[k];
+            copy.count = qty;
+            seen[key] = out.length;
+            out.push(copy);
+        });
+        return out;
     }
     function itemDataset(it, kind, container) {
         return {
@@ -707,33 +738,65 @@
             "data-closed": it.closed ? "1" : ""
         };
     }
+    // One inventory/equipment row. Everything stays on a single line: an
+    // optional lead cell (an expand caret for an open container, else a
+    // condition dot), the name, a ×count, a container state glyph, and the
+    // ⋯ actions button.
     function itemRow(it, kind, container) {
         var ds = itemDataset(it, kind, container);
+        var isContainer = it.type === "container";
+        var hasContents = !!(it.contents && it.contents.length);
         var kids = [];
         if (kind === "equip") kids.push(el("span", { class: "slot", text: it.location || it.slot || "" }));
+        // Lead cell (fixed-width so names align): caret for an expandable
+        // container, otherwise the condition dot.
+        if (isContainer && hasContents) {
+            var ck = containerKey(it), isOpen = !!expanded[ck];
+            kids.push(el("button", {
+                type: "button", class: "row-caret", "data-expand": ck,
+                "aria-expanded": isOpen ? "true" : "false",
+                "aria-label": (isOpen ? "Collapse contents of " : "Expand contents of ") + stripColor(it.name || "container"),
+                text: isOpen ? "▾" : "▸"
+            }));
+        } else if (!isContainer) {
+            var dot = conditionDot(it.condition);
+            if (dot) kids.push(dot);
+        }
         kids.push(el("span", { class: "row-name", text: stripColor(it.name) }));
         if (it.count && it.count > 1) kids.push(el("span", { class: "tag", text: "×" + it.count }));
-        if (kind === "equip") { var cn = conditionNode(it.condition); if (cn) kids.push(cn); }
-        if (it.type === "container") kids.push(el("span", { class: "dim", "aria-hidden": "true", text: it.closed ? " 🔒" : " 📦" }));
+        // A closed/locked (or empty) container can't be searched inline — mark
+        // its state with a glyph instead of a caret.
+        if (isContainer && (it.closed || !hasContents)) {
+            kids.push(el("span", {
+                class: "row-glyph", "aria-hidden": "true",
+                title: it.locked ? "Locked" : it.closed ? "Closed" : "Container",
+                text: it.closed || it.locked ? "🔒" : "📦"
+            }));
+        }
         kids.push(el("button", { type: "button", class: "row-more", "aria-label": "Actions", text: "⋯" }));
-        ds.class = "row" + (kind === "content" ? " sub" : "");
+        ds.class = "item-row" + (kind === "content" ? " sub" : "");
         return el("li", assign(ds, {}), kids);
     }
     function assign(a, b) { Object.keys(b).forEach(function (k) { a[k] = b[k]; }); return a; }
 
-    // A row list where any container row is followed by a sub-list of its (open)
-    // contents. Shared by the inventory and equipment panels so a WORN container
-    // (a backpack on the back) is inspectable exactly like a carried one — the
-    // game already emits worn-container contents in Char.Equipment (#1590); the
-    // equipment panel just wasn't rendering them (issue #1801).
+    // A row list where an open, expanded container row is followed by a
+    // sub-list of its contents. Shared by the inventory and equipment panels
+    // so a WORN container (a backpack on the back) is inspectable exactly like
+    // a carried one — the game already emits worn-container contents in
+    // Char.Equipment (#1590); the equipment panel just wasn't rendering them
+    // (issue #1801). Contents render only when the container is expanded
+    // (packs start collapsed); stackable rows are folded to a ×count.
     function itemListWithContents(items, kind) {
         var list = el("ul", { class: "row-list" });
-        (items || []).forEach(function (it) {
+        // Worn gear occupies distinct slots (Head, Left/Right finger, …) so it
+        // is never stacked; carried piles are.
+        var top = kind === "equip" ? (items || []) : groupStackables(items);
+        top.forEach(function (it) {
             list.appendChild(itemRow(it, kind));
-            if (it.contents && it.contents.length) {
+            if (it.type === "container" && it.contents && it.contents.length && expanded[containerKey(it)]) {
                 var sub = el("ul", { class: "row-list sub" });
                 var ct = targetOf(it.keywords || it.name);
-                it.contents.forEach(function (c) { sub.appendChild(itemRow(c, "content", ct)); });
+                groupStackables(it.contents).forEach(function (c) { sub.appendChild(itemRow(c, "content", ct)); });
                 list.appendChild(sub);
             }
         });
@@ -809,7 +872,7 @@
                     // Real keyword: a tap withdraws from the pouch directly (the
                     // requested behaviour); ⋯ opens deposit/examine.
                     var tgt = targetOf(c.keywords);
-                    li = el("li", { class: "row comp", "data-cmd": "get " + tgt + " pouch", title: "Withdraw from pouch — ⋯ for more" }, [
+                    li = el("li", { class: "item-row comp", "data-cmd": "get " + tgt + " pouch", title: "Withdraw from pouch — ⋯ for more" }, [
                         el("span", { class: "row-name", text: name }),
                         c.count > 1 ? el("span", { class: "tag", text: "×" + c.count }) : null,
                         el("button", { type: "button", class: "row-more", "data-menu": "component", "data-target": tgt, "data-name": name, "aria-label": "Actions", text: "⋯" })
@@ -817,7 +880,7 @@
                 } else {
                     // No keywords (pre-deploy of the game field): a name-derived
                     // withdraw wouldn't resolve, so offer examine only.
-                    li = el("li", { class: "row comp", "data-cmd": "examine " + targetOf(c.name), title: "Examine" }, [
+                    li = el("li", { class: "item-row comp", "data-cmd": "examine " + targetOf(c.name), title: "Examine" }, [
                         el("span", { class: "row-name", text: name }),
                         c.count > 1 ? el("span", { class: "tag", text: "×" + c.count }) : null
                     ]);
@@ -1533,6 +1596,19 @@
             e.preventDefault();
             return;
         }
+        // 1b) Container expand carets — checked before the row's own action
+        // menu so a tap on the caret only toggles its contents.
+        var exp = e.target.closest("[data-expand]");
+        if (exp && dom.app.contains(exp)) {
+            var ekey = exp.getAttribute("data-expand");
+            if (expanded[ekey]) delete expanded[ekey]; else expanded[ekey] = true;
+            saveSet("ishar.itemsExpanded", expanded);
+            renderEquipment();
+            renderInventory();
+            api.onLayoutChange();
+            e.preventDefault();
+            return;
+        }
         // 2) Ability chip filters + star.
         var chip = e.target.closest("[data-abtype],[data-abusable]");
         if (chip && dom.app.contains(chip)) {
@@ -1894,13 +1970,19 @@
                 { name: "a talon-barbed whip", keywords: "whip talon", type: "weapon", vnum: 3, location: "Wielding", condition: 35 },
                 { name: "a sturdy traveling pack", keywords: "pack traveling", type: "container", vnum: 4, location: "Back", closeable: true, closed: false, contents: [
                     { name: "a flask of lamp oil", keywords: "flask oil", count: 2 },
-                    { name: "a coil of silk rope", keywords: "rope silk coil", count: 1 }
+                    { name: "a coil of silk rope", keywords: "rope silk coil", count: 1 },
+                    // Duplicate rows (no count) — the game emits these; the HUD
+                    // folds them to "a glyph of teleportation ×2".
+                    { name: "a glyph of teleportation", keywords: "glyph teleportation" },
+                    { name: "a glyph of teleportation", keywords: "glyph teleportation" }
                 ] },
                 { name: "a rune-locked coffer", keywords: "coffer runelocked", type: "container", vnum: 5, location: "Held", closeable: true, closed: true, locked: true }
             ] },
             "Char.Inventory": { items: [
                 { name: "a glowing potion", keywords: "potion glowing", type: "potion", vnum: 10, count: 3 },
+                // Two separate rows for the same scroll — fold to ×2.
                 { name: "a scroll of recall", keywords: "scroll recall", type: "scroll", vnum: 12, count: 1 },
+                { name: "a scroll of recall", keywords: "scroll recall", type: "scroll", vnum: 12 },
                 { name: "a leather sack", keywords: "sack leather", type: "container", vnum: 11, count: 1, closeable: true, closed: false, contents: [{ name: "a brass key", keywords: "key brass", count: 1 }] }
             ], coins: [{ name: "gold", vnum: 0, count: 18230 }, { name: "silver", vnum: 0, count: 340 }, { name: "obsidian", vnum: 0, count: 12 }], components: [
                 { name: "a pinch of sulfur", keywords: "sulfur pinch", count: 7 },
