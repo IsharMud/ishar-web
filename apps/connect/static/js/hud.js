@@ -73,8 +73,11 @@
     // Panel homes for desktop; sheet order for phones (matches the dock).
     // The compass rose (room) is pinned to the bottom of the left column, so
     // its desktop home is #hud-left itself (a flex footer) while the scrolling
-    // panels live in #hud-left-scroll.
-    var PANELS = ["occupants", "equipment", "inventory", "train", "room",
+    // panels live in #hud-left-scroll (placePanels re-homes them in THIS order).
+    // Occupants sits last in the scroll — directly above the pinned rose — so
+    // the movement (rose) and interaction (occupants) surfaces are together at
+    // the bottom, nearest the input.
+    var PANELS = ["equipment", "inventory", "train", "occupants", "room",
                   "status", "abilities", "chat", "who"];
     var PANEL_HOME = {
         occupants: "hud-left-scroll", equipment: "hud-left-scroll",
