@@ -521,11 +521,17 @@ body.connect-page #content { padding: .5rem !important; }
     border-radius: 3px; cursor: pointer; border-left: 3px solid transparent;
 }
 .grp:hover { background: var(--ac-elev); }
+.grp.grp-self { cursor: default; }
+.grp.grp-self:hover { background: none; }
 .grp.tanking { border-left-color: var(--hud-hostile); }
 .grp-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .grp-line { display: flex; align-items: baseline; gap: 4px; min-width: 0; }
 .grp-name { font-size: .8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.grp-hp-num { margin-left: auto; font-size: .72rem; color: var(--hud-hp); font-weight: 700; flex: none; }
+/* hp readout triage-tints like the in-game group display's condition colors */
+.grp-hp-num { margin-left: auto; font-size: .72rem; color: var(--ac-dim); font-weight: 700; flex: none; }
+.grp-hp-num.cond-ok { color: var(--ac-ok); }
+.grp-hp-num.cond-mid { color: var(--hud-event); }
+.grp-hp-num.cond-low { color: var(--hud-hostile); }
 .grp-chips { display: flex; flex-wrap: wrap; gap: 4px; }
 .grp-chips > span {
     font-size: .64rem; padding: 0 5px; border-radius: 999px; border: 1px solid var(--ac-border);

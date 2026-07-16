@@ -259,7 +259,7 @@
                 // path uses to avoid rebuilding a ~400-row list off-screen.
                 if (abilitiesVisible()) renderAbilities();
                 break;
-            case "Char.Status": S.status = data; renderVitals(); renderStatus(); break;
+            case "Char.Status": S.status = data; renderVitals(); renderStatus(); renderGroup(); break;
             case "Game.Time": S.time = data; renderVitals(); break;
             case "Room.Info": S.room = data; renderRoom(); break;
             case "Room.Occupants": applyOccupants(data); break;
@@ -386,9 +386,10 @@
             // whether your foe is swinging at YOU or someone else is holding
             // it (the tank). Re-rendered by applyOccupants whenever an edge
             // changes; the cheap updateVitals path never touches it.
-            var foe = null;
+            var foe = null, onYou = 0;
             for (var fi = 0; fi < (S.occupants || []).length; fi++) {
-                if (S.occupants[fi].is_your_target) { foe = S.occupants[fi]; break; }
+                if (S.occupants[fi].is_your_target) foe = S.occupants[fi];
+                if (S.occupants[fi].fighting_you && !S.occupants[fi].is_dead) onYou++;
             }
             if (foe) {
                 if (foe.fighting_you) {
@@ -400,6 +401,12 @@
                         barKids.push(el("span", { class: "v-foe-tgt", title: "Your target is attacking them (they tank)", text: "◎ tank: " + tname }));
                     }
                 }
+            }
+            // Attacker count — the multi-combatant tally the row-by-row "⚔
+            // you" tags don't add up for you. Skipped when it would repeat
+            // the "on you" chip's information (exactly one attacker = foe).
+            if (onYou > 0 && !(onYou === 1 && foe && foe.fighting_you)) {
+                barKids.push(el("span", { class: "v-foe-tgt you", title: "Enemies attacking you", text: "⚠ " + onYou + " on you" }));
             }
         }
         if (v && v.metamagic != null) barKids.push(vbar("MM", v.metamagic, v.metamagic_max, "mm"));
@@ -597,7 +604,18 @@
         return null;
     }
     function anyLoyalFollowerHere() {
-        return (S.occupants || []).some(function (o) { return o.is_loyal_follower && !o.is_dead; });
+        // Sleeping followers can't hear an order — offering "Order attack"
+        // with only a sleeping pet present would send a command the game
+        // rejects ("None of your loyal followers can hear you.").
+        return (S.occupants || []).some(function (o) {
+            return o.is_loyal_follower && !o.is_dead && !occSleeping(o);
+        });
+    }
+    // Triage tint for a group member's hp readout — same bands as the game's
+    // condition colors (get_condition_color): ≤40 danger, ≤60 warn, else ok.
+    function hpTintClass(p) {
+        if (p == null) return "";
+        return p <= 40 ? " cond-low" : p <= 60 ? " cond-mid" : " cond-ok";
     }
     // Terse label for a fight edge ("⚔ guard"): the keyword reads better in a
     // cramped row than a full short_desc.
@@ -925,12 +943,12 @@
             : "Threat on their target";
         return el("span", { class: "grp-threat" + (lvl ? " threat-" + lvl : ""), title: title, text: txt });
     }
-    function groupRow(x, kind, idx, extraName) {
+    function groupRow(x, kind, idx, extraName, isSelf) {
         var chips = [];
         if (x.is_tank) chips.push(el("span", { class: "grp-tank", title: "Tanking — enemies are targeting them", text: "TANK" }));
         var tc = threatChip(x);
         if (tc) chips.push(tc);
-        if (x.fighting) chips.push(el("span", { class: "grp-fight", title: "Fighting", text: "⚔ " + stripColor(x.fighting) }));
+        if (x.fighting_name) chips.push(el("span", { class: "grp-fight", title: "Fighting", text: "⚔ " + stripColor(x.fighting_name) }));
         var p = String(x.position || "").toLowerCase();
         if (p && p !== "standing") chips.push(el("span", { class: "grp-pos", text: p }));
         if (x.in_room === false) chips.push(el("span", { class: "grp-away", title: "Not in your room", text: "away" }));
@@ -938,11 +956,13 @@
             el("div", { class: "grp-line" }, [
                 el("span", { class: "grp-name", text: stripColor(String(x.name || "")) + (x.leader ? " ★" : "") }),
                 extraName ? el("span", { class: "dim", text: " " + extraName }) : null,
-                el("span", { class: "grp-hp-num", text: (x.hp_pct != null ? x.hp_pct + "%" : "") })
+                el("span", { class: "grp-hp-num" + hpTintClass(x.hp_pct), text: (x.hp_pct != null ? x.hp_pct + "%" : "") })
             ]),
             chips.length ? el("div", { class: "grp-chips" }, chips) : null,
             el("span", { class: "grp-bars" }, [mini(x.hp_pct, "hp"), mini(x.mp_pct, "mp"), mini(x.mv_pct, "mv")])
         ]);
+        // Your own row is information, not a control — no menu affordances.
+        if (isSelf) return el("li", { class: "grp grp-self" + (x.is_tank ? " tanking" : "") }, [main]);
         return el("li", {
             class: "grp" + (x.is_tank ? " tanking" : ""),
             "data-menu": "grp", "data-gkind": kind, "data-gidx": idx,
@@ -964,7 +984,11 @@
                 kids.push(el("div", { class: "panel-empty", text: "Not grouped." }));
             } else {
                 var gl = el("ul", { class: "grp-list" });
-                members.forEach(function (m, i) { gl.appendChild(groupRow(m, "member", i)); });
+                var selfName = S.status ? String(S.status.name || "").toLowerCase() : "";
+                members.forEach(function (m, i) {
+                    var isSelf = selfName && String(m.name || "").toLowerCase() === selfName;
+                    gl.appendChild(groupRow(m, "member", i, "", isSelf));
+                });
                 kids.push(gl);
                 if (allies.length) {
                     kids.push(el("div", { class: "sub-h", text: "Allies" }));
@@ -1351,14 +1375,14 @@
     // allied (friendly) target only gets beneficial (defensive) spells, everyone
     // else only offensive ones. Favorited spells first (keeps it your curated
     // set), else usable ones.
-    function occupantCastActions(o) {
+    function occupantCastActions(o, max) {
         var want = o.hostile_hint === "friendly" ? "defensive" : "offensive";
         var spells = (S.skills || []).filter(function (s) {
             return s.type === "spell" && s.target_type === want;
         });
         var fav = spells.filter(function (s) { return favorites[nameOf(s.name).toLowerCase()]; });
         var pick = fav.length ? fav : spells.filter(function (s) { return !abilityBlock(s); });
-        return pick.slice(0, 6).map(function (s) {
+        return pick.slice(0, max || 6).map(function (s) {
             return { label: "Cast " + s.name, cmd: "cast '" + nameOf(s.name) + "' " + o.handle };
         });
     }
@@ -1370,30 +1394,38 @@
         acts.push({ label: "Look", cmd: "look " + o.handle });
         if (o.is_dead) return acts;   // slain — nothing else round-trips
         acts.push({ label: "Consider", cmd: "consider " + o.handle });
-        // Cast a chosen spell straight at THIS occupant (not the default target).
-        occupantCastActions(o).forEach(function (a) { acts.push(a); });
+        if (friendly) {
+            // State-contingent verbs FIRST — they exist because of the
+            // target's current posture, so they outrank the evergreen casts.
+            if (occSleeping(o)) acts.push({ label: "Wake", cmd: "wake " + o.handle });
+            if (o.is_my_follower && occSeated(o)) acts.push({ label: "Yank to feet", cmd: "yank " + o.handle });
+            // Posture orders for a loyal follower — only ones that change
+            // anything, and none while it sleeps (can't hear you; Wake first).
+            if (o.is_loyal_follower && !occSleeping(o)) {
+                ["stand", "rest", "sleep"].forEach(function (p) {
+                    var current = posLower(o) === (p === "stand" ? "standing" : p === "rest" ? "resting" : "sleeping");
+                    if (!current) acts.push({ label: "Order: " + p, cmd: "order " + o.handle + " " + p });
+                });
+            }
+        }
+        // Cast a chosen spell straight at THIS occupant (not the default
+        // target). Capped tighter on allies, whose menus carry state verbs.
+        occupantCastActions(o, friendly ? 4 : 6).forEach(function (a) { acts.push(a); });
         if (!friendly) {
             acts.push({ label: "Attack", cmd: "kill " + o.handle, danger: true });
             // Sic your loyal followers on it. Bare keyword, not the handle:
             // each follower resolves ordinals from its OWN perspective, so a
-            // viewer-relative "2.thug" could hit the wrong one for them.
+            // viewer-relative "2.thug" could hit the wrong one for them —
+            // and with duplicate keywords in the room, say so on the label.
             if (anyLoyalFollowerHere()) {
-                acts.push({ label: "Order attack", cmd: "order followers kill " + firstWord(o.keyword), danger: true });
+                var kw = firstWord(o.keyword);
+                var dupes = (S.occupants || []).some(function (x) {
+                    return x !== o && !x.is_dead && x.hostile_hint !== "friendly"
+                        && firstWord(x.keyword).toLowerCase() === kw.toLowerCase();
+                });
+                acts.push({ label: dupes ? "Order attack (any " + kw + ")" : "Order attack",
+                            cmd: "order followers kill " + kw, danger: true });
             }
-        } else {
-            // Allies keep Attack available (PK duels, charm gone wrong) but
-            // below the fold of ally-flavored actions, still marked danger.
-            if (occSleeping(o)) acts.push({ label: "Wake", cmd: "wake " + o.handle });
-            if (o.is_my_follower && occSeated(o)) acts.push({ label: "Yank to feet", cmd: "yank " + o.handle });
-            acts.push({ label: "Attack", cmd: "kill " + o.handle, danger: true });
-        }
-        // Posture orders for a loyal follower — only ones that change
-        // anything, and none while it sleeps (it can't hear you; Wake first).
-        if (o.is_loyal_follower && !occSleeping(o)) {
-            ["stand", "rest", "sleep"].forEach(function (p) {
-                var current = posLower(o) === (p === "stand" ? "standing" : p === "rest" ? "resting" : "sleeping");
-                if (!current) acts.push({ label: "Order: " + p, cmd: "order " + o.handle + " " + p });
-            });
         }
         if (!o.is_player) {
             // Only actual vendors get a list action (is_shopkeeper = the mob
@@ -1407,6 +1439,12 @@
         }
         acts.push({ label: (S.tgtHostile && S.tgtHostile.handle === o.handle ? "✓ " : "") + "Target ⚔ (offensive)", fn: function () { setTarget("tgtHostile", o); } });
         acts.push({ label: (S.tgtFriendly && S.tgtFriendly.handle === o.handle ? "✓ " : "") + "Target ✚ (beneficial)", fn: function () { setTarget("tgtFriendly", o); } });
+        if (friendly) {
+            // Attack on an ally stays possible (PK duels, charm gone wrong)
+            // but dead last — never adjacent to Wake/Yank/heals a shaky
+            // thumb is aiming for.
+            acts.push({ label: "Attack", cmd: "kill " + o.handle, danger: true });
+        }
         return acts;
     }
 
@@ -1857,11 +1895,11 @@
             ] },
             "Char.Affects": { buffs: [{ name: "Stoneskin", id: 101, duration: 1800 }, { name: "Haste", id: 102, duration: 240 }], debuffs: [{ name: "Poison", id: 201, duration: 45 }], maintained: [{ name: "Detect Invisibility", id: 301, duration: 600, target: "self" }, { name: "Shroud", id: 302, duration: 900, target: "Boric", skill: "shroud", handle: "1.boric", releasable: true }] },
             "Group.Update": { leader: "Aelwyn", size: 3, members: [
-                { name: "Aelwyn", level: 45, hp_pct: 86, mp_pct: 85, mv_pct: 82, position: "Standing", race: "Elf", "class": "Magician", leader: true, in_room: true, is_tank: false, fighting: "a wiry crossroads bandit", threat: 40, tank_threat: 55, threat_level: "warn" },
-                { name: "Boric", level: 43, hp_pct: 60, mp_pct: 40, mv_pct: 75, position: "Standing", race: "Dwarf", "class": "Warrior", leader: false, in_room: true, is_tank: true, fighting: "a scarred alley thug", threat: 120 },
+                { name: "Aelwyn", level: 45, hp_pct: 86, mp_pct: 85, mv_pct: 82, position: "Standing", race: "Elf", "class": "Magician", leader: true, in_room: true, is_tank: false, fighting_name: "a wiry crossroads bandit", threat: 40, tank_threat: 55, threat_level: "warn" },
+                { name: "Boric", level: 43, hp_pct: 30, mp_pct: 40, mv_pct: 75, position: "Standing", race: "Dwarf", "class": "Warrior", leader: false, in_room: true, is_tank: true, fighting_name: "a scarred alley thug", threat: 120 },
                 { name: "Selra", level: 41, hp_pct: 95, mp_pct: 90, mv_pct: 88, position: "Sleeping", race: "Human", "class": "Cleric", leader: false, in_room: true, is_tank: false }
             ], allies: [
-                { name: "a large timber wolf", owner: "Aelwyn", hp_pct: 72, mp_pct: 100, mv_pct: 95, position: "Resting", in_room: true, is_tank: false }
+                { name: "a large timber wolf", owner: "Aelwyn", hp_pct: 55, mp_pct: 100, mv_pct: 95, position: "Resting", in_room: true, is_tank: false }
             ] },
             "Char.Skills": { skills: bigSkills },
             "Char.Cooldowns": { cooldowns: [{ id: 3, remaining: 8 }], usable: { "3": false } },

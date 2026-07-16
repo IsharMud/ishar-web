@@ -781,3 +781,21 @@ web, Mudlet, player scripts — equally capable (`ishar-mud`
 `safeCmd()`, tokens for all colors, ≥44px touch targets, no new libraries.
 All new fields are optional — the HUD renders identically against a pre-11.2
 server, the new menu options simply don't appear.
+
+**Adversarial review adjustments (same change set).** The four-reviewer pass
+(exploit / code-quality / architecture / player-experience, findings on
+ishar-mud #1808) reshaped the menu and readouts before ship: state-contingent
+verbs (Wake, Yank, posture orders) moved *above* the cast list — they exist
+because of the target's current posture, so they outrank evergreen casts —
+and ally menus cap casts at 4; **Attack on an ally moved to dead last**,
+never adjacent to Wake/Yank/heals (misclick hazard on phones); "Order
+attack" is suppressed when the only loyal follower present is asleep (the
+order would be heard by no one) and labels itself "(any thug)" when
+duplicate keywords make the bare-keyword command ambiguous; the group hp%
+readout triage-tints with the game's condition-color bands instead of flat
+red; your own group row drops its menu affordances (it had none to offer);
+and the vitals bar gains a "⚠ N on you" attacker tally so multi-combatant
+pressure is a number, not a count-the-red-tags exercise. Feed-side renames
+ride along: the group feed's opponent field is `fighting_name` (display
+name, redacted to "someone" when the recipient couldn't see them) — distinct
+on purpose from the occupants feed's `fighting` handle.
