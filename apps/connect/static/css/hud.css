@@ -152,6 +152,9 @@ body.connect-page #content { padding: .5rem !important; }
 .v-tgt { font-size: .7rem; font-weight: 700; padding: 1px 8px; border-radius: 999px; border: 1px solid; max-width: 12rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .v-tgt.hostile { color: var(--hud-hostile); border-color: rgba(214, 75, 75, .5); background: var(--ac-danger-wash); }
 .v-tgt.friendly { color: var(--hud-friendly); border-color: rgba(76, 187, 23, .5); background: var(--ac-ok-wash); }
+/* Target-of-target readout beside the Foe bar: who your foe is swinging at. */
+.v-foe-tgt { flex: none; font-size: .7rem; color: var(--ac-dim); white-space: nowrap; align-self: center; }
+.v-foe-tgt.you { color: var(--hud-hostile); font-weight: 700; }
 
 .topbar-actions { order: 5; display: flex; gap: 6px; margin-left: auto; }
 
@@ -397,6 +400,10 @@ body.connect-page #content { padding: .5rem !important; }
 .occ-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .occ-marks { flex: none; color: var(--ac-accent); font-size: .78rem; }
 .occ-shop { flex: none; color: var(--hud-gold); font-weight: 700; font-size: .78rem; }
+.occ-loyal { flex: none; color: var(--hud-friendly); font-size: .78rem; }
+.occ-pos { flex: none; color: var(--ac-dim); font-size: .68rem; font-style: italic; }
+.occ-fight { flex: none; color: var(--ac-dim); font-size: .68rem; }
+.occ-fight.you { color: var(--hud-hostile); font-weight: 700; }
 .tgt-chips { display: flex; flex-wrap: wrap; gap: 4px; margin: 5px 0 2px; }
 .tgt-chip {
     font-size: .68rem; font-weight: 700; padding: 1px 7px; border-radius: 999px;
@@ -507,10 +514,28 @@ body.connect-page #content { padding: .5rem !important; }
 }
 .aff-release:hover { color: var(--ac-accent); border-color: var(--ac-accent); }
 
-/* ----- Group ----- */
+/* ----- Group (the party pane) ----- */
 .grp-list { list-style: none; margin: 0; padding: 0; }
-.grp { display: flex; justify-content: space-between; align-items: center; gap: 6px; padding: 3px 0; }
-.grp-name { font-size: .8rem; }
+.grp {
+    display: flex; align-items: flex-start; gap: 6px; padding: 4px 4px;
+    border-radius: 3px; cursor: pointer; border-left: 3px solid transparent;
+}
+.grp:hover { background: var(--ac-elev); }
+.grp.tanking { border-left-color: var(--hud-hostile); }
+.grp-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.grp-line { display: flex; align-items: baseline; gap: 4px; min-width: 0; }
+.grp-name { font-size: .8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.grp-hp-num { margin-left: auto; font-size: .72rem; color: var(--hud-hp); font-weight: 700; flex: none; }
+.grp-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.grp-chips > span {
+    font-size: .64rem; padding: 0 5px; border-radius: 999px; border: 1px solid var(--ac-border);
+    color: var(--ac-dim); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.grp-tank { color: var(--hud-hostile) !important; border-color: rgba(214, 75, 75, .5) !important; background: var(--ac-danger-wash); font-weight: 700; }
+.grp-fight { color: var(--ac-text) !important; }
+.grp-threat.threat-low { color: var(--ac-ok) !important; border-color: rgba(76, 187, 23, .5) !important; }
+.grp-threat.threat-warn { color: var(--hud-event) !important; border-color: rgba(232, 176, 75, .5) !important; }
+.grp-threat.threat-high { color: var(--hud-hostile) !important; border-color: rgba(214, 75, 75, .5) !important; }
 .grp-bars { display: flex; gap: 2px; }
 .mini { width: 26px; height: 7px; background: var(--ac-bg); border: 1px solid var(--ac-border); border-radius: 2px; overflow: hidden; display: inline-block; }
 .mini span { display: block; height: 100%; }

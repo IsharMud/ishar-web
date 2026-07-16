@@ -110,7 +110,8 @@
             <section id="panel-equipment" class="panel"></section>
             <section id="panel-inventory" class="panel"></section>
             <section id="panel-train" class="panel"></section>
-            {# Occupants last — directly above the pinned compass rose, so moving and interacting with who's here read together. #}
+            {# Group then Occupants last — the combat surfaces cluster directly above the pinned compass rose, nearest the input. #}
+            <section id="panel-group" class="panel"></section>
             <section id="panel-occupants" class="panel"></section>
         </div>
         <section id="panel-room" class="panel panel-rose"></section>
@@ -198,6 +199,10 @@
         <button type="button" data-panel="occupants" aria-pressed="false">
             {% bi "people-fill" %}
             <span>Here</span>
+        </button>
+        <button type="button" data-panel="group" aria-pressed="false">
+            {% bi "person-hearts" %}
+            <span>Group</span>
         </button>
         <button type="button" data-panel="equipment" aria-pressed="false">
             {% bi "shield" %}

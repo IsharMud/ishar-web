@@ -737,3 +737,47 @@ the live game — the owner's on-prod test still owns that.
 - ~~**Public-shell facelift**~~ — resolved by roadmap #4–#7: the console
   surfaces are the whole site's language now; the amber-border look survives
   only as brand accents (navbar edge, hero edges), not as panel chrome.
+
+## 2026-07-16 — HUD combat layer: group pane, follower orders, target-of-target
+
+**Decision.** The HUD consumes the GMCP 11.2.0 relationship/combat fields
+(ishar-mud #1808 — occupant `position`/`is_loyal_follower`/`is_my_follower`/
+`fighting_you`/`is_your_target`/`fighting`; Group.Update combat fields +
+`allies`) and turns them into a combat layer:
+
+- **Group panel** (`#panel-group`, left column between Character and
+  Occupants; `person-hearts` dock tab on phones). Members and charmed
+  **Allies** with mini hp/mp/mv bars + an hp% readout, a red **TANK** badge,
+  a threat chip (`T:ours/tank`, tinted by the server-computed `threat_level`
+  low/warn/high — the balance thresholds stay game-side), who they're
+  fighting, their posture, and an "away" chip when out of the room. The old
+  read-only Group sub-section of the Status tab is **removed** — one home.
+- **Group rows share the occupant menu.** A member/ally in your room is
+  matched to its `Room.Occupants` entry (players by name, allies by
+  loyal-follower short_desc) and the row opens `occupantActions()` — heals,
+  wake, yank, orders, targets — one menu system, no drift. Out-of-room
+  members degrade to `Tell…`; the self row gets no menu.
+- **Occupant menu grows relationship verbs**, all server-revalidated plain
+  commands: **Order attack** (below Attack, on living non-friendlies when a
+  loyal follower is present; sends `order followers kill <keyword>` — bare
+  keyword, since followers resolve ordinals from their own perspective),
+  **Wake** (friendly + sleeping), **Yank to feet** (my follower + seated),
+  and **Order: stand/rest/sleep** on loyal followers (current posture and
+  sleeping-can't-hear cases omitted). Occupant rows annotate posture
+  (italic, dim), loyalty (green ⚑) and fight edges ("⚔ you" red / "⚔ kw").
+- **Target-of-target** rides the vitals bar next to the Foe bar: "◎ on you"
+  when your target swings at you, "◎ tank: <name>" when someone else holds
+  it — derived entirely from the occupants combat graph, so it needs no new
+  feed and updates when edges change.
+
+**Why.** The engine already computed tanking and threat for the in-game
+`group` command; the feeds just didn't carry them. Deriving encounter/
+target-of-target views client-side from one combat graph (occupants) rather
+than adding bespoke feeds keeps the GMCP surface small and every client —
+web, Mudlet, player scripts — equally capable (`ishar-mud`
+`docs/gmcp_feeds.md` is the payload contract).
+
+**Discipline.** Unchanged: `el()`/textContent only, every command through
+`safeCmd()`, tokens for all colors, ≥44px touch targets, no new libraries.
+All new fields are optional — the HUD renders identically against a pre-11.2
+server, the new menu options simply don't appear.
