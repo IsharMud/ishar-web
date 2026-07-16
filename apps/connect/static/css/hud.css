@@ -655,6 +655,18 @@ body.connect-page #content { padding: .5rem !important; }
 .skill--pager .skill-icon { width: 20px; height: 20px; color: var(--ac-accent); opacity: .85; }
 .skill--pager .skill-key { top: auto; bottom: 1px; left: 50%; transform: translateX(-50%); background: none; color: var(--ac-accent); }
 
+/* Lock toggle (leads the row). Locked = fire on tap; unlocked = edit mode. */
+.skill--lock { background: var(--ac-panel); }
+.skill--lock .skill-icon { width: 20px; height: 20px; color: var(--ac-dim); opacity: .9; }
+.skill--lock.on { border-bottom-color: var(--ac-accent); }
+.skill--lock.on .skill-icon { color: var(--ac-accent); }
+
+/* Edit mode: taps rearrange (they don't fire), so signal it — grab cursors and
+   a highlighted "picked" slot waiting for its destination. */
+#hud-hotbar.editing .skill[data-ability], #hud-hotbar.editing .skill--empty { cursor: grab; }
+#hud-hotbar.editing .skill.dragging { cursor: grabbing; }
+.skill.picked { box-shadow: 0 0 0 2px var(--ac-accent); border-color: var(--ac-accent); }
+
 /* Keyboard-fire + drag affordances. */
 .skill.fired { transform: translateY(-1px); box-shadow: 0 0 0 2px var(--ac-accent) inset; border-color: var(--ac-accent); }
 .skill.dragging { opacity: .45; }
@@ -711,6 +723,32 @@ body.connect-page #content { padding: .5rem !important; }
 .ab-row.cat-damage .ab-icon { color: #e6836b; }
 .ab-row.cat-heal   .ab-icon { color: #7fc99a; }
 .ab-row.cat-misc   .ab-icon { color: #7fb2e6; }
+
+/* ----- Tooltip (.hud-tip) — the HUD's single hover/focus tip -----
+   Convention (see components.md): terse. A bold title, an optional right-
+   aligned key chip (the hotkey), and at most one status line. Any element opts
+   in with data-tip="text"; the action bar supplies richer structured tips.
+   Hover/focus only — coarse pointers use the long-press menu instead. */
+.hud-tip {
+    position: fixed; z-index: 1060; pointer-events: none; max-width: 240px;
+    padding: 5px 8px; background: var(--ac-panel); color: var(--ac-text);
+    border: 1px solid var(--ac-border-2); border-radius: var(--ac-radius-sm);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, .55); font-size: .72rem; line-height: 1.3;
+}
+.hud-tip[hidden] { display: none; }
+.tip-row { display: flex; align-items: baseline; gap: 12px; }
+.tip-name { font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tip-key {
+    margin-left: auto; flex: none; font-size: .62rem; font-weight: 700; color: var(--ac-accent);
+    border: 1px solid var(--ac-border-2); border-radius: 4px; padding: 0 4px;
+    font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.tip-sub { color: var(--ac-dim); font-size: .66rem; margin-top: 1px; }
+.tip-warn { color: var(--ac-danger); font-weight: 700; }
+@media (prefers-reduced-motion: no-preference) {
+    .hud-tip { animation: hud-tip-in .1s ease-out; }
+    @keyframes hud-tip-in { from { opacity: 0; } to { opacity: 1; } }
+}
 
 /* ----- Shared topbar buttons (aligned with .ac-btn — see components.md) ----- */
 .hud-btn[hidden] { display: none; }

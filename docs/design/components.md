@@ -391,9 +391,12 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
   (`--sweep` angle, motion-gated). School tints via `.cat-*`; states via
   `.off`/`.cooling`/`.blocked`/`.sweeping`/`.fired`/`.dragging`/`.drop-target`.
   `.skill--empty` is a numbered drop target, `.skill--pager` the 1/2 page
-  toggle. Slots persist in `ishar.slots` (ordered, migrated from the old
-  `ishar.favs`); per-skill icon overrides in `ishar.icons`. See the
-  2026-07-16 decision. Hotkeys: **Alt/Ctrl+1…0** fire, **Alt+`** pages.
+  toggle, `.skill--lock` the lock/unlock. Slots persist in `ishar.slots`
+  (ordered, migrated from the old `ishar.favs`); per-skill icon overrides in
+  `ishar.icons`; the unlocked state in `ishar.barUnlocked`. See the 2026-07-16
+  decisions. Hotkeys: **Alt/Ctrl+1…0** fire, **Alt+`** pages. **Locked by
+  default** (taps fire); unlock to edit — `#hud-hotbar.editing` gets grab
+  cursors and a `.skill.picked` slot awaits its destination (tap-to-swap).
 - **Game-Icons.net sprite** (`img/game-icons.svg`, CC BY 3.0, self-hosted) —
   the **skill-art** vocabulary, a scoped exception to the Bootstrap-Icons-only
   rule (see decision). Referenced like `bi` but with class `gi`:
@@ -401,6 +404,20 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
   (hud.js builds these with `createElementNS` + a sanitized href). Glyphs are
   single-path `currentColor`, so they recolor by school. Bootstrap Icons stays
   the sprite for everything else.
+- **Standardized skill→icon map** — the icon a skill gets is resolved
+  personal pick → server-provided → curated map → keyword heuristic. The curated
+  map (`apps/connect/skill_icons.py`, keyed by stable skill id) is injected via
+  `{{ skill_icons|json_script:"ishar-skill-icons" }}` and `IsharHUD.init({skillIcons})`;
+  it's the standardized default everyone inherits. Regenerate a starter from
+  `python manage.py dump_skills` + the scratchpad generator. See the 2026-07-16
+  decision (incl. the future game-side `icon` field).
+- **`.hud-tip` tooltip** — the HUD's single hover/focus tooltip convention.
+  **Terse by rule:** a bold `.tip-name`, an optional right-aligned `.tip-key`
+  chip (the hotkey), and at most one `.tip-sub` line (`.tip-warn` red-tokens a
+  block reason). Opt in with `data-tip="text"` on any element; the action bar
+  supplies structured tips. Hover + keyboard focus, hover-capable pointers only
+  (touch uses the long-press menu); fade gated behind reduced-motion. One shared
+  `#hud-tip` node, built in `hud.js`.
 - **`.picker-grid` / `.picker-icon` / `.picker-auto`** — the per-skill icon
   picker (a themed grid reusing `#hud-menu.menu-picker`); opened from an
   ability's context menu. `.ab-icon` mirrors the chosen glyph in the Abilities

@@ -9,6 +9,65 @@ Format: `## YYYY-MM-DD — Title` · **Decision** · **Why** · (optional) **Not
 
 ---
 
+## 2026-07-16 — HUD icons: a standardized map everyone inherits, and the `.hud-tip` tooltip convention
+
+**Decision (icon resolution).** Skill icons are a **standardized set every player
+inherits**, not a per-player craft. The client resolves an icon in this order:
+
+1. **Personal pick** — the player's own `ishar.icons` override (opt-in, top).
+2. **Server-provided** — a future authoritative `icon` on the `Char.Skills`
+   GMCP feed (see the game-side spec below). Preferred as soon as it exists.
+3. **Curated web map** — `apps/connect/skill_icons.py`: `SKILL_ICONS`, keyed by
+   the game's **stable skill id**, injected into `/connect` via
+   `{{ skill_icons|json_script }}` → `IsharHUD.init({skillIcons})`. This is the
+   standardized default; it overrides the heuristic and everyone gets it.
+4. **Keyword heuristic** → **type/category fallback** — the client-side
+   `ICON_RULES` in `hud.js`, now only the safety net for skills the curated map
+   doesn't list yet. A partial map is fine.
+
+Every candidate is validated against the sprite's symbol set before it renders,
+so a stale override / map typo / bad server value falls through instead of
+showing a blank.
+
+**Why.** The skill list is finite, known, and game-owned; a heuristic is a good
+bootstrap but distinct skills that share a keyword collapse to one glyph. Keying
+the standardized map to the **stable id** makes it authoritative and
+rename-proof, and shipping it site-side (not per-device) means it is inherited
+with zero setup — the property we actually want.
+
+**Tooling (the names live only in the shared DB).** `python manage.py
+dump_skills` emits `[{id, enum_symbol, name, type}]`; the scratchpad
+`build-skill-icons.js` runs the *same* heuristic over that dump to produce a
+starter `id → icon` map (with `# ENUM — name` comments) to hand-tune and paste
+into `skill_icons.py`. So the map is regenerable, and curation is a review pass
+over real data rather than freehand.
+
+**Game-side authority (speced, not built here).** The eventual home for the
+standardized map is the game itself: add an `icon` column to the `skills` table
+(edited in the same admin as the rest of the skill) and emit it on
+`Char.Skills`. Then **every** client — web HUD, Mudlet, player scripts —
+inherits identical icons, new skills get one with no web deploy, and the web
+`SKILL_ICONS` map becomes a fallback. The HUD *already* prefers a server-sent
+`icon` (layer 2 above), so this is a drop-in when `ishar-mud` adds it. Tracked
+for the game repo; the web side needs no further change to consume it.
+
+**Decision (tooltip convention).** The HUD gets **one** tooltip primitive,
+`.hud-tip` (built in `hud.js`, styled in `hud.css`). It is **terse by rule**: a
+bold title, an optional right-aligned **key chip** (the hotkey, e.g. `Alt+1`),
+and **at most one status line** (type · %, with a red cooldown/mana/position
+token when blocked). Any element opts in with `data-tip="text"`; the action bar
+supplies structured tips. It shows on **hover and keyboard focus** (focus makes
+hotkeys discoverable) and **only on hover-capable pointers** — coarse/touch
+pointers keep the long-press context menu, so nothing load-bearing lives in a
+tip. Content goes in via `textContent`; the show animation is a 100 ms fade
+gated behind `prefers-reduced-motion`.
+
+**Why.** The action bar's behaviour (hotkeys especially) needed explaining, and
+the native `title` attribute is slow, unstyleable, can't show a key chip, and is
+invisible on touch. One small styled convention — kept deliberately terse
+(verbosity is not good UX) — teaches the binding without a wall of text, and is
+reusable for any future HUD affordance via `data-tip`.
+
 ## 2026-07-16 — HUD action bar: WoW-style icon slots, hotkeys, and a self-hosted game-icons sprite
 
 **Decision.** The bottom hotbar becomes a proper **action bar**: fixed,
@@ -36,8 +95,14 @@ Format: `## YYYY-MM-DD — Title` · **Decision** · **Why** · (optional) **Not
   transition gated behind `prefers-reduced-motion`) plus the seconds; non-
   cooldown blocks show their reason ("MANA", a min-position).
 - **Hotkeys.** **Alt+1…0** fire the visible page's slots (slot 10 = key "0");
-  **Ctrl+1…0** is wired as a bonus; **Alt+`** pages the bar. Reorder by drag
-  (desktop) or "Move ◄/►" (touch); set icons from the ability menu.
+  **Ctrl+1…0** is wired as a bonus; **Alt+`** pages the bar.
+- **Lock, then rearrange (WoW's "Lock Action Bars").** The bar is **locked by
+  default** — taps and hotkeys fire, nothing drags, so combat is accident-free.
+  A padlock toggle flips to **edit mode**: taps stop firing and instead
+  **rearrange** (drag on desktop, or tap-a-slot-then-tap-its-destination, which
+  also works on touch); hotkeys are suppressed while editing. The unlocked state
+  persists (`ishar.barUnlocked`). "Move ◄/►" stays in the ability menu as an
+  always-available safe reorder even when locked.
 
 **Why.** The plumbing for a real action bar already existed (GMCP-fed
 cooldowns, mana/position gating, target-aware casting, a context menu) — it

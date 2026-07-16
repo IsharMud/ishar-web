@@ -271,6 +271,8 @@
     <div id="hud-menu" hidden role="menu"></div>
 
 </div>
+{# Standardized skill→icon map (id → game-icons name); safely-escaped JSON. #}
+{{ skill_icons|json_script:"ishar-skill-icons" }}
 <script>
 (function() {
     "use strict";
@@ -805,8 +807,9 @@
                 sysln("Ctrl+L clears. PageUp/PageDown scroll. Ctrl+Shift+F searches scrollback.");
                 sysln("Action bar: Alt+1..0 fire the bar's slots (Ctrl+1..0 too when the page");
                 sysln("      is installed/fullscreen — tabbed browsers reserve Ctrl+digit). Alt+`");
-                sysln("      switches bar pages. Pin skills from the Abilities panel (☆), drag to");
-                sysln("      reorder, right-click/long-press a slot to set its icon.");
+                sysln("      switches bar pages. Pin skills from the Abilities panel (☆).");
+                sysln("      Tap the lock to edit: unlocked, tap/drag slots to rearrange (taps");
+                sysln("      don't fire); right-click/long-press a slot to set its icon.");
                 break;
             case "clear":
                 term.clear();
@@ -929,7 +932,13 @@
             },
             onComm: onComm,
             onVitals: onVitals,
-            spriteUrl: "{% static 'img/game-icons.svg' %}"
+            spriteUrl: "{% static 'img/game-icons.svg' %}",
+            skillIcons: (function() {
+                try {
+                    var e = document.getElementById("ishar-skill-icons");
+                    return e ? JSON.parse(e.textContent) : {};
+                } catch (x) { return {}; }
+            })()
         });
     }
 
