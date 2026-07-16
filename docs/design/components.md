@@ -406,11 +406,11 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
   the sprite for everything else.
 - **Standardized skill→icon map** — the icon a skill gets is resolved
   personal pick → server-provided → curated map → keyword heuristic. The curated
-  map (`apps/connect/skill_icons.py`, keyed by stable skill id) is injected via
-  `{{ skill_icons|json_script:"ishar-skill-icons" }}` and `IsharHUD.init({skillIcons})`;
-  it's the standardized default everyone inherits. Regenerate a starter from
-  `python manage.py dump_skills` + the scratchpad generator. See the 2026-07-16
-  decision (incl. the future game-side `icon` field).
+  map (`apps/connect/skill_icons.py`, keyed by normalized skill name, **all 462
+  skills mapped**) is injected via `{{ skill_icons|json_script:"ishar-skill-icons" }}`
+  and `IsharHUD.init({skillIcons})`; it's the standardized default everyone
+  inherits. Regenerate from `python manage.py dump_skills` + the heuristic. See
+  the 2026-07-16 decision (incl. the future game-side `icon` field).
 - **`.hud-tip` tooltip** — the HUD's single hover/focus tooltip convention.
   **Terse by rule:** a bold `.tip-name`, an optional right-aligned `.tip-key`
   chip (the hotkey), and at most one `.tip-sub` line (`.tip-warn` red-tokens a

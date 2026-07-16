@@ -18,29 +18,35 @@ inherits**, not a per-player craft. The client resolves an icon in this order:
 2. **Server-provided** — a future authoritative `icon` on the `Char.Skills`
    GMCP feed (see the game-side spec below). Preferred as soon as it exists.
 3. **Curated web map** — `apps/connect/skill_icons.py`: `SKILL_ICONS`, keyed by
-   the game's **stable skill id**, injected into `/connect` via
-   `{{ skill_icons|json_script }}` → `IsharHUD.init({skillIcons})`. This is the
+   the **normalized skill name** (the key `hud.js` already derives from the
+   feed), injected into `/connect` via `{{ skill_icons|json_script }}` →
+   `IsharHUD.init({skillIcons})`. **All 462 skills are mapped.** This is the
    standardized default; it overrides the heuristic and everyone gets it.
 4. **Keyword heuristic** → **type/category fallback** — the client-side
-   `ICON_RULES` in `hud.js`, now only the safety net for skills the curated map
-   doesn't list yet. A partial map is fine.
+   `ICON_RULES` in `hud.js`, now only the safety net for skills added after the
+   map was last generated. A partial map is fine.
 
 Every candidate is validated against the sprite's symbol set before it renders,
 so a stale override / map typo / bad server value falls through instead of
 showing a blank.
 
-**Why.** The skill list is finite, known, and game-owned; a heuristic is a good
-bootstrap but distinct skills that share a keyword collapse to one glyph. Keying
-the standardized map to the **stable id** makes it authoritative and
-rename-proof, and shipping it site-side (not per-device) means it is inherited
-with zero setup — the property we actually want.
+**Why (name-keyed, not id-keyed).** The skill list is finite, known, and
+game-owned; a heuristic is a good bootstrap but distinct skills that share a
+keyword collapse to one glyph. The `Char.Skills` feed carries the skill's
+**name** (and id), so the web map keys by the normalized name — readable and
+directly hand-editable. Rename-brittleness is acceptable (a rename simply falls
+back to the heuristic), and the **rename-proof authority is the game-side `icon`
+field** below, not the web map. Shipping it site-side (not per-device) means it
+is inherited with zero setup — the property we actually want.
 
 **Tooling (the names live only in the shared DB).** `python manage.py
-dump_skills` emits `[{id, enum_symbol, name, type}]`; the scratchpad
-`build-skill-icons.js` runs the *same* heuristic over that dump to produce a
-starter `id → icon` map (with `# ENUM — name` comments) to hand-tune and paste
-into `skill_icons.py`. So the map is regenerable, and curation is a review pass
-over real data rather than freehand.
+dump_skills` emits `[{id, enum_symbol, name, type}]`. The map was built by
+running the `hud.js` keyword heuristic over that dump, then hand-authoring
+overrides for the ~172 skills the heuristic didn't match and thematic
+corrections (Ishar's monk *Way of the …* forms, Totems, Remembrances, Cobra
+Venom, etc.), and adding ~24 thematic glyphs to the sprite (animal forms, mind,
+time, phoenix). Each entry carries a `# Skill Name` comment; regenerate the same
+way when skills change.
 
 **Game-side authority (speced, not built here).** The eventual home for the
 standardized map is the game itself: add an `icon` column to the `skills` table
@@ -81,7 +87,7 @@ reusable for any future HUD affordance via `data-tip`.
   **auto mode** still offers a capped set of usable damage/heal skills so the
   bar is useful out of the box; pinning anything switches to **custom mode**.
 - **Icons come from Game-Icons.net** (`img/game-icons.svg`, a curated
-  **140-glyph** subset, **CC BY 3.0**, self-hosted, recolored via
+  **166-glyph** subset, **CC BY 3.0**, self-hosted, recolored via
   `fill:currentColor`). The game sends no icon metadata, so a skill's glyph is
   chosen client-side: **user override → keyword rule → type/category
   fallback** (`ICON_RULES` / `iconFallback` in `hud.js`, mirrored by
@@ -114,7 +120,7 @@ art and its glyphs are single-path `currentColor`, so they drop into the dark
 console and tint by school with zero color-management.
 
 **The `no new frontend libraries` deviation, recorded deliberately.** Shipping
-a game-icons sprite adds a **new self-hosted asset** (~200 KiB / ~60 KiB
+a game-icons sprite adds a **new self-hosted asset** (~250 KiB / ~75 KiB
 gzipped), which the frontend rule (`CLAUDE.md`) otherwise forbids. This is a
 **scoped, intentional exception**, not a precedent to add more: it is a
 *curated subset* (not the 4,000-icon set), self-hosted (no CDN, no runtime

@@ -314,6 +314,8 @@
         ["Stealth & travel", ["hidden", "ninja-mask", "cloak", "invisible", "sprint", "run", "walking-boot", "footsteps", "eye-target", "magnifying-glass", "all-seeing-eye", "sight-disabled", "portal", "teleport", "magic-gate"]],
         ["Nature & beast", ["sprout", "leaf-swirl", "thorny-vine", "vine-whip", "wolf-howl", "beast-eye", "claw-slashes", "bleeding-wound", "broken-bone"]],
         ["Craft & enchant", ["hammer-nails", "anvil", "anvil-impact", "blacksmith", "gears", "sewing-needle", "cauldron", "bubbling-flask", "potion-ball", "drink-me", "mortar", "gold-nuggets", "gems", "crystal-shine", "scroll-unfurled", "spell-book", "open-book"]],
+        ["Creatures & forms", ["dragon-head", "dragon-breath", "tiger-head", "monkey", "eagle-head", "raven", "owl", "tortoise", "boar", "octopus", "cobra", "snake", "bear-head", "totem-head"]],
+        ["Mind, time & spirit", ["brain", "third-eye", "psychic-waves", "hourglass", "burning-embers", "feathered-wing", "magic-portal", "shadow-follower", "prayer-beads", "templar-shield", "trident"]],
         ["Generic", ["round-star", "sparkles", "gears"]]
     ];
     // The set of icon names that actually ship in the sprite (derived from the
@@ -342,7 +344,7 @@
     // heuristic → type/category fallback. See the 2026-07-16 decision.
     function standardIcon(s) {
         if (hasIcon(s.icon)) return s.icon;
-        var cur = s.id != null ? curatedIcons[s.id] : null;
+        var cur = curatedIcons[slotKeyOf(s)];   // curated map keyed by normalized name
         if (hasIcon(cur)) return cur;
         return heuristicIcon(s);
     }
