@@ -803,6 +803,10 @@
                 sysln("Tab completes from your history and the game (exits, skills, names);");
                 sysln("Shift+Tab cycles backward. Arrows recall history (clock button on touch).");
                 sysln("Ctrl+L clears. PageUp/PageDown scroll. Ctrl+Shift+F searches scrollback.");
+                sysln("Action bar: Alt+1..0 fire the bar's slots (Ctrl+1..0 too when the page");
+                sysln("      is installed/fullscreen — tabbed browsers reserve Ctrl+digit). Alt+`");
+                sysln("      switches bar pages. Pin skills from the Abilities panel (☆), drag to");
+                sysln("      reorder, right-click/long-press a slot to set its icon.");
                 break;
             case "clear":
                 term.clear();
@@ -924,7 +928,8 @@
                 scheduleFit();
             },
             onComm: onComm,
-            onVitals: onVitals
+            onVitals: onVitals,
+            spriteUrl: "{% static 'img/game-icons.svg' %}"
         });
     }
 

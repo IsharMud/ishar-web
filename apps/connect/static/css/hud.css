@@ -584,32 +584,86 @@ body.connect-page #content { padding: .5rem !important; }
 .chat-ch { color: var(--ac-accent); font-weight: 700; }
 .chat-txt { color: var(--ac-text); }
 
-/* ----- Hotbar (bounded quick bar) ----- */
-/* Always a single horizontally-scrolling row — favorites can exceed the auto
-   count, and the bar must never wrap into extra rows and eat terminal height. */
-#hud-hotbar { display: flex; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; gap: 4px; flex: none; }
+/* ----- Action bar (WoW-style icon slots) ----- */
+/* game-icons.net glyphs recolor via fill:currentColor (see the sprite at
+   img/game-icons.svg + its ATTRIBUTION). Base sizing for the sprite <use>. */
+.gi { fill: currentColor; display: block; width: 1em; height: 1em; }
+
+/* Always a single horizontally-scrolling row — assigned slots can exceed the
+   visible width, and the bar must never wrap into extra rows and eat terminal
+   height. Numbered slots address hotkeys (Alt/Ctrl+1..0). */
+#hud-hotbar { display: flex; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; gap: 5px; flex: none; padding: 1px 0; }
 #hud-hotbar::-webkit-scrollbar { display: none; }
 #hud-hotbar.empty { display: none; }
+
 .skill {
-    position: relative; flex: 0 0 auto; min-width: 64px; max-width: 110px; padding: 4px 8px; cursor: pointer;
-    background: var(--ac-elev); color: var(--ac-text); border: 1px solid var(--ac-border); border-radius: var(--ac-radius-sm);
-    font-size: .74rem; text-align: left; overflow: hidden;
+    position: relative; flex: 0 0 auto; box-sizing: border-box;
+    width: 46px; height: 46px; padding: 0; cursor: pointer; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--ac-elev); color: var(--ac-text);
+    border: 1px solid var(--ac-border); border-bottom: 2px solid var(--ac-border-2);
+    border-radius: var(--ac-radius-sm);
+    transition: border-color .12s ease, transform .12s ease, box-shadow .12s ease;
 }
 .skill:hover { border-color: var(--ac-accent); }
-.skill.off { opacity: .42; cursor: not-allowed; }
-.skill.cat-damage { border-left: 3px solid var(--ac-danger); }
-.skill.cat-heal { border-left: 3px solid var(--ac-ok); }
-.skill.cat-misc { border-left: 3px solid var(--ac-info); }
-.skill.cat-skill { border-left: 3px solid var(--ac-border-2); }
-.skill-name { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.skill-pct { font-size: .64rem; color: var(--ac-dim); }
-.skill-cd { font-size: .7rem; font-weight: 700; color: var(--ac-accent); font-variant-numeric: tabular-nums; }
-.skill .skill-cd { display: none; }
-.skill.cooling .skill-cd { display: inline; }
-.skill.cooling .skill-pct { display: none; }
-/* A non-cooldown block (mana / min-position) shows its reason instead of %. */
-.skill.blocked .skill-cd { display: inline; color: var(--ac-danger); }
-.skill.blocked .skill-pct { display: none; }
+.skill .skill-icon { width: 30px; height: 30px; color: var(--ac-text); opacity: .92; pointer-events: none; }
+/* Category colours the glyph (school-at-a-glance) + the bottom accent rule. */
+.skill.cat-damage { border-bottom-color: var(--ac-danger); }
+.skill.cat-heal   { border-bottom-color: var(--ac-ok); }
+.skill.cat-misc   { border-bottom-color: var(--ac-info); }
+.skill.cat-skill  { border-bottom-color: var(--ac-border-2); }
+.skill.cat-damage .skill-icon { color: #e6836b; }
+.skill.cat-heal   .skill-icon { color: #7fc99a; }
+.skill.cat-misc   .skill-icon { color: #7fb2e6; }
+.skill.cat-skill  .skill-icon { color: var(--ac-text); }
+
+/* Slot number, top-left, on a small scrim so it reads over any glyph. */
+.skill-key {
+    position: absolute; top: 1px; left: 2px; z-index: 2;
+    font-size: .6rem; font-weight: 700; line-height: 1;
+    color: var(--ac-text); padding: 1px 3px; border-radius: 3px;
+    background: rgba(0, 0, 0, .5); font-variant-numeric: tabular-nums; pointer-events: none;
+}
+/* Cooldown seconds / block reason, centred over a scrim. */
+.skill-cd {
+    position: absolute; inset: 0; z-index: 3; display: none;
+    align-items: center; justify-content: center;
+    font-size: .92rem; font-weight: 700; color: #fff; text-shadow: 0 1px 2px #000;
+    background: rgba(0, 0, 0, .32); font-variant-numeric: tabular-nums; pointer-events: none;
+}
+.skill.cooling .skill-cd, .skill.blocked .skill-cd { display: flex; }
+.skill.blocked .skill-cd { color: var(--ac-danger); font-size: .58rem; text-transform: uppercase; letter-spacing: .02em; padding: 0 2px; text-align: center; }
+.skill.off { cursor: not-allowed; }
+.skill.off .skill-icon { opacity: .4; }
+
+/* Radial cooldown sweep: a darkened wedge that drains as the timer runs.
+   --sweep is the remaining fraction as an angle (set by hud.js each tick). */
+.skill-sweep {
+    position: absolute; inset: 0; z-index: 1; display: none; pointer-events: none;
+    border-radius: inherit;
+    background: conic-gradient(from 0deg, rgba(6, 8, 12, .66) var(--sweep, 0deg), transparent 0);
+}
+.skill.sweeping .skill-sweep { display: block; }
+
+/* Empty numbered slot — a faint drop/assign target (custom mode). */
+.skill--empty { background: var(--ac-bg); border-style: dashed; opacity: .55; }
+.skill--empty:hover { opacity: .9; border-color: var(--ac-accent); }
+.skill--empty .skill-key { background: none; color: var(--ac-dim); top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: .8rem; }
+
+/* Page toggle (bar 1/2) sits at the head of the row. */
+.skill--pager { background: var(--ac-panel); border-bottom-color: var(--ac-accent); }
+.skill--pager .skill-icon { width: 20px; height: 20px; color: var(--ac-accent); opacity: .85; }
+.skill--pager .skill-key { top: auto; bottom: 1px; left: 50%; transform: translateX(-50%); background: none; color: var(--ac-accent); }
+
+/* Keyboard-fire + drag affordances. */
+.skill.fired { transform: translateY(-1px); box-shadow: 0 0 0 2px var(--ac-accent) inset; border-color: var(--ac-accent); }
+.skill.dragging { opacity: .45; }
+.skill.drop-target { border-color: var(--ac-accent); box-shadow: 0 0 0 2px var(--ac-accent-wash, rgba(255, 170, 119, .35)); }
+
+@property --sweep { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+@media (prefers-reduced-motion: no-preference) {
+    .skill-sweep { transition: --sweep 1s linear; }
+}
 
 /* ----- Context / action menu ----- */
 #hud-menu {
@@ -634,6 +688,29 @@ body.connect-page #content { padding: .5rem !important; }
 .menu-item.danger { color: var(--ac-danger); }
 .menu-item.danger:hover { background: var(--ac-danger-wash); color: var(--ac-danger); }
 @media (pointer: coarse) { .menu-item { min-height: 44px; } }
+
+/* ----- Icon picker (reuses #hud-menu with a wider grid layout) ----- */
+#hud-menu.menu-picker { min-width: 244px; max-width: min(92vw, 328px); padding: 6px; }
+.picker-group { font-size: .62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--ac-dim); padding: 8px 2px 3px; }
+.picker-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(34px, 1fr)); gap: 4px; }
+.picker-icon, .picker-auto {
+    display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer;
+    background: var(--ac-elev); color: var(--ac-text);
+    border: 1px solid var(--ac-border); border-radius: var(--ac-radius-sm);
+}
+.picker-icon { aspect-ratio: 1 / 1; }
+.picker-icon .gi { width: 21px; height: 21px; }
+.picker-icon:hover, .picker-auto:hover { border-color: var(--ac-accent); color: var(--ac-accent); }
+.picker-icon.on, .picker-auto.on { border-color: var(--ac-accent); box-shadow: 0 0 0 1px var(--ac-accent) inset; color: var(--ac-accent); }
+.picker-auto { width: 100%; padding: 8px 10px; margin: 4px 0 2px; font-size: .82rem; font-weight: 600; }
+.picker-auto .gi { width: 20px; height: 20px; flex: none; }
+@media (pointer: coarse) { .picker-icon { min-height: 44px; } }
+
+/* Ability-browser row icon (mirrors the bar's glyph so pins are recognisable). */
+.ab-icon { flex: none; width: 17px; height: 17px; color: var(--ac-dim); margin-right: 2px; }
+.ab-row.cat-damage .ab-icon { color: #e6836b; }
+.ab-row.cat-heal   .ab-icon { color: #7fc99a; }
+.ab-row.cat-misc   .ab-icon { color: #7fb2e6; }
 
 /* ----- Shared topbar buttons (aligned with .ac-btn — see components.md) ----- */
 .hud-btn[hidden] { display: none; }
@@ -759,7 +836,9 @@ body.connect-page #content { padding: .5rem !important; }
     .exit.ud, .exit.named { padding: 9px 12px; }
     #hud-tabs button { padding: 9px 3px; }
     .who-act button { padding: 7px 12px; }
-    .skill { min-height: 44px; padding: 6px 10px; }
+    /* Bigger touch target for the icon slots (still square). */
+    .skill { width: 52px; height: 52px; }
+    .skill .skill-icon { width: 34px; height: 34px; }
     .row, .occ-row, .ab-row { min-height: 44px; padding: 8px 6px; }
     .row-more { min-width: 40px; min-height: 40px; padding: 6px 8px; }
     .action-btn { padding: 10px; }

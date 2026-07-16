@@ -9,6 +9,67 @@ Format: `## YYYY-MM-DD — Title` · **Decision** · **Why** · (optional) **Not
 
 ---
 
+## 2026-07-16 — HUD action bar: WoW-style icon slots, hotkeys, and a self-hosted game-icons sprite
+
+**Decision.** The bottom hotbar becomes a proper **action bar**: fixed,
+**numbered, hotkey-addressable slots** instead of a reflowing quick-bar.
+
+- **Ordered slots supersede favorites.** The old unordered `ishar.favs` set is
+  migrated (in insertion order) into an ordered `ishar.slots` array — up to
+  **20 slots across two pages of ten**. A slot's number is its identity
+  ("slot 1 is always Fireball"), so trailing empties are trimmed but interior
+  holes are kept as visible, numbered drop targets. Nothing pinned yet →
+  **auto mode** still offers a capped set of usable damage/heal skills so the
+  bar is useful out of the box; pinning anything switches to **custom mode**.
+- **Icons come from Game-Icons.net** (`img/game-icons.svg`, a curated
+  **140-glyph** subset, **CC BY 3.0**, self-hosted, recolored via
+  `fill:currentColor`). The game sends no icon metadata, so a skill's glyph is
+  chosen client-side: **user override → keyword rule → type/category
+  fallback** (`ICON_RULES` / `iconFallback` in `hud.js`, mirrored by
+  `scratchpad/iconset.js` which the sprite generator reads). Per-skill
+  overrides persist in `ishar.icons` and are chosen from a themed picker.
+- **Compact display.** A slot is **icon + slot-number badge** only; the always-
+  on skill % is gone. Verbose detail moves to the **native hover tooltip**
+  (name · % · type · cooldown/mana/position or the exact command) and, on
+  touch, the existing **long-press context menu**. Cooldowns show a **radial
+  sweep** (a `conic-gradient` wedge driven by a `@property --sweep` angle,
+  transition gated behind `prefers-reduced-motion`) plus the seconds; non-
+  cooldown blocks show their reason ("MANA", a min-position).
+- **Hotkeys.** **Alt+1…0** fire the visible page's slots (slot 10 = key "0");
+  **Ctrl+1…0** is wired as a bonus; **Alt+`** pages the bar. Reorder by drag
+  (desktop) or "Move ◄/►" (touch); set icons from the ability menu.
+
+**Why.** The plumbing for a real action bar already existed (GMCP-fed
+cooldowns, mana/position gating, target-aware casting, a context menu) — it
+was wearing text where WoW muscle memory expects an icon grid. Numbered,
+stable slots are what make hotkeys meaningful, and moving the % to hover
+*reduces* on-screen text (the green-field "reduce entropy" mandate) while
+adding function. Game-Icons.net is the open-source standard for skill/spell
+art and its glyphs are single-path `currentColor`, so they drop into the dark
+console and tint by school with zero color-management.
+
+**The `no new frontend libraries` deviation, recorded deliberately.** Shipping
+a game-icons sprite adds a **new self-hosted asset** (~200 KiB / ~60 KiB
+gzipped), which the frontend rule (`CLAUDE.md`) otherwise forbids. This is a
+**scoped, intentional exception**, not a precedent to add more: it is a
+*curated subset* (not the 4,000-icon set), self-hosted (no CDN, no runtime
+dependency, no build step), and attribution lives beside it
+(`img/game-icons.ATTRIBUTION.txt`, CC BY 3.0). Bootstrap Icons remains the
+sprite for everything else; game-icons is *only* the skill-art vocabulary.
+
+**Honest caveat (documented in `/help`).** Browsers reserve **Ctrl+1…9** for
+tab-switching and web content usually cannot veto it, so in a normal tab
+**Alt+digit is the reliable path** (Chrome/Chromium/Safari; Firefox reserves
+Alt+digit too). Ctrl+digit comes fully alive when the HUD runs
+installed/fullscreen (no tab strip). The slot number is painted on every
+button so taps work everywhere the hotkey is browser-eaten.
+
+**Discipline.** Unchanged: `el()`/`textContent` only (icons are built with
+`createElementNS` + a sanitized `#gi-<name>` href, never `innerHTML`); every
+command through `safeCmd()`; tokens for all colors; ≥44 px touch targets; the
+sprite is force-added past the `static/` gitignore. No new *library* — one new
+self-hosted asset, per the recorded exception above.
+
 ## 2026-07-15 — Web client: NUL-sentinel control channel and liveness policy
 
 **Decision.** Issue #74. Websocket text frames starting with NUL (`\x00`) are

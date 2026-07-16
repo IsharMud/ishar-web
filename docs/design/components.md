@@ -382,10 +382,29 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
 - **`.hud-btn`(`--icon`)** — the topbar button, aligned with `.ac-btn`.
 - **`#hud-dock button`** — icon-over-label phone tabs; `.unread` renders an
   amber dot (used by Chat).
-- **`.exit` compass, `.row` lists, `.kv`, `.aff`, `.skill` hotbar** — the
-  in-panel widgets; all have coarse-pointer bumps and `:focus-visible` rings.
-  Hotbar buttons always contain both `.skill-cd` and `.skill-pct`; the
-  `.cooling` class (flipped by JS each tick) picks which one shows.
+- **`.exit` compass, `.row` lists, `.kv`, `.aff`** — the in-panel widgets; all
+  have coarse-pointer bumps and `:focus-visible` rings.
+- **`.skill` action bar** — the WoW-style bottom hotbar (`#hud-hotbar`): fixed,
+  numbered, hotkey-addressable icon slots. Each `.skill` is a square holding a
+  `.skill-icon` (a Game-Icons.net glyph, below), a `.skill-key` number badge,
+  a `.skill-cd` cooldown/blocked overlay, and a `.skill-sweep` radial wedge
+  (`--sweep` angle, motion-gated). School tints via `.cat-*`; states via
+  `.off`/`.cooling`/`.blocked`/`.sweeping`/`.fired`/`.dragging`/`.drop-target`.
+  `.skill--empty` is a numbered drop target, `.skill--pager` the 1/2 page
+  toggle. Slots persist in `ishar.slots` (ordered, migrated from the old
+  `ishar.favs`); per-skill icon overrides in `ishar.icons`. See the
+  2026-07-16 decision. Hotkeys: **Alt/Ctrl+1…0** fire, **Alt+`** pages.
+- **Game-Icons.net sprite** (`img/game-icons.svg`, CC BY 3.0, self-hosted) —
+  the **skill-art** vocabulary, a scoped exception to the Bootstrap-Icons-only
+  rule (see decision). Referenced like `bi` but with class `gi`:
+  `<svg class="gi"><use href="{% static 'img/game-icons.svg' %}#gi-NAME"></use></svg>`
+  (hud.js builds these with `createElementNS` + a sanitized href). Glyphs are
+  single-path `currentColor`, so they recolor by school. Bootstrap Icons stays
+  the sprite for everything else.
+- **`.picker-grid` / `.picker-icon` / `.picker-auto`** — the per-skill icon
+  picker (a themed grid reusing `#hud-menu.menu-picker`); opened from an
+  ability's context menu. `.ab-icon` mirrors the chosen glyph in the Abilities
+  list, and the `☆/★` `.ab-star` (data-bar) pins to the action bar.
 - **`#history-pop` / `.hist-item`** — the touch command-history popover,
   anchored above the input inside `#command-form` (works with the HUD off;
   rows are `textContent`-built, 44px on coarse pointers). Revealed via
