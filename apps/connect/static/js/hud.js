@@ -73,8 +73,11 @@
     // Panel homes for desktop; sheet order for phones (matches the dock).
     // The compass rose (room) is pinned to the bottom of the left column, so
     // its desktop home is #hud-left itself (a flex footer) while the scrolling
-    // panels live in #hud-left-scroll.
-    var PANELS = ["occupants", "equipment", "inventory", "train", "room",
+    // panels live in #hud-left-scroll (placePanels re-homes them in THIS order).
+    // Occupants sits last in the scroll — directly above the pinned rose — so
+    // the movement (rose) and interaction (occupants) surfaces are together at
+    // the bottom, nearest the input.
+    var PANELS = ["equipment", "inventory", "train", "occupants", "room",
                   "status", "abilities", "chat", "who"];
     var PANEL_HOME = {
         occupants: "hud-left-scroll", equipment: "hud-left-scroll",
@@ -248,6 +251,12 @@
                 S.vitals = data;
                 updateVitals();
                 tickHotbar();          // mana gate re-evaluates each pulse
+                // The Abilities browser bakes the mana/position block state into
+                // each row, so it must rebuild when mana changes (combat regen)
+                // or a spell stays greyed after you can afford it (issue #1801).
+                // Only when it's actually on screen — same guard the cooldown
+                // path uses to avoid rebuilding a ~400-row list off-screen.
+                if (abilitiesVisible()) renderAbilities();
                 break;
             case "Char.Status": S.status = data; renderVitals(); renderStatus(); break;
             case "Game.Time": S.time = data; renderVitals(); break;
@@ -383,12 +392,8 @@
             ]),
             el("div", { class: "v-group v-bars" }, barKids)
         ];
-        if (st) {
-            groups.push(el("div", { class: "v-group v-res" }, [
-                el("span", { class: "v-stat" }, [el("span", { class: "v-stat-label", text: "Gold" }), String(Number(st.gold || 0).toLocaleString())]),
-                el("span", { class: "v-stat" }, [el("span", { class: "v-stat-label", text: "To level" }), String(Number(st.tnl || 0).toLocaleString())])
-            ]));
-        }
+        // Gold / To-level are intentionally NOT shown here — both live in the
+        // Status pane, and dropping them reclaims scarce top-bar space (#1801).
         // Active default targets, so target-aware casting is legible at a glance.
         if (S.tgtHostile || S.tgtFriendly) {
             var tk = [];
@@ -638,17 +643,32 @@
     }
     function assign(a, b) { Object.keys(b).forEach(function (k) { a[k] = b[k]; }); return a; }
 
+    // A row list where any container row is followed by a sub-list of its (open)
+    // contents. Shared by the inventory and equipment panels so a WORN container
+    // (a backpack on the back) is inspectable exactly like a carried one — the
+    // game already emits worn-container contents in Char.Equipment (#1590); the
+    // equipment panel just wasn't rendering them (issue #1801).
+    function itemListWithContents(items, kind) {
+        var list = el("ul", { class: "row-list" });
+        (items || []).forEach(function (it) {
+            list.appendChild(itemRow(it, kind));
+            if (it.contents && it.contents.length) {
+                var sub = el("ul", { class: "row-list sub" });
+                var ct = targetOf(it.keywords || it.name);
+                it.contents.forEach(function (c) { sub.appendChild(itemRow(c, "content", ct)); });
+                list.appendChild(sub);
+            }
+        });
+        return list;
+    }
+
     function renderEquipment() {
         var items = S.equipment || [];
         var head = panelHeader("equipment", "Equipment", false);
         var kids = [head];
         if (!isCollapsed("equipment")) {
             if (!items.length) kids.push(el("div", { class: "panel-empty", text: "Nothing worn." }));
-            else {
-                var list = el("ul", { class: "row-list" });
-                items.forEach(function (it) { list.appendChild(itemRow(it, "equip")); });
-                kids.push(list);
-            }
+            else kids.push(itemListWithContents(items, "equip"));
         }
         fill(dom.equipment, kids);
     }
@@ -666,17 +686,7 @@
             } else {
                 var items = inv.items || [], coins = inv.coins || [], comps = inv.components || [];
                 if (items.length) {
-                    var list = el("ul", { class: "row-list" });
-                    items.forEach(function (it) {
-                        list.appendChild(itemRow(it, "item"));
-                        if (it.contents && it.contents.length) {
-                            var sub = el("ul", { class: "row-list sub" });
-                            var ct = targetOf(it.keywords || it.name);
-                            it.contents.forEach(function (c) { sub.appendChild(itemRow(c, "content", ct)); });
-                            list.appendChild(sub);
-                        }
-                    });
-                    kids.push(list);
+                    kids.push(itemListWithContents(items, "item"));
                 } else {
                     kids.push(el("div", { class: "panel-empty", text: "Empty." }));
                 }
@@ -687,8 +697,13 @@
                 if (comps.length) {
                     kids.push(componentsSection(comps));
                 }
-                if (coins.length) {
-                    kids.push(el("div", { class: "coins", text: coins.map(function (c) { return c.count + " " + c.name; }).join(" · ") }));
+                // Obsidian's worth is already folded into the purse "Gold" total
+                // shown in the Status pane (count_inv_coins sums every coin type
+                // ×coin_mult), so a separate obsidian line here is redundant —
+                // drop it (issue #1801).
+                var shownCoins = coins.filter(function (c) { return !/obsidian/i.test(c.name || ""); });
+                if (shownCoins.length) {
+                    kids.push(el("div", { class: "coins", text: shownCoins.map(function (c) { return c.count + " " + c.name; }).join(" · ") }));
                 }
             }
         }
@@ -911,9 +926,19 @@
         if (cd > 0) return { cd: cd, reason: cd + "s" };
         if (s.usable === false || S.usable[s.id] === false) return { cd: 0, reason: "unavailable" };
         var v = S.vitals;
-        if (s.type === "spell" && v && v.maxmp > 0 && s.mana_pct != null) {
-            var manaPct = Math.round((Number(v.mp) || 0) / v.maxmp * 100);
-            if (s.mana_pct > manaPct) return { cd: 0, reason: "low mana" };
+        if (s.type === "spell" && v && v.mp != null) {
+            // The game blocks a cast when current mana (SPTS) < the spell's
+            // energy cost, so gate on the actual points (issue #1801). The
+            // `mana` field is that exact cost; prefer it. The older `mana_pct`
+            // is a rounded cost% compared to a rounded mana% — lossy enough to
+            // falsely block a spell the player can afford — so it's only the
+            // fallback for the window before the game emits `mana`.
+            if (s.mana != null) {
+                if (Number(s.mana) > Number(v.mp)) return { cd: 0, reason: "low mana" };
+            } else if (v.maxmp > 0 && s.mana_pct != null) {
+                var manaPct = Math.round(Number(v.mp) / v.maxmp * 100);
+                if (s.mana_pct > manaPct) return { cd: 0, reason: "low mana" };
+            }
         }
         if (v && v.position && s.min_position && posRank(v.position) < posRank(s.min_position)) {
             return { cd: 0, reason: s.min_position };
@@ -1591,26 +1616,29 @@
     // ------------------------------------------------------------------
     function demo() {
         setHud(true, false);
+        // Demo mana costs are % of maxmp (300); the exact `mana` field is what
+        // the client now gates on (issue #1801). Demo mp is set below so a few
+        // pricier spells (e.g. sanctuary) read as "mana"-blocked.
         var bigSkills = [
-            { id: 1, name: "fireball", type: "spell", percent: 91, usable: true, category: "damage", target_type: "offensive", mana_pct: 30, min_position: "Standing" },
-            { id: 2, name: "heal", type: "spell", percent: 78, usable: true, category: "heal", target_type: "defensive", mana_pct: 40, min_position: "Standing" },
+            { id: 1, name: "fireball", type: "spell", percent: 91, usable: true, category: "damage", target_type: "offensive", mana_pct: 30, mana: 90, min_position: "Standing" },
+            { id: 2, name: "heal", type: "spell", percent: 78, usable: true, category: "heal", target_type: "defensive", mana_pct: 40, mana: 120, min_position: "Standing" },
             { id: 3, name: "kick", type: "skill", percent: 65, usable: false, category: "damage", target_type: "none", min_position: "Fighting" },
             { id: 4, name: "meditate", type: "skill", percent: 50, usable: true, category: "misc", target_type: "none", min_position: "Sitting" },
-            { id: 5, name: "lightning bolt", type: "spell", percent: 88, usable: true, category: "damage", target_type: "offensive", mana_pct: 25, min_position: "Standing" },
-            { id: 6, name: "cure serious", type: "spell", percent: 82, usable: true, category: "heal", target_type: "defensive", mana_pct: 20, min_position: "Standing" },
-            { id: 7, name: "bless", type: "spell", percent: 70, usable: true, category: "misc", target_type: "defensive", mana_pct: 15, min_position: "Standing" },
-            { id: 8, name: "sanctuary", type: "spell", percent: 60, usable: true, category: "misc", target_type: "defensive", mana_pct: 50, min_position: "Standing" },
+            { id: 5, name: "lightning bolt", type: "spell", percent: 88, usable: true, category: "damage", target_type: "offensive", mana_pct: 25, mana: 75, min_position: "Standing" },
+            { id: 6, name: "cure serious", type: "spell", percent: 82, usable: true, category: "heal", target_type: "defensive", mana_pct: 20, mana: 60, min_position: "Standing" },
+            { id: 7, name: "bless", type: "spell", percent: 70, usable: true, category: "misc", target_type: "defensive", mana_pct: 15, mana: 45, min_position: "Standing" },
+            { id: 8, name: "sanctuary", type: "spell", percent: 60, usable: true, category: "misc", target_type: "defensive", mana_pct: 50, mana: 150, min_position: "Standing" },
             { id: 9, name: "disarm", type: "skill", percent: 45, usable: true, category: "damage", target_type: "none", min_position: "Fighting" },
             { id: 10, name: "second attack", type: "passive", percent: 75, usable: false, category: "misc", target_type: "none", min_position: "Standing" },
             { id: 91, name: "Metamagic: Clarity", type: "skill", percent: 100, usable: true, category: "misc", target_type: "none", min_position: "Standing" },
             { id: 92, name: "Shield Slam", type: "skill", percent: 72, usable: true, category: "damage", target_type: "none", min_position: "Fighting" }
         ];
         // Pad to demonstrate the immortal overflow the browser now bounds.
-        for (var i = 11; i <= 90; i++) bigSkills.push({ id: i, name: "spell " + i, type: (i % 3 ? "spell" : "skill"), percent: 40 + (i % 60), usable: (i % 4 !== 0), category: ["damage", "heal", "misc"][i % 3], target_type: ["offensive", "defensive", "none"][i % 3], mana_pct: 20 + (i % 40), min_position: "Standing" });
+        for (var i = 11; i <= 90; i++) bigSkills.push({ id: i, name: "spell " + i, type: (i % 3 ? "spell" : "skill"), percent: 40 + (i % 60), usable: (i % 4 !== 0), category: ["damage", "heal", "misc"][i % 3], target_type: ["offensive", "defensive", "none"][i % 3], mana_pct: 20 + (i % 40), mana: (20 + (i % 40)) * 3, min_position: "Standing" });
 
         var feeds = {
             "Char.Status": { name: "Aelwyn", "class": "Magician", race: "Elf", position: "Standing", level: 45, align: 350, xp: 1250000, tnl: 48000, gold: 18230, bank: 500000, remort: 3 },
-            "Char.Vitals": { hp: 412, maxhp: 480, mp: 255, maxmp: 300, move: 198, maxmove: 240, position: "Standing", opponent_hp_pct: 35, metamagic: 60, metamagic_max: 100, metamagic_regen: 5 },
+            "Char.Vitals": { hp: 412, maxhp: 480, mp: 130, maxmp: 300, move: 198, maxmove: 240, position: "Standing", opponent_hp_pct: 35, metamagic: 60, metamagic_max: 100, metamagic_regen: 5 },
             "Game.Time": { hour: 21, hour12: 9, ampm: "pm", day: 14, day_name: "Sunday", month: 6, month_name: "the Long Shadows", year: 1247, night: true, season_id: 15, season_end: 0, events: [{ name: "Double Essence", seconds: 5400 }, { name: "Festival of Flames" }], moons: [{ name: "Shavar", phase: 4, phase_name: "full", up: true }, { name: "Chenchir", phase: 6, phase_name: "last quarter", up: true }] },
             "Room.Info": { num: 3001, name: "The Grand Concourse", area: "Ishar Nexus", environment: "City", exits: { n: 3002, e: 3005, s: 3008, w: 3010, u: 3100, d: 3200, into: 3500 } },
             "Room.Occupants": { occupants: [
@@ -1624,13 +1652,18 @@
             "Char.Equipment": { items: [
                 { name: "a magnificent helmet of red dragonscales", keywords: "helmet dragonscales", type: "armor", vnum: 1, location: "Head", condition: 100 },
                 { name: "emberforged gauntlets", keywords: "gauntlets emberforged", type: "armor", vnum: 2, location: "Hands", condition: 62 },
-                { name: "a talon-barbed whip", keywords: "whip talon", type: "weapon", vnum: 3, location: "Wielding", condition: 35 }
+                { name: "a talon-barbed whip", keywords: "whip talon", type: "weapon", vnum: 3, location: "Wielding", condition: 35 },
+                { name: "a sturdy traveling pack", keywords: "pack traveling", type: "container", vnum: 4, location: "Back", closeable: true, closed: false, contents: [
+                    { name: "a flask of lamp oil", keywords: "flask oil", count: 2 },
+                    { name: "a coil of silk rope", keywords: "rope silk coil", count: 1 }
+                ] },
+                { name: "a rune-locked coffer", keywords: "coffer runelocked", type: "container", vnum: 5, location: "Held", closeable: true, closed: true, locked: true }
             ] },
             "Char.Inventory": { items: [
                 { name: "a glowing potion", keywords: "potion glowing", type: "potion", vnum: 10, count: 3 },
                 { name: "a scroll of recall", keywords: "scroll recall", type: "scroll", vnum: 12, count: 1 },
                 { name: "a leather sack", keywords: "sack leather", type: "container", vnum: 11, count: 1, closeable: true, closed: false, contents: [{ name: "a brass key", keywords: "key brass", count: 1 }] }
-            ], coins: [{ name: "gold", vnum: 0, count: 18230 }], components: [
+            ], coins: [{ name: "gold", vnum: 0, count: 18230 }, { name: "silver", vnum: 0, count: 340 }, { name: "obsidian", vnum: 0, count: 12 }], components: [
                 { name: "a pinch of sulfur", keywords: "sulfur pinch", count: 7 },
                 { name: "a vial of powdered silver", keywords: "silver vial powdered", count: 3 },
                 { name: "a sprig of nightshade", keywords: "nightshade sprig", count: 12 },

@@ -107,10 +107,11 @@
        bottom-left (near the input, Mudlet-style). -->
     <aside id="hud-left" class="hud-col">
         <div id="hud-left-scroll">
-            <section id="panel-occupants" class="panel"></section>
             <section id="panel-equipment" class="panel"></section>
             <section id="panel-inventory" class="panel"></section>
             <section id="panel-train" class="panel"></section>
+            {# Occupants last — directly above the pinned compass rose, so moving and interacting with who's here read together. #}
+            <section id="panel-occupants" class="panel"></section>
         </div>
         <section id="panel-room" class="panel panel-rose"></section>
     </aside>
@@ -312,6 +313,19 @@
         term.loadAddon(searchAddon);
     }
     term.open(terminalContainer);
+
+    // Clicking the terminal returns focus to the command input, so you can get
+    // straight back to typing without aiming for the small input bar. The
+    // terminal is display-only (disableStdin), so nothing competes for focus.
+    // Guarded so it never breaks a copy: xterm draws its own selection, so we
+    // check term.hasSelection() (window.getSelection is empty in canvas mode)
+    // and refocus only on a plain left click. Skipped on mobile, where a tap
+    // shouldn't pop the on-screen keyboard mid-read.
+    terminalContainer.addEventListener("mouseup", function(e) {
+        if (isMobile || e.button !== 0) return;
+        if (term.hasSelection && term.hasSelection()) return;
+        commandInput.focus();
+    });
 
     function adjustFont(delta) {
         fontSize = Math.max(FONT_MIN, Math.min(FONT_MAX, fontSize + delta));
