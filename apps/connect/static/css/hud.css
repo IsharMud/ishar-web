@@ -635,23 +635,26 @@ body.connect-page #content { padding: .5rem !important; }
 /* ----- Abilities browser (bounded, searchable) ----- */
 #panel-abilities { padding: 6px; }
 .ab-controls { flex: none; margin-bottom: 5px; }
-.ab-search {
+/* Search box + filter chips — shared by the abilities overlay and the
+   professions recipe browser so the two filter surfaces read identically. */
+.ab-search, .recipe-search {
     width: 100%; font-size: 16px; padding: 5px 8px;
     background: var(--ac-bg); color: var(--ac-text);
     border: 1px solid var(--ac-border); border-radius: var(--ac-radius-sm);
 }
-.ab-search:focus-visible { outline: 2px solid var(--ac-accent); outline-offset: -1px; }
-.ab-chips { flex: none; display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
-.ab-chip {
+.ab-search:focus-visible, .recipe-search:focus-visible { outline: 2px solid var(--ac-accent); outline-offset: -1px; }
+.ab-chips, .recipe-chips { flex: none; display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
+.ab-chip, .recipe-chip {
     font-size: .66rem; font-weight: 700; padding: 3px 9px; cursor: pointer;
     background: var(--ac-panel); color: var(--ac-dim);
     border: 1px solid var(--ac-border); border-radius: 999px;
 }
-.ab-chip:hover { border-color: var(--ac-accent); color: var(--ac-accent); }
-.ab-chip.on { color: var(--ac-accent); border-color: var(--ac-accent); background: var(--ac-wash); }
+.ab-chip:hover, .recipe-chip:hover { border-color: var(--ac-accent); color: var(--ac-accent); }
+.ab-chip.on, .recipe-chip.on { color: var(--ac-accent); border-color: var(--ac-accent); background: var(--ac-wash); }
 .ab-chip.ab-fav { color: var(--hud-gold); }
 .ab-chip.ab-fav.on { color: var(--hud-gold); border-color: var(--hud-gold); background: var(--hud-gold-wash); }
-.ab-chip.ab-usable.on { color: var(--ac-ok); border-color: rgba(76, 187, 23, .5); background: var(--ac-ok-wash); }
+.ab-chip.ab-usable.on,
+.recipe-chip.avail.on { color: var(--ac-ok); border-color: rgba(76, 187, 23, .5); background: var(--ac-ok-wash); }
 .ab-scroll { flex: 1; min-height: 0; overflow-y: auto; }
 .ab-list { list-style: none; margin: 0; padding: 0; }
 .ab-row {
@@ -942,26 +945,73 @@ body.connect-page #content { padding: .5rem !important; }
 .prof-hint { border-top: 1px solid var(--ac-border); margin-top: 8px; font-family: monospace; }
 
 /* Recipe browser (Char.Recipes) inside a profession row. */
-.recipe-list { margin-top: 4px; padding-left: 14px; }
+.recipe-controls { margin: 4px 0 6px; padding-left: 14px; }
+.recipe-list { margin-top: 2px; padding-left: 14px; }
+
+/* Category = a collapsible section header (a thematic break, not a lost
+   all-caps line): a full-width disclosure with a caret, name, and a count. */
 .recipe-cat {
-    font-size: .68rem; font-weight: 700; text-transform: uppercase;
-    letter-spacing: .06em; color: var(--ac-dim); padding: 6px 0 2px;
+    display: flex; align-items: center; gap: 6px; width: 100%;
+    margin: 8px 0 2px; padding: 4px 2px 5px; cursor: pointer; text-align: left;
+    background: none; border: 0; border-bottom: 1px solid var(--ac-border);
+    color: var(--ac-text);
 }
+.recipe-cat-caret { flex: none; width: .9rem; color: var(--ac-dim); font-size: .72rem; }
+.recipe-cat-name {
+    flex: 1; min-width: 0; font-size: .68rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .07em; color: var(--ac-accent-2);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.recipe-cat-count {
+    flex: none; font-size: .62rem; font-weight: 700; color: var(--ac-dim);
+    background: var(--ac-bg); border-radius: 999px; padding: 0 6px;
+    font-variant-numeric: tabular-nums;
+}
+.recipe-cat:hover .recipe-cat-name { color: var(--ac-accent); }
+.recipe-cat.collapsed { border-bottom-color: transparent; }
+
 .recipe-row { display: flex; align-items: center; gap: 6px; padding: 3px 0; }
-/* The name is the component-details disclosure — the TOUCH path to "what am
-   I missing?" (the hover title is desktop convenience only). */
+/* The name is the component / batch-craft disclosure — the TOUCH path to
+   "what am I missing?" and the queue (the hover title is desktop convenience). */
 .recipe-toggle {
     flex: 1; min-width: 0; display: block; text-align: left;
     background: none; border: 0; padding: 0; cursor: pointer;
 }
 .recipe-name { font-size: .82rem; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Rank: a bare tier-colored number (no "r" prefix). */
 .recipe-rank { flex: none; font-variant-numeric: tabular-nums; }
-.recipe-ok { flex: none; color: var(--ac-ok); }
+/* Craftable count: visually distinct from the rank — a washed pill, green
+   when ready (×N / ✓), red "Missing" when short. */
+.recipe-avail { flex: none; font-weight: 700; font-variant-numeric: tabular-nums; }
+.recipe-avail.ok { color: var(--ac-ok); background: var(--ac-ok-wash); }
+.recipe-avail.missing { color: var(--ac-danger); background: var(--ac-danger-wash); }
+
 .recipe-comps { padding: 2px 0 6px 10px; border-left: 2px solid var(--ac-border); margin-left: 2px; }
 .recipe-comp { font-size: .74rem; padding: 1px 0; font-variant-numeric: tabular-nums; }
 .recipe-comp.ok { color: var(--ac-ok); }
 .recipe-comp.missing { color: var(--ac-danger); }
 .recipe-comp.loc { color: var(--ac-dim); }
+
+/* Batch-craft queue (targetless recipes): stepper + editable count + Max +
+   Craft ×N. Mirrors the game's `<verb> <recipe> <count>` chain (cap 99). */
+.recipe-queue {
+    display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
+    margin: 2px 0 6px 10px; padding: 6px 8px;
+    background: var(--ac-elev); border: 1px solid var(--ac-border);
+    border-radius: var(--ac-radius-sm);
+}
+.recipe-queue-label { font-size: .72rem; color: var(--ac-dim); }
+.recipe-qty-btn { min-width: 26px; text-align: center; font-weight: 700; padding: 3px 6px; }
+.recipe-qty-num {
+    width: 3ch; text-align: center; font-size: 16px; padding: 3px 4px;
+    font-variant-numeric: tabular-nums;
+    background: var(--ac-bg); color: var(--ac-text);
+    border: 1px solid var(--ac-border); border-radius: var(--ac-radius-sm);
+}
+.recipe-qty-num:focus-visible { outline: 2px solid var(--ac-accent); outline-offset: -1px; }
+.recipe-queue-craft { margin-left: auto; font-weight: 700; color: var(--ac-accent); border-color: var(--ac-border-2); }
+.recipe-queue-craft.off { opacity: .45; }
+
 .prof-btn.off { opacity: .45; }
 
 /* Profession difficulty buckets (docs/gmcp_feeds.md) — the same palette the
@@ -976,6 +1026,9 @@ body.connect-page #content { padding: .5rem !important; }
 /* Tablets show the micro-menu with a coarse pointer — bump its launchers too. */
 @media (pointer: coarse) {
     .prof-btn { min-height: 40px; padding: 6px 12px; }
+    .recipe-chip { min-height: 34px; }
+    .recipe-cat { min-height: 42px; }
+    .recipe-qty-btn { min-width: 40px; }
     .micro-btn { width: 42px; height: 42px; }
 }
 
@@ -1168,7 +1221,8 @@ body.connect-page #content { padding: .5rem !important; }
 .panel-h-toggle:focus-visible, .row-more:focus-visible, .menu-item:focus-visible,
 .ab-chip:focus-visible, .ab-star:focus-visible, .panel-h-btn:focus-visible,
 .aff-release:focus-visible, .occ-row:focus-visible, .sub-h.collapse:focus-visible,
-.micro-btn:focus-visible, .prof-btn:focus-visible {
+.micro-btn:focus-visible, .prof-btn:focus-visible, .prof-head:focus-visible,
+.recipe-toggle:focus-visible, .recipe-cat:focus-visible, .recipe-chip:focus-visible {
     outline: 2px solid var(--ac-accent); outline-offset: 2px;
 }
 
