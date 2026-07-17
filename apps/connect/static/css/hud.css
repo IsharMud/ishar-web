@@ -28,6 +28,22 @@
     --hud-hostile: var(--ac-danger);
     --hud-friendly: var(--ac-ok);
     --hud-dock-h: 3.5rem;
+    /* Map terrain fills (hud-map.js reads these once via getComputedStyle —
+       canvas needs literals). Muted and desaturated on purpose: the map is
+       background; amber (current room / path) is the only thing that pops.
+       Forest/Mountain Path reuse forest/hill. Documented in tokens.md. */
+    --hud-ter-indoor: #26262c;
+    --hud-ter-city: #33333b;
+    --hud-ter-field: #2b3a28;
+    --hud-ter-forest: #243626;
+    --hud-ter-hill: #38332a;
+    --hud-ter-mountain: #3c3c40;
+    --hud-ter-water: #24384d;
+    --hud-ter-deep: #1d2e42;
+    --hud-ter-under: #1a2a3c;
+    --hud-ter-desert: #40382a;
+    --hud-ter-beach: #3d3a2e;
+    --hud-ter-swamp: #2c3626;
 }
 
 /* ----- Page chrome: compact the shell so the session gets the screen ----- */
@@ -367,10 +383,31 @@ body.connect-page #content { padding: .5rem !important; }
 .setting-suffix { color: var(--ac-dim); }
 
 /* ----- Compass rose (bottom-left desktop) ----- */
-.rose-head { display: flex; flex-direction: column; padding: 6px 8px 2px; line-height: 1.2; }
+.rose-head { display: flex; align-items: flex-start; gap: 6px; padding: 6px 8px 2px; line-height: 1.2; }
+.rose-titles { display: flex; flex-direction: column; min-width: 0; flex: 1 1 auto; }
 .rose-name { font-size: .74rem; font-weight: 700; color: var(--ac-accent); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rose-area { font-size: .68rem; }
 .rose-body { padding: 2px 8px 8px; }
+/* Rose | Map micro-tabs in the pinned Room panel header. */
+.rose-tabs { display: flex; gap: 2px; flex: 0 0 auto; }
+.rose-tabs button {
+    border: 1px solid var(--ac-border); background: var(--ac-bg); color: var(--ac-dim);
+    border-radius: 3px; font-size: .64rem; font-weight: 700; padding: 2px 6px;
+    cursor: pointer; line-height: 1.4;
+}
+.rose-tabs button:hover { border-color: var(--ac-accent); color: var(--ac-text); }
+.rose-tabs button.active { background: var(--ac-elev); color: var(--ac-accent); border-color: var(--ac-border-2); }
+.rose-tabs button:focus-visible { outline: 2px solid var(--ac-accent); outline-offset: 1px; }
+
+/* ----- Minimap (Map tab of the Room panel) ----- */
+.map-mini { position: relative; height: 178px; }
+.map-mini .map-canvas { display: block; width: 100%; height: 100%; border-radius: 3px; background: var(--ac-bg); }
+.map-mini.unseen .map-canvas { opacity: .35; }
+.map-hint {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    color: var(--ac-dim); font-size: .7rem; pointer-events: none;
+}
+.map-hint[hidden] { display: none; }
 .compass {
     display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px;
     max-width: 170px; margin: 0 auto;

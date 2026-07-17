@@ -16,6 +16,7 @@
         <script src="{% static 'js/addon-serialize.min.js' %}"></script>
         <script src="{% static 'js/addon-search.min.js' %}"></script>
         <script src="{% static 'js/hud.js' %}"></script>
+        <script src="{% static 'js/hud-map.js' %}"></script>
         <style>
             /* Graceful degradation: served inline with the HTML, so even if
                hud.css / hud.js fail to load (e.g. static not collected) the
@@ -185,6 +186,9 @@
             </nav>
         </div>
         <form id="command-form" autocomplete="off">
+            {# The CSRF cookie is HttpOnly site-wide, so the map's POSTs read #}
+            {# the token from this form field instead of document.cookie. #}
+            {% csrf_token %}
             <!-- Recent-commands popover for touch screens (Arrow keys have no
                thumb equivalent). The button is revealed by JS on coarse
                pointers so the no-assets fallback stays a clean terminal. -->
@@ -973,6 +977,22 @@
                     return e ? JSON.parse(e.textContent) : {};
                 } catch (x) { return {}; }
             })()
+        });
+    }
+    // The map module rides the same page: account gate, reversed endpoint
+    // URLs (the /0/ is a placeholder the client swaps for the real
+    // vnum/zone), and the CSRF token from the form field above (the cookie
+    // is HttpOnly).
+    if (window.IsharMap) {
+        window.IsharMap.init({
+            authenticated: {{ user.is_authenticated|yesno:"true,false" }},
+            csrf: (document.querySelector("#command-form [name=csrfmiddlewaretoken]") || {}).value || "",
+            urls: {
+                graph: "{% url 'map_graph' vnum=0 %}",
+                state: "{% url 'map_state' zone_id=0 %}",
+                discover: "{% url 'map_discover' %}",
+                note: "{% url 'map_note' %}"
+            }
         });
     }
 
