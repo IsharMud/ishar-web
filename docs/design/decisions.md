@@ -979,3 +979,47 @@ Condition detail now lives in the `title`/Examine rather than on-screen text —
 an accepted trade for the tiny known audience, consistent with the game's own
 condition-colour language. Verify with `/connect?demo=1` (the demo feed now
 carries duplicate rows and a multi-item pack to exercise stacking + expand).
+
+---
+
+## 2026-07-17 — HUD hunger/thirst indicators ride the HP and MV bars
+
+**Decision.** Hunger and thirst surface as a **small state-tinted icon at the
+end of the HP bar (food, Bootstrap Icons `apple`) and the MV bar (thirst,
+`droplet-fill`)** — not a new stacked row, not a word. The tint is the only
+signal that changes: **dim/muted** while the reserve is healthy, **amber**
+(`--hud-edge`) once it runs low, **red** (`--ac-danger`, with a
+reduced-motion-gated pulse) when the game would warn you're "very
+hungry/thirsty". The exact percentage + word live in the `title`/`aria-label`.
+
+**Why the HP and MV bars specifically.** In the game hunger/thirst is
+**pool-based, not a DikuMUD 0–24 counter**: eating refills the **HP-regen
+pool**, drinking the **move-regen pool**, and `score`'s hunger/thirst warnings
+read exactly those two pools (`get_pool(pc,HITP)` vs `PHPT`,
+`get_pool(pc,MOVP)` vs `PMPT`; `MAX_POOL = PERM_PTS*3`). So food *is* the HP
+bar's reserve and water *is* the MV bar's — pinning the icon to that bar is
+mechanically true, not decorative. The state thresholds mirror `score`: `≤16%`
+of the pool (game's `<PHPT/2`) is crit, `≤33%` (`<=PHPT`) is low.
+
+**Data.** Two new optional `Char.Vitals` fields, `food` and `water`
+(0–100 percent of the max reserve), added game-side (ishar-mud#1824). The game
+**omits them when hunger/thirst doesn't apply** (immortals / any "unlimited"
+reserve), so the indicator is simply absent rather than pinned full. They ride
+the per-prompt vitals because the reserves drain continuously as you regen; the
+client folds them into the existing `updateVitals` hot path (in-place
+`data-state`/`title` swaps, no extra re-render) with presence tracked in
+`vitalsShape`.
+
+**Convention set: client-side Bootstrap Icons via `biSvg()`.** The HUD chrome
+already uses Bootstrap Icons through `{% bi %}` server-side; the vitals are
+client-rendered, so a small `biSvg(name, cls)` helper (mirroring the
+game-icons `iconSvg()`) now builds `<use>` refs into the self-hosted
+`bootstrap-icons.svg` sprite, fed a `biUrl` init option. Game-icons stays the
+language for skills/abilities; Bootstrap Icons for HUD status chrome — no new
+dependency, no sprite surgery. Reach for `biSvg()` for future HUD status glyphs
+rather than adding one-off symbols to the game-icons subset.
+
+**Notes.** Discipline unchanged: `el()`/`textContent` only, every colour from a
+token, motion gated behind `prefers-reduced-motion`, and the icon sits inside
+the existing bar's row (no new tap target). Verify with `/connect?demo=1`
+(the demo feed now carries `food`/`water` so both a low and a crit state show).

@@ -379,6 +379,10 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
   (denser cousins of `.ac-panel` / `.ac-panel__h`).
 - **`.vbar` / `.mini`** — labeled vitals bars (HP/MP/MV/Foe/XP/MM/Edge) and
   the tiny group-member triple.
+- **`.vbar-reserve`** — the hunger (`.food`, apple) / thirst (`.water`, droplet)
+  icon riding the end of the HP and MV bars; `data-state` `ok`/`low`/`crit`
+  tints it dim → `--hud-edge` → `--ac-danger`. Built client-side via `biSvg()`
+  from `Char.Vitals.food`/`water` (see decisions.md 2026-07-17).
 - **`.hud-btn`(`--icon`)** — the topbar button, aligned with `.ac-btn`.
 - **`#hud-dock button`** — icon-over-label phone tabs; `.unread` renders an
   amber dot (used by Chat).

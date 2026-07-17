@@ -62,6 +62,7 @@
     var barLocked = localStorage.getItem("ishar.barUnlocked") !== "1";
     var pickedSlot = null;                     // tap-to-swap source (edit mode)
     var spriteUrl = "";                        // game-icons sprite URL (set in init)
+    var biUrl = "";                            // Bootstrap Icons sprite URL (set in init)
     var collapsed = loadSet("ishar.collapsed");
     // Which containers the player has expanded to view. Packs start COLLAPSED
     // (default absent = closed): a carried bag shouldn't spill its whole
@@ -375,6 +376,24 @@
         return svg;
     }
 
+    // Build an <svg><use> referencing the self-hosted Bootstrap Icons sprite
+    // (the same sprite the page chrome uses via {% bi %}). `name` is a fixed
+    // vocabulary from this file, but sanitize anyway so a stray value can't
+    // smuggle markup into the href. The symbol carries its own 0 0 16 16
+    // viewBox, so — like {% bi %} — the wrapper sets none.
+    function biSvg(name, cls) {
+        name = String(name || "").replace(/[^a-z0-9-]/g, "");
+        var svg = document.createElementNS(SVGNS, "svg");
+        svg.setAttribute("class", cls || "bi");
+        svg.setAttribute("aria-hidden", "true");
+        var use = document.createElementNS(SVGNS, "use");
+        var href = biUrl + "#" + name;
+        use.setAttributeNS(XLINKNS, "xlink:href", href);
+        use.setAttribute("href", href);
+        svg.appendChild(use);
+        return svg;
+    }
+
     // DOM builder — the ONLY way data-derived nodes are created here. Values
     // reach the DOM as text/attributes, never parsed as markup.
     function el(tag, attrs, kids) {
@@ -586,13 +605,51 @@
     function vitalsShape(v) {
         return (v && v.opponent_hp_pct != null ? "t" : "")
             + (v && v.metamagic != null ? "m" : "")
-            + (v && v.edge != null ? "e" : "");
+            + (v && v.edge != null ? "e" : "")
+            + (v && v.food != null ? "f" : "")
+            + (v && v.water != null ? "w" : "");
     }
+
+    // Hunger / thirst reserves ride the HP and MV bars (food fuels HP regen,
+    // water fuels move regen — eating/drinking refill those pools). `food` and
+    // `water` are a 0-100 percentage of the max reserve; the game omits them
+    // when hunger/thirst doesn't apply (immortals), so the indicator is absent.
+    // The state thresholds mirror the game's `score` warnings: <= PHPT/2 of the
+    // pool (≈16%) is "very hungry/thirsty", <= PHPT (≈33%) is "getting…".
+    function reserveState(pct) {
+        if (pct == null) return "ok";
+        if (pct <= 16) return "crit";
+        if (pct <= 33) return "low";
+        return "ok";
+    }
+    function reserveTitle(kind, pct) {
+        var food = kind === "food";
+        var word = pct == null ? "" : (pct <= 16 ? (food ? "very hungry" : "very thirsty")
+            : pct <= 33 ? (food ? "getting hungry" : "getting thirsty")
+            : (food ? "well fed" : "hydrated"));
+        return (food ? "Food" : "Water") + " reserve: " + (pct == null ? "—" : pct + "%")
+            + (word ? " — " + word : "");
+    }
+    // A small state-tinted icon appended to the HP (food) / MV (water) bar.
+    function reserveEl(kind, pct) {
+        return el("span", {
+            class: "vbar-reserve " + kind,
+            "data-state": reserveState(pct),
+            title: reserveTitle(kind, pct),
+            "aria-label": reserveTitle(kind, pct),
+            role: "img"
+        }, [biSvg(kind === "food" ? "apple" : "droplet-fill", "bi vbar-reserve-icon")]);
+    }
+
     function cacheVitalsRefs() {
-        vitalsCache = { shape: vitalsShape(S.vitals), bars: {} };
+        vitalsCache = { shape: vitalsShape(S.vitals), bars: {}, reserves: {} };
         ["hp", "mp", "mv", "tgt", "mm", "edge"].forEach(function (cls) {
             var e = dom.vitals.querySelector(".vbar." + cls);
             if (e) vitalsCache.bars[cls] = { fill: e.querySelector(".vbar-fill"), text: e.querySelector(".vbar-text") };
+        });
+        ["food", "water"].forEach(function (k) {
+            var e = dom.vitals.querySelector(".vbar-reserve." + k);
+            if (e) vitalsCache.reserves[k] = e;
         });
     }
     function updateVitals() {
@@ -615,6 +672,16 @@
         }
         upd("mm", v && v.metamagic != null ? v.metamagic : null, v ? v.metamagic_max : 0);
         upd("edge", v && v.edge != null ? v.edge : null, v ? v.edge_max : 0);
+        updReserve("food", v && v.food != null ? v.food : null);
+        updReserve("water", v && v.water != null ? v.water : null);
+    }
+    function updReserve(kind, pct) {
+        var n = vitalsCache.reserves[kind];
+        if (!n || pct == null) return;
+        n.setAttribute("data-state", reserveState(pct));
+        var t = reserveTitle(kind, pct);
+        n.setAttribute("title", t);
+        n.setAttribute("aria-label", t);
     }
     function vbar(label, cur, max, cls) {
         var has = cur !== null && cur !== undefined;
@@ -632,9 +699,15 @@
         var sub = st ? ("L" + st.level + " " + st.race + " " + st["class"])
                      : (S.connected ? "awaiting character data" : "not connected");
 
-        var barKids = [vbar("HP", v ? v.hp : null, v ? v.maxhp : 0, "hp"),
+        var hpBar = vbar("HP", v ? v.hp : null, v ? v.maxhp : 0, "hp");
+        var mvBar = vbar("MV", v ? v.move : null, v ? v.maxmove : 0, "mv");
+        // Food rides the HP bar, water the MV bar — that's the pool each one
+        // refills. Present only when the game sends them (mortals with hunger).
+        if (v && v.food != null) hpBar.appendChild(reserveEl("food", v.food));
+        if (v && v.water != null) mvBar.appendChild(reserveEl("water", v.water));
+        var barKids = [hpBar,
                        vbar("MP", v ? v.mp : null, v ? v.maxmp : 0, "mp"),
-                       vbar("MV", v ? v.move : null, v ? v.maxmove : 0, "mv")];
+                       mvBar];
         if (v && v.opponent_hp_pct != null) {
             barKids.push(el("div", { class: "vbar tgt" }, [
                 el("span", { class: "vbar-label", text: "Foe" }),
@@ -2460,6 +2533,7 @@
         if (opts.onComm) api.onComm = opts.onComm;
         if (opts.onVitals) api.onVitals = opts.onVitals;
         if (opts.spriteUrl) spriteUrl = String(opts.spriteUrl);
+        if (opts.biUrl) biUrl = String(opts.biUrl);
         if (opts.skillIcons && typeof opts.skillIcons === "object") curatedIcons = opts.skillIcons;
 
         dom.app = document.getElementById("connect-app");
@@ -2584,7 +2658,7 @@
 
         var feeds = {
             "Char.Status": { name: "Aelwyn", "class": "Magician", race: "Elf", position: "Standing", level: 45, align: 350, xp: 1250000, tnl: 48000, gold: 18230, bank: 500000, remort: 3 },
-            "Char.Vitals": { hp: 412, maxhp: 480, mp: 130, maxmp: 300, move: 198, maxmove: 240, position: "Standing", opponent_hp_pct: 35, metamagic: 60, metamagic_max: 100, metamagic_regen: 5 },
+            "Char.Vitals": { hp: 412, maxhp: 480, mp: 130, maxmp: 300, move: 198, maxmove: 240, position: "Standing", opponent_hp_pct: 35, metamagic: 60, metamagic_max: 100, metamagic_regen: 5, food: 27, water: 9 },
             "Game.Time": { hour: 21, hour12: 9, ampm: "pm", day: 14, day_name: "Sunday", month: 6, month_name: "the Long Shadows", year: 1247, night: true, season_id: 15, season_end: 0, events: [{ name: "Double Essence", seconds: 5400 }, { name: "Festival of Flames" }], moons: [{ name: "Shavar", phase: 4, phase_name: "full", up: true }, { name: "Chenchir", phase: 6, phase_name: "last quarter", up: true }] },
             "Room.Info": { num: 3001, name: "The Grand Concourse", area: "Ishar Nexus", environment: "City", exits: { n: 3002, e: 3005, s: 3008, w: 3010, u: 3100, d: 3200, into: 3500 } },
             "Room.Occupants": { occupants: [
