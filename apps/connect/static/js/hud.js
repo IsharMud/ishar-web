@@ -45,6 +45,7 @@
         equipment: [], inventory: null, train: null,
         affects: null, group: null, who: null, occupants: [],
         skills: [], cooldownExpiry: {}, cooldownTotal: {}, usable: {},
+        professions: [], recipes: [], craft: null,
         chat: [], connected: false,
         // Default targets (from Room.Occupants) that make the hotbar
         // target-aware: offensive spells → hostile, defensive → beneficial.
@@ -97,14 +98,37 @@
     // the movement (rose) and interaction (occupants) surfaces are together at
     // the bottom, nearest the input.
     var PANELS = ["equipment", "inventory", "train", "group", "occupants", "room",
-                  "status", "abilities", "chat", "who"];
+                  "status", "abilities", "chat", "who", "professions"];
     var PANEL_HOME = {
         occupants: "hud-left-scroll", equipment: "hud-left-scroll",
         inventory: "hud-left-scroll", train: "hud-left-scroll",
         group: "hud-left-scroll",
         room: "hud-left",
-        status: "hud-right", abilities: "hud-right", chat: "hud-right", who: "hud-right"
+        status: "hud-right", abilities: "hud-right", chat: "hud-right", who: "hud-right",
+        professions: "hud-overlay-body"
     };
+
+    // ------------------------------------------------------------------
+    // Overlay apps — the micro-menu registry, THE single point of extension
+    // for transient HUD surfaces (docs/design/decisions.md 2026-07-17: the
+    // HUD extension model). Each entry needs: a [data-overlay=key] button in
+    // #hud-micro, a [data-panel=key] dock button, a #panel-<key> node inside
+    // #hud-overlay-body, and PANELS/PANEL_HOME entries. Desktop opens the
+    // #hud-overlay window; phones open the same panel in the bottom sheet.
+    // Hotkeys are Ctrl+<letter>, strict single-modifier.
+    // ------------------------------------------------------------------
+    // Reserved hotkey letters (never register these): "l" (Ctrl+L clears the
+    // terminal — bound in connect.html and would be silently shadowed since
+    // this handler runs first). Ctrl+<letter> may shadow a browser default
+    // (Ctrl+P = print) — deliberate, and only while the app is available.
+    var OVERLAYS = [
+        { key: "professions", title: "Professions", hotkey: "p",
+          render: function () { renderProfessions(); },
+          // The activity bar must stay reachable even in the (theoretical)
+          // no-professions-but-harvesting state.
+          available: function () { return (S.professions || []).length > 0 || !!S.craft; } }
+    ];
+    var overlayName = null;   // open overlay app key (desktop), or null
 
     // Position capability ranking (index = capability), from the game's
     // posn_names[] (constants.c). Higher rank = more capable; a skill whose
@@ -534,13 +558,23 @@
             case "Game.Time": S.time = data; renderVitals(); break;
             case "Room.Info": S.room = data; renderRoom(); break;
             case "Room.Occupants": applyOccupants(data); break;
-            case "Char.Equipment": S.equipment = (data && data.items) || []; renderEquipment(); renderInventory(); break;
-            case "Char.Inventory": S.inventory = data; renderInventory(); renderEquipment(); break;
+            case "Char.Equipment":
+                S.equipment = (data && data.items) || []; renderEquipment(); renderInventory();
+                // Craftable-now marks join against carried items.
+                if (overlayVisible("professions")) renderProfessions();
+                break;
+            case "Char.Inventory":
+                S.inventory = data; renderInventory(); renderEquipment();
+                if (overlayVisible("professions")) renderProfessions();
+                break;
             case "Char.Train": S.train = data; renderTrain(); break;
             case "Char.Affects": S.affects = data; stampAffectExpiry(data); renderStatus(); break;
             case "Group.Update": S.group = data; renderGroup(); break;
             case "Char.Who": S.who = data; renderWho(); break;
             case "Char.Skills": S.skills = (data && data.skills) || []; renderHotbar(); renderAbilities(); break;
+            case "Char.Professions": applyProfessions(data); break;
+            case "Char.Recipes": S.recipes = (data && data.recipes) || []; renderProfessions(); break;
+            case "Char.Craft": applyCraft(data); break;
             case "Char.Cooldowns":
                 applyCooldowns(data); tickHotbar();
                 // The Abilities browser can be ~400 rows; only rebuild it for a
@@ -1062,7 +1096,8 @@
             "data-name": stripColor(it.name || ""),
             "data-container": container || "",
             "data-closeable": it.closeable ? "1" : "",
-            "data-closed": it.closed ? "1" : ""
+            "data-closed": it.closed ? "1" : "",
+            "data-disen": (Number(it.disenchant_rank) > 0) ? String(it.disenchant_rank) : ""
         };
     }
     // One inventory/equipment row. Everything stays on a single line: an
@@ -1868,7 +1903,36 @@
     // comes fully alive when the HUD runs installed/fullscreen (no tab strip).
     function wireHotkeys() {
         document.addEventListener("keydown", function (e) {
-            if (!hudOn || !S.connected) return;
+            // Overlay keys are gated on the HUD only, not the connection —
+            // browsing a reference window while the link is down is fine.
+            if (!hudOn) return;
+            // Esc closes the open overlay window before anything else claims
+            // it. This listener registers before the page's Esc handler
+            // (IsharHUD.init runs first in connect.html), so stop the event
+            // here or the same press would also close the page's search /
+            // settings / history popovers behind the overlay.
+            if (e.key === "Escape" && overlayName && !mqMobile.matches) {
+                e.stopImmediatePropagation();
+                setOverlay(null);
+                return;
+            }
+            // Overlay hotkeys: Ctrl+<letter> toggles a micro-menu app (e.g.
+            // Ctrl+P → Professions). Strict single-modifier, and swallowed
+            // only when the app is actually available, so browser defaults
+            // survive everywhere else.
+            var ctrlOnly = e.ctrlKey && !e.altKey && !e.metaKey && !e.shiftKey;
+            if (ctrlOnly && /^[a-z]$/.test(String(e.key || "").toLowerCase())) {
+                var letter = String(e.key).toLowerCase();
+                for (var oi = 0; oi < OVERLAYS.length; oi++) {
+                    var ov = OVERLAYS[oi];
+                    if (ov.hotkey === letter && (!ov.available || ov.available())) {
+                        e.preventDefault();
+                        toggleOverlay(ov.key);
+                        return;
+                    }
+                }
+            }
+            if (!S.connected) return;
             if (e.key === "`" && e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
                 if (usedPages() > 1) { e.preventDefault(); flipHotbarPage(); }
                 return;
@@ -2004,6 +2068,403 @@
     }
 
     // ------------------------------------------------------------------
+    // Overlay apps: micro-menu buttons → #hud-overlay window (desktop) or
+    // the bottom sheet (phones). One overlay at a time; Esc, outside-click,
+    // the ✕, the hotkey, or the button all dismiss. Registry: OVERLAYS.
+    // ------------------------------------------------------------------
+    function overlayByKey(key) {
+        for (var i = 0; i < OVERLAYS.length; i++) {
+            if (OVERLAYS[i].key === key) return OVERLAYS[i];
+        }
+        return null;
+    }
+    function setOverlay(name) {
+        var prev = overlayName;
+        var hadFocus = dom.overlay && dom.overlay.contains(document.activeElement);
+        var ov = name ? overlayByKey(name) : null;
+        overlayName = ov ? ov.key : null;
+        OVERLAYS.forEach(function (o) {
+            var p = document.getElementById("panel-" + o.key);
+            if (p) p.classList.toggle("overlay-active", o.key === overlayName);
+            var b = dom.micro && dom.micro.querySelector('button[data-overlay="' + o.key + '"]');
+            if (b) b.setAttribute("aria-pressed", o.key === overlayName ? "true" : "false");
+        });
+        if (dom.overlay) dom.overlay.hidden = !ov;
+        if (dom.overlayTitle) dom.overlayTitle.textContent = ov ? ov.title : "";
+        if (ov) {
+            ov.render();
+            markOverlayUnread(ov.key, false);
+            // Dialog semantics: move focus into the window (tabindex="-1") so
+            // keyboard/SR users land where the content is, not behind it.
+            if (dom.overlay && dom.overlay.focus) dom.overlay.focus();
+        } else if (prev && hadFocus) {
+            // Closing with focus inside: hand it back to the launcher.
+            var lb = dom.micro && dom.micro.querySelector('button[data-overlay="' + prev + '"]');
+            if (lb && !lb.hidden) lb.focus();
+        }
+    }
+    function toggleOverlay(key) {
+        if (mqMobile.matches) { setSheet(sheetName === key ? null : key); return; }
+        setOverlay(overlayName === key ? null : key);
+    }
+    function overlayVisible(key) {
+        if (!hudOn) return false;
+        return mqMobile.matches ? sheetName === key : overlayName === key;
+    }
+    // Dot badge on the app's launchers (micro button + dock button): the feed
+    // changed while its window was closed. Same idiom as the chat unread dot.
+    function markOverlayUnread(key, on) {
+        ['#hud-micro button[data-overlay="' + key + '"]',
+         '#hud-dock button[data-panel="' + key + '"]'].forEach(function (sel) {
+            var b = document.querySelector(sel);
+            if (b) b.classList.toggle("unread", !!on);
+        });
+    }
+    // Availability gate: an app with nothing to show hides its launchers
+    // entirely (a character with no professions never sees the button).
+    function updateMicro() {
+        OVERLAYS.forEach(function (o) {
+            var avail = !o.available || o.available();
+            var b = dom.micro && dom.micro.querySelector('button[data-overlay="' + o.key + '"]');
+            if (b) b.hidden = !avail;
+            var d = dom.dock && dom.dock.querySelector('button[data-panel="' + o.key + '"]');
+            if (d) d.hidden = !avail;
+            if (!avail) {
+                if (overlayName === o.key) setOverlay(null);
+                if (sheetName === o.key) setSheet(null);
+                markOverlayUnread(o.key, false);
+            }
+        });
+    }
+
+    // ------------------------------------------------------------------
+    // Professions (Char.Professions + Char.Craft) — the first overlay app.
+    // Standing rows (rank/tier/recipes) plus a live craft/harvest cast bar.
+    // ------------------------------------------------------------------
+    var lastProfessionsBody = null;
+    function applyProfessions(data) {
+        var list = (data && data.professions) || [];
+        var body = "";
+        try { body = JSON.stringify(list); } catch (e) {}
+        // Badge only on a *change* after the first snapshot — the login burst
+        // shouldn't light the dot.
+        var changed = lastProfessionsBody !== null && body !== lastProfessionsBody;
+        lastProfessionsBody = body;
+        S.professions = list;
+        updateMicro();
+        renderProfessions();
+        if (changed && !overlayVisible("professions")) markOverlayUnread("professions", true);
+    }
+    function applyCraft(data) {
+        if (data && data.active) {
+            S.craft = {
+                kind: data.kind === "harvest" ? "harvest" : "craft",
+                name: String(data.name || ""),
+                quantity: Number(data.quantity) || 1,
+                chain: Number(data.chain_remaining) || 0,
+                // Like cooldowns: store the expiry and tick locally between feeds.
+                expiry: now() + (Number(data.remaining) || 0),
+                total: Math.max(1, Number(data.duration) || Number(data.remaining) || 1)
+            };
+        } else {
+            S.craft = null;
+        }
+        updateMicro();   // craft state feeds the availability gate too
+        renderProfessions();
+        tickCraft();
+    }
+    // Per-second updates that must not rebuild the panel: the micro button's
+    // progress strip and the open panel's cast-bar numbers.
+    function tickCraft() {
+        var c = S.craft;
+        var rem = c ? Math.max(0, c.expiry - now()) : 0;
+        var pctW = c ? Math.max(0, Math.min(100, (1 - rem / c.total) * 100)) + "%" : "0%";
+        var b = dom.micro && dom.micro.querySelector('button[data-overlay="professions"]');
+        if (b) {
+            var strip = b.querySelector(".micro-strip");
+            if (strip) { strip.hidden = !c; if (c) strip.style.width = pctW; }
+        }
+        if (c && dom.professions) {
+            var fillBar = dom.professions.querySelector(".craft-fill");
+            if (fillBar) fillBar.style.width = pctW;
+            var t = dom.professions.querySelector(".craft-time");
+            if (t) t.textContent = fmtDur(rem);
+        }
+    }
+    // Command builder: alchemy (and any future non-shortcut profession) routes
+    // through `craft <profession> …`; enchanting/artificing have their own
+    // verbs. `verb` and `name` come from the feed; sendCmd sanitizes.
+    function profCmd(p, sub) {
+        // First word only: the parser prefix-matches profession names, and a
+        // multi-word name would spill its tail into the argument slot.
+        var word = String(p.name || "").toLowerCase().split(/\s+/)[0];
+        var base = (p.verb && p.verb !== "craft") ? p.verb : "craft " + word;
+        return sub ? base + " " + sub : base;
+    }
+    // Shared profession difficulty buckets (docs/gmcp_feeds.md — part of the
+    // GMCP contract; mirrors the game's recipe_skillup_tiers / harvest tiers).
+    // delta = required_rank − your rank.
+    function profTier(delta) {
+        if (delta <= -4) return "trivial";
+        if (delta <= -1) return "easy";
+        if (delta <= 3) return "medium";
+        if (delta <= 5) return "hard";
+        return "blocked";
+    }
+    function professionById(id) {
+        var list = S.professions || [];
+        for (var i = 0; i < list.length; i++) {
+            if (list[i] && list[i].id === id) return list[i];
+        }
+        return null;
+    }
+    // The player's Enchanting standing (identified by its command verb), or
+    // null — gates the disenchant context-menu entry.
+    function enchanterStanding() {
+        var list = S.professions || [];
+        for (var i = 0; i < list.length; i++) {
+            if (list[i] && list[i].verb === "enchant") return list[i];
+        }
+        return null;
+    }
+    // Carried vnum→count map for the craftable-now join: inventory items,
+    // pouch components, open container contents, and worn gear — the same
+    // scope as the game's portable-component check. Entries without a vnum
+    // simply don't count (the game re-validates anyway).
+    function inventoryVnumCounts() {
+        var counts = {};
+        function add(list) {
+            (list || []).forEach(function (it) {
+                if (!it) return;
+                if (it.vnum != null) counts[it.vnum] = (counts[it.vnum] || 0) + (Number(it.count) || 1);
+                if (it.contents && !it.closed) add(it.contents);
+            });
+        }
+        if (S.inventory) { add(S.inventory.items); add(S.inventory.components); }
+        add(S.equipment);
+        return counts;
+    }
+    // Mirror of the game's `available` filter: item + treasure components
+    // must be covered; location components are display-only (the in-game
+    // filter skips them too — "what could I craft if I traveled there").
+    function recipeCraftable(r, counts, treasure) {
+        var comps = (r && r.components) || [];
+        for (var i = 0; i < comps.length; i++) {
+            var comp = comps[i];
+            if (!comp) continue;
+            if (comp.kind === "item") {
+                if ((counts[comp.vnum] || 0) < (Number(comp.count) || 1)) return false;
+            } else if (comp.kind === "treasure") {
+                if (treasure < (Number(comp.amount) || 0)) return false;
+            }
+        }
+        return true;
+    }
+    // One-line component summary for a recipe row's native tooltip.
+    function recipeComponentsText(r) {
+        return ((r && r.components) || []).map(function (comp) {
+            if (!comp) return "";
+            if (comp.kind === "item") return (Number(comp.count) || 1) + "× " + stripColor(comp.name || "component");
+            if (comp.kind === "treasure") return comp.amount + " gold of treasure";
+            if (comp.kind === "location") return "requires " + (comp.label || "a location");
+            return "";
+        }).filter(Boolean).join(" · ");
+    }
+    // Inventory items matching an enchant recipe's gear slot — the same join
+    // the game performs (get_gear_type(item) == recipe->target_gear_type).
+    // Enchant targets resolve from carried items only (the command is FINV).
+    function enchantTargets(r) {
+        var out = [];
+        ((S.inventory && S.inventory.items) || []).forEach(function (it) {
+            if (it && it.gear_type != null && it.gear_type === r.target_gear_type) out.push(it);
+        });
+        return out;
+    }
+    function dismissProfessionsWindow() {
+        // Command output lands in the terminal — get the window out of the
+        // way on every form factor.
+        if (mqMobile.matches) { if (sheetName) setSheet(null); }
+        else if (overlayName) setOverlay(null);
+    }
+    function profBtn(label, fn, cls) {
+        return el("button", { type: "button", class: "prof-btn" + (cls ? " " + cls : ""), text: label, onclick: fn });
+    }
+    // Which professions' recipe lists / recipes' component details are
+    // unfolded (session-local UI state).
+    var profOpen = {};
+    var recipeOpen = {};
+
+    // The tappable component breakdown under a recipe row — the touch path
+    // to "what am I missing?" (the hover title is desktop convenience only).
+    function recipeCompsBlock(r, counts, treasure) {
+        var block = el("div", { class: "recipe-comps" });
+        ((r && r.components) || []).forEach(function (comp) {
+            if (!comp) return;
+            var ok, text;
+            if (comp.kind === "item") {
+                var need = Number(comp.count) || 1;
+                var have = counts[comp.vnum] || 0;
+                ok = have >= need;
+                text = need + "× " + stripColor(comp.name || "component") + " (have " + have + ")";
+            } else if (comp.kind === "treasure") {
+                var amt = Number(comp.amount) || 0;
+                ok = treasure >= amt;
+                text = amt + " gold of treasure (have " + treasure + ")";
+            } else if (comp.kind === "location") {
+                ok = null;   // display-only; never blocks craftable
+                text = "requires " + (comp.label || "a location");
+            } else {
+                return;
+            }
+            block.appendChild(el("div", {
+                class: "recipe-comp" + (ok === true ? " ok" : ok === false ? " missing" : " loc"),
+                text: text
+            }));
+        });
+        if (!block.firstChild) block.appendChild(el("div", { class: "recipe-comp loc", text: "No components required." }));
+        return block;
+    }
+
+    function recipeRow(p, r, counts, treasure) {
+        var rank = Number(p.rank) || 0;
+        var tier = profTier((Number(r.min_rank) || 1) - rank);
+        var craftable = recipeCraftable(r, counts, treasure);
+        var targeted = r.target_gear_type != null;
+        var isOpen = !!recipeOpen[r.id];
+        var actBtn;
+        if (targeted) {
+            var targets = enchantTargets(r);
+            actBtn = profBtn("Enchant…", function (e) {
+                var opener = e && e.target && e.target.closest(".prof-btn");
+                // Second tap on the opener toggles the picker closed.
+                if (menuOpen && menuAnchorEl === opener) { closeMenu(); return; }
+                var acts = targets.map(function (it) {
+                    return {
+                        label: stripColor(it.name || "item"),
+                        fn: function () {
+                            // `enchant <item> <recipe>` (fabricate likewise).
+                            sendCmd(profCmd(p, targetOf(it.keywords || it.name) + " " + nameOf(r.name)));
+                            dismissProfessionsWindow();
+                        }
+                    };
+                });
+                if (!acts.length) acts = [{ label: "No matching item carried", fn: function () {}, keep: true }];
+                openMenu("Enchant · " + stripColor(r.name || ""), acts, opener);
+            }, "menu-opener" + (targets.length ? "" : " off"));   // .menu-opener: exempt from outside-click dismissal
+        } else {
+            actBtn = profBtn("Craft", function () {
+                sendCmd(profCmd(p, nameOf(r.name)));
+                dismissProfessionsWindow();
+            }, craftable ? "" : "off");
+        }
+        var row = el("div", { class: "recipe-row", title: recipeComponentsText(r) || null }, [
+            el("button", {
+                type: "button", class: "recipe-toggle", "data-focus": "r" + r.id,
+                "aria-expanded": isOpen ? "true" : "false",
+                onclick: function () { closeMenu(); recipeOpen[r.id] = !recipeOpen[r.id]; renderProfessions(); }
+            }, [
+                el("span", { class: "recipe-name tier-" + tier, text: stripColor(r.name || "?") })
+            ]),
+            el("span", { class: "tag recipe-rank tier-" + tier, text: "r" + (r.min_rank != null ? r.min_rank : "?") }),
+            craftable ? el("span", { class: "tag recipe-ok", title: "You have the components", text: "✓" }) : null,
+            el("span", { class: "prof-actions" }, [actBtn])
+        ]);
+        var wrap = el("div", { class: "recipe-item" }, [row]);
+        if (isOpen) wrap.appendChild(recipeCompsBlock(r, counts, treasure));
+        return wrap;
+    }
+
+    function renderProfessions() {
+        if (!dom.professions) return;
+        // Wholesale rebuilds run on every inventory delta while the overlay
+        // is open — carry keyboard focus across (a11y: don't dump a keyboard/
+        // switch user to <body> mid-session).
+        var focusKey = null;
+        if (document.activeElement && dom.professions.contains(document.activeElement) &&
+            document.activeElement.getAttribute) {
+            focusKey = document.activeElement.getAttribute("data-focus");
+        }
+        var kids = [];
+        var c = S.craft;
+        if (c) {
+            var rem = Math.max(0, c.expiry - now());
+            var pct = Math.max(0, Math.min(100, (1 - rem / c.total) * 100));
+            var label = (c.kind === "harvest" ? "Harvesting" : "Crafting") + " — " + c.name
+                + (c.quantity > 1 ? " ×" + c.quantity : "")
+                + (c.chain > 0 ? " (+" + c.chain + " queued)" : "");
+            kids.push(el("div", { class: "craft-activity" }, [
+                el("div", { class: "craft-label", text: label }),
+                el("div", { class: "craft-track" }, [
+                    el("div", { class: "craft-fill", style: "width:" + pct + "%" }),
+                    el("span", { class: "craft-time", text: fmtDur(rem) })
+                ])
+            ]));
+        }
+        var profs = S.professions || [];
+        if (!profs.length && !c) {
+            kids.push(el("div", { class: "prof-empty", text: "No professions yet. Seek out a profession master to learn one." }));
+            fill(dom.professions, kids);
+            return;
+        }
+        var counts = inventoryVnumCounts();
+        var treasure = (S.inventory && Number(S.inventory.treasure)) || 0;
+        profs.forEach(function (p) {
+            var rank = Number(p.rank) || 0;
+            var maxRank = Number(p.max_rank) || 0;
+            var pct = maxRank > 0 ? Math.max(0, Math.min(100, (rank / maxRank) * 100)) : 100;
+            var isOpen = !!profOpen[p.id];
+            var recipes = (S.recipes || []).filter(function (r) { return r && r.profession_id === p.id; });
+            recipes.sort(function (a, b) {
+                var ca = String(a.category || ""), cb = String(b.category || "");
+                if (ca !== cb) return ca < cb ? -1 : 1;
+                return (Number(a.min_rank) || 0) - (Number(b.min_rank) || 0);
+            });
+            var row = el("div", { class: "prof-row" }, [
+                el("button", {
+                    type: "button", class: "prof-head", "data-focus": "p" + p.id,
+                    "aria-expanded": isOpen ? "true" : "false",
+                    onclick: function () { closeMenu(); profOpen[p.id] = !profOpen[p.id]; renderProfessions(); }
+                }, [
+                    el("span", { class: "prof-caret", "aria-hidden": "true", text: isOpen ? "▾" : "▸" }),
+                    el("span", { class: "prof-name", text: p.name || "?" }),
+                    p.tier ? el("span", { class: "tag prof-tier", text: p.tier }) : null,
+                    el("span", { class: "prof-rank", text: "Rank " + rank + (maxRank ? "/" + maxRank : "") })
+                ]),
+                el("div", { class: "prof-track", title: maxRank ? rank + " of " + maxRank + " ranks" : "Rank " + rank }, [
+                    el("div", { class: "prof-fill", style: "width:" + pct + "%" })
+                ]),
+                el("div", { class: "prof-foot" }, [
+                    el("span", { class: "prof-recipes", text: "Recipes " + (p.recipes_known != null ? p.recipes_known : "–") + "/" + (p.recipes_total != null ? p.recipes_total : "–") })
+                ])
+            ]);
+            if (isOpen) {
+                var listEl = el("div", { class: "recipe-list" });
+                var lastCat = null;
+                recipes.forEach(function (r) {
+                    var cat = String(r.category || "General");
+                    if (cat !== lastCat) {
+                        listEl.appendChild(el("div", { class: "recipe-cat", text: cat }));
+                        lastCat = cat;
+                    }
+                    listEl.appendChild(recipeRow(p, r, counts, treasure));
+                });
+                if (!recipes.length) {
+                    listEl.appendChild(el("div", { class: "prof-empty", text: "No recipes known yet — trainers and discovery await." }));
+                }
+                row.appendChild(listEl);
+            }
+            kids.push(row);
+        });
+        kids.push(el("div", { class: "prof-hint", text: "profession — overview & trainers · harvest <node> — gather" }));
+        fill(dom.professions, kids);
+        if (focusKey && /^[a-z0-9_-]+$/i.test(focusKey)) {
+            var refocus = dom.professions.querySelector('[data-focus="' + focusKey + '"]');
+            if (refocus) refocus.focus();
+        }
+        tickCraft();
+    }
+
+    // ------------------------------------------------------------------
     // Context / action menu (works with mouse + touch)
     // ------------------------------------------------------------------
     // Single guarded exit for every game command a widget builds — strips
@@ -2012,9 +2473,11 @@
     function sendCmd(c) { c = safeCmd(c); if (c) api.send(c); }
 
     var menuOpen = false;
+    var menuAnchorEl = null;   // the element the open menu was anchored to
     function closeMenu() {
         if (!menuOpen) return;
         menuOpen = false;
+        menuAnchorEl = null;
         dom.menu.hidden = true;
         dom.menu.classList.remove("menu-picker");
         while (dom.menu.firstChild) dom.menu.removeChild(dom.menu.firstChild);
@@ -2061,20 +2524,24 @@
             // handler would fire the command a *second* time. The onclick owns
             // the action outright.
             kids.push(el("button", {
-                type: "button", class: "menu-item" + (a.danger ? " danger" : ""),
+                type: "button",
+                class: "menu-item" + (a.danger ? " danger" : "") + (a.tier ? " tier-" + a.tier : ""),
                 text: a.label,
                 onclick: function () {
                     if (a.fn) a.fn();
                     else if (a.prefill != null) api.prefill(a.prefill);
                     else if (a.cmd) sendCmd(a.cmd);
                     closeMenu();
-                    if (sheetName && mqMobile.matches) setSheet(null);
+                    // `keep`: informational rows shouldn't throw away the
+                    // phone sheet the menu was opened from.
+                    if (!a.keep && sheetName && mqMobile.matches) setSheet(null);
                 }
             }));
         });
         fill(dom.menu, kids);
         dom.menu.hidden = false;
         menuOpen = true;
+        menuAnchorEl = anchor || null;
         positionMenu(anchor);
     }
     function positionMenu(anchor) {
@@ -2199,6 +2666,17 @@
             openContainers().forEach(function (c) {
                 if (c.target !== t) acts.push({ label: "Put in " + c.shortName, cmd: "put " + t + " into " + c.target });
             });
+            // Profession context: enchanters see the disenchant path with the
+            // item's rank requirement, colored by the standard difficulty
+            // buckets (docs/gmcp_feeds.md). The game re-validates the rank.
+            var ench = enchanterStanding();
+            if (ench && ds.disen > 0 && kind !== "content") {
+                acts.push({
+                    label: "Disenchant (r" + ds.disen + ")",
+                    cmd: "disenchant " + t,
+                    tier: profTier(ds.disen - (Number(ench.rank) || 0))
+                });
+            }
             acts.push({ label: "Drop", cmd: "drop " + t });
             acts.push({ label: "Sacrifice", cmd: "sacrifice " + t, danger: true });
         }
@@ -2383,7 +2861,8 @@
             kind: host.getAttribute("data-kind") || "item",
             container: host.getAttribute("data-container") || "",
             closeable: host.getAttribute("data-closeable") === "1",
-            closed: host.getAttribute("data-closed") === "1"
+            closed: host.getAttribute("data-closed") === "1",
+            disen: Number(host.getAttribute("data-disen")) || 0
         };
     }
     // Right-click opens the same menu on desktop.
@@ -2419,6 +2898,7 @@
             if (home && p.parentNode !== home) home.appendChild(p);
         });
         if (!mobile && sheetName) setSheet(null);
+        if (mobile && overlayName) setOverlay(null);
         updateRoseOverlay();
     }
 
@@ -2439,6 +2919,7 @@
         dom.app.classList.toggle("sheet-open", !!name);
         if (name === "chat") { markChatUnread(false); dom.chat.scrollTop = dom.chat.scrollHeight; }
         if (name === "abilities") renderAbilities();   // refresh cooldown/mana greying on open
+        if (overlayByKey(name)) { overlayByKey(name).render(); markOverlayUnread(name, false); }
     }
     function chatVisible() {
         if (!hudOn) return false;
@@ -2477,6 +2958,7 @@
     }
     function setHud(on, persist) {
         hudOn = on;
+        if (!on && overlayName) setOverlay(null);   // no orphaned overlay behind a hidden HUD
         dom.app.classList.toggle("hud-on", on);
         dom.app.classList.toggle("hud-off", !on);
         var btn = document.getElementById("ui-toggle");
@@ -2514,14 +2996,17 @@
     function renderAll() {
         renderVitals(); renderRoom(); renderOccupants(); renderGroup(); renderEquipment(); renderInventory();
         renderTrain(); renderStatus(); renderWho(); renderChat(); renderHotbar(); renderAbilities();
+        renderProfessions(); updateMicro();
     }
     function reset() {
         S.vitals = null; S.status = null; S.time = null; S.room = null;
         S.equipment = []; S.inventory = null; S.train = null;
         S.affects = null; S.group = null; S.who = null; S.occupants = [];
         S.skills = []; S.cooldownExpiry = {}; S.cooldownTotal = {}; S.usable = {};
+        S.professions = []; S.recipes = []; S.craft = null;
         S.tgtHostile = null; S.tgtFriendly = null;
         lastVitalsBody = null;
+        lastProfessionsBody = null;
         renderAll();
     }
 
@@ -2549,6 +3034,10 @@
         dom.chat = document.getElementById("panel-chat");
         dom.who = document.getElementById("panel-who");
         dom.hotbar = document.getElementById("hud-hotbar");
+        dom.micro = document.getElementById("hud-micro");
+        dom.professions = document.getElementById("panel-professions");
+        dom.overlay = document.getElementById("hud-overlay");
+        dom.overlayTitle = document.getElementById("hud-overlay-title");
         dom.dock = document.getElementById("hud-dock");
         dom.sheet = document.getElementById("hud-sheet");
         dom.sheetBody = document.getElementById("hud-sheet-body");
@@ -2588,6 +3077,14 @@
         var sheetClose = document.getElementById("hud-sheet-close");
         if (sheetClose) sheetClose.addEventListener("click", function () { setSheet(null); });
 
+        // Micro-menu: each button toggles its overlay app (sheet on phones).
+        if (dom.micro) dom.micro.addEventListener("click", function (e) {
+            var b = e.target.closest("button[data-overlay]");
+            if (b) toggleOverlay(b.getAttribute("data-overlay"));
+        });
+        var overlayClose = document.getElementById("hud-overlay-close");
+        if (overlayClose) overlayClose.addEventListener("click", function () { setOverlay(null); });
+
         // Mobile rose overlay toggle button.
         var roseBtn = document.getElementById("rose-toggle");
         if (roseBtn) roseBtn.addEventListener("click", function () {
@@ -2597,9 +3094,20 @@
             updateRoseOverlay();
         });
 
-        // Outside tap dismisses the sheet and any open menu.
+        // Outside tap dismisses the sheet, the overlay window and any open menu.
         document.addEventListener("click", function (e) {
-            if (menuOpen && !dom.menu.contains(e.target) && !e.target.closest("[data-menu],.row-more")) closeMenu();
+            // A click that re-renders its own panel (e.g. a recipe-list
+            // disclosure) detaches the target before this listener runs —
+            // contains() would then read "outside" and close the surface the
+            // click was inside. A disconnected target was always handled by
+            // its own onclick; never treat it as an outside click.
+            if (e.target && e.target.isConnected === false) return;
+            if (menuOpen && !dom.menu.contains(e.target) && !e.target.closest("[data-menu],.row-more,.menu-opener")) closeMenu();
+            if (overlayName && !mqMobile.matches && dom.overlay &&
+                !dom.overlay.contains(e.target) && !e.target.closest("#hud-micro") &&
+                !dom.menu.contains(e.target)) {
+                setOverlay(null);
+            }
             if (!sheetName || !mqMobile.matches) return;
             if (dom.sheet.contains(e.target) || dom.dock.contains(e.target)) return;
             if (dom.menu.contains(e.target)) return;
@@ -2628,6 +3136,7 @@
                 e.textContent = fmtDur(parseFloat(e.getAttribute("data-expiry")) - t);
             });
             if (S.skills.length) tickHotbar();
+            if (S.craft) tickCraft();
         }, 1000);
     }
 
@@ -2691,13 +3200,17 @@
                 // Two separate rows for the same scroll — fold to ×2.
                 { name: "a scroll of recall", keywords: "scroll recall", type: "scroll", vnum: 12, count: 1 },
                 { name: "a scroll of recall", keywords: "scroll recall", type: "scroll", vnum: 12 },
+                // Profession context: gear_type joins enchant targeting;
+                // disenchant_rank feeds the enchanter's context-menu entry.
+                { name: "a quilted woolen hood", keywords: "hood woolen quilted", type: "armor", vnum: 20, count: 1, gear_type: 6, disenchant_rank: 9 },
+                { name: "a tarnished silver band", keywords: "band silver tarnished", type: "armor", vnum: 21, count: 1, gear_type: 4, disenchant_rank: 45 },
                 { name: "a leather sack", keywords: "sack leather", type: "container", vnum: 11, count: 1, closeable: true, closed: false, contents: [{ name: "a brass key", keywords: "key brass", count: 1 }] }
             ], coins: [{ name: "gold", vnum: 0, count: 18230 }, { name: "silver", vnum: 0, count: 340 }, { name: "obsidian", vnum: 0, count: 12 }], components: [
-                { name: "a pinch of sulfur", keywords: "sulfur pinch", count: 7 },
-                { name: "a vial of powdered silver", keywords: "silver vial powdered", count: 3 },
-                { name: "a sprig of nightshade", keywords: "nightshade sprig", count: 12 },
-                { name: "a shard of frost quartz", keywords: "quartz frost shard", count: 5 }
-            ] },
+                { name: "a pinch of sulfur", keywords: "sulfur pinch", vnum: 9001, count: 7 },
+                { name: "a vial of powdered silver", keywords: "silver vial powdered", vnum: 9002, count: 3 },
+                { name: "a sprig of nightshade", keywords: "nightshade sprig", vnum: 9003, count: 12 },
+                { name: "a shard of frost quartz", keywords: "quartz frost shard", vnum: 9004, count: 5 }
+            ], treasure: 620 },
             "Char.Affects": { buffs: [{ name: "Stoneskin", id: 101, duration: 1800 }, { name: "Haste", id: 102, duration: 240 }], debuffs: [{ name: "Poison", id: 201, duration: 45 }], maintained: [{ name: "Detect Invisibility", id: 301, duration: 600, target: "self" }, { name: "Shroud", id: 302, duration: 900, target: "Boric", skill: "shroud", handle: "1.boric", releasable: true }] },
             "Group.Update": { leader: "Aelwyn", size: 3, members: [
                 { name: "Aelwyn", level: 45, hp_pct: 86, mp_pct: 85, mv_pct: 82, position: "Standing", race: "Elf", "class": "Magician", leader: true, in_room: true, is_tank: false, fighting_name: "a scarred alley thug", threat: 40, tank_threat: 120, threat_level: "low" },
@@ -2708,7 +3221,26 @@
             ] },
             "Char.Skills": { skills: bigSkills },
             "Char.Cooldowns": { cooldowns: [{ id: 3, remaining: 8 }], usable: { "3": false } },
-            "Char.Train": { stats: [{ name: "Str", value: 18, add: 2 }, { name: "Int", value: 25 }, { name: "Wis", value: 20 }], xp: 1250000, xp_pct: 62, can_advance: true, aux: [{ name: "Crit", value: "12.5% (+2%)" }], resources: [{ name: "Practices", value: 5, max: 10 }, { name: "Trains", value: 2, max: 2 }] }
+            "Char.Train": { stats: [{ name: "Str", value: 18, add: 2 }, { name: "Int", value: 25 }, { name: "Wis", value: 20 }], xp: 1250000, xp_pct: 62, can_advance: true, aux: [{ name: "Crit", value: "12.5% (+2%)" }], resources: [{ name: "Practices", value: 5, max: 10 }, { name: "Trains", value: 2, max: 2 }] },
+            "Char.Professions": { professions: [
+                { id: 1, name: "Alchemy", verb: "craft", rank: 34, max_rank: 99, tier: "Journeyman", recipes_known: 21, recipes_total: 58 },
+                { id: 2, name: "Enchanting", verb: "enchant", rank: 12, max_rank: 99, tier: "Novice", recipes_known: 6, recipes_total: 44 }
+            ] },
+            "Char.Recipes": { recipes: [
+                { id: 101, profession_id: 1, name: "minor healing draught", category: "Draughts", min_rank: 30, duration: 20,
+                  components: [{ kind: "item", vnum: 9001, name: "a pinch of sulfur", count: 2 }, { kind: "item", vnum: 9003, name: "a sprig of nightshade", count: 1 }] },
+                { id: 102, profession_id: 1, name: "tincture of stone", category: "Draughts", min_rank: 39, duration: 30,
+                  components: [{ kind: "item", vnum: 9099, name: "a lump of granite dust", count: 1 }, { kind: "treasure", amount: 500 }] },
+                { id: 103, profession_id: 1, name: "alchemist's fire", category: "Reagents", min_rank: 22, duration: 25,
+                  components: [{ kind: "item", vnum: 9001, name: "a pinch of sulfur", count: 4 }, { kind: "location", label: "a forge" }] },
+                { id: 201, profession_id: 2, name: "minor soothing", category: "Head", min_rank: 8, duration: 20, target_gear_type: 6,
+                  components: [{ kind: "item", vnum: 9002, name: "a vial of powdered silver", count: 1 }] },
+                { id: 202, profession_id: 2, name: "keened edge", category: "Weapon", min_rank: 16, duration: 30, target_gear_type: 0,
+                  components: [{ kind: "item", vnum: 9004, name: "a shard of frost quartz", count: 2 }, { kind: "treasure", amount: 800 }] },
+                { id: 203, profession_id: 2, name: "greater arcane dust", category: "Transmutation", min_rank: 20, duration: 10,
+                  components: [{ kind: "item", vnum: 9002, name: "a vial of powdered silver", count: 2 }] }
+            ] },
+            "Char.Craft": { active: true, kind: "craft", name: "minor healing draught", profession_id: 1, remaining: 14, duration: 20, quantity: 2, chain_remaining: 3 }
         };
         Object.keys(feeds).forEach(function (k) { onGmcp(k, JSON.stringify(feeds[k])); });
         [

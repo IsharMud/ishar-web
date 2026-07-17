@@ -449,6 +449,45 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
   Ctrl+Shift+F, closed by Esc. Match decorations use the amber accent.
 - Note `.hud-btn[hidden] { display: none; }` — the button's explicit
   `display` would otherwise defeat the `hidden` attribute.
+- **`#hud-actionrow` / `#hud-micro` / `.micro-btn`** — the action row wraps
+  the skill bar plus the **micro-menu**: small icon buttons (32px, `{% bi %}`
+  glyphs) that toggle transient **overlay apps** (`Ctrl`+letter hotkeys; see
+  decisions.md "The HUD extension model", 2026-07-17). Launchers are
+  availability-gated by their feed (`hidden` when there's nothing to show) and
+  may carry a `.unread` dot (feed changed while closed) and a `.micro-strip`
+  progress bar (long-running activity). Hidden on phones — the dock is the
+  phone's micro-menu.
+- **`#hud-overlay` / `.overlay-head` / `.overlay-title`** — the desktop
+  overlay window (fixed, centered, `z-index` 1038 — above sheet/popovers,
+  below `#hud-menu`): one `.panel.overlay-active` at a time from
+  `#hud-overlay-body`; dismissed by Esc, outside-click, ✕, the hotkey or the
+  launcher. On phones the same panel node opens in `#hud-sheet` via a dock
+  button (`placePanels()` re-homes it). Register apps in the `OVERLAYS`
+  table in `hud.js`.
+- **Professions app** (`.prof-row/.prof-head/.prof-track/.prof-btn`,
+  `.recipe-list/.recipe-cat/.recipe-row`,
+  `.craft-activity/.craft-track/.craft-fill/.craft-time`) — the reference
+  overlay app: profession standing rows (disclosure header + tier `.tag` +
+  `Rank n/max` + rank meter + recipe counts) fed by `Char.Professions`,
+  topped by the live craft/harvest cast bar fed by `Char.Craft` (ticked
+  locally each second; the micro button mirrors it as `.micro-strip`).
+  Expanding a row opens the **recipe browser** fed by `Char.Recipes`:
+  rows grouped by category, name colored by the **`.tier-*` difficulty
+  classes** (trivial/easy/medium/hard/blocked — the contract's shared
+  buckets, computed client-side from `min_rank` − rank), a `✓` when the
+  component join against `Char.Inventory` (vnums + the `treasure` total)
+  says it's craftable, and an action per row: **Craft** (targetless) or
+  **Enchant…** (targeted — an item picker over carried items whose
+  `gear_type` matches the recipe's `target_gear_type`, sending
+  `enchant <item> <recipe>`). Native `title` holds the component summary.
+  The same `.tier-*` classes color the enchanter's **`Disenchant (rN)`**
+  entry in inventory item context menus (from the item's
+  `disenchant_rank`). Tapping a recipe's name discloses `.recipe-comps` —
+  the per-component have/need breakdown (the touch path to "what am I
+  missing?"; the hover `title` is desktop convenience only). Note one
+  deliberate palette divergence: the trivial tier renders `--ac-dim`
+  (de-emphasis) where the game shows white — worthless-for-skillup recipes
+  should recede, not match body text.
 
 Verify with `/connect?demo=1` (sample GMCP feeds, no server needed).
 

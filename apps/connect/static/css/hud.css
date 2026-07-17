@@ -68,9 +68,10 @@ body.connect-page #content { padding: .5rem !important; }
 
 .hud-off #hud-left,
 .hud-off #hud-right,
-.hud-off #hud-hotbar,
+.hud-off #hud-actionrow,
 .hud-off #hud-dock,
 .hud-off #hud-sheet,
+.hud-off #hud-overlay,
 .hud-off #hud-menu,
 .hud-off #rose-overlay,
 .hud-off #rose-toggle,
@@ -712,6 +713,150 @@ body.connect-page #content { padding: .5rem !important; }
     .skill-sweep { transition: --sweep 1s linear; }
 }
 
+/* ----- Action row: skill bar + micro-menu (overlay app launchers) ----- */
+/* The micro-menu is the WoW-style cluster of small icon buttons at the right
+   end of the action-bar row; each opens a transient overlay app (see
+   docs/design/decisions.md "The HUD extension model"). On phones it is
+   hidden — the dock is the phone's micro-menu. */
+#hud-actionrow { display: flex; gap: 8px; align-items: center; flex: none; min-width: 0; }
+#hud-actionrow #hud-hotbar { flex: 1 1 auto; min-width: 0; }
+#hud-micro { display: flex; gap: 4px; flex: none; margin-left: auto; }
+.micro-btn {
+    position: relative; width: 32px; height: 32px; padding: 0; cursor: pointer; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--ac-elev); color: var(--ac-dim);
+    border: 1px solid var(--ac-border); border-radius: var(--ac-radius-sm);
+}
+.micro-btn[hidden] { display: none; }
+.micro-btn:hover { border-color: var(--ac-accent); color: var(--ac-text); }
+.micro-btn[aria-pressed="true"] { color: var(--ac-accent); border-color: var(--ac-accent); }
+.micro-btn .bi { width: 1rem; height: 1rem; }
+/* Dot badge: the app's feed changed while its window was closed. */
+.micro-btn.unread::after {
+    content: ""; position: absolute; top: 3px; right: 3px;
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--ac-accent); box-shadow: 0 0 0 2px var(--ac-elev);
+}
+/* Progress strip: a long-running activity (active craft/harvest) filling up. */
+.micro-strip {
+    position: absolute; left: 0; bottom: 0; height: 3px; width: 0;
+    background: var(--hud-event); pointer-events: none;
+}
+.micro-strip[hidden] { display: none; }
+@media (max-width: 767.98px) { #hud-micro { display: none; } }
+
+/* ----- Overlay window (micro-menu apps, desktop) ----- */
+#hud-overlay {
+    position: fixed; z-index: 1038;   /* above the sheet/popovers, below #hud-menu */
+    left: 50%; top: 50%; transform: translate(-50%, -50%);
+    width: min(520px, calc(100vw - 32px));
+    max-height: min(72vh, 620px);
+    display: flex; flex-direction: column;
+    background: var(--ac-panel); border: 1px solid var(--ac-border-2);
+    border-radius: var(--ac-radius); box-shadow: 0 16px 44px rgba(0, 0, 0, .6);
+}
+#hud-overlay[hidden] { display: none; }
+.overlay-head {
+    flex: none; display: flex; align-items: center; gap: 8px;
+    padding: 8px 10px 6px; border-bottom: 1px solid var(--ac-border);
+}
+.overlay-title {
+    font-size: .72rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .09em; color: var(--ac-dim);
+}
+#hud-overlay-body { overflow-y: auto; min-height: 0; padding: 6px 10px 10px; }
+#hud-overlay-body .panel { display: none; background: transparent; border: 0; }
+#hud-overlay-body .panel.overlay-active { display: block; }
+
+/* ----- Professions overlay app ----- */
+.craft-activity {
+    margin: 6px 0 10px; padding: 8px;
+    background: var(--ac-elev); border: 1px solid var(--ac-border);
+    border-radius: var(--ac-radius-sm);
+}
+.craft-label { font-size: .78rem; color: var(--ac-text); margin-bottom: 6px; }
+.craft-track {
+    position: relative; height: 16px;
+    background: var(--ac-bg); border: 1px solid var(--ac-border);
+    border-radius: 3px; overflow: hidden;
+}
+.craft-fill { position: absolute; inset: 0 auto 0 0; height: 100%; background: var(--hud-event); opacity: .85; }
+.craft-time {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-size: .68rem; font-weight: 700; text-shadow: 0 0 2px #000, 0 0 2px #000;
+    font-variant-numeric: tabular-nums;
+}
+@media (prefers-reduced-motion: no-preference) {
+    .micro-strip, .craft-fill { transition: width 1s linear; }
+}
+.prof-row { padding: 8px 2px; border-bottom: 1px solid var(--ac-border); }
+.prof-row:last-of-type { border-bottom: 0; }
+/* The header is the recipe-list disclosure — a full-width unstyled button. */
+.prof-head {
+    display: flex; align-items: baseline; gap: 8px; width: 100%;
+    background: none; border: 0; padding: 0; cursor: pointer; text-align: left;
+    color: var(--ac-text);
+}
+.prof-caret { color: var(--ac-dim); font-size: .8rem; }
+.prof-name { font-weight: 700; font-size: .9rem; color: var(--ac-text); }
+.prof-tier { flex: none; }
+.prof-rank { margin-left: auto; font-size: .74rem; color: var(--ac-dim); font-variant-numeric: tabular-nums; }
+.prof-track {
+    position: relative; height: 8px; margin: 6px 0;
+    background: var(--ac-bg); border: 1px solid var(--ac-border);
+    border-radius: 3px; overflow: hidden;
+}
+.prof-fill { position: absolute; inset: 0 auto 0 0; height: 100%; background: var(--ac-accent); opacity: .7; }
+.prof-foot { display: flex; align-items: center; gap: 8px; }
+.prof-recipes { font-size: .74rem; color: var(--ac-dim); font-variant-numeric: tabular-nums; }
+.prof-actions { margin-left: auto; display: flex; gap: 6px; }
+.prof-btn {
+    font-size: .72rem; padding: 3px 8px; cursor: pointer;
+    background: var(--ac-elev); color: var(--ac-text);
+    border: 1px solid var(--ac-border); border-radius: var(--ac-radius-sm);
+}
+.prof-btn:hover { border-color: var(--ac-accent); }
+.prof-empty, .prof-hint { font-size: .76rem; color: var(--ac-dim); padding: 6px 2px; }
+.prof-hint { border-top: 1px solid var(--ac-border); margin-top: 8px; font-family: monospace; }
+
+/* Recipe browser (Char.Recipes) inside a profession row. */
+.recipe-list { margin-top: 4px; padding-left: 14px; }
+.recipe-cat {
+    font-size: .68rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .06em; color: var(--ac-dim); padding: 6px 0 2px;
+}
+.recipe-row { display: flex; align-items: center; gap: 6px; padding: 3px 0; }
+/* The name is the component-details disclosure — the TOUCH path to "what am
+   I missing?" (the hover title is desktop convenience only). */
+.recipe-toggle {
+    flex: 1; min-width: 0; display: block; text-align: left;
+    background: none; border: 0; padding: 0; cursor: pointer;
+}
+.recipe-name { font-size: .82rem; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.recipe-rank { flex: none; font-variant-numeric: tabular-nums; }
+.recipe-ok { flex: none; color: var(--ac-ok); }
+.recipe-comps { padding: 2px 0 6px 10px; border-left: 2px solid var(--ac-border); margin-left: 2px; }
+.recipe-comp { font-size: .74rem; padding: 1px 0; font-variant-numeric: tabular-nums; }
+.recipe-comp.ok { color: var(--ac-ok); }
+.recipe-comp.missing { color: var(--ac-danger); }
+.recipe-comp.loc { color: var(--ac-dim); }
+.prof-btn.off { opacity: .45; }
+
+/* Profession difficulty buckets (docs/gmcp_feeds.md) — the same palette the
+   game's recipe/harvest lists color by. The .menu-item compounds outrank the
+   menu's own color rule (defined later) for the disenchant entry. */
+.tier-trivial, .menu-item.tier-trivial { color: var(--ac-dim); }
+.tier-easy,    .menu-item.tier-easy    { color: var(--ac-ok); }
+.tier-medium,  .menu-item.tier-medium  { color: var(--hud-gold); }
+.tier-hard,    .menu-item.tier-hard    { color: var(--hud-edge); }
+.tier-blocked, .menu-item.tier-blocked { color: var(--ac-danger); }
+
+/* Tablets show the micro-menu with a coarse pointer — bump its launchers too. */
+@media (pointer: coarse) {
+    .prof-btn { min-height: 40px; padding: 6px 12px; }
+    .micro-btn { width: 42px; height: 42px; }
+}
+
 /* ----- Context / action menu ----- */
 #hud-menu {
     position: fixed; z-index: 1040; min-width: 172px; max-width: min(80vw, 260px);
@@ -832,6 +977,9 @@ body.connect-page #content { padding: .5rem !important; }
    scroll edge; labels ellipsize rather than overflow. */
 #hud-dock button span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
 #hud-dock button .bi { width: 1.1rem; height: 1.1rem; }
+/* Overlay-app tabs are availability-gated by hud.js (no professions → no tab);
+   display:flex above would otherwise defeat the hidden attribute. */
+#hud-dock button[hidden] { display: none; }
 #hud-dock button[aria-pressed="true"] { color: var(--ac-accent); background: var(--ac-elev); }
 
 #hud-dock button.unread::after,
@@ -897,7 +1045,8 @@ body.connect-page #content { padding: .5rem !important; }
 .who-act button:focus-visible, .action-btn:focus-visible, .sheet-close:focus-visible,
 .panel-h-toggle:focus-visible, .row-more:focus-visible, .menu-item:focus-visible,
 .ab-chip:focus-visible, .ab-star:focus-visible, .panel-h-btn:focus-visible,
-.aff-release:focus-visible, .occ-row:focus-visible, .sub-h.collapse:focus-visible {
+.aff-release:focus-visible, .occ-row:focus-visible, .sub-h.collapse:focus-visible,
+.micro-btn:focus-visible, .prof-btn:focus-visible {
     outline: 2px solid var(--ac-accent); outline-offset: 2px;
 }
 

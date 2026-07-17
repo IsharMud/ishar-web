@@ -9,6 +9,68 @@ Format: `## YYYY-MM-DD — Title` · **Decision** · **Why** · (optional) **Not
 
 ---
 
+## 2026-07-17 — The HUD extension model: three surface tiers, and the micro-menu + overlay convention
+
+**Decision.** The HUD now has a **definitive placement rule** for every new
+feature. Three tiers, by how the player consumes the information:
+
+1. **Ambient** — glanced at every second: the vitals topbar, the action bar,
+   the compass rose. This set is **closed**; adding to it means arguing (in a
+   new ADR) that something else leaves. Screen real estate here is the
+   scarcest resource the client has.
+2. **Persistent panels** — *monitored* across a session: group, occupants,
+   gear, bag, chat — the desktop side columns and the phone dock/sheet. This
+   set is now **closed by default**: a new feature does not get a column
+   panel just by existing.
+3. **Overlay apps** — *consulted on demand*: professions, and any future
+   quest log / recipe browser / achievements / reference view. An overlay is
+   a transient, dismissible surface — opened from the **micro-menu**, closed
+   by `Esc`, outside-click, its ✕, or its own toggle. **One overlay at a
+   time.** Nothing inside an overlay may be required mid-combat; if a
+   feature needs a per-second glance it belongs (by exception) in tier 1/2.
+
+**The micro-menu.** A row of small icon buttons docked at the **right end of
+the action-bar row** (`#hud-actionrow` = `#hud-hotbar` + `#hud-micro`) — the
+WoW micro-menu, deliberately: players already have a mental slot for "little
+buttons next to the skill bar that open windows". Each overlay app registers
+one button, one hotkey, and one renderer in the `OVERLAYS` table in `hud.js` —
+the registry is the single point of extension. Buttons may carry at most a
+**dot badge** (something changed while closed) and a **thin progress strip**
+(a long-running activity, e.g. an active craft): ambient-lite signals, no
+text, no counts.
+
+**On phones there is no separate micro-menu** — the dock *is* the phone's
+micro-menu. An overlay app adds a dock button like any panel and opens in the
+bottom sheet; `placePanels()` re-homes the same panel node between the
+desktop overlay container and the sheet. One renderer, two presentations.
+
+**Hotkeys.** Overlay hotkeys are **`Ctrl`+letter** (strict single-modifier
+guards, same discipline as the action bar's `Alt/Ctrl+digit`), chosen
+mnemonically: `Ctrl+P` = Professions. The keydown handler swallows the event
+only when the HUD is on and the overlay actually toggled, so terminal/browser
+behavior survives everywhere else. `Esc` closes the open overlay before
+anything else claims it (the HUD's listener registers first and stops the
+event, by design). **Reserved letters:** `l` (`Ctrl+L` clears the terminal —
+a page binding the overlay handler would silently shadow). Shadowing a
+browser default (`Ctrl+P` = print) is a deliberate trade, taken only while
+the app has something to show.
+
+**Why.** The tabs/collapsible-panel pattern was quietly becoming the answer to
+every new feature, and it doesn't scale: each addition taxes the side columns
+(desktop) or lengthens the dock crawl (phone), and most new data — professions
+included — is reference material, not monitoring. Naming the three tiers turns
+"where does this go?" from a per-feature debate into a lookup. The micro-menu
+buys unbounded extension for ~30px of an already-existing row.
+
+**Migration notes.** Existing tier-2/tab residents that are really reference
+views — the **Abilities browser** and **Who** are the clear candidates, and the
+gear/history popovers should eventually converge on the same overlay
+primitive — migrate opportunistically, each as its own change. The
+Professions overlay is the reference implementation of the whole convention
+(`#hud-overlay`, `.micro-btn`, `OVERLAYS`, `Ctrl+P`).
+
+---
+
 ## 2026-07-16 — HUD icons: a standardized map everyone inherits, and the `.hud-tip` tooltip convention
 
 **Decision (icon resolution).** Skill icons are a **standardized set every player

@@ -169,7 +169,21 @@
                 &#x25BC; Latest
             </button>
         </div>
-        <div id="hud-hotbar" class="empty"></div>
+        <!-- Action row: the skill bar plus the micro-menu — small icon buttons
+           that open transient overlay apps (Ctrl+letter hotkeys). See
+           docs/design/decisions.md "The HUD extension model". Buttons are
+           revealed by hud.js when the matching feed has data. -->
+        <div id="hud-actionrow">
+            <div id="hud-hotbar" class="empty"></div>
+            <nav id="hud-micro" aria-label="Overlay windows">
+                <button type="button" class="micro-btn" data-overlay="professions" hidden
+                        aria-pressed="false" aria-haspopup="dialog" aria-controls="hud-overlay"
+                        title="Professions (Ctrl+P)" aria-label="Professions (Ctrl+P)">
+                    {% bi "tools" %}
+                    <span class="micro-strip" hidden></span>
+                </button>
+            </nav>
+        </div>
         <form id="command-form" autocomplete="off">
             <!-- Recent-commands popover for touch screens (Arrow keys have no
                thumb equivalent). The button is revealed by JS on coarse
@@ -237,6 +251,10 @@
             {% bi "stars" %}
             <span>Skills</span>
         </button>
+        <button type="button" data-panel="professions" aria-pressed="false" hidden>
+            {% bi "tools" %}
+            <span>Craft</span>
+        </button>
         <button type="button" data-panel="train" aria-pressed="false">
             {% bi "person-up" %}
             <span>Char</span>
@@ -264,6 +282,21 @@
             </button>
         </div>
         <div id="hud-sheet-body"></div>
+    </div>
+
+    <!-- Desktop overlay window: the transient surface behind the micro-menu
+       (one overlay app at a time; Esc / outside-click / ✕ dismiss). On phones
+       the same panel nodes open in the bottom sheet instead. -->
+    <div id="hud-overlay" role="dialog" aria-labelledby="hud-overlay-title" tabindex="-1" hidden>
+        <div class="overlay-head">
+            <span id="hud-overlay-title" class="overlay-title"></span>
+            <button type="button" class="sheet-close" id="hud-overlay-close" aria-label="Close window">
+                {% bi "x-lg" %}
+            </button>
+        </div>
+        <div id="hud-overlay-body">
+            <section id="panel-professions" class="panel"></section>
+        </div>
     </div>
 
     <!-- Context/action menu (inventory, equipment, occupants). Built on demand
