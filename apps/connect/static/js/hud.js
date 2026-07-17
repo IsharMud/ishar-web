@@ -104,14 +104,14 @@
     // the movement (rose) and interaction (occupants) surfaces are together at
     // the bottom, nearest the input.
     var PANELS = ["equipment", "inventory", "train", "group", "occupants", "room",
-                  "status", "abilities", "chat", "who", "professions"];
+                  "status", "abilities", "chat", "who", "professions", "map"];
     var PANEL_HOME = {
         occupants: "hud-left-scroll", equipment: "hud-left-scroll",
         inventory: "hud-left-scroll", train: "hud-left-scroll",
         group: "hud-left-scroll",
         room: "hud-left",
         status: "hud-right", abilities: "hud-right", chat: "hud-right", who: "hud-right",
-        professions: "hud-overlay-body"
+        professions: "hud-overlay-body", map: "hud-overlay-body"
     };
 
     // ------------------------------------------------------------------
@@ -132,7 +132,11 @@
           render: function () { renderProfessions(); },
           // The activity bar must stay reachable even in the (theoretical)
           // no-professions-but-harvesting state.
-          available: function () { return (S.professions || []).length > 0 || !!S.craft; } }
+          available: function () { return (S.professions || []).length > 0 || !!S.craft; } },
+        { key: "map", title: "Map", hotkey: "m",
+          render: function () { if (mapMod) mapMod.renderOverlay(); },
+          // Account-gated: guests map nothing, so they get no launcher.
+          available: function () { return !!(mapMod && mapMod.enabled()); } }
     ];
     var overlayName = null;   // open overlay app key (desktop), or null
 
@@ -948,7 +952,15 @@
         var body = el("div", { class: "rose-body" });
         if (tab === "map") mapMod.renderMini(body);
         else renderRose(body, false);
-        fill(dom.room, [head, body]);
+        // The current room's note (map feature) rides the Room panel in both
+        // tabs — one quiet clamped line; tap to edit.
+        var note = mapOn && mapMod.currentNote ? mapMod.currentNote() : "";
+        var noteRow = note ? el("button", {
+            type: "button", class: "rose-note", text: note,
+            title: "Edit room note",
+            onclick: function () { mapMod.editCurrentNote(); }
+        }) : null;
+        fill(dom.room, [head, body, noteRow]);
         if (dom.roseOverlay) {
             renderRose(dom.roseOverlay, true);
             updateRoseOverlay();
@@ -2132,7 +2144,11 @@
             var b = dom.micro && dom.micro.querySelector('button[data-overlay="' + o.key + '"]');
             if (b) b.setAttribute("aria-pressed", o.key === overlayName ? "true" : "false");
         });
-        if (dom.overlay) dom.overlay.hidden = !ov;
+        if (dom.overlay) {
+            dom.overlay.hidden = !ov;
+            // Lets CSS size the window per app (the map wants more room).
+            dom.overlay.setAttribute("data-app", ov ? ov.key : "");
+        }
         if (dom.overlayTitle) dom.overlayTitle.textContent = ov ? ov.title : "";
         if (ov) {
             ov.render();

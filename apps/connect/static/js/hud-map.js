@@ -779,7 +779,7 @@
     var MINI_SCALE = 30;
 
     function buildMini() {
-        var canvas = H.el("canvas", { class: "map-canvas" });
+        var canvas = H.el("canvas", { class: "map-canvas menu-opener" });
         var hint = H.el("div", { class: "map-hint", text: "Location unknown" });
         hint.hidden = true;
         var wrap = H.el("div", { class: "map-mini" }, [canvas, hint]);
@@ -845,14 +845,394 @@
     }
     function stepCmd(d) { return DELTA[d] ? d : "go " + d; }
 
-    // Placeholder (Phase C/D wire these fully).
-    function mapRoomMenu() {}
+    // ------------------------------------------------------------------
+    // Big map overlay (OVERLAYS app "map", Ctrl+M): pan/zoom/tap canvas
+    // with a toolbar (zone name · z-levels · search · zoom · center).
+    // ------------------------------------------------------------------
+    var big = null;   // {root, canvas, wrap, zoneLabel, zRow, search, count, anchor}
+    var bigView = { cx: 0, cy: 0, scale: 30, z: 0, follow: true };
+    var BIG_MIN = 12, BIG_MAX = 75;
+    var searchState = { q: "", list: [], i: -1 };
+    var hoverVnum = null;
+
+    function bigOpen() {
+        return !!(big && big.root.isConnected && H && H.overlayVisible("map"));
+    }
+
+    function buildBig() {
+        var canvas = H.el("canvas", { class: "map-canvas menu-opener" });
+        // Synthetic tooltip anchor: an invisible box moved onto the hovered
+        // room so hud.js's positionTip has a rect to aim at.
+        var anchor = H.el("div", { class: "map-tip-anchor", "aria-hidden": "true" });
+        var wrap = H.el("div", { class: "map-big" }, [canvas, anchor]);
+
+        var zoneLabel = H.el("span", { class: "map-zone", text: "" });
+        var zRow = H.el("span", { class: "map-z" });
+        var search = H.el("input", {
+            class: "map-search", type: "search", placeholder: "Find room…",
+            "aria-label": "Find a discovered room by name"
+        });
+        var count = H.el("span", { class: "map-count dim", text: "" });
+        var btnOut = H.el("button", { type: "button", class: "map-btn", text: "−",
+            title: "Zoom out", "aria-label": "Zoom out",
+            onclick: function () { zoomBy(1 / 1.3); } });
+        var btnIn = H.el("button", { type: "button", class: "map-btn", text: "+",
+            title: "Zoom in", "aria-label": "Zoom in",
+            onclick: function () { zoomBy(1.3); } });
+        var btnMe = H.el("button", { type: "button", class: "map-btn", text: "◎",
+            title: "Center on me", "aria-label": "Center on my room",
+            onclick: function () { bigView.follow = true; centerOnMe(); redrawBig(); } });
+        var toolbar = H.el("div", { class: "map-toolbar" },
+            [zoneLabel, zRow, search, count, btnOut, btnIn, btnMe]);
+        var root = H.el("div", { class: "map-app" }, [toolbar, wrap]);
+        big = { root: root, canvas: canvas, wrap: wrap, zoneLabel: zoneLabel,
+                zRow: zRow, search: search, count: count, anchor: anchor };
+
+        // --- search: filter discovered rooms, Enter cycles + centers ---
+        search.addEventListener("input", function () {
+            searchState.q = search.value;
+            rebuildSearch();
+            updateSearchCount();
+            redrawBig();
+        });
+        search.addEventListener("keydown", function (ev) {
+            if (ev.key === "Enter" && searchState.list.length) {
+                ev.preventDefault();
+                searchState.i = (searchState.i + 1) % searchState.list.length;
+                var v = searchState.list[searchState.i];
+                var p = cur.zone != null && zones[cur.zone].layout.pos[v];
+                if (p) {
+                    bigView.follow = false;
+                    bigView.cx = p.x; bigView.cy = p.y; bigView.z = p.z;
+                    updateZRow();
+                }
+                updateSearchCount();
+                redrawBig();
+            }
+            // The overlay's Esc handler must not steal a "clear the field".
+            if (ev.key === "Escape" && search.value) ev.stopPropagation();
+        });
+
+        // --- pan / pinch / tap (pointer events; gestures are enhancement,
+        // the zoom buttons are the accessible path) ---
+        var pointers = {};
+        var pinchDist = null;
+        var drag = null;
+        canvas.addEventListener("pointerdown", function (ev) {
+            canvas.setPointerCapture(ev.pointerId);
+            pointers[ev.pointerId] = { x: ev.clientX, y: ev.clientY };
+            var keys = Object.keys(pointers);
+            if (keys.length === 1) {
+                drag = { x: ev.clientX, y: ev.clientY, moved: false };
+            } else if (keys.length === 2) {
+                var a = pointers[keys[0]], b = pointers[keys[1]];
+                pinchDist = Math.hypot(a.x - b.x, a.y - b.y);
+                drag = null;
+            }
+        });
+        canvas.addEventListener("pointermove", function (ev) {
+            var pt = pointers[ev.pointerId];
+            if (!pt) return;
+            var keys = Object.keys(pointers);
+            if (keys.length === 2) {
+                pt.x = ev.clientX; pt.y = ev.clientY;
+                var a = pointers[keys[0]], b = pointers[keys[1]];
+                var d2 = Math.hypot(a.x - b.x, a.y - b.y);
+                if (pinchDist && d2 > 0) zoomBy(d2 / pinchDist);
+                pinchDist = d2;
+                return;
+            }
+            if (drag) {
+                var dx = ev.clientX - drag.x, dy = ev.clientY - drag.y;
+                if (Math.abs(dx) + Math.abs(dy) > 4) drag.moved = true;
+                if (drag.moved) {
+                    bigView.follow = false;
+                    bigView.cx -= dx / bigView.scale;
+                    bigView.cy -= dy / bigView.scale;
+                    drag.x = ev.clientX; drag.y = ev.clientY;
+                    redrawBig();
+                }
+            }
+            pt.x = ev.clientX; pt.y = ev.clientY;
+        });
+        function endPointer(ev) {
+            var wasDrag = drag;
+            delete pointers[ev.pointerId];
+            if (Object.keys(pointers).length < 2) pinchDist = null;
+            if (ev.type === "pointerup" && wasDrag && !wasDrag.moved) {
+                var r = canvas.getBoundingClientRect();
+                var v = hitTest(cur.zone, bigView, canvas,
+                                ev.clientX - r.left, ev.clientY - r.top);
+                if (v != null) mapRoomMenu(v, syntheticAnchor(ev.clientX, ev.clientY));
+            }
+            if (ev.type === "pointerup" || ev.type === "pointercancel") drag = null;
+        }
+        canvas.addEventListener("pointerup", endPointer);
+        canvas.addEventListener("pointercancel", endPointer);
+
+        // Wheel zoom, centered on the cursor.
+        canvas.addEventListener("wheel", function (ev) {
+            ev.preventDefault();
+            var r = canvas.getBoundingClientRect();
+            zoomBy(ev.deltaY < 0 ? 1.18 : 1 / 1.18,
+                   ev.clientX - r.left, ev.clientY - r.top);
+        }, { passive: false });
+
+        // Hover tooltip (hover-capable pointers only; touch taps the menu).
+        if (window.matchMedia("(hover: hover)").matches) {
+            canvas.addEventListener("mousemove", function (ev) {
+                if (Object.keys(pointers).length) return;   // mid-drag
+                var r = canvas.getBoundingClientRect();
+                var v = hitTest(cur.zone, bigView, canvas,
+                                ev.clientX - r.left, ev.clientY - r.top);
+                if (v === hoverVnum) return;
+                hoverVnum = v;
+                if (v == null) { H.hideTip(); return; }
+                showRoomTip(v);
+            });
+            canvas.addEventListener("mouseleave", function () {
+                hoverVnum = null; H.hideTip();
+            });
+        }
+    }
+
+    function syntheticAnchor(cx, cy) {
+        return { getBoundingClientRect: function () {
+            return { left: cx, right: cx, top: cy, bottom: cy, width: 0, height: 0 };
+        } };
+    }
+
+    function showRoomTip(v) {
+        var zone = zones[cur.zone];
+        if (!zone || !big) return;
+        var fs = fogSet(cur.zone);
+        var room = zone.layout.byVnum[v];
+        var p = zone.layout.pos[v];
+        if (!p) return;
+        // Position the invisible anchor over the room's screen rect.
+        var cssW = big.canvas.clientWidth, cssH = big.canvas.clientHeight;
+        var sc = bigView.scale, halfBox = sc * 0.31;
+        var x = (p.x - bigView.cx) * sc + cssW / 2;
+        var y = (p.y - bigView.cy) * sc + cssH / 2;
+        big.anchor.style.left = (x - halfBox) + "px";
+        big.anchor.style.top = (y - halfBox) + "px";
+        big.anchor.style.width = (halfBox * 2) + "px";
+        big.anchor.style.height = (halfBox * 2) + "px";
+        if (!fs[v]) { H.showTip(big.anchor, { name: "Unexplored" }); return; }
+        var note = noteFor(v);
+        H.showTip(big.anchor, {
+            name: H.stripColor(room.n),
+            sub: room.t + (note ? " · " + firstLine(note) : "")
+        });
+    }
+    function firstLine(s) {
+        var line = String(s).split("\n")[0];
+        return line.length > 60 ? line.slice(0, 57) + "…" : line;
+    }
+
+    function zoomBy(factor, px, py) {
+        var next = Math.max(BIG_MIN, Math.min(BIG_MAX, bigView.scale * factor));
+        if (next === bigView.scale || !big) return;
+        // Keep the point under the cursor (or the center) fixed.
+        var cssW = big.canvas.clientWidth, cssH = big.canvas.clientHeight;
+        if (px == null) { px = cssW / 2; py = cssH / 2; }
+        var wx = (px - cssW / 2) / bigView.scale + bigView.cx;
+        var wy = (py - cssH / 2) / bigView.scale + bigView.cy;
+        bigView.scale = next;
+        bigView.cx = wx - (px - cssW / 2) / next;
+        bigView.cy = wy - (py - cssH / 2) / next;
+        redrawBig();
+    }
+
+    function centerOnMe() {
+        if (cur.zone == null || cur.vnum == null) return;
+        var p = zones[cur.zone].layout.pos[cur.vnum];
+        if (p) { bigView.cx = p.x; bigView.cy = p.y; bigView.z = p.z; }
+        updateZRow();
+    }
+
+    function rebuildSearch() {
+        searchState.list = [];
+        searchState.i = -1;
+        var q = searchState.q.trim().toLowerCase();
+        if (!q || cur.zone == null) return;
+        var zone = zones[cur.zone];
+        var fs = fogSet(cur.zone);
+        zone.graph.rooms.forEach(function (r) {
+            if (fs[r.v] &&
+                H.stripColor(r.n).toLowerCase().indexOf(q) !== -1) {
+                searchState.list.push(r.v);
+            }
+        });
+    }
+    function updateSearchCount() {
+        if (!big) return;
+        var n = searchState.list.length;
+        big.count.textContent = !searchState.q.trim() ? ""
+            : n === 0 ? "0" : ((searchState.i + 1) || 1) + "/" + n;
+    }
+
+    function updateZRow() {
+        if (!big || cur.zone == null) return;
+        var zList = zones[cur.zone].layout.zList;
+        H.fill(big.zRow, zList.length > 1 ? zList.map(function (z) {
+            return H.el("button", {
+                type: "button",
+                class: "map-btn" + (z === bigView.z ? " active" : ""),
+                text: z > 0 ? "+" + z : String(z),
+                title: z === 0 ? "Ground level" : (z > 0 ? "Level +" + z : "Level " + z),
+                onclick: function () { bigView.z = z; updateZRow(); redrawBig(); }
+            });
+        }) : []);
+    }
+    function updateZoneLabel() {
+        if (!big) return;
+        big.zoneLabel.textContent = cur.zone != null ? zones[cur.zone].name : "";
+    }
+
+    function renderOverlay() {
+        var panel = document.getElementById("panel-map");
+        if (!panel || !H) return;
+        if (!big) buildBig();
+        if (big.root.parentNode !== panel) {
+            panel.textContent = "";
+            panel.appendChild(big.root);
+        }
+        if (bigView.follow) centerOnMe();
+        updateZoneLabel();
+        updateZRow();
+        rebuildSearch();
+        updateSearchCount();
+        requestAnimationFrame(redrawBig);
+    }
+
+    function redrawBig() {
+        if (!bigOpen() || cur.zone == null) return;
+        drawMap(big.canvas, cur.zone, bigView, {
+            curVnum: cur.vnum, unseen: cur.unseen,
+            pathVnums: walkPathVnums(), pathEdges: walkPathEdges(),
+            searchVnum: searchState.i >= 0 ? searchState.list[searchState.i] : null
+        });
+    }
+
+    // Room menu (tap/click a room on either surface).
+    function mapRoomMenu(v, anchor) {
+        var zone = zones[cur.zone];
+        if (!zone) return;
+        var fs = fogSet(cur.zone);
+        var room = zone.layout.byVnum[v];
+        var name = fs[v] && room ? H.stripColor(room.n) : "Unexplored";
+        var acts = [];
+        if (v === cur.vnum) {
+            acts.push({ label: "You are here", fn: function () {}, keep: true });
+        } else {
+            var step = cur.vnum != null && adjacentStep(cur.vnum, v);
+            if (step) acts.push({ label: "Step " + step, cmd: step });
+        }
+        if (fs[v]) {
+            acts.push({
+                label: noteFor(v) ? "Edit note…" : "Add note…",
+                fn: function () { openNoteEditor(v); }, keep: true
+            });
+        }
+        H.openMenu(name, acts, anchor);
+    }
+
+    // ------------------------------------------------------------------
+    // Room notes — popover editor; server-persisted, optimistic.
+    // ------------------------------------------------------------------
+    var notePop = null;   // {root, title, ta, vnum}
+
+    function noteFor(v) {
+        if (cur.zone == null || v == null) return "";
+        var m = notes[cur.zone];
+        return (m && m[v]) || "";
+    }
+    function currentNote() { return H ? H.stripColor(noteFor(cur.vnum)) : ""; }
+    function editCurrentNote() {
+        if (cur.vnum != null) openNoteEditor(cur.vnum);
+    }
+
+    function buildNotePop() {
+        var title = H.el("div", { class: "note-title" });
+        var ta = H.el("textarea", {
+            class: "note-text", rows: "5", maxlength: "2000",
+            placeholder: "Notes for this room…",
+            "aria-label": "Room note"
+        });
+        ta.addEventListener("keydown", function (ev) {
+            if (ev.key === "Escape") { ev.stopPropagation(); closeNoteEditor(); }
+        });
+        var save = H.el("button", { type: "button", class: "map-btn note-save",
+            text: "Save", onclick: function () { commitNote(notePop.vnum, ta.value); } });
+        var del = H.el("button", { type: "button", class: "map-btn note-del",
+            text: "Delete", onclick: function () { commitNote(notePop.vnum, ""); } });
+        var close = H.el("button", { type: "button", class: "map-btn",
+            text: "Close", onclick: closeNoteEditor });
+        var row = H.el("div", { class: "note-actions" }, [save, del, close]);
+        var root = H.el("div", { class: "map-note-pop", role: "dialog",
+                                 "aria-label": "Room note" }, [title, ta, row]);
+        root.hidden = true;
+        document.body.appendChild(root);
+        notePop = { root: root, title: title, ta: ta, del: del, vnum: null };
+    }
+    function openNoteEditor(v) {
+        if (!notePop) buildNotePop();
+        var zone = zones[cur.zone];
+        var room = zone && zone.layout.byVnum[v];
+        notePop.vnum = v;
+        notePop.title.textContent = room ? H.stripColor(room.n) : "Room note";
+        notePop.ta.value = noteFor(v);
+        notePop.del.hidden = !noteFor(v);
+        notePop.root.hidden = false;
+        notePop.ta.focus();
+    }
+    function closeNoteEditor() {
+        if (notePop) notePop.root.hidden = true;
+    }
+    function commitNote(v, text) {
+        text = String(text || "").trim().slice(0, 2000);
+        var zoneId = cur.zone;
+        if (zoneId == null || v == null) { closeNoteEditor(); return; }
+        var m = notes[zoneId] = notes[zoneId] || {};
+        var prev = m[v] || "";
+        if (text) m[v] = text; else delete m[v];
+        closeNoteEditor();
+        redraw();
+        if (H) H.rerenderRoom();
+        if (cfg.demo || !cfg.urls) return;
+        fetch(cfg.urls.note, {
+            method: "POST",
+            credentials: "same-origin",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": cfg.csrf
+            },
+            body: JSON.stringify({ vnum: v, text: text })
+        }).then(function (resp) {
+            if (!resp.ok) throw new Error("note " + resp.status);
+        }).catch(function () {
+            // Revert the optimistic write so the map tells the truth.
+            if (prev) m[v] = prev; else delete m[v];
+            redraw();
+            if (H) H.rerenderRoom();
+        });
+    }
+
+    // Placeholder (Phase D wires the walk engine).
     function walkPathVnums() { return null; }
     function walkPathEdges() { return null; }
     function walkOnRoom() {}
     function cancelWalk() {}
-    function renderOverlay() {}
-    function redraw() { redrawMini(); }
+
+    function redraw() {
+        redrawMini();
+        if (bigOpen()) {
+            if (bigView.follow) { centerOnMe(); }
+            updateZoneLabel();
+            redrawBig();
+        }
+    }
 
     // ------------------------------------------------------------------
     // Demo fixture (/connect?demo=1) — a hand-authored zone matching the
@@ -958,7 +1338,9 @@
         onReset: onReset,
         onConnected: onConnected,
         renderMini: renderMini,
-        renderOverlay: renderOverlay
+        renderOverlay: renderOverlay,
+        currentNote: currentNote,
+        editCurrentNote: editCurrentNote
     };
 
     window.IsharMap = {
@@ -978,6 +1360,7 @@
             layoutZone: layoutZone,
             zones: zones,
             fog: fog,
+            notes: notes,
             cur: cur,
             demoGraph: demoGraph
         }

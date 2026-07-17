@@ -183,6 +183,11 @@
                     {% bi "tools" %}
                     <span class="micro-strip" hidden></span>
                 </button>
+                <button type="button" class="micro-btn" data-overlay="map" hidden
+                        aria-pressed="false" aria-haspopup="dialog" aria-controls="hud-overlay"
+                        title="Map (Ctrl+M)" aria-label="Map (Ctrl+M)">
+                    {% bi "map" %}
+                </button>
             </nav>
         </div>
         <form id="command-form" autocomplete="off">
@@ -259,6 +264,10 @@
             {% bi "tools" %}
             <span>Craft</span>
         </button>
+        <button type="button" data-panel="map" aria-pressed="false" hidden>
+            {% bi "map" %}
+            <span>Map</span>
+        </button>
         <button type="button" data-panel="train" aria-pressed="false">
             {% bi "person-up" %}
             <span>Char</span>
@@ -300,6 +309,7 @@
         </div>
         <div id="hud-overlay-body">
             <section id="panel-professions" class="panel"></section>
+            <section id="panel-map" class="panel"></section>
         </div>
     </div>
 

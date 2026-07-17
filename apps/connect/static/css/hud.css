@@ -408,6 +408,70 @@ body.connect-page #content { padding: .5rem !important; }
     color: var(--ac-dim); font-size: .7rem; pointer-events: none;
 }
 .map-hint[hidden] { display: none; }
+/* Current room's note under the rose/minimap: one quiet clamped line. */
+.rose-note {
+    display: block; width: calc(100% - 16px); margin: 0 8px 8px; padding: 3px 6px;
+    text-align: left; font-size: .66rem; color: var(--ac-dim);
+    background: var(--ac-bg); border: 1px solid var(--ac-border); border-radius: 3px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer;
+}
+.rose-note:hover { color: var(--ac-text); border-color: var(--ac-border-2); }
+
+/* ----- Big map overlay (OVERLAYS app "map", Ctrl+M) ----- */
+#hud-overlay[data-app="map"] { width: min(920px, calc(100vw - 32px)); max-height: min(84vh, 760px); }
+.map-app { display: flex; flex-direction: column; min-height: 0; }
+.map-toolbar { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 2px 0 8px; }
+.map-zone {
+    font-size: .72rem; font-weight: 700; color: var(--ac-accent);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 40%;
+}
+.map-z { display: inline-flex; gap: 2px; }
+.map-search {
+    flex: 1 1 8rem; min-width: 6rem; max-width: 14rem; font-size: 16px;
+    padding: 3px 8px; background: var(--ac-bg); color: var(--ac-text);
+    border: 1px solid var(--ac-border-2); border-radius: var(--ac-radius-sm);
+}
+.map-search:focus-visible { outline: 2px solid var(--ac-accent); outline-offset: 1px; }
+.map-count { font-size: .68rem; min-width: 2.2em; }
+.map-btn {
+    border: 1px solid var(--ac-border); background: var(--ac-elev); color: var(--ac-text);
+    border-radius: 3px; font-size: .74rem; font-weight: 700; padding: 3px 9px; cursor: pointer;
+}
+.map-btn:hover { border-color: var(--ac-accent); color: var(--ac-accent); }
+.map-btn.active { color: var(--ac-accent); border-color: var(--ac-accent); }
+.map-btn:focus-visible { outline: 2px solid var(--ac-accent); outline-offset: 1px; }
+.map-big { position: relative; height: min(62vh, 560px); min-height: 220px; }
+.map-big .map-canvas {
+    display: block; width: 100%; height: 100%; border-radius: 3px;
+    background: var(--ac-bg); touch-action: none; cursor: grab;
+}
+.map-tip-anchor { position: absolute; pointer-events: none; visibility: hidden; }
+/* In the phone sheet the map shares the viewport with the dock. */
+#hud-sheet .map-big { height: 46vh; }
+
+/* Note editor popover (above the overlay window, below #hud-menu's tier). */
+.map-note-pop {
+    position: fixed; z-index: 1039; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    width: min(340px, calc(100vw - 32px));
+    display: flex; flex-direction: column; gap: 8px; padding: 10px;
+    background: var(--ac-panel); border: 1px solid var(--ac-border-2);
+    border-radius: var(--ac-radius); box-shadow: 0 16px 44px rgba(0, 0, 0, .6);
+}
+.map-note-pop[hidden] { display: none; }
+.note-title { font-size: .72rem; font-weight: 700; color: var(--ac-accent); }
+.note-text {
+    font-size: 16px; padding: 6px 8px; resize: vertical; min-height: 5.5em;
+    background: var(--ac-bg); color: var(--ac-text);
+    border: 1px solid var(--ac-border-2); border-radius: var(--ac-radius-sm);
+}
+.note-text:focus-visible { outline: 2px solid var(--ac-accent); outline-offset: 1px; }
+.note-actions { display: flex; gap: 6px; justify-content: flex-end; }
+.note-del { color: var(--ac-danger); }
+
+@media (pointer: coarse) {
+    .rose-tabs button, .map-btn { padding: 8px 12px; }
+    .rose-note { padding: 8px; }
+}
 .compass {
     display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px;
     max-width: 170px; margin: 0 auto;
