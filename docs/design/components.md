@@ -481,8 +481,9 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
     **category** — share the abilities overlay's `.ab-search`/`.ab-chip`
     styling (one CSS rule serves both).
   - **Categories** are collapsible **section headers** (a thematic-break
-    rule, caret, name, count), ordered **anatomically head → feet, then
-    held items (weapon/shield), then unknown categories alpha, with
+    rule, caret, name, count), ordered **by paperdoll slot — head → feet,
+    with the held items (weapon/shield) in their worn position (below
+    hands, above the waist) — then unknown categories alpha, with
     transmutation / general last** — *not* the game's alphabetical order
     (a deliberate web presentation choice; see the ADR).
   - **Rows.** Name colored by the **`.tier-*` difficulty classes**

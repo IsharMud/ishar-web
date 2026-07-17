@@ -2314,16 +2314,18 @@
     }
 
     // Category display order. The game lists categories alphabetically; the web
-    // browser reads them anatomically instead — worn slots head → feet, then
-    // held items, then any unknown category (alpha), with transmutation /
-    // general pushed to the bottom. Keeps Enchanting's gear-slot categories in
-    // paperdoll order rather than Body → Feet → Head → Shield → …
+    // browser reads them by paperdoll slot instead — head → feet, with the
+    // held items (weapon, shield) in their worn position (below hands/gloves,
+    // above the waist) rather than dangling at the end. Any unknown category
+    // falls to a middle band (alpha); transmutation / general sink to the
+    // bottom. Keeps Enchanting's gear-slot categories in paperdoll order
+    // rather than the alphabetical Body → Feet → Head → Shield → …
     var CATEGORY_ORDER = [
         "head", "face", "eyes", "ears", "neck", "throat", "about",
         "shoulders", "back", "body", "torso", "chest",
-        "arms", "wrist", "wrists", "hands", "gloves",
-        "finger", "ring", "waist", "belt", "legs", "feet",
-        "weapon", "shield"
+        "arms", "wrist", "wrists", "hands", "gloves", "finger", "ring",
+        "weapon", "shield",
+        "waist", "belt", "legs", "feet"
     ];
     var CATEGORY_BOTTOM = { transmutation: 1, general: 2, miscellaneous: 3, misc: 3, other: 4 };
     function categoryRank(name) {

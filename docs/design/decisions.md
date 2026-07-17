@@ -17,12 +17,17 @@ supports everything consumed here.
 
 - **Category order is a web concern.** The game lists recipe categories
   alphabetically (`compare_category_summary`, `strcasecmp`). The browser
-  instead orders them **anatomically — head → feet worn slots, then held
-  items (weapon, shield), then any unknown category alpha, with
-  `transmutation` / `general` / `misc` pushed to the bottom** (`categoryRank`
-  in `hud.js`). Enchanting's gear-slot categories then read like a paperdoll
-  (Head, Body, Feet, Weapon, Shield, Transmutation) rather than the
-  alphabetical Body → Feet → Head → Shield → Transmutation → Weapon.
+  instead orders them **by paperdoll slot — head → feet, with the held items
+  (weapon, shield) in their worn position (below hands/gloves, above the
+  waist) rather than dangling at the end; any unknown category falls to a
+  middle band (alpha); `transmutation` / `general` / `misc` sink to the
+  bottom** (`categoryRank` in `hud.js`). Enchanting's gear-slot categories
+  then read like a paperdoll (Head, Body, Weapon, Shield, Feet,
+  Transmutation) rather than the alphabetical Body → Feet → Head → Shield →
+  Transmutation → Weapon. The slot list is anchored on the game's full
+  `gear_names` set, so every gear-slot category is covered now and forward;
+  free-form theme categories (Draughts, Reagents, Smelting, …) hit the alpha
+  band — exactly the game's own order, so no regression.
 - **Rank loses its `r` prefix** — a bare tier-colored number
   (`.recipe-rank`). The old `✓` craftable mark is replaced by a
   **craftable-count badge** (`.recipe-avail`): green `×N` computed the same
