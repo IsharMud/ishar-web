@@ -109,6 +109,17 @@ rest have no site-wide equivalent:
 | `--hud-edge` | `#d08a3a` | Edge resource bar. |
 | `--hud-event` | `#e8b04b` | World event flags. |
 | `--hud-moon` | `#9aa6c8` | Moon phases. |
+| `--hud-ter-*` | see below | Map terrain fills (canvas reads them via `getComputedStyle`). |
+
+**Map terrain fills** (`--hud-ter-*`): muted, desaturated room fills for the
+HUD map — the map is background; amber (current room / path) is the only thing
+that pops. `indoor #26262c` · `city #33333b` · `field #2b3a28` ·
+`forest #243626` · `hill #38332a` · `mountain #3c3c40` · `water #24384d`
+(shallow) · `deep #1d2e42` · `under #1a2a3c` (underwater) · `desert #40382a` ·
+`beach #3d3a2e` · `swamp #2c3626`. Forest Path / Mountain Path reuse
+`field` / `hill`. Map state inks come from the shared tokens: current room
+ring `--ac-accent`, note dots `--ac-info`, locked doors `--ac-warn`, death
+corners `--ac-danger`, edges/stubs `--ac-border-2` / `--ac-dim`.
 
 **Player-status vocabulary** (from `style.css`, used by `player_css`):
 - Immortals (`.god-player` … `.consort-player`): `var(--ac-immortal)`, with

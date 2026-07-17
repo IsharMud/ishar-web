@@ -508,6 +508,25 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
   tier renders `--ac-dim` (de-emphasis) where the game shows white —
   worthless-for-skillup recipes should recede, not match body text.
 
+- **Map (Rose | Map tabs, minimap, overlay app)** — the fog-of-war world map
+  (`hud-map.js`, isharmud/ishar-web#125). `.rose-tabs` turns the pinned Room
+  panel header into a Rose | Map micro-tab pair (persisted `ishar.roseTab`;
+  `.rose-expand` ⤢ opens the big map). `.map-mini` hosts the minimap canvas
+  (~7×7 cells centered on the player; tap an adjacent room to walk, tap
+  farther for the room menu); `.map-hint` is the "location unknown" veil
+  when the player can't see. The **overlay app** (`OVERLAYS` key `map`,
+  `Ctrl+M`; `#hud-overlay[data-app="map"]` widens the window) is
+  `.map-app` = `.map-toolbar` (`.map-zone` name, `.map-z` z-level chips,
+  `.map-search` + `.map-count`, `.map-btn` zoom −/+/◎) over `.map-big`
+  (pan/pinch/wheel canvas, `touch-action:none`) over `.map-foot` (show-path
+  step list / walking progress). `.map-note-pop` is the room-note editor
+  (Save/Delete/Close, 2000-char cap); the current room's note renders as
+  the `.rose-note` clamped line in the Room panel. `.map-walk` is the
+  autowalk cancel chip above the action row — the whole chip cancels
+  (44px coarse target). Canvases carry `.menu-opener` so the menus they
+  open survive the document's outside-click close. All canvas colors come
+  from tokens (`--hud-ter-*` + shared inks) read via `getComputedStyle`.
+
 Verify with `/connect?demo=1` (sample GMCP feeds, no server needed).
 
 ---

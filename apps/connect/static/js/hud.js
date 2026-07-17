@@ -81,6 +81,12 @@
 
     var api = { send: function () {}, prefill: function () {}, onLayoutChange: function () {}, onComm: function () {}, onVitals: function () {} };
     var dom = {};
+    // The map subsystem (hud-map.js) plugs in through registerMap() — the
+    // whole mapper stays behind this one seam so a missing/stale-cached
+    // hud-map.js degrades to the rose-only HUD.
+    var mapMod = null;
+    var roseTab = "rose";   // "rose" | "map" — pinned Room-panel tab
+    try { if (localStorage.getItem("ishar.roseTab") === "map") roseTab = "map"; } catch (e) {}
     var hudOn = false;
     var activeTab = "status";
     var sheetName = null;
@@ -98,14 +104,14 @@
     // the movement (rose) and interaction (occupants) surfaces are together at
     // the bottom, nearest the input.
     var PANELS = ["equipment", "inventory", "train", "group", "occupants", "room",
-                  "status", "abilities", "chat", "who", "professions"];
+                  "status", "abilities", "chat", "who", "professions", "map"];
     var PANEL_HOME = {
         occupants: "hud-left-scroll", equipment: "hud-left-scroll",
         inventory: "hud-left-scroll", train: "hud-left-scroll",
         group: "hud-left-scroll",
         room: "hud-left",
         status: "hud-right", abilities: "hud-right", chat: "hud-right", who: "hud-right",
-        professions: "hud-overlay-body"
+        professions: "hud-overlay-body", map: "hud-overlay-body"
     };
 
     // ------------------------------------------------------------------
@@ -126,7 +132,11 @@
           render: function () { renderProfessions(); },
           // The activity bar must stay reachable even in the (theoretical)
           // no-professions-but-harvesting state.
-          available: function () { return (S.professions || []).length > 0 || !!S.craft; } }
+          available: function () { return (S.professions || []).length > 0 || !!S.craft; } },
+        { key: "map", title: "Map", hotkey: "m",
+          render: function () { if (mapMod) mapMod.renderOverlay(); },
+          // Account-gated: guests map nothing, so they get no launcher.
+          available: function () { return !!(mapMod && mapMod.enabled()); } }
     ];
     var overlayName = null;   // open overlay app key (desktop), or null
 
@@ -556,7 +566,12 @@
                 break;
             case "Char.Status": S.status = data; renderVitals(); renderStatus(); renderGroup(); break;
             case "Game.Time": S.time = data; renderVitals(); break;
-            case "Room.Info": S.room = data; renderRoom(); break;
+            case "Room.Info":
+                S.room = data; renderRoom();
+                // Discovery accrual, zone-graph fetch, autowalk confirmation
+                // and the visibility gate all hang off this one call.
+                if (mapMod) mapMod.onRoom(data);
+                break;
             case "Room.Occupants": applyOccupants(data); break;
             case "Char.Equipment":
                 S.equipment = (data && data.items) || []; renderEquipment(); renderInventory();
@@ -897,15 +912,55 @@
         }
         fill(container, kids);
     }
+    function setRoseTab(t) {
+        roseTab = t === "map" ? "map" : "rose";
+        try { localStorage.setItem("ishar.roseTab", roseTab); } catch (e) {}
+        renderRoom();
+    }
     function renderRoom() {
         var r = S.room;
-        var head = el("div", { class: "rose-head" }, [
+        var titles = el("div", { class: "rose-titles" }, [
             el("span", { class: "rose-name", text: stripColor((r && r.name) || "Somewhere") }),
             r && r.area ? el("span", { class: "rose-area dim", text: stripColor(r.area) + (r.environment ? " · " + stripColor(r.environment) : "") }) : null
         ]);
+        // The pinned Room panel is a two-tab micro-group (Rose | Map) once the
+        // map module is live; rose-only otherwise. The phone rose overlay is
+        // untouched — its job is tap-to-move, the big map serves phones.
+        var mapOn = !!(mapMod && mapMod.enabled());
+        var tab = mapOn ? roseTab : "rose";
+        var tabs = null;
+        if (mapOn) {
+            tabs = el("div", { class: "rose-tabs" }, [
+                el("button", {
+                    type: "button", class: tab === "rose" ? "active" : "",
+                    "aria-pressed": tab === "rose" ? "true" : "false",
+                    text: "Rose", onclick: function () { setRoseTab("rose"); }
+                }),
+                el("button", {
+                    type: "button", class: tab === "map" ? "active" : "",
+                    "aria-pressed": tab === "map" ? "true" : "false",
+                    text: "Map", onclick: function () { setRoseTab("map"); }
+                }),
+                tab === "map" ? el("button", {
+                    type: "button", class: "rose-expand", text: "⤢",
+                    title: "Open map (Ctrl+M)", "aria-label": "Open map window",
+                    onclick: function () { toggleOverlay("map"); }
+                }) : null
+            ]);
+        }
+        var head = el("div", { class: "rose-head" }, [titles, tabs]);
         var body = el("div", { class: "rose-body" });
-        renderRose(body, false);
-        fill(dom.room, [head, body]);
+        if (tab === "map") mapMod.renderMini(body);
+        else renderRose(body, false);
+        // The current room's note (map feature) rides the Room panel in both
+        // tabs — one quiet clamped line; tap to edit.
+        var note = mapOn && mapMod.currentNote ? mapMod.currentNote() : "";
+        var noteRow = note ? el("button", {
+            type: "button", class: "rose-note", text: note,
+            title: "Edit room note",
+            onclick: function () { mapMod.editCurrentNote(); }
+        }) : null;
+        fill(dom.room, [head, body, noteRow]);
         if (dom.roseOverlay) {
             renderRose(dom.roseOverlay, true);
             updateRoseOverlay();
@@ -2089,7 +2144,11 @@
             var b = dom.micro && dom.micro.querySelector('button[data-overlay="' + o.key + '"]');
             if (b) b.setAttribute("aria-pressed", o.key === overlayName ? "true" : "false");
         });
-        if (dom.overlay) dom.overlay.hidden = !ov;
+        if (dom.overlay) {
+            dom.overlay.hidden = !ov;
+            // Lets CSS size the window per app (the map wants more room).
+            dom.overlay.setAttribute("data-app", ov ? ov.key : "");
+        }
         if (dom.overlayTitle) dom.overlayTitle.textContent = ov ? ov.title : "";
         if (ov) {
             ov.render();
@@ -3162,7 +3221,11 @@
         updateRoseOverlay();
         api.onLayoutChange();
     }
-    function setConnected(on) { S.connected = !!on; renderVitals(); }
+    function setConnected(on) {
+        S.connected = !!on;
+        renderVitals();
+        if (mapMod) mapMod.onConnected(S.connected);
+    }
 
     function restorePrefs() {
         var saved = null, tab = null, colL = null, colR = null, rose = null;
@@ -3198,6 +3261,7 @@
         S.tgtHostile = null; S.tgtFriendly = null;
         lastVitalsBody = null;
         lastProfessionsBody = null;
+        if (mapMod) mapMod.onReset();
         renderAll();
     }
 
@@ -3332,6 +3396,36 @@
     }
 
     // ------------------------------------------------------------------
+    // Map subsystem seam — hud-map.js registers here and receives a small
+    // context so the mapper reuses this file's primitives (el/fill/send/
+    // menus/tips) instead of duplicating them. registerMap runs at script
+    // load, before init(); every ctx function resolves its state lazily.
+    // ------------------------------------------------------------------
+    function registerMap(mod) {
+        if (!mod || typeof mod.attach !== "function") return;
+        mapMod = mod;
+        mod.attach({
+            el: el, fill: fill, stripColor: stripColor,
+            send: sendCmd,
+            prefill: function (t) { api.prefill(t); },
+            openMenu: openMenu, closeMenu: closeMenu,
+            showTip: showTip, hideTip: hideTip,
+            toggleOverlay: toggleOverlay,
+            overlayVisible: overlayVisible,
+            isMobile: function () { return mqMobile.matches; },
+            markUnread: function (on) { markOverlayUnread("map", on); },
+            updateMicro: updateMicro,
+            rerenderRoom: function () { if (dom.room) renderRoom(); },
+            connected: function () { return S.connected; },
+            // Autowalk's combat brake: an opponent bar or anyone beating on us.
+            inCombat: function () {
+                if (S.vitals && S.vitals.opponent_hp_pct != null) return true;
+                return (S.occupants || []).some(function (o) { return o.fighting_you && !o.is_dead; });
+            }
+        });
+    }
+
+    // ------------------------------------------------------------------
     // Demo mode (/connect?demo=1)
     // ------------------------------------------------------------------
     function demo() {
@@ -3454,5 +3548,5 @@
         setConnected(true);
     }
 
-    window.IsharHUD = { init: init, onGmcp: onGmcp, reset: reset, setConnected: setConnected, completions: completions, demo: demo };
+    window.IsharHUD = { init: init, onGmcp: onGmcp, reset: reset, setConnected: setConnected, completions: completions, demo: demo, registerMap: registerMap };
 })();

@@ -1,10 +1,17 @@
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.generic.base import TemplateView
 
 from apps.connect.skill_icons import SKILL_ICONS
 
 
+@method_decorator(ensure_csrf_cookie, name="get")
 class ConnectView(TemplateView):
-    """MUD web client connection page."""
+    """MUD web client connection page.
+
+    ``ensure_csrf_cookie`` guarantees the CSRF cookie is set so the HUD
+    map's POST endpoints (``hud-map.js``) can send ``X-CSRFToken``.
+    """
 
     template_name = "connect.html"
 
