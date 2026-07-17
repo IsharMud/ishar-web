@@ -47,6 +47,7 @@
     var stateLoaded = {};   // zoneId -> true once /map/state merged
     var dirty = [];         // discovered vnums not yet flushed to the server
     var flushTimer = null;
+    var pendingFocus = null; // vnum to refocus the big map on once its zone loads
 
     // ------------------------------------------------------------------
     // Geometry
@@ -302,9 +303,13 @@
             };
         });
 
-        // Cross-zone stubs.
-        var outStubs = {};   // vnum -> [{d, zone, zname, t}]
+        // Cross-zone exits. `outFrom` is the complete adjacency (every
+        // cross-zone exit regardless of geometry) that cross-zone
+        // pathfinding walks; `outStubs` is the drawable horizontal subset.
+        var outStubs = {};   // vnum -> [{d, zone, zname, t}]  (drawn arrows)
+        var outFrom = {};    // vnum -> [{f, d, t, zone, zname}]  (all crosses)
         (graph.out || []).forEach(function (o) {
+            (outFrom[o.f] = outFrom[o.f] || []).push(o);
             if (!pos[o.f]) return;
             if (DELTA[o.d] && o.d !== "u" && o.d !== "d") {
                 (outStubs[o.f] = outStubs[o.f] || []).push(o);
@@ -317,7 +322,7 @@
         var zList = Object.keys(zsUsed).map(Number).sort(function (a, b) { return a - b; });
         return {
             pos: pos, cells: cells, edges: edges, portals: portals,
-            vert: vert, out: outStubs, zList: zList,
+            vert: vert, out: outStubs, outFrom: outFrom, zList: zList,
             exitsFrom: exitsFrom, byVnum: byVnum
         };
     }
@@ -625,6 +630,12 @@
         if (cur.vnum != null && vnumZone[cur.vnum] === zoneId) {
             enterZone(zoneId, cur.vnum);
         }
+        // A cross-zone "Go to <zone>" awaiting this graph refocuses now.
+        if (pendingFocus != null && vnumZone[pendingFocus] === zoneId) {
+            var fv = pendingFocus;
+            pendingFocus = null;
+            focusZone(zoneId, fv);
+        }
     }
 
     function loadState(zoneId) {
@@ -741,6 +752,7 @@
         cur.z = p ? p.z : 0;
         accrue(vnum, zoneId);
         walkOnRoom(vnum);
+        shownPathOnRoom(vnum);
         redraw();
     }
 
@@ -764,6 +776,7 @@
 
     function onReset() {
         cancelWalk("reset");
+        setShownPath(null);
         cur.vnum = null;
         cur.unseen = false;
         redraw();
@@ -791,7 +804,7 @@
             if (v == null || v === cur.vnum) return;
             var step = adjacentStep(cur.vnum, v);
             if (step) { H.send(step); return; }
-            mapRoomMenu(v, { getBoundingClientRect: function () {
+            mapRoomMenu(cur.zone, v, { getBoundingClientRect: function () {
                 return { left: ev.clientX, right: ev.clientX,
                          top: ev.clientY, bottom: ev.clientY,
                          width: 0, height: 0 };
@@ -850,10 +863,19 @@
     // with a toolbar (zone name · z-levels · search · zoom · center).
     // ------------------------------------------------------------------
     var big = null;   // {root, canvas, wrap, zoneLabel, zRow, search, count, anchor}
-    var bigView = { cx: 0, cy: 0, scale: 30, z: 0, follow: true };
+    // `zone` is the zone the big map is *looking at* — normally the player's
+    // (cur.zone), but a cross-zone "Go to" or a border tap can point it at an
+    // adjacent zone while the player stays put. viewedZone() resolves it.
+    var bigView = { cx: 0, cy: 0, scale: 30, z: 0, follow: true, zone: null };
     var BIG_MIN = 12, BIG_MAX = 75;
     var searchState = { q: "", list: [], i: -1 };
     var hoverVnum = null;
+    var pendingFocusView = null; // {zone, vnum} to apply once the overlay is up
+    var bigZoneShown = null;     // last zone the big map's chrome was built for
+
+    function viewedZone() {
+        return bigView.zone != null ? bigView.zone : cur.zone;
+    }
 
     function bigOpen() {
         return !!(big && big.root.isConnected && H && H.overlayVisible("map"));
@@ -881,7 +903,7 @@
             onclick: function () { zoomBy(1.3); } });
         var btnMe = H.el("button", { type: "button", class: "map-btn", text: "◎",
             title: "Center on me", "aria-label": "Center on my room",
-            onclick: function () { bigView.follow = true; centerOnMe(); redrawBig(); } });
+            onclick: function () { bigView.follow = true; centerOnMe(); redraw(); } });
         var toolbar = H.el("div", { class: "map-toolbar" },
             [zoneLabel, zRow, search, count, btnOut, btnIn, btnMe]);
         var foot = H.el("div", { class: "map-foot" });
@@ -889,7 +911,7 @@
         var root = H.el("div", { class: "map-app" }, [toolbar, wrap, foot]);
         big = { root: root, canvas: canvas, wrap: wrap, zoneLabel: zoneLabel,
                 zRow: zRow, search: search, count: count, anchor: anchor,
-                foot: foot };
+                foot: foot, btnMe: btnMe };
 
         // --- search: filter discovered rooms, Enter cycles + centers ---
         search.addEventListener("input", function () {
@@ -903,7 +925,8 @@
                 ev.preventDefault();
                 searchState.i = (searchState.i + 1) % searchState.list.length;
                 var v = searchState.list[searchState.i];
-                var p = cur.zone != null && zones[cur.zone].layout.pos[v];
+                var vz = viewedZone();
+                var p = vz != null && zones[vz].layout.pos[v];
                 if (p) {
                     bigView.follow = false;
                     bigView.cx = p.x; bigView.cy = p.y; bigView.z = p.z;
@@ -964,9 +987,10 @@
             if (Object.keys(pointers).length < 2) pinchDist = null;
             if (ev.type === "pointerup" && wasDrag && !wasDrag.moved) {
                 var r = canvas.getBoundingClientRect();
-                var v = hitTest(cur.zone, bigView, canvas,
+                var v = hitTest(viewedZone(), bigView, canvas,
                                 ev.clientX - r.left, ev.clientY - r.top);
-                if (v != null) mapRoomMenu(v, syntheticAnchor(ev.clientX, ev.clientY));
+                if (v != null) mapRoomMenu(viewedZone(), v,
+                                           syntheticAnchor(ev.clientX, ev.clientY));
             }
             if (ev.type === "pointerup" || ev.type === "pointercancel") drag = null;
         }
@@ -986,7 +1010,7 @@
             canvas.addEventListener("mousemove", function (ev) {
                 if (Object.keys(pointers).length) return;   // mid-drag
                 var r = canvas.getBoundingClientRect();
-                var v = hitTest(cur.zone, bigView, canvas,
+                var v = hitTest(viewedZone(), bigView, canvas,
                                 ev.clientX - r.left, ev.clientY - r.top);
                 if (v === hoverVnum) return;
                 hoverVnum = v;
@@ -1006,9 +1030,10 @@
     }
 
     function showRoomTip(v) {
-        var zone = zones[cur.zone];
+        var zid = viewedZone();
+        var zone = zones[zid];
         if (!zone || !big) return;
-        var fs = fogSet(cur.zone);
+        var fs = fogSet(zid);
         var room = zone.layout.byVnum[v];
         var p = zone.layout.pos[v];
         if (!p) return;
@@ -1049,18 +1074,60 @@
 
     function centerOnMe() {
         if (cur.zone == null || cur.vnum == null) return;
+        bigView.zone = cur.zone;   // following the player snaps back on-zone
         var p = zones[cur.zone].layout.pos[cur.vnum];
         if (p) { bigView.cx = p.x; bigView.cy = p.y; bigView.z = p.z; }
-        updateZRow();
+    }
+
+    // Point the big map at another (already-loaded) zone without moving the
+    // player. Opens the overlay if it isn't up yet.
+    function focusZone(zoneId, vnum) {
+        pendingFocusView = { zone: zoneId, vnum: vnum };
+        if (!bigOpen() && H && H.toggleOverlay) H.toggleOverlay("map");
+        applyFocus();
+    }
+    function applyFocus() {
+        if (!pendingFocusView || !big) return;
+        var f = pendingFocusView;
+        if (!zones[f.zone]) return;   // graph not here yet; renderOverlay retries
+        pendingFocusView = null;
+        mergeLocalFog(f.zone);   // show the neighbor's remembered fog at once
+        bigView.zone = f.zone;
+        bigView.follow = false;
+        var p = zones[f.zone].layout.pos[f.vnum];
+        if (p) { bigView.cx = p.x; bigView.cy = p.y; bigView.z = p.z; }
+        searchState = { q: "", list: [], i: -1 };
+        if (big.search) big.search.value = "";
+        bigZoneShown = f.zone;
+        updateZoneLabel(); updateZRow(); updateSearchCount(); updateMeButton();
+        redrawBig();
+    }
+    // Menu action: jump the map to an adjacent zone, loading it if needed.
+    function goToZone(zoneId, vnum, zname) {
+        if (zones[zoneId]) { focusZone(zoneId, vnum); return; }
+        pendingFocus = vnum;
+        if (!bigOpen() && H && H.toggleOverlay) H.toggleOverlay("map");
+        if (big) big.zoneLabel.textContent = (zname || "Loading") + " …";
+        requestGraph(vnum);
+    }
+    // The ◎ button doubles as "return to my location" when off-zone.
+    function updateMeButton() {
+        if (!big || !big.btnMe) return;
+        var off = cur.zone != null && bigView.zone != null &&
+                  bigView.zone !== cur.zone;
+        big.btnMe.classList.toggle("active", off);
+        big.btnMe.title = off ? "Return to my location" : "Center on me";
+        big.btnMe.setAttribute("aria-label", big.btnMe.title);
     }
 
     function rebuildSearch() {
         searchState.list = [];
         searchState.i = -1;
         var q = searchState.q.trim().toLowerCase();
-        if (!q || cur.zone == null) return;
-        var zone = zones[cur.zone];
-        var fs = fogSet(cur.zone);
+        var zid = viewedZone();
+        if (!q || zid == null) return;
+        var zone = zones[zid];
+        var fs = fogSet(zid);
         zone.graph.rooms.forEach(function (r) {
             if (fs[r.v] &&
                 H.stripColor(r.n).toLowerCase().indexOf(q) !== -1) {
@@ -1076,8 +1143,9 @@
     }
 
     function updateZRow() {
-        if (!big || cur.zone == null) return;
-        var zList = zones[cur.zone].layout.zList;
+        var zid = viewedZone();
+        if (!big || zid == null) return;
+        var zList = zones[zid].layout.zList;
         H.fill(big.zRow, zList.length > 1 ? zList.map(function (z) {
             return H.el("button", {
                 type: "button",
@@ -1090,7 +1158,10 @@
     }
     function updateZoneLabel() {
         if (!big) return;
-        big.zoneLabel.textContent = cur.zone != null ? zones[cur.zone].name : "";
+        var zid = viewedZone();
+        big.zoneLabel.textContent = zid != null && zones[zid] ? zones[zid].name : "";
+        var off = cur.zone != null && zid != null && zid !== cur.zone;
+        big.zoneLabel.classList.toggle("offzone", off);
     }
 
     function renderOverlay() {
@@ -1101,28 +1172,34 @@
             panel.textContent = "";
             panel.appendChild(big.root);
         }
-        if (bigView.follow) centerOnMe();
+        if (pendingFocusView) applyFocus();
+        else if (bigView.follow) centerOnMe();
+        bigZoneShown = viewedZone();
         updateZoneLabel();
         updateZRow();
+        updateMeButton();
         rebuildSearch();
         updateSearchCount();
         requestAnimationFrame(redrawBig);
     }
 
     function redrawBig() {
-        if (!bigOpen() || cur.zone == null) return;
-        drawMap(big.canvas, cur.zone, bigView, {
+        var zid = viewedZone();
+        if (!bigOpen() || zid == null) return;
+        drawMap(big.canvas, zid, bigView, {
             curVnum: cur.vnum, unseen: cur.unseen,
             pathVnums: walkPathVnums(), pathEdges: walkPathEdges(),
             searchVnum: searchState.i >= 0 ? searchState.list[searchState.i] : null
         });
     }
 
-    // Room menu (tap/click a room on either surface).
-    function mapRoomMenu(v, anchor) {
-        var zone = zones[cur.zone];
+    // Room menu (tap/click a room on either surface). `zoneId` is the zone
+    // the tapped room belongs to — the minimap passes cur.zone, the big map
+    // passes viewedZone() (which may be an adjacent zone).
+    function mapRoomMenu(zoneId, v, anchor) {
+        var zone = zones[zoneId];
         if (!zone) return;
-        var fs = fogSet(cur.zone);
+        var fs = fogSet(zoneId);
         var room = zone.layout.byVnum[v];
         var name = fs[v] && room ? H.stripColor(room.n) : "Unexplored";
         var acts = [];
@@ -1142,6 +1219,20 @@
                 });
             }
         }
+        // Cross-zone jumps: one entry per adjacent zone this room borders.
+        if (fs[v]) {
+            var seenZone = {};
+            (zone.layout.outFrom[v] || []).forEach(function (o) {
+                if (seenZone[o.zone]) return;
+                seenZone[o.zone] = true;
+                acts.push({
+                    label: "Go to " + (o.zname || "zone " + o.zone) + " →",
+                    fn: (function (oo) {
+                        return function () { goToZone(oo.zone, oo.t, oo.zname); };
+                    })(o)
+                });
+            });
+        }
         if (fs[v]) {
             acts.push({
                 label: noteFor(v) ? "Edit note…" : "Add note…",
@@ -1157,8 +1248,9 @@
     var notePop = null;   // {root, title, ta, vnum}
 
     function noteFor(v) {
-        if (cur.zone == null || v == null) return "";
-        var m = notes[cur.zone];
+        var zoneId = v == null ? null : vnumZone[v];
+        if (zoneId == null) return "";
+        var m = notes[zoneId];
         return (m && m[v]) || "";
     }
     function currentNote() { return H ? H.stripColor(noteFor(cur.vnum)) : ""; }
@@ -1191,7 +1283,7 @@
     }
     function openNoteEditor(v) {
         if (!notePop) buildNotePop();
-        var zone = zones[cur.zone];
+        var zone = zones[vnumZone[v]];
         var room = zone && zone.layout.byVnum[v];
         notePop.vnum = v;
         notePop.title.textContent = room ? H.stripColor(room.n) : "Room note";
@@ -1205,8 +1297,8 @@
     }
     function commitNote(v, text) {
         text = String(text || "").trim().slice(0, 2000);
-        var zoneId = cur.zone;
-        if (zoneId == null || v == null) { closeNoteEditor(); return; }
+        var zoneId = v == null ? null : vnumZone[v];
+        if (zoneId == null) { closeNoteEditor(); return; }
         var m = notes[zoneId] = notes[zoneId] || {};
         var prev = m[v] || "";
         if (text) m[v] = text; else delete m[v];
@@ -1245,25 +1337,54 @@
     var STEP_PAUSE_MS = 250;   // between confirmed steps (server pacing)
     var STEP_TIMEOUT_MS = 5000;
 
+    // Zone-agnostic discovery/frontier tests, so pathfinding can reason
+    // about rooms in any loaded zone (a cross-zone destination lives in a
+    // different fog set than the one the player is standing in).
+    function isSeen(v) {
+        var z = vnumZone[v];
+        return z != null && !!fogSet(z)[v];
+    }
+    function isFrontierGlobal(v) {
+        var z = vnumZone[v];
+        return z != null && !!frontier(z)[v];
+    }
+    // Every directed exit leaving `v`: in-zone edges plus cross-zone exits
+    // (which carry the player across a zone boundary in one step).
+    function neighborsOf(v) {
+        var z = vnumZone[v];
+        if (z == null || !zones[z]) return [];
+        var L = zones[z].layout;
+        var list = L.exitsFrom[v] || [];
+        var cross = L.outFrom[v];
+        if (cross && cross.length) {
+            list = list.concat(cross.map(function (o) {
+                return { t: o.t, d: o.d };
+            }));
+        }
+        return list;
+    }
+
     // BFS shortest path from `from` to `to` over directed exits whose
     // SOURCE is discovered; an undiscovered frontier room is admissible
-    // only as the destination. Deterministic (exitsFrom is pre-sorted).
+    // only as the destination. Spans zones via cross-zone exits, so the
+    // walker can be routed into an adjacent zone. Deterministic
+    // (exitsFrom is pre-sorted; cross exits append in server order).
     function findPath(from, to) {
-        if (cur.zone == null || from == null || to == null || from === to) return null;
-        var zone = zones[cur.zone];
-        var fs = fogSet(cur.zone), fr = frontier(cur.zone);
-        if (!fs[from] || (!fs[to] && !fr[to])) return null;
+        if (from == null || to == null || from === to) return null;
+        if (!isSeen(from)) return null;
+        if (!isSeen(to) && !isFrontierGlobal(to)) return null;
         var prev = {};
         prev[from] = null;
-        var queue = [from];
-        while (queue.length) {
-            var v = queue.shift();
+        var queue = [from], head = 0;
+        while (head < queue.length) {
+            var v = queue[head++];
             if (v === to) break;
-            if (!fs[v]) continue;   // frontier rooms are terminal
-            var outs = zone.layout.exitsFrom[v] || [];
+            if (!isSeen(v)) continue;   // frontier rooms are terminal
+            var outs = neighborsOf(v);
             for (var i = 0; i < outs.length; i++) {
                 var t = outs[i].t;
-                if (prev[t] !== undefined || (!fs[t] && !fr[t])) continue;
+                if (prev[t] !== undefined) continue;
+                if (t !== to && !isSeen(t) && !isFrontierGlobal(t)) continue;
                 prev[t] = { v: v, d: outs[i].d };
                 queue.push(t);
             }
@@ -1378,6 +1499,23 @@
         updateFoot();
         redraw();
     }
+    // Called on every sighted room: a shown path resolves (clears) once the
+    // player reaches its destination, and trims the leg already walked so the
+    // highlight shrinks as they follow it. Wandering off it leaves it intact.
+    function shownPathOnRoom(vnum) {
+        if (!shownPath || !shownPath.steps.length) return;
+        var steps = shownPath.steps;
+        if (vnum === steps[steps.length - 1].expect) {
+            setShownPath(null);   // arrived — the route is resolved
+            return;
+        }
+        for (var i = 0; i < steps.length; i++) {
+            if (steps[i].from === vnum) {
+                if (i > 0) { shownPath = { steps: steps.slice(i) }; updateFoot(); }
+                return;
+            }
+        }
+    }
 
     function activePath() { return walk || shownPath; }
     function walkPathVnums() {
@@ -1437,11 +1575,20 @@
 
     function redraw() {
         redrawMini();
-        if (bigOpen()) {
-            if (bigView.follow) { centerOnMe(); }
-            updateZoneLabel();
-            redrawBig();
+        if (!bigOpen()) return;
+        if (bigView.follow) centerOnMe();
+        // Following the player across a zone border rebuilds the per-zone
+        // chrome (z-levels, search index) exactly once, not every frame.
+        var zid = viewedZone();
+        if (zid !== bigZoneShown) {
+            bigZoneShown = zid;
+            updateZRow();
+            rebuildSearch();
+            updateSearchCount();
         }
+        updateZoneLabel();
+        updateMeButton();
+        redrawBig();
     }
 
     // ------------------------------------------------------------------
@@ -1523,18 +1670,50 @@
             rooms: rooms, exits: exits, out: out
         };
     }
+    // A second, adjacent demo zone reached by the forest's west stub, so
+    // cross-zone refocus ("Go to Kingdom of Jolnara →") and a cross-zone
+    // walk (3001 → 5003, over the 3030→5001 border) are both demoable.
+    function demoGraph2() {
+        var rooms = [
+            { v: 5001, n: "Jolnaran Border Post", t: "Field" },
+            { v: 5002, n: "Dusty Cart Track", t: "Field" },
+            { v: 5003, n: "Village Square", t: "City" },
+            { v: 5004, n: "Herbalist's Hut", t: "Indoor" },
+            { v: 5005, n: "Wildflower Meadow", t: "Field" }
+        ];
+        var exits = [
+            { f: 5001, d: "w", t: 5002 }, { f: 5002, d: "e", t: 5001 },
+            { f: 5002, d: "w", t: 5003 }, { f: 5003, d: "e", t: 5002 },
+            { f: 5003, d: "n", t: 5004 }, { f: 5004, d: "s", t: 5003 },
+            { f: 5003, d: "s", t: 5005 }, { f: 5005, d: "n", t: 5003 }
+        ];
+        var out = [
+            { f: 5001, d: "e", t: 3030, zone: 90, zname: "Ishar Nexus" }
+        ];
+        return {
+            zone: { id: 91, name: "Kingdom of Jolnara" },
+            rooms: rooms, exits: exits, out: out
+        };
+    }
     function seedDemo() {
         cfg.demo = true;
         registerGraph(demoGraph());
-        // ~60% explored: the plaza + east + the quad, not the forest/underlevels.
+        registerGraph(demoGraph2());
+        // ~60% explored: the plaza + east + the quad + the forest verge (the
+        // border room), not the underlevels/grove.
         var seen = [3001, 3002, 3005, 3006, 3008, 3010, 3011, 3012, 3013,
-                    3014, 3100, 3500, 3020];
+                    3014, 3100, 3500, 3020, 3030];
         var fs = fogSet(90);
         seen.forEach(function (v) { fs[v] = true; });
+        // The near end of the neighbor is explored; its far rooms stay fog.
+        var seen2 = [5001, 5002, 5003];
+        var fs2 = fogSet(91);
+        seen2.forEach(function (v) { fs2[v] = true; });
         notes[90] = {
             3005: "Hadeon buys curios here",
             3014: "stash spot — check after reboot"
         };
+        notes[91] = { 5003: "rare reagents restock at dawn" };
         fogStamp++;
     }
 
@@ -1574,7 +1753,14 @@
             notes: notes,
             cur: cur,
             demoGraph: demoGraph,
+            demoGraph2: demoGraph2,
+            seedDemo: seedDemo,
             findPath: findPath,
+            onRoom: onRoom,
+            setShownPath: setShownPath,
+            shownPath: function () { return shownPath; },
+            viewedZone: viewedZone,
+            focusZone: focusZone,
             walking: function () { return !!walk; }
         }
     };
