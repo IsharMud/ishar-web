@@ -478,7 +478,12 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
   `enchant <item> <recipe>`). Native `title` holds the component summary.
   The same `.tier-*` classes color the enchanter's **`Disenchant (rN)`**
   entry in inventory item context menus (from the item's
-  `disenchant_rank`).
+  `disenchant_rank`). Tapping a recipe's name discloses `.recipe-comps` —
+  the per-component have/need breakdown (the touch path to "what am I
+  missing?"; the hover `title` is desktop convenience only). Note one
+  deliberate palette divergence: the trivial tier renders `--ac-dim`
+  (de-emphasis) where the game shows white — worthless-for-skillup recipes
+  should recede, not match body text.
 
 Verify with `/connect?demo=1` (sample GMCP feeds, no server needed).
 

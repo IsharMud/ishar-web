@@ -812,9 +812,20 @@ body.connect-page #content { padding: .5rem !important; }
     letter-spacing: .06em; color: var(--ac-dim); padding: 6px 0 2px;
 }
 .recipe-row { display: flex; align-items: center; gap: 6px; padding: 3px 0; }
-.recipe-name { font-size: .82rem; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* The name is the component-details disclosure — the TOUCH path to "what am
+   I missing?" (the hover title is desktop convenience only). */
+.recipe-toggle {
+    flex: 1; min-width: 0; display: block; text-align: left;
+    background: none; border: 0; padding: 0; cursor: pointer;
+}
+.recipe-name { font-size: .82rem; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .recipe-rank { flex: none; font-variant-numeric: tabular-nums; }
 .recipe-ok { flex: none; color: var(--ac-ok); }
+.recipe-comps { padding: 2px 0 6px 10px; border-left: 2px solid var(--ac-border); margin-left: 2px; }
+.recipe-comp { font-size: .74rem; padding: 1px 0; font-variant-numeric: tabular-nums; }
+.recipe-comp.ok { color: var(--ac-ok); }
+.recipe-comp.missing { color: var(--ac-danger); }
+.recipe-comp.loc { color: var(--ac-dim); }
 .prof-btn.off { opacity: .45; }
 
 /* Profession difficulty buckets (docs/gmcp_feeds.md) — the same palette the

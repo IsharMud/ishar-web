@@ -2216,18 +2216,55 @@
     function profBtn(label, fn, cls) {
         return el("button", { type: "button", class: "prof-btn" + (cls ? " " + cls : ""), text: label, onclick: fn });
     }
-    // Which professions' recipe lists are unfolded (session-local UI state).
+    // Which professions' recipe lists / recipes' component details are
+    // unfolded (session-local UI state).
     var profOpen = {};
+    var recipeOpen = {};
+
+    // The tappable component breakdown under a recipe row — the touch path
+    // to "what am I missing?" (the hover title is desktop convenience only).
+    function recipeCompsBlock(r, counts, treasure) {
+        var block = el("div", { class: "recipe-comps" });
+        ((r && r.components) || []).forEach(function (comp) {
+            if (!comp) return;
+            var ok, text;
+            if (comp.kind === "item") {
+                var need = Number(comp.count) || 1;
+                var have = counts[comp.vnum] || 0;
+                ok = have >= need;
+                text = need + "× " + stripColor(comp.name || "component") + " (have " + have + ")";
+            } else if (comp.kind === "treasure") {
+                var amt = Number(comp.amount) || 0;
+                ok = treasure >= amt;
+                text = amt + " gold of treasure (have " + treasure + ")";
+            } else if (comp.kind === "location") {
+                ok = null;   // display-only; never blocks craftable
+                text = "requires " + (comp.label || "a location");
+            } else {
+                return;
+            }
+            block.appendChild(el("div", {
+                class: "recipe-comp" + (ok === true ? " ok" : ok === false ? " missing" : " loc"),
+                text: text
+            }));
+        });
+        if (!block.firstChild) block.appendChild(el("div", { class: "recipe-comp loc", text: "No components required." }));
+        return block;
+    }
 
     function recipeRow(p, r, counts, treasure) {
         var rank = Number(p.rank) || 0;
         var tier = profTier((Number(r.min_rank) || 1) - rank);
         var craftable = recipeCraftable(r, counts, treasure);
         var targeted = r.target_gear_type != null;
+        var isOpen = !!recipeOpen[r.id];
         var actBtn;
         if (targeted) {
+            var targets = enchantTargets(r);
             actBtn = profBtn("Enchant…", function (e) {
-                var targets = enchantTargets(r);
+                var opener = e && e.target && e.target.closest(".prof-btn");
+                // Second tap on the opener toggles the picker closed.
+                if (menuOpen && menuAnchorEl === opener) { closeMenu(); return; }
                 var acts = targets.map(function (it) {
                     return {
                         label: stripColor(it.name || "item"),
@@ -2238,25 +2275,42 @@
                         }
                     };
                 });
-                if (!acts.length) acts = [{ label: "No matching item carried", fn: function () {} }];
-                openMenu("Enchant · " + stripColor(r.name || ""), acts, e && e.target);
-            }, "menu-opener");   // exempt from the outside-click menu dismissal
+                if (!acts.length) acts = [{ label: "No matching item carried", fn: function () {}, keep: true }];
+                openMenu("Enchant · " + stripColor(r.name || ""), acts, opener);
+            }, "menu-opener" + (targets.length ? "" : " off"));   // .menu-opener: exempt from outside-click dismissal
         } else {
             actBtn = profBtn("Craft", function () {
                 sendCmd(profCmd(p, nameOf(r.name)));
                 dismissProfessionsWindow();
             }, craftable ? "" : "off");
         }
-        return el("div", { class: "recipe-row", title: recipeComponentsText(r) || null }, [
-            el("span", { class: "recipe-name tier-" + tier, text: stripColor(r.name || "?") }),
+        var row = el("div", { class: "recipe-row", title: recipeComponentsText(r) || null }, [
+            el("button", {
+                type: "button", class: "recipe-toggle", "data-focus": "r" + r.id,
+                "aria-expanded": isOpen ? "true" : "false",
+                onclick: function () { closeMenu(); recipeOpen[r.id] = !recipeOpen[r.id]; renderProfessions(); }
+            }, [
+                el("span", { class: "recipe-name tier-" + tier, text: stripColor(r.name || "?") })
+            ]),
             el("span", { class: "tag recipe-rank tier-" + tier, text: "r" + (r.min_rank != null ? r.min_rank : "?") }),
             craftable ? el("span", { class: "tag recipe-ok", title: "You have the components", text: "✓" }) : null,
             el("span", { class: "prof-actions" }, [actBtn])
         ]);
+        var wrap = el("div", { class: "recipe-item" }, [row]);
+        if (isOpen) wrap.appendChild(recipeCompsBlock(r, counts, treasure));
+        return wrap;
     }
 
     function renderProfessions() {
         if (!dom.professions) return;
+        // Wholesale rebuilds run on every inventory delta while the overlay
+        // is open — carry keyboard focus across (a11y: don't dump a keyboard/
+        // switch user to <body> mid-session).
+        var focusKey = null;
+        if (document.activeElement && dom.professions.contains(document.activeElement) &&
+            document.activeElement.getAttribute) {
+            focusKey = document.activeElement.getAttribute("data-focus");
+        }
         var kids = [];
         var c = S.craft;
         if (c) {
@@ -2294,8 +2348,9 @@
             });
             var row = el("div", { class: "prof-row" }, [
                 el("button", {
-                    type: "button", class: "prof-head", "aria-expanded": isOpen ? "true" : "false",
-                    onclick: function () { profOpen[p.id] = !profOpen[p.id]; renderProfessions(); }
+                    type: "button", class: "prof-head", "data-focus": "p" + p.id,
+                    "aria-expanded": isOpen ? "true" : "false",
+                    onclick: function () { closeMenu(); profOpen[p.id] = !profOpen[p.id]; renderProfessions(); }
                 }, [
                     el("span", { class: "prof-caret", "aria-hidden": "true", text: isOpen ? "▾" : "▸" }),
                     el("span", { class: "prof-name", text: p.name || "?" }),
@@ -2329,6 +2384,10 @@
         });
         kids.push(el("div", { class: "prof-hint", text: "profession — overview & trainers · harvest <node> — gather" }));
         fill(dom.professions, kids);
+        if (focusKey && /^[a-z0-9_-]+$/i.test(focusKey)) {
+            var refocus = dom.professions.querySelector('[data-focus="' + focusKey + '"]');
+            if (refocus) refocus.focus();
+        }
         tickCraft();
     }
 
@@ -2341,9 +2400,11 @@
     function sendCmd(c) { c = safeCmd(c); if (c) api.send(c); }
 
     var menuOpen = false;
+    var menuAnchorEl = null;   // the element the open menu was anchored to
     function closeMenu() {
         if (!menuOpen) return;
         menuOpen = false;
+        menuAnchorEl = null;
         dom.menu.hidden = true;
         dom.menu.classList.remove("menu-picker");
         while (dom.menu.firstChild) dom.menu.removeChild(dom.menu.firstChild);
@@ -2398,13 +2459,16 @@
                     else if (a.prefill != null) api.prefill(a.prefill);
                     else if (a.cmd) sendCmd(a.cmd);
                     closeMenu();
-                    if (sheetName && mqMobile.matches) setSheet(null);
+                    // `keep`: informational rows shouldn't throw away the
+                    // phone sheet the menu was opened from.
+                    if (!a.keep && sheetName && mqMobile.matches) setSheet(null);
                 }
             }));
         });
         fill(dom.menu, kids);
         dom.menu.hidden = false;
         menuOpen = true;
+        menuAnchorEl = anchor || null;
         positionMenu(anchor);
     }
     function positionMenu(anchor) {
