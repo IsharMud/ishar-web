@@ -777,7 +777,13 @@ body.connect-page #content { padding: .5rem !important; }
 }
 .prof-row { padding: 8px 2px; border-bottom: 1px solid var(--ac-border); }
 .prof-row:last-of-type { border-bottom: 0; }
-.prof-head { display: flex; align-items: baseline; gap: 8px; }
+/* The header is the recipe-list disclosure — a full-width unstyled button. */
+.prof-head {
+    display: flex; align-items: baseline; gap: 8px; width: 100%;
+    background: none; border: 0; padding: 0; cursor: pointer; text-align: left;
+    color: var(--ac-text);
+}
+.prof-caret { color: var(--ac-dim); font-size: .8rem; }
 .prof-name { font-weight: 700; font-size: .9rem; color: var(--ac-text); }
 .prof-tier { flex: none; }
 .prof-rank { margin-left: auto; font-size: .74rem; color: var(--ac-dim); font-variant-numeric: tabular-nums; }
@@ -798,6 +804,28 @@ body.connect-page #content { padding: .5rem !important; }
 .prof-btn:hover { border-color: var(--ac-accent); }
 .prof-empty, .prof-hint { font-size: .76rem; color: var(--ac-dim); padding: 6px 2px; }
 .prof-hint { border-top: 1px solid var(--ac-border); margin-top: 8px; font-family: monospace; }
+
+/* Recipe browser (Char.Recipes) inside a profession row. */
+.recipe-list { margin-top: 4px; padding-left: 14px; }
+.recipe-cat {
+    font-size: .68rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .06em; color: var(--ac-dim); padding: 6px 0 2px;
+}
+.recipe-row { display: flex; align-items: center; gap: 6px; padding: 3px 0; }
+.recipe-name { font-size: .82rem; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.recipe-rank { flex: none; font-variant-numeric: tabular-nums; }
+.recipe-ok { flex: none; color: var(--ac-ok); }
+.prof-btn.off { opacity: .45; }
+
+/* Profession difficulty buckets (docs/gmcp_feeds.md) — the same palette the
+   game's recipe/harvest lists color by. The .menu-item compounds outrank the
+   menu's own color rule (defined later) for the disenchant entry. */
+.tier-trivial, .menu-item.tier-trivial { color: var(--ac-dim); }
+.tier-easy,    .menu-item.tier-easy    { color: var(--ac-ok); }
+.tier-medium,  .menu-item.tier-medium  { color: var(--hud-gold); }
+.tier-hard,    .menu-item.tier-hard    { color: var(--hud-edge); }
+.tier-blocked, .menu-item.tier-blocked { color: var(--ac-danger); }
+
 /* Tablets show the micro-menu with a coarse pointer — bump its launchers too. */
 @media (pointer: coarse) {
     .prof-btn { min-height: 40px; padding: 6px 12px; }
