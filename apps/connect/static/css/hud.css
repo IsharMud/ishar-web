@@ -439,17 +439,38 @@ body.connect-page #content { padding: .5rem !important; }
 .row-more:hover { color: var(--ac-accent); background: var(--ac-bg); }
 
 /* ----- Generic rows (equipment / inventory) ----- */
+/* The row class is `.item-row`, NOT `.row`: Bootstrap's grid `.row` is loaded
+   globally, and its `.row > * { width: 100% }` would stack every cell (slot,
+   name, condition, ⋯) onto its own line. flex-wrap:nowrap keeps a row a row. */
 .row-list { list-style: none; margin: 0; padding: 0; }
-.row-list.sub { margin: 1px 0 3px 12px; }
-.row {
+.row-list.sub { margin: 1px 0 3px 14px; }
+.item-row {
     display: flex; align-items: center; gap: 6px; padding: 3px 4px; border-radius: 3px;
-    cursor: pointer; font-size: .82rem;
+    cursor: pointer; font-size: .82rem; flex-wrap: nowrap;
 }
-.row:hover { background: var(--ac-elev); }
-.row.sub { font-size: .78rem; color: var(--ac-dim); }
-.row.comp { color: var(--ac-text); }
-.row-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.item-row:hover { background: var(--ac-elev); }
+.item-row.sub { font-size: .78rem; color: var(--ac-dim); }
+.item-row.comp { color: var(--ac-text); }
+.row-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .slot { color: var(--ac-dim); font-size: .68rem; width: 56px; flex: none; text-transform: capitalize; }
+
+/* Condition as a single colour-coded dot (numeric % lives in the title).
+   Fixed width so it shares the lead column with a container's expand caret,
+   keeping item names aligned down the list. */
+.cond-dot { flex: none; width: .9rem; text-align: center; font-size: .55rem; line-height: 1; color: var(--ac-dim); }
+.cond-dot.cond-ok { color: var(--ac-ok); }
+.cond-dot.cond-mid { color: var(--hud-edge); }
+.cond-dot.cond-low { color: var(--ac-danger); }
+
+/* Expand caret on an open container row; toggles its contents (packs start
+   collapsed). Shares the lead column's width with .cond-dot. */
+.row-caret {
+    flex: none; width: .9rem; padding: 0; background: none; border: 0;
+    color: var(--ac-dim); cursor: pointer; font-size: .7rem; line-height: 1; text-align: center;
+}
+.row-caret:hover { color: var(--ac-accent); }
+/* Container state glyph (🔒 / 📦) for a closed or empty container. */
+.row-glyph { flex: none; color: var(--ac-dim); font-size: .82em; }
 .coins { margin: 5px 8px; font-size: .78rem; color: var(--hud-gold); }
 .comp-section { margin-top: 2px; }
 
@@ -877,8 +898,11 @@ body.connect-page #content { padding: .5rem !important; }
     /* Bigger touch target for the icon slots (still square). */
     .skill { width: 52px; height: 52px; }
     .skill .skill-icon { width: 34px; height: 34px; }
-    .row, .occ-row, .ab-row { min-height: 44px; padding: 8px 6px; }
+    .item-row, .occ-row, .ab-row { min-height: 44px; padding: 8px 6px; }
     .row-more { min-width: 40px; min-height: 40px; padding: 6px 8px; }
+    /* Taller (full row height) tap zone for the caret without widening the
+       lead column and shoving container names out of line with dotted rows. */
+    .row-caret { width: 1.6rem; min-height: 40px; }
     .action-btn { padding: 10px; }
     .sheet-close { padding: 8px 10px; }
     .panel-h-toggle { padding: 10px 8px; }

@@ -382,8 +382,19 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
 - **`.hud-btn`(`--icon`)** — the topbar button, aligned with `.ac-btn`.
 - **`#hud-dock button`** — icon-over-label phone tabs; `.unread` renders an
   amber dot (used by Chat).
-- **`.exit` compass, `.row` lists, `.kv`, `.aff`** — the in-panel widgets; all
-  have coarse-pointer bumps and `:focus-visible` rings.
+- **`.exit` compass, `.item-row` lists, `.kv`, `.aff`** — the in-panel widgets;
+  all have coarse-pointer bumps and `:focus-visible` rings.
+- **`.item-row`** — the equipment/inventory row (NB: **not** `.row` — that's
+  Bootstrap's grid class, loaded globally; see decisions.md). One nowrap flex
+  line: an optional lead cell (a `.row-caret` on an expandable container, else
+  a `.cond-dot`), `.row-name` (ellipsized), a `.tag` ×count, an optional
+  `.row-glyph` (🔒/📦) for a closed container, and the trailing `.row-more` ⋯.
+  Item condition is a **colour-coded `.cond-dot`** (● ok/mid/low, exact % in
+  the `title`), never a word on its own line. Worn containers expand inline
+  to a `.row-list.sub`; **packs start collapsed** and toggle via the caret
+  (`data-expand`, persisted in `ishar.itemsExpanded`). Identical stackable
+  rows are folded to one `×N` (the game emits duplicate rows; the HUD
+  defaults to stacking).
 - **`.skill` action bar** — the WoW-style bottom hotbar (`#hud-hotbar`): fixed,
   numbered, hotkey-addressable icon slots. Each `.skill` is a square holding a
   `.skill-icon` (a Game-Icons.net glyph, below), a `.skill-key` number badge,
