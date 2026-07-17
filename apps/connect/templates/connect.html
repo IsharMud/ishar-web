@@ -177,8 +177,8 @@
             <div id="hud-hotbar" class="empty"></div>
             <nav id="hud-micro" aria-label="Overlay windows">
                 <button type="button" class="micro-btn" data-overlay="professions" hidden
-                        aria-pressed="false" title="Professions (Ctrl+P)"
-                        aria-label="Professions (Ctrl+P)">
+                        aria-pressed="false" aria-haspopup="dialog" aria-controls="hud-overlay"
+                        title="Professions (Ctrl+P)" aria-label="Professions (Ctrl+P)">
                     {% bi "tools" %}
                     <span class="micro-strip" hidden></span>
                 </button>
@@ -287,7 +287,7 @@
     <!-- Desktop overlay window: the transient surface behind the micro-menu
        (one overlay app at a time; Esc / outside-click / ✕ dismiss). On phones
        the same panel nodes open in the bottom sheet instead. -->
-    <div id="hud-overlay" hidden>
+    <div id="hud-overlay" role="dialog" aria-labelledby="hud-overlay-title" tabindex="-1" hidden>
         <div class="overlay-head">
             <span id="hud-overlay-title" class="overlay-title"></span>
             <button type="button" class="sheet-close" id="hud-overlay-close" aria-label="Close window">

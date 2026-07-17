@@ -116,10 +116,16 @@
     // #hud-overlay window; phones open the same panel in the bottom sheet.
     // Hotkeys are Ctrl+<letter>, strict single-modifier.
     // ------------------------------------------------------------------
+    // Reserved hotkey letters (never register these): "l" (Ctrl+L clears the
+    // terminal — bound in connect.html and would be silently shadowed since
+    // this handler runs first). Ctrl+<letter> may shadow a browser default
+    // (Ctrl+P = print) — deliberate, and only while the app is available.
     var OVERLAYS = [
         { key: "professions", title: "Professions", hotkey: "p",
           render: function () { renderProfessions(); },
-          available: function () { return (S.professions || []).length > 0; } }
+          // The activity bar must stay reachable even in the (theoretical)
+          // no-professions-but-harvesting state.
+          available: function () { return (S.professions || []).length > 0 || !!S.craft; } }
     ];
     var overlayName = null;   // open overlay app key (desktop), or null
 
@@ -1815,9 +1821,16 @@
     // comes fully alive when the HUD runs installed/fullscreen (no tab strip).
     function wireHotkeys() {
         document.addEventListener("keydown", function (e) {
-            if (!hudOn || !S.connected) return;
-            // Esc closes the open overlay window before anything else claims it.
+            // Overlay keys are gated on the HUD only, not the connection —
+            // browsing a reference window while the link is down is fine.
+            if (!hudOn) return;
+            // Esc closes the open overlay window before anything else claims
+            // it. This listener registers before the page's Esc handler
+            // (IsharHUD.init runs first in connect.html), so stop the event
+            // here or the same press would also close the page's search /
+            // settings / history popovers behind the overlay.
             if (e.key === "Escape" && overlayName && !mqMobile.matches) {
+                e.stopImmediatePropagation();
                 setOverlay(null);
                 return;
             }
@@ -1837,6 +1850,7 @@
                     }
                 }
             }
+            if (!S.connected) return;
             if (e.key === "`" && e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
                 if (usedPages() > 1) { e.preventDefault(); flipHotbarPage(); }
                 return;
@@ -1983,6 +1997,8 @@
         return null;
     }
     function setOverlay(name) {
+        var prev = overlayName;
+        var hadFocus = dom.overlay && dom.overlay.contains(document.activeElement);
         var ov = name ? overlayByKey(name) : null;
         overlayName = ov ? ov.key : null;
         OVERLAYS.forEach(function (o) {
@@ -1993,7 +2009,17 @@
         });
         if (dom.overlay) dom.overlay.hidden = !ov;
         if (dom.overlayTitle) dom.overlayTitle.textContent = ov ? ov.title : "";
-        if (ov) { ov.render(); markOverlayUnread(ov.key, false); }
+        if (ov) {
+            ov.render();
+            markOverlayUnread(ov.key, false);
+            // Dialog semantics: move focus into the window (tabindex="-1") so
+            // keyboard/SR users land where the content is, not behind it.
+            if (dom.overlay && dom.overlay.focus) dom.overlay.focus();
+        } else if (prev && hadFocus) {
+            // Closing with focus inside: hand it back to the launcher.
+            var lb = dom.micro && dom.micro.querySelector('button[data-overlay="' + prev + '"]');
+            if (lb && !lb.hidden) lb.focus();
+        }
     }
     function toggleOverlay(key) {
         if (mqMobile.matches) { setSheet(sheetName === key ? null : key); return; }
@@ -2061,6 +2087,7 @@
         } else {
             S.craft = null;
         }
+        updateMicro();   // craft state feeds the availability gate too
         renderProfessions();
         tickCraft();
     }
@@ -2072,7 +2099,6 @@
         var pctW = c ? Math.max(0, Math.min(100, (1 - rem / c.total) * 100)) + "%" : "0%";
         var b = dom.micro && dom.micro.querySelector('button[data-overlay="professions"]');
         if (b) {
-            b.classList.toggle("busy", !!c);
             var strip = b.querySelector(".micro-strip");
             if (strip) { strip.hidden = !c; if (c) strip.style.width = pctW; }
         }
@@ -2087,9 +2113,10 @@
     // through `craft <profession> …`; enchanting/artificing have their own
     // verbs. `verb` and `name` come from the feed; sendCmd sanitizes.
     function profCmd(p, sub) {
-        var base = (p.verb && p.verb !== "craft")
-            ? p.verb
-            : "craft " + String(p.name || "").toLowerCase();
+        // First word only: the parser prefix-matches profession names, and a
+        // multi-word name would spill its tail into the argument slot.
+        var word = String(p.name || "").toLowerCase().split(/\s+/)[0];
+        var base = (p.verb && p.verb !== "craft") ? p.verb : "craft " + word;
         return sub ? base + " " + sub : base;
     }
     function profBtn(label, cmd) {
@@ -2631,6 +2658,7 @@
     }
     function setHud(on, persist) {
         hudOn = on;
+        if (!on && overlayName) setOverlay(null);   // no orphaned overlay behind a hidden HUD
         dom.app.classList.toggle("hud-on", on);
         dom.app.classList.toggle("hud-off", !on);
         var btn = document.getElementById("ui-toggle");

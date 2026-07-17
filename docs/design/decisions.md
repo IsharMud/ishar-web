@@ -49,7 +49,11 @@ guards, same discipline as the action bar's `Alt/Ctrl+digit`), chosen
 mnemonically: `Ctrl+P` = Professions. The keydown handler swallows the event
 only when the HUD is on and the overlay actually toggled, so terminal/browser
 behavior survives everywhere else. `Esc` closes the open overlay before
-anything else claims it.
+anything else claims it (the HUD's listener registers first and stops the
+event, by design). **Reserved letters:** `l` (`Ctrl+L` clears the terminal —
+a page binding the overlay handler would silently shadow). Shadowing a
+browser default (`Ctrl+P` = print) is a deliberate trade, taken only while
+the app has something to show.
 
 **Why.** The tabs/collapsible-panel pattern was quietly becoming the answer to
 every new feature, and it doesn't scale: each addition taxes the side columns
