@@ -45,6 +45,7 @@
         equipment: [], inventory: null, train: null,
         affects: null, group: null, who: null, occupants: [],
         skills: [], cooldownExpiry: {}, cooldownTotal: {}, usable: {},
+        professions: [], craft: null,
         chat: [], connected: false,
         // Default targets (from Room.Occupants) that make the hotbar
         // target-aware: offensive spells → hostile, defensive → beneficial.
@@ -96,14 +97,31 @@
     // the movement (rose) and interaction (occupants) surfaces are together at
     // the bottom, nearest the input.
     var PANELS = ["equipment", "inventory", "train", "group", "occupants", "room",
-                  "status", "abilities", "chat", "who"];
+                  "status", "abilities", "chat", "who", "professions"];
     var PANEL_HOME = {
         occupants: "hud-left-scroll", equipment: "hud-left-scroll",
         inventory: "hud-left-scroll", train: "hud-left-scroll",
         group: "hud-left-scroll",
         room: "hud-left",
-        status: "hud-right", abilities: "hud-right", chat: "hud-right", who: "hud-right"
+        status: "hud-right", abilities: "hud-right", chat: "hud-right", who: "hud-right",
+        professions: "hud-overlay-body"
     };
+
+    // ------------------------------------------------------------------
+    // Overlay apps — the micro-menu registry, THE single point of extension
+    // for transient HUD surfaces (docs/design/decisions.md 2026-07-17: the
+    // HUD extension model). Each entry needs: a [data-overlay=key] button in
+    // #hud-micro, a [data-panel=key] dock button, a #panel-<key> node inside
+    // #hud-overlay-body, and PANELS/PANEL_HOME entries. Desktop opens the
+    // #hud-overlay window; phones open the same panel in the bottom sheet.
+    // Hotkeys are Ctrl+<letter>, strict single-modifier.
+    // ------------------------------------------------------------------
+    var OVERLAYS = [
+        { key: "professions", title: "Professions", hotkey: "p",
+          render: function () { renderProfessions(); },
+          available: function () { return (S.professions || []).length > 0; } }
+    ];
+    var overlayName = null;   // open overlay app key (desktop), or null
 
     // Position capability ranking (index = capability), from the game's
     // posn_names[] (constants.c). Higher rank = more capable; a skill whose
@@ -522,6 +540,8 @@
             case "Group.Update": S.group = data; renderGroup(); break;
             case "Char.Who": S.who = data; renderWho(); break;
             case "Char.Skills": S.skills = (data && data.skills) || []; renderHotbar(); renderAbilities(); break;
+            case "Char.Professions": applyProfessions(data); break;
+            case "Char.Craft": applyCraft(data); break;
             case "Char.Cooldowns":
                 applyCooldowns(data); tickHotbar();
                 // The Abilities browser can be ~400 rows; only rebuild it for a
@@ -1796,6 +1816,27 @@
     function wireHotkeys() {
         document.addEventListener("keydown", function (e) {
             if (!hudOn || !S.connected) return;
+            // Esc closes the open overlay window before anything else claims it.
+            if (e.key === "Escape" && overlayName && !mqMobile.matches) {
+                setOverlay(null);
+                return;
+            }
+            // Overlay hotkeys: Ctrl+<letter> toggles a micro-menu app (e.g.
+            // Ctrl+P → Professions). Strict single-modifier, and swallowed
+            // only when the app is actually available, so browser defaults
+            // survive everywhere else.
+            var ctrlOnly = e.ctrlKey && !e.altKey && !e.metaKey && !e.shiftKey;
+            if (ctrlOnly && /^[a-z]$/.test(String(e.key || "").toLowerCase())) {
+                var letter = String(e.key).toLowerCase();
+                for (var oi = 0; oi < OVERLAYS.length; oi++) {
+                    var ov = OVERLAYS[oi];
+                    if (ov.hotkey === letter && (!ov.available || ov.available())) {
+                        e.preventDefault();
+                        toggleOverlay(ov.key);
+                        return;
+                    }
+                }
+            }
             if (e.key === "`" && e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
                 if (usedPages() > 1) { e.preventDefault(); flipHotbarPage(); }
                 return;
@@ -1928,6 +1969,190 @@
         if (iconOrNull) iconOverrides[k] = iconOrNull; else delete iconOverrides[k];
         saveMap("ishar.icons", iconOverrides);
         renderHotbar(); renderAbilities();
+    }
+
+    // ------------------------------------------------------------------
+    // Overlay apps: micro-menu buttons → #hud-overlay window (desktop) or
+    // the bottom sheet (phones). One overlay at a time; Esc, outside-click,
+    // the ✕, the hotkey, or the button all dismiss. Registry: OVERLAYS.
+    // ------------------------------------------------------------------
+    function overlayByKey(key) {
+        for (var i = 0; i < OVERLAYS.length; i++) {
+            if (OVERLAYS[i].key === key) return OVERLAYS[i];
+        }
+        return null;
+    }
+    function setOverlay(name) {
+        var ov = name ? overlayByKey(name) : null;
+        overlayName = ov ? ov.key : null;
+        OVERLAYS.forEach(function (o) {
+            var p = document.getElementById("panel-" + o.key);
+            if (p) p.classList.toggle("overlay-active", o.key === overlayName);
+            var b = dom.micro && dom.micro.querySelector('button[data-overlay="' + o.key + '"]');
+            if (b) b.setAttribute("aria-pressed", o.key === overlayName ? "true" : "false");
+        });
+        if (dom.overlay) dom.overlay.hidden = !ov;
+        if (dom.overlayTitle) dom.overlayTitle.textContent = ov ? ov.title : "";
+        if (ov) { ov.render(); markOverlayUnread(ov.key, false); }
+    }
+    function toggleOverlay(key) {
+        if (mqMobile.matches) { setSheet(sheetName === key ? null : key); return; }
+        setOverlay(overlayName === key ? null : key);
+    }
+    function overlayVisible(key) {
+        if (!hudOn) return false;
+        return mqMobile.matches ? sheetName === key : overlayName === key;
+    }
+    // Dot badge on the app's launchers (micro button + dock button): the feed
+    // changed while its window was closed. Same idiom as the chat unread dot.
+    function markOverlayUnread(key, on) {
+        ['#hud-micro button[data-overlay="' + key + '"]',
+         '#hud-dock button[data-panel="' + key + '"]'].forEach(function (sel) {
+            var b = document.querySelector(sel);
+            if (b) b.classList.toggle("unread", !!on);
+        });
+    }
+    // Availability gate: an app with nothing to show hides its launchers
+    // entirely (a character with no professions never sees the button).
+    function updateMicro() {
+        OVERLAYS.forEach(function (o) {
+            var avail = !o.available || o.available();
+            var b = dom.micro && dom.micro.querySelector('button[data-overlay="' + o.key + '"]');
+            if (b) b.hidden = !avail;
+            var d = dom.dock && dom.dock.querySelector('button[data-panel="' + o.key + '"]');
+            if (d) d.hidden = !avail;
+            if (!avail) {
+                if (overlayName === o.key) setOverlay(null);
+                if (sheetName === o.key) setSheet(null);
+                markOverlayUnread(o.key, false);
+            }
+        });
+    }
+
+    // ------------------------------------------------------------------
+    // Professions (Char.Professions + Char.Craft) — the first overlay app.
+    // Standing rows (rank/tier/recipes) plus a live craft/harvest cast bar.
+    // ------------------------------------------------------------------
+    var lastProfessionsBody = null;
+    function applyProfessions(data) {
+        var list = (data && data.professions) || [];
+        var body = "";
+        try { body = JSON.stringify(list); } catch (e) {}
+        // Badge only on a *change* after the first snapshot — the login burst
+        // shouldn't light the dot.
+        var changed = lastProfessionsBody !== null && body !== lastProfessionsBody;
+        lastProfessionsBody = body;
+        S.professions = list;
+        updateMicro();
+        renderProfessions();
+        if (changed && !overlayVisible("professions")) markOverlayUnread("professions", true);
+    }
+    function applyCraft(data) {
+        if (data && data.active) {
+            S.craft = {
+                kind: data.kind === "harvest" ? "harvest" : "craft",
+                name: String(data.name || ""),
+                quantity: Number(data.quantity) || 1,
+                chain: Number(data.chain_remaining) || 0,
+                // Like cooldowns: store the expiry and tick locally between feeds.
+                expiry: now() + (Number(data.remaining) || 0),
+                total: Math.max(1, Number(data.duration) || Number(data.remaining) || 1)
+            };
+        } else {
+            S.craft = null;
+        }
+        renderProfessions();
+        tickCraft();
+    }
+    // Per-second updates that must not rebuild the panel: the micro button's
+    // progress strip and the open panel's cast-bar numbers.
+    function tickCraft() {
+        var c = S.craft;
+        var rem = c ? Math.max(0, c.expiry - now()) : 0;
+        var pctW = c ? Math.max(0, Math.min(100, (1 - rem / c.total) * 100)) + "%" : "0%";
+        var b = dom.micro && dom.micro.querySelector('button[data-overlay="professions"]');
+        if (b) {
+            b.classList.toggle("busy", !!c);
+            var strip = b.querySelector(".micro-strip");
+            if (strip) { strip.hidden = !c; if (c) strip.style.width = pctW; }
+        }
+        if (c && dom.professions) {
+            var fillBar = dom.professions.querySelector(".craft-fill");
+            if (fillBar) fillBar.style.width = pctW;
+            var t = dom.professions.querySelector(".craft-time");
+            if (t) t.textContent = fmtDur(rem);
+        }
+    }
+    // Command builder: alchemy (and any future non-shortcut profession) routes
+    // through `craft <profession> …`; enchanting/artificing have their own
+    // verbs. `verb` and `name` come from the feed; sendCmd sanitizes.
+    function profCmd(p, sub) {
+        var base = (p.verb && p.verb !== "craft")
+            ? p.verb
+            : "craft " + String(p.name || "").toLowerCase();
+        return sub ? base + " " + sub : base;
+    }
+    function profBtn(label, cmd) {
+        return el("button", {
+            type: "button", class: "prof-btn", text: label,
+            onclick: function () {
+                sendCmd(cmd);
+                // The output lands in the terminal — get the window out of
+                // the way on every form factor.
+                if (mqMobile.matches) { if (sheetName) setSheet(null); }
+                else if (overlayName) setOverlay(null);
+            }
+        });
+    }
+    function renderProfessions() {
+        if (!dom.professions) return;
+        var kids = [];
+        var c = S.craft;
+        if (c) {
+            var rem = Math.max(0, c.expiry - now());
+            var pct = Math.max(0, Math.min(100, (1 - rem / c.total) * 100));
+            var label = (c.kind === "harvest" ? "Harvesting" : "Crafting") + " — " + c.name
+                + (c.quantity > 1 ? " ×" + c.quantity : "")
+                + (c.chain > 0 ? " (+" + c.chain + " queued)" : "");
+            kids.push(el("div", { class: "craft-activity" }, [
+                el("div", { class: "craft-label", text: label }),
+                el("div", { class: "craft-track" }, [
+                    el("div", { class: "craft-fill", style: "width:" + pct + "%" }),
+                    el("span", { class: "craft-time", text: fmtDur(rem) })
+                ])
+            ]));
+        }
+        var profs = S.professions || [];
+        if (!profs.length && !c) {
+            kids.push(el("div", { class: "prof-empty", text: "No professions yet. Seek out a profession master to learn one." }));
+            fill(dom.professions, kids);
+            return;
+        }
+        profs.forEach(function (p) {
+            var rank = Number(p.rank) || 0;
+            var maxRank = Number(p.max_rank) || 0;
+            var pct = maxRank > 0 ? Math.max(0, Math.min(100, (rank / maxRank) * 100)) : 100;
+            kids.push(el("div", { class: "prof-row" }, [
+                el("div", { class: "prof-head" }, [
+                    el("span", { class: "prof-name", text: p.name || "?" }),
+                    p.tier ? el("span", { class: "tag prof-tier", text: p.tier }) : null,
+                    el("span", { class: "prof-rank", text: "Rank " + rank + (maxRank ? "/" + maxRank : "") })
+                ]),
+                el("div", { class: "prof-track", title: maxRank ? rank + " of " + maxRank + " ranks" : "Rank " + rank }, [
+                    el("div", { class: "prof-fill", style: "width:" + pct + "%" })
+                ]),
+                el("div", { class: "prof-foot" }, [
+                    el("span", { class: "prof-recipes", text: "Recipes " + (p.recipes_known != null ? p.recipes_known : "–") + "/" + (p.recipes_total != null ? p.recipes_total : "–") }),
+                    el("span", { class: "prof-actions" }, [
+                        profBtn("Recipes", profCmd(p, "")),
+                        profBtn("Craftable", profCmd(p, "available"))
+                    ])
+                ])
+            ]));
+        });
+        kids.push(el("div", { class: "prof-hint", text: "profession — overview & trainers · harvest <node> — gather" }));
+        fill(dom.professions, kids);
+        tickCraft();
     }
 
     // ------------------------------------------------------------------
@@ -2346,6 +2571,7 @@
             if (home && p.parentNode !== home) home.appendChild(p);
         });
         if (!mobile && sheetName) setSheet(null);
+        if (mobile && overlayName) setOverlay(null);
         updateRoseOverlay();
     }
 
@@ -2366,6 +2592,7 @@
         dom.app.classList.toggle("sheet-open", !!name);
         if (name === "chat") { markChatUnread(false); dom.chat.scrollTop = dom.chat.scrollHeight; }
         if (name === "abilities") renderAbilities();   // refresh cooldown/mana greying on open
+        if (overlayByKey(name)) { overlayByKey(name).render(); markOverlayUnread(name, false); }
     }
     function chatVisible() {
         if (!hudOn) return false;
@@ -2441,14 +2668,17 @@
     function renderAll() {
         renderVitals(); renderRoom(); renderOccupants(); renderGroup(); renderEquipment(); renderInventory();
         renderTrain(); renderStatus(); renderWho(); renderChat(); renderHotbar(); renderAbilities();
+        renderProfessions(); updateMicro();
     }
     function reset() {
         S.vitals = null; S.status = null; S.time = null; S.room = null;
         S.equipment = []; S.inventory = null; S.train = null;
         S.affects = null; S.group = null; S.who = null; S.occupants = [];
         S.skills = []; S.cooldownExpiry = {}; S.cooldownTotal = {}; S.usable = {};
+        S.professions = []; S.craft = null;
         S.tgtHostile = null; S.tgtFriendly = null;
         lastVitalsBody = null;
+        lastProfessionsBody = null;
         renderAll();
     }
 
@@ -2475,6 +2705,10 @@
         dom.chat = document.getElementById("panel-chat");
         dom.who = document.getElementById("panel-who");
         dom.hotbar = document.getElementById("hud-hotbar");
+        dom.micro = document.getElementById("hud-micro");
+        dom.professions = document.getElementById("panel-professions");
+        dom.overlay = document.getElementById("hud-overlay");
+        dom.overlayTitle = document.getElementById("hud-overlay-title");
         dom.dock = document.getElementById("hud-dock");
         dom.sheet = document.getElementById("hud-sheet");
         dom.sheetBody = document.getElementById("hud-sheet-body");
@@ -2514,6 +2748,14 @@
         var sheetClose = document.getElementById("hud-sheet-close");
         if (sheetClose) sheetClose.addEventListener("click", function () { setSheet(null); });
 
+        // Micro-menu: each button toggles its overlay app (sheet on phones).
+        if (dom.micro) dom.micro.addEventListener("click", function (e) {
+            var b = e.target.closest("button[data-overlay]");
+            if (b) toggleOverlay(b.getAttribute("data-overlay"));
+        });
+        var overlayClose = document.getElementById("hud-overlay-close");
+        if (overlayClose) overlayClose.addEventListener("click", function () { setOverlay(null); });
+
         // Mobile rose overlay toggle button.
         var roseBtn = document.getElementById("rose-toggle");
         if (roseBtn) roseBtn.addEventListener("click", function () {
@@ -2523,9 +2765,14 @@
             updateRoseOverlay();
         });
 
-        // Outside tap dismisses the sheet and any open menu.
+        // Outside tap dismisses the sheet, the overlay window and any open menu.
         document.addEventListener("click", function (e) {
             if (menuOpen && !dom.menu.contains(e.target) && !e.target.closest("[data-menu],.row-more")) closeMenu();
+            if (overlayName && !mqMobile.matches && dom.overlay &&
+                !dom.overlay.contains(e.target) && !e.target.closest("#hud-micro") &&
+                !dom.menu.contains(e.target)) {
+                setOverlay(null);
+            }
             if (!sheetName || !mqMobile.matches) return;
             if (dom.sheet.contains(e.target) || dom.dock.contains(e.target)) return;
             if (dom.menu.contains(e.target)) return;
@@ -2554,6 +2801,7 @@
                 e.textContent = fmtDur(parseFloat(e.getAttribute("data-expiry")) - t);
             });
             if (S.skills.length) tickHotbar();
+            if (S.craft) tickCraft();
         }, 1000);
     }
 
@@ -2634,7 +2882,12 @@
             ] },
             "Char.Skills": { skills: bigSkills },
             "Char.Cooldowns": { cooldowns: [{ id: 3, remaining: 8 }], usable: { "3": false } },
-            "Char.Train": { stats: [{ name: "Str", value: 18, add: 2 }, { name: "Int", value: 25 }, { name: "Wis", value: 20 }], xp: 1250000, xp_pct: 62, can_advance: true, aux: [{ name: "Crit", value: "12.5% (+2%)" }], resources: [{ name: "Practices", value: 5, max: 10 }, { name: "Trains", value: 2, max: 2 }] }
+            "Char.Train": { stats: [{ name: "Str", value: 18, add: 2 }, { name: "Int", value: 25 }, { name: "Wis", value: 20 }], xp: 1250000, xp_pct: 62, can_advance: true, aux: [{ name: "Crit", value: "12.5% (+2%)" }], resources: [{ name: "Practices", value: 5, max: 10 }, { name: "Trains", value: 2, max: 2 }] },
+            "Char.Professions": { professions: [
+                { id: 1, name: "Alchemy", verb: "craft", rank: 34, max_rank: 99, tier: "Journeyman", recipes_known: 21, recipes_total: 58 },
+                { id: 2, name: "Enchanting", verb: "enchant", rank: 12, max_rank: 99, tier: "Novice", recipes_known: 6, recipes_total: 44 }
+            ] },
+            "Char.Craft": { active: true, kind: "craft", name: "minor healing draught", profession_id: 1, remaining: 14, duration: 20, quantity: 2, chain_remaining: 3 }
         };
         Object.keys(feeds).forEach(function (k) { onGmcp(k, JSON.stringify(feeds[k])); });
         [

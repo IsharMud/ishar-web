@@ -445,6 +445,27 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
   Ctrl+Shift+F, closed by Esc. Match decorations use the amber accent.
 - Note `.hud-btn[hidden] { display: none; }` — the button's explicit
   `display` would otherwise defeat the `hidden` attribute.
+- **`#hud-actionrow` / `#hud-micro` / `.micro-btn`** — the action row wraps
+  the skill bar plus the **micro-menu**: small icon buttons (32px, `{% bi %}`
+  glyphs) that toggle transient **overlay apps** (`Ctrl`+letter hotkeys; see
+  decisions.md "The HUD extension model", 2026-07-17). Launchers are
+  availability-gated by their feed (`hidden` when there's nothing to show) and
+  may carry a `.unread` dot (feed changed while closed) and a `.micro-strip`
+  progress bar (long-running activity). Hidden on phones — the dock is the
+  phone's micro-menu.
+- **`#hud-overlay` / `.overlay-head` / `.overlay-title`** — the desktop
+  overlay window (fixed, centered, `z-index` 1038 — above sheet/popovers,
+  below `#hud-menu`): one `.panel.overlay-active` at a time from
+  `#hud-overlay-body`; dismissed by Esc, outside-click, ✕, the hotkey or the
+  launcher. On phones the same panel node opens in `#hud-sheet` via a dock
+  button (`placePanels()` re-homes it). Register apps in the `OVERLAYS`
+  table in `hud.js`.
+- **Professions app** (`.prof-row/.prof-track/.prof-btn`,
+  `.craft-activity/.craft-track/.craft-fill/.craft-time`) — the reference
+  overlay app: profession standing rows (name + tier `.tag` + `Rank n/max` +
+  rank meter + recipe counts + command buttons) fed by `Char.Professions`,
+  topped by the live craft/harvest cast bar fed by `Char.Craft` (ticked
+  locally each second; the micro button mirrors it as `.micro-strip`).
 
 Verify with `/connect?demo=1` (sample GMCP feeds, no server needed).
 
