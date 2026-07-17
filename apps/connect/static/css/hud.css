@@ -203,6 +203,20 @@ body.connect-page #content { padding: .5rem !important; }
     .vbar-track { height: 14px; }
 }
 
+/* Hunger / thirst reserve icon riding the end of the HP (food) and MV (water)
+   bars. Quiet and dim when the reserve is healthy; it warms to amber as it
+   runs low and reddens when the game would warn you're "very hungry/thirsty",
+   so it only pulls the eye when there's something to act on. */
+.vbar-reserve { flex: 0 0 auto; display: inline-flex; align-items: center; line-height: 0; }
+.vbar-reserve-icon { width: .82rem; height: .82rem; }
+.vbar-reserve[data-state="ok"]   { color: var(--ac-dim); opacity: .65; }
+.vbar-reserve[data-state="low"]  { color: var(--hud-edge); opacity: 1; }
+.vbar-reserve[data-state="crit"] { color: var(--ac-danger); opacity: 1; }
+@media (prefers-reduced-motion: no-preference) {
+    .vbar-reserve[data-state="crit"] { animation: reserve-pulse 1.5s ease-in-out infinite; }
+    @keyframes reserve-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
+}
+
 /* ----- Left column: scrolling stack + pinned compass rose ----- */
 #hud-left {
     display: flex; flex-direction: column; gap: 6px;
