@@ -425,6 +425,10 @@ body.connect-page #content { padding: .5rem !important; }
     font-size: .72rem; font-weight: 700; color: var(--ac-accent);
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 40%;
 }
+/* Cross-zone: the map is looking at a neighbor, not the player's zone. */
+.map-zone.offzone::after {
+    content: " · viewing"; color: var(--ac-dim); font-weight: 400;
+}
 .map-z { display: inline-flex; gap: 2px; }
 .map-search {
     flex: 1 1 8rem; min-width: 6rem; max-width: 14rem; font-size: 16px;

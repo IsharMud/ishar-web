@@ -9,6 +9,48 @@ Format: `## YYYY-MM-DD — Title` · **Decision** · **Why** · (optional) **Not
 
 ---
 
+## 2026-07-17 — HUD map fast-follow: cross-zone viewing + navigation
+
+**Decision.** The mapper (shipped earlier today) was single-zone: it only ever
+drew `cur.zone`, so you couldn't look at an adjacent zone or route into one.
+Two changes lift that ceiling, both client-side (`hud-map.js` + one CSS rule);
+the server already ships everything needed (each zone graph's `out` array
+carries `zone`/`zname`/destination-vnum for every cross-zone exit).
+
+1. **Viewing is decoupled from standing.** The big map gained a *viewed zone*
+   (`bigView.zone`, resolved by `viewedZone()`) distinct from the player's
+   `cur.zone`. Tapping a discovered border room offers **"Go to &lt;zone&gt; →"**
+   (one entry per adjacent zone it borders); selecting it loads that zone's
+   graph on demand and points the map at it while the player stays put. The
+   toolbar label shows **"&lt;name&gt; · viewing"** and the ◎ button lights up as
+   **"Return to my location"**. The minimap is untouched — it always follows
+   the player; cross-zone browsing is a big-map affordance only.
+2. **Pathfinding spans zones.** `findPath` is now zone-agnostic: BFS over the
+   union of *loaded* zones, following in-zone edges **and** cross-zone `out`
+   edges, still gated to discovered sources with a frontier room admissible
+   only as the destination (the original autowalk safety rule, unchanged —
+   navigation never uses knowledge the player lacks). The one-step-at-a-time
+   walker already keys on the destination vnum, so it crosses a zone boundary
+   with no engine change: the border step's confirming `Room.Info` lands in
+   the neighbor, `enterZone` flips `cur.zone`, and the walk continues. Multi-hop
+   works to the extent the intermediate zones are loaded; the guaranteed case —
+   routing into a directly adjacent, previously-visited zone — is what the
+   "Go to" flow loads for you.
+
+Also fixed in the same pass: a **shown path now resolves.** "Show path"
+highlighted a route but never cleared, so it lingered after you arrived. It now
+trims the leg behind you as you walk and clears entirely on reaching the
+destination (`shownPathOnRoom`, called on every sighted room); it also clears on
+reset. Autowalk already resolved on arrival — this brings the passive highlight
+in line.
+
+**Why.** A world map that can't look past the room you're standing in is a
+minimap with extra steps; "where's the guildmaster two zones over" is exactly
+the question a map should answer. The green-field mandate favors the honest
+generalization (one graph search over all loaded zones) over a bolt-on
+"adjacent-only" special case, and the server contract already carried the
+cross-zone data — the ceiling was purely client-side.
+
 ## 2026-07-17 — HUD map: server graph + client fog, deterministic layout, canvas rendering
 
 **Decision.** The HUD gets a world map (isharmud/ishar-web#125), built on four
