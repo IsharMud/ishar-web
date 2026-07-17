@@ -9,6 +9,78 @@ Format: `## YYYY-MM-DD — Title` · **Decision** · **Why** · (optional) **Not
 
 ---
 
+## 2026-07-17 — HUD map: server graph + client fog, deterministic layout, canvas rendering
+
+**Decision.** The HUD gets a world map (isharmud/ishar-web#125), built on four
+load-bearing choices:
+
+1. **The server serves the whole zone graph; the client renders fog.**
+   `/connect/map/graph/<vnum>/` returns the zone's full room/exit graph from
+   the game's authoritative `rooms`/`room_exits` tables (hidden exits
+   excluded, exit keys normalized **byte-identically** to the game's
+   `gmcp_exit_key()` so edges line up with live `Room.Info`). The UI reveals
+   only rooms the account has visited plus a one-exit frontier of dashed,
+   nameless stubs. *Honest caveat:* the full graph is in the payload —
+   devtools can read it. For this audience that trade (stable layout, no
+   discovery-time redraw churn) beats engineering spoiler-proofing; the
+   exploration reward is UX, not security.
+2. **Per-account persistence in site-owned tables.** `web_room_discovery` and
+   `web_room_note` are `managed=True` (the `web_login_token` shared-DB
+   pattern: plain `account_id`, no cross-ownership FK), so fog and notes
+   follow the player across phone and desktop. Discovery mirrors to
+   `localStorage` (`ishar.mapSeen.<zone>`) and batch-flushes; local-only
+   rooms self-heal to the server. Guests get the rose only.
+3. **Deterministic layout, recomputed not persisted.** The world has no
+   coordinates — it's a directed graph with non-Euclidean geometry. Layout is
+   a pure function of the zone graph: BFS from the smallest vnum ordered by
+   `(depth, vnum)`, Mudlet-style edge-stretch (2–4×) when the ideal cell is
+   occupied (this resolves the classic first-zone n→e→s→w loop), a fixed
+   spiral as last resort, dogleg polylines for contradictory edges (portal
+   badges when far apart), named exits as portals, u/d as z-planes.
+   Determinism means recompute-on-load is safe and cheap — no stale-layout
+   cache class of bugs; the graph JSON itself is browser-cached via ETag.
+4. **Canvas, not SVG/DOM.** A zone is hundreds to ~2k rooms; one canvas node
+   with a single draw pass hits phone-smooth pan/zoom where retained DOM
+   would not, hit-testing is O(1) on the integer grid, and `fillText`-only
+   sidesteps the innerHTML discipline entirely. This is a **scoped
+   deviation** from the "no client-side chart rendering" stance: the map is
+   a live game surface, not staff data-viz. All colors still live in CSS
+   (`--hud-ter-*` + shared inks) and are read once via `getComputedStyle`.
+
+**Placement.** Per the extension model: the always-visible minimap shares the
+pinned Room panel as a **Rose | Map tab pair** (zero new real estate; the
+phone tap-to-move rose overlay is untouched); the big map is an **overlay
+app** (`Ctrl+M`, micro-menu/dock). `setOverlay` now stamps
+`data-app` on `#hud-overlay` so CSS can size the window per app.
+
+**Visibility gate.** The game's redacted `Room.Info` (no `num` — the player
+can't see; isharmud/ishar-mud#1699) never touches the map: no discovery, no
+graph writes, ring removed (keeping it would lie), minimap dims behind
+"location unknown", autowalk aborts; the next sighted room recovers
+automatically.
+
+**Autowalk safety rules.** Pathfinding runs over the *discovered* graph only
+(frontier rooms admissible solely as destination) — navigation can't use
+knowledge the player doesn't have. The walker sends one step, waits for the
+confirming `Room.Info`, pauses 250ms; it aborts on wrong/missing room, 5s
+timeout, combat, disconnect, Esc, or the player's own command — **player
+input always wins**, and every stop states its reason on the cancel chip
+(never fake game output).
+
+**The `registerMap` seam.** The mapper is a sibling IIFE (`hud-map.js`,
+~1.5k lines) attached through one `IsharHUD.registerMap()` call; hud.js hands
+it a small context (el/fill/send/menus/tips) and calls
+`onRoom/renderMini/renderOverlay/onReset/onConnected`. A missing or
+stale-cached module degrades to the rose-only HUD. This is the pattern for
+future HUD subsystems too big for `hud.js` proper.
+
+**Why.** The map is the biggest single UX gap for new players in a 20k-room
+world, and every alternative design either leaked unexplored content (full
+map), produced unstable geometry (pure client discovery mapping), or taxed
+`hud.js` beyond maintainability (inline implementation).
+
+---
+
 ## 2026-07-17 — The HUD extension model: three surface tiers, and the micro-menu + overlay convention
 
 **Decision.** The HUD now has a **definitive placement rule** for every new
