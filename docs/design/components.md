@@ -471,23 +471,41 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
   `Rank n/max` + rank meter + recipe counts) fed by `Char.Professions`,
   topped by the live craft/harvest cast bar fed by `Char.Craft` (ticked
   locally each second; the micro button mirrors it as `.micro-strip`).
-  Expanding a row opens the **recipe browser** fed by `Char.Recipes`:
-  rows grouped by category, name colored by the **`.tier-*` difficulty
-  classes** (trivial/easy/medium/hard/blocked — the contract's shared
-  buckets, computed client-side from `min_rank` − rank), a `✓` when the
-  component join against `Char.Inventory` (vnums + the `treasure` total)
-  says it's craftable, and an action per row: **Craft** (targetless) or
-  **Enchant…** (targeted — an item picker over carried items whose
-  `gear_type` matches the recipe's `target_gear_type`, sending
-  `enchant <item> <recipe>`). Native `title` holds the component summary.
-  The same `.tier-*` classes color the enchanter's **`Disenchant (rN)`**
+  Expanding a row opens the **recipe browser** fed by `Char.Recipes`
+  (`.recipe-controls/.recipe-search/.recipe-chips/.recipe-chip`,
+  `.recipe-cat/.recipe-cat-caret/.recipe-cat-name/.recipe-cat-count`,
+  `.recipe-row/.recipe-toggle/.recipe-name/.recipe-rank/.recipe-avail`,
+  `.recipe-comps`, `.recipe-queue/.recipe-qty-btn/.recipe-qty-num`):
+  - **Controls.** A per-profession **search** box plus filter chips — an
+    **Available** toggle (craftable-now only, persisted) and one chip per
+    **category** — share the abilities overlay's `.ab-search`/`.ab-chip`
+    styling (one CSS rule serves both).
+  - **Categories** are collapsible **section headers** (a thematic-break
+    rule, caret, name, count), ordered **anatomically head → feet, then
+    held items (weapon/shield), then unknown categories alpha, with
+    transmutation / general last** — *not* the game's alphabetical order
+    (a deliberate web presentation choice; see the ADR).
+  - **Rows.** Name colored by the **`.tier-*` difficulty classes**
+    (trivial/easy/medium/hard/blocked — computed client-side from
+    `min_rank` − rank), a **bare rank number** (`.recipe-rank`, no `r`
+    prefix), and a **craftable-count badge** (`.recipe-avail`): green
+    `×N` (how many the carried components allow — mirrors the game's
+    `recipe_available_count`), `✓` (ready / targeted), or red `Missing`.
+    Action per row: **Craft** (targetless; hidden while the row's detail
+    is open) or **Enchant…** (targeted — an item picker over carried
+    items whose `gear_type` matches `target_gear_type`, sending
+    `enchant <item> <recipe>`).
+  - **Detail** (tap the name) discloses `.recipe-comps` — the per-component
+    have/need breakdown (the touch path to "what am I missing?") — and, for
+    targetless recipes, the **batch-craft queue** (`.recipe-queue`): a
+    keyboard-free `−`/`+` stepper + editable count + **Max** (= components
+    on hand) + **Craft ×N**, sending `<verb> <recipe> <count>` (the game's
+    craft chain, capped at 99).
+  The `.tier-*` classes also color the enchanter's **`Disenchant (rN)`**
   entry in inventory item context menus (from the item's
-  `disenchant_rank`). Tapping a recipe's name discloses `.recipe-comps` —
-  the per-component have/need breakdown (the touch path to "what am I
-  missing?"; the hover `title` is desktop convenience only). Note one
-  deliberate palette divergence: the trivial tier renders `--ac-dim`
-  (de-emphasis) where the game shows white — worthless-for-skillup recipes
-  should recede, not match body text.
+  `disenchant_rank`). Note one deliberate palette divergence: the trivial
+  tier renders `--ac-dim` (de-emphasis) where the game shows white —
+  worthless-for-skillup recipes should recede, not match body text.
 
 Verify with `/connect?demo=1` (sample GMCP feeds, no server needed).
 
