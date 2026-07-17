@@ -2244,21 +2244,32 @@
         add(S.equipment);
         return counts;
     }
-    // Mirror of the game's `available` filter: item + treasure components
-    // must be covered; location components are display-only (the in-game
-    // filter skips them too — "what could I craft if I traveled there").
-    function recipeCraftable(r, counts, treasure) {
+    // How many of a recipe the carried components allow, mirroring the game's
+    // recipe_available_count: min over item + treasure components of
+    // floor(have / need). Location components are display-only (the in-game
+    // `available` filter skips them too — "what could I craft if I traveled
+    // there"). Returns Infinity when nothing material bounds it (craftable,
+    // but not limited by mats — e.g. a location-only or component-free recipe).
+    function recipeCraftCount(r, counts, treasure) {
         var comps = (r && r.components) || [];
+        var min = Infinity;
         for (var i = 0; i < comps.length; i++) {
             var comp = comps[i];
             if (!comp) continue;
             if (comp.kind === "item") {
-                if ((counts[comp.vnum] || 0) < (Number(comp.count) || 1)) return false;
+                var need = Number(comp.count) || 1;
+                if (need > 0) min = Math.min(min, Math.floor((counts[comp.vnum] || 0) / need));
             } else if (comp.kind === "treasure") {
-                if (treasure < (Number(comp.amount) || 0)) return false;
+                var amt = Number(comp.amount) || 0;
+                if (amt > 0) min = Math.min(min, Math.floor(treasure / amt));
             }
         }
-        return true;
+        return min;
+    }
+    // Craftable-now: the same portable-components join as the game's `available`
+    // filter (≥ 1 of everything material; location requirements ignored).
+    function recipeCraftable(r, counts, treasure) {
+        return recipeCraftCount(r, counts, treasure) >= 1;
     }
     // One-line component summary for a recipe row's native tooltip.
     function recipeComponentsText(r) {
@@ -2289,10 +2300,50 @@
     function profBtn(label, fn, cls) {
         return el("button", { type: "button", class: "prof-btn" + (cls ? " " + cls : ""), text: label, onclick: fn });
     }
-    // Which professions' recipe lists / recipes' component details are
-    // unfolded (session-local UI state).
-    var profOpen = {};
-    var recipeOpen = {};
+    // Session-local recipe-browser UI state.
+    var profOpen = {};       // profession id → recipe list unfolded
+    var recipeOpen = {};     // recipe id → component/queue detail unfolded
+    var catCollapsed = {};   // "pid:category" → section folded
+    var recipeQty = {};      // recipe id → chosen craft quantity (queue stepper)
+    var profSearch = {};     // profession id → recipe search string
+    var profCat = {};        // profession id → selected category ("" = all)
+    var profAvailOnly = false;   // global "craftable now" filter (persisted)
+    try { profAvailOnly = localStorage.getItem("ishar.profAvailOnly") === "1"; } catch (e) {}
+    function persistProfAvail() {
+        try { localStorage.setItem("ishar.profAvailOnly", profAvailOnly ? "1" : "0"); } catch (e) {}
+    }
+
+    // Category display order. The game lists categories alphabetically; the web
+    // browser reads them by paperdoll slot instead — head → feet, with the
+    // held items (weapon, shield) in their worn position (below hands/gloves,
+    // above the waist) rather than dangling at the end. Any unknown category
+    // falls to a middle band (alpha); transmutation / general sink to the
+    // bottom. Keeps Enchanting's gear-slot categories in paperdoll order
+    // rather than the alphabetical Body → Feet → Head → Shield → …
+    var CATEGORY_ORDER = [
+        "head", "face", "eyes", "ears", "neck", "throat", "about",
+        "shoulders", "back", "body", "torso", "chest",
+        "arms", "wrist", "wrists", "hands", "gloves", "finger", "ring",
+        "weapon", "shield",
+        "waist", "belt", "legs", "feet"
+    ];
+    var CATEGORY_BOTTOM = { transmutation: 1, general: 2, miscellaneous: 3, misc: 3, other: 4 };
+    function categoryRank(name) {
+        var key = String(name || "").trim().toLowerCase();
+        if (CATEGORY_BOTTOM[key]) return 900 + CATEGORY_BOTTOM[key];
+        var i = CATEGORY_ORDER.indexOf(key);
+        if (i >= 0) return 100 + i;
+        return 500;   // unknown category — ordered alphabetically within its band
+    }
+    function sortRecipes(list) {
+        return list.slice().sort(function (a, b) {
+            var ra = categoryRank(a.category), rb = categoryRank(b.category);
+            if (ra !== rb) return ra - rb;
+            var ca = String(a.category || "").toLowerCase(), cb = String(b.category || "").toLowerCase();
+            if (ca !== cb) return ca < cb ? -1 : 1;   // separate same-band categories alpha
+            return (Number(a.min_rank) || 0) - (Number(b.min_rank) || 0);
+        });
+    }
 
     // The tappable component breakdown under a recipe row — the touch path
     // to "what am I missing?" (the hover title is desktop convenience only).
@@ -2325,16 +2376,69 @@
         return block;
     }
 
+    // The batch-craft station for a targetless recipe (the game chains crafts
+    // with `<verb> <recipe> <count>`, capped at 99). A keyboard-free stepper
+    // plus an editable count and a Max shortcut = the components on hand. The
+    // −/+/Max buttons and the field update in place (no re-render) so typing
+    // stays smooth and focus never drops.
+    function recipeQueue(p, r, count) {
+        var craftable = count >= 1;
+        var maxMake = (count === Infinity) ? 99 : Math.max(1, Math.min(99, count));
+        var q = Math.max(1, Math.min(99, Math.floor(Number(recipeQty[r.id]) || 1)));
+        recipeQty[r.id] = q;
+        var num = el("input", {
+            type: "text", inputmode: "numeric", class: "recipe-qty-num",
+            value: String(q), "aria-label": "Quantity to craft"
+        });
+        var craftBtn = profBtn(q > 1 ? "Craft ×" + q : "Craft", function () {
+            var n = Math.max(1, Math.min(99, Math.floor(Number(recipeQty[r.id]) || 1)));
+            sendCmd(profCmd(p, nameOf(r.name) + (n > 1 ? " " + n : "")));
+            dismissProfessionsWindow();
+        }, "recipe-queue-craft" + (craftable ? "" : " off"));
+        function setQ(v, writeField) {
+            v = Math.max(1, Math.min(99, Math.floor(Number(v) || 1)));
+            recipeQty[r.id] = v;
+            if (writeField) num.value = String(v);
+            craftBtn.textContent = v > 1 ? "Craft ×" + v : "Craft";
+        }
+        num.addEventListener("input", function () { setQ(num.value, false); });
+        num.addEventListener("change", function () { num.value = String(recipeQty[r.id]); });
+        num.addEventListener("blur", function () { num.value = String(recipeQty[r.id]); });
+        return el("div", { class: "recipe-queue" }, [
+            el("span", { class: "recipe-queue-label", text: "Make" }),
+            profBtn("−", function () { setQ(recipeQty[r.id] - 1, true); }, "recipe-qty-btn"),
+            num,
+            profBtn("+", function () { setQ(recipeQty[r.id] + 1, true); }, "recipe-qty-btn"),
+            profBtn("Max", function () { setQ(maxMake, true); }, "recipe-qty-max"),
+            craftBtn
+        ]);
+    }
+
     function recipeRow(p, r, counts, treasure) {
         var rank = Number(p.rank) || 0;
         var tier = profTier((Number(r.min_rank) || 1) - rank);
-        var craftable = recipeCraftable(r, counts, treasure);
+        var count = recipeCraftCount(r, counts, treasure);
+        var craftable = count >= 1;
         var targeted = r.target_gear_type != null;
         var isOpen = !!recipeOpen[r.id];
-        var actBtn;
+        // Craftable-count badge (#8) — distinct from the rank: a green ×N (how
+        // many the components allow) or ✓ (ready, mats-unbounded / targeted),
+        // or a red "Missing". Replaces the old bare ✓.
+        var availBadge;
+        if (!craftable) {
+            availBadge = el("span", { class: "tag recipe-avail missing", title: "Missing components", text: "Missing" });
+        } else if (targeted || count === Infinity) {
+            availBadge = el("span", { class: "tag recipe-avail ok", title: "Components ready", text: "✓" });
+        } else {
+            availBadge = el("span", { class: "tag recipe-avail ok", title: "You can make " + count + " with your components", text: "×" + count });
+        }
+        // Inline action. Enchants keep their item picker (single target, no
+        // chaining). Targetless crafts get a quick Craft-one here; the batch
+        // queue lives in the disclosed detail, so hide this button when open.
+        var actions = [];
         if (targeted) {
             var targets = enchantTargets(r);
-            actBtn = profBtn("Enchant…", function (e) {
+            actions.push(profBtn("Enchant…", function (e) {
                 var opener = e && e.target && e.target.closest(".prof-btn");
                 // Second tap on the opener toggles the picker closed.
                 if (menuOpen && menuAnchorEl === opener) { closeMenu(); return; }
@@ -2350,12 +2454,12 @@
                 });
                 if (!acts.length) acts = [{ label: "No matching item carried", fn: function () {}, keep: true }];
                 openMenu("Enchant · " + stripColor(r.name || ""), acts, opener);
-            }, "menu-opener" + (targets.length ? "" : " off"));   // .menu-opener: exempt from outside-click dismissal
-        } else {
-            actBtn = profBtn("Craft", function () {
+            }, "menu-opener" + (targets.length ? "" : " off")));   // .menu-opener: exempt from outside-click dismissal
+        } else if (!isOpen) {
+            actions.push(profBtn("Craft", function () {
                 sendCmd(profCmd(p, nameOf(r.name)));
                 dismissProfessionsWindow();
-            }, craftable ? "" : "off");
+            }, craftable ? "" : "off"));
         }
         var row = el("div", { class: "recipe-row", title: recipeComponentsText(r) || null }, [
             el("button", {
@@ -2365,25 +2469,47 @@
             }, [
                 el("span", { class: "recipe-name tier-" + tier, text: stripColor(r.name || "?") })
             ]),
-            el("span", { class: "tag recipe-rank tier-" + tier, text: "r" + (r.min_rank != null ? r.min_rank : "?") }),
-            craftable ? el("span", { class: "tag recipe-ok", title: "You have the components", text: "✓" }) : null,
-            el("span", { class: "prof-actions" }, [actBtn])
+            el("span", { class: "tag recipe-rank tier-" + tier, title: "Minimum rank " + (r.min_rank != null ? r.min_rank : "?"), text: (r.min_rank != null ? String(r.min_rank) : "?") }),
+            availBadge,
+            el("span", { class: "prof-actions" }, actions)
         ]);
         var wrap = el("div", { class: "recipe-item" }, [row]);
-        if (isOpen) wrap.appendChild(recipeCompsBlock(r, counts, treasure));
+        if (isOpen) {
+            wrap.appendChild(recipeCompsBlock(r, counts, treasure));
+            if (!targeted) wrap.appendChild(recipeQueue(p, r, count));
+        }
         return wrap;
+    }
+
+    // The overlay/sheet body that scrolls the panel — saved/restored across
+    // rebuilds so a filter/collapse/keystroke doesn't snap a long list to top.
+    function profScrollParent() {
+        var n = dom.professions && dom.professions.parentElement;
+        while (n) {
+            var oy = "";
+            try { oy = getComputedStyle(n).overflowY; } catch (e) {}
+            if ((oy === "auto" || oy === "scroll") && n.scrollHeight > n.clientHeight + 1) return n;
+            n = n.parentElement;
+        }
+        return null;
     }
 
     function renderProfessions() {
         if (!dom.professions) return;
-        // Wholesale rebuilds run on every inventory delta while the overlay
-        // is open — carry keyboard focus across (a11y: don't dump a keyboard/
-        // switch user to <body> mid-session).
-        var focusKey = null;
-        if (document.activeElement && dom.professions.contains(document.activeElement) &&
-            document.activeElement.getAttribute) {
-            focusKey = document.activeElement.getAttribute("data-focus");
+        // Wholesale rebuilds run on every inventory delta while the overlay is
+        // open (and on every search keystroke) — carry keyboard focus + caret
+        // across (a11y: don't dump a keyboard/switch user to <body>), and hold
+        // the scroll position.
+        var focusKey = null, caretPos = null;
+        var ae = document.activeElement;
+        if (ae && dom.professions.contains(ae) && ae.getAttribute) {
+            focusKey = ae.getAttribute("data-focus");
+            if (ae.tagName === "INPUT" && ae.selectionStart != null) {
+                try { caretPos = ae.selectionStart; } catch (e) {}
+            }
         }
+        var sc = profScrollParent();
+        var savedTop = sc ? sc.scrollTop : 0;
         var kids = [];
         var c = S.craft;
         if (c) {
@@ -2414,11 +2540,6 @@
             var pct = maxRank > 0 ? Math.max(0, Math.min(100, (rank / maxRank) * 100)) : 100;
             var isOpen = !!profOpen[p.id];
             var recipes = (S.recipes || []).filter(function (r) { return r && r.profession_id === p.id; });
-            recipes.sort(function (a, b) {
-                var ca = String(a.category || ""), cb = String(b.category || "");
-                if (ca !== cb) return ca < cb ? -1 : 1;
-                return (Number(a.min_rank) || 0) - (Number(b.min_rank) || 0);
-            });
             var row = el("div", { class: "prof-row" }, [
                 el("button", {
                     type: "button", class: "prof-head", "data-focus": "p" + p.id,
@@ -2438,18 +2559,82 @@
                 ])
             ]);
             if (isOpen) {
-                var listEl = el("div", { class: "recipe-list" });
-                var lastCat = null;
-                recipes.forEach(function (r) {
+                var pid = p.id;
+                var sorted = sortRecipes(recipes);
+                // The full ordered category set — the chip list, independent of
+                // what the active search/filter currently shows.
+                var catList = [];
+                sorted.forEach(function (r) {
                     var cat = String(r.category || "General");
-                    if (cat !== lastCat) {
-                        listEl.appendChild(el("div", { class: "recipe-cat", text: cat }));
-                        lastCat = cat;
-                    }
-                    listEl.appendChild(recipeRow(p, r, counts, treasure));
+                    if (catList.indexOf(cat) === -1) catList.push(cat);
                 });
+                var searchVal = profSearch[pid] || "";
+                var q = searchVal.trim().toLowerCase();
+                var selCat = profCat[pid] || "";
+                if (selCat && catList.indexOf(selCat) === -1) selCat = profCat[pid] = "";   // recipe forgotten → stale category
+
+                // Controls: search + Available toggle + category chips. Only when
+                // there's something to browse (a 0-recipe profession skips them).
+                if (recipes.length) {
+                    var searchInput = el("input", {
+                        type: "text", class: "recipe-search", "data-focus": "search-" + pid,
+                        placeholder: "Search recipes…", autocomplete: "off", spellcheck: "false",
+                        value: searchVal, "aria-label": "Search recipes"
+                    });
+                    searchInput.addEventListener("input", function () { profSearch[pid] = searchInput.value; renderProfessions(); });
+                    var chips = el("div", { class: "recipe-chips" });
+                    chips.appendChild(el("button", {
+                        type: "button", class: "recipe-chip avail" + (profAvailOnly ? " on" : ""),
+                        "data-focus": "avail-" + pid,
+                        onclick: function () { profAvailOnly = !profAvailOnly; persistProfAvail(); renderProfessions(); },
+                        text: "✓ Available"
+                    }));
+                    var catChip = function (label, val) {
+                        return el("button", {
+                            type: "button", class: "recipe-chip" + (selCat === val ? " on" : ""),
+                            onclick: function () { profCat[pid] = (selCat === val ? "" : val); renderProfessions(); },
+                            text: label
+                        });
+                    };
+                    chips.appendChild(catChip("All", ""));
+                    catList.forEach(function (cat) { chips.appendChild(catChip(cat, cat)); });
+                    row.appendChild(el("div", { class: "recipe-controls" }, [searchInput, chips]));
+                }
+
+                var shown = sorted.filter(function (r) {
+                    if (q && stripColor(r.name || "").toLowerCase().indexOf(q) === -1) return false;
+                    if (selCat && String(r.category || "General") !== selCat) return false;
+                    if (profAvailOnly && !recipeCraftable(r, counts, treasure)) return false;
+                    return true;
+                });
+
+                var listEl = el("div", { class: "recipe-list" });
                 if (!recipes.length) {
                     listEl.appendChild(el("div", { class: "prof-empty", text: "No recipes known yet — trainers and discovery await." }));
+                } else if (!shown.length) {
+                    listEl.appendChild(el("div", { class: "prof-empty", text: "No recipes match." }));
+                } else {
+                    var byCat = {}, order = [];
+                    shown.forEach(function (r) {
+                        var cat = String(r.category || "General");
+                        if (!byCat[cat]) { byCat[cat] = []; order.push(cat); }
+                        byCat[cat].push(r);
+                    });
+                    order.forEach(function (cat) {
+                        var key = pid + ":" + cat;
+                        var collapsed = !!catCollapsed[key];
+                        listEl.appendChild(el("button", {
+                            type: "button", class: "recipe-cat" + (collapsed ? " collapsed" : ""),
+                            "data-focus": "cat-" + pid + "-" + cat.replace(/[^a-z0-9]+/gi, "_"),
+                            "aria-expanded": collapsed ? "false" : "true",
+                            onclick: (function (k, was) { return function () { closeMenu(); catCollapsed[k] = !was; renderProfessions(); }; })(key, collapsed)
+                        }, [
+                            el("span", { class: "recipe-cat-caret", "aria-hidden": "true", text: collapsed ? "▸" : "▾" }),
+                            el("span", { class: "recipe-cat-name", text: cat }),
+                            el("span", { class: "recipe-cat-count", text: String(byCat[cat].length) })
+                        ]));
+                        if (!collapsed) byCat[cat].forEach(function (r) { listEl.appendChild(recipeRow(p, r, counts, treasure)); });
+                    });
                 }
                 row.appendChild(listEl);
             }
@@ -2457,9 +2642,15 @@
         });
         kids.push(el("div", { class: "prof-hint", text: "profession — overview & trainers · harvest <node> — gather" }));
         fill(dom.professions, kids);
+        if (sc) sc.scrollTop = savedTop;
         if (focusKey && /^[a-z0-9_-]+$/i.test(focusKey)) {
             var refocus = dom.professions.querySelector('[data-focus="' + focusKey + '"]');
-            if (refocus) refocus.focus();
+            if (refocus) {
+                refocus.focus();
+                if (caretPos != null && refocus.setSelectionRange) {
+                    try { refocus.setSelectionRange(caretPos, caretPos); } catch (e) {}
+                }
+            }
         }
         tickCraft();
     }
@@ -3231,12 +3422,24 @@
                   components: [{ kind: "item", vnum: 9001, name: "a pinch of sulfur", count: 2 }, { kind: "item", vnum: 9003, name: "a sprig of nightshade", count: 1 }] },
                 { id: 102, profession_id: 1, name: "tincture of stone", category: "Draughts", min_rank: 39, duration: 30,
                   components: [{ kind: "item", vnum: 9099, name: "a lump of granite dust", count: 1 }, { kind: "treasure", amount: 500 }] },
+                { id: 106, profession_id: 1, name: "weak salve", category: "Draughts", min_rank: 10, duration: 15,
+                  components: [{ kind: "item", vnum: 9003, name: "a sprig of nightshade", count: 1 }] },
                 { id: 103, profession_id: 1, name: "alchemist's fire", category: "Reagents", min_rank: 22, duration: 25,
                   components: [{ kind: "item", vnum: 9001, name: "a pinch of sulfur", count: 4 }, { kind: "location", label: "a forge" }] },
+                { id: 104, profession_id: 1, name: "spark reagent", category: "Reagents", min_rank: 30, duration: 18,
+                  components: [{ kind: "item", vnum: 9002, name: "a vial of powdered silver", count: 2 }] },
+                { id: 105, profession_id: 1, name: "elixir of vigor", category: "Elixirs", min_rank: 45, duration: 40,
+                  components: [{ kind: "item", vnum: 9004, name: "a shard of frost quartz", count: 3 }, { kind: "treasure", amount: 300 }] },
                 { id: 201, profession_id: 2, name: "minor soothing", category: "Head", min_rank: 8, duration: 20, target_gear_type: 6,
                   components: [{ kind: "item", vnum: 9002, name: "a vial of powdered silver", count: 1 }] },
+                { id: 204, profession_id: 2, name: "warding sigil", category: "Body", min_rank: 10, duration: 22, target_gear_type: 2,
+                  components: [{ kind: "item", vnum: 9001, name: "a pinch of sulfur", count: 1 }] },
+                { id: 205, profession_id: 2, name: "fleetfoot glyph", category: "Feet", min_rank: 14, duration: 22, target_gear_type: 5,
+                  components: [{ kind: "item", vnum: 9004, name: "a shard of frost quartz", count: 1 }] },
                 { id: 202, profession_id: 2, name: "keened edge", category: "Weapon", min_rank: 16, duration: 30, target_gear_type: 0,
                   components: [{ kind: "item", vnum: 9004, name: "a shard of frost quartz", count: 2 }, { kind: "treasure", amount: 800 }] },
+                { id: 206, profession_id: 2, name: "aegis boon", category: "Shield", min_rank: 22, duration: 28, target_gear_type: 1,
+                  components: [{ kind: "item", vnum: 9002, name: "a vial of powdered silver", count: 1 }] },
                 { id: 203, profession_id: 2, name: "greater arcane dust", category: "Transmutation", min_rank: 20, duration: 10,
                   components: [{ kind: "item", vnum: 9002, name: "a vial of powdered silver", count: 2 }] }
             ] },

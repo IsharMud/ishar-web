@@ -9,6 +9,54 @@ Format: `## YYYY-MM-DD — Title` · **Decision** · **Why** · (optional) **Not
 
 ---
 
+## 2026-07-17 — Recipe browser fast-follow: anatomical category order, filters/search/collapse, batch-craft queue, craftable-count badge
+
+**Decision.** The Professions recipe browser (shipped the same day) gets a
+usability pass, all client-side (`hud.js` + `hud.css`); the game already
+supports everything consumed here.
+
+- **Category order is a web concern.** The game lists recipe categories
+  alphabetically (`compare_category_summary`, `strcasecmp`). The browser
+  instead orders them **by paperdoll slot — head → feet, with the held items
+  (weapon, shield) in their worn position (below hands/gloves, above the
+  waist) rather than dangling at the end; any unknown category falls to a
+  middle band (alpha); `transmutation` / `general` / `misc` sink to the
+  bottom** (`categoryRank` in `hud.js`). Enchanting's gear-slot categories
+  then read like a paperdoll (Head, Body, Weapon, Shield, Feet,
+  Transmutation) rather than the alphabetical Body → Feet → Head → Shield →
+  Transmutation → Weapon. The slot list is anchored on the game's full
+  `gear_names` set, so every gear-slot category is covered now and forward;
+  free-form theme categories (Draughts, Reagents, Smelting, …) hit the alpha
+  band — exactly the game's own order, so no regression.
+- **Rank loses its `r` prefix** — a bare tier-colored number
+  (`.recipe-rank`). The old `✓` craftable mark is replaced by a
+  **craftable-count badge** (`.recipe-avail`): green `×N` computed the same
+  way the game's `recipe_available_count` does (`min` over item+treasure
+  components of `floor(have/need)`; location comps ignored), `✓` when ready
+  but unbounded/targeted, red `Missing` otherwise. Count and rank are
+  deliberately distinct pills so they can't be misread for each other.
+- **Filter + search + collapse.** A per-profession search box and filter
+  chips (an **Available** toggle — persisted — plus one chip per category)
+  reuse the abilities overlay's `.ab-search`/`.ab-chip` styling via shared
+  CSS selectors (one rule, two surfaces — the reduce-entropy move rather than
+  a forked look). Category headers double as **collapse** disclosures.
+- **Batch-craft queue.** Targetless recipes disclose a `−`/`+`/editable/**Max**
+  stepper + **Craft ×N** that sends `<verb> <recipe> <count>` — the game's
+  existing craft chain (cap 99). The quick inline **Craft** (=1) is hidden
+  while the detail is open so there's exactly one craft action per state.
+
+**Why.** The browser launched alphabetical, all-caps-header, single-craft, and
+count-less; the phone-first playerbase asked for order that matches how they
+think about gear, a way to find one recipe in a long list, and the batch craft
+they already have in-game (`fabricate steel ingot 3`). Mirroring the game's
+`available` math keeps the ×N honest.
+
+**Notes.** Verified against the real render code via `?demo=1`-style feeds in a
+headless-Chromium harness (desktop overlay + phone sheet; `scrollWidth ==
+innerWidth` at the narrow viewport — no horizontal overflow; the queue row
+`flex-wrap`s before it can). Not exercised against a live GMCP session — the
+owner's on-prod check. Relates to ishar-web#124, PR #123.
+
 ## 2026-07-17 — The HUD extension model: three surface tiers, and the micro-menu + overlay convention
 
 **Decision.** The HUD now has a **definitive placement rule** for every new
