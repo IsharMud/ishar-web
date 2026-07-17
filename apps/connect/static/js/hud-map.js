@@ -884,9 +884,12 @@
             onclick: function () { bigView.follow = true; centerOnMe(); redrawBig(); } });
         var toolbar = H.el("div", { class: "map-toolbar" },
             [zoneLabel, zRow, search, count, btnOut, btnIn, btnMe]);
-        var root = H.el("div", { class: "map-app" }, [toolbar, wrap]);
+        var foot = H.el("div", { class: "map-foot" });
+        foot.hidden = true;
+        var root = H.el("div", { class: "map-app" }, [toolbar, wrap, foot]);
         big = { root: root, canvas: canvas, wrap: wrap, zoneLabel: zoneLabel,
-                zRow: zRow, search: search, count: count, anchor: anchor };
+                zRow: zRow, search: search, count: count, anchor: anchor,
+                foot: foot };
 
         // --- search: filter discovered rooms, Enter cycles + centers ---
         search.addEventListener("input", function () {
@@ -1125,9 +1128,19 @@
         var acts = [];
         if (v === cur.vnum) {
             acts.push({ label: "You are here", fn: function () {}, keep: true });
-        } else {
-            var step = cur.vnum != null && adjacentStep(cur.vnum, v);
-            if (step) acts.push({ label: "Step " + step, cmd: step });
+        } else if (cur.vnum != null && !cur.unseen) {
+            var steps = findPath(cur.vnum, v);
+            if (steps) {
+                acts.push({
+                    label: "Walk here (" + steps.length + " step" +
+                        (steps.length === 1 ? "" : "s") + ")",
+                    fn: function () { startWalk(steps); }
+                });
+                acts.push({
+                    label: "Show path",
+                    fn: function () { setShownPath(steps); }, keep: true
+                });
+            }
         }
         if (fs[v]) {
             acts.push({
@@ -1219,11 +1232,208 @@
         });
     }
 
-    // Placeholder (Phase D wires the walk engine).
-    function walkPathVnums() { return null; }
-    function walkPathEdges() { return null; }
-    function walkOnRoom() {}
-    function cancelWalk() {}
+    // ------------------------------------------------------------------
+    // Navigation: pathfinding over the DISCOVERED graph, show-path, and
+    // the autowalk engine (one confirmed step at a time, abort on any
+    // surprise — the player's own commands always win).
+    // ------------------------------------------------------------------
+    var walk = null;        // {steps, i, timer, label} while autowalking
+    var shownPath = null;   // {steps, label} for show-path (no execution)
+    var walkChip = null;    // {root, label} cancel chip above the hotbar
+    var chipNoteTimer = null;
+
+    var STEP_PAUSE_MS = 250;   // between confirmed steps (server pacing)
+    var STEP_TIMEOUT_MS = 5000;
+
+    // BFS shortest path from `from` to `to` over directed exits whose
+    // SOURCE is discovered; an undiscovered frontier room is admissible
+    // only as the destination. Deterministic (exitsFrom is pre-sorted).
+    function findPath(from, to) {
+        if (cur.zone == null || from == null || to == null || from === to) return null;
+        var zone = zones[cur.zone];
+        var fs = fogSet(cur.zone), fr = frontier(cur.zone);
+        if (!fs[from] || (!fs[to] && !fr[to])) return null;
+        var prev = {};
+        prev[from] = null;
+        var queue = [from];
+        while (queue.length) {
+            var v = queue.shift();
+            if (v === to) break;
+            if (!fs[v]) continue;   // frontier rooms are terminal
+            var outs = zone.layout.exitsFrom[v] || [];
+            for (var i = 0; i < outs.length; i++) {
+                var t = outs[i].t;
+                if (prev[t] !== undefined || (!fs[t] && !fr[t])) continue;
+                prev[t] = { v: v, d: outs[i].d };
+                queue.push(t);
+            }
+        }
+        if (prev[to] === undefined) return null;
+        var steps = [];
+        var node = to;
+        while (prev[node]) {
+            steps.unshift({ cmd: stepCmd(prev[node].d), expect: node, from: prev[node].v });
+            node = prev[node].v;
+        }
+        return steps.length ? steps : null;
+    }
+    function pathLabel(steps) {
+        return steps.map(function (s) { return s.cmd; }).join(" · ");
+    }
+
+    // --- the cancel chip (above the hotbar; the whole chip cancels) ---
+    function buildChip() {
+        var label = H.el("span", { class: "walk-label" });
+        var root = H.el("button", {
+            type: "button", class: "map-walk", onclick: function () {
+                if (walk) cancelWalk("cancelled");
+                else hideChip();
+            }
+        }, [label]);
+        root.hidden = true;
+        var center = document.getElementById("hud-center");
+        var actionrow = document.getElementById("hud-actionrow");
+        if (center && actionrow) center.insertBefore(root, actionrow);
+        else document.body.appendChild(root);
+        walkChip = { root: root, label: label };
+    }
+    function chipSay(text, transientMs) {
+        if (!walkChip) buildChip();
+        clearTimeout(chipNoteTimer);
+        chipNoteTimer = null;
+        walkChip.label.textContent = text;
+        walkChip.root.hidden = false;
+        if (transientMs) {
+            chipNoteTimer = setTimeout(hideChip, transientMs);
+        }
+    }
+    function hideChip() {
+        clearTimeout(chipNoteTimer);
+        chipNoteTimer = null;
+        if (walkChip) walkChip.root.hidden = true;
+    }
+    function updateChip() {
+        if (!walk) { hideChip(); return; }
+        var step = Math.min(walk.i + 1, walk.steps.length);
+        chipSay("Walking… " + step + "/" + walk.steps.length + " — tap to cancel");
+    }
+
+    // --- the engine ---
+    function startWalk(steps) {
+        cancelWalk("replaced");
+        shownPath = null;
+        walk = { steps: steps, i: 0, timer: null };
+        sendStep();
+        redraw();
+        updateFoot();
+    }
+    function sendStep() {
+        if (!walk) return;
+        if (cur.unseen) { cancelWalk("you cannot see"); return; }
+        if (H.inCombat()) { cancelWalk("combat"); return; }
+        if (!H.connected() && !cfg.demo) { cancelWalk("disconnected"); return; }
+        var st = walk.steps[walk.i];
+        H.send(st.cmd);
+        walk.timer = setTimeout(function () { cancelWalk("no response"); }, STEP_TIMEOUT_MS);
+        updateChip();
+    }
+    // Called from enterZone on every sighted Room.Info.
+    function walkOnRoom(vnum) {
+        if (!walk) return;
+        var st = walk.steps[walk.i];
+        if (vnum === st.expect) {
+            clearTimeout(walk.timer);
+            walk.timer = null;
+            walk.i++;
+            if (walk.i >= walk.steps.length) {
+                walk = null;
+                chipSay("Arrived.", 2000);
+                updateFoot();
+                return;
+            }
+            walk.timer = setTimeout(sendStep, STEP_PAUSE_MS);
+            updateChip();
+        } else if (vnum !== st.from) {
+            // Somewhere unexpected: a follow, a portal, the player's own
+            // command. Their reality wins; stop quietly.
+            cancelWalk("off route");
+        }
+    }
+    function cancelWalk(reason) {
+        if (!walk) return;
+        clearTimeout(walk.timer);
+        walk = null;
+        if (reason && reason !== "replaced" && reason !== "reset") {
+            chipSay("Walk stopped: " + reason, 3000);
+        } else {
+            hideChip();
+        }
+        updateFoot();
+        redraw();
+    }
+
+    // Show-path: highlight without walking; listed in the overlay footer.
+    function setShownPath(steps) {
+        shownPath = steps ? { steps: steps } : null;
+        updateFoot();
+        redraw();
+    }
+
+    function activePath() { return walk || shownPath; }
+    function walkPathVnums() {
+        var p = activePath();
+        if (!p) return null;
+        var s = {};
+        p.steps.forEach(function (st) { s[st.from] = true; s[st.expect] = true; });
+        return s;
+    }
+    function walkPathEdges() {
+        var p = activePath();
+        if (!p) return null;
+        var m = {};
+        p.steps.forEach(function (st) {
+            m[st.from + "|" + st.expect] = true;
+            m[st.expect + "|" + st.from] = true;
+        });
+        return m;
+    }
+
+    function updateFoot() {
+        if (!big) return;
+        if (walk) {
+            H.fill(big.foot, [H.el("span", { class: "dim",
+                text: "Walking… " + walk.i + "/" + walk.steps.length })]);
+        } else if (shownPath) {
+            H.fill(big.foot, [
+                H.el("span", { text: pathLabel(shownPath.steps) + "  (" +
+                    shownPath.steps.length + " step" +
+                    (shownPath.steps.length === 1 ? "" : "s") + ")" }),
+                H.el("button", { type: "button", class: "map-btn",
+                    text: "Clear", onclick: function () { setShownPath(null); } })
+            ]);
+        } else {
+            H.fill(big.foot, []);
+        }
+        big.foot.hidden = !walk && !shownPath;
+    }
+
+    // Player input beats automation: Enter in the command line or Esc
+    // anywhere cancels an active walk (capture phase so the overlay's own
+    // Esc handling still runs afterwards only when no walk was active).
+    function wireWalkCancels() {
+        document.addEventListener("keydown", function (ev) {
+            if (ev.key === "Escape" && walk) {
+                ev.stopImmediatePropagation();
+                cancelWalk("cancelled");
+            }
+        }, true);
+        var input = document.getElementById("command-input");
+        if (input) input.addEventListener("keydown", function (ev) {
+            if (ev.key === "Enter" && walk && input.value.trim()) {
+                cancelWalk("your command");
+            }
+        });
+    }
 
     function redraw() {
         redrawMini();
@@ -1352,6 +1562,7 @@
             if (/[?&]demo=1/.test(window.location.search)) seedDemo();
             // Discovery must not be lost to a tab close mid-batch.
             window.addEventListener("pagehide", function () { doFlush(true); });
+            wireWalkCancels();
             if (H) { H.updateMicro(); H.rerenderRoom(); }
         },
         // Verification hooks (the repo's headless-Chromium harness asserts
@@ -1362,7 +1573,9 @@
             fog: fog,
             notes: notes,
             cur: cur,
-            demoGraph: demoGraph
+            demoGraph: demoGraph,
+            findPath: findPath,
+            walking: function () { return !!walk; }
         }
     };
 

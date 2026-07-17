@@ -468,9 +468,30 @@ body.connect-page #content { padding: .5rem !important; }
 .note-actions { display: flex; gap: 6px; justify-content: flex-end; }
 .note-del { color: var(--ac-danger); }
 
+/* Overlay footer: show-path step list / walking progress. */
+.map-foot {
+    display: flex; align-items: center; gap: 8px; padding: 8px 0 2px;
+    font-size: .72rem; color: var(--ac-text); flex-wrap: wrap;
+}
+.map-foot[hidden] { display: none; }
+
+/* Autowalk cancel chip, pinned above the action row. The whole chip is
+   the cancel button (44px coarse target) — player control in one tap. */
+.map-walk {
+    display: block; width: 100%; min-height: 30px; margin: 4px 0 0;
+    padding: 5px 10px; text-align: center; cursor: pointer;
+    font-size: .72rem; font-weight: 700; color: var(--ac-accent-2);
+    background: var(--ac-wash); border: 1px solid var(--ac-accent);
+    border-radius: var(--ac-radius-sm);
+}
+.map-walk[hidden] { display: none; }
+.map-walk:hover { background: var(--ac-elev); }
+.map-walk:focus-visible { outline: 2px solid var(--ac-accent); outline-offset: 1px; }
+
 @media (pointer: coarse) {
     .rose-tabs button, .map-btn { padding: 8px 12px; }
     .rose-note { padding: 8px; }
+    .map-walk { min-height: 44px; }
 }
 .compass {
     display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px;
