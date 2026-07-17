@@ -1265,7 +1265,11 @@ inventory row language (`.item-row`, `row-name`, `×N` tags, `⋯` menu, the
 - **Corpses** lead with a red `☠`, show a tier-colored `⛏ rN` chip when
   harvestable, and fold their loot behind the standard caret (a dim "N inside"
   count keeps it glanceable). Menu: Look · Loot all · Harvest (rank-gated) ·
-  Sacrifice (danger-styled, dead last — never adjacent to the loot actions).
+  Sacrifice (danger-styled, dead last, and behind a **confirm submenu** — it
+  destroys the corpse and its unlooted contents, and danger styling alone is
+  no guard against a thumb-slip on a 44px row). Menus opened *from* a menu
+  item's `fn` now work generally: the parent closes before the action runs
+  (this also fixes the latent icon-picker-from-menu ordering bug).
 - **Ground containers** must be **opened before contents show** — the feed
   itself only carries open-container contents (what `look in` reveals), so the
   panel can't leak traps or closed contents by construction. Open-container
@@ -1279,7 +1283,14 @@ inventory row language (`.item-row`, `row-name`, `×N` tags, `⋯` menu, the
   meet renders as a visible requirement ("Harvest (r41) — rank too low")
   instead of silently missing — the menu teaches.
 - **Verb map fixes:** `tome → Use` (learn), `deck → Draw`; **Sacrifice removed
-  from carried-item menus** — it lives only on ground corpses.
+  from carried-item menus** — it lives only on ground corpses (and the game
+  command itself was re-scoped to room-only resolution, ishar-mud#1827, so a
+  handle tap can never resolve to a carried corpse). A locked ground
+  container shows an inert "Locked" row instead of a dead Open action.
+- **One body, one row:** slain occupants stay in the Room.Occupants feed
+  (they hold parser ordinal slots) but are no longer rendered — the ground
+  corpse row is the single representation of a body, so the post-kill moment
+  shows one actionable row instead of a dead person row + a corpse row.
 
 **Data.** New per-viewer GMCP feed `Room.Contents` (ishar-mud#1827,
 contract 11.5.0): items with server-computed `"N.dotted.keywords"` handles

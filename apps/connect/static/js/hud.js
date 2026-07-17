@@ -1064,7 +1064,11 @@
     }
 
     function renderOccupants() {
-        var occ = S.occupants || [];
+        // Slain occupants stay in the FEED (they hold parser ordinal slots,
+        // #1679) but not in the PANEL: the corpse object in Room.Contents is
+        // the single representation of a body — two rows for one corpse was
+        // the panel's most confusing moment (post-kill).
+        var occ = (S.occupants || []).filter(function (o) { return !o.is_dead; });
         var items = S.roomItems || [];
         var nodes = S.roomNodes || [];
         var hasShop = occ.some(function (o) { return o.is_shopkeeper; });
@@ -1086,19 +1090,22 @@
                     kids.push(el("div", { class: "tgt-chips" }, chips));
                 }
                 var list = el("ul", { class: "occ-list" });
-                occ.forEach(function (o, i) {
+                // Iterate the UNFILTERED list: data-idx must index S.occupants
+                // (openHostMenu reads it back); dead entries just skip.
+                (S.occupants || []).forEach(function (o, i) {
+                    if (o.is_dead) return;
                     var marks = "";
                     if (S.tgtHostile && S.tgtHostile.handle === o.handle) marks += " ⚔";
                     if (S.tgtFriendly && S.tgtFriendly.handle === o.handle) marks += " ✚";
                     // Position tag for anyone not simply standing (the same
                     // cue the room text gives: "is sleeping here").
-                    var ptag = (!o.is_dead && o.position && posLower(o) !== "standing")
+                    var ptag = (o.position && posLower(o) !== "standing")
                         ? posLower(o) : "";
-                    var fight = o.is_dead ? "" : occFightLabel(o);
+                    var fight = occFightLabel(o);
                     var row = el("li", {
-                        class: "occ-row " + occHostileClass(o) + (o.is_dead ? " is-dead" : ""),
+                        class: "occ-row " + occHostileClass(o),
                         "data-menu": "occupant", "data-idx": i,
-                        title: o.is_dead ? "Slain — not targetable" : "Tap for actions"
+                        title: "Tap for actions"
                     }, [
                         el("span", { class: "occ-icon", "aria-hidden": "true", text: o.is_player ? "☻" : "•" }),
                         el("span", { class: "occ-name", text: stripColor(o.short_desc || o.keyword) }),
@@ -1139,14 +1146,18 @@
         if (!hv.profession_id) return { ok: true, tier: null, req: req };
         var prof = professionById(hv.profession_id);
         if (!prof) return { ok: false, tier: "blocked", untrained: true, req: req };
-        var tier = profTier(req - (Number(prof.rank) || 0));
-        return { ok: tier !== "blocked", tier: tier, prof: prof, req: req };
+        var rank = Number(prof.rank) || 0;
+        var tier = profTier(req - rank);
+        // rank 0 = held but never practiced: harvest_rank_allows hard-fails
+        // rank <= 0 server-side regardless of the delta.
+        return { ok: rank > 0 && tier !== "blocked", tier: tier, prof: prof, req: req };
     }
     function harvestChip(hv) {
         var hs = harvestStanding(hv);
-        var title = hs.untrained ? "Harvestable — you lack the profession"
-            : hs.ok ? "Harvestable — requires rank " + hs.req + (hs.prof ? " " + hs.prof.name : "")
-            : "Harvestable — rank " + hs.req + " needed (yours: " + (hs.prof ? hs.prof.rank : 0) + ")";
+        var profName = hs.prof ? hs.prof.name : (hv.profession || "");
+        var title = hs.untrained ? "Harvestable — requires " + (profName || "a profession you lack")
+            : hs.ok ? "Harvestable — requires rank " + hs.req + (profName ? " " + profName : "")
+            : "Harvestable — " + (profName ? profName + " " : "") + "rank " + hs.req + " needed (yours: " + (hs.prof ? hs.prof.rank : 0) + ")";
         return el("span", {
             class: "tag harvest tier-" + (hs.tier || "open"),
             title: title, text: "⛏ r" + hs.req
@@ -1169,7 +1180,12 @@
             var isContainer = it.type === "container";
             var hasContents = !!(it.contents && it.contents.length);
             var open = isContainer && !it.closed;
-            var ekey = "g" + groundTarget(it);
+            // Expand-state key WITHOUT the handle's ordinal: "2.corpse.rat"
+            // becomes "1.corpse.rat" when an earlier duplicate goes away, and
+            // an ordinal-bearing key would silently drop the expansion (and
+            // accrete stale variants in localStorage). Same-keyword duplicates
+            // sharing one expand state is the lesser wart.
+            var ekey = "g" + targetOf(it.keywords || it.name);
             var canExpand = open && hasContents;
             var isOpen = canExpand && !!expanded[ekey];
             var kids = [];
@@ -2923,10 +2939,13 @@
                 text: a.label,
                 onclick: function () {
                     if (a.disabled) return;
+                    // Close BEFORE running the action: an fn may open its own
+                    // surface (icon picker, a confirm submenu) and a
+                    // close-after would immediately dismiss it.
+                    closeMenu();
                     if (a.fn) a.fn();
                     else if (a.prefill != null) api.prefill(a.prefill);
                     else if (a.cmd) sendCmd(a.cmd);
-                    closeMenu();
                     // `keep`: informational rows shouldn't throw away the
                     // phone sheet the menu was opened from.
                     if (!a.keep && sheetName && mqMobile.matches) setSheet(null);
@@ -3043,7 +3062,7 @@
     // Actions for a ground object (Room.Contents item). Commands target the
     // server-computed handle so duplicates ("2.corpse.rat") resolve to the
     // exact instance; the server re-validates everything.
-    function groundItemActions(it) {
+    function groundItemActions(it, anchor) {
         var h = groundTarget(it);
         var acts = [{ label: "Look", cmd: "look " + h }];
         var isContainer = it.type === "container";
@@ -3052,19 +3071,39 @@
             if (hasContents) acts.push({ label: "Loot all", cmd: "get all from " + h });
             if (it.harvest) acts.push(harvestAction(it.harvest, h));
         } else if (isContainer) {
-            if (it.closeable) acts.push(it.closed ? { label: "Open", cmd: "open " + h } : { label: "Close", cmd: "close " + h });
+            if (it.locked) {
+                // Honest verb: the game refuses Open on a locked container,
+                // so surface the state instead of a dead action.
+                acts.push({ label: "Locked", disabled: true });
+            } else if (it.closeable) {
+                acts.push(it.closed ? { label: "Open", cmd: "open " + h } : { label: "Close", cmd: "close " + h });
+            }
             if (!it.closed && hasContents) acts.push({ label: "Get all from", cmd: "get all from " + h });
         }
         // no_take = scenery ("You can't seem to budge...") — omit dead verbs.
         if (!it.no_take && !it.is_corpse) acts.push({ label: "Get", cmd: "get " + h });
-        // Sacrifice lives HERE and only here: the command takes a corpse in
-        // the room, never a carried item. Last and danger-styled.
-        if (it.is_corpse) acts.push({ label: "Sacrifice", cmd: "sacrifice " + h, danger: true });
+        if (it.is_corpse) {
+            // Sacrifice lives HERE and only here (the command takes a corpse
+            // on the ground, never a carried item) — last, danger-styled, and
+            // behind a confirm: it destroys the corpse AND any unlooted
+            // contents, and a thumb-slip on a 44px row is one tap away.
+            acts.push({
+                label: "Sacrifice…", danger: true, keep: true,
+                fn: function () {
+                    openMenu("Sacrifice " + stripColor(it.name || "corpse") + "?", [
+                        { label: "Confirm — destroys it" + (hasContents ? " and its contents" : ""), cmd: "sacrifice " + h, danger: true },
+                        { label: "Cancel", fn: function () {} }
+                    ], anchor);
+                }
+            });
+        }
         return acts;
     }
     function harvestAction(hv, target) {
         var hs = harvestStanding(hv);
-        if (hs.untrained) return { label: "Harvest — untrained", disabled: true };
+        if (hs.untrained) {
+            return { label: "Harvest — requires " + (hv.profession || "training"), disabled: true };
+        }
         if (!hs.ok) return { label: "Harvest (r" + hs.req + ") — rank too low", disabled: true };
         return { label: "Harvest (r" + hs.req + ")", cmd: "harvest " + target, tier: hs.tier || undefined };
     }
@@ -3277,7 +3316,7 @@
             openMenu(ds.name || ds.target, itemActions(ds), anchor);
         } else if (kind === "grounditem") {
             var gi = (S.roomItems || [])[Number(host.getAttribute("data-idx"))];
-            if (gi) openMenu(stripColor(gi.name || ""), groundItemActions(gi), anchor);
+            if (gi) openMenu(stripColor(gi.name || ""), groundItemActions(gi, anchor), anchor);
         } else if (kind === "groundcontent") {
             var gds = readDataset(host);
             openMenu(gds.name || gds.target, groundContentActions(gds), anchor);
@@ -3666,7 +3705,7 @@
             ] },
             "Room.Contents": { items: [
                 { name: "the corpse of a sewer rat", keywords: "corpse rat", handle: "1.corpse.rat", type: "container", vnum: -1, count: 1, is_corpse: true,
-                  harvest: { profession_id: 1, required_rank: 30 },
+                  harvest: { profession_id: 1, profession: "Alchemy", required_rank: 30 },
                   closeable: false, closed: false, locked: false, contents: [
                     { name: "a pitted short sword", keywords: "sword short pitted", type: "weapon", vnum: 301, count: 1 },
                     { name: "a mangy rat pelt", keywords: "pelt rat mangy", type: "other", vnum: 302, count: 2 }
@@ -3679,9 +3718,9 @@
                 { name: "a glowing potion", keywords: "potion glowing", handle: "1.potion.glowing", type: "potion", vnum: 10, count: 2 },
                 { name: "a marble fountain", keywords: "fountain marble", handle: "1.fountain.marble", type: "drink", vnum: 312, count: 1, no_take: true }
             ], nodes: [
-                { name: "a vein of glittering ore", keywords: "vein ore", profession_id: 2, required_rank: 16 },
-                { name: "a tangle of silverleaf", keywords: "silverleaf tangle", profession_id: 1, required_rank: 41 },
-                { name: "a seam of rough crystal", keywords: "seam crystal", profession_id: 3, required_rank: 5 }
+                { name: "a vein of glittering ore", keywords: "vein ore", profession_id: 2, profession: "Enchanting", required_rank: 16 },
+                { name: "a tangle of silverleaf", keywords: "silverleaf tangle", profession_id: 1, profession: "Alchemy", required_rank: 41 },
+                { name: "a seam of rough crystal", keywords: "seam crystal", profession_id: 3, profession: "Artificing", required_rank: 5 }
             ] },
             "Char.Equipment": { items: [
                 { name: "a magnificent helmet of red dragonscales", keywords: "helmet dragonscales", type: "armor", vnum: 1, location: "Head", condition: 100 },
