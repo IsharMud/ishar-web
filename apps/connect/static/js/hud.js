@@ -3062,7 +3062,7 @@
     // Actions for a ground object (Room.Contents item). Commands target the
     // server-computed handle so duplicates ("2.corpse.rat") resolve to the
     // exact instance; the server re-validates everything.
-    function groundItemActions(it, anchor) {
+    function groundItemActions(it) {
         var h = groundTarget(it);
         var acts = [{ label: "Look", cmd: "look " + h }];
         var isContainer = it.type === "container";
@@ -3084,18 +3084,11 @@
         if (!it.no_take && !it.is_corpse) acts.push({ label: "Get", cmd: "get " + h });
         if (it.is_corpse) {
             // Sacrifice lives HERE and only here (the command takes a corpse
-            // on the ground, never a carried item) — last, danger-styled, and
-            // behind a confirm: it destroys the corpse AND any unlooted
-            // contents, and a thumb-slip on a 44px row is one tap away.
-            acts.push({
-                label: "Sacrifice…", danger: true, keep: true,
-                fn: function () {
-                    openMenu("Sacrifice " + stripColor(it.name || "corpse") + "?", [
-                        { label: "Confirm — destroys it" + (hasContents ? " and its contents" : ""), cmd: "sacrifice " + h, danger: true },
-                        { label: "Cancel", fn: function () {} }
-                    ], anchor);
-                }
-            });
+            // on the ground, never a carried item) — last and danger-styled.
+            // No confirm, matching the game: sacrificing spills any contents
+            // onto the ground and consumes only the corpse itself, so a
+            // mis-tap costs nothing but the body.
+            acts.push({ label: "Sacrifice", cmd: "sacrifice " + h, danger: true });
         }
         return acts;
     }
@@ -3316,7 +3309,7 @@
             openMenu(ds.name || ds.target, itemActions(ds), anchor);
         } else if (kind === "grounditem") {
             var gi = (S.roomItems || [])[Number(host.getAttribute("data-idx"))];
-            if (gi) openMenu(stripColor(gi.name || ""), groundItemActions(gi, anchor), anchor);
+            if (gi) openMenu(stripColor(gi.name || ""), groundItemActions(gi), anchor);
         } else if (kind === "groundcontent") {
             var gds = readDataset(host);
             openMenu(gds.name || gds.target, groundContentActions(gds), anchor);

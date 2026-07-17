@@ -1265,11 +1265,12 @@ inventory row language (`.item-row`, `row-name`, `×N` tags, `⋯` menu, the
 - **Corpses** lead with a red `☠`, show a tier-colored `⛏ rN` chip when
   harvestable, and fold their loot behind the standard caret (a dim "N inside"
   count keeps it glanceable). Menu: Look · Loot all · Harvest (rank-gated) ·
-  Sacrifice (danger-styled, dead last, and behind a **confirm submenu** — it
-  destroys the corpse and its unlooted contents, and danger styling alone is
-  no guard against a thumb-slip on a 44px row). Menus opened *from* a menu
-  item's `fn` now work generally: the parent closes before the action runs
-  (this also fixes the latent icon-picker-from-menu ordering bug).
+  Sacrifice (danger-styled, dead last; deliberately **no confirm** — the game
+  offers none, and sacrificing spills a corpse's contents onto the ground
+  rather than destroying them, so a mis-tap costs only the body). Menus
+  opened *from* a menu item's `fn` now work generally: the parent closes
+  before the action runs (this fixes the latent icon-picker-from-menu
+  ordering bug and enables future confirm flows should one ever be needed).
 - **Ground containers** must be **opened before contents show** — the feed
   itself only carries open-container contents (what `look in` reveals), so the
   panel can't leak traps or closed contents by construction. Open-container
