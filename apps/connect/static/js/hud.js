@@ -28,9 +28,14 @@
     "use strict";
 
     var CHAT_MAX = 200;
-    var QUICKBAR_MAX = 12;   // backfill target for the auto quick-bar
-    var FAV_CAP = 30;        // ceiling on pinned favorites shown in the quick-bar
-    // (the bar is single-row horizontal-scroll, so it never grows vertically)
+    var QUICKBAR_MAX = 12;   // suggestions shown in "auto" mode (nothing pinned yet)
+    // WoW-style action bar: fixed, numbered, hotkey-addressable slots. Two pages
+    // of ten (Alt/Ctrl+1..0 fire the visible page); slot 10 is keyed "0".
+    var SLOTS_PER_PAGE = 10;
+    var SLOT_PAGES = 2;
+    var SLOT_MAX = SLOTS_PER_PAGE * SLOT_PAGES;   // 20 assignable slots
+    var SVGNS = "http://www.w3.org/2000/svg";
+    var XLINKNS = "http://www.w3.org/1999/xlink";
 
     // ------------------------------------------------------------------
     // State
@@ -39,16 +44,24 @@
         vitals: null, status: null, time: null, room: null,
         equipment: [], inventory: null, train: null,
         affects: null, group: null, who: null, occupants: [],
-        skills: [], cooldownExpiry: {}, usable: {},
+        skills: [], cooldownExpiry: {}, cooldownTotal: {}, usable: {},
         chat: [], connected: false,
         // Default targets (from Room.Occupants) that make the hotbar
         // target-aware: offensive spells → hostile, defensive → beneficial.
         tgtHostile: null, tgtFriendly: null
     };
 
-    // Persisted client prefs (localStorage): pinned abilities + collapsed
-    // panels + Abilities-browser filters.
-    var favorites = loadSet("ishar.favs");
+    // Persisted client prefs (localStorage): the action-bar slot assignments,
+    // per-skill icon overrides, collapsed panels, and Abilities-browser filters.
+    var slots = loadSlots();                  // sparse array, index 0..SLOT_MAX-1 -> skill key
+    var iconOverrides = loadMap("ishar.icons"); // per-player pick: skill key -> game-icons name
+    var curatedIcons = {};                     // site-shipped standardized map: skill id -> icon (set in init)
+    var hotbarPage = 0;                        // which page of ten is visible
+    // Action-bar lock (WoW-style): locked (default) fires on tap/hotkey and can't
+    // be dragged; unlocked is edit mode — taps rearrange instead of firing.
+    var barLocked = localStorage.getItem("ishar.barUnlocked") !== "1";
+    var pickedSlot = null;                     // tap-to-swap source (edit mode)
+    var spriteUrl = "";                        // game-icons sprite URL (set in init)
     var collapsed = loadSet("ishar.collapsed");
     // Which containers the player has expanded to view. Packs start COLLAPSED
     // (default absent = closed): a carried bag shouldn't spill its whole
@@ -58,7 +71,8 @@
     try {
         var af = JSON.parse(localStorage.getItem("ishar.abilityFilter"));
         if (af && typeof af === "object") {
-            if (typeof af.type === "string") abilityFilter.type = af.type;
+            // Legacy "fav" filter is now "bar" (on the action bar).
+            if (typeof af.type === "string") abilityFilter.type = (af.type === "fav" ? "bar" : af.type);
             if (typeof af.usableOnly === "boolean") abilityFilter.usableOnly = af.usableOnly;
         }
     } catch (e) {}
@@ -128,6 +142,237 @@
     }
     function saveSet(key, s) {
         try { localStorage.setItem(key, JSON.stringify(Object.keys(s))); } catch (e) {}
+    }
+    function loadMap(key) {
+        try { var m = JSON.parse(localStorage.getItem(key)); if (m && typeof m === "object" && !Array.isArray(m)) return m; } catch (e) {}
+        return {};
+    }
+    function saveMap(key, m) { try { localStorage.setItem(key, JSON.stringify(m)); } catch (e) {} }
+
+    // Action-bar slots persist as an array of skill keys (null = empty). On first
+    // run we migrate the legacy unordered favorites set into ordered slots so a
+    // returning player keeps their pins.
+    function loadSlots() {
+        try {
+            var raw = localStorage.getItem("ishar.slots");
+            if (raw != null) {
+                var a = JSON.parse(raw);
+                if (Array.isArray(a)) return a.slice(0, SLOT_MAX).map(function (x) { return (typeof x === "string" && x) ? x : null; });
+            }
+            var fav = JSON.parse(localStorage.getItem("ishar.favs"));
+            if (Array.isArray(fav)) {
+                var m = fav.filter(function (x) { return typeof x === "string" && x; })
+                           .map(function (x) { return x.toLowerCase(); }).slice(0, SLOT_MAX);
+                localStorage.setItem("ishar.slots", JSON.stringify(m));
+                return m;
+            }
+        } catch (e) {}
+        return [];
+    }
+    function saveSlots() {
+        try { localStorage.setItem("ishar.slots", JSON.stringify(slots.map(function (x) { return x || null; }))); } catch (e) {}
+    }
+    function slotKeyOf(s) { return nameOf(s && s.name).toLowerCase(); }
+    function slotIndexOf(key) { for (var i = 0; i < slots.length; i++) if (slots[i] === key) return i; return -1; }
+    function onBar(key) { return slotIndexOf(key) !== -1; }
+    function firstEmptySlot() { for (var i = 0; i < SLOT_MAX; i++) if (!slots[i]) return i; return -1; }
+    // The human "1..0" label for a slot index on its page.
+    function slotLabel(i) { var n = (i % SLOTS_PER_PAGE) + 1; return n === 10 ? "0" : String(n); }
+    function pageOfIndex(i) { return Math.floor(i / SLOTS_PER_PAGE); }
+    function anyAssigned() { for (var i = 0; i < slots.length; i++) if (slots[i]) return true; return false; }
+
+    // Pin/unpin a skill on the bar (toggle its presence).
+    function toggleSlot(name) {
+        var key = nameOf(name).toLowerCase();
+        var cur = slotIndexOf(key);
+        if (cur !== -1) { slots[cur] = null; }
+        else { var e = firstEmptySlot(); if (e !== -1) slots[e] = key; else if (slots.length < SLOT_MAX) slots.push(key); else return; }
+        saveSlots(); renderHotbar(); renderAbilities();
+    }
+    // Drop a skill onto an explicit slot index (drag, or "Assign to slot N").
+    function assignSlot(idx, key) {
+        if (idx < 0 || idx >= SLOT_MAX || !key) return;
+        var cur = slotIndexOf(key);
+        var occupant = slots[idx] || null;
+        if (cur !== -1) slots[cur] = occupant;   // swap if the source was already on the bar
+        slots[idx] = key;
+        saveSlots(); renderHotbar(); renderAbilities();
+    }
+    function clearSlot(idx) { if (slots[idx]) { slots[idx] = null; saveSlots(); renderHotbar(); renderAbilities(); } }
+    // Nudge a slot left/right within the bar (swaps with the neighbour).
+    function moveSlot(idx, dir) {
+        var j = idx + dir;
+        if (j < 0 || j >= SLOT_MAX) return;
+        var tmp = slots[idx]; slots[idx] = slots[j] || null; slots[j] = tmp;
+        saveSlots(); renderHotbar(); renderAbilities();
+    }
+
+    // ------------------------------------------------------------------
+    // Skill icons (game-icons.net, CC BY 3.0, self-hosted sprite)
+    // ------------------------------------------------------------------
+    // The game sends no icon metadata, so we map client-side: a user override
+    // wins, else the first keyword rule to match the (color-stripped, lowercased)
+    // skill name, else a type/category fallback. This SAME table is mirrored by
+    // scratchpad/iconset.js, which the sprite generator reads — every name below
+    // is guaranteed present in game-icons.svg.
+    var ICON_RULES = [
+        [/fireball|meteor|fire ?storm|flame ?strike|firewall/, "fireball"],
+        [/frost ?fire/, "frostfire"],
+        [/fire|flame|flaming|burn|blaz|inferno|pyro|scorch|ignit|ember|cinder|combust/, "fire"],
+        [/blizzard|snow/, "snowflake-1"],
+        [/ice|frost|freez|cold|glaci|chill|hail|winter|rime|frigid/, "ice-bolt"],
+        [/chain ?light/, "chain-lightning"],
+        [/storm|tempest/, "lightning-storm"],
+        [/lightn|shock|thunder|electr|volt|spark|static|arc\b/, "lightning-arc"],
+        [/acid|corros|melt|dissolve/, "acid"],
+        [/disease|plague|infect|\brot\b|pestilence|contagi|fester/, "poison-cloud"],
+        [/poison|venom|toxic|toxin|noxious|virulen/, "poison-bottle"],
+        [/water|wave|tide|aqua|drown|tsunami|deluge|torrent/, "water-drop"],
+        [/tornado|cyclone|whirlwind|vortex|hurricane/, "tornado"],
+        [/wind|\bair\b|gust|gale|breeze|zephyr/, "wind-hole"],
+        [/earth|stone|\brock\b|quake|boulder|tremor|seismic|granite/, "earth-crack"],
+        [/regen|rejuven|regrow|sustain/, "regeneration"],
+        [/heal|cure|mend|renew|restor|recover|salv|remedy|soothe/, "healing"],
+        [/resurrect|revive|raise dead|\blife\b|vitalit|\bres\b/, "caduceus"],
+        [/bless|blessing|benedict|\bboon\b/, "prayer"],
+        [/holy|divine|sacred|consecrat|sanctif|celestial|righteous|hallow/, "holy-symbol"],
+        [/\bsun\b|sunlight|radian|dawn|solar|lumin|\bglow\b/, "sunbeams"],
+        [/curse|hex|doom|blight|wither|decay|afflict|malediction/, "cursed-star"],
+        [/necro|death|\bdead\b|grave|corpse|\bsoul\b|drain|siphon|leech|vampir|\breap/, "death-skull"],
+        [/dark|shadow|night|umbral|gloom|\bblack\b/, "evil-wings"],
+        [/fear|terror|horror|dread|panic|scare|fright/, "spectre"],
+        [/mind|psych|psion|charm|dominat|hypno|mesmer|confus|sleep|slumber|daze|beguile|enthrall/, "psychic-waves"],
+        [/stone ?skin|bark ?skin|iron ?skin/, "aura"],
+        [/sanctuar|globe|barrier|\bward\b|aegis|bulwark/, "energy-shield"],
+        [/armor|armour|\bplate\b|carapace|\bhide\b|toughness|hardskin/, "armor-vest"],
+        [/shield|protect|\bguard\b|defen|shelter/, "shield"],
+        [/haste|speed|swift|quick|celerity|hasten|fleet|nimble/, "sprint"],
+        [/\bfly\b|levit|feather|soar|\bwing/, "angel-wings"],
+        [/teleport|blink|recall|\bgate\b|dimension|translocat|portal/, "magic-gate"],
+        [/summon|conjur|beckon/, "portal"],
+        [/detect|scry|\bsense\b|reveal|truesight|identif|locate|farsight|clairvoy|augury/, "all-seeing-eye"],
+        [/invis|vanish|shroud|unseen/, "invisible"],
+        [/hide|sneak|stealth|camoufl|prowl|conceal/, "hidden"],
+        [/backstab|assassin|ambush|garrote/, "stiletto"],
+        [/steal|pick ?pocket|pilfer|thiev|filch|purloin|palm/, "plain-dagger"],
+        [/dual|whirl|flurry|\bcombo\b|multi ?(hit|attack)|barrage/, "crossed-swords"],
+        [/slash|slice|cleav|\bhack\b|\brend\b|lacerat/, "saber-slash"],
+        [/sword|blade|parry|riposte|fenc|thrust|pierce|\bstab\b|impale|lunge|skewer/, "pointy-sword"],
+        [/\baxe\b|chop|\bhew\b/, "sharp-axe"],
+        [/hammer|\bmace\b|blunt|smash|crush|\bmaul\b|pound|pulver/, "flat-hammer"],
+        [/bash|\bslam\b|shatter/, "shield-reflect"],
+        [/spear|lance|polearm|halberd|\bpike\b|javelin|glaive/, "spear-hook"],
+        [/crossbow/, "crossbow"],
+        [/\bbow\b|arrow|shoot|archer|ranged|volley|snipe|marksman|fletch/, "pocket-bow"],
+        [/dagger|knife|\bdirk\b/, "plain-dagger"],
+        [/kick|roundhouse|stomp/, "high-kick"],
+        [/punch|\bjab\b|fist|martial|brawl|pummel|uppercut|\bstrike\b/, "punch"],
+        [/dodge|evade|deflect|\bblock\b/, "vibrating-shield"],
+        [/rage|berserk|fury|frenzy|enrage|bloodlust|\bwrath\b/, "muscle-up"],
+        [/shout|\byell\b|war ?cry|battle ?cry|\broar\b|\bhowl\b|bellow|scream|taunt/, "sonic-shout"],
+        [/disarm|\btrip\b|feint|sunder|\bbreak\b/, "sword-clash"],
+        [/thorn|\bvine\b|entangle|\broot\b|bramble/, "thorny-vine"],
+        [/nature|\bplant\b|druid|grove|forest|\bbloom\b|sprout|\bseed\b/, "sprout"],
+        [/\bleaf\b|petal|pollen|\bspore/, "leaf-swirl"],
+        [/beast|animal|\bpet\b|companion|\btame\b|feral/, "wolf-howl"],
+        [/\bwolf\b|\bbear\b|\bhawk\b|falcon|serpent/, "beast-eye"],
+        [/\bclaw|talon|\bbite\b|\bfang/, "claw-slashes"],
+        [/bleed|hemorrh|\bwound\b|\bgash\b/, "bleeding-wound"],
+        [/\bbone\b|skeleton|marrow/, "broken-bone"],
+        [/enchant|imbue|inscri|\brune\b|glyph|sigil|empower|augment/, "rune-stone"],
+        [/brew|alchem|potion|distil|concoct|elixir|philter/, "bubbling-flask"],
+        [/forge|smith|anvil|temper|reforge/, "anvil"],
+        [/craft|\bmake\b|create|\bbuild\b|construct|assemble|fashion/, "hammer-nails"],
+        [/\bsew\b|tailor|weav|stitch|\bknit\b|leatherwork/, "sewing-needle"],
+        [/\bmine\b|\bdig\b|excavat|prospect|\bore\b/, "gold-nuggets"],
+        [/cook|bake|roast/, "cauldron"],
+        [/\bgem\b|jewel|crystal|prism|facet/, "gems"],
+        [/scroll|scribe|transcri/, "scroll-unfurled"],
+        [/meditat|focus|concentrat|trance|commune|contemplat|\bcenter\b/, "meditation"],
+        [/spell ?book|\bstudy\b|\blore\b|grimoire|\btome\b|research/, "spell-book"],
+        [/track|hunt|forage|surviv|scout|\btrail\b/, "footsteps"],
+        [/magic|arcane|mystic|arcana|sorcer|wizard|\bmana\b|\bspell\b/, "magic-swirl"]
+    ];
+    function iconFallback(s) {
+        var t = s.type, c = s.category;
+        if (t === "craft") return "hammer-nails";
+        if (t === "enchant") return "rune-stone";
+        if (t === "passive") return "aura";
+        if (t === "spell") return c === "damage" ? "magic-swirl" : c === "heal" ? "healing" : "sparkles";
+        if (t === "skill") return c === "damage" ? "crossed-swords" : c === "heal" ? "bandage-roll" : "sword-brandish";
+        return "round-star";
+    }
+    // The manual icon picker palette (themed groups). Every name ships in the sprite.
+    var ICON_PALETTE = [
+        ["Fire", ["fire", "fireball", "fire-bomb", "flaming-arrow", "celebration-fire", "burning-skull", "fire-ray"]],
+        ["Ice & water", ["ice-bolt", "frozen-orb", "snowflake-1", "ice-cube", "frostfire", "water-drop"]],
+        ["Storm & air", ["lightning-arc", "lightning-storm", "chain-lightning", "lightning-helix", "tornado", "wind-hole"]],
+        ["Earth", ["earth-crack", "rock", "stone-spear"]],
+        ["Poison & death", ["poison-bottle", "poison-gas", "poison-cloud", "acid", "acid-blob", "death-skull", "skull-crossed-bones", "crossed-bones", "cursed-star", "death-zone"]],
+        ["Arcane", ["magic-swirl", "sparkles", "star-swirl", "wizard-staff", "magic-palm", "fairy-wand", "magick-trick", "rune-stone"]],
+        ["Holy & shadow", ["holy-symbol", "sunbeams", "sun", "angel-wings", "prayer", "sun-priest", "evil-wings", "spectre", "psychic-waves"]],
+        ["Healing", ["healing", "health-potion", "heart-plus", "first-aid-kit", "bandage-roll", "caduceus", "life-support", "holy-water", "health-normal", "heart-bottle", "regeneration", "meditation"]],
+        ["Defense", ["shield", "checked-shield", "edged-shield", "armor-vest", "aura", "magic-shield", "energy-shield", "barrier", "shield-reflect", "vibrating-shield"]],
+        ["Blades & weapons", ["pointy-sword", "sword-wound", "sword-brandish", "crossed-swords", "broadsword", "saber-slash", "sword-clash", "sharp-axe", "battle-axe", "flat-hammer", "gavel", "spear-hook", "thrown-spear", "pocket-bow", "high-shot", "crossbow", "plain-dagger", "stiletto", "bone-knife"]],
+        ["Unarmed & fury", ["fist", "punch", "punch-blast", "high-kick", "boot-stomp", "muscle-up", "biceps", "sonic-shout"]],
+        ["Stealth & travel", ["hidden", "ninja-mask", "cloak", "invisible", "sprint", "run", "walking-boot", "footsteps", "eye-target", "magnifying-glass", "all-seeing-eye", "sight-disabled", "portal", "teleport", "magic-gate"]],
+        ["Nature & beast", ["sprout", "leaf-swirl", "thorny-vine", "vine-whip", "wolf-howl", "beast-eye", "claw-slashes", "bleeding-wound", "broken-bone"]],
+        ["Craft & enchant", ["hammer-nails", "anvil", "anvil-impact", "blacksmith", "gears", "sewing-needle", "cauldron", "bubbling-flask", "potion-ball", "drink-me", "mortar", "gold-nuggets", "gems", "crystal-shine", "scroll-unfurled", "spell-book", "open-book"]],
+        ["Creatures & forms", ["dragon-head", "dragon-breath", "tiger-head", "monkey", "eagle-head", "raven", "owl", "tortoise", "boar", "octopus", "cobra", "snake", "bear-head", "totem-head"]],
+        ["Mind, time & spirit", ["brain", "third-eye", "psychic-waves", "hourglass", "burning-embers", "feathered-wing", "magic-portal", "shadow-follower", "prayer-beads", "templar-shield", "trident"]],
+        ["Generic", ["round-star", "sparkles", "gears"]]
+    ];
+    // The set of icon names that actually ship in the sprite (derived from the
+    // same rules/palette the generator reads), so a stale override, a curated-map
+    // typo, or a future server value can be validated before it renders blank.
+    var SPRITE_ICONS = (function () {
+        var set = {};
+        ICON_RULES.forEach(function (r) { set[r[1]] = true; });
+        ["hammer-nails", "rune-stone", "aura", "magic-swirl", "healing", "sparkles",
+         "crossed-swords", "bandage-roll", "sword-brandish", "round-star"].forEach(function (n) { set[n] = true; });
+        ICON_PALETTE.forEach(function (g) { g[1].forEach(function (n) { set[n] = true; }); });
+        return set;
+    })();
+    function hasIcon(n) { return !!(n && SPRITE_ICONS[n]); }
+
+    // The keyword heuristic — the client-side fallback when nothing more
+    // authoritative names the icon.
+    function heuristicIcon(s) {
+        var nm = nameOf(s.name).toLowerCase();
+        for (var i = 0; i < ICON_RULES.length; i++) if (ICON_RULES[i][0].test(nm)) return ICON_RULES[i][1];
+        return iconFallback(s);
+    }
+    // The standardized icon every player inherits, before any personal override.
+    // Precedence: server-provided (future Char.Skills `icon` field, the eventual
+    // authority) → the curated id-keyed map shipped by the site → keyword
+    // heuristic → type/category fallback. See the 2026-07-16 decision.
+    function standardIcon(s) {
+        if (hasIcon(s.icon)) return s.icon;
+        var cur = curatedIcons[slotKeyOf(s)];   // curated map keyed by normalized name
+        if (hasIcon(cur)) return cur;
+        return heuristicIcon(s);
+    }
+    // The final icon for a skill: a personal pick wins over everything, else the
+    // standardized icon above.
+    function iconName(s) {
+        var ov = iconOverrides[slotKeyOf(s)];
+        return hasIcon(ov) ? ov : standardIcon(s);
+    }
+    // Build an <svg><use> referencing the sprite. `name` is a fixed vocabulary
+    // (rules/palette/fallback), but sanitize anyway so a stray value can't smuggle
+    // markup into the href.
+    function iconSvg(name, cls) {
+        name = String(name || "").replace(/[^a-z0-9-]/g, "");
+        var svg = document.createElementNS(SVGNS, "svg");
+        svg.setAttribute("class", cls || "gi");
+        svg.setAttribute("viewBox", "0 0 512 512");
+        svg.setAttribute("aria-hidden", "true");
+        var use = document.createElementNS(SVGNS, "use");
+        var href = spriteUrl + "#gi-" + name;
+        use.setAttributeNS(XLINKNS, "xlink:href", href);
+        use.setAttribute("href", href);
+        svg.appendChild(use);
+        return svg;
     }
 
     // DOM builder — the ONLY way data-derived nodes are created here. Values
@@ -297,12 +542,21 @@
     }
 
     function applyCooldowns(data) {
+        var prevExp = S.cooldownExpiry || {};
+        var prevTot = S.cooldownTotal || {};
         S.cooldownExpiry = {};
+        S.cooldownTotal = {};
         S.usable = (data && data.usable) || {};
         var list = (data && data.cooldowns) || [];
         var t = now();
         for (var i = 0; i < list.length; i++) {
-            S.cooldownExpiry[list[i].id] = t + (Number(list[i].remaining) || 0);
+            var id = list[i].id, rem = Number(list[i].remaining) || 0;
+            S.cooldownExpiry[id] = t + rem;
+            // Total duration for the radial sweep: the game only sends `remaining`,
+            // so we take the first value seen this episode as the full length. If
+            // the id was already cooling, keep the earlier (larger) total so the
+            // ring keeps draining smoothly rather than snapping to a new full.
+            S.cooldownTotal[id] = (prevExp[id] && prevExp[id] > t && prevTot[id]) ? prevTot[id] : rem;
         }
     }
 
@@ -1198,56 +1452,141 @@
         return "cat-" + String(s.category || (s.type === "spell" ? "misc" : "skill")).replace(/[^a-zA-Z0-9_-]/g, "");
     }
 
-    // The bounded bottom quick-bar. Favorites if any; else a capped default of
-    // usable damage/heal so it's useful out-of-box and NEVER unbounded.
-    var hotbarNodes = {};
-    function quickbarSkills() {
+    // ------------------------------------------------------------------
+    // The WoW-style action bar (bottom of the HUD)
+    // ------------------------------------------------------------------
+    // Two modes:
+    //   • custom  — the player has pinned at least one skill; the bar shows their
+    //               numbered slots (fixed positions, hotkey-addressable), paged.
+    //   • auto    — nothing pinned yet; a capped set of usable damage/heal skills
+    //               is offered so the bar is useful out of the box. Pinning any
+    //               skill (★ / "Add to bar") switches to custom mode.
+    var hotbarNodes = {};   // render-key -> { btn, cdEl?, id?, idx?, empty? }
+    function skillById(id) {
+        id = String(id);
+        var list = S.skills || [];
+        for (var i = 0; i < list.length; i++) if (String(list[i].id) === id) return list[i];
+        return null;
+    }
+    function skillByKey(key) {
+        if (!key) return null;
+        var list = S.skills || [];
+        for (var i = 0; i < list.length; i++) if (slotKeyOf(list[i]) === key) return list[i];
+        return null;
+    }
+    // Auto mode: usable damage/heal first, then anything cooling, capped to a page.
+    function autoSuggestions() {
         var skills = (S.skills || []).filter(function (s) { return s.type === "spell" || s.type === "skill"; });
+        var rank = { damage: 0, heal: 1, misc: 2 };
         var out = [], seen = {};
-        function push(s, cap) { if (s && !seen[s.id] && out.length < cap) { seen[s.id] = true; out.push(s); } }
-        // Favorites first (user-chosen, shown in full up to FAV_CAP)...
-        skills.forEach(function (s) { if (favorites[nameOf(s.name).toLowerCase()]) push(s, FAV_CAP); });
-        // ...then backfill toward QUICKBAR_MAX with usable damage/heal, so a few
-        // pins don't wipe the auto set — the bar stays useful, not empty...
-        if (out.length < QUICKBAR_MAX) {
-            var rank = { damage: 0, heal: 1, misc: 2 };
-            skills.filter(function (s) { return !abilityBlock(s); })
-                  .sort(function (a, b) { return (rank[a.category] == null ? 3 : rank[a.category]) - (rank[b.category] == null ? 3 : rank[b.category]); })
-                  .forEach(function (s) { push(s, QUICKBAR_MAX); });
-        }
-        // ...and always surface anything cooling so its timer stays visible.
-        skills.forEach(function (s) { if (S.cooldownExpiry[s.id] > now()) push(s, FAV_CAP); });
+        function push(s) { if (s && !seen[s.id] && out.length < SLOTS_PER_PAGE) { seen[s.id] = true; out.push(s); } }
+        skills.filter(function (s) { return !abilityBlock(s); })
+              .sort(function (a, b) { return (rank[a.category] == null ? 3 : rank[a.category]) - (rank[b.category] == null ? 3 : rank[b.category]); })
+              .forEach(push);
+        skills.forEach(function (s) { if (S.cooldownExpiry[s.id] > now()) push(s); });
         return out;
     }
+    // How many pages hold at least one assigned slot (custom mode).
+    function usedPages() {
+        var mx = -1;
+        for (var i = 0; i < slots.length; i++) if (slots[i]) mx = Math.max(mx, pageOfIndex(i));
+        return mx + 1;
+    }
     function renderHotbar() {
-        var skills = quickbarSkills();
+        hideTip();                       // a rebuild orphans the tip's anchor
         hotbarNodes = {};
         while (dom.hotbar.firstChild) dom.hotbar.removeChild(dom.hotbar.firstChild);
-        if (!skills.length) { dom.hotbar.classList.add("empty"); return; }
+        var custom = anyAssigned();
+        dom.hotbar.classList.toggle("custom", custom);
+        // Edit mode only makes sense once there are real slots to move.
+        dom.hotbar.classList.toggle("editing", custom && !barLocked);
+        if (barLocked) pickedSlot = null;
+        var entries = [];   // { s, key, idx, label, empty }
+
+        if (custom) {
+            var pages = Math.max(1, usedPages());
+            hotbarPage = clamp(hotbarPage, 0, pages - 1);
+            dom.hotbar.appendChild(buildLock());
+            if (pages > 1) dom.hotbar.appendChild(buildPager(pages));
+            var base = hotbarPage * SLOTS_PER_PAGE;
+            var last = base;   // render through the last filled slot (trim trailing empties)
+            for (var i = base; i < base + SLOTS_PER_PAGE; i++) if (slots[i]) last = i;
+            for (var j = base; j <= last; j++) {
+                var key = slots[j];
+                entries.push({ s: key ? skillByKey(key) : null, key: key, idx: j, label: slotLabel(j), empty: !key });
+            }
+        } else {
+            hotbarPage = 0;
+            autoSuggestions().forEach(function (s, i) {
+                entries.push({ s: s, key: slotKeyOf(s), idx: i, label: slotLabel(i), empty: false });
+            });
+        }
+
+        if (!entries.length) { dom.hotbar.classList.add("empty"); return; }
         dom.hotbar.classList.remove("empty");
-        skills.forEach(function (s) {
-            var btn = el("button", {
-                class: "skill " + catClass(s), "data-ability": s.id, "data-menu": "ability",
-                title: s.name + " (" + s.percent + "%)"
-            }, [
-                el("span", { class: "skill-name", text: s.name }),
-                el("span", { class: "skill-cd" }),
-                el("span", { class: "skill-pct", text: String(s.percent) })
-            ]);
-            dom.hotbar.appendChild(btn);
-            hotbarNodes[s.id] = { btn: btn, cdEl: btn.querySelector(".skill-cd") };
-        });
+        entries.forEach(function (e) { dom.hotbar.appendChild(buildSlot(e, custom)); });
         tickHotbar();
     }
+    function buildPager(pages) {
+        return el("button", {
+            type: "button", class: "skill skill--pager", "data-pager": "1",
+            "data-tip": "Bar " + (hotbarPage + 1) + "/" + pages + " · switch (Alt+`)",
+            "aria-label": "Switch action bar page, currently " + (hotbarPage + 1) + " of " + pages
+        }, [
+            iconSvg("gears", "gi skill-icon"),
+            el("span", { class: "skill-key", text: (hotbarPage + 1) + "/" + pages })
+        ]);
+    }
+    // The lock toggle: locked fires on tap, unlocked is edit mode (rearrange).
+    function buildLock() {
+        var open = !barLocked;
+        return el("button", {
+            type: "button", class: "skill skill--lock" + (open ? " on" : ""), "data-lock": "1",
+            "data-tip": open ? "Unlocked · drag or tap slots to rearrange" : "Locked · tap to edit the bar",
+            "aria-label": open ? "Lock action bar (rearranging enabled)" : "Unlock action bar to rearrange",
+            "aria-pressed": open ? "true" : "false"
+        }, [iconSvg(open ? "padlock-open" : "padlock", "gi skill-icon")]);
+    }
+    function buildSlot(e, custom) {
+        // Empty numbered placeholder — a visible drop/assign target in custom mode.
+        if (e.empty || !e.s) {
+            var eb = el("button", {
+                type: "button", class: "skill skill--empty", "data-slot": e.idx, "data-menu": "slot",
+                "aria-label": "Empty slot " + e.label,
+                "data-tip": "Slot " + e.label + " · empty — pin from Abilities or drag here"
+            }, [el("span", { class: "skill-key", text: e.label })]);
+            hotbarNodes["e" + e.idx] = { btn: eb, empty: true };
+            return eb;
+        }
+        var s = e.s;
+        var editing = custom && !barLocked;
+        var btn = el("button", {
+            type: "button", class: "skill " + catClass(s) + (e.idx === pickedSlot ? " picked" : ""),
+            "data-ability": s.id, "data-menu": "ability",
+            "data-slot": custom ? e.idx : null, "data-key": e.label, draggable: editing ? "true" : null,
+            "aria-label": e.label + ": " + s.name
+        }, [
+            iconSvg(iconName(s), "gi skill-icon"),
+            el("span", { class: "skill-sweep", "aria-hidden": "true" }),
+            el("span", { class: "skill-key", text: e.label }),
+            el("span", { class: "skill-cd" })
+        ]);
+        hotbarNodes["s" + e.idx] = {
+            btn: btn, cdEl: btn.querySelector(".skill-cd"),
+            sweepEl: btn.querySelector(".skill-sweep"), id: String(s.id), idx: e.idx
+        };
+        return btn;
+    }
     function tickHotbar() {
-        Object.keys(hotbarNodes).forEach(function (id) {
-            var n = hotbarNodes[id];
-            var s = skillById(id);
-            if (!s || !n) return;
+        Object.keys(hotbarNodes).forEach(function (key) {
+            var n = hotbarNodes[key];
+            if (!n || n.empty) return;
+            var s = skillById(n.id);
+            if (!s) return;
             var blk = abilityBlock(s);
             var cd = blk ? blk.cd : 0;
-            // Surface a non-cooldown block reason (mana / min-position) in the
-            // button and title, so a blocked skill isn't a silent dead tap.
+            // A non-cooldown block (mana / min-position) shows its reason instead
+            // of a timer, so a blocked slot isn't a silent dead tap.
             var reason = (blk && cd === 0)
                 ? (blk.reason === "low mana" ? "mana" : blk.reason === "unavailable" ? "" : blk.reason)
                 : "";
@@ -1255,14 +1594,221 @@
             n.btn.classList.toggle("cooling", cd > 0);
             n.btn.classList.toggle("blocked", !!(blk && cd === 0 && reason));
             n.cdEl.textContent = cd > 0 ? String(cd) : reason;
-            n.btn.title = s.name + " (" + s.percent + "%)" + (blk && cd === 0 ? " — " + blk.reason : "");
+            // Radial cooldown sweep: fraction remaining, from the approximate total.
+            if (n.sweepEl) {
+                var tot = cd > 0 ? Number(S.cooldownTotal[s.id]) || 0 : 0;
+                var frac = (tot > 0) ? clamp01((S.cooldownExpiry[s.id] - now()) / tot) : 0;
+                n.sweepEl.style.setProperty("--sweep", (frac * 360).toFixed(1) + "deg");
+                n.btn.classList.toggle("sweeping", frac > 0);
+            }
+            // The slot face stays icon + number only; verbose detail lives in the
+            // hover/focus tooltip (desktop) and the long-press menu (touch). If the
+            // tip is open on this slot, refresh it so a running cooldown ticks.
+            if (tipAnchor === n.btn) showTip(n.btn, skillTipData(s, n.btn.getAttribute("data-key")));
         });
     }
-    function skillById(id) {
-        id = String(id);
-        var list = S.skills || [];
-        for (var i = 0; i < list.length; i++) if (String(list[i].id) === id) return list[i];
+    function clamp01(x) { return Math.max(0, Math.min(1, x)); }
+    // Cycle to the next used page of the action bar (custom mode only).
+    function flipHotbarPage() {
+        var pages = Math.max(1, usedPages());
+        if (pages < 2) return;
+        hotbarPage = (hotbarPage + 1) % pages;
+        renderHotbar();
+    }
+    // Lock ⇄ unlock. Unlocked (edit mode) rearranges on tap/drag instead of firing.
+    function toggleBarLock() {
+        barLocked = !barLocked;
+        try { localStorage.setItem("ishar.barUnlocked", barLocked ? "0" : "1"); } catch (e) {}
+        pickedSlot = null;
+        renderHotbar();
+    }
+    // Tap-to-swap (works on mouse + touch): pick a slot, then tap its destination.
+    function pickOrPlace(idx) {
+        if (pickedSlot == null) {
+            if (!slots[idx]) return;            // nothing to pick up in an empty slot
+            pickedSlot = idx;
+        } else if (pickedSlot === idx) {
+            pickedSlot = null;                  // tap the picked slot again to cancel
+        } else {
+            var key = slots[pickedSlot];
+            pickedSlot = null;
+            if (key) { assignSlot(idx, key); return; }   // assignSlot swaps + re-renders
+        }
+        renderHotbar();
+    }
+    // Fire the Nth visible slot (0-based) as if tapped. Used by the hotkeys.
+    function fireSlot(n) {
+        if (!barLocked) return false;   // edit mode: hotkeys don't cast
+        var node = hotbarNodes["s" + (hotbarPage * SLOTS_PER_PAGE + n)]   // custom mode
+                || hotbarNodes["s" + n];                                   // auto mode
+        if (!node) return false;
+        var s = skillById(node.id);
+        if (!s) return false;
+        if (abilityBlock(s)) { flashSlot(node.btn); return true; }   // on cooldown / blocked: no-op, but flash
+        var cmd = abilityCommand(s);
+        if (cmd) { sendCmd(cmd); flashSlot(node.btn); return true; }
+        return false;
+    }
+    // Brief press feedback so a keyboard fire is visible on the bar.
+    function flashSlot(btn) {
+        if (!btn) return;
+        btn.classList.add("fired");
+        setTimeout(function () { btn.classList.remove("fired"); }, 180);
+    }
+
+    // ------------------------------------------------------------------
+    // Tooltip convention (.hud-tip)
+    // ------------------------------------------------------------------
+    // The HUD's one hover/focus tooltip. Deliberately terse — a title line, an
+    // optional right-aligned key chip (the hotkey), and at most one status line.
+    // Any element opts in with `data-tip="text"`; the action bar supplies richer
+    // structured tips. Hover/focus only: coarse pointers never see it (they use
+    // the long-press menu), so nothing load-bearing lives here.
+    var tipAnchor = null, tipTimer = null;
+    var mqHover = window.matchMedia ? window.matchMedia("(hover: hover)") : { matches: true };
+    // The structured tip for a skill slot: name + "Alt+N" chip + one status line.
+    function skillTipData(s, keyLabel) {
+        var blk = abilityBlock(s);
+        var bits = [];
+        if (s.type) bits.push(s.type);
+        if (s.percent != null) bits.push(s.percent + "%");
+        var warn = blk ? (blk.cd > 0 ? blk.cd + "s" : blk.reason) : "";
+        return { name: s.name, key: keyLabel ? "Alt+" + keyLabel : "", sub: bits.join(" · "), warn: warn };
+    }
+    function showTip(anchor, d) {
+        if (!dom.tip || !d) return;
+        var row = el("div", { class: "tip-row" }, [el("span", { class: "tip-name", text: d.name })]);
+        if (d.key) row.appendChild(el("span", { class: "tip-key", text: d.key }));
+        var kids = [row];
+        if (d.sub || d.warn) {
+            var sub = el("div", { class: "tip-sub" });
+            if (d.sub) sub.appendChild(el("span", { text: d.sub }));
+            if (d.warn) sub.appendChild(el("span", { class: "tip-warn", text: (d.sub ? " · " : "") + d.warn }));
+            kids.push(sub);
+        }
+        fill(dom.tip, kids);
+        dom.tip.hidden = false;
+        tipAnchor = anchor;
+        positionTip(anchor);
+    }
+    function hideTip() {
+        clearTimeout(tipTimer); tipTimer = null; tipAnchor = null;
+        if (dom.tip) dom.tip.hidden = true;
+    }
+    function positionTip(anchor) {
+        var m = dom.tip;
+        m.style.left = "0px"; m.style.top = "0px";
+        var r = anchor.getBoundingClientRect();
+        var mw = m.offsetWidth, mh = m.offsetHeight;
+        var vw = window.innerWidth, vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+        var x = r.left + r.width / 2 - mw / 2;
+        var y = r.top - mh - 6;                 // above by default
+        if (y < 6) y = r.bottom + 6;            // flip below if it would clip the top
+        m.style.left = Math.max(6, Math.min(x, vw - mw - 6)) + "px";
+        m.style.top = Math.max(6, Math.min(y, vh - mh - 6)) + "px";
+    }
+    // Resolve the tip payload for a hovered/focused element (or null).
+    function tipDataFor(t) {
+        var ab = t.closest && t.closest(".skill[data-ability]");
+        if (ab) {
+            var s = skillById(ab.getAttribute("data-ability"));
+            return s ? skillTipData(s, ab.getAttribute("data-key")) : null;
+        }
+        if (t.getAttribute && t.getAttribute("data-tip")) return { name: t.getAttribute("data-tip") };
         return null;
+    }
+    function wireTooltips() {
+        if (!dom.app) return;
+        var SEL = ".skill[data-ability],[data-tip]";
+        dom.app.addEventListener("mouseover", function (e) {
+            if (!mqHover.matches) return;
+            var t = e.target.closest(SEL);
+            if (!t || !dom.app.contains(t)) return;
+            var d = tipDataFor(t);
+            if (!d) return;
+            clearTimeout(tipTimer);
+            tipTimer = setTimeout(function () { showTip(t, d); }, 320);   // small hover delay
+        });
+        dom.app.addEventListener("mouseout", function (e) {
+            var t = e.target.closest(SEL);
+            if (!t) return;
+            if (e.relatedTarget && t.contains(e.relatedTarget)) return;   // moving within the same target
+            hideTip();
+        });
+        // Keyboard focus reveals the tip immediately (hotkey discovery).
+        dom.app.addEventListener("focusin", function (e) {
+            var t = e.target.closest && e.target.closest(SEL);
+            if (!t) return;
+            var d = tipDataFor(t);
+            if (d) showTip(t, d);
+        });
+        dom.app.addEventListener("focusout", hideTip);
+        // A moving/rerendering anchor must not leave a stale tip floating.
+        if (dom.hotbar) dom.hotbar.addEventListener("scroll", hideTip, { passive: true });
+    }
+
+    // Desktop drag-to-reorder within the bar (custom mode). Dropping A onto B
+    // swaps them — the WoW gesture. Touch reorders via the "Move ◄/►" menu items.
+    var dragFromSlot = null;
+    function wireHotbarDrag() {
+        if (!dom.hotbar) return;
+        dom.hotbar.addEventListener("dragstart", function (e) {
+            if (barLocked) { e.preventDefault(); return; }   // locked: no dragging
+            var b = e.target.closest(".skill[data-slot]");
+            if (!b || b.classList.contains("skill--empty")) { e.preventDefault(); return; }
+            dragFromSlot = Number(b.getAttribute("data-slot"));
+            e.dataTransfer.effectAllowed = "move";
+            try { e.dataTransfer.setData("text/plain", "slot:" + dragFromSlot); } catch (x) {}
+            b.classList.add("dragging");
+        });
+        dom.hotbar.addEventListener("dragend", function () {
+            dragFromSlot = null;
+            var els = dom.hotbar.querySelectorAll(".dragging,.drop-target");
+            for (var i = 0; i < els.length; i++) els[i].classList.remove("dragging", "drop-target");
+        });
+        dom.hotbar.addEventListener("dragover", function (e) {
+            var b = e.target.closest(".skill[data-slot]");
+            if (!b || dragFromSlot == null) return;
+            e.preventDefault();
+            e.dataTransfer.dropEffect = "move";
+            b.classList.add("drop-target");
+        });
+        dom.hotbar.addEventListener("dragleave", function (e) {
+            var b = e.target.closest(".skill[data-slot]");
+            if (b) b.classList.remove("drop-target");
+        });
+        dom.hotbar.addEventListener("drop", function (e) {
+            var b = e.target.closest(".skill[data-slot]");
+            if (!b || dragFromSlot == null) return;
+            e.preventDefault();
+            var to = Number(b.getAttribute("data-slot"));
+            var key = slots[dragFromSlot];
+            if (key != null && to !== dragFromSlot) assignSlot(to, key);
+            dragFromSlot = null;
+        });
+    }
+
+    // Global hotkeys: Alt/Ctrl + 1..0 fire the visible bar's slots; Alt+` pages.
+    // Browsers reserve Ctrl+digit for tab-switching and web content usually can't
+    // veto that, so Alt+digit is the reliable path (works in Chrome/Chromium/
+    // Safari; Firefox reserves Alt+digit too). Ctrl is offered as a bonus that
+    // comes fully alive when the HUD runs installed/fullscreen (no tab strip).
+    function wireHotkeys() {
+        document.addEventListener("keydown", function (e) {
+            if (!hudOn || !S.connected) return;
+            if (e.key === "`" && e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
+                if (usedPages() > 1) { e.preventDefault(); flipHotbarPage(); }
+                return;
+            }
+            var m = e.code && /^(Digit|Numpad)([0-9])$/.exec(e.code);
+            var digit = m ? m[2] : (/^[0-9]$/.test(e.key) ? e.key : null);
+            if (digit == null) return;
+            var alt = e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey;
+            var ctrl = e.ctrlKey && !e.altKey && !e.metaKey && !e.shiftKey;
+            if (!alt && !ctrl) return;
+            var n = digit === "0" ? 9 : (Number(digit) - 1);   // 1..9 -> 0..8, 0 -> 9 (slot 10)
+            if (fireSlot(n)) e.preventDefault();   // only swallow the combo when a slot actually fired
+        });
     }
 
     // The full, scroll-bounded Abilities browser: search + type filter +
@@ -1287,20 +1833,20 @@
         kids.push(el("div", { class: "ab-controls" }, [search]));
 
         var typeChips = el("div", { class: "ab-chips" });
-        var counts = { all: 0, fav: 0, spell: 0, skill: 0, craft: 0 };
+        var counts = { all: 0, bar: 0, spell: 0, skill: 0, craft: 0 };
         all.forEach(function (s) {
             counts.all++;
-            if (favorites[nameOf(s.name).toLowerCase()]) counts.fav++;
+            if (onBar(slotKeyOf(s))) counts.bar++;
             if (s.type === "spell") counts.spell++;
             else if (s.type === "skill") counts.skill++;
             else if (s.type === "craft" || s.type === "enchant") counts.craft++;
         });
-        // "All" and "★ Fav" always show (Fav invites pinning even at 0); the
+        // "All" and "★ Bar" always show (Bar invites pinning even at 0); the
         // type chips appear only when they have members.
-        [["all", "All"], ["fav", "★"], ["spell", "Spells"], ["skill", "Skills"], ["craft", "Crafts"]].forEach(function (tc) {
-            if (tc[0] !== "all" && tc[0] !== "fav" && !counts[tc[0]]) return;
+        [["all", "All"], ["bar", "★"], ["spell", "Spells"], ["skill", "Skills"], ["craft", "Crafts"]].forEach(function (tc) {
+            if (tc[0] !== "all" && tc[0] !== "bar" && !counts[tc[0]]) return;
             typeChips.appendChild(el("button", {
-                type: "button", class: "ab-chip" + (tc[0] === "fav" ? " ab-fav" : "") + (abilityFilter.type === tc[0] ? " on" : ""),
+                type: "button", class: "ab-chip" + (tc[0] === "bar" ? " ab-fav" : "") + (abilityFilter.type === tc[0] ? " on" : ""),
                 "data-abtype": tc[0], text: tc[1] + " " + counts[tc[0]]
             }));
         });
@@ -1313,7 +1859,7 @@
         // Filtered list.
         var q = abilityFilter.q.trim().toLowerCase();
         var rows = all.filter(function (s) {
-            if (abilityFilter.type === "fav" && !favorites[nameOf(s.name).toLowerCase()]) return false;
+            if (abilityFilter.type === "bar" && !onBar(slotKeyOf(s))) return false;
             if (abilityFilter.type === "spell" && s.type !== "spell") return false;
             if (abilityFilter.type === "skill" && s.type !== "skill") return false;
             if (abilityFilter.type === "craft" && s.type !== "craft" && s.type !== "enchant") return false;
@@ -1331,7 +1877,7 @@
         var scroller = el("div", { class: "ab-scroll" });
         if (!rows.length) {
             var emptyMsg = !all.length ? "—"
-                : abilityFilter.type === "fav" ? "No favorites yet — tap ☆ (or right-click an ability) to add one."
+                : abilityFilter.type === "bar" ? "No skills on your bar yet — tap ☆ to pin one, then fire it with Alt+1…0."
                 : "No abilities match.";
             scroller.appendChild(el("div", { class: "panel-empty", text: emptyMsg }));
         } else {
@@ -1339,18 +1885,19 @@
             rows.forEach(function (s) {
                 var passive = !abilityUsable(s);   // passive / craft / enchant
                 var blk = passive ? null : abilityBlock(s);
-                var fav = !!favorites[nameOf(s.name).toLowerCase()];
+                var pinned = onBar(slotKeyOf(s));
                 var right = [];
                 if (blk) right.push(el("span", { class: "ab-block", text: blk.cd > 0 ? blk.cd + "s" : blk.reason }));
                 if (passive) right.push(el("span", { class: "ab-type", text: s.type }));
                 right.push(el("span", { class: "ab-pct", text: s.percent + "%" }));
-                right.push(el("button", { type: "button", class: "ab-star" + (fav ? " on" : ""), "data-fav": nameOf(s.name), "aria-label": fav ? "Remove from favorites" : "Add to favorites", title: fav ? "Remove from favorites" : "Add to favorites", text: fav ? "★" : "☆" }));
+                right.push(el("button", { type: "button", class: "ab-star" + (pinned ? " on" : ""), "data-bar": nameOf(s.name), "aria-label": pinned ? "Remove from action bar" : "Add to action bar", title: pinned ? "Remove from action bar" : "Add to action bar", text: pinned ? "★" : "☆" }));
                 right.push(el("button", { type: "button", class: "row-more", "aria-label": "More actions", text: "⋯" }));
                 ul.appendChild(el("li", {
                     class: "ab-row " + catClass(s) + (blk ? " off" : "") + (passive ? " ab-passive" : ""),
                     "data-ability": s.id, "data-menu": "ability",
                     title: passive ? s.name + " — " + s.type + " (not usable)" : castHint(s)
                 }, [
+                    iconSvg(iconName(s), "gi ab-icon"),
                     el("span", { class: "ab-name", text: s.name }),
                     el("span", { class: "ab-right" }, right)
                 ]));
@@ -1375,10 +1922,11 @@
     function persistAbilityFilter() {
         try { localStorage.setItem("ishar.abilityFilter", JSON.stringify({ type: abilityFilter.type, usableOnly: abilityFilter.usableOnly })); } catch (e) {}
     }
-    function toggleFavorite(name) {
+    // Set (or clear) a per-skill icon override, then repaint.
+    function setIcon(name, iconOrNull) {
         var k = nameOf(name).toLowerCase();
-        if (favorites[k]) delete favorites[k]; else favorites[k] = true;
-        saveSet("ishar.favs", favorites);
+        if (iconOrNull) iconOverrides[k] = iconOrNull; else delete iconOverrides[k];
+        saveMap("ishar.icons", iconOverrides);
         renderHotbar(); renderAbilities();
     }
 
@@ -1395,11 +1943,43 @@
         if (!menuOpen) return;
         menuOpen = false;
         dom.menu.hidden = true;
+        dom.menu.classList.remove("menu-picker");
         while (dom.menu.firstChild) dom.menu.removeChild(dom.menu.firstChild);
+    }
+    // The icon picker: a grouped grid of the curated game-icons, plus "Auto"
+    // (clear the override). Reuses the menu container with a wider grid layout.
+    function openIconPicker(s, anchor) {
+        closeMenu();
+        var key = slotKeyOf(s);
+        var kids = [el("div", { class: "menu-title", text: "Icon · " + s.name })];
+        var autoBtn = el("button", { type: "button", class: "picker-auto" + (iconOverrides[key] ? "" : " on"), title: "Use the automatic icon" }, [
+            iconSvg(standardIcon(s), "gi"), el("span", { text: "Auto" })
+        ]);
+        autoBtn.addEventListener("click", function () { setIcon(s.name, null); closeMenu(); });
+        kids.push(autoBtn);
+        ICON_PALETTE.forEach(function (group) {
+            kids.push(el("div", { class: "picker-group", text: group[0] }));
+            var grid = el("div", { class: "picker-grid" });
+            group[1].forEach(function (nm) {
+                var b = el("button", {
+                    type: "button", class: "picker-icon" + (iconOverrides[key] === nm ? " on" : ""),
+                    title: nm, "aria-label": nm
+                }, [iconSvg(nm, "gi")]);
+                b.addEventListener("click", function () { setIcon(s.name, nm); closeMenu(); });
+                grid.appendChild(b);
+            });
+            kids.push(grid);
+        });
+        dom.menu.classList.add("menu-picker");
+        fill(dom.menu, kids);
+        dom.menu.hidden = false;
+        menuOpen = true;
+        positionMenu(anchor);
     }
     // actions: [{label, cmd|prefill|fn, danger}]. Anchored near `anchor`.
     function openMenu(title, actions, anchor) {
         closeMenu();
+        hideTip();
         actions = actions.filter(Boolean);
         if (!actions.length) return;
         var kids = [el("div", { class: "menu-title", text: title })];
@@ -1445,15 +2025,15 @@
     // Person-target spells to offer as one-off casts AT a specific occupant —
     // independent of the default ⚔/✚ targets. Filtered by disposition: an
     // allied (friendly) target only gets beneficial (defensive) spells, everyone
-    // else only offensive ones. Favorited spells first (keeps it your curated
-    // set), else usable ones.
+    // else only offensive ones. Bar spells first (keeps it your curated set),
+    // else usable ones.
     function occupantCastActions(o, max) {
         var want = o.hostile_hint === "friendly" ? "defensive" : "offensive";
         var spells = (S.skills || []).filter(function (s) {
             return s.type === "spell" && s.target_type === want;
         });
-        var fav = spells.filter(function (s) { return favorites[nameOf(s.name).toLowerCase()]; });
-        var pick = fav.length ? fav : spells.filter(function (s) { return !abilityBlock(s); });
+        var onbar = spells.filter(function (s) { return onBar(slotKeyOf(s)); });
+        var pick = onbar.length ? onbar : spells.filter(function (s) { return !abilityBlock(s); });
         return pick.slice(0, max || 6).map(function (s) {
             return { label: "Cast " + s.name, cmd: "cast '" + nameOf(s.name) + "' " + o.handle };
         });
@@ -1571,15 +2151,38 @@
             { label: "Examine", cmd: "examine " + ds.target }
         ];
     }
-    function abilityActions(s) {
+    function abilityActions(s, anchor) {
         if (!s) return [];
-        var fav = !!favorites[nameOf(s.name).toLowerCase()];
+        var key = slotKeyOf(s);
+        var idx = slotIndexOf(key);
+        var pinned = idx !== -1;
         var acts = [];
         var cmd = abilityCommand(s);
         if (cmd) acts.push({ label: s.type === "spell" ? "Cast" : "Use", fn: function () { sendCmd(cmd); } });
+        acts.push({ label: pinned ? "★ Remove from bar" : "☆ Add to bar", fn: function () { toggleSlot(s.name); } });
+        // Nudge along the bar (only meaningful once it's on the bar).
+        if (pinned) {
+            if (idx % SLOTS_PER_PAGE > 0) acts.push({ label: "Move ◄ left", fn: function () { moveSlot(idx, -1); } });
+            if (idx % SLOTS_PER_PAGE < SLOTS_PER_PAGE - 1 && idx + 1 < SLOT_MAX) acts.push({ label: "Move ► right", fn: function () { moveSlot(idx, 1); } });
+        }
+        acts.push({ label: "Choose icon…", fn: function () { openIconPicker(s, anchor); } });
+        if (iconOverrides[key]) acts.push({ label: "Reset icon", fn: function () { setIcon(s.name, null); } });
         acts.push({ label: "Look up", cmd: "skill search " + nameOf(s.name) });
-        acts.push({ label: fav ? "★ Remove from favorites" : "☆ Add to favorites", fn: function () { toggleFavorite(s.name); } });
         return acts;
+    }
+    // Assign an ability to a specific slot index (used by empty-slot menus).
+    function slotAssignActions(idx) {
+        var usable = (S.skills || []).filter(function (s) { return s.type === "spell" || s.type === "skill"; });
+        // Bar spells/skills first would be redundant here; offer usable ones,
+        // alphabetical, capped so the menu stays tap-sized.
+        usable.sort(function (a, b) {
+            var ba = abilityBlock(a) ? 1 : 0, bb = abilityBlock(b) ? 1 : 0;
+            if (ba !== bb) return ba - bb;
+            return String(a.name).localeCompare(String(b.name));
+        });
+        return usable.slice(0, 12).map(function (s) {
+            return { label: s.name, fn: function () { assignSlot(idx, slotKeyOf(s)); } };
+        });
     }
 
     // ------------------------------------------------------------------
@@ -1609,7 +2212,23 @@
             e.preventDefault();
             return;
         }
-        // 2) Ability chip filters + star.
+
+        // 2) Action-bar page toggle.
+        var pager = e.target.closest("[data-pager]");
+        if (pager && dom.app.contains(pager)) { flipHotbarPage(); return; }
+
+        // 2a) Lock toggle.
+        var lockBtn = e.target.closest("[data-lock]");
+        if (lockBtn && dom.app.contains(lockBtn)) { toggleBarLock(); return; }
+
+        // 2b) Edit mode (unlocked): a tap on a slot rearranges instead of firing —
+        // pick a slot, then tap where it should go. Prevents accidental casts.
+        if (!barLocked) {
+            var editSlot = e.target.closest(".skill[data-slot]");
+            if (editSlot && dom.hotbar.contains(editSlot)) { pickOrPlace(Number(editSlot.getAttribute("data-slot"))); return; }
+        }
+
+        // 2d) Ability chip filters + bar-pin star.
         var chip = e.target.closest("[data-abtype],[data-abusable]");
         if (chip && dom.app.contains(chip)) {
             if (chip.hasAttribute("data-abtype")) abilityFilter.type = chip.getAttribute("data-abtype");
@@ -1618,12 +2237,12 @@
             renderAbilities();
             return;
         }
-        var star = e.target.closest("[data-fav]");
-        if (star && dom.app.contains(star)) { toggleFavorite(star.getAttribute("data-fav")); return; }
+        var star = e.target.closest("[data-bar]");
+        if (star && dom.app.contains(star)) { toggleSlot(star.getAttribute("data-bar")); return; }
 
         // 3) Ability cast (hotbar button or abilities row) — not the star.
         var ab = e.target.closest("[data-ability]");
-        if (ab && dom.app.contains(ab) && !e.target.closest("[data-fav]") && !e.target.closest(".row-more")) {
+        if (ab && dom.app.contains(ab) && !e.target.closest("[data-bar]") && !e.target.closest(".row-more")) {
             var s = skillById(ab.getAttribute("data-ability"));
             if (s) {
                 if (abilityBlock(s) && ab.classList.contains("skill")) return;   // hotbar: inert when blocked
@@ -1672,7 +2291,10 @@
             openMenu(cds.name || cds.target, componentActions(cds), anchor);
         } else if (kind === "ability") {
             var s2 = skillById(host.getAttribute("data-ability"));
-            if (s2) openMenu(s2.name, abilityActions(s2), anchor);
+            if (s2) openMenu(s2.name, abilityActions(s2, anchor), anchor);
+        } else if (kind === "slot") {
+            var si = Number(host.getAttribute("data-slot"));
+            openMenu("Slot " + slotLabel(si), slotAssignActions(si), anchor);
         } else if (kind === "grp") {
             var gkind = host.getAttribute("data-gkind");
             var arr = gkind === "ally" ? (S.group && S.group.allies) : (S.group && S.group.members);
@@ -1824,7 +2446,7 @@
         S.vitals = null; S.status = null; S.time = null; S.room = null;
         S.equipment = []; S.inventory = null; S.train = null;
         S.affects = null; S.group = null; S.who = null; S.occupants = [];
-        S.skills = []; S.cooldownExpiry = {}; S.usable = {};
+        S.skills = []; S.cooldownExpiry = {}; S.cooldownTotal = {}; S.usable = {};
         S.tgtHostile = null; S.tgtFriendly = null;
         lastVitalsBody = null;
         renderAll();
@@ -1837,6 +2459,8 @@
         if (opts.onLayoutChange) api.onLayoutChange = opts.onLayoutChange;
         if (opts.onComm) api.onComm = opts.onComm;
         if (opts.onVitals) api.onVitals = opts.onVitals;
+        if (opts.spriteUrl) spriteUrl = String(opts.spriteUrl);
+        if (opts.skillIcons && typeof opts.skillIcons === "object") curatedIcons = opts.skillIcons;
 
         dom.app = document.getElementById("connect-app");
         dom.vitals = document.getElementById("vitals-bar");
@@ -1857,9 +2481,19 @@
         dom.sheetTitle = document.getElementById("hud-sheet-title");
         dom.menu = document.getElementById("hud-menu");
         dom.roseOverlay = document.getElementById("rose-overlay");
+        // One shared tooltip element, created here so no template change is needed.
+        dom.tip = document.createElement("div");
+        dom.tip.id = "hud-tip";
+        dom.tip.className = "hud-tip";
+        dom.tip.setAttribute("role", "tooltip");
+        dom.tip.hidden = true;
+        document.body.appendChild(dom.tip);
 
         dom.app.addEventListener("click", onAppClick);
         dom.app.addEventListener("contextmenu", onAppContext);
+        wireHotbarDrag();
+        wireHotkeys();
+        wireTooltips();
 
         var tabs = document.getElementById("hud-tabs");
         if (tabs) tabs.addEventListener("click", function (e) {

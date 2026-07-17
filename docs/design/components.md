@@ -382,10 +382,8 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
 - **`.hud-btn`(`--icon`)** — the topbar button, aligned with `.ac-btn`.
 - **`#hud-dock button`** — icon-over-label phone tabs; `.unread` renders an
   amber dot (used by Chat).
-- **`.exit` compass, `.item-row` lists, `.kv`, `.aff`, `.skill` hotbar** — the
-  in-panel widgets; all have coarse-pointer bumps and `:focus-visible` rings.
-  Hotbar buttons always contain both `.skill-cd` and `.skill-pct`; the
-  `.cooling` class (flipped by JS each tick) picks which one shows.
+- **`.exit` compass, `.item-row` lists, `.kv`, `.aff`** — the in-panel widgets;
+  all have coarse-pointer bumps and `:focus-visible` rings.
 - **`.item-row`** — the equipment/inventory row (NB: **not** `.row` — that's
   Bootstrap's grid class, loaded globally; see decisions.md). One nowrap flex
   line: an optional lead cell (a `.row-caret` on an expandable container, else
@@ -397,6 +395,44 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
   (`data-expand`, persisted in `ishar.itemsExpanded`). Identical stackable
   rows are folded to one `×N` (the game emits duplicate rows; the HUD
   defaults to stacking).
+- **`.skill` action bar** — the WoW-style bottom hotbar (`#hud-hotbar`): fixed,
+  numbered, hotkey-addressable icon slots. Each `.skill` is a square holding a
+  `.skill-icon` (a Game-Icons.net glyph, below), a `.skill-key` number badge,
+  a `.skill-cd` cooldown/blocked overlay, and a `.skill-sweep` radial wedge
+  (`--sweep` angle, motion-gated). School tints via `.cat-*`; states via
+  `.off`/`.cooling`/`.blocked`/`.sweeping`/`.fired`/`.dragging`/`.drop-target`.
+  `.skill--empty` is a numbered drop target, `.skill--pager` the 1/2 page
+  toggle, `.skill--lock` the lock/unlock. Slots persist in `ishar.slots`
+  (ordered, migrated from the old `ishar.favs`); per-skill icon overrides in
+  `ishar.icons`; the unlocked state in `ishar.barUnlocked`. See the 2026-07-16
+  decisions. Hotkeys: **Alt/Ctrl+1…0** fire, **Alt+`** pages. **Locked by
+  default** (taps fire); unlock to edit — `#hud-hotbar.editing` gets grab
+  cursors and a `.skill.picked` slot awaits its destination (tap-to-swap).
+- **Game-Icons.net sprite** (`img/game-icons.svg`, CC BY 3.0, self-hosted) —
+  the **skill-art** vocabulary, a scoped exception to the Bootstrap-Icons-only
+  rule (see decision). Referenced like `bi` but with class `gi`:
+  `<svg class="gi"><use href="{% static 'img/game-icons.svg' %}#gi-NAME"></use></svg>`
+  (hud.js builds these with `createElementNS` + a sanitized href). Glyphs are
+  single-path `currentColor`, so they recolor by school. Bootstrap Icons stays
+  the sprite for everything else.
+- **Standardized skill→icon map** — the icon a skill gets is resolved
+  personal pick → server-provided → curated map → keyword heuristic. The curated
+  map (`apps/connect/skill_icons.py`, keyed by normalized skill name, **all 462
+  skills mapped**) is injected via `{{ skill_icons|json_script:"ishar-skill-icons" }}`
+  and `IsharHUD.init({skillIcons})`; it's the standardized default everyone
+  inherits. Regenerate from `python manage.py dump_skills` + the heuristic. See
+  the 2026-07-16 decision (incl. the future game-side `icon` field).
+- **`.hud-tip` tooltip** — the HUD's single hover/focus tooltip convention.
+  **Terse by rule:** a bold `.tip-name`, an optional right-aligned `.tip-key`
+  chip (the hotkey), and at most one `.tip-sub` line (`.tip-warn` red-tokens a
+  block reason). Opt in with `data-tip="text"` on any element; the action bar
+  supplies structured tips. Hover + keyboard focus, hover-capable pointers only
+  (touch uses the long-press menu); fade gated behind reduced-motion. One shared
+  `#hud-tip` node, built in `hud.js`.
+- **`.picker-grid` / `.picker-icon` / `.picker-auto`** — the per-skill icon
+  picker (a themed grid reusing `#hud-menu.menu-picker`); opened from an
+  ability's context menu. `.ab-icon` mirrors the chosen glyph in the Abilities
+  list, and the `☆/★` `.ab-star` (data-bar) pins to the action bar.
 - **`#history-pop` / `.hist-item`** — the touch command-history popover,
   anchored above the input inside `#command-form` (works with the HUD off;
   rows are `textContent`-built, 44px on coarse pointers). Revealed via

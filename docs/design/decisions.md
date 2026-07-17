@@ -9,6 +9,138 @@ Format: `## YYYY-MM-DD — Title` · **Decision** · **Why** · (optional) **Not
 
 ---
 
+## 2026-07-16 — HUD icons: a standardized map everyone inherits, and the `.hud-tip` tooltip convention
+
+**Decision (icon resolution).** Skill icons are a **standardized set every player
+inherits**, not a per-player craft. The client resolves an icon in this order:
+
+1. **Personal pick** — the player's own `ishar.icons` override (opt-in, top).
+2. **Server-provided** — a future authoritative `icon` on the `Char.Skills`
+   GMCP feed (see the game-side spec below). Preferred as soon as it exists.
+3. **Curated web map** — `apps/connect/skill_icons.py`: `SKILL_ICONS`, keyed by
+   the **normalized skill name** (the key `hud.js` already derives from the
+   feed), injected into `/connect` via `{{ skill_icons|json_script }}` →
+   `IsharHUD.init({skillIcons})`. **All 462 skills are mapped.** This is the
+   standardized default; it overrides the heuristic and everyone gets it.
+4. **Keyword heuristic** → **type/category fallback** — the client-side
+   `ICON_RULES` in `hud.js`, now only the safety net for skills added after the
+   map was last generated. A partial map is fine.
+
+Every candidate is validated against the sprite's symbol set before it renders,
+so a stale override / map typo / bad server value falls through instead of
+showing a blank.
+
+**Why (name-keyed, not id-keyed).** The skill list is finite, known, and
+game-owned; a heuristic is a good bootstrap but distinct skills that share a
+keyword collapse to one glyph. The `Char.Skills` feed carries the skill's
+**name** (and id), so the web map keys by the normalized name — readable and
+directly hand-editable. Rename-brittleness is acceptable (a rename simply falls
+back to the heuristic), and the **rename-proof authority is the game-side `icon`
+field** below, not the web map. Shipping it site-side (not per-device) means it
+is inherited with zero setup — the property we actually want.
+
+**Tooling (the names live only in the shared DB).** `python manage.py
+dump_skills` emits `[{id, enum_symbol, name, type}]`. The map was built by
+running the `hud.js` keyword heuristic over that dump, then hand-authoring
+overrides for the ~172 skills the heuristic didn't match and thematic
+corrections (Ishar's monk *Way of the …* forms, Totems, Remembrances, Cobra
+Venom, etc.), and adding ~24 thematic glyphs to the sprite (animal forms, mind,
+time, phoenix). Each entry carries a `# Skill Name` comment; regenerate the same
+way when skills change.
+
+**Game-side authority (speced, not built here).** The eventual home for the
+standardized map is the game itself: add an `icon` column to the `skills` table
+(edited in the same admin as the rest of the skill) and emit it on
+`Char.Skills`. Then **every** client — web HUD, Mudlet, player scripts —
+inherits identical icons, new skills get one with no web deploy, and the web
+`SKILL_ICONS` map becomes a fallback. The HUD *already* prefers a server-sent
+`icon` (layer 2 above), so this is a drop-in when `ishar-mud` adds it. Tracked
+for the game repo; the web side needs no further change to consume it.
+
+**Decision (tooltip convention).** The HUD gets **one** tooltip primitive,
+`.hud-tip` (built in `hud.js`, styled in `hud.css`). It is **terse by rule**: a
+bold title, an optional right-aligned **key chip** (the hotkey, e.g. `Alt+1`),
+and **at most one status line** (type · %, with a red cooldown/mana/position
+token when blocked). Any element opts in with `data-tip="text"`; the action bar
+supplies structured tips. It shows on **hover and keyboard focus** (focus makes
+hotkeys discoverable) and **only on hover-capable pointers** — coarse/touch
+pointers keep the long-press context menu, so nothing load-bearing lives in a
+tip. Content goes in via `textContent`; the show animation is a 100 ms fade
+gated behind `prefers-reduced-motion`.
+
+**Why.** The action bar's behaviour (hotkeys especially) needed explaining, and
+the native `title` attribute is slow, unstyleable, can't show a key chip, and is
+invisible on touch. One small styled convention — kept deliberately terse
+(verbosity is not good UX) — teaches the binding without a wall of text, and is
+reusable for any future HUD affordance via `data-tip`.
+
+## 2026-07-16 — HUD action bar: WoW-style icon slots, hotkeys, and a self-hosted game-icons sprite
+
+**Decision.** The bottom hotbar becomes a proper **action bar**: fixed,
+**numbered, hotkey-addressable slots** instead of a reflowing quick-bar.
+
+- **Ordered slots supersede favorites.** The old unordered `ishar.favs` set is
+  migrated (in insertion order) into an ordered `ishar.slots` array — up to
+  **20 slots across two pages of ten**. A slot's number is its identity
+  ("slot 1 is always Fireball"), so trailing empties are trimmed but interior
+  holes are kept as visible, numbered drop targets. Nothing pinned yet →
+  **auto mode** still offers a capped set of usable damage/heal skills so the
+  bar is useful out of the box; pinning anything switches to **custom mode**.
+- **Icons come from Game-Icons.net** (`img/game-icons.svg`, a curated
+  **166-glyph** subset, **CC BY 3.0**, self-hosted, recolored via
+  `fill:currentColor`). The game sends no icon metadata, so a skill's glyph is
+  chosen client-side: **user override → keyword rule → type/category
+  fallback** (`ICON_RULES` / `iconFallback` in `hud.js`, mirrored by
+  `scratchpad/iconset.js` which the sprite generator reads). Per-skill
+  overrides persist in `ishar.icons` and are chosen from a themed picker.
+- **Compact display.** A slot is **icon + slot-number badge** only; the always-
+  on skill % is gone. Verbose detail moves to the **native hover tooltip**
+  (name · % · type · cooldown/mana/position or the exact command) and, on
+  touch, the existing **long-press context menu**. Cooldowns show a **radial
+  sweep** (a `conic-gradient` wedge driven by a `@property --sweep` angle,
+  transition gated behind `prefers-reduced-motion`) plus the seconds; non-
+  cooldown blocks show their reason ("MANA", a min-position).
+- **Hotkeys.** **Alt+1…0** fire the visible page's slots (slot 10 = key "0");
+  **Ctrl+1…0** is wired as a bonus; **Alt+`** pages the bar.
+- **Lock, then rearrange (WoW's "Lock Action Bars").** The bar is **locked by
+  default** — taps and hotkeys fire, nothing drags, so combat is accident-free.
+  A padlock toggle flips to **edit mode**: taps stop firing and instead
+  **rearrange** (drag on desktop, or tap-a-slot-then-tap-its-destination, which
+  also works on touch); hotkeys are suppressed while editing. The unlocked state
+  persists (`ishar.barUnlocked`). "Move ◄/►" stays in the ability menu as an
+  always-available safe reorder even when locked.
+
+**Why.** The plumbing for a real action bar already existed (GMCP-fed
+cooldowns, mana/position gating, target-aware casting, a context menu) — it
+was wearing text where WoW muscle memory expects an icon grid. Numbered,
+stable slots are what make hotkeys meaningful, and moving the % to hover
+*reduces* on-screen text (the green-field "reduce entropy" mandate) while
+adding function. Game-Icons.net is the open-source standard for skill/spell
+art and its glyphs are single-path `currentColor`, so they drop into the dark
+console and tint by school with zero color-management.
+
+**The `no new frontend libraries` deviation, recorded deliberately.** Shipping
+a game-icons sprite adds a **new self-hosted asset** (~250 KiB / ~75 KiB
+gzipped), which the frontend rule (`CLAUDE.md`) otherwise forbids. This is a
+**scoped, intentional exception**, not a precedent to add more: it is a
+*curated subset* (not the 4,000-icon set), self-hosted (no CDN, no runtime
+dependency, no build step), and attribution lives beside it
+(`img/game-icons.ATTRIBUTION.txt`, CC BY 3.0). Bootstrap Icons remains the
+sprite for everything else; game-icons is *only* the skill-art vocabulary.
+
+**Honest caveat (documented in `/help`).** Browsers reserve **Ctrl+1…9** for
+tab-switching and web content usually cannot veto it, so in a normal tab
+**Alt+digit is the reliable path** (Chrome/Chromium/Safari; Firefox reserves
+Alt+digit too). Ctrl+digit comes fully alive when the HUD runs
+installed/fullscreen (no tab strip). The slot number is painted on every
+button so taps work everywhere the hotkey is browser-eaten.
+
+**Discipline.** Unchanged: `el()`/`textContent` only (icons are built with
+`createElementNS` + a sanitized `#gi-<name>` href, never `innerHTML`); every
+command through `safeCmd()`; tokens for all colors; ≥44 px touch targets; the
+sprite is force-added past the `static/` gitignore. No new *library* — one new
+self-hosted asset, per the recorded exception above.
+
 ## 2026-07-15 — Web client: NUL-sentinel control channel and liveness policy
 
 **Decision.** Issue #74. Websocket text frames starting with NUL (`\x00`) are

@@ -1,0 +1,24 @@
+Game-Icons.net icon attribution
+===============================
+
+The skill-bar icons in game-icons.svg are a curated subset (166 glyphs) of the
+Game-Icons.net collection.
+
+  Source:   https://game-icons.net  (repository: https://github.com/game-icons/icons)
+  License:  Creative Commons Attribution 3.0 Unported (CC BY 3.0)
+            https://creativecommons.org/licenses/by/3.0/
+            License text: https://github.com/game-icons/icons/blob/master/license.txt
+
+The icons were extracted from the Iconify redistribution of the collection
+(@iconify-json/game-icons, itself CC BY 3.0) and rewritten as <symbol> elements
+that recolor via CSS (fill="currentColor"). No icon artwork was altered beyond
+this recoloring hook.
+
+Per-artist credits for each glyph are listed on the icon's page at
+game-icons.net. The Game-Icons.net collection is the work of many contributors
+(Lorc, Delapouite, Skoll, sbed, John Colburn, Felbrigg, Carl Olsen, and others);
+this attribution notice and the links above are provided in accordance with
+CC BY 3.0.
+
+Icons included:
+acid, acid-blob, all-seeing-eye, angel-wings, anvil, anvil-impact, armor-vest, aura, bandage-roll, barrier, battle-axe, bear-head, beast-eye, biceps, blacksmith, bleeding-wound, boar, bone-knife, boot-stomp, brain, broadsword, broken-bone, bubbling-flask, burning-embers, burning-skull, caduceus, cauldron, celebration-fire, chain-lightning, checked-shield, claw-slashes, cloak, cobra, crossbow, crossed-bones, crossed-swords, crystal-shine, cursed-star, death-skull, death-zone, dragon-breath, dragon-head, drink-me, eagle-head, earth-crack, edged-shield, energy-shield, evil-wings, eye-target, fairy-wand, feathered-wing, fire, fire-bomb, fire-ray, fireball, first-aid-kit, fist, flaming-arrow, flat-hammer, footsteps, frostfire, frozen-orb, gavel, gears, gems, gold-nuggets, hammer-nails, healing, health-normal, health-potion, heart-bottle, heart-plus, hidden, high-kick, high-shot, holy-symbol, holy-water, hourglass, ice-bolt, ice-cube, invisible, leaf-swirl, life-support, lightning-arc, lightning-helix, lightning-storm, magic-gate, magic-palm, magic-portal, magic-shield, magic-swirl, magick-trick, magnifying-glass, meditation, monkey, mortar, muscle-up, ninja-mask, octopus, open-book, owl, padlock, padlock-open, plain-dagger, pocket-bow, pointy-sword, poison-bottle, poison-cloud, poison-gas, portal, potion-ball, prayer, prayer-beads, psychic-waves, punch, punch-blast, raven, regeneration, rock, round-star, run, rune-stone, saber-slash, scroll-unfurled, sewing-needle, shadow-follower, sharp-axe, shield, shield-reflect, sight-disabled, skull-crossed-bones, snake, snowflake-1, sonic-shout, sparkles, spear-hook, spectre, spell-book, sprint, sprout, star-swirl, stiletto, stone-spear, sun, sun-priest, sunbeams, sword-brandish, sword-clash, sword-wound, teleport, templar-shield, third-eye, thorny-vine, thrown-spear, tiger-head, tornado, tortoise, totem-head, trident, vibrating-shield, vine-whip, walking-boot, water-drop, wind-hole, wizard-staff, wolf-howl
