@@ -41,6 +41,12 @@ scores), `.ac-table` (matrix grids), `.ac-quote` (free text).
 **Notes.** `{% crumb %}` gained a prebuilt-`url` param for routes needing
 arguments. The nav/portal "Surveys" pill (`SURVEYS_OPEN`) counts accepting
 surveys the account hasn't answered, mirroring `PATCH_NOTES_UNREAD`.
+Lifecycle is driven from the site, not only the admin: the surveys list gives
+Gods Open/Close/Reopen buttons (POST + `JsonResponse`, the action-view
+convention) plus edit/new links into the admin builder — Django admin is where
+structure is *authored*, the site page is where a survey is *operated*
+(consistent with the deploy/season console split). An explicit Open clears an
+already-elapsed `closes_at` so "Reopen" never lands in a still-closed window.
 
 ## 2026-07-17 — HUD map fast-follow: cross-zone viewing + navigation
 

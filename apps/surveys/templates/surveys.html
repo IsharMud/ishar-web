@@ -52,6 +52,17 @@
 {% if user.is_eternal %}
                 <a class="ac-btn ac-btn--info" href="{% url 'survey_results' survey.slug %}#results">Results</a>
 {% endif %}
+{% if user.is_god %}
+{% if survey.status == "open" %}
+                <button class="ac-btn ac-btn--warn sv-state" data-slug="{{ survey.slug }}" data-status="closed"
+                        title="Stop accepting responses">Close</button>
+{% else %}
+                <button class="ac-btn ac-btn--ok sv-state" data-slug="{{ survey.slug }}" data-status="open"
+                        title="Start accepting responses">{% if survey.status == "closed" %}Reopen{% else %}Open{% endif %}</button>
+{% endif %}
+                <a class="ac-btn" href="{{ survey.get_admin_url }}" target="_blank"
+                   title="Edit questions in Administration">{% bi "pencil-square" label="Edit in Administration" %}</a>
+{% endif %}
             </div>
         </div>
 {% endfor %}
@@ -63,5 +74,38 @@
     </div>
 {% endif %}
 
+{% if user.is_forger %}
+    <div class="mt-2">
+        <a class="ac-btn ac-btn--accent" href="{% url 'admin:surveys_survey_add' %}" target="_blank">
+            {% bi "plus-lg" %} New survey {% bi "box-arrow-up-right" label="Opens in Administration, in a new window." %}
+        </a>
+    </div>
+{% endif %}
+
 </div>
+
+{% if user.is_god %}
+<script>
+    // Lifecycle flip (draft/open/closed) straight from the list; the reload
+    // refreshes pills, buttons, and the awaiting-answers counts together.
+    async function surveyState(button) {
+        button.disabled = true
+        const resp = await fetch(`/surveys/${button.dataset.slug}/state/`, {
+            method: "POST",
+            headers: {"X-CSRFToken": "{{ csrf_token }}"},
+            body: new URLSearchParams({status: button.dataset.status}),
+        })
+        const data = await resp.json().catch(() => ({ok: false}))
+        if (data.ok) {
+            location.reload()
+        } else {
+            button.disabled = false
+            alert(data.message || "The change failed.")
+        }
+    }
+    document.querySelectorAll(".sv-state").forEach((el) => {
+        el.addEventListener("click", () => surveyState(el))
+    })
+</script>
+{% endif %}
 {% endblock content %}

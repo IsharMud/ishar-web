@@ -4,6 +4,7 @@ from .views import (
     SurveyListView,
     SurveyResultsCSVView,
     SurveyResultsView,
+    SurveyStateView,
     SurveySubmissionView,
     SurveySubmitView,
     SurveyView,
@@ -14,6 +15,7 @@ urlpatterns = [
     path("", SurveyListView.as_view(), name="surveys"),
     path("<slug:slug>/", SurveyView.as_view(), name="survey"),
     path("<slug:slug>/submit/", SurveySubmitView.as_view(), name="survey_submit"),
+    path("<slug:slug>/state/", SurveyStateView.as_view(), name="survey_state"),
     path("<slug:slug>/results/", SurveyResultsView.as_view(), name="survey_results"),
     path(
         "<slug:slug>/results/export/",
