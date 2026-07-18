@@ -408,11 +408,23 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
   icon riding the end of the HP and MV bars; `data-state` `ok`/`low`/`crit`
   tints it dim → `--hud-edge` → `--ac-danger`. Built client-side via `biSvg()`
   from `Char.Vitals.food`/`water` (see decisions.md 2026-07-17).
+- **`.v-affects` / `.self-aff`** — the ambient self buff/debuff strip by the
+  vitals (`#vitals-affects`, `renderSelfAffects`). Bare 26px icon tiles, buff
+  green / debuff red; a `.self-aff-chip` countdown + an `.alarm` pulse appear
+  only within `AFFECT_SOON` (60s) of expiry, so ~10 buffs stay a compact
+  wrapping row. From `Char.Affects.buffs`/`.debuffs` (see decisions.md
+  2026-07-18, "HUD affects split").
 - **`.hud-btn`(`--icon`)** — the topbar button, aligned with `.ac-btn`.
 - **`#hud-dock button`** — icon-over-label phone tabs; `.unread` renders an
-  amber dot (used by Chat).
-- **`.exit` compass, `.item-row` lists, `.kv`, `.aff`** — the in-panel widgets;
+  amber dot (used by Chat), `.alarm` a pulsing caution dot (used by Tracked
+  Spells when a maintained spell nears expiry).
+- **`.exit` compass, `.item-row` lists, `.kv`** — the in-panel widgets;
   all have coarse-pointer bumps and `:focus-visible` rings.
+- **`.aff` (Tracked Spells)** — one row per maintained spell in the persistent
+  right-column `#panel-tracked` (`renderTracked`): `.aff-ic` icon · `.aff-body`
+  (name + colour-coded `.aff-tgt` `self`/`mate`/`foe`) · `.aff-time` · `.aff-rel`
+  release button. Expiry-sorted; `.aff.soon` warms a row nearing expiry. From
+  `Char.Affects.maintained`.
 - **`.item-row`** — the equipment/inventory row (NB: **not** `.row` — that's
   Bootstrap's grid class, loaded globally; see decisions.md). One nowrap flex
   line: an optional lead cell (a `.row-caret` on an expandable container, else

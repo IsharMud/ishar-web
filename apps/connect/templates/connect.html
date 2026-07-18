@@ -46,6 +46,10 @@
             <span class="status-text">Connecting&hellip;</span>
         </span>
         <div id="vitals-bar"></div>
+        {# Ambient self buff/debuff timer icons — always visible by the vitals
+           (hud.js renderSelfAffects). Bare icons; a countdown chip + pulse
+           appear only near expiry. #}
+        <div id="vitals-affects" class="v-group v-affects" aria-label="Active effects"></div>
         <div class="topbar-actions">
             <button class="hud-btn hud-btn--icon" type="button" id="search-btn" aria-pressed="false"
                     title="Search the scrollback" aria-label="Search the scrollback">
@@ -220,6 +224,9 @@
     </main>
 
     <aside id="hud-right">
+        {# Tracked Spells — a persistent, collapsible panel pinned above the tab
+           bar (CSS order): the magic you maintain, expiry-sorted. #}
+        <section id="panel-tracked" class="panel panel-tracked"></section>
         <div id="hud-tabs">
             <button type="button" data-tab="status">Status</button>
             <button type="button" data-tab="abilities">Abilities</button>
@@ -246,6 +253,10 @@
         <button type="button" data-panel="group" aria-pressed="false">
             {% bi "person-hearts" %}
             <span>Group</span>
+        </button>
+        <button type="button" data-panel="tracked" aria-pressed="false">
+            {% bi "hourglass-split" %}
+            <span>Tracked</span>
         </button>
         <button type="button" data-panel="equipment" aria-pressed="false">
             {% bi "shield" %}
