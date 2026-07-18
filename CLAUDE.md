@@ -268,6 +268,11 @@ is often tracked in `isharmud/ishar-mud`). Reference the issue number in commits
 (`Relates to #NN`) and post a brief completion summary. Trivial changes (typos,
 one-line fixes) don't need an issue — use judgment.
 
+When writing an issue, follow the `write-ishar-issue` skill (business impact
+first, then technical detail). When writing a PR, follow the `write-ishar-pr`
+skill (issue-closing link, Problem/Solution/Verification structure,
+screenshots for UI).
+
 **Do not open a pull request unless explicitly asked.** When you do, mirror any
 PR template in `.github/` and describe only the diff.
 
