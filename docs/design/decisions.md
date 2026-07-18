@@ -9,6 +9,64 @@ Format: `## YYYY-MM-DD — Title` · **Decision** · **Why** · (optional) **Not
 
 ---
 
+## 2026-07-18 — HUD re-tiering: ambient affects/XP, pinnable items, Tracked Spells, overlay migration
+
+**Status.** Agreed direction, tracked in isharmud/ishar-web#141 — recorded here
+before implementation so the plan is the standard, not discovered per-PR.
+Realized incrementally (see the issue's sequencing); annotate/supersede these
+points as each piece lands.
+
+**Decision.** The three-tier placement model (see 2026-07-17, "The HUD extension
+model") is applied to the *whole* `/connect` surface, not just admin/overlays.
+Every surface is sorted by how it's consumed:
+
+- **Ambient** (always visible): vitals, action bar, **XP strip**, **self
+  buff/debuff timer icons**, compass rose.
+- **Persistent, collapsible** (side columns / phone dock): Group, Here, Room
+  (keeps its Rose\|Map tab pair), **Tracked Spells**, Chat. The column is a
+  flexible collapsible stack the player curates (`panel-h-toggle`/`isCollapsed`),
+  **not** fixed allocation — this is what lets Group scale from empty (solo) to a
+  raid healer's whole column.
+- **Overlay** (micro-menu): Equipment, Bags, Character, Abilities, Who. The
+  right-column tab bar dissolves.
+
+The specific calls:
+
+- **Affects split by interaction, not by target.** Self buffs/debuffs → an
+  ambient icon row by the vitals (bare icons; a countdown chip appears and the
+  tile pulses *only* near expiry, so ~10 quest buffs stay a compact wrapping
+  row). The magic *you* maintain → a **Tracked Spells** panel: spell · target ·
+  timer · release, expiry-sorted, target color-coded. Both already come from
+  `Char.Affects` and the renderer + `release spell` exist in `renderStatus`;
+  this lifts them out of the buried Status tab. Name is deliberately **"Tracked
+  Spells"** — *sustained* is a specific in-game mechanic.
+- **XP graduates to ambient.** A thin strip on the action row (`Char.Train.xp_pct`,
+  already computed); the Character panel becomes an overlay.
+- **Action-bar slots generalize from skill to command.** A slot may hold a skill
+  *or* a keyword command, so consumables pin (`quaff glowing`) with a live count
+  and gray-out driven by matching `vnum` against `Char.Inventory`, verb by item
+  `type`. Ships **with** the Inventory→overlay migration so fast consumable
+  access isn't lost.
+- **Bags overlay aggregates worn + carried** containers (join `Char.Equipment` +
+  `Char.Inventory`), provenance-tagged, closed/locked honored.
+- **Group density is two presets, not a field-picker.** Full (HP/MP/MV triple +
+  chips) and Compact (HP bar · % · one status marker · range); scrolls; collapse
+  retained.
+
+**Why.** The terminal is the product; a panel earns permanent space only by
+doing what the scrollback can't — live timers, at-a-glance bars, spatial layout,
+tap-to-act. Buff/debuff timers (the one thing text handles worst) were buried in
+a tab; low-churn reference held column space it didn't earn; phones had no room
+for either. Tiering by consumption frequency, keeping the columns collapsible,
+and adding a compact group density fix all three — and it needs **no new data**:
+everything renders from GMCP feeds the game already sends (`/connect?demo=1`).
+
+**Notes.** Out of scope / future: per-member group affects and enemy debuffs are
+not in the feed today; when `isharmud/ishar-mud` emits them, render on the
+party-frame / target frame, not a global list. Design mock + generator live at
+`docs/design/hud-retiering/` (throwaway; remove once landed). Update
+`components.md` as pieces ship.
+
 ## 2026-07-18 — Surveys: an in-house survey engine, and the `.ac-opt` option row
 
 **Decision.** Player surveys are a first-class site feature (`apps/surveys`)
