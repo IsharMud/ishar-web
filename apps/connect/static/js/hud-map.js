@@ -48,6 +48,10 @@
     var dirty = [];         // discovered vnums not yet flushed to the server
     var flushTimer = null;
     var pendingFocus = null; // vnum to refocus the big map on once its zone loads
+    // Live overlays fed by GMCP (isharmud/ishar-mud#1834), not persisted:
+    var groupMates = [];    // non-self group members carrying a location
+    var deathMark = null;   // {vnum, roomName, zoneName, time} — last death
+    var exploredZones = null; // cached [{id,name,count,anchor}] for the picker
 
     // ------------------------------------------------------------------
     // Geometry
@@ -91,6 +95,7 @@
             warn: v("--ac-warn", "#f80"),
             danger: v("--ac-danger", "#d64b4b"),
             panel: v("--ac-panel", "#131316"),
+            group: v("--hud-group", "#3fb6a8"),
             ter: {}
         };
         ["indoor", "city", "field", "forest", "hill", "mountain", "water",
@@ -574,6 +579,58 @@
                                box + 8, box + 8);
             }
         }
+
+        // ---- last-death marker (personal, session-only; #1834) ----
+        // A danger ring + skull, distinct from a death-TRAP room's red corner
+        // triangle: this is "you fell here," a route-back anchor.
+        if (opts.deathVnum != null) {
+            var dpos = L.pos[opts.deathVnum];
+            if (dpos && dpos.z === view.z &&
+                dpos.x >= minWX && dpos.x <= maxWX &&
+                dpos.y >= minWY && dpos.y <= maxWY) {
+                var dxp = sx(dpos.x), dyp = sy(dpos.y);
+                ctx.strokeStyle = palette.danger;
+                ctx.lineWidth = 2;
+                ctx.strokeRect(dxp - half - 2.5, dyp - half - 2.5, box + 5, box + 5);
+                ctx.font = Math.round(box * 0.82) + "px sans-serif";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText("💀", dxp, dyp + box * 0.04);
+            }
+        }
+
+        // ---- group-mate markers (same-zone; #1834) ----
+        // One pip per room a mate is in, at the bottom edge; a lone mate shows
+        // their initial, a shared room shows the count. Names live in the
+        // tooltip / jump menu.
+        if (opts.groupMarks) {
+            var gkeys = Object.keys(opts.groupMarks);
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            for (var gi = 0; gi < gkeys.length; gi++) {
+                var gpos = L.pos[gkeys[gi]];
+                if (!gpos || gpos.z !== view.z) continue;
+                if (gpos.x < minWX || gpos.x > maxWX ||
+                    gpos.y < minWY || gpos.y > maxWY) continue;
+                var mates = opts.groupMarks[gkeys[gi]];
+                var pr = Math.max(3, box * 0.19);
+                var gxp = sx(gpos.x), gyp = sy(gpos.y) + half - pr;
+                ctx.fillStyle = palette.group;
+                ctx.beginPath();
+                ctx.arc(gxp, gyp, pr, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = palette.panel;
+                ctx.lineWidth = 1;
+                ctx.stroke();
+                var badge = mates.length > 1 ? String(mates.length)
+                    : (mates[0].name ? mates[0].name.charAt(0).toUpperCase() : "");
+                if (badge && box >= 16) {
+                    ctx.fillStyle = "#08110f";
+                    ctx.font = "700 " + Math.round(pr * 1.35) + "px system-ui, sans-serif";
+                    ctx.fillText(badge, gxp, gyp + 0.5);
+                }
+            }
+        }
     }
 
     // Invert a canvas point to a room vnum (grid hit-test).
@@ -779,10 +836,121 @@
         setShownPath(null);
         cur.vnum = null;
         cur.unseen = false;
+        // Live overlays belong to the character/session just left; the server
+        // re-primes them on the next entry.
+        groupMates = [];
+        deathMark = null;
         redraw();
     }
     function onConnected(on) {
         if (!on) cancelWalk("disconnected");
+    }
+
+    // ------------------------------------------------------------------
+    // Live overlays — group-mate + last-death markers (#1834). Both are
+    // GMCP-fed and never persisted; they clear on reset and re-prime from the
+    // server on reconnect. The game already gates what we're allowed to show:
+    // a member's exact `vnum` arrives only when they share the player's zone.
+    // ------------------------------------------------------------------
+    function onGroup(data) {
+        if (!enabled()) return;
+        var self = (H && H.selfName ? H.selfName() : "").toLowerCase();
+        var members = (data && data.members) || [];
+        groupMates = members.filter(function (m) {
+            return m && String(m.name || "").toLowerCase() !== self;
+        }).map(function (m) {
+            return {
+                name: H ? H.stripColor(String(m.name || "")) : String(m.name || ""),
+                vnum: typeof m.vnum === "number" ? m.vnum : null,
+                zone: typeof m.zone === "number" ? m.zone : null,
+                room: m.room ? (H ? H.stripColor(String(m.room)) : String(m.room)) : "",
+                area: m.area ? (H ? H.stripColor(String(m.area)) : String(m.area)) : "",
+                leader: !!m.leader
+            };
+        });
+        redraw();
+    }
+
+    // A zone the account has explored (has fog for, or the server listed as
+    // discovered). This is the "don't overshare" gate: a mate's exact room and
+    // jump are revealed only for zones you've actually mapped.
+    function zoneDiscovered(zoneId) {
+        if (zoneId == null) return false;
+        var fs = fog[zoneId];
+        if (fs && fs.set) { for (var k in fs.set) { if (fs.set[k]) return true; } }
+        return (exploredZones || []).some(function (z) { return z.id === zoneId; });
+    }
+    // Location string the group panel shows for a mate not in your room — from
+    // a raw Group.Update member. Exact room when you've discovered its zone,
+    // else the coarse area name (or "elsewhere"): never the exact room of a
+    // zone you've never been to.
+    function memberWhere(m) {
+        if (!m) return "";
+        var z = typeof m.zone === "number" ? m.zone : null;
+        var room = m.room && H ? H.stripColor(String(m.room)) : "";
+        var area = m.area && H ? H.stripColor(String(m.area)) : "";
+        if (z != null && zoneDiscovered(z) && room) return room;
+        return area || "elsewhere";
+    }
+    // A mate we can actually plot / jump to: located, in a discovered zone.
+    function mateLocatable(m) {
+        return !!(m && m.vnum != null && zoneDiscovered(m.zone));
+    }
+
+    function onDeath(data) {
+        if (!enabled()) return;
+        if (!data || typeof data.vnum !== "number" || !(data.vnum > 0)) {
+            deathMark = null; redraw(); return;
+        }
+        deathMark = {
+            vnum: data.vnum,
+            roomName: data.name ? (H ? H.stripColor(String(data.name)) : String(data.name)) : "",
+            zoneName: data.zone ? (H ? H.stripColor(String(data.zone)) : String(data.zone)) : "",
+            time: typeof data.time === "number" ? data.time : null
+        };
+        redraw();
+    }
+
+    // The death room, but only when it lives in `zoneId` and its graph is
+    // loaded (so a position exists to draw on).
+    function deathVnumInZone(zoneId) {
+        if (!deathMark || zoneId == null) return null;
+        return vnumZone[deathMark.vnum] === zoneId ? deathMark.vnum : null;
+    }
+    // Mates grouped by the room they're in, for the given zone — but only when
+    // that zone is discovered, so cross-zone *viewing* a neighbor you haven't
+    // explored never plots a mate standing in it.
+    function groupMarksInZone(zoneId) {
+        var byVnum = {};
+        if (zoneId == null || !zoneDiscovered(zoneId)) return byVnum;
+        groupMates.forEach(function (m) {
+            if (m.vnum == null || vnumZone[m.vnum] !== zoneId) return;
+            (byVnum[m.vnum] = byVnum[m.vnum] || []).push(m);
+        });
+        return byVnum;
+    }
+    function hasLocatedMate() {
+        return groupMates.some(mateLocatable);
+    }
+    function agoSuffix(t) {
+        if (!t) return "";
+        var s = Math.floor(Date.now() / 1000) - t;
+        if (s < 0) return "";
+        if (s < 90) return " · just now";
+        if (s < 3600) return " · " + Math.round(s / 60) + "m ago";
+        if (s < 86400) return " · " + Math.round(s / 3600) + "h ago";
+        return " · " + Math.round(s / 86400) + "d ago";
+    }
+    // Focus the big map on any vnum, loading its zone graph first if needed —
+    // a death can sit in a zone not loaded this session, unlike a same-zone
+    // mate. Mirrors goToZone but keyed purely on the vnum.
+    function jumpToVnum(vnum, label) {
+        var zid = vnumZone[vnum];
+        if (zid != null && zones[zid]) { focusZone(zid, vnum); return; }
+        pendingFocus = vnum;
+        if (!bigOpen() && H && H.toggleOverlay) H.toggleOverlay("map");
+        if (big && big.zoneLabel) big.zoneLabel.textContent = (label || "Loading") + " …";
+        requestGraph(vnum);
     }
 
     // ------------------------------------------------------------------
@@ -839,7 +1007,9 @@
         if (cur.zone != null) {
             drawMap(mini.canvas, cur.zone, miniView(), {
                 curVnum: cur.vnum, unseen: cur.unseen,
-                pathVnums: walkPathVnums(), pathEdges: walkPathEdges()
+                pathVnums: walkPathVnums(), pathEdges: walkPathEdges(),
+                deathVnum: deathVnumInZone(cur.zone),
+                groupMarks: groupMarksInZone(cur.zone)
             });
         } else {
             var ctx = mini.canvas.getContext("2d");
@@ -917,14 +1087,23 @@
         var btnMe = H.el("button", { type: "button", class: "map-btn", text: "◎",
             title: "Center on me", "aria-label": "Center on my room",
             onclick: function () { bigView.follow = true; centerOnMe(); redraw(); } });
+        // Jump to a live marker — your last death, or a group-mate. Hidden
+        // until there's somewhere to jump (#1834).
+        var btnJump = H.el("button", {
+            type: "button", class: "map-btn map-jump menu-opener", text: "Jump ▾",
+            title: "Jump to a group-mate or where you died",
+            "aria-label": "Jump to a group-mate or where you died",
+            onclick: function () { openMarkerJump(btnJump); }
+        });
+        btnJump.hidden = true;
         var toolbar = H.el("div", { class: "map-toolbar" },
-            [zoneLabel, btnZones, zRow, search, count, btnOut, btnIn, btnMe]);
+            [zoneLabel, btnZones, btnJump, zRow, search, count, btnOut, btnIn, btnMe]);
         var foot = H.el("div", { class: "map-foot" });
         foot.hidden = true;
         var root = H.el("div", { class: "map-app" }, [toolbar, wrap, foot]);
         big = { root: root, canvas: canvas, wrap: wrap, zoneLabel: zoneLabel,
                 zRow: zRow, search: search, count: count, anchor: anchor,
-                foot: foot, btnMe: btnMe, btnZones: btnZones };
+                foot: foot, btnMe: btnMe, btnZones: btnZones, btnJump: btnJump };
 
         // --- search: filter discovered rooms, Enter cycles + centers ---
         search.addEventListener("input", function () {
@@ -1060,11 +1239,13 @@
         big.anchor.style.width = (halfBox * 2) + "px";
         big.anchor.style.height = (halfBox * 2) + "px";
         if (!fs[v]) { H.showTip(big.anchor, { name: "Unexplored" }); return; }
+        var parts = [room.t];
+        if (deathMark && v === deathMark.vnum) parts.push("💀 you died here");
+        var here = groupMates.filter(function (m) { return m.vnum === v; });
+        if (here.length) parts.push(here.map(function (m) { return m.name; }).join(", "));
         var note = noteFor(v);
-        H.showTip(big.anchor, {
-            name: H.stripColor(room.n),
-            sub: room.t + (note ? " · " + firstLine(note) : "")
-        });
+        if (note) parts.push(firstLine(note));
+        H.showTip(big.anchor, { name: H.stripColor(room.n), sub: parts.join(" · ") });
     }
     function firstLine(s) {
         var line = String(s).split("\n")[0];
@@ -1115,49 +1296,188 @@
         updateZoneLabel(); updateZRow(); updateSearchCount(); updateMeButton();
         redrawBig();
     }
-    // Toolbar "Zones ▾" menu: every neighbor reachable from an explored
-    // border of the viewed zone, plus a "back to my location" when off-zone.
-    function openZoneJump(anchor) {
-        var zid = viewedZone();
-        if (zid == null || !zones[zid]) return;
-        var zone = zones[zid], fs = fogSet(zid);
-        var acts = [];
-        if (cur.zone != null && zid !== cur.zone) {
-            acts.push({
-                label: "◎ Back to my location",
-                fn: function () { bigView.follow = true; centerOnMe(); redraw(); }
-            });
-        }
-        // One entry per adjacent zone, keyed off discovered border rooms so
-        // we only surface crossings the player has actually found.
-        var byZone = {};
+    // ------------------------------------------------------------------
+    // Zone picker — a filterable popover, not a flat menu, because a veteran
+    // account can have discovered dozens of zones. Adjacent zones (reachable
+    // from an explored border of the viewed zone) pin to the top; every other
+    // explored zone follows, alphabetical, filtered live.
+    // ------------------------------------------------------------------
+    var zonePop = null;   // {root, input, list}
+
+    function buildZonePop() {
+        var input = H.el("input", {
+            class: "map-search zone-pick-search", type: "search",
+            placeholder: "Filter zones…", "aria-label": "Filter zones by name"
+        });
+        var closeBtn = H.el("button", { type: "button", class: "map-btn",
+            text: "Close", onclick: closeZonePop });
+        var head = H.el("div", { class: "zone-pick-head" }, [input, closeBtn]);
+        var list = H.el("div", { class: "zone-pick-list" });
+        var root = H.el("div", { class: "map-zone-pop menu-opener", role: "dialog",
+            "aria-label": "Jump to zone" }, [head, list]);
+        root.hidden = true;
+        document.body.appendChild(root);
+        input.addEventListener("input", function () { renderZoneList(input.value); });
+        input.addEventListener("keydown", function (ev) {
+            if (ev.key === "Escape") { ev.stopPropagation(); closeZonePop(); }
+        });
+        // Dismiss on an outside tap (the toolbar button is exempt so its own
+        // click doesn't immediately re-close the popover it just opened).
+        document.addEventListener("pointerdown", function (ev) {
+            if (!zonePop || zonePop.root.hidden) return;
+            if (zonePop.root.contains(ev.target)) return;
+            if (big && big.btnZones && big.btnZones.contains(ev.target)) return;
+            closeZonePop();
+        }, true);
+        zonePop = { root: root, input: input, list: list };
+    }
+
+    // Adjacent zones = crossings found from an explored border of the viewed
+    // zone (the old picker's whole content; now just the pinned section).
+    function adjacentZones() {
+        var zid = viewedZone(), out = [];
+        if (zid == null || !zones[zid]) return out;
+        var zone = zones[zid], fs = fogSet(zid), byZone = {};
         zone.graph.rooms.forEach(function (r) {
             if (!fs[r.v]) return;
             (zone.layout.outFrom[r.v] || []).forEach(function (o) {
                 if (!byZone[o.zone]) byZone[o.zone] = o;
             });
         });
-        var keys = Object.keys(byZone);
-        keys.sort(function (a, b) {
-            var na = byZone[a].zname || "", nb = byZone[b].zname || "";
-            return na < nb ? -1 : na > nb ? 1 : 0;
-        });
-        keys.forEach(function (k) {
+        Object.keys(byZone).forEach(function (k) {
             var o = byZone[k];
-            acts.push({
-                label: "Go to " + (o.zname || "zone " + o.zone) + " →",
-                fn: (function (oo) {
-                    return function () { goToZone(oo.zone, oo.t, oo.zname); };
-                })(o)
-            });
+            out.push({ id: Number(o.zone), name: o.zname || ("zone " + o.zone), vnum: o.t });
         });
-        if (!keys.length) {
-            acts.push({
-                label: "Walk to a zone border to unlock jumps",
-                fn: function () {}, keep: true
+        out.sort(function (a, b) { return byName(a.name, b.name); });
+        return out;
+    }
+    function byName(a, b) {
+        a = (a || "").toLowerCase(); b = (b || "").toLowerCase();
+        return a < b ? -1 : a > b ? 1 : 0;
+    }
+    function zoneRow(label, fn) {
+        return H.el("button", { type: "button", class: "zone-pick-row",
+            text: label, onclick: fn });
+    }
+    function renderZoneList(q) {
+        if (!zonePop) return;
+        q = (q || "").trim().toLowerCase();
+        var zid = viewedZone(), kids = [];
+        if (cur.zone != null && zid !== cur.zone) {
+            kids.push(zoneRow("◎ Back to my location", function () {
+                closeZonePop(); bigView.follow = true; centerOnMe(); redraw();
+            }));
+        }
+        var adj = adjacentZones();
+        var adjIds = {};
+        adj.forEach(function (z) { adjIds[z.id] = true; });
+        var adjShown = adj.filter(function (z) {
+            return !q || z.name.toLowerCase().indexOf(q) !== -1;
+        });
+        if (adjShown.length) {
+            kids.push(H.el("div", { class: "zone-pick-h", text: "Adjacent" }));
+            adjShown.forEach(function (z) {
+                kids.push(zoneRow("→ " + z.name, function () {
+                    closeZonePop(); goToZone(z.id, z.vnum, z.name);
+                }));
             });
         }
-        H.openMenu("Jump to zone", acts, anchor);
+        var explored = (exploredZones || []).filter(function (z) {
+            return z.id !== cur.zone && z.id !== zid && !adjIds[z.id] &&
+                   (!q || (z.name || "").toLowerCase().indexOf(q) !== -1);
+        });
+        if (explored.length) {
+            kids.push(H.el("div", { class: "zone-pick-h", text: "Explored" }));
+            explored.forEach(function (z) {
+                kids.push(zoneRow(z.name + "  (" + z.count + ")", function () {
+                    closeZonePop(); goToZone(z.id, z.anchor, z.name);
+                }));
+            });
+        }
+        if (!adjShown.length && !explored.length) {
+            kids.push(H.el("div", { class: "zone-pick-empty",
+                text: exploredZones == null ? "Loading…" : "No zones found." }));
+        }
+        H.fill(zonePop.list, kids);
+    }
+    function positionZonePop(anchor) {
+        var pop = zonePop.root;
+        pop.hidden = false;
+        pop.style.left = "-9999px"; pop.style.top = "0px";
+        var pw = pop.offsetWidth, ph = pop.offsetHeight;
+        var vw = window.innerWidth, vh = window.innerHeight;
+        var r = anchor && anchor.getBoundingClientRect
+            ? anchor.getBoundingClientRect() : null;
+        var left = r ? Math.min(r.left, vw - pw - 8) : (vw - pw) / 2;
+        var top = r ? Math.min(r.bottom + 6, vh - ph - 8) : (vh - ph) / 2;
+        pop.style.left = Math.max(8, left) + "px";
+        pop.style.top = Math.max(8, top) + "px";
+    }
+    function closeZonePop() { if (zonePop) zonePop.root.hidden = true; }
+
+    function fetchExploredZones() {
+        if (cfg.demo) {
+            exploredZones = demoExploredZones();
+            if (zonePop && !zonePop.root.hidden) renderZoneList(zonePop.input.value);
+            return;
+        }
+        if (!cfg.urls || !cfg.urls.zones) {
+            if (exploredZones == null) exploredZones = [];
+            return;
+        }
+        fetch(cfg.urls.zones, { credentials: "same-origin" })
+            .then(function (r) { if (!r.ok) throw new Error("zones " + r.status); return r.json(); })
+            .then(function (d) { exploredZones = (d && d.zones) || []; })
+            .catch(function () { if (exploredZones == null) exploredZones = []; })
+            .then(function () {
+                if (zonePop && !zonePop.root.hidden) renderZoneList(zonePop.input.value);
+            });
+    }
+
+    // Toolbar "Zones ▾": open the picker, (re)load the explored-zone list.
+    function openZoneJump(anchor) {
+        if (!zonePop) buildZonePop();
+        positionZonePop(anchor);
+        zonePop.input.value = "";
+        renderZoneList("");
+        fetchExploredZones();
+        try { zonePop.input.focus({ preventScroll: true }); } catch (e) { zonePop.input.focus(); }
+    }
+
+    // Toolbar "Jump ▾": jump to a live marker — where you died, or a group-mate.
+    function openMarkerJump(anchor) {
+        var acts = [];
+        if (deathMark) {
+            acts.push({
+                label: "💀 " + (deathMark.roomName || "Where you died") + agoSuffix(deathMark.time),
+                fn: function () { jumpToVnum(deathMark.vnum, deathMark.zoneName || "Where you died"); }
+            });
+            if (cur.vnum != null && !cur.unseen && vnumZone[deathMark.vnum] != null) {
+                var dsteps = findPath(cur.vnum, deathMark.vnum);
+                if (dsteps) acts.push({
+                    label: "Walk back (" + dsteps.length + " step" +
+                        (dsteps.length === 1 ? "" : "s") + ")",
+                    fn: function () { startWalk(dsteps); }
+                });
+            }
+        }
+        groupMates.forEach(function (m) {
+            if (!mateLocatable(m)) return;
+            var loaded = vnumZone[m.vnum] != null && zones[vnumZone[m.vnum]];
+            var zn = loaded ? zones[vnumZone[m.vnum]].name : (m.area || m.room);
+            acts.push({
+                label: "◎ " + m.name + (m.room ? " — " + m.room : ""),
+                fn: function () { jumpToVnum(m.vnum, zn); }
+            });
+        });
+        if (!acts.length) {
+            acts.push({ label: "No markers to jump to yet", fn: function () {}, keep: true });
+        }
+        H.openMenu("Jump to", acts, anchor);
+    }
+    function updateJumpButton() {
+        if (!big || !big.btnJump) return;
+        big.btnJump.hidden = !(deathMark || hasLocatedMate());
     }
 
     // Menu action: jump the map to an adjacent zone, loading it if needed.
@@ -1236,6 +1556,7 @@
         updateZoneLabel();
         updateZRow();
         updateMeButton();
+        updateJumpButton();
         rebuildSearch();
         updateSearchCount();
         requestAnimationFrame(redrawBig);
@@ -1247,7 +1568,9 @@
         drawMap(big.canvas, zid, bigView, {
             curVnum: cur.vnum, unseen: cur.unseen,
             pathVnums: walkPathVnums(), pathEdges: walkPathEdges(),
-            searchVnum: searchState.i >= 0 ? searchState.list[searchState.i] : null
+            searchVnum: searchState.i >= 0 ? searchState.list[searchState.i] : null,
+            deathVnum: deathVnumInZone(zid),
+            groupMarks: groupMarksInZone(zid)
         });
     }
 
@@ -1646,6 +1969,7 @@
         }
         updateZoneLabel();
         updateMeButton();
+        updateJumpButton();
         redrawBig();
     }
 
@@ -1774,6 +2098,19 @@
         notes[91] = { 5003: "rare reagents restock at dawn" };
         fogStamp++;
     }
+    // What the /connect/map/zones/ endpoint would return for the demo account:
+    // the two seeded zones plus a few "explored in a past session" zones with
+    // no loaded graph, so the picker's Explored section (and its filter) has
+    // something to show beyond the current + adjacent zones.
+    function demoExploredZones() {
+        return [
+            { id: 90, name: "Ishar Nexus", count: 14, anchor: 3001 },
+            { id: 91, name: "Kingdom of Jolnara", count: 3, anchor: 5001 },
+            { id: 42, name: "The Ashen Waste", count: 26, anchor: 4201 },
+            { id: 57, name: "Sunspire Catacombs", count: 41, anchor: 5701 },
+            { id: 63, name: "Tidewrack Shoals", count: 12, anchor: 6301 }
+        ];
+    }
 
     // ------------------------------------------------------------------
     // Public surface
@@ -1784,6 +2121,9 @@
         onRoom: onRoom,
         onReset: onReset,
         onConnected: onConnected,
+        onGroup: onGroup,
+        onDeath: onDeath,
+        memberWhere: memberWhere,
         renderMini: renderMini,
         renderOverlay: renderOverlay,
         currentNote: currentNote,
@@ -1799,6 +2139,10 @@
             if (/[?&]demo=1/.test(window.location.search)) seedDemo();
             // Discovery must not be lost to a tab close mid-batch.
             window.addEventListener("pagehide", function () { doFlush(true); });
+            // Learn which zones this account has explored up front, so a mate's
+            // room reveals as soon as their Group.Update arrives — without
+            // waiting for the zone picker to be opened.
+            fetchExploredZones();
             wireWalkCancels();
             if (H) { H.updateMicro(); H.rerenderRoom(); }
         },

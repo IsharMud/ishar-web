@@ -597,7 +597,13 @@
                 break;
             case "Char.Train": S.train = data; renderTrain(); break;
             case "Char.Affects": S.affects = data; stampAffectExpiry(data); renderStatus(); break;
-            case "Group.Update": S.group = data; renderGroup(); break;
+            case "Group.Update":
+                S.group = data; renderGroup();
+                if (mapMod && mapMod.onGroup) mapMod.onGroup(data);
+                break;
+            case "Char.Death":
+                if (mapMod && mapMod.onDeath) mapMod.onDeath(data);
+                break;
             case "Char.Who": S.who = data; renderWho(); break;
             case "Char.Skills": S.skills = (data && data.skills) || []; renderHotbar(); renderAbilities(); break;
             case "Char.Professions": applyProfessions(data); break;
@@ -1591,7 +1597,15 @@
         if (x.fighting_name) chips.push(el("span", { class: "grp-fight", title: "Fighting", text: "⚔ " + stripColor(x.fighting_name) }));
         var p = String(x.position || "").toLowerCase();
         if (p && p !== "standing") chips.push(el("span", { class: "grp-pos", text: p }));
-        if (x.in_room === false) chips.push(el("span", { class: "grp-away", title: "Not in your room", text: "away" }));
+        // Where a mate is when they're not with you. The map owns the reveal
+        // rule (exact room only for a zone you've discovered, else the area),
+        // so the HUD never shows more than you've earned; fall back to a plain
+        // "away" if the mapper isn't loaded.
+        if (x.in_room === false) {
+            var whereText = (mapMod && mapMod.memberWhere) ? mapMod.memberWhere(x) : "";
+            if (!whereText) whereText = "away";
+            chips.push(el("span", { class: "grp-away", title: "Not in your room", text: whereText }));
+        }
         var main = el("div", { class: "grp-main" }, [
             el("div", { class: "grp-line" }, [
                 el("span", { class: "grp-name", text: stripColor(String(x.name || "")) + (x.leader ? " ★" : "") }),
@@ -1658,8 +1672,36 @@
         if (kind === "member") {
             var nm = firstWord(String(x.name || ""));
             var self = S.status && String(S.status.name || "").toLowerCase() === nm.toLowerCase();
-            if (nm && !self) acts.push({ label: "Tell…", prefill: "tell " + nm + " " });
+            if (nm && !self) {
+                acts.push({ label: "Tell…", prefill: "tell " + nm + " " });
+                regroupActions(nm).forEach(function (a) { acts.push(a); });
+            }
         }
+        return acts;
+    }
+
+    // Regroup spells offered on an away mate's menu, only when the caster knows
+    // them — the game enforces mana / range / anti-magic / group-bond itself, so
+    // a shown action can still be refused in play. translocate moves you to the
+    // mate; summon brings the mate to you.
+    function knownSpell(name) {
+        var hits = (S.skills || []).filter(function (s) {
+            return s.type === "spell" && nameOf(s.name).toLowerCase() === name;
+        });
+        return hits.length ? hits[0] : null;
+    }
+    function regroupActions(nm) {
+        var acts = [];
+        [["translocate", "Translocate to "], ["summon", "Summon "]].forEach(function (p) {
+            var s = knownSpell(p[0]);
+            if (!s) return;
+            var blocked = abilityBlock(s);
+            acts.push({
+                label: p[1] + nm + (blocked ? " (" + blocked.reason + ")" : ""),
+                cmd: "cast '" + p[0] + "' " + nm,
+                disabled: !!blocked
+            });
+        });
         return acts;
     }
 
@@ -3643,6 +3685,7 @@
             toggleOverlay: toggleOverlay,
             overlayVisible: overlayVisible,
             isMobile: function () { return mqMobile.matches; },
+            selfName: function () { return S.status ? String(S.status.name || "") : ""; },
             markUnread: function (on) { markOverlayUnread("map", on); },
             updateMicro: updateMicro,
             rerenderRoom: function () { if (dom.room) renderRoom(); },
@@ -3675,7 +3718,9 @@
             { id: 9, name: "disarm", type: "skill", percent: 45, usable: true, category: "damage", target_type: "none", min_position: "Fighting" },
             { id: 10, name: "second attack", type: "passive", percent: 75, usable: false, category: "misc", target_type: "none", min_position: "Standing" },
             { id: 91, name: "Metamagic: Clarity", type: "skill", percent: 100, usable: true, category: "misc", target_type: "none", min_position: "Standing" },
-            { id: 92, name: "Shield Slam", type: "skill", percent: 72, usable: true, category: "damage", target_type: "none", min_position: "Fighting" }
+            { id: 92, name: "Shield Slam", type: "skill", percent: 72, usable: true, category: "damage", target_type: "none", min_position: "Fighting" },
+            { id: 60, name: "translocate", type: "spell", percent: 84, usable: true, category: "misc", target_type: "defensive", mana_pct: 25, mana: 75, min_position: "Standing" },
+            { id: 61, name: "summon", type: "spell", percent: 79, usable: true, category: "misc", target_type: "defensive", mana_pct: 33, mana: 100, min_position: "Standing" }
         ];
         // Pad to demonstrate the immortal overflow the browser now bounds.
         for (var i = 11; i <= 90; i++) bigSkills.push({ id: i, name: "spell " + i, type: (i % 3 ? "spell" : "skill"), percent: 40 + (i % 60), usable: (i % 4 !== 0), category: ["damage", "heal", "misc"][i % 3], target_type: ["offensive", "defensive", "none"][i % 3], mana_pct: 20 + (i % 40), mana: (20 + (i % 40)) * 3, min_position: "Standing" });
@@ -3746,10 +3791,12 @@
                 { name: "a shard of frost quartz", keywords: "quartz frost shard", vnum: 9004, count: 5 }
             ], treasure: 620 },
             "Char.Affects": { buffs: [{ name: "Stoneskin", id: 101, duration: 1800 }, { name: "Haste", id: 102, duration: 240 }], debuffs: [{ name: "Poison", id: 201, duration: 45 }], maintained: [{ name: "Detect Invisibility", id: 301, duration: 600, target: "self" }, { name: "Shroud", id: 302, duration: 900, target: "Boric", skill: "shroud", handle: "1.boric", releasable: true }] },
-            "Group.Update": { leader: "Aelwyn", size: 3, members: [
-                { name: "Aelwyn", level: 45, hp_pct: 86, mp_pct: 85, mv_pct: 82, position: "Standing", race: "Elf", "class": "Magician", leader: true, in_room: true, is_tank: false, fighting_name: "a scarred alley thug", threat: 40, tank_threat: 120, threat_level: "low" },
-                { name: "Boric", level: 43, hp_pct: 30, mp_pct: 40, mv_pct: 75, position: "Standing", race: "Dwarf", "class": "Warrior", leader: false, in_room: true, is_tank: true, fighting_name: "a scarred alley thug", threat: 120 },
-                { name: "Selra", level: 41, hp_pct: 95, mp_pct: 90, mv_pct: 88, position: "Sleeping", race: "Human", "class": "Cleric", leader: false, in_room: true, is_tank: false }
+            "Group.Update": { leader: "Aelwyn", size: 5, members: [
+                { name: "Aelwyn", level: 45, hp_pct: 86, mp_pct: 85, mv_pct: 82, position: "Standing", race: "Elf", "class": "Magician", leader: true, in_room: true, is_tank: false, fighting_name: "a scarred alley thug", threat: 40, tank_threat: 120, threat_level: "low", room: "The Grand Concourse", vnum: 3001, zone: 90 },
+                { name: "Boric", level: 43, hp_pct: 30, mp_pct: 40, mv_pct: 75, position: "Standing", race: "Dwarf", "class": "Warrior", leader: false, in_room: true, is_tank: true, fighting_name: "a scarred alley thug", threat: 120, room: "The Grand Concourse", vnum: 3001, zone: 90 },
+                { name: "Selra", level: 41, hp_pct: 95, mp_pct: 90, mv_pct: 88, position: "Sleeping", race: "Human", "class": "Cleric", leader: false, in_room: false, is_tank: false, room: "Cramped Alcove", vnum: 3014, zone: 90 },
+                { name: "Kael", level: 39, hp_pct: 72, mp_pct: 60, mv_pct: 80, position: "Standing", race: "Human", "class": "Ranger", leader: false, in_room: false, is_tank: false, room: "Village Square", vnum: 5003, zone: 91, area: "Kingdom of Jolnara" },
+                { name: "Doran", level: 44, hp_pct: 88, mp_pct: 55, mv_pct: 66, position: "Standing", race: "Dwarf", "class": "Cleric", leader: false, in_room: false, is_tank: false, room: "Ashen Hollow", vnum: 4210, zone: 99, area: "Shrouded Vale" }
             ], allies: [
                 { name: "a large timber wolf", owner: "Aelwyn", hp_pct: 55, mp_pct: 100, mv_pct: 95, position: "Resting", in_room: true, is_tank: false }
             ] },
@@ -3786,7 +3833,8 @@
                 { id: 203, profession_id: 2, name: "greater arcane dust", category: "Transmutation", min_rank: 20, duration: 10,
                   components: [{ kind: "item", vnum: 9002, name: "a vial of powdered silver", count: 2 }] }
             ] },
-            "Char.Craft": { active: true, kind: "craft", name: "minor healing draught", profession_id: 1, remaining: 14, duration: 20, quantity: 2, chain_remaining: 3 }
+            "Char.Craft": { active: true, kind: "craft", name: "minor healing draught", profession_id: 1, remaining: 14, duration: 20, quantity: 2, chain_remaining: 3 },
+            "Char.Death": { vnum: 3020, name: "Crumbled Ledge", zone: "Ishar Nexus", time: Math.floor(Date.now() / 1000) - 240 }
         };
         Object.keys(feeds).forEach(function (k) { onGmcp(k, JSON.stringify(feeds[k])); });
         [
