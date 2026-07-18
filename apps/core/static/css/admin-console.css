@@ -276,6 +276,77 @@
 .btn-check:checked + .ac-toggle .ac-toggle__check { color: var(--ac-accent-2); transform: scale(1.05); }
 .btn-check:focus-visible + .ac-toggle { outline: 2px solid var(--ac-accent); outline-offset: 2px; }
 
+/* ------------------------------------------------------ option rows --- */
+/* .ac-opt — a compact radio/checkbox answer row (.ac-toggle's lighter
+   sibling for long option lists, e.g. survey questions). Same hidden
+   .btn-check pattern; the __mark disc fills amber when checked (an inset
+   bg ring keeps a visible dot without extra markup). */
+.ac-opts { display: flex; flex-direction: column; gap: .45rem; }
+.ac-opt {
+    cursor: pointer;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    padding: .55rem .75rem;
+    border-radius: var(--ac-radius-sm);
+    background: var(--ac-bg);
+    border: 1px solid var(--ac-border);
+    color: var(--ac-text);
+    font-size: .92rem;
+    line-height: 1.35;
+    transition: background .15s, border-color .15s;
+}
+.ac-opt:hover { border-color: var(--ac-border-2); background: var(--ac-elev); }
+.ac-opt__mark {
+    flex: 0 0 auto;
+    width: 1.1rem;
+    height: 1.1rem;
+    border-radius: 50%;
+    border: 2px solid var(--ac-border-2);
+    transition: border-color .15s, background .15s;
+}
+.ac-opt--box .ac-opt__mark { border-radius: .3rem; }
+.btn-check:checked + .ac-opt {
+    border-color: rgba(255,170,119,.55);
+    background: var(--ac-wash);
+}
+.btn-check:checked + .ac-opt .ac-opt__mark {
+    border-color: var(--ac-accent);
+    background: var(--ac-accent);
+    box-shadow: inset 0 0 0 3px var(--ac-bg);
+}
+.btn-check:focus-visible + .ac-opt { outline: 2px solid var(--ac-accent); outline-offset: 2px; }
+.btn-check:disabled + .ac-opt { opacity: .45; cursor: not-allowed; }
+/* "Other: ___" — an .ac-opt beside its write-in field on one wrapping row. */
+.ac-opt-other { display: flex; flex-wrap: wrap; gap: .45rem; }
+.ac-opt-other .ac-opt { flex: 0 0 auto; }
+.ac-opt-other .ac-field { flex: 1 1 auto; width: auto; min-width: 9rem; }
+
+/* ---------------------------------------------------- survey form --- */
+/* One question inside an .ac-panel; a dashed rule separates siblings. */
+.ac-q + .ac-q { border-top: 1px dashed var(--ac-border); margin-top: 1.1rem; padding-top: 1.1rem; }
+.ac-q__text { font-weight: 600; margin: 0 0 .55rem; line-height: 1.4; }
+.ac-q__num {
+    color: var(--ac-accent);
+    font-family: var(--bs-font-monospace, monospace);
+    font-size: .85em;
+    margin-right: .3rem;
+}
+.ac-q__hint { color: var(--ac-dim); font-size: .82rem; margin: -.35rem 0 .55rem; }
+.ac-q__error { color: var(--ac-danger); font-size: .82rem; margin: .45rem 0 0; }
+.ac-q__error[hidden] { display: none; }
+.ac-q--invalid { border-left: 3px solid var(--ac-danger); padding-left: .8rem; }
+/* Matrix rows: an .ac-label per row over a wrapping rating segment. */
+.ac-mx { display: flex; flex-direction: column; gap: .7rem; }
+.ac-mx__row .ac-label { margin-bottom: .25rem; }
+/* Ranked picks: one labeled select per slot. */
+.ac-rank {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: .6rem;
+}
+
 /* -------------------------------------------------------- callouts --- */
 .ac-note {
     display: flex;

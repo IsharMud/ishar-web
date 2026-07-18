@@ -1,0 +1,67 @@
+{% extends "layout.html" %}
+{% load humanize %}
+{% load ishar %}
+{% block meta_title %}{{ WEBSITE_TITLE }} Surveys{% endblock meta_title %}
+{% block meta_description %}Player surveys for {{ WEBSITE_TITLE }}.{% endblock meta_description %}
+{% block meta_url %}{% url 'surveys' %}#surveys{% endblock meta_url %}
+{% block title %}{{ WEBSITE_TITLE }} Surveys{% endblock title %}
+{% block scripts %}let focusTo = 'surveys'{% endblock scripts %}
+{% block breadcrumbs %}
+    {% crumb "Portal" "person-gear" urlname="portal" anchor="portal" %}
+    {% crumb "Surveys" "clipboard-data" urlname="surveys" anchor="surveys" active=True %}
+{% endblock breadcrumbs %}
+{% block content %}
+<div class="ac">
+
+    <header class="ac-hero">
+        <span class="ac-hero__badge">{% bi "clipboard-data" %}</span>
+        <div class="ac-hero__text">
+            <h2 class="ac-hero__title">Surveys</h2>
+            <p class="ac-hero__sub">Your answers directly shape what gets built next.</p>
+        </div>
+{% if SURVEYS_OPEN %}
+        <div class="ac-hero__status">
+            <span class="ac-pill ac-pill--status ac-pill--ok ac-pill--live">{{ SURVEYS_OPEN }} awaiting your answers</span>
+        </div>
+{% endif %}
+    </header>
+
+{% if surveys %}
+    <div class="ac-rows">
+{% for survey in surveys %}
+        <div class="ac-row">
+            <span class="ac-row__icon">{% bi "clipboard-data" %}</span>
+            <div class="ac-row__main">
+                <div class="ac-row__title">
+                    <a class="ac-row__link" href="{% url 'survey' survey.slug %}#survey">{{ survey.title }}</a>
+                </div>
+                <div class="ac-row__meta">
+{% if survey.closes_at and survey.state_label == "Open" %}
+                    <span title="{{ survey.closes_at }}">closes {{ survey.closes_at|naturaltime }}</span>
+{% endif %}
+{% if user.is_eternal %}
+                    <span>{{ survey.num_submissions }} response{{ survey.num_submissions|pluralize }}</span>
+{% endif %}
+                </div>
+            </div>
+            <div class="ac-row__side">
+{% if survey.answered %}
+                <span class="ac-pill ac-pill--accent" title="You have answered this survey">answered</span>
+{% endif %}
+                <span class="ac-pill ac-pill--status ac-pill--{{ survey.state_pill }}">{{ survey.state_label }}</span>
+{% if user.is_eternal %}
+                <a class="ac-btn ac-btn--info" href="{% url 'survey_results' survey.slug %}#results">Results</a>
+{% endif %}
+            </div>
+        </div>
+{% endfor %}
+    </div>
+{% else %}
+    <div class="ac-empty">
+        {% bi "inbox" %}
+        <span>No surveys right now — check back later.</span>
+    </div>
+{% endif %}
+
+</div>
+{% endblock content %}

@@ -1,0 +1,65 @@
+{% extends "layout.html" %}
+{% load humanize %}
+{% load ishar %}
+{% block meta_title %}{{ survey.title }} Response{% endblock meta_title %}
+{% block meta_description %}Staff survey response view for {{ WEBSITE_TITLE }}.{% endblock meta_description %}
+{% block meta_url %}{% url 'survey_submission' survey.slug submission.pk %}#response{% endblock meta_url %}
+{% block title %}{{ survey.title }} Response{% endblock title %}
+{% block scripts %}let focusTo = 'response'{% endblock scripts %}
+{% block breadcrumbs %}
+    {% url 'survey_results' survey.slug as results_url %}
+    {% crumb "Portal" "person-gear" urlname="portal" anchor="portal" %}
+    {% crumb "Surveys" "clipboard-data" urlname="surveys" anchor="surveys" %}
+    {% crumb "Results" "bar-chart" url=results_url anchor="results" %}
+    {% crumb submission.account "person" anchor="response" active=True %}
+{% endblock breadcrumbs %}
+{% block content %}
+<div class="ac">
+
+    <header class="ac-hero">
+        <span class="ac-hero__badge">{% bi "person" %}</span>
+        <div class="ac-hero__text">
+            <h2 class="ac-hero__title">{{ submission.account }}</h2>
+            <p class="ac-hero__sub">
+                {{ survey.title }} ·
+                <span title="{{ submission.submitted_at }}">{{ submission.submitted_at|naturaltime }}</span>
+            </p>
+        </div>
+    </header>
+
+    <div class="ac-panel">
+{% for question in questions %}
+        <div class="ac-q">
+            <p class="ac-q__text">
+                <span class="ac-q__num">{{ question.number }}.</span>{{ question.text }}
+            </p>
+{% if question.kind == "text" %}
+{% for answer in question.answer_list %}
+            <pre class="ac-quote mb-0">{{ answer.text }}</pre>
+{% empty %}
+            <p class="ac-q__hint m-0">—</p>
+{% endfor %}
+{% elif question.kind == "matrix" %}
+            <dl class="ac-kv m-0">
+{% for answer in question.answer_list %}
+                <dt>{{ answer.row.text }}</dt>
+                <dd>{{ answer.option.text }}</dd>
+{% empty %}
+                <dt>—</dt><dd></dd>
+{% endfor %}
+            </dl>
+{% else %}
+            <p class="m-0">
+{% for answer in question.answer_list %}
+                <span class="ac-pill ac-pill--accent">{% if answer.rank %}#{{ answer.rank }} {% endif %}{{ answer.display_value }}</span>
+{% empty %}
+                <span class="ac-q__hint">—</span>
+{% endfor %}
+            </p>
+{% endif %}
+        </div>
+{% endfor %}
+    </div>
+
+</div>
+{% endblock content %}

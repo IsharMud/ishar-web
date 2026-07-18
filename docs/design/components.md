@@ -29,10 +29,12 @@ Output is built with `format_html` (labels are escaped). Status: **formalized.**
 ```django
 {% crumb "Portal" "person-gear" urlname="portal" anchor="portal" %}
 {% crumb "Deploy" "rocket-takeoff" urlname="deploy" anchor="deploy" active=True %}
+{% url 'survey_results' survey.slug as results_url %}{% crumb "Results" "bar-chart" url=results_url %}
 ```
 Reverses `urlname` (+ `#anchor`), puts `id="{{ anchor }}"` on the label span so
-`focusTo` deep-linking works, sets `aria-current` when active. Omit `urlname`
-for an unlinked crumb. Status: **formalized.**
+`focusTo` deep-linking works, sets `aria-current` when active. For routes that
+need arguments, pass a prebuilt `url=` instead of `urlname`. Omit both for an
+unlinked crumb. Status: **formalized.**
 
 ---
 
@@ -109,6 +111,29 @@ hidden `.btn-check`. Selected state uses the amber wash.
 </label>
 ```
 Lay out in `.ac-grid` (responsive auto-fit). Status: **formalized.**
+
+### `.ac-opts` + `.ac-opt` — option rows
+`.ac-toggle`'s lighter sibling for long radio/checkbox lists (survey answers):
+a compact row over a hidden `.btn-check`, with a drawn `__mark` disc that
+fills amber when checked. `--box` squares the mark for checkboxes.
+`.ac-opt-other` pairs a pick with its "Other: ___" `.ac-field` on one
+wrapping row (the field enables with the pick, via JS).
+```html
+<div class="ac-opts">
+  <input class="btn-check" type="radio" name="q1" id="q1-o1" value="1">
+  <label class="ac-opt" for="q1-o1"><span class="ac-opt__mark" aria-hidden="true"></span>0–5</label>
+  …
+</div>
+```
+Used: survey form. Status: **formalized.**
+
+### `.ac-q` — question block
+One survey/form question inside an `.ac-panel`: `__text` (with an amber
+mono `__num`), optional `__hint`, an `__error` line, `--invalid` danger left
+edge. Siblings separate with a dashed rule. Companions: `.ac-mx`/`.ac-mx__row`
+(matrix rows — an `.ac-label` over an `.ac-seg--wrap` rating segment) and
+`.ac-rank` (labeled ordinal `.ac-field` selects in a responsive grid).
+Used: survey form + results. Status: **formalized.**
 
 ### `.ac-switch` — labeled switch
 Bootstrap `form-check form-switch` recolored amber. Status: **formalized.**

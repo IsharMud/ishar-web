@@ -138,6 +138,7 @@ INSTALLED_APPS = [
     "apps.RoomsConfig",
     "apps.SeasonsConfig",
     "apps.SkillsConfig",
+    "apps.SurveysConfig",
 #    "daphne",
     "channels",
 ]
@@ -178,6 +179,7 @@ TEMPLATES = [
                 "apps.players.contexts.player_search_form",
                 "apps.players.contexts.players_online",
                 "apps.seasons.contexts.current_season",
+                "apps.surveys.contexts.surveys_open",
             ],
 #            "libraries": {
 #                "ishar": "apps.core.templatetags"

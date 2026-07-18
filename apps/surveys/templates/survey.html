@@ -1,0 +1,350 @@
+{% extends "layout.html" %}
+{% load humanize %}
+{% load ishar %}
+{% block meta_title %}{{ survey.title }}{% endblock meta_title %}
+{% block meta_description %}{{ WEBSITE_TITLE }} player survey: {{ survey.title }}.{% endblock meta_description %}
+{% block meta_url %}{% url 'survey' survey.slug %}#survey{% endblock meta_url %}
+{% block title %}{{ survey.title }}{% endblock title %}
+{% block scripts %}let focusTo = 'survey'{% endblock scripts %}
+{% block breadcrumbs %}
+    {% crumb "Portal" "person-gear" urlname="portal" anchor="portal" %}
+    {% crumb "Surveys" "clipboard-data" urlname="surveys" anchor="surveys" %}
+    {% crumb survey.title "clipboard-data" anchor="survey" active=True %}
+{% endblock breadcrumbs %}
+{% block content %}
+<div class="ac">
+
+    <header class="ac-hero">
+        <span class="ac-hero__badge">{% bi "clipboard-data" %}</span>
+        <div class="ac-hero__text">
+            <h2 class="ac-hero__title">{{ survey.title }}</h2>
+{% if survey.intro %}
+            <p class="ac-hero__sub">{{ survey.intro }}</p>
+{% endif %}
+        </div>
+        <div class="ac-hero__status">
+            <span class="ac-pill ac-pill--status ac-pill--{{ survey.state_pill }}">{{ survey.state_label }}</span>
+        </div>
+    </header>
+
+    <div class="ac-note ac-note--ok" id="survey-done"{% if not answered %} hidden{% endif %} role="status">
+        {% bi "check-circle-fill" %}
+        <span>Thank you — your answers are in. They directly shape what gets built next.</span>
+    </div>
+
+{% if not answered %}
+{% if not survey.is_accepting %}
+    <div class="ac-note ac-note--warn" role="status">
+        {% bi "hourglass-split" %}
+        <span>
+{% if survey.state_label == "Scheduled" %}
+            This survey opens {{ survey.opens_at|naturaltime }} — come back then.
+{% else %}
+            This survey is no longer accepting responses.
+{% endif %}
+        </span>
+    </div>
+{% else %}
+
+    <form id="survey-form">
+{% for group in groups %}
+        <div class="ac-panel">
+{% if group.section %}
+            <div class="ac-panel__h">{% bi "collection" %} {{ group.section.title }}</div>
+{% if group.section.preamble %}
+            <p class="ac-panel__hint">{{ group.section.preamble }}</p>
+{% endif %}
+{% endif %}
+{% for question in group.questions %}
+            <div class="ac-q" id="q{{ question.question_id }}"
+                 data-qid="{{ question.question_id }}" data-kind="{{ question.kind }}"
+                 {% if question.required %}data-required="1"{% endif %}
+                 {% if question.max_choices %}data-max="{{ question.max_choices }}"{% endif %}>
+                <p class="ac-q__text">
+                    <span class="ac-q__num">{{ question.number }}.</span>{{ question.text }}
+{% if not question.required %}
+                    <span class="ac-pill ac-pill--muted">optional</span>
+{% endif %}
+                </p>
+{% if question.hint %}
+                <p class="ac-q__hint">{{ question.hint }}</p>
+{% endif %}
+
+{% if question.kind == "single" or question.kind == "multi" %}
+                <div class="ac-opts">
+{% for option in question.choices %}
+                    <input class="btn-check" type="{% if question.kind == 'single' %}radio{% else %}checkbox{% endif %}"
+                           name="q{{ question.question_id }}" id="q{{ question.question_id }}-o{{ option.option_id }}"
+                           value="{{ option.option_id }}" autocomplete="off">
+                    <label class="ac-opt{% if question.kind == 'multi' %} ac-opt--box{% endif %}" for="q{{ question.question_id }}-o{{ option.option_id }}">
+                        <span class="ac-opt__mark" aria-hidden="true"></span>{{ option.text }}
+                    </label>
+{% endfor %}
+{% if question.allow_other %}
+                    <div class="ac-opt-other">
+                        <input class="btn-check" type="{% if question.kind == 'single' %}radio{% else %}checkbox{% endif %}"
+                               name="q{{ question.question_id }}" id="q{{ question.question_id }}-other"
+                               value="other" autocomplete="off">
+                        <label class="ac-opt{% if question.kind == 'multi' %} ac-opt--box{% endif %}" for="q{{ question.question_id }}-other">
+                            <span class="ac-opt__mark" aria-hidden="true"></span>Other:
+                        </label>
+                        <input class="ac-field" type="text" id="q{{ question.question_id }}-othertext"
+                               maxlength="255" placeholder="Your own answer" disabled
+                               aria-label="Other answer">
+                    </div>
+{% endif %}
+                </div>
+
+{% elif question.kind == "matrix" %}
+                <div class="ac-mx">
+{% for row in question.matrix_rows %}
+                    <div class="ac-mx__row" data-row="{{ row.option_id }}">
+                        <span class="ac-label">{{ row.text }}</span>
+                        <div class="ac-seg ac-seg--wrap" role="radiogroup" aria-label="{{ row.text }}">
+{% for option in question.choices %}
+                            <input class="btn-check" type="radio"
+                                   name="q{{ question.question_id }}r{{ row.option_id }}"
+                                   id="q{{ question.question_id }}r{{ row.option_id }}o{{ option.option_id }}"
+                                   value="{{ option.option_id }}" autocomplete="off">
+                            <label class="ac-seg__item" for="q{{ question.question_id }}r{{ row.option_id }}o{{ option.option_id }}">{{ option.text }}</label>
+{% endfor %}
+                        </div>
+                    </div>
+{% endfor %}
+                </div>
+
+{% elif question.kind == "rank" %}
+                <div class="ac-rank">
+{% for slot in question.rank_slots %}
+                    <div>
+                        <label class="ac-label" for="q{{ question.question_id }}-slot{{ slot }}">{{ slot|ordinal }} pick</label>
+                        <select class="ac-field" id="q{{ question.question_id }}-slot{{ slot }}" data-slot="{{ slot }}" autocomplete="off">
+                            <option value="">—</option>
+{% for option in question.choices %}
+                            <option value="{{ option.option_id }}">{{ option.text }}</option>
+{% endfor %}
+{% if question.allow_other %}
+                            <option value="other">Other…</option>
+{% endif %}
+                        </select>
+                    </div>
+{% endfor %}
+                </div>
+{% if question.allow_other %}
+                <input class="ac-field mt-2" type="text" id="q{{ question.question_id }}-othertext"
+                       maxlength="255" placeholder="Your “Other…” answer" disabled
+                       aria-label="Other answer">
+{% endif %}
+
+{% elif question.kind == "text" %}
+                <textarea class="ac-field" id="q{{ question.question_id }}-text" rows="3"
+                          maxlength="4000" autocomplete="off"></textarea>
+{% endif %}
+
+                <p class="ac-q__error" data-role="error" hidden></p>
+            </div>
+{% endfor %}
+        </div>
+{% endfor %}
+
+        <div class="ac-note ac-note--danger" id="survey-error" hidden role="alert">
+            {% bi "exclamation-triangle-fill" %}
+            <span data-role="message">Please fix the highlighted questions.</span>
+        </div>
+
+        <div class="d-flex flex-wrap align-items-center gap-3 mb-4">
+            <button class="ac-cta ac-cta--accent" type="submit" id="survey-submit">
+                {% bi "send" %} Submit answers
+            </button>
+            <span class="ac-q__hint m-0">{{ question_count }} questions · one submission per account</span>
+        </div>
+        <noscript>
+            <div class="ac-note ac-note--warn" role="alert">
+                {% bi "exclamation-triangle-fill" %}
+                <span>Submitting the survey requires JavaScript.</span>
+            </div>
+        </noscript>
+    </form>
+
+{% endif %}
+{% endif %}
+
+</div>
+
+{% if not answered and survey.is_accepting %}
+<script>
+    // Survey form: JSON submit (apps/surveys/services.py documents the shape).
+    const form = document.getElementById("survey-form")
+
+    function questionPayload(q) {
+        const qid = q.dataset.qid
+        const other = document.getElementById(`q${qid}-othertext`)
+        switch (q.dataset.kind) {
+            case "single": {
+                const picked = q.querySelector(`input[name="q${qid}"]:checked`)
+                if (!picked) return {}
+                if (picked.value === "other") return {other: other.value.trim()}
+                return {option: Number(picked.value)}
+            }
+            case "multi": {
+                const data = {options: []}
+                for (const box of q.querySelectorAll(`input[name="q${qid}"]:checked`)) {
+                    if (box.value === "other") data.other = other.value.trim()
+                    else data.options.push(Number(box.value))
+                }
+                return data
+            }
+            case "matrix": {
+                const rows = {}
+                for (const row of q.querySelectorAll(".ac-mx__row")) {
+                    const picked = row.querySelector("input:checked")
+                    if (picked) rows[row.dataset.row] = Number(picked.value)
+                }
+                return {rows}
+            }
+            case "rank": {
+                const data = {ranked: []}
+                for (const select of q.querySelectorAll("select")) {
+                    if (!select.value) continue
+                    data.ranked.push(select.value === "other" ? "other" : Number(select.value))
+                    if (select.value === "other") data.other = other.value.trim()
+                }
+                return data
+            }
+            case "text":
+                return {text: document.getElementById(`q${qid}-text`).value.trim()}
+        }
+        return {}
+    }
+
+    function unanswered(q, data) {
+        switch (q.dataset.kind) {
+            case "single": return !("option" in data) && !data.other
+            case "multi": return !(data.options || []).length && !data.other
+            case "matrix": return Object.keys(data.rows || {}).length < q.querySelectorAll(".ac-mx__row").length
+            case "rank": return !(data.ranked || []).length
+            case "text": return !data.text
+        }
+        return false
+    }
+
+    function setError(q, message) {
+        const note = q.querySelector('[data-role="error"]')
+        note.textContent = message || ""
+        note.hidden = !message
+        q.classList.toggle("ac-q--invalid", Boolean(message))
+    }
+
+    // Answering a flagged question clears its error immediately.
+    form.addEventListener("change", (event) => {
+        const q = event.target.closest(".ac-q")
+        if (q) setError(q, "")
+        if (!form.querySelector(".ac-q--invalid")) {
+            document.getElementById("survey-error").hidden = true
+        }
+    })
+
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault()
+        const payload = {}
+        let firstInvalid = null
+        for (const q of form.querySelectorAll(".ac-q")) {
+            const data = questionPayload(q)
+            const missing = q.dataset.required && unanswered(q, data)
+            const rankedOther = (data.ranked || []).includes("other") && !data.other
+            setError(q, missing ? "An answer is required here."
+                : rankedOther ? "Fill in the “Other” text for its ranked slot." : "")
+            if (missing || rankedOther) firstInvalid = firstInvalid || q
+            payload[q.dataset.qid] = data
+        }
+        const banner = document.getElementById("survey-error")
+        if (firstInvalid) {
+            banner.hidden = false
+            firstInvalid.scrollIntoView({block: "center"})
+            return
+        }
+        banner.hidden = true
+
+        const button = document.getElementById("survey-submit")
+        button.disabled = true
+        let data = {ok: false, message: "The submission failed — please try again."}
+        try {
+            const resp = await fetch("{% url 'survey_submit' survey.slug %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}",
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(payload),
+            })
+            data = await resp.json()
+        } catch (error) { /* keep the default failure message */ }
+
+        if (data.ok) {
+            form.hidden = true
+            const done = document.getElementById("survey-done")
+            done.hidden = false
+            done.scrollIntoView({block: "center"})
+            return
+        }
+        button.disabled = false
+        for (const [qid, message] of Object.entries(data.errors || {})) {
+            const q = document.getElementById(`q${qid}`)
+            if (q) setError(q, message)
+        }
+        const invalid = form.querySelector(".ac-q--invalid")
+        if (invalid) invalid.scrollIntoView({block: "center"})
+        banner.querySelector('[data-role="message"]').textContent =
+            data.message || "The submission failed — please try again."
+        banner.hidden = false
+    })
+
+    // "Other" write-ins enable with their pick (and focus on first enable).
+    for (const q of form.querySelectorAll(".ac-q")) {
+        const qid = q.dataset.qid
+        const other = document.getElementById(`q${qid}-othertext`)
+        if (!other) continue
+        const sync = (focus) => {
+            const kind = q.dataset.kind
+            const on = kind === "rank"
+                ? [...q.querySelectorAll("select")].some((s) => s.value === "other")
+                : q.querySelector(`input[name="q${qid}"][value="other"]`).checked
+            const enable = on && other.disabled
+            other.disabled = !on
+            if (!on) other.value = ""
+            if (enable && focus) other.focus()
+        }
+        q.addEventListener("change", () => sync(true))
+        sync(false)
+    }
+
+    // Multiple choice: cap picks at data-max by freezing the unchecked rest.
+    for (const q of form.querySelectorAll('.ac-q[data-kind="multi"][data-max]')) {
+        const boxes = [...q.querySelectorAll('input[type="checkbox"]')]
+        const cap = () => {
+            const full = boxes.filter((b) => b.checked).length >= Number(q.dataset.max)
+            boxes.forEach((b) => { if (!b.checked) b.disabled = full })
+        }
+        q.addEventListener("change", cap)
+        cap()
+    }
+
+    // Ranked picks: a pick used in one slot greys out in the other slots.
+    for (const q of form.querySelectorAll('.ac-q[data-kind="rank"]')) {
+        const selects = [...q.querySelectorAll("select")]
+        const dedupe = () => {
+            const taken = selects.map((s) => s.value).filter(Boolean)
+            for (const select of selects) {
+                for (const option of select.options) {
+                    option.disabled = Boolean(option.value)
+                        && option.value !== select.value
+                        && taken.includes(option.value)
+                }
+            }
+        }
+        q.addEventListener("change", dedupe)
+        dedupe()
+    }
+</script>
+{% endif %}
+{% endblock content %}

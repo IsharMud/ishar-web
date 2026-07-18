@@ -131,6 +131,16 @@
                 <span class="ac-link__side ac-pill ac-pill--warn" title="{{ PATCH_NOTES_UNREAD }} unread">{{ PATCH_NOTES_UNREAD }}</span>
 {% endif %}
             </a>
+            <a class="ac-link" href="{% url 'surveys' %}#surveys" title="Surveys">
+                <span class="ac-link__icon">{% bi "clipboard-data" %}</span>
+                <span class="ac-link__body">
+                    <span class="ac-link__name">Surveys</span>
+                    <span class="ac-link__note d-block">Shape what gets built next</span>
+                </span>
+{% if SURVEYS_OPEN %}
+                <span class="ac-link__side ac-pill ac-pill--ok" title="{{ SURVEYS_OPEN }} awaiting your answers">{{ SURVEYS_OPEN }}</span>
+{% endif %}
+            </a>
             <a class="ac-link" href="{% url 'challenges' %}#challenges" title="Challenges">
                 <span class="ac-link__icon">{% bi "award" %}</span>
                 <span class="ac-link__body">

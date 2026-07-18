@@ -1,0 +1,150 @@
+{% extends "layout.html" %}
+{% load humanize %}
+{% load ishar %}
+{% block meta_title %}{{ survey.title }} Results{% endblock meta_title %}
+{% block meta_description %}Staff survey results for {{ WEBSITE_TITLE }}.{% endblock meta_description %}
+{% block meta_url %}{% url 'survey_results' survey.slug %}#results{% endblock meta_url %}
+{% block title %}{{ survey.title }} Results{% endblock title %}
+{% block scripts %}let focusTo = 'results'{% endblock scripts %}
+{% block breadcrumbs %}
+    {% crumb "Portal" "person-gear" urlname="portal" anchor="portal" %}
+    {% crumb "Surveys" "clipboard-data" urlname="surveys" anchor="surveys" %}
+    {% crumb "Results" "bar-chart" anchor="results" active=True %}
+{% endblock breadcrumbs %}
+{% block content %}
+<div class="ac ac--wide">
+
+    <header class="ac-hero">
+        <span class="ac-hero__badge">{% bi "bar-chart" %}</span>
+        <div class="ac-hero__text">
+            <h2 class="ac-hero__title">{{ survey.title }}</h2>
+            <p class="ac-hero__sub">
+                {{ respondents }} response{{ respondents|pluralize }} ·
+                <a href="{{ survey.get_admin_url }}" target="_blank">edit in admin {% bi "box-arrow-up-right" label="Opens in a new window." %}</a>
+            </p>
+        </div>
+        <div class="ac-hero__status">
+            <span class="ac-pill ac-pill--status ac-pill--{{ survey.state_pill }}">{{ survey.state_label }}</span>
+        </div>
+    </header>
+
+{% if not respondents %}
+    <div class="ac-empty">
+        {% bi "inbox" %}
+        <span>No responses yet.</span>
+    </div>
+{% else %}
+
+{% for group in groups %}
+    <div class="ac-panel">
+{% if group.section %}
+        <div class="ac-panel__h">{% bi "collection" %} {{ group.section.title }}</div>
+{% endif %}
+{% for question in group.questions %}
+        <div class="ac-q">
+            <p class="ac-q__text">
+                <span class="ac-q__num">{{ question.number }}.</span>{{ question.text }}
+                <span class="ac-pill ac-pill--muted" title="How many respondents answered this question">{{ question.result.answered }}/{{ respondents }}</span>
+            </p>
+
+{% if question.kind == "single" or question.kind == "multi" %}
+            <div class="ac-bars">
+{% for bar in question.result.bars %}
+                <div class="ac-bar" title="{{ bar.count }} pick{{ bar.count|pluralize }}: {{ bar.label }}">
+                    <span class="ac-bar__label">{{ bar.label }}</span>
+                    <span class="ac-bar__track"><span class="ac-bar__fill" style="width: {{ bar.width }}%;"></span></span>
+                    <span class="ac-bar__n">{{ bar.count }} · {{ bar.pct }}%</span>
+                </div>
+{% endfor %}
+            </div>
+
+{% elif question.kind == "rank" %}
+            <div class="ac-bars">
+{% for row in question.result.ranked %}
+                <div class="ac-bar" title="{{ row.count }} point{{ row.count|pluralize }} (1st pick = {{ question.max_choices|default:2 }} points)">
+                    <span class="ac-bar__label">{{ row.label }}</span>
+                    <span class="ac-bar__track"><span class="ac-bar__fill" style="width: {{ row.width }}%;"></span></span>
+                    <span class="ac-bar__n">{{ row.count }} pts · {{ row.firsts }}× 1st</span>
+                </div>
+{% endfor %}
+            </div>
+
+{% elif question.kind == "matrix" %}
+            <div class="ac-tablewrap">
+                <table class="ac-table">
+                    <thead>
+                        <tr>
+                            <th scope="col"></th>
+{% for option in question.result.scale %}
+                            <th class="ac-table__num" scope="col">{{ option.text }}</th>
+{% endfor %}
+                            <th class="ac-table__num" scope="col" title="Average on a 1–{{ question.result.scale|length }} scale">Avg</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+{% for line in question.result.matrix %}
+                        <tr>
+                            <th scope="row">{{ line.row.text }}</th>
+{% for cell in line.cells %}
+                            <td class="ac-table__num{% if cell.top %} text-ishar fw-bold{% endif %}">{{ cell.count }}</td>
+{% endfor %}
+                            <td class="ac-table__num">{{ line.avg|default:"—" }}</td>
+                        </tr>
+{% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+{% elif question.kind == "text" %}
+{% for entry in question.result.texts %}
+            <figure class="mb-2">
+                <pre class="ac-quote mb-1">{{ entry.text }}</pre>
+                <figcaption class="ac-q__hint m-0">— {{ entry.account }}, <span title="{{ entry.when }}">{{ entry.when|naturaltime }}</span></figcaption>
+            </figure>
+{% empty %}
+            <p class="ac-q__hint m-0">No answers.</p>
+{% endfor %}
+{% endif %}
+
+{% if question.result.others %}
+            <p class="ac-q__hint mb-0 mt-2">Other:
+{% for other in question.result.others %}
+                <span class="ac-pill ac-pill--muted">{{ other }}</span>
+{% endfor %}
+            </p>
+{% endif %}
+        </div>
+{% endfor %}
+    </div>
+{% endfor %}
+
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "people" %} Individual responses</div>
+        <p class="ac-panel__hint">Read one player's full response — useful for segmenting hardcore vs. casual answers.</p>
+        <div class="ac-rows mb-2">
+{% for submission in submissions %}
+            <div class="ac-row">
+                <span class="ac-row__icon">{% bi "person" %}</span>
+                <div class="ac-row__main">
+                    <div class="ac-row__title">
+                        <a class="ac-row__link" href="{% url 'survey_submission' survey.slug submission.pk %}#response">{{ submission.account }}</a>
+                    </div>
+                    <div class="ac-row__meta">
+                        <span title="{{ submission.submitted_at }}">{{ submission.submitted_at|naturaltime }}</span>
+                    </div>
+                </div>
+                <div class="ac-row__side">
+                    <a class="ac-btn" href="{% url 'survey_submission' survey.slug submission.pk %}#response">Open</a>
+                </div>
+            </div>
+{% endfor %}
+        </div>
+        <a class="ac-btn ac-btn--info" href="{% url 'survey_results_csv' survey.slug %}">
+            {% bi "filetype-csv" %} Export CSV
+        </a>
+    </div>
+
+{% endif %}
+
+</div>
+{% endblock content %}
