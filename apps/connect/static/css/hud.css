@@ -689,6 +689,14 @@ body.connect-page #content { padding: .5rem !important; }
 #hud-tabs button.active { color: var(--ac-accent); border-bottom-color: var(--ac-accent); background: var(--ac-elev); }
 #hud-right .panel.tab { display: none; flex: 1; min-height: 0; overflow-y: auto; }
 #hud-right .panel.tab.tab-active { display: flex; flex-direction: column; }
+/* Tracked Spells is persistent, not a tab: pinned above the bar (order, since
+   placePanels can't preserve DOM order across a phone↔desktop swap), height-
+   capped so a long maintained list scrolls rather than crowding out the tab. */
+#hud-right .panel-tracked {
+    order: -1; flex: 0 1 auto; min-height: 0; max-height: 42%;
+    display: flex; flex-direction: column;
+}
+#hud-right .panel-tracked > .aff-list { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
 
 /* ----- Abilities browser (bounded, searchable) ----- */
 #panel-abilities { padding: 6px; }
@@ -736,21 +744,68 @@ body.connect-page #content { padding: .5rem !important; }
 .ab-type { font-size: .58rem; text-transform: uppercase; letter-spacing: .04em; color: var(--ac-dim); background: var(--ac-bg); border-radius: 3px; padding: 0 5px; }
 .ab-row.ab-passive .ab-name { color: var(--ac-dim); font-style: italic; }
 
-/* ----- Affects ----- */
+/* ----- Tracked Spells (maintained magic; a persistent right-column panel) -----
+   One row per spell you maintain: icon · name + target · timer · release,
+   expiry-sorted. The target is colour-coded by relationship, and a row within
+   AFFECT_SOON of dropping warms to the caution colour. */
 .aff-list { list-style: none; margin: 0; padding: 0; }
-.aff { display: flex; justify-content: space-between; align-items: center; gap: 6px; font-size: .8rem; padding: 2px 5px; border-left: 3px solid; border-radius: 2px; margin-bottom: 2px; }
-.aff.buff { border-color: var(--ac-ok); }
-.aff.debuff { border-color: var(--ac-danger); }
-.aff.maint { border-color: var(--ac-info); }
-.aff-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.aff-right { flex: none; display: flex; align-items: center; gap: 5px; }
-.aff-time { color: var(--ac-dim); font-size: .72rem; font-variant-numeric: tabular-nums; }
-.aff-release {
-    font-size: .62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em;
-    padding: 1px 6px; cursor: pointer; color: var(--ac-info);
-    background: var(--ac-info-wash); border: 1px solid rgba(74, 134, 207, .4); border-radius: 3px;
+.aff {
+    display: flex; align-items: center; gap: 7px;
+    font-size: .8rem; padding: 4px 6px; margin-bottom: 3px;
+    border-left: 3px solid var(--ac-info); border-radius: 2px; background: var(--ac-elev);
 }
-.aff-release:hover { color: var(--ac-accent); border-color: var(--ac-accent); }
+.aff.soon { border-left-color: var(--ac-warn); background: rgba(255, 136, 0, .1); }
+.aff-ic { flex: none; width: 20px; height: 20px; color: var(--ac-info); }
+.aff-ic .gi { width: 20px; height: 20px; }
+.aff-body { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.25; }
+.aff-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.aff-tgt { font-size: .68rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.aff-tgt.self { color: var(--ac-dim); }
+.aff-tgt.mate { color: var(--hud-group); }
+.aff-tgt.foe  { color: var(--hud-tgt); }
+.aff-time { flex: none; color: var(--ac-dim); font-size: .72rem; font-variant-numeric: tabular-nums; }
+.aff.soon .aff-time { color: var(--ac-warn); font-weight: 700; }
+.aff-rel {
+    flex: none; font-size: .6rem; font-weight: 700; text-transform: uppercase; letter-spacing: .03em;
+    padding: 2px 6px; cursor: pointer; color: var(--ac-dim);
+    background: var(--ac-panel); border: 1px solid var(--ac-border-2); border-radius: 4px;
+}
+.aff-rel:hover { color: var(--ac-accent); border-color: var(--ac-accent); }
+
+/* ----- Ambient self-affect strip (topbar, by the vitals) -----
+   Bare icon tiles for the buffs/debuffs on you; a countdown chip appears and
+   the tile pulses only within AFFECT_SOON of dropping, so a quest group's ~10
+   buffs stay a compact wrapping row. Buff green, debuff red. */
+.v-affects {
+    order: 4; display: flex; flex-wrap: wrap; align-items: center; gap: 4px;
+    padding-left: 8px; border-left: 1px solid var(--ac-border); max-width: 22rem;
+}
+.v-affects[hidden] { display: none; }
+.self-aff {
+    position: relative; flex: none; width: 26px; height: 26px;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--ac-border-2); border-radius: 5px; background: var(--ac-elev);
+}
+.self-aff .gi { width: 15px; height: 15px; }
+.self-aff.buff   { color: var(--ac-ok);     border-color: rgba(76, 187, 23, .5);  background: var(--ac-ok-wash); }
+.self-aff.debuff { color: var(--ac-danger); border-color: rgba(214, 75, 75, .5);  background: var(--ac-danger-wash); }
+.self-aff-chip {
+    position: absolute; bottom: -4px; right: -4px;
+    font-size: .5rem; font-weight: 800; line-height: 1.3; padding: 0 2px;
+    background: var(--ac-bg); border: 1px solid var(--ac-border); border-radius: 3px;
+    color: var(--hud-event); font-variant-numeric: tabular-nums;
+}
+.self-aff.debuff .self-aff-chip { color: var(--ac-danger); border-color: rgba(214, 75, 75, .5); }
+@media (max-width: 767.98px) {
+    .v-affects { order: 7; flex-basis: 100%; max-width: none; padding-left: 0; border-left: 0; }
+}
+@media (prefers-reduced-motion: no-preference) {
+    .self-aff.alarm { animation: self-aff-pulse 1.2s ease-in-out infinite; }
+    @keyframes self-aff-pulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(232, 176, 75, 0); }
+        50%      { box-shadow: 0 0 7px 1px rgba(232, 176, 75, .65); }
+    }
+}
 
 /* ----- Group (the party pane) ----- */
 .grp-list { list-style: none; margin: 0; padding: 0; }
@@ -1224,6 +1279,18 @@ body.connect-page #content { padding: .5rem !important; }
     width: .45rem; height: .45rem; border-radius: 50%;
     background: var(--ac-accent);
 }
+/* Tracked-spell expiry alarm on the phone dock: a spell about to drop raises a
+   caution dot on the Tracked button — the ambient warning the panel can't be
+   while it's off-screen. Distinct (caution, pulsing) from the amber unread dot. */
+#hud-dock button.alarm::after {
+    content: ""; position: absolute; top: 4px; right: 8px;
+    width: .5rem; height: .5rem; border-radius: 50%;
+    background: var(--ac-warn); box-shadow: 0 0 5px 1px rgba(255, 136, 0, .7);
+}
+@media (prefers-reduced-motion: no-preference) {
+    #hud-dock button.alarm::after { animation: dock-alarm 1.2s ease-in-out infinite; }
+    @keyframes dock-alarm { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+}
 
 /* ----- Phone bottom sheet ----- */
 #hud-sheet {
@@ -1281,7 +1348,7 @@ body.connect-page #content { padding: .5rem !important; }
 .who-act button:focus-visible, .action-btn:focus-visible, .sheet-close:focus-visible,
 .panel-h-toggle:focus-visible, .row-more:focus-visible, .menu-item:focus-visible,
 .ab-chip:focus-visible, .ab-star:focus-visible, .panel-h-btn:focus-visible,
-.aff-release:focus-visible, .occ-row:focus-visible, .sub-h.collapse:focus-visible,
+.aff-rel:focus-visible, .occ-row:focus-visible, .sub-h.collapse:focus-visible,
 .micro-btn:focus-visible, .prof-btn:focus-visible, .prof-head:focus-visible,
 .recipe-toggle:focus-visible, .recipe-cat:focus-visible, .recipe-chip:focus-visible {
     outline: 2px solid var(--ac-accent); outline-offset: 2px;

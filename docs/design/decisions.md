@@ -9,6 +9,60 @@ Format: `## YYYY-MM-DD — Title` · **Decision** · **Why** · (optional) **Not
 
 ---
 
+## 2026-07-18 — HUD affects split: ambient self-affect strip + Tracked Spells panel
+
+**Status.** First slice of the re-tiering below (#141, "affects rework").
+Realizes the stub's affect decisions; the rest of that entry (XP strip, item
+pinning, overlay migration, Bags aggregation, group density) is still pending.
+
+**Decision.** `Char.Affects` is now rendered in two places keyed to how each
+kind is consumed, and the old Status-tab affects list is deleted:
+
+- **Self buffs/debuffs → an ambient icon strip by the vitals** (`#vitals-affects`
+  in the topbar, `renderSelfAffects`). One bare 26px tile per affect — buff
+  green, debuff red — from `iconName({name})` (the same keyword heuristic the
+  action bar uses). The tile is silent until the affect is within `AFFECT_SOON`
+  (**60s**) of dropping; then a corner countdown chip appears and the tile
+  pulses (amber glow, `prefers-reduced-motion`-gated). So a quest group's ~10
+  long buffs stay a compact wrapping row and only the thing about to lapse pulls
+  the eye. The strip survives on phones (it's ambient) as a full-width row under
+  the vitals; it hides entirely when you have no affects.
+- **Maintained magic → the Tracked Spells panel** (`#panel-tracked`,
+  `renderTracked`) — a persistent, collapsible right-column panel pinned **above
+  the tab bar** by CSS `order` (placePanels re-appends across a phone↔desktop
+  swap, so DOM order can't be trusted). Rows are **icon · name · `› target` ·
+  timer · release**, **expiry-sorted** (soonest-to-drop leads), with the target
+  colour-coded by relationship — **self** (dim), **group-mate** (`--hud-group`
+  teal, matched against `Group.Update` members/allies), **foe** (`--hud-tgt`
+  magenta, i.e. an enemy debuff you sustain). A row within `AFFECT_SOON` warms
+  to the caution colour. `release` reuses the existing `release spell <skill>
+  <handle>` command. Named **Tracked Spells**, never *sustained* — *sustained*
+  is a distinct in-game mechanic.
+- **Phone alarm.** The panel can't be ambient on a phone (it lives in the dock
+  sheet), so a maintained spell nearing expiry raises a pulsing caution dot on
+  the dock's **Tracked** button (`markTrackedAlarm`, computed from the feed data
+  so it fires even while the panel is collapsed/off-screen).
+
+A per-second `tickAffects()` (from the existing init interval, replacing the old
+`.aff-time` sweep) counts the timers down and re-evaluates soon/alarm **in
+place** — the tile pulse and row tint aren't restarted each tick, and the whole
+thing needs no new feed between server updates.
+
+**Why.** Buff/debuff timers are the one thing scrollback handles worst and the
+most decision-critical state a caster/healer has; they were buried in a
+right-column Status tab you can't watch during a fight. Splitting affects by
+interaction — glance-constantly vs. monitor-across-a-fight — puts the timers
+where the eye already is (the vitals) and the maintained cockpit where it earns
+persistent space, while collapsing the low-value reference (the Status tab's
+resource list stays; its affects are gone).
+
+**Notes.** Discipline unchanged: `el()`/`textContent` only, every command
+through the delegated `data-cmd` path, colours from tokens, motion gated. New
+tracked CSS/JS were force-added past the `static/` gitignore. Verified by
+loading the real `hud.js`/`hud.css` + template markup against `/connect?demo=1`
+(plus an injected combat-affects state) under headless Chromium at desktop and
+390px. Component catalog updated (`components.md`).
+
 ## 2026-07-18 — HUD re-tiering: ambient affects/XP, pinnable items, Tracked Spells, overlay migration
 
 **Status.** Agreed direction, tracked in isharmud/ishar-web#141 — recorded here

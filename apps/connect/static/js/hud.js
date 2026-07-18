@@ -107,12 +107,15 @@
     // the movement (rose) and interaction (occupants) surfaces are together at
     // the bottom, nearest the input.
     var PANELS = ["equipment", "inventory", "train", "group", "occupants", "room",
-                  "status", "abilities", "chat", "who", "professions", "map"];
+                  "tracked", "status", "abilities", "chat", "who", "professions", "map"];
     var PANEL_HOME = {
         occupants: "hud-left-scroll", equipment: "hud-left-scroll",
         inventory: "hud-left-scroll", train: "hud-left-scroll",
         group: "hud-left-scroll",
         room: "hud-left",
+        // Tracked Spells is pinned above the tab bar by CSS order (placePanels
+        // re-appends after a phone→desktop swap, so DOM order can't be relied on).
+        tracked: "hud-right",
         status: "hud-right", abilities: "hud-right", chat: "hud-right", who: "hud-right",
         professions: "hud-overlay-body", map: "hud-overlay-body"
     };
@@ -169,6 +172,12 @@
         quaff: "Quaff", recite: "Recite", eat: "Eat", drink: "Drink",
         wield: "Wield", wear: "Wear", use: "Use", hold: "Hold", draw: "Draw"
     };
+
+    // An affect within this many seconds of dropping is "soon": its ambient
+    // self-affect tile shows a countdown chip and pulses, its Tracked Spells
+    // row warms, and the phone dock raises an alarm dot. Below the threshold
+    // the surface stays quiet, so a quest group's long buffs are a bare row.
+    var AFFECT_SOON = 60;
 
     // ------------------------------------------------------------------
     // Helpers
@@ -596,7 +605,7 @@
                 if (overlayVisible("professions")) renderProfessions();
                 break;
             case "Char.Train": S.train = data; renderTrain(); break;
-            case "Char.Affects": S.affects = data; stampAffectExpiry(data); renderStatus(); break;
+            case "Char.Affects": S.affects = data; stampAffectExpiry(data); renderSelfAffects(); renderTracked(); break;
             case "Group.Update":
                 S.group = data; renderGroup();
                 if (mapMod && mapMod.onGroup) mapMod.onGroup(data);
@@ -1508,7 +1517,9 @@
     }
 
     // ------------------------------------------------------------------
-    // Status (resources + affects + group)
+    // Status (reference resources). Affects graduated out of this tab: self
+    // buffs/debuffs are ambient (renderSelfAffects), maintained magic is the
+    // Tracked Spells panel (renderTracked) — see the 2026-07-18 re-tiering.
     // ------------------------------------------------------------------
     function mini(p, cls) {
         return el("span", { class: "mini " + cls }, el("span", { style: "width:" + clamp(p, 0, 100) + "%" }));
@@ -1524,29 +1535,129 @@
             });
             kids.push(ul);
         }
+        fill(dom.status, kids.length ? kids : [el("div", { class: "panel-empty", text: "—" })]);
+    }
+
+    // ------------------------------------------------------------------
+    // Affects (Char.Affects) — split by how they're consumed. Self buffs and
+    // debuffs are ambient icons by the vitals (glanced at constantly); the
+    // magic you maintain is the persistent Tracked Spells panel (monitored
+    // across a fight). Absolute expiry is stamped once on arrival, so a
+    // countdown never snaps back to full on an unrelated re-render.
+    // ------------------------------------------------------------------
+    function affExpiry(x) { return (x && x._expiry != null) ? x._expiry : now() + (Number(x && x.duration) || 0); }
+    function affSoon(rem) { return rem > 0 && rem <= AFFECT_SOON; }
+
+    function selfAffTile(x, kind) {
+        var exp = affExpiry(x), rem = exp - now(), soon = affSoon(rem), name = stripColor(x.name);
+        var tile = el("span", {
+            class: "self-aff " + kind + (soon ? " alarm" : ""),
+            "data-expiry": exp, title: name + " — " + fmtDur(rem)
+        }, iconSvg(iconName({ name: x.name }), "gi"));
+        if (soon) tile.appendChild(el("span", { class: "self-aff-chip", text: fmtDur(rem) }));
+        return tile;
+    }
+    function renderSelfAffects() {
+        if (!dom.selfAffects) return;
+        var a = S.affects, tiles = [];
+        if (a) {
+            (a.buffs || []).forEach(function (x) { tiles.push(selfAffTile(x, "buff")); });
+            (a.debuffs || []).forEach(function (x) { tiles.push(selfAffTile(x, "debuff")); });
+        }
+        fill(dom.selfAffects, tiles);
+        dom.selfAffects.hidden = tiles.length === 0;
+    }
+
+    // Color the maintained-spell target by relationship: self, a group-mate
+    // (member or ally), or a foe (anyone else — an enemy debuff you sustain).
+    function maintainTargetClass(target) {
+        var tg = String(target || "").toLowerCase();
+        if (!tg || tg === "self") return "self";
+        var self = S.status && String(S.status.name || "").toLowerCase();
+        if (self && tg === self) return "self";
+        var g = S.group;
+        if (g) {
+            var roster = (g.members || []).concat(g.allies || []);
+            for (var i = 0; i < roster.length; i++) {
+                if (String(roster[i].name || "").toLowerCase() === tg) return "mate";
+            }
+        }
+        return "foe";
+    }
+    function trackedRow(x) {
+        var exp = affExpiry(x), rem = exp - now(), soon = affSoon(rem);
+        var body = [el("span", { class: "aff-name", text: stripColor(x.name) })];
+        if (x.target) {
+            body.push(el("span", { class: "aff-tgt " + maintainTargetClass(x.target),
+                text: "› " + (String(x.target).toLowerCase() === "self" ? "self" : stripColor(x.target)) }));
+        }
+        var kids = [
+            el("span", { class: "aff-ic" }, iconSvg(iconName({ name: x.skill || x.name }), "gi")),
+            el("div", { class: "aff-body" }, body),
+            el("span", { class: "aff-time", "data-expiry": exp, text: fmtDur(rem) })
+        ];
+        if (x.releasable && x.skill) {
+            kids.push(el("button", { type: "button", class: "aff-rel",
+                "data-cmd": "release spell " + nameOf(x.skill) + " " + (x.handle || ""),
+                title: "Release this spell", text: "release" }));
+        }
+        return el("li", { class: "aff maint" + (soon ? " soon" : ""), "data-expiry": exp }, kids);
+    }
+    function renderTracked() {
+        if (!dom.tracked) return;
         var a = S.affects;
-        function affItems(arr, cls) {
-            return (arr || []).map(function (x) {
-                // Absolute expiry is stamped once when Char.Affects arrives, so
-                // unrelated re-renders (Char.Status, Group.Update) don't snap the
-                // countdown back to its full original duration.
-                var exp = x._expiry != null ? x._expiry : now() + (Number(x.duration) || 0);
-                var right = [el("span", { class: "aff-time", "data-expiry": exp, text: fmtDur(exp - now()) })];
-                if (x.releasable && x.skill) {
-                    right.unshift(el("button", { type: "button", class: "aff-release", "data-cmd": "release spell " + nameOf(x.skill) + " " + (x.handle || ""), title: "Release", text: "release" }));
-                }
-                return el("li", { class: "aff " + cls }, [
-                    el("span", { class: "aff-name" }, [stripColor(x.name), x.target ? el("span", { class: "dim", text: " › " + stripColor(x.target) }) : null]),
-                    el("span", { class: "aff-right" }, right)
-                ]);
+        var list = (a && a.maintained) ? a.maintained.slice() : [];
+        // Soonest-to-drop first — the decision-critical row leads.
+        list.sort(function (p, q) { return affExpiry(p) - affExpiry(q); });
+        var head = panelHeader("tracked", "Tracked Spells" + (list.length ? " (" + list.length + ")" : ""), false);
+        var kids = [head];
+        if (!isCollapsed("tracked")) {
+            kids.push(list.length
+                ? el("ul", { class: "aff-list" }, list.map(trackedRow))
+                : el("div", { class: "panel-empty", text: "None active." }));
+        }
+        fill(dom.tracked, kids);
+        markTrackedAlarm(anyMaintainedSoon());
+    }
+    function anyMaintainedSoon() {
+        var a = S.affects, t = now();
+        if (!a || !a.maintained) return false;
+        for (var i = 0; i < a.maintained.length; i++) {
+            if (affSoon(affExpiry(a.maintained[i]) - t)) return true;
+        }
+        return false;
+    }
+    // The phone can't see the Tracked panel, so a spell about to drop raises a
+    // dot on its dock button — the ambient alarm without the panel on-screen.
+    function markTrackedAlarm(on) {
+        var b = dom.dock && dom.dock.querySelector('button[data-panel="tracked"]');
+        if (b) b.classList.toggle("alarm", !!on);
+    }
+    // Per-second refresh (from the init interval): timers count down, and the
+    // soon/alarm state re-evaluates without a feed. In-place so the tile pulse
+    // and row tint aren't restarted each tick.
+    function tickAffects() {
+        var t = now();
+        if (dom.selfAffects) {
+            Array.prototype.forEach.call(dom.selfAffects.querySelectorAll(".self-aff[data-expiry]"), function (tile) {
+                var rem = parseFloat(tile.getAttribute("data-expiry")) - t, soon = affSoon(rem);
+                tile.classList.toggle("alarm", soon);
+                var chip = tile.querySelector(".self-aff-chip");
+                if (soon) {
+                    if (!chip) { chip = el("span", { class: "self-aff-chip" }); tile.appendChild(chip); }
+                    chip.textContent = fmtDur(rem);
+                } else if (chip) { chip.parentNode.removeChild(chip); }
             });
         }
-        if (a) {
-            kids.push(el("div", { class: "sub-h", text: "Affects" }));
-            var affNodes = affItems(a.buffs, "buff").concat(affItems(a.maintained, "maint"), affItems(a.debuffs, "debuff"));
-            kids.push(affNodes.length ? el("ul", { class: "aff-list" }, affNodes) : el("div", { class: "panel-empty", text: "None." }));
+        if (dom.tracked) {
+            Array.prototype.forEach.call(dom.tracked.querySelectorAll(".aff[data-expiry]"), function (row) {
+                var rem = parseFloat(row.getAttribute("data-expiry")) - t;
+                row.classList.toggle("soon", affSoon(rem));
+                var tm = row.querySelector(".aff-time");
+                if (tm) tm.textContent = fmtDur(rem);
+            });
         }
-        fill(dom.status, kids.length ? kids : [el("div", { class: "panel-empty", text: "—" })]);
+        markTrackedAlarm(anyMaintainedSoon());
     }
 
     // ------------------------------------------------------------------
@@ -3403,6 +3514,7 @@
             case "equipment": renderEquipment(); break;
             case "inventory": case "components": renderInventory(); break;
             case "train": renderTrain(); break;
+            case "tracked": renderTracked(); break;
             default: renderAll();
         }
         api.onLayoutChange();
@@ -3520,9 +3632,9 @@
     // Lifecycle
     // ------------------------------------------------------------------
     function renderAll() {
-        renderVitals(); renderRoom(); renderOccupants(); renderGroup(); renderEquipment(); renderInventory();
-        renderTrain(); renderStatus(); renderWho(); renderChat(); renderHotbar(); renderAbilities();
-        renderProfessions(); updateMicro();
+        renderVitals(); renderSelfAffects(); renderRoom(); renderOccupants(); renderGroup();
+        renderEquipment(); renderInventory(); renderTrain(); renderStatus(); renderTracked();
+        renderWho(); renderChat(); renderHotbar(); renderAbilities(); renderProfessions(); updateMicro();
     }
     function reset() {
         S.vitals = null; S.status = null; S.time = null; S.room = null;
@@ -3558,6 +3670,8 @@
         dom.inventory = document.getElementById("panel-inventory");
         dom.train = document.getElementById("panel-train");
         dom.status = document.getElementById("panel-status");
+        dom.tracked = document.getElementById("panel-tracked");
+        dom.selfAffects = document.getElementById("vitals-affects");
         dom.abilities = document.getElementById("panel-abilities");
         dom.chat = document.getElementById("panel-chat");
         dom.who = document.getElementById("panel-who");
@@ -3658,11 +3772,7 @@
         renderAll();
 
         setInterval(function () {
-            var t = now();
-            var times = dom.status.querySelectorAll(".aff-time[data-expiry]");
-            if (times.forEach) times.forEach(function (e) {
-                e.textContent = fmtDur(parseFloat(e.getAttribute("data-expiry")) - t);
-            });
+            if (S.affects) tickAffects();
             if (S.skills.length) tickHotbar();
             if (S.craft) tickCraft();
         }, 1000);
