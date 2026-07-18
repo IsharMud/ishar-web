@@ -889,6 +889,15 @@
         var wrap = H.el("div", { class: "map-big" }, [canvas, anchor]);
 
         var zoneLabel = H.el("span", { class: "map-zone", text: "" });
+        // Cross-zone picker: the discoverable home for "look at / walk to
+        // another zone" (the per-room border menu is the shortcut, not the
+        // signpost). Lists the neighbors reachable from explored borders.
+        var btnZones = H.el("button", {
+            type: "button", class: "map-btn map-zones", text: "Zones ▾",
+            title: "View or jump to an adjacent zone",
+            "aria-label": "View or jump to an adjacent zone",
+            onclick: function () { openZoneJump(btnZones); }
+        });
         var zRow = H.el("span", { class: "map-z" });
         var search = H.el("input", {
             class: "map-search", type: "search", placeholder: "Find room…",
@@ -905,13 +914,13 @@
             title: "Center on me", "aria-label": "Center on my room",
             onclick: function () { bigView.follow = true; centerOnMe(); redraw(); } });
         var toolbar = H.el("div", { class: "map-toolbar" },
-            [zoneLabel, zRow, search, count, btnOut, btnIn, btnMe]);
+            [zoneLabel, btnZones, zRow, search, count, btnOut, btnIn, btnMe]);
         var foot = H.el("div", { class: "map-foot" });
         foot.hidden = true;
         var root = H.el("div", { class: "map-app" }, [toolbar, wrap, foot]);
         big = { root: root, canvas: canvas, wrap: wrap, zoneLabel: zoneLabel,
                 zRow: zRow, search: search, count: count, anchor: anchor,
-                foot: foot, btnMe: btnMe };
+                foot: foot, btnMe: btnMe, btnZones: btnZones };
 
         // --- search: filter discovered rooms, Enter cycles + centers ---
         search.addEventListener("input", function () {
@@ -1102,6 +1111,51 @@
         updateZoneLabel(); updateZRow(); updateSearchCount(); updateMeButton();
         redrawBig();
     }
+    // Toolbar "Zones ▾" menu: every neighbor reachable from an explored
+    // border of the viewed zone, plus a "back to my location" when off-zone.
+    function openZoneJump(anchor) {
+        var zid = viewedZone();
+        if (zid == null || !zones[zid]) return;
+        var zone = zones[zid], fs = fogSet(zid);
+        var acts = [];
+        if (cur.zone != null && zid !== cur.zone) {
+            acts.push({
+                label: "◎ Back to my location",
+                fn: function () { bigView.follow = true; centerOnMe(); redraw(); }
+            });
+        }
+        // One entry per adjacent zone, keyed off discovered border rooms so
+        // we only surface crossings the player has actually found.
+        var byZone = {};
+        zone.graph.rooms.forEach(function (r) {
+            if (!fs[r.v]) return;
+            (zone.layout.outFrom[r.v] || []).forEach(function (o) {
+                if (!byZone[o.zone]) byZone[o.zone] = o;
+            });
+        });
+        var keys = Object.keys(byZone);
+        keys.sort(function (a, b) {
+            var na = byZone[a].zname || "", nb = byZone[b].zname || "";
+            return na < nb ? -1 : na > nb ? 1 : 0;
+        });
+        keys.forEach(function (k) {
+            var o = byZone[k];
+            acts.push({
+                label: "Go to " + (o.zname || "zone " + o.zone) + " →",
+                fn: (function (oo) {
+                    return function () { goToZone(oo.zone, oo.t, oo.zname); };
+                })(o)
+            });
+        });
+        if (!keys.length) {
+            acts.push({
+                label: "Walk to a zone border to unlock jumps",
+                fn: function () {}, keep: true
+            });
+        }
+        H.openMenu("Jump to zone", acts, anchor);
+    }
+
     // Menu action: jump the map to an adjacent zone, loading it if needed.
     function goToZone(zoneId, vnum, zname) {
         if (zones[zoneId]) { focusZone(zoneId, vnum); return; }
@@ -1761,6 +1815,7 @@
             shownPath: function () { return shownPath; },
             viewedZone: viewedZone,
             focusZone: focusZone,
+            openZoneJump: openZoneJump,
             walking: function () { return !!walk; }
         }
     };
