@@ -1672,8 +1672,36 @@
         if (kind === "member") {
             var nm = firstWord(String(x.name || ""));
             var self = S.status && String(S.status.name || "").toLowerCase() === nm.toLowerCase();
-            if (nm && !self) acts.push({ label: "Tell…", prefill: "tell " + nm + " " });
+            if (nm && !self) {
+                acts.push({ label: "Tell…", prefill: "tell " + nm + " " });
+                regroupActions(nm).forEach(function (a) { acts.push(a); });
+            }
         }
+        return acts;
+    }
+
+    // Regroup spells offered on an away mate's menu, only when the caster knows
+    // them — the game enforces mana / range / anti-magic / group-bond itself, so
+    // a shown action can still be refused in play. translocate moves you to the
+    // mate; summon brings the mate to you.
+    function knownSpell(name) {
+        var hits = (S.skills || []).filter(function (s) {
+            return s.type === "spell" && nameOf(s.name).toLowerCase() === name;
+        });
+        return hits.length ? hits[0] : null;
+    }
+    function regroupActions(nm) {
+        var acts = [];
+        [["translocate", "Translocate to "], ["summon", "Summon "]].forEach(function (p) {
+            var s = knownSpell(p[0]);
+            if (!s) return;
+            var blocked = abilityBlock(s);
+            acts.push({
+                label: p[1] + nm + (blocked ? " (" + blocked.reason + ")" : ""),
+                cmd: "cast '" + p[0] + "' " + nm,
+                disabled: !!blocked
+            });
+        });
         return acts;
     }
 
@@ -3690,7 +3718,9 @@
             { id: 9, name: "disarm", type: "skill", percent: 45, usable: true, category: "damage", target_type: "none", min_position: "Fighting" },
             { id: 10, name: "second attack", type: "passive", percent: 75, usable: false, category: "misc", target_type: "none", min_position: "Standing" },
             { id: 91, name: "Metamagic: Clarity", type: "skill", percent: 100, usable: true, category: "misc", target_type: "none", min_position: "Standing" },
-            { id: 92, name: "Shield Slam", type: "skill", percent: 72, usable: true, category: "damage", target_type: "none", min_position: "Fighting" }
+            { id: 92, name: "Shield Slam", type: "skill", percent: 72, usable: true, category: "damage", target_type: "none", min_position: "Fighting" },
+            { id: 60, name: "translocate", type: "spell", percent: 84, usable: true, category: "misc", target_type: "defensive", mana_pct: 25, mana: 75, min_position: "Standing" },
+            { id: 61, name: "summon", type: "spell", percent: 79, usable: true, category: "misc", target_type: "defensive", mana_pct: 33, mana: 100, min_position: "Standing" }
         ];
         // Pad to demonstrate the immortal overflow the browser now bounds.
         for (var i = 11; i <= 90; i++) bigSkills.push({ id: i, name: "spell " + i, type: (i % 3 ? "spell" : "skill"), percent: 40 + (i % 60), usable: (i % 4 !== 0), category: ["damage", "heal", "misc"][i % 3], target_type: ["offensive", "defensive", "none"][i % 3], mana_pct: 20 + (i % 40), mana: (20 + (i % 40)) * 3, min_position: "Standing" });
