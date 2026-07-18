@@ -892,8 +892,12 @@
         // Cross-zone picker: the discoverable home for "look at / walk to
         // another zone" (the per-room border menu is the shortcut, not the
         // signpost). Lists the neighbors reachable from explored borders.
+        // `menu-opener`: the toolbar button opens a menu, so it must be
+        // exempt from hud.js's document outside-click dismissal — otherwise
+        // the same click that opens the picker bubbles up and closes it
+        // (the map canvas carries this class for exactly this reason).
         var btnZones = H.el("button", {
-            type: "button", class: "map-btn map-zones", text: "Zones ▾",
+            type: "button", class: "map-btn map-zones menu-opener", text: "Zones ▾",
             title: "View or jump to an adjacent zone",
             "aria-label": "View or jump to an adjacent zone",
             onclick: function () { openZoneJump(btnZones); }
