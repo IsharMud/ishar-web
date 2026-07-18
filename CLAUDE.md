@@ -73,6 +73,46 @@ project doesn't have. Rigor — verification, adversarial thinking about abuse a
 edge cases, taste in UX — is the only quality gate. Don't hand-wave "this
 probably works"; prove it as far as the environment allows.
 
+### Leave It Better Than You Found It
+
+A corollary of the green-field mandate: **existing code is not precedent.** When
+a change routes you through markup, CSS, or a view that predates the current
+conventions, converge the part you touch — swap the legacy pattern for its
+`.ac-*` / token / mixin equivalent, delete what the change obsoletes — rather
+than matching the old style "for consistency." Consistency with debt is just
+more debt. Scope it to what you're already touching; a full-page rebuild is its
+own task (and often worth proposing).
+
+### Comments
+
+Code should be self-documenting: clear names, small views and functions, obvious
+control flow. Comments exist for what the code *cannot* say — and almost nothing
+else.
+
+- **Write a comment for**: a non-obvious business rule (the 404-not-403 gating
+  convention, `immortal_level` vs. character level), an invariant the code can't
+  enforce (a `managed = False` column the game engine owns), or why a surprising
+  approach beat the obvious one.
+- **Never write a comment that** narrates the next line, restates the function
+  name, banners each step of the logic, or describes the *edit* rather than the
+  code ("changed X to Y", "new helper for Z"). Commit messages and issues tell
+  the story of the change; comments describe only the code as it now stands.
+  This applies equally to templates (`{# #}`), CSS, and JS.
+- **Terse but intelligent.** One sharp sentence beats a paragraph. If a block
+  needs a paragraph to explain, restructure or rename instead of writing prose.
+- **Maintain comments like code.** Update or delete stale comments in anything
+  you touch — a wrong comment is worse than none.
+
+### Solo-Project Hygiene
+
+- **Commits are the code review record** — small, focused, with messages that
+  explain *why*. Six months from now, history is the only reviewer's notes.
+- **Delete, don't deprecate** — no external consumers; remove what a change
+  obsoletes in the same change.
+- **Write decisions down** — a genuine design call goes in
+  `docs/design/decisions.md`; a convention worth having is worth applying
+  site-wide, not scoping to one page.
+
 ---
 
 ## Technical Stack
