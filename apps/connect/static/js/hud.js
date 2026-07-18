@@ -3113,11 +3113,12 @@
             if (hasContents) acts.push({ label: "Loot all", cmd: "get all from " + h });
             if (it.harvest) acts.push(harvestAction(it.harvest, h));
         } else if (isContainer) {
-            if (it.locked) {
-                // Honest verb: the game refuses Open on a locked container,
-                // so surface the state instead of a dead action.
-                acts.push({ label: "Locked", disabled: true });
-            } else if (it.closeable) {
+            // Offer Open/Close on any closeable container, locked included: a
+            // locked coffer is closed, so this reads "Open" and the game
+            // refuses it server-side ("It's locked.") — surfacing the verb the
+            // player would reach for beats a dead "Locked" row that offers no
+            // way to try. Mirrors the inventory container menu.
+            if (it.closeable) {
                 acts.push(it.closed ? { label: "Open", cmd: "open " + h } : { label: "Close", cmd: "close " + h });
             }
             if (!it.closed && hasContents) acts.push({ label: "Get all from", cmd: "get all from " + h });
