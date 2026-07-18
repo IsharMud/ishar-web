@@ -520,11 +520,14 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
   `.map-search` + `.map-count`, `.map-btn` zoom −/+/◎) over `.map-big`
   (pan/pinch/wheel canvas, `touch-action:none`) over `.map-foot` (show-path
   step list / walking progress). **Cross-zone:** the big map can view an
-  adjacent zone without moving the player — a border room's menu offers
-  "Go to &lt;zone&gt; →", `.map-zone.offzone` appends a "· viewing" cue, and
-  ◎ (`.map-btn.active`) becomes "return to my location"; pathfinding and
-  autowalk route across zone borders (the minimap always stays on the
-  player's zone). `.map-note-pop` is the room-note editor
+  adjacent zone without moving the player — the toolbar's **`.map-zones`
+  "Zones ▾"** button (accent-tinted, beside the zone name) is the signpost:
+  it lists every neighbor reachable from an explored border, plus "◎ Back
+  to my location" when off-zone (a border room's own menu keeps the same
+  "Go to &lt;zone&gt; →" as a shortcut). `.map-zone.offzone` appends a
+  "· viewing" cue and ◎ (`.map-btn.active`) becomes "return to my
+  location"; pathfinding and autowalk route across zone borders (the
+  minimap always stays on the player's zone). `.map-note-pop` is the room-note editor
   (Save/Delete/Close, 2000-char cap); the current room's note renders as
   the `.rose-note` clamped line in the Room panel. `.map-walk` is the
   autowalk cancel chip above the action row — the whole chip cancels
