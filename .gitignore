@@ -16,3 +16,7 @@ venv
 /logs/
 static/
 models.generated.py
+
+# Claude Code project config (skills, etc.) — but never local settings
+!.claude/
+.claude/settings.local.json
