@@ -494,6 +494,10 @@ body.connect-page #content { padding: .5rem !important; }
     display: flex; flex-direction: column; gap: 1px;
     max-height: min(46vh, 320px); overflow-y: auto;
 }
+/* overflow:hidden on a row zeroes its automatic min-height, so without this the
+   flex column shrinks rows to fit the cap — squashing names — instead of
+   scrolling. Children keep their natural height; the list scrolls. */
+.zone-pick-h, .zone-pick-row, .zone-pick-empty { flex-shrink: 0; }
 .zone-pick-h {
     font-size: .62rem; font-weight: 700; letter-spacing: .05em;
     text-transform: uppercase; color: var(--ac-dim);
