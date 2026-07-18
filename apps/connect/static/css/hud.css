@@ -27,6 +27,7 @@
     --hud-moon: #9aa6c8;
     --hud-hostile: var(--ac-danger);
     --hud-friendly: var(--ac-ok);
+    --hud-group: #3fb6a8;
     --hud-dock-h: 3.5rem;
     /* Map terrain fills (hud-map.js reads these once via getComputedStyle —
        canvas needs literals). Muted and desaturated on purpose: the map is
@@ -431,6 +432,9 @@ body.connect-page #content { padding: .5rem !important; }
 }
 /* The zone picker is the signposted way across a border — tint it accent. */
 .map-zones { color: var(--ac-accent); }
+/* Jump-to-marker (last death / group-mate) shares the accent-tint signposting. */
+.map-jump { color: var(--ac-accent); }
+.map-jump[hidden] { display: none; }
 .map-z { display: inline-flex; gap: 2px; }
 .map-search {
     flex: 1 1 8rem; min-width: 6rem; max-width: 14rem; font-size: 16px;
@@ -473,6 +477,40 @@ body.connect-page #content { padding: .5rem !important; }
 .note-text:focus-visible { outline: 2px solid var(--ac-accent); outline-offset: 1px; }
 .note-actions { display: flex; gap: 6px; justify-content: flex-end; }
 .note-del { color: var(--ac-danger); }
+
+/* Zone picker popover — a filterable list of adjacent + explored zones. Sits
+   on the note-editor's tier, above the overlay window. */
+.map-zone-pop {
+    position: fixed; z-index: 1039;
+    width: min(300px, calc(100vw - 16px));
+    display: flex; flex-direction: column; gap: 6px; padding: 8px;
+    background: var(--ac-panel); border: 1px solid var(--ac-border-2);
+    border-radius: var(--ac-radius); box-shadow: 0 16px 44px rgba(0, 0, 0, .6);
+}
+.map-zone-pop[hidden] { display: none; }
+.zone-pick-head { display: flex; gap: 6px; align-items: center; }
+.zone-pick-search { flex: 1 1 auto; max-width: none; }
+.zone-pick-list {
+    display: flex; flex-direction: column; gap: 1px;
+    max-height: min(46vh, 320px); overflow-y: auto;
+}
+.zone-pick-h {
+    font-size: .62rem; font-weight: 700; letter-spacing: .05em;
+    text-transform: uppercase; color: var(--ac-dim);
+    padding: 6px 4px 2px; position: sticky; top: 0; background: var(--ac-panel);
+}
+.zone-pick-row {
+    text-align: left; padding: 7px 8px; cursor: pointer;
+    font-size: .74rem; color: var(--ac-text);
+    background: transparent; border: 0; border-radius: var(--ac-radius-sm);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.zone-pick-row:hover { background: var(--ac-elev); color: var(--ac-accent); }
+.zone-pick-row:focus-visible { outline: 2px solid var(--ac-accent); outline-offset: -2px; }
+.zone-pick-empty { padding: 10px 4px; font-size: .72rem; color: var(--ac-dim); }
+@media (pointer: coarse) {
+    .zone-pick-row { padding: 11px 8px; }
+}
 
 /* Overlay footer: show-path step list / walking progress. */
 .map-foot {

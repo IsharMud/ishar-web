@@ -22,6 +22,7 @@ import json
 import re
 
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Count, Min
 from django.http import HttpResponse, JsonResponse
 from django.views.generic.base import View
 
@@ -228,6 +229,46 @@ class MapStateView(MapJSONMixin, NeverCacheMixin, View):
             ).values("room_vnum", "text")
         }
         return JsonResponse({"discovered": discovered, "notes": notes})
+
+
+class MapZonesView(MapJSONMixin, NeverCacheMixin, View):
+    """GET every zone this account has explored (has any discovered room).
+
+    Backs the expanded map's zone picker: the client already knows the zones
+    it has loaded graphs for this session, but not the ones discovered in
+    prior sessions. Each entry carries a room ``count`` and an ``anchor`` vnum
+    (the lowest discovered vnum — stable and always inside explored fog) the
+    client loads + focuses when the zone is picked.
+    """
+
+    http_method_names = ("get",)
+
+    def get(self, request, *args, **kwargs):
+        account_id = request.user.account_id
+        rows = list(
+            RoomDiscovery.objects.filter(account_id=account_id)
+            .values("zone_id")
+            .annotate(count=Count("room_vnum"), anchor=Min("room_vnum"))
+        )
+        names = {
+            z["id"]: z["name"]
+            for z in Zone.objects.filter(
+                id__in=[r["zone_id"] for r in rows],
+            ).values("id", "name")
+        }
+        zones = sorted(
+            (
+                {
+                    "id": r["zone_id"],
+                    "name": names.get(r["zone_id"], ""),
+                    "count": r["count"],
+                    "anchor": r["anchor"],
+                }
+                for r in rows
+            ),
+            key=lambda z: (z["name"] or "").lower(),
+        )
+        return JsonResponse({"zones": zones})
 
 
 class MapDiscoverView(MapJSONMixin, NeverCacheMixin, View):

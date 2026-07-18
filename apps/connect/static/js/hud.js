@@ -597,7 +597,13 @@
                 break;
             case "Char.Train": S.train = data; renderTrain(); break;
             case "Char.Affects": S.affects = data; stampAffectExpiry(data); renderStatus(); break;
-            case "Group.Update": S.group = data; renderGroup(); break;
+            case "Group.Update":
+                S.group = data; renderGroup();
+                if (mapMod && mapMod.onGroup) mapMod.onGroup(data);
+                break;
+            case "Char.Death":
+                if (mapMod && mapMod.onDeath) mapMod.onDeath(data);
+                break;
             case "Char.Who": S.who = data; renderWho(); break;
             case "Char.Skills": S.skills = (data && data.skills) || []; renderHotbar(); renderAbilities(); break;
             case "Char.Professions": applyProfessions(data); break;
@@ -1591,7 +1597,14 @@
         if (x.fighting_name) chips.push(el("span", { class: "grp-fight", title: "Fighting", text: "⚔ " + stripColor(x.fighting_name) }));
         var p = String(x.position || "").toLowerCase();
         if (p && p !== "standing") chips.push(el("span", { class: "grp-pos", text: p }));
-        if (x.in_room === false) chips.push(el("span", { class: "grp-away", title: "Not in your room", text: "away" }));
+        // Where a mate is when they're not with you — the room name the game now
+        // shares (parity with the `group` command), zone-qualified when far.
+        if (x.in_room === false) {
+            var whereText = x.room
+                ? stripColor(x.room) + (x.area ? " · " + stripColor(x.area) : "")
+                : "away";
+            chips.push(el("span", { class: "grp-away", title: "Not in your room", text: whereText }));
+        }
         var main = el("div", { class: "grp-main" }, [
             el("div", { class: "grp-line" }, [
                 el("span", { class: "grp-name", text: stripColor(String(x.name || "")) + (x.leader ? " ★" : "") }),
@@ -3643,6 +3656,7 @@
             toggleOverlay: toggleOverlay,
             overlayVisible: overlayVisible,
             isMobile: function () { return mqMobile.matches; },
+            selfName: function () { return S.status ? String(S.status.name || "") : ""; },
             markUnread: function (on) { markOverlayUnread("map", on); },
             updateMicro: updateMicro,
             rerenderRoom: function () { if (dom.room) renderRoom(); },
@@ -3747,9 +3761,9 @@
             ], treasure: 620 },
             "Char.Affects": { buffs: [{ name: "Stoneskin", id: 101, duration: 1800 }, { name: "Haste", id: 102, duration: 240 }], debuffs: [{ name: "Poison", id: 201, duration: 45 }], maintained: [{ name: "Detect Invisibility", id: 301, duration: 600, target: "self" }, { name: "Shroud", id: 302, duration: 900, target: "Boric", skill: "shroud", handle: "1.boric", releasable: true }] },
             "Group.Update": { leader: "Aelwyn", size: 3, members: [
-                { name: "Aelwyn", level: 45, hp_pct: 86, mp_pct: 85, mv_pct: 82, position: "Standing", race: "Elf", "class": "Magician", leader: true, in_room: true, is_tank: false, fighting_name: "a scarred alley thug", threat: 40, tank_threat: 120, threat_level: "low" },
-                { name: "Boric", level: 43, hp_pct: 30, mp_pct: 40, mv_pct: 75, position: "Standing", race: "Dwarf", "class": "Warrior", leader: false, in_room: true, is_tank: true, fighting_name: "a scarred alley thug", threat: 120 },
-                { name: "Selra", level: 41, hp_pct: 95, mp_pct: 90, mv_pct: 88, position: "Sleeping", race: "Human", "class": "Cleric", leader: false, in_room: true, is_tank: false }
+                { name: "Aelwyn", level: 45, hp_pct: 86, mp_pct: 85, mv_pct: 82, position: "Standing", race: "Elf", "class": "Magician", leader: true, in_room: true, is_tank: false, fighting_name: "a scarred alley thug", threat: 40, tank_threat: 120, threat_level: "low", room: "The Grand Concourse", vnum: 3001 },
+                { name: "Boric", level: 43, hp_pct: 30, mp_pct: 40, mv_pct: 75, position: "Standing", race: "Dwarf", "class": "Warrior", leader: false, in_room: true, is_tank: true, fighting_name: "a scarred alley thug", threat: 120, room: "The Grand Concourse", vnum: 3001 },
+                { name: "Selra", level: 41, hp_pct: 95, mp_pct: 90, mv_pct: 88, position: "Sleeping", race: "Human", "class": "Cleric", leader: false, in_room: false, is_tank: false, room: "Cramped Alcove", vnum: 3014 }
             ], allies: [
                 { name: "a large timber wolf", owner: "Aelwyn", hp_pct: 55, mp_pct: 100, mv_pct: 95, position: "Resting", in_room: true, is_tank: false }
             ] },
@@ -3786,7 +3800,8 @@
                 { id: 203, profession_id: 2, name: "greater arcane dust", category: "Transmutation", min_rank: 20, duration: 10,
                   components: [{ kind: "item", vnum: 9002, name: "a vial of powdered silver", count: 2 }] }
             ] },
-            "Char.Craft": { active: true, kind: "craft", name: "minor healing draught", profession_id: 1, remaining: 14, duration: 20, quantity: 2, chain_remaining: 3 }
+            "Char.Craft": { active: true, kind: "craft", name: "minor healing draught", profession_id: 1, remaining: 14, duration: 20, quantity: 2, chain_remaining: 3 },
+            "Char.Death": { vnum: 3020, name: "Crumbled Ledge", zone: "Ishar Nexus", time: Math.floor(Date.now() / 1000) - 240 }
         };
         Object.keys(feeds).forEach(function (k) { onGmcp(k, JSON.stringify(feeds[k])); });
         [
