@@ -9,6 +9,39 @@ Format: `## YYYY-MM-DD — Title` · **Decision** · **Why** · (optional) **Not
 
 ---
 
+## 2026-07-18 — Surveys: an in-house survey engine, and the `.ac-opt` option row
+
+**Decision.** Player surveys are a first-class site feature (`apps/surveys`)
+rather than an external tool: structure is authored in Django admin (survey →
+sections → questions → options; five kinds: single, multi with a pick cap,
+matrix grid, ranked picks, free text, each with an optional "Other: ___"
+write-in), lifecycle is a manual Draft/Open/Closed switch plus an optional
+opens/closes window, players get `/surveys/` (login required, one submission
+per account, enforced by a DB unique constraint), and staff (Eternal+) read
+`/surveys/<slug>/results/` — per-question aggregates, an individual-response
+browser, CSV export. Submission is the site's standard fetch + `JsonResponse`
+POST; validation lives once, server-side (`apps/surveys/services.py`).
+
+**Why.** Off-site survey tools lose the account identity (who answered — the
+segmentation signal a ~10-player game actually needs), can't gate to one
+response per *account*, and put the data somewhere the dashboards can't reach.
+The tables are site-owned (`managed = True`, like notes) — the game never
+touches them.
+
+**New components.** `.ac-opts`/`.ac-opt` — the compact radio/checkbox answer
+row (`.ac-toggle`'s lighter sibling for long option lists; same hidden
+`.btn-check` pattern, amber-filled `__mark` disc, `--box` squares it for
+checkboxes) with `.ac-opt-other` pairing a pick with its write-in field.
+`.ac-q` — the question block (numbered text, hint, inline error, `--invalid`
+danger edge). Matrix rows reuse `.ac-seg--wrap`; ranked picks are labeled
+`.ac-field` selects (`.ac-rank` grid) — ordinal dropdowns beat drag-ranking on
+phones and need no new machinery. Results reuse `.ac-bars` (counts + rank
+scores), `.ac-table` (matrix grids), `.ac-quote` (free text).
+
+**Notes.** `{% crumb %}` gained a prebuilt-`url` param for routes needing
+arguments. The nav/portal "Surveys" pill (`SURVEYS_OPEN`) counts accepting
+surveys the account hasn't answered, mirroring `PATCH_NOTES_UNREAD`.
+
 ## 2026-07-17 — HUD map fast-follow: cross-zone viewing + navigation
 
 **Decision.** The mapper (shipped earlier today) was single-zone: it only ever

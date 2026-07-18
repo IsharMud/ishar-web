@@ -40,18 +40,18 @@ def bi(name, css="", label=""):
 
 
 @register.inclusion_tag("partials/crumb.html")
-def crumb(label, icon, urlname="", anchor="", active=False):
+def crumb(label, icon, urlname="", anchor="", active=False, url=""):
     """One breadcrumb item, the site-wide pattern.
 
     `urlname` is reversed to an href (with `#anchor` appended when given);
-    omit it for a plain, unlinked crumb. `anchor` also becomes the id of the
-    label span so `focusTo` deep-linking keeps working.
+    pass a prebuilt `url` instead when the route needs arguments
+    (`{% url … as x %}` then `url=x`). Omit both for a plain, unlinked
+    crumb. `anchor` also becomes the id of the label span so `focusTo`
+    deep-linking keeps working.
     """
-    href = ""
-    if urlname:
-        href = reverse(urlname)
-        if anchor:
-            href = f"{href}#{anchor}"
+    href = url or (reverse(urlname) if urlname else "")
+    if href and anchor:
+        href = f"{href}#{anchor}"
     return {
         "label": label,
         "icon": icon,

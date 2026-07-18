@@ -154,6 +154,7 @@ INSTALLED_APPS = [
     "apps.RoomsConfig",
     "apps.SeasonsConfig",
     "apps.SkillsConfig",
+    "apps.SurveysConfig",
 #    "daphne",
     "channels",
 ]
@@ -195,6 +196,7 @@ TEMPLATES = [
                 "apps.players.contexts.players_online",
                 "apps.patchnotes.contexts.patch_notes_unread",
                 "apps.seasons.contexts.current_season",
+                "apps.surveys.contexts.surveys_open",
             ],
 #            "libraries": {
 #                "ishar": "apps.core.templatetags"
@@ -587,6 +589,11 @@ JAZZMIN_SETTINGS = {
         "skills.SpellFlag": "fas fa-flag",
         "skills.Force": "fas fa-infinity",
         "skills.Skill": "fas fa-brain",
+
+        # surveys
+        "surveys.Survey": "fas fa-poll",
+        "surveys.SurveyQuestion": "fas fa-question-circle",
+        "surveys.SurveySubmission": "fas fa-inbox",
     },
     # Icons that are used when one is not manually specified
     "default_icon_parents": "fas fa-chevron-circle-right",

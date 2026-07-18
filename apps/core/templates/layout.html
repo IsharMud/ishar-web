@@ -340,6 +340,18 @@
                                     </a>
                                 </li>
 
+                                <li class="nav-item" title="Surveys">
+                                    <a class="nav-link dropdown-item icon-link icon-link-hover" href="{% url 'surveys' %}#surveys">
+                                        {% bi "clipboard-data" %}
+                                        Surveys
+{% if SURVEYS_OPEN %}
+                                        <span class="ac-pill ac-pill--ok" title="{{ SURVEYS_OPEN }} survey{{ SURVEYS_OPEN|pluralize }} awaiting your answers">
+                                            {{ SURVEYS_OPEN }}
+                                        </span>
+{% endif %}
+                                    </a>
+                                </li>
+
                                 <li class="nav-item" title="Upgrades">
                                     <a class="nav-link dropdown-item icon-link icon-link-hover" href="{% url 'upgrades' %}#upgrades">
                                         {% bi "shield" %}
