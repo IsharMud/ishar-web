@@ -862,12 +862,39 @@
             return {
                 name: H ? H.stripColor(String(m.name || "")) : String(m.name || ""),
                 vnum: typeof m.vnum === "number" ? m.vnum : null,
+                zone: typeof m.zone === "number" ? m.zone : null,
                 room: m.room ? (H ? H.stripColor(String(m.room)) : String(m.room)) : "",
                 area: m.area ? (H ? H.stripColor(String(m.area)) : String(m.area)) : "",
                 leader: !!m.leader
             };
         });
         redraw();
+    }
+
+    // A zone the account has explored (has fog for, or the server listed as
+    // discovered). This is the "don't overshare" gate: a mate's exact room and
+    // jump are revealed only for zones you've actually mapped.
+    function zoneDiscovered(zoneId) {
+        if (zoneId == null) return false;
+        var fs = fog[zoneId];
+        if (fs && fs.set) { for (var k in fs.set) { if (fs.set[k]) return true; } }
+        return (exploredZones || []).some(function (z) { return z.id === zoneId; });
+    }
+    // Location string the group panel shows for a mate not in your room — from
+    // a raw Group.Update member. Exact room when you've discovered its zone,
+    // else the coarse area name (or "elsewhere"): never the exact room of a
+    // zone you've never been to.
+    function memberWhere(m) {
+        if (!m) return "";
+        var z = typeof m.zone === "number" ? m.zone : null;
+        var room = m.room && H ? H.stripColor(String(m.room)) : "";
+        var area = m.area && H ? H.stripColor(String(m.area)) : "";
+        if (z != null && zoneDiscovered(z) && room) return room;
+        return area || "elsewhere";
+    }
+    // A mate we can actually plot / jump to: located, in a discovered zone.
+    function mateLocatable(m) {
+        return !!(m && m.vnum != null && zoneDiscovered(m.zone));
     }
 
     function onDeath(data) {
@@ -890,10 +917,12 @@
         if (!deathMark || zoneId == null) return null;
         return vnumZone[deathMark.vnum] === zoneId ? deathMark.vnum : null;
     }
-    // Same-zone mates grouped by the room they're standing in.
+    // Mates grouped by the room they're in, for the given zone — but only when
+    // that zone is discovered, so cross-zone *viewing* a neighbor you haven't
+    // explored never plots a mate standing in it.
     function groupMarksInZone(zoneId) {
         var byVnum = {};
-        if (zoneId == null) return byVnum;
+        if (zoneId == null || !zoneDiscovered(zoneId)) return byVnum;
         groupMates.forEach(function (m) {
             if (m.vnum == null || vnumZone[m.vnum] !== zoneId) return;
             (byVnum[m.vnum] = byVnum[m.vnum] || []).push(m);
@@ -901,9 +930,7 @@
         return byVnum;
     }
     function hasLocatedMate() {
-        return groupMates.some(function (m) {
-            return m.vnum != null && vnumZone[m.vnum] != null;
-        });
+        return groupMates.some(mateLocatable);
     }
     function agoSuffix(t) {
         if (!t) return "";
@@ -1435,8 +1462,9 @@
             }
         }
         groupMates.forEach(function (m) {
-            if (m.vnum == null || vnumZone[m.vnum] == null) return;
-            var zn = zones[vnumZone[m.vnum]] ? zones[vnumZone[m.vnum]].name : m.room;
+            if (!mateLocatable(m)) return;
+            var loaded = vnumZone[m.vnum] != null && zones[vnumZone[m.vnum]];
+            var zn = loaded ? zones[vnumZone[m.vnum]].name : (m.area || m.room);
             acts.push({
                 label: "◎ " + m.name + (m.room ? " — " + m.room : ""),
                 fn: function () { jumpToVnum(m.vnum, zn); }
@@ -2095,6 +2123,7 @@
         onConnected: onConnected,
         onGroup: onGroup,
         onDeath: onDeath,
+        memberWhere: memberWhere,
         renderMini: renderMini,
         renderOverlay: renderOverlay,
         currentNote: currentNote,
@@ -2110,6 +2139,10 @@
             if (/[?&]demo=1/.test(window.location.search)) seedDemo();
             // Discovery must not be lost to a tab close mid-batch.
             window.addEventListener("pagehide", function () { doFlush(true); });
+            // Learn which zones this account has explored up front, so a mate's
+            // room reveals as soon as their Group.Update arrives — without
+            // waiting for the zone picker to be opened.
+            fetchExploredZones();
             wireWalkCancels();
             if (H) { H.updateMicro(); H.rerenderRoom(); }
         },

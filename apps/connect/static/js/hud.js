@@ -1597,12 +1597,13 @@
         if (x.fighting_name) chips.push(el("span", { class: "grp-fight", title: "Fighting", text: "⚔ " + stripColor(x.fighting_name) }));
         var p = String(x.position || "").toLowerCase();
         if (p && p !== "standing") chips.push(el("span", { class: "grp-pos", text: p }));
-        // Where a mate is when they're not with you — the room name the game now
-        // shares (parity with the `group` command), zone-qualified when far.
+        // Where a mate is when they're not with you. The map owns the reveal
+        // rule (exact room only for a zone you've discovered, else the area),
+        // so the HUD never shows more than you've earned; fall back to a plain
+        // "away" if the mapper isn't loaded.
         if (x.in_room === false) {
-            var whereText = x.room
-                ? stripColor(x.room) + (x.area ? " · " + stripColor(x.area) : "")
-                : "away";
+            var whereText = (mapMod && mapMod.memberWhere) ? mapMod.memberWhere(x) : "";
+            if (!whereText) whereText = "away";
             chips.push(el("span", { class: "grp-away", title: "Not in your room", text: whereText }));
         }
         var main = el("div", { class: "grp-main" }, [
@@ -3760,10 +3761,12 @@
                 { name: "a shard of frost quartz", keywords: "quartz frost shard", vnum: 9004, count: 5 }
             ], treasure: 620 },
             "Char.Affects": { buffs: [{ name: "Stoneskin", id: 101, duration: 1800 }, { name: "Haste", id: 102, duration: 240 }], debuffs: [{ name: "Poison", id: 201, duration: 45 }], maintained: [{ name: "Detect Invisibility", id: 301, duration: 600, target: "self" }, { name: "Shroud", id: 302, duration: 900, target: "Boric", skill: "shroud", handle: "1.boric", releasable: true }] },
-            "Group.Update": { leader: "Aelwyn", size: 3, members: [
-                { name: "Aelwyn", level: 45, hp_pct: 86, mp_pct: 85, mv_pct: 82, position: "Standing", race: "Elf", "class": "Magician", leader: true, in_room: true, is_tank: false, fighting_name: "a scarred alley thug", threat: 40, tank_threat: 120, threat_level: "low", room: "The Grand Concourse", vnum: 3001 },
-                { name: "Boric", level: 43, hp_pct: 30, mp_pct: 40, mv_pct: 75, position: "Standing", race: "Dwarf", "class": "Warrior", leader: false, in_room: true, is_tank: true, fighting_name: "a scarred alley thug", threat: 120, room: "The Grand Concourse", vnum: 3001 },
-                { name: "Selra", level: 41, hp_pct: 95, mp_pct: 90, mv_pct: 88, position: "Sleeping", race: "Human", "class": "Cleric", leader: false, in_room: false, is_tank: false, room: "Cramped Alcove", vnum: 3014 }
+            "Group.Update": { leader: "Aelwyn", size: 5, members: [
+                { name: "Aelwyn", level: 45, hp_pct: 86, mp_pct: 85, mv_pct: 82, position: "Standing", race: "Elf", "class": "Magician", leader: true, in_room: true, is_tank: false, fighting_name: "a scarred alley thug", threat: 40, tank_threat: 120, threat_level: "low", room: "The Grand Concourse", vnum: 3001, zone: 90 },
+                { name: "Boric", level: 43, hp_pct: 30, mp_pct: 40, mv_pct: 75, position: "Standing", race: "Dwarf", "class": "Warrior", leader: false, in_room: true, is_tank: true, fighting_name: "a scarred alley thug", threat: 120, room: "The Grand Concourse", vnum: 3001, zone: 90 },
+                { name: "Selra", level: 41, hp_pct: 95, mp_pct: 90, mv_pct: 88, position: "Sleeping", race: "Human", "class": "Cleric", leader: false, in_room: false, is_tank: false, room: "Cramped Alcove", vnum: 3014, zone: 90 },
+                { name: "Kael", level: 39, hp_pct: 72, mp_pct: 60, mv_pct: 80, position: "Standing", race: "Human", "class": "Ranger", leader: false, in_room: false, is_tank: false, room: "Village Square", vnum: 5003, zone: 91, area: "Kingdom of Jolnara" },
+                { name: "Doran", level: 44, hp_pct: 88, mp_pct: 55, mv_pct: 66, position: "Standing", race: "Dwarf", "class": "Cleric", leader: false, in_room: false, is_tank: false, room: "Ashen Hollow", vnum: 4210, zone: 99, area: "Shrouded Vale" }
             ], allies: [
                 { name: "a large timber wolf", owner: "Aelwyn", hp_pct: 55, mp_pct: 100, mv_pct: 95, position: "Resting", in_room: true, is_tank: false }
             ] },
