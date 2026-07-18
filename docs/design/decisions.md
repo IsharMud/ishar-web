@@ -1246,3 +1246,63 @@ rather than adding one-off symbols to the game-icons subset.
 token, motion gated behind `prefers-reduced-motion`, and the icon sits inside
 the existing bar's row (no new tap target). Verify with `/connect?demo=1`
 (the demo feed now carries `food`/`water` so both a low and a crit state show).
+
+## 2026-07-17 — Room panel carries the ground: items, corpses, harvest nodes
+
+**Context.** The Room (occupants) panel listed only persons. Everything else a
+player interacts with in a room — the corpse they just made, dropped items,
+ground containers, harvest nodes — was invisible to the HUD, and the item
+menus over-offered verbs: **Sacrifice on every carried item** (the command only
+accepts a corpse on the ground, so it could never succeed), no verb for tomes
+(`use` learns them) or decks (`draw`).
+
+**Decision.** The Room panel is the room's **whole interaction surface**: the
+persons list, then **On the ground** (Room.Contents items), then **Nodes** —
+one panel, one mental model, nearest the input. Ground rows reuse the
+inventory row language (`.item-row`, `row-name`, `×N` tags, `⋯` menu, the
+`row-caret` expand pattern) rather than inventing a parallel one:
+
+- **Corpses** lead with a red `☠`, show a tier-colored `⛏ rN` chip when
+  harvestable, and fold their loot behind the standard caret (a dim "N inside"
+  count keeps it glanceable). Menu: Look · Loot all · Harvest (rank-gated) ·
+  Sacrifice (danger-styled, dead last; deliberately **no confirm** — the game
+  offers none, and sacrificing spills a corpse's contents onto the ground
+  rather than destroying them, so a mis-tap costs only the body). Menus
+  opened *from* a menu item's `fn` now work generally: the parent closes
+  before the action runs (this fixes the latent icon-picker-from-menu
+  ordering bug and enables future confirm flows should one ever be needed).
+- **Ground containers** must be **opened before contents show** — the feed
+  itself only carries open-container contents (what `look in` reveals), so the
+  panel can't leak traps or closed contents by construction. Open-container
+  loot rows are tap-to-take (`get X from <handle>`), the corpse-looting hot
+  path on phones.
+- **Nodes** lead with an accent `✦` and the same `⛏ rN` chip; Harvest is
+  **enabled/disabled by a client-side join** against `Char.Professions`
+  (has the profession + `rank + 5 ≥ required`, mirroring the game's
+  `harvest_rank_allows`), tier-colored with the standard `.tier-*` buckets.
+- **Menu rows can now be `disabled`** (inert, dim, no hover): a gate you don't
+  meet renders as a visible requirement ("Harvest (r41) — rank too low")
+  instead of silently missing — the menu teaches.
+- **Verb map fixes:** `tome → Use` (learn), `deck → Draw`; **Sacrifice removed
+  from carried-item menus** — it lives only on ground corpses (and the game
+  command itself was re-scoped to room-only resolution, ishar-mud#1827, so a
+  handle tap can never resolve to a carried corpse). A locked ground
+  container shows an inert "Locked" row instead of a dead Open action.
+- **One body, one row:** slain occupants stay in the Room.Occupants feed
+  (they hold parser ordinal slots) but are no longer rendered — the ground
+  corpse row is the single representation of a body, so the post-kill moment
+  shows one actionable row instead of a dead person row + a corpse row.
+
+**Data.** New per-viewer GMCP feed `Room.Contents` (ishar-mud#1827,
+contract 11.5.0): items with server-computed `"N.dotted.keywords"` handles
+(exact-instance targeting for duplicate corpses), `no_take` scenery flag,
+corpse `harvest` standing, and the active node list with `required_rank`
+(exactly what `look` reveals — nothing more). Targeting rule: objects use the
+handle; **nodes use a single bare keyword token** (the game matches node
+keywords exactly, not via the object parser).
+
+**Notes.** Row count in the header becomes persons+items+nodes ("Room (18)").
+Empty state is "Nothing else here." only when all three lists are empty.
+Discipline unchanged: `el()`/`textContent`, tokens only, no new tap-target
+patterns. Verify with the demo feed (corpse with loot, locked chest, scenery
+fountain, three nodes across the tier spread).

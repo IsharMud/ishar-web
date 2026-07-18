@@ -44,6 +44,9 @@
         vitals: null, status: null, time: null, room: null,
         equipment: [], inventory: null, train: null,
         affects: null, group: null, who: null, occupants: [],
+        // Room.Contents — ground objects (corpses, drops, containers) and
+        // active harvest nodes; rendered under the occupants in the Room panel.
+        roomItems: [], roomNodes: [],
         skills: [], cooldownExpiry: {}, cooldownTotal: {}, usable: {},
         professions: [], recipes: [], craft: null,
         chat: [], connected: false,
@@ -157,11 +160,14 @@
     // means the type has no primary use action (only examine/drop).
     var TYPE_VERB = {
         potion: "quaff", scroll: "recite", food: "eat", drink: "drink",
-        weapon: "wield", armor: "wear", wand: "use", staff: "use", light: "hold"
+        weapon: "wield", armor: "wear", wand: "use", staff: "use", light: "hold",
+        // `use <tome>` learns the recipe/skill it holds; `draw <deck>` pulls a
+        // card from the Fateweaver's Deck. Both resolve from inventory.
+        tome: "use", deck: "draw"
     };
     var TYPE_VERB_LABEL = {
         quaff: "Quaff", recite: "Recite", eat: "Eat", drink: "Drink",
-        wield: "Wield", wear: "Wear", use: "Use", hold: "Hold"
+        wield: "Wield", wear: "Wear", use: "Use", hold: "Hold", draw: "Draw"
     };
 
     // ------------------------------------------------------------------
@@ -531,6 +537,8 @@
         (S.skills || []).forEach(function (s) { add(nameOf(s.name)); });
         if (S.who && S.who.players) S.who.players.forEach(function (p) { add(stripColor(p.name)); });
         (S.occupants || []).forEach(function (o) { add(o.keyword); });
+        (S.roomItems || []).forEach(addKeywords);
+        (S.roomNodes || []).forEach(function (n) { String(n.keywords || "").split(/\s+/).forEach(add); });
         (S.equipment || []).forEach(addKeywords);
         if (S.inventory) {
             (S.inventory.items || []).forEach(addKeywords);
@@ -573,6 +581,11 @@
                 if (mapMod) mapMod.onRoom(data);
                 break;
             case "Room.Occupants": applyOccupants(data); break;
+            case "Room.Contents":
+                S.roomItems = (data && data.items) || [];
+                S.roomNodes = (data && data.nodes) || [];
+                renderOccupants();
+                break;
             case "Char.Equipment":
                 S.equipment = (data && data.items) || []; renderEquipment(); renderInventory();
                 // Craftable-now marks join against carried items.
@@ -1051,18 +1064,24 @@
     }
 
     function renderOccupants() {
-        var occ = S.occupants || [];
+        // Slain occupants stay in the FEED (they hold parser ordinal slots,
+        // #1679) but not in the PANEL: the corpse object in Room.Contents is
+        // the single representation of a body — two rows for one corpse was
+        // the panel's most confusing moment (post-kill).
+        var occ = (S.occupants || []).filter(function (o) { return !o.is_dead; });
+        var items = S.roomItems || [];
+        var nodes = S.roomNodes || [];
         var hasShop = occ.some(function (o) { return o.is_shopkeeper; });
         // Room-level List (every shop here) only when there's a shop to list.
         var actions = hasShop
             ? [el("button", { type: "button", class: "panel-h-btn", "data-cmd": "list", title: "List every shopkeeper's wares here", text: "List" })]
             : null;
-        var head = panelHeader("occupants", "Room (" + occ.length + ")", false, actions);
+        var head = panelHeader("occupants", "Room (" + (occ.length + items.length + nodes.length) + ")", false, actions);
         var kids = [head];
         if (!isCollapsed("occupants")) {
-            if (!occ.length) {
-                kids.push(el("div", { class: "panel-empty", text: "No one else here." }));
-            } else {
+            if (!occ.length && !items.length && !nodes.length) {
+                kids.push(el("div", { class: "panel-empty", text: "Nothing else here." }));
+            } else if (occ.length) {
                 // Target chips (current defaults) so they're visible at a glance.
                 if (S.tgtHostile || S.tgtFriendly) {
                     var chips = [];
@@ -1071,19 +1090,22 @@
                     kids.push(el("div", { class: "tgt-chips" }, chips));
                 }
                 var list = el("ul", { class: "occ-list" });
-                occ.forEach(function (o, i) {
+                // Iterate the UNFILTERED list: data-idx must index S.occupants
+                // (openHostMenu reads it back); dead entries just skip.
+                (S.occupants || []).forEach(function (o, i) {
+                    if (o.is_dead) return;
                     var marks = "";
                     if (S.tgtHostile && S.tgtHostile.handle === o.handle) marks += " ⚔";
                     if (S.tgtFriendly && S.tgtFriendly.handle === o.handle) marks += " ✚";
                     // Position tag for anyone not simply standing (the same
                     // cue the room text gives: "is sleeping here").
-                    var ptag = (!o.is_dead && o.position && posLower(o) !== "standing")
+                    var ptag = (o.position && posLower(o) !== "standing")
                         ? posLower(o) : "";
-                    var fight = o.is_dead ? "" : occFightLabel(o);
+                    var fight = occFightLabel(o);
                     var row = el("li", {
-                        class: "occ-row " + occHostileClass(o) + (o.is_dead ? " is-dead" : ""),
+                        class: "occ-row " + occHostileClass(o),
                         "data-menu": "occupant", "data-idx": i,
-                        title: o.is_dead ? "Slain — not targetable" : "Tap for actions"
+                        title: "Tap for actions"
                     }, [
                         el("span", { class: "occ-icon", "aria-hidden": "true", text: o.is_player ? "☻" : "•" }),
                         el("span", { class: "occ-name", text: stripColor(o.short_desc || o.keyword) }),
@@ -1098,8 +1120,142 @@
                 });
                 kids.push(list);
             }
+            // Ground objects and harvest nodes (Room.Contents) share the panel:
+            // the room's whole interaction surface lives in one place.
+            if (items.length) {
+                kids.push(el("div", { class: "sub-h", text: "On the ground" }));
+                kids.push(groundList(items));
+            }
+            if (nodes.length) {
+                kids.push(el("div", { class: "sub-h", text: "Nodes" }));
+                kids.push(nodeList(nodes));
+            }
         }
         fill(dom.occupants, kids);
+    }
+
+    // ------------------------------------------------------------------
+    // Ground items + nodes (Room.Contents) — rendered inside the Room panel.
+    // ------------------------------------------------------------------
+    // Client-side eligibility join for a harvest source (a node, or a corpse's
+    // `harvest` object): mirrors the game's gate — must hold the profession,
+    // and harvest_rank_allows (rank + 5 >= required, i.e. tier != "blocked").
+    // A profession-less source is open to everyone.
+    function harvestStanding(hv) {
+        var req = Math.max(1, Number(hv.required_rank) || 1);
+        if (!hv.profession_id) return { ok: true, tier: null, req: req };
+        var prof = professionById(hv.profession_id);
+        if (!prof) return { ok: false, tier: "blocked", untrained: true, req: req };
+        var rank = Number(prof.rank) || 0;
+        var tier = profTier(req - rank);
+        // rank 0 = held but never practiced: harvest_rank_allows hard-fails
+        // rank <= 0 server-side regardless of the delta.
+        return { ok: rank > 0 && tier !== "blocked", tier: tier, prof: prof, req: req };
+    }
+    function harvestChip(hv) {
+        var hs = harvestStanding(hv);
+        var profName = hs.prof ? hs.prof.name : (hv.profession || "");
+        var title = hs.untrained ? "Harvestable — requires " + (profName || "a profession you lack")
+            : hs.ok ? "Harvestable — requires rank " + hs.req + (profName ? " " + profName : "")
+            : "Harvestable — " + (profName ? profName + " " : "") + "rank " + hs.req + " needed (yours: " + (hs.prof ? hs.prof.rank : 0) + ")";
+        return el("span", {
+            class: "tag harvest tier-" + (hs.tier || "open"),
+            title: title, text: "⛏ r" + hs.req
+        });
+    }
+    // Server-computed handle first (exact instance), keyword join as fallback.
+    function groundTarget(it) { return it.handle || targetOf(it.keywords || it.name); }
+    // Nodes are matched by exact keyword token (or name substring) game-side —
+    // NOT the object parser — so send one bare token, never a dotted join.
+    function nodeTarget(n) {
+        var k = firstWord(n.keywords);
+        if (k) return k;
+        var w = String(stripColor(n.name || "")).trim().split(/\s+/);
+        return (w[w.length - 1] || "").replace(/[^A-Za-z0-9]/g, "");
+    }
+
+    function groundList(items) {
+        var list = el("ul", { class: "row-list ground" });
+        items.forEach(function (it, i) {
+            var isContainer = it.type === "container";
+            var hasContents = !!(it.contents && it.contents.length);
+            var open = isContainer && !it.closed;
+            // Expand-state key WITHOUT the handle's ordinal: "2.corpse.rat"
+            // becomes "1.corpse.rat" when an earlier duplicate goes away, and
+            // an ordinal-bearing key would silently drop the expansion (and
+            // accrete stale variants in localStorage). Same-keyword duplicates
+            // sharing one expand state is the lesser wart.
+            var ekey = "g" + targetOf(it.keywords || it.name);
+            var canExpand = open && hasContents;
+            var isOpen = canExpand && !!expanded[ekey];
+            var kids = [];
+            if (canExpand) {
+                kids.push(el("button", {
+                    type: "button", class: "row-caret", "data-expand": ekey,
+                    "aria-expanded": isOpen ? "true" : "false",
+                    "aria-label": (isOpen ? "Collapse contents of " : "Expand contents of ") + stripColor(it.name || "container"),
+                    text: isOpen ? "▾" : "▸"
+                }));
+            }
+            if (it.is_corpse) kids.push(el("span", { class: "gnd-icon corpse", title: "Corpse", "aria-hidden": "true", text: "☠" }));
+            kids.push(el("span", { class: "row-name", text: stripColor(it.name) }));
+            if (it.count && it.count > 1) kids.push(el("span", { class: "tag", text: "×" + it.count }));
+            // Glanceable loot count while the contents are folded.
+            if (canExpand && !isOpen) kids.push(el("span", { class: "tag dim", text: it.contents.length + " inside" }));
+            if (it.harvest) kids.push(harvestChip(it.harvest));
+            // Closed/empty container state glyph (same language as inventory).
+            if (isContainer && !it.is_corpse && (it.closed || !hasContents)) {
+                kids.push(el("span", {
+                    class: "row-glyph", "aria-hidden": "true",
+                    title: it.locked ? "Locked" : it.closed ? "Closed — Open to see inside" : "Empty container",
+                    text: it.closed || it.locked ? "🔒" : "📦"
+                }));
+            }
+            kids.push(el("button", { type: "button", class: "row-more", "data-menu": "grounditem", "data-idx": i, "aria-label": "Actions", text: "⋯" }));
+            list.appendChild(el("li", {
+                class: "item-row ground" + (it.is_corpse ? " corpse" : ""),
+                "data-menu": "grounditem", "data-idx": i, title: "Tap for actions"
+            }, kids));
+            if (isOpen) {
+                var sub = el("ul", { class: "row-list sub" });
+                var ct = groundTarget(it);
+                groupStackables(it.contents).forEach(function (c) {
+                    var tgt = targetOf(c.keywords || c.name);
+                    // Row tap loots the item directly (the corpse-looting hot
+                    // path); ⋯ opens the menu.
+                    sub.appendChild(el("li", {
+                        class: "item-row sub", "data-cmd": "get " + tgt + " from " + ct,
+                        title: "Take from " + stripColor(it.name || "container") + " — ⋯ for more"
+                    }, [
+                        el("span", { class: "row-name", text: stripColor(c.name) }),
+                        (c.count && c.count > 1) ? el("span", { class: "tag", text: "×" + c.count }) : null,
+                        el("button", {
+                            type: "button", class: "row-more", "data-menu": "groundcontent",
+                            "data-target": tgt, "data-name": stripColor(c.name || ""), "data-container": ct,
+                            "aria-label": "Actions", text: "⋯"
+                        })
+                    ]));
+                });
+                list.appendChild(sub);
+            }
+        });
+        return list;
+    }
+
+    function nodeList(nodes) {
+        var list = el("ul", { class: "row-list ground" });
+        nodes.forEach(function (n, i) {
+            var hs = harvestStanding(n);
+            list.appendChild(el("li", {
+                class: "item-row ground node", "data-menu": "node", "data-idx": i, title: "Tap for actions"
+            }, [
+                el("span", { class: "gnd-icon node" + (hs.tier ? " tier-" + hs.tier : ""), "aria-hidden": "true", text: "✦" }),
+                el("span", { class: "row-name", text: stripColor(n.name) }),
+                harvestChip(n),
+                el("button", { type: "button", class: "row-more", "data-menu": "node", "data-idx": i, "aria-label": "Actions", text: "⋯" })
+            ]));
+        });
+        return list;
     }
 
     // ------------------------------------------------------------------
@@ -2762,7 +2918,10 @@
         menuOpen = true;
         positionMenu(anchor);
     }
-    // actions: [{label, cmd|prefill|fn, danger}]. Anchored near `anchor`.
+    // actions: [{label, cmd|prefill|fn, danger, tier, disabled}]. Anchored
+    // near `anchor`. `disabled` renders an inert greyed row — used for
+    // actions that exist but the player can't take yet (harvest rank gates),
+    // so the requirement is visible instead of the action silently missing.
     function openMenu(title, actions, anchor) {
         closeMenu();
         hideTip();
@@ -2775,13 +2934,18 @@
             // the action outright.
             kids.push(el("button", {
                 type: "button",
-                class: "menu-item" + (a.danger ? " danger" : "") + (a.tier ? " tier-" + a.tier : ""),
+                class: "menu-item" + (a.danger ? " danger" : "") + (a.tier ? " tier-" + a.tier : "") + (a.disabled ? " disabled" : ""),
+                disabled: a.disabled ? true : null,
                 text: a.label,
                 onclick: function () {
+                    if (a.disabled) return;
+                    // Close BEFORE running the action: an fn may open its own
+                    // surface (icon picker, a confirm submenu) and a
+                    // close-after would immediately dismiss it.
+                    closeMenu();
                     if (a.fn) a.fn();
                     else if (a.prefill != null) api.prefill(a.prefill);
                     else if (a.cmd) sendCmd(a.cmd);
-                    closeMenu();
                     // `keep`: informational rows shouldn't throw away the
                     // phone sheet the menu was opened from.
                     if (!a.keep && sheetName && mqMobile.matches) setSheet(null);
@@ -2895,6 +3059,60 @@
         return acts;
     }
 
+    // Actions for a ground object (Room.Contents item). Commands target the
+    // server-computed handle so duplicates ("2.corpse.rat") resolve to the
+    // exact instance; the server re-validates everything.
+    function groundItemActions(it) {
+        var h = groundTarget(it);
+        var acts = [{ label: "Look", cmd: "look " + h }];
+        var isContainer = it.type === "container";
+        var hasContents = !!(it.contents && it.contents.length);
+        if (it.is_corpse) {
+            if (hasContents) acts.push({ label: "Loot all", cmd: "get all from " + h });
+            if (it.harvest) acts.push(harvestAction(it.harvest, h));
+        } else if (isContainer) {
+            if (it.locked) {
+                // Honest verb: the game refuses Open on a locked container,
+                // so surface the state instead of a dead action.
+                acts.push({ label: "Locked", disabled: true });
+            } else if (it.closeable) {
+                acts.push(it.closed ? { label: "Open", cmd: "open " + h } : { label: "Close", cmd: "close " + h });
+            }
+            if (!it.closed && hasContents) acts.push({ label: "Get all from", cmd: "get all from " + h });
+        }
+        // no_take = scenery ("You can't seem to budge...") — omit dead verbs.
+        if (!it.no_take && !it.is_corpse) acts.push({ label: "Get", cmd: "get " + h });
+        if (it.is_corpse) {
+            // Sacrifice lives HERE and only here (the command takes a corpse
+            // on the ground, never a carried item) — last and danger-styled.
+            // No confirm, matching the game: sacrificing spills any contents
+            // onto the ground and consumes only the corpse itself, so a
+            // mis-tap costs nothing but the body.
+            acts.push({ label: "Sacrifice", cmd: "sacrifice " + h, danger: true });
+        }
+        return acts;
+    }
+    function harvestAction(hv, target) {
+        var hs = harvestStanding(hv);
+        if (hs.untrained) {
+            return { label: "Harvest — requires " + (hv.profession || "training"), disabled: true };
+        }
+        if (!hs.ok) return { label: "Harvest (r" + hs.req + ") — rank too low", disabled: true };
+        return { label: "Harvest (r" + hs.req + ")", cmd: "harvest " + target, tier: hs.tier || undefined };
+    }
+    function groundContentActions(ds) {
+        return [
+            { label: "Get", cmd: "get " + ds.target + " from " + ds.container }
+        ];
+    }
+    function nodeActions(n) {
+        var t = nodeTarget(n);
+        return [
+            { label: "Look", cmd: "look " + t },
+            harvestAction(n, t)
+        ];
+    }
+
     function itemActions(ds) {
         var t = ds.target, name = ds.name || t, otype = ds.otype, kind = ds.kind, container = ds.container;
         var acts = [{ label: "Examine", cmd: "examine " + t }];
@@ -2927,8 +3145,9 @@
                     tier: profTier(ds.disen - (Number(ench.rank) || 0))
                 });
             }
+            // No Sacrifice here: the command only accepts a corpse on the
+            // ground, so it lives on the Room panel's corpse menu instead.
             acts.push({ label: "Drop", cmd: "drop " + t });
-            acts.push({ label: "Sacrifice", cmd: "sacrifice " + t, danger: true });
         }
         return acts;
     }
@@ -3009,6 +3228,7 @@
             saveSet("ishar.itemsExpanded", expanded);
             renderEquipment();
             renderInventory();
+            renderOccupants();   // ground containers expand in the Room panel
             api.onLayoutChange();
             e.preventDefault();
             return;
@@ -3087,6 +3307,15 @@
         } else if (kind === "item") {
             var ds = readDataset(host);
             openMenu(ds.name || ds.target, itemActions(ds), anchor);
+        } else if (kind === "grounditem") {
+            var gi = (S.roomItems || [])[Number(host.getAttribute("data-idx"))];
+            if (gi) openMenu(stripColor(gi.name || ""), groundItemActions(gi), anchor);
+        } else if (kind === "groundcontent") {
+            var gds = readDataset(host);
+            openMenu(gds.name || gds.target, groundContentActions(gds), anchor);
+        } else if (kind === "node") {
+            var nd = (S.roomNodes || [])[Number(host.getAttribute("data-idx"))];
+            if (nd) openMenu(stripColor(nd.name || ""), nodeActions(nd), anchor);
         } else if (kind === "component") {
             var cds = readDataset(host);
             openMenu(cds.name || cds.target, componentActions(cds), anchor);
@@ -3256,6 +3485,7 @@
         S.vitals = null; S.status = null; S.time = null; S.room = null;
         S.equipment = []; S.inventory = null; S.train = null;
         S.affects = null; S.group = null; S.who = null; S.occupants = [];
+        S.roomItems = []; S.roomNodes = [];
         S.skills = []; S.cooldownExpiry = {}; S.cooldownTotal = {}; S.usable = {};
         S.professions = []; S.recipes = []; S.craft = null;
         S.tgtHostile = null; S.tgtFriendly = null;
@@ -3465,6 +3695,25 @@
                 { keyword: "Selra", short_desc: "Selra the Quiet", handle: "1.Selra", is_player: true, is_dead: false, is_shopkeeper: false, hostile_hint: "friendly", position: "Sleeping", is_loyal_follower: false, is_my_follower: false, fighting_you: false, is_your_target: false },
                 { keyword: "wolf", short_desc: "a large timber wolf", handle: "1.wolf", is_player: false, is_dead: false, is_shopkeeper: false, hostile_hint: "friendly", position: "Resting", is_loyal_follower: true, is_my_follower: true, fighting_you: false, is_your_target: false },
                 { keyword: "rat", short_desc: "the corpse of a sewer rat", handle: "1.rat", is_player: false, is_dead: true, is_shopkeeper: false, hostile_hint: "neutral", position: "Dead", is_loyal_follower: false, is_my_follower: false, fighting_you: false, is_your_target: false }
+            ] },
+            "Room.Contents": { items: [
+                { name: "the corpse of a sewer rat", keywords: "corpse rat", handle: "1.corpse.rat", type: "container", vnum: -1, count: 1, is_corpse: true,
+                  harvest: { profession_id: 1, profession: "Alchemy", required_rank: 30 },
+                  closeable: false, closed: false, locked: false, contents: [
+                    { name: "a pitted short sword", keywords: "sword short pitted", type: "weapon", vnum: 301, count: 1 },
+                    { name: "a mangy rat pelt", keywords: "pelt rat mangy", type: "other", vnum: 302, count: 2 }
+                ] },
+                { name: "the corpse of an alley thug", keywords: "corpse thug", handle: "1.corpse.thug", type: "container", vnum: -1, count: 1, is_corpse: true,
+                  closeable: false, closed: false, locked: false, contents: [] },
+                { name: "an iron-banded chest", keywords: "chest iron", handle: "1.chest.iron", type: "container", vnum: 310, count: 1, no_take: true,
+                  closeable: true, closed: true, locked: false, contents: [] },
+                { name: "a crumpled traveling cloak", keywords: "cloak traveling crumpled", handle: "1.cloak.traveling.crumpled", type: "armor", vnum: 311, count: 1 },
+                { name: "a glowing potion", keywords: "potion glowing", handle: "1.potion.glowing", type: "potion", vnum: 10, count: 2 },
+                { name: "a marble fountain", keywords: "fountain marble", handle: "1.fountain.marble", type: "drink", vnum: 312, count: 1, no_take: true }
+            ], nodes: [
+                { name: "a vein of glittering ore", keywords: "vein ore", profession_id: 2, profession: "Enchanting", required_rank: 16 },
+                { name: "a tangle of silverleaf", keywords: "silverleaf tangle", profession_id: 1, profession: "Alchemy", required_rank: 41 },
+                { name: "a seam of rough crystal", keywords: "seam crystal", profession_id: 3, profession: "Artificing", required_rank: 5 }
             ] },
             "Char.Equipment": { items: [
                 { name: "a magnificent helmet of red dragonscales", keywords: "helmet dragonscales", type: "armor", vnum: 1, location: "Head", condition: 100 },

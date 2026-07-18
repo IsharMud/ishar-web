@@ -612,6 +612,16 @@ body.connect-page #content { padding: .5rem !important; }
 .row-caret:hover { color: var(--ac-accent); }
 /* Container state glyph (🔒 / 📦) for a closed or empty container. */
 .row-glyph { flex: none; color: var(--ac-dim); font-size: .82em; }
+
+/* Ground items + harvest nodes (Room.Contents) in the Room panel. The lead
+   icon shares the caret/dot column width so names align; the harvest chip
+   ("⛏ rN") takes the standard tier-* text colors. */
+.gnd-icon { flex: none; width: .9rem; text-align: center; font-size: .72rem; line-height: 1; color: var(--ac-dim); }
+.gnd-icon.corpse { color: var(--ac-danger); }
+.gnd-icon.node { color: var(--ac-accent); }
+.tag.harvest { background: var(--ac-bg); }
+.tag.harvest.tier-open { color: var(--ac-ok); }
+.tag.dim { color: var(--ac-dim); }
 .coins { margin: 5px 8px; font-size: .78rem; color: var(--hud-gold); }
 .comp-section { margin-top: 2px; }
 
@@ -1058,6 +1068,9 @@ body.connect-page #content { padding: .5rem !important; }
 .menu-item:hover { background: var(--ac-elev); color: var(--ac-accent); }
 .menu-item.danger { color: var(--ac-danger); }
 .menu-item.danger:hover { background: var(--ac-danger-wash); color: var(--ac-danger); }
+/* Inert requirement rows (e.g. a harvest whose rank gate you don't meet):
+   visible so the requirement teaches, but never clickable. */
+.menu-item.disabled, .menu-item.disabled:hover { color: var(--ac-dim); background: none; cursor: default; opacity: .65; }
 @media (pointer: coarse) { .menu-item { min-height: 44px; } }
 
 /* ----- Icon picker (reuses #hud-menu with a wider grid layout) ----- */
