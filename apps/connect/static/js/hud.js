@@ -128,7 +128,7 @@
     // the bottom, nearest the input.
     var PANELS = ["inventory", "group", "occupants", "room",
                   "tracked", "chat", "train", "abilities", "who",
-                  "professions", "map", "quests"];
+                  "professions", "map", "quests", "season"];
     var PANEL_HOME = {
         occupants: "hud-left-scroll",
         group: "hud-left-scroll",
@@ -141,7 +141,7 @@
         inventory: "hud-overlay-body", train: "hud-overlay-body",
         abilities: "hud-overlay-body", who: "hud-overlay-body",
         professions: "hud-overlay-body", map: "hud-overlay-body",
-        quests: "hud-overlay-body"
+        quests: "hud-overlay-body", season: "hud-overlay-body"
     };
 
     // ------------------------------------------------------------------
@@ -198,7 +198,14 @@
         // objectives tracker over the terminal (isharmud/ishar-web#150).
         { key: "quests", title: "Quest Log", hotkey: "q",
           render: function () { renderQuests(); },
-          available: function () { return (S.quests || []).length > 0; } }
+          available: function () { return (S.quests || []).length > 0; } },
+        // Season: identity + countdown, the engagement track (progress,
+        // milestones, per-activity breakdown), essence, and active events.
+        // Char.Season feed (isharmud/ishar-mud#1845); also opened by the
+        // clickable season pill in the topbar clock strip.
+        { key: "season", title: "Season", hotkey: "e",
+          render: function () { renderSeason(); },
+          available: function () { return !!S.season; } }
     ];
     var overlayName = null;   // open overlay app key (desktop), or null
 
@@ -761,6 +768,7 @@
             case "Char.Recipes": S.recipes = (data && data.recipes) || []; renderProfessions(); break;
             case "Char.Craft": applyCraft(data); break;
             case "Char.Quests": applyQuests(data); break;
+            case "Char.Season": applySeason(data); break;
             case "Room.QuestMarkers":
                 S.questMarkers = data;
                 if (mapMod && mapMod.onQuestMarkers) mapMod.onQuestMarkers(data);
@@ -993,7 +1001,16 @@
                 + (tm.day_name ? " · " + tm.day_name : "")
                 + (tm.month_name ? ", " + tm.month_name : "")
                 + (tm.year != null ? " · Yr " + tm.year : "") }));
-            if (tm.season_id != null) world.appendChild(el("span", { class: "v-season", text: "Season " + tm.season_id }));
+            if (tm.season_id != null) {
+                var seasonPill = el("span", { class: "v-season", role: "button", tabindex: "0",
+                    title: "Season & engagement details", "aria-label": "Season " + tm.season_id + " details",
+                    text: "Season " + tm.season_id,
+                    onclick: function () { toggleOverlay("season"); } });
+                seasonPill.addEventListener("keydown", function (ev) {
+                    if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); toggleOverlay("season"); }
+                });
+                world.appendChild(seasonPill);
+            }
             (tm.events || []).forEach(function (e) {
                 world.appendChild(el("span", { class: "v-event", title: "Global event", text: "⚑ " + e.name + (e.seconds ? " (" + fmtDur(e.seconds) + ")" : "") }));
             });
@@ -3475,6 +3492,216 @@
         return "qst-progress";
     }
 
+    // ------------------------------------------------------------------
+    // Season (Char.Season) — identity + countdown, the engagement track
+    // (progress, milestones, per-activity breakdown), essence, and the
+    // active global events. isharmud/ishar-mud#1845.
+    // ------------------------------------------------------------------
+    var lastSeasonBody = null;
+    function applySeason(data) {
+        var body = "";
+        try { body = JSON.stringify(data || {}); } catch (e) {}
+        var changed = lastSeasonBody !== null && body !== lastSeasonBody;
+        lastSeasonBody = body;
+        var s = data || {};
+        // The feed sends seconds-remaining; store an absolute expiry and tick it
+        // down locally (like cooldowns) so the countdown stays honest between the
+        // infrequent season pushes.
+        S.season = {
+            id: s.season_id,
+            name: String(s.name || ""),
+            endsAt: Number(s.ends_in) > 0 ? now() + Number(s.ends_in) : 0,
+            essence: s.essence || null,
+            eng: s.engagement || null
+        };
+        updateMicro();
+        renderVitals();   // the topbar season pill becomes a launcher
+        if (overlayVisible("season")) renderSeason();
+        if (changed && !overlayVisible("season")) markOverlayUnread("season", true);
+    }
+
+    // Coarse countdown for a multi-day season ("12d 6h", "6h 20m", "18m").
+    // fmtDur caps at a day, so the season scale needs its own.
+    function fmtSeasonLeft(secs) {
+        secs = Math.floor(Number(secs) || 0);
+        if (secs <= 0) return "ended";
+        var d = Math.floor(secs / 86400),
+            h = Math.floor((secs % 86400) / 3600),
+            m = Math.floor((secs % 3600) / 60);
+        if (d > 0) return d + "d" + (h ? " " + h + "h" : "");
+        if (h > 0) return h + "h" + (m ? " " + m + "m" : "");
+        if (m > 0) return m + "m";
+        return "<1m";
+    }
+
+    // Placeholder reward rows (seeded but not yet named in the game DB) arrive as
+    // "Placeholder ..." over GMCP; show them as pending rather than leaking it.
+    function seasonReward(t) {
+        t = String(t || "");
+        return (!t || /placeholder/i.test(t)) ? "Reward pending" : t;
+    }
+    function seasonPct(v, dp) {
+        v = Number(v) || 0;
+        return (dp === 0 || v % 1 === 0) ? v.toFixed(0) + "%" : v.toFixed(1) + "%";
+    }
+    var SEASON_AXES = {
+        crafting: { label: "Crafting", cls: "ax-craft" },
+        exploration: { label: "Exploration", cls: "ax-explore" },
+        general: { label: "General / Play", cls: "ax-general" }
+    };
+
+    function seasonSection(label, kids) {
+        return el("div", { class: "season-sec" },
+            [el("div", { class: "season-sec-h", text: label })].concat(kids || []));
+    }
+
+    function tickSeasonCountdown() {
+        var node = dom.season && dom.season.querySelector(".season-count b");
+        if (!node || !S.season || !S.season.endsAt) return;
+        var left = Math.max(0, S.season.endsAt - now());
+        node.textContent = left > 0 ? fmtSeasonLeft(left) : "Season ended";
+    }
+
+    function renderSeason() {
+        var host = dom.season;
+        if (!host) return;
+        var s = S.season;
+        if (!s) {
+            fill(host, el("div", { class: "panel-empty", text: "Season details load when you enter the game." }));
+            return;
+        }
+        var secs = [];
+
+        var idText = "Season" + (s.id != null ? " " + s.id : "");
+        var head = el("div", { class: "season-id" }, [
+            el("span", { class: "season-id-name", text: s.name ? idText + " · " + s.name : idText })
+        ]);
+        if (s.endsAt) {
+            var left = Math.max(0, s.endsAt - now());
+            head.appendChild(el("span", { class: "season-count" }, [
+                left > 0 ? "Ends in " : "",
+                el("b", { text: left > 0 ? fmtSeasonLeft(left) : "Season ended" })
+            ]));
+        }
+        secs.push(head);
+
+        var eng = s.eng;
+        if (eng) secs.push(seasonSection("Engagement Track", engagementBlock(eng)));
+
+        if (s.essence) {
+            var tiles = [
+                seasonTile(s.essence.current, "Current"),
+                seasonTile(s.essence.lifetime, "Lifetime")
+            ];
+            if (s.essence.this_season != null) tiles.push(seasonTile(s.essence.this_season, "This Season"));
+            secs.push(seasonSection("Essence", el("div", { class: "season-tiles" }, tiles)));
+        }
+
+        if (eng && eng.axes && eng.axes.length) secs.push(seasonSection("Progress by Activity", axisBars(eng.axes)));
+        if (eng && eng.milestones && eng.milestones.length) secs.push(seasonSection("Milestones", milestoneList(eng.milestones)));
+
+        var events = (S.time && S.time.events) || [];
+        if (events.length) {
+            var chips = events.map(function (e) {
+                return el("span", { class: "season-event" }, [
+                    "⚑ " + (e.name || "Event"),
+                    e.seconds ? el("b", { text: " " + fmtDur(e.seconds) }) : null
+                ]);
+            });
+            secs.push(seasonSection("Active Events", el("div", { class: "season-events" }, chips)));
+        }
+
+        fill(host, secs);
+    }
+
+    function engagementBlock(eng) {
+        var out = [];
+        var prog = clamp(Number(eng.progress) || 0, 0, 100);
+        var total = (eng.milestones || []).length;
+        out.push(el("div", { class: "eng-top" }, [
+            el("span", { class: "eng-pct", text: (Number(eng.progress) || 0).toFixed(1) + "%" }),
+            el("span", { class: "eng-sub" }, [
+                el("b", { text: String(Number(eng.milestones_done) || 0) }),
+                " of " + total + " milestones"
+            ])
+        ]));
+
+        var wrap = el("div", { class: "eng-track-wrap" }, [
+            el("div", { class: "eng-track" }, [
+                el("div", { class: "eng-fill", style: "width:" + prog + "%" })
+            ])
+        ]);
+        (eng.milestones || []).forEach(function (m) {
+            var at = clamp(Number(m.at) || 0, 0, 100);
+            wrap.appendChild(el("span", {
+                class: "eng-tick" + (m.done ? " done" : "") + (at >= 100 ? " cap" : ""),
+                style: "left:" + at + "%"
+            }));
+        });
+        out.push(wrap);
+
+        if (eng.next) {
+            out.push(el("div", { class: "eng-next" }, [
+                "Next: ", el("b", { text: seasonPct(eng.next.remaining) }), " to go → ",
+                el("b", { text: seasonReward(eng.next.reward) }),
+                " (at " + seasonPct(eng.next.at, 0) + ")"
+            ]));
+        } else if (total) {
+            out.push(el("div", { class: "eng-next complete", text: "Track complete — every milestone reached." }));
+        }
+
+        var perks = [];
+        if (Number(eng.xp_bonus_pct) > 0) perks.push(el("span", { class: "season-pill accent", text: "+" + eng.xp_bonus_pct + "% XP" }));
+        if (Number(eng.shop_discount_pct) > 0) perks.push(el("span", { class: "season-pill ok", text: "−" + eng.shop_discount_pct + "% shops" }));
+        if (perks.length) out.push(el("div", { class: "season-perks" }, perks));
+        return out;
+    }
+
+    function seasonTile(v, label) {
+        return el("div", { class: "season-tile" }, [
+            el("span", { class: "season-tile-n", text: Number(v || 0).toLocaleString() }),
+            el("span", { class: "season-tile-l", text: label })
+        ]);
+    }
+
+    function axisBars(axes) {
+        return el("div", { class: "season-bars" }, axes.map(function (a) {
+            var cap = Number(a.cap) || 0, earned = Number(a.earned) || 0;
+            var w = cap > 0 ? clamp(Math.round(earned / cap * 100), 0, 100) : 0;
+            var meta = SEASON_AXES[a.key] || { label: a.key || "—", cls: "ax-general" };
+            return el("div", { class: "season-bar" }, [
+                el("span", { class: "season-bar-l", text: meta.label }),
+                el("span", { class: "season-bar-track" }, [
+                    el("span", { class: "season-bar-fill " + meta.cls, style: "width:" + w + "%" })
+                ]),
+                el("span", { class: "season-bar-n" }, [
+                    el("b", { text: Number(earned).toLocaleString() }), " / " + Number(cap).toLocaleString()
+                ])
+            ]);
+        }));
+    }
+
+    function milestoneList(ms) {
+        var nextSeen = false;
+        return el("div", { class: "season-ms" }, ms.map(function (m) {
+            var done = !!m.done;
+            var isNext = !done && !nextSeen;
+            if (isNext) nextSeen = true;
+            var at = Number(m.at) || 0;
+            var cap = at >= 100;
+            var row = el("div", {
+                class: "season-ms-row" + (done ? " done" : " locked") + (isNext ? " next" : "")
+            }, [
+                el("span", { class: "season-ms-mk", text: done ? "✓" : (cap ? "◆" : "○") }),
+                el("span", { class: "season-ms-at", text: seasonPct(at, 0) }),
+                el("span", { class: "season-ms-rw", text: seasonReward(m.reward) })
+            ]);
+            if (isNext) row.appendChild(el("span", { class: "season-ms-badge", text: "Next" }));
+            else if (cap) row.appendChild(el("span", { class: "season-ms-badge cap", text: "Capstone" }));
+            return row;
+        }));
+    }
+
     function applyQuests(data) {
         var list = (data && data.quests) || [];
         var body = "";
@@ -4491,6 +4718,7 @@
         dom.micro = document.getElementById("hud-micro");
         dom.professions = document.getElementById("panel-professions");
         dom.quests = document.getElementById("panel-quests");
+        dom.season = document.getElementById("panel-season");
         dom.questTracker = document.getElementById("quest-tracker");
         dom.overlay = document.getElementById("hud-overlay");
         dom.overlayTitle = document.getElementById("hud-overlay-title");
@@ -4584,6 +4812,7 @@
             if (S.affects) tickAffects();
             if (S.skills.length) tickHotbar();
             if (S.craft) tickCraft();
+            if (S.season && S.season.endsAt && overlayVisible("season")) tickSeasonCountdown();
         }, 1000);
     }
 
@@ -4664,6 +4893,7 @@
             "Char.Status": { name: "Aelwyn", "class": "Magician", race: "Elf", position: "Standing", level: 45, align: 350, xp: 1250000, tnl: 48000, gold: 18230, bank: 500000, remort: 3 },
             "Char.Vitals": { hp: 412, maxhp: 480, mp: 130, maxmp: 300, move: 198, maxmove: 240, position: "Standing", opponent_hp_pct: 35, metamagic: 60, metamagic_max: 100, metamagic_regen: 5, food: 27, water: 9 },
             "Game.Time": { hour: 21, hour12: 9, ampm: "pm", day: 14, day_name: "Sunday", month: 6, month_name: "the Long Shadows", year: 1247, night: true, season_id: 15, season_end: 0, events: [{ name: "Double Essence", seconds: 5400 }, { name: "Festival of Flames" }], moons: [{ name: "Shavar", phase: 4, phase_name: "full", up: true }, { name: "Chenchir", phase: 6, phase_name: "last quarter", up: true }] },
+            "Char.Season": { season_id: 15, name: "Enigma of the Tempest", ends_in: 1058400, essence: { current: 1240, lifetime: 8890 }, engagement: { progress: 54.0, milestones_done: 5, xp_bonus_pct: 8, shop_discount_pct: 15, axes: [{ key: "crafting", earned: 200, cap: 365, weight: 3 }, { key: "exploration", earned: 180, cap: 310, weight: 4 }, { key: "general", earned: 140, cap: 200, weight: 4 }], milestones: [{ at: 8.0, done: true, reward: "+4% XP (passive)" }, { at: 20.0, done: true, reward: "an ornate chest + -5% shop prices (passive)" }, { at: 30.0, done: true, reward: "+40 Renown" }, { at: 42.0, done: true, reward: "+4% XP (passive) + Memory: a tempest's echo" }, { at: 54.0, done: true, reward: "-10% shop prices (passive)" }, { at: 68.0, done: false, reward: "Memory: a tempest's echo" }, { at: 82.0, done: false, reward: "+80 Renown" }, { at: 100.0, done: false, reward: "Title: World-Walker" }], next: { at: 68.0, remaining: 14.0, reward: "Memory: a tempest's echo" } } },
             "Room.Info": { num: 3001, name: "The Grand Concourse", area: "Ishar Nexus", environment: "City", exits: { n: 3002, e: 3005, s: 3008, w: 3010, u: 3100, d: 3200, into: 3500 } },
             "Room.Occupants": { occupants: [
                 { keyword: "guard", short_desc: "a towering city guard", handle: "1.guard", is_player: false, is_dead: false, is_shopkeeper: false, hostile_hint: "neutral", position: "Standing", is_loyal_follower: false, is_my_follower: false, fighting_you: false, is_your_target: false },
