@@ -146,6 +146,11 @@
             <!-- Phone tap-to-move: a translucent compass overlaid on the terminal,
                so a thumb can move without hiding the view. Toggleable. -->
             <div id="rose-overlay" hidden aria-label="Tap-to-move compass"></div>
+            <!-- Tracked-quest objectives: the one sanctioned persistent surface
+               over the terminal (docs/design/decisions.md, tracked-objectives
+               amendment). Collapsible; hidden until a tracked quest is active.
+               hud.js renders the whole thing. -->
+            <div id="quest-tracker" hidden aria-label="Tracked quest objectives"></div>
             <button type="button" class="hud-btn hud-btn--icon" id="rose-toggle" aria-pressed="true"
                     title="Toggle the tap-to-move compass" aria-label="Toggle the tap-to-move compass">
                 {% bi "compass" %}
@@ -217,6 +222,11 @@
                         aria-pressed="false" aria-haspopup="dialog" aria-controls="hud-overlay"
                         title="Map (Ctrl+M)" aria-label="Map (Ctrl+M)">
                     {% bi "map" %}
+                </button>
+                <button type="button" class="micro-btn" data-overlay="quests" hidden
+                        aria-pressed="false" aria-haspopup="dialog" aria-controls="hud-overlay"
+                        title="Quest Log (Ctrl+Q)" aria-label="Quest Log (Ctrl+Q)">
+                    {% bi "journal-bookmark" %}
                 </button>
             </nav>
         </div>
@@ -308,6 +318,10 @@
             {% bi "map" %}
             <span>Map</span>
         </button>
+        <button type="button" data-panel="quests" aria-pressed="false" hidden>
+            {% bi "journal-bookmark" %}
+            <span>Quests</span>
+        </button>
     </nav>
 
     <div id="hud-sheet" hidden>
@@ -352,6 +366,7 @@
             <section id="panel-who" class="panel"></section>
             <section id="panel-professions" class="panel"></section>
             <section id="panel-map" class="panel"></section>
+            <section id="panel-quests" class="panel"></section>
         </div>
     </div>
 
@@ -1029,7 +1044,18 @@
                     var e = document.getElementById("ishar-skill-icons");
                     return e ? JSON.parse(e.textContent) : {};
                 } catch (x) { return {}; }
-            })()
+            })(),
+            // Quest Log endpoints: the static catalog + account tracking state
+            // (same CSRF source as the map — the cookie is HttpOnly).
+            quests: {
+                authed: {{ user.is_authenticated|yesno:"true,false" }},
+                csrf: (document.querySelector("#command-form [name=csrfmiddlewaretoken]") || {}).value || "",
+                urls: {
+                    catalog: "{% url 'quest_catalog' %}",
+                    tracked: "{% url 'quest_tracked' %}",
+                    track: "{% url 'quest_track' %}"
+                }
+            }
         });
     }
     // The map module rides the same page: account gate, reversed endpoint

@@ -51,6 +51,9 @@
     // Live overlays fed by GMCP (isharmud/ishar-mud#1834), not persisted:
     var groupMates = [];    // non-self group members carrying a location
     var deathMark = null;   // {vnum, roomName, zoneName, time} — last death
+    // Quest pins (Room.QuestMarkers, isharmud/ishar-mud#1836): the current
+    // zone's giver "!" / turn-in "?" set, replaced wholesale per message.
+    var questMarks = { zone: null, markers: [] };
     var exploredZones = null; // cached [{id,name,count,anchor}] for the picker
 
     // ------------------------------------------------------------------
@@ -96,6 +99,7 @@
             danger: v("--ac-danger", "#d64b4b"),
             panel: v("--ac-panel", "#131316"),
             group: v("--hud-group", "#3fb6a8"),
+            gold: v("--hud-gold", "#cdcd00"),
             ter: {}
         };
         ["indoor", "city", "field", "forest", "hill", "mountain", "water",
@@ -631,6 +635,39 @@
                 }
             }
         }
+
+        // ---- quest pins (current zone; #1836) ----
+        // WoW convention: gold "!" = a giver with quests you can start,
+        // teal "?" = a ready turn-in. A badge circle at the room's top-right
+        // corner; a room with both kinds shows the "?" (turn-in wins — it's
+        // the actionable one). Fog-gated upstream (questMarksInZone).
+        if (opts.questMarks) {
+            var qkeys = Object.keys(opts.questMarks);
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            for (var qi = 0; qi < qkeys.length; qi++) {
+                var qpos = L.pos[qkeys[qi]];
+                if (!qpos || qpos.z !== view.z) continue;
+                if (qpos.x < minWX || qpos.x > maxWX ||
+                    qpos.y < minWY || qpos.y > maxWY) continue;
+                var pins = opts.questMarks[qkeys[qi]];
+                var turnin = pins.some(function (p) { return p.kind === "turnin"; });
+                var qr = Math.max(3.5, box * 0.21);
+                var qxp = sx(qpos.x) + half - qr * 0.6, qyp = sy(qpos.y) - half + qr * 0.6;
+                ctx.fillStyle = turnin ? palette.group : palette.gold;
+                ctx.beginPath();
+                ctx.arc(qxp, qyp, qr, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = palette.panel;
+                ctx.lineWidth = 1;
+                ctx.stroke();
+                if (box >= 14) {
+                    ctx.fillStyle = "#08110f";
+                    ctx.font = "700 " + Math.round(qr * 1.6) + "px system-ui, sans-serif";
+                    ctx.fillText(turnin ? "?" : "!", qxp, qyp + 0.5);
+                }
+            }
+        }
     }
 
     // Invert a canvas point to a room vnum (grid hit-test).
@@ -840,6 +877,7 @@
         // re-primes them on the next entry.
         groupMates = [];
         deathMark = null;
+        questMarks = { zone: null, markers: [] };
         redraw();
     }
     function onConnected(on) {
@@ -895,6 +933,46 @@
     // A mate we can actually plot / jump to: located, in a discovered zone.
     function mateLocatable(m) {
         return !!(m && m.vnum != null && zoneDiscovered(m.zone));
+    }
+
+    function onQuestMarkers(data) {
+        if (!enabled()) return;
+        var zone = data && typeof data.zone === "number" ? data.zone : null;
+        var markers = (data && data.markers) || [];
+        questMarks = {
+            zone: zone,
+            markers: markers.filter(function (m) {
+                return m && typeof m.vnum === "number" &&
+                    (m.kind === "giver" || m.kind === "turnin");
+            }).map(function (m) {
+                return {
+                    vnum: m.vnum,
+                    kind: m.kind,
+                    mob: H ? H.stripColor(String(m.mob || "")) : String(m.mob || ""),
+                    quests: (m.quests || []).map(function (q) {
+                        return {
+                            id: q && q.id,
+                            name: q && q.name
+                                ? (H ? H.stripColor(String(q.name)) : String(q.name)) : ""
+                        };
+                    })
+                };
+            })
+        };
+        redraw();
+    }
+    // Pins for the given zone, keyed by room vnum — only rooms the account
+    // has DISCOVERED: the server filters *whether* a pin exists (per-viewer
+    // quest gates), fog filters *where* it may be drawn.
+    function questMarksInZone(zoneId) {
+        var byVnum = {};
+        if (zoneId == null || questMarks.zone !== zoneId) return byVnum;
+        var fs = fogSet(zoneId);
+        questMarks.markers.forEach(function (m) {
+            if (!fs[m.vnum]) return;
+            (byVnum[m.vnum] = byVnum[m.vnum] || []).push(m);
+        });
+        return byVnum;
     }
 
     function onDeath(data) {
@@ -1006,6 +1084,7 @@
         mini.wrap.classList.toggle("unseen", cur.unseen);
         if (cur.zone != null) {
             drawMap(mini.canvas, cur.zone, miniView(), {
+                questMarks: questMarksInZone(cur.zone),
                 curVnum: cur.vnum, unseen: cur.unseen,
                 pathVnums: walkPathVnums(), pathEdges: walkPathEdges(),
                 deathVnum: deathVnumInZone(cur.zone),
@@ -1241,6 +1320,11 @@
         if (!fs[v]) { H.showTip(big.anchor, { name: "Unexplored" }); return; }
         var parts = [room.t];
         if (deathMark && v === deathMark.vnum) parts.push("💀 you died here");
+        var pins = questMarksInZone(vnumZone[v])[v] || [];
+        pins.forEach(function (p) {
+            var names = p.quests.map(function (q) { return q.name; }).filter(Boolean).join(", ");
+            parts.push((p.kind === "turnin" ? "? " : "! ") + p.mob + (names ? " — " + names : ""));
+        });
         var here = groupMates.filter(function (m) { return m.vnum === v; });
         if (here.length) parts.push(here.map(function (m) { return m.name; }).join(", "));
         var note = noteFor(v);
@@ -1566,6 +1650,7 @@
         var zid = viewedZone();
         if (!bigOpen() || zid == null) return;
         drawMap(big.canvas, zid, bigView, {
+            questMarks: questMarksInZone(zid),
             curVnum: cur.vnum, unseen: cur.unseen,
             pathVnums: walkPathVnums(), pathEdges: walkPathEdges(),
             searchVnum: searchState.i >= 0 ? searchState.list[searchState.i] : null,
@@ -2123,6 +2208,7 @@
         onConnected: onConnected,
         onGroup: onGroup,
         onDeath: onDeath,
+        onQuestMarkers: onQuestMarkers,
         memberWhere: memberWhere,
         renderMini: renderMini,
         renderOverlay: renderOverlay,
