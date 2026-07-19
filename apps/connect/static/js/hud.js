@@ -599,7 +599,7 @@
                 // path uses to avoid rebuilding a ~400-row list off-screen.
                 if (abilitiesVisible()) renderAbilities();
                 break;
-            case "Char.Status": S.status = data; renderVitals(); renderTrain(); renderGroup(); updateMicro(); break;
+            case "Char.Status": S.status = data; renderVitals(); renderTrain(); renderXp(); renderGroup(); updateMicro(); break;
             case "Game.Time": S.time = data; renderVitals(); break;
             case "Room.Info":
                 S.room = data; renderRoom();
@@ -622,7 +622,7 @@
                 S.inventory = data; renderInventory(); renderEquipment();
                 if (overlayVisible("professions")) renderProfessions();
                 break;
-            case "Char.Train": S.train = data; renderTrain(); updateMicro(); break;
+            case "Char.Train": S.train = data; renderTrain(); renderXp(); updateMicro(); break;
             case "Char.Affects": S.affects = data; stampAffectExpiry(data); renderSelfAffects(); renderTracked(); break;
             case "Group.Update":
                 S.group = data; renderGroup();
@@ -1497,26 +1497,18 @@
     }
 
     // ------------------------------------------------------------------
-    // Character sheet — Char.Train (stats/resources/XP) plus the Char.Status
+    // Character sheet — Char.Train (stats/resources) plus the Char.Status
     // reference kv (align/currency/remort), folded together now that both are
     // one overlay app rather than a column panel and a tab. Renders bare (the
-    // window/sheet supplies the title). Affects graduated out of the old Status
-    // tab: self buffs/debuffs are ambient (renderSelfAffects), maintained magic
-    // is Tracked Spells (renderTracked). See docs/design/decisions.md
-    // (2026-07-18 re-tiering, 2026-07-19 overlay migration).
+    // window/sheet supplies the title). XP graduated out to the ambient strip
+    // (renderXp); affects graduated out of the old Status tab: self buffs/
+    // debuffs are ambient (renderSelfAffects), maintained magic is Tracked
+    // Spells (renderTracked). See docs/design/decisions.md (2026-07-18
+    // re-tiering, 2026-07-19 overlay migration + XP strip).
     // ------------------------------------------------------------------
     function renderTrain() {
         var t = S.train, st = S.status, kids = [];
         if (t) {
-            if (t.xp_pct != null) {
-                kids.push(el("div", { class: "vbar xp" }, [
-                    el("span", { class: "vbar-label", text: "XP" }),
-                    el("span", { class: "vbar-track" }, [
-                        el("span", { class: "vbar-fill", style: "width:" + clamp(t.xp_pct, 0, 100) + "%" }),
-                        el("span", { class: "vbar-text", text: clamp(t.xp_pct, 0, 100) + "%" })
-                    ])
-                ]));
-            }
             if (t.can_advance) kids.push(el("button", { class: "action-btn", "data-cmd": "advance", text: "⬆ Advance available" }));
             var ul = el("ul", { class: "kv" });
             (t.stats || []).forEach(function (s) {
@@ -1540,6 +1532,27 @@
             kids.push(sul);
         }
         fill(dom.train, kids.length ? kids : [el("div", { class: "panel-empty", text: "—" })]);
+    }
+
+    // ------------------------------------------------------------------
+    // XP — a thin ambient strip below the terminal. The fill is
+    // Char.Train.xp_pct; the label names the level it's climbing toward
+    // (Char.Status.level + 1). Progress-to-level is glanced at constantly, so
+    // it earns permanent space rather than living in the Character overlay
+    // (docs/design/decisions.md 2026-07-19 XP strip). Hidden until the feed
+    // arrives so the strip never shows an empty bar.
+    // ------------------------------------------------------------------
+    function renderXp() {
+        if (!dom.xpstrip) return;
+        var t = S.train;
+        if (!t || t.xp_pct == null) { dom.xpstrip.hidden = true; return; }
+        var p = clamp(t.xp_pct, 0, 100);
+        dom.xpFill.style.width = p + "%";
+        var lvl = S.status && S.status.level != null ? Number(S.status.level) : null;
+        dom.xpLabel.textContent = lvl != null
+            ? "XP — " + p + "% to level " + (lvl + 1)
+            : "XP — " + p + "%";
+        dom.xpstrip.hidden = false;
     }
 
     function mini(p, cls) {
@@ -3625,7 +3638,7 @@
     // ------------------------------------------------------------------
     function renderAll() {
         renderVitals(); renderSelfAffects(); renderRoom(); renderOccupants(); renderGroup();
-        renderEquipment(); renderInventory(); renderTrain(); renderTracked();
+        renderEquipment(); renderInventory(); renderTrain(); renderXp(); renderTracked();
         renderWho(); renderChat(); renderHotbar(); renderAbilities(); renderProfessions(); updateMicro();
     }
     function reset() {
@@ -3667,6 +3680,9 @@
         dom.chat = document.getElementById("panel-chat");
         dom.who = document.getElementById("panel-who");
         dom.hotbar = document.getElementById("hud-hotbar");
+        dom.xpstrip = document.getElementById("hud-xpstrip");
+        dom.xpFill = dom.xpstrip && dom.xpstrip.querySelector(".xp-fill");
+        dom.xpLabel = dom.xpstrip && dom.xpstrip.querySelector(".xp-label");
         dom.micro = document.getElementById("hud-micro");
         dom.professions = document.getElementById("panel-professions");
         dom.overlay = document.getElementById("hud-overlay");

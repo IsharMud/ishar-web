@@ -171,6 +171,14 @@
                 &#x25BC; Latest
             </button>
         </div>
+        {# XP: a thin ambient strip below the terminal — progress-to-level is
+           glanced at constantly, so it earns permanent space (graduated off the
+           Character overlay, docs/design/decisions.md 2026-07-19 XP strip).
+           Hidden until Char.Train arrives; hud.js fills it. #}
+        <div id="hud-xpstrip" hidden>
+            <span class="xp-fill"></span>
+            <span class="xp-label"></span>
+        </div>
         <!-- Action row: the skill bar plus the micro-menu — small icon buttons
            that open transient overlay apps (Ctrl+letter hotkeys). See
            docs/design/decisions.md "The HUD extension model". Buttons are
