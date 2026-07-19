@@ -173,6 +173,9 @@ body.connect-page #content { padding: .5rem !important; }
 .v-tgt { font-size: .7rem; font-weight: 700; padding: 1px 8px; border-radius: 999px; border: 1px solid; max-width: 12rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .v-tgt.hostile { color: var(--hud-hostile); border-color: rgba(214, 75, 75, .5); background: var(--ac-danger-wash); }
 .v-tgt.friendly { color: var(--hud-friendly); border-color: rgba(76, 187, 23, .5); background: var(--ac-ok-wash); }
+/* The hostile chip is a button (tap = cycle); keep the pill look. */
+button.v-tgt { font-family: inherit; margin: 0; cursor: pointer; }
+button.v-tgt:hover { border-color: rgba(214, 75, 75, .8); }
 /* Target-of-target readout beside the Foe bar: who your foe is swinging at. */
 .v-foe-tgt { flex: none; font-size: .7rem; color: var(--ac-dim); white-space: nowrap; align-self: center; }
 .v-foe-tgt.you { color: var(--hud-hostile); font-weight: 700; }
@@ -603,6 +606,8 @@ body.connect-page #content { padding: .5rem !important; }
 .occ-row.friendly { border-left-color: var(--hud-friendly); }
 .occ-row.neutral { border-left-color: var(--ac-border-2); }
 .occ-row.is-dead { opacity: .5; cursor: default; }
+/* The ⚔ target's row — the Alt+T cycle is legible in the panel, not just the chip. */
+.occ-row.is-tgt { background: var(--ac-danger-wash); }
 .occ-icon { flex: none; width: 1rem; text-align: center; color: var(--ac-dim); }
 .occ-row.hostile .occ-icon { color: var(--hud-hostile); }
 .occ-row.friendly .occ-icon { color: var(--hud-friendly); }
@@ -1101,6 +1106,38 @@ body.connect-page #content { padding: .5rem !important; }
    hidden — the dock is the phone's micro-menu. */
 #hud-actionrow { display: flex; gap: 8px; align-items: center; flex: none; min-width: 0; }
 #hud-actionrow #hud-hotbar { flex: 1 1 auto; min-width: 0; }
+
+/* ----- Attack cluster: the attack/assist tile + the ⚔ target chip it fires at.
+   Heads the action row; the chip is the phone's target readout (the vitals
+   target chips are desktop-only). Armed = a target is set (kill); otherwise
+   the tile assists (joins the group's fight). ----- */
+#hud-attack { display: flex; align-items: center; gap: 5px; flex: none; min-width: 0; }
+#hud-attack[hidden] { display: none; }
+.skill--attack .skill-icon { color: var(--ac-text); }
+.skill--attack.armed { border-bottom-color: var(--ac-danger); }
+.skill--attack.armed .skill-icon { color: var(--hud-hostile); }
+.atk-chip { display: flex; align-items: stretch; min-width: 0; }
+.atk-tgt {
+    min-width: 0; max-width: 9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    font-family: inherit; font-size: .7rem; font-weight: 700; line-height: 1.2;
+    margin: 0; padding: 2px 8px; cursor: pointer;
+    color: var(--ac-dim); background: var(--ac-elev);
+    border: 1px solid var(--ac-border); border-radius: 999px;
+}
+.atk-tgt:hover { border-color: var(--ac-accent); color: var(--ac-text); }
+.atk-tgt.hostile {
+    color: var(--hud-hostile); background: var(--ac-danger-wash);
+    border-color: rgba(214, 75, 75, .5); border-radius: 999px 0 0 999px; border-right: 0;
+}
+.atk-tgt.hostile:hover { color: var(--hud-hostile); border-color: rgba(214, 75, 75, .8); }
+.atk-tgt.fired { border-color: var(--ac-accent); }
+.atk-x {
+    flex: none; margin: 0; padding: 2px 8px 2px 6px; cursor: pointer;
+    font-family: inherit; font-size: .7rem; font-weight: 700; line-height: 1.2;
+    color: var(--hud-hostile); background: var(--ac-danger-wash);
+    border: 1px solid rgba(214, 75, 75, .5); border-left: 0; border-radius: 0 999px 999px 0;
+}
+.atk-x:hover { color: #fff; }
 #hud-micro { display: flex; gap: 4px; flex: none; margin-left: auto; }
 .micro-btn {
     position: relative; width: 32px; height: 32px; padding: 0; cursor: pointer; overflow: hidden;
@@ -1124,7 +1161,7 @@ body.connect-page #content { padding: .5rem !important; }
     background: var(--hud-event); pointer-events: none;
 }
 .micro-strip[hidden] { display: none; }
-@media (max-width: 767.98px) { #hud-micro { display: none; } }
+@media (max-width: 767.98px) { #hud-micro { display: none; } .atk-tgt { max-width: 7rem; } }
 
 /* ----- Overlay window (micro-menu apps, desktop) ----- */
 #hud-overlay {

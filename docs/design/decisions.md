@@ -9,6 +9,51 @@ Format: `## YYYY-MM-DD — Title` · **Decision** · **Why** · (optional) **Not
 
 ---
 
+## 2026-07-19 — HUD combat layer II: target cycling + the attack/assist cluster (Alt = act)
+
+**Decision.** The ⚔ default target graduates from a context-menu toggle to a
+first-class combat control, and attack becomes one press. Three pieces
+(isharmud/ishar-web#153):
+
+- **Cycling.** `Alt+T` (Shift reverses) — and `Tab` on an *empty* input line,
+  the MUD tab-targeting reflex; completion keeps Tab once a word precedes the
+  caret, so the two never collide. The cycle order is the Room panel's own:
+  hostiles and anyone `fighting_you` first, then neutrals, feed (= parser)
+  order within a tier, wrap-around. It never lands on players, shopkeepers,
+  followers, or friendly-hinted occupants — those stay context-menu-only
+  deliberate acts (the misclick-safety rule from combat layer I). Neutrals
+  ARE included: killable neutral mobs are the normal grind, and a
+  hostiles-only cycle would be useless most nights.
+- **The attack/assist cluster** (`#hud-attack`) heads the action row: a
+  `.skill`-chrome tile (crossed swords, key badge "A") plus the `.atk-tgt`
+  target chip. `Alt+A` / tap resolves at press time: target set →
+  `kill <handle>` (the server-computed round-trippable handle, never a name);
+  no target → bare `assist`, which the game resolves to whoever is fighting
+  you or your group. "No target" is thus the *join-the-fight* path — the
+  client never auto-picks a victim. Armed state = danger accent on tile +
+  chip; chip tap cycles, its `✕` clears, and the structured tooltip previews
+  the exact command (`kill 1.thug` / "join your group's fight").
+- **Surfacing.** The chip is the phone's target readout (vitals `.v-targets`
+  chips are desktop-only); the vitals ⚔ chip becomes a button that also
+  cycles; the targeted Room row gets an `.is-tgt` wash; `/help` documents the
+  keys. The cluster hides until connected — no dead furniture on the login
+  screen.
+
+**Why.** Melee had no HUD fast path for the game's most common action (three
+taps through a menu), and nothing surfaced `assist` at all. The pieces —
+handles, `S.tgtHostile`, target-aware casting — already existed; this is the
+missing input layer, not a new data model.
+
+**Notes.** Hotkey families are now: `Ctrl+letter` opens overlays,
+`Alt+letter/digit` **acts** (bar slots, `Alt+``` paging, now T/A). Combat keys
+match on `e.code` (`KeyT`/`KeyA`) — macOS Alt+letter composes characters and
+Shift changes case, so `e.key` is unreliable there. `Ctrl+T` was never an
+option (browser-reserved, uninterceptable). Stale-handle safety is unchanged:
+`applyOccupants` drops a dead/absent target, and the server re-validates every
+command. Verified end-to-end in the demo harness: simulated Alt+T/Alt+A and
+empty-input Tab produced `kill 1.thug` → `kill 1.bandit` → `assist` through
+the real keydown → `sendCmd` path, plus desktop/phone screenshots.
+
 ## 2026-07-19 — Quest Log overlay app + the tracked-objectives surface (a scoped tier-model amendment)
 
 **Decision.** The Quest Log ships as the seventh overlay app — **Ctrl+Q**,
