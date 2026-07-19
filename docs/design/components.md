@@ -406,8 +406,9 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
   overlay section below and decisions.md 2026-07-19).
 - **`.panel` / `.panel-h`** — the HUD's compact panel + uppercase header
   (denser cousins of `.ac-panel` / `.ac-panel__h`).
-- **`.vbar` / `.mini`** — labeled vitals bars (HP/MP/MV/Foe/XP/MM/Edge) and
-  the tiny group-member triple.
+- **`.vbar` / `.mini`** — labeled vitals bars (HP/MP/MV/Foe/MM/Edge) and
+  the tiny group-member triple. (XP is no longer a `.vbar` — it graduated to the
+  ambient `#hud-xpstrip`; see below.)
 - **`.vbar-reserve`** — the hunger (`.food`, apple) / thirst (`.water`, droplet)
   icon riding the end of the HP and MV bars; `data-state` `ok`/`low`/`crit`
   tints it dim → `--hud-edge` → `--ac-danger`. Built client-side via `biSvg()`
@@ -418,6 +419,14 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
   only within `AFFECT_SOON` (60s) of expiry, so ~10 buffs stay a compact
   wrapping row. From `Char.Affects.buffs`/`.debuffs` (see decisions.md
   2026-07-18, "HUD affects split").
+- **`#hud-xpstrip`** — the ambient XP strip below the terminal (between it and
+  `#hud-actionrow`). A full-width thin bar: a `.xp-fill` (`--hud-gold`, width =
+  `Char.Train.xp_pct`) under a centered `.xp-label` — `XP — <pct>% to level
+  <next>` (`Char.Status.level + 1`), light text with a dark shadow so it reads
+  over both the fill and the bare track. `renderXp()` swaps the width + label
+  text; `hidden` until `Char.Train` arrives, and hidden in `.hud-off`. Ambient on
+  phones too (survives above the action slots at 390px). See decisions.md
+  2026-07-19, "HUD XP strip".
 - **`.hud-btn`(`--icon`)** — the topbar button, aligned with `.ac-btn`.
 - **`#hud-dock button`** — icon-over-label phone tabs; `.unread` renders an
   amber dot (used by Chat), `.alarm` a pulsing caution dot (used by Tracked
@@ -508,8 +517,9 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
 - **Reference overlay apps** (`OVERLAYS` keys `equipment`/`train`/`abilities`/
   `who`, migrated out of the columns + right-column tab bar — decisions.md
   2026-07-19): **Gear** (`renderEquipment`, worn `.item-row`s by slot),
-  **Character** (`renderTrain` — the XP `.vbar`, stats/resources/aux `.kv`, and
-  the folded-in `Char.Status` reference kv; there is no separate Status panel),
+  **Character** (`renderTrain` — stats/resources/aux `.kv` and the folded-in
+  `Char.Status` reference kv; there is no separate Status panel, and XP now lives
+  in the ambient `#hud-xpstrip`, not here),
   **Abilities** (`renderAbilities`, the `.ab-*` browser below), and **Who**
   (`renderWho`, `.who-list`). Each renders **bare** (the window/sheet chrome
   supplies the title — no in-panel `panelHeader`) and is availability-gated on

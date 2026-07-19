@@ -9,6 +9,41 @@ Format: `## YYYY-MM-DD — Title` · **Decision** · **Why** · (optional) **Not
 
 ---
 
+## 2026-07-19 — HUD XP strip: progress-to-level graduates to a thin ambient strip
+
+**Status.** Third slice of the re-tiering (#141, "XP strip"). Builds on the
+affects split (2026-07-18) and the overlay migration (2026-07-19). Still pending
+per that issue: the Inventory overlay + item pinning, the chat channel filter,
+and group density presets.
+
+**Decision.** XP leaves the Character overlay and becomes a **thin ambient strip**
+(`#hud-xpstrip`) in the center column, pinned between the terminal and the action
+row. Full-width so its centered label — `XP — <pct>% to level <next>` — reads; the
+gold fill is `Char.Train.xp_pct`, the level named is `Char.Status.level + 1`.
+`renderXp()` sets the fill width and the label `textContent`; the strip stays
+`hidden` until `Char.Train` arrives, so it never shows an empty bar. It hides in
+`.hud-off` with the rest of the interface. The XP `.vbar` is **deleted** from
+`renderTrain` (the Character overlay now carries only stats/resources/aux + the
+Status kv), and the now-unused `.vbar.xp` fill rule is removed.
+
+**Why.** The re-tiering rule: *a panel earns permanent space only by doing what
+the scrollback can't.* Progress-to-level is glanced at constantly — every kill
+nudges it — so it belongs in the always-visible ambient tier, not buried one tap
+deep in an on-demand overlay. A dedicated strip (vs. crowding it into the vitals
+`.vbar` cluster) keeps the "% to next level" label legible and reads as its own
+thing. Ambient means both surfaces: it survives on the 390px phone above the
+action slots, the only XP the player needs without opening a window.
+
+**Notes.** Discipline unchanged: `textContent`/class swaps (no `innerHTML`), the
+fill transition gated behind `prefers-reduced-motion`, tokens only (`--hud-gold`
+on `--ac-bg`, light label with a dark text-shadow so it reads over both the fill
+and the bare track). No new tracked assets beyond the edited `hud.js`/`hud.css`
+(force-added past the `static/` gitignore) and the one-line `connect.html` markup.
+Verified by loading the real `hud.js`/`hud.css` + expanded template markup against
+`/connect?demo=1` under headless Chromium — desktop (strip at 62% below the
+terminal) and 390px (strip survives the ambient row). Component catalog updated
+(`components.md`).
+
 ## 2026-07-19 — HUD overlay migration: Gear/Character/Abilities/Who leave the columns; the right-column tab bar is gone
 
 **Status.** Second slice of the re-tiering (#141, "overlay migration"). Builds

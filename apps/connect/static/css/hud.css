@@ -93,6 +93,7 @@ body.connect-page #content { padding: .5rem !important; }
 .hud-off #rose-overlay,
 .hud-off #rose-toggle,
 .hud-off .col-toggle,
+.hud-off #hud-xpstrip,
 .hud-off #vitals-bar { display: none; }
 
 @media (max-width: 767.98px) {
@@ -209,7 +210,6 @@ body.connect-page #content { padding: .5rem !important; }
 .vbar.mp .vbar-fill { background: var(--hud-mp); }
 .vbar.mv .vbar-fill { background: var(--hud-mv); }
 .vbar.tgt .vbar-fill { background: var(--hud-tgt); }
-.vbar.xp .vbar-fill { background: var(--hud-gold); }
 .vbar.mm .vbar-fill { background: var(--hud-mm); }
 .vbar.edge .vbar-fill { background: var(--hud-edge); }
 .vbar-text {
@@ -943,6 +943,28 @@ body.connect-page #content { padding: .5rem !important; }
 @property --sweep { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
 @media (prefers-reduced-motion: no-preference) {
     .skill-sweep { transition: --sweep 1s linear; }
+}
+
+/* ----- XP: thin ambient strip below the terminal (Char.Train.xp_pct) ----- */
+/* Full-width so the centered "62% to level 46" label reads; the label sits over
+   both the gold fill and the bare track, so it's light with a dark shadow rather
+   than the black-on-gold the fill alone would carry. */
+#hud-xpstrip {
+    position: relative; flex: none; height: 16px; overflow: hidden;
+    background: var(--ac-bg); border: 1px solid var(--ac-border); border-radius: 8px;
+}
+#hud-xpstrip[hidden] { display: none; }
+#hud-xpstrip .xp-fill {
+    position: absolute; inset: 0 auto 0 0; height: 100%;
+    background: var(--hud-gold); opacity: .5; transition: width .2s ease;
+}
+#hud-xpstrip .xp-label {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-size: .62rem; font-weight: 700; letter-spacing: .04em;
+    color: var(--ac-text); text-shadow: 0 1px 2px rgba(0, 0, 0, .85);
+}
+@media (prefers-reduced-motion: reduce) {
+    #hud-xpstrip .xp-fill { transition: none; }
 }
 
 /* ----- Action row: skill bar + micro-menu (overlay app launchers) ----- */
