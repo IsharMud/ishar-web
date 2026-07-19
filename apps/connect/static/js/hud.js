@@ -74,7 +74,7 @@
     var expanded = loadSet("ishar.itemsExpanded");
     // Chat: a single-select category filter over the log, and the channel the
     // targeted input routes to. Categories fold the game's real channel labels
-    // (Char.Comm / Comm.Channel: World, Bazaar, Recruit, Say, Shout, Yell, Tell,
+    // (Comm.Channel: World, Bazaar, Recruit, Say, Shout, Yell, Tell,
     // Whisper, Group, System, …) into Public / Tells / Group. The send list is
     // [display, verb] — "Group" routes via `gtell`. Both prefs persisted.
     var CHAT_CATS = ["all", "public", "tells", "group"];
@@ -4916,7 +4916,13 @@
             var b = dom.dock && dom.dock.querySelector('button[data-panel="' + n + '"]');
             if (b) {
                 b.setAttribute("aria-pressed", n === name ? "true" : "false");
-                if (n === name) { var l = b.querySelector("span"); title = l ? l.textContent : n; }
+                // Overlay apps keep one name on both form factors ("Character",
+                // not the dock's abbreviated "Char"); persistent panes fall back
+                // to their dock label.
+                if (n === name) {
+                    var ov = overlayByKey(n), l = b.querySelector("span");
+                    title = ov ? ov.title : (l ? l.textContent : n);
+                }
             }
         });
         if (dom.sheet) dom.sheet.hidden = !name;
@@ -5002,10 +5008,13 @@
         S.skills = []; S.cooldownExpiry = {}; S.cooldownTotal = {}; S.usable = {};
         S.professions = []; S.recipes = []; S.craft = null;
         S.quests = []; S.questMarkers = null;
+        S.season = null; S.achievements = null;
         S.tgtHostile = null; S.tgtFriendly = null;
         lastVitalsBody = null;
         lastProfessionsBody = null;
         lastQuestsBody = null;
+        lastSeasonBody = null;
+        lastAchvBody = null;
         if (mapMod) mapMod.onReset();
         renderQuestTracker();
         renderAll();
