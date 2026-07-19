@@ -9,6 +9,69 @@ Format: `## YYYY-MM-DD — Title` · **Decision** · **Why** · (optional) **Not
 
 ---
 
+## 2026-07-19 — HUD Chat: category filter + channel-targeted input (earns the pane vs. the terminal)
+
+**Status.** Fifth slice of the re-tiering (#141, "chat filter/channel input").
+Builds on the affects split (2026-07-18) and the overlay migration / XP strip /
+Bags-overlay slices (2026-07-19). Only **group density presets** remain pending
+from the issue.
+
+**The real channel taxonomy (corrected).** `Comm.Channel` carries a `channel`
+**label** — from ishar-mud `get_message_type_string`: **World, Bazaar, Recruit,
+Say, Shout, Yell, Tell, Whisper, Group, System**, plus the staff channels
+**Imm / Artisan / Eternal / God** — and a **fully-rendered `text` line**. The
+global channels (`do_channel`) bake a `[World] ` prefix into the text; say/tell/
+etc. are sentence-form (`Boric told you, "…"`). The old demo feed used
+`gossip`/`auction`/`newbie` — none of which are real Ishar channels — so it was
+**corrected** to the real labels/formats (the send verbs are `world`/`bazaar`/
+`recruit`, not gossip/auction/newbie).
+
+**Decision.** Chat stays the second persistent right-column pane (below Tracked
+Spells; the dock sheet on phones) but earns that space with two things a raw
+scrollback echo can't do:
+
+- **A category filter over the log — `All / Public / Tells / Group`**, a
+  single-select segmented control (`.chat-tabs`, `data-`less inline handlers).
+  The many real labels fold into three buckets (`chatCat`): **Tells** = Tell +
+  Whisper (Reply/Ask ride `MSG_TELL`), **Group** = the `Group` channel (gtell +
+  death/level notices), **Public** = everything else (World/Bazaar/Recruit/Say/
+  Shout/Yell/System/staff). Four **stable** segments (never reshuffle as new
+  channels arrive) read cleanly at 390px; per-channel chips were rejected as too
+  wide and jumpy. Persisted (`ishar.chatFilter`).
+- **A channel-targeted input** — a `<select>` (**World** default · Bazaar ·
+  Recruit · Say · Shout · Yell · Group) over a message field. Pick a channel,
+  type, Enter: it routes `<verb> <text>` through `api.send` **without the verb**
+  (Group → `gtell`). Persisted (`ishar.chatChannel`); the placeholder tracks the
+  choice (`message #world…`). Sending reclaims focus from the main input so you
+  can keep chatting.
+- **Colour-coded, de-duplicated log.** The line keeps a channel **tag** tinted
+  by category — Public `--ac-accent`, Tells `--hud-mm`, Group `--hud-group` — so
+  a glance sorts even the All view; the redundant `[World] ` prefix the game
+  bakes into `text` is stripped (the tag already conveys it).
+- **Chat becomes a full persistent pane.** It gains a collapsible `panelHeader`
+  like its siblings; the inner **`.chat-log`** is now the scroll container
+  (`appendChat` pins to it), with the filter tabs above and the input below.
+
+**Why.** The re-tiering rule: *a panel earns permanent space only by doing what
+the scrollback can't.* Every channel already streams through the terminal, so a
+chat pane that just re-prints it is dead weight. Filtering to **Tells** or
+**Group** mid-fight (when World/Bazaar are noise) and firing a line at a channel
+**without typing the verb** are the two things the terminal can't offer — so
+those are exactly what the pane does. No game-side change: it all renders from
+the `Comm.Channel` feed the game already sends.
+
+**Notes.** Discipline unchanged: `el()`/`textContent` (no `innerHTML`), the send
+verb allow-listed before it goes out, tokens only (category tints reuse
+`--ac-accent`/`--hud-mm`/`--hud-group`), the message field at `16px` to dodge
+iOS focus-zoom. No new tracked assets beyond the edited `hud.js`/`hud.css`
+(force-added past the `static/` gitignore); no template change (the `#panel-chat`
+node already existed). Verified by loading the real `hud.js`/`hud.css` + expanded
+`connect.html` markup against `/connect?demo=1` under headless Chromium — desktop
+(All, and Tells-filtered to a single row) and a true **390px** viewport (an
+iframe, to beat the headless min-width clamp): `scrollWidth == innerWidth` (no
+horizontal overflow), all four tabs and the channel input fit. Component catalog
+updated (`components.md`).
+
 ## 2026-07-19 — HUD Bags overlay + item pinning: storage graduates to an overlay; the action bar pins consumables
 
 **Status.** Fourth slice of the re-tiering (#141, "Inventory overlay + item

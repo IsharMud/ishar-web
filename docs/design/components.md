@@ -438,6 +438,17 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
   (name + colour-coded `.aff-tgt` `self`/`mate`/`foe`) · `.aff-time` · `.aff-rel`
   release button. Expiry-sorted; `.aff.soon` warms a row nearing expiry. From
   `Char.Affects.maintained`.
+- **`.panel-chat` (Chat)** — the second persistent right-column pane (dock sheet
+  on phones), `renderChat`. A collapsible `panelHeader` over three parts: a
+  **`.chat-tabs`** segmented filter (`All / Public / Tells / Group`,
+  single-select, persisted `ishar.chatFilter`), the scrolling **`.chat-log`**,
+  and a **`.chat-in`** channel-targeted input (a `.chat-ch-select` over a
+  `.chat-msg` field; pick a channel, type, Enter routes `<verb> <text>` without
+  the verb, persisted `ishar.chatChannel`). Each `.chat-line` leads with a
+  `.chat-ch` tag tinted by category (`.ch-public` amber / `.ch-tells`
+  `--hud-mm` / `.ch-group` `--hud-group`); the game's redundant `[World] ` text
+  prefix is stripped. From `Comm.Channel` (`channel` label + rendered `text`);
+  see decisions.md 2026-07-19 (HUD Chat) for the real channel taxonomy.
 - **`.item-row`** — the equipment/inventory row (NB: **not** `.row` — that's
   Bootstrap's grid class, loaded globally; see decisions.md). One nowrap flex
   line: an optional lead cell (a `.row-caret` on an expandable container, else
