@@ -236,6 +236,11 @@
                         title="Season (Ctrl+E)" aria-label="Season (Ctrl+E)">
                     {% bi "trophy" %}
                 </button>
+                <button type="button" class="micro-btn" data-overlay="achievements" hidden
+                        aria-pressed="false" aria-haspopup="dialog" aria-controls="hud-overlay"
+                        title="Achievements (Ctrl+H)" aria-label="Achievements (Ctrl+H)">
+                    {% bi "award" %}
+                </button>
             </nav>
         </div>
         <form id="command-form" autocomplete="off">
@@ -334,6 +339,10 @@
             {% bi "trophy" %}
             <span>Season</span>
         </button>
+        <button type="button" data-panel="achievements" aria-pressed="false" hidden>
+            {% bi "award" %}
+            <span>Awards</span>
+        </button>
     </nav>
 
     <div id="hud-sheet" hidden>
@@ -380,6 +389,7 @@
             <section id="panel-map" class="panel"></section>
             <section id="panel-quests" class="panel"></section>
             <section id="panel-season" class="panel"></section>
+            <section id="panel-achievements" class="panel"></section>
         </div>
     </div>
 

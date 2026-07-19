@@ -74,7 +74,7 @@
     var expanded = loadSet("ishar.itemsExpanded");
     // Chat: a single-select category filter over the log, and the channel the
     // targeted input routes to. Categories fold the game's real channel labels
-    // (Char.Comm / Comm.Channel: World, Bazaar, Recruit, Say, Shout, Yell, Tell,
+    // (Comm.Channel: World, Bazaar, Recruit, Say, Shout, Yell, Tell,
     // Whisper, Group, System, …) into Public / Tells / Group. The send list is
     // [display, verb] — "Group" routes via `gtell`. Both prefs persisted.
     var CHAT_CATS = ["all", "public", "tells", "group"];
@@ -128,7 +128,7 @@
     // the bottom, nearest the input.
     var PANELS = ["inventory", "group", "occupants", "room",
                   "tracked", "chat", "train", "abilities", "who",
-                  "professions", "map", "quests", "season"];
+                  "professions", "map", "quests", "season", "achievements"];
     var PANEL_HOME = {
         occupants: "hud-left-scroll",
         group: "hud-left-scroll",
@@ -141,7 +141,8 @@
         inventory: "hud-overlay-body", train: "hud-overlay-body",
         abilities: "hud-overlay-body", who: "hud-overlay-body",
         professions: "hud-overlay-body", map: "hud-overlay-body",
-        quests: "hud-overlay-body", season: "hud-overlay-body"
+        quests: "hud-overlay-body", season: "hud-overlay-body",
+        achievements: "hud-overlay-body"
     };
 
     // ------------------------------------------------------------------
@@ -205,7 +206,17 @@
         // clickable season pill in the topbar clock strip.
         { key: "season", title: "Season", hotkey: "e",
           render: function () { renderSeason(); },
-          available: function () { return !!S.season; } }
+          available: function () { return !!S.season; } },
+        // Achievements: account standing (points, completion, live criteria)
+        // from Char.Achievements (isharmud/ishar-mud#1847). Deliberately
+        // second-tier — no topbar presence; the launcher chip, Ctrl+H, and a
+        // Character-overlay row are the only doors (isharmud/ishar-web#157).
+        { key: "achievements", title: "Achievements", hotkey: "h",
+          render: function () { renderAchievements(); },
+          available: function () {
+              return !!(S.achievements &&
+                        (S.achievements.rows.length || S.achievements.points));
+          } }
     ];
     var overlayName = null;   // open overlay app key (desktop), or null
 
@@ -780,6 +791,7 @@
             case "Char.Craft": applyCraft(data); break;
             case "Char.Quests": applyQuests(data); break;
             case "Char.Season": applySeason(data); break;
+            case "Char.Achievements": applyAchievements(data); break;
             case "Room.QuestMarkers":
                 S.questMarkers = data;
                 if (mapMod && mapMod.onQuestMarkers) mapMod.onQuestMarkers(data);
@@ -1820,6 +1832,22 @@
                 sul.appendChild(el("li", {}, [el("span", { text: kvp[0] }), el("span", { text: String(kvp[1]) })]));
             });
             kids.push(sul);
+        }
+        // Achievements live one hop away, not here: the row is the door the
+        // "check my character" reflex expects (isharmud/ishar-web#157).
+        if (S.achievements && (S.achievements.rows.length || S.achievements.points)) {
+            var achEarned = S.achievements.rows.filter(function (a) { return a.done; }).length;
+            kids.push(el("button", {
+                class: "char-achv", type: "button",
+                "aria-label": "Open achievements",
+                onclick: function () { toggleOverlay("achievements"); }
+            }, [
+                el("span", { text: "Achievements" }),
+                el("span", { class: "char-achv-n" }, [
+                    el("b", { text: String(S.achievements.points) }),
+                    " pts · " + achEarned + " of " + S.achievements.rows.length
+                ])
+            ]));
         }
         fill(dom.train, kids.length ? kids : [el("div", { class: "panel-empty", text: "—" })]);
     }
@@ -3861,6 +3889,138 @@
         }));
     }
 
+    // ------------------------------------------------------------------
+    // Achievements (Char.Achievements) — account standing: points, catalog +
+    // completion stamps, live per-criterion state. Rows arrive pre-sorted in
+    // the in-game command's category order; hidden achievements only ever
+    // arrive once earned (server-side rule), so no masking happens here.
+    // ------------------------------------------------------------------
+    var lastAchvBody = null;
+    function applyAchievements(data) {
+        var body = "";
+        try { body = JSON.stringify(data || {}); } catch (e) {}
+        var changed = lastAchvBody !== null && body !== lastAchvBody;
+        lastAchvBody = body;
+        S.achievements = {
+            points: Number(data && data.points) || 0,
+            rows: (data && data.achievements) || []
+        };
+        updateMicro();
+        renderTrain();   // the Character overlay's achievements row tracks this feed
+        if (overlayVisible("achievements")) renderAchievements();
+        if (changed && !overlayVisible("achievements")) markOverlayUnread("achievements", true);
+    }
+
+    function fmtAchvDate(epoch) {
+        var d = new Date(Number(epoch) * 1000);
+        if (isNaN(d.getTime()) || !Number(epoch)) return "";
+        return d.getFullYear() + "-"
+            + ("0" + (d.getMonth() + 1)).slice(-2) + "-"
+            + ("0" + d.getDate()).slice(-2);
+    }
+
+    function achvRewardChips(rewards) {
+        return (rewards || []).map(function (r) {
+            var t = "";
+            if (r.kind === "essence") t = Number(r.amount || 0).toLocaleString() + " Essence";
+            else if (r.kind === "item") t = "Memory: " + (r.name || "—");
+            else if (r.kind === "title") t = "Title: " + (r.name || "—");
+            else return null;
+            return el("span", { class: "achv-reward", text: t });
+        }).filter(Boolean);
+    }
+
+    // Grouped ("AccountGrouped") achievements: each group is a bundle one
+    // character must satisfy whole, and every group must be satisfied — so
+    // groups render as separate chip lines, never as alternatives.
+    function achvCriteriaLines(crits) {
+        var grouped = crits.some(function (c) { return c.group != null; });
+        var chip = function (c) {
+            return el("span", { class: "achv-crit" + (c.met ? " met" : ""), text: c.label || "—" });
+        };
+        if (!grouped) return [el("div", { class: "achv-crits" }, crits.map(chip))];
+        var lines = [], byGroup = {}, order = [];
+        crits.forEach(function (c) {
+            var g = c.group == null ? 0 : c.group;
+            if (!byGroup[g]) { byGroup[g] = []; order.push(g); }
+            byGroup[g].push(c);
+        });
+        order.forEach(function (g) {
+            lines.push(el("div", { class: "achv-crits" }, byGroup[g].map(chip)));
+        });
+        return lines;
+    }
+
+    function achvRow(a) {
+        var done = !!a.done;
+        var row = el("div", { class: "achv-row" + (done ? " done" : "") });
+        row.appendChild(el("div", { class: "achv-row-h" }, [
+            el("span", { class: "achv-mk", text: done ? "✓" : "○" }),
+            el("span", { class: "achv-name", text: a.name || "—" }),
+            a.hidden ? el("span", { class: "achv-badge", text: "Hidden" }) : null,
+            el("span", { class: "achv-pts", text: (Number(a.points) || 0) + " pts" })
+        ]));
+        if (done) {
+            var when = fmtAchvDate(a.date);
+            row.appendChild(el("div", { class: "achv-sub", text:
+                "Completed" + (when ? " " + when : "") + (a.by ? " by " + a.by : "") }));
+        } else {
+            if (a.desc) row.appendChild(el("div", { class: "achv-sub", text: a.desc }));
+            var crits = a.criteria || [];
+            if (crits.length) achvCriteriaLines(crits).forEach(function (line) { row.appendChild(line); });
+        }
+        var rewards = achvRewardChips(a.rewards);
+        if (rewards.length) row.appendChild(el("div", { class: "achv-rewards" }, rewards));
+        return row;
+    }
+
+    function renderAchievements() {
+        var host = dom.achievements;
+        if (!host) return;
+        var st = S.achievements;
+        if (!st) {
+            fill(host, el("div", { class: "panel-empty", text: "Achievements load when you enter the game." }));
+            return;
+        }
+        var rows = st.rows || [];
+        var earned = rows.filter(function (a) { return a.done; });
+        var secs = [];
+
+        secs.push(el("div", { class: "achv-head" }, [
+            el("span", { class: "achv-points" }, [el("b", { text: String(st.points) }), " points"]),
+            el("span", { class: "achv-count", text: earned.length + " of " + rows.length + " earned" })
+        ]));
+
+        if (earned.length) {
+            var latest = earned.slice()
+                .sort(function (a, b) { return (Number(b.date) || 0) - (Number(a.date) || 0); })
+                .slice(0, 3);
+            secs.push(seasonSection("Latest", el("div", { class: "achv-latest" }, latest.map(function (a) {
+                return el("div", { class: "achv-latest-row" }, [
+                    el("span", { class: "achv-mk", text: "✓" }),
+                    el("span", { class: "achv-name", text: a.name || "—" }),
+                    el("span", { class: "achv-when", text:
+                        fmtAchvDate(a.date) + (a.by ? " · " + a.by : "") })
+                ]);
+            }))));
+        }
+
+        var curKey = null, curList = null;
+        rows.forEach(function (a) {
+            var label = String(a.category || "General") + (a.sub ? " · " + a.sub : "");
+            if (label !== curKey) {
+                curKey = label;
+                curList = el("div", { class: "achv-rows" });
+                secs.push(seasonSection(label, curList));
+            }
+            curList.appendChild(achvRow(a));
+        });
+
+        if (!rows.length) secs.push(el("div", { class: "panel-empty", text: "No achievements are on the books yet." }));
+
+        fill(host, secs);
+    }
+
     function applyQuests(data) {
         var list = (data && data.quests) || [];
         var body = "";
@@ -4756,7 +4916,13 @@
             var b = dom.dock && dom.dock.querySelector('button[data-panel="' + n + '"]');
             if (b) {
                 b.setAttribute("aria-pressed", n === name ? "true" : "false");
-                if (n === name) { var l = b.querySelector("span"); title = l ? l.textContent : n; }
+                // Overlay apps keep one name on both form factors ("Character",
+                // not the dock's abbreviated "Char"); persistent panes fall back
+                // to their dock label.
+                if (n === name) {
+                    var ov = overlayByKey(n), l = b.querySelector("span");
+                    title = ov ? ov.title : (l ? l.textContent : n);
+                }
             }
         });
         if (dom.sheet) dom.sheet.hidden = !name;
@@ -4842,10 +5008,13 @@
         S.skills = []; S.cooldownExpiry = {}; S.cooldownTotal = {}; S.usable = {};
         S.professions = []; S.recipes = []; S.craft = null;
         S.quests = []; S.questMarkers = null;
+        S.season = null; S.achievements = null;
         S.tgtHostile = null; S.tgtFriendly = null;
         lastVitalsBody = null;
         lastProfessionsBody = null;
         lastQuestsBody = null;
+        lastSeasonBody = null;
+        lastAchvBody = null;
         if (mapMod) mapMod.onReset();
         renderQuestTracker();
         renderAll();
@@ -4890,6 +5059,7 @@
         dom.professions = document.getElementById("panel-professions");
         dom.quests = document.getElementById("panel-quests");
         dom.season = document.getElementById("panel-season");
+        dom.achievements = document.getElementById("panel-achievements");
         dom.questTracker = document.getElementById("quest-tracker");
         dom.overlay = document.getElementById("hud-overlay");
         dom.overlayTitle = document.getElementById("hud-overlay-title");
@@ -5066,6 +5236,33 @@
             "Char.Vitals": { hp: 412, maxhp: 480, mp: 130, maxmp: 300, move: 198, maxmove: 240, position: "Standing", opponent_hp_pct: 35, metamagic: 60, metamagic_max: 100, metamagic_regen: 5, food: 27, water: 9 },
             "Game.Time": { hour: 21, hour12: 9, ampm: "pm", day: 14, day_name: "Sunday", month: 6, month_name: "the Long Shadows", year: 1247, night: true, season_id: 15, season_end: 0, events: [{ name: "Double Essence", seconds: 5400 }, { name: "Festival of Flames" }], moons: [{ id: 0, name: "Shavar", phase: 4, phase_name: "full", position: "almost directly overhead", light: "blazing bright", up: true }, { id: 3, name: "Chenchir", phase: 6, phase_name: "last quarter", position: "lowering through the western sky", light: "fading", up: true }] },
             "Char.Season": { season_id: 15, name: "Enigma of the Tempest", ends_in: 1058400, essence: { current: 1240, lifetime: 8890 }, engagement: { progress: 54.0, milestones_done: 5, xp_bonus_pct: 8, shop_discount_pct: 15, axes: [{ key: "crafting", earned: 200, cap: 365, weight: 3 }, { key: "exploration", earned: 180, cap: 310, weight: 4 }, { key: "general", earned: 140, cap: 200, weight: 4 }], milestones: [{ at: 8.0, done: true, reward: "+4% XP (passive)" }, { at: 20.0, done: true, reward: "an ornate chest + -5% shop prices (passive)" }, { at: 30.0, done: true, reward: "+40 Renown" }, { at: 42.0, done: true, reward: "+4% XP (passive) + Memory: a tempest's echo" }, { at: 54.0, done: true, reward: "-10% shop prices (passive)" }, { at: 68.0, done: false, reward: "Memory: a tempest's echo" }, { at: 82.0, done: false, reward: "+80 Renown" }, { at: 100.0, done: false, reward: "Title: World-Walker" }], next: { at: 68.0, remaining: 14.0, reward: "Memory: a tempest's echo" } } },
+            "Char.Achievements": { points: 45, achievements: [
+                { id: 3, name: "Welcome to Ishar!", desc: "Create your first character and begin your journey within the world of Ishar!", category: "GENERAL", points: 5, done: true, date: Math.floor(Date.now() / 1000) - 86400 * 40, by: "Aelwyn" },
+                { id: 5, name: "Well on your way!", desc: "Reach level 5 on any class for the first time.", category: "GENERAL", points: 5, done: true, date: Math.floor(Date.now() / 1000) - 86400 * 38, by: "Aelwyn" },
+                { id: 7, name: "Circle of Rebirth", desc: "Achieve your first remort as any class, embracing the cycle of power and renewal in Ishar.", category: "GENERAL", points: 10, done: true, date: Math.floor(Date.now() / 1000) - 86400 * 2, by: "Aelwyn" },
+                { id: 8, name: "The Adventure Begins", desc: "Complete your first quest and take your first step into the vast lore and challenges that Ishar offers.", category: "GENERAL", sub: "QUESTS", points: 5, done: true, date: Math.floor(Date.now() / 1000) - 7200, by: "Aelwyn" },
+                { id: 9, name: "Challenge Novice", desc: "Complete your first challenge, proving your might against the formidable foes of Ishar.", category: "GENERAL", sub: "CHALLENGES", points: 10, done: true, date: Math.floor(Date.now() / 1000) - 86400 * 12, by: "Boric",
+                  rewards: [{ kind: "essence", amount: 100 }] },
+                { id: 14, name: "Challenge Apprentice", desc: "Complete 5 challenges in a single remort, proving your growing expertise in facing Ishar's diverse trials.", category: "GENERAL", sub: "CHALLENGES", points: 15,
+                  criteria: [{ label: "Challenges: 5", met: false }],
+                  rewards: [{ kind: "essence", amount: 250 }] },
+                { id: 18, name: "Challenge Conqueror", desc: "Complete every unique challenge within a single cycle, proving your unparalleled dedication and mastery over the trials of Ishar.", category: "GENERAL", sub: "CHALLENGES", points: 30,
+                  criteria: [{ label: "Unique Challenges This Cycle: 24", met: false }],
+                  rewards: [{ kind: "title", name: "the Conqueror" }, { kind: "item", name: "a banner of the vanquished" }] },
+                { id: 10, name: "Untouched Legacy", desc: "Achieve a remort in Classic mode without succumbing to death a single time, a testament to your skill and perseverance.", category: "GENERAL", sub: "CLASSIC", points: 20,
+                  criteria: [{ label: "Remorts: 1", met: true }, { label: "Deaths: 0", met: false }, { label: "Game Type: Classic", met: true }] },
+                { id: 13, name: "Renowned Hero", desc: "Amass 100 renown in a single remort, showcasing your dedication and mastery in the art of progression within Ishar.", category: "GENERAL", points: 15,
+                  criteria: [{ label: "Renown: 100", met: false }] },
+                { id: 17, name: "Seasoned Shapeshifter", desc: "Within a single season of Ishar, demonstrate your mastery and versatility by remorting as each class at least once.", category: "SEASON", points: 25,
+                  criteria: [
+                    { label: "Class: Warrior", met: true, group: 1 }, { label: "Remorts: 1", met: true, group: 1 },
+                    { label: "Class: Cleric", met: true, group: 2 }, { label: "Remorts: 1", met: true, group: 2 },
+                    { label: "Class: Magician", met: false, group: 3 }, { label: "Remorts: 1", met: false, group: 3 },
+                    { label: "Class: Rogue", met: false, group: 4 }, { label: "Remorts: 1", met: false, group: 4 }
+                  ],
+                  rewards: [{ kind: "essence", amount: 500 }, { kind: "title", name: "the Everchanging" }] },
+                { id: 21, name: "Beta Tester: Season 8", desc: "Participate in the beta testing phase of Season 8, providing valuable feedback and helping to shape the future of Ishar.", category: "SEASON", sub: "BETA", points: 10, hidden: true, done: true, date: Math.floor(Date.now() / 1000) - 86400 * 300, by: "Aelwyn" }
+            ] },
             "Room.Info": { num: 3001, name: "The Grand Concourse", area: "Ishar Nexus", environment: "City", exits: { n: 3002, e: 3005, s: 3008, w: 3010, u: 3100, d: 3200, into: 3500 } },
             "Room.Occupants": { occupants: [
                 { keyword: "guard", short_desc: "a towering city guard", handle: "1.guard", is_player: false, is_dead: false, is_shopkeeper: false, hostile_hint: "neutral", position: "Standing", is_loyal_follower: false, is_my_follower: false, fighting_you: false, is_your_target: false },

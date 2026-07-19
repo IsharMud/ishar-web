@@ -1709,6 +1709,48 @@ button.v-tgt:hover { border-color: rgba(214, 75, 75, .8); }
 .season-event { display: inline-flex; align-items: center; gap: 4px; font-size: .72rem; color: var(--hud-event); background: rgba(232, 176, 75, .08); border: 1px solid rgba(232, 176, 75, .3); border-radius: 999px; padding: 2px 9px; white-space: nowrap; }
 .season-event b { color: var(--ac-text); font-weight: 600; font-variant-numeric: tabular-nums; }
 
+/* ----- Achievements (OVERLAYS app "achievements", Ctrl+H) — Char.Achievements
+   Rows arrive in the in-game command's category order; done rows are quiet
+   green, in-progress rows carry criteria chips colored by live met state. */
+#hud-overlay[data-app="achievements"] { width: min(560px, calc(100vw - 32px)); }
+#panel-achievements { padding-bottom: 8px; }
+.achv-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.achv-points { font-size: 1.02rem; color: var(--ac-text); }
+.achv-points b { font-size: 1.2rem; font-weight: 700; color: var(--hud-gold); font-variant-numeric: tabular-nums; }
+.achv-count { font-size: .74rem; color: var(--ac-dim); white-space: nowrap; }
+
+.achv-latest { display: flex; flex-direction: column; }
+.achv-latest-row { display: flex; align-items: baseline; gap: 4px 8px; padding: 4px 4px; font-size: .78rem; min-width: 0; flex-wrap: wrap; }
+.achv-latest-row .achv-name { flex: 1; }
+.achv-when { color: var(--ac-dim); font-size: .7rem; white-space: nowrap; }
+
+.achv-rows { display: flex; flex-direction: column; }
+.achv-row { padding: 7px 4px; border-top: 1px solid var(--ac-border); }
+.achv-row:first-child { border-top: 0; }
+.achv-row-h { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.achv-mk { flex: none; width: 15px; text-align: center; font-weight: 700; color: var(--ac-border-2); }
+.achv-row.done .achv-mk, .achv-latest-row .achv-mk { color: var(--ac-ok); }
+.achv-name { font-size: .82rem; font-weight: 600; color: var(--ac-text); min-width: 0; overflow-wrap: anywhere; }
+.achv-row.done .achv-name { color: var(--ac-ok); }
+.achv-pts { margin-left: auto; flex: none; font-size: .68rem; color: var(--hud-gold); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.achv-badge { flex: none; font-size: .56rem; letter-spacing: .05em; text-transform: uppercase; color: var(--ac-accent); border: 1px solid rgba(255, 170, 119, .4); border-radius: 999px; padding: 1px 7px; }
+.achv-sub { font-size: .72rem; color: var(--ac-dim); margin: 3px 0 0 23px; overflow-wrap: anywhere; }
+.achv-row.done .achv-sub { font-style: italic; }
+
+.achv-crits { display: flex; gap: 5px; flex-wrap: wrap; margin: 5px 0 0 23px; }
+.achv-crit { font-size: .66rem; white-space: nowrap; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--ac-border); color: var(--ac-dim); }
+.achv-crit.met { color: var(--ac-ok); border-color: rgba(76, 187, 23, .4); background: var(--ac-ok-wash); }
+
+.achv-rewards { display: flex; gap: 5px; flex-wrap: wrap; margin: 5px 0 0 23px; }
+.achv-reward { font-size: .66rem; white-space: nowrap; padding: 1px 8px; border-radius: 999px; color: var(--ac-accent); border: 1px solid rgba(255, 170, 119, .4); background: var(--ac-wash); }
+
+/* Character overlay → achievements door (renderTrain). */
+.char-achv { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; width: 100%; margin-top: 10px; padding: 7px 10px; font: inherit; font-size: .8rem; color: var(--ac-text); text-align: left; background: var(--ac-bg); border: 1px solid var(--ac-border); border-radius: var(--ac-radius-sm); cursor: pointer; }
+.char-achv:hover { border-color: var(--ac-accent); }
+.char-achv:focus-visible { outline: 2px solid var(--ac-accent); outline-offset: 2px; }
+.char-achv-n { color: var(--ac-dim); font-size: .72rem; white-space: nowrap; }
+.char-achv-n b { color: var(--hud-gold); font-variant-numeric: tabular-nums; }
+
 /* ----- Reduced motion ----- */
 @keyframes hud-pulse {
     0%, 100% { opacity: 1; }

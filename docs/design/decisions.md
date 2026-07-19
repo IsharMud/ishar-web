@@ -1992,3 +1992,36 @@ client fills the missing slots itself from the fixed four-moon set (keyed by
 the comet is `☄`. Discipline unchanged: `el()`/`textContent`, tokens only,
 motion-free. Verified with the demo feed plus a self-contained CSS preview
 (up/down mix, all-phases legibility, nothing-up, 390px).
+
+## 2026-07-19 — Achievements: a second-tier overlay app, never prime real estate
+
+**Problem.** Achievements had no HUD surface at all — the last progression
+system visible only by typing `achievement` into the terminal. But achievements
+are deliberately not first-class in Ishar: giving them a topbar slot or a
+persistent panel would overweight them, while burying them as a sub-tab inside
+the Character overlay would create the HUD's first nested-overlay pattern and
+break the "one registry, one door-style" extension model.
+
+**Decision.** Achievements are a standard overlay app — micro-menu chip
+(`bi-award`; `bi-trophy` stays Season's), dock button ("Awards"), `Ctrl+H` — and
+nothing more. Placement expresses tier: apps in the registry are already
+second-tier by construction (hidden until their feed has data, zero screen cost
+until opened). Two quiet affordances acknowledge where players will look for
+it: a row at the foot of the Character overlay (points · earned count, opens
+the app) and the standard unread dot on the launcher when the feed changes
+while closed — no toast, because the game text already announces earns with a
+bell; the HUD must not say it louder.
+
+**Data.** Char.Achievements (ishar-mud #1847, GMCP contract 11.9.0) is
+self-contained — points + per-viewer visible rows with completion stamps, live
+per-criterion `{label, met}`, and server-resolved reward labels. Unlike quests
+there is no HTTP catalog: the whole catalog is ~20 rows, hidden-masking is
+server-side, and a self-contained feed serves Mudlet identically. Grouped
+("AccountGrouped") criteria render as separate chip lines per group — groups
+are conjunctive bundles one character must satisfy whole, never alternatives.
+
+**Notes.** Rows render in the feed's (= in-game command's) category order;
+`.achv-*` chips reuse the season pill geometry; done rows are quiet green.
+Discipline unchanged: `el()`/`textContent`, tokens only, motion-free. Verified
+with the demo feed (done/undone/hidden-earned/grouped mix) at desktop and
+390px.
