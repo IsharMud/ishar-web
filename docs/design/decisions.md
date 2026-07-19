@@ -9,6 +9,35 @@ Format: `## YYYY-MM-DD — Title` · **Decision** · **Why** · (optional) **Not
 
 ---
 
+## 2026-07-19 — HUD XP strip refinement: 5px violet hairline + side caption (supersedes the gold pill)
+
+**Status.** Refines the XP strip shipped in slice 3 (#145). The original
+treatment — a 16px full-width pill, `--hud-gold` (`#cdcd00`) fill at .5, with the
+`XP — 62% to level 46` label baked *inside* the bar — read as a UI band, not an
+ambient element: too tall (taller than the group HP bars) and the saturated
+caution-yellow pulled the eye harder than progress-to-level deserves.
+
+**Decision.** The strip becomes a genuine **hairline**: a 5px `.xp-track` that
+grows with the terminal, its caption moved **beside** the bar (`XP 62% · to L46`,
+the % tinted). The label-inside-the-bar was what forced the height; moving it out
+lets the bar be a true 5px line. The fill adopts a new **`--hud-xp: #9a86e0`**
+violet — the one hue used nowhere else in the HUD, so it reads unambiguously as
+XP without competing with the amber accent (interactive), the green vitals /
+terminal text, the red danger, or the blue info. `--hud-gold` stays for currency
+/ shop / pinned marks (its meaning narrows from "XP / currency" to "currency").
+Rejected: keeping gold but quieter (still reads as caution-yellow); the brand
+amber (`--ac-accent` is *the* interactive color — muddies it on a passive bar).
+
+**Why.** An ambient element earns permanent space by being glanceable and then
+getting out of the way. A hairline in a hue that means only "XP" does both; a
+tall yellow block does neither.
+
+**Notes.** Markup gains a `.xp-track` wrapper (`#hud-xpstrip` is now a flex row);
+`renderXp` rebuilds the caption via `el()`/`fill()` (no `innerHTML`) to tint the
+%. Tokens/components updated (`tokens.md`, `components.md`). Verified against the
+real `hud.js`/`hud.css` under headless Chromium at desktop and a true 390px phone
+— the caption stays legible and the bar recedes.
+
 ## 2026-07-19 — HUD Group density: Full / Compact presets (the last re-tiering slice)
 
 **Status.** Sixth and final slice of the re-tiering (#141, "group density

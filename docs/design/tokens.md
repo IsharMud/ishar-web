@@ -103,7 +103,8 @@ rest have no site-wide equivalent:
 
 | Token | Value | Meaning |
 |---|---|---|
-| `--hud-gold` | `#cdcd00` | XP / currency (plus `--hud-gold-wash` `rgba(205,205,0,.1)`). |
+| `--hud-gold` | `#cdcd00` | Currency, shop, pinned/favourite marks (plus `--hud-gold-wash` `rgba(205,205,0,.1)`). |
+| `--hud-xp` | `#9a86e0` | XP hairline strip — a violet used nowhere else, so it reads unambiguously as XP without competing with the amber accent, green vitals, or terminal text. |
 | `--hud-tgt` | `#a0408a` | Opponent health bar. |
 | `--hud-mm` | `#a05ad0` | Metamagic bar. |
 | `--hud-edge` | `#d08a3a` | Edge resource bar. |

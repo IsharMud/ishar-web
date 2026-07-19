@@ -420,13 +420,14 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
   wrapping row. From `Char.Affects.buffs`/`.debuffs` (see decisions.md
   2026-07-18, "HUD affects split").
 - **`#hud-xpstrip`** — the ambient XP strip below the terminal (between it and
-  `#hud-actionrow`). A full-width thin bar: a `.xp-fill` (`--hud-gold`, width =
-  `Char.Train.xp_pct`) under a centered `.xp-label` — `XP — <pct>% to level
-  <next>` (`Char.Status.level + 1`), light text with a dark shadow so it reads
-  over both the fill and the bare track. `renderXp()` swaps the width + label
-  text; `hidden` until `Char.Train` arrives, and hidden in `.hud-off`. Ambient on
-  phones too (survives above the action slots at 390px). See decisions.md
-  2026-07-19, "HUD XP strip".
+  `#hud-actionrow`). A **5px hairline**: a `.xp-track` (`flex:1`) holding the
+  `.xp-fill` (`--hud-xp` violet, width = `Char.Train.xp_pct`), with the
+  `.xp-label` caption sitting **beside** it (not baked in) — `XP <pct>% · to
+  L<next>` (`Char.Status.level + 1`), the `.xp-pct` tinted `--hud-xp`.
+  `renderXp()` swaps the fill width + rebuilds the caption; `hidden` until
+  `Char.Train` arrives, and hidden in `.hud-off`. Ambient on phones too (the
+  bar shrinks, the caption stays at 390px). See decisions.md 2026-07-19,
+  "HUD XP strip" and its refinement note.
 - **`.hud-btn`(`--icon`)** — the topbar button, aligned with `.ac-btn`.
 - **`#hud-dock button`** — icon-over-label phone tabs; `.unread` renders an
   amber dot (used by Chat), `.alarm` a pulsing caution dot (used by Tracked

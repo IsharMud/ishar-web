@@ -1703,12 +1703,13 @@
     }
 
     // ------------------------------------------------------------------
-    // XP — a thin ambient strip below the terminal. The fill is
-    // Char.Train.xp_pct; the label names the level it's climbing toward
-    // (Char.Status.level + 1). Progress-to-level is glanced at constantly, so
-    // it earns permanent space rather than living in the Character overlay
-    // (docs/design/decisions.md 2026-07-19 XP strip). Hidden until the feed
-    // arrives so the strip never shows an empty bar.
+    // XP — a hairline ambient strip below the terminal. The fill is
+    // Char.Train.xp_pct; the caption beside it names the level it's climbing
+    // toward (Char.Status.level + 1), with the % tinted violet (--hud-xp).
+    // Progress-to-level is glanced at constantly, so it earns permanent space
+    // rather than living in the Character overlay (docs/design/decisions.md
+    // 2026-07-19 XP strip). Hidden until the feed arrives so the strip never
+    // shows an empty bar.
     // ------------------------------------------------------------------
     function renderXp() {
         if (!dom.xpstrip) return;
@@ -1717,9 +1718,11 @@
         var p = clamp(t.xp_pct, 0, 100);
         dom.xpFill.style.width = p + "%";
         var lvl = S.status && S.status.level != null ? Number(S.status.level) : null;
-        dom.xpLabel.textContent = lvl != null
-            ? "XP — " + p + "% to level " + (lvl + 1)
-            : "XP — " + p + "%";
+        fill(dom.xpLabel, [
+            el("span", { text: "XP" }),
+            el("span", { class: "xp-pct", text: p + "%" }),
+            lvl != null ? el("span", { text: "· to L" + (lvl + 1) }) : null
+        ]);
         dom.xpstrip.hidden = false;
     }
 
