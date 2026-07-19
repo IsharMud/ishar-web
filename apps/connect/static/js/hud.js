@@ -83,6 +83,13 @@
     var chatFilter = loadChoice("ishar.chatFilter", CHAT_CATS, "all");
     var chatChannel = loadChoice("ishar.chatChannel", CHAT_SEND.map(function (o) { return o[1]; }), "world");
 
+    // Group panel density: "full" (HP/MP/MV triple + chips, small groups) or
+    // "compact" (one scannable line per member — HP bar · % · status · range —
+    // sorted low-HP/tank first, panel scrolls, for a raid). Two opinionated
+    // presets, not a field-picker. Persisted.
+    var GROUP_DENSITIES = ["full", "compact"];
+    var groupDensity = loadChoice("ishar.groupDensity", GROUP_DENSITIES, "full");
+
     var abilityFilter = { q: "", type: "all", usableOnly: false };
     try {
         var af = JSON.parse(localStorage.getItem("ishar.abilityFilter"));
@@ -1882,6 +1889,49 @@
             : "Threat on their target";
         return el("span", { class: "grp-threat" + (lvl ? " threat-" + lvl : ""), title: title, text: txt });
     }
+    // The single most decision-relevant status for a compact row: an
+    // incapacitating state a healer must react to outranks the persistent tank
+    // identity (which the row's left border + the sort already convey). Derived
+    // from the game's `position` (asleep/stunned/fleeing), is_tank last.
+    function grpStatusMark(x) {
+        var p = String(x.position || "").toLowerCase();
+        if (p.indexOf("stun") !== -1) return { cls: "mark-cc", label: "stunned" };
+        if (p.indexOf("flee") !== -1) return { cls: "mark-cc", label: "fleeing" };
+        if (p === "sleeping") return { cls: "mark-cc", label: "asleep" };
+        if (x.is_tank) return { cls: "mark-tank", label: "tank" };
+        return null;
+    }
+    // Compact sort: the people about to die lead; the tank floats up too (a 20pt
+    // HP handicap), so the top of a scrolled raid list is exactly who a healer
+    // acts on next. Unknown HP sinks to the bottom.
+    function grpSortKey(x) {
+        var hp = (x && x.hp_pct != null) ? x.hp_pct : 999;
+        return hp - (x && x.is_tank ? 20 : 0);
+    }
+    function groupRowCompact(x, kind, idx, extraName, hasMenu) {
+        var tint = hpTintClass(x.hp_pct);
+        var mark = grpStatusMark(x);
+        // Range: only the out-of-room case earns ink (in-room is the quiet
+        // default a scan skips). The exact where is the full row's job.
+        var away = x.in_room === false;
+        var kids = [
+            el("span", { class: "grp-cn", text: stripColor(String(x.name || "")) + (x.leader ? " ★" : "") }),
+            el("span", { class: "grp-cbar" }, el("span", { class: tint, style: "width:" + clamp(x.hp_pct, 0, 100) + "%" })),
+            el("span", { class: "grp-cp" + tint, text: (x.hp_pct != null ? x.hp_pct + "%" : "—") }),
+            mark ? el("span", { class: "grp-ct " + mark.cls, text: mark.label }) : null,
+            away ? el("span", { class: "grp-range", text: "away" }) : null
+        ];
+        // A row with nothing to offer (your own row; an out-of-room ally) is
+        // information, not a control.
+        if (!hasMenu) return el("li", { class: "grp grp-cmp grp-self" + (x.is_tank ? " tanking" : "") }, kids);
+        // The whole row is the tap target — the delegated handler opens the menu
+        // off any [data-menu] — so compact drops the explicit ⋯ to stay dense.
+        return el("li", {
+            class: "grp grp-cmp" + (x.is_tank ? " tanking" : ""),
+            "data-menu": "grp", "data-gkind": kind, "data-gidx": idx,
+            title: "Tap for actions"
+        }, kids);
+    }
     function groupRow(x, kind, idx, extraName, hasMenu) {
         var chips = [];
         if (x.is_tank) chips.push(el("span", { class: "grp-tank", title: "Tanking — enemies are targeting them", text: "TANK" }));
@@ -1920,39 +1970,67 @@
             el("button", { type: "button", class: "row-more", "data-menu": "grp", "data-gkind": kind, "data-gidx": idx, "aria-label": "Actions", text: "⋯" })
         ]);
     }
+    function groupDensityBtn() {
+        var compact = groupDensity === "compact";
+        return el("button", {
+            type: "button", class: "panel-h-btn grp-dens" + (compact ? " on" : ""),
+            "aria-pressed": compact ? "true" : "false",
+            "aria-label": "Group density: " + (compact ? "compact" : "full") + " (tap to switch)",
+            title: "Group density — full ↔ compact",
+            text: compact ? "Compact" : "Full",
+            onclick: function () { setGroupDensity(compact ? "full" : "compact"); }
+        });
+    }
+    function setGroupDensity(d) {
+        if (GROUP_DENSITIES.indexOf(d) === -1 || d === groupDensity) return;
+        groupDensity = d;
+        try { localStorage.setItem("ishar.groupDensity", d); } catch (e) {}
+        renderGroup();
+    }
     function renderGroup() {
         if (!dom.group) return;
         var g = S.group;
         var members = (g && g.members) || [];
         var allies = (g && g.allies) || [];
-        var head = panelHeader("group", "Group" + (members.length ? " (" + (g.size != null ? g.size : members.length) + ")" : ""), false);
+        var compact = groupDensity === "compact";
+        var grouped = members.length || allies.length;
+        var rowFn = compact ? groupRowCompact : groupRow;
+        var listClass = "grp-list" + (compact ? " grp-cmp-list" : "");
+        // The density toggle only earns header space when there's a group to
+        // re-densify and the panel is open.
+        var actions = (grouped && !isCollapsed("group")) ? [groupDensityBtn()] : null;
+        var head = panelHeader("group", "Group" + (members.length ? " (" + (g.size != null ? g.size : members.length) + ")" : ""), false, actions);
         var kids = [head];
         if (!isCollapsed("group")) {
-            if (!members.length && !allies.length) {
+            if (!grouped) {
                 kids.push(el("div", { class: "panel-empty", text: "Not grouped." }));
             } else {
-                var gl = el("ul", { class: "grp-list" });
                 var selfName = S.status ? String(S.status.name || "").toLowerCase() : "";
-                members.forEach(function (m, i) {
-                    // Your own row never has actions; other members always
-                    // have at least Tell.
-                    var isSelf = selfName && String(m.name || "").toLowerCase() === selfName;
-                    gl.appendChild(groupRow(m, "member", i, "", !isSelf));
-                });
-                kids.push(gl);
+                // Carry each row's ORIGINAL feed index so its tap menu still
+                // resolves after a compact-mode reorder (data-gidx indexes the
+                // unsorted S.group arrays).
+                var appendList = function (arr, kind, extra) {
+                    var rows = arr.map(function (v, i) { return { x: v, i: i }; });
+                    if (compact) rows.sort(function (a, b) { return grpSortKey(a.x) - grpSortKey(b.x); });
+                    var ul = el("ul", { class: listClass });
+                    rows.forEach(function (r) { ul.appendChild(rowFn(r.x, kind, r.i, extra(r.x), hasRowMenu(r.x, kind, selfName))); });
+                    return ul;
+                };
+                kids.push(appendList(members, "member", function () { return ""; }));
                 if (allies.length) {
                     kids.push(el("div", { class: "sub-h", text: "Allies" }));
-                    var al = el("ul", { class: "grp-list" });
-                    allies.forEach(function (a, i) {
-                        // An ally row is only actionable through its occupant
-                        // entry — out of the room there's nothing to offer.
-                        al.appendChild(groupRow(a, "ally", i, a.owner ? "(" + a.owner + ")" : "", !!groupAllyOcc(a)));
-                    });
-                    kids.push(al);
+                    kids.push(appendList(allies, "ally", function (a) { return a.owner ? "(" + a.owner + ")" : ""; }));
                 }
             }
         }
         fill(dom.group, kids);
+    }
+    // Your own row never has actions; other members always have at least Tell.
+    // An ally is only actionable through its occupant entry — out of the room
+    // there's nothing to offer.
+    function hasRowMenu(x, kind, selfName) {
+        if (kind === "ally") return !!groupAllyOcc(x);
+        return !(selfName && String(x.name || "").toLowerCase() === selfName);
     }
     function groupRowActions(x, kind) {
         if (!x) return [];
@@ -4235,14 +4313,18 @@
                 { name: "a shard of frost quartz", keywords: "quartz frost shard", vnum: 9004, count: 5 }
             ], treasure: 620 },
             "Char.Affects": { buffs: [{ name: "Stoneskin", id: 101, duration: 1800 }, { name: "Haste", id: 102, duration: 240 }], debuffs: [{ name: "Poison", id: 201, duration: 45 }], maintained: [{ name: "Detect Invisibility", id: 301, duration: 600, target: "self" }, { name: "Shroud", id: 302, duration: 900, target: "Boric", skill: "shroud", handle: "1.boric", releasable: true }] },
-            "Group.Update": { leader: "Aelwyn", size: 5, members: [
+            "Group.Update": { leader: "Aelwyn", size: 8, members: [
                 { name: "Aelwyn", level: 45, hp_pct: 86, mp_pct: 85, mv_pct: 82, position: "Standing", race: "Elf", "class": "Magician", leader: true, in_room: true, is_tank: false, fighting_name: "a scarred alley thug", threat: 40, tank_threat: 120, threat_level: "low", room: "The Grand Concourse", vnum: 3001, zone: 90 },
                 { name: "Boric", level: 43, hp_pct: 30, mp_pct: 40, mv_pct: 75, position: "Standing", race: "Dwarf", "class": "Warrior", leader: false, in_room: true, is_tank: true, fighting_name: "a scarred alley thug", threat: 120, room: "The Grand Concourse", vnum: 3001, zone: 90 },
                 { name: "Selra", level: 41, hp_pct: 95, mp_pct: 90, mv_pct: 88, position: "Sleeping", race: "Human", "class": "Cleric", leader: false, in_room: false, is_tank: false, room: "Cramped Alcove", vnum: 3014, zone: 90 },
                 { name: "Kael", level: 39, hp_pct: 72, mp_pct: 60, mv_pct: 80, position: "Standing", race: "Human", "class": "Ranger", leader: false, in_room: false, is_tank: false, room: "Village Square", vnum: 5003, zone: 91, area: "Kingdom of Jolnara" },
-                { name: "Doran", level: 44, hp_pct: 88, mp_pct: 55, mv_pct: 66, position: "Standing", race: "Dwarf", "class": "Cleric", leader: false, in_room: false, is_tank: false, room: "Ashen Hollow", vnum: 4210, zone: 99, area: "Shrouded Vale" }
+                { name: "Doran", level: 44, hp_pct: 88, mp_pct: 55, mv_pct: 66, position: "Standing", race: "Dwarf", "class": "Cleric", leader: false, in_room: false, is_tank: false, room: "Ashen Hollow", vnum: 4210, zone: 99, area: "Shrouded Vale" },
+                { name: "Mirena", level: 42, hp_pct: 100, mp_pct: 78, mv_pct: 91, position: "Standing", race: "Half-Elf", "class": "Cleric", leader: false, in_room: true, is_tank: false, room: "The Grand Concourse", vnum: 3001, zone: 90 },
+                { name: "Thane", level: 40, hp_pct: 64, mp_pct: 30, mv_pct: 58, position: "Stunned", race: "Human", "class": "Warrior", leader: false, in_room: true, is_tank: false, fighting_name: "a scarred alley thug", threat: 70, room: "The Grand Concourse", vnum: 3001, zone: 90 },
+                { name: "Ysolde", level: 38, hp_pct: 41, mp_pct: 62, mv_pct: 44, position: "Fleeing", race: "Elf", "class": "Ranger", leader: false, in_room: false, is_tank: false, room: "Sunken Causeway", vnum: 4180, zone: 99, area: "Shrouded Vale" }
             ], allies: [
-                { name: "a large timber wolf", owner: "Aelwyn", hp_pct: 55, mp_pct: 100, mv_pct: 95, position: "Resting", in_room: true, is_tank: false }
+                { name: "a large timber wolf", owner: "Aelwyn", hp_pct: 55, mp_pct: 100, mv_pct: 95, position: "Resting", in_room: true, is_tank: false },
+                { name: "a lesser fire elemental", owner: "Mirena", hp_pct: 100, mp_pct: 100, mv_pct: 100, position: "Standing", in_room: true, is_tank: false }
             ] },
             "Char.Skills": { skills: bigSkills },
             "Char.Cooldowns": { cooldowns: [{ id: 3, remaining: 8 }], usable: { "3": false } },

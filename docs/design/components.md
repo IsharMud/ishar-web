@@ -433,6 +433,19 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
   Spells when a maintained spell nears expiry).
 - **`.exit` compass, `.item-row` lists, `.kv`** — the in-panel widgets;
   all have coarse-pointer bumps and `:focus-visible` rings.
+- **`.grp` (Group)** — the party pane in the left column (`#panel-group`,
+  `renderGroup`), with two density presets a header toggle (`.grp-dens`,
+  persisted `ishar.groupDensity`) flips between — **not** a field-picker.
+  **Full** (default) is the rich row: `.grp-main` with name · triage-tinted
+  `.grp-hp-num` % · `.grp-chips` (`.grp-tank` / `.grp-threat` / `.grp-fight` /
+  `.grp-pos` / `.grp-away`) · the `.grp-bars` HP/MP/MV `.mini` triple, in feed
+  order. **Compact** (`.grp-cmp`, `groupRowCompact`) is one scannable line —
+  `.grp-cn` name · `.grp-cbar` triage-tinted HP bar · `.grp-cp` % · a single
+  `.grp-ct` status marker (`.mark-cc` amber for stunned/fleeing/asleep, `.mark-tank`
+  red) · `.grp-range` `away` — sorted low-HP/tank-first and capped to `44vh`
+  in-column scroll (`.grp-cmp-list`); the whole row is the tap target (`data-menu`,
+  no `⋯`). Tank rows keep the `.tanking` left border in both. From `Group.Update`;
+  see decisions.md 2026-07-19 (HUD Group density).
 - **`.aff` (Tracked Spells)** — one row per maintained spell in the persistent
   right-column `#panel-tracked` (`renderTracked`): `.aff-ic` icon · `.aff-body`
   (name + colour-coded `.aff-tgt` `self`/`mate`/`foe`) · `.aff-time` · `.aff-rel`

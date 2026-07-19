@@ -9,6 +9,65 @@ Format: `## YYYY-MM-DD — Title` · **Decision** · **Why** · (optional) **Not
 
 ---
 
+## 2026-07-19 — HUD Group density: Full / Compact presets (the last re-tiering slice)
+
+**Status.** Sixth and final slice of the re-tiering (#141, "group density
+presets"). With this the issue is complete — every acceptance criterion has
+shipped across #143 (affects), #144 (overlay migration), #145 (XP strip), #146
+(Bags + item pinning), #147 (chat filter), and this.
+
+**Decision.** The Group panel (`renderGroup`) gains two opinionated density
+presets a header toggle (`.grp-dens`, a `panel-h-btn` in the panel actions)
+flips between — **not** a field-picker. Persisted (`ishar.groupDensity`).
+
+- **Full** (default, small groups) is the existing row: name · % · chips
+  (tank / threat / fighting / position / away) · HP/MP/MV triple, in feed order.
+- **Compact** (big groups) is one scannable line per member —
+  **name · triage-tinted HP bar · % · one status marker · range** (`.grp-cmp`,
+  `groupRowCompact`). It drops the explicit `⋯` (the whole row stays a tap
+  target via `data-menu`) and the MP/MV bars, so a full raid fits; the list caps
+  at `44vh` and scrolls in-column (`#hud-left-scroll .grp-cmp-list`) so a big
+  group never shoves Here/Room off the side.
+  - **Status marker** is a single chip, most-decision-relevant first: an
+    incapacitating state (`stunned` / `fleeing` / `asleep`, from the game's
+    `position`) outranks the persistent `tank` identity — which the row's
+    left border and the sort already signal. Amber (`--hud-event`) for control
+    states, red (`--hud-hostile`) for tank.
+  - **Range** earns ink only when out of room (`away`); in-room is the quiet
+    default a scan skips. (The exact where stays the full row's job.)
+  - **Sort** floats the people a healer acts on to the top: ascending HP%, with
+    the tank given a 20-point handicap so it rises too. Rows keep their
+    **original feed index** in `data-gidx`, so the tap menu still resolves after
+    the reorder. Compact-only; full keeps feed order (small, familiar groups).
+
+Collapsibility is untouched — the toggle only appears when there's a group and
+the panel is open.
+
+**Why.** The re-tiering rule: *a panel earns permanent space only by doing what
+the scrollback can't.* Full mode is right for a 3-person group where every
+stat matters; it turns illegible for a raid. Rather than a field-picker (a
+fiddly per-field menu nobody curates mid-fight), two presets let the player
+pick the trade — full detail vs. a dense, sorted, scannable list — with one tap.
+No new data: `Group.Update` already carries hp%, position, tank, and in-room.
+Per-member arbitrary affects / enemy debuffs remain **out of scope** (not in the
+feed; a future `isharmud/ishar-mud` GMCP addition renders on the party frame,
+not a global list).
+
+**Notes.** Discipline unchanged: `el()`/`textContent` (no `innerHTML`), tokens
+only (`--hud-event`/`--hud-hostile`/`--ac-ok` for the triage tints, `--ac-accent`
+for the active toggle), the status marker derived defensively from `position`
+(so a `fleeing`/`stunned` token the game sends renders without a schema change,
+and a token it never sends simply never shows). No template change (`#panel-group`
+already existed); `hud.js`/`hud.css` force-added past the `static/` gitignore.
+The demo group (`/connect?demo=1`) grew to 8 members + 2 allies covering
+asleep/stunned/fleeing/away/low-HP so both presets are exercisable. Verified by
+loading the real `hud.js`/`hud.css` + expanded `connect.html` markup under
+headless Chromium: desktop 1400px (full and compact) and a **true 390px**
+viewport (an iframe, to beat the headless 500px min-width clamp) — no horizontal
+overflow, sort/markers/range correct, toggle round-trips. Screenshots at
+`docs/design/hud-retiering/slice6-*.png`. Component catalog updated
+(`components.md`).
+
 ## 2026-07-19 — HUD Chat: category filter + channel-targeted input (earns the pane vs. the terminal)
 
 **Status.** Fifth slice of the re-tiering (#141, "chat filter/channel input").

@@ -867,6 +867,28 @@ body.connect-page #content { padding: .5rem !important; }
 .mini.mp span { background: var(--hud-mp); }
 .mini.mv span { background: var(--hud-mv); }
 
+/* Compact (raid) group density — one scannable line per member: name · HP bar
+   (triage-tinted) · % · one status marker · away. The header toggle (.grp-dens)
+   flips it; low-HP/tank sort to the top and the list scrolls in-column so a
+   full raid doesn't shove Here/Room off the side. */
+.grp-dens.on { border-color: var(--ac-accent); color: var(--ac-accent); }
+#hud-left-scroll .grp-cmp-list { max-height: 44vh; overflow-y: auto; }
+.grp.grp-cmp { align-items: center; gap: 6px; padding: 3px 6px; }
+.grp-cn { flex: 0 0 34%; max-width: 40%; font-size: .76rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.grp-cbar { flex: 1 1 auto; min-width: 24px; height: 11px; background: var(--ac-bg); border: 1px solid var(--ac-border); border-radius: 5px; overflow: hidden; }
+.grp-cbar > span { display: block; height: 100%; background: var(--hud-hp); }
+.grp-cbar > span.cond-ok { background: var(--ac-ok); }
+.grp-cbar > span.cond-mid { background: var(--hud-event); }
+.grp-cbar > span.cond-low { background: var(--hud-hostile); }
+.grp-cp { flex: none; min-width: 32px; text-align: right; font-size: .7rem; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ac-dim); }
+.grp-cp.cond-ok { color: var(--ac-ok); }
+.grp-cp.cond-mid { color: var(--hud-event); }
+.grp-cp.cond-low { color: var(--hud-hostile); }
+.grp-ct { flex: none; font-size: .58rem; padding: 0 5px; border-radius: 999px; border: 1px solid var(--ac-border); color: var(--ac-dim); }
+.grp-ct.mark-tank { color: var(--hud-hostile); border-color: rgba(214, 75, 75, .5); background: var(--ac-danger-wash); font-weight: 700; }
+.grp-ct.mark-cc { color: var(--hud-event); border-color: rgba(232, 176, 75, .5); font-weight: 700; }
+.grp-range { flex: none; font-size: .58rem; color: var(--ac-dim); }
+
 /* ----- Who ----- */
 .who-list { list-style: none; margin: 0; padding: 0; }
 .who-row { padding: 4px 2px; border-bottom: 1px solid var(--ac-elev); }
