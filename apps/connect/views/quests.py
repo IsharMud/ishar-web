@@ -27,8 +27,10 @@ from django.views.generic.base import View
 from apps.core.views.mixins import NeverCacheMixin
 from apps.mobiles.models import Mobile
 from apps.objects.models.object import Object
+from apps.players.models.remort_upgrade import RemortUpgrade
 from apps.quests.models import Quest
 from apps.quests.models.prereq import QuestPrereq
+from apps.quests.models.recipe import ProfessionRecipe
 from apps.quests.models.reward import QuestReward
 from apps.quests.models.step import QuestStep
 from apps.rooms.models import Room
@@ -91,7 +93,8 @@ class QuestCatalogView(MapJSONMixin, View):
 
         # Bulk-resolve step targets and reward objects to display names,
         # mirroring the game's objective labels (quest_step_objective_label).
-        mob_vnums, obj_vnums, room_vnums, skill_ids = set(), set(), set(), set()
+        mob_vnums, obj_vnums, room_vnums = set(), set(), set()
+        skill_ids, recipe_ids, upgrade_ids = set(), set(), set()
         for s in steps:
             if s["mystify"]:
                 continue
@@ -109,6 +112,10 @@ class QuestCatalogView(MapJSONMixin, View):
                 obj_vnums.add(r["reward_num"])
             elif r["reward_type"] == REWARD_SKILL:
                 skill_ids.add(r["reward_num"])
+            elif r["reward_type"] == REWARD_RECIPE:
+                recipe_ids.add(r["reward_num"])
+            elif r["reward_type"] == REWARD_UPGRADE:
+                upgrade_ids.add(r["reward_num"])
 
         mob_names = {
             m["id"]: strip_color(m["long_name"] or m["name"])
@@ -133,6 +140,18 @@ class QuestCatalogView(MapJSONMixin, View):
             for s in Skill.objects.filter(id__in=skill_ids).values(
                 "id", "skill_name",
             )
+        }
+        recipe_names = {
+            r["id"]: r["name"]
+            for r in ProfessionRecipe.objects.filter(id__in=recipe_ids).values(
+                "id", "name",
+            )
+        }
+        upgrade_names = {
+            u["upgrade_id"]: u["display_name"] or u["name"]
+            for u in RemortUpgrade.objects.filter(
+                upgrade_id__in=upgrade_ids,
+            ).values("upgrade_id", "name", "display_name")
         }
         quest_names = {q["quest_id"]: q["display_name"] for q in quests}
 
@@ -180,8 +199,14 @@ class QuestCatalogView(MapJSONMixin, View):
             if t == REWARD_MEMORY:
                 name = obj_names.get(n)
                 return {"kind": "memory", "name": name} if name else None
-            # Renown is unadvertised in-game; buff/upgrade/recipe names
-            # live game-side only — surface the kind without a name.
+            if t == REWARD_RECIPE:
+                name = recipe_names.get(n)
+                return {"kind": "recipe", "name": "Recipe: " + name} if name else None
+            if t == REWARD_UPGRADE:
+                name = upgrade_names.get(n)
+                return {"kind": "upgrade", "name": name} if name else None
+            # Renown is unadvertised in-game (the display switch skips it);
+            # buff rewards are unused in current content.
             return None
 
         steps_by_quest, rewards_by_quest, prereqs_by_quest = {}, {}, {}
