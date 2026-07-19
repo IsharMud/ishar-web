@@ -109,7 +109,8 @@ rest have no site-wide equivalent:
 | `--hud-mm` | `#a05ad0` | Metamagic bar. |
 | `--hud-edge` | `#d08a3a` | Edge resource bar. |
 | `--hud-event` | `#e8b04b` | World event flags. |
-| `--hud-moon` | `#9aa6c8` | Moon phases. |
+| `--hud-moon` | `#9aa6c8` | Moon phases (default; each up moon is tinted to its game `@c` colour inline). |
+| `--hud-moon-down` | `rgba(154,166,200,.22)` | An unlit body in the night-sky strip — a down moon or the Saorin comet stub. |
 | `--hud-ter-*` | see below | Map terrain fills (canvas reads them via `getComputedStyle`). |
 
 **Map terrain fills** (`--hud-ter-*`): muted, desaturated room fills for the
