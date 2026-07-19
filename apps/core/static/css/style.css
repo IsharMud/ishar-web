@@ -94,6 +94,25 @@ svg.bi:not([width]) { width: 1em; height: 1em; }
 .nav-link .bi { color: var(--ishar-color); }
 footer a .bi { color: var(--ac-dim); }
 
+/* Play Now — the one amber-filled item in the bar. Playing is the site's
+   first-class action, so its nav entry reads as a button, not a text link. */
+.navbar .nav-link.nav-cta {
+    color: #231005;
+    background: linear-gradient(180deg, #ffb385 0%, #dd8a52 100%);
+    border-radius: 999px;
+    padding: .3rem .9rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: filter .15s, box-shadow .15s;
+}
+.navbar .nav-link.nav-cta:hover,
+.navbar .nav-link.nav-cta:focus-visible {
+    color: #231005;
+    filter: brightness(1.08);
+    box-shadow: 0 0 0 .2rem var(--ac-wash);
+}
+.navbar .nav-cta .bi { color: #231005; }
+
 .icon-link-hover { --bs-icon-link-transform: translate3d(0, -.3rem, 0); }
 /* Hover affordances are hover-only: on touch, taps must not leave icons
    stuck mid-lift (mobile friendliness — see docs/design/decisions.md). */

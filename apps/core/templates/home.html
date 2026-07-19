@@ -8,35 +8,25 @@
 {% block content %}
 <div class="ac">
 
-    <!-- Latest news -->
+    <!-- Play now: the flagship banner — the site is the best way to play Ishar,
+         so the play action leads the page. -->
     <header class="ac-hero">
-        <span class="ac-hero__badge">{% bi "newspaper" %}</span>
+        <span class="ac-hero__badge">{% bi "controller" %}</span>
         <div class="ac-hero__text">
-            <h2 class="ac-hero__title">{{ news.subject|default:"Welcome" }}</h2>
-{% if news %}
+            <h2 class="ac-hero__title">Play Ishar in your browser</h2>
             <p class="ac-hero__sub">
-                {{ news.account.get_username|title }} &mdash;
-                <time datetime="{{ news.created|date:'c' }}" title="{{ news.created|date:'l, F jS, Y' }}">
-                    {{ news.created|date:"l, F jS, Y" }}
-                </time>
+                Free to play, no download &mdash; jump straight into the live game.
+                Prefer your own <a href="{% url 'clients' %}#clients">MUD client</a>?
+                Point it at <code>isharmud.com</code> port <code>23</code> or <code>9999</code>.
             </p>
-{% else %}
-            <p class="ac-hero__sub">The world ends, and then it begins again.</p>
-{% endif %}
         </div>
         <div class="ac-hero__status">
-            <a class="ac-btn ac-btn--accent" href="{% url 'news' %}?page=2#news">
-                {% bi "newspaper" %}
-                Past News
+            <a class="ac-cta ac-cta--accent" href="{% url 'connect' %}">
+                {% bi "play-fill" %}
+                Play Now
             </a>
         </div>
     </header>
-
-{% if news %}
-    <div class="ac-panel">
-        {% autoescape off %}{{ news.body }}{% endautoescape %}
-    </div>
-{% endif %}
 
     <!-- The pitch -->
     <div class="ac-panel">
@@ -65,23 +55,25 @@
         </p>
     </div>
 
-    <!-- Play now -->
+    <!-- Latest news -->
     <div class="ac-panel">
-        <div class="ac-panel__h">{% bi "controller" %} Play Now</div>
+        <div class="ac-panel__h">{% bi "newspaper" %} Latest News</div>
+{% if news %}
         <p class="ac-panel__hint">
-            Free to play &mdash; right here in your browser, or with any
-            <a href="{% url 'clients' %}#clients">MUD client</a> pointed at the game server.
+            <strong class="text-ishar">{{ news.subject }}</strong> &mdash;
+            {{ news.account.get_username|title }},
+            <time datetime="{{ news.created|date:'c' }}" title="{{ news.created|date:'l, F jS, Y' }}">
+                {{ news.created|date:"F jS, Y" }}
+            </time>
         </p>
-        <a class="ac-cta ac-cta--accent" href="{% url 'connect' %}">
-            {% bi "globe" %}
-            Play in your browser
+        {% autoescape off %}{{ news.body }}{% endautoescape %}
+        <a class="ac-btn ac-btn--accent mt-3" href="{% url 'news' %}?page=2#news">
+            {% bi "newspaper" %}
+            Past News
         </a>
-        <dl class="ac-kv mt-3 mb-0">
-            <dt>Host</dt>
-            <dd><code>isharmud.com</code></dd>
-            <dt>Ports</dt>
-            <dd><code>23</code> or <code>9999</code></dd>
-        </dl>
+{% else %}
+        <p class="ac-panel__hint mb-0">The world ends, and then it begins again.</p>
+{% endif %}
     </div>
 
 </div>

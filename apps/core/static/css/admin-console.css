@@ -1186,6 +1186,9 @@ a.ac-link--featured:visited .ac-link__name { color: var(--ac-accent); }
 @media (max-width: 575.98px) {
     .ac-hero { flex-wrap: wrap; padding: .9rem 1rem; }
     .ac-hero__status { align-self: stretch; min-width: 0; }
+    /* A hero's primary CTA fills the width once the hero wraps, so the flagship
+       action is a full tap target on phones. */
+    .ac-hero__status:has(.ac-cta) { width: 100%; }
     /* Never clip a hero pill on a phone — let its text wrap instead. */
     .ac-hero__status .ac-pill { white-space: normal; }
     .ac-hero__badge { width: 2.6rem; height: 2.6rem; }

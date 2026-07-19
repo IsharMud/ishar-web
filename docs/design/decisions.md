@@ -9,6 +9,38 @@ Format: `## YYYY-MM-DD — Title` · **Decision** · **Why** · (optional) **Not
 
 ---
 
+## 2026-07-19 — "Play Now" is the site's first-class action (nav CTA + home flagship)
+
+**Decision.** The web client is the best way to play Ishar, so playing is treated
+as the site's primary action rather than one link among many.
+
+- **Nav.** The navbar's "Connect" (a vague amber text link with a `globe` icon,
+  indistinguishable from its neighbours and sharing the glyph with Wiki/World)
+  becomes **"Play Now"** — a `play-fill` icon on the one amber-*filled* pill in
+  the bar (`.nav-cta` in `style.css`). It reads as a button, not a link; on the
+  collapsed phone menu it stays a distinct amber pill.
+- **Home.** The play call-to-action, previously the *last* panel on the page
+  (buried below news + lore), is promoted to the **flagship `.ac-hero`** at the
+  top: `controller` badge, "Play Ishar in your browser", host/ports folded into
+  the sub, and an `.ac-cta--accent` "Play Now" button. Page order is now
+  **Play → The World (pitch) → Latest News**. News steps down from a hero to an
+  `.ac-panel` (headline + byline + body + "Past News"), so the page has one
+  unambiguous hero.
+- **Full-width hero CTA on phones.** `.ac-hero__status:has(.ac-cta)` spans the
+  full width once the hero wraps (≤575.98px), so the flagship action is a full
+  tap target on the device the playerbase mostly uses. Pill-only hero statuses
+  (deploy, feedback) are unaffected.
+
+**Why.** The primary conversion action was the least prominent thing on the home
+page, and "Connect" is jargon a first-time visitor has to decode. Amber is
+reserved for brand/focus/**primary actions** (tokens.md) — a single filled play
+button is exactly that use, not accent overuse. Green-field: optimise for the
+best design, don't preserve the buried layout.
+
+**Notes.** `.nav-cta` uses the `.ac-cta--accent` amber gradient + `#231005` ink
+for consistency with the home CTA. Every real "go play" control now uses
+`play-fill` + "Play Now"; `controller` stays the decorative game badge.
+
 ## 2026-07-19 — HUD combat layer II: target cycling + the attack/assist cluster (Alt = act)
 
 **Decision.** The ⚔ default target graduates from a context-menu toggle to a
