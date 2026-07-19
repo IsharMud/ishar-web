@@ -187,11 +187,6 @@
         <div id="hud-actionrow">
             <div id="hud-hotbar" class="empty"></div>
             <nav id="hud-micro" aria-label="Overlay windows">
-                <button type="button" class="micro-btn" data-overlay="equipment" hidden
-                        aria-pressed="false" aria-haspopup="dialog" aria-controls="hud-overlay"
-                        title="Equipment (Ctrl+G)" aria-label="Equipment (Ctrl+G)">
-                    {% bi "shield" %}
-                </button>
                 <button type="button" class="micro-btn" data-overlay="inventory" hidden
                         aria-pressed="false" aria-haspopup="dialog" aria-controls="hud-overlay"
                         title="Bags (Ctrl+I)" aria-label="Bags (Ctrl+I)">
@@ -258,8 +253,8 @@
     <aside id="hud-right">
         {# The two persistent right-column panes: Tracked Spells (the magic you
            maintain, expiry-sorted) pinned above Chat. Reference surfaces —
-           Gear, Character, Abilities, Who — open as micro-menu overlays, not
-           tabs here (docs/design/decisions.md 2026-07-19, HUD overlay migration). #}
+           Character (worn gear + stats), Abilities, Who — open as micro-menu
+           overlays, not tabs here (docs/design/decisions.md 2026-07-19). #}
         <section id="panel-tracked" class="panel panel-tracked"></section>
         <section id="panel-chat" class="panel panel-chat"></section>
     </aside>
@@ -288,10 +283,6 @@
         <button type="button" data-panel="chat" aria-pressed="false">
             {% bi "chat-dots" %}
             <span>Chat</span>
-        </button>
-        <button type="button" data-panel="equipment" aria-pressed="false" hidden>
-            {% bi "shield" %}
-            <span>Gear</span>
         </button>
         <button type="button" data-panel="inventory" aria-pressed="false" hidden>
             {% bi "backpack2" %}
@@ -341,9 +332,22 @@
             </button>
         </div>
         <div id="hud-overlay-body">
-            <section id="panel-equipment" class="panel"></section>
             <section id="panel-inventory" class="panel"></section>
-            <section id="panel-train" class="panel"></section>
+            {# Character overlay: worn gear beside the stat sheet. Two fill
+               targets (hud.js renderEquipment → #char-gear, renderTrain →
+               #char-stats); two columns on desktop, stacked in the phone sheet. #}
+            <section id="panel-train" class="panel">
+                <div class="char-cols">
+                    <div class="char-col">
+                        <h3 class="char-h">Worn</h3>
+                        <div id="char-gear"></div>
+                    </div>
+                    <div class="char-col">
+                        <h3 class="char-h">Stats</h3>
+                        <div id="char-stats"></div>
+                    </div>
+                </div>
+            </section>
             <section id="panel-abilities" class="panel"></section>
             <section id="panel-who" class="panel"></section>
             <section id="panel-professions" class="panel"></section>

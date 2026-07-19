@@ -553,19 +553,26 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
   launcher. On phones the same panel node opens in `#hud-sheet` via a dock
   button (`placePanels()` re-homes it). Register apps in the `OVERLAYS`
   table in `hud.js`.
-- **Reference overlay apps** (`OVERLAYS` keys `equipment`/`inventory`/`train`/
-  `abilities`/`who`, migrated out of the columns + right-column tab bar —
-  decisions.md 2026-07-19): **Gear** (`renderEquipment`, worn `.item-row`s by
-  slot), **Bags** (`renderInventory`, the `.bag` aggregation above),
-  **Character** (`renderTrain` — stats/resources/aux `.kv` and the folded-in
-  `Char.Status` reference kv; there is no separate Status panel, and XP now lives
-  in the ambient `#hud-xpstrip`, not here),
-  **Abilities** (`renderAbilities`, the `.ab-*` browser below), and **Who**
-  (`renderWho`, `.who-list`). Each renders **bare** (the window/sheet chrome
-  supplies the title — no in-panel `panelHeader`) and is availability-gated on
-  its feed (`Char.Equipment`/`Char.Inventory`/`Char.Train`/`Char.Skills`/
-  `Char.Who`), so its micro + dock launchers appear only once there's data.
-  Hotkeys Ctrl+G/I/K/B/U.
+- **Reference overlay apps** (`OVERLAYS` keys `inventory`/`train`/`abilities`/
+  `who`, migrated out of the columns + right-column tab bar — decisions.md
+  2026-07-19): **Bags** (`renderInventory`, the `.bag` aggregation above),
+  **Character** (worn gear + stats in one overlay — decisions.md 2026-07-19
+  "Character overlay merge"), **Abilities** (`renderAbilities`, the `.ab-*`
+  browser below), and **Who** (`renderWho`, `.who-list`). Each renders **bare**
+  (the window/sheet chrome supplies the title — no in-panel `panelHeader`) and is
+  availability-gated on its feed, so its micro + dock launchers appear only once
+  there's data. Hotkeys Ctrl+I/K/B/U.
+- **`.char-cols` Character overlay** — one overlay (`train`, Ctrl+K, person icon)
+  holding two fill targets inside `#panel-train`: `#char-gear` (`renderEquipment`,
+  worn `.item-row`s in wear-slot order) and `#char-stats` (`renderTrain` —
+  stats/resources/aux `.kv` + the folded-in `Char.Status` reference kv). Each
+  column is headed by a `.char-h` label ("Worn" / "Stats"). Two columns with a
+  divider on desktop (`#hud-overlay[data-app="train"]` widens to 720px), stacked
+  in the phone sheet — `grid-template-columns: minmax(0, 1fr)` so long gear names
+  ellipsis instead of forcing the panel wide. Available when either
+  `Char.Equipment` or `Char.Train`/`Char.Status` has data. There is no separate
+  Gear/Equipment overlay, no Status panel, and XP lives in the ambient
+  `#hud-xpstrip`, not here.
 - **`.ab-*` Abilities browser** (`.ab-controls/.ab-search`, `.ab-chips/.ab-chip`,
   `.ab-scroll/.ab-list/.ab-row`, `.ab-name/.ab-right/.ab-block/.ab-pct/.ab-star/
   .ab-type`) — the searchable, type-filtered, usable-only skill list fed by

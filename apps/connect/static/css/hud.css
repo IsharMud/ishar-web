@@ -421,6 +421,8 @@ body.connect-page #content { padding: .5rem !important; }
 
 /* ----- Big map overlay (OVERLAYS app "map", Ctrl+M) ----- */
 #hud-overlay[data-app="map"] { width: min(920px, calc(100vw - 32px)); max-height: min(84vh, 760px); }
+/* Character overlay is two columns on desktop, so it wants more width. */
+#hud-overlay[data-app="train"] { width: min(720px, calc(100vw - 32px)); }
 .map-app { display: flex; flex-direction: column; min-height: 0; }
 .map-toolbar { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 2px 0 8px; }
 .map-zone {
@@ -698,6 +700,21 @@ body.connect-page #content { padding: .5rem !important; }
 .bag .row-list { padding: 2px 6px 4px; }
 .bag-items { list-style: none; margin: 0; padding: 4px 8px; }
 .bag-items li.dim { color: var(--ac-dim); font-style: italic; font-size: .78rem; padding: 2px 0; }
+
+/* ----- Character overlay: worn gear beside the stat sheet -----
+   Mobile-first: one stacked column (the phone sheet). At the desktop
+   breakpoint the two columns sit side by side with a divider between them. */
+/* minmax(0,…) lets the track shrink below content so long gear names ellipsis
+   instead of forcing the panel wider than the phone sheet. */
+.char-cols { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
+.char-h {
+    margin: 0 0 6px; font-size: .68rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .08em; color: var(--ac-dim);
+}
+@media (min-width: 768px) {
+    .char-cols { grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); column-gap: 20px; align-items: start; }
+    .char-col:first-child { border-right: 1px solid var(--ac-border); padding-right: 20px; }
+}
 
 /* ----- Key/value lists (train / status) ----- */
 .kv { list-style: none; margin: 0; padding: 0; }

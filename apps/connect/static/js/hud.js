@@ -124,7 +124,7 @@
     // the movement (rose) and interaction (occupants) surfaces are together at
     // the bottom, nearest the input.
     var PANELS = ["inventory", "group", "occupants", "room",
-                  "tracked", "chat", "equipment", "train", "abilities", "who",
+                  "tracked", "chat", "train", "abilities", "who",
                   "professions", "map"];
     var PANEL_HOME = {
         occupants: "hud-left-scroll",
@@ -135,8 +135,7 @@
         // so DOM order can't be relied on).
         tracked: "hud-right", chat: "hud-right",
         // Reference surfaces are micro-menu overlays (the bottom sheet on phones).
-        equipment: "hud-overlay-body", inventory: "hud-overlay-body",
-        train: "hud-overlay-body",
+        inventory: "hud-overlay-body", train: "hud-overlay-body",
         abilities: "hud-overlay-body", who: "hud-overlay-body",
         professions: "hud-overlay-body", map: "hud-overlay-body"
     };
@@ -159,17 +158,17 @@
         // 2026-07-19). Each is available once its feed has data, so a launcher
         // never opens an empty window and its hotkey only shadows the browser
         // default while there's something to show.
-        { key: "equipment", title: "Equipment", hotkey: "g",
-          render: function () { renderEquipment(); },
-          available: function () { return (S.equipment || []).length > 0; } },
         // Bags: all storage in one place (worn packs + carried). Migrated out of
         // the left column with item pinning, 2026-07-19.
         { key: "inventory", title: "Bags", hotkey: "i",
           render: function () { renderInventory(); },
           available: function () { return bagsHaveContent(); } },
+        // Character: worn gear beside the stat sheet in one overlay (2026-07-19,
+        // merged from the split Gear/Character apps — gear drives the stats it
+        // sits next to, and one "character screen" beats two hotkey trips).
         { key: "train", title: "Character", hotkey: "k",
-          render: function () { renderTrain(); },
-          available: function () { return !!(S.train || S.status); } },
+          render: function () { renderEquipment(); renderTrain(); },
+          available: function () { return (S.equipment || []).length > 0 || !!(S.train || S.status); } },
         { key: "abilities", title: "Abilities", hotkey: "b",
           render: function () { renderAbilities(); },
           available: function () { return (S.skills || []).length > 0; } },
@@ -1535,8 +1534,9 @@
         return list;
     }
 
-    // Equipment is an overlay app (the window/sheet supplies the title), so it
-    // renders bare content — no collapsible panel header.
+    // Worn gear fills the Character overlay's "Worn" column (#char-gear). Feed
+    // order is the game's wear-slot order (head→feet), so the list reads like a
+    // paperdoll without the client hardcoding a slot map the game owns.
     function renderEquipment() {
         var items = S.equipment || [];
         fill(dom.equipment, items.length
@@ -4084,9 +4084,10 @@
         dom.room = document.getElementById("panel-room");
         dom.occupants = document.getElementById("panel-occupants");
         dom.group = document.getElementById("panel-group");
-        dom.equipment = document.getElementById("panel-equipment");
+        // The Character overlay's two fill targets live inside #panel-train.
+        dom.equipment = document.getElementById("char-gear");
         dom.inventory = document.getElementById("panel-inventory");
-        dom.train = document.getElementById("panel-train");
+        dom.train = document.getElementById("char-stats");
         dom.tracked = document.getElementById("panel-tracked");
         dom.selfAffects = document.getElementById("vitals-affects");
         dom.abilities = document.getElementById("panel-abilities");
