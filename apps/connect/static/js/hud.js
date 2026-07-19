@@ -91,7 +91,6 @@
     var roseTab = "rose";   // "rose" | "map" — pinned Room-panel tab
     try { if (localStorage.getItem("ishar.roseTab") === "map") roseTab = "map"; } catch (e) {}
     var hudOn = false;
-    var activeTab = "status";
     var sheetName = null;
     var roseOverlayOn = true;
 
@@ -106,17 +105,20 @@
     // Occupants sits last in the scroll — directly above the pinned rose — so
     // the movement (rose) and interaction (occupants) surfaces are together at
     // the bottom, nearest the input.
-    var PANELS = ["equipment", "inventory", "train", "group", "occupants", "room",
-                  "tracked", "status", "abilities", "chat", "who", "professions", "map"];
+    var PANELS = ["inventory", "group", "occupants", "room",
+                  "tracked", "chat", "equipment", "train", "abilities", "who",
+                  "professions", "map"];
     var PANEL_HOME = {
-        occupants: "hud-left-scroll", equipment: "hud-left-scroll",
-        inventory: "hud-left-scroll", train: "hud-left-scroll",
+        occupants: "hud-left-scroll", inventory: "hud-left-scroll",
         group: "hud-left-scroll",
         room: "hud-left",
-        // Tracked Spells is pinned above the tab bar by CSS order (placePanels
-        // re-appends after a phone→desktop swap, so DOM order can't be relied on).
-        tracked: "hud-right",
-        status: "hud-right", abilities: "hud-right", chat: "hud-right", who: "hud-right",
+        // The two persistent right-column panes. Tracked Spells is pinned above
+        // Chat by CSS order (placePanels re-appends after a phone→desktop swap,
+        // so DOM order can't be relied on).
+        tracked: "hud-right", chat: "hud-right",
+        // Reference surfaces are micro-menu overlays (the bottom sheet on phones).
+        equipment: "hud-overlay-body", train: "hud-overlay-body",
+        abilities: "hud-overlay-body", who: "hud-overlay-body",
         professions: "hud-overlay-body", map: "hud-overlay-body"
     };
 
@@ -134,6 +136,22 @@
     // this handler runs first). Ctrl+<letter> may shadow a browser default
     // (Ctrl+P = print) — deliberate, and only while the app is available.
     var OVERLAYS = [
+        // Character-reference surfaces (migrated out of the columns/tab bar,
+        // 2026-07-19). Each is available once its feed has data, so a launcher
+        // never opens an empty window and its hotkey only shadows the browser
+        // default while there's something to show.
+        { key: "equipment", title: "Equipment", hotkey: "g",
+          render: function () { renderEquipment(); },
+          available: function () { return (S.equipment || []).length > 0; } },
+        { key: "train", title: "Character", hotkey: "k",
+          render: function () { renderTrain(); },
+          available: function () { return !!(S.train || S.status); } },
+        { key: "abilities", title: "Abilities", hotkey: "b",
+          render: function () { renderAbilities(); },
+          available: function () { return (S.skills || []).length > 0; } },
+        { key: "who", title: "Who", hotkey: "u",
+          render: function () { renderWho(); },
+          available: function () { return !!(S.who && S.who.players && S.who.players.length); } },
         { key: "professions", title: "Professions", hotkey: "p",
           render: function () { renderProfessions(); },
           // The activity bar must stay reachable even in the (theoretical)
@@ -581,7 +599,7 @@
                 // path uses to avoid rebuilding a ~400-row list off-screen.
                 if (abilitiesVisible()) renderAbilities();
                 break;
-            case "Char.Status": S.status = data; renderVitals(); renderStatus(); renderGroup(); break;
+            case "Char.Status": S.status = data; renderVitals(); renderTrain(); renderGroup(); updateMicro(); break;
             case "Game.Time": S.time = data; renderVitals(); break;
             case "Room.Info":
                 S.room = data; renderRoom();
@@ -596,7 +614,7 @@
                 renderOccupants();
                 break;
             case "Char.Equipment":
-                S.equipment = (data && data.items) || []; renderEquipment(); renderInventory();
+                S.equipment = (data && data.items) || []; renderEquipment(); renderInventory(); updateMicro();
                 // Craftable-now marks join against carried items.
                 if (overlayVisible("professions")) renderProfessions();
                 break;
@@ -604,7 +622,7 @@
                 S.inventory = data; renderInventory(); renderEquipment();
                 if (overlayVisible("professions")) renderProfessions();
                 break;
-            case "Char.Train": S.train = data; renderTrain(); break;
+            case "Char.Train": S.train = data; renderTrain(); updateMicro(); break;
             case "Char.Affects": S.affects = data; stampAffectExpiry(data); renderSelfAffects(); renderTracked(); break;
             case "Group.Update":
                 S.group = data; renderGroup();
@@ -613,8 +631,8 @@
             case "Char.Death":
                 if (mapMod && mapMod.onDeath) mapMod.onDeath(data);
                 break;
-            case "Char.Who": S.who = data; renderWho(); break;
-            case "Char.Skills": S.skills = (data && data.skills) || []; renderHotbar(); renderAbilities(); break;
+            case "Char.Who": S.who = data; renderWho(); updateMicro(); break;
+            case "Char.Skills": S.skills = (data && data.skills) || []; renderHotbar(); renderAbilities(); updateMicro(); break;
             case "Char.Professions": applyProfessions(data); break;
             case "Char.Recipes": S.recipes = (data && data.recipes) || []; renderProfessions(); break;
             case "Char.Craft": applyCraft(data); break;
@@ -1391,15 +1409,13 @@
         return list;
     }
 
+    // Equipment is an overlay app (the window/sheet supplies the title), so it
+    // renders bare content — no collapsible panel header.
     function renderEquipment() {
         var items = S.equipment || [];
-        var head = panelHeader("equipment", "Equipment", false);
-        var kids = [head];
-        if (!isCollapsed("equipment")) {
-            if (!items.length) kids.push(el("div", { class: "panel-empty", text: "Nothing worn." }));
-            else kids.push(itemListWithContents(items, "equip"));
-        }
-        fill(dom.equipment, kids);
+        fill(dom.equipment, items.length
+            ? itemListWithContents(items, "equip")
+            : el("div", { class: "panel-empty", text: "Nothing worn." }));
     }
 
     // ------------------------------------------------------------------
@@ -1481,61 +1497,53 @@
     }
 
     // ------------------------------------------------------------------
-    // Character (train)
+    // Character sheet — Char.Train (stats/resources/XP) plus the Char.Status
+    // reference kv (align/currency/remort), folded together now that both are
+    // one overlay app rather than a column panel and a tab. Renders bare (the
+    // window/sheet supplies the title). Affects graduated out of the old Status
+    // tab: self buffs/debuffs are ambient (renderSelfAffects), maintained magic
+    // is Tracked Spells (renderTracked). See docs/design/decisions.md
+    // (2026-07-18 re-tiering, 2026-07-19 overlay migration).
     // ------------------------------------------------------------------
     function renderTrain() {
-        var t = S.train;
-        var head = panelHeader("train", "Character", false);
-        var kids = [head];
-        if (!isCollapsed("train")) {
-            if (!t) kids.push(el("div", { class: "panel-empty", text: "—" }));
-            else {
-                if (t.xp_pct != null) {
-                    kids.push(el("div", { class: "vbar xp" }, [
-                        el("span", { class: "vbar-label", text: "XP" }),
-                        el("span", { class: "vbar-track" }, [
-                            el("span", { class: "vbar-fill", style: "width:" + clamp(t.xp_pct, 0, 100) + "%" }),
-                            el("span", { class: "vbar-text", text: clamp(t.xp_pct, 0, 100) + "%" })
-                        ])
-                    ]));
-                }
-                if (t.can_advance) kids.push(el("button", { class: "action-btn", "data-cmd": "advance", text: "⬆ Advance available" }));
-                var ul = el("ul", { class: "kv" });
-                (t.stats || []).forEach(function (s) {
-                    ul.appendChild(el("li", {}, [el("span", { text: s.name }), el("span", { text: s.value + (s.add ? " (+" + s.add + ")" : "") })]));
-                });
-                (t.resources || []).forEach(function (r) {
-                    ul.appendChild(el("li", {}, [el("span", { text: r.label || r.name }), el("span", { text: r.value + " / " + r.max })]));
-                });
-                (t.aux || []).forEach(function (a) {
-                    ul.appendChild(el("li", {}, [el("span", { text: a.label || a.name }), el("span", { text: a.value })]));
-                });
-                kids.push(ul);
+        var t = S.train, st = S.status, kids = [];
+        if (t) {
+            if (t.xp_pct != null) {
+                kids.push(el("div", { class: "vbar xp" }, [
+                    el("span", { class: "vbar-label", text: "XP" }),
+                    el("span", { class: "vbar-track" }, [
+                        el("span", { class: "vbar-fill", style: "width:" + clamp(t.xp_pct, 0, 100) + "%" }),
+                        el("span", { class: "vbar-text", text: clamp(t.xp_pct, 0, 100) + "%" })
+                    ])
+                ]));
             }
-        }
-        fill(dom.train, kids);
-    }
-
-    // ------------------------------------------------------------------
-    // Status (reference resources). Affects graduated out of this tab: self
-    // buffs/debuffs are ambient (renderSelfAffects), maintained magic is the
-    // Tracked Spells panel (renderTracked) — see the 2026-07-18 re-tiering.
-    // ------------------------------------------------------------------
-    function mini(p, cls) {
-        return el("span", { class: "mini " + cls }, el("span", { style: "width:" + clamp(p, 0, 100) + "%" }));
-    }
-    function renderStatus() {
-        var kids = [], st = S.status;
-        if (st) {
+            if (t.can_advance) kids.push(el("button", { class: "action-btn", "data-cmd": "advance", text: "⬆ Advance available" }));
             var ul = el("ul", { class: "kv" });
-            [["Align", st.align], ["Gold", Number(st.gold || 0).toLocaleString()],
-             ["To level", Number(st.tnl || 0).toLocaleString()], ["Bank", Number(st.bank || 0).toLocaleString()],
-             ["Remort", st.remort]].forEach(function (kvp) {
-                ul.appendChild(el("li", {}, [el("span", { text: kvp[0] }), el("span", { text: String(kvp[1]) })]));
+            (t.stats || []).forEach(function (s) {
+                ul.appendChild(el("li", {}, [el("span", { text: s.name }), el("span", { text: s.value + (s.add ? " (+" + s.add + ")" : "") })]));
+            });
+            (t.resources || []).forEach(function (r) {
+                ul.appendChild(el("li", {}, [el("span", { text: r.label || r.name }), el("span", { text: r.value + " / " + r.max })]));
+            });
+            (t.aux || []).forEach(function (a) {
+                ul.appendChild(el("li", {}, [el("span", { text: a.label || a.name }), el("span", { text: a.value })]));
             });
             kids.push(ul);
         }
-        fill(dom.status, kids.length ? kids : [el("div", { class: "panel-empty", text: "—" })]);
+        if (st) {
+            var sul = el("ul", { class: "kv" });
+            [["Align", st.align], ["Gold", Number(st.gold || 0).toLocaleString()],
+             ["To level", Number(st.tnl || 0).toLocaleString()], ["Bank", Number(st.bank || 0).toLocaleString()],
+             ["Remort", st.remort]].forEach(function (kvp) {
+                sul.appendChild(el("li", {}, [el("span", { text: kvp[0] }), el("span", { text: String(kvp[1]) })]));
+            });
+            kids.push(sul);
+        }
+        fill(dom.train, kids.length ? kids : [el("div", { class: "panel-empty", text: "—" })]);
+    }
+
+    function mini(p, cls) {
+        return el("span", { class: "mini " + cls }, el("span", { style: "width:" + clamp(p, 0, 100) + "%" }));
     }
 
     // ------------------------------------------------------------------
@@ -3506,14 +3514,14 @@
         openHostMenu(host, host);
     }
 
-    // Re-render just the panel that owns a collapse key.
+    // Re-render just the panel that owns a collapse key. (Equipment and the
+    // Character sheet are overlay apps now — no collapse header — so they're
+    // absent here.)
     function rerenderPanel(key) {
         switch (key) {
             case "occupants": renderOccupants(); break;
             case "group": renderGroup(); break;
-            case "equipment": renderEquipment(); break;
             case "inventory": case "components": renderInventory(); break;
-            case "train": renderTrain(); break;
             case "tracked": renderTracked(); break;
             default: renderAll();
         }
@@ -3552,22 +3560,21 @@
         if (dom.sheetTitle) dom.sheetTitle.textContent = title;
         dom.app.classList.toggle("sheet-open", !!name);
         if (name === "chat") { markChatUnread(false); dom.chat.scrollTop = dom.chat.scrollHeight; }
-        if (name === "abilities") renderAbilities();   // refresh cooldown/mana greying on open
+        // Overlay apps (abilities/who/gear/character/professions/map) render on
+        // open and clear their unread dot — covers the abilities cooldown/mana
+        // re-grey too, so no special-case is needed here.
         if (overlayByKey(name)) { overlayByKey(name).render(); markOverlayUnread(name, false); }
     }
+    // Chat is a persistent right-column pane on desktop (always visible while the
+    // right column is open), a dock sheet on phones.
     function chatVisible() {
         if (!hudOn) return false;
-        return mqMobile.matches ? sheetName === "chat" : activeTab === "chat";
+        return mqMobile.matches ? sheetName === "chat" : !dom.app.classList.contains("r-closed");
     }
-    function abilitiesVisible() {
-        if (!hudOn) return false;
-        return mqMobile.matches ? sheetName === "abilities" : activeTab === "abilities";
-    }
+    function abilitiesVisible() { return overlayVisible("abilities"); }
     function markChatUnread(on) {
-        ['#hud-dock button[data-panel="chat"]', '#hud-tabs button[data-tab="chat"]'].forEach(function (sel) {
-            var b = document.querySelector(sel);
-            if (b) b.classList.toggle("unread", !!on);
-        });
+        var b = dom.dock && dom.dock.querySelector('button[data-panel="chat"]');
+        if (b) b.classList.toggle("unread", !!on);
     }
     function setCol(side, open, persist) {
         dom.app.classList.toggle(side === "left" ? "l-closed" : "r-closed", !open);
@@ -3577,18 +3584,6 @@
             try { localStorage.setItem(side === "left" ? "ishar.colL" : "ishar.colR", open ? "1" : "0"); } catch (e) {}
         }
         api.onLayoutChange();
-    }
-    function setTab(name) {
-        activeTab = name;
-        ["status", "abilities", "chat", "who"].forEach(function (n) {
-            var p = document.getElementById("panel-" + n);
-            if (p) p.classList.toggle("tab-active", n === name);
-            var b = document.querySelector('#hud-tabs button[data-tab="' + n + '"]');
-            if (b) b.classList.toggle("active", n === name);
-        });
-        if (name === "chat") { markChatUnread(false); dom.chat.scrollTop = dom.chat.scrollHeight; }
-        if (name === "abilities") renderAbilities();   // refresh cooldown/mana greying on open
-        try { localStorage.setItem("ishar.tab", name); } catch (e) {}
     }
     function setHud(on, persist) {
         hudOn = on;
@@ -3612,18 +3607,15 @@
     }
 
     function restorePrefs() {
-        var saved = null, tab = null, colL = null, colR = null, rose = null;
+        var saved = null, colL = null, colR = null, rose = null;
         try {
             saved = localStorage.getItem("ishar.hud");
-            tab = localStorage.getItem("ishar.tab");
             colL = localStorage.getItem("ishar.colL");
             colR = localStorage.getItem("ishar.colR");
             rose = localStorage.getItem("ishar.roseOverlay");
         } catch (e) {}
-        if (tab && ["status", "abilities", "chat", "who"].indexOf(tab) !== -1) activeTab = tab;
         roseOverlayOn = rose !== "0";
         setHud(saved !== "0");
-        setTab(activeTab);
         setCol("left", colL != null ? colL === "1" : mqWide.matches, false);
         setCol("right", colR != null ? colR === "1" : true, false);
     }
@@ -3633,7 +3625,7 @@
     // ------------------------------------------------------------------
     function renderAll() {
         renderVitals(); renderSelfAffects(); renderRoom(); renderOccupants(); renderGroup();
-        renderEquipment(); renderInventory(); renderTrain(); renderStatus(); renderTracked();
+        renderEquipment(); renderInventory(); renderTrain(); renderTracked();
         renderWho(); renderChat(); renderHotbar(); renderAbilities(); renderProfessions(); updateMicro();
     }
     function reset() {
@@ -3669,7 +3661,6 @@
         dom.equipment = document.getElementById("panel-equipment");
         dom.inventory = document.getElementById("panel-inventory");
         dom.train = document.getElementById("panel-train");
-        dom.status = document.getElementById("panel-status");
         dom.tracked = document.getElementById("panel-tracked");
         dom.selfAffects = document.getElementById("vitals-affects");
         dom.abilities = document.getElementById("panel-abilities");
@@ -3699,12 +3690,6 @@
         wireHotbarDrag();
         wireHotkeys();
         wireTooltips();
-
-        var tabs = document.getElementById("hud-tabs");
-        if (tabs) tabs.addEventListener("click", function (e) {
-            var b = e.target.closest("button[data-tab]");
-            if (b) setTab(b.getAttribute("data-tab"));
-        });
 
         var toggle = document.getElementById("ui-toggle");
         if (toggle) toggle.addEventListener("click", function () {

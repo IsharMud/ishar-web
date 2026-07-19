@@ -400,6 +400,10 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
   priority-width terminal; phone: terminal-first with `#hud-dock` (bottom tab
   bar) + `#hud-sheet` (one-panel bottom sheet). `hud.js` re-parents the panel
   sections between the columns and the sheet on the 768px media-query flip.
+  The left column stacks **Bag · Group · Here** above the pinned Room/rose; the
+  right column is **Tracked Spells over Chat** — no tab bar. Reference surfaces
+  (Gear, Character, Abilities, Who) are overlay apps, not columns/tabs (see the
+  overlay section below and decisions.md 2026-07-19).
 - **`.panel` / `.panel-h`** — the HUD's compact panel + uppercase header
   (denser cousins of `.ac-panel` / `.ac-panel__h`).
 - **`.vbar` / `.mini`** — labeled vitals bars (HP/MP/MV/Foe/XP/MM/Edge) and
@@ -501,6 +505,24 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
   launcher. On phones the same panel node opens in `#hud-sheet` via a dock
   button (`placePanels()` re-homes it). Register apps in the `OVERLAYS`
   table in `hud.js`.
+- **Reference overlay apps** (`OVERLAYS` keys `equipment`/`train`/`abilities`/
+  `who`, migrated out of the columns + right-column tab bar — decisions.md
+  2026-07-19): **Gear** (`renderEquipment`, worn `.item-row`s by slot),
+  **Character** (`renderTrain` — the XP `.vbar`, stats/resources/aux `.kv`, and
+  the folded-in `Char.Status` reference kv; there is no separate Status panel),
+  **Abilities** (`renderAbilities`, the `.ab-*` browser below), and **Who**
+  (`renderWho`, `.who-list`). Each renders **bare** (the window/sheet chrome
+  supplies the title — no in-panel `panelHeader`) and is availability-gated on
+  its feed (`Char.Equipment`/`Char.Train`/`Char.Skills`/`Char.Who`), so its
+  micro + dock launchers appear only once there's data. Hotkeys Ctrl+G/K/B/U.
+- **`.ab-*` Abilities browser** (`.ab-controls/.ab-search`, `.ab-chips/.ab-chip`,
+  `.ab-scroll/.ab-list/.ab-row`, `.ab-name/.ab-right/.ab-block/.ab-pct/.ab-star/
+  .ab-type`) — the searchable, type-filtered, usable-only skill list fed by
+  `Char.Skills`. The search box + filter chips **pin** (`position: sticky`) to
+  the top of the scroll container — the overlay body on desktop, the dock sheet
+  on phones (one CSS rule serves both) — so a 400-row list never scrolls the
+  controls away. Rows carry the school `.cat-*` left border, the `☆/★` pin, and
+  a `⋯` action menu.
 - **Professions app** (`.prof-row/.prof-head/.prof-track/.prof-btn`,
   `.recipe-list/.recipe-cat/.recipe-row`,
   `.craft-activity/.craft-track/.craft-fill/.craft-time`) — the reference

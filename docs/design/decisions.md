@@ -9,6 +9,61 @@ Format: `## YYYY-MM-DD — Title` · **Decision** · **Why** · (optional) **Not
 
 ---
 
+## 2026-07-19 — HUD overlay migration: Gear/Character/Abilities/Who leave the columns; the right-column tab bar is gone
+
+**Status.** Second slice of the re-tiering (#141, "overlay migration"). Builds
+on the affects split (2026-07-18). Still pending per that issue: the XP strip,
+the Inventory overlay + item pinning, the chat channel filter, and group density
+presets.
+
+**Decision.** The four reference surfaces graduate from column panels / right-
+column tabs into **micro-menu overlay apps** (the extension model from
+2026-07-17), and the right-column **tab bar is removed**:
+
+- **Equipment → the Gear overlay** (`equipment`, Ctrl+G). **Character → the
+  Character overlay** (`train`, Ctrl+K). **Abilities → the Abilities overlay**
+  (`abilities`, Ctrl+B). **Who → the Who overlay** (`who`, Ctrl+U). Each is a new
+  `OVERLAYS` entry that renders its existing panel into `#hud-overlay-body`
+  (desktop window) or the dock sheet (phones) — same registry the Professions
+  and Map apps use.
+- **Availability-gated launchers.** Like Professions/Map, each app's micro
+  button + dock button appears only once its feed has data (`updateMicro` on the
+  `Char.Equipment` / `Char.Train` / `Char.Status` / `Char.Skills` / `Char.Who`
+  deltas), so a launcher never opens an empty window and its Ctrl-key only
+  shadows the browser default while there's something to show.
+- **Status folds into Character.** The old Status tab was, after the affects
+  split, just five reference rows (align, gold, to-level, bank, remort). Rather
+  than mint a sixth overlay for it, its `Char.Status` kv is rendered **inside the
+  Character sheet** below the train stats — one character-reference surface, not
+  two. `renderStatus`/`#panel-status` are deleted.
+- **The right column is now the two persistent panes** it should be: **Tracked
+  Spells** (pinned, from the affects split) over **Chat** (grows to fill). No tab
+  bar, no `setTab`/`activeTab`, no `.panel.tab`. Overlay panels render **bare**
+  (the window/sheet chrome supplies the title) — Equipment and the Character
+  sheet drop their old collapsible `panelHeader`, matching Professions.
+- **Dock reorder.** The phone dock now reads persistent-first (Room · Here ·
+  Group · Tracked · Chat) then the reference overlays (Gear · Bag · Char · Skills
+  · Who · Craft · Map), mirroring the tier order.
+
+**Why.** The re-tiering rule: *a panel earns permanent column space only by doing
+what the scrollback can't* — live timers, at-a-glance bars, spatial layout. Gear,
+the character sheet, the ability browser, and Who are all **consulted on demand**,
+not monitored, so they don't earn a column (and on a phone there was never room).
+Moving them to overlays clears the left column down to the combat surfaces (Group
+· Here, above the pinned rose) and the right column to the two things you *do*
+monitor across a fight (Tracked Spells, Chat). Folding Status into Character
+reduces surfaces instead of fragmenting a five-row list into its own window.
+
+**Notes.** Inventory (Bags) stays a left-column panel for now — its overlay
+migration + item pinning is a later slice. Discipline unchanged: `el()`/
+`textContent`, `data-cmd` for every action, tokens only, motion gated; the
+Abilities filter/chips pin via `position: sticky` in the overlay body exactly as
+they already do in the dock sheet. No new tracked assets beyond the edited
+`hud.js`/`hud.css` (force-added past the `static/` gitignore). Verified by
+loading the real `hud.js`/`hud.css` + expanded template markup against
+`/connect?demo=1` under headless Chromium — desktop (each overlay opened) and
+390px (dock sheets). Component catalog updated (`components.md`).
+
 ## 2026-07-18 — HUD affects split: ambient self-affect strip + Tracked Spells panel
 
 **Status.** First slice of the re-tiering below (#141, "affects rework").

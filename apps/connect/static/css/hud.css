@@ -678,20 +678,14 @@ body.connect-page #content { padding: .5rem !important; }
     background: var(--hud-gold-wash); color: var(--hud-gold); border: 1px solid var(--hud-gold); border-radius: 3px; font-weight: 700; font-size: .78rem;
 }
 
-/* ----- Right column tabs (desktop) ----- */
+/* ----- Right column (desktop): Tracked Spells over Chat, no tab bar ----- */
 #hud-right { display: flex; flex-direction: column; gap: 6px; min-height: 0; }
-#hud-tabs { display: flex; gap: 3px; flex: none; }
-#hud-tabs button {
-    position: relative;
-    flex: 1; padding: 5px 3px; cursor: pointer; font-size: .72rem; font-weight: 700;
-    background: var(--ac-panel); color: var(--ac-dim); border: 1px solid var(--ac-border); border-radius: var(--ac-radius-sm) var(--ac-radius-sm) 0 0;
-}
-#hud-tabs button.active { color: var(--ac-accent); border-bottom-color: var(--ac-accent); background: var(--ac-elev); }
-#hud-right .panel.tab { display: none; flex: 1; min-height: 0; overflow-y: auto; }
-#hud-right .panel.tab.tab-active { display: flex; flex-direction: column; }
-/* Tracked Spells is persistent, not a tab: pinned above the bar (order, since
-   placePanels can't preserve DOM order across a phone↔desktop swap), height-
-   capped so a long maintained list scrolls rather than crowding out the tab. */
+/* Chat fills the column below Tracked Spells and is the scroll container
+   (appendChat pins to its own scrollTop). */
+#hud-right .panel-chat { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+/* Tracked Spells is pinned above Chat (order, since placePanels can't preserve
+   DOM order across a phone↔desktop swap) and height-capped so a long maintained
+   list scrolls rather than crowding Chat out. */
 #hud-right .panel-tracked {
     order: -1; flex: 0 1 auto; min-height: 0; max-height: 42%;
     display: flex; flex-direction: column;
@@ -1005,6 +999,12 @@ body.connect-page #content { padding: .5rem !important; }
 #hud-overlay-body { overflow-y: auto; min-height: 0; padding: 6px 10px 10px; }
 #hud-overlay-body .panel { display: none; background: transparent; border: 0; }
 #hud-overlay-body .panel.overlay-active { display: block; }
+/* The overlay body is the scroll container (like the sheet body), so pin the
+   Abilities search + filter chips to the top instead of scrolling them away. */
+#hud-overlay-body .ab-controls,
+#hud-overlay-body .ab-chips {
+    position: sticky; top: 0; z-index: 1; background: var(--ac-panel);
+}
 
 /* ----- Professions overlay app ----- */
 .craft-activity {
@@ -1273,8 +1273,7 @@ body.connect-page #content { padding: .5rem !important; }
 #hud-dock button[hidden] { display: none; }
 #hud-dock button[aria-pressed="true"] { color: var(--ac-accent); background: var(--ac-elev); }
 
-#hud-dock button.unread::after,
-#hud-tabs button.unread::after {
+#hud-dock button.unread::after {
     content: ""; position: absolute; top: 4px; right: 8px;
     width: .45rem; height: .45rem; border-radius: 50%;
     background: var(--ac-accent);
@@ -1344,7 +1343,7 @@ body.connect-page #content { padding: .5rem !important; }
 
 /* ----- Focus (keyboard) ----- */
 .hud-btn:focus-visible, .exit:focus-visible, .skill:focus-visible,
-#hud-tabs button:focus-visible, #hud-dock button:focus-visible,
+#hud-dock button:focus-visible,
 .who-act button:focus-visible, .action-btn:focus-visible, .sheet-close:focus-visible,
 .panel-h-toggle:focus-visible, .row-more:focus-visible, .menu-item:focus-visible,
 .ab-chip:focus-visible, .ab-star:focus-visible, .panel-h-btn:focus-visible,
@@ -1360,7 +1359,6 @@ body.connect-page #content { padding: .5rem !important; }
     .hud-btn--icon { padding: 8px 10px; }
     .exit { padding: 10px 0; }
     .exit.ud, .exit.named { padding: 9px 12px; }
-    #hud-tabs button { padding: 9px 3px; }
     .who-act button { padding: 7px 12px; }
     /* Bigger touch target for the icon slots (still square). */
     .skill { width: 52px; height: 52px; }
