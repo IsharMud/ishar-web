@@ -660,18 +660,29 @@
         return { n: "N", s: "S", e: "E", w: "W", ne: "NE", nw: "NW", se: "SE", sw: "SW" }[d] || String(d);
     }
 
-    // Moons: per-moon colour (matching the game's @c tints) + an illumination
-    // glyph by phase. Ready for a richer Game.Time.moons feed
-    // ({name, phase 0-7, phase_name, up}); degrades to a plain glyph for the
-    // current name-only payload.
-    var MOON_COLOR = { shavar: "#cfd6e6", tregalien: "#e8c14b", fandaro: "#6fce7a", chenchir: "#d05a5a" };
-    var MOON_GLYPH = ["○", "◔", "◑", "◕", "●", "◕", "◑", "◔"];   // new → waning crescent
-    function moonColor(m) {
-        var key = String(m.name || "").toLowerCase().replace(/[^a-z].*$/, "");
-        return MOON_COLOR[key] || "var(--hud-moon)";
-    }
+    // The night-sky strip: Saorin (the wandering comet) then the four moons, in
+    // fixed celestial order so the world bar never reflows as bodies rise and
+    // set. Game.Time carries only the above-horizon moons (matching a normal
+    // player's `look sky`), each keyed by `id`; a moon absent from the feed is
+    // down and drawn as an unlit disc, its phase never revealed. Saorin is a
+    // stub — no feed data yet — and holds its slot as an unlit comet.
+    var MOON_SLOTS = [
+        { id: 0, name: "Shavar",    color: "#cfd6e6" },
+        { id: 1, name: "Tregalien", color: "#e8c14b" },
+        { id: 2, name: "Fandaro",   color: "#6fce7a" },
+        { id: 3, name: "Chenchir",  color: "#d05a5a" }
+    ];
+    var MOON_PHASE_GLYPH = ["○", "◔", "◑", "◕", "●", "◕", "◑", "◔"];   // new → waning crescent
     function moonGlyph(m) {
-        return (typeof m.phase === "number" && m.phase >= 0 && m.phase <= 7) ? MOON_GLYPH[m.phase] : "☽";
+        return (typeof m.phase === "number" && m.phase >= 0 && m.phase <= 7) ? MOON_PHASE_GLYPH[m.phase] : "☽";
+    }
+    // Hover detail mirrors `look sky`: "Name — phase", then position · luminosity.
+    function moonTip(name, m) {
+        var tip = name + " — " + (m.phase_name || "up");
+        var detail = [];
+        if (m.position) detail.push(m.position);
+        if (m.light) detail.push(m.light);
+        return detail.length ? tip + "\n" + detail.join(" · ") : tip;
     }
 
     function completions() {
@@ -997,13 +1008,28 @@
             (tm.events || []).forEach(function (e) {
                 world.appendChild(el("span", { class: "v-event", title: "Global event", text: "⚑ " + e.name + (e.seconds ? " (" + fmtDur(e.seconds) + ")" : "") }));
             });
-            (tm.moons || []).forEach(function (m) {
-                var span = el("span", { class: "v-moon", title: "Moon" + (m.phase_name ? " — " + m.phase_name : "") }, [
-                    el("span", { class: "v-moon-icon", style: "color:" + moonColor(m), text: moonGlyph(m) }),
-                    " " + m.name + (m.phase_name ? " (" + m.phase_name + ")" : "")
-                ]);
-                world.appendChild(span);
+            var moons = el("div", { class: "v-moons" });
+            moons.appendChild(el("span", {
+                class: "v-moon v-comet is-down", text: "☄",
+                title: "Saorin — the wandering comet is not in the sky"
+            }));
+            var upById = {};
+            (tm.moons || []).forEach(function (m) { if (m && m.id != null) upById[m.id] = m; });
+            MOON_SLOTS.forEach(function (slot) {
+                var m = upById[slot.id];
+                if (m) {
+                    moons.appendChild(el("span", {
+                        class: "v-moon is-up", style: "color:" + slot.color,
+                        title: moonTip(slot.name, m), text: moonGlyph(m)
+                    }));
+                } else {
+                    moons.appendChild(el("span", {
+                        class: "v-moon is-down", text: "●",
+                        title: slot.name + " — not currently in the sky"
+                    }));
+                }
             });
+            world.appendChild(moons);
         } else {
             world.appendChild(el("span", { class: "v-clock dim", text: "☾ —" }));
         }
@@ -4663,7 +4689,7 @@
         var feeds = {
             "Char.Status": { name: "Aelwyn", "class": "Magician", race: "Elf", position: "Standing", level: 45, align: 350, xp: 1250000, tnl: 48000, gold: 18230, bank: 500000, remort: 3 },
             "Char.Vitals": { hp: 412, maxhp: 480, mp: 130, maxmp: 300, move: 198, maxmove: 240, position: "Standing", opponent_hp_pct: 35, metamagic: 60, metamagic_max: 100, metamagic_regen: 5, food: 27, water: 9 },
-            "Game.Time": { hour: 21, hour12: 9, ampm: "pm", day: 14, day_name: "Sunday", month: 6, month_name: "the Long Shadows", year: 1247, night: true, season_id: 15, season_end: 0, events: [{ name: "Double Essence", seconds: 5400 }, { name: "Festival of Flames" }], moons: [{ name: "Shavar", phase: 4, phase_name: "full", up: true }, { name: "Chenchir", phase: 6, phase_name: "last quarter", up: true }] },
+            "Game.Time": { hour: 21, hour12: 9, ampm: "pm", day: 14, day_name: "Sunday", month: 6, month_name: "the Long Shadows", year: 1247, night: true, season_id: 15, season_end: 0, events: [{ name: "Double Essence", seconds: 5400 }, { name: "Festival of Flames" }], moons: [{ id: 0, name: "Shavar", phase: 4, phase_name: "full", position: "almost directly overhead", light: "blazing bright", up: true }, { id: 3, name: "Chenchir", phase: 6, phase_name: "last quarter", position: "lowering through the western sky", light: "fading", up: true }] },
             "Room.Info": { num: 3001, name: "The Grand Concourse", area: "Ishar Nexus", environment: "City", exits: { n: 3002, e: 3005, s: 3008, w: 3010, u: 3100, d: 3200, into: 3500 } },
             "Room.Occupants": { occupants: [
                 { keyword: "guard", short_desc: "a towering city guard", handle: "1.guard", is_player: false, is_dead: false, is_shopkeeper: false, hostile_hint: "neutral", position: "Standing", is_loyal_follower: false, is_my_follower: false, fighting_you: false, is_your_target: false },

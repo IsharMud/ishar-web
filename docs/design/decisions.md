@@ -1919,3 +1919,31 @@ Empty state is "Nothing else here." only when all three lists are empty.
 Discipline unchanged: `el()`/`textContent`, tokens only, no new tap-target
 patterns. Verify with the demo feed (corpse with loot, locked chest, scenery
 fountain, three nodes across the tier spread).
+
+## 2026-07-19 — HUD night-sky strip: fixed comet + four moons, detail on hover
+
+**Problem.** The world bar printed each visible moon inline as `icon Name
+(phase)`, so its width jumped every time a moon rose or set — motion in a bar
+players glance at mid-combat — and each moon carried only a name and phase where
+`look sky` also gives sky position and luminosity.
+
+**Decision.** Render a fixed five-slot strip (`.v-moons`): Saorin (the wandering
+comet) then the four moons in celestial order (Shavar, Tregalien, Fandaro,
+Chenchir). Slots are always present, so the bar never reflows:
+
+- An **up** moon shows its phase glyph (`○◔◑◕●…`) tinted to the game's `@c`
+  colour; a **down** moon is an unlit disc (`--hud-moon-down`); **Saorin** is a
+  stub with no feed data yet and holds its slot as an unlit comet (`☄`).
+- **Detail moves to the native `title` tooltip**: `Name — phase`, then
+  `position · luminosity` — the same descriptors `look sky` prints.
+
+**Data.** Game.Time `moons[]` gains `position` + `light` per moon (ishar-mud
+#1843, GMCP contract 11.7.0). The feed still carries only above-horizon moons
+(a normal player's `look sky`), so a down moon's phase is never revealed — the
+client fills the missing slots itself from the fixed four-moon set (keyed by
+`id`). Saorin data is deferred; the comet is inert today.
+
+**Notes.** Phase glyphs stay Unicode (Bootstrap Icons has no partial phases);
+the comet is `☄`. Discipline unchanged: `el()`/`textContent`, tokens only,
+motion-free. Verified with the demo feed plus a self-contained CSS preview
+(up/down mix, all-phases legibility, nothing-up, 390px).

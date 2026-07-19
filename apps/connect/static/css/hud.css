@@ -26,6 +26,7 @@
     --hud-edge: #d08a3a;
     --hud-event: #e8b04b;
     --hud-moon: #9aa6c8;
+    --hud-moon-down: rgba(154, 166, 200, .22);
     --hud-hostile: var(--ac-danger);
     --hud-friendly: var(--ac-ok);
     --hud-group: #3fb6a8;
@@ -188,8 +189,9 @@ body.connect-page #content { padding: .5rem !important; }
 .v-clock { color: var(--ac-text); white-space: nowrap; }
 .v-season { color: var(--ac-accent); font-weight: 700; white-space: nowrap; padding: 1px 8px; border: 1px solid rgba(255, 170, 119, .45); background: var(--ac-wash); border-radius: 999px; }
 .v-event { color: var(--hud-event); white-space: nowrap; }
-.v-moon { color: var(--hud-moon); white-space: nowrap; }
-.v-moon-icon { font-weight: 700; }
+.v-moons { display: inline-flex; align-items: center; gap: 5px; }
+.v-moon { color: var(--hud-moon); font-weight: 700; font-size: 1.05em; line-height: 1; cursor: default; }
+.v-moon.is-down { color: var(--hud-moon-down); }
 
 @media (max-width: 767.98px) {
     #hud-topbar { gap: 8px; }
