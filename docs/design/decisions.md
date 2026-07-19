@@ -9,6 +9,76 @@ Format: `## YYYY-MM-DD — Title` · **Decision** · **Why** · (optional) **Not
 
 ---
 
+## 2026-07-19 — Quest Log overlay app + the tracked-objectives surface (a scoped tier-model amendment)
+
+**Decision.** The Quest Log ships as the seventh overlay app — **Ctrl+Q**,
+`journal-bookmark` icon, the tier-3 slot the extension-model ADR reserved for
+it by name. Its data model mirrors the map's split: GMCP `Char.Quests`
+carries per-player dynamic state (status, step progress, mystify-safe labels),
+while the static catalog — descriptions, intros, step labels, reward names —
+is served once over HTTP (`/connect/quests/catalog/`, ETagged) and joined
+client-side on quest id. Search covers name + objectives + description +
+intro + rewards, a superset of the in-game `quest log <term>`. Chips:
+**Active (default) / Completed / All**; a repeatable with `completions>0`
+presents as *Available again (completed N×)*, never a bare "Not Started".
+
+**Tracking is account state, not localStorage.** Pinned quests (`QuestTrack`
+table, `/connect/quests/tracked|track/`, capped at 8 server-side) follow the
+player between phone and desktop — the same reasoning as map fog-of-war.
+Guests degrade to localStorage. Tracked rows pin to the top of the log in
+pin order.
+
+**The tracked-objectives surface — a scoped amendment to the tier model.**
+The extension-model ADR closed tier 1 and said "nothing inside an overlay may
+be required mid-combat". Quest objectives are the case that genuinely sits
+between: progress updates land *while fighting* ("3/5 marsh trolls"), and a
+hotkey round-trip to read a counter is worse than a glance. The owner's call:
+**exactly one** persistent over-terminal surface is sanctioned —
+`#quest-tracker`, top-right over the terminal, WoW-style. Its constraints are
+the contract that keeps tier 1 closed in spirit:
+
+- **Opt-in only** — it renders nothing unless the player tracked a quest.
+- **Bounded** — cap 8 tracked quests, enforced server-side.
+- **Collapsible to a pill** (count + ready-count), persisted; **phones start
+  collapsed** so the terminal keeps its width.
+- **Read-only and focus-inert** — one collapse button, no inputs, never
+  steals focus from the command line.
+- **Hidden with the HUD** (`.hud-off`), and gone entirely when nothing
+  qualifies. No motion; nothing here animates, so reduced-motion is moot.
+
+This is not a precedent for tier-1 additions: any future over-terminal
+surface still needs its own ADR arguing these same five constraints.
+
+**Map pins.** `Room.QuestMarkers` draws a gold **"!"** badge (giver with
+startable quests) / teal **"?"** (ready turn-in) at the room's top-right
+corner, beside the group-pip/death-skull overlay family. The server filters
+*whether* a pin exists (per-viewer quest gates, ready-only turn-ins — the
+mystify spoiler guard); fog-of-war filters *where* it draws. Pin details ride
+the room tooltip. The feed's `nearby` count is carried for a future
+"quests nearby" affordance.
+
+**Ctrl+Q caveat, recorded.** Ctrl+Q quits the browser on Linux Firefox (and
+some minimal WMs). Accepted as the same class of shadow as Ctrl+P/Ctrl+S:
+the letter is the mnemonic players expect, the HUD can't intercept it there
+(browser-reserved), and every other platform is fine. `Q` was otherwise free.
+
+**Why.** The quest log was the biggest remaining information surface the HUD
+couldn't show; the extension model explicitly anticipated it. The
+static/dynamic split keeps the GMCP feed small enough to re-send on every
+progress tick (which is what makes the tracker live), and the catalog join
+makes web search strictly better than the text command instead of merely
+matching it.
+
+**Notes.** Endpoints verified against a local MariaDB carrying the real game
+schema + seed data (112 quests; mystify/source/return redaction asserted;
+track cap 200/404/400/409 paths exercised). Panel + tracker + pins
+demo-rendered in headless Chromium at desktop and 375px widths. Not exercised
+against a live GMCP session — the owner's on-prod check. Game-side contract:
+`ishar-mud docs/gmcp_feeds.md` (Char.Quests / Room.QuestMarkers). Relates to
+ishar-web#150, IsharMud/ishar-mud#1836.
+
+---
+
 ## 2026-07-19 — HUD overlay hotkeys: a mnemonic pass (Skills→S, Who→F "finger")
 
 **Status.** Supersedes the hotkey letters set in the overlay-migration ADR

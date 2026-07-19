@@ -1566,7 +1566,7 @@ body.connect-page #content { padding: .5rem !important; }
    amendment). Glanceable, collapsible, never focus-stealing. ----- */
 #quest-tracker {
     position: absolute; top: 8px; right: 8px; z-index: 5;
-    width: min(260px, 42vw);
+    width: min(260px, 42vw); max-height: 60%; overflow-y: auto;
     background: rgba(20, 20, 26, .82); border: 1px solid var(--ac-border);
     border-radius: var(--ac-radius-sm); padding: 0 0 4px;
     font-size: .74rem; pointer-events: auto;
@@ -1591,9 +1591,13 @@ body.connect-page #content { padding: .5rem !important; }
 .qtr-step-label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .qtr-step-count { flex: none; font-variant-numeric: tabular-nums; }
 @media (max-width: 767.98px) {
-    /* Phones: a slim pill by default (renderQuestTracker starts collapsed);
-       expanded it still yields most of the terminal. */
-    #quest-tracker { width: min(220px, 60vw); font-size: .7rem; }
+    /* Phones: a slim count pill by default (renderQuestTracker starts
+       collapsed), raised above the tap-to-move compass (z 15) so the
+       whole pill stays tappable where their corners meet; expanded, the
+       card drops below the compass so it never covers an exit button. */
+    #quest-tracker { width: min(220px, 58vw); font-size: .7rem; z-index: 16; }
+    #quest-tracker.collapsed .qtr-title { display: none; }
+    #quest-tracker:not(.collapsed) { top: 10.5rem; max-height: calc(100% - 11.5rem); }
     #quest-tracker .qtr-head { min-height: 34px; }
 }
 .hud-off #quest-tracker { display: none; }

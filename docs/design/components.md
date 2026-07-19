@@ -651,6 +651,35 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
   (44px coarse target). Canvases carry `.menu-opener` so the menus they
   open survive the document's outside-click close. All canvas colors come
   from tokens (`--hud-ter-*` + shared inks) read via `getComputedStyle`.
+  **Quest pins** join the canvas overlay family (group pips, death skull):
+  a gold **"!"** badge (giver with startable quests) / teal **"?"** (ready
+  turn-in) at the room's top-right corner, fed by `Room.QuestMarkers`,
+  fog-gated per room; pin details ride the room tooltip.
+
+- **Quest Log app** (`OVERLAYS` key `quests`, `Ctrl+Q`, `journal-bookmark`;
+  `.qst-*`) — the questing overlay (isharmud/ishar-web#150; decisions.md
+  2026-07-19 "Quest Log overlay app"). `Char.Quests` dynamic state joined
+  client-side to the HTTP catalog (`/connect/quests/catalog/`). Reuses the
+  `.ab-search`/`.ab-chips`/`.ab-scroll` browser chrome: search over
+  name/objectives/description/intro/rewards, chips **Active / Completed /
+  All** (persisted `ishar.questFilter`). `.qst-row` carries a status-colored
+  left edge (`.qst-progress/.qst-ready/.qst-failed/.qst-done`); `.qst-head`
+  = name + status label + `.ab-star` track toggle (active quests only,
+  cap 8); tapping the head discloses `.qst-detail` — description,
+  `.qst-steps` have/need rows (mystified steps show only their cover text),
+  reward names, and the `quest <id> info` command hint. Tracked rows pin to
+  the top in pin order and sync via the account endpoints.
+
+- **`#quest-tracker` objectives tracker** (`.qtr-*`) — the **one sanctioned
+  persistent over-terminal surface** (decisions.md 2026-07-19, tracked-
+  objectives amendment): a translucent card at the terminal's top-right
+  listing each tracked active quest (`.qtr-quest` = `.qtr-name` +
+  `.qtr-step` have/need rows; "Ready for turn-in" collapses the steps).
+  Live-updates on every `Char.Quests` re-fire. `.qtr-head` collapses it to
+  a count pill (`.qtr-count`, `.ready` tint when something's turn-in-able);
+  collapse state persists (`ishar.questTrackerCollapsed`), **phones start
+  collapsed**. Read-only, focus-inert, hidden with `.hud-off` and when
+  nothing is tracked.
 
 Verify with `/connect?demo=1` (sample GMCP feeds, no server needed).
 

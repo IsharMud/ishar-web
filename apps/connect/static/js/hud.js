@@ -4623,6 +4623,21 @@
     // ------------------------------------------------------------------
     function demo() {
         setHud(true, false);
+        // Tracked quests + a catalog stub so the Quest Log's expanded detail
+        // and the objectives tracker render without the endpoints.
+        questTracked = [12, 7];
+        questCatalog = questCatalog || {};
+        questCatalog[12] = {
+            id: 12, name: "The Curio Trade", min_level: 12,
+            desc: "Hadeon wants proof the marsh road is passable again — and the trolls squatting on it gone.",
+            rewards: [{ kind: "cash", name: "5000 Obsidian" }, { kind: "item", name: "a curio dealer's signet" }]
+        };
+        questCatalog[3] = {
+            id: 3, name: "Sorrows", min_level: 10,
+            desc: "The sorrows of Illiar are not yet done with you.",
+            steps: [{ label: "Kill - a weeping shade", need: 3 }],
+            rewards: [{ kind: "xp", name: "40000 Experience" }]
+        };
         // Demo mana costs are % of maxmp (300); the exact `mana` field is what
         // the client now gates on (issue #1801). Demo mp is set below so a few
         // pricier spells (e.g. sanctuary) read as "mana"-blocked.
@@ -4758,6 +4773,26 @@
                   components: [{ kind: "item", vnum: 9002, name: "a vial of powdered silver", count: 2 }] }
             ] },
             "Char.Craft": { active: true, kind: "craft", name: "minor healing draught", profession_id: 1, remaining: 14, duration: 20, quantity: 2, chain_remaining: 3 },
+            "Char.Quests": { quests: [
+                { id: 12, name: "The Curio Trade", status: "In Progress", completions: 0, ready: false, steps: [
+                    { i: 0, label: "Kill - a marsh troll", done: 3, need: 5 },
+                    { i: 1, label: "a whisper on the wind", done: 0, need: 1, mystify: true }
+                ] },
+                { id: 7, name: "The Long Watch", status: "Ready for Turn-In", completions: 0, ready: true, steps: [
+                    { i: 0, label: "Retrieve - a signal lantern", done: 1, need: 1 }
+                ] },
+                { id: 21, name: "Whispers Below", status: "In Progress", completions: 0, ready: false, steps: [
+                    { i: 0, label: "Find - The Sunken Vestry", done: 0, need: 1 },
+                    { i: 1, label: "Kill - a drowned acolyte", done: 2, need: 4 }
+                ] },
+                { id: 30, name: "Escort: The Salt Road", status: "Failed", completions: 0 },
+                { id: 3, name: "Sorrows", status: "Completed", completions: 1 },
+                { id: 5, name: "Xymar's Errand", status: "Not Started", completions: 2, repeatable: true }
+            ] },
+            "Room.QuestMarkers": { zone: 1, markers: [
+                { vnum: 3002, kind: "giver", mob: "Hadeon the curio merchant", quests: [{ id: 12, name: "The Curio Trade" }] },
+                { vnum: 3008, kind: "turnin", mob: "Captain Voss", quests: [{ id: 7, name: "The Long Watch" }] }
+            ], nearby: 3 },
             "Char.Death": { vnum: 3020, name: "Crumbled Ledge", zone: "Ishar Nexus", time: Math.floor(Date.now() / 1000) - 240 }
         };
         Object.keys(feeds).forEach(function (k) { onGmcp(k, JSON.stringify(feeds[k])); });
