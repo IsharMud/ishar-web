@@ -9,6 +9,67 @@ Format: `## YYYY-MM-DD — Title` · **Decision** · **Why** · (optional) **Not
 
 ---
 
+## 2026-07-19 — HUD Bags overlay + item pinning: storage graduates to an overlay; the action bar pins consumables
+
+**Status.** Fourth slice of the re-tiering (#141, "Inventory overlay + item
+pinning"). Builds on the affects split (2026-07-18), the overlay migration and
+the XP strip (2026-07-19). Still pending per that issue: the chat channel filter
+and group density presets.
+
+**Decision.** Two coupled moves — the shipping order the issue calls for, so
+fast consumable access isn't lost when Inventory leaves the column.
+
+- **Inventory → the Bags overlay** (`inventory`, title "Bags", **Ctrl+I**). The
+  left-column Inventory panel becomes a micro-menu overlay app (the same
+  `OVERLAYS` registry as Gear/Character/Abilities/Who), availability-gated on
+  having storage (`bagsHaveContent`), rendering **bare** into `#hud-overlay-body`
+  (desktop window) or the dock sheet (phones). The left column is now just the
+  combat surfaces — Group · Here — above the pinned Room/rose.
+- **Bags aggregates worn + carried.** It leads with **container cards**: worn
+  packs/coffers (from `Char.Equipment`, tagged `worn: Back` / `worn: Held`) then
+  carried containers (from `Char.Inventory`, tagged `carried`), each a header
+  (its own open/close/get-all menu; worn ones offer Remove, not Drop) over its
+  contents — or a *"locked — unlock to view contents"* note when closed/locked.
+  Then a **Loose in inventory** section (the non-container carried items),
+  Components, coins. So every place a thing can live is one surface.
+- **A slot holds a skill OR an item.** `ishar.slots` generalizes from a
+  skill-key string to *string-or-object*; an item slot is
+  `{item, cmd, vnum, otype, name, icon}`. It fires its keyword command
+  (`quaff potion.glowing`), shows a **live count** in the corner and **greys
+  out** (`.off`) at zero — the count matched by **vnum** against
+  `Char.Inventory` (+ open containers + worn gear, the same join the crafting
+  marks use), the verb chosen by **type** at pin time (potion→quaff,
+  scroll→recite, wand/staff→use, food→eat, drink→drink, tome→use, deck→draw),
+  the glyph a **type→game-icons** map. Item slots carry a gold accent to read
+  distinct from a skill.
+- **Pin flow.** A consumable row (Bags, or a worn-container's contents) carries
+  a `☆/★` chip and a "Pin to bar" menu entry — both toggle. Drag / tap-to-swap /
+  hotkeys treat an item slot exactly like a skill slot; slot moves are now
+  **index-based** (`swapSlots`) so an item — which has no skill-key identity —
+  rearranges correctly.
+
+**Why.** The re-tiering rule: *a panel earns permanent column space only by
+doing what the scrollback can't.* Inventory is consulted on demand, not
+monitored, so it fails that test and belongs behind a launcher — but a caster
+mid-fight can't afford to open a window to down a heal potion. Generalizing the
+action bar to pin items is what makes the overlay migration safe: the two ship
+together. Pinning by **vnum** (stable item identity) rather than name keeps the
+count live and the gray-out honest as stacks change; choosing the verb/glyph by
+**type** means a pin is one tap, not a form.
+
+**Notes.** Discipline unchanged: `el()`/`textContent` (no `innerHTML`), every
+action a `data-*`/command, tokens only (item slots + provenance tags reuse
+`--hud-gold`/`--hud-event`), motion gated, coarse-pointer bumps on the new pin
+chip + bag header. Existing skill pins survive the format change
+(`normalizeSlot` on load; the old `ishar.favs` migration is untouched). No new
+tracked assets beyond the edited `hud.js`/`hud.css` (force-added past the
+`static/` gitignore) and the `connect.html` markup (panel re-homed to the
+overlay body, a Bags micro button, the dock "Bag" gated). Verified by loading
+the real `hud.js`/`hud.css` + expanded template markup against `/connect?demo=1`
+under headless Chromium — desktop (Bags overlay + a bar carrying a skill and two
+item slots with live ×3/×2 counts) and 390px (Bags dock sheet + the item slots
+surviving the ambient row). Component catalog updated (`components.md`).
+
 ## 2026-07-19 — HUD XP strip: progress-to-level graduates to a thin ambient strip
 
 **Status.** Third slice of the re-tiering (#141, "XP strip"). Builds on the

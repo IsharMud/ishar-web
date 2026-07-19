@@ -109,7 +109,7 @@
                   "tracked", "chat", "equipment", "train", "abilities", "who",
                   "professions", "map"];
     var PANEL_HOME = {
-        occupants: "hud-left-scroll", inventory: "hud-left-scroll",
+        occupants: "hud-left-scroll",
         group: "hud-left-scroll",
         room: "hud-left",
         // The two persistent right-column panes. Tracked Spells is pinned above
@@ -117,7 +117,8 @@
         // so DOM order can't be relied on).
         tracked: "hud-right", chat: "hud-right",
         // Reference surfaces are micro-menu overlays (the bottom sheet on phones).
-        equipment: "hud-overlay-body", train: "hud-overlay-body",
+        equipment: "hud-overlay-body", inventory: "hud-overlay-body",
+        train: "hud-overlay-body",
         abilities: "hud-overlay-body", who: "hud-overlay-body",
         professions: "hud-overlay-body", map: "hud-overlay-body"
     };
@@ -143,6 +144,11 @@
         { key: "equipment", title: "Equipment", hotkey: "g",
           render: function () { renderEquipment(); },
           available: function () { return (S.equipment || []).length > 0; } },
+        // Bags: all storage in one place (worn packs + carried). Migrated out of
+        // the left column with item pinning, 2026-07-19.
+        { key: "inventory", title: "Bags", hotkey: "i",
+          render: function () { renderInventory(); },
+          available: function () { return bagsHaveContent(); } },
         { key: "train", title: "Character", hotkey: "k",
           render: function () { renderTrain(); },
           available: function () { return !!(S.train || S.status); } },
@@ -190,6 +196,17 @@
         quaff: "Quaff", recite: "Recite", eat: "Eat", drink: "Drink",
         wield: "Wield", wear: "Wear", use: "Use", hold: "Hold", draw: "Draw"
     };
+    // Consumable types the action bar can pin (a slot generalizes from
+    // skill-only to skill-or-item). Each has a use verb (TYPE_VERB) and a
+    // game-icons glyph picked by type at pin time; a pinned item slot tracks
+    // its live count by vnum against Char.Inventory and greys out at zero.
+    var PIN_TYPES = { potion: 1, scroll: 1, wand: 1, staff: 1, food: 1, drink: 1, tome: 1, deck: 1 };
+    // Item type → game-icons glyph (all names ship in the sprite; see
+    // SPRITE_ICONS). Unmapped types fall back to the name heuristic.
+    var TYPE_ICON = {
+        potion: "health-potion", scroll: "scroll-unfurled", wand: "fairy-wand",
+        staff: "wizard-staff", drink: "water-drop", tome: "spell-book"
+    };
 
     // An affect within this many seconds of dropping is "soon": its ambient
     // self-affect tile shows a countdown chip and pulses, its Tracked Spells
@@ -217,15 +234,28 @@
     }
     function saveMap(key, m) { try { localStorage.setItem(key, JSON.stringify(m)); } catch (e) {} }
 
-    // Action-bar slots persist as an array of skill keys (null = empty). On first
-    // run we migrate the legacy unordered favorites set into ordered slots so a
-    // returning player keeps their pins.
+    // A slot holds a skill (a string key) OR a pinned item (an object with a
+    // keyword command). Item slots let the bar fire consumables — quaff a
+    // potion, recite a scroll — with a live count and a type-picked glyph.
+    function isItemSlot(v) { return !!(v && typeof v === "object" && v.item && typeof v.cmd === "string"); }
+    function normalizeSlot(x) {
+        if (typeof x === "string" && x) return x;
+        if (isItemSlot(x)) return {
+            item: true, cmd: String(x.cmd), vnum: (x.vnum != null ? Number(x.vnum) : null),
+            otype: String(x.otype || ""), name: String(x.name || ""), icon: String(x.icon || "")
+        };
+        return null;
+    }
+
+    // Action-bar slots persist as an array of skill keys / item objects (null =
+    // empty). On first run we migrate the legacy unordered favorites set into
+    // ordered slots so a returning player keeps their pins.
     function loadSlots() {
         try {
             var raw = localStorage.getItem("ishar.slots");
             if (raw != null) {
                 var a = JSON.parse(raw);
-                if (Array.isArray(a)) return a.slice(0, SLOT_MAX).map(function (x) { return (typeof x === "string" && x) ? x : null; });
+                if (Array.isArray(a)) return a.slice(0, SLOT_MAX).map(normalizeSlot);
             }
             var fav = JSON.parse(localStorage.getItem("ishar.favs"));
             if (Array.isArray(fav)) {
@@ -244,6 +274,21 @@
     function slotIndexOf(key) { for (var i = 0; i < slots.length; i++) if (slots[i] === key) return i; return -1; }
     function onBar(key) { return slotIndexOf(key) !== -1; }
     function firstEmptySlot() { for (var i = 0; i < SLOT_MAX; i++) if (!slots[i]) return i; return -1; }
+    // Find a pinned item slot: by vnum when both carry one (the game's stable
+    // item identity), else by its exact command.
+    function itemSlotIndex(vnum, cmd) {
+        for (var i = 0; i < slots.length; i++) {
+            var v = slots[i];
+            if (!isItemSlot(v)) continue;
+            if (vnum != null && v.vnum != null) { if (v.vnum === vnum) return i; }
+            else if (cmd != null && v.cmd === cmd) return i;
+        }
+        return -1;
+    }
+    // The slot glyph for an item: by type (the spec), else the name heuristic.
+    function itemIcon(otype, name) {
+        return hasIcon(TYPE_ICON[otype]) ? TYPE_ICON[otype] : heuristicIcon({ name: name });
+    }
     // The human "1..0" label for a slot index on its page.
     function slotLabel(i) { var n = (i % SLOTS_PER_PAGE) + 1; return n === 10 ? "0" : String(n); }
     function pageOfIndex(i) { return Math.floor(i / SLOTS_PER_PAGE); }
@@ -255,25 +300,64 @@
         var cur = slotIndexOf(key);
         if (cur !== -1) { slots[cur] = null; }
         else { var e = firstEmptySlot(); if (e !== -1) slots[e] = key; else if (slots.length < SLOT_MAX) slots.push(key); else return; }
-        saveSlots(); renderHotbar(); renderAbilities();
+        saveSlots(); afterSlotChange();
     }
-    // Drop a skill onto an explicit slot index (drag, or "Assign to slot N").
+    // Drop a skill key onto an explicit slot index (menu "Assign to slot N").
     function assignSlot(idx, key) {
         if (idx < 0 || idx >= SLOT_MAX || !key) return;
         var cur = slotIndexOf(key);
         var occupant = slots[idx] || null;
         if (cur !== -1) slots[cur] = occupant;   // swap if the source was already on the bar
         slots[idx] = key;
-        saveSlots(); renderHotbar(); renderAbilities();
+        saveSlots(); afterSlotChange();
     }
-    function clearSlot(idx) { if (slots[idx]) { slots[idx] = null; saveSlots(); renderHotbar(); renderAbilities(); } }
+    // Move a slot's content (skill or item) to another index, swapping any
+    // occupant back. Index-based, so it moves an item slot without the
+    // skill-key identity assignSlot relies on (drag + tap-to-swap).
+    function swapSlots(from, to) {
+        if (from === to || from < 0 || to < 0 || to >= SLOT_MAX) return;
+        var tmp = slots[to] || null;
+        slots[to] = slots[from] || null;
+        slots[from] = tmp;
+        saveSlots(); afterSlotChange();
+    }
+    function clearSlot(idx) { if (slots[idx]) { slots[idx] = null; saveSlots(); afterSlotChange(); } }
     // Nudge a slot left/right within the bar (swaps with the neighbour).
     function moveSlot(idx, dir) {
         var j = idx + dir;
         if (j < 0 || j >= SLOT_MAX) return;
         var tmp = slots[idx]; slots[idx] = slots[j] || null; slots[j] = tmp;
-        saveSlots(); renderHotbar(); renderAbilities();
+        saveSlots(); afterSlotChange();
     }
+    // Pin a consumable to the first free slot (or append). ds carries the row's
+    // target/type/vnum/name; the verb is chosen by type, the glyph too.
+    function pinItem(ds) {
+        var verb = TYPE_VERB[ds.otype];
+        if (!verb || !PIN_TYPES[ds.otype]) return;
+        var cmd = verb + " " + ds.target;
+        if (itemSlotIndex(ds.vnum, cmd) !== -1) return;   // already pinned
+        var obj = { item: true, cmd: cmd, vnum: (ds.vnum != null ? ds.vnum : null),
+                    otype: ds.otype, name: ds.name || ds.target, icon: itemIcon(ds.otype, ds.name) };
+        var e = firstEmptySlot();
+        if (e !== -1) slots[e] = obj;
+        else if (slots.length < SLOT_MAX) slots.push(obj);
+        else return;   // bar full
+        saveSlots(); afterSlotChange();
+    }
+    function unpinItem(ds) {
+        var verb = TYPE_VERB[ds.otype];
+        var idx = itemSlotIndex(ds.vnum, verb ? verb + " " + ds.target : null);
+        if (idx === -1) return;
+        slots[idx] = null; saveSlots(); afterSlotChange();
+    }
+    function togglePin(ds) {
+        var verb = TYPE_VERB[ds.otype];
+        if (itemSlotIndex(ds.vnum, verb ? verb + " " + ds.target : null) !== -1) unpinItem(ds);
+        else pinItem(ds);
+    }
+    // Repaint after any slot mutation: the bar, and the surfaces that show
+    // pin state (the Abilities ★, the Bags/Gear pin chips).
+    function afterSlotChange() { renderHotbar(); renderAbilities(); renderInventory(); renderEquipment(); }
 
     // ------------------------------------------------------------------
     // Skill icons (game-icons.net, CC BY 3.0, self-hosted sprite)
@@ -615,11 +699,13 @@
                 break;
             case "Char.Equipment":
                 S.equipment = (data && data.items) || []; renderEquipment(); renderInventory(); updateMicro();
+                tickHotbar();   // worn-container contents count toward pinned-item stock
                 // Craftable-now marks join against carried items.
                 if (overlayVisible("professions")) renderProfessions();
                 break;
             case "Char.Inventory":
-                S.inventory = data; renderInventory(); renderEquipment();
+                S.inventory = data; renderInventory(); renderEquipment(); updateMicro();
+                tickHotbar();   // pinned-item slots track their live count from here
                 if (overlayVisible("professions")) renderProfessions();
                 break;
             case "Char.Train": S.train = data; renderTrain(); renderXp(); updateMicro(); break;
@@ -1338,12 +1424,16 @@
             "data-target": targetOf(it.keywords || it.name),
             "data-otype": it.type || "",
             "data-name": stripColor(it.name || ""),
+            "data-vnum": (it.vnum != null ? String(it.vnum) : ""),
             "data-container": container || "",
             "data-closeable": it.closeable ? "1" : "",
             "data-closed": it.closed ? "1" : "",
             "data-disen": (Number(it.disenchant_rank) > 0) ? String(it.disenchant_rank) : ""
         };
     }
+    // A consumable row (potion/scroll/…) can pin to the action bar for one-tap
+    // use. The keyword command derived here is what a pin stores and fires.
+    function isPinnable(it) { return !!(it && PIN_TYPES[it.type] && TYPE_VERB[it.type]); }
     // One inventory/equipment row. Everything stays on a single line: an
     // optional lead cell (an expand caret for an open container, else a
     // condition dot), the name, a ×count, a container state glyph, and the
@@ -1377,6 +1467,18 @@
                 class: "row-glyph", "aria-hidden": "true",
                 title: it.locked ? "Locked" : it.closed ? "Closed" : "Container",
                 text: it.closed || it.locked ? "🔒" : "📦"
+            }));
+        }
+        // Fast pin: a consumable row carries a ☆/★ toggle straight to the action
+        // bar (worn gear is the Gear overlay's business, so it's skipped there).
+        if (kind !== "equip" && isPinnable(it)) {
+            var pinned = itemSlotIndex(it.vnum != null ? it.vnum : null,
+                TYPE_VERB[it.type] + " " + targetOf(it.keywords || it.name)) !== -1;
+            kids.push(el("button", {
+                type: "button", class: "item-pin" + (pinned ? " on" : ""), "data-pin": "1",
+                "aria-label": pinned ? "Unpin from action bar" : "Pin to action bar",
+                title: pinned ? "Pinned to the action bar" : "Pin to the action bar",
+                text: pinned ? "★" : "☆"
             }));
         }
         kids.push(el("button", { type: "button", class: "row-more", "aria-label": "Actions", text: "⋯" }));
@@ -1419,40 +1521,82 @@
     }
 
     // ------------------------------------------------------------------
-    // Inventory (items + containers + components + coins)
+    // Bags overlay — all storage in one place, worn and carried. Container
+    // cards head the view (a worn pack tagged "worn: Back", a carried sack
+    // "carried"), each spilling its contents unless closed/locked; then the
+    // loose carried items, components pouch, and coins. Renders bare (the
+    // window/sheet supplies the "Bags" title). See docs/design/decisions.md
+    // (2026-07-19, HUD Bags overlay + item pinning).
     // ------------------------------------------------------------------
-    function renderInventory() {
+    function wornContainers() {
+        return (S.equipment || []).filter(function (it) { return it && it.type === "container"; });
+    }
+    function bagsHaveContent() {
         var inv = S.inventory;
-        var head = panelHeader("inventory", "Inventory", false);
-        var kids = [head];
-        if (!isCollapsed("inventory")) {
-            if (!inv) {
-                kids.push(el("div", { class: "panel-empty", text: "Empty." }));
-            } else {
-                var items = inv.items || [], coins = inv.coins || [], comps = inv.components || [];
-                if (items.length) {
-                    kids.push(itemListWithContents(items, "item"));
-                } else {
-                    kids.push(el("div", { class: "panel-empty", text: "Empty." }));
-                }
-
-                // Components — collapsible on its own and default-collapsed,
-                // since a crafter's pouch gets very long. Clicking a component
-                // withdraws it from the pouch.
-                if (comps.length) {
-                    kids.push(componentsSection(comps));
-                }
-                // Obsidian's worth is already folded into the purse "Gold" total
-                // shown in the Status pane (count_inv_coins sums every coin type
-                // ×coin_mult), so a separate obsidian line here is redundant —
-                // drop it (issue #1801).
-                var shownCoins = coins.filter(function (c) { return !/obsidian/i.test(c.name || ""); });
-                if (shownCoins.length) {
-                    kids.push(el("div", { class: "coins", text: shownCoins.map(function (c) { return c.count + " " + c.name; }).join(" · ") }));
-                }
-            }
+        if (inv) {
+            if ((inv.items || []).length) return true;
+            if ((inv.components || []).length) return true;
+            if ((inv.coins || []).some(function (c) { return !/obsidian/i.test(c.name || ""); })) return true;
         }
-        fill(dom.inventory, kids);
+        return wornContainers().length > 0;
+    }
+    // One container card: a header (its own action menu — open/close/get-all)
+    // tagged by provenance, over its contents (or a "locked/closed" note). Worn
+    // containers use the equip kind so the menu offers Remove, not Drop.
+    function bagCard(it, prov, worn) {
+        var kind = worn ? "equip" : "item";
+        var ds = itemDataset(it, kind);
+        var head = el("button", assign(ds, {
+            type: "button", class: "bag-h", "data-menu": "item"
+        }), [
+            el("span", { class: "bag-ic", "aria-hidden": "true", text: it.locked || it.closed ? "🔒" : "📦" }),
+            el("span", { class: "bag-nm", text: stripColor(it.name) }),
+            el("span", { class: "bag-prov" + (worn ? " worn" : ""), text: prov }),
+            it.locked ? el("span", { class: "bag-lock", text: "🔒 locked" }) : null
+        ]);
+        var body;
+        if (it.closed || it.locked) {
+            body = el("ul", { class: "bag-items" }, el("li", { class: "dim",
+                text: it.locked ? "locked — unlock to view contents" : "closed — open to view contents" }));
+        } else if (it.contents && it.contents.length) {
+            var ct = targetOf(it.keywords || it.name);
+            body = el("ul", { class: "row-list" },
+                groupStackables(it.contents).map(function (c) { return itemRow(c, "content", ct); }));
+        } else {
+            body = el("ul", { class: "bag-items" }, el("li", { class: "dim", text: "empty" }));
+        }
+        return el("div", { class: "bag" }, [head, body]);
+    }
+    function renderInventory() {
+        if (!dom.inventory) return;
+        var inv = S.inventory, kids = [];
+
+        wornContainers().forEach(function (it) {
+            kids.push(bagCard(it, "worn: " + (it.location || it.slot || "worn"), true));
+        });
+        ((inv && inv.items) || []).forEach(function (it) {
+            if (it.type === "container") kids.push(bagCard(it, "carried", false));
+        });
+
+        var loose = ((inv && inv.items) || []).filter(function (it) { return it.type !== "container"; });
+        if (loose.length) {
+            kids.push(el("div", { class: "sub-h", text: "Loose in inventory" }));
+            kids.push(itemListWithContents(loose, "item"));
+        }
+
+        // Components — collapsible on its own and default-collapsed, since a
+        // crafter's pouch gets very long. A tap withdraws from the pouch.
+        var comps = (inv && inv.components) || [];
+        if (comps.length) kids.push(componentsSection(comps));
+
+        // Obsidian's worth is already folded into the purse "Gold" total shown in
+        // the Character sheet, so a separate obsidian line here is redundant.
+        var shownCoins = ((inv && inv.coins) || []).filter(function (c) { return !/obsidian/i.test(c.name || ""); });
+        if (shownCoins.length) {
+            kids.push(el("div", { class: "coins", text: shownCoins.map(function (c) { return c.count + " " + c.name; }).join(" · ") }));
+        }
+
+        fill(dom.inventory, kids.length ? kids : el("div", { class: "panel-empty", text: inv ? "Empty." : "—" }));
     }
 
     function componentsSection(comps) {
@@ -2005,13 +2149,12 @@
             var last = base;   // render through the last filled slot (trim trailing empties)
             for (var i = base; i < base + SLOTS_PER_PAGE; i++) if (slots[i]) last = i;
             for (var j = base; j <= last; j++) {
-                var key = slots[j];
-                entries.push({ s: key ? skillByKey(key) : null, key: key, idx: j, label: slotLabel(j), empty: !key });
+                entries.push({ v: slots[j], idx: j, label: slotLabel(j), empty: !slots[j] });
             }
         } else {
             hotbarPage = 0;
             autoSuggestions().forEach(function (s, i) {
-                entries.push({ s: s, key: slotKeyOf(s), idx: i, label: slotLabel(i), empty: false });
+                entries.push({ v: slotKeyOf(s), s: s, idx: i, label: slotLabel(i), empty: false });
             });
         }
 
@@ -2041,17 +2184,13 @@
         }, [iconSvg(open ? "padlock-open" : "padlock", "gi skill-icon")]);
     }
     function buildSlot(e, custom) {
-        // Empty numbered placeholder — a visible drop/assign target in custom mode.
-        if (e.empty || !e.s) {
-            var eb = el("button", {
-                type: "button", class: "skill skill--empty", "data-slot": e.idx, "data-menu": "slot",
-                "aria-label": "Empty slot " + e.label,
-                "data-tip": "Slot " + e.label + " · empty — pin from Abilities or drag here"
-            }, [el("span", { class: "skill-key", text: e.label })]);
-            hotbarNodes["e" + e.idx] = { btn: eb, empty: true };
-            return eb;
-        }
-        var s = e.s;
+        var v = e.v;
+        if (e.empty || v == null) return buildEmptySlot(e);
+        if (isItemSlot(v)) return buildItemSlot(v, e, custom);
+        // A pinned skill whose feed hasn't arrived yet renders as an empty
+        // placeholder until Char.Skills fills it in.
+        var s = e.s || skillByKey(v);
+        if (!s) return buildEmptySlot(e);
         var editing = custom && !barLocked;
         var btn = el("button", {
             type: "button", class: "skill " + catClass(s) + (e.idx === pickedSlot ? " picked" : ""),
@@ -2070,10 +2209,55 @@
         };
         return btn;
     }
+    // Empty numbered placeholder — a visible drop/assign target in custom mode.
+    function buildEmptySlot(e) {
+        var eb = el("button", {
+            type: "button", class: "skill skill--empty", "data-slot": e.idx, "data-menu": "slot",
+            "aria-label": "Empty slot " + e.label,
+            "data-tip": "Slot " + e.label + " · empty — pin a skill or item, or drag here"
+        }, [el("span", { class: "skill-key", text: e.label })]);
+        hotbarNodes["e" + e.idx] = { btn: eb, empty: true };
+        return eb;
+    }
+    // A pinned item (a consumable): the same slot chrome, a type-picked glyph, a
+    // live count in the corner (tickHotbar), and a keyword command it fires.
+    function buildItemSlot(v, e, custom) {
+        var editing = custom && !barLocked;
+        var useLabel = (TYPE_VERB_LABEL[TYPE_VERB[v.otype]] || "Use") + " " + (v.name || v.cmd);
+        var btn = el("button", {
+            type: "button", class: "skill skill--item" + (e.idx === pickedSlot ? " picked" : ""),
+            "data-item-slot": "1", "data-menu": "itemslot",
+            "data-slot": custom ? e.idx : null, "data-key": e.label, draggable: editing ? "true" : null,
+            "aria-label": e.label + ": " + useLabel, "data-tip": useLabel
+        }, [
+            iconSvg(hasIcon(v.icon) ? v.icon : itemIcon(v.otype, v.name), "gi skill-icon"),
+            el("span", { class: "skill-key", text: e.label }),
+            el("span", { class: "skill-count", hidden: true })
+        ]);
+        hotbarNodes["i" + e.idx] = {
+            btn: btn, countEl: btn.querySelector(".skill-count"),
+            item: true, vnum: (v.vnum != null ? v.vnum : null), cmd: v.cmd, idx: e.idx
+        };
+        return btn;
+    }
     function tickHotbar() {
+        var invCounts = null;   // computed once, only if there's an item slot
         Object.keys(hotbarNodes).forEach(function (key) {
             var n = hotbarNodes[key];
-            if (!n || n.empty) return;
+            if (!n) return;
+            // Item slots: live count by vnum, grey out at zero stock.
+            if (n.item) {
+                if (invCounts == null) invCounts = inventoryVnumCounts();
+                var c = n.vnum != null ? (invCounts[n.vnum] || 0) : null;
+                n.off = (c === 0);
+                n.btn.classList.toggle("off", c === 0);
+                if (n.countEl) {
+                    n.countEl.hidden = (c == null);
+                    n.countEl.textContent = (c == null) ? "" : String(c);
+                }
+                return;
+            }
+            if (n.empty) return;
             var s = skillById(n.id);
             if (!s) return;
             var blk = abilityBlock(s);
@@ -2115,7 +2299,8 @@
         pickedSlot = null;
         renderHotbar();
     }
-    // Tap-to-swap (works on mouse + touch): pick a slot, then tap its destination.
+    // Tap-to-swap (works on mouse + touch): pick a slot, then tap its
+    // destination. Index-based, so it moves a skill or item slot alike.
     function pickOrPlace(idx) {
         if (pickedSlot == null) {
             if (!slots[idx]) return;            // nothing to pick up in an empty slot
@@ -2123,17 +2308,23 @@
         } else if (pickedSlot === idx) {
             pickedSlot = null;                  // tap the picked slot again to cancel
         } else {
-            var key = slots[pickedSlot];
+            var from = pickedSlot;
             pickedSlot = null;
-            if (key) { assignSlot(idx, key); return; }   // assignSlot swaps + re-renders
+            swapSlots(from, idx); return;       // swapSlots re-renders
         }
         renderHotbar();
     }
     // Fire the Nth visible slot (0-based) as if tapped. Used by the hotkeys.
     function fireSlot(n) {
         if (!barLocked) return false;   // edit mode: hotkeys don't cast
-        var node = hotbarNodes["s" + (hotbarPage * SLOTS_PER_PAGE + n)]   // custom mode
-                || hotbarNodes["s" + n];                                   // auto mode
+        var idx = anyAssigned() ? hotbarPage * SLOTS_PER_PAGE + n : n;
+        var inode = hotbarNodes["i" + idx];   // item slot
+        if (inode) {
+            if (!inode.off) sendCmd(inode.cmd);   // out of stock: no-op, but flash
+            flashSlot(inode.btn);
+            return true;
+        }
+        var node = hotbarNodes["s" + idx];
         if (!node) return false;
         var s = skillById(node.id);
         if (!s) return false;
@@ -2275,8 +2466,7 @@
             if (!b || dragFromSlot == null) return;
             e.preventDefault();
             var to = Number(b.getAttribute("data-slot"));
-            var key = slots[dragFromSlot];
-            if (key != null && to !== dragFromSlot) assignSlot(to, key);
+            if (slots[dragFromSlot] != null && to !== dragFromSlot) swapSlots(dragFromSlot, to);
             dragFromSlot = null;
         });
     }
@@ -3288,11 +3478,19 @@
         ];
     }
 
+    // The pin/unpin menu entry for a consumable row (null if the item can't be
+    // pinned). Mirrors the inline ☆/★ chip; both route through togglePin.
+    function pinAction(ds) {
+        if (!PIN_TYPES[ds.otype] || !TYPE_VERB[ds.otype]) return null;
+        var pinned = itemSlotIndex(ds.vnum, TYPE_VERB[ds.otype] + " " + ds.target) !== -1;
+        return { label: pinned ? "★ Unpin from bar" : "☆ Pin to bar", fn: function () { togglePin(ds); } };
+    }
     function itemActions(ds) {
         var t = ds.target, name = ds.name || t, otype = ds.otype, kind = ds.kind, container = ds.container;
         var acts = [{ label: "Examine", cmd: "examine " + t }];
         if (kind === "content") {
             acts.push({ label: "Get", cmd: "get " + t + " from " + container });
+            var pc = pinAction(ds); if (pc) acts.push(pc);
             return acts;
         }
         if (otype === "container") {
@@ -3301,6 +3499,7 @@
         } else {
             var verb = TYPE_VERB[otype];
             if (verb) acts.push({ label: TYPE_VERB_LABEL[verb], cmd: verb + " " + t });
+            if (kind !== "equip") { var pa = pinAction(ds); if (pa) acts.push(pa); }
         }
         if (kind === "equip") {
             acts.push({ label: "Remove", cmd: "remove " + t });
@@ -3379,6 +3578,14 @@
             return { label: s.name, fn: function () { assignSlot(idx, slotKeyOf(s)); } };
         });
     }
+    // Right-click / long-press menu for a pinned item slot on the bar.
+    function itemSlotActions(idx, v) {
+        var acts = [{ label: TYPE_VERB_LABEL[TYPE_VERB[v.otype]] || "Use", cmd: v.cmd }];
+        acts.push({ label: "★ Unpin from bar", fn: function () { clearSlot(idx); } });
+        if (idx % SLOTS_PER_PAGE > 0) acts.push({ label: "Move ◄ left", fn: function () { moveSlot(idx, -1); } });
+        if (idx % SLOTS_PER_PAGE < SLOTS_PER_PAGE - 1 && idx + 1 < SLOT_MAX) acts.push({ label: "Move ► right", fn: function () { moveSlot(idx, 1); } });
+        return acts;
+    }
 
     // ------------------------------------------------------------------
     // Interaction (delegated)
@@ -3435,6 +3642,26 @@
         }
         var star = e.target.closest("[data-bar]");
         if (star && dom.app.contains(star)) { toggleSlot(star.getAttribute("data-bar")); return; }
+
+        // 2e) Inline pin chip on a consumable row (Bags / worn-container contents).
+        var pinChip = e.target.closest("[data-pin]");
+        if (pinChip && dom.app.contains(pinChip)) {
+            var pinRow = pinChip.closest('[data-menu="item"]');
+            if (pinRow) togglePin(readDataset(pinRow));
+            e.preventDefault();
+            return;
+        }
+
+        // 2f) Item-slot fire (locked): a tap uses the pinned consumable. Unlocked,
+        // step 2b already claimed the slot for rearrange.
+        var itemSlot = e.target.closest(".skill[data-item-slot]");
+        if (itemSlot && dom.hotbar.contains(itemSlot)) {
+            var isv = slots[Number(itemSlot.getAttribute("data-slot"))];
+            if (isItemSlot(isv)) {
+                if (!itemSlot.classList.contains("off")) { sendCmd(isv.cmd); flashSlot(itemSlot); }
+                return;
+            }
+        }
 
         // 3) Ability cast (hotbar button or abilities row) — not the star.
         var ab = e.target.closest("[data-ability]");
@@ -3500,6 +3727,10 @@
         } else if (kind === "slot") {
             var si = Number(host.getAttribute("data-slot"));
             openMenu("Slot " + slotLabel(si), slotAssignActions(si), anchor);
+        } else if (kind === "itemslot") {
+            var ii = Number(host.getAttribute("data-slot"));
+            var iv = slots[ii];
+            if (isItemSlot(iv)) openMenu(iv.name || iv.cmd, itemSlotActions(ii, iv), anchor);
         } else if (kind === "grp") {
             var gkind = host.getAttribute("data-gkind");
             var arr = gkind === "ally" ? (S.group && S.group.allies) : (S.group && S.group.members);
@@ -3508,11 +3739,13 @@
         }
     }
     function readDataset(host) {
+        var vn = host.getAttribute("data-vnum");
         return {
             target: host.getAttribute("data-target") || "",
             name: host.getAttribute("data-name") || "",
             otype: host.getAttribute("data-otype") || "",
             kind: host.getAttribute("data-kind") || "item",
+            vnum: (vn ? Number(vn) : null),
             container: host.getAttribute("data-container") || "",
             closeable: host.getAttribute("data-closeable") === "1",
             closed: host.getAttribute("data-closed") === "1",

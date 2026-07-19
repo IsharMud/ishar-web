@@ -129,11 +129,11 @@
     </div>
 
     <!-- Left column: a scrolling panel stack with the compass rose pinned to the
-       bottom-left (near the input, Mudlet-style). -->
+       bottom-left (near the input, Mudlet-style). Group then Occupants — the
+       combat surfaces cluster directly above the pinned compass rose, nearest
+       the input. Bags graduated to a micro-menu overlay (2026-07-19). -->
     <aside id="hud-left" class="hud-col">
         <div id="hud-left-scroll">
-            <section id="panel-inventory" class="panel"></section>
-            {# Group then Occupants last — the combat surfaces cluster directly above the pinned compass rose, nearest the input. #}
             <section id="panel-group" class="panel"></section>
             <section id="panel-occupants" class="panel"></section>
         </div>
@@ -190,6 +190,11 @@
                         aria-pressed="false" aria-haspopup="dialog" aria-controls="hud-overlay"
                         title="Equipment (Ctrl+G)" aria-label="Equipment (Ctrl+G)">
                     {% bi "shield" %}
+                </button>
+                <button type="button" class="micro-btn" data-overlay="inventory" hidden
+                        aria-pressed="false" aria-haspopup="dialog" aria-controls="hud-overlay"
+                        title="Bags (Ctrl+I)" aria-label="Bags (Ctrl+I)">
+                    {% bi "backpack2" %}
                 </button>
                 <button type="button" class="micro-btn" data-overlay="train" hidden
                         aria-pressed="false" aria-haspopup="dialog" aria-controls="hud-overlay"
@@ -287,7 +292,7 @@
             {% bi "shield" %}
             <span>Gear</span>
         </button>
-        <button type="button" data-panel="inventory" aria-pressed="false">
+        <button type="button" data-panel="inventory" aria-pressed="false" hidden>
             {% bi "backpack2" %}
             <span>Bag</span>
         </button>
@@ -336,6 +341,7 @@
         </div>
         <div id="hud-overlay-body">
             <section id="panel-equipment" class="panel"></section>
+            <section id="panel-inventory" class="panel"></section>
             <section id="panel-train" class="panel"></section>
             <section id="panel-abilities" class="panel"></section>
             <section id="panel-who" class="panel"></section>
@@ -885,9 +891,10 @@
                 sysln("Ctrl+L clears. PageUp/PageDown scroll. Ctrl+Shift+F searches scrollback.");
                 sysln("Action bar: Alt+1..0 fire the bar's slots (Ctrl+1..0 too when the page");
                 sysln("      is installed/fullscreen — tabbed browsers reserve Ctrl+digit). Alt+`");
-                sysln("      switches bar pages. Pin skills from the Abilities panel (☆).");
-                sysln("      Tap the lock to edit: unlocked, tap/drag slots to rearrange (taps");
-                sysln("      don't fire); right-click/long-press a slot to set its icon.");
+                sysln("      switches bar pages. Pin skills from the Abilities panel and");
+                sysln("      consumables from Bags (☆) — an item slot shows a live count and");
+                sysln("      greys out when you're empty. Tap the lock to edit: unlocked,");
+                sysln("      tap/drag slots to rearrange (taps don't fire).");
                 break;
             case "clear":
                 term.clear();

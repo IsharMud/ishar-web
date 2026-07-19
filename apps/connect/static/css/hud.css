@@ -669,6 +669,35 @@ body.connect-page #content { padding: .5rem !important; }
 .coins { margin: 5px 8px; font-size: .78rem; color: var(--hud-gold); }
 .comp-section { margin-top: 2px; }
 
+/* Inline pin chip on a consumable row: ☆ pins to the action bar, ★ is pinned. */
+.item-pin {
+    flex: none; background: none; border: 1px solid transparent; color: var(--ac-dim);
+    cursor: pointer; padding: 0 4px; line-height: 1; border-radius: 3px; font-size: .82em;
+}
+.item-pin:hover { color: var(--ac-accent); border-color: rgba(255, 170, 119, .4); }
+.item-pin.on { color: var(--hud-gold); }
+
+/* ----- Bags overlay: aggregated worn + carried storage ----- */
+/* Each container is a card — a tappable header (its own open/close/get-all
+   menu) tagged by provenance ("worn: Back" / "carried"), over its contents or a
+   locked/closed note. Loose carried items follow under a "Loose in inventory"
+   sub-head. See decisions.md 2026-07-19 (HUD Bags overlay). */
+.bag { border: 1px solid var(--ac-border); border-radius: var(--ac-radius-sm); margin-bottom: 8px; overflow: hidden; }
+.bag-h {
+    display: flex; align-items: center; gap: 7px; width: 100%; padding: 6px 8px;
+    background: var(--ac-elev); border: 0; text-align: left; font: inherit;
+    color: var(--ac-text); cursor: pointer;
+}
+.bag-h:hover { background: var(--ac-panel); }
+.bag-ic { flex: none; color: var(--ac-dim); font-size: .82rem; line-height: 1; }
+.bag-nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; font-size: .8rem; }
+.bag-prov { flex: none; font-size: .6rem; padding: 1px 5px; border-radius: 3px; border: 1px solid var(--ac-border-2); color: var(--ac-dim); }
+.bag-prov.worn { color: var(--hud-event); border-color: rgba(232, 176, 75, .4); }
+.bag-lock { flex: none; font-size: .66rem; color: var(--ac-warn); white-space: nowrap; }
+.bag .row-list { padding: 2px 6px 4px; }
+.bag-items { list-style: none; margin: 0; padding: 4px 8px; }
+.bag-items li.dim { color: var(--ac-dim); font-style: italic; font-size: .78rem; padding: 2px 0; }
+
 /* ----- Key/value lists (train / status) ----- */
 .kv { list-style: none; margin: 0; padding: 0; }
 .kv li { display: flex; justify-content: space-between; font-size: .8rem; padding: 2px 0; border-bottom: 1px dotted var(--ac-border); }
@@ -929,9 +958,24 @@ body.connect-page #content { padding: .5rem !important; }
 .skill--lock.on { border-bottom-color: var(--ac-accent); }
 .skill--lock.on .skill-icon { color: var(--ac-accent); }
 
+/* Item slots (pinned consumables): the same chrome, a gold accent + glyph to
+   read distinct from a skill, and a live count badge (bottom-right) that greys
+   the tile via .off at zero stock. */
+.skill--item { border-bottom-color: var(--hud-gold); }
+.skill--item .skill-icon { color: var(--hud-gold); }
+.skill-count {
+    position: absolute; bottom: 1px; right: 2px; z-index: 2;
+    font-size: .6rem; font-weight: 700; line-height: 1;
+    color: var(--ac-text); padding: 1px 3px; border-radius: 3px;
+    background: rgba(0, 0, 0, .5); font-variant-numeric: tabular-nums; pointer-events: none;
+}
+.skill-count[hidden] { display: none; }
+.skill--item.off .skill-count { color: var(--ac-danger); }
+
 /* Edit mode: taps rearrange (they don't fire), so signal it — grab cursors and
    a highlighted "picked" slot waiting for its destination. */
-#hud-hotbar.editing .skill[data-ability], #hud-hotbar.editing .skill--empty { cursor: grab; }
+#hud-hotbar.editing .skill[data-ability], #hud-hotbar.editing .skill[data-item-slot],
+#hud-hotbar.editing .skill--empty { cursor: grab; }
 #hud-hotbar.editing .skill.dragging { cursor: grabbing; }
 .skill.picked { box-shadow: 0 0 0 2px var(--ac-accent); border-color: var(--ac-accent); }
 
@@ -1370,6 +1414,7 @@ body.connect-page #content { padding: .5rem !important; }
 .panel-h-toggle:focus-visible, .row-more:focus-visible, .menu-item:focus-visible,
 .ab-chip:focus-visible, .ab-star:focus-visible, .panel-h-btn:focus-visible,
 .aff-rel:focus-visible, .occ-row:focus-visible, .sub-h.collapse:focus-visible,
+.item-pin:focus-visible, .bag-h:focus-visible,
 .micro-btn:focus-visible, .prof-btn:focus-visible, .prof-head:focus-visible,
 .recipe-toggle:focus-visible, .recipe-cat:focus-visible, .recipe-chip:focus-visible {
     outline: 2px solid var(--ac-accent); outline-offset: 2px;
@@ -1386,7 +1431,8 @@ body.connect-page #content { padding: .5rem !important; }
     .skill { width: 52px; height: 52px; }
     .skill .skill-icon { width: 34px; height: 34px; }
     .item-row, .occ-row, .ab-row { min-height: 44px; padding: 8px 6px; }
-    .row-more { min-width: 40px; min-height: 40px; padding: 6px 8px; }
+    .row-more, .item-pin { min-width: 40px; min-height: 40px; padding: 6px 8px; }
+    .bag-h { min-height: 44px; }
     /* Taller (full row height) tap zone for the caret without widening the
        lead column and shoving container names out of line with dotted rows. */
     .row-caret { width: 1.6rem; min-height: 40px; }

@@ -400,10 +400,10 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
   priority-width terminal; phone: terminal-first with `#hud-dock` (bottom tab
   bar) + `#hud-sheet` (one-panel bottom sheet). `hud.js` re-parents the panel
   sections between the columns and the sheet on the 768px media-query flip.
-  The left column stacks **Bag · Group · Here** above the pinned Room/rose; the
+  The left column stacks **Group · Here** above the pinned Room/rose; the
   right column is **Tracked Spells over Chat** — no tab bar. Reference surfaces
-  (Gear, Character, Abilities, Who) are overlay apps, not columns/tabs (see the
-  overlay section below and decisions.md 2026-07-19).
+  (Gear, **Bags**, Character, Abilities, Who) are overlay apps, not columns/tabs
+  (see the overlay section below and decisions.md 2026-07-19).
 - **`.panel` / `.panel-h`** — the HUD's compact panel + uppercase header
   (denser cousins of `.ac-panel` / `.ac-panel__h`).
 - **`.vbar` / `.mini`** — labeled vitals bars (HP/MP/MV/Foe/MM/Edge) and
@@ -448,7 +448,17 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
   to a `.row-list.sub`; **packs start collapsed** and toggle via the caret
   (`data-expand`, persisted in `ishar.itemsExpanded`). Identical stackable
   rows are folded to one `×N` (the game emits duplicate rows; the HUD
-  defaults to stacking).
+  defaults to stacking). A consumable row carries an inline **`.item-pin`**
+  `☆/★` chip (`data-pin`) that pins/unpins it on the action bar.
+- **`.bag` (Bags overlay)** — the aggregated worn + carried storage view
+  (`renderInventory`, the `inventory` overlay app, title "Bags"). Leads with
+  container **cards**: a `.bag-h` header (its own open/close/get-all menu) with
+  a `.bag-ic` glyph, `.bag-nm` name, a `.bag-prov` provenance tag (`carried`, or
+  `.worn` amber for `worn: <slot>`), and a `.bag-lock` note when locked; over its
+  contents (`.item-row`s) or a `.bag-items li.dim` "locked/closed/empty" note.
+  Then a **Loose in inventory** `.sub-h`, the Components pouch, and coins. From
+  `Char.Equipment` (worn containers) + `Char.Inventory`. See decisions.md
+  2026-07-19 (Bags overlay + item pinning).
 - **`.skill` action bar** — the WoW-style bottom hotbar (`#hud-hotbar`): fixed,
   numbered, hotkey-addressable icon slots. Each `.skill` is a square holding a
   `.skill-icon` (a Game-Icons.net glyph, below), a `.skill-key` number badge,
@@ -456,12 +466,16 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
   (`--sweep` angle, motion-gated). School tints via `.cat-*`; states via
   `.off`/`.cooling`/`.blocked`/`.sweeping`/`.fired`/`.dragging`/`.drop-target`.
   `.skill--empty` is a numbered drop target, `.skill--pager` the 1/2 page
-  toggle, `.skill--lock` the lock/unlock. Slots persist in `ishar.slots`
-  (ordered, migrated from the old `ishar.favs`); per-skill icon overrides in
+  toggle, `.skill--lock` the lock/unlock. A slot can also hold a **pinned item**
+  (`.skill--item`, gold accent): a consumable's keyword command, a type-picked
+  glyph, and a live `.skill-count` corner badge that greys the tile (`.off`) at
+  zero stock (count by vnum against `Char.Inventory`). Slots persist in
+  `ishar.slots` (ordered; skills are strings, items `{item,cmd,vnum,otype,name,
+  icon}`; migrated from the old `ishar.favs`); per-skill icon overrides in
   `ishar.icons`; the unlocked state in `ishar.barUnlocked`. See the 2026-07-16
-  decisions. Hotkeys: **Alt/Ctrl+1…0** fire, **Alt+`** pages. **Locked by
-  default** (taps fire); unlock to edit — `#hud-hotbar.editing` gets grab
-  cursors and a `.skill.picked` slot awaits its destination (tap-to-swap).
+  and 2026-07-19 decisions. Hotkeys: **Alt/Ctrl+1…0** fire, **Alt+`** pages.
+  **Locked by default** (taps fire); unlock to edit — `#hud-hotbar.editing` gets
+  grab cursors and a `.skill.picked` slot awaits its destination (tap-to-swap).
 - **Game-Icons.net sprite** (`img/game-icons.svg`, CC BY 3.0, self-hosted) —
   the **skill-art** vocabulary, a scoped exception to the Bootstrap-Icons-only
   rule (see decision). Referenced like `bi` but with class `gi`:
@@ -514,17 +528,19 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
   launcher. On phones the same panel node opens in `#hud-sheet` via a dock
   button (`placePanels()` re-homes it). Register apps in the `OVERLAYS`
   table in `hud.js`.
-- **Reference overlay apps** (`OVERLAYS` keys `equipment`/`train`/`abilities`/
-  `who`, migrated out of the columns + right-column tab bar — decisions.md
-  2026-07-19): **Gear** (`renderEquipment`, worn `.item-row`s by slot),
+- **Reference overlay apps** (`OVERLAYS` keys `equipment`/`inventory`/`train`/
+  `abilities`/`who`, migrated out of the columns + right-column tab bar —
+  decisions.md 2026-07-19): **Gear** (`renderEquipment`, worn `.item-row`s by
+  slot), **Bags** (`renderInventory`, the `.bag` aggregation above),
   **Character** (`renderTrain` — stats/resources/aux `.kv` and the folded-in
   `Char.Status` reference kv; there is no separate Status panel, and XP now lives
   in the ambient `#hud-xpstrip`, not here),
   **Abilities** (`renderAbilities`, the `.ab-*` browser below), and **Who**
   (`renderWho`, `.who-list`). Each renders **bare** (the window/sheet chrome
   supplies the title — no in-panel `panelHeader`) and is availability-gated on
-  its feed (`Char.Equipment`/`Char.Train`/`Char.Skills`/`Char.Who`), so its
-  micro + dock launchers appear only once there's data. Hotkeys Ctrl+G/K/B/U.
+  its feed (`Char.Equipment`/`Char.Inventory`/`Char.Train`/`Char.Skills`/
+  `Char.Who`), so its micro + dock launchers appear only once there's data.
+  Hotkeys Ctrl+G/I/K/B/U.
 - **`.ab-*` Abilities browser** (`.ab-controls/.ab-search`, `.ab-chips/.ab-chip`,
   `.ab-scroll/.ab-list/.ab-row`, `.ab-name/.ab-right/.ab-block/.ab-pct/.ab-star/
   .ab-type`) — the searchable, type-filtered, usable-only skill list fed by
