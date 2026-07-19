@@ -46,9 +46,9 @@
             <span class="status-text">Connecting&hellip;</span>
         </span>
         <div id="vitals-bar"></div>
-        {# Ambient self buff/debuff timer icons — always visible by the vitals
+        <!-- Ambient self buff/debuff timer icons — always visible by the vitals
            (hud.js renderSelfAffects). Bare icons; a countdown chip + pulse
-           appear only near expiry. #}
+           appear only near expiry. -->
         <div id="vitals-affects" class="v-group v-affects" aria-label="Active effects"></div>
         <div class="topbar-actions">
             <button class="hud-btn hud-btn--icon" type="button" id="search-btn" aria-pressed="false"
@@ -171,11 +171,11 @@
                 &#x25BC; Latest
             </button>
         </div>
-        <!----> XP: a hairline ambient strip below the terminal — progress-to-level is
+        <!-- XP: a hairline ambient strip below the terminal — progress-to-level is
            glanced at constantly, so it earns permanent space (graduated off the
            Character overlay, docs/design/decisions.md 2026-07-19 XP strip).
            The caption sits beside the track; hud.js fills both. Hidden until
-           Char.Train arrives. --!>
+           Char.Train arrives. -->
         <div id="hud-xpstrip" hidden>
             <span class="xp-track"><span class="xp-fill"></span></span>
             <span class="xp-label"></span>
@@ -221,8 +221,8 @@
             </nav>
         </div>
         <form id="command-form" autocomplete="off">
-            {# The CSRF cookie is HttpOnly site-wide, so the map's POSTs read #}
-            {# the token from this form field instead of document.cookie. #}
+            <!-- The CSRF cookie is HttpOnly site-wide, so the map's POSTs read -->
+            <!-- the token from this form field instead of document.cookie. -->
             {% csrf_token %}
             <!-- Recent-commands popover for touch screens (Arrow keys have no
                thumb equivalent). The button is revealed by JS on coarse
@@ -251,10 +251,10 @@
     </main>
 
     <aside id="hud-right">
-        {# The two persistent right-column panes: Tracked Spells (the magic you
+        <!-- The two persistent right-column panes: Tracked Spells (the magic you
            maintain, expiry-sorted) pinned above Chat. Reference surfaces —
            Character (worn gear + stats), Abilities, Who — open as micro-menu
-           overlays, not tabs here (docs/design/decisions.md 2026-07-19). #}
+           overlays, not tabs here (docs/design/decisions.md 2026-07-19). -->
         <section id="panel-tracked" class="panel panel-tracked"></section>
         <section id="panel-chat" class="panel panel-chat"></section>
     </aside>
@@ -262,8 +262,8 @@
     <!-- Phone dock: one thumb-reach tab bar over all panels; opens the sheet.
        Horizontally scrollable, so extra panels are fine. -->
     <nav id="hud-dock" aria-label="Game panels">
-        {# Persistent panes first (what you monitor), then the reference overlays.
-           Overlay buttons hide until their feed has data (hud.js updateMicro). #}
+        <!-- Persistent panes first (what you monitor), then the reference overlays.
+           Overlay buttons hide until their feed has data (hud.js updateMicro). -->
         <button type="button" data-panel="room" aria-pressed="false">
             {% bi "compass" %}
             <span>Room</span>
@@ -333,9 +333,9 @@
         </div>
         <div id="hud-overlay-body">
             <section id="panel-inventory" class="panel"></section>
-            {# Character overlay: worn gear beside the stat sheet. Two fill
+            <!-- Character overlay: worn gear beside the stat sheet. Two fill
                targets (hud.js renderEquipment → #char-gear, renderTrain →
-               #char-stats); two columns on desktop, stacked in the phone sheet. #}
+               #char-stats); two columns on desktop, stacked in the phone sheet. -->
             <section id="panel-train" class="panel">
                 <div class="char-cols">
                     <div class="char-col">
