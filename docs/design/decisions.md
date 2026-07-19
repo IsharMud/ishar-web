@@ -9,6 +9,96 @@ Format: `## YYYY-MM-DD — Title` · **Decision** · **Why** · (optional) **Not
 
 ---
 
+## 2026-07-19 — HUD overlay hotkeys: a mnemonic pass (Skills→S, Who→F "finger")
+
+**Status.** Supersedes the hotkey letters set in the overlay-migration ADR
+(2026-07-19, below). The overlay *set* is unchanged; only two letters move.
+
+**Decision.** Overlay hotkeys should read as **the first letter of the name the
+player sees**, falling back to a defensible handle only when that letter is
+un-usable. Two changes bring the set in line:
+
+- **Abilities: Ctrl+B → Ctrl+S.** The dock labels it **"Skills"**; `S` matches it,
+  `B` ("a**B**ilities") pointed at nothing. `S` shadows the browser's Save-page —
+  harmless in a HUD, and only while the overlay is available.
+- **Who: Ctrl+U → Ctrl+F.** `F` for **`finger`**, the old Unix/MUD alias for the
+  who-list — a first-class mnemonic for a greybeard playerbase; `U` was a leftover.
+
+The rest hold: **Bags = I** (the near-universal "inventory" reflex), **Character =
+K** (its /k/ sound — `C` is Copy, sacred in a terminal), **Professions = P**,
+**Map = M**. The final set: **I / K / S / F / P / M**.
+
+**The reserved wall** (why the obvious letters are unavailable): `C V X A` are
+clipboard + line-editing in the terminal, `L` clears it, `W T N` are browser
+tab/window and JS can't even veto them, `1–0` are the action bar. So `Who`
+can't be `W`, `Character` can't be `C`, `Abilities` can't be `A` — each routes
+around the wall.
+
+**Why `F` for Who is cheap despite Ctrl+F = Find.** The scrollback search (the
+find players actually use) is **Ctrl+Shift+F**, a distinct chord left untouched;
+native browser find-in-page can't read the `<canvas>` terminal anyway; and the
+key is only swallowed while a who-list exists (the same availability gate that
+lets Ctrl+P shadow Print). Residual cost, acknowledged: find-in-page over the DOM
+panels (chat) is shadowed while Who is up.
+
+**Notes.** `OVERLAYS` hotkeys + the `#hud-micro` tooltips/aria updated;
+`components.md` reflects `I/K/S/F`. The set is days old, so muscle memory is
+barely formed — the cheapest time to correct a letter.
+
+## 2026-07-19 — HUD Character overlay: merge worn gear + stats into one two-pane app (reject the WoW paperdoll)
+
+**Status.** Supersedes the Gear/Character split from the 2026-07-19 overlay
+migration (below): the two adjacent overlays become one. Prompted by "did we
+consider a WoW-style paperdoll — equipment on a doll, stats beside it?"
+
+**Decision.** **Equipment and Character collapse into a single Character overlay**
+(`train`, Ctrl+K, person icon): worn gear in a "Worn" column, the stat sheet in a
+"Stats" column. `#panel-train` holds two fill targets — `#char-gear`
+(`renderEquipment`) and `#char-stats` (`renderTrain`) — laid out by `.char-cols`:
+two columns with a divider on desktop (the overlay widens to 720px via
+`#hud-overlay[data-app="train"]`, the Map's precedent), **stacked** in the phone
+sheet. Available when *either* feed (`Char.Equipment` / `Char.Train`+`Char.Status`)
+has data. The separate **Gear overlay, its shield launcher, and the Ctrl+G hotkey
+are removed**; the phone dock loses its "Gear" button (the "Char" button carries
+both now).
+
+**Rejected — the spatial paperdoll** (equipment slots arranged around a
+silhouette). It's a desktop-MMO affordance whose supporting conditions don't
+exist here:
+- **No avatar to frame.** WoW's doll centers a 3D model you want to look at; a
+  text MUD has none. The silhouette would be empty chrome.
+- **It hardcodes a game-owned enum.** A spatial layout needs `location → (x,y)`;
+  the wear-slot vocabulary is the C engine's (`managed = False` contract). A doll
+  duplicates it in JS and breaks silently when the game adds/renames a slot. The
+  list renders any `location` string with zero coupling — so gear stays in the
+  game's **wear-slot feed order** (head→feet); the list already reads like a
+  paperdoll without a client-side slot map.
+- **It dies at 390px.** The doll's signature is a wide two-sided layout; on a
+  phone it collapses to a stack — i.e. back to lists — in a HUD whose whole thesis
+  is phone-first.
+- **A slot icon is less expressive than the row.** `.item-row` already carries a
+  colour-coded condition dot, ×count folding, an inline-expandable worn container,
+  a lock/closed glyph, and a ⋯ menu. A doll slot would need popovers to match —
+  two taps each on touch.
+
+**Why.** The good idea inside WoW's character pane isn't the doll, it's the
+**adjacency** — gear beside the stats it drives (a MUD character's worn gear *is*
+most of the stat block; the demo's `Str 18 (+2)` bonus is gear/affects). One
+"character screen" beats two hotkey trips (Ctrl+G, look, close, Ctrl+K). Keeping
+each half as its own renderer means the merge composes existing parts and adds no
+game coupling. Cost, acknowledged: it spends the Gear/Character hotkey separation
+and renders both feeds per open — judged worth it for one coherent surface.
+
+**Notes.** `.char-cols` uses `grid-template-columns: minmax(0, 1fr)` (not `1fr`)
+so a long gear name ellipsises instead of forcing the panel wider than the phone
+sheet — a real overflow bug the visual pass caught and fixed. `renderEquipment`
+now fills `#char-gear`, `renderTrain` fills `#char-stats`; the `equipment` key
+leaves `PANELS`/`PANEL_HOME`/`OVERLAYS`. Verified against the real `hud.js`/
+`hud.css` under headless Chromium — desktop two-column overlay and a true 390px
+phone sheet (all stat values in-bounds, gear names ellipsis, no horizontal
+overflow). Not exercised against a live GMCP session — the owner's on-prod check.
+`components.md` updated.
+
 ## 2026-07-19 — HUD XP strip refinement: 5px violet hairline + side caption (supersedes the gold pill)
 
 **Status.** Refines the XP strip shipped in slice 3 (#145). The original
