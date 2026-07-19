@@ -152,7 +152,10 @@
     // Reserved hotkey letters (never register these): "l" (Ctrl+L clears the
     // terminal — bound in connect.html and would be silently shadowed since
     // this handler runs first). Ctrl+<letter> may shadow a browser default
-    // (Ctrl+P = print) — deliberate, and only while the app is available.
+    // (Ctrl+P = print, Ctrl+F = find, Ctrl+S = save) — deliberate, and only
+    // while the app is available. Ctrl+F for Who is the old `finger` alias; it
+    // costs little here since the scrollback search is Ctrl+Shift+F (a distinct
+    // chord, unaffected) and browser find can't read the canvas terminal anyway.
     var OVERLAYS = [
         // Character-reference surfaces (migrated out of the columns/tab bar,
         // 2026-07-19). Each is available once its feed has data, so a launcher
@@ -169,10 +172,12 @@
         { key: "train", title: "Character", hotkey: "k",
           render: function () { renderEquipment(); renderTrain(); },
           available: function () { return (S.equipment || []).length > 0 || !!(S.train || S.status); } },
-        { key: "abilities", title: "Abilities", hotkey: "b",
+        // Skills → Ctrl+S (matches the dock's "Skills" label); Who → Ctrl+F for
+        // the old `finger` alias (W is un-interceptable — Ctrl+W closes the tab).
+        { key: "abilities", title: "Abilities", hotkey: "s",
           render: function () { renderAbilities(); },
           available: function () { return (S.skills || []).length > 0; } },
-        { key: "who", title: "Who", hotkey: "u",
+        { key: "who", title: "Who", hotkey: "f",
           render: function () { renderWho(); },
           available: function () { return !!(S.who && S.who.players && S.who.players.length); } },
         { key: "professions", title: "Professions", hotkey: "p",

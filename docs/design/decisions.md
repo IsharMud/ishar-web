@@ -9,6 +9,42 @@ Format: `## YYYY-MM-DD — Title` · **Decision** · **Why** · (optional) **Not
 
 ---
 
+## 2026-07-19 — HUD overlay hotkeys: a mnemonic pass (Skills→S, Who→F "finger")
+
+**Status.** Supersedes the hotkey letters set in the overlay-migration ADR
+(2026-07-19, below). The overlay *set* is unchanged; only two letters move.
+
+**Decision.** Overlay hotkeys should read as **the first letter of the name the
+player sees**, falling back to a defensible handle only when that letter is
+un-usable. Two changes bring the set in line:
+
+- **Abilities: Ctrl+B → Ctrl+S.** The dock labels it **"Skills"**; `S` matches it,
+  `B` ("a**B**ilities") pointed at nothing. `S` shadows the browser's Save-page —
+  harmless in a HUD, and only while the overlay is available.
+- **Who: Ctrl+U → Ctrl+F.** `F` for **`finger`**, the old Unix/MUD alias for the
+  who-list — a first-class mnemonic for a greybeard playerbase; `U` was a leftover.
+
+The rest hold: **Bags = I** (the near-universal "inventory" reflex), **Character =
+K** (its /k/ sound — `C` is Copy, sacred in a terminal), **Professions = P**,
+**Map = M**. The final set: **I / K / S / F / P / M**.
+
+**The reserved wall** (why the obvious letters are unavailable): `C V X A` are
+clipboard + line-editing in the terminal, `L` clears it, `W T N` are browser
+tab/window and JS can't even veto them, `1–0` are the action bar. So `Who`
+can't be `W`, `Character` can't be `C`, `Abilities` can't be `A` — each routes
+around the wall.
+
+**Why `F` for Who is cheap despite Ctrl+F = Find.** The scrollback search (the
+find players actually use) is **Ctrl+Shift+F**, a distinct chord left untouched;
+native browser find-in-page can't read the `<canvas>` terminal anyway; and the
+key is only swallowed while a who-list exists (the same availability gate that
+lets Ctrl+P shadow Print). Residual cost, acknowledged: find-in-page over the DOM
+panels (chat) is shadowed while Who is up.
+
+**Notes.** `OVERLAYS` hotkeys + the `#hud-micro` tooltips/aria updated;
+`components.md` reflects `I/K/S/F`. The set is days old, so muscle memory is
+barely formed — the cheapest time to correct a letter.
+
 ## 2026-07-19 — HUD Character overlay: merge worn gear + stats into one two-pane app (reject the WoW paperdoll)
 
 **Status.** Supersedes the Gear/Character split from the 2026-07-19 overlay

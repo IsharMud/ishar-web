@@ -561,7 +561,7 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
   browser below), and **Who** (`renderWho`, `.who-list`). Each renders **bare**
   (the window/sheet chrome supplies the title — no in-panel `panelHeader`) and is
   availability-gated on its feed, so its micro + dock launchers appear only once
-  there's data. Hotkeys Ctrl+I/K/B/U.
+  there's data. Hotkeys Ctrl+I/K/S/F (Bags / Character / Skills / Who-"finger").
 - **`.char-cols` Character overlay** — one overlay (`train`, Ctrl+K, person icon)
   holding two fill targets inside `#panel-train`: `#char-gear` (`renderEquipment`,
   worn `.item-row`s in wear-slot order) and `#char-stats` (`renderTrain` —
