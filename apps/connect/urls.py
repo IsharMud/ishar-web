@@ -3,7 +3,7 @@ from django.urls import path
 
 from .views import (
     ConnectView, MapDiscoverView, MapNoteView, MapStateView, MapZonesView,
-    ZoneGraphView,
+    QuestCatalogView, QuestTrackedView, QuestTrackView, ZoneGraphView,
 )
 
 
@@ -14,4 +14,7 @@ urlpatterns = [
     path("map/zones/", MapZonesView.as_view(), name="map_zones"),
     path("map/discover/", MapDiscoverView.as_view(), name="map_discover"),
     path("map/note/", MapNoteView.as_view(), name="map_note"),
+    path("quests/catalog/", QuestCatalogView.as_view(), name="quest_catalog"),
+    path("quests/tracked/", QuestTrackedView.as_view(), name="quest_tracked"),
+    path("quests/track/", QuestTrackView.as_view(), name="quest_track"),
 ]
