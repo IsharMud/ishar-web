@@ -358,6 +358,20 @@ Collapsible with an amber `summary` (`.h5 text-ishar`) + `.anchor-link` "#"
 affordance, inside an `.ac-panel`. Used: FAQ. Fine to reuse where content is
 genuinely collapsible; don't use it as a section header substitute.
 
+### Nav "Play Now" CTA — `.nav-cta`
+The one amber-*filled* pill in the navbar (`style.css`), marking the site's
+first-class action (playing). A `.nav-link.nav-cta` with a `play-fill` icon;
+reads as a button, not a text link, and stays a distinct pill in the collapsed
+phone menu. Use only for the single primary nav action — the rest of the bar
+stays text links. Status: **formalized** (see decisions.md 2026-07-19).
+
+### `.ac-hero` with a primary CTA
+A hero whose `.ac-hero__status` holds an `.ac-cta`/`.ac-cta--accent` (not just a
+pill or `.ac-btn`) is the page's flagship call to action — e.g. the home "Play
+Now" banner. The CTA sits top-right on desktop and, via
+`.ac-hero__status:has(.ac-cta)`, fills the width once the hero wraps on phones.
+Status: **formalized** (see decisions.md 2026-07-19).
+
 ### Global nav "Portal" dropdown
 `apps/core/templates/layout.html` — the staff/admin menu (Administration,
 Deploy, Feedback Triage, …), gated by `is_staff`/`is_god`/`is_eternal`. The
