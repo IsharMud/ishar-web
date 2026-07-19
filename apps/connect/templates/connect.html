@@ -190,6 +190,9 @@
            docs/design/decisions.md "The HUD extension model". Buttons are
            revealed by hud.js when the matching feed has data. -->
         <div id="hud-actionrow">
+            <!-- Attack cluster (attack/assist tile + ⚔ target chip); hud.js
+               builds and maintains it. Alt+A fires, Alt+T / chip-tap cycles. -->
+            <div id="hud-attack"></div>
             <div id="hud-hotbar" class="empty"></div>
             <nav id="hud-micro" aria-label="Overlay windows">
                 <button type="button" class="micro-btn" data-overlay="inventory" hidden
@@ -919,6 +922,11 @@
                 sysln("Tab completes from your history and the game (exits, skills, names);");
                 sysln("Shift+Tab cycles backward. Arrows recall history (clock button on touch).");
                 sysln("Ctrl+L clears. PageUp/PageDown scroll. Ctrl+Shift+F searches scrollback.");
+                sysln("Targeting: Alt+T (or Tab on an empty line) cycles the ⚔ target through");
+                sysln("      the room's attackables; Shift reverses; the chip by the action bar");
+                sysln("      shows it (tap to cycle, ✕ to clear). Alt+A / the crossed-swords");
+                sysln("      tile attacks it — with no target it sends `assist` to join your");
+                sysln("      group's fight.");
                 sysln("Action bar: Alt+1..0 fire the bar's slots (Ctrl+1..0 too when the page");
                 sysln("      is installed/fullscreen — tabbed browsers reserve Ctrl+digit). Alt+`");
                 sysln("      switches bar pages. Pin skills from the Abilities panel and");
@@ -1145,6 +1153,14 @@
     commandInput.addEventListener("keydown", function(e) {
         if (e.key === "Tab") {
             e.preventDefault();
+            // Completion owns Tab only once a word precedes the caret; on an
+            // empty line Tab cycles the HUD's ⚔ target instead (the MUD
+            // tab-targeting reflex — Alt+T works everywhere too).
+            var head = commandInput.value.slice(0, commandInput.selectionStart);
+            if (!tabState && !/\S/.test(head) && window.IsharHUD && window.IsharHUD.cycleTarget) {
+                window.IsharHUD.cycleTarget(e.shiftKey ? -1 : 1);
+                return;
+            }
             tabComplete(e.shiftKey);
             return;
         }

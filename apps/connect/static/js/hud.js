@@ -667,18 +667,29 @@
         return { n: "N", s: "S", e: "E", w: "W", ne: "NE", nw: "NW", se: "SE", sw: "SW" }[d] || String(d);
     }
 
-    // Moons: per-moon colour (matching the game's @c tints) + an illumination
-    // glyph by phase. Ready for a richer Game.Time.moons feed
-    // ({name, phase 0-7, phase_name, up}); degrades to a plain glyph for the
-    // current name-only payload.
-    var MOON_COLOR = { shavar: "#cfd6e6", tregalien: "#e8c14b", fandaro: "#6fce7a", chenchir: "#d05a5a" };
-    var MOON_GLYPH = ["○", "◔", "◑", "◕", "●", "◕", "◑", "◔"];   // new → waning crescent
-    function moonColor(m) {
-        var key = String(m.name || "").toLowerCase().replace(/[^a-z].*$/, "");
-        return MOON_COLOR[key] || "var(--hud-moon)";
-    }
+    // The night-sky strip: Saorin (the wandering comet) then the four moons, in
+    // fixed celestial order so the world bar never reflows as bodies rise and
+    // set. Game.Time carries only the above-horizon moons (matching a normal
+    // player's `look sky`), each keyed by `id`; a moon absent from the feed is
+    // down and drawn as an unlit disc, its phase never revealed. Saorin is a
+    // stub — no feed data yet — and holds its slot as an unlit comet.
+    var MOON_SLOTS = [
+        { id: 0, name: "Shavar",    color: "#cfd6e6" },
+        { id: 1, name: "Tregalien", color: "#e8c14b" },
+        { id: 2, name: "Fandaro",   color: "#6fce7a" },
+        { id: 3, name: "Chenchir",  color: "#d05a5a" }
+    ];
+    var MOON_PHASE_GLYPH = ["○", "◔", "◑", "◕", "●", "◕", "◑", "◔"];   // new → waning crescent
     function moonGlyph(m) {
-        return (typeof m.phase === "number" && m.phase >= 0 && m.phase <= 7) ? MOON_GLYPH[m.phase] : "☽";
+        return (typeof m.phase === "number" && m.phase >= 0 && m.phase <= 7) ? MOON_PHASE_GLYPH[m.phase] : "☽";
+    }
+    // Hover detail mirrors `look sky`: "Name — phase", then position · luminosity.
+    function moonTip(name, m) {
+        var tip = name + " — " + (m.phase_name || "up");
+        var detail = [];
+        if (m.position) detail.push(m.position);
+        if (m.light) detail.push(m.light);
+        return detail.length ? tip + "\n" + detail.join(" · ") : tip;
     }
 
     function completions() {
@@ -990,7 +1001,7 @@
         // Active default targets, so target-aware casting is legible at a glance.
         if (S.tgtHostile || S.tgtFriendly) {
             var tk = [];
-            if (S.tgtHostile) tk.push(el("span", { class: "v-tgt hostile", title: "Offensive spells target this", text: "⚔ " + S.tgtHostile.desc }));
+            if (S.tgtHostile) tk.push(el("button", { type: "button", class: "v-tgt hostile", "data-act": "cycle-target", title: "Offensive spells + Attack target this — tap to cycle (Alt+T)", text: "⚔ " + S.tgtHostile.desc }));
             if (S.tgtFriendly) tk.push(el("span", { class: "v-tgt friendly", title: "Beneficial spells target this", text: "✚ " + S.tgtFriendly.desc }));
             groups.push(el("div", { class: "v-group v-targets" }, tk));
         }
@@ -1014,13 +1025,28 @@
             (tm.events || []).forEach(function (e) {
                 world.appendChild(el("span", { class: "v-event", title: "Global event", text: "⚑ " + e.name + (e.seconds ? " (" + fmtDur(e.seconds) + ")" : "") }));
             });
-            (tm.moons || []).forEach(function (m) {
-                var span = el("span", { class: "v-moon", title: "Moon" + (m.phase_name ? " — " + m.phase_name : "") }, [
-                    el("span", { class: "v-moon-icon", style: "color:" + moonColor(m), text: moonGlyph(m) }),
-                    " " + m.name + (m.phase_name ? " (" + m.phase_name + ")" : "")
-                ]);
-                world.appendChild(span);
+            var moons = el("div", { class: "v-moons" });
+            moons.appendChild(el("span", {
+                class: "v-moon v-comet is-down", text: "☄",
+                title: "Saorin — the wandering comet is not in the sky"
+            }));
+            var upById = {};
+            (tm.moons || []).forEach(function (m) { if (m && m.id != null) upById[m.id] = m; });
+            MOON_SLOTS.forEach(function (slot) {
+                var m = upById[slot.id];
+                if (m) {
+                    moons.appendChild(el("span", {
+                        class: "v-moon is-up", style: "color:" + slot.color,
+                        title: moonTip(slot.name, m), text: moonGlyph(m)
+                    }));
+                } else {
+                    moons.appendChild(el("span", {
+                        class: "v-moon is-down", text: "●",
+                        title: slot.name + " — not currently in the sky"
+                    }));
+                }
             });
+            world.appendChild(moons);
         } else {
             world.appendChild(el("span", { class: "v-clock dim", text: "☾ —" }));
         }
@@ -1185,6 +1211,7 @@
         renderGroup();       // member menus map onto occupant handles
         renderVitals();      // target chip + tank line live near the foe bar
         tickHotbar();        // target-aware labels
+        updateAttack();      // armed state + cycle count track the room
     }
 
     function setTarget(slot, occ) {
@@ -1195,6 +1222,63 @@
         renderOccupants();
         renderVitals();
         tickHotbar();
+        updateAttack();
+    }
+
+    // What Alt+T / Tab may aim the ⚔ target at: live NPCs that aren't vendors,
+    // followers, or friendly-hinted — those stay context-menu-only (the
+    // misclick-safety rule), as do players (PK is never one accidental
+    // keystroke). Hostiles and anyone beating on you outrank neutrals; within
+    // a tier, feed order (= parser order).
+    function attackables() {
+        var hot = [], cold = [];
+        (S.occupants || []).forEach(function (o) {
+            if (o.is_dead || o.is_player || o.is_shopkeeper) return;
+            if (o.is_loyal_follower || o.is_my_follower) return;
+            if (o.hostile_hint === "friendly") return;
+            (o.hostile_hint === "hostile" || o.fighting_you ? hot : cold).push(o);
+        });
+        return hot.concat(cold);
+    }
+    function cycleTarget(dir) {
+        var list = attackables();
+        if (!list.length) return false;
+        dir = dir < 0 ? -1 : 1;
+        var i = -1;
+        if (S.tgtHostile) {
+            for (var j = 0; j < list.length; j++) {
+                if (list[j].handle === S.tgtHostile.handle) { i = j; break; }
+            }
+        }
+        var o = i < 0 ? list[dir > 0 ? 0 : list.length - 1]
+                      : list[(i + dir + list.length) % list.length];
+        S.tgtHostile = { handle: o.handle, desc: stripColor(o.short_desc || o.keyword) };
+        renderOccupants();
+        renderVitals();
+        tickHotbar();
+        updateAttack(true);
+        return true;
+    }
+    function clearTarget() {
+        if (!S.tgtHostile) return;
+        S.tgtHostile = null;
+        renderOccupants();
+        renderVitals();
+        tickHotbar();
+        updateAttack();
+    }
+
+    // The attack control resolves at press time: kill the ⚔ target, else bare
+    // `assist` — the game then picks whoever is fighting you or your group,
+    // so "no target" is the join-the-fight path, never an auto-picked victim.
+    function attackCommand() {
+        return S.tgtHostile ? "kill " + S.tgtHostile.handle : "assist";
+    }
+    function fireAttack() {
+        if (!S.connected) return false;
+        sendCmd(attackCommand());
+        if (dom.attackBtn) flashSlot(dom.attackBtn);
+        return true;
     }
 
     function occHostileClass(o) {
@@ -1281,8 +1365,9 @@
                     var ptag = (o.position && posLower(o) !== "standing")
                         ? posLower(o) : "";
                     var fight = occFightLabel(o);
+                    var isTgt = S.tgtHostile && S.tgtHostile.handle === o.handle;
                     var row = el("li", {
-                        class: "occ-row " + occHostileClass(o),
+                        class: "occ-row " + occHostileClass(o) + (isTgt ? " is-tgt" : ""),
                         "data-menu": "occupant", "data-idx": i,
                         title: "Tap for actions"
                     }, [
@@ -2557,6 +2642,63 @@
     }
 
     // ------------------------------------------------------------------
+    // Attack cluster (#hud-attack) — the persistent attack/assist tile plus
+    // the ⚔ target chip that feeds it. Heads the action row so target and
+    // act sit together, and stays visible on phones (the vitals target
+    // chips are desktop-only).
+    // ------------------------------------------------------------------
+    function buildAttack() {
+        if (!dom.attack) return;
+        dom.attackBtn = el("button", {
+            type: "button", class: "skill skill--attack", "data-act": "attack"
+        }, [
+            iconSvg("crossed-swords", "gi skill-icon"),
+            el("span", { class: "skill-key", text: "A" })
+        ]);
+        dom.attackChip = el("span", { class: "atk-chip" });
+        dom.attack.appendChild(dom.attackBtn);
+        dom.attack.appendChild(dom.attackChip);
+        updateAttack();
+    }
+    function updateAttack(pulse) {
+        if (!dom.attackBtn) return;
+        dom.attack.hidden = !S.connected;
+        var t = S.tgtHostile;
+        dom.attackBtn.classList.toggle("armed", !!t);
+        dom.attackBtn.setAttribute("aria-label",
+            (t ? "Attack " + t.desc : "Assist — join your group's fight") + " (Alt+A)");
+        var kids = [el("button", {
+            type: "button", class: "atk-tgt" + (t ? " hostile" : ""),
+            "data-act": "cycle-target",
+            "aria-label": (t ? "Target: " + t.desc : "No target") + " — cycle (Alt+T)",
+            text: t ? "⚔ " + t.desc : "⌖ no target"
+        })];
+        if (t) kids.push(el("button", {
+            type: "button", class: "atk-x", "data-act": "clear-target",
+            "aria-label": "Clear target", text: "✕"
+        }));
+        fill(dom.attackChip, kids);
+        if (pulse) flashSlot(dom.attackChip.firstChild);
+        if (tipAnchor && dom.attack.contains(tipAnchor)) hideTip();
+    }
+    // Structured tips for the cluster (tipDataFor routes here): each control
+    // names its hotkey and previews the exact command it will send.
+    function attackTipData(act) {
+        var t = S.tgtHostile;
+        if (act === "attack") {
+            return t ? { name: "Attack " + t.desc, key: "Alt+A", sub: "kill " + t.handle }
+                     : { name: "Assist", key: "Alt+A", sub: "join your group's fight — no ⚔ target" };
+        }
+        if (act === "cycle-target") {
+            var n = attackables().length;
+            return { name: t ? t.desc : "No ⚔ target", key: "Alt+T",
+                     sub: n ? "cycle " + n + " target" + (n === 1 ? "" : "s") + " · Tab on empty input"
+                            : "nothing attackable here" };
+        }
+        return { name: "Clear target" };
+    }
+
+    // ------------------------------------------------------------------
     // Tooltip convention (.hud-tip)
     // ------------------------------------------------------------------
     // The HUD's one hover/focus tooltip. Deliberately terse — a title line, an
@@ -2614,12 +2756,14 @@
             var s = skillById(ab.getAttribute("data-ability"));
             return s ? skillTipData(s, ab.getAttribute("data-key")) : null;
         }
+        var atk = t.closest && dom.attack && t.closest("#hud-attack [data-act]");
+        if (atk) return attackTipData(atk.getAttribute("data-act"));
         if (t.getAttribute && t.getAttribute("data-tip")) return { name: t.getAttribute("data-tip") };
         return null;
     }
     function wireTooltips() {
         if (!dom.app) return;
-        var SEL = ".skill[data-ability],[data-tip]";
+        var SEL = ".skill[data-ability],#hud-attack [data-act],[data-tip]";
         dom.app.addEventListener("mouseover", function (e) {
             if (!mqHover.matches) return;
             var t = e.target.closest(SEL);
@@ -2687,11 +2831,14 @@
         });
     }
 
-    // Global hotkeys: Alt/Ctrl + 1..0 fire the visible bar's slots; Alt+` pages.
+    // Global hotkeys: Alt/Ctrl + 1..0 fire the visible bar's slots; Alt+` pages;
+    // Alt+T cycles the ⚔ target (Shift reverses) and Alt+A attacks/assists.
     // Browsers reserve Ctrl+digit for tab-switching and web content usually can't
     // veto that, so Alt+digit is the reliable path (works in Chrome/Chromium/
     // Safari; Firefox reserves Alt+digit too). Ctrl is offered as a bonus that
     // comes fully alive when the HUD runs installed/fullscreen (no tab strip).
+    // Alt+letter is the "act" family (Ctrl+letter opens overlays); Ctrl+T could
+    // never work anyway — the browser owns it.
     function wireHotkeys() {
         document.addEventListener("keydown", function (e) {
             // Overlay keys are gated on the HUD only, not the connection —
@@ -2724,6 +2871,18 @@
                 }
             }
             if (!S.connected) return;
+            // Combat keys — Alt+letter (the "act" modifier, like the bar's
+            // Alt+digit). By e.code, not e.key: macOS Alt+letter yields
+            // composed characters ("†"), Shift changes case.
+            var altCombo = e.altKey && !e.ctrlKey && !e.metaKey;
+            if (altCombo && e.code === "KeyT") {
+                if (cycleTarget(e.shiftKey ? -1 : 1)) e.preventDefault();
+                return;
+            }
+            if (altCombo && !e.shiftKey && e.code === "KeyA") {
+                if (fireAttack()) e.preventDefault();
+                return;
+            }
             if (e.key === "`" && e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
                 if (usedPages() > 1) { e.preventDefault(); flipHotbarPage(); }
                 return;
@@ -4384,6 +4543,15 @@
         var lockBtn = e.target.closest("[data-lock]");
         if (lockBtn && dom.app.contains(lockBtn)) { toggleBarLock(); return; }
 
+        // 2a2) Attack cluster + the vitals ⚔ chip: fire, cycle, or clear.
+        var act = e.target.closest("[data-act]");
+        if (act && dom.app.contains(act)) {
+            var an = act.getAttribute("data-act");
+            if (an === "attack") { fireAttack(); return; }
+            if (an === "cycle-target") { cycleTarget(1); return; }
+            if (an === "clear-target") { clearTarget(); return; }
+        }
+
         // 2b) Edit mode (unlocked): a tap on a slot rearranges instead of firing —
         // pick a slot, then tap where it should go. Prevents accidental casts.
         if (!barLocked) {
@@ -4639,6 +4807,7 @@
     function setConnected(on) {
         S.connected = !!on;
         renderVitals();
+        updateAttack();
         if (mapMod) mapMod.onConnected(S.connected);
     }
 
@@ -4662,7 +4831,8 @@
     function renderAll() {
         renderVitals(); renderSelfAffects(); renderRoom(); renderOccupants(); renderGroup();
         renderEquipment(); renderInventory(); renderTrain(); renderXp(); renderTracked();
-        renderWho(); renderChat(); renderHotbar(); renderAbilities(); renderProfessions(); updateMicro();
+        renderWho(); renderChat(); renderHotbar(); renderAbilities(); renderProfessions();
+        updateMicro(); updateAttack();
     }
     function reset() {
         S.vitals = null; S.status = null; S.time = null; S.room = null;
@@ -4712,6 +4882,7 @@
         dom.chat = document.getElementById("panel-chat");
         dom.who = document.getElementById("panel-who");
         dom.hotbar = document.getElementById("hud-hotbar");
+        dom.attack = document.getElementById("hud-attack");
         dom.xpstrip = document.getElementById("hud-xpstrip");
         dom.xpFill = dom.xpstrip && dom.xpstrip.querySelector(".xp-fill");
         dom.xpLabel = dom.xpstrip && dom.xpstrip.querySelector(".xp-label");
@@ -4739,6 +4910,7 @@
         dom.app.addEventListener("click", onAppClick);
         dom.app.addEventListener("contextmenu", onAppContext);
         wireHotbarDrag();
+        buildAttack();
         wireHotkeys();
         wireTooltips();
         loadQuestTracked();
@@ -4892,7 +5064,7 @@
         var feeds = {
             "Char.Status": { name: "Aelwyn", "class": "Magician", race: "Elf", position: "Standing", level: 45, align: 350, xp: 1250000, tnl: 48000, gold: 18230, bank: 500000, remort: 3 },
             "Char.Vitals": { hp: 412, maxhp: 480, mp: 130, maxmp: 300, move: 198, maxmove: 240, position: "Standing", opponent_hp_pct: 35, metamagic: 60, metamagic_max: 100, metamagic_regen: 5, food: 27, water: 9 },
-            "Game.Time": { hour: 21, hour12: 9, ampm: "pm", day: 14, day_name: "Sunday", month: 6, month_name: "the Long Shadows", year: 1247, night: true, season_id: 15, season_end: 0, events: [{ name: "Double Essence", seconds: 5400 }, { name: "Festival of Flames" }], moons: [{ name: "Shavar", phase: 4, phase_name: "full", up: true }, { name: "Chenchir", phase: 6, phase_name: "last quarter", up: true }] },
+            "Game.Time": { hour: 21, hour12: 9, ampm: "pm", day: 14, day_name: "Sunday", month: 6, month_name: "the Long Shadows", year: 1247, night: true, season_id: 15, season_end: 0, events: [{ name: "Double Essence", seconds: 5400 }, { name: "Festival of Flames" }], moons: [{ id: 0, name: "Shavar", phase: 4, phase_name: "full", position: "almost directly overhead", light: "blazing bright", up: true }, { id: 3, name: "Chenchir", phase: 6, phase_name: "last quarter", position: "lowering through the western sky", light: "fading", up: true }] },
             "Char.Season": { season_id: 15, name: "Enigma of the Tempest", ends_in: 1058400, essence: { current: 1240, lifetime: 8890 }, engagement: { progress: 54.0, milestones_done: 5, xp_bonus_pct: 8, shop_discount_pct: 15, axes: [{ key: "crafting", earned: 200, cap: 365, weight: 3 }, { key: "exploration", earned: 180, cap: 310, weight: 4 }, { key: "general", earned: 140, cap: 200, weight: 4 }], milestones: [{ at: 8.0, done: true, reward: "+4% XP (passive)" }, { at: 20.0, done: true, reward: "an ornate chest + -5% shop prices (passive)" }, { at: 30.0, done: true, reward: "+40 Renown" }, { at: 42.0, done: true, reward: "+4% XP (passive) + Memory: a tempest's echo" }, { at: 54.0, done: true, reward: "-10% shop prices (passive)" }, { at: 68.0, done: false, reward: "Memory: a tempest's echo" }, { at: 82.0, done: false, reward: "+80 Renown" }, { at: 100.0, done: false, reward: "Title: World-Walker" }], next: { at: 68.0, remaining: 14.0, reward: "Memory: a tempest's echo" } } },
             "Room.Info": { num: 3001, name: "The Grand Concourse", area: "Ishar Nexus", environment: "City", exits: { n: 3002, e: 3005, s: 3008, w: 3010, u: 3100, d: 3200, into: 3500 } },
             "Room.Occupants": { occupants: [
@@ -5040,5 +5212,5 @@
         setConnected(true);
     }
 
-    window.IsharHUD = { init: init, onGmcp: onGmcp, reset: reset, setConnected: setConnected, completions: completions, demo: demo, registerMap: registerMap };
+    window.IsharHUD = { init: init, onGmcp: onGmcp, reset: reset, setConnected: setConnected, completions: completions, cycleTarget: cycleTarget, demo: demo, registerMap: registerMap };
 })();

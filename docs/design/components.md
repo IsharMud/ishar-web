@@ -501,6 +501,16 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
   and 2026-07-19 decisions. Hotkeys: **Alt/Ctrl+1…0** fire, **Alt+`** pages.
   **Locked by default** (taps fire); unlock to edit — `#hud-hotbar.editing` gets
   grab cursors and a `.skill.picked` slot awaits its destination (tap-to-swap).
+- **`#hud-attack` attack/assist cluster** — heads the action row: a
+  `.skill--attack` tile (crossed swords, key badge "A") + the `.atk-tgt`
+  target chip (with `.atk-x` clear). `Alt+A`/tap sends `kill <handle>` when
+  the ⚔ target is set (`.armed`, danger accent), bare `assist` when not.
+  `Alt+T` / chip tap / `Tab` on an empty input cycles the target (hostiles +
+  anyone fighting you first, then neutrals; never players/shopkeepers/
+  followers/friendlies). The chip is the phone's target readout; the vitals
+  ⚔ chip (`button.v-tgt`) cycles too, and the targeted Room row gets
+  `.occ-row.is-tgt`. Hidden until connected. Structured `.hud-tip`s preview
+  the exact command. See decisions.md 2026-07-19 (HUD combat layer II).
 - **Game-Icons.net sprite** (`img/game-icons.svg`, CC BY 3.0, self-hosted) —
   the **skill-art** vocabulary, a scoped exception to the Bootstrap-Icons-only
   rule (see decision). Referenced like `bi` but with class `gi`:
