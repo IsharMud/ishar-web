@@ -190,7 +190,9 @@ button.v-tgt:hover { border-color: rgba(214, 75, 75, .8); }
 }
 .v-world::-webkit-scrollbar { display: none; }
 .v-clock { color: var(--ac-text); white-space: nowrap; }
-.v-season { color: var(--ac-accent); font-weight: 700; white-space: nowrap; padding: 1px 8px; border: 1px solid rgba(255, 170, 119, .45); background: var(--ac-wash); border-radius: 999px; }
+.v-season { color: var(--ac-accent); font-weight: 700; white-space: nowrap; padding: 1px 8px; border: 1px solid rgba(255, 170, 119, .45); background: var(--ac-wash); border-radius: 999px; cursor: pointer; }
+.v-season:hover { border-color: var(--ac-accent); color: var(--ac-accent-2); }
+.v-season:focus-visible { outline: 2px solid var(--ac-accent); outline-offset: 2px; }
 .v-event { color: var(--hud-event); white-space: nowrap; }
 .v-moons { display: inline-flex; align-items: center; gap: 5px; }
 .v-moon { color: var(--hud-moon); font-weight: 700; font-size: 1.05em; line-height: 1; cursor: default; }
@@ -1641,6 +1643,72 @@ button.v-tgt:hover { border-color: rgba(214, 75, 75, .8); }
 }
 .hud-off #quest-tracker { display: none; }
 
+/* ----- Season (OVERLAYS app "season", Ctrl+E) — Char.Season -----
+   Season identity + countdown, the engagement track (meter with milestone
+   ticks, per-activity bars, milestone list), essence, and active events.
+   Colours are the shared --ac-* tokens; the amber track reads as "season". */
+#panel-season { padding-bottom: 8px; }
+.season-id { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+.season-id-name { font-size: 1.02rem; font-weight: 700; color: var(--ac-accent-2); min-width: 0; overflow-wrap: anywhere; }
+.season-count { font-size: .74rem; color: var(--ac-dim); white-space: nowrap; }
+.season-count b { color: var(--ac-text); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+.season-sec { margin-top: 14px; }
+.season-sec-h { font-size: .64rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--ac-dim); margin-bottom: 7px; }
+
+.eng-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+.eng-pct { font-size: 1.4rem; font-weight: 700; color: var(--ac-accent); font-variant-numeric: tabular-nums; line-height: 1; }
+.eng-sub { font-size: .72rem; color: var(--ac-dim); }
+.eng-sub b { color: var(--ac-text); }
+.eng-track-wrap { position: relative; padding-top: 8px; }
+.eng-track { position: relative; height: 13px; background: var(--ac-bg); border: 1px solid var(--ac-border); border-radius: 4px; overflow: hidden; }
+.eng-fill { position: absolute; inset: 0 auto 0 0; height: 100%; background: linear-gradient(90deg, #d88a4a, var(--ac-accent)); opacity: .9; transition: width .2s ease; }
+.eng-tick { position: absolute; top: 2px; width: 2px; height: 19px; transform: translateX(-1px); background: var(--ac-border-2); }
+.eng-tick.done { background: var(--ac-ok); }
+.eng-tick::before { content: ""; position: absolute; top: -8px; left: 50%; transform: translateX(-50%); width: 6px; height: 6px; border-radius: 50%; background: var(--ac-elev); border: 1px solid var(--ac-border-2); }
+.eng-tick.done::before { background: var(--ac-ok); border-color: var(--ac-ok); }
+.eng-tick.cap::before { border-radius: 1px; transform: translateX(-50%) rotate(45deg); }
+.eng-next { margin-top: 9px; font-size: .74rem; color: var(--ac-dim); }
+.eng-next b { color: var(--ac-accent-2); }
+.eng-next.complete { color: var(--ac-ok); }
+
+.season-perks { display: flex; gap: 7px; margin-top: 10px; flex-wrap: wrap; }
+.season-pill { font-size: .66rem; font-weight: 600; letter-spacing: .03em; text-transform: uppercase; white-space: nowrap; padding: 2px 9px; border-radius: 999px; border: 1px solid var(--ac-border); color: var(--ac-dim); }
+.season-pill.accent { color: var(--ac-accent); border-color: rgba(255, 170, 119, .45); background: var(--ac-wash); }
+.season-pill.ok { color: var(--ac-ok); border-color: rgba(76, 187, 23, .4); background: var(--ac-ok-wash); }
+
+.season-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(5.5rem, 1fr)); gap: 8px; }
+.season-tile { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 9px 6px; border-radius: var(--ac-radius-sm); background: var(--ac-bg); border: 1px solid var(--ac-border); }
+.season-tile-n { font-size: 1.2rem; font-weight: 700; color: var(--hud-gold); font-variant-numeric: tabular-nums; line-height: 1.05; }
+.season-tile-l { font-size: .58rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--ac-dim); text-align: center; }
+
+.season-bars { display: flex; flex-direction: column; gap: 8px; }
+.season-bar { display: grid; grid-template-columns: minmax(0, 6rem) minmax(0, 1fr) auto; align-items: center; gap: 10px; font-size: .78rem; }
+.season-bar-l { color: var(--ac-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.season-bar-track { height: 9px; border-radius: 5px; background: var(--ac-elev); overflow: hidden; }
+.season-bar-fill { display: block; height: 100%; border-radius: 5px; background: var(--ac-info); transition: width .2s ease; }
+.season-bar-fill.ax-craft { background: var(--ac-accent); }
+.season-bar-fill.ax-explore { background: var(--ac-info); }
+.season-bar-fill.ax-general { background: var(--ac-ok); }
+.season-bar-n { color: var(--ac-dim); font-variant-numeric: tabular-nums; font-size: .72rem; white-space: nowrap; }
+.season-bar-n b { color: var(--ac-text); }
+
+.season-ms { display: flex; flex-direction: column; }
+.season-ms-row { display: flex; align-items: center; gap: 8px; padding: 6px 4px; border-top: 1px solid var(--ac-border); font-size: .78rem; }
+.season-ms-row:first-child { border-top: 0; }
+.season-ms-row.locked { color: var(--ac-dim); }
+.season-ms-row.next { background: var(--ac-wash); border-radius: var(--ac-radius-sm); }
+.season-ms-mk { flex: none; width: 15px; text-align: center; font-weight: 700; color: var(--ac-ok); }
+.season-ms-row.locked .season-ms-mk { color: var(--ac-border-2); }
+.season-ms-at { flex: none; width: 34px; text-align: right; color: var(--ac-dim); font-variant-numeric: tabular-nums; font-size: .72rem; }
+.season-ms-rw { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.season-ms-row.next .season-ms-rw { color: var(--ac-accent-2); }
+.season-ms-badge { flex: none; font-size: .56rem; letter-spacing: .05em; text-transform: uppercase; color: var(--ac-accent); border: 1px solid rgba(255, 170, 119, .4); border-radius: 999px; padding: 1px 7px; }
+
+.season-events { display: flex; gap: 7px; flex-wrap: wrap; }
+.season-event { display: inline-flex; align-items: center; gap: 4px; font-size: .72rem; color: var(--hud-event); background: rgba(232, 176, 75, .08); border: 1px solid rgba(232, 176, 75, .3); border-radius: 999px; padding: 2px 9px; white-space: nowrap; }
+.season-event b { color: var(--ac-text); font-weight: 600; font-variant-numeric: tabular-nums; }
+
 /* ----- Reduced motion ----- */
 @keyframes hud-pulse {
     0%, 100% { opacity: 1; }
@@ -1649,4 +1717,5 @@ button.v-tgt:hover { border-color: rgba(214, 75, 75, .8); }
 @media (prefers-reduced-motion: reduce) {
     .vbar-fill, .hud-btn, #rose-overlay { transition: none; }
     .status-connecting .status-dot { animation: none; }
+    .eng-fill, .season-bar-fill { transition: none; }
 }

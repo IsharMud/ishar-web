@@ -231,6 +231,11 @@
                         title="Quest Log (Ctrl+Q)" aria-label="Quest Log (Ctrl+Q)">
                     {% bi "journal-bookmark" %}
                 </button>
+                <button type="button" class="micro-btn" data-overlay="season" hidden
+                        aria-pressed="false" aria-haspopup="dialog" aria-controls="hud-overlay"
+                        title="Season (Ctrl+E)" aria-label="Season (Ctrl+E)">
+                    {% bi "trophy" %}
+                </button>
             </nav>
         </div>
         <form id="command-form" autocomplete="off">
@@ -325,6 +330,10 @@
             {% bi "journal-bookmark" %}
             <span>Quests</span>
         </button>
+        <button type="button" data-panel="season" aria-pressed="false" hidden>
+            {% bi "trophy" %}
+            <span>Season</span>
+        </button>
     </nav>
 
     <div id="hud-sheet" hidden>
@@ -370,6 +379,7 @@
             <section id="panel-professions" class="panel"></section>
             <section id="panel-map" class="panel"></section>
             <section id="panel-quests" class="panel"></section>
+            <section id="panel-season" class="panel"></section>
         </div>
     </div>
 
