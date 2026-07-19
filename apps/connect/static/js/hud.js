@@ -72,6 +72,17 @@
     // (default absent = closed): a carried bag shouldn't spill its whole
     // contents into the inventory view unasked.
     var expanded = loadSet("ishar.itemsExpanded");
+    // Chat: a single-select category filter over the log, and the channel the
+    // targeted input routes to. Categories fold the game's real channel labels
+    // (Char.Comm / Comm.Channel: World, Bazaar, Recruit, Say, Shout, Yell, Tell,
+    // Whisper, Group, System, …) into Public / Tells / Group. The send list is
+    // [display, verb] — "Group" routes via `gtell`. Both prefs persisted.
+    var CHAT_CATS = ["all", "public", "tells", "group"];
+    var CHAT_SEND = [["World", "world"], ["Bazaar", "bazaar"], ["Recruit", "recruit"],
+                     ["Say", "say"], ["Shout", "shout"], ["Yell", "yell"], ["Group", "gtell"]];
+    var chatFilter = loadChoice("ishar.chatFilter", CHAT_CATS, "all");
+    var chatChannel = loadChoice("ishar.chatChannel", CHAT_SEND.map(function (o) { return o[1]; }), "world");
+
     var abilityFilter = { q: "", type: "all", usableOnly: false };
     try {
         var af = JSON.parse(localStorage.getItem("ishar.abilityFilter"));
@@ -233,6 +244,12 @@
         return {};
     }
     function saveMap(key, m) { try { localStorage.setItem(key, JSON.stringify(m)); } catch (e) {} }
+    // Read a persisted single-choice pref, falling back to a default unless the
+    // stored value is one of the allowed keys (guards against stale/renamed prefs).
+    function loadChoice(key, allowed, dflt) {
+        try { var v = localStorage.getItem(key); if (v != null && allowed.indexOf(v) !== -1) return v; } catch (e) {}
+        return dflt;
+    }
 
     // A slot holds a skill (a string key) OR a pinned item (an object with a
     // keyword command). Item slots let the bar fire consumables — quaff a
@@ -2011,26 +2028,107 @@
     }
 
     // ------------------------------------------------------------------
-    // Chat (hot path)
+    // Chat (hot path) — a persistent pane that earns its place vs. the terminal
+    // via a category filter over the log + a channel-targeted input (pick a
+    // channel, type, it routes without the verb). Layout: header · filter tabs ·
+    // scrolling log · input. See decisions.md 2026-07-19 (HUD chat).
     // ------------------------------------------------------------------
+    // Fold the game's channel labels into the three filter buckets. Reply/Ask
+    // ride MSG_TELL (label "Tell"); death/level notices ride MSG_GTELL ("Group").
+    function chatCat(channel) {
+        var c = String(channel || "").toLowerCase();
+        if (c === "tell" || c === "whisper") return "tells";
+        if (c === "group") return "group";
+        return "public";   // world/bazaar/recruit/say/shout/yell/system/imm/…
+    }
+    // The line text is a fully-rendered game line; global channels bake in a
+    // "[World] " prefix that our own colour-coded tag already conveys — strip it.
+    function chatText(t) {
+        return String(t == null ? "" : t).replace(/^\[[^\]\r\n]{1,24}\]\s+/, "");
+    }
+    function chatShows(c) { return chatFilter === "all" || chatCat(c.channel) === chatFilter; }
     function chatLine(c) {
+        var cat = chatCat(c.channel);
         return el("div", { class: "chat-line" }, [
-            el("span", { class: "chat-ch", text: "[" + c.channel + "]" }), " ",
-            el("span", { class: "chat-txt", text: c.text })
+            el("span", { class: "chat-ch ch-" + cat, text: c.channel || "•" }), " ",
+            el("span", { class: "chat-txt", text: chatText(c.text) })
         ]);
     }
     function appendChat(c) {
-        var empty = dom.chat.querySelector(".panel-empty");
-        if (empty) dom.chat.removeChild(empty);
-        var stick = dom.chat.scrollTop + dom.chat.clientHeight >= dom.chat.scrollHeight - 40;
-        dom.chat.appendChild(chatLine(c));
-        while (dom.chat.children.length > CHAT_MAX) dom.chat.removeChild(dom.chat.firstChild);
-        if (stick) dom.chat.scrollTop = dom.chat.scrollHeight;
+        if (!dom.chatLog || !chatShows(c)) return;   // filtered lines wait in S.chat
+        var empty = dom.chatLog.querySelector(".panel-empty");
+        if (empty) dom.chatLog.removeChild(empty);
+        var stick = dom.chatLog.scrollTop + dom.chatLog.clientHeight >= dom.chatLog.scrollHeight - 40;
+        dom.chatLog.appendChild(chatLine(c));
+        while (dom.chatLog.children.length > CHAT_MAX) dom.chatLog.removeChild(dom.chatLog.firstChild);
+        if (stick) dom.chatLog.scrollTop = dom.chatLog.scrollHeight;
+    }
+    function chatPlaceholder() {
+        for (var i = 0; i < CHAT_SEND.length; i++) {
+            if (CHAT_SEND[i][1] === chatChannel) return "message #" + CHAT_SEND[i][0].toLowerCase() + "…";
+        }
+        return "message…";
+    }
+    function setChatFilter(f) {
+        if (CHAT_CATS.indexOf(f) === -1 || f === chatFilter) return;
+        chatFilter = f;
+        try { localStorage.setItem("ishar.chatFilter", f); } catch (e) {}
+        renderChat();
+    }
+    function sendChat(input) {
+        var text = String(input.value == null ? "" : input.value)
+            .replace(/[\r\n\x00]+/g, " ").trim().slice(0, 400);
+        input.value = "";
+        if (!text) return;
+        var ok = CHAT_SEND.some(function (o) { return o[1] === chatChannel; });
+        if (ok) api.send(chatChannel + " " + text);
+        input.focus();   // api.send steals focus to the main input on desktop
+    }
+    function chatFilterTabs() {
+        return el("div", { class: "chat-tabs", role: "tablist" }, CHAT_CATS.map(function (k) {
+            var on = chatFilter === k;
+            return el("button", {
+                type: "button", class: "chat-tab" + (on ? " on" : ""),
+                "aria-pressed": on ? "true" : "false",
+                text: k.charAt(0).toUpperCase() + k.slice(1),
+                onclick: function () { setChatFilter(k); }
+            });
+        }));
+    }
+    function chatInputRow() {
+        var sel = el("select", { class: "chat-ch-select", "aria-label": "Channel to send on" },
+            CHAT_SEND.map(function (o) {
+                return el("option", { value: o[1], selected: o[1] === chatChannel, text: o[0] });
+            }));
+        var input = el("input", {
+            type: "text", class: "chat-msg", "aria-label": "Message",
+            autocomplete: "off", enterkeyhint: "send", placeholder: chatPlaceholder()
+        });
+        sel.addEventListener("change", function () {
+            chatChannel = sel.value;
+            try { localStorage.setItem("ishar.chatChannel", chatChannel); } catch (e) {}
+            input.placeholder = chatPlaceholder();
+        });
+        var form = el("form", { class: "chat-in" }, [sel, input]);
+        form.addEventListener("submit", function (e) { e.preventDefault(); sendChat(input); });
+        return form;
     }
     function renderChat() {
-        if (!S.chat.length) fill(dom.chat, el("div", { class: "panel-empty", text: "No messages yet." }));
-        else fill(dom.chat, S.chat.map(chatLine));
-        dom.chat.scrollTop = dom.chat.scrollHeight;
+        if (!dom.chat) return;
+        var head = panelHeader("chat", "Chat", false);
+        var col = isCollapsed("chat");
+        dom.chat.classList.toggle("collapsed", col);
+        if (col) { dom.chatLog = null; fill(dom.chat, [head]); return; }
+        var shown = chatFilter === "all" ? S.chat : S.chat.filter(chatShows);
+        var emptyText = S.chat.length
+            ? "Nothing in " + chatFilter.charAt(0).toUpperCase() + chatFilter.slice(1) + "."
+            : "No messages yet.";
+        var log = el("div", { class: "chat-log" }, shown.length
+            ? shown.map(chatLine)
+            : el("div", { class: "panel-empty", text: emptyText }));
+        dom.chatLog = log;
+        fill(dom.chat, [head, chatFilterTabs(), log, chatInputRow()]);
+        log.scrollTop = log.scrollHeight;
     }
 
     // ------------------------------------------------------------------
@@ -3769,6 +3867,7 @@
             case "group": renderGroup(); break;
             case "inventory": case "components": renderInventory(); break;
             case "tracked": renderTracked(); break;
+            case "chat": renderChat(); break;
             default: renderAll();
         }
         api.onLayoutChange();
@@ -3805,7 +3904,7 @@
         if (dom.sheet) dom.sheet.hidden = !name;
         if (dom.sheetTitle) dom.sheetTitle.textContent = title;
         dom.app.classList.toggle("sheet-open", !!name);
-        if (name === "chat") { markChatUnread(false); dom.chat.scrollTop = dom.chat.scrollHeight; }
+        if (name === "chat") { markChatUnread(false); if (dom.chatLog) dom.chatLog.scrollTop = dom.chatLog.scrollHeight; }
         // Overlay apps (abilities/who/gear/character/professions/map) render on
         // open and clear their unread dot — covers the abilities cooldown/mana
         // re-grey too, so no special-case is needed here.
@@ -4182,10 +4281,16 @@
             "Char.Death": { vnum: 3020, name: "Crumbled Ledge", zone: "Ishar Nexus", time: Math.floor(Date.now() / 1000) - 240 }
         };
         Object.keys(feeds).forEach(function (k) { onGmcp(k, JSON.stringify(feeds[k])); });
+        // The real Comm.Channel labels + line formats the game emits (see
+        // ishar-mud get_message_type_string / do_channel): global channels bake
+        // in a "[World] " prefix, say/tell/etc. are sentence-form.
         [
-            { channel: "gossip", text: "Boric: anyone up for a UDN run?" },
-            { channel: "auction", text: "WTS dragonscale helm, pst" },
-            { channel: "newbie", text: "Mage: how do I cast spells?" }
+            { channel: "World", text: "[World] Boric: anyone up for a UDN run?" },
+            { channel: "Bazaar", text: "[Bazaar] Hadeon: WTS dragonscale helm, pst" },
+            { channel: "Tell", text: "Selra told you, \"omw, 2 rooms out\"" },
+            { channel: "Recruit", text: "[Recruit] Mage: how do I cast spells?" },
+            { channel: "Group", text: "You told the group, \"pulling in 5\"" },
+            { channel: "Say", text: "Aelwyn said, \"ready when you are\"" }
         ].forEach(function (c) { onGmcp("Comm.Channel", JSON.stringify(c)); });
         setConnected(true);
     }
