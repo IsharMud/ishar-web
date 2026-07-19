@@ -20,6 +20,7 @@
     --hud-mv: var(--ac-ok);
     --hud-gold: #cdcd00;
     --hud-gold-wash: rgba(205, 205, 0, .1);
+    --hud-xp: #9a86e0;
     --hud-tgt: #a0408a;
     --hud-mm: #a05ad0;
     --hud-edge: #d08a3a;
@@ -867,6 +868,28 @@ body.connect-page #content { padding: .5rem !important; }
 .mini.mp span { background: var(--hud-mp); }
 .mini.mv span { background: var(--hud-mv); }
 
+/* Compact (raid) group density — one scannable line per member: name · HP bar
+   (triage-tinted) · % · one status marker · away. The header toggle (.grp-dens)
+   flips it; low-HP/tank sort to the top and the list scrolls in-column so a
+   full raid doesn't shove Here/Room off the side. */
+.grp-dens.on { border-color: var(--ac-accent); color: var(--ac-accent); }
+#hud-left-scroll .grp-cmp-list { max-height: 44vh; overflow-y: auto; }
+.grp.grp-cmp { align-items: center; gap: 6px; padding: 3px 6px; }
+.grp-cn { flex: 0 0 34%; max-width: 40%; font-size: .76rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.grp-cbar { flex: 1 1 auto; min-width: 24px; height: 11px; background: var(--ac-bg); border: 1px solid var(--ac-border); border-radius: 5px; overflow: hidden; }
+.grp-cbar > span { display: block; height: 100%; background: var(--hud-hp); }
+.grp-cbar > span.cond-ok { background: var(--ac-ok); }
+.grp-cbar > span.cond-mid { background: var(--hud-event); }
+.grp-cbar > span.cond-low { background: var(--hud-hostile); }
+.grp-cp { flex: none; min-width: 32px; text-align: right; font-size: .7rem; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ac-dim); }
+.grp-cp.cond-ok { color: var(--ac-ok); }
+.grp-cp.cond-mid { color: var(--hud-event); }
+.grp-cp.cond-low { color: var(--hud-hostile); }
+.grp-ct { flex: none; font-size: .58rem; padding: 0 5px; border-radius: 999px; border: 1px solid var(--ac-border); color: var(--ac-dim); }
+.grp-ct.mark-tank { color: var(--hud-hostile); border-color: rgba(214, 75, 75, .5); background: var(--ac-danger-wash); font-weight: 700; }
+.grp-ct.mark-cc { color: var(--hud-event); border-color: rgba(232, 176, 75, .5); font-weight: 700; }
+.grp-range { flex: none; font-size: .58rem; color: var(--ac-dim); }
+
 /* ----- Who ----- */
 .who-list { list-style: none; margin: 0; padding: 0; }
 .who-row { padding: 4px 2px; border-bottom: 1px solid var(--ac-elev); }
@@ -1028,24 +1051,26 @@ body.connect-page #content { padding: .5rem !important; }
     .skill-sweep { transition: --sweep 1s linear; }
 }
 
-/* ----- XP: thin ambient strip below the terminal (Char.Train.xp_pct) ----- */
-/* Full-width so the centered "62% to level 46" label reads; the label sits over
-   both the gold fill and the bare track, so it's light with a dark shadow rather
-   than the black-on-gold the fill alone would carry. */
-#hud-xpstrip {
-    position: relative; flex: none; height: 16px; overflow: hidden;
-    background: var(--ac-bg); border: 1px solid var(--ac-border); border-radius: 8px;
-}
+/* ----- XP: a hairline ambient strip below the terminal (Char.Train.xp_pct) ----- */
+/* A 5px track that grows with the terminal, its progress-to-level caption sitting
+   *beside* it (not baked into a taller bar). Violet (--hud-xp) is the one HUD hue
+   used nowhere else, so it reads unambiguously as XP without competing with the
+   amber accent, the green vitals, or the terminal text — and stays quiet. */
+#hud-xpstrip { flex: none; display: flex; align-items: center; gap: 8px; }
 #hud-xpstrip[hidden] { display: none; }
+#hud-xpstrip .xp-track {
+    flex: 1 1 auto; height: 5px; overflow: hidden;
+    background: var(--ac-bg); border: 1px solid var(--ac-border); border-radius: 3px;
+}
 #hud-xpstrip .xp-fill {
-    position: absolute; inset: 0 auto 0 0; height: 100%;
-    background: var(--hud-gold); opacity: .5; transition: width .2s ease;
+    display: block; height: 100%;
+    background: var(--hud-xp); opacity: .8; transition: width .2s ease;
 }
 #hud-xpstrip .xp-label {
-    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-    font-size: .62rem; font-weight: 700; letter-spacing: .04em;
-    color: var(--ac-text); text-shadow: 0 1px 2px rgba(0, 0, 0, .85);
+    flex: none; display: flex; gap: 4px; white-space: nowrap;
+    font-size: .58rem; font-weight: 600; letter-spacing: .03em; color: var(--ac-dim);
 }
+#hud-xpstrip .xp-pct { color: var(--hud-xp); font-weight: 700; }
 @media (prefers-reduced-motion: reduce) {
     #hud-xpstrip .xp-fill { transition: none; }
 }

@@ -420,19 +420,33 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
   wrapping row. From `Char.Affects.buffs`/`.debuffs` (see decisions.md
   2026-07-18, "HUD affects split").
 - **`#hud-xpstrip`** — the ambient XP strip below the terminal (between it and
-  `#hud-actionrow`). A full-width thin bar: a `.xp-fill` (`--hud-gold`, width =
-  `Char.Train.xp_pct`) under a centered `.xp-label` — `XP — <pct>% to level
-  <next>` (`Char.Status.level + 1`), light text with a dark shadow so it reads
-  over both the fill and the bare track. `renderXp()` swaps the width + label
-  text; `hidden` until `Char.Train` arrives, and hidden in `.hud-off`. Ambient on
-  phones too (survives above the action slots at 390px). See decisions.md
-  2026-07-19, "HUD XP strip".
+  `#hud-actionrow`). A **5px hairline**: a `.xp-track` (`flex:1`) holding the
+  `.xp-fill` (`--hud-xp` violet, width = `Char.Train.xp_pct`), with the
+  `.xp-label` caption sitting **beside** it (not baked in) — `XP <pct>% · to
+  L<next>` (`Char.Status.level + 1`), the `.xp-pct` tinted `--hud-xp`.
+  `renderXp()` swaps the fill width + rebuilds the caption; `hidden` until
+  `Char.Train` arrives, and hidden in `.hud-off`. Ambient on phones too (the
+  bar shrinks, the caption stays at 390px). See decisions.md 2026-07-19,
+  "HUD XP strip" and its refinement note.
 - **`.hud-btn`(`--icon`)** — the topbar button, aligned with `.ac-btn`.
 - **`#hud-dock button`** — icon-over-label phone tabs; `.unread` renders an
   amber dot (used by Chat), `.alarm` a pulsing caution dot (used by Tracked
   Spells when a maintained spell nears expiry).
 - **`.exit` compass, `.item-row` lists, `.kv`** — the in-panel widgets;
   all have coarse-pointer bumps and `:focus-visible` rings.
+- **`.grp` (Group)** — the party pane in the left column (`#panel-group`,
+  `renderGroup`), with two density presets a header toggle (`.grp-dens`,
+  persisted `ishar.groupDensity`) flips between — **not** a field-picker.
+  **Full** (default) is the rich row: `.grp-main` with name · triage-tinted
+  `.grp-hp-num` % · `.grp-chips` (`.grp-tank` / `.grp-threat` / `.grp-fight` /
+  `.grp-pos` / `.grp-away`) · the `.grp-bars` HP/MP/MV `.mini` triple, in feed
+  order. **Compact** (`.grp-cmp`, `groupRowCompact`) is one scannable line —
+  `.grp-cn` name · `.grp-cbar` triage-tinted HP bar · `.grp-cp` % · a single
+  `.grp-ct` status marker (`.mark-cc` amber for stunned/fleeing/asleep, `.mark-tank`
+  red) · `.grp-range` `away` — sorted low-HP/tank-first and capped to `44vh`
+  in-column scroll (`.grp-cmp-list`); the whole row is the tap target (`data-menu`,
+  no `⋯`). Tank rows keep the `.tanking` left border in both. From `Group.Update`;
+  see decisions.md 2026-07-19 (HUD Group density).
 - **`.aff` (Tracked Spells)** — one row per maintained spell in the persistent
   right-column `#panel-tracked` (`renderTracked`): `.aff-ic` icon · `.aff-body`
   (name + colour-coded `.aff-tgt` `self`/`mate`/`foe`) · `.aff-time` · `.aff-rel`
