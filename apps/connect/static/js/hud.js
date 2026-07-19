@@ -90,6 +90,9 @@
     var GROUP_DENSITIES = ["full", "compact"];
     var groupDensity = loadChoice("ishar.groupDensity", GROUP_DENSITIES, "full");
 
+    var QUEST_TABS = ["active", "done", "all"];
+    var questFilter = { q: "", tab: loadChoice("ishar.questFilter", QUEST_TABS, "active") };
+
     var abilityFilter = { q: "", type: "all", usableOnly: false };
     try {
         var af = JSON.parse(localStorage.getItem("ishar.abilityFilter"));
@@ -125,7 +128,7 @@
     // the bottom, nearest the input.
     var PANELS = ["inventory", "group", "occupants", "room",
                   "tracked", "chat", "train", "abilities", "who",
-                  "professions", "map"];
+                  "professions", "map", "quests"];
     var PANEL_HOME = {
         occupants: "hud-left-scroll",
         group: "hud-left-scroll",
@@ -137,7 +140,8 @@
         // Reference surfaces are micro-menu overlays (the bottom sheet on phones).
         inventory: "hud-overlay-body", train: "hud-overlay-body",
         abilities: "hud-overlay-body", who: "hud-overlay-body",
-        professions: "hud-overlay-body", map: "hud-overlay-body"
+        professions: "hud-overlay-body", map: "hud-overlay-body",
+        quests: "hud-overlay-body"
     };
 
     // ------------------------------------------------------------------
@@ -188,7 +192,13 @@
         { key: "map", title: "Map", hotkey: "m",
           render: function () { if (mapMod) mapMod.renderOverlay(); },
           // Account-gated: guests map nothing, so they get no launcher.
-          available: function () { return !!(mapMod && mapMod.enabled()); } }
+          available: function () { return !!(mapMod && mapMod.enabled()); } },
+        // Quest Log: Char.Quests dynamic state joined to the web-served
+        // static catalog; tracked quests pin to the top and feed the
+        // objectives tracker over the terminal (isharmud/ishar-web#150).
+        { key: "quests", title: "Quest Log", hotkey: "q",
+          render: function () { renderQuests(); },
+          available: function () { return (S.quests || []).length > 0; } }
     ];
     var overlayName = null;   // open overlay app key (desktop), or null
 
@@ -750,6 +760,11 @@
             case "Char.Professions": applyProfessions(data); break;
             case "Char.Recipes": S.recipes = (data && data.recipes) || []; renderProfessions(); break;
             case "Char.Craft": applyCraft(data); break;
+            case "Char.Quests": applyQuests(data); break;
+            case "Room.QuestMarkers":
+                S.questMarkers = data;
+                if (mapMod && mapMod.onQuestMarkers) mapMod.onQuestMarkers(data);
+                break;
             case "Char.Cooldowns":
                 applyCooldowns(data); tickHotbar();
                 // The Abilities browser can be ~400 rows; only rebuild it for a
@@ -3419,6 +3434,340 @@
     }
 
     // ------------------------------------------------------------------
+    // Quest Log (Char.Quests + Room.QuestMarkers + the web quest endpoints).
+    // The data model mirrors the map's: GMCP carries per-player dynamic
+    // state (status, step progress); the static catalog — descriptions,
+    // step labels, reward names — is fetched once over HTTP and joined
+    // client-side on quest id. Tracking (pin-to-top + the objectives
+    // tracker over the terminal) is account state, so pins follow the
+    // player between phone and desktop; guests fall back to localStorage.
+    // ------------------------------------------------------------------
+    var questCfg = { urls: null, csrf: "", authed: false };
+    var questCatalog = null;          // id -> catalog entry, once fetched
+    var questCatalogLoading = false;
+    var questTracked = [];            // tracked quest ids, pin order
+    var questTrackMax = 8;
+    var lastQuestsBody = null;
+    var questExpanded = {};           // id -> true (transient detail toggle)
+
+    function catalogOf(id) { return (questCatalog && questCatalog[id]) || null; }
+    function questActive(q) { return q.status === "In Progress" || q.status === "Ready for Turn-In"; }
+    // Repeatables reset to "Not Started" on completion; completions>0 keeps
+    // them in the done bucket ("Available again", per the GMCP contract).
+    function questDone(q) {
+        return q.status === "Completed" ||
+            (!!q.repeatable && q.status === "Not Started" && (q.completions || 0) > 0);
+    }
+    function questTrackedOn(id) { return questTracked.indexOf(id) !== -1; }
+    function questStatusLabel(q) {
+        if (q.repeatable && q.status === "Not Started" && (q.completions || 0) > 0) {
+            return "Available again (completed " + q.completions + "×)";
+        }
+        if (q.repeatable && q.status === "Completed" && (q.completions || 0) > 1) {
+            return "Completed " + q.completions + "×";
+        }
+        return q.status;
+    }
+    function questStatusClass(q) {
+        if (q.status === "Ready for Turn-In") return "qst-ready";
+        if (q.status === "Failed") return "qst-failed";
+        if (questDone(q)) return "qst-done";
+        return "qst-progress";
+    }
+
+    function applyQuests(data) {
+        var list = (data && data.quests) || [];
+        var body = "";
+        try { body = JSON.stringify(list); } catch (e) {}
+        // Badge only on a *change* after the first snapshot — the login burst
+        // shouldn't light the dot.
+        var changed = lastQuestsBody !== null && body !== lastQuestsBody;
+        lastQuestsBody = body;
+        S.quests = list;
+        ensureQuestCatalog();
+        updateMicro();
+        if (overlayVisible("quests")) renderQuests();
+        renderQuestTracker();
+        if (changed && !overlayVisible("quests")) markOverlayUnread("quests", true);
+    }
+
+    function ensureQuestCatalog() {
+        if (questCatalog || questCatalogLoading || !questCfg.urls || !questCfg.authed) return;
+        questCatalogLoading = true;
+        fetch(questCfg.urls.catalog, { credentials: "same-origin" })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (data) {
+                questCatalogLoading = false;
+                if (!data || !Array.isArray(data.quests)) return;
+                questCatalog = {};
+                data.quests.forEach(function (q) { questCatalog[q.id] = q; });
+                if (overlayVisible("quests")) renderQuests();
+                renderQuestTracker();
+            })
+            .catch(function () { questCatalogLoading = false; });
+    }
+
+    function loadQuestTracked() {
+        if (!questCfg.authed || !questCfg.urls) {
+            try {
+                var arr = JSON.parse(localStorage.getItem("ishar.questTracked"));
+                if (Array.isArray(arr)) {
+                    questTracked = arr.filter(function (v) { return typeof v === "number"; });
+                }
+            } catch (e) {}
+            return;
+        }
+        fetch(questCfg.urls.tracked, { credentials: "same-origin" })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (data) {
+                if (!data || !Array.isArray(data.tracked)) return;
+                questTracked = data.tracked;
+                if (data.max) questTrackMax = data.max;
+                if (overlayVisible("quests")) renderQuests();
+                renderQuestTracker();
+            })
+            .catch(function () {});
+    }
+
+    function toggleQuestTrack(id) {
+        var on = !questTrackedOn(id);
+        if (on && questTracked.length >= questTrackMax) return;
+        // Optimistic flip; the account POST reconciles behind it.
+        if (on) questTracked.push(id);
+        else questTracked = questTracked.filter(function (v) { return v !== id; });
+        if (overlayVisible("quests")) renderQuests();
+        renderQuestTracker();
+        if (!questCfg.authed || !questCfg.urls) {
+            try { localStorage.setItem("ishar.questTracked", JSON.stringify(questTracked)); } catch (e) {}
+            return;
+        }
+        fetch(questCfg.urls.track, {
+            method: "POST", credentials: "same-origin",
+            headers: { "Content-Type": "application/json", "X-CSRFToken": questCfg.csrf },
+            body: JSON.stringify({ quest_id: id, on: on })
+        }).then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (data) {
+                if (!data || !Array.isArray(data.tracked)) return;
+                questTracked = data.tracked;
+                if (overlayVisible("quests")) renderQuests();
+                renderQuestTracker();
+            })
+            .catch(function () {});
+    }
+
+    // Everything searchable about a quest, dynamic + catalog: name, status,
+    // objective labels, description, intro, reward names — a superset of the
+    // in-game `quest log <term>` fields.
+    function questSearchText(q) {
+        var parts = [q.name, q.status];
+        (q.steps || []).forEach(function (s) { parts.push(s.label); });
+        var cat = catalogOf(q.id);
+        if (cat) {
+            parts.push(cat.desc || "", cat.intro || "");
+            (cat.steps || []).forEach(function (s) { parts.push(s.label); });
+            (cat.rewards || []).forEach(function (r) { parts.push(r.name || ""); });
+        }
+        return parts.join("\n").toLowerCase();
+    }
+
+    function questStepRows(q) {
+        var steps = q.steps || [];
+        if (!steps.length) {
+            // Non-active rows ride step-less on the feed; the catalog fills in.
+            var cat = catalogOf(q.id);
+            steps = (cat && cat.steps) || [];
+        }
+        return steps.map(function (s) {
+            var done = s.done != null ? s.done : null;
+            var complete = done != null && done >= s.need;
+            return el("li", { class: "qst-step" + (complete ? " complete" : "") }, [
+                el("span", { class: "qst-step-label", text: s.label }),
+                el("span", {
+                    class: "qst-step-count",
+                    text: done != null ? done + "/" + s.need : "×" + s.need
+                })
+            ]);
+        });
+    }
+
+    function renderQuests() {
+        if (!dom.quests) return;
+        var all = S.quests || [];
+        var hadFocus = document.activeElement && document.activeElement.id === "qst-search";
+        var caret = hadFocus ? document.activeElement.selectionStart : null;
+        var prevScroll = dom.quests.querySelector(".ab-scroll");
+        var savedTop = prevScroll ? prevScroll.scrollTop : 0;
+        var kids = [];
+
+        var search = el("input", {
+            type: "text", class: "ab-search", id: "qst-search",
+            placeholder: "Search quests…", autocomplete: "off", spellcheck: "false",
+            value: questFilter.q
+        });
+        search.addEventListener("input", function () { questFilter.q = search.value; renderQuests(); });
+        kids.push(el("div", { class: "ab-controls" }, [search]));
+
+        var counts = { active: 0, done: 0, all: all.length };
+        all.forEach(function (q) {
+            if (questActive(q) || q.status === "Failed") counts.active++;
+            if (questDone(q)) counts.done++;
+        });
+        var chips = el("div", { class: "ab-chips" });
+        [["active", "Active"], ["done", "Completed"], ["all", "All"]].forEach(function (tc) {
+            chips.appendChild(el("button", {
+                type: "button", class: "ab-chip" + (questFilter.tab === tc[0] ? " on" : ""),
+                "data-qtab": tc[0], text: tc[1] + " " + counts[tc[0]]
+            }));
+        });
+        kids.push(chips);
+
+        var q = questFilter.q.trim().toLowerCase();
+        var rows = all.filter(function (row) {
+            if (questFilter.tab === "active" && !(questActive(row) || row.status === "Failed")) return false;
+            if (questFilter.tab === "done" && !questDone(row)) return false;
+            if (q && questSearchText(row).indexOf(q) === -1) return false;
+            return true;
+        });
+        // Tracked first (pin order), then Ready, then in progress, then alpha.
+        var statusRank = function (row) {
+            if (row.status === "Ready for Turn-In") return 0;
+            if (row.status === "In Progress") return 1;
+            if (row.status === "Failed") return 2;
+            return 3;
+        };
+        rows.sort(function (a, b) {
+            var ta = questTrackedOn(a.id) ? questTracked.indexOf(a.id) : 999;
+            var tb = questTrackedOn(b.id) ? questTracked.indexOf(b.id) : 999;
+            if (ta !== tb) return ta - tb;
+            var ra = statusRank(a), rb = statusRank(b);
+            if (ra !== rb) return ra - rb;
+            return String(a.name).localeCompare(String(b.name));
+        });
+
+        var scroller = el("div", { class: "ab-scroll" });
+        if (!rows.length) {
+            scroller.appendChild(el("div", {
+                class: "panel-empty",
+                text: !all.length ? "—" : "No quests match."
+            }));
+        } else {
+            var ul = el("ul", { class: "qst-list" });
+            rows.forEach(function (row) {
+                var tracked = questTrackedOn(row.id);
+                var open = !!questExpanded[row.id];
+                var li = el("li", { class: "qst-row " + questStatusClass(row) + (open ? " open" : "") });
+                var head = el("div", { class: "qst-head", "data-qrow": row.id }, [
+                    el("span", { class: "qst-name", text: row.name }),
+                    el("span", { class: "qst-right" }, [
+                        el("span", { class: "qst-status", text: questStatusLabel(row) }),
+                        questActive(row) ? el("button", {
+                            type: "button",
+                            class: "ab-star" + (tracked ? " on" : ""),
+                            "data-qtrack": row.id,
+                            "aria-label": tracked ? "Untrack quest" : "Track quest",
+                            title: tracked ? "Untrack quest"
+                                : (questTracked.length >= questTrackMax
+                                    ? "Track limit reached (" + questTrackMax + ")" : "Track quest"),
+                            text: tracked ? "★" : "☆"
+                        }) : null
+                    ])
+                ]);
+                li.appendChild(head);
+                if (open) {
+                    var cat = catalogOf(row.id);
+                    var detail = [];
+                    if (cat && cat.desc) detail.push(el("p", { class: "qst-desc", text: cat.desc }));
+                    var stepRows = questStepRows(row);
+                    if (stepRows.length) detail.push(el("ul", { class: "qst-steps" }, stepRows));
+                    if (cat && (cat.rewards || []).length) {
+                        detail.push(el("div", { class: "qst-rewards" },
+                            [el("span", { class: "qst-h", text: "Rewards: " })].concat(
+                                cat.rewards.map(function (r, i) {
+                                    return el("span", { class: "qst-reward", text: (i ? ", " : "") + r.name });
+                                })
+                            )));
+                    }
+                    if (cat && cat.min_level) {
+                        detail.push(el("div", { class: "qst-meta", text: "Level " + cat.min_level + "+"
+                            + (cat.repeatable ? " · repeatable" : "") }));
+                    }
+                    detail.push(el("div", { class: "qst-meta qst-cmd", text: "quest " + row.id + " info" }));
+                    li.appendChild(el("div", { class: "qst-detail" }, detail));
+                }
+                ul.appendChild(li);
+            });
+            scroller.appendChild(ul);
+        }
+        kids.push(scroller);
+        fill(dom.quests, kids);
+        scroller.scrollTop = savedTop;
+        if (hadFocus) {
+            var again = document.getElementById("qst-search");
+            if (again) { again.focus(); if (caret != null) again.setSelectionRange(caret, caret); }
+        }
+    }
+
+    // The tracked-objectives tracker: a glanceable, collapsible surface over
+    // the terminal's top-right that live-updates as Char.Quests re-fires —
+    // the sanctioned exception to "nothing persistent over the terminal"
+    // (docs/design/decisions.md, tracked-objectives amendment).
+    var questTrackerCollapsed = null;   // resolved lazily: phones start collapsed
+    function trackerCollapsedNow() {
+        if (questTrackerCollapsed == null) {
+            try {
+                var v = localStorage.getItem("ishar.questTrackerCollapsed");
+                questTrackerCollapsed = v != null ? v === "1" : mqMobile.matches;
+            } catch (e) { questTrackerCollapsed = mqMobile.matches; }
+        }
+        return questTrackerCollapsed;
+    }
+    function setTrackerCollapsed(on) {
+        questTrackerCollapsed = !!on;
+        try { localStorage.setItem("ishar.questTrackerCollapsed", on ? "1" : "0"); } catch (e) {}
+        renderQuestTracker();
+    }
+    function renderQuestTracker() {
+        var box = dom.questTracker;
+        if (!box) return;
+        var rows = (S.quests || []).filter(function (q) {
+            return questTrackedOn(q.id) && questActive(q);
+        });
+        rows.sort(function (a, b) { return questTracked.indexOf(a.id) - questTracked.indexOf(b.id); });
+        if (!hudOn || !rows.length) { box.hidden = true; return; }
+        box.hidden = false;
+        var collapsed = trackerCollapsedNow();
+        box.classList.toggle("collapsed", collapsed);
+        var ready = rows.filter(function (q) { return q.status === "Ready for Turn-In"; }).length;
+        var kids = [el("button", {
+            type: "button", class: "qtr-head", "data-qtracker": "1",
+            "aria-expanded": collapsed ? "false" : "true",
+            title: collapsed ? "Expand objectives" : "Collapse objectives"
+        }, [
+            el("span", { class: "qtr-title", text: "Objectives" }),
+            el("span", { class: "qtr-count" + (ready ? " ready" : ""), text: ready ? rows.length + " · " + ready + " ready" : String(rows.length) }),
+            el("span", { class: "qtr-caret", text: collapsed ? "▸" : "▾" })
+        ])];
+        if (!collapsed) {
+            rows.forEach(function (q) {
+                var body = [el("div", { class: "qtr-name " + questStatusClass(q), text: q.name })];
+                if (q.status === "Ready for Turn-In") {
+                    body.push(el("div", { class: "qtr-step complete", text: "Ready for turn-in" }));
+                } else {
+                    (q.steps || []).forEach(function (s) {
+                        var complete = s.done >= s.need;
+                        body.push(el("div", { class: "qtr-step" + (complete ? " complete" : "") }, [
+                            el("span", { class: "qtr-step-label", text: s.label }),
+                            el("span", { class: "qtr-step-count", text: s.done + "/" + s.need })
+                        ]));
+                    });
+                }
+                kids.push(el("div", { class: "qtr-quest" }, body));
+            });
+        }
+        fill(box, kids);
+    }
+
+    // ------------------------------------------------------------------
     // Context / action menu (works with mouse + touch)
     // ------------------------------------------------------------------
     // Single guarded exit for every game command a widget builds — strips
@@ -3827,6 +4176,34 @@
         var star = e.target.closest("[data-bar]");
         if (star && dom.app.contains(star)) { toggleSlot(star.getAttribute("data-bar")); return; }
 
+        // 2d2) Quest Log: filter chips, track stars, row expand; plus the
+        // objectives tracker's collapse toggle (it lives outside #hud-overlay
+        // but inside #connect-app, so the same delegation reaches it).
+        var qchip = e.target.closest("[data-qtab]");
+        if (qchip && dom.app.contains(qchip)) {
+            questFilter.tab = qchip.getAttribute("data-qtab");
+            try { localStorage.setItem("ishar.questFilter", questFilter.tab); } catch (x) {}
+            renderQuests();
+            return;
+        }
+        var qstar = e.target.closest("[data-qtrack]");
+        if (qstar && dom.app.contains(qstar)) {
+            toggleQuestTrack(Number(qstar.getAttribute("data-qtrack")));
+            return;
+        }
+        var qrow = e.target.closest("[data-qrow]");
+        if (qrow && dom.app.contains(qrow)) {
+            var qid = Number(qrow.getAttribute("data-qrow"));
+            if (questExpanded[qid]) delete questExpanded[qid]; else questExpanded[qid] = true;
+            renderQuests();
+            return;
+        }
+        var qtr = e.target.closest("[data-qtracker]");
+        if (qtr && dom.app.contains(qtr)) {
+            setTrackerCollapsed(!trackerCollapsedNow());
+            return;
+        }
+
         // 2e) Inline pin chip on a consumable row (Bags / worn-container contents).
         var pinChip = e.target.closest("[data-pin]");
         if (pinChip && dom.app.contains(pinChip)) {
@@ -4029,6 +4406,7 @@
         }
         if (persist !== false) { try { localStorage.setItem("ishar.hud", on ? "1" : "0"); } catch (e) {} }
         updateRoseOverlay();
+        renderQuestTracker();   // the objectives tracker hides with the HUD
         api.onLayoutChange();
     }
     function setConnected(on) {
@@ -4066,10 +4444,13 @@
         S.roomItems = []; S.roomNodes = [];
         S.skills = []; S.cooldownExpiry = {}; S.cooldownTotal = {}; S.usable = {};
         S.professions = []; S.recipes = []; S.craft = null;
+        S.quests = []; S.questMarkers = null;
         S.tgtHostile = null; S.tgtFriendly = null;
         lastVitalsBody = null;
         lastProfessionsBody = null;
+        lastQuestsBody = null;
         if (mapMod) mapMod.onReset();
+        renderQuestTracker();
         renderAll();
     }
 
@@ -4083,6 +4464,11 @@
         if (opts.spriteUrl) spriteUrl = String(opts.spriteUrl);
         if (opts.biUrl) biUrl = String(opts.biUrl);
         if (opts.skillIcons && typeof opts.skillIcons === "object") curatedIcons = opts.skillIcons;
+        if (opts.quests && typeof opts.quests === "object") {
+            questCfg.urls = opts.quests.urls || null;
+            questCfg.csrf = String(opts.quests.csrf || "");
+            questCfg.authed = !!opts.quests.authed;
+        }
 
         dom.app = document.getElementById("connect-app");
         dom.vitals = document.getElementById("vitals-bar");
@@ -4104,6 +4490,8 @@
         dom.xpLabel = dom.xpstrip && dom.xpstrip.querySelector(".xp-label");
         dom.micro = document.getElementById("hud-micro");
         dom.professions = document.getElementById("panel-professions");
+        dom.quests = document.getElementById("panel-quests");
+        dom.questTracker = document.getElementById("quest-tracker");
         dom.overlay = document.getElementById("hud-overlay");
         dom.overlayTitle = document.getElementById("hud-overlay-title");
         dom.dock = document.getElementById("hud-dock");
@@ -4125,6 +4513,7 @@
         wireHotbarDrag();
         wireHotkeys();
         wireTooltips();
+        loadQuestTracked();
 
         var toggle = document.getElementById("ui-toggle");
         if (toggle) toggle.addEventListener("click", function () {

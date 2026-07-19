@@ -1527,6 +1527,77 @@ body.connect-page #content { padding: .5rem !important; }
     #rose-overlay .compass.overlay { grid-template-columns: repeat(3, 44px); }
 }
 
+/* ----- Quest Log (OVERLAYS app "quests", Ctrl+Q) -----
+   Reuses the .ab-search/.ab-chips/.ab-scroll browser chrome; rows carry a
+   status-colored left edge and expand in place to catalog detail. */
+#hud-overlay[data-app="quests"] { width: min(560px, calc(100vw - 32px)); }
+.qst-list { list-style: none; margin: 0; padding: 0; }
+.qst-row { border-left: 3px solid transparent; border-radius: 3px; margin-bottom: 2px; }
+.qst-row.qst-progress { border-left-color: var(--ac-info); }
+.qst-row.qst-ready { border-left-color: var(--ac-ok); }
+.qst-row.qst-failed { border-left-color: var(--ac-danger); }
+.qst-row.qst-done { border-left-color: var(--ac-border-2); }
+.qst-head {
+    display: flex; align-items: center; gap: 6px;
+    padding: 5px 6px; cursor: pointer; font-size: .82rem;
+}
+.qst-head:hover { background: var(--ac-elev); }
+.qst-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.qst-row.qst-done .qst-name { color: var(--ac-dim); font-weight: 400; }
+.qst-right { flex: none; display: flex; align-items: center; gap: 6px; }
+.qst-status { font-size: .64rem; color: var(--ac-dim); white-space: nowrap; }
+.qst-row.qst-ready .qst-status { color: var(--ac-ok); font-weight: 700; }
+.qst-row.qst-failed .qst-status { color: var(--ac-danger); }
+.qst-detail { padding: 0 8px 7px 9px; font-size: .76rem; }
+.qst-desc { margin: 0 0 5px; color: var(--ac-dim); white-space: pre-line; }
+.qst-steps { list-style: none; margin: 0 0 5px; padding: 0; }
+.qst-step { display: flex; gap: 8px; align-items: baseline; padding: 1px 0; }
+.qst-step.complete .qst-step-label { color: var(--ac-ok); text-decoration: line-through; }
+.qst-step-label { flex: 1; }
+.qst-step-count { flex: none; font-variant-numeric: tabular-nums; color: var(--ac-dim); }
+.qst-step.complete .qst-step-count { color: var(--ac-ok); }
+.qst-rewards { margin-bottom: 3px; }
+.qst-h { color: var(--ac-dim); font-weight: 700; font-size: .68rem; text-transform: uppercase; letter-spacing: .04em; }
+.qst-meta { font-size: .68rem; color: var(--ac-dim); }
+.qst-cmd { font-family: var(--bs-font-monospace, monospace); }
+
+/* ----- Tracked-objectives tracker: the one sanctioned persistent surface
+   over the terminal (docs/design/decisions.md, tracked-objectives
+   amendment). Glanceable, collapsible, never focus-stealing. ----- */
+#quest-tracker {
+    position: absolute; top: 8px; right: 8px; z-index: 5;
+    width: min(260px, 42vw);
+    background: rgba(20, 20, 26, .82); border: 1px solid var(--ac-border);
+    border-radius: var(--ac-radius-sm); padding: 0 0 4px;
+    font-size: .74rem; pointer-events: auto;
+}
+#quest-tracker.collapsed { width: auto; padding: 0; }
+.qtr-head {
+    display: flex; align-items: center; gap: 6px; width: 100%;
+    background: none; border: 0; color: var(--ac-dim); cursor: pointer;
+    padding: 4px 8px; font-size: .68rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .05em; text-align: left;
+}
+.qtr-head:hover { color: var(--ac-text); }
+.qtr-title { flex: 1; }
+.qtr-count { font-variant-numeric: tabular-nums; }
+.qtr-count.ready { color: var(--ac-ok); }
+.qtr-caret { flex: none; }
+.qtr-quest { padding: 2px 8px 4px; }
+.qtr-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.qtr-name.qst-ready { color: var(--ac-ok); }
+.qtr-step { display: flex; gap: 6px; align-items: baseline; color: var(--ac-dim); }
+.qtr-step.complete { color: var(--ac-ok); }
+.qtr-step-label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.qtr-step-count { flex: none; font-variant-numeric: tabular-nums; }
+@media (max-width: 767.98px) {
+    /* Phones: a slim pill by default (renderQuestTracker starts collapsed);
+       expanded it still yields most of the terminal. */
+    #quest-tracker { width: min(220px, 60vw); font-size: .7rem; }
+    #quest-tracker .qtr-head { min-height: 34px; }
+}
+.hud-off #quest-tracker { display: none; }
+
 /* ----- Reduced motion ----- */
 @keyframes hud-pulse {
     0%, 100% { opacity: 1; }
