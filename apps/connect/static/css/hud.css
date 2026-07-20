@@ -738,8 +738,11 @@ button.v-tgt:hover { border-color: rgba(214, 75, 75, .8); }
 #hud-right { display: flex; flex-direction: column; gap: 6px; min-height: 0; }
 /* Chat fills the column below Tracked Spells: a flex stack of header · filter
    tabs · scrolling log · input. The inner .chat-log is the scroll container
-   (appendChat pins to its scrollTop); collapsed, the pane shrinks to its head. */
-#hud-right .panel-chat { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+   (appendChat pins to its scrollTop); collapsed, the pane shrinks to its head.
+   flex-basis 0 (not auto) is load-bearing: it makes Chat size to the *leftover*
+   space, not to its message history — otherwise a long log inflates Chat's basis
+   and the flex-shrink split lets it crowd Tracked Spells below its 42% cap. */
+#hud-right .panel-chat { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; }
 #hud-right .panel-chat.collapsed { flex: 0 0 auto; }
 /* Tracked Spells is pinned above Chat (order, since placePanels can't preserve
    DOM order across a phone↔desktop swap) and height-capped so a long maintained
