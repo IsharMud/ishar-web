@@ -43,7 +43,7 @@
     var S = {
         vitals: null, status: null, time: null, room: null,
         equipment: [], inventory: null, train: null,
-        affects: null, group: null, who: null, occupants: [],
+        affects: null, group: null, groupRaw: null, who: null, occupants: [],
         // Room.Contents — ground objects (corpses, drops, containers) and
         // active harvest nodes; rendered under the occupants in the Room panel.
         roomItems: [], roomNodes: [],
@@ -750,7 +750,13 @@
                 // path uses to avoid rebuilding a ~400-row list off-screen.
                 if (abilitiesVisible()) renderAbilities();
                 break;
-            case "Char.Status": S.status = data; renderVitals(); renderTrain(); renderXp(); renderGroup(); updateMicro(); break;
+            case "Char.Status":
+                S.status = data; renderVitals(); renderTrain(); renderXp();
+                // Self-name may have just landed; re-run the group leak guard if
+                // an earlier Group.Update couldn't verify us (issue #162).
+                if (groupPendingSelf) applyGroup(); else renderGroup();
+                updateMicro();
+                break;
             case "Game.Time": S.time = data; renderVitals(); break;
             case "Room.Info":
                 S.room = data; renderRoom();
@@ -778,8 +784,7 @@
             case "Char.Train": S.train = data; renderTrain(); renderXp(); updateMicro(); break;
             case "Char.Affects": S.affects = data; stampAffectExpiry(data); renderSelfAffects(); renderTracked(); break;
             case "Group.Update":
-                S.group = data; renderGroup();
-                if (mapMod && mapMod.onGroup) mapMod.onGroup(data);
+                S.groupRaw = data; applyGroup();
                 break;
             case "Char.Death":
                 if (mapMod && mapMod.onDeath) mapMod.onDeath(data);
@@ -2003,6 +2008,36 @@
     }
 
     // ------------------------------------------------------------------
+    // Group data is trusted only when it's actually OURS. The game's
+    // Group.Update can list a player we merely `follow` (not group) as a
+    // "member", leaking their vitals and location (isharmud/ishar-mud#1851). A
+    // real group always lists us among its members; a follow-leak never does —
+    // so if our own character isn't in `members`, drop the roster rather than
+    // surface a stranger. Sanitizing at ingest closes every consumer at once:
+    // the panel, the map overlay, and spell-target coloring. Remove once the
+    // server gates Group.Update on same_group.
+    var groupPendingSelf = false;
+    function sanitizeGroup(data) {
+        var members = (data && data.members) || [];
+        if (!members.length) return data;
+        var self = S.status ? firstWord(String(S.status.name || "")).toLowerCase() : "";
+        var mine = !!self && members.some(function (m) {
+            return firstWord(stripColor(String(m.name || ""))).toLowerCase() === self;
+        });
+        if (mine) return data;
+        return { leader: "", size: 0, members: [], allies: [] };
+    }
+    function applyGroup() {
+        var raw = S.groupRaw;
+        var haveSelf = !!(S.status && String(S.status.name || ""));
+        // No self-name yet (reconnect burst before Char.Status): suppress now,
+        // revisit when it lands rather than risk showing an unverified roster.
+        groupPendingSelf = !haveSelf && !!(raw && raw.members && raw.members.length);
+        S.group = sanitizeGroup(raw);
+        renderGroup();
+        if (mapMod && mapMod.onGroup) mapMod.onGroup(S.group);
+    }
+
     // Group (Group.Update) — the party pane. Members and allies with live
     // vitals, tank/threat state and fight edges; rows map onto Room.Occupants
     // entries (players by name, allies by loyal-follower short_desc) so one
@@ -5003,7 +5038,8 @@
     function reset() {
         S.vitals = null; S.status = null; S.time = null; S.room = null;
         S.equipment = []; S.inventory = null; S.train = null;
-        S.affects = null; S.group = null; S.who = null; S.occupants = [];
+        S.affects = null; S.group = null; S.groupRaw = null; groupPendingSelf = false;
+        S.who = null; S.occupants = [];
         S.roomItems = []; S.roomNodes = [];
         S.skills = []; S.cooldownExpiry = {}; S.cooldownTotal = {}; S.usable = {};
         S.professions = []; S.recipes = []; S.craft = null;
