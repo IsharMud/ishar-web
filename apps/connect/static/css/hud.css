@@ -1296,6 +1296,12 @@ button.v-tgt:hover { border-color: rgba(214, 75, 75, .8); }
 .recipe-comp.missing { color: var(--ac-danger); }
 .recipe-comp.loc { color: var(--ac-dim); }
 
+/* What an enchant recipe does (the info Effects block). Accent-tinted border
+   reads it as the outcome, distinct from the plain-bordered component cost. */
+.recipe-effects { padding: 2px 0 6px 10px; border-left: 2px solid var(--ac-accent); margin-left: 2px; margin-bottom: 4px; }
+.recipe-effects-label { font-size: .68rem; text-transform: uppercase; letter-spacing: .04em; color: var(--ac-dim); }
+.recipe-effect { font-size: .74rem; padding: 1px 0; color: var(--ac-text); }
+
 /* Batch-craft queue (targetless recipes): stepper + editable count + Max +
    Craft ×N. Mirrors the game's `<verb> <recipe> <count>` chain (cap 99). */
 .recipe-queue {
