@@ -3431,6 +3431,22 @@
         ]);
     }
 
+    // What an enchant recipe *does* — the stat outcome the in-game `info`
+    // Effects block shows (Char.Recipes `effects`, pre-formatted server-side).
+    // Enchant recipes only; other professions convey outcome via the crafted
+    // item. Returns null when there's nothing to show.
+    function recipeEffectsBlock(r) {
+        var lines = ((r && r.effects) || []).map(stripColor).filter(Boolean);
+        if (!lines.length) return null;
+        var block = el("div", { class: "recipe-effects" }, [
+            el("div", { class: "recipe-effects-label", text: "Effects" })
+        ]);
+        lines.forEach(function (text) {
+            block.appendChild(el("div", { class: "recipe-effect", text: text }));
+        });
+        return block;
+    }
+
     function recipeRow(p, r, counts, treasure) {
         var rank = Number(p.rank) || 0;
         var tier = profTier((Number(r.min_rank) || 1) - rank);
@@ -3492,6 +3508,8 @@
         ]);
         var wrap = el("div", { class: "recipe-item" }, [row]);
         if (isOpen) {
+            var fx = recipeEffectsBlock(r);
+            if (fx) wrap.appendChild(fx);
             wrap.appendChild(recipeCompsBlock(r, counts, treasure));
             if (!targeted) wrap.appendChild(recipeQueue(p, r, count));
         }
@@ -5395,14 +5413,19 @@
                 { id: 105, profession_id: 1, name: "elixir of vigor", category: "Elixirs", min_rank: 45, duration: 40,
                   components: [{ kind: "item", vnum: 9004, name: "a shard of frost quartz", count: 3 }, { kind: "treasure", amount: 300 }] },
                 { id: 201, profession_id: 2, name: "minor soothing", category: "Head", min_rank: 8, duration: 20, target_gear_type: 6,
+                  effects: ["It soothes your mind and steadies your focus. (+3 Focus)"],
                   components: [{ kind: "item", vnum: 9002, name: "a vial of powdered silver", count: 1 }] },
                 { id: 204, profession_id: 2, name: "warding sigil", category: "Body", min_rank: 10, duration: 22, target_gear_type: 2,
+                  effects: ["It hums with a protective ward. (+5 Armor)", "It steels you against harm. (fire Resistance)"],
                   components: [{ kind: "item", vnum: 9001, name: "a pinch of sulfur", count: 1 }] },
                 { id: 205, profession_id: 2, name: "fleetfoot glyph", category: "Feet", min_rank: 14, duration: 22, target_gear_type: 5,
+                  effects: ["Time seems to quicken around you. (+10% Haste)"],
                   components: [{ kind: "item", vnum: 9004, name: "a shard of frost quartz", count: 1 }] },
                 { id: 202, profession_id: 2, name: "keened edge", category: "Weapon", min_rank: 16, duration: 30, target_gear_type: 0,
+                  effects: ["Its edge bites deeper. (+2 Damage)", "Its swing is straight and true. (+1 Attack)"],
                   components: [{ kind: "item", vnum: 9004, name: "a shard of frost quartz", count: 2 }, { kind: "treasure", amount: 800 }] },
                 { id: 206, profession_id: 2, name: "aegis boon", category: "Shield", min_rank: 22, duration: 28, target_gear_type: 1,
+                  effects: ["It turns aside blows meant for you. (+4 Armor)"],
                   components: [{ kind: "item", vnum: 9002, name: "a vial of powdered silver", count: 1 }] },
                 { id: 203, profession_id: 2, name: "greater arcane dust", category: "Transmutation", min_rank: 20, duration: 10,
                   components: [{ kind: "item", vnum: 9002, name: "a vial of powdered silver", count: 2 }] }
