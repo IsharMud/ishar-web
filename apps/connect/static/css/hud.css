@@ -1302,6 +1302,14 @@ button.v-tgt:hover { border-color: rgba(214, 75, 75, .8); }
 .recipe-effects-label { font-size: .68rem; text-transform: uppercase; letter-spacing: .04em; color: var(--ac-dim); }
 .recipe-effect { font-size: .74rem; padding: 1px 0; color: var(--ac-text); }
 
+/* What a craft recipe produces (the info Result block). Informational-blue
+   border sets "what you get" apart from the amber "what it does" effects. */
+.recipe-result { padding: 2px 0 6px 10px; border-left: 2px solid var(--ac-info); margin-left: 2px; margin-bottom: 4px; }
+.recipe-result-label { font-size: .68rem; text-transform: uppercase; letter-spacing: .04em; color: var(--ac-dim); }
+.recipe-result-name { font-size: .78rem; color: var(--ac-text); }
+.recipe-result-meta { font-size: .7rem; color: var(--ac-dim); font-variant-numeric: tabular-nums; }
+.recipe-result-prop { font-size: .74rem; padding: 1px 0; color: var(--ac-text); }
+
 /* Batch-craft queue (targetless recipes): stepper + editable count + Max +
    Craft ×N. Mirrors the game's `<verb> <recipe> <count>` chain (cap 99). */
 .recipe-queue {

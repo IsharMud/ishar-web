@@ -3447,6 +3447,30 @@
         return block;
     }
 
+    // What a targetless craft (alchemy/artificing) recipe produces — the item,
+    // its type/quantity/level, and a short "what it does" list (Char.Recipes
+    // `result`, game-formatted). Enchants act on existing gear and carry none.
+    function recipeResultBlock(r) {
+        var res = r && r.result;
+        if (!res) return null;
+        var meta = [];
+        if (res.type) meta.push(stripColor(res.type));
+        var qty = Number(res.qty) || 1;
+        var qtyMax = Number(res.qty_max) || 0;
+        meta.push("×" + qty + (qtyMax > qty ? "–" + qtyMax : ""));
+        if (res.level) meta.push("lvl " + res.level);
+        if (res.bind_on_craft) meta.push("binds");
+        var block = el("div", { class: "recipe-result" }, [
+            el("div", { class: "recipe-result-label", text: "Makes" }),
+            el("div", { class: "recipe-result-name", text: stripColor(res.name || "an item") }),
+            el("div", { class: "recipe-result-meta", text: meta.join(" · ") })
+        ]);
+        ((res.props) || []).map(stripColor).filter(Boolean).forEach(function (text) {
+            block.appendChild(el("div", { class: "recipe-result-prop", text: text }));
+        });
+        return block;
+    }
+
     function recipeRow(p, r, counts, treasure) {
         var rank = Number(p.rank) || 0;
         var tier = profTier((Number(r.min_rank) || 1) - rank);
@@ -3508,6 +3532,8 @@
         ]);
         var wrap = el("div", { class: "recipe-item" }, [row]);
         if (isOpen) {
+            var res = recipeResultBlock(r);
+            if (res) wrap.appendChild(res);
             var fx = recipeEffectsBlock(r);
             if (fx) wrap.appendChild(fx);
             wrap.appendChild(recipeCompsBlock(r, counts, treasure));
@@ -5401,16 +5427,22 @@
             ] },
             "Char.Recipes": { recipes: [
                 { id: 101, profession_id: 1, name: "minor healing draught", category: "Draughts", min_rank: 30, duration: 20,
+                  result: { name: "a minor healing draught", type: "Potion", qty: 2, props: ["Restores 4d8+5 health"] },
                   components: [{ kind: "item", vnum: 9001, name: "a pinch of sulfur", count: 2 }, { kind: "item", vnum: 9003, name: "a sprig of nightshade", count: 1 }] },
                 { id: 102, profession_id: 1, name: "tincture of stone", category: "Draughts", min_rank: 39, duration: 30,
+                  result: { name: "a tincture of stone", type: "Potion", qty: 1, level: 20, props: ["Quaff to cast stone skin (level 20)"] },
                   components: [{ kind: "item", vnum: 9099, name: "a lump of granite dust", count: 1 }, { kind: "treasure", amount: 500 }] },
                 { id: 106, profession_id: 1, name: "weak salve", category: "Draughts", min_rank: 10, duration: 15,
+                  result: { name: "a weak salve", type: "Potion", qty: 1, props: ["Cures poison"] },
                   components: [{ kind: "item", vnum: 9003, name: "a sprig of nightshade", count: 1 }] },
                 { id: 103, profession_id: 1, name: "alchemist's fire", category: "Reagents", min_rank: 22, duration: 25,
+                  result: { name: "a flask of alchemist's fire", type: "Weapon oil", qty: 1 },
                   components: [{ kind: "item", vnum: 9001, name: "a pinch of sulfur", count: 4 }, { kind: "location", label: "a forge" }] },
                 { id: 104, profession_id: 1, name: "spark reagent", category: "Reagents", min_rank: 30, duration: 18,
+                  result: { name: "a spark reagent", type: "Component", qty: 1, qty_max: 3 },
                   components: [{ kind: "item", vnum: 9002, name: "a vial of powdered silver", count: 2 }] },
                 { id: 105, profession_id: 1, name: "elixir of vigor", category: "Elixirs", min_rank: 45, duration: 40,
+                  result: { name: "an elixir of vigor", type: "Potion", qty: 1, bind_on_craft: true, props: ["Restores 25 stamina", "It causes your muscles to swell with power. (+2 Strength)"] },
                   components: [{ kind: "item", vnum: 9004, name: "a shard of frost quartz", count: 3 }, { kind: "treasure", amount: 300 }] },
                 { id: 201, profession_id: 2, name: "minor soothing", category: "Head", min_rank: 8, duration: 20, target_gear_type: 6,
                   effects: ["It soothes your mind and steadies your focus. (+3 Focus)"],
