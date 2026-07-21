@@ -190,8 +190,9 @@
            docs/design/decisions.md "The HUD extension model". Buttons are
            revealed by hud.js when the matching feed has data. -->
         <div id="hud-actionrow">
-            <!-- Attack cluster (attack/assist tile + ⚔ target chip); hud.js
-               builds and maintains it. Alt+A fires, Alt+T / chip-tap cycles. -->
+            <!-- Attack cluster (attack/assist + order-followers tiles + ⚔ target
+               chip); hud.js builds and maintains it. Alt+A attacks, Alt+O orders
+               followers, Alt+T / chip-tap cycles. -->
             <div id="hud-attack"></div>
             <div id="hud-hotbar" class="empty"></div>
             <nav id="hud-micro" aria-label="Overlay windows">
@@ -936,7 +937,9 @@
                 sysln("      the room's attackables; Shift reverses; the chip by the action bar");
                 sysln("      shows it (tap to cycle, ✕ to clear). Alt+A / the crossed-swords");
                 sysln("      tile attacks it — with no target it sends `assist` to join your");
-                sysln("      group's fight.");
+                sysln("      group's fight. Alt+O / the wolf tile (shown when a loyal follower");
+                sysln("      is here) orders your followers to attack the ⚔ target. Offensive");
+                sysln("      skills and spells (backstab, fireball) auto-aim at it too.");
                 sysln("Action bar: Alt+1..0 fire the bar's slots (Ctrl+1..0 too when the page");
                 sysln("      is installed/fullscreen — tabbed browsers reserve Ctrl+digit). Alt+`");
                 sysln("      switches bar pages. Pin skills from the Abilities panel and");

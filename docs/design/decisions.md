@@ -9,6 +9,53 @@ Format: `## YYYY-MM-DD — Title` · **Decision** · **Why** · (optional) **Not
 
 ---
 
+## 2026-07-21 — HUD combat layer III: order-followers hotkey + skills that inherit the target
+
+**Decision.** Two combat gaps in the `/connect` HUD close, and the "Alt = act"
+family gains a member (isharmud/ishar-web web-connector-hotkey-issues):
+
+- **Order followers → attack (`Alt+O`).** A summoner's reflex — pets open the
+  fight — had no fast path; the only door was a per-occupant context menu.
+  `Alt+O` (and a new **wolf-howl tile** in the `#hud-attack` cluster, between the
+  attack tile and the ⚔ chip) sends `order followers kill <keyword>` at the
+  current ⚔ target. The tile renders **only when a loyal follower is present**
+  (`anyLoyalFollowerHere()`) and arms (accent, not danger — it reads apart from
+  the attack tile beside it) once a ⚔ target gives the order a subject; with no
+  target it's a no-op. It sends the **bare keyword, never the handle**: each
+  follower resolves ordinals from its own spot in the room, so a viewer-relative
+  `2.thug` could aim the wrong way for them (same rule as the occupant menu's
+  "Order attack"). The tile is the phone path (Alt+O is desktop-only, and
+  summoners drive from phones).
+- **Skills inherit the ⚔/✚ target.** `abilityCommand` routed *spells* by
+  `target_type` (offensive → hostile handle, defensive → beneficial) but sent
+  skills bare, so a hotkeyed **backstab** fired at nothing. Skills now append the
+  same target the same way — offensive skills take the ⚔ target, defensive the ✚
+  — closing the gap the 2026-07-15 "route by target_type" decision named but only
+  wired for spells. The tile/browser tooltip (`castHint`) now shows the target
+  arrow for any offensive/defensive ability, not just spells.
+- **Every skill goes through `action`.** Previously only multi-word skills used
+  the `action` parser (a bare `shield slam` misparses as command+arg); single-
+  word skills fired as a bare verb, which a same-named command could shadow.
+  All skills now invoke as `action <name> [target]` — one uniform, unambiguous
+  form, and the single place the target is appended.
+
+**Why.** The data (`Room.Occupants`, `is_loyal_follower`, per-ability
+`target_type`, `S.tgtHostile`/`tgtFriendly`) and the input family (`Alt = act`)
+already existed; these are the missing wires, not new models. Consistency is the
+fix: skills and spells are both "abilities with a target_type", so they route
+identically, and ordering pets is an *act* on the ⚔ target, so it joins Alt+T/A.
+
+**Notes.** Hotkey families unchanged: `Ctrl+letter` opens overlays; `Alt+letter/
+digit` acts (bar slots, `Alt+``` paging, `T` cycle, `A` attack, now `O` order).
+`Alt+O` matches on `e.code === "KeyO"` like the other combat letters (macOS
+Alt+letter composes glyphs). **Verification:** `node --check` on `hud.js` and the
+inline `connect.html` script; a logic harness asserted the exact commands
+(`action backstab 1.thug`, `action backstab` with no target, `order followers
+kill thug`, spells unchanged, passives → null); a self-contained `preview.html`
+rendered the cluster's three states (order tile hidden / dim / armed) under
+headless Chromium. Not run end-to-end (needs the game's websocket + shared DB);
+the game's `action <skill> <target>` acceptance is the owner's on-prod check.
+
 ## 2026-07-21 — HUD action bar is per-character server state, not per-device
 
 **Problem.** The action bar (favorite skills + pinned consumables in numbered
