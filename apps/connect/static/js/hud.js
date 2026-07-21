@@ -827,12 +827,13 @@
                 // Let the page decide on HP-based notifications (damage taken /
                 // low-health) — it owns the tab-visibility + settings state.
                 api.onVitals(data);
-                tickHotbar();          // mana gate re-evaluates each pulse
-                // The Abilities browser bakes the mana/position block state into
-                // each row, so it must rebuild when mana changes (combat regen)
-                // or a spell stays greyed after you can afford it (issue #1801).
-                // Only when it's actually on screen — same guard the cooldown
-                // path uses to avoid rebuilding a ~400-row list off-screen.
+                tickHotbar();          // mana/edge gates re-evaluate each pulse
+                // The Abilities browser bakes the resource/position block state
+                // into each row, so it must rebuild when mana or edge changes
+                // (combat regen) or a skill stays greyed after you can afford it
+                // (mana #1801, edge isharmud/ishar-mud#1857). Only when it's
+                // actually on screen — same guard the cooldown path uses to
+                // avoid rebuilding a ~400-row list off-screen.
                 if (abilitiesVisible()) renderAbilities();
                 break;
             case "Char.Status":
@@ -2551,6 +2552,14 @@
                 if (s.mana_pct > manaPct) return { cd: 0, reason: "low mana" };
             }
         }
+        // Edge is a combat-built pool near zero out of combat; gate on the live
+        // value so a skill greyed while it's empty frees the moment enough edge
+        // is earned. The game omits edge affordability from `usable` for exactly
+        // this reason (isharmud/ishar-mud#1857), so this is the sole authority.
+        if (v && v.edge != null && s.edge != null && Number(s.edge) > 0
+            && Number(s.edge) > Number(v.edge)) {
+            return { cd: 0, reason: "low edge" };
+        }
         if (v && v.position && s.min_position && posRank(v.position) < posRank(s.min_position)) {
             return { cd: 0, reason: s.min_position };
         }
@@ -2733,10 +2742,12 @@
             if (!s) return;
             var blk = abilityBlock(s);
             var cd = blk ? blk.cd : 0;
-            // A non-cooldown block (mana / min-position) shows its reason instead
-            // of a timer, so a blocked slot isn't a silent dead tap.
+            // A non-cooldown block (mana / edge / min-position) shows its reason
+            // instead of a timer, so a blocked slot isn't a silent dead tap.
             var reason = (blk && cd === 0)
-                ? (blk.reason === "low mana" ? "mana" : blk.reason === "unavailable" ? "" : blk.reason)
+                ? (blk.reason === "low mana" ? "mana"
+                    : blk.reason === "low edge" ? "edge"
+                    : blk.reason === "unavailable" ? "" : blk.reason)
                 : "";
             n.btn.classList.toggle("off", !!blk);
             n.btn.classList.toggle("cooling", cd > 0);
