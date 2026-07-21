@@ -1121,6 +1121,12 @@ button.v-tgt:hover { border-color: rgba(214, 75, 75, .8); }
 .skill--attack .skill-icon { color: var(--ac-text); }
 .skill--attack.armed { border-bottom-color: var(--ac-danger); }
 .skill--attack.armed .skill-icon { color: var(--hud-hostile); }
+/* Order-followers tile: accent (not danger) to read apart from the attack
+   tile it sits beside; armed once a ⚔ target gives the order a subject. */
+.skill--order[hidden] { display: none; }
+.skill--order .skill-icon { color: var(--ac-dim); }
+.skill--order.armed { border-bottom-color: var(--ac-accent); }
+.skill--order.armed .skill-icon { color: var(--ac-accent); }
 .atk-chip { display: flex; align-items: stretch; min-width: 0; }
 .atk-tgt {
     min-width: 0; max-width: 9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;

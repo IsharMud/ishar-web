@@ -51,7 +51,7 @@
         professions: [], recipes: [], craft: null,
         chat: [], connected: false,
         // Default targets (from Room.Occupants) that make the hotbar
-        // target-aware: offensive spells → hostile, defensive → beneficial.
+        // target-aware: offensive abilities → hostile, defensive → beneficial.
         tgtHostile: null, tgtFriendly: null
     };
 
@@ -1105,8 +1105,8 @@
         // Active default targets, so target-aware casting is legible at a glance.
         if (S.tgtHostile || S.tgtFriendly) {
             var tk = [];
-            if (S.tgtHostile) tk.push(el("button", { type: "button", class: "v-tgt hostile", "data-act": "cycle-target", title: "Offensive spells + Attack target this — tap to cycle (Alt+T)", text: "⚔ " + S.tgtHostile.desc }));
-            if (S.tgtFriendly) tk.push(el("span", { class: "v-tgt friendly", title: "Beneficial spells target this", text: "✚ " + S.tgtFriendly.desc }));
+            if (S.tgtHostile) tk.push(el("button", { type: "button", class: "v-tgt hostile", "data-act": "cycle-target", title: "Offensive abilities + Attack target this — tap to cycle (Alt+T)", text: "⚔ " + S.tgtHostile.desc }));
+            if (S.tgtFriendly) tk.push(el("span", { class: "v-tgt friendly", title: "Beneficial abilities target this", text: "✚ " + S.tgtFriendly.desc }));
             groups.push(el("div", { class: "v-group v-targets" }, tk));
         }
         var world = el("div", { class: "v-group v-world" });
@@ -1384,6 +1384,20 @@
         if (dom.attackBtn) flashSlot(dom.attackBtn);
         return true;
     }
+    // Sic your loyal followers on the ⚔ target — the summoner reflex (pets open
+    // the fight). Needs a target and a follower that can hear the order; a
+    // no-op (returns false, so the hotkey combo isn't swallowed) otherwise.
+    // Bare keyword, never the handle: each follower resolves ordinals from its
+    // own spot in the room, so a viewer-relative "2.thug" could aim the wrong
+    // way for them (mirrors the occupant menu's "Order attack", line ~4560).
+    function orderFollowersAttack() {
+        if (!S.connected || !S.tgtHostile || !anyLoyalFollowerHere()) return false;
+        var o = occByHandle(S.tgtHostile.handle);
+        if (!o) return false;
+        sendCmd("order followers kill " + firstWord(o.keyword));
+        if (dom.orderBtn) flashSlot(dom.orderBtn);
+        return true;
+    }
 
     function occHostileClass(o) {
         if (o.is_dead) return "dead";
@@ -1452,8 +1466,8 @@
                 // Target chips (current defaults) so they're visible at a glance.
                 if (S.tgtHostile || S.tgtFriendly) {
                     var chips = [];
-                    if (S.tgtHostile) chips.push(el("span", { class: "tgt-chip hostile", title: "Offensive spells target this", text: "⚔ " + S.tgtHostile.desc }));
-                    if (S.tgtFriendly) chips.push(el("span", { class: "tgt-chip friendly", title: "Beneficial spells target this", text: "✚ " + S.tgtFriendly.desc }));
+                    if (S.tgtHostile) chips.push(el("span", { class: "tgt-chip hostile", title: "Offensive abilities target this", text: "⚔ " + S.tgtHostile.desc }));
+                    if (S.tgtFriendly) chips.push(el("span", { class: "tgt-chip friendly", title: "Beneficial abilities target this", text: "✚ " + S.tgtFriendly.desc }));
                     kids.push(el("div", { class: "tgt-chips" }, chips));
                 }
                 var list = el("ul", { class: "occ-list" });
@@ -2503,10 +2517,16 @@
             if (s.target_type === "defensive" && S.tgtFriendly) return base + " " + S.tgtFriendly.handle;
             return base;
         }
-        // Multi-word skills ("Shield Slam") must go through the "action" parser
-        // (the one spells use) or they're misread as command "shield" + arg
-        // "slam"; single-word skills work as a bare verb.
-        return /\s/.test(nm) ? "action " + nm : nm;
+        // Every skill invokes through the "action" parser (the one spells use),
+        // not a bare verb: uniform so a multi-word name isn't misread as
+        // command+arg ("Shield Slam" → "shield" + "slam") and a single-word
+        // skill can't be shadowed by a same-named command. Offensive/defensive
+        // skills inherit the ⚔/✚ target exactly like spells, so a hotkeyed
+        // backstab lands on the set foe instead of firing bare.
+        var cmd = "action " + nm;
+        if (s.target_type === "offensive" && S.tgtHostile) return cmd + " " + S.tgtHostile.handle;
+        if (s.target_type === "defensive" && S.tgtFriendly) return cmd + " " + S.tgtFriendly.handle;
+        return cmd;
     }
     function abilityUsable(s) { return abilityCommand(s) != null; }
     // Why a skill is unusable right now (or null). cd in seconds.
@@ -2805,8 +2825,18 @@
             iconSvg("crossed-swords", "gi skill-icon"),
             el("span", { class: "skill-key", text: "A" })
         ]);
+        // Order-followers tile: sits between the attack tile and the target
+        // chip so both act-on-the-⚔-target controls share the one readout.
+        // Hidden until a loyal follower is present (nothing to command).
+        dom.orderBtn = el("button", {
+            type: "button", class: "skill skill--order", "data-act": "order-followers", hidden: true
+        }, [
+            iconSvg("wolf-howl", "gi skill-icon"),
+            el("span", { class: "skill-key", text: "O" })
+        ]);
         dom.attackChip = el("span", { class: "atk-chip" });
         dom.attack.appendChild(dom.attackBtn);
+        dom.attack.appendChild(dom.orderBtn);
         dom.attack.appendChild(dom.attackChip);
         updateAttack();
     }
@@ -2817,6 +2847,15 @@
         dom.attackBtn.classList.toggle("armed", !!t);
         dom.attackBtn.setAttribute("aria-label",
             (t ? "Attack " + t.desc : "Assist — join your group's fight") + " (Alt+A)");
+        if (dom.orderBtn) {
+            // Only when there's a follower to command; armed once a ⚔ target
+            // gives the order a subject.
+            var canOrder = S.connected && anyLoyalFollowerHere();
+            dom.orderBtn.hidden = !canOrder;
+            dom.orderBtn.classList.toggle("armed", canOrder && !!t);
+            dom.orderBtn.setAttribute("aria-label",
+                (t ? "Order followers to attack " + t.desc : "Order followers to attack (set a ⚔ target)") + " (Alt+O)");
+        }
         var kids = [el("button", {
             type: "button", class: "atk-tgt" + (t ? " hostile" : ""),
             "data-act": "cycle-target",
@@ -2844,6 +2883,12 @@
             return { name: t ? t.desc : "No ⚔ target", key: "Alt+T",
                      sub: n ? "cycle " + n + " target" + (n === 1 ? "" : "s") + " · Tab on empty input"
                             : "nothing attackable here" };
+        }
+        if (act === "order-followers") {
+            var o = t ? occByHandle(t.handle) : null;
+            return t ? { name: "Order followers → " + t.desc, key: "Alt+O",
+                         sub: o ? "order followers kill " + firstWord(o.keyword) : "order followers kill" }
+                     : { name: "Order followers attack", key: "Alt+O", sub: "set a ⚔ target first" };
         }
         return { name: "Clear target" };
     }
@@ -2982,7 +3027,8 @@
     }
 
     // Global hotkeys: Alt/Ctrl + 1..0 fire the visible bar's slots; Alt+` pages;
-    // Alt+T cycles the ⚔ target (Shift reverses) and Alt+A attacks/assists.
+    // Alt+T cycles the ⚔ target (Shift reverses), Alt+A attacks/assists, and
+    // Alt+O orders loyal followers to attack the ⚔ target (summoner reflex).
     // Browsers reserve Ctrl+digit for tab-switching and web content usually can't
     // veto that, so Alt+digit is the reliable path (works in Chrome/Chromium/
     // Safari; Firefox reserves Alt+digit too). Ctrl is offered as a bonus that
@@ -3031,6 +3077,10 @@
             }
             if (altCombo && !e.shiftKey && e.code === "KeyA") {
                 if (fireAttack()) e.preventDefault();
+                return;
+            }
+            if (altCombo && !e.shiftKey && e.code === "KeyO") {
+                if (orderFollowersAttack()) e.preventDefault();
                 return;
             }
             if (e.key === "`" && e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
@@ -3152,8 +3202,8 @@
     function castHint(s) {
         var tt = s.type === "spell" ? "cast" : "use";
         var arrow = "";
-        if (s.type === "spell" && s.target_type === "offensive") arrow = S.tgtHostile ? " → " + S.tgtHostile.desc : " (set a ⚔ target)";
-        if (s.type === "spell" && s.target_type === "defensive") arrow = S.tgtFriendly ? " → " + S.tgtFriendly.desc : " (set a ✚ target)";
+        if (s.target_type === "offensive") arrow = S.tgtHostile ? " → " + S.tgtHostile.desc : " (set a ⚔ target)";
+        else if (s.target_type === "defensive") arrow = S.tgtFriendly ? " → " + S.tgtFriendly.desc : " (set a ✚ target)";
         return tt + " " + s.name + arrow;
     }
     function persistAbilityFilter() {
@@ -4874,6 +4924,7 @@
         if (act && dom.app.contains(act)) {
             var an = act.getAttribute("data-act");
             if (an === "attack") { fireAttack(); return; }
+            if (an === "order-followers") { orderFollowersAttack(); return; }
             if (an === "cycle-target") { cycleTarget(1); return; }
             if (an === "clear-target") { clearTarget(); return; }
         }
@@ -5409,7 +5460,8 @@
             { id: 91, name: "Metamagic: Clarity", type: "skill", percent: 100, usable: true, category: "misc", target_type: "none", min_position: "Standing" },
             { id: 92, name: "Shield Slam", type: "skill", percent: 72, usable: true, category: "damage", target_type: "none", min_position: "Fighting" },
             { id: 60, name: "translocate", type: "spell", percent: 84, usable: true, category: "misc", target_type: "defensive", mana_pct: 25, mana: 75, min_position: "Standing" },
-            { id: 61, name: "summon", type: "spell", percent: 79, usable: true, category: "misc", target_type: "defensive", mana_pct: 33, mana: 100, min_position: "Standing" }
+            { id: 61, name: "summon", type: "spell", percent: 79, usable: true, category: "misc", target_type: "defensive", mana_pct: 33, mana: 100, min_position: "Standing" },
+            { id: 62, name: "backstab", type: "skill", percent: 80, usable: true, category: "damage", target_type: "offensive", min_position: "Standing" }
         ];
         // Pad to demonstrate the immortal overflow the browser now bounds.
         for (var i = 11; i <= 90; i++) bigSkills.push({ id: i, name: "spell " + i, type: (i % 3 ? "spell" : "skill"), percent: 40 + (i % 60), usable: (i % 4 !== 0), category: ["damage", "heal", "misc"][i % 3], target_type: ["offensive", "defensive", "none"][i % 3], mana_pct: 20 + (i % 40), mana: (20 + (i % 40)) * 3, min_position: "Standing" });
