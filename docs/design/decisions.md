@@ -9,6 +9,48 @@ Format: `## YYYY-MM-DD — Title` · **Decision** · **Why** · (optional) **Not
 
 ---
 
+## 2026-07-21 — HUD action bar is per-character server state, not per-device
+
+**Problem.** The action bar (favorite skills + pinned consumables in numbered
+slots) lived only in `localStorage` (`ishar.slots`). That made it a property of
+the *browser*: every character on a device shared one bar, and it never followed
+a player between phone and desktop. Switching characters meant re-pinning.
+
+**Decision.** The bar is **per-character** state, stored server-side and keyed on
+the connected character — a mage and a warrior want different bars. A new
+site-owned table `web_hud_bar` (`managed = True`, same shared-DB pattern as the
+map fog-of-war and quest tracking) holds one JSON slot list per character.
+
+- **Keyed on `players.id`, not the account.** The client knows only the
+  character's GMCP name (`Char.Status.name`); the view resolves it to a
+  `players` row **owned by the requesting account** (`HudBarView._player_id`).
+  That resolution is the authorization boundary — an account can only read/write
+  bars for its own characters — and yields the stable id the row keys on.
+  `account_id` is denormalized for ownership scoping, mirroring the map/quest
+  tables.
+- **`localStorage` demotes to a write-through cache** (fast reconnect paint) and
+  the **guest fallback** (unauthenticated players keep pure-local bars,
+  unchanged). The server is the source of truth once signed in.
+- **The stored blob is never trusted.** Slots are re-sanitized server-side on
+  every save (`_sanitize_slots`, mirroring the client's `normalizeSlot`): skill
+  keys capped, item objects rebuilt field-by-field, everything else → empty
+  slot, list capped at `SLOT_MAX`.
+
+**Migration (no one loses their bar).** The character in play when this ships
+keeps the browser's existing bar: the first time a signed-in player loads a
+character with no server row yet, the client seeds that row from `ishar.slots`
+(guarded by a one-time `ishar.barMigrated` flag). Every *other* character starts
+from its own (empty) server bar rather than inheriting this one — the flag stops
+one character's bar from spraying onto all of them.
+
+**Notes.** Saves debounce (600 ms) but flush on character switch (so an edit
+saves under the right name) and on page hide, with `keepalive` on the POST so a
+last-moment pin outlives the tab — the server can't fall behind the cache the
+next load reads. Bar *edit-mode* state (`ishar.barUnlocked`, page) and icon
+overrides stay device-local: they're UI/session state, not per-character prefs.
+Endpoint `GET/POST /connect/hud/bar/` follows the map/quest `MapJSONMixin`
+(login-gated JSON, 403 not redirect) + `X-CSRFToken` conventions.
+
 ## 2026-07-19 — "Play Now" is the site's first-class action (nav CTA + home flagship)
 
 **Decision.** The web client is the best way to play Ishar, so playing is treated

@@ -1083,6 +1083,13 @@
                     tracked: "{% url 'quest_tracked' %}",
                     track: "{% url 'quest_track' %}"
                 }
+            },
+            // Per-character action bar: server-persisted for signed-in players,
+            // keyed on the connected character (same CSRF source as the map).
+            bar: {
+                authed: {{ user.is_authenticated|yesno:"true,false" }},
+                csrf: (document.querySelector("#command-form [name=csrfmiddlewaretoken]") || {}).value || "",
+                url: "{% url 'hud_bar' %}"
             }
         });
     }

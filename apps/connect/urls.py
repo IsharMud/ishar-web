@@ -2,8 +2,9 @@
 from django.urls import path
 
 from .views import (
-    ConnectView, MapDiscoverView, MapNoteView, MapStateView, MapZonesView,
-    QuestCatalogView, QuestTrackedView, QuestTrackView, ZoneGraphView,
+    ConnectView, HudBarView, MapDiscoverView, MapNoteView, MapStateView,
+    MapZonesView, QuestCatalogView, QuestTrackedView, QuestTrackView,
+    ZoneGraphView,
 )
 
 
@@ -17,4 +18,5 @@ urlpatterns = [
     path("quests/catalog/", QuestCatalogView.as_view(), name="quest_catalog"),
     path("quests/tracked/", QuestTrackedView.as_view(), name="quest_tracked"),
     path("quests/track/", QuestTrackView.as_view(), name="quest_track"),
+    path("hud/bar/", HudBarView.as_view(), name="hud_bar"),
 ]
