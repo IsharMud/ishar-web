@@ -65,6 +65,15 @@
     // be dragged; unlocked is edit mode — taps rearrange instead of firing.
     var barLocked = localStorage.getItem("ishar.barUnlocked") !== "1";
     var pickedSlot = null;                     // tap-to-swap source (edit mode)
+    // Per-character bar sync (isharmud/ishar-web#167). Signed in, the action
+    // bar lives server-side keyed on the connected character; localStorage is
+    // a write-through cache and the guest fallback. barChar is the character
+    // whose bar is currently live (set from Char.Status).
+    var barCfg = { url: "", csrf: "", authed: false };
+    var barChar = null;
+    var barSeq = 0;            // fetch generation, guards a stale async load
+    var barSaveTimer = null;   // debounce handle for the save POST
+    var barPending = null;     // {name, slots} snapshot awaiting the debounce
     var spriteUrl = "";                        // game-icons sprite URL (set in init)
     var biUrl = "";                            // Bootstrap Icons sprite URL (set in init)
     var collapsed = loadSet("ishar.collapsed");
@@ -323,9 +332,13 @@
         } catch (e) {}
         return [];
     }
-    function saveSlots() {
-        try { localStorage.setItem("ishar.slots", JSON.stringify(slots.map(function (x) { return x || null; }))); } catch (e) {}
+    function slotsArray() { return slots.map(function (x) { return x || null; }); }
+    function writeSlotsCache() {
+        try { localStorage.setItem("ishar.slots", JSON.stringify(slotsArray())); } catch (e) {}
     }
+    // A slot edit: cache locally (the guest fallback + a fast reconnect paint)
+    // and, when signed in, mirror the active character's bar to the server.
+    function saveSlots() { writeSlotsCache(); pushBar(); }
     function slotKeyOf(s) { return nameOf(s && s.name).toLowerCase(); }
     function slotIndexOf(key) { for (var i = 0; i < slots.length; i++) if (slots[i] === key) return i; return -1; }
     function onBar(key) { return slotIndexOf(key) !== -1; }
@@ -414,6 +427,78 @@
     // Repaint after any slot mutation: the bar, and the surfaces that show
     // pin state (the Abilities ★, the Bags/Gear pin chips).
     function afterSlotChange() { renderHotbar(); renderAbilities(); renderInventory(); renderEquipment(); }
+
+    // ------------------------------------------------------------------
+    // Per-character bar sync (isharmud/ishar-web#167)
+    // ------------------------------------------------------------------
+    // One-time migration guard: the character in play when this shipped keeps
+    // the browser's existing bar; every other character starts from its own
+    // server bar (empty until customized), instead of inheriting this one.
+    function barMigrated() {
+        try { return localStorage.getItem("ishar.barMigrated") === "1"; } catch (e) { return false; }
+    }
+    function markBarMigrated() {
+        try { localStorage.setItem("ishar.barMigrated", "1"); } catch (e) {}
+    }
+
+    // keepalive lets an in-flight save outlive the page (a pin made moments
+    // before the tab closes still lands), so the server never ends up behind
+    // the localStorage cache the next load reads from.
+    function postBar(name, arr) {
+        fetch(barCfg.url, {
+            method: "POST", credentials: "same-origin", keepalive: true,
+            headers: { "Content-Type": "application/json", "X-CSRFToken": barCfg.csrf },
+            body: JSON.stringify({ character: name, slots: arr })
+        }).catch(function () {});
+    }
+    // Send any debounced save now — before switching characters (so it saves
+    // under the right name) and on page hide (so a last edit isn't lost).
+    function flushBar() {
+        if (barSaveTimer) { clearTimeout(barSaveTimer); barSaveTimer = null; }
+        if (barPending) { postBar(barPending.name, barPending.slots); barPending = null; }
+    }
+    // Debounced mirror of the active character's bar to the server. A no-op
+    // for guests and before Char.Status names the character. The pending
+    // snapshot is captured now, so a save can't pick up a later character's
+    // slots when it fires.
+    function pushBar() {
+        if (!barCfg.authed || !barCfg.url || !barChar) return;
+        barPending = { name: barChar, slots: slotsArray() };
+        if (barSaveTimer) clearTimeout(barSaveTimer);
+        barSaveTimer = setTimeout(flushBar, 600);
+    }
+
+    // Char.Status named the character in play. On a change, load that
+    // character's server bar in place of the last one's. A character with no
+    // server bar yet inherits the browser's pre-migration bar exactly once
+    // (see barMigrated), then starts empty.
+    function onCharacter(name) {
+        name = String(name || "").trim();
+        if (!name || !barCfg.authed || !barCfg.url || name === barChar) return;
+        flushBar();   // persist the previous character's pending edit first
+        barChar = name;
+        var seq = ++barSeq;
+        fetch(barCfg.url + "?character=" + encodeURIComponent(name), { credentials: "same-origin" })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (data) {
+                if (seq !== barSeq || !data) return;   // a newer character superseded this load
+                if (data.found && Array.isArray(data.slots)) {
+                    slots = data.slots.map(normalizeSlot);
+                    markBarMigrated();
+                    writeSlotsCache();
+                    afterSlotChange();
+                } else if (!barMigrated() && anyAssigned()) {
+                    markBarMigrated();
+                    postBar(name, slotsArray());   // one-time seed from the browser's bar
+                } else {
+                    markBarMigrated();
+                    slots = [];
+                    writeSlotsCache();
+                    afterSlotChange();
+                }
+            })
+            .catch(function () {});
+    }
 
     // ------------------------------------------------------------------
     // Skill icons (game-icons.net, CC BY 3.0, self-hosted sprite)
@@ -751,7 +836,9 @@
                 if (abilitiesVisible()) renderAbilities();
                 break;
             case "Char.Status":
-                S.status = data; renderVitals(); renderTrain(); renderXp();
+                S.status = data;
+                if (data && data.name) onCharacter(String(data.name));
+                renderVitals(); renderTrain(); renderXp();
                 // Self-name may have just landed; re-run the group leak guard if
                 // an earlier Group.Update couldn't verify us (issue #162).
                 if (groupPendingSelf) applyGroup(); else renderGroup();
@@ -5090,6 +5177,9 @@
         S.quests = []; S.questMarkers = null;
         S.season = null; S.achievements = null;
         S.tgtHostile = null; S.tgtFriendly = null;
+        // A reconnect may land as a different character; re-sync the bar on the
+        // next Char.Status. The cached slots stay up meanwhile (no empty flash).
+        barChar = null;
         lastVitalsBody = null;
         lastProfessionsBody = null;
         lastQuestsBody = null;
@@ -5114,6 +5204,11 @@
             questCfg.urls = opts.quests.urls || null;
             questCfg.csrf = String(opts.quests.csrf || "");
             questCfg.authed = !!opts.quests.authed;
+        }
+        if (opts.bar && typeof opts.bar === "object") {
+            barCfg.url = String(opts.bar.url || "");
+            barCfg.csrf = String(opts.bar.csrf || "");
+            barCfg.authed = !!opts.bar.authed;
         }
 
         dom.app = document.getElementById("connect-app");
@@ -5164,6 +5259,14 @@
         wireHotkeys();
         wireTooltips();
         loadQuestTracked();
+
+        // A bar edit debounces its save; flush it when the tab is backgrounded
+        // or closed so a last-moment pin still reaches the server (keepalive on
+        // the POST lets it finish after the page goes away).
+        document.addEventListener("visibilitychange", function () {
+            if (document.visibilityState === "hidden") flushBar();
+        });
+        window.addEventListener("pagehide", flushBar);
 
         var toggle = document.getElementById("ui-toggle");
         if (toggle) toggle.addEventListener("click", function () {
