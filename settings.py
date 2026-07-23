@@ -284,8 +284,10 @@ DEPLOY_AGENT_SOCKET = getenv("DEPLOY_AGENT_SOCKET", "/run/ishar-deploy/deploy-ag
 DEPLOY_AGENT_SECRET = getenv("DEPLOY_AGENT_SECRET", "")
 # Allowlist surfaced in the UI. The agent re-validates authoritatively; ishar-db
 # is intentionally absent (a phone-button DB rebuild under a live game is a
-# footgun).
-DEPLOY_AGENT_ENVS = ("test", "prod")
+# footgun). Prod only: staging.isharmud.com is a separate Lightsail box, and this
+# agent reaches the local (prod) Docker host only — offering "test" here would be
+# a control that runs deploy.sh against the wrong box and can never touch staging.
+DEPLOY_AGENT_ENVS = ("prod",)
 DEPLOY_AGENT_SERVICES = ("ishar-app", "ishar-web", "ishar-feedback-bridge")
 
 # Staff log viewer (/portal/logs/, ishar-web#104). Reuses the same host agent,
