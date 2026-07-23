@@ -193,6 +193,18 @@
     background: var(--ac-danger-wash);
     border-color: rgba(214,75,75,.5);
 }
+/* Staging's intent tint (blue — the safe, non-prod box). */
+.btn-check:checked + .ac-seg__item--staging {
+    color: #bcd8ff;
+    background: var(--ac-info-wash);
+    border-color: rgba(74,134,207,.5);
+}
+/* An env above the viewer's level: dimmed and not selectable. */
+.btn-check:disabled + .ac-seg__item {
+    opacity: .55;
+    cursor: not-allowed;
+}
+.ac-seg__lock { width: .8rem; height: .8rem; opacity: .7; }
 .btn-check:focus-visible + .ac-seg__item {
     outline: 2px solid var(--ac-accent);
     outline-offset: 2px;

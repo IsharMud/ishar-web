@@ -282,18 +282,35 @@ MUD_PORT = int(getenv("MUD_PORT", 23))
 # the agent's allowlist is. See docs/infrastructure/reboot_process.md §4.
 DEPLOY_AGENT_SOCKET = getenv("DEPLOY_AGENT_SOCKET", "/run/ishar-deploy/deploy-agent.sock")
 DEPLOY_AGENT_SECRET = getenv("DEPLOY_AGENT_SECRET", "")
-# Allowlist surfaced in the UI. The agent re-validates authoritatively; ishar-db
-# is intentionally absent (a phone-button DB rebuild under a live game is a
-# footgun). Prod only: staging.isharmud.com is a separate Lightsail box, and this
-# agent reaches the local (prod) Docker host only — offering "test" here would be
-# a control that runs deploy.sh against the wrong box and can never touch staging.
-DEPLOY_AGENT_ENVS = ("prod",)
-DEPLOY_AGENT_SERVICES = ("ishar-app", "ishar-web", "ishar-feedback-bridge")
+# Deploy Console + Log Viewer environments (#1868). Each console env maps to how
+# the host agent runs it: `target` selects the agent — "local" is the prod host
+# agent; any other name is FORWARDED to that remote (the agent's
+# ISHAR_DEPLOY_REMOTES). `env` is the deploy.sh env on that box. `services` is the
+# per-env deploy allowlist (staging is game-only — it has no website). `gate` is
+# the minimum immortal level to DEPLOY it (logs are Eternal for every env). The
+# agent re-validates target/env/services authoritatively; ishar-db is never
+# offered — a phone-button DB rebuild under a live game is a footgun.
+DEPLOY_ENVIRONMENTS = {
+    "prod": {
+        "target": "local",
+        "env": "prod",
+        "services": ("ishar-app", "ishar-web", "ishar-feedback-bridge"),
+        "gate": "forger",
+        "icon": "hdd-stack",
+    },
+    "staging": {
+        "target": "staging",
+        "env": "test",
+        "services": ("ishar-app", "ishar-feedback-bridge"),
+        "gate": "eternal",
+        "icon": "cone-striped",
+    },
+}
 
 # Staff log viewer (/portal/logs/, ishar-web#104). Reuses the same host agent,
-# socket, and secret as the deploy button — the log actions are read-only
-# additions to that agent. LOG_VIEWER_ENV is which deploy env the viewer reads
-# (prod in production); the agent still re-validates it against its own allowlist.
+# socket, and secret as the deploy console, and the DEPLOY_ENVIRONMENTS map above
+# (logs are Eternal for every env; a non-local env is forwarded like a deploy).
+# LOG_VIEWER_ENV is the viewer's default env selection.
 LOG_VIEWER_ENV = getenv("LOG_VIEWER_ENV", "prod")
 LOG_VIEWER_SOURCES = ("runlog", "stderr", "web")
 

@@ -70,6 +70,23 @@
         <span id="agentDiagText"></span>
     </div>
 
+    <!-- Environment -->
+    <div class="ac-panel">
+        <div class="ac-panel__h">
+            <svg class="bi" aria-hidden="true"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#hdd-network"></use></svg>
+            Environment
+        </div>
+        <div class="ac-seg ac-seg--wrap" role="radiogroup" aria-label="Environment" id="envSeg">
+    {% for env in log_envs %}
+            <input class="btn-check" type="radio" name="logenv" id="logenv-{{ env.key }}" value="{{ env.key }}" autocomplete="off"{% if env.checked %} checked{% endif %}>
+            <label class="ac-seg__item ac-seg__item--{{ env.key }}" for="logenv-{{ env.key }}">
+                <svg class="bi" aria-hidden="true"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#{{ env.icon }}"></use></svg>
+                {{ env.key }}
+            </label>
+    {% endfor %}
+        </div>
+    </div>
+
     <!-- Source + color + size -->
     <div class="ac-panel">
         <div class="ac-panel__h">
@@ -219,6 +236,10 @@
         const el = document.querySelector('input[name="color"]:checked');
         return el ? el.value : "live";
     }
+    function currentLogEnv() {
+        const el = document.querySelector('input[name="logenv"]:checked');
+        return el ? el.value : "";
+    }
 
     function post(url, params) {
         const body = new URLSearchParams(params);
@@ -257,7 +278,7 @@
 
     function loadStatus() {
         if (!configured) { return; }
-        post("{% url 'logs_status' %}", {}).then(function (r) {
+        post("{% url 'logs_status' %}", { env: currentLogEnv() }).then(function (r) {
             if (r.status === 200 && r.data && r.data.ok) {
                 const live = r.data.live_color;
                 if (live) {
@@ -405,6 +426,7 @@
         refreshBtn.disabled = true;
         outTitle.textContent = SOURCE_LABEL[source] || source;
         post("{% url 'logs_fetch' %}", {
+            env: currentLogEnv(),
             source: source,
             color: currentColor(),
             lines: linesSel.value,
@@ -452,6 +474,9 @@
 
     document.querySelectorAll('input[name="source"]').forEach(function (el) {
         el.addEventListener("change", function () { syncColorVisibility(); fetchLogs(); });
+    });
+    document.querySelectorAll('input[name="logenv"]').forEach(function (el) {
+        el.addEventListener("change", function () { loadStatus(); fetchLogs(); });
     });
     document.querySelectorAll('input[name="color"]').forEach(function (el) {
         el.addEventListener("change", fetchLogs);

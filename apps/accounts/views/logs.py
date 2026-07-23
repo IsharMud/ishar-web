@@ -44,6 +44,20 @@ def _agent_version_hint(payload):
     return None
 
 
+def _log_env(request):
+    """(deploy_env, target) for the requested console env. Logs are Eternal for
+    every env, so there's no gate — just map the selection to a box: the
+    deploy.sh env (for container names) and the forward target (#1868). An
+    absent/unknown env falls back to LOG_VIEWER_ENV / the local agent."""
+    key = request.POST.get("env") or settings.LOG_VIEWER_ENV
+    spec = settings.DEPLOY_ENVIRONMENTS.get(key) or settings.DEPLOY_ENVIRONMENTS.get(
+        settings.LOG_VIEWER_ENV
+    )
+    if spec is None:
+        return settings.LOG_VIEWER_ENV, None
+    return spec["env"], spec["target"]
+
+
 class LogViewerView(EternalRequiredMixin, NeverCacheMixin, TemplateView):
     """Render the log viewer. Eternal-gated (staff); unauthorized -> 404."""
 
@@ -56,6 +70,12 @@ class LogViewerView(EternalRequiredMixin, NeverCacheMixin, TemplateView):
         context["log_default_lines"] = DEFAULT_LINES
         context["log_levels"] = LEVELS
         context["log_configured"] = bool(settings.DEPLOY_AGENT_SECRET)
+        # Env selector: every deploy env is viewable at Eternal; default to
+        # LOG_VIEWER_ENV. A single env renders as one (still-labelled) chip.
+        context["log_envs"] = [
+            {"key": key, "icon": spec["icon"], "checked": key == settings.LOG_VIEWER_ENV}
+            for key, spec in settings.DEPLOY_ENVIRONMENTS.items()
+        ]
         return context
 
 
@@ -66,8 +86,9 @@ class LogStatusView(EternalRequiredMixin, NeverCacheMixin, View):
     http_method_names = ("post",)
 
     def post(self, request, *args, **kwargs):
+        env, target = _log_env(request)
         try:
-            result = log_status(settings.LOG_VIEWER_ENV)
+            result = log_status(env, target=target)
         except DeployAgentError as exc:
             return JsonResponse(
                 {"ok": False, "message": f"Log agent unavailable: {exc}"},
@@ -100,13 +121,15 @@ class LogFetchView(EternalRequiredMixin, NeverCacheMixin, View):
         except (TypeError, ValueError):
             lines = DEFAULT_LINES
 
+        env, target = _log_env(request)
         try:
             data = fetch_log(
                 actor=request.user.get_username(),
-                env=settings.LOG_VIEWER_ENV,
+                env=env,
                 source=source,
                 color=color,
                 lines=lines,
+                target=target,
             )
         except DeployAgentError as exc:
             return JsonResponse(

@@ -47,12 +47,23 @@ def _call(payload, timeout=15):
         raise DeployAgentError("invalid response from deploy agent") from exc
 
 
-def ping():
+def _with_target(payload, target):
+    """Tag a request for a remote agent so the local (prod) agent forwards it
+    (#1868). "local"/None means handle it here — no target field, wire-identical
+    to the pre-forwarding protocol. A forwarded action's state (e.g. a deploy_id)
+    lives in the remote agent, so status/cancel for it must carry the same
+    target."""
+    if target and target != "local":
+        payload["target"] = target
+    return payload
+
+
+def ping(target=None):
     """Liveness + allowlist discovery."""
-    return _call({"action": "ping"})
+    return _call(_with_target({"action": "ping"}, target))
 
 
-def start_deploy(actor, env, services, no_pull=False, delay_seconds=0):
+def start_deploy(actor, env, services, no_pull=False, delay_seconds=0, target=None):
     """Ask the agent to start a deploy. Returns the agent's JSON (deploy_id on
     success, or a rejection with an `error` key).
 
@@ -60,25 +71,25 @@ def start_deploy(actor, env, services, no_pull=False, delay_seconds=0):
     single-flight slot immediately (status "scheduled") and fires deploy.sh
     itself after the delay — surviving this container restarting. Cancel a
     scheduled deploy with cancel_deploy()."""
-    return _call({
+    return _call(_with_target({
         "action": "deploy",
         "actor": actor,
         "env": env,
         "services": services,
         "no_pull": no_pull,
         "delay_seconds": int(delay_seconds),
-    })
+    }, target))
 
 
-def cancel_deploy(deploy_id):
+def cancel_deploy(deploy_id, target=None):
     """Cancel a still-scheduled deploy before it fires. No-op (409) once it has
     started running. Returns the agent's JSON."""
-    return _call({"action": "cancel", "deploy_id": deploy_id})
+    return _call(_with_target({"action": "cancel", "deploy_id": deploy_id}, target))
 
 
-def deploy_status(deploy_id):
+def deploy_status(deploy_id, target=None):
     """Poll a running/finished/scheduled deploy by id."""
-    return _call({"action": "status", "deploy_id": deploy_id})
+    return _call(_with_target({"action": "status", "deploy_id": deploy_id}, target))
 
 
 # ── Read-only log access (ishar-web#104) ─────────────────────────────────────
@@ -87,25 +98,28 @@ def deploy_status(deploy_id):
 # source / color and argv-execs docker with no shell.
 
 
-def log_status(env):
+def log_status(env, target=None):
     """Live-color + which colors/web containers are up, plus the source/color
     allowlists. Powers the viewer's LIVE badge and control state."""
-    return _call({"action": "log-status", "env": env})
+    return _call(_with_target({"action": "log-status", "env": env}, target))
 
 
-def fetch_log(actor, env, source, color="live", lines=500, timeout=25):
+def fetch_log(actor, env, source, color="live", lines=500, timeout=25, target=None):
     """Return a byte-capped tail of one log source. `source` is runlog|stderr|web;
     `color` is live|blue|green (ignored for web). The agent re-validates all of
     it. A slightly longer timeout than deploy calls: reading an idle color's
     runlog spins up a throwaway container host-side."""
     return _call(
-        {
-            "action": "log-tail",
-            "actor": actor,
-            "env": env,
-            "source": source,
-            "color": color,
-            "lines": int(lines),
-        },
+        _with_target(
+            {
+                "action": "log-tail",
+                "actor": actor,
+                "env": env,
+                "source": source,
+                "color": color,
+                "lines": int(lines),
+            },
+            target,
+        ),
         timeout=timeout,
     )
