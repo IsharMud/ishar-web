@@ -26,22 +26,6 @@ class GodRequiredMixin(View):
         return super().dispatch(request, *args, **kwargs)
 
 
-class ForgerRequiredMixin(View):
-    """Restrict a view to Forger-level accounts (immortal_level >= FORGER).
-
-    Same 404-for-everyone-else convention as GodRequiredMixin. Gates the Deploy
-    Console: firing a prod deploy sits one rung below God but above the Eternal
-    staff floor. game-DB immortal_level is the sole source of truth (see
-    apps/accounts/models/account.py: is_forger()).
-    """
-
-    def dispatch(self, request, *args, **kwargs):
-        user = getattr(request, "user", None)
-        if not (user and user.is_authenticated and user.is_forger()):
-            raise Http404
-        return super().dispatch(request, *args, **kwargs)
-
-
 class EternalRequiredMixin(View):
     """Restrict a view to Eternal-level accounts (immortal_level >= ETERNAL).
 

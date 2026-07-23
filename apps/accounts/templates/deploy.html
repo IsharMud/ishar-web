@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% load static %}
 {% block meta_title %}{{ WEBSITE_TITLE }} Deploy Console{% endblock meta_title %}
-{% block meta_description %}Forger-only deploy console for {{ WEBSITE_TITLE }}.{% endblock meta_description %}
+{% block meta_description %}Deploy console for {{ WEBSITE_TITLE }} staff.{% endblock meta_description %}
 {% block meta_url %}{% url 'deploy' %}#deploy{% endblock meta_url %}
 {% block title %}{{ WEBSITE_TITLE }} Deploy Console{% endblock title %}
 {% block scripts %}let focusTo = 'deploy'{% endblock scripts %}
@@ -72,13 +72,20 @@
             </div>
             <div class="ac-seg" role="radiogroup" aria-label="Environment">
     {% for env in deploy_envs %}
-                <input class="btn-check" type="radio" name="env" id="env-{{ env }}" value="{{ env }}" autocomplete="off"{% if env == "prod" %} checked{% endif %}>
-                <label class="ac-seg__item ac-seg__item--{{ env }}" for="env-{{ env }}">
-                    <svg class="bi" aria-hidden="true"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#{% if env == 'prod' %}hdd-stack{% else %}cone-striped{% endif %}"></use></svg>
-                    {{ env }}
+                <input class="btn-check" type="radio" name="env" id="env-{{ env.key }}" value="{{ env.key }}" autocomplete="off"{% if env.checked %} checked{% endif %}{% if not env.allowed %} disabled{% endif %}>
+                <label class="ac-seg__item ac-seg__item--{{ env.key }}" for="env-{{ env.key }}"{% if not env.allowed %} title="Deploying {{ env.key }} requires {{ env.gate }} or higher."{% endif %}>
+                    <svg class="bi" aria-hidden="true"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#{{ env.icon }}"></use></svg>
+                    {{ env.key }}
+        {% if not env.allowed %}<svg class="bi ac-seg__lock" aria-hidden="true"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#lock-fill"></use></svg>{% endif %}
                 </label>
     {% endfor %}
             </div>
+    {% for env in deploy_locked %}
+            <p class="ac-panel__hint mt-2" role="note">
+                <svg class="bi" aria-hidden="true"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#lock-fill"></use></svg>
+                Deploying <code>{{ env.key }}</code> is <strong>{{ env.gate }}+</strong>. Ask a Forger or God if you need a <code>{{ env.key }}</code> re-release.
+            </p>
+    {% endfor %}
         </div>
 
         <!-- Services -->
@@ -93,14 +100,14 @@
             </p>
             <div class="ac-grid">
     {% for service in deploy_services %}
-                <input class="btn-check service-check" type="checkbox" name="services" id="svc-{{ service }}" value="{{ service }}" autocomplete="off"{% if service == "ishar-app" %} checked{% endif %}>
-                <label class="ac-toggle" for="svc-{{ service }}">
+                <input class="btn-check service-check" type="checkbox" name="services" id="svc-{{ service.name }}" value="{{ service.name }}" data-envs="{{ service.envs }}" autocomplete="off"{% if service.checked %} checked{% endif %}>
+                <label class="ac-toggle" for="svc-{{ service.name }}">
                     <span class="ac-toggle__icon">
-                        <svg class="bi" aria-hidden="true"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#{% if service == 'ishar-app' %}controller{% elif service == 'ishar-web' %}globe2{% elif service == 'ishar-feedback-bridge' %}chat-left-dots{% else %}box{% endif %}"></use></svg>
+                        <svg class="bi" aria-hidden="true"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#{% if service.name == 'ishar-app' %}controller{% elif service.name == 'ishar-web' %}globe2{% elif service.name == 'ishar-feedback-bridge' %}chat-left-dots{% else %}box{% endif %}"></use></svg>
                     </span>
                     <span class="ac-toggle__body">
-                        <span class="ac-toggle__name">{{ service }}</span>
-                        <span class="ac-toggle__note">{% if service == 'ishar-app' %}Game server · blue-green, no player drop{% elif service == 'ishar-web' %}Website · restarts this page{% elif service == 'ishar-feedback-bridge' %}Discord → feedback bridge{% else %}Service{% endif %}</span>
+                        <span class="ac-toggle__name">{{ service.name }}</span>
+                        <span class="ac-toggle__note">{% if service.name == 'ishar-app' %}Game server · blue-green, no player drop{% elif service.name == 'ishar-web' %}Website · restarts this page{% elif service.name == 'ishar-feedback-bridge' %}Discord → feedback bridge{% else %}Service{% endif %}</span>
                     </span>
                     <span class="ac-toggle__check">
                         <svg class="bi" aria-hidden="true"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#check-circle-fill"></use></svg>
@@ -157,6 +164,7 @@
             </div>
             <p class="ac-panel__hint mt-2 mb-0">Re-authentication is required on every deploy.</p>
 
+            <div id="scheduleSection">
             <label class="ac-panel__h" style="margin-top:1.25rem; margin-bottom:.35rem;">
                 <svg class="bi" aria-hidden="true"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#clock-history"></use></svg>
                 Or schedule &amp; warn players
@@ -164,6 +172,7 @@
             <p class="ac-panel__hint mt-0">
                 Announce a reboot in-game, count it down, then deploy after the delay.
                 The game does the countdown — you don't need to keep this page open.
+                Prod only.
             </p>
             <div class="ac-seg" role="radiogroup" aria-label="Reboot delay">
                 <input class="btn-check" type="radio" name="delay_min" id="delay-2" value="2" autocomplete="off">
@@ -179,6 +188,7 @@
                 <svg class="bi" aria-hidden="true"><use xlink:href="{% static 'bootstrap-icons/bootstrap-icons.svg' %}#alarm"></use></svg>
                 Schedule &amp; warn players
             </button>
+            </div>
         </div>
 
         <!-- CTA -->
@@ -237,6 +247,11 @@
     const cancelScheduledBtn = document.getElementById("cancelScheduledBtn");
     const csrftoken = "{{ csrf_token }}";
     const deployConfigured = {% if deploy_configured %}true{% else %}false{% endif %};
+    // Per-env agent routing / services / scheduling, from DEPLOY_ENVIRONMENTS.
+    const ENV_META = {{ deploy_env_meta|safe }};
+    // Env of the in-flight/last deploy — status + cancel polls must reach the
+    // same agent it started on (a forwarded staging deploy's state lives there).
+    let currentDeployEnv = "";
     let polling = null;
     let timer = null;
     let startedAt = 0;
@@ -288,7 +303,21 @@
     // ---- self-deploy caveat + live web-client count ----------------------
     // "Nothing selected = all services" includes ishar-web, so an empty
     // selection gets the same warnings as an explicit ishar-web check.
+    function currentEnv() {
+        const el = form.querySelector("input[name=env]:checked");
+        return el ? el.value : "";
+    }
+    function currentEnvMeta() { return ENV_META[currentEnv()] || null; }
+    function envIsLocal() {
+        const m = currentEnvMeta();
+        return m ? m.target === "local" : true;
+    }
+
+    // ishar-web only exists in envs whose service set includes it (prod). For a
+    // staging deploy it's never in the set, so this is always false there.
     function deployIncludesWeb() {
+        const meta = currentEnvMeta();
+        if (!meta || meta.services.indexOf("ishar-web") === -1) { return false; }
         const web = document.getElementById("svc-ishar-web");
         const anyChecked = form.querySelector(".service-check:checked") !== null;
         return (web && web.checked) || !anyChecked;
@@ -320,18 +349,44 @@
         return Math.floor(s / 3600) + "h " + (Math.floor(s / 60) % 60) + "m";
     }
 
+    // The web/game warnings are about the PROD game (its /connect sessions and
+    // presence), so they only apply to a local (prod) deploy — a staging deploy
+    // touches neither.
     function refreshWarning() {
+        const local = envIsLocal();
         const includesWeb = deployIncludesWeb();
         warning.classList.toggle("d-none", !includesWeb);
         webClientsWarning.classList.toggle(
             "d-none", !(includesWeb && webClientCount > 0)
         );
         gamePlayersWarning.classList.toggle(
-            "d-none", !(deployIncludesApp() && gamePlayerCount > 0)
+            "d-none", !(local && deployIncludesApp() && gamePlayerCount > 0)
         );
+    }
+
+    // React to an env switch: show only that env's services (unchecking any that
+    // vanished), and hide the prod-only "schedule & warn players" block.
+    const scheduleSection = document.getElementById("scheduleSection");
+    function applyEnv() {
+        const meta = currentEnvMeta();
+        const svcs = meta ? meta.services : [];
+        document.querySelectorAll(".service-check").forEach(function (input) {
+            const ok = svcs.indexOf(input.value) !== -1;
+            const label = document.querySelector('label[for="' + input.id + '"]');
+            input.classList.toggle("d-none", !ok);
+            if (label) { label.classList.toggle("d-none", !ok); }
+            if (!ok && input.checked) { input.checked = false; }
+        });
+        if (scheduleSection) {
+            scheduleSection.classList.toggle("d-none", !(meta && meta.schedulable));
+        }
+        refreshWarning();
     }
     document.querySelectorAll(".service-check").forEach(function (el) {
         el.addEventListener("change", refreshWarning);
+    });
+    form.querySelectorAll("input[name=env]").forEach(function (el) {
+        el.addEventListener("change", applyEnv);
     });
 
     function pollWebClients() {
@@ -352,7 +407,7 @@
             })
             .catch(function () { /* keep last known count */ });
     }
-    refreshWarning();
+    applyEnv();
     pollWebClients();
     setInterval(pollWebClients, 10000);
 
@@ -461,7 +516,7 @@
 
     // ---- poll ------------------------------------------------------------
     function poll(deployId) {
-        post("{% url 'deploy_status' %}", { deploy_id: deployId })
+        post("{% url 'deploy_status' %}", { deploy_id: deployId, env: currentDeployEnv })
             .then(function (r) {
                 if (r.status !== 200) {
                     setBadge("lost", "danger", false);
@@ -502,6 +557,7 @@
     // ---- submit ----------------------------------------------------------
     form.addEventListener("submit", function () {
         const env = (form.querySelector("input[name=env]:checked") || {}).value;
+        currentDeployEnv = env;
         const services = Array.from(
             form.querySelectorAll("input[name=services]:checked")
         ).map(function (el) { return el.value; });
@@ -519,7 +575,7 @@
                 " player session" + (webClientCount === 1 ? "" : "s") +
                 " on the web client will be disconnected mid-game.";
         }
-        if (deployIncludesApp() && gamePlayerCount > 0) {
+        if (envIsLocal() && deployIncludesApp() && gamePlayerCount > 0) {
             prompt += "\n\nNote: " + gamePlayerCount + " player" +
                 (gamePlayerCount === 1 ? " is" : "s are") +
                 " in the game. ishar-app is blue-green (no drop), but the game" +
@@ -603,6 +659,7 @@
 
     scheduleBtn.addEventListener("click", function () {
         const env = (form.querySelector("input[name=env]:checked") || {}).value;
+        currentDeployEnv = env;
         const services = Array.from(
             form.querySelectorAll("input[name=services]:checked")
         ).map(function (el) { return el.value; });
@@ -686,7 +743,7 @@
             return;
         }
         const id = scheduledDeployId;
-        post("{% url 'deploy_cancel_scheduled' %}", { deploy_id: id }).then(function (r) {
+        post("{% url 'deploy_cancel_scheduled' %}", { deploy_id: id, env: currentDeployEnv }).then(function (r) {
             if (r.status === 200 && r.data.ok) {
                 clearInterval(polling);
                 endScheduleUI();

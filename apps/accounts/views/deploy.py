@@ -1,10 +1,14 @@
-"""Forger-gated web deploy button (#1754).
+"""Web deploy console (#1754, #1868).
 
-A phone-friendly page (NOT Django admin) where a Forger picks an environment and
-services and triggers scripts/deploy.sh on the host via the deploy agent. The
-deploy POST requires password re-entry (re-auth), so a driven/XSS'd session
-cannot fire a deploy on its own — see docs/infrastructure/reboot_process.md §4.
+A phone-friendly page (NOT Django admin) where staff pick an environment and
+services and trigger scripts/deploy.sh on the host via the deploy agent. Prod
+runs on the local host agent; staging is a separate box the agent forwards to
+(#1868). The page floor is Eternal, but a *prod* deploy requires Forger — the
+per-env gate is enforced here, not just disabled in the UI. The deploy POST
+requires password re-entry (re-auth), so a driven/XSS'd session cannot fire a
+deploy on its own — see docs/infrastructure/reboot_process.md §4.
 """
+import json
 from datetime import timedelta
 
 from django.conf import settings
@@ -17,7 +21,7 @@ from apps.connect import tracker as connect_tracker
 from apps.core.models.webadmin import WebAdminCommand
 from apps.core.utils import webadmin
 from apps.core.utils.staff import staff_name
-from apps.core.views.mixins import ForgerRequiredMixin, NeverCacheMixin
+from apps.core.views.mixins import EternalRequiredMixin, NeverCacheMixin
 
 from ..utils.deploy_agent import (
     DeployAgentError,
@@ -32,26 +36,94 @@ from ..utils.deploy_agent import (
 SCHEDULE_DELAY_MIN = 60
 SCHEDULE_DELAY_MAX = 3600
 
+# DEPLOY_ENVIRONMENTS[env]["gate"] -> the Account predicate that gates deploying
+# that env. immortal_level is the sole source of truth (game-owned column).
+GATE_METHODS = {"eternal": "is_eternal", "forger": "is_forger", "god": "is_god"}
 
-class DeployView(ForgerRequiredMixin, NeverCacheMixin, TemplateView):
-    """Render the deploy control page. Forger-only (ForgerRequiredMixin -> 404)."""
+
+def _resolve_deploy_env(request):
+    """Resolve the POSTed console env for a *mutating* deploy and enforce its
+    gate (prod → Forger, staging → Eternal). Returns (spec, error_response) with
+    exactly one non-None. This is the real authorization boundary; the UI only
+    disables the control an account can't use."""
+    key = request.POST.get("env", "")
+    spec = settings.DEPLOY_ENVIRONMENTS.get(key)
+    if spec is None:
+        return None, JsonResponse({"message": "Unknown environment."}, status=400)
+    if not getattr(request.user, GATE_METHODS[spec["gate"]])():
+        return None, JsonResponse(
+            {"message": f"Deploying {key} requires {spec['gate'].title()} or higher."},
+            status=403,
+        )
+    return spec, None
+
+
+def _poll_target(request):
+    """Forward target for a status/cancel poll. A forwarded deploy's state lives
+    in the remote agent, so the poll must reach the same agent the deploy ran on.
+    Read-only, so no gate; an absent/unknown env falls back to the local agent."""
+    spec = settings.DEPLOY_ENVIRONMENTS.get(request.POST.get("env", ""))
+    return spec["target"] if spec else "local"
+
+
+class DeployView(EternalRequiredMixin, NeverCacheMixin, TemplateView):
+    """Render the deploy control page. Eternal floor (EternalRequiredMixin ->
+    404); a prod deploy additionally requires Forger (enforced in the actions)."""
 
     template_name = "deploy.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["deploy_envs"] = settings.DEPLOY_AGENT_ENVS
-        context["deploy_services"] = settings.DEPLOY_AGENT_SERVICES
+        user = self.request.user
+
+        # Show every env, but mark which ones this account may actually deploy
+        # (a disabled control + note beats hiding it). The default selection is
+        # the first env the account can deploy — prod for a Forger, staging for
+        # an Eternal. Services are the union across envs, each tagged with the
+        # envs it belongs to so the UI can show only the relevant ones.
+        envs = []
+        service_order = []
+        service_envs = {}
+        default_taken = False
+        for key, spec in settings.DEPLOY_ENVIRONMENTS.items():
+            allowed = getattr(user, GATE_METHODS[spec["gate"]])()
+            checked = allowed and not default_taken
+            default_taken = default_taken or checked
+            envs.append({
+                "key": key,
+                "icon": spec["icon"],
+                "gate": spec["gate"].title(),
+                "allowed": allowed,
+                "checked": checked,
+            })
+            for svc in spec["services"]:
+                if svc not in service_envs:
+                    service_envs[svc] = []
+                    service_order.append(svc)
+                service_envs[svc].append(key)
+
+        context["deploy_envs"] = envs
+        context["deploy_locked"] = [e for e in envs if not e["allowed"]]
+        context["deploy_services"] = [
+            {"name": s, "envs": " ".join(service_envs[s]), "checked": s == "ishar-app"}
+            for s in service_order
+        ]
+        context["deploy_env_meta"] = json.dumps({
+            key: {"target": spec["target"], "services": list(spec["services"]),
+                  "schedulable": spec["target"] == "local"}
+            for key, spec in settings.DEPLOY_ENVIRONMENTS.items()
+        })
         context["deploy_configured"] = bool(settings.DEPLOY_AGENT_SECRET)
         return context
 
 
-class DeployActionView(ForgerRequiredMixin, NeverCacheMixin, View):
+class DeployActionView(EternalRequiredMixin, NeverCacheMixin, View):
     """POST-only endpoint that starts a deploy. CSRF-protected (no exemption).
 
-    Requires re-authentication: the Forger must re-enter their account password on
-    this request. The heavy validation (env/service allowlist, injection
-    inertness) lives in the host agent; we surface its verdict.
+    Requires re-authentication (password) AND the target env's gate (Forger for
+    prod). Env/service validation and injection inertness live in the host agent
+    — the local one for prod, the forwarded remote for staging; we surface its
+    verdict.
     """
 
     http_method_names = ("post",)
@@ -64,16 +136,26 @@ class DeployActionView(ForgerRequiredMixin, NeverCacheMixin, View):
                 {"message": "Re-authentication failed."}, status=403
             )
 
-        env = request.POST.get("env", "")
+        spec, err = _resolve_deploy_env(request)
+        if err:
+            return err
+
         services = request.POST.getlist("services")
+        bad = [s for s in services if s not in spec["services"]]
+        if bad:
+            return JsonResponse(
+                {"message": f"Service(s) not available on this env: {', '.join(bad)}"},
+                status=400,
+            )
         no_pull = request.POST.get("no_pull") in ("1", "true", "on")
 
         try:
             result = start_deploy(
                 actor=request.user.get_username(),
-                env=env,
+                env=spec["env"],
                 services=services,
                 no_pull=no_pull,
+                target=spec["target"],
             )
         except DeployAgentError as exc:
             return JsonResponse(
@@ -86,9 +168,9 @@ class DeployActionView(ForgerRequiredMixin, NeverCacheMixin, View):
         return JsonResponse(result, status=status)
 
 
-class DeployPingView(ForgerRequiredMixin, NeverCacheMixin, View):
+class DeployPingView(EternalRequiredMixin, NeverCacheMixin, View):
     """POST-only liveness probe for the host agent. Powers the console's live
-    agent-health pill. Read-only (no re-auth); Forger gate + CSRF still apply."""
+    agent-health pill. Read-only (no re-auth); Eternal gate + CSRF still apply."""
 
     http_method_names = ("post",)
 
@@ -107,14 +189,14 @@ class DeployPingView(ForgerRequiredMixin, NeverCacheMixin, View):
         return JsonResponse(result)
 
 
-class DeployWebClientsView(ForgerRequiredMixin, NeverCacheMixin, View):
+class DeployWebClientsView(EternalRequiredMixin, NeverCacheMixin, View):
     """POST-only count of live web-client (/connect) game sessions.
 
     Deploying ishar-web restarts Daphne, which severs every browser player's
     telnet proxy mid-game — the console polls this to warn before that happens.
     Reads an in-process registry (Daphne is a single process; see
     apps.connect.tracker), so it costs nothing and needs no agent or DB.
-    Read-only (no re-auth); Forger gate + CSRF still apply.
+    Read-only (no re-auth); Eternal gate + CSRF still apply.
     """
 
     http_method_names = ("post",)
@@ -123,10 +205,12 @@ class DeployWebClientsView(ForgerRequiredMixin, NeverCacheMixin, View):
         return JsonResponse(connect_tracker.snapshot())
 
 
-class DeployScheduleView(ForgerRequiredMixin, NeverCacheMixin, View):
+class DeployScheduleView(EternalRequiredMixin, NeverCacheMixin, View):
     """POST-only: schedule a deploy after a delay, warning players first.
 
-    One action, two effects, in this order:
+    Prod-only: the countdown is announced to the live game, which is meaningless
+    for staging (a separate box with no prod players), so a non-local target is
+    rejected. One action, two effects, in this order:
       1. Ask the host agent to schedule the deploy (it holds the timer and fires
          deploy.sh itself after the delay — surviving this container restarting).
       2. Only if that was accepted, enqueue a `reboot_notice` so the game counts
@@ -147,6 +231,15 @@ class DeployScheduleView(ForgerRequiredMixin, NeverCacheMixin, View):
                 {"message": "Re-authentication failed."}, status=403
             )
 
+        spec, err = _resolve_deploy_env(request)
+        if err:
+            return err
+        if spec["target"] != "local":
+            return JsonResponse(
+                {"message": "Scheduling with a player warning is prod-only."},
+                status=400,
+            )
+
         delay_raw = request.POST.get("delay_seconds", "")
         if not delay_raw.isdigit():
             return JsonResponse({"message": "Invalid delay."}, status=400)
@@ -156,18 +249,24 @@ class DeployScheduleView(ForgerRequiredMixin, NeverCacheMixin, View):
                 {"message": "Delay must be between 1 and 60 minutes."}, status=400
             )
 
-        env = request.POST.get("env", "")
         services = request.POST.getlist("services")
+        bad = [s for s in services if s not in spec["services"]]
+        if bad:
+            return JsonResponse(
+                {"message": f"Service(s) not available on this env: {', '.join(bad)}"},
+                status=400,
+            )
         no_pull = request.POST.get("no_pull") in ("1", "true", "on")
 
         # 1. Schedule the deploy on the host agent (the part that can be refused).
         try:
             result = start_deploy(
                 actor=request.user.get_username(),
-                env=env,
+                env=spec["env"],
                 services=services,
                 no_pull=no_pull,
                 delay_seconds=delay_seconds,
+                target=spec["target"],
             )
         except DeployAgentError as exc:
             return JsonResponse(
@@ -189,13 +288,13 @@ class DeployScheduleView(ForgerRequiredMixin, NeverCacheMixin, View):
         return JsonResponse({**result, "notice_task_id": task.id}, status=200)
 
 
-class DeployCancelScheduledView(ForgerRequiredMixin, NeverCacheMixin, View):
+class DeployCancelScheduledView(EternalRequiredMixin, NeverCacheMixin, View):
     """POST-only: cancel a still-scheduled deploy and tell players it's off.
 
     Cancels the host agent's pending deploy (a no-op once it has started
-    running), then — if the cancel landed — enqueues a `reboot_cancel` so the
-    game announces the stand-down. No re-auth: cancelling is the safe direction.
-    Forger gate + CSRF still apply.
+    running), then — if the cancel landed on a prod (local) deploy — enqueues a
+    `reboot_cancel` so the game announces the stand-down. No re-auth: cancelling
+    is the safe direction. Eternal gate + CSRF still apply.
     """
 
     http_method_names = ("post",)
@@ -205,14 +304,17 @@ class DeployCancelScheduledView(ForgerRequiredMixin, NeverCacheMixin, View):
         if not deploy_id:
             return JsonResponse({"message": "Missing deploy_id."}, status=400)
 
+        target = _poll_target(request)
         try:
-            result = cancel_deploy(deploy_id)
+            result = cancel_deploy(deploy_id, target=target)
         except DeployAgentError as exc:
             return JsonResponse(
                 {"message": f"Deploy agent unavailable: {exc}"}, status=503
             )
 
-        if result.get("ok"):
+        # Only prod deploys are scheduled (and thus announced), so only they get
+        # a stand-down announcement.
+        if result.get("ok") and target == "local":
             webadmin.enqueue(
                 command=WebAdminCommand.REBOOT_CANCEL,
                 payload={},
@@ -224,7 +326,7 @@ class DeployCancelScheduledView(ForgerRequiredMixin, NeverCacheMixin, View):
         return JsonResponse(result, status=status)
 
 
-class DeployGameStatusView(ForgerRequiredMixin, NeverCacheMixin, View):
+class DeployGameStatusView(EternalRequiredMixin, NeverCacheMixin, View):
     """POST-only read of the game's presence heartbeat (Contract 2, #1771).
 
     Powers the console's live "Game" pill and the pre-deploy warning when
@@ -233,7 +335,7 @@ class DeployGameStatusView(ForgerRequiredMixin, NeverCacheMixin, View):
     game_presence (one row per in-game character); we report whether the game
     is up (heartbeat within the staleness window), the live player count, and
     the heartbeat age. Degrades gracefully before the game ships the heartbeat
-    (tables absent / no row). Read-only (no re-auth); Forger gate + CSRF apply.
+    (tables absent / no row). Read-only (no re-auth); Eternal gate + CSRF apply.
     """
 
     http_method_names = ("post",)
@@ -280,9 +382,10 @@ class DeployGameStatusView(ForgerRequiredMixin, NeverCacheMixin, View):
         )
 
 
-class DeployStatusView(ForgerRequiredMixin, NeverCacheMixin, View):
+class DeployStatusView(EternalRequiredMixin, NeverCacheMixin, View):
     """POST-only status poll for a running/finished deploy. No re-auth (read
-    only); Forger gate + CSRF still apply."""
+    only); Eternal gate + CSRF still apply. Carries the deploy's env so a
+    forwarded (staging) deploy is polled on the agent that holds its state."""
 
     http_method_names = ("post",)
 
@@ -291,7 +394,7 @@ class DeployStatusView(ForgerRequiredMixin, NeverCacheMixin, View):
         if not deploy_id:
             return JsonResponse({"message": "Missing deploy_id."}, status=400)
         try:
-            result = deploy_status(deploy_id)
+            result = deploy_status(deploy_id, target=_poll_target(request))
         except DeployAgentError as exc:
             return JsonResponse(
                 {"message": f"Deploy agent unavailable: {exc}"}, status=503
