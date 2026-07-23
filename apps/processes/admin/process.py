@@ -14,7 +14,7 @@ class MUDProcessAdmin(ModelAdmin):
     # The old "Restart" button here shelled out to `sudo systemctl restart` on
     # the host (apps/processes/utils/service.py) — a bare-metal relic that is
     # broken in the container model and was security-sensitive. It is retired in
-    # favour of the God-gated web deploy page (portal:deploy, #1754). The
+    # favour of the Forger-gated web deploy page (portal:deploy, #1754). The
     # terminate/kill signal actions remain but only see this container's process
     # table; the game runs in a separate container, so they are largely inert in
     # prod too (tracked as follow-up cleanup, out of scope for #1754).

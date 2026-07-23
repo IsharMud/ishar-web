@@ -1,6 +1,6 @@
 """Client for the host deploy agent (#1754).
 
-The God-gated deploy page (apps/accounts/views/deploy.py) uses this to talk to
+The Forger-gated deploy page (apps/accounts/views/deploy.py) uses this to talk to
 scripts/deploy-agent.py on the host over a bind-mounted unix socket. The agent —
 NOT this container — is the real security boundary: it enforces the env/service
 allowlist and argv-execs deploy.sh. This client only frames JSON requests and

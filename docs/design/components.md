@@ -374,7 +374,7 @@ Status: **formalized** (see decisions.md 2026-07-19).
 
 ### Global nav "Portal" dropdown
 `apps/core/templates/layout.html` — the staff/admin menu (Administration,
-Deploy, Feedback Triage, …), gated by `is_staff`/`is_god`/`is_eternal`. The
+Deploy, Feedback Triage, …), gated by `is_staff`/`is_forger`/`is_god`/`is_eternal`. The
 canonical place to surface a new staff tool (mirror the existing items).
 Count badges in the nav are plain `.ac-pill`s.
 

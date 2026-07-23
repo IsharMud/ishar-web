@@ -12,7 +12,7 @@ repo is **not** the game; the game engine (C + a growing Rust layer) lives in
 2. **The web telnet client** (`/connect`) — a browser terminal that speaks to
    the live game over a Channels/Daphne websocket bridge (the "HUD").
 3. **Staff / admin tooling** — the account portal (`/portal`), feedback triage,
-   the **Deploy Console** (`/portal/deploy`, God-gated, drives blue-green
+   the **Deploy Console** (`/portal/deploy`, Forger-gated, drives blue-green
    deploys of the game from a phone), and process/admin views.
 
 The site **shares the game's MariaDB**. Most models are `managed = False` — they
@@ -187,6 +187,8 @@ New views are class-based. Staff gating uses the mixins in
 for them):
 
 - `GodRequiredMixin` — `account.is_god()` (`immortal_level >= 5`).
+- `ForgerRequiredMixin` — `account.is_forger()` (`immortal_level >= 4`); gates
+  the Deploy Console.
 - `EternalRequiredMixin` — `account.is_eternal()` (`immortal_level >= 3`;
   equivalent to `is_staff`).
 - `NeverCacheMixin` — for sensitive/live pages.
