@@ -187,16 +187,11 @@
     background: var(--ac-elev);
     border-color: var(--ac-border-2);
 }
-/* Environment intent tints when selected. */
+/* Prod's intent tint when selected (red — it's the dangerous env). */
 .btn-check:checked + .ac-seg__item--prod {
     color: #ffb3b3;
     background: var(--ac-danger-wash);
     border-color: rgba(214,75,75,.5);
-}
-.btn-check:checked + .ac-seg__item--test {
-    color: #bcd8ff;
-    background: var(--ac-info-wash);
-    border-color: rgba(74,134,207,.5);
 }
 .btn-check:focus-visible + .ac-seg__item {
     outline: 2px solid var(--ac-accent);
