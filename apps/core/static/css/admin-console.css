@@ -198,7 +198,7 @@
     outline-offset: 2px;
 }
 /* Wrapping variant: for a control with more/longer items than fit one phone row
-   (the deploy console's 2 short envs never need it; the log viewer's 3 sources
+   (the deploy console's single env never needs it; the log viewer's 3 sources
    do). Block-level (`display:flex`) so it's constrained to its container width —
    base .ac-seg is inline-flex and sizes to content, so flex-wrap alone would
    never trigger. Items grow to fill and wrap to the next line on overflow. */

@@ -1,6 +1,6 @@
-"""God-gated web deploy button (#1754).
+"""Forger-gated web deploy button (#1754).
 
-A phone-friendly page (NOT Django admin) where a God picks an environment and
+A phone-friendly page (NOT Django admin) where a Forger picks an environment and
 services and triggers scripts/deploy.sh on the host via the deploy agent. The
 deploy POST requires password re-entry (re-auth), so a driven/XSS'd session
 cannot fire a deploy on its own — see docs/infrastructure/reboot_process.md §4.
@@ -17,7 +17,7 @@ from apps.connect import tracker as connect_tracker
 from apps.core.models.webadmin import WebAdminCommand
 from apps.core.utils import webadmin
 from apps.core.utils.staff import staff_name
-from apps.core.views.mixins import GodRequiredMixin, NeverCacheMixin
+from apps.core.views.mixins import ForgerRequiredMixin, NeverCacheMixin
 
 from ..utils.deploy_agent import (
     DeployAgentError,
@@ -33,8 +33,8 @@ SCHEDULE_DELAY_MIN = 60
 SCHEDULE_DELAY_MAX = 3600
 
 
-class DeployView(GodRequiredMixin, NeverCacheMixin, TemplateView):
-    """Render the deploy control page. God-only (GodRequiredMixin -> 404)."""
+class DeployView(ForgerRequiredMixin, NeverCacheMixin, TemplateView):
+    """Render the deploy control page. Forger-only (ForgerRequiredMixin -> 404)."""
 
     template_name = "deploy.html"
 
@@ -46,10 +46,10 @@ class DeployView(GodRequiredMixin, NeverCacheMixin, TemplateView):
         return context
 
 
-class DeployActionView(GodRequiredMixin, NeverCacheMixin, View):
+class DeployActionView(ForgerRequiredMixin, NeverCacheMixin, View):
     """POST-only endpoint that starts a deploy. CSRF-protected (no exemption).
 
-    Requires re-authentication: the God must re-enter their account password on
+    Requires re-authentication: the Forger must re-enter their account password on
     this request. The heavy validation (env/service allowlist, injection
     inertness) lives in the host agent; we surface its verdict.
     """
@@ -86,9 +86,9 @@ class DeployActionView(GodRequiredMixin, NeverCacheMixin, View):
         return JsonResponse(result, status=status)
 
 
-class DeployPingView(GodRequiredMixin, NeverCacheMixin, View):
+class DeployPingView(ForgerRequiredMixin, NeverCacheMixin, View):
     """POST-only liveness probe for the host agent. Powers the console's live
-    agent-health pill. Read-only (no re-auth); God gate + CSRF still apply."""
+    agent-health pill. Read-only (no re-auth); Forger gate + CSRF still apply."""
 
     http_method_names = ("post",)
 
@@ -107,14 +107,14 @@ class DeployPingView(GodRequiredMixin, NeverCacheMixin, View):
         return JsonResponse(result)
 
 
-class DeployWebClientsView(GodRequiredMixin, NeverCacheMixin, View):
+class DeployWebClientsView(ForgerRequiredMixin, NeverCacheMixin, View):
     """POST-only count of live web-client (/connect) game sessions.
 
     Deploying ishar-web restarts Daphne, which severs every browser player's
     telnet proxy mid-game — the console polls this to warn before that happens.
     Reads an in-process registry (Daphne is a single process; see
     apps.connect.tracker), so it costs nothing and needs no agent or DB.
-    Read-only (no re-auth); God gate + CSRF still apply.
+    Read-only (no re-auth); Forger gate + CSRF still apply.
     """
 
     http_method_names = ("post",)
@@ -123,7 +123,7 @@ class DeployWebClientsView(GodRequiredMixin, NeverCacheMixin, View):
         return JsonResponse(connect_tracker.snapshot())
 
 
-class DeployScheduleView(GodRequiredMixin, NeverCacheMixin, View):
+class DeployScheduleView(ForgerRequiredMixin, NeverCacheMixin, View):
     """POST-only: schedule a deploy after a delay, warning players first.
 
     One action, two effects, in this order:
@@ -189,13 +189,13 @@ class DeployScheduleView(GodRequiredMixin, NeverCacheMixin, View):
         return JsonResponse({**result, "notice_task_id": task.id}, status=200)
 
 
-class DeployCancelScheduledView(GodRequiredMixin, NeverCacheMixin, View):
+class DeployCancelScheduledView(ForgerRequiredMixin, NeverCacheMixin, View):
     """POST-only: cancel a still-scheduled deploy and tell players it's off.
 
     Cancels the host agent's pending deploy (a no-op once it has started
     running), then — if the cancel landed — enqueues a `reboot_cancel` so the
     game announces the stand-down. No re-auth: cancelling is the safe direction.
-    God gate + CSRF still apply.
+    Forger gate + CSRF still apply.
     """
 
     http_method_names = ("post",)
@@ -224,7 +224,7 @@ class DeployCancelScheduledView(GodRequiredMixin, NeverCacheMixin, View):
         return JsonResponse(result, status=status)
 
 
-class DeployGameStatusView(GodRequiredMixin, NeverCacheMixin, View):
+class DeployGameStatusView(ForgerRequiredMixin, NeverCacheMixin, View):
     """POST-only read of the game's presence heartbeat (Contract 2, #1771).
 
     Powers the console's live "Game" pill and the pre-deploy warning when
@@ -233,7 +233,7 @@ class DeployGameStatusView(GodRequiredMixin, NeverCacheMixin, View):
     game_presence (one row per in-game character); we report whether the game
     is up (heartbeat within the staleness window), the live player count, and
     the heartbeat age. Degrades gracefully before the game ships the heartbeat
-    (tables absent / no row). Read-only (no re-auth); God gate + CSRF apply.
+    (tables absent / no row). Read-only (no re-auth); Forger gate + CSRF apply.
     """
 
     http_method_names = ("post",)
@@ -280,9 +280,9 @@ class DeployGameStatusView(GodRequiredMixin, NeverCacheMixin, View):
         )
 
 
-class DeployStatusView(GodRequiredMixin, NeverCacheMixin, View):
+class DeployStatusView(ForgerRequiredMixin, NeverCacheMixin, View):
     """POST-only status poll for a running/finished deploy. No re-auth (read
-    only); God gate + CSRF still apply."""
+    only); Forger gate + CSRF still apply."""
 
     http_method_names = ("post",)
 

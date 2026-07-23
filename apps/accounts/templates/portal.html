@@ -46,7 +46,7 @@
                     <span class="ac-link__note d-block">Django admin — models &amp; data</span>
                 </span>
             </a>
-    {% if user.is_god %}
+    {% if user.is_forger %}
             <a class="ac-link" href="{% url 'deploy' %}#deploy" title="Deploy Console">
                 <span class="ac-link__icon">{% bi "rocket-takeoff" %}</span>
                 <span class="ac-link__body">
@@ -54,6 +54,8 @@
                     <span class="ac-link__note d-block">Rebuild &amp; restart the stack</span>
                 </span>
             </a>
+    {% endif %}
+    {% if user.is_god %}
             <a class="ac-link" href="{% url 'season_console' %}#console" title="Season Console">
                 <span class="ac-link__icon">{% bi "hourglass-split" %}</span>
                 <span class="ac-link__body">

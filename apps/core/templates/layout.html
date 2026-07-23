@@ -240,13 +240,15 @@
                                         {% bi "box-arrow-up-right" label="Open Administration in a new window." %}
                                     </a>
                                 </li>
-        {% if user.is_god %}
+        {% if user.is_forger %}
                                 <li class="nav-item" title="Deploy">
                                     <a class="nav-link dropdown-item icon-link icon-link-hover" href="{% url 'deploy' %}#deploy">
                                         {% bi "rocket-takeoff" %}
                                         Deploy
                                     </a>
                                 </li>
+        {% endif %}
+        {% if user.is_god %}
                                 <li class="nav-item" title="Season Console">
                                     <a class="nav-link dropdown-item icon-link icon-link-hover" href="{% url 'season_console' %}#console">
                                         {% bi "hourglass-split" %}
