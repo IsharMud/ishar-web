@@ -2146,3 +2146,45 @@ are conjunctive bundles one character must satisfy whole, never alternatives.
 Discipline unchanged: `el()`/`textContent`, tokens only, motion-free. Verified
 with the demo feed (done/undone/hidden-earned/grouped mix) at desktop and
 390px.
+
+## 2026-07-26 — Player profile inspect layer: kit paperdoll, standing bars, ledger
+
+**Problem.** The profile page stopped at prose details and six trainable
+stats while the shared DB already held the character's whole material life —
+worn equipment (`player_objects`, refreshed by the ~5-minute autosave),
+enchants, object mods, lifetime `player_stats` totals. Nothing on the web
+showed a character's kit or where they stand against the playerbase, for
+players or for staff triaging balance questions.
+
+**Decision.** Three new panels on `player.html`, gated to an "inspect layer":
+the profile's owning account and Eternal+ staff, until the feature is promoted
+to public (isharmud/ishar-web#176 tracks the promotion call). Within the gate:
+
+- **Kit** — a paperdoll as a slot-tile grid (`.ac-doll`), head→feet with held
+  items in their worn position (the same presentation order as the HUD's
+  recipe categories), *not* literal body art: Bootstrap Icons carry the slot
+  vocabulary and the console greys carry the look. Tapping a filled slot pins
+  its server-rendered item card below the grid — cards are plain Django
+  markup toggled by class/`hidden` swaps, so no data ever passes through JS.
+  The `title` attribute provides desktop hover text as sugar; tap is the
+  affordance of record (hover isn't real on phones).
+- **Standing** — `.ac-bars` comparing lifetime totals against all living
+  mortal characters plus per-day-rate `.ac-tiles`. `player_stats` is snapshot
+  totals with no history, so the visuals are comparative by design, never
+  time-series; a rank token (`#n`) rides each bar's value.
+- **Ledger** — an `.ac-kv` of bank / gold / unspent renown / favors / karma.
+  Money is inspect-gated with the rest; it's the most sensitive number here.
+
+**Data.** `player_objects.position_type/position_val` (26 wear slots) joined
+to `objects`, `object_flags`, and — via a new `managed = False` `Enchantment`
+model, upgrading `PlayerObject.enchant` from a bare int to the FK the DB
+already declares — `enchantments`. Object mods come from the
+`object_object_mods` through table queried directly (its OneToOne-to-Object
+mapping can't represent multiple mod slots). Slot spec + assembly live in
+`apps/players/kit.py`; standing math in the view.
+
+**Notes.** Empty slots render dashed/dim so gaps read at a glance; an amber
+✦ marks enchanted tiles. Verified: template compile, `manage.py check`,
+`node --check`, and Chromium screenshots of a simulated-data preview at
+1200px and a true 390px viewport (headless `--window-size` clamps at 500 —
+use Playwright device emulation for phone proof).

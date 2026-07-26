@@ -322,6 +322,32 @@ dim second line inside a cell (class under player name).
 Used: leaders. Status: **formalized** (supersedes the DataTables treatment —
 see decisions.md).
 
+### `.ac-doll` — equipment paperdoll
+The profile kit panel (player.html): wear slots as tiles in a responsive grid,
+head→feet with held items in their worn position (the HUD recipe-category
+order). Filled slots are `<button>`s that pin their server-rendered
+`.ac-doll__card` below the grid (class/`hidden` swap only — no data through
+JS); empty slots are dashed, dim, non-interactive `<div>`s. An amber
+`.ac-doll__ench` ✦ marks enchanted tiles; `title` gives desktop hover text
+(tap is the affordance of record). Card: `__cardhead` (name + `.ac-pill`s),
+an `.ac-kv`, an ok-green `__mods` list, a dim italic `__flavor` line.
+```html
+<div class="ac-doll">
+  <button class="ac-doll__slot" type="button" data-slot="1" aria-expanded="false"
+          aria-controls="kit-card-1" title="the greatsword Duskrender">
+    <span class="ac-doll__icon">{% bi "lightning-charge" %}</span>
+    <span class="ac-doll__body">
+      <span class="ac-doll__label">Wielded</span>
+      <span class="ac-doll__name">the greatsword Duskrender</span>
+    </span>
+    <span class="ac-doll__ench" title="Enchanted">&#10038;</span>
+  </button>
+</div>
+<div class="ac-doll__card" id="kit-card-1" hidden>…</div>
+```
+Used: player profile (inspect-gated — see decisions.md 2026-07-26).
+Status: **formalized.**
+
 ### `.ac-row--done` / `.ac-row:target` — row states
 `--done` checks a record off: title struck through in ok-green, icon tile
 turns ok (challenges). `:target` washes a deep-linked row amber (row `id`s +

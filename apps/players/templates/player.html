@@ -170,6 +170,140 @@
     </div>
 {% endif %}
 
+{% if can_inspect %}
+    <div class="ac-panel">
+        <div class="ac-panel__h" id="kit">
+            {% bi "backpack2" %}
+            Kit
+            <a class="anchor-link" href="#kit" aria-label="Link to this section: Kit"></a>
+        </div>
+        <p class="ac-panel__hint">
+            Worn equipment as of the last autosave (within ~5 minutes).
+            Tap a slot for details &mdash; visible only to this character&#39;s
+            account and staff.
+        </p>
+        <div class="ac-doll" id="kit-doll">
+{% for slot in kit %}
+{% if slot.item %}
+            <button class="ac-doll__slot" type="button" data-slot="{{ slot.position }}"
+                    aria-expanded="false" aria-controls="kit-card-{{ slot.position }}"
+                    title="{{ slot.item.object.longname }}{% if slot.item.enchant %} &middot; {{ slot.item.enchant.name }}{% endif %}">
+                <span class="ac-doll__icon">{% bi slot.icon %}</span>
+                <span class="ac-doll__body">
+                    <span class="ac-doll__label">{{ slot.label }}</span>
+                    <span class="ac-doll__name">{{ slot.item.object.longname }}</span>
+                </span>
+{% if slot.item.enchant %}
+                <span class="ac-doll__ench" title="Enchanted: {{ slot.item.enchant.name }}">&#10038;</span>
+{% endif %}
+            </button>
+{% else %}
+            <div class="ac-doll__slot ac-doll__slot--empty">
+                <span class="ac-doll__icon">{% bi slot.icon %}</span>
+                <span class="ac-doll__body">
+                    <span class="ac-doll__label">{{ slot.label }}</span>
+                    <span class="ac-doll__name">&mdash;</span>
+                </span>
+            </div>
+{% endif %}
+{% endfor %}
+        </div>
+{% for slot in kit %}
+{% if slot.item %}
+        <div class="ac-doll__card" id="kit-card-{{ slot.position }}" hidden>
+            <div class="ac-doll__cardhead">
+                <span>{{ slot.item.object.longname }}</span>
+{% if slot.item.object.flag.artifact %}
+                <span class="ac-pill ac-pill--warn">artifact</span>
+{% endif %}
+{% if slot.item.object.flag.relic %}
+                <span class="ac-pill ac-pill--info">relic</span>
+{% endif %}
+{% if slot.item.enchant %}
+                <span class="ac-pill ac-pill--accent">{{ slot.item.enchant.name }}</span>
+{% endif %}
+            </div>
+            <dl class="ac-kv mb-0">
+                <dt>Slot</dt>
+                <dd>{{ slot.label }}</dd>
+                <dt>Type</dt>
+                <dd>{{ slot.item.object.get_item_type_display }}</dd>
+{% if slot.item.min_level %}
+                <dt>Min Level</dt>
+                <dd>{{ slot.item.min_level }}</dd>
+{% endif %}
+{% if slot.item.object.weight %}
+                <dt>Weight</dt>
+                <dd>{{ slot.item.object.weight }}</dd>
+{% endif %}
+            </dl>
+{% if slot.mods %}
+            <ul class="ac-doll__mods">
+{% for mod in slot.mods %}
+                <li>{{ mod.value|stringformat:"+d" }} {{ mod.object_mod }}</li>
+{% endfor %}
+            </ul>
+{% endif %}
+{% if slot.item.enchant.obj_display %}
+            <p class="ac-doll__flavor">{{ slot.item.enchant.obj_display }}</p>
+{% endif %}
+        </div>
+{% endif %}
+{% endfor %}
+    </div>
+
+    <div class="ac-panel">
+        <div class="ac-panel__h" id="standing">
+            {% bi "bar-chart" %}
+            Standing
+            <a class="anchor-link" href="#standing" aria-label="Link to this section: Standing"></a>
+        </div>
+        <p class="ac-panel__hint">
+            Lifetime totals compared against all {{ standing.peer_count }}
+            living mortal characters.
+        </p>
+        <div class="ac-bars">
+{% for row in standing.rows %}
+            <div class="ac-bar" title="{{ row.label }}: {{ row.display }} (#{{ row.rank }} of {{ standing.peer_count }})">
+                <span class="ac-bar__label">{{ row.label }}</span>
+                <span class="ac-bar__track"><span class="ac-bar__fill" style="width: {{ row.pct }}%;"></span></span>
+                <span class="ac-bar__n">{{ row.display }} &middot; #{{ row.rank }}</span>
+            </div>
+{% endfor %}
+        </div>
+{% if standing.tiles %}
+        <div class="ac-tiles mt-2">
+{% for tile in standing.tiles %}
+            <div class="ac-tile ac-tile--{{ tile.css }}">
+                <span class="ac-tile__n">{{ tile.value }}</span>
+                <span class="ac-tile__label">{{ tile.label }}</span>
+            </div>
+{% endfor %}
+        </div>
+{% endif %}
+    </div>
+
+    <div class="ac-panel">
+        <div class="ac-panel__h" id="ledger">
+            {% bi "coin" %}
+            Ledger
+            <a class="anchor-link" href="#ledger" aria-label="Link to this section: Ledger"></a>
+        </div>
+        <dl class="ac-kv mb-0">
+            <dt>Bank</dt>
+            <dd>{{ player.bankacc|intcomma }}</dd>
+            <dt>Gold Carried</dt>
+            <dd>{{ player.common.gold|intcomma }}</dd>
+            <dt>Unspent Renown</dt>
+            <dd>{{ player.renown|intcomma }}</dd>
+            <dt>Favors</dt>
+            <dd>{{ player.favors|intcomma }}</dd>
+            <dt>Karma</dt>
+            <dd>{{ player.common.karma|intcomma }}</dd>
+        </dl>
+    </div>
+{% endif %}
+
     <div class="ac-panel">
         <div class="ac-panel__h" id="time">
             {% bi "hourglass-split" %}
@@ -213,4 +347,35 @@
 {% endif %}
 
 </div>
+<script>
+    (function () {
+        "use strict";
+
+        const doll = document.getElementById("kit-doll");
+        if (!doll) { return; }
+
+        const slots = doll.querySelectorAll("button.ac-doll__slot");
+        const cards = document.querySelectorAll(".ac-doll__card");
+
+        const closeAll = function () {
+            slots.forEach(function (slot) {
+                slot.classList.remove("ac-doll__slot--active");
+                slot.setAttribute("aria-expanded", "false");
+            });
+            cards.forEach(function (card) { card.hidden = true; });
+        };
+
+        slots.forEach(function (slot) {
+            slot.addEventListener("click", function () {
+                const wasActive = slot.classList.contains("ac-doll__slot--active");
+                closeAll();
+                if (wasActive) { return; }
+                slot.classList.add("ac-doll__slot--active");
+                slot.setAttribute("aria-expanded", "true");
+                const card = document.getElementById("kit-card-" + slot.dataset.slot);
+                if (card) { card.hidden = false; }
+            });
+        });
+    })();
+</script>
 {% endblock content %}
