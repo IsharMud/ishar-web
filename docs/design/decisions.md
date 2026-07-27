@@ -9,6 +9,74 @@ Format: `## YYYY-MM-DD — Title` · **Decision** · **Why** · (optional) **Not
 
 ---
 
+## 2026-07-27 — Multiplay: sessions are a client-side concern; one HUD, N terminals
+
+**Decision.** The web client hosts up to three simultaneous game sessions in
+one page (isharmud/ishar-web#178). The architecture and the chrome it earned:
+
+- **Per-session objects, one singleton HUD.** Each session owns a websocket,
+  an xterm instance in its own `.term-host`, a GMCP latest-state cache, a chat
+  ring, and its reconnect ladder. Exactly one session is *focused*: only its
+  GMCP feed reaches `IsharHUD.onGmcp`, and a focus switch rebuilds the HUD by
+  `reset()` + replaying the cache in login-burst order (`Char.Status` first so
+  the per-character action bar re-syncs; cooldown/affect durations rebased by
+  cache age). The alternative — factory-izing `hud.js`/`hud-map.js` into N
+  instances — was rejected: ~35 hardcoded element ids, module state, document
+  hotkeys, and a map canvas per copy, for no player-visible gain. **Background
+  sessions never feed the HUD** — that invariant is what keeps map discovery,
+  quest state, bar sync, and notifications uncontaminated.
+- **All terminals share the main slot.** Blurred hosts hide via `visibility`,
+  not `display`, so every terminal keeps real dimensions: one fit pass sizes
+  all, NAWS stays honest per socket, and a switch is instant with no refit.
+- **Session tabs live in the topbar** — existing chrome, not an over-terminal
+  surface, so the 2026-07-19 "no persistent over-terminal chrome" rule is not
+  implicated; with one session the strip renders nothing and the page is
+  byte-for-byte the old one. Tabs carry status dot, name (immortal-account
+  characters tinted `--ac-immortal`), unread count, and a danger-pulse bell
+  (damage or tell while blurred). The "+" opens a character picker fed by
+  `/connect/characters/`; enforcement stays in the game (`check_multiplay`),
+  whose refusal prints in the new session's terminal.
+- **Cross-send is browser-side routing** — the page owns every socket, so
+  `@name/@slot/@all <cmd>`, mirror mode (`/mirror`, warn-orange armed input),
+  and the peek mini input are all just "pick a session, run the normal
+  pipeline against its `send`". A hard wall everywhere: a target at a
+  password prompt is refused, and mirror disarms when the focused session
+  enters one — secret keystrokes never fan out. A chip by the input always
+  names the driven character.
+- **The peek pane** (≥1200px, 2+ sessions, hidden with the HUD, never on
+  phones) hosts the background session's own re-parented terminal under the
+  main one with a mini input. It meets the tracked-objectives amendment's
+  bar for near-terminal chrome: opt-in by having sessions, collapsible
+  (persisted), bounded (~9 rows), desktop-only, and gone with `.hud-off`.
+- **Hotkey: `Alt+C` cycles sessions** (`Shift` reverses), by `e.code` like
+  `Alt+T/A/O`. Rejected: `Alt/Ctrl+digit` (action bar's), `Alt+Shift+digit`
+  (Windows input-language toggle / AltGr collisions), direct-jump digits
+  (three sessions max — cycle plus tap covers it).
+- **Storage:** scrollback moves to `ishar.term.<slot>` (the 2026-07-15 entry's
+  single-key assumption held only for one session per tab; legacy key
+  migrates to slot 1), and `ishar.sessions` (sessionStorage) persists the
+  roster + focus so a reload rebuilds and reconnects the whole set. Aliases,
+  history, and settings stay device-shared; per-character state was already
+  server-side (`web_hud_bar`).
+
+**Why.** Immortals drive an admin character and a player character at once,
+and the game already sanctions account multiplay (immortals bypass the check;
+mortals get the season limit) — but the web had no story beyond blind browser
+tabs, and the only sanctioned cross-character control anywhere is a Mudlet
+trigger hack. The bridge made the client-side design nearly free: each
+websocket re-auths itself (`webauth` per socket) and now auto-selects its
+character, so N sessions need no new server surface — in line with the
+"DB-mediated, no new sockets" bridge rule.
+
+**Notes.** Verification: `node --check`, template compile, `manage.py check`,
+and headless-Chromium sims of the real code paths (focus switch + replay,
+badges, picker, @-routing, mirror, peek) at 1400px/390px; live multi-socket
+play against the game is the owner's on-prod check. Server rough edges are
+filed in ishar-mud, not fixed here: single `Account.sockd` pointer,
+`is_account_busy()` blocking a second seasonal-menu, regen divided by
+`num_online`, no per-account premium entitlement, and the char-select
+automation's dependence on prompt copy.
+
 ## 2026-07-21 — HUD combat layer III: order-followers hotkey + skills that inherit the target
 
 **Decision.** Two combat gaps in the `/connect` HUD close, and the "Alt = act"
