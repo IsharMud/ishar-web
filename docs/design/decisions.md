@@ -2188,3 +2188,37 @@ mapping can't represent multiple mod slots). Slot spec + assembly live in
 `node --check`, and Chromium screenshots of a simulated-data preview at
 1200px and a true 390px viewport (headless `--window-size` clamps at 500 —
 use Playwright device emulation for phone proof).
+
+## 2026-07-27 — Kit goes public; the paperdoll becomes an actual paper doll
+
+**Problem.** The first kit panel (2026-07-26) rendered as a flat auto-fill
+grid — organized, but it didn't read as a body — and the whole inspect layer
+(kit + standing + ledger) was gated to owner/Eternal while the page already
+surfaces remort upgrades publicly. Equipment isn't truly competitive
+information for this playerbase.
+
+**Decision.** Two-tier profile, deliberately:
+
+- **Public** (any logged-in viewer of a non-private profile): the prose
+  details, remort upgrades, trainable stats, times — and now the **kit**.
+  Owner-promoted from the inspect layer per #176.
+- **Inspect** (owning account + Eternal+): **standing** and **ledger** — the
+  comparative analytics and the money stay the private layer.
+
+The doll itself is now anatomical: two slot columns flank a drawn SVG
+silhouette (head/neck/back zone on its left, torso/arms on its right), with
+held items and the lower body in a strip beneath a dashed rule. The
+silhouette is inline `currentColor` art tinted `--ac-elev` — background, not
+foreground; the slots stay the interactive surface. On phones the figure
+hides and the columns sit side by side, so the anatomical grouping survives
+at 390px without the art. Slot markup consolidated into the `kit_slot.html`
+partial; groups defined in `apps/players/kit.py`.
+
+**Also.** A private profile no longer 404s its own account: the owner always
+sees their own characters (staff-gating for everyone else unchanged). The
+prior behavior meant marking yourself private removed your own profile page —
+indefensible once the profile carries a self-view layer.
+
+**Notes.** Verified as before — template compile + render smoke test,
+`manage.py check`, Playwright screenshots at 1200px and a true 390px
+viewport (scrollWidth 390, no overflow).

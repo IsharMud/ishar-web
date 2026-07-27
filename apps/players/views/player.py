@@ -43,8 +43,10 @@ class PlayerView(LoginRequiredMixin, NeverCacheMixin, DetailView):
         if is_private:
             # Same 404-for-everyone-else convention as GodRequiredMixin: a
             #   private profile does not disclose its own existence to
-            #   anyone below Artisan.
-            if not self.request.user.is_artisan():
+            #   anyone below Artisan — except its own account, who always
+            #   sees their own characters.
+            user = self.request.user
+            if not (user.pk == obj.account_id or user.is_artisan()):
                 raise Http404
             messages.add_message(
                 request=self.request,
@@ -57,14 +59,14 @@ class PlayerView(LoginRequiredMixin, NeverCacheMixin, DetailView):
         context = super().get_context_data(**kwargs)
         player = context["player"]
 
-        # Kit / standing / ledger are the "inspect" layer: the owning account
-        #   and Eternal+ staff, until the feature is promoted to public
-        #   (isharmud/ishar-web#176).
+        # The kit is public (isharmud/ishar-web#176: equipment surfaces like
+        #   remort upgrades do); standing/ledger stay the "inspect" layer —
+        #   the owning account and Eternal+ staff.
+        context["kit"] = build_kit(player)
         user = self.request.user
         can_inspect = user.pk == player.account_id or user.is_eternal()
         context["can_inspect"] = can_inspect
         if can_inspect:
-            context["kit"] = build_kit(player)
             context["standing"] = self.build_standing(player)
         return context
 

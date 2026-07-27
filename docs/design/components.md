@@ -323,29 +323,28 @@ Used: leaders. Status: **formalized** (supersedes the DataTables treatment —
 see decisions.md).
 
 ### `.ac-doll` — equipment paperdoll
-The profile kit panel (player.html): wear slots as tiles in a responsive grid,
-head→feet with held items in their worn position (the HUD recipe-category
-order). Filled slots are `<button>`s that pin their server-rendered
-`.ac-doll__card` below the grid (class/`hidden` swap only — no data through
-JS); empty slots are dashed, dim, non-interactive `<div>`s. An amber
-`.ac-doll__ench` ✦ marks enchanted tiles; `title` gives desktop hover text
-(tap is the affordance of record). Card: `__cardhead` (name + `.ac-pill`s),
-an `.ac-kv`, an ok-green `__mods` list, a dim italic `__flavor` line.
+The profile kit panel (player.html): two anatomical slot columns flanking a
+drawn SVG silhouette (`__figure`, inline `currentColor` art on `--ac-elev`) —
+head/neck/back zone left, torso/arms right — with held items and the lower
+body in a full-width `__strip` beneath a dashed rule. Slot markup lives in
+the `kit_slot.html` partial; groups come from `apps/players/kit.py`. Filled
+slots are `<button>`s that pin their server-rendered `.ac-doll__card` below
+the doll (class/`hidden` swap only — no data through JS); empty slots are
+dashed, dim, non-interactive `<div>`s. An amber `.ac-doll__ench` ✦ marks
+enchanted tiles; `title` gives desktop hover text (tap is the affordance of
+record). Card: `__cardhead` (name + `.ac-pill`s), an `.ac-kv`, an ok-green
+`__mods` list, a dim italic `__flavor` line. On phones the figure hides and
+the two columns sit side by side.
 ```html
 <div class="ac-doll">
-  <button class="ac-doll__slot" type="button" data-slot="1" aria-expanded="false"
-          aria-controls="kit-card-1" title="the greatsword Duskrender">
-    <span class="ac-doll__icon">{% bi "lightning-charge" %}</span>
-    <span class="ac-doll__body">
-      <span class="ac-doll__label">Wielded</span>
-      <span class="ac-doll__name">the greatsword Duskrender</span>
-    </span>
-    <span class="ac-doll__ench" title="Enchanted">&#10038;</span>
-  </button>
+  <div class="ac-doll__col">{# head/neck/back slots via kit_slot.html #}</div>
+  <div class="ac-doll__figure" aria-hidden="true">{# inline silhouette svg #}</div>
+  <div class="ac-doll__col">{# torso/arm slots #}</div>
+  <div class="ac-doll__strip">{# held + lower-body slots #}</div>
 </div>
 <div class="ac-doll__card" id="kit-card-1" hidden>…</div>
 ```
-Used: player profile (inspect-gated — see decisions.md 2026-07-26).
+Used: player profile (public — see decisions.md 2026-07-27).
 Status: **formalized.**
 
 ### `.ac-row--done` / `.ac-row:target` — row states

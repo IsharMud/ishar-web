@@ -1,0 +1,23 @@
+{% load ishar %}
+{% if slot.item %}
+<button class="ac-doll__slot" type="button" data-slot="{{ slot.position }}"
+        aria-expanded="false" aria-controls="kit-card-{{ slot.position }}"
+        title="{{ slot.item.object.longname }}{% if slot.item.enchant %} &middot; {{ slot.item.enchant.name }}{% endif %}">
+    <span class="ac-doll__icon">{% bi slot.icon %}</span>
+    <span class="ac-doll__body">
+        <span class="ac-doll__label">{{ slot.label }}</span>
+        <span class="ac-doll__name">{{ slot.item.object.longname }}</span>
+    </span>
+{% if slot.item.enchant %}
+    <span class="ac-doll__ench" title="Enchanted: {{ slot.item.enchant.name }}">&#10038;</span>
+{% endif %}
+</button>
+{% else %}
+<div class="ac-doll__slot ac-doll__slot--empty">
+    <span class="ac-doll__icon">{% bi slot.icon %}</span>
+    <span class="ac-doll__body">
+        <span class="ac-doll__label">{{ slot.label }}</span>
+        <span class="ac-doll__name">&mdash;</span>
+    </span>
+</div>
+{% endif %}

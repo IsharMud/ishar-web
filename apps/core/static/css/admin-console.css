@@ -1170,14 +1170,40 @@ a.ac-link--featured:visited .ac-link__name { color: var(--ac-accent); }
 }
 
 /* -------------------------------------------------------- kit doll --- */
-/* Profile equipment paperdoll (player.html): slot tiles in wear order —
-   head to feet, held items in their worn position. Tapping a filled slot
-   pins its item card below the grid (hover isn't real on phones, so the
-   title-attribute hover text is desktop sugar, never the only affordance). */
+/* Profile equipment paperdoll (player.html): slot columns flank a drawn
+   silhouette — head/neck/back zone left, torso/arms right — with held items
+   and the lower body in a strip beneath. Tapping a filled slot pins its item
+   card below the doll (hover isn't real on phones, so the title-attribute
+   hover text is desktop sugar, never the only affordance). On phones the
+   figure steps aside and the columns sit side by side. */
 .ac-doll {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(6rem, 8rem) minmax(0, 1fr);
+    gap: .5rem .8rem;
+    align-items: start;
+}
+.ac-doll__col {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    min-width: 0;
+}
+.ac-doll__figure {
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: .4rem 0;
+    color: var(--ac-elev);
+}
+.ac-doll__figure svg { width: 100%; max-width: 7.5rem; height: auto; }
+.ac-doll__strip {
+    grid-column: 1 / -1;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
     gap: .5rem;
+    border-top: 1px dashed var(--ac-border);
+    padding-top: .6rem;
 }
 .ac-doll__slot {
     display: flex;
@@ -1275,6 +1301,8 @@ button.ac-doll__slot.ac-doll__slot--active:hover {
 
 /* ----------------------------------------------------- responsive --- */
 @media (max-width: 575.98px) {
+    .ac-doll { grid-template-columns: 1fr 1fr; gap: .5rem; }
+    .ac-doll__figure { display: none; }
     .ac-hero { flex-wrap: wrap; padding: .9rem 1rem; }
     .ac-hero__status { align-self: stretch; min-width: 0; }
     /* A hero's primary CTA fills the width once the hero wraps, so the flagship
