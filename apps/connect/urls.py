@@ -2,14 +2,19 @@
 from django.urls import path
 
 from .views import (
-    ConnectView, HudBarView, MapDiscoverView, MapNoteView, MapStateView,
-    MapZonesView, QuestCatalogView, QuestTrackedView, QuestTrackView,
-    ZoneGraphView,
+    ConnectCharactersView, ConnectView, HudBarView, MapDiscoverView,
+    MapNoteView, MapStateView, MapZonesView, QuestCatalogView,
+    QuestTrackedView, QuestTrackView, ZoneGraphView,
 )
 
 
 urlpatterns = [
     path("", ConnectView.as_view(), name="connect"),
+    path(
+        "characters/",
+        ConnectCharactersView.as_view(),
+        name="connect_characters",
+    ),
     path("map/graph/<int:vnum>/", ZoneGraphView.as_view(), name="map_graph"),
     path("map/state/<int:zone_id>/", MapStateView.as_view(), name="map_state"),
     path("map/zones/", MapZonesView.as_view(), name="map_zones"),
