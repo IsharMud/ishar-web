@@ -1,5 +1,6 @@
 from django.db import models
 
+from apps.objects.models.enchantment import Enchantment
 from apps.objects.models.object import Object
 from .player import PlayerBase
 
@@ -81,7 +82,10 @@ class PlayerObject(models.Model):
         to_field="vnum",
         verbose_name="Object",
     )
-    enchant = models.PositiveIntegerField(
+    enchant = models.ForeignKey(
+        to=Enchantment,
+        db_column="enchant",
+        on_delete=models.DO_NOTHING,
         blank=True,
         null=True,
         help_text="Enchantment of the player object.",

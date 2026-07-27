@@ -1169,6 +1169,116 @@ a.ac-link--featured:visited .ac-link__name { color: var(--ac-accent); }
     white-space: normal;
 }
 
+/* -------------------------------------------------------- kit doll --- */
+/* Profile equipment paperdoll (player.html): slot columns flank a drawn
+   silhouette — head/neck/back zone left, torso/arms right — with held items
+   and the lower body in a strip beneath. Tapping a filled slot pins its item
+   card below the doll (hover isn't real on phones, so the title-attribute
+   hover text is desktop sugar, never the only affordance). On phones the
+   figure steps aside and the columns sit side by side. */
+.ac-doll {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(6rem, 8rem) minmax(0, 1fr);
+    gap: .5rem .8rem;
+    align-items: start;
+}
+.ac-doll__col {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    min-width: 0;
+}
+.ac-doll__figure {
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: .4rem 0;
+    color: var(--ac-elev);
+}
+.ac-doll__figure svg { width: 100%; max-width: 7.5rem; height: auto; }
+.ac-doll__strip {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+    gap: .5rem;
+    border-top: 1px dashed var(--ac-border);
+    padding-top: .6rem;
+}
+.ac-doll__slot {
+    display: flex;
+    align-items: center;
+    gap: .55rem;
+    padding: .45rem .6rem;
+    background: var(--ac-bg);
+    border: 1px solid var(--ac-border);
+    border-radius: var(--ac-radius-sm);
+    color: var(--ac-text);
+    text-align: left;
+    min-width: 0;
+}
+button.ac-doll__slot {
+    cursor: pointer;
+    transition: border-color .15s ease, background .15s ease;
+}
+button.ac-doll__slot:hover {
+    border-color: var(--ac-border-2);
+    background: var(--ac-elev);
+}
+button.ac-doll__slot:focus-visible {
+    outline: 2px solid var(--ac-accent);
+    outline-offset: 1px;
+}
+.ac-doll__slot--active,
+button.ac-doll__slot.ac-doll__slot--active:hover {
+    border-color: rgba(255, 170, 119, .45);
+    background: var(--ac-wash);
+}
+.ac-doll__slot--empty { border-style: dashed; color: var(--ac-dim); }
+.ac-doll__icon { flex: 0 0 auto; display: inline-flex; color: var(--ac-accent); }
+.ac-doll__icon .bi { width: 1.05rem; height: 1.05rem; }
+.ac-doll__slot--empty .ac-doll__icon { color: var(--ac-dim); opacity: .55; }
+.ac-doll__body { min-width: 0; display: flex; flex-direction: column; }
+.ac-doll__label {
+    font-size: .62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--ac-dim);
+}
+.ac-doll__name {
+    font-size: .8rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.ac-doll__ench { margin-left: auto; flex: 0 0 auto; color: var(--ac-accent); }
+.ac-doll__card {
+    margin-top: .65rem;
+    padding: .75rem .85rem;
+    background: var(--ac-bg);
+    border: 1px solid var(--ac-border-2);
+    border-left: 3px solid var(--ac-accent);
+    border-radius: var(--ac-radius-sm);
+}
+.ac-doll__card[hidden] { display: none; }
+.ac-doll__cardhead {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .4rem;
+    margin-bottom: .55rem;
+    font-weight: 600;
+}
+.ac-doll__mods {
+    list-style: none;
+    margin: .55rem 0 0;
+    padding: 0;
+    font-size: .82rem;
+}
+.ac-doll__mods li { color: var(--ac-ok); font-variant-numeric: tabular-nums; }
+.ac-doll__flavor { margin: .55rem 0 0; font-size: .8rem; font-style: italic; color: var(--ac-dim); }
+
 /* ---------------------------------------------------------- motion --- */
 @keyframes ac-pulse {
     0%, 100% { opacity: 1;   transform: scale(1); }
@@ -1191,6 +1301,8 @@ a.ac-link--featured:visited .ac-link__name { color: var(--ac-accent); }
 
 /* ----------------------------------------------------- responsive --- */
 @media (max-width: 575.98px) {
+    .ac-doll { grid-template-columns: 1fr 1fr; gap: .5rem; }
+    .ac-doll__figure { display: none; }
     .ac-hero { flex-wrap: wrap; padding: .9rem 1rem; }
     .ac-hero__status { align-self: stretch; min-width: 0; }
     /* A hero's primary CTA fills the width once the hero wraps, so the flagship
@@ -1226,4 +1338,8 @@ a.ac-link--featured:visited .ac-link__name { color: var(--ac-accent); }
     .ac-toggle:hover { transform: none; }
     .ac-row:hover { background: transparent; }
     .ac-table tbody tr:hover { background: transparent; }
+    button.ac-doll__slot:not(.ac-doll__slot--active):hover {
+        border-color: var(--ac-border);
+        background: var(--ac-bg);
+    }
 }

@@ -2146,3 +2146,79 @@ are conjunctive bundles one character must satisfy whole, never alternatives.
 Discipline unchanged: `el()`/`textContent`, tokens only, motion-free. Verified
 with the demo feed (done/undone/hidden-earned/grouped mix) at desktop and
 390px.
+
+## 2026-07-26 — Player profile inspect layer: kit paperdoll, standing bars, ledger
+
+**Problem.** The profile page stopped at prose details and six trainable
+stats while the shared DB already held the character's whole material life —
+worn equipment (`player_objects`, refreshed by the ~5-minute autosave),
+enchants, object mods, lifetime `player_stats` totals. Nothing on the web
+showed a character's kit or where they stand against the playerbase, for
+players or for staff triaging balance questions.
+
+**Decision.** Three new panels on `player.html`, gated to an "inspect layer":
+the profile's owning account and Eternal+ staff, until the feature is promoted
+to public (isharmud/ishar-web#176 tracks the promotion call). Within the gate:
+
+- **Kit** — a paperdoll as a slot-tile grid (`.ac-doll`), head→feet with held
+  items in their worn position (the same presentation order as the HUD's
+  recipe categories), *not* literal body art: Bootstrap Icons carry the slot
+  vocabulary and the console greys carry the look. Tapping a filled slot pins
+  its server-rendered item card below the grid — cards are plain Django
+  markup toggled by class/`hidden` swaps, so no data ever passes through JS.
+  The `title` attribute provides desktop hover text as sugar; tap is the
+  affordance of record (hover isn't real on phones).
+- **Standing** — `.ac-bars` comparing lifetime totals against all living
+  mortal characters plus per-day-rate `.ac-tiles`. `player_stats` is snapshot
+  totals with no history, so the visuals are comparative by design, never
+  time-series; a rank token (`#n`) rides each bar's value.
+- **Ledger** — an `.ac-kv` of bank / gold / unspent renown / favors / karma.
+  Money is inspect-gated with the rest; it's the most sensitive number here.
+
+**Data.** `player_objects.position_type/position_val` (26 wear slots) joined
+to `objects`, `object_flags`, and — via a new `managed = False` `Enchantment`
+model, upgrading `PlayerObject.enchant` from a bare int to the FK the DB
+already declares — `enchantments`. Object mods come from the
+`object_object_mods` through table queried directly (its OneToOne-to-Object
+mapping can't represent multiple mod slots). Slot spec + assembly live in
+`apps/players/kit.py`; standing math in the view.
+
+**Notes.** Empty slots render dashed/dim so gaps read at a glance; an amber
+✦ marks enchanted tiles. Verified: template compile, `manage.py check`,
+`node --check`, and Chromium screenshots of a simulated-data preview at
+1200px and a true 390px viewport (headless `--window-size` clamps at 500 —
+use Playwright device emulation for phone proof).
+
+## 2026-07-27 — Kit goes public; the paperdoll becomes an actual paper doll
+
+**Problem.** The first kit panel (2026-07-26) rendered as a flat auto-fill
+grid — organized, but it didn't read as a body — and the whole inspect layer
+(kit + standing + ledger) was gated to owner/Eternal while the page already
+surfaces remort upgrades publicly. Equipment isn't truly competitive
+information for this playerbase.
+
+**Decision.** Two-tier profile, deliberately:
+
+- **Public** (any logged-in viewer of a non-private profile): the prose
+  details, remort upgrades, trainable stats, times — and now the **kit**.
+  Owner-promoted from the inspect layer per #176.
+- **Inspect** (owning account + Eternal+): **standing** and **ledger** — the
+  comparative analytics and the money stay the private layer.
+
+The doll itself is now anatomical: two slot columns flank a drawn SVG
+silhouette (head/neck/back zone on its left, torso/arms on its right), with
+held items and the lower body in a strip beneath a dashed rule. The
+silhouette is inline `currentColor` art tinted `--ac-elev` — background, not
+foreground; the slots stay the interactive surface. On phones the figure
+hides and the columns sit side by side, so the anatomical grouping survives
+at 390px without the art. Slot markup consolidated into the `kit_slot.html`
+partial; groups defined in `apps/players/kit.py`.
+
+**Also.** A private profile no longer 404s its own account: the owner always
+sees their own characters (staff-gating for everyone else unchanged). The
+prior behavior meant marking yourself private removed your own profile page —
+indefensible once the profile carries a self-view layer.
+
+**Notes.** Verified as before — template compile + render smoke test,
+`manage.py check`, Playwright screenshots at 1200px and a true 390px
+viewport (scrollWidth 390, no overflow).
