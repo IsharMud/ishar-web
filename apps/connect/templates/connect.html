@@ -268,6 +268,8 @@
                 {% bi "clock-history" %}
             </button>
             <div id="history-pop" hidden></div>
+            {# Multiplay: which character the input drives (2+ sessions only). #}
+            <span id="input-chip" hidden aria-live="polite"></span>
             <label for="command-input" class="visually-hidden">Command</label>
             <input type="text" id="command-input" class="form-control"
                    placeholder="Enter command..."
@@ -278,6 +280,12 @@
                    spellcheck="false"
                    enterkeyhint="send"
                    autofocus>
+            {# Multiplay: mirror typed commands to every session (2+ only). #}
+            <button type="button" class="hud-btn hud-btn--icon" id="mirror-btn" hidden
+                    aria-pressed="false" title="Mirror typed commands to all sessions"
+                    aria-label="Mirror typed commands to all sessions">
+                {% bi "broadcast" %}
+            </button>
             <button type="submit" class="hud-btn" id="send-btn" title="Send command" aria-label="Send command">
                 {% bi "send" %}
                 <span class="send-label">Send</span>
@@ -431,6 +439,8 @@
     var sessionTabs = document.getElementById("session-tabs");
     var sessionAddBtn = document.getElementById("session-add");
     var sessionPop = document.getElementById("session-pop");
+    var inputChip = document.getElementById("input-chip");
+    var mirrorBtn = document.getElementById("mirror-btn");
 
     var isMobile = ("ontouchstart" in window) && window.innerWidth < 768;
     var isDemo = new URLSearchParams(location.search).has("demo");
@@ -884,7 +894,10 @@
                     if (d === "\x00PONG") { clearProbe(); return; }
                     if (d === "\x00ECHO_ON") {
                         sess.echo = true;
-                        if (isFocused(sess)) commandInput.type = "password";
+                        if (isFocused(sess)) {
+                            commandInput.type = "password";
+                            setMirror(false);   // password keystrokes never fan out
+                        }
                         return;
                     }
                     if (d === "\x00ECHO_OFF") {
@@ -1026,6 +1039,8 @@
     // today's zero-footprint topbar. Names are player data: textContent
     // only.
     function renderSessionTabs() {
+        syncMirrorUi();
+        syncInputChip();
         if (!sessionTabs) return;
         if (sessionAddBtn) sessionAddBtn.hidden = sessions.length >= MAX_SESSIONS;
         while (sessionTabs.firstChild) sessionTabs.removeChild(sessionTabs.firstChild);
@@ -1265,6 +1280,96 @@
         });
     }
 
+    // --- Cross-session routing ---
+    // "@name cmd" / "@2 cmd" / "@all cmd" send without switching focus;
+    // mirror mode sends every typed game line to the selected sessions.
+    // Both refuse a target at a password prompt (its input is secret), and
+    // mirror disarms the moment the focused session enters one — password
+    // keystrokes must never fan out.
+
+    function sessLabel(s) { return s.displayName || ("Session " + s.slot); }
+
+    var mirror = { on: false, names: null };   // names null = every session
+
+    function mirrorTargets() {
+        if (!mirror.on) return null;
+        return sessions.filter(function(s) {
+            if (!mirror.names) return true;
+            var dn = (s.displayName || "").toLowerCase();
+            return mirror.names.some(function(n) {
+                return String(s.slot) === n || (dn && dn.indexOf(n) === 0);
+            });
+        });
+    }
+
+    function setMirror(on, names) {
+        mirror.on = !!on && sessions.length > 1;
+        mirror.names = mirror.on ? (names || null) : null;
+        syncMirrorUi();
+    }
+
+    function syncMirrorUi() {
+        if (!mirrorBtn) return;
+        if (mirror.on && sessions.length < 2) { mirror.on = false; mirror.names = null; }
+        mirrorBtn.hidden = sessions.length < 2;
+        mirrorBtn.setAttribute("aria-pressed", mirror.on ? "true" : "false");
+        commandForm.classList.toggle("mirror-armed", mirror.on);
+        commandInput.placeholder = mirror.on
+            ? "Mirroring to " + (mirror.names ? mirror.names.join(", ") : "all sessions") + "…"
+            : "Enter command...";
+    }
+
+    function syncInputChip() {
+        if (!inputChip) return;
+        var s = focusedSession;
+        var show = !!s && sessions.length > 1;
+        inputChip.hidden = !show;
+        if (!show) return;
+        inputChip.textContent = sessLabel(s);
+        inputChip.classList.toggle("input-chip--immortal", !!s.isImmortal);
+    }
+
+    // A typed game line: mirrored to the selected sessions when armed,
+    // otherwise the focused session alone.
+    function dispatchLine(line) {
+        var targets = mirrorTargets();
+        if (!targets) { dispatchGame(line); return; }
+        if (!targets.length) { sysln("Mirror matches no open session — /mirror off or /mirror all."); return; }
+        targets.forEach(function(t) {
+            if (t.echo) { sysln(sessLabel(t) + " is at a password prompt — skipped."); return; }
+            dispatchGame(line, t);
+            if (t !== focusedSession) sysln("→ " + sessLabel(t) + ": " + line);
+        });
+    }
+
+    // "@token rest" — route rest to another session (or all) explicitly.
+    function routeAcross(line) {
+        var m = line.match(/^@(\S+)\s*([\s\S]*)$/);
+        if (!m) { sysln("Usage: @<name|slot|all> <command> — see /help."); return; }
+        var token = m[1].toLowerCase();
+        var rest = m[2];
+        var targets;
+        if (token === "all") {
+            targets = sessions.slice();
+        } else {
+            var t = Sessions.byToken(token);
+            if (!t) { sysln("No session matches @" + cleanText(m[1]) + " — the tabs show who's open."); return; }
+            targets = [t];
+        }
+        targets.forEach(function(t) {
+            if (t.echo) { sysln(sessLabel(t) + " is at a password prompt — not sent."); return; }
+            dispatchGame(rest, t);
+            if (t !== focusedSession) sysln("→ " + sessLabel(t) + ": " + rest);
+        });
+    }
+
+    if (mirrorBtn) {
+        mirrorBtn.addEventListener("click", function() {
+            setMirror(!mirror.on);
+            commandInput.focus();
+        });
+    }
+
     // --- Terminal focus-return ---
     // Clicking the terminal returns focus to the command input, so you can
     // get straight back to typing without aiming for the small input bar.
@@ -1464,6 +1569,11 @@
                 sysln("      consumables from Bags (☆) — an item slot shows a live count and");
                 sysln("      greys out when you're empty. Tap the lock to edit: unlocked,");
                 sysln("      tap/drag slots to rearrange (taps don't fire).");
+                sysln("Multiplay: the topbar + opens another character's session; tabs switch,");
+                sysln("      Alt+C cycles (Shift reverses). @<name> <cmd>, @<slot> <cmd>, or");
+                sysln("      @all <cmd> send to another session without switching (@@ sends a");
+                sysln("      literal @). /mirror all|<names>|off types to several at once — the");
+                sysln("      input glows orange while armed. Password prompts never cross.");
                 break;
             case "clear":
                 if (focusedSession) focusedSession.term.clear();
@@ -1511,6 +1621,29 @@
                     + " (\"open door;n;look\" sends three commands).");
                 break;
             }
+            case "mirror": {
+                var margs = argv.map(function(a) { return a.toLowerCase(); });
+                if (!margs.length) {
+                    sysln(mirror.on
+                        ? "Mirror is on → " + (mirror.names ? mirror.names.join(", ") : "all sessions")
+                            + ". /mirror off disarms."
+                        : "Mirror is off. /mirror all types to every session at once.");
+                    break;
+                }
+                if (margs[0] === "off") {
+                    setMirror(false);
+                    sysln("Mirror off.");
+                    break;
+                }
+                if (sessions.length < 2) {
+                    sysln("Mirror needs a second session — open one with the topbar +.");
+                    break;
+                }
+                setMirror(true, (margs[0] === "all" || margs[0] === "on") ? null : margs);
+                sysln("Mirror on → " + (mirror.names ? mirror.names.join(", ") : "all sessions")
+                    + ". /mirror off disarms.");
+                break;
+            }
             case "settings":
                 sysln("Client settings (change via the gear menu):");
                 sysln("  keep input after send:  " + (settings.keepInput ? "on" : "off"));
@@ -1541,11 +1674,16 @@
             return;
         }
         var line = raw.trim();
-        if (line.charAt(0) === "/") {
-            if (line.charAt(1) === "/") dispatchGame(line.slice(1));
-            else runClientCommand(line);
+        if (line.charAt(0) === "@" && line.length > 1 && line.charAt(1) !== "@") {
+            routeAcross(line);
         } else {
-            dispatchGame(line);
+            if (line.charAt(0) === "@") line = line.slice(1);  // "@@" literal
+            if (line.charAt(0) === "/") {
+                if (line.charAt(1) === "/") dispatchGame(line.slice(1));
+                else runClientCommand(line);
+            } else {
+                dispatchLine(line);
+            }
         }
         if (line) addHistory(line);
         sess.term.scrollToBottom();
@@ -2040,6 +2178,14 @@
 
     // --- Keyboard shortcuts (documented in /help) ---
     document.addEventListener("keydown", function(e) {
+        // Alt+C cycles the focused session (Shift reverses). By e.code, like
+        // the HUD's Alt+T/A/O — macOS Alt+letter composes glyphs. C is free:
+        // Alt/Ctrl+digits belong to the action bar, Ctrl+letters to overlays.
+        if (e.altKey && !e.ctrlKey && !e.metaKey && e.code === "KeyC") {
+            e.preventDefault();
+            Sessions.cycle(e.shiftKey ? -1 : 1);
+            return;
+        }
         if (e.key === "Escape") {
             if (!searchBar.hidden) { closeSearch(); return; }
             if (!settingsPop.hidden) { closeSettingsPop(); return; }

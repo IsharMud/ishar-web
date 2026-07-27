@@ -324,6 +324,22 @@ button.v-tgt:hover { border-color: rgba(214, 75, 75, .8); }
 #command-input { flex: 1; font-family: monospace; font-size: 16px; padding: 6px 8px; }
 #send-btn { flex: none; }
 #history-btn { flex: none; }
+/* Multiplay: who the input drives (2+ sessions), and the loud armed state
+   while mirror fans typing out to several sessions at once. */
+#input-chip {
+    flex: none; max-width: 7rem; overflow: hidden; text-overflow: ellipsis;
+    font-size: .74rem; font-weight: 700; white-space: nowrap;
+    padding: 2px 9px; border-radius: 999px;
+    color: var(--ac-text); background: var(--ac-panel);
+    border: 1px solid var(--ac-border-2);
+}
+#input-chip.input-chip--immortal { color: var(--ac-immortal); border-color: rgba(0, 183, 235, .45); }
+#mirror-btn[aria-pressed="true"] { color: var(--ac-warn); border-color: var(--ac-warn); background: var(--ac-warn-wash); }
+#command-form.mirror-armed #command-input {
+    border-color: var(--ac-warn);
+    box-shadow: 0 0 0 2px var(--ac-warn-wash), 0 0 10px rgba(255, 136, 0, .35);
+}
+#command-form.mirror-armed #command-input::placeholder { color: var(--ac-warn); opacity: .9; }
 #scroll-bottom-btn { position: absolute; bottom: 8px; right: 12px; z-index: 10; opacity: .9; font-size: .8rem; }
 @media (max-width: 767.98px) {
     #command-form { gap: 6px; }
