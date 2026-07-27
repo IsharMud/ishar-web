@@ -309,8 +309,13 @@ button.v-tgt:hover { border-color: rgba(214, 75, 75, .8); }
    tap-to-move overlay off-screen with it. */
 #hud-center { display: flex; flex-direction: column; gap: 6px; min-height: 0; min-width: 0; }
 #terminal-wrapper { position: relative; flex: 1; min-height: 0; min-width: 0; overflow: hidden; }
-#terminal-container { height: 100%; background: #000; border-radius: var(--ac-radius-sm); overflow: hidden; }
-#terminal-container .xterm { height: 100%; padding: 4px; }
+#terminal-container { position: relative; height: 100%; background: #000; border-radius: var(--ac-radius-sm); overflow: hidden; }
+/* One host per session, all filling the slot; blurred hosts keep full
+   layout (visibility, not display) so every terminal stays correctly
+   sized and a focus switch is instant with no refit jolt. */
+.term-host { position: absolute; inset: 0; }
+.term-host--blurred { visibility: hidden; }
+.term-host .xterm { height: 100%; padding: 4px; }
 #command-form { display: flex; gap: 8px; align-items: center; position: relative; }
 #command-input { flex: 1; font-family: monospace; font-size: 16px; padding: 6px 8px; }
 #send-btn { flex: none; }
