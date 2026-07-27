@@ -10,14 +10,13 @@ from ..kit import build_kit
 from ..models.player import Player
 
 
-# Standing bars: label, player_stats column, per-day rate tile (or None)
-#   and the tile's semantic tint.
+# Standing bars: label, player_stats column.
 STANDING_METRICS = (
-    ("Renown", "total_renown", "Renown / day", "accent"),
-    ("Hours Played", "total_play_time", None, None),
-    ("Quests", "total_quests", "Quests / day", "info"),
-    ("Challenges", "total_challenges", None, None),
-    ("Deaths", "total_deaths", "Deaths / day", "danger"),
+    ("Renown", "total_renown"),
+    ("Hours Played", "total_play_time"),
+    ("Quests", "total_quests"),
+    ("Challenges", "total_challenges"),
+    ("Deaths", "total_deaths"),
 )
 
 
@@ -75,7 +74,7 @@ class PlayerView(LoginRequiredMixin, NeverCacheMixin, DetailView):
         # Lifetime totals compared against every living mortal character.
         #   player_stats holds snapshot totals only (no history), so the
         #   visuals are comparative, not time-series.
-        stat_fields = [field for _, field, _, _ in STANDING_METRICS]
+        stat_fields = [field for _, field in STANDING_METRICS]
         peers = list(
             Player.objects.filter(is_deleted=0).values(
                 "id", *[f"statistics__{field}" for field in stat_fields]
@@ -86,11 +85,9 @@ class PlayerView(LoginRequiredMixin, NeverCacheMixin, DetailView):
         mine = {
             field: getattr(stats, field, 0) or 0 for field in stat_fields
         }
-        days_played = mine["total_play_time"] / 86400
 
         rows = []
-        tiles = []
-        for label, field, rate_label, rate_css in STANDING_METRICS:
+        for label, field in STANDING_METRICS:
             values = [peer[f"statistics__{field}"] or 0 for peer in peers]
             value = mine[field]
             top = max(values, default=0)
@@ -106,15 +103,35 @@ class PlayerView(LoginRequiredMixin, NeverCacheMixin, DetailView):
                 "pct": min(100, round(100 * value / top)) if top else 0,
                 "rank": 1 + sum(1 for v in values if v > value),
             })
-            if rate_label and days_played:
+
+        # Pace tiles are normalized to this character's own play time and say
+        #   so in their labels. "Per hour played" (not per day) keeps the
+        #   numbers sane for young characters — a 10-hour character with 3
+        #   deaths reads "3.2h / death", not "7.5 deaths / day".
+        tiles = []
+        hours = mine["total_play_time"] / 3600
+        if hours:
+            tiles.append({
+                "label": "Renown / Hour Played",
+                "value": f"{mine['total_renown'] / hours:,.1f}",
+                "css": "accent",
+            })
+            if mine["total_quests"]:
                 tiles.append({
-                    "label": rate_label,
-                    "value": f"{value / days_played:,.1f}",
-                    "css": rate_css,
+                    "label": "Hours Played / Quest",
+                    "value": f"{hours / mine['total_quests']:,.1f}h",
+                    "css": "info",
+                })
+            if mine["total_deaths"]:
+                tiles.append({
+                    "label": "Hours Played / Death",
+                    "value": f"{hours / mine['total_deaths']:,.1f}h",
+                    "css": "danger",
                 })
 
         return {
             "rows": rows,
             "tiles": tiles,
             "peer_count": len(peers),
+            "hours_display": f"{hours:,.0f}h",
         }

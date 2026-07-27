@@ -262,7 +262,8 @@
         </div>
         <p class="ac-panel__hint">
             Lifetime totals compared against all {{ standing.peer_count }}
-            living mortal characters.
+            living mortal characters &mdash; #n is this character&#39;s rank
+            among them.
         </p>
         <div class="ac-bars">
 {% for row in standing.rows %}
@@ -274,7 +275,11 @@
 {% endfor %}
         </div>
 {% if standing.tiles %}
-        <div class="ac-tiles mt-2">
+        <p class="ac-panel__hint mt-3 mb-2">
+            Pace &mdash; this character&#39;s own rates against their
+            {{ standing.hours_display }} of play time, no one else&#39;s.
+        </p>
+        <div class="ac-tiles">
 {% for tile in standing.tiles %}
             <div class="ac-tile ac-tile--{{ tile.css }}">
                 <span class="ac-tile__n">{{ tile.value }}</span>
