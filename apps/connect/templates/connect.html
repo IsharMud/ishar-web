@@ -45,6 +45,17 @@
             <span class="status-dot" aria-hidden="true"></span>
             <span class="status-text">Connecting&hellip;</span>
         </span>
+        {# Multiplay chrome: tabs render only with 2+ sessions; the "+" #}
+        {# opens the character picker (authenticated accounts only). #}
+        <div id="session-tabs" aria-label="Game sessions"></div>
+        {% if user.is_authenticated %}
+        <button class="hud-btn hud-btn--icon" type="button" id="session-add"
+                aria-expanded="false" aria-controls="session-pop"
+                title="Open another character" aria-label="Open another character">
+            {% bi "plus-lg" %}
+        </button>
+        <div id="session-pop" hidden></div>
+        {% endif %}
         <div id="vitals-bar"></div>
         <!-- Ambient self buff/debuff timer icons — always visible by the vitals
            (hud.js renderSelfAffects). Bare icons; a countdown chip + pulse
@@ -417,9 +428,13 @@
     var statusText = statusEl.querySelector(".status-text");
     var reconnectBtn = document.getElementById("reconnect-btn");
     var scrollBtn = document.getElementById("scroll-bottom-btn");
+    var sessionTabs = document.getElementById("session-tabs");
+    var sessionAddBtn = document.getElementById("session-add");
+    var sessionPop = document.getElementById("session-pop");
 
     var isMobile = ("ontouchstart" in window) && window.innerWidth < 768;
     var isDemo = new URLSearchParams(location.search).has("demo");
+    var isAuthed = {{ user.is_authenticated|yesno:"true,false" }};
 
     // --- ANSI color theme (all 16 standard colors) ---
     var mudTheme = {
@@ -637,7 +652,10 @@
         if (pkg === "Char.Status") {
             try {
                 var st = JSON.parse(body);
-                if (st && st.name) sess.displayName = String(st.name);
+                if (st && st.name && sess.displayName !== String(st.name)) {
+                    sess.displayName = String(st.name);
+                    renderSessionTabs();
+                }
             } catch (e) {}
         }
     }
@@ -1003,9 +1021,114 @@
         return sess;
     }
 
-    // Placeholder hooks the multiplay UI fills in; harmless with one session.
-    function renderSessionTabs() {}
-    function noteBackgroundGmcp(sess, pkg, body) {}
+    // --- Session tabs ---
+    // Rendered only with 2+ sessions, so a single-session page keeps
+    // today's zero-footprint topbar. Names are player data: textContent
+    // only.
+    function renderSessionTabs() {
+        if (!sessionTabs) return;
+        if (sessionAddBtn) sessionAddBtn.hidden = sessions.length >= MAX_SESSIONS;
+        while (sessionTabs.firstChild) sessionTabs.removeChild(sessionTabs.firstChild);
+        if (sessions.length < 2) return;
+        sessions.forEach(function(s) {
+            var name = s.displayName || ("Session " + s.slot);
+            var tab = document.createElement("div");
+            tab.className = "sess-tab";
+            if (isFocused(s)) tab.classList.add("sess-tab--active");
+            if (s.isImmortal) tab.classList.add("sess-tab--immortal");
+            if (s.bell) tab.classList.add("sess-tab--bell");
+
+            var btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "sess-tab__btn";
+            btn.setAttribute("aria-pressed", isFocused(s) ? "true" : "false");
+            btn.title = "Switch to " + name + " (Alt+C cycles)";
+
+            var dot = document.createElement("span");
+            dot.className = "sess-tab__dot sess-dot--" + s.state;
+            btn.appendChild(dot);
+
+            var label = document.createElement("span");
+            label.className = "sess-tab__name";
+            label.textContent = name;
+            btn.appendChild(label);
+
+            if (s.unread > 0 && !isFocused(s)) {
+                var n = document.createElement("span");
+                n.className = "sess-tab__n";
+                n.textContent = s.unread > 99 ? "99+" : String(s.unread);
+                btn.appendChild(n);
+            }
+            btn.addEventListener("click", function() { Sessions.focus(s); });
+            tab.appendChild(btn);
+
+            var x = document.createElement("button");
+            x.type = "button";
+            x.className = "sess-tab__x";
+            x.setAttribute("aria-label", "Close the " + name + " session");
+            x.title = "Close the " + name + " session";
+            x.textContent = "×";
+            x.addEventListener("click", function(e) {
+                e.stopPropagation();
+                if (s.state === "connected"
+                        && !window.confirm(name + " is still connected — close this session?")) {
+                    return;
+                }
+                Sessions.close(s);
+            });
+            tab.appendChild(x);
+
+            sessionTabs.appendChild(tab);
+        });
+    }
+
+    // Background attention: a blurred session pulses its tab when its
+    // character takes damage or is told something directly. lastHp is
+    // reset on blur, so the first vitals only set the baseline.
+    function noteBackgroundGmcp(sess, pkg, body) {
+        if (pkg !== "Char.Vitals" && pkg !== "Comm.Channel") return;
+        var data = null;
+        try { data = JSON.parse(body); } catch (e) { return; }
+        if (pkg === "Char.Vitals") {
+            var hp = (data && data.hp != null) ? Number(data.hp) : null;
+            if (hp != null) {
+                if (sess.lastHp != null && hp < sess.lastHp && !sess.bell) {
+                    sess.bell = true;
+                    renderSessionTabs();
+                }
+                sess.lastHp = hp;
+            }
+            return;
+        }
+        if (/^(tell|reply|whisper)/i.test((data && data.channel) || "") && !sess.bell) {
+            sess.bell = true;
+            renderSessionTabs();
+        }
+    }
+
+    // --- Session roster (per tab, like the scrollback) ---
+    // A reload rebuilds the whole session set: each entry reconnects and
+    // re-selects its character through the bridge.
+    var ROSTER_KEY = "ishar.sessions";
+    function saveRoster() {
+        if (isDemo || !isAuthed) return;
+        try {
+            sessionStorage.setItem(ROSTER_KEY, JSON.stringify({
+                focused: focusedSession ? focusedSession.slot : null,
+                list: sessions.map(function(s) {
+                    return { slot: s.slot, character: s.charName, isImmortal: s.isImmortal };
+                })
+            }));
+        } catch (e) {}
+    }
+    function loadRoster() {
+        if (isDemo || !isAuthed) return null;
+        try {
+            var r = JSON.parse(sessionStorage.getItem(ROSTER_KEY));
+            if (r && Array.isArray(r.list) && r.list.length) return r;
+        } catch (e) {}
+        return null;
+    }
 
     var Sessions = {
         focused: function() { return focusedSession; },
@@ -1014,8 +1137,8 @@
             if (sessions.length >= MAX_SESSIONS) return null;
             var used = {};
             sessions.forEach(function(s) { used[s.slot] = true; });
-            var slot = 1;
-            while (used[slot]) slot++;
+            var slot = (opts && opts.slot && !used[opts.slot]) ? opts.slot : 0;
+            if (!slot) { slot = 1; while (used[slot]) slot++; }
             var sess = createSession({
                 slot: slot,
                 character: opts && opts.character,
@@ -1023,19 +1146,25 @@
             });
             if (!focusedSession) Sessions.focus(sess);
             if (!isDemo) sess.connect();
+            saveRoster();
+            renderSessionTabs();
             return sess;
         },
         focus: function(sess) {
             if (!sess || focusedSession === sess) return;
             var prev = focusedSession;
             focusedSession = sess;
-            if (prev) prev.container.classList.add("term-host--blurred");
+            if (prev) {
+                prev.container.classList.add("term-host--blurred");
+                prev.lastHp = null;   // blurred baseline: first vitals re-anchor
+            }
             sess.container.classList.remove("term-host--blurred");
             sess.unread = 0;
             sess.bell = false;
             scheduleFit();
             replayHud(sess);
             syncFocusUi();
+            saveRoster();
             commandInput.focus();
         },
         cycle: function(dir) {
@@ -1052,6 +1181,7 @@
                 focusedSession = null;
                 if (sessions.length) Sessions.focus(sessions[Math.min(i, sessions.length - 1)]);
             }
+            saveRoster();
             renderSessionTabs();
         },
         byToken: function(token) {
@@ -1071,6 +1201,8 @@
             return exact || prefix;
         }
     };
+    // Debug/preview handle, like window.IsharHUD.
+    window.IsharSessions = Sessions;
 
     // Rebuild the singleton HUD as the newly-focused session's view: reset,
     // then replay the cached GMCP bodies in login-burst order (Char.Status
@@ -1806,11 +1938,112 @@
         closeSettingsPop();
     });
 
+    // --- Character picker (the topbar "+") ---
+    // Lists the account's characters from /connect/characters/; picking one
+    // opens a session whose bridge auto-selects that character. The season
+    // multiplay limit is advisory here — the game enforces it, and its
+    // refusal prints in the new session's terminal.
+    var CHARACTERS_URL = "{% url 'connect_characters' %}";
+
+    function closeSessionPop() {
+        if (!sessionPop || sessionPop.hidden) return;
+        sessionPop.hidden = true;
+        sessionAddBtn.setAttribute("aria-expanded", "false");
+    }
+
+    function sessionPopNote(text) {
+        var note = document.createElement("div");
+        note.className = "sess-note";
+        note.textContent = text;
+        sessionPop.appendChild(note);
+    }
+
+    function buildSessionPop(payload) {
+        while (sessionPop.firstChild) sessionPop.removeChild(sessionPop.firstChild);
+        var open = {};
+        sessions.forEach(function(s) {
+            [s.charName, s.displayName].forEach(function(n) {
+                if (n) open[n.toLowerCase()] = true;
+            });
+        });
+        var chars = (payload && payload.characters) || [];
+        if (!chars.length) {
+            sessionPopNote("No characters on this account yet.");
+            return;
+        }
+        chars.forEach(function(c) {
+            var b = document.createElement("button");
+            b.type = "button";
+            b.className = "sess-pick";
+            if (c.is_immortal) b.classList.add("sess-pick--immortal");
+
+            var dot = document.createElement("span");
+            dot.className = "sess-pick__dot" + (c.online ? " is-online" : "");
+            b.appendChild(dot);
+
+            var name = document.createElement("span");
+            name.className = "sess-pick__name";
+            name.textContent = c.name;
+            b.appendChild(name);
+
+            var meta = document.createElement("span");
+            meta.className = "sess-pick__meta";
+            meta.textContent = (c.is_immortal ? "Immortal" : "L" + c.level)
+                + (c.online ? " · online" : "");
+            b.appendChild(meta);
+
+            if (open[String(c.name).toLowerCase()]) {
+                b.disabled = true;
+                b.title = "Already open in a session";
+            }
+            b.addEventListener("click", function() {
+                closeSessionPop();
+                var s = Sessions.create({ character: c.name, isImmortal: c.is_immortal });
+                if (s) Sessions.focus(s);
+            });
+            sessionPop.appendChild(b);
+        });
+        if (payload.multiplay_limit != null) {
+            sessionPopNote("Season limit: " + payload.multiplay_limit
+                + " at once" + (payload.immortal_account ? " (immortals exempt)" : "")
+                + ". The game has the final say.");
+        }
+    }
+
+    if (sessionAddBtn) {
+        sessionAddBtn.addEventListener("click", function() {
+            if (!sessionPop.hidden) { closeSessionPop(); return; }
+            while (sessionPop.firstChild) sessionPop.removeChild(sessionPop.firstChild);
+            sessionPopNote("Loading characters…");
+            sessionPop.hidden = false;
+            sessionAddBtn.setAttribute("aria-expanded", "true");
+            fetch(CHARACTERS_URL, { credentials: "same-origin" })
+                .then(function(r) {
+                    if (!r.ok) throw new Error(String(r.status));
+                    return r.json();
+                })
+                .then(function(payload) {
+                    if (!sessionPop.hidden) buildSessionPop(payload);
+                })
+                .catch(function() {
+                    if (sessionPop.hidden) return;
+                    while (sessionPop.firstChild) sessionPop.removeChild(sessionPop.firstChild);
+                    sessionPopNote("Couldn't load your characters — try again.");
+                });
+        });
+        document.addEventListener("click", function(e) {
+            if (sessionPop.hidden) return;
+            if (sessionPop.contains(e.target) || sessionAddBtn.contains(e.target)) return;
+            closeSessionPop();
+        });
+    }
+
     // --- Keyboard shortcuts (documented in /help) ---
     document.addEventListener("keydown", function(e) {
         if (e.key === "Escape") {
             if (!searchBar.hidden) { closeSearch(); return; }
             if (!settingsPop.hidden) { closeSettingsPop(); return; }
+            if (sessionPop && !sessionPop.hidden) { closeSessionPop(); return; }
             if (!historyPop.hidden) { closeHistoryPop(); commandInput.focus(); return; }
             return;
         }
@@ -1893,9 +2126,24 @@
     fitAppHeight();
     scheduleFit();
 
+    // A saved roster (same tab) rebuilds the whole session set — each
+    // session reconnects and re-selects its character. Otherwise, one
+    // plain session, exactly the pre-multiplay page.
+    var roster = loadRoster();
+    var first = null;
+    if (roster) {
+        roster.list.slice(0, MAX_SESSIONS).forEach(function(r) {
+            var s = Sessions.create({
+                slot: r.slot, character: r.character, isImmortal: r.isImmortal
+            });
+            if (s && r.slot === roster.focused) Sessions.focus(s);
+        });
+        first = focusedSession;
+    }
+    if (!first) first = Sessions.create({});
+
     // Demo mode (/connect?demo=1): populate the HUD with sample data for design
     // review without a GMCP-enabled server. Skips the live connection.
-    var first = Sessions.create({});
     if (isDemo) {
         if (window.IsharHUD) window.IsharHUD.demo();
         first.term.writeln("\x1b[33m--- DEMO MODE: sample data, not connected to the game. ---\x1b[0m");
