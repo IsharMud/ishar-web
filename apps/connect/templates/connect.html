@@ -187,6 +187,33 @@
                 &#x25BC; Latest
             </button>
         </div>
+        <!-- Peek pane (desktop, 2+ sessions): a background session's live
+           terminal below the main one, with a mini input, so both characters
+           are watchable at once. Collapsible; never on phones — tabs are the
+           whole phone story. JS re-parents the session's .term-host here. -->
+        <div id="term-peek" hidden>
+            <div class="peek-head">
+                <span id="peek-dot" class="peek-dot" aria-hidden="true"></span>
+                <span id="peek-name" class="peek-name"></span>
+                <button type="button" class="hud-btn hud-btn--icon" id="peek-swap"
+                        title="Switch places with the main terminal"
+                        aria-label="Switch places with the main terminal">
+                    {% bi "arrow-down-up" %}
+                </button>
+                <button type="button" class="hud-btn hud-btn--icon" id="peek-collapse" aria-pressed="false"
+                        title="Collapse the peek pane" aria-label="Collapse the peek pane">
+                    {% bi "chevron-down" %}
+                </button>
+            </div>
+            <div id="peek-body"></div>
+            <form id="peek-form" autocomplete="off">
+                <label for="peek-input" class="visually-hidden">Command for the peeked session</label>
+                <input type="text" id="peek-input"
+                       aria-label="Command for the peeked session"
+                       autocapitalize="off" autocomplete="off" autocorrect="off"
+                       spellcheck="false" enterkeyhint="send">
+            </form>
+        </div>
         <!-- XP: a hairline ambient strip below the terminal — progress-to-level is
            glanced at constantly, so it earns permanent space (graduated off the
            Character overlay, docs/design/decisions.md 2026-07-19 XP strip).
@@ -898,11 +925,13 @@
                             commandInput.type = "password";
                             setMirror(false);   // password keystrokes never fan out
                         }
+                        if (sess === peekSession) peekInput.type = "password";
                         return;
                     }
                     if (d === "\x00ECHO_OFF") {
                         sess.echo = false;
                         if (isFocused(sess)) commandInput.type = "text";
+                        if (sess === peekSession) peekInput.type = "text";
                         return;
                     }
                     if (d.indexOf("\x00GMCP ") === 0) {
@@ -921,9 +950,10 @@
                     return;
                 }
                 sess.term.write(d);
-                if (!isFocused(sess)) {
+                // A peeked terminal is on screen — its output isn't unread.
+                if (!isFocused(sess) && !isPeeked(sess)) {
                     sess.unread++;
-                    renderSessionTabs();
+                    scheduleTabs();
                 }
             };
 
@@ -1038,9 +1068,22 @@
     // Rendered only with 2+ sessions, so a single-session page keeps
     // today's zero-footprint topbar. Names are player data: textContent
     // only.
+    // rAF-debounced tab refresh for high-frequency callers (a streaming
+    // background terminal bumps unread on every write).
+    var tabsScheduled = false;
+    function scheduleTabs() {
+        if (tabsScheduled) return;
+        tabsScheduled = true;
+        requestAnimationFrame(function() {
+            tabsScheduled = false;
+            renderSessionTabs();
+        });
+    }
+
     function renderSessionTabs() {
         syncMirrorUi();
         syncInputChip();
+        updatePeek();
         if (!sessionTabs) return;
         if (sessionAddBtn) sessionAddBtn.hidden = sessions.length >= MAX_SESSIONS;
         while (sessionTabs.firstChild) sessionTabs.removeChild(sessionTabs.firstChild);
@@ -1169,14 +1212,9 @@
             if (!sess || focusedSession === sess) return;
             var prev = focusedSession;
             focusedSession = sess;
-            if (prev) {
-                prev.container.classList.add("term-host--blurred");
-                prev.lastHp = null;   // blurred baseline: first vitals re-anchor
-            }
-            sess.container.classList.remove("term-host--blurred");
+            if (prev) prev.lastHp = null;   // blurred baseline: first vitals re-anchor
             sess.unread = 0;
             sess.bell = false;
-            scheduleFit();
             replayHud(sess);
             syncFocusUi();
             saveRoster();
@@ -1368,6 +1406,108 @@
             setMirror(!mirror.on);
             commandInput.focus();
         });
+    }
+
+    // --- Peek pane (desktop) ---
+    // A background session's live terminal in a strip under the main one,
+    // with a mini input — watch and nudge the other character without a
+    // switch. Wide viewports only; phones get tabs alone. The pane hosts
+    // the session's own .term-host (xterm survives re-parenting), so what
+    // it shows *is* that session, not a copy.
+    var peekEl = document.getElementById("term-peek");
+    var peekDot = document.getElementById("peek-dot");
+    var peekNameEl = document.getElementById("peek-name");
+    var peekBody = document.getElementById("peek-body");
+    var peekForm = document.getElementById("peek-form");
+    var peekInput = document.getElementById("peek-input");
+    var peekSwapBtn = document.getElementById("peek-swap");
+    var peekCollapseBtn = document.getElementById("peek-collapse");
+    var mqPeek = window.matchMedia("(min-width: 1200px)");
+    var peekSession = null;
+    var peekCollapsed = false;
+    try { peekCollapsed = localStorage.getItem("ishar.peek") === "0"; } catch (e) {}
+
+    function isPeeked(sess) {
+        return peekSession === sess && !peekEl.hidden && !peekCollapsed;
+    }
+
+    // Every session's terminal lives either in the main slot (focused one
+    // visible, rest blurred-but-laid-out) or in the peek body.
+    function placeContainers() {
+        var moved = false;
+        sessions.forEach(function(s) {
+            var parent = isPeeked(s) ? peekBody : terminalContainer;
+            if (s.container.parentNode !== parent) {
+                parent.appendChild(s.container);
+                moved = true;
+            }
+            s.container.classList.toggle(
+                "term-host--blurred",
+                parent === terminalContainer && !isFocused(s)
+            );
+        });
+        return moved;
+    }
+
+    function updatePeek() {
+        if (!peekEl) return;
+        var want = sessions.length > 1 && mqPeek.matches && !app.classList.contains("hud-off");
+        if (!want) {
+            peekSession = null;
+            peekEl.hidden = true;
+        } else {
+            // Keep the current peek target while it's still a background
+            // session; otherwise the most recently opened one.
+            if (!peekSession || peekSession === focusedSession
+                    || sessions.indexOf(peekSession) === -1) {
+                peekSession = null;
+                for (var i = sessions.length - 1; i >= 0; i--) {
+                    if (sessions[i] !== focusedSession) { peekSession = sessions[i]; break; }
+                }
+            }
+            peekEl.hidden = !peekSession;
+        }
+        if (peekSession) {
+            peekNameEl.textContent = sessLabel(peekSession);
+            peekNameEl.classList.toggle("peek-name--immortal", !!peekSession.isImmortal);
+            peekDot.className = "peek-dot sess-dot--" + peekSession.state;
+            peekEl.classList.toggle("peek-collapsed", peekCollapsed);
+            peekCollapseBtn.setAttribute("aria-pressed", peekCollapsed ? "true" : "false");
+            peekInput.type = peekSession.echo ? "password" : "text";
+            peekInput.placeholder = "→ " + sessLabel(peekSession) + "…";
+        }
+        // The main slot's own size changes are covered by its
+        // ResizeObserver; a refit is only needed when a terminal moved
+        // between slots.
+        if (placeContainers()) scheduleFit();
+    }
+
+    if (peekEl) {
+        peekForm.addEventListener("submit", function(e) {
+            e.preventDefault();
+            if (!peekSession) return;
+            var raw = peekInput.value;
+            peekInput.value = "";
+            if (peekSession.echo) {
+                // Password entry for the peeked session: verbatim, no echo,
+                // no history — same rule as the main input.
+                peekSession.send(raw);
+                return;
+            }
+            var line = raw.trim();
+            if (!line) return;
+            dispatchGame(line, peekSession);
+            addHistory(line);
+        });
+        peekSwapBtn.addEventListener("click", function() {
+            if (peekSession) Sessions.focus(peekSession);
+        });
+        peekCollapseBtn.addEventListener("click", function() {
+            peekCollapsed = !peekCollapsed;
+            try { localStorage.setItem("ishar.peek", peekCollapsed ? "0" : "1"); } catch (e) {}
+            updatePeek();
+        });
+        if (mqPeek.addEventListener) mqPeek.addEventListener("change", updatePeek);
     }
 
     // --- Terminal focus-return ---
@@ -1734,6 +1874,7 @@
             },
             onLayoutChange: function() {
                 fitAppHeight();
+                updatePeek();   // the pane hides with the HUD
                 scheduleFit();
             },
             onComm: onComm,
