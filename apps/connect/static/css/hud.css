@@ -2056,8 +2056,12 @@ button.v-tgt:hover { border-color: rgba(214, 75, 75, .8); }
 .zn-fill { display: block; height: 100%; background: var(--ac-ok); opacity: .8; }
 .zn-status { flex: none; min-width: 4.5em; text-align: right; color: var(--ac-dim); font-size: .66rem; font-variant-numeric: tabular-nums; }
 @media (max-width: 767.98px) {
-    /* Phone: the meter cedes its width to the name; the numbers carry it. */
+    /* Phone: no meter, and flags/status wrap under the name — the row may
+       take two lines but the sheet never scrolls sideways. */
     .zn-track { display: none; }
+    .zn-row { flex-wrap: wrap; }
+    .zn-name { flex-basis: 55%; }
+    .zn-status { margin-left: auto; }
 }
 
 /* Admin overlay: sectioned label · value · actions rows. */
