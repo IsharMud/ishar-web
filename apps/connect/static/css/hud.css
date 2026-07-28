@@ -1975,6 +1975,130 @@ button.v-tgt:hover { border-color: rgba(214, 75, 75, .8); }
 .char-achv-n { color: var(--ac-dim); font-size: .72rem; white-space: nowrap; }
 .char-achv-n b { color: var(--hud-gold); font-variant-numeric: tabular-nums; }
 
+/* ----- Admin tier (Admin.* staff feeds; decisions.md "Admin re-tier") ----- */
+/* The ambient tier's second profile: a level-21+ focused character (set from
+   Admin.Caps via the hud-admin root class) trades the mortal combat chrome —
+   attack cluster + XP strip — for the admin strip: rank pill, the live
+   `set o` target, current zone. Everything else admin lives in overlays. */
+.hud-admin #hud-attack,
+.hud-admin #hud-xpstrip { display: none; }
+
+#hud-adminstrip {
+    flex: none; display: flex; align-items: center; gap: 8px;
+    min-width: 0; font-size: .68rem;
+}
+#hud-adminstrip[hidden] { display: none; }
+
+.adm-pill {
+    flex: none; padding: 1px 8px; border-radius: 999px;
+    font-size: .62rem; font-weight: 700; letter-spacing: .04em;
+    color: var(--ac-immortal); border: 1px solid var(--ac-immortal);
+    background: var(--ac-bg); white-space: nowrap;
+}
+.adm-pill--sm { padding: 0 6px; font-size: .58rem; font-weight: 600; }
+
+/* The set-o target chip: tap prefills `set o `. */
+.adm-target {
+    flex: 0 1 auto; display: inline-flex; align-items: baseline; gap: 4px;
+    min-width: 0; padding: 2px 8px; font: inherit; text-align: left;
+    color: var(--ac-text); background: var(--ac-bg);
+    border: 1px solid var(--ac-border); border-radius: var(--ac-radius-sm);
+    cursor: pointer;
+}
+.adm-target:hover { border-color: var(--ac-accent); }
+.adm-target:focus-visible { outline: 2px solid var(--ac-accent); outline-offset: 2px; }
+.adm-target .adm-vnum { flex: none; font-weight: 700; color: var(--ac-accent); font-variant-numeric: tabular-nums; }
+.adm-target .adm-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.adm-target--denied .adm-vnum { color: var(--ac-danger); }
+.adm-target--empty { color: var(--ac-dim); border-style: dashed; cursor: default; }
+
+.adm-zone { flex: none; color: var(--ac-dim); white-space: nowrap; }
+
+/* Who panel: the WhoExtra staff line under a player's name. */
+.who-adm { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; margin-top: 2px; font-size: .64rem; }
+.who-adm-room { color: var(--ac-text); }
+.who-adm-idle { color: var(--ac-dim); }
+.who-adm-invis { color: var(--ac-immortal); }
+.who-adm-snoop { color: var(--ac-danger); font-weight: 600; }
+.who-main[data-menu] { cursor: pointer; }
+.who-main[data-menu]:focus-visible { outline: 2px solid var(--ac-accent); outline-offset: 2px; }
+
+/* Two-tap confirm: an armed destructive row reads as the warning it is. */
+.menu-item.armed {
+    color: var(--ac-danger); background: var(--ac-danger-wash);
+    font-weight: 700;
+}
+
+/* Zones overlay: id · name · flags · regen meter · elapsed/lifespan. */
+.zn-scroll { max-height: min(52vh, 460px); overflow-y: auto; }
+.zn-row {
+    display: flex; align-items: center; gap: 6px;
+    padding: 4px 2px; border-bottom: 1px solid var(--ac-elev);
+    cursor: pointer;
+}
+.zn-row:hover { background: var(--ac-elev); }
+.zn-row:focus-visible { outline: 2px solid var(--ac-accent); outline-offset: -2px; }
+.zn-row--here { border-left: 2px solid var(--ac-accent); padding-left: 4px; }
+.zn-id { flex: none; min-width: 2.6em; color: var(--ac-dim); font-variant-numeric: tabular-nums; text-align: right; }
+.zn-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.zn-flags { flex: none; display: flex; gap: 3px; }
+.zn-flag {
+    padding: 0 5px; border-radius: 999px; font-size: .58rem; font-weight: 600;
+    color: var(--ac-dim); border: 1px solid var(--ac-border);
+}
+.zn-flag--warn { color: var(--ac-warn); border-color: var(--ac-warn); }
+.zn-flag--off { color: var(--ac-dim); border-style: dashed; }
+.zn-flag--danger { color: var(--ac-danger); border-color: var(--ac-danger); }
+.zn-track {
+    flex: none; width: 54px; height: 5px; overflow: hidden;
+    background: var(--ac-bg); border: 1px solid var(--ac-border); border-radius: 3px;
+}
+.zn-fill { display: block; height: 100%; background: var(--ac-ok); opacity: .8; }
+.zn-status { flex: none; min-width: 4.5em; text-align: right; color: var(--ac-dim); font-size: .66rem; font-variant-numeric: tabular-nums; }
+@media (max-width: 767.98px) {
+    /* Phone: no meter, and flags/status wrap under the name — the row may
+       take two lines but the sheet never scrolls sideways. */
+    .zn-track { display: none; }
+    .zn-row { flex-wrap: wrap; }
+    .zn-name { flex-basis: 55%; }
+    .zn-status { margin-left: auto; }
+}
+
+/* Admin overlay: sectioned label · value · actions rows. */
+.ap-h {
+    margin: 10px 0 4px; font-size: .62rem; font-weight: 700;
+    letter-spacing: .06em; text-transform: uppercase; color: var(--ac-dim);
+}
+.ap-h:first-child { margin-top: 0; }
+.ap-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 3px 0; border-bottom: 1px solid var(--ac-elev);
+}
+.ap-label { flex: none; min-width: 7em; color: var(--ac-text); }
+.ap-value { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ap-value.ap-dim { color: var(--ac-dim); }
+.ap-value.ap-on-danger { color: var(--ac-danger); font-weight: 700; }
+.ap-act { flex: none; margin-left: auto; display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
+.ap-act .hud-btn.ap-danger { color: var(--ac-danger); border-color: var(--ac-danger); }
+
+/* In-place armed state for data-confirm-cmd buttons (admin panel). */
+.hud-btn.armed {
+    color: var(--ac-danger); border-color: var(--ac-danger);
+    background: var(--ac-danger-wash); font-weight: 700;
+}
+
+/* Inspector overlay: header + key/value grid + drill-down rows. */
+.ins-head { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; padding-bottom: 4px; border-bottom: 1px solid var(--ac-border); }
+.ins-name { font-weight: 700; color: var(--ac-text); }
+.ins-pos { margin-left: auto; color: var(--ac-dim); font-size: .66rem; }
+.ins-kv { display: grid; grid-template-columns: minmax(6em, auto) 1fr; gap: 1px 10px; font-size: .72rem; }
+.ins-k { color: var(--ac-dim); white-space: nowrap; }
+.ins-v { min-width: 0; overflow-wrap: anywhere; }
+.ins-v.ins-danger { color: var(--ac-danger); font-weight: 600; }
+.ins-kv-row { display: contents; }
+.ins-row { display: flex; align-items: center; gap: 6px; padding: 3px 0; border-bottom: 1px solid var(--ac-elev); }
+.ins-row .ap-act { margin-left: auto; }
+
 /* ----- Reduced motion ----- */
 @keyframes hud-pulse {
     0%, 100% { opacity: 1; }

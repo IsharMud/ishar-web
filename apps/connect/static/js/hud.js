@@ -53,7 +53,11 @@
         chat: [], connected: false,
         // Default targets (from Room.Occupants) that make the hotbar
         // target-aware: offensive abilities → hostile, defensive → beneficial.
-        tgtHostile: null, tgtFriendly: null
+        tgtHostile: null, tgtFriendly: null,
+        // Admin.* staff feeds (level-gated game-side; adminCaps is the client
+        // gate for every admin surface — null means mortal, full stop).
+        adminCaps: null, builder: null, whoExtra: null,
+        zones: null, adminPanel: null, adminStat: null
     };
 
     // Persisted client prefs (localStorage): the action-bar slot assignments,
@@ -114,6 +118,10 @@
     } catch (e) {}
 
     var api = { send: function () {}, prefill: function () {}, onLayoutChange: function () {}, onComm: function () {}, onVitals: function () {} };
+    // True while connect.html replays a session's cached GMCP (tab switch):
+    // event-ish reactions (the Inspector auto-open) stay quiet during replay.
+    var replayingNow = false;
+    function setReplaying(on) { replayingNow = !!on; }
     var dom = {};
     // The map subsystem (hud-map.js) plugs in through registerMap() — the
     // whole mapper stays behind this one seam so a missing/stale-cached
@@ -138,7 +146,8 @@
     // the bottom, nearest the input.
     var PANELS = ["inventory", "group", "occupants", "room",
                   "tracked", "chat", "train", "abilities", "who",
-                  "professions", "map", "quests", "season", "achievements"];
+                  "professions", "map", "quests", "season", "achievements",
+                  "zones", "admin", "inspect"];
     var PANEL_HOME = {
         occupants: "hud-left-scroll",
         group: "hud-left-scroll",
@@ -152,7 +161,8 @@
         abilities: "hud-overlay-body", who: "hud-overlay-body",
         professions: "hud-overlay-body", map: "hud-overlay-body",
         quests: "hud-overlay-body", season: "hud-overlay-body",
-        achievements: "hud-overlay-body"
+        achievements: "hud-overlay-body", zones: "hud-overlay-body",
+        admin: "hud-overlay-body", inspect: "hud-overlay-body"
     };
 
     // ------------------------------------------------------------------
@@ -226,7 +236,26 @@
           available: function () {
               return !!(S.achievements &&
                         (S.achievements.rows.length || S.achievements.points));
-          } }
+          } },
+        // Zones (staff): the zones table with live regen state and row
+        // actions (regen/purge/goto). `admin: true` keeps it out of the key
+        // reference for mortals; available() hides launcher + hotkey unless
+        // Admin.Caps grants it (isharmud/ishar-mud#1888).
+        { key: "zones", title: "Zones", hotkey: "z", admin: true,
+          render: function () { renderZones(); },
+          available: function () { return adminCap("zones") && !!S.zones; } },
+        // Admin (staff, Eternal+): the `admin` menu as a control panel —
+        // game state toggles, season block (Forger), world clock/moons,
+        // lookups. Buttons send the matching `admin …` subcommands.
+        { key: "admin", title: "Admin", hotkey: "a", admin: true,
+          render: function () { renderAdminPanel(); },
+          available: function () { return adminCap("admin") && !!S.adminPanel; } },
+        // Inspector (staff): the last Admin.Stat payload, organized. Auto-
+        // opens on a live frame (you just ran `stat` or tapped Inspect),
+        // never on a tab-switch replay.
+        { key: "inspect", title: "Inspector", hotkey: "x", admin: true,
+          render: function () { renderInspector(); },
+          available: function () { return adminLevel() >= 21 && !!S.adminStat; } }
     ];
     var overlayName = null;   // open overlay app key (desktop), or null
 
@@ -905,8 +934,135 @@
                 }
                 break;
             }
+            case "Admin.Caps":
+                // {"level":0} is the game's de-level clear: wipe every admin
+                // surface, not just the caps — stale staff data must not
+                // survive on a now-mortal client.
+                S.adminCaps = (data && Number(data.level) >= 21) ? data : null;
+                if (!S.adminCaps) {
+                    S.builder = null; S.whoExtra = null; S.zones = null;
+                    S.adminPanel = null; S.adminStat = null;
+                }
+                retierAdmin(); renderAdminStrip(); renderWho(); updateMicro();
+                break;
+            case "Admin.Builder":
+                S.builder = data; renderAdminStrip();
+                // Current-zone highlight in the Zones panel follows the strip.
+                if (overlayVisible("zones")) renderZones();
+                break;
+            case "Admin.Zones":
+                S.zones = data;
+                // Snapshot time anchors the client-side regen countdowns.
+                if (S.zones) S.zones._at = Date.now();
+                if (overlayVisible("zones")) renderZones();
+                updateMicro();
+                break;
+            case "Admin.Panel":
+                S.adminPanel = data;
+                if (overlayVisible("admin")) renderAdminPanel();
+                updateMicro();
+                break;
+            case "Admin.Stat":
+                S.adminStat = data;
+                updateMicro();
+                if (overlayVisible("inspect")) renderInspector();
+                // Pop only for a live frame — the player just asked for it.
+                else if (!replayingNow && data) toggleOverlay("inspect");
+                break;
+            case "Admin.WhoExtra":
+                applyWhoExtra(data);
+                break;
             default: break;
         }
+    }
+
+    // ------------------------------------------------------------------
+    // Admin tier (Admin.* staff feeds — isharmud/ishar-mud#1888)
+    // ------------------------------------------------------------------
+    function adminLevel() {
+        return (S.adminCaps && Number(S.adminCaps.level)) || 0;
+    }
+    // The client-side gate for admin UI. Cosmetic only: every action is a
+    // plain-text command the game's own level gates re-validate.
+    function adminCap(name) {
+        return adminLevel() >= 21 &&
+            !!(S.adminCaps.caps && S.adminCaps.caps[name]);
+    }
+    // The admin profile of the ambient tier: swaps the mortal combat chrome
+    // (attack cluster, XP strip) for the admin strip via one root class.
+    function retierAdmin() {
+        if (dom.app) dom.app.classList.toggle("hud-admin", adminLevel() >= 21);
+        if (dom.adminstrip) dom.adminstrip.hidden = adminLevel() < 21;
+    }
+    function applyWhoExtra(data) {
+        var byName = null;
+        ((data && data.players) || []).forEach(function (p) {
+            if (!p || !p.name) return;
+            (byName = byName || {})[String(p.name).toLowerCase()] = p;
+        });
+        S.whoExtra = byName;
+        renderWho();
+    }
+    function whoExtraFor(name) {
+        return (S.whoExtra && S.whoExtra[String(name || "").toLowerCase()]) || null;
+    }
+    function fmtIdle(secs) {
+        secs = Number(secs) || 0;
+        if (secs < 60) return secs + "s";
+        if (secs < 3600) return Math.floor(secs / 60) + "m";
+        return Math.floor(secs / 3600) + "h" + Math.floor((secs % 3600) / 60) + "m";
+    }
+    function renderAdminStrip() {
+        if (!dom.adminstrip) return;
+        if (adminLevel() < 21) { fill(dom.adminstrip, []); return; }
+        var kids = [];
+        kids.push(el("span", { class: "adm-pill", text: S.adminCaps.label || ("L" + adminLevel()) }));
+
+        // The live `set o` target — the one line a builder glances at
+        // constantly. Tap prefills `set o ` ready for the field.
+        var t = S.builder && S.builder.set_o;
+        if (t) {
+            kids.push(el("button", {
+                class: "adm-target" + (t.permitted === false ? " adm-target--denied" : ""),
+                "data-prefill": "set o ",
+                title: t.permitted === false
+                    ? "set o target (no permission for this vnum)"
+                    : "set o target — tap to prefill `set o `"
+            }, [
+                el("span", { class: "adm-vnum", text: "#" + t.vnum }),
+                el("span", { class: "adm-name", text: " " + stripColor(t.name || t.keyword || "") })
+            ]));
+        } else {
+            kids.push(el("span", { class: "adm-target adm-target--empty", text: "set o: nothing carried" }));
+        }
+
+        var z = S.builder && S.builder.zone;
+        if (z) {
+            kids.push(el("span", { class: "adm-zone", text: z.name + " (" + z.id + ")" }));
+        }
+        fill(dom.adminstrip, kids);
+    }
+    // Staff context actions for a who-list player. Every row is gated by
+    // Admin.Caps; destructive ones arm a confirm tap first. Ban only ever
+    // prefills — the duration is typed, never defaulted.
+    function whoAdminActions(name, extra) {
+        var nm = firstWord(name);
+        var acts = [];
+        if (adminCap("stat")) acts.push({ label: "Stat", cmd: "stat " + nm });
+        if (adminCap("goto")) acts.push({ label: "GoTo", cmd: "goto " + nm });
+        if (extra && extra.room_vnum && adminCap("goto")) {
+            acts.push({ label: "GoTo room #" + extra.room_vnum, cmd: "goto " + extra.room_vnum });
+        }
+        if (adminCap("snoop")) acts.push({ label: "Snoop", cmd: "snoop " + nm, confirm: true, danger: true });
+        if (adminCap("trans")) acts.push({ label: "Trans here", cmd: "trans " + nm, confirm: true, danger: true });
+        if (adminCap("bolt")) acts.push({ label: "Bolt", cmd: "bolt " + nm, confirm: true, danger: true });
+        if (adminCap("bounty")) acts.push({ label: "Bounty…", prefill: "bounty " + nm + " " });
+        if (adminCap("ban")) {
+            var acct = extra && extra.account ? firstWord(extra.account) : "";
+            acts.push({ label: acct ? "Ban " + acct + "…" : "Ban…",
+                        prefill: "ban " + (acct ? acct + " " : "") });
+        }
+        return acts;
     }
 
     function applyCooldowns(data) {
@@ -2373,16 +2529,43 @@
     function renderWho() {
         var w = S.who;
         if (!w || !w.players) { fill(dom.who, el("div", { class: "panel-empty", text: "—" })); return; }
+        var admin = adminLevel() >= 21;
         var list = el("ul", { class: "who-list" });
         w.players.forEach(function (p) {
             var nm = firstWord(p.name);
             var flags = (p.is_my_leader ? " ◂leader" : "") + (p.following_me ? " follower▸" : "");
+            var extra = admin ? whoExtraFor(p.name) : null;
+            // Staff rows: the name area doubles as the admin-menu opener
+            // (data-menu on .who-main only, so Tell/Follow/Group stay plain
+            // buttons), and an .who-adm line carries the WhoExtra columns.
+            var mainAttrs = { class: "who-main" };
+            if (admin) {
+                mainAttrs["data-menu"] = "who";
+                mainAttrs["data-who"] = nm;
+                mainAttrs.role = "button";
+                mainAttrs.tabindex = "0";
+            }
+            var adm = null;
+            if (extra) {
+                var bits = [];
+                if (extra.label) bits.push(el("span", { class: "adm-pill adm-pill--sm", text: extra.label }));
+                if (extra.room_name || extra.room_vnum) {
+                    bits.push(el("span", { class: "who-adm-room",
+                        text: (extra.room_name || "?") + " #" + (extra.room_vnum || "?") }));
+                }
+                if (extra.idle >= 60) bits.push(el("span", { class: "who-adm-idle", text: "idle " + fmtIdle(extra.idle) }));
+                if (extra.invis) bits.push(el("span", { class: "who-adm-invis", text: "invis " + extra.invis }));
+                if (extra.snooping) bits.push(el("span", { class: "who-adm-snoop", text: "snooping " + extra.snooping }));
+                if (extra.account) bits.push(el("span", { class: "dim", text: extra.account }));
+                if (bits.length) adm = el("div", { class: "who-adm" }, bits);
+            }
             list.appendChild(el("li", { class: "who-row" }, [
-                el("div", { class: "who-main" }, [
+                el("div", mainAttrs, [
                     el("span", { class: "who-name", text: p.name }),
                     el("span", { class: "dim", text: " L" + p.level + " " + p.race + " " + p["class"] }),
                     p.title ? el("div", { class: "who-title", text: p.title }) : null,
-                    flags ? el("span", { class: "dim", text: flags }) : null
+                    flags ? el("span", { class: "dim", text: flags }) : null,
+                    adm
                 ]),
                 el("div", { class: "who-act" }, [
                     el("button", { "data-prefill": "tell " + nm + " ", text: "Tell" }),
@@ -2394,6 +2577,364 @@
         var kids = [list];
         if (w.hidden) kids.push(el("div", { class: "who-hidden", text: "+" + w.hidden + " hidden" }));
         fill(dom.who, kids);
+    }
+
+    // ------------------------------------------------------------------
+    // Zones (staff overlay) — the zones table with live regen countdowns.
+    // Server pushes only on real zone-state change; the countdown ticks
+    // locally from the snapshot age.
+    // ------------------------------------------------------------------
+    var zoneFilter = { q: "", unlive: false };
+
+    function zoneRegenText(z, ageMin) {
+        if (z.fails > 0) return "try " + (z.fails + 1);
+        if (z.elapsed < 0 || !z.lifespan) return "—";
+        var elapsed = z.elapsed + ageMin;
+        var left = z.lifespan - elapsed;
+        return left <= 0 ? "due" : elapsed + "/" + z.lifespan + "m";
+    }
+
+    function renderZones() {
+        if (!dom.zones) return;
+        var zd = S.zones;
+        if (!zd || !zd.zones) { fill(dom.zones, el("div", { class: "panel-empty", text: "—" })); return; }
+
+        var hadFocus = document.activeElement && document.activeElement.id === "zn-search";
+        var caret = hadFocus ? document.activeElement.selectionStart : null;
+        var prevScroll = dom.zones.querySelector(".zn-scroll");
+        var savedTop = prevScroll ? prevScroll.scrollTop : 0;
+
+        var ageMin = Math.max(0, Math.floor((Date.now() - (zd._at || Date.now())) / 60000));
+        var hereId = (S.builder && S.builder.zone) ? S.builder.zone.id : null;
+
+        var q = zoneFilter.q.trim().toLowerCase();
+        var liveCount = 0, unliveCount = 0;
+        var rows = zd.zones.filter(function (z) {
+            if (z.live) liveCount++; else unliveCount++;
+            if (zoneFilter.unlive ? z.live : !z.live) return false;
+            if (!q) return true;
+            return String(z.id) === q ||
+                String(z.name || "").toLowerCase().indexOf(q) !== -1;
+        }).sort(function (a, b) { return a.id - b.id; });
+
+        var search = el("input", {
+            type: "text", class: "ab-search", id: "zn-search",
+            placeholder: "Filter zones…", autocomplete: "off", spellcheck: "false",
+            value: zoneFilter.q
+        });
+        search.addEventListener("input", function () { zoneFilter.q = search.value; renderZones(); });
+        var chips = el("div", { class: "ab-chips" }, [
+            el("button", { type: "button", class: "ab-chip" + (zoneFilter.unlive ? "" : " on"),
+                "data-znlive": "live", text: "Live " + liveCount }),
+            el("button", { type: "button", class: "ab-chip" + (zoneFilter.unlive ? " on" : ""),
+                "data-znlive": "unlive", text: "Unlive " + unliveCount })
+        ]);
+
+        var list = el("div", { class: "zn-scroll" });
+        rows.forEach(function (z) {
+            var flags = [];
+            if (z.occ === "O") flags.push(el("span", { class: "zn-flag", title: "Never occupied since regen tracking", text: "O" }));
+            if (z.occ === "S") flags.push(el("span", { class: "zn-flag zn-flag--warn", title: "Occupied since last regen", text: "S" }));
+            if (z.noregen) flags.push(el("span", { class: "zn-flag zn-flag--off", text: "noregen" }));
+            if (z.skip) flags.push(el("span", { class: "zn-flag zn-flag--off", text: "skip" }));
+            if (!z.live) flags.push(el("span", { class: "zn-flag zn-flag--danger", text: "unlive" }));
+            if (z.fails > 0) flags.push(el("span", { class: "zn-flag zn-flag--danger", text: "failing" }));
+
+            var meter = null;
+            if (z.fails === 0 && z.elapsed >= 0 && z.lifespan > 0) {
+                var pct = Math.max(0, Math.min(100, ((z.elapsed + ageMin) / z.lifespan) * 100));
+                meter = el("span", { class: "zn-track" }, [
+                    el("span", { class: "zn-fill", style: "width:" + pct.toFixed(0) + "%" })
+                ]);
+            }
+            list.appendChild(el("div", {
+                class: "zn-row" + (z.id === hereId ? " zn-row--here" : ""),
+                "data-menu": "zone", "data-zid": z.id, role: "button", tabindex: "0"
+            }, [
+                el("span", { class: "zn-id", text: z.id }),
+                el("span", { class: "zn-name", text: z.name || "unnamed" }),
+                el("span", { class: "zn-flags" }, flags),
+                meter,
+                el("span", { class: "zn-status", text: zoneRegenText(z, ageMin) })
+            ]));
+        });
+        if (!rows.length) list.appendChild(el("div", { class: "panel-empty", text: "No matching zones" }));
+
+        var kids = [el("div", { class: "ab-controls" }, [search]), chips, list];
+        if (zd.truncated) kids.push(el("div", { class: "who-hidden", text: "Zone list truncated — use the zones command" }));
+        fill(dom.zones, kids);
+
+        if (hadFocus) {
+            var s2 = document.getElementById("zn-search");
+            if (s2) { s2.focus(); if (caret != null) s2.setSelectionRange(caret, caret); }
+        }
+        var scroll2 = dom.zones.querySelector(".zn-scroll");
+        if (scroll2) scroll2.scrollTop = savedTop;
+    }
+
+    function zoneById(id) {
+        var arr = (S.zones && S.zones.zones) || [];
+        for (var i = 0; i < arr.length; i++) if (arr[i].id === id) return arr[i];
+        return null;
+    }
+
+    function zoneActions(z) {
+        var acts = [];
+        if (adminCap("goto") && z.first) {
+            acts.push({ label: "Goto zone (#" + z.first + ")", cmd: "goto " + z.first });
+        }
+        if (adminCap("regen")) {
+            acts.push({ label: "Regen now", cmd: "regen " + z.id, confirm: true, danger: true });
+        }
+        if (adminCap("purge")) {
+            acts.push({ label: "Purge zone", cmd: "purge " + z.id, confirm: true, danger: true });
+        }
+        acts.push({ label: "Details (terminal)", cmd: "zones " + z.id });
+        if (adminCap("admin")) acts.push({ label: "zset…", prefill: "zset " + z.id + " " });
+        return acts;
+    }
+
+    // ------------------------------------------------------------------
+    // Admin panel (staff overlay, Eternal+) — the `admin` menu as controls.
+    // Every button sends the matching `admin …` subcommand; the game's own
+    // gates re-validate (season/autocycle are Forger-only inner gates the
+    // feed mirrors as can_season).
+    // ------------------------------------------------------------------
+    function fmtEta(unixSecs) {
+        var left = Math.floor(unixSecs - Date.now() / 1000);
+        if (left <= 0) return "expired";
+        var d = Math.floor(left / 86400), h = Math.floor((left % 86400) / 3600);
+        return d > 0 ? d + "d " + h + "h" : h + "h " + Math.floor((left % 3600) / 60) + "m";
+    }
+
+    function renderAdminPanel() {
+        if (!dom.admin) return;
+        var p = S.adminPanel;
+        if (!p) { fill(dom.admin, el("div", { class: "panel-empty", text: "—" })); return; }
+        var kids = [];
+        function section(t) { kids.push(el("div", { class: "ap-h", text: t })); }
+        function row(label, value, valueClass, actions) {
+            kids.push(el("div", { class: "ap-row" }, [
+                el("span", { class: "ap-label", text: label }),
+                value != null ? el("span", { class: "ap-value" + (valueClass ? " " + valueClass : ""), text: value }) : null,
+                actions ? el("span", { class: "ap-act" }, actions) : null
+            ]));
+        }
+        function btn(label, attrs) {
+            attrs = attrs || {};
+            attrs.type = "button";
+            attrs.class = "hud-btn" + (attrs.class ? " " + attrs.class : "");
+            attrs.text = label;
+            return el("button", attrs);
+        }
+
+        section("Game state");
+        row("Maintenance", p.maintenance ? "On" : "Off", p.maintenance ? "ap-on-danger" : "ap-dim", [
+            // Enabling walks through the game's own y/N prompt in the
+            // terminal — the two-tap arm here is the first fence, not the last.
+            btn(p.maintenance ? "End" : "Start…", { "data-confirm-cmd": "admin maintenance" })
+        ]);
+        row("Beta", null, null, ["open", "closed", "off"].map(function (b) {
+            return btn(b, {
+                class: "ab-chip" + (p.beta === b ? " on" : ""),
+                "data-cmd": "admin beta " + b
+            });
+        }));
+        var mp = Number(p.multiplay) || 0;
+        row("Multiplay", String(mp), null, [
+            btn("−", mp > 0 ? { "data-cmd": "admin multiplay " + (mp - 1) } : { disabled: true }),
+            btn("+", mp < 3 ? { "data-cmd": "admin multiplay " + (mp + 1) } : { disabled: true })
+        ]);
+        row("New features", p.features ? "On" : "Off", p.features ? "" : "ap-dim", [
+            btn("Toggle", { "data-cmd": "admin features" })
+        ]);
+        row("AutoCycle", (p.autocycle ? "On" : "Off"), p.autocycle ? "" : "ap-dim",
+            p.can_season ? [btn("Toggle", { "data-cmd": "admin autocycle" })] : null);
+
+        if (p.season) {
+            section("Season " + p.season.id + (p.can_season ? "" : " (Forger controls hidden)"));
+            row("State", p.season.state, p.season.state === "normal" ? "" : "ap-on-danger", null);
+            row("Enigma", p.season.enigma, null,
+                p.can_season ? [btn("Next…", { "data-prefill": "admin season nextenigma " })] : null);
+            if (p.season.next_enigma) row("Next enigma", p.season.next_enigma, "ap-dim", null);
+            row("Expires", fmtEta(p.season.expires), null, p.can_season ? [
+                btn("Cycle…", { class: "ap-danger", "data-confirm-cmd": "admin season cycle" }),
+                btn("Start…", { "data-confirm-cmd": "admin season start" })
+            ] : null);
+        }
+
+        section("World");
+        row("Hour", (p.hour < 10 ? "0" : "") + p.hour + ":00", null, [
+            btn("Set…", { "data-prefill": "admin time " })
+        ]);
+        (p.moons || []).forEach(function (m) {
+            row(m.name, m.phase_name, "ap-dim", [
+                btn("Set…", { "data-prefill": "admin moon " + m.name.toLowerCase() + " " })
+            ]);
+        });
+        row("Overrides", null, null, [
+            btn("Clear moon overrides", { "data-confirm-cmd": "admin moon clear" })
+        ]);
+
+        section("Lookups");
+        row("Reports", null, null, [
+            btn("Player…", { "data-prefill": "admin player " }),
+            btn("Account…", { "data-prefill": "admin account " }),
+            btn("Weekly…", { "data-confirm-cmd": "admin weekly" }),
+            btn("Nodes", { "data-cmd": "admin view nodes" })
+        ]);
+
+        fill(dom.admin, kids);
+    }
+
+    // ------------------------------------------------------------------
+    // Inspector (staff overlay) — the last Admin.Stat payload, organized.
+    // Kind-discriminated renderer; every vnum-bearing row offers a
+    // drill-down `stat`.
+    // ------------------------------------------------------------------
+    function insH(text) { return el("div", { class: "ap-h", text: text }); }
+    function insKv(rows) {
+        return el("div", { class: "ins-kv" }, rows.filter(Boolean).map(function (r) {
+            return el("div", { class: "ins-kv-row" }, [
+                el("span", { class: "ins-k", text: r[0] }),
+                el("span", { class: "ins-v" + (r[2] ? " " + r[2] : ""), text: String(r[1]) })
+            ]);
+        }));
+    }
+    function pool(t) { return t[0] + "/" + t[1] + (t[2] ? " (" + (t[2] > 0 ? "+" : "") + t[2] + ")" : ""); }
+
+    function renderInspector() {
+        if (!dom.inspect) return;
+        var d = S.adminStat;
+        if (!d) { fill(dom.inspect, el("div", { class: "panel-empty", text: "Run stat <target> to inspect something." })); return; }
+        var kids = [];
+        if (d.kind === "person") {
+            kids.push(el("div", { class: "ins-head" }, [
+                el("span", { class: "ins-name", text: d.name }),
+                el("span", { class: "dim", text: " L" + d.level + (d.is_player ? (" " + d.race + " " + d["class"]) : (" mob #" + d.vnum)) }),
+                el("span", { class: "ins-pos", text: d.position || "" })
+            ]));
+            kids.push(insH("Pools"));
+            kids.push(insKv([
+                ["HP", pool(d.hp)], ["Mana", pool(d.mana)],
+                ["Move", pool(d.mv)], ["Favor", pool(d.fp)]
+            ]));
+            kids.push(insH("Combat"));
+            kids.push(insKv([
+                ["Weapon", d.wpn[0] + "d" + d.wpn[1] + "+" + d.wpn[2]],
+                ["Critical", (d.crit[0] / 10).toFixed(1) + "% (+" + d.crit[1] + "%)"],
+                ["Expertise", d.expertise[0] + " (+" + d.expertise[1] + ")"],
+                ["Saves", "Fort " + d.saves.fort[0] + (d.saves.fort[1] ? "+" + d.saves.fort[1] : "") +
+                          " · Ref " + d.saves.ref[0] + (d.saves.ref[1] ? "+" + d.saves.ref[1] : "") +
+                          " · Wil " + d.saves.wil[0] + (d.saves.wil[1] ? "+" + d.saves.wil[1] : "")],
+                ["Edge", d.edge[0] + "/" + d.edge[1]],
+                (d.charges && (d.charges.animist || d.charges.soulweaver)) ?
+                    ["Charges", "Animist " + d.charges.animist + " · Soulweaver " + d.charges.soulweaver] : null
+            ]));
+            kids.push(insH("Session"));
+            kids.push(insKv([
+                ["Carrying", d.carrying.n + " items · " + d.carrying.kg + "/" + d.carrying.max_kg + "kg" +
+                             (d.carrying.move_pct ? " (" + (d.carrying.move_pct > 0 ? "+" : "") + d.carrying.move_pct + "% move)" : "")],
+                d.idle >= 0 ? ["Idle", fmtIdle(d.idle)] : null,
+                d.is_player ? ["Online", fmtIdle(d.online)] : null,
+                d.is_player ? ["Age", d.age.yr + "yr " + d.age.mon + "mon"] : null,
+                d.leader ? ["Leader", d.leader] : null,
+                d.fighting ? ["Fighting", d.fighting, "ins-danger"] : null,
+                (d.followers || []).length ? ["Followers", d.followers.join(", ")] : null
+            ]));
+            if (d.account) {
+                kids.push(insH("Account"));
+                kids.push(insKv([
+                    ["Name", d.account.name], ["Email", d.account.email],
+                    ["Id", d.account.id], ["Online chars", d.account.num_online],
+                    d.xp_bonus ? ["XP bonus", d.xp_bonus] : null
+                ]));
+            }
+            if (d.upgrades) {
+                var ups = (d.upgrades.remort || []).filter(function (u) { return u[1]; });
+                var aups = (d.upgrades.account || []).filter(function (u) { return u[1]; });
+                kids.push(insH("Upgrades"));
+                if (!ups.length && !aups.length) {
+                    kids.push(el("div", { class: "panel-empty", text: "none" }));
+                } else {
+                    kids.push(insKv(ups.concat(aups)));
+                }
+            }
+            if ((d.spells || []).length) {
+                kids.push(insH("Spells in effect"));
+                kids.push(insKv(d.spells.map(function (s) {
+                    return [s.name, s.secs > 0 ? fmtIdle(s.secs) : "—"];
+                })));
+            }
+        } else if (d.kind === "object") {
+            kids.push(el("div", { class: "ins-head" }, [
+                el("span", { class: "adm-vnum", text: "#" + d.vnum }),
+                el("span", { class: "ins-name", text: " " + d.name }),
+                el("span", { class: "dim", text: " (" + d.keyword + ") · " + d.type + (d.dirty ? " · DIRTY" : "") })
+            ]));
+            kids.push(insH("Values"));
+            kids.push(insKv([
+                ["Weight / size", d.weight + " / " + d.size],
+                ["Set / true value", d.set_value + " / " + d.true_value],
+                ["vals", d.vals.join(" ")],
+                ["Min level", d.min_level + (d.min_level_diff ? " (" + (d.min_level_diff > 0 ? "+" : "") + d.min_level_diff + " vs template)" : "")],
+                d.owner != null ? ["Owner", d.owner] : null,
+                d.bound_secs != null ? ["Bound", fmtIdle(d.bound_secs) + " left"] : null,
+                d.load_on ? ["Load on", d.load_on] : null,
+                d.home_zone ? ["Home zone", d.home_zone.name + " (" + d.home_zone.id + ")"] : null,
+                d.timer ? ["Timer", d.timer] : null,
+                ["State", d.state],
+                d.func ? ["Func", d.func] : null,
+                d.enchant ? ["Enchant", d.enchant] : null,
+                d.grant_skill ? ["Grants", d.grant_skill] : null,
+                d.bonus_damage ? ["Bonus damage", d.bonus_damage.force + " (" + d.bonus_damage.num + "d" + d.bonus_damage.size + ")"] : null
+            ]));
+            if ((d.mods || []).length || (d.auras || []).length) {
+                kids.push(insH("Mods"));
+                kids.push(insKv((d.mods || []).map(function (m) {
+                    return [m.slot, m.value + (m.live != null && String(m.live) !== m.value ? " (live " + m.live + ")" : "")];
+                }).concat((d.auras || []).map(function (a) {
+                    return ["Aura · " + a.slot, a.value];
+                }))));
+            }
+            if ((d.wear || []).length) kids.push(el("div", { class: "who-adm", text: "Wear: " + d.wear.join(" ") }));
+            if ((d.flags || []).length) kids.push(el("div", { class: "who-adm", text: "Flags: " + d.flags.join(" ") }));
+            kids.push(el("div", { class: "ap-row" }, [
+                el("span", { class: "ap-act" }, [
+                    el("button", { type: "button", class: "hud-btn", "data-prefill": "set o ", text: "set o …" })
+                ])
+            ]));
+        } else if (d.kind === "room") {
+            kids.push(el("div", { class: "ins-head" }, [
+                el("span", { class: "ins-name", text: d.name }),
+                el("span", { class: "dim", text: " #" + d.vnum + (d.zone ? " · " + d.zone.name + " (" + d.zone.id + ")" : "") })
+            ]));
+            kids.push(insH("People"));
+            (d.people || []).forEach(function (p2) {
+                kids.push(el("div", { class: "ins-row" }, [
+                    el("span", { class: "ins-name", text: p2.name }),
+                    p2.vnum ? el("span", { class: "dim", text: " #" + p2.vnum }) : null,
+                    el("span", { class: "ap-act" }, [
+                        el("button", { type: "button", class: "hud-btn", "data-cmd": "stat " + firstWord(p2.keyword), text: "Stat" })
+                    ])
+                ]));
+            });
+            if (!(d.people || []).length) kids.push(el("div", { class: "panel-empty", text: "nobody" }));
+            kids.push(insH("Objects"));
+            (d.objects || []).forEach(function (o2) {
+                kids.push(el("div", { class: "ins-row" }, [
+                    el("span", { class: "ins-name", text: o2.name }),
+                    el("span", { class: "dim", text: " #" + o2.vnum }),
+                    el("span", { class: "ap-act" }, [
+                        el("button", { type: "button", class: "hud-btn", "data-cmd": "stat " + firstWord(o2.keyword), text: "Stat" })
+                    ])
+                ]));
+            });
+            if (!(d.objects || []).length) kids.push(el("div", { class: "panel-empty", text: "nothing" }));
+        } else {
+            kids.push(el("div", { class: "panel-empty", text: "—" }));
+        }
+        fill(dom.inspect, kids);
     }
 
     // ------------------------------------------------------------------
@@ -3138,7 +3679,11 @@
             },
             {
                 title: "Overlay apps", hud: true,
-                rows: OVERLAYS.map(function (o) {
+                // Staff overlays are invisible in the reference below the
+                // admin tier — no advertising surfaces mortals can't open.
+                rows: OVERLAYS.filter(function (o) {
+                    return !o.admin || adminLevel() >= 21;
+                }).map(function (o) {
                     return { keys: ["Ctrl+" + o.hotkey.toUpperCase()], desc: o.title };
                 }),
                 notes: [
@@ -4649,10 +5194,13 @@
         menuOpen = true;
         positionMenu(anchor);
     }
-    // actions: [{label, cmd|prefill|fn, danger, tier, disabled}]. Anchored
-    // near `anchor`. `disabled` renders an inert greyed row — used for
-    // actions that exist but the player can't take yet (harvest rank gates),
-    // so the requirement is visible instead of the action silently missing.
+    // actions: [{label, cmd|prefill|fn, danger, tier, disabled, confirm}].
+    // Anchored near `anchor`. `disabled` renders an inert greyed row — used
+    // for actions that exist but the player can't take yet (harvest rank
+    // gates), so the requirement is visible instead of the action silently
+    // missing. `confirm` arms on the first tap ("Confirm: X") and fires on
+    // the second — destructive staff actions (bolt, trans, purge) never go
+    // off a single stray tap; reopening the menu disarms.
     function openMenu(title, actions, anchor) {
         closeMenu();
         hideTip();
@@ -4670,6 +5218,12 @@
                 text: a.label,
                 onclick: function () {
                     if (a.disabled) return;
+                    if (a.confirm && !this._armed) {
+                        this._armed = true;
+                        this.textContent = "Confirm: " + a.label;
+                        this.classList.add("armed");
+                        return;
+                    }
                     // Close BEFORE running the action: an fn may open its own
                     // surface (icon picker, a confirm submenu) and a
                     // close-after would immediately dismiss it.
@@ -4769,6 +5323,7 @@
                             cmd: "order followers kill " + kw, danger: true });
             }
         }
+        if (adminCap("stat")) acts.push({ label: "Inspect", cmd: "stat " + o.handle });
         if (!o.is_player) {
             // Only actual vendors get a list action (is_shopkeeper = the mob
             // handles the `list` command, per Room.Occupants).
@@ -4890,6 +5445,7 @@
             // ground, so it lives on the Room panel's corpse menu instead.
             acts.push({ label: "Drop", cmd: "drop " + t });
         }
+        if (adminCap("stat")) acts.push({ label: "Inspect", cmd: "stat " + t });
         return acts;
     }
     function openContainers() {
@@ -5020,6 +5576,14 @@
         var star = e.target.closest("[data-bar]");
         if (star && dom.app.contains(star)) { toggleSlot(star.getAttribute("data-bar")); return; }
 
+        // 2d1b) Zones panel live/unlive filter chips.
+        var znchip = e.target.closest("[data-znlive]");
+        if (znchip && dom.app.contains(znchip)) {
+            zoneFilter.unlive = znchip.getAttribute("data-znlive") === "unlive";
+            renderZones();
+            return;
+        }
+
         // 2d2) Quest Log: filter chips, track stars, row expand; plus the
         // objectives tracker's collapse toggle (it lives outside #hud-overlay
         // but inside #connect-app, so the same delegation reaches it).
@@ -5093,6 +5657,24 @@
             return;
         }
 
+        // 4b) Two-tap confirm buttons outside menus (admin panel): first tap
+        // arms in place, second fires. A re-render (fresh state push after
+        // the command) naturally disarms.
+        var cfm = e.target.closest("[data-confirm-cmd]");
+        if (cfm && dom.app.contains(cfm)) {
+            if (!cfm._armed) {
+                cfm._armed = true;
+                cfm.classList.add("armed");
+                cfm.textContent = "Confirm: " + cfm.textContent;
+            } else {
+                sendCmd(cfm.getAttribute("data-confirm-cmd"));
+                cfm._armed = false;
+                cfm.classList.remove("armed");
+                cfm.textContent = cfm.textContent.replace(/^Confirm: /, "");
+            }
+            return;
+        }
+
         // 5) Plain data-cmd / data-prefill (exits, group buttons, header List…).
         var t = e.target.closest("[data-cmd],[data-prefill]");
         if (!t || !dom.app.contains(t)) return;
@@ -5141,6 +5723,16 @@
             var arr = gkind === "ally" ? (S.group && S.group.allies) : (S.group && S.group.members);
             var x = (arr || [])[Number(host.getAttribute("data-gidx"))];
             if (x) openMenu(stripColor(String(x.name || "")), groupRowActions(x, gkind), anchor);
+        } else if (kind === "who") {
+            var wn = host.getAttribute("data-who");
+            if (wn && adminLevel() >= 21) {
+                openMenu(wn, whoAdminActions(wn, whoExtraFor(wn)), anchor);
+            }
+        } else if (kind === "zone") {
+            var zz = zoneById(Number(host.getAttribute("data-zid")));
+            if (zz && adminLevel() >= 21) {
+                openMenu("[" + zz.id + "] " + (zz.name || "unnamed"), zoneActions(zz), anchor);
+            }
         }
     }
     function readDataset(host) {
@@ -5287,6 +5879,7 @@
         renderVitals(); renderSelfAffects(); renderRoom(); renderOccupants(); renderGroup();
         renderEquipment(); renderInventory(); renderTrain(); renderXp(); renderTracked();
         renderWho(); renderChat(); renderHotbar(); renderAbilities(); renderProfessions();
+        renderAdminStrip();
         updateMicro(); updateAttack();
     }
     function reset() {
@@ -5300,6 +5893,9 @@
         S.quests = []; S.questMarkers = null;
         S.season = null; S.achievements = null;
         S.tgtHostile = null; S.tgtFriendly = null;
+        S.adminCaps = null; S.builder = null; S.whoExtra = null;
+        S.zones = null; S.adminPanel = null; S.adminStat = null;
+        retierAdmin();
         // A reconnect may land as a different character; re-sync the bar on the
         // next Char.Status. The cached slots stay up meanwhile (no empty flash).
         barChar = null;
@@ -5350,11 +5946,15 @@
         dom.who = document.getElementById("panel-who");
         dom.hotbar = document.getElementById("hud-hotbar");
         dom.attack = document.getElementById("hud-attack");
+        dom.adminstrip = document.getElementById("hud-adminstrip");
         dom.xpstrip = document.getElementById("hud-xpstrip");
         dom.xpFill = dom.xpstrip && dom.xpstrip.querySelector(".xp-fill");
         dom.xpLabel = dom.xpstrip && dom.xpstrip.querySelector(".xp-label");
         dom.micro = document.getElementById("hud-micro");
         dom.professions = document.getElementById("panel-professions");
+        dom.zones = document.getElementById("panel-zones");
+        dom.admin = document.getElementById("panel-admin");
+        dom.inspect = document.getElementById("panel-inspect");
         dom.quests = document.getElementById("panel-quests");
         dom.season = document.getElementById("panel-season");
         dom.achievements = document.getElementById("panel-achievements");
@@ -5498,7 +6098,7 @@
     // ------------------------------------------------------------------
     // Demo mode (/connect?demo=1)
     // ------------------------------------------------------------------
-    function demo() {
+    function demo(opts) {
         setHud(true, false);
         // Tracked quests + a catalog stub so the Quest Log's expanded detail
         // and the objectives tracker render without the endpoints.
@@ -5646,6 +6246,11 @@
                 { name: "a lesser fire elemental", owner: "Mirena", hp_pct: 100, mp_pct: 100, mv_pct: 100, position: "Standing", in_room: true, is_tank: false }
             ] },
             "Char.Skills": { skills: bigSkills },
+            "Char.Who": { players: [
+                { name: "Aelwyn", level: 45, race: "Elf", "class": "Magician", title: "the Tempest-Touched", following_me: false, is_my_leader: false },
+                { name: "Selra", level: 44, race: "Human", "class": "Cleric", title: "Voice of the Dawn", following_me: true, is_my_leader: false },
+                { name: "Boric", level: 43, race: "Dwarf", "class": "Warrior", title: "Shield of the Dawn", following_me: false, is_my_leader: true }
+            ], hidden: 1 },
             "Char.Cooldowns": { cooldowns: [{ id: 3, remaining: 8 }], usable: { "3": false } },
             "Char.Train": { stats: [{ name: "Str", value: 18, add: 2 }, { name: "Int", value: 25 }, { name: "Wis", value: 20 }], xp: 1250000, xp_pct: 62, can_advance: true, aux: [{ name: "Crit", value: "12.5% (+2%)" }], resources: [{ name: "Practices", value: 5, max: 10 }, { name: "Trains", value: 2, max: 2 }] },
             "Char.Professions": { professions: [
@@ -5724,8 +6329,76 @@
             { channel: "Group", text: "You told the group, \"pulling in 5\"" },
             { channel: "Say", text: "Aelwyn said, \"ready when you are\"" }
         ].forEach(function (c) { onGmcp("Comm.Channel", JSON.stringify(c)); });
+
+        // ?demo=admin — the staff fixtures, layered last so the re-tier and
+        // the who-supplement merge render over the sample player state.
+        // Fed under the replay flag so the Inspector arms without popping.
+        if (opts && opts.admin) {
+            setReplaying(true);
+            var adminFeeds = {
+                "Admin.Stat": {
+                    kind: "person", is_player: true, name: "Boric", vnum: 0,
+                    level: 43, race: "Dwa", "class": "Warrior", position: "Standing",
+                    hp: [412, 480, 12], mana: [300, 300, 0], mv: [198, 240, 0], fp: [80, 80, 0],
+                    saves: { fort: [12, 3], ref: [10, 0], wil: [14, 1] },
+                    wpn: [2, 6, 3], crit: [125, 2], expertise: [4, 1], comm: 3,
+                    edge: [3, 6], charges: { animist: 0, soulweaver: 0 },
+                    carrying: { n: 10, kg: 42, max_kg: 100, move_pct: 0 },
+                    idle: 90, online: 123456, age: { yr: 21, mon: 4 },
+                    leader: "", fighting: "", followers: ["a war hound"],
+                    upgrades: { remort: [["Attack", 2], ["Critical", 1], ["Speed", 3]],
+                                account: [["Vit HP", 2], ["XP Bonus", 1]] },
+                    account: { id: 123, email: "boric@example.com", name: "boric-acct", num_online: 1, gift: 0 },
+                    xp_bonus: 8,
+                    spells: [{ name: "sanctuary", secs: 120 }, { name: "stone skin", secs: 1740 }]
+                },
+                "Admin.Caps": { level: 24, label: "Eternal", caps: {
+                    "goto": true, stat: true, set: true, zones: true,
+                    purge: true, regen: true, show: true, snoop: true,
+                    trans: true, bolt: true, admin: true, ban: true,
+                    bounty: true, season: false } },
+                "Admin.Builder": {
+                    set_o: { vnum: 41230, name: "a rusty dagger", keyword: "dagger rusty", permitted: true },
+                    zone: { id: 30, name: "Ritani" } },
+                "Admin.Panel": {
+                    maintenance: false, beta: "off", multiplay: 2,
+                    features: true, autocycle: true,
+                    season: { id: 15, state: "normal", enigma: "Enigma of the Tempest",
+                              next_enigma: "Enigma of Ashes",
+                              expires: Math.floor(Date.now() / 1000) + 1058400 },
+                    hour: 21, can_season: false,
+                    moons: [
+                        { name: "Shavar", phase: 4, phase_name: "full" },
+                        { name: "Tregalien", phase: 1, phase_name: "waxing crescent" },
+                        { name: "Fandaro", phase: 2, phase_name: "first quarter" },
+                        { name: "Chenchir", phase: 6, phase_name: "last quarter" }
+                    ] },
+                "Admin.Zones": { zones: [
+                    { id: 2, name: "Mareldjan Park", parent: 0, elapsed: 12, lifespan: 40, fails: 0, occ: "O", live: true, noregen: false, skip: false, rooms: 58, first: 4001 },
+                    { id: 19, name: "Shinerock Mines", parent: 0, elapsed: 35, lifespan: 40, fails: 0, occ: "", live: true, noregen: false, skip: false, rooms: 84, first: 19001 },
+                    { id: 30, name: "Ritani", parent: 0, elapsed: 3, lifespan: 60, fails: 0, occ: "S", live: true, noregen: false, skip: false, rooms: 112, first: 30001 },
+                    { id: 44, name: "The Sunken Vaults", parent: 30, elapsed: -1, lifespan: 90, fails: 2, occ: "", live: true, noregen: false, skip: false, rooms: 41, first: 44001 },
+                    { id: 51, name: "Stormreach Spire", parent: 0, elapsed: 58, lifespan: 60, fails: 0, occ: "", live: true, noregen: false, skip: true, rooms: 66, first: 51001 },
+                    { id: 63, name: "Cinderfall Approach", parent: 0, elapsed: -1, lifespan: 0, fails: 0, occ: "O", live: true, noregen: true, skip: false, rooms: 23, first: 63001 },
+                    { id: 71, name: "The Glass Orchard", parent: 0, elapsed: 20, lifespan: 45, fails: 0, occ: "", live: false, noregen: false, skip: false, rooms: 37, first: 71001 }
+                ], truncated: false },
+                "Admin.WhoExtra": { players: [
+                    { name: "Aelwyn", level: 24, label: "Eternal", room_vnum: 3001,
+                      room_name: "The Temple Square", idle: 0, invis: 22, account: "aelwyn-acct" },
+                    { name: "Boric", level: 15, label: "", room_vnum: 4188,
+                      room_name: "A Muddy Track", idle: 90, invis: 0, account: "boric-acct" },
+                    { name: "Selra", level: 21, label: "Consort", room_vnum: 3054,
+                      room_name: "The Bazaar", idle: 660, invis: 0,
+                      snooping: "Boric", account: "selra-acct" }
+                ] }
+            };
+            Object.keys(adminFeeds).forEach(function (k) {
+                onGmcp(k, JSON.stringify(adminFeeds[k]));
+            });
+            setReplaying(false);
+        }
         setConnected(true);
     }
 
-    window.IsharHUD = { init: init, onGmcp: onGmcp, reset: reset, setConnected: setConnected, completions: completions, cycleTarget: cycleTarget, keyHelp: keyHelp, demo: demo, registerMap: registerMap };
+    window.IsharHUD = { init: init, onGmcp: onGmcp, reset: reset, setConnected: setConnected, setReplaying: setReplaying, completions: completions, cycleTarget: cycleTarget, keyHelp: keyHelp, demo: demo, registerMap: registerMap };
 })();

@@ -2361,3 +2361,59 @@ indefensible once the profile carries a self-view layer.
 **Notes.** Verified as before — template compile + render smoke test,
 `manage.py check`, Playwright screenshots at 1200px and a true 390px
 viewport (scrollWidth 390, no overflow).
+
+## 2026-07-28 — Admin re-tier: a second ambient profile, not an ambient addition
+
+**Problem.** The HUD's ambient tier is built for mortals — attack cluster, XP
+strip, hotbar — which is dead weight on an admin character, while the things
+staff glance at constantly (the `set o` target, current zone, rank) had no
+home. The ambient tier is a closed set (2026-07-17, the HUD extension model),
+so admin surfaces couldn't just be piled on.
+
+**Decision.** The ambient tier stays closed *per profile*, and there are now
+exactly two profiles:
+
+- **Player** (default): the existing set, unchanged.
+- **Admin** (focused session's character is level 21+): the attack cluster
+  and XP strip hide, and exactly one element appears — the **admin strip**
+  (`#hud-adminstrip`: rank pill · live `set o` target with vnum · current
+  zone). Everything else admin lives behind overlay apps, the existing
+  extension point.
+
+The trigger is `Admin.Caps.level >= 21` from the focused session's GMCP cache
+— a character fact, never an account setting — so multiplay tab-switching
+re-tiers automatically via the existing reset+replay path, and a game-side
+de-level collapses the HUD back to the player profile. Implementation is one
+root class (`hud-admin` on `#connect-app`); adding a third profile or another
+ambient element still requires a new ADR.
+
+**Notes.** See the companion entry below for the gating model, and
+components.md ("Admin tier") for the widget inventory.
+
+## 2026-07-28 — Admin HUD gating: character level via Admin.Caps, three layers
+
+**Problem.** Staff data (locations, snoop edges, account names) must never
+reach a mortal's browser, but the HUD needs to know what the focused
+character may do so it can show the right panels and context actions.
+
+**Decision.** Three layers, outermost authoritative (isharmud/ishar-mud#1888):
+
+1. **Game.** Every `Admin.*` GMCP sender re-checks the character's *current*
+   level against the feed's floor on every send, and only for connections
+   whose `Core.Supports` opted into the Admin package. De-leveling pushes an
+   explicit `Admin.Caps {"level":0}` clear; the client wipes all admin state
+   on receipt.
+2. **Bridge.** The websocket consumer declares `"Admin 1"` only for
+   staff-capable accounts (immortal_level > 0 or owns a level-21+ character)
+   and drops `Admin.*` frames for everyone else — defense in depth, not the
+   boundary.
+3. **Client.** `adminCap(name)` (from `Admin.Caps`, floors mirrored from the
+   game's command table server-side) gates panels, hotkeys, and context-menu
+   rows. Cosmetic only: every action is a plain-text command the game's
+   parser re-validates.
+
+Corollaries: destructive staff actions (bolt, trans, snoop, purge, regen,
+maintenance) use a **two-tap confirm** in the context menu (`confirm: true`
+arms "Confirm: X" on the first tap); `ban` only ever *prefills* the input —
+the duration is typed, never defaulted. Account names ride Admin.WhoExtra
+only for Eternal+ viewers; host/IP is never sent over GMCP.

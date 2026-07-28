@@ -757,7 +757,47 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
   collapsed**. Read-only, focus-inert, hidden with `.hud-off` and when
   nothing is tracked.
 
-Verify with `/connect?demo=1` (sample GMCP feeds, no server needed).
+- **Admin tier** (decisions.md 2026-07-28, both entries) — the ambient
+  tier's staff profile plus the admin widgets, all gated by `Admin.Caps`
+  (`hud-admin` root class; level-21+ focused character):
+  - `#hud-adminstrip` — rank pill (`.adm-pill`, immortal cyan), the live
+    `set o` target (`.adm-target`: `.adm-vnum` + `.adm-name`; `--denied`
+    red vnum when un-permitted, `--empty` dashed when nothing carried; tap
+    prefills `set o `), and the current-zone chip (`.adm-zone`). Replaces
+    `#hud-attack` + `#hud-xpstrip` under `.hud-admin`.
+  - **Who staff line** (`.who-adm` under `.who-main`) — rank pill, room
+    name+vnum, idle, invis level (cyan), snoop edge (danger), account name
+    (Eternal+ only). The name area becomes the admin context-menu opener
+    (`data-menu="who"`); Tell/Follow/Group buttons stay plain.
+  - **Two-tap confirm** (`.menu-item.armed`) — `confirm: true` menu actions
+    arm to "Confirm: X" (danger wash) on the first tap, fire on the second.
+  - **Zones overlay** (`#panel-zones`, Ctrl+Z, `admin: true` in `OVERLAYS`)
+    — reuses the Abilities filter chrome (`.ab-search`, `.ab-chips`) over
+    `.zn-row` rows: right-aligned id, name, flag pills (`.zn-flag`:
+    O/S occupancy, noregen/skip dashed, unlive/failing danger), a regen
+    meter (`.zn-track`/`.zn-fill`, hidden at phone width) and the
+    elapsed/lifespan countdown ticked client-side. Current zone gets a
+    `.zn-row--here` accent edge; rows open a menu (goto/regen/purge with
+    confirm, details, zset prefill). Staff overlays are filtered out of the
+    keys reference below the admin tier.
+  - **Inspector overlay** (`#panel-inspect`, Ctrl+X) — the last `Admin.Stat`
+    payload, kind-discriminated: person (pools/combat/session `.ins-kv`
+    grids, account block, non-zero upgrades, spells), object (vnum header,
+    values/mods/auras, wear+flag lines, `set o` prefill), room (people and
+    object `.ins-row`s with drill-down Stat buttons). Auto-opens only on a
+    live frame — `IsharHUD.setReplaying` brackets the tab-switch replay so
+    cached frames re-arm the launcher without popping the window. Inspect
+    rows appear in the who/occupant/item menus behind the stat cap.
+  - **Admin overlay** (`#panel-admin`, Ctrl+A, Eternal+) — the `admin` menu
+    as sectioned control rows (`.ap-h` headers, `.ap-row` label · value ·
+    `.ap-act` buttons): maintenance, beta tri-state chips, multiplay
+    stepper, feature/autocycle toggles, season block (Forger controls only
+    with `can_season`), clock/moon setters, lookups. Destructive buttons
+    use the in-place arm (`data-confirm-cmd` → `.hud-btn.armed`); everything
+    else is plain `data-cmd`/`data-prefill` sending `admin …` subcommands.
+
+Verify with `/connect?demo=1` (sample GMCP feeds, no server needed);
+`/connect?demo=admin` layers the staff fixtures for the admin tier.
 
 ---
 
