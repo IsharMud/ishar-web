@@ -771,6 +771,15 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
     (`data-menu="who"`); Tell/Follow/Group buttons stay plain.
   - **Two-tap confirm** (`.menu-item.armed`) — `confirm: true` menu actions
     arm to "Confirm: X" (danger wash) on the first tap, fire on the second.
+  - **Zones overlay** (`#panel-zones`, Ctrl+Z, `admin: true` in `OVERLAYS`)
+    — reuses the Abilities filter chrome (`.ab-search`, `.ab-chips`) over
+    `.zn-row` rows: right-aligned id, name, flag pills (`.zn-flag`:
+    O/S occupancy, noregen/skip dashed, unlive/failing danger), a regen
+    meter (`.zn-track`/`.zn-fill`, hidden at phone width) and the
+    elapsed/lifespan countdown ticked client-side. Current zone gets a
+    `.zn-row--here` accent edge; rows open a menu (goto/regen/purge with
+    confirm, details, zset prefill). Staff overlays are filtered out of the
+    keys reference below the admin tier.
 
 Verify with `/connect?demo=1` (sample GMCP feeds, no server needed);
 `/connect?demo=admin` layers the staff fixtures for the admin tier.

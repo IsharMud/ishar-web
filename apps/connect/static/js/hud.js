@@ -142,7 +142,8 @@
     // the bottom, nearest the input.
     var PANELS = ["inventory", "group", "occupants", "room",
                   "tracked", "chat", "train", "abilities", "who",
-                  "professions", "map", "quests", "season", "achievements"];
+                  "professions", "map", "quests", "season", "achievements",
+                  "zones"];
     var PANEL_HOME = {
         occupants: "hud-left-scroll",
         group: "hud-left-scroll",
@@ -156,7 +157,7 @@
         abilities: "hud-overlay-body", who: "hud-overlay-body",
         professions: "hud-overlay-body", map: "hud-overlay-body",
         quests: "hud-overlay-body", season: "hud-overlay-body",
-        achievements: "hud-overlay-body"
+        achievements: "hud-overlay-body", zones: "hud-overlay-body"
     };
 
     // ------------------------------------------------------------------
@@ -230,7 +231,14 @@
           available: function () {
               return !!(S.achievements &&
                         (S.achievements.rows.length || S.achievements.points));
-          } }
+          } },
+        // Zones (staff): the zones table with live regen state and row
+        // actions (regen/purge/goto). `admin: true` keeps it out of the key
+        // reference for mortals; available() hides launcher + hotkey unless
+        // Admin.Caps grants it (isharmud/ishar-mud#1888).
+        { key: "zones", title: "Zones", hotkey: "z", admin: true,
+          render: function () { renderZones(); },
+          available: function () { return adminCap("zones") && !!S.zones; } }
     ];
     var overlayName = null;   // open overlay app key (desktop), or null
 
@@ -922,6 +930,15 @@
                 break;
             case "Admin.Builder":
                 S.builder = data; renderAdminStrip();
+                // Current-zone highlight in the Zones panel follows the strip.
+                if (overlayVisible("zones")) renderZones();
+                break;
+            case "Admin.Zones":
+                S.zones = data;
+                // Snapshot time anchors the client-side regen countdowns.
+                if (S.zones) S.zones._at = Date.now();
+                if (overlayVisible("zones")) renderZones();
+                updateMicro();
                 break;
             case "Admin.WhoExtra":
                 applyWhoExtra(data);
@@ -2534,6 +2551,121 @@
     }
 
     // ------------------------------------------------------------------
+    // Zones (staff overlay) — the zones table with live regen countdowns.
+    // Server pushes only on real zone-state change; the countdown ticks
+    // locally from the snapshot age.
+    // ------------------------------------------------------------------
+    var zoneFilter = { q: "", unlive: false };
+
+    function zoneRegenText(z, ageMin) {
+        if (z.fails > 0) return "try " + (z.fails + 1);
+        if (z.elapsed < 0 || !z.lifespan) return "—";
+        var elapsed = z.elapsed + ageMin;
+        var left = z.lifespan - elapsed;
+        return left <= 0 ? "due" : elapsed + "/" + z.lifespan + "m";
+    }
+
+    function renderZones() {
+        if (!dom.zones) return;
+        var zd = S.zones;
+        if (!zd || !zd.zones) { fill(dom.zones, el("div", { class: "panel-empty", text: "—" })); return; }
+
+        var hadFocus = document.activeElement && document.activeElement.id === "zn-search";
+        var caret = hadFocus ? document.activeElement.selectionStart : null;
+        var prevScroll = dom.zones.querySelector(".zn-scroll");
+        var savedTop = prevScroll ? prevScroll.scrollTop : 0;
+
+        var ageMin = Math.max(0, Math.floor((Date.now() - (zd._at || Date.now())) / 60000));
+        var hereId = (S.builder && S.builder.zone) ? S.builder.zone.id : null;
+
+        var q = zoneFilter.q.trim().toLowerCase();
+        var liveCount = 0, unliveCount = 0;
+        var rows = zd.zones.filter(function (z) {
+            if (z.live) liveCount++; else unliveCount++;
+            if (zoneFilter.unlive ? z.live : !z.live) return false;
+            if (!q) return true;
+            return String(z.id) === q ||
+                String(z.name || "").toLowerCase().indexOf(q) !== -1;
+        }).sort(function (a, b) { return a.id - b.id; });
+
+        var search = el("input", {
+            type: "text", class: "ab-search", id: "zn-search",
+            placeholder: "Filter zones…", autocomplete: "off", spellcheck: "false",
+            value: zoneFilter.q
+        });
+        search.addEventListener("input", function () { zoneFilter.q = search.value; renderZones(); });
+        var chips = el("div", { class: "ab-chips" }, [
+            el("button", { type: "button", class: "ab-chip" + (zoneFilter.unlive ? "" : " on"),
+                "data-znlive": "live", text: "Live " + liveCount }),
+            el("button", { type: "button", class: "ab-chip" + (zoneFilter.unlive ? " on" : ""),
+                "data-znlive": "unlive", text: "Unlive " + unliveCount })
+        ]);
+
+        var list = el("div", { class: "zn-scroll" });
+        rows.forEach(function (z) {
+            var flags = [];
+            if (z.occ === "O") flags.push(el("span", { class: "zn-flag", title: "Never occupied since regen tracking", text: "O" }));
+            if (z.occ === "S") flags.push(el("span", { class: "zn-flag zn-flag--warn", title: "Occupied since last regen", text: "S" }));
+            if (z.noregen) flags.push(el("span", { class: "zn-flag zn-flag--off", text: "noregen" }));
+            if (z.skip) flags.push(el("span", { class: "zn-flag zn-flag--off", text: "skip" }));
+            if (!z.live) flags.push(el("span", { class: "zn-flag zn-flag--danger", text: "unlive" }));
+            if (z.fails > 0) flags.push(el("span", { class: "zn-flag zn-flag--danger", text: "failing" }));
+
+            var meter = null;
+            if (z.fails === 0 && z.elapsed >= 0 && z.lifespan > 0) {
+                var pct = Math.max(0, Math.min(100, ((z.elapsed + ageMin) / z.lifespan) * 100));
+                meter = el("span", { class: "zn-track" }, [
+                    el("span", { class: "zn-fill", style: "width:" + pct.toFixed(0) + "%" })
+                ]);
+            }
+            list.appendChild(el("div", {
+                class: "zn-row" + (z.id === hereId ? " zn-row--here" : ""),
+                "data-menu": "zone", "data-zid": z.id, role: "button", tabindex: "0"
+            }, [
+                el("span", { class: "zn-id", text: z.id }),
+                el("span", { class: "zn-name", text: z.name || "unnamed" }),
+                el("span", { class: "zn-flags" }, flags),
+                meter,
+                el("span", { class: "zn-status", text: zoneRegenText(z, ageMin) })
+            ]));
+        });
+        if (!rows.length) list.appendChild(el("div", { class: "panel-empty", text: "No matching zones" }));
+
+        var kids = [el("div", { class: "ab-controls" }, [search]), chips, list];
+        if (zd.truncated) kids.push(el("div", { class: "who-hidden", text: "Zone list truncated — use the zones command" }));
+        fill(dom.zones, kids);
+
+        if (hadFocus) {
+            var s2 = document.getElementById("zn-search");
+            if (s2) { s2.focus(); if (caret != null) s2.setSelectionRange(caret, caret); }
+        }
+        var scroll2 = dom.zones.querySelector(".zn-scroll");
+        if (scroll2) scroll2.scrollTop = savedTop;
+    }
+
+    function zoneById(id) {
+        var arr = (S.zones && S.zones.zones) || [];
+        for (var i = 0; i < arr.length; i++) if (arr[i].id === id) return arr[i];
+        return null;
+    }
+
+    function zoneActions(z) {
+        var acts = [];
+        if (adminCap("goto") && z.first) {
+            acts.push({ label: "Goto zone (#" + z.first + ")", cmd: "goto " + z.first });
+        }
+        if (adminCap("regen")) {
+            acts.push({ label: "Regen now", cmd: "regen " + z.id, confirm: true, danger: true });
+        }
+        if (adminCap("purge")) {
+            acts.push({ label: "Purge zone", cmd: "purge " + z.id, confirm: true, danger: true });
+        }
+        acts.push({ label: "Details (terminal)", cmd: "zones " + z.id });
+        if (adminCap("admin")) acts.push({ label: "zset…", prefill: "zset " + z.id + " " });
+        return acts;
+    }
+
+    // ------------------------------------------------------------------
     // Chat (hot path) — a persistent pane that earns its place vs. the terminal
     // via a category filter over the log + a channel-targeted input (pick a
     // channel, type, it routes without the verb). Layout: header · filter tabs ·
@@ -3275,7 +3407,11 @@
             },
             {
                 title: "Overlay apps", hud: true,
-                rows: OVERLAYS.map(function (o) {
+                // Staff overlays are invisible in the reference below the
+                // admin tier — no advertising surfaces mortals can't open.
+                rows: OVERLAYS.filter(function (o) {
+                    return !o.admin || adminLevel() >= 21;
+                }).map(function (o) {
                     return { keys: ["Ctrl+" + o.hotkey.toUpperCase()], desc: o.title };
                 }),
                 notes: [
@@ -5166,6 +5302,14 @@
         var star = e.target.closest("[data-bar]");
         if (star && dom.app.contains(star)) { toggleSlot(star.getAttribute("data-bar")); return; }
 
+        // 2d1b) Zones panel live/unlive filter chips.
+        var znchip = e.target.closest("[data-znlive]");
+        if (znchip && dom.app.contains(znchip)) {
+            zoneFilter.unlive = znchip.getAttribute("data-znlive") === "unlive";
+            renderZones();
+            return;
+        }
+
         // 2d2) Quest Log: filter chips, track stars, row expand; plus the
         // objectives tracker's collapse toggle (it lives outside #hud-overlay
         // but inside #connect-app, so the same delegation reaches it).
@@ -5291,6 +5435,11 @@
             var wn = host.getAttribute("data-who");
             if (wn && adminLevel() >= 21) {
                 openMenu(wn, whoAdminActions(wn, whoExtraFor(wn)), anchor);
+            }
+        } else if (kind === "zone") {
+            var zz = zoneById(Number(host.getAttribute("data-zid")));
+            if (zz && adminLevel() >= 21) {
+                openMenu("[" + zz.id + "] " + (zz.name || "unnamed"), zoneActions(zz), anchor);
             }
         }
     }
@@ -5511,6 +5660,7 @@
         dom.xpLabel = dom.xpstrip && dom.xpstrip.querySelector(".xp-label");
         dom.micro = document.getElementById("hud-micro");
         dom.professions = document.getElementById("panel-professions");
+        dom.zones = document.getElementById("panel-zones");
         dom.quests = document.getElementById("panel-quests");
         dom.season = document.getElementById("panel-season");
         dom.achievements = document.getElementById("panel-achievements");
@@ -5898,6 +6048,15 @@
                 "Admin.Builder": {
                     set_o: { vnum: 41230, name: "a rusty dagger", keyword: "dagger rusty", permitted: true },
                     zone: { id: 30, name: "Ritani" } },
+                "Admin.Zones": { zones: [
+                    { id: 2, name: "Mareldjan Park", parent: 0, elapsed: 12, lifespan: 40, fails: 0, occ: "O", live: true, noregen: false, skip: false, rooms: 58, first: 4001 },
+                    { id: 19, name: "Shinerock Mines", parent: 0, elapsed: 35, lifespan: 40, fails: 0, occ: "", live: true, noregen: false, skip: false, rooms: 84, first: 19001 },
+                    { id: 30, name: "Ritani", parent: 0, elapsed: 3, lifespan: 60, fails: 0, occ: "S", live: true, noregen: false, skip: false, rooms: 112, first: 30001 },
+                    { id: 44, name: "The Sunken Vaults", parent: 30, elapsed: -1, lifespan: 90, fails: 2, occ: "", live: true, noregen: false, skip: false, rooms: 41, first: 44001 },
+                    { id: 51, name: "Stormreach Spire", parent: 0, elapsed: 58, lifespan: 60, fails: 0, occ: "", live: true, noregen: false, skip: true, rooms: 66, first: 51001 },
+                    { id: 63, name: "Cinderfall Approach", parent: 0, elapsed: -1, lifespan: 0, fails: 0, occ: "O", live: true, noregen: true, skip: false, rooms: 23, first: 63001 },
+                    { id: 71, name: "The Glass Orchard", parent: 0, elapsed: 20, lifespan: 45, fails: 0, occ: "", live: false, noregen: false, skip: false, rooms: 37, first: 71001 }
+                ], truncated: false },
                 "Admin.WhoExtra": { players: [
                     { name: "Aelwyn", level: 24, label: "Eternal", room_vnum: 3001,
                       room_name: "The Temple Square", idle: 0, invis: 22, account: "aelwyn-acct" },

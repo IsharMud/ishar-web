@@ -304,6 +304,12 @@
                         title="Achievements (Ctrl+H)" aria-label="Achievements (Ctrl+H)">
                     {% bi "award" %}
                 </button>
+                {# Staff overlays — revealed only by Admin.Caps (updateMicro). #}
+                <button type="button" class="micro-btn" data-overlay="zones" hidden
+                        aria-pressed="false" aria-haspopup="dialog" aria-controls="hud-overlay"
+                        title="Zones (Ctrl+Z)" aria-label="Zones (Ctrl+Z)">
+                    {% bi "globe2" %}
+                </button>
             </nav>
         </div>
         <form id="command-form" autocomplete="off">
@@ -414,6 +420,10 @@
             {% bi "award" %}
             <span>Awards</span>
         </button>
+        <button type="button" data-panel="zones" aria-pressed="false" hidden>
+            {% bi "globe2" %}
+            <span>Zones</span>
+        </button>
     </nav>
 
     <div id="hud-sheet" hidden>
@@ -461,6 +471,7 @@
             <section id="panel-quests" class="panel"></section>
             <section id="panel-season" class="panel"></section>
             <section id="panel-achievements" class="panel"></section>
+            <section id="panel-zones" class="panel"></section>
         </div>
     </div>
 
@@ -1295,7 +1306,7 @@
         "Char.Inventory", "Room.Info", "Room.Occupants", "Room.Contents",
         "Room.QuestMarkers", "Group.Update", "Char.Who", "Char.Professions",
         "Char.Recipes", "Char.Craft", "Char.Quests", "Char.Season",
-        "Char.Achievements", "Admin.Builder", "Admin.WhoExtra"
+        "Char.Achievements", "Admin.Builder", "Admin.WhoExtra", "Admin.Zones"
     ];
 
     function rebaseTimers(pkg, body, ageSec) {
