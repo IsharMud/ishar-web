@@ -2083,6 +2083,18 @@ button.v-tgt:hover { border-color: rgba(214, 75, 75, .8); }
     background: var(--ac-danger-wash); font-weight: 700;
 }
 
+/* Inspector overlay: header + key/value grid + drill-down rows. */
+.ins-head { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; padding-bottom: 4px; border-bottom: 1px solid var(--ac-border); }
+.ins-name { font-weight: 700; color: var(--ac-text); }
+.ins-pos { margin-left: auto; color: var(--ac-dim); font-size: .66rem; }
+.ins-kv { display: grid; grid-template-columns: minmax(6em, auto) 1fr; gap: 1px 10px; font-size: .72rem; }
+.ins-k { color: var(--ac-dim); white-space: nowrap; }
+.ins-v { min-width: 0; overflow-wrap: anywhere; }
+.ins-v.ins-danger { color: var(--ac-danger); font-weight: 600; }
+.ins-kv-row { display: contents; }
+.ins-row { display: flex; align-items: center; gap: 6px; padding: 3px 0; border-bottom: 1px solid var(--ac-elev); }
+.ins-row .ap-act { margin-left: auto; }
+
 /* ----- Reduced motion ----- */
 @keyframes hud-pulse {
     0%, 100% { opacity: 1; }

@@ -118,6 +118,10 @@
     } catch (e) {}
 
     var api = { send: function () {}, prefill: function () {}, onLayoutChange: function () {}, onComm: function () {}, onVitals: function () {} };
+    // True while connect.html replays a session's cached GMCP (tab switch):
+    // event-ish reactions (the Inspector auto-open) stay quiet during replay.
+    var replayingNow = false;
+    function setReplaying(on) { replayingNow = !!on; }
     var dom = {};
     // The map subsystem (hud-map.js) plugs in through registerMap() — the
     // whole mapper stays behind this one seam so a missing/stale-cached
@@ -143,7 +147,7 @@
     var PANELS = ["inventory", "group", "occupants", "room",
                   "tracked", "chat", "train", "abilities", "who",
                   "professions", "map", "quests", "season", "achievements",
-                  "zones", "admin"];
+                  "zones", "admin", "inspect"];
     var PANEL_HOME = {
         occupants: "hud-left-scroll",
         group: "hud-left-scroll",
@@ -158,7 +162,7 @@
         professions: "hud-overlay-body", map: "hud-overlay-body",
         quests: "hud-overlay-body", season: "hud-overlay-body",
         achievements: "hud-overlay-body", zones: "hud-overlay-body",
-        admin: "hud-overlay-body"
+        admin: "hud-overlay-body", inspect: "hud-overlay-body"
     };
 
     // ------------------------------------------------------------------
@@ -245,7 +249,13 @@
         // lookups. Buttons send the matching `admin …` subcommands.
         { key: "admin", title: "Admin", hotkey: "a", admin: true,
           render: function () { renderAdminPanel(); },
-          available: function () { return adminCap("admin") && !!S.adminPanel; } }
+          available: function () { return adminCap("admin") && !!S.adminPanel; } },
+        // Inspector (staff): the last Admin.Stat payload, organized. Auto-
+        // opens on a live frame (you just ran `stat` or tapped Inspect),
+        // never on a tab-switch replay.
+        { key: "inspect", title: "Inspector", hotkey: "x", admin: true,
+          render: function () { renderInspector(); },
+          available: function () { return adminLevel() >= 21 && !!S.adminStat; } }
     ];
     var overlayName = null;   // open overlay app key (desktop), or null
 
@@ -951,6 +961,13 @@
                 S.adminPanel = data;
                 if (overlayVisible("admin")) renderAdminPanel();
                 updateMicro();
+                break;
+            case "Admin.Stat":
+                S.adminStat = data;
+                updateMicro();
+                if (overlayVisible("inspect")) renderInspector();
+                // Pop only for a live frame — the player just asked for it.
+                else if (!replayingNow && data) toggleOverlay("inspect");
                 break;
             case "Admin.WhoExtra":
                 applyWhoExtra(data);
@@ -2768,6 +2785,156 @@
         ]);
 
         fill(dom.admin, kids);
+    }
+
+    // ------------------------------------------------------------------
+    // Inspector (staff overlay) — the last Admin.Stat payload, organized.
+    // Kind-discriminated renderer; every vnum-bearing row offers a
+    // drill-down `stat`.
+    // ------------------------------------------------------------------
+    function insH(text) { return el("div", { class: "ap-h", text: text }); }
+    function insKv(rows) {
+        return el("div", { class: "ins-kv" }, rows.filter(Boolean).map(function (r) {
+            return el("div", { class: "ins-kv-row" }, [
+                el("span", { class: "ins-k", text: r[0] }),
+                el("span", { class: "ins-v" + (r[2] ? " " + r[2] : ""), text: String(r[1]) })
+            ]);
+        }));
+    }
+    function pool(t) { return t[0] + "/" + t[1] + (t[2] ? " (" + (t[2] > 0 ? "+" : "") + t[2] + ")" : ""); }
+
+    function renderInspector() {
+        if (!dom.inspect) return;
+        var d = S.adminStat;
+        if (!d) { fill(dom.inspect, el("div", { class: "panel-empty", text: "Run stat <target> to inspect something." })); return; }
+        var kids = [];
+        if (d.kind === "person") {
+            kids.push(el("div", { class: "ins-head" }, [
+                el("span", { class: "ins-name", text: d.name }),
+                el("span", { class: "dim", text: " L" + d.level + (d.is_player ? (" " + d.race + " " + d["class"]) : (" mob #" + d.vnum)) }),
+                el("span", { class: "ins-pos", text: d.position || "" })
+            ]));
+            kids.push(insH("Pools"));
+            kids.push(insKv([
+                ["HP", pool(d.hp)], ["Mana", pool(d.mana)],
+                ["Move", pool(d.mv)], ["Favor", pool(d.fp)]
+            ]));
+            kids.push(insH("Combat"));
+            kids.push(insKv([
+                ["Weapon", d.wpn[0] + "d" + d.wpn[1] + "+" + d.wpn[2]],
+                ["Critical", (d.crit[0] / 10).toFixed(1) + "% (+" + d.crit[1] + "%)"],
+                ["Expertise", d.expertise[0] + " (+" + d.expertise[1] + ")"],
+                ["Saves", "Fort " + d.saves.fort[0] + (d.saves.fort[1] ? "+" + d.saves.fort[1] : "") +
+                          " · Ref " + d.saves.ref[0] + (d.saves.ref[1] ? "+" + d.saves.ref[1] : "") +
+                          " · Wil " + d.saves.wil[0] + (d.saves.wil[1] ? "+" + d.saves.wil[1] : "")],
+                ["Edge", d.edge[0] + "/" + d.edge[1]],
+                (d.charges && (d.charges.animist || d.charges.soulweaver)) ?
+                    ["Charges", "Animist " + d.charges.animist + " · Soulweaver " + d.charges.soulweaver] : null
+            ]));
+            kids.push(insH("Session"));
+            kids.push(insKv([
+                ["Carrying", d.carrying.n + " items · " + d.carrying.kg + "/" + d.carrying.max_kg + "kg" +
+                             (d.carrying.move_pct ? " (" + (d.carrying.move_pct > 0 ? "+" : "") + d.carrying.move_pct + "% move)" : "")],
+                d.idle >= 0 ? ["Idle", fmtIdle(d.idle)] : null,
+                d.is_player ? ["Online", fmtIdle(d.online)] : null,
+                d.is_player ? ["Age", d.age.yr + "yr " + d.age.mon + "mon"] : null,
+                d.leader ? ["Leader", d.leader] : null,
+                d.fighting ? ["Fighting", d.fighting, "ins-danger"] : null,
+                (d.followers || []).length ? ["Followers", d.followers.join(", ")] : null
+            ]));
+            if (d.account) {
+                kids.push(insH("Account"));
+                kids.push(insKv([
+                    ["Name", d.account.name], ["Email", d.account.email],
+                    ["Id", d.account.id], ["Online chars", d.account.num_online],
+                    d.xp_bonus ? ["XP bonus", d.xp_bonus] : null
+                ]));
+            }
+            if (d.upgrades) {
+                var ups = (d.upgrades.remort || []).filter(function (u) { return u[1]; });
+                var aups = (d.upgrades.account || []).filter(function (u) { return u[1]; });
+                kids.push(insH("Upgrades"));
+                if (!ups.length && !aups.length) {
+                    kids.push(el("div", { class: "panel-empty", text: "none" }));
+                } else {
+                    kids.push(insKv(ups.concat(aups)));
+                }
+            }
+            if ((d.spells || []).length) {
+                kids.push(insH("Spells in effect"));
+                kids.push(insKv(d.spells.map(function (s) {
+                    return [s.name, s.secs > 0 ? fmtIdle(s.secs) : "—"];
+                })));
+            }
+        } else if (d.kind === "object") {
+            kids.push(el("div", { class: "ins-head" }, [
+                el("span", { class: "adm-vnum", text: "#" + d.vnum }),
+                el("span", { class: "ins-name", text: " " + d.name }),
+                el("span", { class: "dim", text: " (" + d.keyword + ") · " + d.type + (d.dirty ? " · DIRTY" : "") })
+            ]));
+            kids.push(insH("Values"));
+            kids.push(insKv([
+                ["Weight / size", d.weight + " / " + d.size],
+                ["Set / true value", d.set_value + " / " + d.true_value],
+                ["vals", d.vals.join(" ")],
+                ["Min level", d.min_level + (d.min_level_diff ? " (" + (d.min_level_diff > 0 ? "+" : "") + d.min_level_diff + " vs template)" : "")],
+                d.owner != null ? ["Owner", d.owner] : null,
+                d.bound_secs != null ? ["Bound", fmtIdle(d.bound_secs) + " left"] : null,
+                d.load_on ? ["Load on", d.load_on] : null,
+                d.home_zone ? ["Home zone", d.home_zone.name + " (" + d.home_zone.id + ")"] : null,
+                d.timer ? ["Timer", d.timer] : null,
+                ["State", d.state],
+                d.func ? ["Func", d.func] : null,
+                d.enchant ? ["Enchant", d.enchant] : null,
+                d.grant_skill ? ["Grants", d.grant_skill] : null,
+                d.bonus_damage ? ["Bonus damage", d.bonus_damage.force + " (" + d.bonus_damage.num + "d" + d.bonus_damage.size + ")"] : null
+            ]));
+            if ((d.mods || []).length || (d.auras || []).length) {
+                kids.push(insH("Mods"));
+                kids.push(insKv((d.mods || []).map(function (m) {
+                    return [m.slot, m.value + (m.live != null && String(m.live) !== m.value ? " (live " + m.live + ")" : "")];
+                }).concat((d.auras || []).map(function (a) {
+                    return ["Aura · " + a.slot, a.value];
+                }))));
+            }
+            if ((d.wear || []).length) kids.push(el("div", { class: "who-adm", text: "Wear: " + d.wear.join(" ") }));
+            if ((d.flags || []).length) kids.push(el("div", { class: "who-adm", text: "Flags: " + d.flags.join(" ") }));
+            kids.push(el("div", { class: "ap-row" }, [
+                el("span", { class: "ap-act" }, [
+                    el("button", { type: "button", class: "hud-btn", "data-prefill": "set o ", text: "set o …" })
+                ])
+            ]));
+        } else if (d.kind === "room") {
+            kids.push(el("div", { class: "ins-head" }, [
+                el("span", { class: "ins-name", text: d.name }),
+                el("span", { class: "dim", text: " #" + d.vnum + (d.zone ? " · " + d.zone.name + " (" + d.zone.id + ")" : "") })
+            ]));
+            kids.push(insH("People"));
+            (d.people || []).forEach(function (p2) {
+                kids.push(el("div", { class: "ins-row" }, [
+                    el("span", { class: "ins-name", text: p2.name }),
+                    p2.vnum ? el("span", { class: "dim", text: " #" + p2.vnum }) : null,
+                    el("span", { class: "ap-act" }, [
+                        el("button", { type: "button", class: "hud-btn", "data-cmd": "stat " + firstWord(p2.keyword), text: "Stat" })
+                    ])
+                ]));
+            });
+            if (!(d.people || []).length) kids.push(el("div", { class: "panel-empty", text: "nobody" }));
+            kids.push(insH("Objects"));
+            (d.objects || []).forEach(function (o2) {
+                kids.push(el("div", { class: "ins-row" }, [
+                    el("span", { class: "ins-name", text: o2.name }),
+                    el("span", { class: "dim", text: " #" + o2.vnum }),
+                    el("span", { class: "ap-act" }, [
+                        el("button", { type: "button", class: "hud-btn", "data-cmd": "stat " + firstWord(o2.keyword), text: "Stat" })
+                    ])
+                ]));
+            });
+            if (!(d.objects || []).length) kids.push(el("div", { class: "panel-empty", text: "nothing" }));
+        } else {
+            kids.push(el("div", { class: "panel-empty", text: "—" }));
+        }
+        fill(dom.inspect, kids);
     }
 
     // ------------------------------------------------------------------
@@ -5156,6 +5323,7 @@
                             cmd: "order followers kill " + kw, danger: true });
             }
         }
+        if (adminCap("stat")) acts.push({ label: "Inspect", cmd: "stat " + o.handle });
         if (!o.is_player) {
             // Only actual vendors get a list action (is_shopkeeper = the mob
             // handles the `list` command, per Room.Occupants).
@@ -5277,6 +5445,7 @@
             // ground, so it lives on the Room panel's corpse menu instead.
             acts.push({ label: "Drop", cmd: "drop " + t });
         }
+        if (adminCap("stat")) acts.push({ label: "Inspect", cmd: "stat " + t });
         return acts;
     }
     function openContainers() {
@@ -5785,6 +5954,7 @@
         dom.professions = document.getElementById("panel-professions");
         dom.zones = document.getElementById("panel-zones");
         dom.admin = document.getElementById("panel-admin");
+        dom.inspect = document.getElementById("panel-inspect");
         dom.quests = document.getElementById("panel-quests");
         dom.season = document.getElementById("panel-season");
         dom.achievements = document.getElementById("panel-achievements");
@@ -6162,8 +6332,26 @@
 
         // ?demo=admin — the staff fixtures, layered last so the re-tier and
         // the who-supplement merge render over the sample player state.
+        // Fed under the replay flag so the Inspector arms without popping.
         if (opts && opts.admin) {
+            setReplaying(true);
             var adminFeeds = {
+                "Admin.Stat": {
+                    kind: "person", is_player: true, name: "Boric", vnum: 0,
+                    level: 43, race: "Dwa", "class": "Warrior", position: "Standing",
+                    hp: [412, 480, 12], mana: [300, 300, 0], mv: [198, 240, 0], fp: [80, 80, 0],
+                    saves: { fort: [12, 3], ref: [10, 0], wil: [14, 1] },
+                    wpn: [2, 6, 3], crit: [125, 2], expertise: [4, 1], comm: 3,
+                    edge: [3, 6], charges: { animist: 0, soulweaver: 0 },
+                    carrying: { n: 10, kg: 42, max_kg: 100, move_pct: 0 },
+                    idle: 90, online: 123456, age: { yr: 21, mon: 4 },
+                    leader: "", fighting: "", followers: ["a war hound"],
+                    upgrades: { remort: [["Attack", 2], ["Critical", 1], ["Speed", 3]],
+                                account: [["Vit HP", 2], ["XP Bonus", 1]] },
+                    account: { id: 123, email: "boric@example.com", name: "boric-acct", num_online: 1, gift: 0 },
+                    xp_bonus: 8,
+                    spells: [{ name: "sanctuary", secs: 120 }, { name: "stone skin", secs: 1740 }]
+                },
                 "Admin.Caps": { level: 24, label: "Eternal", caps: {
                     "goto": true, stat: true, set: true, zones: true,
                     purge: true, regen: true, show: true, snoop: true,
@@ -6207,9 +6395,10 @@
             Object.keys(adminFeeds).forEach(function (k) {
                 onGmcp(k, JSON.stringify(adminFeeds[k]));
             });
+            setReplaying(false);
         }
         setConnected(true);
     }
 
-    window.IsharHUD = { init: init, onGmcp: onGmcp, reset: reset, setConnected: setConnected, completions: completions, cycleTarget: cycleTarget, keyHelp: keyHelp, demo: demo, registerMap: registerMap };
+    window.IsharHUD = { init: init, onGmcp: onGmcp, reset: reset, setConnected: setConnected, setReplaying: setReplaying, completions: completions, cycleTarget: cycleTarget, keyHelp: keyHelp, demo: demo, registerMap: registerMap };
 })();

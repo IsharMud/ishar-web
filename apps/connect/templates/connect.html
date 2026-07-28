@@ -315,6 +315,11 @@
                         title="Admin (Ctrl+A)" aria-label="Admin (Ctrl+A)">
                     {% bi "sliders" %}
                 </button>
+                <button type="button" class="micro-btn" data-overlay="inspect" hidden
+                        aria-pressed="false" aria-haspopup="dialog" aria-controls="hud-overlay"
+                        title="Inspector (Ctrl+X)" aria-label="Inspector (Ctrl+X)">
+                    {% bi "search" %}
+                </button>
             </nav>
         </div>
         <form id="command-form" autocomplete="off">
@@ -433,6 +438,10 @@
             {% bi "sliders" %}
             <span>Admin</span>
         </button>
+        <button type="button" data-panel="inspect" aria-pressed="false" hidden>
+            {% bi "search" %}
+            <span>Inspect</span>
+        </button>
     </nav>
 
     <div id="hud-sheet" hidden>
@@ -482,6 +491,7 @@
             <section id="panel-achievements" class="panel"></section>
             <section id="panel-zones" class="panel"></section>
             <section id="panel-admin" class="panel"></section>
+            <section id="panel-inspect" class="panel"></section>
         </div>
     </div>
 
@@ -1317,7 +1327,7 @@
         "Room.QuestMarkers", "Group.Update", "Char.Who", "Char.Professions",
         "Char.Recipes", "Char.Craft", "Char.Quests", "Char.Season",
         "Char.Achievements", "Admin.Builder", "Admin.WhoExtra", "Admin.Zones",
-        "Admin.Panel"
+        "Admin.Panel", "Admin.Stat"
     ];
 
     function rebaseTimers(pkg, body, ageSec) {
@@ -1347,6 +1357,9 @@
         if (!window.IsharHUD) return;
         window.IsharHUD.reset();
         window.IsharHUD.setConnected(sess.state === "connected");
+        // Replayed frames rebuild state but must not act like live events
+        // (e.g. pop the staff Inspector for a stat run minutes ago).
+        if (window.IsharHUD.setReplaying) window.IsharHUD.setReplaying(true);
         var seen = {};
         var nowMs = Date.now();
         function feed(pkg) {
@@ -1359,11 +1372,15 @@
             }
             window.IsharHUD.onGmcp(pkg, body);
         }
-        REPLAY_ORDER.forEach(feed);
-        Object.keys(sess.gmcp).forEach(feed);
-        sess.chat.forEach(function(body) {
-            window.IsharHUD.onGmcp("Comm.Channel", body);
-        });
+        try {
+            REPLAY_ORDER.forEach(feed);
+            Object.keys(sess.gmcp).forEach(feed);
+            sess.chat.forEach(function(body) {
+                window.IsharHUD.onGmcp("Comm.Channel", body);
+            });
+        } finally {
+            if (window.IsharHUD.setReplaying) window.IsharHUD.setReplaying(false);
+        }
     }
 
     // --- Cross-session routing ---

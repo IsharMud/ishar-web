@@ -780,6 +780,14 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
     `.zn-row--here` accent edge; rows open a menu (goto/regen/purge with
     confirm, details, zset prefill). Staff overlays are filtered out of the
     keys reference below the admin tier.
+  - **Inspector overlay** (`#panel-inspect`, Ctrl+X) — the last `Admin.Stat`
+    payload, kind-discriminated: person (pools/combat/session `.ins-kv`
+    grids, account block, non-zero upgrades, spells), object (vnum header,
+    values/mods/auras, wear+flag lines, `set o` prefill), room (people and
+    object `.ins-row`s with drill-down Stat buttons). Auto-opens only on a
+    live frame — `IsharHUD.setReplaying` brackets the tab-switch replay so
+    cached frames re-arm the launcher without popping the window. Inspect
+    rows appear in the who/occupant/item menus behind the stat cap.
   - **Admin overlay** (`#panel-admin`, Ctrl+A, Eternal+) — the `admin` menu
     as sectioned control rows (`.ap-h` headers, `.ap-row` label · value ·
     `.ap-act` buttons): maintenance, beta tri-state chips, multiplay
