@@ -53,7 +53,11 @@
         chat: [], connected: false,
         // Default targets (from Room.Occupants) that make the hotbar
         // target-aware: offensive abilities → hostile, defensive → beneficial.
-        tgtHostile: null, tgtFriendly: null
+        tgtHostile: null, tgtFriendly: null,
+        // Admin.* staff feeds (level-gated game-side; adminCaps is the client
+        // gate for every admin surface — null means mortal, full stop).
+        adminCaps: null, builder: null, whoExtra: null,
+        zones: null, adminPanel: null, adminStat: null
     };
 
     // Persisted client prefs (localStorage): the action-bar slot assignments,
@@ -905,8 +909,114 @@
                 }
                 break;
             }
+            case "Admin.Caps":
+                // {"level":0} is the game's de-level clear: wipe every admin
+                // surface, not just the caps — stale staff data must not
+                // survive on a now-mortal client.
+                S.adminCaps = (data && Number(data.level) >= 21) ? data : null;
+                if (!S.adminCaps) {
+                    S.builder = null; S.whoExtra = null; S.zones = null;
+                    S.adminPanel = null; S.adminStat = null;
+                }
+                retierAdmin(); renderAdminStrip(); renderWho(); updateMicro();
+                break;
+            case "Admin.Builder":
+                S.builder = data; renderAdminStrip();
+                break;
+            case "Admin.WhoExtra":
+                applyWhoExtra(data);
+                break;
             default: break;
         }
+    }
+
+    // ------------------------------------------------------------------
+    // Admin tier (Admin.* staff feeds — isharmud/ishar-mud#1888)
+    // ------------------------------------------------------------------
+    function adminLevel() {
+        return (S.adminCaps && Number(S.adminCaps.level)) || 0;
+    }
+    // The client-side gate for admin UI. Cosmetic only: every action is a
+    // plain-text command the game's own level gates re-validate.
+    function adminCap(name) {
+        return adminLevel() >= 21 &&
+            !!(S.adminCaps.caps && S.adminCaps.caps[name]);
+    }
+    // The admin profile of the ambient tier: swaps the mortal combat chrome
+    // (attack cluster, XP strip) for the admin strip via one root class.
+    function retierAdmin() {
+        if (dom.app) dom.app.classList.toggle("hud-admin", adminLevel() >= 21);
+        if (dom.adminstrip) dom.adminstrip.hidden = adminLevel() < 21;
+    }
+    function applyWhoExtra(data) {
+        var byName = null;
+        ((data && data.players) || []).forEach(function (p) {
+            if (!p || !p.name) return;
+            (byName = byName || {})[String(p.name).toLowerCase()] = p;
+        });
+        S.whoExtra = byName;
+        renderWho();
+    }
+    function whoExtraFor(name) {
+        return (S.whoExtra && S.whoExtra[String(name || "").toLowerCase()]) || null;
+    }
+    function fmtIdle(secs) {
+        secs = Number(secs) || 0;
+        if (secs < 60) return secs + "s";
+        if (secs < 3600) return Math.floor(secs / 60) + "m";
+        return Math.floor(secs / 3600) + "h" + Math.floor((secs % 3600) / 60) + "m";
+    }
+    function renderAdminStrip() {
+        if (!dom.adminstrip) return;
+        if (adminLevel() < 21) { fill(dom.adminstrip, []); return; }
+        var kids = [];
+        kids.push(el("span", { class: "adm-pill", text: S.adminCaps.label || ("L" + adminLevel()) }));
+
+        // The live `set o` target — the one line a builder glances at
+        // constantly. Tap prefills `set o ` ready for the field.
+        var t = S.builder && S.builder.set_o;
+        if (t) {
+            kids.push(el("button", {
+                class: "adm-target" + (t.permitted === false ? " adm-target--denied" : ""),
+                "data-prefill": "set o ",
+                title: t.permitted === false
+                    ? "set o target (no permission for this vnum)"
+                    : "set o target — tap to prefill `set o `"
+            }, [
+                el("span", { class: "adm-vnum", text: "#" + t.vnum }),
+                el("span", { class: "adm-name", text: " " + stripColor(t.name || t.keyword || "") })
+            ]));
+        } else {
+            kids.push(el("span", { class: "adm-target adm-target--empty", text: "set o: nothing carried" }));
+        }
+
+        var z = S.builder && S.builder.zone;
+        if (z) {
+            kids.push(el("span", { class: "adm-zone", text: z.name + " (" + z.id + ")" }));
+        }
+        fill(dom.adminstrip, kids);
+    }
+    // Staff context actions for a who-list player. Every row is gated by
+    // Admin.Caps; destructive ones arm a confirm tap first. Ban only ever
+    // prefills — the duration is typed, never defaulted.
+    function whoAdminActions(name, extra) {
+        var nm = firstWord(name);
+        var acts = [];
+        if (adminCap("stat")) acts.push({ label: "Stat", cmd: "stat " + nm });
+        if (adminCap("goto")) acts.push({ label: "GoTo", cmd: "goto " + nm });
+        if (extra && extra.room_vnum && adminCap("goto")) {
+            acts.push({ label: "GoTo room #" + extra.room_vnum, cmd: "goto " + extra.room_vnum });
+        }
+        if (adminCap("snoop")) acts.push({ label: "Snoop", cmd: "snoop " + nm, confirm: true, danger: true });
+        if (adminCap("trans")) acts.push({ label: "Trans here", cmd: "trans " + nm, confirm: true, danger: true });
+        if (adminCap("bolt")) acts.push({ label: "Bolt", cmd: "bolt " + nm, confirm: true, danger: true });
+        if (adminCap("bounty")) acts.push({ label: "Bounty…", prefill: "bounty " + nm + " " });
+        if (adminCap("ban")) {
+            var acct = extra && extra.account ? firstWord(extra.account) : "";
+            acts.push({ label: acct ? "Ban " + acct + "…" : "Ban…",
+                        prefill: "ban " + (acct ? acct + " " : "") });
+        }
+        return acts;
     }
 
     function applyCooldowns(data) {
@@ -2373,16 +2483,43 @@
     function renderWho() {
         var w = S.who;
         if (!w || !w.players) { fill(dom.who, el("div", { class: "panel-empty", text: "—" })); return; }
+        var admin = adminLevel() >= 21;
         var list = el("ul", { class: "who-list" });
         w.players.forEach(function (p) {
             var nm = firstWord(p.name);
             var flags = (p.is_my_leader ? " ◂leader" : "") + (p.following_me ? " follower▸" : "");
+            var extra = admin ? whoExtraFor(p.name) : null;
+            // Staff rows: the name area doubles as the admin-menu opener
+            // (data-menu on .who-main only, so Tell/Follow/Group stay plain
+            // buttons), and an .who-adm line carries the WhoExtra columns.
+            var mainAttrs = { class: "who-main" };
+            if (admin) {
+                mainAttrs["data-menu"] = "who";
+                mainAttrs["data-who"] = nm;
+                mainAttrs.role = "button";
+                mainAttrs.tabindex = "0";
+            }
+            var adm = null;
+            if (extra) {
+                var bits = [];
+                if (extra.label) bits.push(el("span", { class: "adm-pill adm-pill--sm", text: extra.label }));
+                if (extra.room_name || extra.room_vnum) {
+                    bits.push(el("span", { class: "who-adm-room",
+                        text: (extra.room_name || "?") + " #" + (extra.room_vnum || "?") }));
+                }
+                if (extra.idle >= 60) bits.push(el("span", { class: "who-adm-idle", text: "idle " + fmtIdle(extra.idle) }));
+                if (extra.invis) bits.push(el("span", { class: "who-adm-invis", text: "invis " + extra.invis }));
+                if (extra.snooping) bits.push(el("span", { class: "who-adm-snoop", text: "snooping " + extra.snooping }));
+                if (extra.account) bits.push(el("span", { class: "dim", text: extra.account }));
+                if (bits.length) adm = el("div", { class: "who-adm" }, bits);
+            }
             list.appendChild(el("li", { class: "who-row" }, [
-                el("div", { class: "who-main" }, [
+                el("div", mainAttrs, [
                     el("span", { class: "who-name", text: p.name }),
                     el("span", { class: "dim", text: " L" + p.level + " " + p.race + " " + p["class"] }),
                     p.title ? el("div", { class: "who-title", text: p.title }) : null,
-                    flags ? el("span", { class: "dim", text: flags }) : null
+                    flags ? el("span", { class: "dim", text: flags }) : null,
+                    adm
                 ]),
                 el("div", { class: "who-act" }, [
                     el("button", { "data-prefill": "tell " + nm + " ", text: "Tell" }),
@@ -4649,10 +4786,13 @@
         menuOpen = true;
         positionMenu(anchor);
     }
-    // actions: [{label, cmd|prefill|fn, danger, tier, disabled}]. Anchored
-    // near `anchor`. `disabled` renders an inert greyed row — used for
-    // actions that exist but the player can't take yet (harvest rank gates),
-    // so the requirement is visible instead of the action silently missing.
+    // actions: [{label, cmd|prefill|fn, danger, tier, disabled, confirm}].
+    // Anchored near `anchor`. `disabled` renders an inert greyed row — used
+    // for actions that exist but the player can't take yet (harvest rank
+    // gates), so the requirement is visible instead of the action silently
+    // missing. `confirm` arms on the first tap ("Confirm: X") and fires on
+    // the second — destructive staff actions (bolt, trans, purge) never go
+    // off a single stray tap; reopening the menu disarms.
     function openMenu(title, actions, anchor) {
         closeMenu();
         hideTip();
@@ -4670,6 +4810,12 @@
                 text: a.label,
                 onclick: function () {
                     if (a.disabled) return;
+                    if (a.confirm && !this._armed) {
+                        this._armed = true;
+                        this.textContent = "Confirm: " + a.label;
+                        this.classList.add("armed");
+                        return;
+                    }
                     // Close BEFORE running the action: an fn may open its own
                     // surface (icon picker, a confirm submenu) and a
                     // close-after would immediately dismiss it.
@@ -5141,6 +5287,11 @@
             var arr = gkind === "ally" ? (S.group && S.group.allies) : (S.group && S.group.members);
             var x = (arr || [])[Number(host.getAttribute("data-gidx"))];
             if (x) openMenu(stripColor(String(x.name || "")), groupRowActions(x, gkind), anchor);
+        } else if (kind === "who") {
+            var wn = host.getAttribute("data-who");
+            if (wn && adminLevel() >= 21) {
+                openMenu(wn, whoAdminActions(wn, whoExtraFor(wn)), anchor);
+            }
         }
     }
     function readDataset(host) {
@@ -5287,6 +5438,7 @@
         renderVitals(); renderSelfAffects(); renderRoom(); renderOccupants(); renderGroup();
         renderEquipment(); renderInventory(); renderTrain(); renderXp(); renderTracked();
         renderWho(); renderChat(); renderHotbar(); renderAbilities(); renderProfessions();
+        renderAdminStrip();
         updateMicro(); updateAttack();
     }
     function reset() {
@@ -5300,6 +5452,9 @@
         S.quests = []; S.questMarkers = null;
         S.season = null; S.achievements = null;
         S.tgtHostile = null; S.tgtFriendly = null;
+        S.adminCaps = null; S.builder = null; S.whoExtra = null;
+        S.zones = null; S.adminPanel = null; S.adminStat = null;
+        retierAdmin();
         // A reconnect may land as a different character; re-sync the bar on the
         // next Char.Status. The cached slots stay up meanwhile (no empty flash).
         barChar = null;
@@ -5350,6 +5505,7 @@
         dom.who = document.getElementById("panel-who");
         dom.hotbar = document.getElementById("hud-hotbar");
         dom.attack = document.getElementById("hud-attack");
+        dom.adminstrip = document.getElementById("hud-adminstrip");
         dom.xpstrip = document.getElementById("hud-xpstrip");
         dom.xpFill = dom.xpstrip && dom.xpstrip.querySelector(".xp-fill");
         dom.xpLabel = dom.xpstrip && dom.xpstrip.querySelector(".xp-label");
@@ -5498,7 +5654,7 @@
     // ------------------------------------------------------------------
     // Demo mode (/connect?demo=1)
     // ------------------------------------------------------------------
-    function demo() {
+    function demo(opts) {
         setHud(true, false);
         // Tracked quests + a catalog stub so the Quest Log's expanded detail
         // and the objectives tracker render without the endpoints.
@@ -5646,6 +5802,11 @@
                 { name: "a lesser fire elemental", owner: "Mirena", hp_pct: 100, mp_pct: 100, mv_pct: 100, position: "Standing", in_room: true, is_tank: false }
             ] },
             "Char.Skills": { skills: bigSkills },
+            "Char.Who": { players: [
+                { name: "Aelwyn", level: 45, race: "Elf", "class": "Magician", title: "the Tempest-Touched", following_me: false, is_my_leader: false },
+                { name: "Selra", level: 44, race: "Human", "class": "Cleric", title: "Voice of the Dawn", following_me: true, is_my_leader: false },
+                { name: "Boric", level: 43, race: "Dwarf", "class": "Warrior", title: "Shield of the Dawn", following_me: false, is_my_leader: true }
+            ], hidden: 1 },
             "Char.Cooldowns": { cooldowns: [{ id: 3, remaining: 8 }], usable: { "3": false } },
             "Char.Train": { stats: [{ name: "Str", value: 18, add: 2 }, { name: "Int", value: 25 }, { name: "Wis", value: 20 }], xp: 1250000, xp_pct: 62, can_advance: true, aux: [{ name: "Crit", value: "12.5% (+2%)" }], resources: [{ name: "Practices", value: 5, max: 10 }, { name: "Trains", value: 2, max: 2 }] },
             "Char.Professions": { professions: [
@@ -5724,6 +5885,33 @@
             { channel: "Group", text: "You told the group, \"pulling in 5\"" },
             { channel: "Say", text: "Aelwyn said, \"ready when you are\"" }
         ].forEach(function (c) { onGmcp("Comm.Channel", JSON.stringify(c)); });
+
+        // ?demo=admin — the staff fixtures, layered last so the re-tier and
+        // the who-supplement merge render over the sample player state.
+        if (opts && opts.admin) {
+            var adminFeeds = {
+                "Admin.Caps": { level: 24, label: "Eternal", caps: {
+                    "goto": true, stat: true, set: true, zones: true,
+                    purge: true, regen: true, show: true, snoop: true,
+                    trans: true, bolt: true, admin: true, ban: true,
+                    bounty: true, season: false } },
+                "Admin.Builder": {
+                    set_o: { vnum: 41230, name: "a rusty dagger", keyword: "dagger rusty", permitted: true },
+                    zone: { id: 30, name: "Ritani" } },
+                "Admin.WhoExtra": { players: [
+                    { name: "Aelwyn", level: 24, label: "Eternal", room_vnum: 3001,
+                      room_name: "The Temple Square", idle: 0, invis: 22, account: "aelwyn-acct" },
+                    { name: "Boric", level: 15, label: "", room_vnum: 4188,
+                      room_name: "A Muddy Track", idle: 90, invis: 0, account: "boric-acct" },
+                    { name: "Selra", level: 21, label: "Consort", room_vnum: 3054,
+                      room_name: "The Bazaar", idle: 660, invis: 0,
+                      snooping: "Boric", account: "selra-acct" }
+                ] }
+            };
+            Object.keys(adminFeeds).forEach(function (k) {
+                onGmcp(k, JSON.stringify(adminFeeds[k]));
+            });
+        }
         setConnected(true);
     }
 

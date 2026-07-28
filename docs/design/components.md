@@ -757,7 +757,23 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
   collapsed**. Read-only, focus-inert, hidden with `.hud-off` and when
   nothing is tracked.
 
-Verify with `/connect?demo=1` (sample GMCP feeds, no server needed).
+- **Admin tier** (decisions.md 2026-07-28, both entries) — the ambient
+  tier's staff profile plus the admin widgets, all gated by `Admin.Caps`
+  (`hud-admin` root class; level-21+ focused character):
+  - `#hud-adminstrip` — rank pill (`.adm-pill`, immortal cyan), the live
+    `set o` target (`.adm-target`: `.adm-vnum` + `.adm-name`; `--denied`
+    red vnum when un-permitted, `--empty` dashed when nothing carried; tap
+    prefills `set o `), and the current-zone chip (`.adm-zone`). Replaces
+    `#hud-attack` + `#hud-xpstrip` under `.hud-admin`.
+  - **Who staff line** (`.who-adm` under `.who-main`) — rank pill, room
+    name+vnum, idle, invis level (cyan), snoop edge (danger), account name
+    (Eternal+ only). The name area becomes the admin context-menu opener
+    (`data-menu="who"`); Tell/Follow/Group buttons stay plain.
+  - **Two-tap confirm** (`.menu-item.armed`) — `confirm: true` menu actions
+    arm to "Confirm: X" (danger wash) on the first tap, fire on the second.
+
+Verify with `/connect?demo=1` (sample GMCP feeds, no server needed);
+`/connect?demo=admin` layers the staff fixtures for the admin tier.
 
 ---
 

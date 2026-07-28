@@ -242,6 +242,11 @@
             <span class="xp-track"><span class="xp-fill"></span></span>
             <span class="xp-label"></span>
         </div>
+        <!-- Admin strip: the ambient tier's second profile (decisions.md
+           "Admin re-tier"). Replaces the XP strip + attack cluster when the
+           focused character is level 21+ (Admin.Caps): rank pill, the live
+           `set o` target, current zone. hud.js fills and reveals it. -->
+        <div id="hud-adminstrip" hidden></div>
         <!-- Action row: the skill bar plus the micro-menu — small icon buttons
            that open transient overlay apps (Ctrl+letter hotkeys). See
            docs/design/decisions.md "The HUD extension model". Buttons are
@@ -1283,12 +1288,14 @@
     // relative seconds stamped at receive time, so their cached bodies are
     // rebased by the cache age before the feed.
     var REPLAY_ORDER = [
-        "Char.Status", "Game.Time", "Char.Vitals", "Char.Train",
+        // Admin.Caps directly after Char.Status: the caps gate must be set
+        // before any other Admin.* feed replays, so the HUD re-tiers first.
+        "Char.Status", "Admin.Caps", "Game.Time", "Char.Vitals", "Char.Train",
         "Char.Skills", "Char.Cooldowns", "Char.Affects", "Char.Equipment",
         "Char.Inventory", "Room.Info", "Room.Occupants", "Room.Contents",
         "Room.QuestMarkers", "Group.Update", "Char.Who", "Char.Professions",
         "Char.Recipes", "Char.Craft", "Char.Quests", "Char.Season",
-        "Char.Achievements"
+        "Char.Achievements", "Admin.Builder", "Admin.WhoExtra"
     ];
 
     function rebaseTimers(pkg, body, ageSec) {
@@ -2617,7 +2624,10 @@
     // Demo mode (/connect?demo=1): populate the HUD with sample data for design
     // review without a GMCP-enabled server. Skips the live connection.
     if (isDemo) {
-        if (window.IsharHUD) window.IsharHUD.demo();
+        // ?demo=admin layers the staff fixtures (Admin.*) over the sample data.
+        if (window.IsharHUD) window.IsharHUD.demo({
+            admin: new URLSearchParams(location.search).get("demo") === "admin"
+        });
         first.term.writeln("\x1b[33m--- DEMO MODE: sample data, not connected to the game. ---\x1b[0m");
         fitAppHeight();
         scheduleFit();

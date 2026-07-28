@@ -29,12 +29,17 @@ PONG = "\x00PONG"
 
 # GMCP handshake sent to the game once it offers GMCP (IAC WILL GMCP → we
 # reply IAC DO GMCP plus these two subnegotiations). Identifies the web
-# client and declares the packages the HUD consumes, so the game's
-# per-package gating (GmcpClient.set_client_info / supported_packages) has
-# real data to work with when it starts using it.
+# client and declares the packages the HUD consumes. "Admin 1" is added
+# per-connection for staff-capable accounts only — the game builds its
+# level-gated Admin.* feeds solely for connections that declared it
+# (CLIENT_GMCP_ADMIN, ishar-mud#1888), and the character's current level
+# is re-checked game-side on every send.
 GMCP_HELLO = b'Core.Hello {"client": "IsharWeb", "version": "1.0"}'
-GMCP_SUPPORTS = (
+GMCP_SUPPORTS_BASE = (
     b'Core.Supports.Set ["Char 1", "Room 1", "Group 1", "Game 1", "Comm 1"]'
+)
+GMCP_SUPPORTS_STAFF = GMCP_SUPPORTS_BASE.replace(
+    b'"Comm 1"', b'"Comm 1", "Admin 1"'
 )
 
 # The WAIT_ACCOUNT_NAME prompt the game prints when it is ready for a login
@@ -116,6 +121,24 @@ class TelnetConsumer(AsyncWebsocketConsumer):
             requested = (params.get("character") or [""])[0].strip()
             if 0 < len(requested) <= 15:
                 self._autoselect_name = requested
+
+        # Staff capability decides whether this connection declares the
+        # Admin GMCP package and may relay Admin.* frames to the browser.
+        # Defense in depth only: the game re-checks the logged-in
+        # character's current level on every Admin.* send. Gate on the
+        # character axis (owns a level-21+ character) plus the account
+        # flag, matching how the HUD itself tiers by character.
+        self._staff_capable = False
+        if account_id is not None:
+            try:
+                self._staff_capable = await database_sync_to_async(
+                    self._is_staff_capable
+                )(user)
+            except Exception as exc:
+                logger.warning(
+                    "Staff-capability lookup failed for account %s: %s",
+                    account_id, exc,
+                )
 
         # Accept before dialing the game: a close code sent on a never-accepted
         # socket surfaces in the browser as a bare handshake failure (1006),
@@ -201,6 +224,18 @@ class TelnetConsumer(AsyncWebsocketConsumer):
     # ------------------------------------------------------------------
     # Internal helpers
     # ------------------------------------------------------------------
+
+    @staticmethod
+    def _is_staff_capable(user):
+        """Whether this account may receive Admin.* GMCP at all."""
+        from django.conf import settings as dj_settings
+
+        if user.immortal_level and user.immortal_level > 0:
+            return True
+        return user.players.filter(
+            is_deleted=False,
+            true_level__gte=dj_settings.MIN_IMMORTAL_LEVEL,
+        ).exists()
 
     def _cache_naws(self, frame):
         """Remember the window size from a browser NAWS subnegotiation.
@@ -361,8 +396,12 @@ class TelnetConsumer(AsyncWebsocketConsumer):
 
                 # Forward GMCP out-of-band data on a dedicated channel so the
                 # browser HUD can parse it without polluting the terminal text
-                # stream. Payload is "Package.Message {json}".
+                # stream. Payload is "Package.Message {json}". Admin.* frames
+                # never reach a non-staff browser even if the game-side level
+                # gate ever regressed.
                 for message in gmcp_messages:
+                    if message.startswith("Admin.") and not self._staff_capable:
+                        continue
                     await self.send(text_data="\x00GMCP " + message)
 
                 # Forward displayable text to the browser.
@@ -474,7 +513,11 @@ class TelnetConsumer(AsyncWebsocketConsumer):
                 responses.extend([IAC, DO, option])
                 if option == OPT_GMCP and not self._gmcp_hello_sent:
                     self._gmcp_hello_sent = True
-                    for payload in (GMCP_HELLO, GMCP_SUPPORTS):
+                    supports = (
+                        GMCP_SUPPORTS_STAFF if self._staff_capable
+                        else GMCP_SUPPORTS_BASE
+                    )
+                    for payload in (GMCP_HELLO, supports):
                         responses.extend([IAC, SB, OPT_GMCP])
                         responses.extend(payload)
                         responses.extend([IAC, SE])
