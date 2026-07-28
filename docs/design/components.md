@@ -443,6 +443,20 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
   right column is **Tracked Spells over Chat** — no tab bar. Reference surfaces
   (Gear, **Bags**, Character, Abilities, Who) are overlay apps, not columns/tabs
   (see the overlay section below and decisions.md 2026-07-19).
+- **Multiplay chrome** (decisions.md 2026-07-27) — `#session-tabs` in the
+  topbar: one `.sess-tab` per session (status dot `.sess-dot--<state>`, name
+  tinted `--ac-immortal` for immortal-account characters via
+  `.sess-tab--immortal`, `.sess-tab__n` unread count, `.sess-tab--bell`
+  danger-pulse, `.sess-tab__x` close), rendered only with 2+ sessions; the
+  `+` (`#session-add`) opens the `#session-pop` character picker
+  (`.sess-pick` rows fed by `/connect/characters/`). `#input-chip` by the
+  command input names the driven character; `#mirror-btn` +
+  `.mirror-armed` (warn-orange input glow) mark mirror mode. `#term-peek`
+  (≥1200px, 2+ sessions) frames a background session's live terminal —
+  `.peek-head` (name/dot/swap/collapse), `#peek-body` hosting the
+  re-parented `.term-host`, `#peek-form` mini input. All terminals are
+  `.term-host` layers in `#terminal-container`; blurred ones hide via
+  `visibility` (`.term-host--blurred`) so dimensions stay live.
 - **`.panel` / `.panel-h`** — the HUD's compact panel + uppercase header
   (denser cousins of `.ac-panel` / `.ac-panel__h`).
 - **`.vbar` / `.mini`** — labeled vitals bars (HP/MP/MV/Foe/MM/Edge) and

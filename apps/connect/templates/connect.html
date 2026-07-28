@@ -45,6 +45,17 @@
             <span class="status-dot" aria-hidden="true"></span>
             <span class="status-text">Connecting&hellip;</span>
         </span>
+        {# Multiplay chrome: tabs render only with 2+ sessions; the "+" #}
+        {# opens the character picker (authenticated accounts only). #}
+        <div id="session-tabs" aria-label="Game sessions"></div>
+        {% if user.is_authenticated %}
+        <button class="hud-btn hud-btn--icon" type="button" id="session-add"
+                aria-expanded="false" aria-controls="session-pop"
+                title="Open another character" aria-label="Open another character">
+            {% bi "plus-lg" %}
+        </button>
+        <div id="session-pop" hidden></div>
+        {% endif %}
         <div id="vitals-bar"></div>
         <!-- Ambient self buff/debuff timer icons — always visible by the vitals
            (hud.js renderSelfAffects). Bare icons; a countdown chip + pulse
@@ -176,6 +187,33 @@
                 &#x25BC; Latest
             </button>
         </div>
+        <!-- Peek pane (desktop, 2+ sessions): a background session's live
+           terminal below the main one, with a mini input, so both characters
+           are watchable at once. Collapsible; never on phones — tabs are the
+           whole phone story. JS re-parents the session's .term-host here. -->
+        <div id="term-peek" hidden>
+            <div class="peek-head">
+                <span id="peek-dot" class="peek-dot" aria-hidden="true"></span>
+                <span id="peek-name" class="peek-name"></span>
+                <button type="button" class="hud-btn hud-btn--icon" id="peek-swap"
+                        title="Switch places with the main terminal"
+                        aria-label="Switch places with the main terminal">
+                    {% bi "arrow-down-up" %}
+                </button>
+                <button type="button" class="hud-btn hud-btn--icon" id="peek-collapse" aria-pressed="false"
+                        title="Collapse the peek pane" aria-label="Collapse the peek pane">
+                    {% bi "chevron-down" %}
+                </button>
+            </div>
+            <div id="peek-body"></div>
+            <form id="peek-form" autocomplete="off">
+                <label for="peek-input" class="visually-hidden">Command for the peeked session</label>
+                <input type="text" id="peek-input"
+                       aria-label="Command for the peeked session"
+                       autocapitalize="off" autocomplete="off" autocorrect="off"
+                       spellcheck="false" enterkeyhint="send">
+            </form>
+        </div>
         <!-- XP: a hairline ambient strip below the terminal — progress-to-level is
            glanced at constantly, so it earns permanent space (graduated off the
            Character overlay, docs/design/decisions.md 2026-07-19 XP strip).
@@ -257,6 +295,8 @@
                 {% bi "clock-history" %}
             </button>
             <div id="history-pop" hidden></div>
+            {# Multiplay: which character the input drives (2+ sessions only). #}
+            <span id="input-chip" hidden aria-live="polite"></span>
             <label for="command-input" class="visually-hidden">Command</label>
             <input type="text" id="command-input" class="form-control"
                    placeholder="Enter command..."
@@ -267,6 +307,12 @@
                    spellcheck="false"
                    enterkeyhint="send"
                    autofocus>
+            {# Multiplay: mirror typed commands to every session (2+ only). #}
+            <button type="button" class="hud-btn hud-btn--icon" id="mirror-btn" hidden
+                    aria-pressed="false" title="Mirror typed commands to all sessions"
+                    aria-label="Mirror typed commands to all sessions">
+                {% bi "broadcast" %}
+            </button>
             <button type="submit" class="hud-btn" id="send-btn" title="Send command" aria-label="Send command">
                 {% bi "send" %}
                 <span class="send-label">Send</span>
@@ -417,8 +463,15 @@
     var statusText = statusEl.querySelector(".status-text");
     var reconnectBtn = document.getElementById("reconnect-btn");
     var scrollBtn = document.getElementById("scroll-bottom-btn");
+    var sessionTabs = document.getElementById("session-tabs");
+    var sessionAddBtn = document.getElementById("session-add");
+    var sessionPop = document.getElementById("session-pop");
+    var inputChip = document.getElementById("input-chip");
+    var mirrorBtn = document.getElementById("mirror-btn");
 
     var isMobile = ("ontouchstart" in window) && window.innerWidth < 768;
+    var isDemo = new URLSearchParams(location.search).has("demo");
+    var isAuthed = {{ user.is_authenticated|yesno:"true,false" }};
 
     // --- ANSI color theme (all 16 standard colors) ---
     var mudTheme = {
@@ -433,7 +486,7 @@
         brightBlue:    "#5599ff", brightMagenta: "#ff55ff", brightCyan:    "#55ffff", brightWhite:   "#ffffff"
     };
 
-    // --- Terminal font size (persisted) ---
+    // --- Terminal font size (persisted, applied to every session) ---
     var FONT_MIN = 10, FONT_MAX = 22;
     var fontSize = isMobile ? 13 : 14;
     try {
@@ -441,104 +494,7 @@
         if (savedFont >= FONT_MIN && savedFont <= FONT_MAX) fontSize = savedFont;
     } catch (e) {}
 
-    // --- Terminal setup ---
-    var term = new Terminal({
-        cursorBlink: false,
-        cursorInactiveStyle: "none",
-        disableStdin: true,
-        scrollback: 5000,
-        fontSize: fontSize,
-        fontFamily: "'Courier New', Courier, 'Liberation Mono', monospace",
-        theme: mudTheme,
-        convertEol: true
-    });
-
-    var fitAddon = new FitAddon.FitAddon();
-    term.loadAddon(fitAddon);
-    term.loadAddon(new WebLinksAddon.WebLinksAddon());
-    // Feature-checked: a missing addon file degrades to no scrollback
-    // persistence, matching the page's graceful-degradation stance.
-    var serializeAddon = null;
-    if (window.SerializeAddon) {
-        serializeAddon = new SerializeAddon.SerializeAddon();
-        term.loadAddon(serializeAddon);
-    }
-    var searchAddon = null;
-    if (window.SearchAddon) {
-        searchAddon = new SearchAddon.SearchAddon();
-        term.loadAddon(searchAddon);
-    }
-    term.open(terminalContainer);
-
-    // Game beep → notification (while hidden). xterm parses the BEL (\x07) out
-    // of the stream for us, so this is independent of the HUD/GMCP and works
-    // even if hud.js failed to load. Throttled so a chatty prompt-bell can't
-    // machine-gun notifications.
-    var lastBeepAt = 0;
-    if (term.onBell) {
-        term.onBell(function() {
-            if (!settings.notifyBeep || !document.hidden) return;
-            var t = Date.now();
-            if (t - lastBeepAt < 15000) return;
-            lastBeepAt = t;
-            notify("Ishar MUD", "The game beeped you.", "ishar-beep");
-        });
-    }
-
-    // Clicking the terminal returns focus to the command input, so you can get
-    // straight back to typing without aiming for the small input bar. The
-    // terminal is display-only (disableStdin), so nothing competes for focus.
-    // Guarded so it never breaks a copy: xterm draws its own selection, so we
-    // check term.hasSelection() (window.getSelection is empty in canvas mode)
-    // and refocus only on a plain left click. Skipped on mobile, where a tap
-    // shouldn't pop the on-screen keyboard mid-read.
-    terminalContainer.addEventListener("mouseup", function(e) {
-        if (isMobile || e.button !== 0) return;
-        if (term.hasSelection && term.hasSelection()) return;
-        commandInput.focus();
-    });
-
-    function adjustFont(delta) {
-        fontSize = Math.max(FONT_MIN, Math.min(FONT_MAX, fontSize + delta));
-        term.options.fontSize = fontSize;
-        try { localStorage.setItem("ishar.fontsize", String(fontSize)); } catch (e) {}
-        scheduleFit();
-    }
-    document.getElementById("font-dec").addEventListener("click", function() { adjustFont(-1); });
-    document.getElementById("font-inc").addEventListener("click", function() { adjustFont(1); });
-
-    // --- Sizing ---
-    // The app gets an explicit, header-aware pixel height; the inner grid
-    // and flexbox distribute it, and a ResizeObserver refits the terminal
-    // whenever its cell changes (toggle UI, viewport, mobile keyboard).
-    function fitAppHeight() {
-        var vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-        var top = app.getBoundingClientRect().top;
-        app.style.height = Math.max(240, Math.floor(vh - top - 8)) + "px";
-    }
-
-    var nawsTimer = null;
-    function scheduleNaws() {
-        if (nawsTimer) clearTimeout(nawsTimer);
-        nawsTimer = setTimeout(sendNaws, 150);
-    }
-
-    var fitScheduled = false;
-    function scheduleFit() {
-        if (fitScheduled) return;
-        fitScheduled = true;
-        requestAnimationFrame(function() {
-            fitScheduled = false;
-            try { fitAddon.fit(); } catch (e) {}
-            scheduleNaws();
-        });
-    }
-
-    if (typeof ResizeObserver !== "undefined") {
-        new ResizeObserver(scheduleFit).observe(terminalContainer);
-    }
-
-    // --- Command history (persisted across page loads) ---
+    // --- Command history (persisted across page loads; shared by sessions) ---
     var history = [];
     var historyIndex = -1;
     var savedInput = "";
@@ -591,7 +547,7 @@
         try { localStorage.setItem("ishar.settings", JSON.stringify(settings)); } catch (e) {}
     }
 
-    // --- Aliases (persisted) ---
+    // --- Aliases (persisted; shared by sessions) ---
     var ALIAS_NAME_RE = /^[a-z0-9_-]{1,20}$/;
     var ALIAS_MAX = 400;
     var aliases = {};
@@ -609,212 +565,1010 @@
         try { localStorage.setItem("ishar.aliases", JSON.stringify(aliases)); } catch (e) {}
     }
 
-    // --- Echo / scroll state ---
-    var serverEcho = false;
-    var userScrolledUp = false;
-    function isAtBottom() {
-        var buf = term.buffer.active;
-        return buf.viewportY >= buf.baseY;
+    // --- Desktop notifications (title badge + tells/beep/damage/low-health) ---
+    // Every trigger below fires only while the tab is hidden: when it's focused
+    // the HUD already shows tells, vitals, and the terminal directly.
+    var baseTitle = document.title;
+    var unreadTitle = 0;
+    function clearTitleBadge() {
+        unreadTitle = 0;
+        document.title = baseTitle;
     }
-    term.onScroll(function() {
-        var atBottom = isAtBottom();
-        if (atBottom && userScrolledUp) {
-            userScrolledUp = false;
-            scrollBtn.style.display = "none";
-        } else if (!atBottom && !userScrolledUp) {
-            userScrolledUp = true;
-            scrollBtn.style.display = "";
+    // One guarded path for raising a Notification. tag lets the OS collapse
+    // repeats of the same kind (a second low-health note replaces the first).
+    function notify(title, body, tag) {
+        if (!("Notification" in window) || Notification.permission !== "granted") return;
+        try {
+            var n = new Notification(title, { body: String(body || "").slice(0, 140), tag: tag });
+            n.onclick = function() { window.focus(); this.close(); };
+        } catch (e) {}
+    }
+
+    // Called by the HUD for every Comm.Channel message (text already
+    // color-stripped there). The HUD only sees the focused session's feed.
+    function onComm(channel, text) {
+        if (!document.hidden) return;
+        if (settings.titleBadge) {
+            unreadTitle++;
+            document.title = "(" + unreadTitle + ") " + baseTitle;
+        }
+        if (settings.notifyTells && /^(tell|reply|whisper)/i.test(channel || "")) {
+            notify("Ishar MUD", text, "ishar-tell");
+        }
+    }
+
+    // HP-based notifications, fed Char.Vitals by the HUD. Two independent
+    // triggers, each one-shot and re-armed on tab-return (see visibilitychange):
+    //   • notifyHit    — HP dropped below where it stood when you tabbed out.
+    //   • notifyHealth — HP fell to/under the configured percent.
+    var lastVitals = null;      // most recent vitals, for the visibility handler
+    var hitAnchorHp = null;     // HP captured when the tab went hidden
+    var hitNotified = false;    // damage note already sent this hidden stretch
+    var lowHealthNotified = false;
+    function onVitals(v) {
+        lastVitals = v;
+        if (!v || v.hp == null) return;
+        var hp = Number(v.hp), maxhp = Number(v.maxhp) || 0;
+        var pctHp = maxhp > 0 ? (hp / maxhp * 100) : null;
+
+        // Low health: fire once when at/under the threshold; re-arm above it.
+        if (pctHp != null && pctHp <= settings.healthThreshold) {
+            if (settings.notifyHealth && document.hidden && !lowHealthNotified) {
+                notify("Ishar MUD — low health",
+                    "HP " + hp + " / " + maxhp + " (" + Math.round(pctHp) + "%)", "ishar-health");
+                lowHealthNotified = true;
+            }
+        } else if (pctHp != null) {
+            lowHealthNotified = false;
+        }
+
+        // Took damage while hidden: anchor at the hide, fire once on any dip
+        // below it. Lazily anchor if the toggle was flipped on mid-stretch.
+        if (settings.notifyHit && document.hidden) {
+            if (hitAnchorHp == null) hitAnchorHp = hp;
+            else if (!hitNotified && hp < hitAnchorHp) {
+                notify("Ishar MUD — taking damage",
+                    "HP " + hp + " / " + maxhp, "ishar-hit");
+                hitNotified = true;
+            }
+        }
+    }
+
+    document.addEventListener("visibilitychange", function() {
+        if (!document.hidden) {
+            clearTitleBadge();
+            // Returning to the tab acknowledges everything — re-arm so the next
+            // time you tab out, a fresh event can alert again.
+            hitAnchorHp = null;
+            hitNotified = false;
+            lowHealthNotified = false;
+        } else {
+            // Tabbing out: anchor "took damage" at the HP we're leaving on, and
+            // evaluate low-health right now in case we're already hurt (no new
+            // Char.Vitals may arrive while idle).
+            hitAnchorHp = (lastVitals && lastVitals.hp != null) ? Number(lastVitals.hp) : null;
+            hitNotified = false;
+            if (settings.notifyHealth && lastVitals) onVitals(lastVitals);
         }
     });
-    scrollBtn.addEventListener("click", function() {
-        term.scrollToBottom();
-        userScrolledUp = false;
-        scrollBtn.style.display = "none";
+
+    // ==================================================================
+    // Sessions
+    // ==================================================================
+    // Each session owns a socket, a terminal, and its own GMCP state cache;
+    // exactly one is *focused* — it owns the main terminal slot, the shared
+    // input line, and the singleton HUD (only its GMCP feed reaches
+    // IsharHUD). Background sessions stay live: their terminals keep
+    // writing (hidden), their caches keep updating, and a focus switch
+    // rebuilds the HUD by replaying the cache through IsharHUD.onGmcp.
+
+    var MAX_SESSIONS = 3;
+    var BACKOFF_MS = [1000, 2000, 5000, 10000];
+    var CLOSE_BRIDGE_FAILURE = 4502;  // matches apps/connect/consumers.py
+    var SCROLLBACK_MAX = 512 * 1024;
+    var CHAT_MAX = 200;               // mirrors hud.js CHAT_MAX
+
+    var sessions = [];
+    var focusedSession = null;
+
+    function isFocused(sess) { return focusedSession === sess; }
+
+    function scrollbackKey(slot) { return "ishar.term." + slot; }
+
+    // Latest-state cache for a focus-switch replay. Comm.Channel is a
+    // stream (ring buffer); Char.Death is an event, not state — replaying
+    // it would re-run death handling on every switch.
+    function cacheGmcp(sess, pkg, body) {
+        if (pkg === "Comm.Channel") {
+            sess.chat.push(body);
+            if (sess.chat.length > CHAT_MAX) sess.chat.shift();
+            return;
+        }
+        if (pkg === "Char.Death") return;
+        sess.gmcp[pkg] = { body: body, at: Date.now() };
+        if (pkg === "Char.Status") {
+            try {
+                var st = JSON.parse(body);
+                if (st && st.name && sess.displayName !== String(st.name)) {
+                    sess.displayName = String(st.name);
+                    renderSessionTabs();
+                }
+            } catch (e) {}
+        }
+    }
+
+    // The focused session's status/echo/scroll state is what the shared
+    // chrome shows; re-sync after any state change or focus move.
+    function syncFocusUi() {
+        var s = focusedSession;
+        if (!s) return;
+        statusText.textContent = s.statusMsg;
+        statusEl.className = s.statusCls;
+        reconnectBtn.style.display = s.reconnectVisible ? "" : "none";
+        commandInput.type = s.echo ? "password" : "text";
+        updateScrollBtn();
+        renderSessionTabs();
+    }
+
+    function updateScrollBtn() {
+        scrollBtn.style.display =
+            (focusedSession && focusedSession.userScrolledUp) ? "" : "none";
+    }
+
+    function createSession(opts) {
+        var sess = {
+            slot: opts.slot,
+            charName: opts.character || null,
+            displayName: opts.character || null,
+            isImmortal: !!opts.isImmortal,
+            echo: false,
+            state: "connecting",
+            statusMsg: "Connecting…",
+            statusCls: "status-connecting",
+            reconnectVisible: false,
+            unread: 0,
+            bell: false,
+            gmcp: {},
+            chat: [],
+            ws: null,
+            reconnectAttempt: 0,
+            reconnectTimer: null,
+            countdownTimer: null,
+            openedAt: 0,
+            pongTimer: null,
+            quitClean: false,
+            userScrolledUp: false,
+            lastBeepAt: 0,
+            lastHp: null
+        };
+
+        sess.container = document.createElement("div");
+        sess.container.className = "term-host term-host--blurred";
+        terminalContainer.appendChild(sess.container);
+
+        sess.term = new Terminal({
+            cursorBlink: false,
+            cursorInactiveStyle: "none",
+            disableStdin: true,
+            scrollback: 5000,
+            fontSize: fontSize,
+            fontFamily: "'Courier New', Courier, 'Liberation Mono', monospace",
+            theme: mudTheme,
+            convertEol: true
+        });
+        sess.fit = new FitAddon.FitAddon();
+        sess.term.loadAddon(sess.fit);
+        sess.term.loadAddon(new WebLinksAddon.WebLinksAddon());
+        // Feature-checked: a missing addon file degrades to no scrollback
+        // persistence / no search, matching the page's graceful-degradation
+        // stance.
+        sess.serialize = null;
+        if (window.SerializeAddon) {
+            sess.serialize = new SerializeAddon.SerializeAddon();
+            sess.term.loadAddon(sess.serialize);
+        }
+        sess.search = null;
+        if (window.SearchAddon) {
+            sess.search = new SearchAddon.SearchAddon();
+            sess.term.loadAddon(sess.search);
+        }
+        sess.term.open(sess.container);
+
+        // Game beep → notification (while hidden). xterm parses the BEL
+        // (\x07) out of the stream for us, so this is independent of the
+        // HUD/GMCP and works even if hud.js failed to load. Throttled so a
+        // chatty prompt-bell can't machine-gun notifications.
+        if (sess.term.onBell) {
+            sess.term.onBell(function() {
+                if (!settings.notifyBeep || !document.hidden) return;
+                var t = Date.now();
+                if (t - sess.lastBeepAt < 15000) return;
+                sess.lastBeepAt = t;
+                notify("Ishar MUD", "The game beeped you.", "ishar-beep");
+            });
+        }
+
+        sess.term.onScroll(function() {
+            var buf = sess.term.buffer.active;
+            sess.userScrolledUp = buf.viewportY < buf.baseY;
+            if (isFocused(sess)) updateScrollBtn();
+        });
+
+        function setStatus(text, cls) {
+            sess.statusMsg = text;
+            sess.statusCls = cls;
+            if (isFocused(sess)) syncFocusUi(); else renderSessionTabs();
+        }
+
+        function clearReconnect() {
+            if (sess.reconnectTimer) { clearTimeout(sess.reconnectTimer); sess.reconnectTimer = null; }
+            if (sess.countdownTimer) { clearInterval(sess.countdownTimer); sess.countdownTimer = null; }
+        }
+
+        function clearProbe() {
+            if (sess.pongTimer) { clearTimeout(sess.pongTimer); sess.pongTimer = null; }
+        }
+
+        // --- Liveness ---
+        // A phone that switches networks (or sleeps through a websocket
+        // death) often keeps a half-open socket that looks OPEN but goes
+        // nowhere. The probe sends a NUL-prefixed PING that the bridge
+        // answers with PONG only while its telnet leg is healthy; no answer
+        // in 5s means the socket is dead — tear it down and reconnect.
+        sess.probe = function() {
+            if (isDemo || sess.pongTimer || !sess.ws || sess.ws.readyState !== WebSocket.OPEN) return;
+            try { sess.ws.send("\x00PING"); } catch (e) { return; }
+            sess.pongTimer = setTimeout(function () {
+                sess.pongTimer = null;
+                sess.forceReconnect();
+            }, 5000);
+        };
+
+        // Reconnect *now*: a wake/online event is a fresh network situation,
+        // so skip any pending backoff wait and restart the ladder.
+        sess.forceReconnect = function() {
+            clearReconnect();
+            sess.reconnectAttempt = 0;
+            sess.connect();
+        };
+
+        // On waking (tab visible again, network back, bfcache restore):
+        // revive a pending or parked reconnect immediately, otherwise probe.
+        sess.wake = function() {
+            if (isDemo || sess.quitClean) return;
+            if (sess.reconnectTimer || !sess.ws || sess.ws.readyState > WebSocket.OPEN) {
+                sess.forceReconnect();
+            } else {
+                sess.probe();
+            }
+        };
+
+        sess.parkOffline = function() {
+            clearReconnect();
+            clearProbe();
+            if (!sess.quitClean) {
+                sess.reconnectVisible = true;
+                setStatus("Offline — waiting for network", "status-disconnected");
+            }
+        };
+
+        function scheduleReconnect(reason) {
+            clearReconnect();
+            var delay = BACKOFF_MS[Math.min(sess.reconnectAttempt, BACKOFF_MS.length - 1)];
+            sess.reconnectAttempt++;
+            var until = Date.now() + delay;
+            sess.reconnectVisible = true;
+            sess.term.writeln("\r\n\x1b[1;33m--- " + reason + " — reconnecting in "
+                + Math.round(delay / 1000) + "s ---\x1b[0m");
+            function tick() {
+                var left = Math.max(0, Math.ceil((until - Date.now()) / 1000));
+                setStatus("Reconnecting in " + left + "s…", "status-connecting");
+            }
+            tick();
+            sess.countdownTimer = setInterval(tick, 500);
+            sess.reconnectTimer = setTimeout(sess.connect, delay);
+        }
+
+        // Reconnect-with-backoff is the primary recovery path (#85): the
+        // bridge re-authenticates each new socket server-side (and re-selects
+        // this session's character), so a reconnect lands a signed-in player
+        // back in place without retyping anything. Only a clean close (code
+        // 1000 — the game ended the session, e.g. a quit) is left to the
+        // manual button; everything else retries on a 1s/2s/5s/10s ladder.
+        sess.connect = function() {
+            clearReconnect();
+            clearProbe();
+            sess.quitClean = false;
+            if (sess.ws) {
+                // Deliberate replacement: a stale socket's close must not
+                // race the new one into the reconnect scheduler.
+                sess.ws.onopen = sess.ws.onmessage = sess.ws.onclose = sess.ws.onerror = null;
+                if (sess.ws.readyState <= WebSocket.OPEN) sess.ws.close();
+            }
+            // A new socket is a new game session: the cached state is stale.
+            sess.gmcp = {};
+            if (isFocused(sess) && window.IsharHUD) window.IsharHUD.reset();
+
+            var protocol = location.protocol === "https:" ? "wss:" : "ws:";
+            var url = protocol + "//" + location.host + "/ws/connect";
+            if (sess.charName) url += "?character=" + encodeURIComponent(sess.charName);
+
+            sess.state = "connecting";
+            sess.reconnectVisible = false;
+            setStatus("Connecting...", "status-connecting");
+
+            var ws = new WebSocket(url);
+            sess.ws = ws;
+            ws.binaryType = "arraybuffer";
+
+            ws.onopen = function() {
+                sess.openedAt = Date.now();
+                sess.state = "connected";
+                setStatus("Connected", "status-connected");
+                if (isFocused(sess)) {
+                    if (window.IsharHUD) window.IsharHUD.setConnected(true);
+                    commandInput.focus();
+                }
+                sess.sendNaws();
+            };
+
+            ws.onmessage = function(event) {
+                var d = event.data;
+                if (typeof d !== "string") return;
+
+                // Out-of-band control sentinels are prefixed with NUL.
+                if (d.charCodeAt(0) === 0) {
+                    if (d === "\x00PONG") { clearProbe(); return; }
+                    if (d === "\x00ECHO_ON") {
+                        sess.echo = true;
+                        if (isFocused(sess)) {
+                            commandInput.type = "password";
+                            setMirror(false);   // password keystrokes never fan out
+                        }
+                        if (sess === peekSession) peekInput.type = "password";
+                        return;
+                    }
+                    if (d === "\x00ECHO_OFF") {
+                        sess.echo = false;
+                        if (isFocused(sess)) commandInput.type = "text";
+                        if (sess === peekSession) peekInput.type = "text";
+                        return;
+                    }
+                    if (d.indexOf("\x00GMCP ") === 0) {
+                        var rest = d.slice(6);
+                        var sp = rest.indexOf(" ");
+                        var pkg = sp === -1 ? rest : rest.slice(0, sp);
+                        var body = sp === -1 ? "" : rest.slice(sp + 1);
+                        cacheGmcp(sess, pkg, body);
+                        if (isFocused(sess)) {
+                            if (window.IsharHUD) window.IsharHUD.onGmcp(pkg, body);
+                        } else {
+                            noteBackgroundGmcp(sess, pkg, body);
+                        }
+                        return;
+                    }
+                    return;
+                }
+                sess.term.write(d);
+                // A peeked terminal is on screen — its output isn't unread.
+                if (!isFocused(sess) && !isPeeked(sess)) {
+                    sess.unread++;
+                    scheduleTabs();
+                }
+            };
+
+            ws.onclose = function(event) {
+                clearProbe();
+                sess.state = "disconnected";
+                setStatus("Disconnected", "status-disconnected");
+                if (isFocused(sess) && window.IsharHUD) window.IsharHUD.setConnected(false);
+                // A session that lived a while proves the path works —
+                // restart the backoff ladder instead of climbing it forever.
+                if (sess.openedAt && Date.now() - sess.openedAt > 30000) sess.reconnectAttempt = 0;
+                sess.openedAt = 0;
+                if (event.code === 1000) {
+                    // The game ended the session (e.g. quit) — don't fight a
+                    // deliberate exit with an auto-reconnect loop.
+                    sess.quitClean = true;
+                    sess.state = "dead";
+                    sess.reconnectVisible = true;
+                    if (isFocused(sess)) syncFocusUi(); else renderSessionTabs();
+                    sess.term.writeln("\r\n\x1b[1;31m--- Disconnected ---\x1b[0m");
+                    return;
+                }
+                if (navigator.onLine === false) {
+                    // No network: retries would fail instantly and burn the
+                    // backoff ladder. Park; the "online" handler revives us.
+                    sess.reconnectVisible = true;
+                    setStatus("Offline — waiting for network", "status-disconnected");
+                    return;
+                }
+                scheduleReconnect(event.code === CLOSE_BRIDGE_FAILURE
+                    ? "Game server unreachable"
+                    : "Connection lost");
+            };
+
+            // A failed handshake also fires onclose (with a non-1000 code),
+            // so the reconnect scheduling lives there alone.
+            ws.onerror = function() {};
+        };
+
+        sess.send = function(cmd) {
+            if (sess.ws && sess.ws.readyState === WebSocket.OPEN) sess.ws.send(cmd + "\r\n");
+        };
+
+        sess.sendNaws = function() {
+            if (sess.ws && sess.ws.readyState === WebSocket.OPEN) {
+                var cols = sess.term.cols || 80;
+                var rows = sess.term.rows || 24;
+                sess.ws.send(new Uint8Array([
+                    255, 250, 31,
+                    (cols >> 8) & 0xff, cols & 0xff,
+                    (rows >> 8) & 0xff, rows & 0xff,
+                    255, 240
+                ]).buffer);
+            }
+        };
+
+        sess.saveScrollback = function() {
+            if (!sess.serialize || isDemo) return;
+            try {
+                var s = sess.serialize.serialize({ scrollback: 1500 });
+                if (s.length > SCROLLBACK_MAX) {
+                    // Front-truncate at a line break, never mid-escape-sequence.
+                    var cut = s.indexOf("\n", s.length - SCROLLBACK_MAX);
+                    s = cut === -1 ? "" : s.slice(cut + 1);
+                }
+                if (s) sessionStorage.setItem(scrollbackKey(sess.slot), s);
+                else sessionStorage.removeItem(scrollbackKey(sess.slot));
+            } catch (e) {
+                try { sessionStorage.removeItem(scrollbackKey(sess.slot)); } catch (e2) {}
+            }
+        };
+
+        sess.destroy = function() {
+            sess.quitClean = true;
+            clearReconnect();
+            clearProbe();
+            if (sess.ws) {
+                sess.ws.onopen = sess.ws.onmessage = sess.ws.onclose = sess.ws.onerror = null;
+                if (sess.ws.readyState <= WebSocket.OPEN) sess.ws.close();
+                sess.ws = null;
+            }
+            try { sess.term.dispose(); } catch (e) {}
+            if (sess.container.parentNode) sess.container.parentNode.removeChild(sess.container);
+            try { sessionStorage.removeItem(scrollbackKey(sess.slot)); } catch (e) {}
+        };
+
+        // Restore the previous scrollback (same tab, same slot) before
+        // connecting, so the session picks up where the last page load left
+        // off. The pre-multiplay key migrates to slot 1 once.
+        if (!isDemo) {
+            try {
+                if (sess.slot === 1) {
+                    var legacy = sessionStorage.getItem("ishar.term");
+                    if (legacy && !sessionStorage.getItem(scrollbackKey(1))) {
+                        sessionStorage.setItem(scrollbackKey(1), legacy);
+                    }
+                    sessionStorage.removeItem("ishar.term");
+                }
+                var savedTerm = sessionStorage.getItem(scrollbackKey(sess.slot));
+                if (savedTerm) {
+                    sess.term.write(savedTerm);
+                    sess.term.writeln("\r\n\x1b[90m--- earlier output restored after reload ---\x1b[0m");
+                }
+            } catch (e) {}
+        }
+
+        sessions.push(sess);
+        return sess;
+    }
+
+    // --- Session tabs ---
+    // Rendered only with 2+ sessions, so a single-session page keeps
+    // today's zero-footprint topbar. Names are player data: textContent
+    // only.
+    // rAF-debounced tab refresh for high-frequency callers (a streaming
+    // background terminal bumps unread on every write).
+    var tabsScheduled = false;
+    function scheduleTabs() {
+        if (tabsScheduled) return;
+        tabsScheduled = true;
+        requestAnimationFrame(function() {
+            tabsScheduled = false;
+            renderSessionTabs();
+        });
+    }
+
+    function renderSessionTabs() {
+        syncMirrorUi();
+        syncInputChip();
+        updatePeek();
+        if (!sessionTabs) return;
+        if (sessionAddBtn) sessionAddBtn.hidden = sessions.length >= MAX_SESSIONS;
+        while (sessionTabs.firstChild) sessionTabs.removeChild(sessionTabs.firstChild);
+        if (sessions.length < 2) return;
+        sessions.forEach(function(s) {
+            var name = s.displayName || ("Session " + s.slot);
+            var tab = document.createElement("div");
+            tab.className = "sess-tab";
+            if (isFocused(s)) tab.classList.add("sess-tab--active");
+            if (s.isImmortal) tab.classList.add("sess-tab--immortal");
+            if (s.bell) tab.classList.add("sess-tab--bell");
+
+            var btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "sess-tab__btn";
+            btn.setAttribute("aria-pressed", isFocused(s) ? "true" : "false");
+            btn.title = "Switch to " + name + " (Alt+C cycles)";
+
+            var dot = document.createElement("span");
+            dot.className = "sess-tab__dot sess-dot--" + s.state;
+            btn.appendChild(dot);
+
+            var label = document.createElement("span");
+            label.className = "sess-tab__name";
+            label.textContent = name;
+            btn.appendChild(label);
+
+            if (s.unread > 0 && !isFocused(s)) {
+                var n = document.createElement("span");
+                n.className = "sess-tab__n";
+                n.textContent = s.unread > 99 ? "99+" : String(s.unread);
+                btn.appendChild(n);
+            }
+            btn.addEventListener("click", function() { Sessions.focus(s); });
+            tab.appendChild(btn);
+
+            var x = document.createElement("button");
+            x.type = "button";
+            x.className = "sess-tab__x";
+            x.setAttribute("aria-label", "Close the " + name + " session");
+            x.title = "Close the " + name + " session";
+            x.textContent = "×";
+            x.addEventListener("click", function(e) {
+                e.stopPropagation();
+                if (s.state === "connected"
+                        && !window.confirm(name + " is still connected — close this session?")) {
+                    return;
+                }
+                Sessions.close(s);
+            });
+            tab.appendChild(x);
+
+            sessionTabs.appendChild(tab);
+        });
+    }
+
+    // Background attention: a blurred session pulses its tab when its
+    // character takes damage or is told something directly. lastHp is
+    // reset on blur, so the first vitals only set the baseline.
+    function noteBackgroundGmcp(sess, pkg, body) {
+        if (pkg !== "Char.Vitals" && pkg !== "Comm.Channel") return;
+        var data = null;
+        try { data = JSON.parse(body); } catch (e) { return; }
+        if (pkg === "Char.Vitals") {
+            var hp = (data && data.hp != null) ? Number(data.hp) : null;
+            if (hp != null) {
+                if (sess.lastHp != null && hp < sess.lastHp && !sess.bell) {
+                    sess.bell = true;
+                    renderSessionTabs();
+                }
+                sess.lastHp = hp;
+            }
+            return;
+        }
+        if (/^(tell|reply|whisper)/i.test((data && data.channel) || "") && !sess.bell) {
+            sess.bell = true;
+            renderSessionTabs();
+        }
+    }
+
+    // --- Session roster (per tab, like the scrollback) ---
+    // A reload rebuilds the whole session set: each entry reconnects and
+    // re-selects its character through the bridge.
+    var ROSTER_KEY = "ishar.sessions";
+    function saveRoster() {
+        if (isDemo || !isAuthed) return;
+        try {
+            sessionStorage.setItem(ROSTER_KEY, JSON.stringify({
+                focused: focusedSession ? focusedSession.slot : null,
+                list: sessions.map(function(s) {
+                    return { slot: s.slot, character: s.charName, isImmortal: s.isImmortal };
+                })
+            }));
+        } catch (e) {}
+    }
+    function loadRoster() {
+        if (isDemo || !isAuthed) return null;
+        try {
+            var r = JSON.parse(sessionStorage.getItem(ROSTER_KEY));
+            if (r && Array.isArray(r.list) && r.list.length) return r;
+        } catch (e) {}
+        return null;
+    }
+
+    var Sessions = {
+        focused: function() { return focusedSession; },
+        list: function() { return sessions.slice(); },
+        create: function(opts) {
+            if (sessions.length >= MAX_SESSIONS) return null;
+            var used = {};
+            sessions.forEach(function(s) { used[s.slot] = true; });
+            var slot = (opts && opts.slot && !used[opts.slot]) ? opts.slot : 0;
+            if (!slot) { slot = 1; while (used[slot]) slot++; }
+            var sess = createSession({
+                slot: slot,
+                character: opts && opts.character,
+                isImmortal: opts && opts.isImmortal
+            });
+            if (!focusedSession) Sessions.focus(sess);
+            if (!isDemo) sess.connect();
+            saveRoster();
+            renderSessionTabs();
+            return sess;
+        },
+        focus: function(sess) {
+            if (!sess || focusedSession === sess) return;
+            var prev = focusedSession;
+            focusedSession = sess;
+            if (prev) prev.lastHp = null;   // blurred baseline: first vitals re-anchor
+            sess.unread = 0;
+            sess.bell = false;
+            replayHud(sess);
+            syncFocusUi();
+            saveRoster();
+            commandInput.focus();
+        },
+        cycle: function(dir) {
+            if (sessions.length < 2 || !focusedSession) return;
+            var i = sessions.indexOf(focusedSession);
+            Sessions.focus(sessions[(i + dir + sessions.length) % sessions.length]);
+        },
+        close: function(sess) {
+            var i = sessions.indexOf(sess);
+            if (i === -1) return;
+            sessions.splice(i, 1);
+            sess.destroy();
+            if (focusedSession === sess) {
+                focusedSession = null;
+                if (sessions.length) Sessions.focus(sessions[Math.min(i, sessions.length - 1)]);
+            }
+            saveRoster();
+            renderSessionTabs();
+        },
+        byToken: function(token) {
+            // "@2" by slot, "@name" by display-name prefix (case-insensitive).
+            token = String(token || "").toLowerCase();
+            if (/^[0-9]$/.test(token)) {
+                var n = parseInt(token, 10);
+                return sessions.filter(function(s) { return s.slot === n; })[0] || null;
+            }
+            var exact = null, prefix = null;
+            sessions.forEach(function(s) {
+                var dn = (s.displayName || "").toLowerCase();
+                if (!dn) return;
+                if (dn === token) exact = exact || s;
+                else if (dn.indexOf(token) === 0) prefix = prefix || s;
+            });
+            return exact || prefix;
+        }
+    };
+    // Debug/preview handle, like window.IsharHUD.
+    window.IsharSessions = Sessions;
+
+    // Rebuild the singleton HUD as the newly-focused session's view: reset,
+    // then replay the cached GMCP bodies in login-burst order (Char.Status
+    // first so the per-character action bar re-syncs before anything
+    // renders against it), then the chat ring. Cooldowns/affects carry
+    // relative seconds stamped at receive time, so their cached bodies are
+    // rebased by the cache age before the feed.
+    var REPLAY_ORDER = [
+        "Char.Status", "Game.Time", "Char.Vitals", "Char.Train",
+        "Char.Skills", "Char.Cooldowns", "Char.Affects", "Char.Equipment",
+        "Char.Inventory", "Room.Info", "Room.Occupants", "Room.Contents",
+        "Room.QuestMarkers", "Group.Update", "Char.Who", "Char.Professions",
+        "Char.Recipes", "Char.Craft", "Char.Quests", "Char.Season",
+        "Char.Achievements"
+    ];
+
+    function rebaseTimers(pkg, body, ageSec) {
+        if (ageSec <= 0) return body;
+        try {
+            var data = JSON.parse(body);
+            if (pkg === "Char.Cooldowns") {
+                data.cooldowns = (data.cooldowns || []).map(function(c) {
+                    return { id: c.id, remaining: Math.max(0, (Number(c.remaining) || 0) - ageSec) };
+                }).filter(function(c) { return c.remaining > 0; });
+            } else if (pkg === "Char.Affects") {
+                ["buffs", "maintained", "debuffs"].forEach(function(k) {
+                    if (!data[k]) return;
+                    data[k] = data[k].map(function(x) {
+                        if (x && x.duration != null) {
+                            x.duration = Math.max(0, (Number(x.duration) || 0) - ageSec);
+                        }
+                        return x;
+                    });
+                });
+            }
+            return JSON.stringify(data);
+        } catch (e) { return body; }
+    }
+
+    function replayHud(sess) {
+        if (!window.IsharHUD) return;
+        window.IsharHUD.reset();
+        window.IsharHUD.setConnected(sess.state === "connected");
+        var seen = {};
+        var nowMs = Date.now();
+        function feed(pkg) {
+            var entry = sess.gmcp[pkg];
+            if (!entry || seen[pkg]) return;
+            seen[pkg] = true;
+            var body = entry.body;
+            if (pkg === "Char.Cooldowns" || pkg === "Char.Affects") {
+                body = rebaseTimers(pkg, body, (nowMs - entry.at) / 1000);
+            }
+            window.IsharHUD.onGmcp(pkg, body);
+        }
+        REPLAY_ORDER.forEach(feed);
+        Object.keys(sess.gmcp).forEach(feed);
+        sess.chat.forEach(function(body) {
+            window.IsharHUD.onGmcp("Comm.Channel", body);
+        });
+    }
+
+    // --- Cross-session routing ---
+    // "@name cmd" / "@2 cmd" / "@all cmd" send without switching focus;
+    // mirror mode sends every typed game line to the selected sessions.
+    // Both refuse a target at a password prompt (its input is secret), and
+    // mirror disarms the moment the focused session enters one — password
+    // keystrokes must never fan out.
+
+    function sessLabel(s) { return s.displayName || ("Session " + s.slot); }
+
+    var mirror = { on: false, names: null };   // names null = every session
+
+    function mirrorTargets() {
+        if (!mirror.on) return null;
+        return sessions.filter(function(s) {
+            if (!mirror.names) return true;
+            var dn = (s.displayName || "").toLowerCase();
+            return mirror.names.some(function(n) {
+                return String(s.slot) === n || (dn && dn.indexOf(n) === 0);
+            });
+        });
+    }
+
+    function setMirror(on, names) {
+        mirror.on = !!on && sessions.length > 1;
+        mirror.names = mirror.on ? (names || null) : null;
+        syncMirrorUi();
+    }
+
+    function syncMirrorUi() {
+        if (!mirrorBtn) return;
+        if (mirror.on && sessions.length < 2) { mirror.on = false; mirror.names = null; }
+        mirrorBtn.hidden = sessions.length < 2;
+        mirrorBtn.setAttribute("aria-pressed", mirror.on ? "true" : "false");
+        commandForm.classList.toggle("mirror-armed", mirror.on);
+        commandInput.placeholder = mirror.on
+            ? "Mirroring to " + (mirror.names ? mirror.names.join(", ") : "all sessions") + "…"
+            : "Enter command...";
+    }
+
+    function syncInputChip() {
+        if (!inputChip) return;
+        var s = focusedSession;
+        var show = !!s && sessions.length > 1;
+        inputChip.hidden = !show;
+        if (!show) return;
+        inputChip.textContent = sessLabel(s);
+        inputChip.classList.toggle("input-chip--immortal", !!s.isImmortal);
+    }
+
+    // A typed game line: mirrored to the selected sessions when armed,
+    // otherwise the focused session alone.
+    function dispatchLine(line) {
+        var targets = mirrorTargets();
+        if (!targets) { dispatchGame(line); return; }
+        if (!targets.length) { sysln("Mirror matches no open session — /mirror off or /mirror all."); return; }
+        targets.forEach(function(t) {
+            if (t.echo) { sysln(sessLabel(t) + " is at a password prompt — skipped."); return; }
+            dispatchGame(line, t);
+            if (t !== focusedSession) sysln("→ " + sessLabel(t) + ": " + line);
+        });
+    }
+
+    // "@token rest" — route rest to another session (or all) explicitly.
+    function routeAcross(line) {
+        var m = line.match(/^@(\S+)\s*([\s\S]*)$/);
+        if (!m) { sysln("Usage: @<name|slot|all> <command> — see /help."); return; }
+        var token = m[1].toLowerCase();
+        var rest = m[2];
+        var targets;
+        if (token === "all") {
+            targets = sessions.slice();
+        } else {
+            var t = Sessions.byToken(token);
+            if (!t) { sysln("No session matches @" + cleanText(m[1]) + " — the tabs show who's open."); return; }
+            targets = [t];
+        }
+        targets.forEach(function(t) {
+            if (t.echo) { sysln(sessLabel(t) + " is at a password prompt — not sent."); return; }
+            dispatchGame(rest, t);
+            if (t !== focusedSession) sysln("→ " + sessLabel(t) + ": " + rest);
+        });
+    }
+
+    if (mirrorBtn) {
+        mirrorBtn.addEventListener("click", function() {
+            setMirror(!mirror.on);
+            commandInput.focus();
+        });
+    }
+
+    // --- Peek pane (desktop) ---
+    // A background session's live terminal in a strip under the main one,
+    // with a mini input — watch and nudge the other character without a
+    // switch. Wide viewports only; phones get tabs alone. The pane hosts
+    // the session's own .term-host (xterm survives re-parenting), so what
+    // it shows *is* that session, not a copy.
+    var peekEl = document.getElementById("term-peek");
+    var peekDot = document.getElementById("peek-dot");
+    var peekNameEl = document.getElementById("peek-name");
+    var peekBody = document.getElementById("peek-body");
+    var peekForm = document.getElementById("peek-form");
+    var peekInput = document.getElementById("peek-input");
+    var peekSwapBtn = document.getElementById("peek-swap");
+    var peekCollapseBtn = document.getElementById("peek-collapse");
+    var mqPeek = window.matchMedia("(min-width: 1200px)");
+    var peekSession = null;
+    var peekCollapsed = false;
+    try { peekCollapsed = localStorage.getItem("ishar.peek") === "0"; } catch (e) {}
+
+    function isPeeked(sess) {
+        return peekSession === sess && !peekEl.hidden && !peekCollapsed;
+    }
+
+    // Every session's terminal lives either in the main slot (focused one
+    // visible, rest blurred-but-laid-out) or in the peek body.
+    function placeContainers() {
+        var moved = false;
+        sessions.forEach(function(s) {
+            var parent = isPeeked(s) ? peekBody : terminalContainer;
+            if (s.container.parentNode !== parent) {
+                parent.appendChild(s.container);
+                moved = true;
+            }
+            s.container.classList.toggle(
+                "term-host--blurred",
+                parent === terminalContainer && !isFocused(s)
+            );
+        });
+        return moved;
+    }
+
+    function updatePeek() {
+        if (!peekEl) return;
+        var want = sessions.length > 1 && mqPeek.matches && !app.classList.contains("hud-off");
+        if (!want) {
+            peekSession = null;
+            peekEl.hidden = true;
+        } else {
+            // Keep the current peek target while it's still a background
+            // session; otherwise the most recently opened one.
+            if (!peekSession || peekSession === focusedSession
+                    || sessions.indexOf(peekSession) === -1) {
+                peekSession = null;
+                for (var i = sessions.length - 1; i >= 0; i--) {
+                    if (sessions[i] !== focusedSession) { peekSession = sessions[i]; break; }
+                }
+            }
+            peekEl.hidden = !peekSession;
+        }
+        if (peekSession) {
+            peekNameEl.textContent = sessLabel(peekSession);
+            peekNameEl.classList.toggle("peek-name--immortal", !!peekSession.isImmortal);
+            peekDot.className = "peek-dot sess-dot--" + peekSession.state;
+            peekEl.classList.toggle("peek-collapsed", peekCollapsed);
+            peekCollapseBtn.setAttribute("aria-pressed", peekCollapsed ? "true" : "false");
+            peekInput.type = peekSession.echo ? "password" : "text";
+            peekInput.placeholder = "→ " + sessLabel(peekSession) + "…";
+        }
+        // The main slot's own size changes are covered by its
+        // ResizeObserver; a refit is only needed when a terminal moved
+        // between slots.
+        if (placeContainers()) scheduleFit();
+    }
+
+    if (peekEl) {
+        peekForm.addEventListener("submit", function(e) {
+            e.preventDefault();
+            if (!peekSession) return;
+            var raw = peekInput.value;
+            peekInput.value = "";
+            if (peekSession.echo) {
+                // Password entry for the peeked session: verbatim, no echo,
+                // no history — same rule as the main input.
+                peekSession.send(raw);
+                return;
+            }
+            var line = raw.trim();
+            if (!line) return;
+            dispatchGame(line, peekSession);
+            addHistory(line);
+        });
+        peekSwapBtn.addEventListener("click", function() {
+            if (peekSession) Sessions.focus(peekSession);
+        });
+        peekCollapseBtn.addEventListener("click", function() {
+            peekCollapsed = !peekCollapsed;
+            try { localStorage.setItem("ishar.peek", peekCollapsed ? "0" : "1"); } catch (e) {}
+            updatePeek();
+        });
+        if (mqPeek.addEventListener) mqPeek.addEventListener("change", updatePeek);
+    }
+
+    // --- Terminal focus-return ---
+    // Clicking the terminal returns focus to the command input, so you can
+    // get straight back to typing without aiming for the small input bar.
+    // The terminal is display-only (disableStdin), so nothing competes for
+    // focus. Guarded so it never breaks a copy: xterm draws its own
+    // selection, so we check term.hasSelection() (window.getSelection is
+    // empty in canvas mode) and refocus only on a plain left click. Skipped
+    // on mobile, where a tap shouldn't pop the on-screen keyboard mid-read.
+    terminalContainer.addEventListener("mouseup", function(e) {
+        if (isMobile || e.button !== 0 || !focusedSession) return;
+        var term = focusedSession.term;
+        if (term.hasSelection && term.hasSelection()) return;
         commandInput.focus();
     });
 
-    // --- WebSocket ---
-    // Reconnect-with-backoff is the primary recovery path (#85): the bridge
-    // re-authenticates each new socket server-side, so a reconnect lands a
-    // signed-in player back at character select without retyping anything.
-    // Only a clean close (code 1000 — the game ended the session, e.g. a
-    // quit) is left to the manual button; everything else retries on a
-    // 1s/2s/5s/10s ladder until the game comes back.
-    var ws = null;
-    var BACKOFF_MS = [1000, 2000, 5000, 10000];
-    var CLOSE_BRIDGE_FAILURE = 4502;  // matches apps/connect/consumers.py
-    var reconnectAttempt = 0;
-    var reconnectTimer = null;
-    var countdownTimer = null;
-    var openedAt = 0;
-    var pongTimer = null;     // in-flight liveness probe deadline
-    var quitClean = false;    // game ended the session — don't auto-revive
-    var isDemo = new URLSearchParams(location.search).has("demo");
+    function adjustFont(delta) {
+        fontSize = Math.max(FONT_MIN, Math.min(FONT_MAX, fontSize + delta));
+        sessions.forEach(function(s) { s.term.options.fontSize = fontSize; });
+        try { localStorage.setItem("ishar.fontsize", String(fontSize)); } catch (e) {}
+        scheduleFit();
+    }
+    document.getElementById("font-dec").addEventListener("click", function() { adjustFont(-1); });
+    document.getElementById("font-inc").addEventListener("click", function() { adjustFont(1); });
 
-    function setStatus(text, cls) {
-        statusText.textContent = text;
-        statusEl.className = cls;
+    // --- Sizing ---
+    // The app gets an explicit, header-aware pixel height; the inner grid
+    // and flexbox distribute it, and a ResizeObserver refits the terminals
+    // whenever the slot changes (toggle UI, viewport, mobile keyboard).
+    // Every session's terminal fills the same main slot (hidden ones keep
+    // full layout via visibility, not display), so one fit pass sizes all.
+    function fitAppHeight() {
+        var vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+        var top = app.getBoundingClientRect().top;
+        app.style.height = Math.max(240, Math.floor(vh - top - 8)) + "px";
     }
 
-    function clearReconnect() {
-        if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
-        if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
+    var nawsTimer = null;
+    function scheduleNaws() {
+        if (nawsTimer) clearTimeout(nawsTimer);
+        nawsTimer = setTimeout(function() {
+            sessions.forEach(function(s) { s.sendNaws(); });
+        }, 150);
     }
 
-    function clearProbe() {
-        if (pongTimer) { clearTimeout(pongTimer); pongTimer = null; }
+    var fitScheduled = false;
+    function scheduleFit() {
+        if (fitScheduled) return;
+        fitScheduled = true;
+        requestAnimationFrame(function() {
+            fitScheduled = false;
+            sessions.forEach(function(s) {
+                try { s.fit.fit(); } catch (e) {}
+            });
+            scheduleNaws();
+        });
     }
 
-    // --- Liveness ---
-    // A phone that switches networks (or sleeps through a websocket death)
-    // often keeps a half-open socket that looks OPEN but goes nowhere. The
-    // probe sends a NUL-prefixed PING that the bridge answers with PONG
-    // only while its telnet leg is healthy; no answer in 5s means the
-    // socket is dead — tear it down and reconnect immediately.
-    function probe() {
-        if (isDemo || pongTimer || !ws || ws.readyState !== WebSocket.OPEN) return;
-        try { ws.send("\x00PING"); } catch (e) { return; }
-        pongTimer = setTimeout(function () {
-            pongTimer = null;
-            forceReconnect();
-        }, 5000);
-    }
-
-    // Reconnect *now*: a wake/online event is a fresh network situation, so
-    // skip any pending backoff wait and restart the ladder.
-    function forceReconnect() {
-        clearReconnect();
-        reconnectAttempt = 0;
-        connect();
-    }
-
-    // On waking (tab visible again, network back, bfcache restore): revive
-    // a pending or parked reconnect immediately, otherwise just probe.
-    function wake() {
-        if (isDemo || quitClean) return;
-        if (reconnectTimer || !ws || ws.readyState > WebSocket.OPEN) {
-            forceReconnect();
-        } else {
-            probe();
-        }
-    }
-
-    function scheduleReconnect(reason) {
-        clearReconnect();
-        var delay = BACKOFF_MS[Math.min(reconnectAttempt, BACKOFF_MS.length - 1)];
-        reconnectAttempt++;
-        var until = Date.now() + delay;
-        reconnectBtn.style.display = "";
-        term.writeln("\r\n\x1b[1;33m--- " + reason + " — reconnecting in "
-            + Math.round(delay / 1000) + "s ---\x1b[0m");
-        function tick() {
-            var left = Math.max(0, Math.ceil((until - Date.now()) / 1000));
-            setStatus("Reconnecting in " + left + "s…", "status-connecting");
-        }
-        tick();
-        countdownTimer = setInterval(tick, 500);
-        reconnectTimer = setTimeout(connect, delay);
-    }
-
-    function connect() {
-        clearReconnect();
-        clearProbe();
-        quitClean = false;
-        if (ws) {
-            // Deliberate replacement: a stale socket's close must not race
-            // the new one into the reconnect scheduler.
-            ws.onopen = ws.onmessage = ws.onclose = ws.onerror = null;
-            if (ws.readyState <= WebSocket.OPEN) ws.close();
-        }
-        if (window.IsharHUD) window.IsharHUD.reset();
-
-        var protocol = location.protocol === "https:" ? "wss:" : "ws:";
-        var url = protocol + "//" + location.host + "/ws/connect";
-
-        setStatus("Connecting...", "status-connecting");
-        reconnectBtn.style.display = "none";
-
-        ws = new WebSocket(url);
-        ws.binaryType = "arraybuffer";
-
-        ws.onopen = function() {
-            openedAt = Date.now();
-            setStatus("Connected", "status-connected");
-            if (window.IsharHUD) window.IsharHUD.setConnected(true);
-            sendNaws();
-            commandInput.focus();
-        };
-
-        ws.onmessage = function(event) {
-            var d = event.data;
-            if (typeof d !== "string") return;
-
-            // Out-of-band control sentinels are prefixed with NUL.
-            if (d.charCodeAt(0) === 0) {
-                if (d === "\x00PONG") { clearProbe(); return; }
-                if (d === "\x00ECHO_ON") { serverEcho = true; commandInput.type = "password"; return; }
-                if (d === "\x00ECHO_OFF") { serverEcho = false; commandInput.type = "text"; return; }
-                if (d.indexOf("\x00GMCP ") === 0) {
-                    var rest = d.slice(6);
-                    var sp = rest.indexOf(" ");
-                    var pkg = sp === -1 ? rest : rest.slice(0, sp);
-                    var body = sp === -1 ? "" : rest.slice(sp + 1);
-                    if (window.IsharHUD) window.IsharHUD.onGmcp(pkg, body);
-                    return;
-                }
-                return;
-            }
-            term.write(d);
-        };
-
-        ws.onclose = function(event) {
-            clearProbe();
-            setStatus("Disconnected", "status-disconnected");
-            if (window.IsharHUD) window.IsharHUD.setConnected(false);
-            // A session that lived a while proves the path works — restart
-            // the backoff ladder instead of climbing it forever.
-            if (openedAt && Date.now() - openedAt > 30000) reconnectAttempt = 0;
-            openedAt = 0;
-            if (event.code === 1000) {
-                // The game ended the session (e.g. quit) — don't fight a
-                // deliberate exit with an auto-reconnect loop.
-                quitClean = true;
-                reconnectBtn.style.display = "";
-                term.writeln("\r\n\x1b[1;31m--- Disconnected ---\x1b[0m");
-                return;
-            }
-            if (navigator.onLine === false) {
-                // No network: retries would fail instantly and burn the
-                // backoff ladder. Park; the "online" handler revives us.
-                reconnectBtn.style.display = "";
-                setStatus("Offline — waiting for network", "status-disconnected");
-                return;
-            }
-            scheduleReconnect(event.code === CLOSE_BRIDGE_FAILURE
-                ? "Game server unreachable"
-                : "Connection lost");
-        };
-
-        // A failed handshake also fires onclose (with a non-1000 code), so
-        // the reconnect scheduling lives there alone.
-        ws.onerror = function() {};
-    }
-
-    function sendCommand(cmd) {
-        if (ws && ws.readyState === WebSocket.OPEN) ws.send(cmd + "\r\n");
-    }
-
-    function sendNaws() {
-        if (ws && ws.readyState === WebSocket.OPEN) {
-            var cols = term.cols || 80;
-            var rows = term.rows || 24;
-            ws.send(new Uint8Array([
-                255, 250, 31,
-                (cols >> 8) & 0xff, cols & 0xff,
-                (rows >> 8) & 0xff, rows & 0xff,
-                255, 240
-            ]).buffer);
-        }
+    if (typeof ResizeObserver !== "undefined") {
+        new ResizeObserver(scheduleFit).observe(terminalContainer);
     }
 
     // --- Command pipeline ---
@@ -826,7 +1580,11 @@
     // Write a local, dim client message; strips control chars from
     // interpolated user text so nothing can smuggle escape sequences.
     function cleanText(s) { return String(s).replace(/[\x00-\x1f\x7f]/g, " "); }
-    function sysln(text) { term.writeln("\x1b[90m" + cleanText(text) + "\x1b[0m"); }
+    function sysln(text) {
+        if (focusedSession) {
+            focusedSession.term.writeln("\x1b[90m" + cleanText(text) + "\x1b[0m");
+        }
+    }
 
     // Final guard before anything goes to the game (mirror of hud.js
     // safeCmd, with a longer cap for alias output).
@@ -886,22 +1644,27 @@
         return exp.slice(0, ALIAS_MAX);
     }
 
-    function sendOne(cmd) {
+    // Echo + send one command on a session. The dim echo lands in the
+    // *target* session's terminal, so a cross-sent command is visible where
+    // it acts.
+    function sendOne(cmd, sess) {
+        sess = sess || focusedSession;
+        if (!sess) return;
         cmd = cmd ? safeCmd(cmd) : "";
-        if (!serverEcho && cmd) term.writeln("\x1b[90m" + cmd + "\x1b[0m");
-        sendCommand(cmd);
+        if (!sess.echo && cmd) sess.term.writeln("\x1b[90m" + cmd + "\x1b[0m");
+        sess.send(cmd);
     }
 
     // Stack, expand each segment, and honor stacking inside expansions
     // (that's how an alias chains commands). One expansion pass per typed
     // segment — expansions are never re-expanded, so no recursion.
-    function dispatchGame(line) {
+    function dispatchGame(line, sess) {
         var cmds = [];
         splitStack(line).forEach(function(seg) {
             splitStack(expandAlias(seg)).forEach(function(c) { cmds.push(c); });
         });
         if (!cmds.length) cmds = [""];  // bare Enter still goes through
-        cmds.slice(0, 20).forEach(sendOne);
+        cmds.slice(0, 20).forEach(function(c) { sendOne(c, sess); });
     }
 
     function listAliases() {
@@ -946,9 +1709,14 @@
                 sysln("      consumables from Bags (☆) — an item slot shows a live count and");
                 sysln("      greys out when you're empty. Tap the lock to edit: unlocked,");
                 sysln("      tap/drag slots to rearrange (taps don't fire).");
+                sysln("Multiplay: the topbar + opens another character's session; tabs switch,");
+                sysln("      Alt+C cycles (Shift reverses). @<name> <cmd>, @<slot> <cmd>, or");
+                sysln("      @all <cmd> send to another session without switching (@@ sends a");
+                sysln("      literal @). /mirror all|<names>|off types to several at once — the");
+                sysln("      input glows orange while armed. Password prompts never cross.");
                 break;
             case "clear":
-                term.clear();
+                if (focusedSession) focusedSession.term.clear();
                 break;
             case "aliases":
                 listAliases();
@@ -993,6 +1761,29 @@
                     + " (\"open door;n;look\" sends three commands).");
                 break;
             }
+            case "mirror": {
+                var margs = argv.map(function(a) { return a.toLowerCase(); });
+                if (!margs.length) {
+                    sysln(mirror.on
+                        ? "Mirror is on → " + (mirror.names ? mirror.names.join(", ") : "all sessions")
+                            + ". /mirror off disarms."
+                        : "Mirror is off. /mirror all types to every session at once.");
+                    break;
+                }
+                if (margs[0] === "off") {
+                    setMirror(false);
+                    sysln("Mirror off.");
+                    break;
+                }
+                if (sessions.length < 2) {
+                    sysln("Mirror needs a second session — open one with the topbar +.");
+                    break;
+                }
+                setMirror(true, (margs[0] === "all" || margs[0] === "on") ? null : margs);
+                sysln("Mirror on → " + (mirror.names ? mirror.names.join(", ") : "all sessions")
+                    + ". /mirror off disarms.");
+                break;
+            }
             case "settings":
                 sysln("Client settings (change via the gear menu):");
                 sysln("  keep input after send:  " + (settings.keepInput ? "on" : "off"));
@@ -1013,24 +1804,31 @@
     // Everything a submitted line does, in one place (form submit + Enter).
     function submitLine(raw) {
         closeHistoryPop();
-        if (serverEcho) {
+        var sess = focusedSession;
+        if (!sess) return;
+        if (sess.echo) {
             // Password entry: send verbatim — no echo, no history, no
             // alias/stacking (a password may legally contain ";" or "/").
-            sendCommand(raw);
+            sess.send(raw);
             commandInput.value = "";
             return;
         }
         var line = raw.trim();
-        if (line.charAt(0) === "/") {
-            if (line.charAt(1) === "/") dispatchGame(line.slice(1));
-            else runClientCommand(line);
+        if (line.charAt(0) === "@" && line.length > 1 && line.charAt(1) !== "@") {
+            routeAcross(line);
         } else {
-            dispatchGame(line);
+            if (line.charAt(0) === "@") line = line.slice(1);  // "@@" literal
+            if (line.charAt(0) === "/") {
+                if (line.charAt(1) === "/") dispatchGame(line.slice(1));
+                else runClientCommand(line);
+            } else {
+                dispatchLine(line);
+            }
         }
         if (line) addHistory(line);
-        term.scrollToBottom();
-        userScrolledUp = false;
-        scrollBtn.style.display = "none";
+        sess.term.scrollToBottom();
+        sess.userScrolledUp = false;
+        updateScrollBtn();
         if (settings.keepInput && line) {
             commandInput.value = line;
             commandInput.select();
@@ -1039,19 +1837,31 @@
         }
     }
 
+    scrollBtn.addEventListener("click", function() {
+        if (focusedSession) {
+            focusedSession.term.scrollToBottom();
+            focusedSession.userScrolledUp = false;
+        }
+        updateScrollBtn();
+        commandInput.focus();
+    });
+
     // --- HUD integration ---
     // HUD widgets act by sending plain-text commands (the server ignores
     // inbound GMCP) or by pre-filling the input line for the player to edit.
+    // The HUD always speaks for the focused session — its GMCP feed is the
+    // only one wired in, so its sends land on the matching socket.
     if (window.IsharHUD) {
         window.IsharHUD.init({
             send: function(cmd) {
-                if (!cmd) return;
-                if (!serverEcho) term.writeln("\x1b[90m" + cmd + "\x1b[0m");
-                sendCommand(cmd);
+                var sess = focusedSession;
+                if (!cmd || !sess) return;
+                if (!sess.echo) sess.term.writeln("\x1b[90m" + cmd + "\x1b[0m");
+                sess.send(cmd);
                 addHistory(cmd);
-                term.scrollToBottom();
-                userScrolledUp = false;
-                scrollBtn.style.display = "none";
+                sess.term.scrollToBottom();
+                sess.userScrolledUp = false;
+                updateScrollBtn();
                 // On phones a fire-and-forget HUD tap (tap-to-move rose, hotbar
                 // cast, context-menu action) must NOT re-raise the virtual
                 // keyboard — that would cover the terminal the overlay exists to
@@ -1064,6 +1874,7 @@
             },
             onLayoutChange: function() {
                 fitAppHeight();
+                updatePeek();   // the pane hides with the HUD
                 scheduleFit();
             },
             onComm: onComm,
@@ -1214,8 +2025,9 @@
         // Keep the scrollback — what happened before the drop is exactly
         // what a returning player wants to reread. A dim divider marks
         // the seam.
-        term.writeln("\r\n\x1b[90m--- reconnecting ---\x1b[0m");
-        connect();
+        if (!focusedSession) return;
+        focusedSession.term.writeln("\r\n\x1b[90m--- reconnecting ---\x1b[0m");
+        focusedSession.connect();
     });
 
     // --- Touch history popover ---
@@ -1274,7 +2086,7 @@
         closeHistoryPop();
     });
 
-    // --- Scrollback search ---
+    // --- Scrollback search (focused session) ---
     var searchBar = document.getElementById("term-search");
     var searchInput = document.getElementById("term-search-input");
     var searchBtn = document.getElementById("search-btn");
@@ -1289,22 +2101,23 @@
         activeMatchColorOverviewRuler: "#ffaa77"
     };
     function doSearch(dir, incremental) {
-        if (!searchAddon) return;
+        var addon = focusedSession && focusedSession.search;
+        if (!addon) return;
         var q = searchInput.value;
-        if (!q) { searchAddon.clearDecorations(); return; }
+        if (!q) { addon.clearDecorations(); return; }
         var opts = { decorations: SEARCH_DECOR, incremental: !!incremental };
         try {
-            if (dir < 0) searchAddon.findPrevious(q, opts);
-            else searchAddon.findNext(q, opts);
+            if (dir < 0) addon.findPrevious(q, opts);
+            else addon.findNext(q, opts);
         } catch (e) {
             // Decorations need APIs an older vendored xterm may lack —
             // degrade to plain find-and-select.
-            if (dir < 0) searchAddon.findPrevious(q);
-            else searchAddon.findNext(q);
+            if (dir < 0) addon.findPrevious(q);
+            else addon.findNext(q);
         }
     }
     function openSearch() {
-        if (!searchAddon) return;
+        if (!window.SearchAddon) return;
         searchBar.hidden = false;
         searchBtn.setAttribute("aria-pressed", "true");
         searchInput.focus();
@@ -1314,12 +2127,13 @@
         if (searchBar.hidden) return;
         searchBar.hidden = true;
         searchBtn.setAttribute("aria-pressed", "false");
-        if (searchAddon) {
-            try { searchAddon.clearDecorations(); } catch (e) {}
+        var addon = focusedSession && focusedSession.search;
+        if (addon) {
+            try { addon.clearDecorations(); } catch (e) {}
         }
         commandInput.focus();
     }
-    if (!searchAddon) searchBtn.style.display = "none";
+    if (!window.SearchAddon) searchBtn.style.display = "none";
     searchBtn.addEventListener("click", function() {
         if (searchBar.hidden) openSearch();
         else closeSearch();
@@ -1403,98 +2217,120 @@
         closeSettingsPop();
     });
 
-    // --- Desktop notifications (title badge + tells/beep/damage/low-health) ---
-    // Every trigger below fires only while the tab is hidden: when it's focused
-    // the HUD already shows tells, vitals, and the terminal directly.
-    var baseTitle = document.title;
-    var unread = 0;
-    function clearTitleBadge() {
-        unread = 0;
-        document.title = baseTitle;
-    }
-    // One guarded path for raising a Notification. tag lets the OS collapse
-    // repeats of the same kind (a second low-health note replaces the first).
-    function notify(title, body, tag) {
-        if (!("Notification" in window) || Notification.permission !== "granted") return;
-        try {
-            var n = new Notification(title, { body: String(body || "").slice(0, 140), tag: tag });
-            n.onclick = function() { window.focus(); this.close(); };
-        } catch (e) {}
+    // --- Character picker (the topbar "+") ---
+    // Lists the account's characters from /connect/characters/; picking one
+    // opens a session whose bridge auto-selects that character. The season
+    // multiplay limit is advisory here — the game enforces it, and its
+    // refusal prints in the new session's terminal.
+    var CHARACTERS_URL = "{% url 'connect_characters' %}";
+
+    function closeSessionPop() {
+        if (!sessionPop || sessionPop.hidden) return;
+        sessionPop.hidden = true;
+        sessionAddBtn.setAttribute("aria-expanded", "false");
     }
 
-    // Called by the HUD for every Comm.Channel message (text already
-    // color-stripped there).
-    function onComm(channel, text) {
-        if (!document.hidden) return;
-        if (settings.titleBadge) {
-            unread++;
-            document.title = "(" + unread + ") " + baseTitle;
+    function sessionPopNote(text) {
+        var note = document.createElement("div");
+        note.className = "sess-note";
+        note.textContent = text;
+        sessionPop.appendChild(note);
+    }
+
+    function buildSessionPop(payload) {
+        while (sessionPop.firstChild) sessionPop.removeChild(sessionPop.firstChild);
+        var open = {};
+        sessions.forEach(function(s) {
+            [s.charName, s.displayName].forEach(function(n) {
+                if (n) open[n.toLowerCase()] = true;
+            });
+        });
+        var chars = (payload && payload.characters) || [];
+        if (!chars.length) {
+            sessionPopNote("No characters on this account yet.");
+            return;
         }
-        if (settings.notifyTells && /^(tell|reply|whisper)/i.test(channel || "")) {
-            notify("Ishar MUD", text, "ishar-tell");
-        }
-    }
+        chars.forEach(function(c) {
+            var b = document.createElement("button");
+            b.type = "button";
+            b.className = "sess-pick";
+            if (c.is_immortal) b.classList.add("sess-pick--immortal");
 
-    // HP-based notifications, fed Char.Vitals by the HUD. Two independent
-    // triggers, each one-shot and re-armed on tab-return (see visibilitychange):
-    //   • notifyHit    — HP dropped below where it stood when you tabbed out.
-    //   • notifyHealth — HP fell to/under the configured percent.
-    var lastVitals = null;      // most recent vitals, for the visibility handler
-    var hitAnchorHp = null;     // HP captured when the tab went hidden
-    var hitNotified = false;    // damage note already sent this hidden stretch
-    var lowHealthNotified = false;
-    function onVitals(v) {
-        lastVitals = v;
-        if (!v || v.hp == null) return;
-        var hp = Number(v.hp), maxhp = Number(v.maxhp) || 0;
-        var pctHp = maxhp > 0 ? (hp / maxhp * 100) : null;
+            var dot = document.createElement("span");
+            dot.className = "sess-pick__dot" + (c.online ? " is-online" : "");
+            b.appendChild(dot);
 
-        // Low health: fire once when at/under the threshold; re-arm above it.
-        if (pctHp != null && pctHp <= settings.healthThreshold) {
-            if (settings.notifyHealth && document.hidden && !lowHealthNotified) {
-                notify("Ishar MUD — low health",
-                    "HP " + hp + " / " + maxhp + " (" + Math.round(pctHp) + "%)", "ishar-health");
-                lowHealthNotified = true;
+            var name = document.createElement("span");
+            name.className = "sess-pick__name";
+            name.textContent = c.name;
+            b.appendChild(name);
+
+            var meta = document.createElement("span");
+            meta.className = "sess-pick__meta";
+            meta.textContent = (c.is_immortal ? "Immortal" : "L" + c.level)
+                + (c.online ? " · online" : "");
+            b.appendChild(meta);
+
+            if (open[String(c.name).toLowerCase()]) {
+                b.disabled = true;
+                b.title = "Already open in a session";
             }
-        } else if (pctHp != null) {
-            lowHealthNotified = false;
-        }
-
-        // Took damage while hidden: anchor at the hide, fire once on any dip
-        // below it. Lazily anchor if the toggle was flipped on mid-stretch.
-        if (settings.notifyHit && document.hidden) {
-            if (hitAnchorHp == null) hitAnchorHp = hp;
-            else if (!hitNotified && hp < hitAnchorHp) {
-                notify("Ishar MUD — taking damage",
-                    "HP " + hp + " / " + maxhp, "ishar-hit");
-                hitNotified = true;
-            }
+            b.addEventListener("click", function() {
+                closeSessionPop();
+                var s = Sessions.create({ character: c.name, isImmortal: c.is_immortal });
+                if (s) Sessions.focus(s);
+            });
+            sessionPop.appendChild(b);
+        });
+        if (payload.multiplay_limit != null) {
+            sessionPopNote("Season limit: " + payload.multiplay_limit
+                + " at once" + (payload.immortal_account ? " (immortals exempt)" : "")
+                + ". The game has the final say.");
         }
     }
 
-    document.addEventListener("visibilitychange", function() {
-        if (!document.hidden) {
-            clearTitleBadge();
-            // Returning to the tab acknowledges everything — re-arm so the next
-            // time you tab out, a fresh event can alert again.
-            hitAnchorHp = null;
-            hitNotified = false;
-            lowHealthNotified = false;
-        } else {
-            // Tabbing out: anchor "took damage" at the HP we're leaving on, and
-            // evaluate low-health right now in case we're already hurt (no new
-            // Char.Vitals may arrive while idle).
-            hitAnchorHp = (lastVitals && lastVitals.hp != null) ? Number(lastVitals.hp) : null;
-            hitNotified = false;
-            if (settings.notifyHealth && lastVitals) onVitals(lastVitals);
-        }
-    });
+    if (sessionAddBtn) {
+        sessionAddBtn.addEventListener("click", function() {
+            if (!sessionPop.hidden) { closeSessionPop(); return; }
+            while (sessionPop.firstChild) sessionPop.removeChild(sessionPop.firstChild);
+            sessionPopNote("Loading characters…");
+            sessionPop.hidden = false;
+            sessionAddBtn.setAttribute("aria-expanded", "true");
+            fetch(CHARACTERS_URL, { credentials: "same-origin" })
+                .then(function(r) {
+                    if (!r.ok) throw new Error(String(r.status));
+                    return r.json();
+                })
+                .then(function(payload) {
+                    if (!sessionPop.hidden) buildSessionPop(payload);
+                })
+                .catch(function() {
+                    if (sessionPop.hidden) return;
+                    while (sessionPop.firstChild) sessionPop.removeChild(sessionPop.firstChild);
+                    sessionPopNote("Couldn't load your characters — try again.");
+                });
+        });
+        document.addEventListener("click", function(e) {
+            if (sessionPop.hidden) return;
+            if (sessionPop.contains(e.target) || sessionAddBtn.contains(e.target)) return;
+            closeSessionPop();
+        });
+    }
 
     // --- Keyboard shortcuts (documented in /help) ---
     document.addEventListener("keydown", function(e) {
+        // Alt+C cycles the focused session (Shift reverses). By e.code, like
+        // the HUD's Alt+T/A/O — macOS Alt+letter composes glyphs. C is free:
+        // Alt/Ctrl+digits belong to the action bar, Ctrl+letters to overlays.
+        if (e.altKey && !e.ctrlKey && !e.metaKey && e.code === "KeyC") {
+            e.preventDefault();
+            Sessions.cycle(e.shiftKey ? -1 : 1);
+            return;
+        }
         if (e.key === "Escape") {
             if (!searchBar.hidden) { closeSearch(); return; }
             if (!settingsPop.hidden) { closeSettingsPop(); return; }
+            if (sessionPop && !sessionPop.hidden) { closeSessionPop(); return; }
             if (!historyPop.hidden) { closeHistoryPop(); commandInput.focus(); return; }
             return;
         }
@@ -1505,12 +2341,12 @@
         }
         if (e.ctrlKey && !e.shiftKey && !e.altKey && (e.key === "l" || e.key === "L")) {
             e.preventDefault();
-            term.clear();
+            if (focusedSession) focusedSession.term.clear();
             return;
         }
         if ((e.key === "PageUp" || e.key === "PageDown") && e.target !== searchInput) {
             e.preventDefault();
-            term.scrollPages(e.key === "PageUp" ? -1 : 1);
+            if (focusedSession) focusedSession.term.scrollPages(e.key === "PageUp" ? -1 : 1);
         }
     });
 
@@ -1529,88 +2365,77 @@
         window.visualViewport.addEventListener("scroll", onResize);
     }
 
-    // --- Liveness wiring ---
+    // --- Liveness wiring (all sessions) ---
     document.addEventListener("visibilitychange", function() {
-        if (!document.hidden) wake();
+        if (!document.hidden) sessions.forEach(function(s) { s.wake(); });
     });
-    window.addEventListener("online", wake);
+    window.addEventListener("online", function() {
+        sessions.forEach(function(s) { s.wake(); });
+    });
     window.addEventListener("pageshow", function(e) {
-        // bfcache restore: the page returns with a socket that died while
+        // bfcache restore: the page returns with sockets that died while
         // it was frozen.
-        if (e.persisted) wake();
+        if (e.persisted) sessions.forEach(function(s) { s.wake(); });
     });
     window.addEventListener("offline", function() {
         if (isDemo) return;
-        clearReconnect();
-        clearProbe();
-        if (!quitClean) setStatus("Offline — waiting for network", "status-disconnected");
+        sessions.forEach(function(s) { s.parkOffline(); });
     });
     // Idle keepalive: catches half-open sockets promptly and keeps
     // intermediate proxies from reaping a quiet connection. Visible tabs
     // only — a hidden tab gets probed by the visibilitychange wake instead.
     setInterval(function() {
-        if (!document.hidden) probe();
+        if (!document.hidden) sessions.forEach(function(s) { s.probe(); });
     }, 45000);
 
-    // --- Scrollback persistence (per tab) ---
-    // The buffer is re-encoded to clean ANSI and stashed in sessionStorage
+    // --- Scrollback persistence (per tab, per session slot) ---
+    // Each buffer is re-encoded to clean ANSI and stashed in sessionStorage
     // whenever the page might be going away (pagehide, or hidden — iOS
     // Safari doesn't reliably fire pagehide). sessionStorage on purpose:
     // per-tab (no multi-tab clobber) and gone when the tab closes.
-    var SCROLLBACK_KEY = "ishar.term";
-    var SCROLLBACK_MAX = 512 * 1024;
-    function saveScrollback() {
-        if (!serializeAddon || isDemo) return;
-        try {
-            var s = serializeAddon.serialize({ scrollback: 1500 });
-            if (s.length > SCROLLBACK_MAX) {
-                // Front-truncate at a line break, never mid-escape-sequence.
-                var cut = s.indexOf("\n", s.length - SCROLLBACK_MAX);
-                s = cut === -1 ? "" : s.slice(cut + 1);
-            }
-            if (s) sessionStorage.setItem(SCROLLBACK_KEY, s);
-            else sessionStorage.removeItem(SCROLLBACK_KEY);
-        } catch (e) {
-            try { sessionStorage.removeItem(SCROLLBACK_KEY); } catch (e2) {}
-        }
+    function saveAllScrollback() {
+        sessions.forEach(function(s) { s.saveScrollback(); });
     }
-    window.addEventListener("pagehide", saveScrollback);
+    window.addEventListener("pagehide", saveAllScrollback);
     document.addEventListener("visibilitychange", function() {
-        if (document.hidden) saveScrollback();
+        if (document.hidden) saveAllScrollback();
     });
 
     terminalContainer.addEventListener("click", function() {
         // While the phone sheet is open, a terminal tap just dismisses it
         // (the HUD's outside-tap handler) — don't also pop the keyboard.
         if (app.classList.contains("sheet-open")) return;
-        if (!term.getSelection()) commandInput.focus();
+        if (!focusedSession) return;
+        if (!focusedSession.term.getSelection()) commandInput.focus();
     });
 
     // --- Start ---
     fitAppHeight();
     scheduleFit();
 
-    // Restore the previous scrollback (same tab) before connecting, so the
-    // session picks up where the last page load left off.
-    if (!isDemo) {
-        try {
-            var savedTerm = sessionStorage.getItem(SCROLLBACK_KEY);
-            if (savedTerm) {
-                term.write(savedTerm);
-                term.writeln("\r\n\x1b[90m--- earlier output restored after reload ---\x1b[0m");
-            }
-        } catch (e) {}
+    // A saved roster (same tab) rebuilds the whole session set — each
+    // session reconnects and re-selects its character. Otherwise, one
+    // plain session, exactly the pre-multiplay page.
+    var roster = loadRoster();
+    var first = null;
+    if (roster) {
+        roster.list.slice(0, MAX_SESSIONS).forEach(function(r) {
+            var s = Sessions.create({
+                slot: r.slot, character: r.character, isImmortal: r.isImmortal
+            });
+            if (s && r.slot === roster.focused) Sessions.focus(s);
+        });
+        first = focusedSession;
     }
+    if (!first) first = Sessions.create({});
 
     // Demo mode (/connect?demo=1): populate the HUD with sample data for design
     // review without a GMCP-enabled server. Skips the live connection.
     if (isDemo) {
         if (window.IsharHUD) window.IsharHUD.demo();
-        term.writeln("\x1b[33m--- DEMO MODE: sample data, not connected to the game. ---\x1b[0m");
+        first.term.writeln("\x1b[33m--- DEMO MODE: sample data, not connected to the game. ---\x1b[0m");
         fitAppHeight();
         scheduleFit();
-    } else {
-        connect();
     }
 })();
 </script>

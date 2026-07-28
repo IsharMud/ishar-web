@@ -1,6 +1,7 @@
 """WebSocket consumer that proxies to a telnet MUD server."""
 import asyncio
 import logging
+from urllib.parse import parse_qs
 
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
@@ -42,6 +43,12 @@ GMCP_SUPPORTS = (
 # lookups) is silently discarded — and minting on the prompt means none of
 # the token's 90 s TTL is spent on that latency.
 ACCOUNT_PROMPT = "please enter your account email"
+
+# The CHARACTER_SELECT prompt (src/server/output.c, send_prompt_other).
+# webauth lands the connection at character select, not in the world; a
+# multiplay session opened for a specific character answers this prompt
+# with that character's name (isharmud/ishar-web#178).
+CHAR_SELECT_PROMPT = "which character would you like to join as"
 
 # Telnet protocol constants.
 IAC = 255    # Interpret As Command
@@ -90,8 +97,25 @@ class TelnetConsumer(AsyncWebsocketConsumer):
         )
         # States: account id set = waiting for the account prompt;
         # None = guest, already sent, or minting failed — leave manual login.
+        # _account_id survives the attempt (auto-select needs it later).
+        self._account_id = account_id
         self._autologin_account_id = account_id
         self._prompt_tail = ""
+        # Auto character select (#178): `ws/connect?character=<name>` names
+        # the character this session is for. Only honored after a successful
+        # webauth (the game validates ownership too — this is UX, not the
+        # security boundary), and never for guests.
+        self._autoselect_name = None
+        self._webauth_sent = False
+        self._select_tail = ""
+        if account_id is not None:
+            query = self.scope.get("query_string", b"").decode(
+                "utf-8", errors="replace"
+            )
+            params = parse_qs(query)
+            requested = (params.get("character") or [""])[0].strip()
+            if 0 < len(requested) <= 15:
+                self._autoselect_name = requested
 
         # Accept before dialing the game: a close code sent on a never-accepted
         # socket surfaces in the browser as a bare handshake failure (1006),
@@ -238,6 +262,62 @@ class TelnetConsumer(AsyncWebsocketConsumer):
 
         if self._writer and not self._writer.is_closing():
             self._writer.write(b"webauth " + token.encode("ascii") + b"\r\n")
+            self._webauth_sent = True
+            try:
+                await self._writer.drain()
+            except (ConnectionError, OSError):
+                await self.close(code=CLOSE_BRIDGE_FAILURE)
+
+    async def _maybe_autoselect(self, display_data):
+        """Answer the character-select prompt with the requested character.
+
+        Armed only for a session opened with ``?character=`` whose webauth
+        already fired. The name is resolved to an account-owned, non-deleted
+        ``players`` row for canonical casing; resolution failure (or any DB
+        error) leaves the player at the normal manual select. One attempt
+        per connection — a game-side refusal (multiplay limit) prints in
+        the terminal and is not retried.
+        """
+        text = self._select_tail + display_data.decode(
+            "utf-8", errors="replace"
+        ).lower()
+        if CHAR_SELECT_PROMPT not in text:
+            self._select_tail = text[-(len(CHAR_SELECT_PROMPT) - 1):]
+            return
+
+        requested = self._autoselect_name
+        self._autoselect_name = None  # one attempt per connection
+        self._select_tail = ""
+
+        # Point-of-use import for the same app-registry reason as
+        # WebLoginToken in _maybe_autologin above.
+        from apps.players.models import Player
+
+        def _canonical_name():
+            return (
+                Player.objects.filter(
+                    account_id=self._account_id,
+                    name__iexact=requested,
+                    is_deleted=False,
+                ).values_list("name", flat=True).first()
+            )
+
+        try:
+            name = await database_sync_to_async(_canonical_name)()
+        except Exception as exc:
+            logger.warning(
+                "Auto-select lookup failed for %r: %s", requested, exc
+            )
+            return
+        if name is None:
+            logger.warning(
+                "Auto-select: account %s does not own %r",
+                self._account_id, requested,
+            )
+            return
+
+        if self._writer and not self._writer.is_closing():
+            self._writer.write(name.encode("utf-8") + b"\r\n")
             try:
                 await self._writer.drain()
             except (ConnectionError, OSError):
@@ -296,6 +376,8 @@ class TelnetConsumer(AsyncWebsocketConsumer):
                     # mint a token and answer for the authenticated player.
                     if self._autologin_account_id is not None:
                         await self._maybe_autologin(display_data)
+                    elif self._autoselect_name and self._webauth_sent:
+                        await self._maybe_autoselect(display_data)
         except asyncio.CancelledError:
             pass
         except Exception as exc:
