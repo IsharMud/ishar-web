@@ -14,9 +14,11 @@ chromium --headless=new --allow-file-access-from-files \
 # &open=<overlay key> clicks a launcher after load (dock button on phones)
 ```
 
-- `shot-desktop.png` — the admin re-tier: attack cluster + XP strip gone,
-  admin strip live (Eternal pill · `#41230 a rusty dagger` set-o chip ·
-  `Ritani (30)`), staff launchers in the micro-menu.
+- `shot-desktop.png` — the admin re-tier: attack cluster, XP strip, hotbar,
+  Group, and Tracked Spells gone; admin strip live (Eternal pill · `#41230
+  a rusty dagger` set-o chip · `Ritani (30)`); **Who pinned over Chat** in
+  the right column; staff launchers in the micro-menu (no Who launcher —
+  the pane is persistent on desktop).
 - `shot-who.png` — Who overlay with the WhoExtra staff lines (rank pills,
   room #vnum, idle, cyan invis, red snoop edge, account names).
 - `shot-zones.png` — Zones overlay: filter, live/unlive chips, regen meters,

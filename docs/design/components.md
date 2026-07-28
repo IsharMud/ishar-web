@@ -764,7 +764,13 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
     `set o` target (`.adm-target`: `.adm-vnum` + `.adm-name`; `--denied`
     red vnum when un-permitted, `--empty` dashed when nothing carried; tap
     prefills `set o `), and the current-zone chip (`.adm-zone`). Replaces
-    `#hud-attack` + `#hud-xpstrip` under `.hud-admin`.
+    `#hud-attack` + `#hud-xpstrip` + `#hud-hotbar` under `.hud-admin`.
+  - **Persistent-tier profile** (decisions.md 2026-07-28 v2) — under
+    `.hud-admin`, Group and Tracked Spells (panes + dock buttons + combat
+    hotkeys + their keys-panel group) are gone, and **Who** is the right
+    column's pinned pane over Chat (`panelHome()` re-homes it; standard
+    collapsible header; the desktop Ctrl+F launcher hides while phones
+    keep the dock/sheet path).
   - **Who staff line** (`.who-adm` under `.who-main`) — rank pill, room
     name+vnum, idle, invis level (cyan), snoop edge (danger), account name
     (Eternal+ only). The name area becomes the admin context-menu opener

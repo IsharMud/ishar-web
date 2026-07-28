@@ -2417,3 +2417,30 @@ maintenance) use a **two-tap confirm** in the context menu (`confirm: true`
 arms "Confirm: X" on the first tap); `ban` only ever *prefills* the input —
 the duration is typed, never defaulted. Account names ride Admin.WhoExtra
 only for Eternal+ viewers; host/IP is never sent over GMCP.
+
+## 2026-07-28 — Admin profile v2: the persistent tier is profiled too
+
+**Problem.** The admin re-tier (earlier today) swapped only the ambient
+chrome. Living with it immediately showed the persistent panes are just as
+mortal-shaped: on an admin character Group and Tracked Spells are dead
+weight, the skill hotbar is useless, and the one staff surface an admin
+actually monitors — Who with its WhoExtra columns — sat behind Ctrl+F.
+
+**Decision.** The admin profile now covers both tiers:
+
+- **Killed under `hud-admin`:** `#hud-hotbar`, `#panel-group`,
+  `#panel-tracked`, their phone dock buttons, the bar/combat hotkeys
+  (Alt+digits, Alt+A/O/T, Alt+` — hidden UI must not fire), and the
+  "Action bar & combat" group in the keys reference.
+- **Promoted:** Who becomes the right column's pinned pane over Chat (the
+  slot Tracked vacates, same sizing rules), wearing the standard
+  collapsible `panelHeader`. Homing goes through `panelHome(name)` in
+  `placePanels` — the single seam for profile-driven placement. On desktop
+  the Ctrl+F launcher hides while the pane is persistent; phones keep the
+  dock/sheet path (availability is form-factor-aware).
+
+The player profile is untouched — `?demo=1` renders identically — and a
+game-side de-level restores it live via the same `Admin.Caps` trigger.
+
+**Notes.** Proofs refreshed in `docs/design/admin-hud/` (desktop re-tier,
+player regression eyeballed, 390px dock + who sheet).
