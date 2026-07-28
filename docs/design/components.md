@@ -780,6 +780,13 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
     `.zn-row--here` accent edge; rows open a menu (goto/regen/purge with
     confirm, details, zset prefill). Staff overlays are filtered out of the
     keys reference below the admin tier.
+  - **Admin overlay** (`#panel-admin`, Ctrl+A, Eternal+) — the `admin` menu
+    as sectioned control rows (`.ap-h` headers, `.ap-row` label · value ·
+    `.ap-act` buttons): maintenance, beta tri-state chips, multiplay
+    stepper, feature/autocycle toggles, season block (Forger controls only
+    with `can_season`), clock/moon setters, lookups. Destructive buttons
+    use the in-place arm (`data-confirm-cmd` → `.hud-btn.armed`); everything
+    else is plain `data-cmd`/`data-prefill` sending `admin …` subcommands.
 
 Verify with `/connect?demo=1` (sample GMCP feeds, no server needed);
 `/connect?demo=admin` layers the staff fixtures for the admin tier.

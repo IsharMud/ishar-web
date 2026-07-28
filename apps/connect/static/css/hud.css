@@ -2060,6 +2060,29 @@ button.v-tgt:hover { border-color: rgba(214, 75, 75, .8); }
     .zn-track { display: none; }
 }
 
+/* Admin overlay: sectioned label · value · actions rows. */
+.ap-h {
+    margin: 10px 0 4px; font-size: .62rem; font-weight: 700;
+    letter-spacing: .06em; text-transform: uppercase; color: var(--ac-dim);
+}
+.ap-h:first-child { margin-top: 0; }
+.ap-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 3px 0; border-bottom: 1px solid var(--ac-elev);
+}
+.ap-label { flex: none; min-width: 7em; color: var(--ac-text); }
+.ap-value { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ap-value.ap-dim { color: var(--ac-dim); }
+.ap-value.ap-on-danger { color: var(--ac-danger); font-weight: 700; }
+.ap-act { flex: none; margin-left: auto; display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
+.ap-act .hud-btn.ap-danger { color: var(--ac-danger); border-color: var(--ac-danger); }
+
+/* In-place armed state for data-confirm-cmd buttons (admin panel). */
+.hud-btn.armed {
+    color: var(--ac-danger); border-color: var(--ac-danger);
+    background: var(--ac-danger-wash); font-weight: 700;
+}
+
 /* ----- Reduced motion ----- */
 @keyframes hud-pulse {
     0%, 100% { opacity: 1; }

@@ -143,7 +143,7 @@
     var PANELS = ["inventory", "group", "occupants", "room",
                   "tracked", "chat", "train", "abilities", "who",
                   "professions", "map", "quests", "season", "achievements",
-                  "zones"];
+                  "zones", "admin"];
     var PANEL_HOME = {
         occupants: "hud-left-scroll",
         group: "hud-left-scroll",
@@ -157,7 +157,8 @@
         abilities: "hud-overlay-body", who: "hud-overlay-body",
         professions: "hud-overlay-body", map: "hud-overlay-body",
         quests: "hud-overlay-body", season: "hud-overlay-body",
-        achievements: "hud-overlay-body", zones: "hud-overlay-body"
+        achievements: "hud-overlay-body", zones: "hud-overlay-body",
+        admin: "hud-overlay-body"
     };
 
     // ------------------------------------------------------------------
@@ -238,7 +239,13 @@
         // Admin.Caps grants it (isharmud/ishar-mud#1888).
         { key: "zones", title: "Zones", hotkey: "z", admin: true,
           render: function () { renderZones(); },
-          available: function () { return adminCap("zones") && !!S.zones; } }
+          available: function () { return adminCap("zones") && !!S.zones; } },
+        // Admin (staff, Eternal+): the `admin` menu as a control panel —
+        // game state toggles, season block (Forger), world clock/moons,
+        // lookups. Buttons send the matching `admin …` subcommands.
+        { key: "admin", title: "Admin", hotkey: "a", admin: true,
+          render: function () { renderAdminPanel(); },
+          available: function () { return adminCap("admin") && !!S.adminPanel; } }
     ];
     var overlayName = null;   // open overlay app key (desktop), or null
 
@@ -938,6 +945,11 @@
                 // Snapshot time anchors the client-side regen countdowns.
                 if (S.zones) S.zones._at = Date.now();
                 if (overlayVisible("zones")) renderZones();
+                updateMicro();
+                break;
+            case "Admin.Panel":
+                S.adminPanel = data;
+                if (overlayVisible("admin")) renderAdminPanel();
                 updateMicro();
                 break;
             case "Admin.WhoExtra":
@@ -2663,6 +2675,99 @@
         acts.push({ label: "Details (terminal)", cmd: "zones " + z.id });
         if (adminCap("admin")) acts.push({ label: "zset…", prefill: "zset " + z.id + " " });
         return acts;
+    }
+
+    // ------------------------------------------------------------------
+    // Admin panel (staff overlay, Eternal+) — the `admin` menu as controls.
+    // Every button sends the matching `admin …` subcommand; the game's own
+    // gates re-validate (season/autocycle are Forger-only inner gates the
+    // feed mirrors as can_season).
+    // ------------------------------------------------------------------
+    function fmtEta(unixSecs) {
+        var left = Math.floor(unixSecs - Date.now() / 1000);
+        if (left <= 0) return "expired";
+        var d = Math.floor(left / 86400), h = Math.floor((left % 86400) / 3600);
+        return d > 0 ? d + "d " + h + "h" : h + "h " + Math.floor((left % 3600) / 60) + "m";
+    }
+
+    function renderAdminPanel() {
+        if (!dom.admin) return;
+        var p = S.adminPanel;
+        if (!p) { fill(dom.admin, el("div", { class: "panel-empty", text: "—" })); return; }
+        var kids = [];
+        function section(t) { kids.push(el("div", { class: "ap-h", text: t })); }
+        function row(label, value, valueClass, actions) {
+            kids.push(el("div", { class: "ap-row" }, [
+                el("span", { class: "ap-label", text: label }),
+                value != null ? el("span", { class: "ap-value" + (valueClass ? " " + valueClass : ""), text: value }) : null,
+                actions ? el("span", { class: "ap-act" }, actions) : null
+            ]));
+        }
+        function btn(label, attrs) {
+            attrs = attrs || {};
+            attrs.type = "button";
+            attrs.class = "hud-btn" + (attrs.class ? " " + attrs.class : "");
+            attrs.text = label;
+            return el("button", attrs);
+        }
+
+        section("Game state");
+        row("Maintenance", p.maintenance ? "On" : "Off", p.maintenance ? "ap-on-danger" : "ap-dim", [
+            // Enabling walks through the game's own y/N prompt in the
+            // terminal — the two-tap arm here is the first fence, not the last.
+            btn(p.maintenance ? "End" : "Start…", { "data-confirm-cmd": "admin maintenance" })
+        ]);
+        row("Beta", null, null, ["open", "closed", "off"].map(function (b) {
+            return btn(b, {
+                class: "ab-chip" + (p.beta === b ? " on" : ""),
+                "data-cmd": "admin beta " + b
+            });
+        }));
+        var mp = Number(p.multiplay) || 0;
+        row("Multiplay", String(mp), null, [
+            btn("−", mp > 0 ? { "data-cmd": "admin multiplay " + (mp - 1) } : { disabled: true }),
+            btn("+", mp < 3 ? { "data-cmd": "admin multiplay " + (mp + 1) } : { disabled: true })
+        ]);
+        row("New features", p.features ? "On" : "Off", p.features ? "" : "ap-dim", [
+            btn("Toggle", { "data-cmd": "admin features" })
+        ]);
+        row("AutoCycle", (p.autocycle ? "On" : "Off"), p.autocycle ? "" : "ap-dim",
+            p.can_season ? [btn("Toggle", { "data-cmd": "admin autocycle" })] : null);
+
+        if (p.season) {
+            section("Season " + p.season.id + (p.can_season ? "" : " (Forger controls hidden)"));
+            row("State", p.season.state, p.season.state === "normal" ? "" : "ap-on-danger", null);
+            row("Enigma", p.season.enigma, null,
+                p.can_season ? [btn("Next…", { "data-prefill": "admin season nextenigma " })] : null);
+            if (p.season.next_enigma) row("Next enigma", p.season.next_enigma, "ap-dim", null);
+            row("Expires", fmtEta(p.season.expires), null, p.can_season ? [
+                btn("Cycle…", { class: "ap-danger", "data-confirm-cmd": "admin season cycle" }),
+                btn("Start…", { "data-confirm-cmd": "admin season start" })
+            ] : null);
+        }
+
+        section("World");
+        row("Hour", (p.hour < 10 ? "0" : "") + p.hour + ":00", null, [
+            btn("Set…", { "data-prefill": "admin time " })
+        ]);
+        (p.moons || []).forEach(function (m) {
+            row(m.name, m.phase_name, "ap-dim", [
+                btn("Set…", { "data-prefill": "admin moon " + m.name.toLowerCase() + " " })
+            ]);
+        });
+        row("Overrides", null, null, [
+            btn("Clear moon overrides", { "data-confirm-cmd": "admin moon clear" })
+        ]);
+
+        section("Lookups");
+        row("Reports", null, null, [
+            btn("Player…", { "data-prefill": "admin player " }),
+            btn("Account…", { "data-prefill": "admin account " }),
+            btn("Weekly…", { "data-confirm-cmd": "admin weekly" }),
+            btn("Nodes", { "data-cmd": "admin view nodes" })
+        ]);
+
+        fill(dom.admin, kids);
     }
 
     // ------------------------------------------------------------------
@@ -5383,6 +5488,24 @@
             return;
         }
 
+        // 4b) Two-tap confirm buttons outside menus (admin panel): first tap
+        // arms in place, second fires. A re-render (fresh state push after
+        // the command) naturally disarms.
+        var cfm = e.target.closest("[data-confirm-cmd]");
+        if (cfm && dom.app.contains(cfm)) {
+            if (!cfm._armed) {
+                cfm._armed = true;
+                cfm.classList.add("armed");
+                cfm.textContent = "Confirm: " + cfm.textContent;
+            } else {
+                sendCmd(cfm.getAttribute("data-confirm-cmd"));
+                cfm._armed = false;
+                cfm.classList.remove("armed");
+                cfm.textContent = cfm.textContent.replace(/^Confirm: /, "");
+            }
+            return;
+        }
+
         // 5) Plain data-cmd / data-prefill (exits, group buttons, header List…).
         var t = e.target.closest("[data-cmd],[data-prefill]");
         if (!t || !dom.app.contains(t)) return;
@@ -5661,6 +5784,7 @@
         dom.micro = document.getElementById("hud-micro");
         dom.professions = document.getElementById("panel-professions");
         dom.zones = document.getElementById("panel-zones");
+        dom.admin = document.getElementById("panel-admin");
         dom.quests = document.getElementById("panel-quests");
         dom.season = document.getElementById("panel-season");
         dom.achievements = document.getElementById("panel-achievements");
@@ -6048,6 +6172,19 @@
                 "Admin.Builder": {
                     set_o: { vnum: 41230, name: "a rusty dagger", keyword: "dagger rusty", permitted: true },
                     zone: { id: 30, name: "Ritani" } },
+                "Admin.Panel": {
+                    maintenance: false, beta: "off", multiplay: 2,
+                    features: true, autocycle: true,
+                    season: { id: 15, state: "normal", enigma: "Enigma of the Tempest",
+                              next_enigma: "Enigma of Ashes",
+                              expires: Math.floor(Date.now() / 1000) + 1058400 },
+                    hour: 21, can_season: false,
+                    moons: [
+                        { name: "Shavar", phase: 4, phase_name: "full" },
+                        { name: "Tregalien", phase: 1, phase_name: "waxing crescent" },
+                        { name: "Fandaro", phase: 2, phase_name: "first quarter" },
+                        { name: "Chenchir", phase: 6, phase_name: "last quarter" }
+                    ] },
                 "Admin.Zones": { zones: [
                     { id: 2, name: "Mareldjan Park", parent: 0, elapsed: 12, lifespan: 40, fails: 0, occ: "O", live: true, noregen: false, skip: false, rooms: 58, first: 4001 },
                     { id: 19, name: "Shinerock Mines", parent: 0, elapsed: 35, lifespan: 40, fails: 0, occ: "", live: true, noregen: false, skip: false, rooms: 84, first: 19001 },

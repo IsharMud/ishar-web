@@ -310,6 +310,11 @@
                         title="Zones (Ctrl+Z)" aria-label="Zones (Ctrl+Z)">
                     {% bi "globe2" %}
                 </button>
+                <button type="button" class="micro-btn" data-overlay="admin" hidden
+                        aria-pressed="false" aria-haspopup="dialog" aria-controls="hud-overlay"
+                        title="Admin (Ctrl+A)" aria-label="Admin (Ctrl+A)">
+                    {% bi "sliders" %}
+                </button>
             </nav>
         </div>
         <form id="command-form" autocomplete="off">
@@ -424,6 +429,10 @@
             {% bi "globe2" %}
             <span>Zones</span>
         </button>
+        <button type="button" data-panel="admin" aria-pressed="false" hidden>
+            {% bi "sliders" %}
+            <span>Admin</span>
+        </button>
     </nav>
 
     <div id="hud-sheet" hidden>
@@ -472,6 +481,7 @@
             <section id="panel-season" class="panel"></section>
             <section id="panel-achievements" class="panel"></section>
             <section id="panel-zones" class="panel"></section>
+            <section id="panel-admin" class="panel"></section>
         </div>
     </div>
 
@@ -1306,7 +1316,8 @@
         "Char.Inventory", "Room.Info", "Room.Occupants", "Room.Contents",
         "Room.QuestMarkers", "Group.Update", "Char.Who", "Char.Professions",
         "Char.Recipes", "Char.Craft", "Char.Quests", "Char.Season",
-        "Char.Achievements", "Admin.Builder", "Admin.WhoExtra", "Admin.Zones"
+        "Char.Achievements", "Admin.Builder", "Admin.WhoExtra", "Admin.Zones",
+        "Admin.Panel"
     ];
 
     function rebaseTimers(pkg, body, ageSec) {
