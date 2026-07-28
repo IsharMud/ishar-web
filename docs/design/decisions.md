@@ -9,6 +9,32 @@ Format: `## YYYY-MM-DD — Title` · **Decision** · **Why** · (optional) **Not
 
 ---
 
+## 2026-07-28 — Season overlay: engagement rewards claim in place
+
+**Decision.** The Season overlay's milestone list gains claim affordances
+(isharmud/ishar-web#180, server contract ishar-mud#1883): a reached-but-
+unclaimed milestone renders `.season-ms-row.claimable` (warn-wash, `!`
+marker) with a gold `.season-ms-claim` pill button that sends
+`season claim <n>` through the standard `data-cmd` delegation; the
+engagement header shows "Claim all (N)" (or a `1 to claim` pill when
+singular). Buttons appear only when the feed's explicit `claimable` flag
+says so — an older server that lacks the flag renders the old read-only
+view, no misfires.
+
+**Why.** Claiming binds renown and reward caches to the *connected*
+character, which is exactly what the focused-session model already
+expresses: the character whose HUD you're looking at is the one who
+receives. A tap in the overlay is the phone path; the terminal command
+stays canonical. The `data-cmd` route was chosen over a Django endpoint
+because the claim must act on the live game session (the same reason the
+Character overlay's Advance button works this way).
+
+**Notes.** Overlay refresh after a claim is server-driven (the Char.Season
+signature folds the claim-receipt count). Demo fixture carries two
+claimable states for design review. Verified: `node --check`, headless
+Chromium at 1400px/390px through the real render path; the command
+round-trip against the live game is the owner's on-prod check.
+
 ## 2026-07-27 — Multiplay: sessions are a client-side concern; one HUD, N terminals
 
 **Decision.** The web client hosts up to three simultaneous game sessions in

@@ -4032,13 +4032,23 @@
         var out = [];
         var prog = clamp(Number(eng.progress) || 0, 0, 100);
         var total = (eng.milestones || []).length;
-        out.push(el("div", { class: "eng-top" }, [
+        var unclaimed = Math.max(0, Math.floor(Number(eng.unclaimed)) || 0);
+        var top = [
             el("span", { class: "eng-pct", text: (Number(eng.progress) || 0).toFixed(1) + "%" }),
             el("span", { class: "eng-sub" }, [
                 el("b", { text: String(Number(eng.milestones_done) || 0) }),
                 " of " + total + " milestones"
             ])
-        ]));
+        ];
+        if (unclaimed > 1) {
+            top.push(el("button", {
+                class: "season-ms-claim", "data-cmd": "season claim all",
+                text: "Claim all (" + unclaimed + ")"
+            }));
+        } else if (unclaimed === 1) {
+            top.push(el("span", { class: "season-pill warn", text: "1 to claim" }));
+        }
+        out.push(el("div", { class: "eng-top" }, top));
 
         var wrap = el("div", { class: "eng-track-wrap" }, [
             el("div", { class: "eng-track" }, [
@@ -4095,22 +4105,33 @@
         }));
     }
 
+    // A reached milestone waits for its claim (server contract #1883): the
+    // Claim button sends `season claim <n>` to the focused session, so the
+    // connected character — the one this HUD is looking at — receives it.
     function milestoneList(ms) {
         var nextSeen = false;
         return el("div", { class: "season-ms" }, ms.map(function (m) {
             var done = !!m.done;
+            var claimable = !!m.claimable && Number(m.n) > 0;
             var isNext = !done && !nextSeen;
             if (isNext) nextSeen = true;
             var at = Number(m.at) || 0;
             var cap = at >= 100;
             var row = el("div", {
-                class: "season-ms-row" + (done ? " done" : " locked") + (isNext ? " next" : "")
+                class: "season-ms-row" + (done ? " done" : " locked")
+                    + (isNext ? " next" : "") + (claimable ? " claimable" : "")
             }, [
-                el("span", { class: "season-ms-mk", text: done ? "✓" : (cap ? "◆" : "○") }),
+                el("span", { class: "season-ms-mk", text: claimable ? "!" : (done ? "✓" : (cap ? "◆" : "○")) }),
                 el("span", { class: "season-ms-at", text: seasonPct(at, 0) }),
                 el("span", { class: "season-ms-rw", text: seasonReward(m.reward) })
             ]);
-            if (isNext) row.appendChild(el("span", { class: "season-ms-badge", text: "Next" }));
+            if (claimable) {
+                row.appendChild(el("button", {
+                    class: "season-ms-claim",
+                    "data-cmd": "season claim " + Math.floor(Number(m.n)),
+                    text: "Claim"
+                }));
+            } else if (isNext) row.appendChild(el("span", { class: "season-ms-badge", text: "Next" }));
             else if (cap) row.appendChild(el("span", { class: "season-ms-badge cap", text: "Capstone" }));
             return row;
         }));
@@ -5481,7 +5502,7 @@
             "Char.Status": { name: "Aelwyn", "class": "Magician", race: "Elf", position: "Standing", level: 45, align: 350, xp: 1250000, tnl: 48000, gold: 18230, bank: 500000, remort: 3 },
             "Char.Vitals": { hp: 412, maxhp: 480, mp: 130, maxmp: 300, move: 198, maxmove: 240, position: "Standing", opponent_hp_pct: 35, metamagic: 60, metamagic_max: 100, metamagic_regen: 5, food: 27, water: 9 },
             "Game.Time": { hour: 21, hour12: 9, ampm: "pm", day: 14, day_name: "Sunday", month: 6, month_name: "the Long Shadows", year: 1247, night: true, season_id: 15, season_end: 0, events: [{ name: "Double Essence", seconds: 5400 }, { name: "Festival of Flames" }], moons: [{ id: 0, name: "Shavar", phase: 4, phase_name: "full", position: "almost directly overhead", light: "blazing bright", up: true }, { id: 3, name: "Chenchir", phase: 6, phase_name: "last quarter", position: "lowering through the western sky", light: "fading", up: true }] },
-            "Char.Season": { season_id: 15, name: "Enigma of the Tempest", ends_in: 1058400, essence: { current: 1240, lifetime: 8890 }, engagement: { progress: 54.0, milestones_done: 5, xp_bonus_pct: 8, shop_discount_pct: 15, axes: [{ key: "crafting", earned: 200, cap: 365, weight: 3 }, { key: "exploration", earned: 180, cap: 310, weight: 4 }, { key: "general", earned: 140, cap: 200, weight: 4 }], milestones: [{ at: 8.0, done: true, reward: "+4% XP (passive)" }, { at: 20.0, done: true, reward: "an ornate chest + -5% shop prices (passive)" }, { at: 30.0, done: true, reward: "+40 Renown" }, { at: 42.0, done: true, reward: "+4% XP (passive) + Memory: a tempest's echo" }, { at: 54.0, done: true, reward: "-10% shop prices (passive)" }, { at: 68.0, done: false, reward: "Memory: a tempest's echo" }, { at: 82.0, done: false, reward: "+80 Renown" }, { at: 100.0, done: false, reward: "Title: World-Walker" }], next: { at: 68.0, remaining: 14.0, reward: "Memory: a tempest's echo" } } },
+            "Char.Season": { season_id: 15, name: "Enigma of the Tempest", ends_in: 1058400, essence: { current: 1240, lifetime: 8890 }, engagement: { progress: 54.0, milestones_done: 5, xp_bonus_pct: 8, shop_discount_pct: 15, axes: [{ key: "crafting", earned: 200, cap: 365, weight: 3 }, { key: "exploration", earned: 180, cap: 310, weight: 4 }, { key: "general", earned: 140, cap: 200, weight: 4 }], unclaimed: 2, milestones: [{ n: 1, at: 8.0, done: true, claimed: true, claimable: false, reward: "+4% XP (passive)" }, { n: 2, at: 20.0, done: true, claimed: true, claimable: false, reward: "an ornate chest + -5% shop prices (passive)" }, { n: 3, at: 30.0, done: true, claimed: false, claimable: true, reward: "+40 Renown" }, { n: 4, at: 42.0, done: true, claimed: true, claimable: false, reward: "+4% XP (passive) + Memory: a tempest's echo" }, { n: 5, at: 54.0, done: true, claimed: false, claimable: true, reward: "-10% shop prices (passive)" }, { n: 6, at: 68.0, done: false, claimed: false, claimable: false, reward: "Memory: a tempest's echo" }, { n: 7, at: 82.0, done: false, claimed: false, claimable: false, reward: "+80 Renown" }, { n: 8, at: 100.0, done: false, claimed: false, claimable: false, reward: "Title: World-Walker" }], next: { at: 68.0, remaining: 14.0, reward: "Memory: a tempest's echo" } } },
             "Char.Achievements": { points: 45, achievements: [
                 { id: 3, name: "Welcome to Ishar!", desc: "Create your first character and begin your journey within the world of Ishar!", category: "GENERAL", points: 5, done: true, date: Math.floor(Date.now() / 1000) - 86400 * 40, by: "Aelwyn" },
                 { id: 5, name: "Well on your way!", desc: "Reach level 5 on any class for the first time.", category: "GENERAL", points: 5, done: true, date: Math.floor(Date.now() / 1000) - 86400 * 38, by: "Aelwyn" },
