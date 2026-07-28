@@ -1976,12 +1976,28 @@ button.v-tgt:hover { border-color: rgba(214, 75, 75, .8); }
 .char-achv-n b { color: var(--hud-gold); font-variant-numeric: tabular-nums; }
 
 /* ----- Admin tier (Admin.* staff feeds; decisions.md "Admin re-tier") ----- */
-/* The ambient tier's second profile: a level-21+ focused character (set from
-   Admin.Caps via the hud-admin root class) trades the mortal combat chrome —
-   attack cluster + XP strip — for the admin strip: rank pill, the live
-   `set o` target, current zone. Everything else admin lives in overlays. */
+/* The HUD's second profile: a level-21+ focused character (set from
+   Admin.Caps via the hud-admin root class). Ambient: the mortal combat
+   chrome — attack cluster, XP strip, hotbar — yields to the admin strip
+   (rank pill, live `set o` target, current zone). Persistent: Group and
+   Tracked Spells die, and Who docks into the right column over Chat
+   (placePanels re-homes it; the Ctrl+F launcher hides on desktop). */
 .hud-admin #hud-attack,
-.hud-admin #hud-xpstrip { display: none; }
+.hud-admin #hud-xpstrip,
+.hud-admin #hud-hotbar,
+.hud-admin #panel-group,
+.hud-admin #panel-tracked,
+.hud-admin #hud-dock button[data-panel="group"],
+.hud-admin #hud-dock button[data-panel="tracked"] { display: none; }
+
+/* Who as the right column's pinned pane — the slot Tracked vacates. */
+.hud-admin #hud-right #panel-who {
+    order: -1; flex: 0 1 auto; min-height: 0; max-height: 46%;
+    display: flex; flex-direction: column;
+}
+.hud-admin #hud-right #panel-who > .who-list {
+    flex: 1 1 auto; min-height: 0; overflow-y: auto;
+}
 
 #hud-adminstrip {
     flex: none; display: flex; align-items: center; gap: 8px;

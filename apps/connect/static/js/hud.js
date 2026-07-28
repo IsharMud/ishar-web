@@ -204,7 +204,13 @@
           available: function () { return (S.skills || []).length > 0; } },
         { key: "who", title: "Who", hotkey: "f",
           render: function () { renderWho(); },
-          available: function () { return !!(S.who && S.who.players && S.who.players.length); } },
+          // Under the admin profile Who is a persistent right-column pane on
+          // desktop — the launcher would open an empty window (the panel
+          // node lives in the column). Phones keep the dock/sheet path.
+          available: function () {
+              return !!(S.who && S.who.players && S.who.players.length) &&
+                  (mqMobile.matches || adminLevel() < 21);
+          } },
         { key: "professions", title: "Professions", hotkey: "p",
           render: function () { renderProfessions(); },
           // The activity bar must stay reachable even in the (theoretical)
@@ -988,11 +994,21 @@
         return adminLevel() >= 21 &&
             !!(S.adminCaps.caps && S.adminCaps.caps[name]);
     }
-    // The admin profile of the ambient tier: swaps the mortal combat chrome
-    // (attack cluster, XP strip) for the admin strip via one root class.
+    // The admin profile: one root class swaps the ambient chrome (attack
+    // cluster, XP strip, hotbar → admin strip) and re-shapes the persistent
+    // tier — Group/Tracked die, Who docks into the right column
+    // (decisions.md 2026-07-28 + amendment).
     function retierAdmin() {
-        if (dom.app) dom.app.classList.toggle("hud-admin", adminLevel() >= 21);
-        if (dom.adminstrip) dom.adminstrip.hidden = adminLevel() < 21;
+        var admin = adminLevel() >= 21;
+        if (!dom.app) return;
+        dom.app.classList.toggle("hud-admin", admin);
+        if (dom.adminstrip) dom.adminstrip.hidden = !admin;
+        placePanels();
+        // A sheet whose panel the profile just removed would strand an
+        // empty surface; the launchers resync via availability.
+        if (admin && (sheetName === "group" || sheetName === "tracked")) setSheet(null);
+        renderWho();
+        updateMicro();
     }
     function applyWhoExtra(data) {
         var byName = null;
@@ -2528,8 +2544,16 @@
     // ------------------------------------------------------------------
     function renderWho() {
         var w = S.who;
-        if (!w || !w.players) { fill(dom.who, el("div", { class: "panel-empty", text: "—" })); return; }
         var admin = adminLevel() >= 21;
+        // As a persistent pane (admin profile) Who wears the standard
+        // collapsible header like its column neighbors; as an overlay the
+        // window chrome already titles it.
+        var head = admin ? panelHeader("who", "Who") : null;
+        if (!w || !w.players) {
+            fill(dom.who, [head, el("div", { class: "panel-empty", text: "—" })]);
+            return;
+        }
+        if (admin && isCollapsed("who")) { fill(dom.who, [head]); return; }
         var list = el("ul", { class: "who-list" });
         w.players.forEach(function (p) {
             var nm = firstWord(p.name);
@@ -2574,7 +2598,7 @@
                 ])
             ]));
         });
-        var kids = [list];
+        var kids = [head, list];
         if (w.hidden) kids.push(el("div", { class: "who-hidden", text: "+" + w.hidden + " hidden" }));
         fill(dom.who, kids);
     }
@@ -3624,6 +3648,9 @@
                 }
             }
             if (!S.connected) return;
+            // The admin profile has no bar or attack cluster; everything
+            // below is their combos, and hidden UI must not fire.
+            if (adminLevel() >= 21) return;
             // Combat keys — Alt+letter (the "act" modifier, like the bar's
             // Alt+digit). By e.code, not e.key: macOS Alt+letter yields
             // composed characters ("†"), Shift changes case.
@@ -3660,7 +3687,7 @@
     // from OVERLAYS, so an app's hotkey can never drift from its documentation.
     // A group's `hud: true` marks it dead while the interface is hidden.
     function keyHelp() {
-        return [
+        var groups = [
             {
                 title: "Action bar & combat", hud: true,
                 rows: [
@@ -3692,6 +3719,11 @@
                 ]
             }
         ];
+        // The admin profile has no bar/combat chrome; don't document dead keys.
+        if (adminLevel() >= 21) {
+            groups = groups.filter(function (g) { return g.title !== "Action bar & combat"; });
+        }
+        return groups;
     }
 
     // The full, scroll-bounded Abilities browser: search + type filter +
@@ -5767,6 +5799,7 @@
             case "inventory": case "components": renderInventory(); break;
             case "tracked": renderTracked(); break;
             case "chat": renderChat(); break;
+            case "who": renderWho(); break;
             default: renderAll();
         }
         api.onLayoutChange();
@@ -5775,12 +5808,19 @@
     // ------------------------------------------------------------------
     // Layout modes: panel placement, phone sheet, desktop columns
     // ------------------------------------------------------------------
+    // Desktop homes are profile-aware: the admin profile docks Who in the
+    // right column (the slot Tracked vacates); everything else keeps its
+    // PANEL_HOME. Phones are unaffected — every panel lives in the sheet.
+    function panelHome(name) {
+        if (name === "who" && adminLevel() >= 21) return "hud-right";
+        return PANEL_HOME[name];
+    }
     function placePanels() {
         var mobile = mqMobile.matches;
         PANELS.forEach(function (n) {
             var p = document.getElementById("panel-" + n);
             if (!p) return;
-            var home = mobile ? dom.sheetBody : document.getElementById(PANEL_HOME[n]);
+            var home = mobile ? dom.sheetBody : document.getElementById(panelHome(n));
             if (home && p.parentNode !== home) home.appendChild(p);
         });
         if (!mobile && sheetName) setSheet(null);
@@ -6049,7 +6089,9 @@
         });
 
         placePanels();
-        var onMq = function () { placePanels(); api.onLayoutChange(); };
+        // Availability is form-factor-sensitive under the admin profile
+        // (Who is a launcher on phones, a persistent pane on desktop).
+        var onMq = function () { placePanels(); updateMicro(); api.onLayoutChange(); };
         if (mqMobile.addEventListener) mqMobile.addEventListener("change", onMq);
         else if (mqMobile.addListener) mqMobile.addListener(onMq);
 
