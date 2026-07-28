@@ -22,6 +22,7 @@
  *   init({ send, prefill, onLayoutChange, onComm })  wire to the connect page
  *   onGmcp(name, jsonBody)                            feed a GMCP message
  *   reset()                                           clear state on (re)connect
+ *   keyHelp()                                         the HUD's hotkey registry
  *   setConnected(bool) / completions() / demo()
  */
 (function () {
@@ -3046,6 +3047,10 @@
     // comes fully alive when the HUD runs installed/fullscreen (no tab strip).
     // Alt+letter is the "act" family (Ctrl+letter opens overlays); Ctrl+T could
     // never work anyway — the browser owns it.
+    //
+    // Every key claimed below must also be listed in keyHelp() — that registry
+    // is the only place a player can discover it (gear menu ▸ Keys & commands,
+    // and /help).
     function wireHotkeys() {
         document.addEventListener("keydown", function (e) {
             // Overlay keys are gated on the HUD only, not the connection —
@@ -3107,6 +3112,41 @@
             var n = digit === "0" ? 9 : (Number(digit) - 1);   // 1..9 -> 0..8, 0 -> 9 (slot 10)
             if (fireSlot(n)) e.preventDefault();   // only swallow the combo when a slot actually fired
         });
+    }
+
+    // The HUD's half of the Keys & commands reference; connect.html renders it
+    // into the panel and prints it for /help. The overlay rows are generated
+    // from OVERLAYS, so an app's hotkey can never drift from its documentation.
+    // A group's `hud: true` marks it dead while the interface is hidden.
+    function keyHelp() {
+        return [
+            {
+                title: "Action bar & combat", hud: true,
+                rows: [
+                    { keys: ["Alt+1…0"], desc: "Fire action-bar slots 1–10 (skills, spells, consumables)" },
+                    { keys: ["Ctrl+1…0"], desc: "Same, once the client runs installed or fullscreen — tabbed browsers keep Ctrl+digit for themselves" },
+                    { keys: ["Alt+`"], desc: "Flip to the other action-bar page" },
+                    { keys: ["Alt+T", "Shift+Alt+T"], desc: "Cycle the ⚔ target forward / backward (Tab on an empty input does the same)" },
+                    { keys: ["Alt+A"], desc: "Attack the ⚔ target — with none set, assist your group's fight" },
+                    { keys: ["Alt+O"], desc: "Order loyal followers to attack the ⚔ target" }
+                ],
+                notes: [
+                    "A combo only reaches the game when it has something to do: an empty slot, no target, or no follower leaves the browser default alone.",
+                    "Every one of these has a tile or chip beside the bar — the phone path. Offensive skills and spells auto-aim at the ⚔ target.",
+                    "Fill the bar with ☆ from Abilities (skills) and Bags (consumables); tap the lock to rearrange slots by tap or drag."
+                ]
+            },
+            {
+                title: "Overlay apps", hud: true,
+                rows: OVERLAYS.map(function (o) {
+                    return { keys: ["Ctrl+" + o.hotkey.toUpperCase()], desc: o.title };
+                }),
+                notes: [
+                    "An app's key opens it only once its feed has data — until then the browser default (Ctrl+S, Ctrl+P…) stands.",
+                    "Esc, the ✕, the launcher chip, or the same key again closes the open window."
+                ]
+            }
+        ];
     }
 
     // The full, scroll-bounded Abilities browser: search + type filter +
@@ -5687,5 +5727,5 @@
         setConnected(true);
     }
 
-    window.IsharHUD = { init: init, onGmcp: onGmcp, reset: reset, setConnected: setConnected, completions: completions, cycleTarget: cycleTarget, demo: demo, registerMap: registerMap };
+    window.IsharHUD = { init: init, onGmcp: onGmcp, reset: reset, setConnected: setConnected, completions: completions, cycleTarget: cycleTarget, keyHelp: keyHelp, demo: demo, registerMap: registerMap };
 })();

@@ -595,7 +595,20 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
   `#history-btn`, which JS un-hides on `(pointer: coarse)`.
 - **`#settings-pop` / `.setting-row`** — the gear menu under the topbar's
   right edge: checkbox rows persisted in `ishar.settings`, mirrored by the
-  `/settings` client command.
+  `/settings` client command. `.setting-link` is its full-width action row
+  (icon + label), used to open the keys reference.
+- **`#keys-pop` / `.key-*`** — the **Keys & commands** reference: a centered
+  dialog over the terminal (`.keys-head` + scrolling `#keys-body`), opened by
+  the gear menu's `.setting-link`, `F1`, or `/keys`; closed by Esc, the ✕, or
+  an outside click. It scrims itself with a `100vmax` box-shadow — no backdrop
+  node. Rows are `.key-row` (a `.key-keys` column of `.key-chord`/`<kbd>` chips
+  or a `.key-cmd` literal, plus `.key-desc`), grouped under `.key-group-h` with
+  `.key-note` footnotes; stacks to one column under 576px.
+  **Content comes from the key registry, and every new binding must be added
+  there:** `KEYS_TERMINAL` / `KEYS_CLIENT` in `connect.html` for terminal,
+  session, `@`-routing and `/` commands; `keyHelp()` in `hud.js` for the action
+  bar, combat and overlay apps (its overlay rows generate from `OVERLAYS`).
+  `/help` prints the same registry — see decisions.md 2026-07-28.
 - **`#term-search`** — the scrollback find bar floating over the terminal's
   top-right (input + prev/next/close); opened by `#search-btn` or
   Ctrl+Shift+F, closed by Esc. Match decorations use the amber accent.

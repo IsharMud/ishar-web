@@ -211,6 +211,24 @@ container→host **deploy agent** bridge lives in
 `apps/accounts/utils/deploy_agent.py` (a shared unix socket + shared secret;
 strict env/service allowlist).
 
+### Adding a hotkey or a client command
+
+The web client's keys and `/` commands live in one **key registry**, rendered
+by the **Keys & commands** panel (gear menu, `F1`, or `/keys`) and by `/help`.
+A binding that isn't in the registry is undiscoverable — so add the row in the
+same change:
+
+- Terminal, session, `@`-routing and `/` commands → `KEYS_TERMINAL` /
+  `KEYS_CLIENT` in `apps/connect/templates/connect.html`.
+- Action bar, combat and overlay apps → `keyHelp()` in
+  `apps/connect/static/js/hud.js` (overlay rows generate from `OVERLAYS` — a
+  new overlay documents itself).
+
+Hotkey families, to keep new bindings coherent: `Ctrl`+letter opens overlay
+apps, `Alt`+letter/digit *acts* (bar slots, target, attack, order), `F1` opens
+the reference. Combat/letter keys match on `e.code` — macOS `Alt`+letter
+composes glyphs.
+
 ### Surfacing a new staff tool
 
 The canonical place is the **Portal dropdown** in
