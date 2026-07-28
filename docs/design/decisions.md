@@ -9,6 +9,51 @@ Format: `## YYYY-MM-DD — Title` · **Decision** · **Why** · (optional) **Not
 
 ---
 
+## 2026-07-28 — Keys & commands: one registry, two surfaces, and a rule
+
+**Decision.** Every key the web client binds and every `/` command it handles
+is declared once, in a **key registry**, and rendered from there — never
+described twice. Two halves, each owned by the layer that binds the keys:
+`KEYS_TERMINAL` / `KEYS_CLIENT` in `connect.html` (terminal, sessions,
+`@`-routing, client commands) and `keyHelp()` in `hud.js` (action bar, combat,
+overlay apps — the overlay rows are *generated* from `OVERLAYS`, so an app's
+hotkey cannot drift from its documentation). Two surfaces render it: the
+**Keys & commands panel** (`#keys-pop`, opened from the gear menu, `F1`, or
+`/keys`) and `/help`, which now prints the same rows instead of its own prose.
+
+**The rule this exists to enforce:** *a binding that is not in the registry does
+not ship.* Wiring a hotkey or a `/` command without a row makes it
+undiscoverable — the panel is the only place a player can find one.
+
+**Why.** The client had accumulated ~30 bindings — `Alt+1…0`, the `Ctrl`+letter
+overlay family, `Alt+T/A/O`, `Alt+C`, `Alt+``, plus `@<name>`/`@<slot>`/`@all`
+cross-session routing — discoverable only by reading a wall of `/help` prose
+that had already drifted from the code (the `@`-routing and several overlays
+were surfaced nowhere else). A settings-menu panel is where a player looks; a
+registry is the only thing that keeps it true.
+
+**F1 opens it.** The client's hotkey families were full by construction
+(`Ctrl`+letter opens overlays, `Alt`+letter/digit acts), and a reference you
+can only reach by typing is the wrong shape. `F1` is the help reflex, collides
+with neither family, and the browser default it shadows (a help site) is no
+loss mid-fight.
+
+**Custom keybinds: deferred, deliberately.** The panel is read-only. Remapping
+means a persisted override layer, conflict detection against the browser's own
+reserved chords, and a reset path — worth doing only if the fixed set actually
+chafes. The registry is the precondition for it either way, so nothing here
+blocks it later.
+
+**Notes.** Rows carry `keys` (chords, rendered as `<kbd>` chips) or `cmd` (a
+typed literal); a group marked `hud: true` renders a "needs the interface" note
+while the HUD is off. Panel scrims itself with a `100vmax` box-shadow rather
+than a backdrop node — outside clicks land on the document, which closes it.
+**Verification:** `node --check` on both files, Django template compile,
+headless Chromium at 1280px and 390px through the real registry + render path
+(the panel builds from `IsharHUD.keyHelp()` as shipped), and the `/help`
+rendering diffed by eye against the old prose. Live keypresses are the owner's
+on-prod check.
+
 ## 2026-07-28 — Season overlay: engagement rewards claim in place
 
 **Decision.** The Season overlay's milestone list gains claim affordances

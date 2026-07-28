@@ -432,6 +432,75 @@ button.v-tgt:hover { border-color: rgba(214, 75, 75, .8); }
 .setting-row:hover { background: var(--ac-elev); }
 .setting-row input { flex: none; margin: 0; }
 
+/* A full-width action row inside the gear menu (opens the keys reference). */
+.setting-link {
+    display: flex; align-items: center; gap: 10px; width: 100%;
+    padding: 8px 10px; margin: 0; border: 0; background: none;
+    font: inherit; font-size: .85rem; color: var(--ac-text);
+    border-radius: var(--ac-radius-sm); cursor: pointer; text-align: left;
+}
+.setting-link:hover { background: var(--ac-elev); }
+.setting-link:focus-visible { outline: 2px solid var(--ac-accent); outline-offset: -2px; }
+.setting-link .bi { width: 1em; height: 1em; flex: none; }
+@media (pointer: coarse) { .setting-link { min-height: 44px; } }
+
+/* ----- Keys & commands reference ----- */
+/* A centered dialog over the terminal, opened from the gear menu or /keys.
+   The 100vmax shadow is its scrim — no backdrop node, and clicks land on the
+   document (which closes it). */
+#keys-pop {
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    z-index: 1050; display: flex; flex-direction: column;
+    width: min(640px, calc(100vw - 24px)); max-height: min(80vh, 760px);
+    background: var(--ac-panel); border: 1px solid var(--ac-border-2);
+    border-radius: var(--ac-radius);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, .6), 0 0 0 100vmax rgba(0, 0, 0, .55);
+}
+#keys-pop[hidden] { display: none; }
+#keys-pop:focus-visible { outline: none; }
+.keys-head {
+    display: flex; align-items: center; gap: 8px; flex: none;
+    padding: 10px 12px; border-bottom: 1px solid var(--ac-border);
+}
+.keys-title { flex: 1; font-size: .9rem; font-weight: 700; color: var(--ac-text); }
+#keys-body { overflow-y: auto; overscroll-behavior: contain; padding: 2px 12px 12px; }
+.key-group { padding-top: 12px; }
+.key-group-h {
+    margin: 0 0 2px; font-size: .7rem; font-weight: 700;
+    letter-spacing: .06em; text-transform: uppercase; color: var(--ac-dim);
+}
+.key-row {
+    display: flex; gap: 12px; align-items: baseline;
+    padding: 5px 0; border-top: 1px solid var(--ac-border);
+}
+.key-group-h + .key-row, .key-note + .key-row { border-top: 0; }
+.key-keys {
+    flex: none; width: 11.5rem; display: flex; flex-wrap: wrap;
+    align-items: center; gap: 2px; font-size: .72rem; color: var(--ac-dim);
+}
+.key-chord { display: inline-flex; align-items: center; gap: 2px; }
+.key-keys kbd {
+    display: inline-block; padding: 1px 6px; font-family: monospace;
+    font-size: .72rem; color: var(--ac-text); background: var(--ac-elev);
+    border: 1px solid var(--ac-border-2); border-bottom-width: 2px;
+    border-radius: var(--ac-radius-sm); white-space: nowrap;
+}
+.key-cmd { font-family: monospace; font-size: .74rem; color: var(--ac-accent); overflow-wrap: anywhere; }
+.key-desc { flex: 1; min-width: 0; font-size: .8rem; line-height: 1.4; color: var(--ac-text); }
+.key-note { margin: 6px 0 0; font-size: .72rem; line-height: 1.45; color: var(--ac-dim); }
+.key-note--off { color: var(--ac-accent); }
+@media (max-width: 575.98px) {
+    #keys-pop { width: calc(100vw - 12px); max-height: 85vh; }
+    .key-row { flex-direction: column; gap: 1px; }
+    .key-keys { width: auto; }
+}
+@media (prefers-reduced-motion: no-preference) {
+    #keys-pop:not([hidden]) { animation: keys-in .14s ease-out; }
+    @keyframes keys-in {
+        from { opacity: 0; transform: translate(-50%, -46%); }
+    }
+}
+
 /* ----- Session tabs + character picker (multiplay) ----- */
 #session-tabs {
     order: 1; display: flex; align-items: center; gap: 4px;

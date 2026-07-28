@@ -136,7 +136,26 @@
                     <label for="set-healthThreshold" class="setting-suffix">%</label>
                 </div>
             </div>
+            <div class="setting-group">
+                <button type="button" class="setting-link" id="keys-btn"
+                        aria-haspopup="dialog" aria-expanded="false" aria-controls="keys-pop">
+                    {% bi "keyboard" %}
+                    <span>Keys &amp; commands</span>
+                </button>
+            </div>
         </div>
+    </div>
+
+    {# The keyboard/command reference. Filled by JS from the key registry — #}
+    {# hotkeys and client commands are declared once and rendered here and by /help. #}
+    <div id="keys-pop" role="dialog" aria-modal="true" aria-labelledby="keys-pop-title" tabindex="-1" hidden>
+        <div class="keys-head">
+            <span class="keys-title" id="keys-pop-title">Keys &amp; commands</span>
+            <button type="button" class="sheet-close" id="keys-close" aria-label="Close">
+                {% bi "x-lg" %}
+            </button>
+        </div>
+        <div id="keys-body"></div>
     </div>
 
     <!-- Left column: a scrolling panel stack with the compass rose pinned to the
@@ -1676,44 +1695,102 @@
         names.forEach(function(n) { sysln("  " + n + " = " + aliases[n]); });
     }
 
+    // --- Keys & commands registry ---
+    // Every key this page binds and every "/" command it handles, declared
+    // once. The reference panel (gear menu ▸ Keys & commands, or /keys) and
+    // /help both render it, so a binding is discoverable the moment it lands
+    // here — a hotkey wired without a row is an undiscoverable hotkey.
+    // The HUD's own keys come from hud.js keyHelp() and splice in between;
+    // a group marked `hud: true` is dead while the interface is hidden.
+    // Rows carry either `keys` (chords) or `cmd` (a literal you type).
+    var KEYS_TERMINAL = [
+        {
+            title: "Terminal & input",
+            rows: [
+                { keys: ["Enter"], desc: "Send the line (the Send button on touch)" },
+                { keys: ["Tab", "Shift+Tab"], desc: "Complete forward / backward from your history and the game — exits, skills, names" },
+                { keys: ["↑", "↓"], desc: "Recall command history (the clock button on touch)" },
+                { keys: ["PageUp", "PageDown"], desc: "Scroll the terminal by a page" },
+                { keys: ["Ctrl+Shift+F"], desc: "Search the scrollback — Enter jumps to the next match, Shift+Enter the previous" },
+                { keys: ["Ctrl+L"], desc: "Clear the terminal" },
+                { keys: ["F1"], desc: "Open this reference (so does the gear menu ▸ Keys & commands)" },
+                { keys: ["Esc"], desc: "Close the open window, popover, or search bar" }
+            ]
+        },
+        {
+            title: "Sessions",
+            rows: [
+                { keys: ["Alt+C", "Shift+Alt+C"], desc: "Switch to the next / previous session" },
+                { cmd: "@<name> <command>", desc: "Run one command on another open session — a name prefix is enough" },
+                { cmd: "@<slot> <command>", desc: "Same, addressed by the session's tab number" },
+                { cmd: "@all <command>", desc: "Run one command on every open session" },
+                { cmd: "@@<text>", desc: "Send a line that starts with a literal @" },
+                { cmd: "/mirror all|<names>|off", desc: "Arm or disarm mirror mode: every line you type goes to those sessions" }
+            ],
+            notes: [
+                "The topbar + opens another character; on a wide screen the peek pane watches a background session.",
+                "A crossed command echoes in the session that runs it, and the input glows orange while mirror is armed. Password prompts never cross."
+            ]
+        }
+    ];
+    var KEYS_CLIENT = [
+        {
+            title: "Client commands",
+            rows: [
+                { cmd: "/help", desc: "Print this reference in the terminal" },
+                { cmd: "/keys", desc: "Open this reference as a panel" },
+                { cmd: "/alias", desc: "List your aliases" },
+                { cmd: "/alias <name>", desc: "Show one alias" },
+                { cmd: "/alias <name> <commands>", desc: "Define one — $1-$9 and $* take arguments, ; chains" },
+                { cmd: "/unalias <name>", desc: "Remove an alias" },
+                { cmd: "/stack on|off", desc: "Chain commands typed with ; (\"open door;n;look\" sends three)" },
+                { cmd: "/mirror all|<names>|off", desc: "Type to several sessions at once" },
+                { cmd: "/settings", desc: "Print the client settings (the gear menu changes them)" },
+                { cmd: "/clear", desc: "Clear the terminal" },
+                { cmd: "//<text>", desc: "Send a line that starts with a literal /" }
+            ],
+            notes: [
+                "These are handled in the browser and never reach the game.",
+                "; splits only while stacking is on; say/tell/gossip-style lines and lines starting with ' never split, and ;; sends a literal ;."
+            ]
+        }
+    ];
+    function keyGroups() {
+        var hud = (window.IsharHUD && window.IsharHUD.keyHelp) ? window.IsharHUD.keyHelp() : [];
+        return KEYS_TERMINAL.concat(hud, KEYS_CLIENT);
+    }
+
+    // The terminal rendering of the registry — the same rows the panel shows.
+    var KEY_COL = 25;
+    function printKeyReference() {
+        sysln("Keys & commands — the gear menu ▸ Keys & commands (or /keys) shows this as a panel.");
+        keyGroups().forEach(function(g) {
+            sysln("");
+            sysln(g.title);
+            g.rows.forEach(function(r) {
+                var left = r.cmd || r.keys.join(" / ");
+                if (left.length > KEY_COL) {
+                    sysln("  " + left);
+                    sysln("  " + new Array(KEY_COL + 2).join(" ") + r.desc);
+                } else {
+                    sysln("  " + left + new Array(KEY_COL - left.length + 2).join(" ") + r.desc);
+                }
+            });
+            (g.notes || []).forEach(function(n) { sysln("    · " + n); });
+        });
+    }
+
     // Local "/" commands — handled in the browser, never sent to the game.
+    // A new one belongs in KEYS_CLIENT above, or nobody will find it.
     function runClientCommand(line) {
         var argv = line.slice(1).trim().split(/\s+/);
         var cmd = (argv.shift() || "").toLowerCase();
         switch (cmd) {
             case "help":
-                sysln("Client commands (handled in the browser):");
-                sysln("  /alias                    list aliases");
-                sysln("  /alias <name>             show one alias");
-                sysln("  /alias <name> <commands>  define ($1-$9/$* for args, ; to chain)");
-                sysln("  /unalias <name>           remove an alias");
-                sysln("  /stack on|off             ; command stacking (now " + (settings.stack ? "on" : "off") + ")");
-                sysln("      say/tell/gossip-style lines and lines starting with ' never split;");
-                sysln("      ;; sends a literal ;");
-                sysln("  /settings                 show client settings (also: the gear menu)");
-                sysln("  /clear                    clear the terminal");
-                sysln("  //<text>                  send <text> that starts with a literal /");
-                sysln("Tab completes from your history and the game (exits, skills, names);");
-                sysln("Shift+Tab cycles backward. Arrows recall history (clock button on touch).");
-                sysln("Ctrl+L clears. PageUp/PageDown scroll. Ctrl+Shift+F searches scrollback.");
-                sysln("Targeting: Alt+T (or Tab on an empty line) cycles the ⚔ target through");
-                sysln("      the room's attackables; Shift reverses; the chip by the action bar");
-                sysln("      shows it (tap to cycle, ✕ to clear). Alt+A / the crossed-swords");
-                sysln("      tile attacks it — with no target it sends `assist` to join your");
-                sysln("      group's fight. Alt+O / the wolf tile (shown when a loyal follower");
-                sysln("      is here) orders your followers to attack the ⚔ target. Offensive");
-                sysln("      skills and spells (backstab, fireball) auto-aim at it too.");
-                sysln("Action bar: Alt+1..0 fire the bar's slots (Ctrl+1..0 too when the page");
-                sysln("      is installed/fullscreen — tabbed browsers reserve Ctrl+digit). Alt+`");
-                sysln("      switches bar pages. Pin skills from the Abilities panel and");
-                sysln("      consumables from Bags (☆) — an item slot shows a live count and");
-                sysln("      greys out when you're empty. Tap the lock to edit: unlocked,");
-                sysln("      tap/drag slots to rearrange (taps don't fire).");
-                sysln("Multiplay: the topbar + opens another character's session; tabs switch,");
-                sysln("      Alt+C cycles (Shift reverses). @<name> <cmd>, @<slot> <cmd>, or");
-                sysln("      @all <cmd> send to another session without switching (@@ sends a");
-                sysln("      literal @). /mirror all|<names>|off types to several at once — the");
-                sysln("      input glows orange while armed. Password prompts never cross.");
+                printKeyReference();
+                break;
+            case "keys":
+                openKeysPop();
                 break;
             case "clear":
                 if (focusedSession) focusedSession.term.clear();
@@ -2217,6 +2294,104 @@
         closeSettingsPop();
     });
 
+    // --- Keys & commands panel ---
+    // Renders keyGroups() into a dialog over the terminal. Built on every open,
+    // so the HUD rows reflect whether the interface is currently up.
+    var keysBtn = document.getElementById("keys-btn");
+    var keysPop = document.getElementById("keys-pop");
+    var keysBody = document.getElementById("keys-body");
+
+    function keyNote(text, cls) {
+        var p = document.createElement("p");
+        p.className = "key-note" + (cls ? " " + cls : "");
+        p.textContent = text;
+        return p;
+    }
+
+    // Each chord is its own inline group, so a narrow column wraps between
+    // alternatives ("Alt+C" / "Shift+Alt+C") and never inside one.
+    function keyChords(chords) {
+        var wrap = document.createElement("div");
+        wrap.className = "key-keys";
+        chords.forEach(function(chord, i) {
+            if (i) wrap.appendChild(document.createTextNode("/"));
+            var span = document.createElement("span");
+            span.className = "key-chord";
+            chord.split("+").forEach(function(part, j) {
+                if (j) span.appendChild(document.createTextNode("+"));
+                var k = document.createElement("kbd");
+                k.textContent = part;
+                span.appendChild(k);
+            });
+            wrap.appendChild(span);
+        });
+        return wrap;
+    }
+
+    function keyRow(r) {
+        var row = document.createElement("div");
+        row.className = "key-row";
+        if (r.cmd) {
+            var holder = document.createElement("div");
+            holder.className = "key-keys";
+            var code = document.createElement("code");
+            code.className = "key-cmd";
+            code.textContent = r.cmd;
+            holder.appendChild(code);
+            row.appendChild(holder);
+        } else {
+            row.appendChild(keyChords(r.keys));
+        }
+        var desc = document.createElement("div");
+        desc.className = "key-desc";
+        desc.textContent = r.desc;
+        row.appendChild(desc);
+        return row;
+    }
+
+    function buildKeysPanel() {
+        while (keysBody.firstChild) keysBody.removeChild(keysBody.firstChild);
+        var hudOff = app.classList.contains("hud-off");
+        keyGroups().forEach(function(g) {
+            var sec = document.createElement("section");
+            sec.className = "key-group";
+            var h = document.createElement("h3");
+            h.className = "key-group-h";
+            h.textContent = g.title;
+            sec.appendChild(h);
+            if (g.hud && hudOff) {
+                sec.appendChild(keyNote("Needs the interface — turn it on with Show interface.", "key-note--off"));
+            }
+            g.rows.forEach(function(r) { sec.appendChild(keyRow(r)); });
+            (g.notes || []).forEach(function(n) { sec.appendChild(keyNote(n)); });
+            keysBody.appendChild(sec);
+        });
+    }
+
+    function closeKeysPop() {
+        if (keysPop.hidden) return;
+        keysPop.hidden = true;
+        keysBtn.setAttribute("aria-expanded", "false");
+        commandInput.focus();
+    }
+
+    function openKeysPop() {
+        closeSettingsPop();
+        buildKeysPanel();
+        keysPop.hidden = false;
+        keysBtn.setAttribute("aria-expanded", "true");
+        keysBody.scrollTop = 0;
+        keysPop.focus();
+    }
+
+    keysBtn.addEventListener("click", openKeysPop);
+    document.getElementById("keys-close").addEventListener("click", closeKeysPop);
+    document.addEventListener("click", function(e) {
+        if (keysPop.hidden) return;
+        if (keysPop.contains(e.target) || keysBtn.contains(e.target)) return;
+        closeKeysPop();
+    });
+
     // --- Character picker (the topbar "+") ---
     // Lists the account's characters from /connect/characters/; picking one
     // opens a session whose bridge auto-selects that character. The season
@@ -2317,7 +2492,9 @@
         });
     }
 
-    // --- Keyboard shortcuts (documented in /help) ---
+    // --- Keyboard shortcuts ---
+    // Anything bound here needs a row in KEYS_TERMINAL, or players never
+    // learn it: that registry is the panel and /help both.
     document.addEventListener("keydown", function(e) {
         // Alt+C cycles the focused session (Shift reverses). By e.code, like
         // the HUD's Alt+T/A/O — macOS Alt+letter composes glyphs. C is free:
@@ -2327,7 +2504,15 @@
             Sessions.cycle(e.shiftKey ? -1 : 1);
             return;
         }
+        // F1 is the one un-modified key the client claims: the help reflex,
+        // and the browser's own F1 (a help site) is no loss mid-fight.
+        if (e.key === "F1" && !e.ctrlKey && !e.altKey && !e.metaKey && !e.shiftKey) {
+            e.preventDefault();
+            if (keysPop.hidden) openKeysPop(); else closeKeysPop();
+            return;
+        }
         if (e.key === "Escape") {
+            if (!keysPop.hidden) { closeKeysPop(); return; }
             if (!searchBar.hidden) { closeSearch(); return; }
             if (!settingsPop.hidden) { closeSettingsPop(); return; }
             if (sessionPop && !sessionPop.hidden) { closeSessionPop(); return; }
