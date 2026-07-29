@@ -55,6 +55,7 @@ urlpatterns = [
     path("season/", include("apps.seasons.urls"), name="season"),
     path("skills/", include("apps.skills.urls"), name="skills"),
     path("surveys/", include("apps.surveys.urls"), name="surveys"),
+    path("trials/", include("apps.trials.urls"), name="trials"),
     path("wiki/", RedirectView.as_view(url=settings.WIKI_URL), name="wiki"),
 ]
 

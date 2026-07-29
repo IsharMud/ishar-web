@@ -1,0 +1,185 @@
+{% extends "layout.html" %}
+{% load humanize %}
+{% load ishar %}
+{% block meta_title %}{{ WEBSITE_TITLE }} Trial Application{% endblock meta_title %}
+{% block meta_description %}Your {{ WEBSITE_TITLE }} Immortal Trial application.{% endblock meta_description %}
+{% block meta_url %}{% url 'trial_application' %}#application{% endblock meta_url %}
+{% block title %}{{ WEBSITE_TITLE }} Trial Application{% endblock title %}
+{% block scripts %}let focusTo = 'application'{% endblock scripts %}
+{% block breadcrumbs %}
+    {% crumb "Immortal Trial" "stars" urlname="trials" anchor="trials" %}
+    {% crumb "Your Application" "envelope-paper" urlname="trial_application" anchor="application" active=True %}
+{% endblock breadcrumbs %}
+{% block content %}
+<div class="ac ac--wide">
+
+    <!-- Hero -->
+    <header class="ac-hero">
+        <span class="ac-hero__badge">{% bi application.track_icon %}</span>
+        <div class="ac-hero__text">
+            <h2 class="ac-hero__title"><span id="application">Your Trial Application</span></h2>
+            <p class="ac-hero__sub">
+                {{ application.get_track_display }} track · submitted
+                {{ application.submitted_at|naturaltime }}
+                {% if application.revision_count %} · revision {{ application.revision_count }}{% endif %}
+            </p>
+        </div>
+        <div class="ac-hero__status d-flex flex-wrap gap-1 justify-content-end">
+            <span class="ac-pill ac-pill--status ac-pill--{{ application.status_pill }}" id="status-badge">{{ application.status_label }}</span>
+{% if application.is_submitted %}
+{% if application.is_overdue %}
+            <span class="ac-pill ac-pill--warn" title="Staff aim to review within seven days">review running long</span>
+{% else %}
+            <span class="ac-pill ac-pill--muted" title="{{ application.due_at }}">review {{ application.due_label }}</span>
+{% endif %}
+{% endif %}
+        </div>
+    </header>
+
+{% if application.is_accepted %}
+    <div class="ac-note ac-note--ok" role="status">
+        {% bi "stars" %}
+        <span><strong>Accepted — welcome to the trial.</strong> Senior staff will
+        reach out to scope your first project. Log in to the game to get started.</span>
+    </div>
+{% elif application.is_rejected %}
+    <div class="ac-note ac-note--danger" role="status">
+        {% bi "x-circle" %}
+        <span><strong>Not this time:</strong> {{ application.rejection_reason }}
+        You're welcome to apply again next season.</span>
+    </div>
+{% elif application.is_needs_revision %}
+    <div class="ac-note ac-note--warn" role="status">
+        {% bi "arrow-counterclockwise" %}
+        <span><strong>Revision requested</strong> — read the feedback below, then
+        revise and resubmit. The review clock restarts when you do.</span>
+    </div>
+{% endif %}
+
+    <div class="row g-3">
+
+        {# ---- Left: application + timeline -------------------------------- #}
+        <div class="col-lg-8 d-flex flex-column gap-3">
+            <div class="ac-panel">
+                <div class="ac-panel__h">{% bi "file-earmark-text" %} Application</div>
+                <dl class="ac-kv">
+                    <dt>Character</dt><dd>{{ application.character_name }}</dd>
+                    <dt>Track</dt><dd>{{ application.get_track_display }}</dd>
+                </dl>
+                <div class="ac-label mt-2">Project proposal</div>
+                <pre class="ac-quote">{{ application.proposal|urlize }}</pre>
+{% if application.experience %}
+                <div class="ac-label mt-2">Experience</div>
+                <pre class="ac-quote">{{ application.experience|urlize }}</pre>
+{% endif %}
+            </div>
+
+            <div class="ac-panel">
+                <div class="ac-panel__h">{% bi "chat-left-text" %} Timeline</div>
+                <div class="ac-timeline">
+{% for comment in timeline %}
+                    <div class="ac-tl{% if comment.is_system %} ac-tl--system{% endif %}">
+                        <span class="ac-tl__icon" title="{{ comment.get_kind_display }}">
+                            {% bi comment.kind_icon label=comment.get_kind_display %}
+                        </span>
+                        <div class="ac-tl__body">
+                            <div class="ac-tl__head">
+                                <span class="ac-tl__author{% if comment.kind == 'staff' %} ac-tl__author--staff{% endif %}">{{ comment.author }}</span>
+{% if comment.kind == 'staff' %}
+                                <span class="ac-pill ac-pill--info">staff</span>
+{% endif %}
+                                <span class="ac-tl__time" title="{{ comment.created_at }}">{{ comment.created_at|naturaltime }}</span>
+                            </div>
+                            <div class="ac-tl__text">{{ comment.body|urlize }}</div>
+                        </div>
+                    </div>
+{% empty %}
+                    <div class="ac-empty">
+                        {% bi "chat-left" %}
+                        <span>Nothing here yet.</span>
+                    </div>
+{% endfor %}
+                </div>
+            </div>
+        </div>
+
+        {# ---- Right: actions ----------------------------------------------- #}
+        <div class="col-lg-4 d-flex flex-column gap-3">
+            <div class="ac-panel">
+                <div class="ac-panel__h">{% bi "lightning-charge" %} Actions</div>
+                <div class="d-grid gap-2" id="action-panel">
+                    <div id="action-msg" class="d-none" role="status"></div>
+
+{% if application.is_needs_revision %}
+                    <a class="ac-btn ac-btn--accent" href="{% url 'trial_apply' %}">
+                        {% bi "pencil-square" %} Revise application
+                    </a>
+{% endif %}
+
+{% if application.is_open %}
+                    <div>
+                        <label class="ac-label" for="reply-text">Reply to staff</label>
+                        <textarea class="ac-field" id="reply-text" rows="3"
+                                  placeholder="Questions, updates, context…"></textarea>
+                    </div>
+                    <button class="ac-btn ac-btn--info" data-action="reply">
+                        {% bi "chat-left-text" %} Post reply
+                    </button>
+
+                    <hr class="border-secondary my-1">
+                    <button class="ac-btn ac-btn--danger" data-action="withdraw"
+                            data-confirm="Withdraw your application? This closes it — you'd start over with a fresh one.">
+                        {% bi "x-circle" %} Withdraw application
+                    </button>
+{% else %}
+                    <a class="ac-btn ac-btn--accent" href="{% url 'trials' %}">
+                        {% bi "stars" %} Back to the trial page
+                    </a>
+{% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% if application.is_open %}
+<script>
+    const msg = document.getElementById("action-msg")
+
+    function showMsg(text, ok) {
+        msg.textContent = text
+        msg.className = `ac-note ${ok ? "ac-note--ok" : "ac-note--danger"}`
+    }
+
+    async function postAction(action) {
+        const body = new URLSearchParams()
+        const replyText = document.getElementById("reply-text")
+        if (action === "reply" && replyText) body.append("text", replyText.value)
+
+        const resp = await fetch(`/trials/application/${action}/`, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}",
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: body.toString(),
+        })
+        const data = await resp.json().catch(() => ({ok: false, message: "Server error."}))
+        showMsg(data.message || (data.ok ? "Done." : "Failed."), data.ok)
+        if (data.ok) {
+            // Reload to reflect the new timeline entry and status.
+            setTimeout(() => window.location.reload(), 500)
+        }
+    }
+
+    document.querySelectorAll("#action-panel [data-action]").forEach((el) => {
+        el.addEventListener("click", () => {
+            el.blur()
+            if (el.dataset.confirm && !confirm(el.dataset.confirm)) return
+            postAction(el.dataset.action)
+        })
+    })
+</script>
+{% endif %}
+{% endblock content %}

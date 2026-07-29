@@ -2444,3 +2444,53 @@ game-side de-level restores it live via the same `Admin.Caps` trigger.
 
 **Notes.** Proofs refreshed in `docs/design/admin-hud/` (desktop re-tier,
 player regression eyeballed, 390px dock + who sheet).
+
+## 2026-07-29 — Immortal Trials: application flow, mixed-audience timeline, and the first game-owned column write
+
+**Problem.** The Immortal Trial policy (how mortals join the staff) lived
+only in a PDF. There was no way to apply, no review queue, no record of
+decisions — and no notification when someone did apply.
+
+**Decision.** A new `apps/trials` app, deliberately assembled from the two
+proven halves: the surveys pattern for the player-facing submission (site-
+owned `managed = True` tables, Account FK with `db_constraint=False`, fetch +
+`JsonResponse` POST with validation in `services.py`) and the feedback
+pattern for staff triage (Eternal-gated dashboard/detail, verb services in
+`transaction.atomic()` that mutate state + append a system timeline comment +
+enqueue a transactional-outbox row). Specific calls:
+
+1. **Five states, no draft.** `submitted ⇄ needs_revision`, terminal
+   `accepted / rejected / withdrawn`. "Submitted" *is* under review — the
+   7-day clock (`due_at`, stored) starts at submit and restarts on resubmit.
+   The clock is **display-only** (countdown/overdue pills, overdue-first
+   ordering); no scheduler, no auto-transitions.
+2. **One open application per account**, enforced in services with a DB
+   backstop: MariaDB has no conditional unique constraints, so a nullable
+   `open_slot` column mirrors `account_id` while open (unique; NULLed on
+   terminal transitions, and NULLs never collide).
+3. **A new site-owned outbox** (`trial_sync_queue`), not rows in
+   `feedback_sync_queue` — that table is game/daemon-owned and its action
+   enum is a frozen wire contract. Same column shape so the daemon reuses
+   its drain loop; the model docstring is the contract's source of truth
+   (Discord staff-channel embeds; daemon worker tracked in ishar-mud).
+   Notification is Discord-only: the repo has no email infrastructure and
+   account emails are unverified login credentials.
+4. **Mixed-audience timeline.** One comment model with `kind`
+   (staff/applicant/system) + `is_internal`. The applicant view filters
+   internal entries; internal comments are **never enqueued** to the outbox
+   (the daemon posts where applicants can read). New `.ac-tl--internal`
+   timeline variant (warn left edge + warn pill) marks them for staff.
+5. **Eligibility is a soft check.** Policy guideline (1 full season, 2
+   remorts) computed from `HistoricSeasonStat` + the leaderboard's hardcore
+   Coalesce, shown to both sides as "meets the guideline / below the
+   guideline" — never a gate.
+6. **Acceptance writes `immortal_level`** — the site's first write to a
+   game-owned `accounts` column. Invariant: a guarded single-column queryset
+   UPDATE (`0/None → IMMORTAL` only, never `account.save()`, never a
+   downgrade), atomic with the decision and its outbox row. In-game effect
+   depends on the engine's account reload semantics — verify on prod.
+
+**Notes.** `clean_text` (control/bidi stripping) promoted from feedback's
+private `_clean` to `apps/core/utils/text.py` for both apps. Public `/trials/`
+page carries the policy summary; portal cards + Portal dropdown entries wired
+for both surfaces with `TRIALS_PENDING` / `TRIAL_ATTENTION` badges.

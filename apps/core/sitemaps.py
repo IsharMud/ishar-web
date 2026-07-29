@@ -23,6 +23,7 @@ class StaticViewSitemap(Sitemap):
             "connect",
             "events",
             "news",
+            "trials",
         ]
 
     def location(self, item):
@@ -42,6 +43,7 @@ class StaticViewSitemap(Sitemap):
             "patches": 0.6,
             "history": 0.6,
             "support": 0.5,
+            "trials": 0.6,
         }
         return priorities.get(item, 0.5)
 
@@ -59,5 +61,6 @@ class StaticViewSitemap(Sitemap):
             "history": "yearly",
             "support": "yearly",
             "connect": "monthly",
+            "trials": "monthly",
         }
         return frequencies.get(item, "weekly")

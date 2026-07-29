@@ -1,0 +1,151 @@
+{% extends "layout.html" %}
+{% load humanize %}
+{% load ishar %}
+{% block meta_title %}{{ WEBSITE_TITLE }} Trial Review{% endblock meta_title %}
+{% block meta_description %}Staff review queue for {{ WEBSITE_TITLE }} Immortal Trial applications.{% endblock meta_description %}
+{% block meta_url %}{% url 'trial_review' %}#review{% endblock meta_url %}
+{% block title %}{{ WEBSITE_TITLE }} Trial Review{% endblock title %}
+{% block scripts %}let focusTo = 'review'{% endblock scripts %}
+{% block breadcrumbs %}
+    {% crumb "Portal" "person-gear" urlname="portal" anchor="portal" %}
+    {% crumb "Trial Review" "stars" urlname="trial_review" anchor="review" active=True %}
+{% endblock breadcrumbs %}
+{% block content %}
+<div class="ac ac--wide">
+
+    <!-- Hero -->
+    <header class="ac-hero">
+        <span class="ac-hero__badge">{% bi "stars" %}</span>
+        <div class="ac-hero__text">
+            <h2 class="ac-hero__title"><span id="review">Trial Review</span></h2>
+            <p class="ac-hero__sub">
+                Immortal Trial applications — the seven-day review clock is a
+                promise to applicants.
+            </p>
+        </div>
+        <div class="ac-hero__status">
+{% if counts.overdue %}
+            <span class="ac-pill ac-pill--status ac-pill--danger ac-pill--live" title="Applications past the seven-day review window">
+                {{ counts.overdue }} overdue
+            </span>
+{% elif counts.open %}
+            <span class="ac-pill ac-pill--status ac-pill--info" title="Applications awaiting a decision">
+                {{ counts.open }} in review
+            </span>
+{% else %}
+            <span class="ac-pill ac-pill--status ac-pill--ok" title="No applications waiting">
+                queue clear
+            </span>
+{% endif %}
+        </div>
+    </header>
+
+    <!-- Stat tiles -->
+    <div class="ac-tiles">
+        <a class="ac-tile ac-tile--accent{% if current.show == 'open' %} ac-tile--active{% endif %}"
+           href="{% url 'trial_review' %}?show=open">
+            <span class="ac-tile__n">{{ counts.open }}</span>
+            <span class="ac-tile__label">Open</span>
+        </a>
+        <a class="ac-tile {% if counts.overdue %}ac-tile--danger{% else %}ac-tile--muted{% endif %}{% if current.show == 'submitted' %} ac-tile--active{% endif %}"
+           href="{% url 'trial_review' %}?show=submitted">
+            <span class="ac-tile__n">{{ counts.overdue }}</span>
+            <span class="ac-tile__label">Overdue</span>
+        </a>
+        <a class="ac-tile {% if counts.needs_revision %}ac-tile--warn{% else %}ac-tile--muted{% endif %}{% if current.show == 'needs_revision' %} ac-tile--active{% endif %}"
+           href="{% url 'trial_review' %}?show=needs_revision">
+            <span class="ac-tile__n">{{ counts.needs_revision }}</span>
+            <span class="ac-tile__label">Needs Revision</span>
+        </a>
+        <a class="ac-tile {% if counts.accepted %}ac-tile--info{% else %}ac-tile--muted{% endif %}{% if current.show == 'decided' %} ac-tile--active{% endif %}"
+           href="{% url 'trial_review' %}?show=decided">
+            <span class="ac-tile__n">{{ counts.accepted }}</span>
+            <span class="ac-tile__label">Accepted</span>
+        </a>
+    </div>
+
+    <!-- Filters -->
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "funnel" %} Filters</div>
+        <div class="ac-filter mb-2" role="group" aria-label="Status filter">
+{% for key, label in show_filters %}
+            <a class="ac-chip{% if current.show == key %} ac-chip--active{% endif %}"
+               href="{% querystring show=key page=None %}">{{ label }}</a>
+{% endfor %}
+            <span class="ac-filter__sep" aria-hidden="true"></span>
+            <a class="ac-chip{% if not current.track %} ac-chip--active{% endif %}"
+               href="{% querystring track=None page=None %}">All tracks</a>
+{% for value, label in tracks %}
+            <a class="ac-chip{% if current.track == value %} ac-chip--active{% endif %}"
+               href="{% querystring track=value page=None %}">{{ label }}</a>
+{% endfor %}
+        </div>
+        <form class="d-flex flex-wrap gap-2 align-items-center" method="get" role="search">
+            <input type="hidden" name="show" value="{{ current.show }}">
+{% if current.track %}
+            <input type="hidden" name="track" value="{{ current.track }}">
+{% endif %}
+            <input class="ac-field ac-field--inline flex-grow-1" style="min-width: 12rem;" type="search"
+                   name="q" value="{{ current.q }}" placeholder="Search character, proposal, #id" aria-label="Search">
+            <button class="ac-btn" type="submit">{% bi "search" %} Search</button>
+        </form>
+    </div>
+
+    <!-- Applications -->
+{% if applications %}
+    <div class="ac-rows">
+{% for application in applications %}
+        <div class="ac-row" id="row-{{ application.pk }}">
+            <span class="ac-row__icon" title="{{ application.get_track_display }}">
+                {% bi application.track_icon label=application.get_track_display %}
+            </span>
+            <div class="ac-row__main">
+                <div class="ac-row__title">
+                    <a class="ac-row__link" href="{% url 'trial_review_detail' application.pk %}">
+                        {{ application.character_name }} — {{ application.summary }}
+                    </a>
+                </div>
+                <div class="ac-row__meta">
+                    <span class="mono">#{{ application.pk }}</span>
+                    <span>{{ application.account.account_name }}</span>
+                    <span title="{{ application.submitted_at }}">{{ application.submitted_at|naturaltime }}</span>
+{% if application.revision_count %}
+                    <span title="Resubmitted {{ application.revision_count }} time{{ application.revision_count|pluralize }}">{% bi "arrow-counterclockwise" %} rev {{ application.revision_count }}</span>
+{% endif %}
+{% if application.num_comments %}
+                    <span title="{{ application.num_comments }} timeline entr{{ application.num_comments|pluralize:'y,ies' }}">{% bi "chat-left-text" %} {{ application.num_comments }}</span>
+{% endif %}
+                </div>
+            </div>
+            <div class="ac-row__side">
+                <span class="ac-pill ac-pill--status ac-pill--{{ application.status_pill }}">{{ application.status_label }}</span>
+{% if application.is_submitted %}
+                <span class="ac-pill ac-pill--{% if application.is_overdue %}danger{% else %}muted{% endif %}" title="{{ application.due_at }}">{{ application.due_label }}</span>
+{% endif %}
+                <a class="ac-btn" href="{% url 'trial_review_detail' application.pk %}">Open</a>
+            </div>
+        </div>
+{% endfor %}
+    </div>
+
+{% if is_paginated %}
+    <nav class="ac-pager" aria-label="Application pages">
+{% if page_obj.has_previous %}
+        <a class="ac-btn" href="{% querystring page=page_obj.previous_page_number %}">{% bi "chevron-left" %} Prev</a>
+{% endif %}
+        <span class="ac-pager__info">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+{% if page_obj.has_next %}
+        <a class="ac-btn" href="{% querystring page=page_obj.next_page_number %}">Next {% bi "chevron-right" %}</a>
+{% endif %}
+    </nav>
+{% endif %}
+
+{% else %}
+    <div class="ac-empty">
+        {% bi "inbox" %}
+        <span>No applications match the current filter.</span>
+    </div>
+{% endif %}
+
+</div>
+{% endblock content %}

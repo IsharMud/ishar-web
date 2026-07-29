@@ -294,6 +294,17 @@
                                         Style Guide
                                     </a>
                                 </li>
+                                <li class="nav-item" title="Trial Review">
+                                    <a class="nav-link dropdown-item icon-link icon-link-hover" href="{% url 'trial_review' %}#review">
+                                        {% bi "stars" %}
+                                        Trial Review
+{% if TRIALS_PENDING %}
+                                        <span class="ac-pill ac-pill--warn" title="{{ TRIALS_PENDING }} application{{ TRIALS_PENDING|pluralize }} awaiting review">
+                                            {{ TRIALS_PENDING }}
+                                        </span>
+{% endif %}
+                                    </a>
+                                </li>
                                 <li class="nav-item">
                                     <hr class="dropdown-divider">
                                 </li>
@@ -306,6 +317,16 @@
                                     <a class="nav-link dropdown-item icon-link icon-link-hover" href="{% url 'challenges' %}#challenges">
                                         {% bi "award" %}
                                         Challenges
+                                    </a>
+                                </li>
+
+                                <li class="nav-item" title="Immortal Trial">
+                                    <a class="nav-link dropdown-item icon-link icon-link-hover" href="{% url 'trials' %}#trials">
+                                        {% bi "stars" %}
+                                        Immortal Trial
+{% if TRIAL_ATTENTION %}
+                                        <span class="ac-pill ac-pill--warn" title="Your application needs revision">!</span>
+{% endif %}
                                     </a>
                                 </li>
 

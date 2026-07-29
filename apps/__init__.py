@@ -25,4 +25,5 @@ from .rooms import RoomsConfig
 from .seasons import SeasonsConfig
 from .skills import SkillsConfig
 from .surveys import SurveysConfig
+from .trials import TrialsConfig
 from .connect import ConnectConfig

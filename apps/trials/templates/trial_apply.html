@@ -1,0 +1,177 @@
+{% extends "layout.html" %}
+{% load ishar %}
+{% block meta_title %}{{ WEBSITE_TITLE }} Trial Application{% endblock meta_title %}
+{% block meta_description %}Apply for the {{ WEBSITE_TITLE }} Immortal Trial.{% endblock meta_description %}
+{% block meta_url %}{% url 'trial_apply' %}#apply{% endblock meta_url %}
+{% block title %}{{ WEBSITE_TITLE }} Trial Application{% endblock title %}
+{% block scripts %}let focusTo = 'apply'{% endblock scripts %}
+{% block breadcrumbs %}
+    {% crumb "Immortal Trial" "stars" urlname="trials" anchor="trials" %}
+    {% crumb "Apply" "pencil-square" urlname="trial_apply" anchor="apply" active=True %}
+{% endblock breadcrumbs %}
+{% block content %}
+<div class="ac">
+
+    <!-- Hero -->
+    <header class="ac-hero">
+        <span class="ac-hero__badge">{% bi "pencil-square" %}</span>
+        <div class="ac-hero__text">
+            <h2 class="ac-hero__title"><span id="apply">{% if application %}Revise your application{% else %}Apply for the Immortal Trial{% endif %}</span></h2>
+            <p class="ac-hero__sub">
+                Pitch a small, guided project — about four weeks of your free
+                time. Staff aim to review within seven days.
+            </p>
+        </div>
+    </header>
+
+{% if application and revision_note %}
+    <div class="ac-note ac-note--warn" role="alert">
+        {% bi "arrow-counterclockwise" %}
+        <span>{{ revision_note }}</span>
+    </div>
+{% endif %}
+
+{% if eligibility and not eligibility.eligible %}
+    <div class="ac-note" role="note">
+        {% bi "person-check" %}
+        <span>The guideline is one full season played and two remorts — you're at
+        {{ eligibility.seasons_played }} season{{ eligibility.seasons_played|pluralize }}
+        and {{ eligibility.best_remorts }} remort{{ eligibility.best_remorts|pluralize }}.
+        You can still apply; use your proposal to make the case.</span>
+    </div>
+{% endif %}
+
+    <form id="trial-form" novalidate>
+        <div class="ac-panel">
+            <div class="ac-panel__h">{% bi "person" %} Who you are</div>
+            <label class="ac-label" for="character_name">Character name</label>
+            <input class="ac-field" id="character_name" name="character_name"
+                   maxlength="{{ caps.character }}" list="character-names" required
+                   value="{{ application.character_name|default:'' }}"
+                   placeholder="The mortal you're known by">
+            <datalist id="character-names">
+{% for name in character_names %}
+                <option value="{{ name }}"></option>
+{% endfor %}
+            </datalist>
+        </div>
+
+        <div class="ac-panel">
+            <div class="ac-panel__h">{% bi "signpost" %} Track</div>
+            <div class="ac-opts">
+                <input class="btn-check" type="radio" name="track" id="track-zoner"
+                       value="zoner" autocomplete="off"
+                       {% if application.track == "zoner" %}checked{% endif %}>
+                <label class="ac-opt" for="track-zoner">
+                    <span class="ac-opt__mark" aria-hidden="true"></span>
+                    {% bi "map" %} Zoner — zone design, quests, lore
+                </label>
+                <input class="btn-check" type="radio" name="track" id="track-coder"
+                       value="coder" autocomplete="off"
+                       {% if application.track == "coder" %}checked{% endif %}>
+                <label class="ac-opt" for="track-coder">
+                    <span class="ac-opt__mark" aria-hidden="true"></span>
+                    {% bi "code-slash" %} Coder — features, scripting, bug fixes
+                </label>
+            </div>
+        </div>
+
+        <div class="ac-panel">
+            <div class="ac-panel__h">{% bi "lightbulb" %} Your trial project</div>
+            <label class="ac-label" for="proposal">
+                What do you want to build? Keep it small — a 3–10 room
+                mini-zone with a quest line and a lore book, or a bug fix /
+                quality-of-life command.
+            </label>
+            <textarea class="ac-field" id="proposal" name="proposal" rows="8"
+                      maxlength="{{ caps.proposal }}" required
+                      placeholder="The project, why it fits the game, and roughly how you'd spend the four weeks…">{{ application.proposal|default:'' }}</textarea>
+            <label class="ac-label mt-3" for="experience">
+                Relevant experience <span class="text-secondary">(optional)</span>
+            </label>
+            <textarea class="ac-field" id="experience" name="experience" rows="4"
+                      maxlength="{{ caps.experience }}"
+                      placeholder="Building, writing, or coding you've done — here or elsewhere">{{ application.experience|default:'' }}</textarea>
+        </div>
+
+        <div class="ac-panel">
+            <div class="ac-panel__h">{% bi "check2-square" %} Acknowledgments</div>
+            <div class="d-flex flex-column gap-2">
+                <div class="ac-note" role="note">
+                    <div class="form-check m-0">
+                        <input class="form-check-input" type="checkbox" id="ack_ai_policy"
+                               name="ack_ai_policy"{% if application.ack_ai_policy %} checked{% endif %}>
+                        <label class="form-check-label" for="ack_ai_policy">
+                            My creative writing for the trial — room descriptions,
+                            quest dialogue, lore — will be my own original work,
+                            not pasted AI output.
+                        </label>
+                    </div>
+                </div>
+                <div class="ac-note" role="note">
+                    <div class="form-check m-0">
+                        <input class="form-check-input" type="checkbox" id="ack_commitment"
+                               name="ack_commitment"{% if application.ack_commitment %} checked{% endif %}>
+                        <label class="form-check-label" for="ack_commitment">
+                            I can commit the time for a ~4-week guided project,
+                            and if life gets in the way I'll communicate rather
+                            than go quiet.
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ac-note ac-note--danger" id="form-error" hidden role="alert">
+            {% bi "exclamation-triangle" %}
+            <span id="form-error-text"></span>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2 align-items-center">
+            <button class="ac-cta ac-cta--accent" type="submit" id="form-submit">
+                {% bi "send" %} {% if application %}Resubmit application{% else %}Submit application{% endif %}
+            </button>
+            <a class="ac-btn" href="{% url 'trials' %}">Back to the trial page</a>
+        </div>
+    </form>
+
+</div>
+
+<script>
+    const form = document.getElementById("trial-form")
+    const errorBox = document.getElementById("form-error")
+    const errorText = document.getElementById("form-error-text")
+    const submitBtn = document.getElementById("form-submit")
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault()
+        errorBox.hidden = true
+        submitBtn.disabled = true
+        const track = form.querySelector('input[name="track"]:checked')
+        const payload = {
+            character_name: document.getElementById("character_name").value,
+            track: track ? track.value : "",
+            proposal: document.getElementById("proposal").value,
+            experience: document.getElementById("experience").value,
+            ack_ai_policy: document.getElementById("ack_ai_policy").checked,
+            ack_commitment: document.getElementById("ack_commitment").checked,
+        }
+        const resp = await fetch("{% url 'trial_apply_submit' %}", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}",
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+        }).catch(() => null)
+        const data = resp ? await resp.json().catch(() => null) : null
+        if (data && data.ok) {
+            window.location.assign(data.redirect || "{% url 'trial_application' %}")
+            return
+        }
+        errorText.textContent = (data && data.message) || "Submission failed — please try again."  // textContent: no HTML injection
+        errorBox.hidden = false
+        submitBtn.disabled = false
+    })
+</script>
+{% endblock content %}
