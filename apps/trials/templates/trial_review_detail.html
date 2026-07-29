@@ -1,0 +1,234 @@
+{% extends "layout.html" %}
+{% load humanize %}
+{% load ishar %}
+{% block meta_title %}{{ WEBSITE_TITLE }} Trial Application #{{ application.pk }}{% endblock meta_title %}
+{% block meta_description %}Immortal Trial application #{{ application.pk }}.{% endblock meta_description %}
+{% block meta_url %}{% url 'trial_review_detail' application.pk %}{% endblock meta_url %}
+{% block title %}{{ WEBSITE_TITLE }} Trial Application #{{ application.pk }}{% endblock title %}
+{% block scripts %}let focusTo = 'application'{% endblock scripts %}
+{% block breadcrumbs %}
+    {% crumb "Portal" "person-gear" urlname="portal" anchor="portal" %}
+    {% crumb "Trial Review" "stars" urlname="trial_review" anchor="review" %}
+    <li class="breadcrumb-item active h2" aria-current="page" title="Application #{{ application.pk }}">
+        <span id="application">#{{ application.pk }}</span>
+    </li>
+{% endblock breadcrumbs %}
+{% block content %}
+<div class="ac ac--wide">
+
+    <!-- Hero -->
+    <header class="ac-hero">
+        <span class="ac-hero__badge">{% bi application.track_icon %}</span>
+        <div class="ac-hero__text">
+            <h2 class="ac-hero__title">#{{ application.pk }} · {{ application.character_name }}</h2>
+            <p class="ac-hero__sub">
+                {{ application.get_track_display }} track ·
+                submitted {{ application.submitted_at|naturaltime }}
+{% if application.revision_count %} · revision {{ application.revision_count }}{% endif %}
+            </p>
+        </div>
+        <div class="ac-hero__status d-flex flex-wrap gap-1 justify-content-end">
+            <span class="ac-pill ac-pill--status ac-pill--{{ application.status_pill }}" id="status-badge">{{ application.status_label }}</span>
+{% if application.is_submitted %}
+            <span class="ac-pill ac-pill--{% if application.is_overdue %}danger{% else %}muted{% endif %}" title="{{ application.due_at }}">{{ application.due_label }}</span>
+{% endif %}
+        </div>
+    </header>
+
+    <div class="row g-3">
+
+        {# ---- Left: application + timeline -------------------------------- #}
+        <div class="col-lg-8 d-flex flex-column gap-3">
+            <div class="ac-panel">
+                <div class="ac-panel__h">{% bi "file-earmark-text" %} Application</div>
+                <div class="ac-label">Project proposal</div>
+                <pre class="ac-quote">{{ application.proposal }}</pre>
+{% if application.experience %}
+                <div class="ac-label mt-2">Experience</div>
+                <pre class="ac-quote">{{ application.experience }}</pre>
+{% endif %}
+            </div>
+
+            <div class="ac-panel">
+                <div class="ac-panel__h">{% bi "chat-left-text" %} Timeline</div>
+                <div class="ac-timeline">
+{% for comment in timeline %}
+                    <div class="ac-tl{% if comment.is_system %} ac-tl--system{% endif %}{% if comment.is_internal %} ac-tl--internal{% endif %}">
+                        <span class="ac-tl__icon" title="{{ comment.get_kind_display }}">
+                            {% bi comment.kind_icon label=comment.get_kind_display %}
+                        </span>
+                        <div class="ac-tl__body">
+                            <div class="ac-tl__head">
+                                <span class="ac-tl__author{% if comment.kind == 'staff' %} ac-tl__author--staff{% endif %}">{{ comment.author }}</span>
+{% if comment.is_internal %}
+                                <span class="ac-pill ac-pill--warn" title="Staff only — the applicant never sees this">internal</span>
+{% elif comment.kind == 'staff' %}
+                                <span class="ac-pill ac-pill--info">staff</span>
+{% endif %}
+                                <span class="ac-tl__time" title="{{ comment.created_at }}">{{ comment.created_at|naturaltime }}</span>
+                            </div>
+                            <div class="ac-tl__text">{{ comment.body }}</div>
+                        </div>
+                    </div>
+{% empty %}
+                    <div class="ac-empty">
+                        {% bi "chat-left" %}
+                        <span>No comments yet.</span>
+                    </div>
+{% endfor %}
+                </div>
+            </div>
+        </div>
+
+        {# ---- Right: metadata + actions ----------------------------------- #}
+        <div class="col-lg-4 d-flex flex-column gap-3">
+            <div class="ac-panel">
+                <div class="ac-panel__h">{% bi "card-list" %} Details</div>
+                <dl class="ac-kv">
+                    <dt>Account</dt><dd>{{ application.account.account_name }}</dd>
+                    <dt>Character</dt><dd>{{ application.character_name }}</dd>
+                    <dt>Track</dt><dd>{{ application.get_track_display }}</dd>
+                    <dt>Submitted</dt><dd title="{{ application.submitted_at }}">{{ application.submitted_at|naturaltime }}</dd>
+                    <dt>Review due</dt><dd title="{{ application.due_at }}">{{ application.due_at|naturaltime }}</dd>
+{% if application.revision_count %}
+                    <dt>Revisions</dt><dd>{{ application.revision_count }}</dd>
+{% endif %}
+{% if application.decided_by %}
+                    <dt>Decided by</dt><dd>{{ application.decided_by }}</dd>
+                    <dt>Decided</dt><dd title="{{ application.decided_at }}">{{ application.decided_at|naturaltime }}</dd>
+{% endif %}
+{% if application.rejection_reason %}
+                    <dt>Reason</dt><dd>{{ application.rejection_reason }}</dd>
+{% endif %}
+{% if prior_applications %}
+                    <dt>Prior</dt>
+                    <dd>{% for prior in prior_applications %}<a href="{% url 'trial_review_detail' prior.pk %}" title="{{ prior.status_label }}">#{{ prior.pk }}</a> {% endfor %}</dd>
+{% endif %}
+                </dl>
+            </div>
+
+            <div class="ac-panel">
+                <div class="ac-panel__h">{% bi "person-check" %} Eligibility</div>
+                <dl class="ac-kv">
+                    <dt>Seasons played</dt>
+                    <dd>{{ eligibility.seasons_played }} {% if eligibility.meets_seasons %}{% bi "check-lg" css="text-success" label="meets" %}{% else %}{% bi "x-lg" css="text-warning" label="below" %}{% endif %}</dd>
+                    <dt>Best remorts</dt>
+                    <dd>{{ eligibility.best_remorts }} {% if eligibility.meets_remorts %}{% bi "check-lg" css="text-success" label="meets" %}{% else %}{% bi "x-lg" css="text-warning" label="below" %}{% endif %}</dd>
+                </dl>
+{% if eligibility.eligible %}
+                <span class="ac-pill ac-pill--ok">meets the guideline</span>
+{% else %}
+                <span class="ac-pill ac-pill--warn" title="A guideline, not a gate — staff judgment applies">below the guideline</span>
+{% endif %}
+            </div>
+
+            <div class="ac-panel">
+                <div class="ac-panel__h">{% bi "lightning-charge" %} Actions</div>
+                <div class="d-grid gap-2" id="action-panel">
+                    <div id="action-msg" class="d-none" role="status"></div>
+
+{% if application.is_open %}
+                    <div>
+                        <label class="ac-label" for="note">Note / reason</label>
+                        <input class="ac-field" id="note"
+                               placeholder="required for Needs Revision & Reject">
+                    </div>
+                    <div class="d-flex flex-wrap gap-1">
+                        <button class="ac-btn ac-btn--warn flex-fill" data-action="needs_revision"
+                                title="Send back for revision — the note is shown to the applicant">
+                            Needs&nbsp;Revision
+                        </button>
+                        <button class="ac-btn ac-btn--danger flex-fill" data-action="reject"
+                                title="Reject — the reason is shown to the applicant">
+                            Reject
+                        </button>
+                    </div>
+                    <button class="ac-btn ac-btn--ok" data-action="accept"
+                            data-confirm="Accept this application?{% if not application.account.is_immortal %} This grants the account Immortal (Trial) rank in the game.{% endif %}">
+                        {% bi "stars" %} Accept
+                    </button>
+{% if not application.account.is_immortal %}
+                    <div class="ac-note" role="note">
+                        {% bi "info-circle" %}
+                        <span>Accepting grants <code>{{ application.account.account_name }}</code>
+                        Immortal (Trial) rank in the game.</span>
+                    </div>
+{% endif %}
+{% else %}
+                    <div class="ac-note" role="note">
+                        {% bi "check2-circle" %}
+                        <span>Decided — the timeline above is the record.</span>
+                    </div>
+{% endif %}
+
+                    <hr class="border-secondary my-1">
+                    <div>
+                        <label class="ac-label" for="comment-text">Comment</label>
+                        <textarea class="ac-field" id="comment-text" rows="3"
+                                  placeholder="Feedback for the applicant, or an internal note…"></textarea>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="comment-internal">
+                        <label class="form-check-label" for="comment-internal"
+                               title="Internal notes never reach the applicant or Discord">
+                            Internal only
+                        </label>
+                    </div>
+                    <button class="ac-btn ac-btn--accent" data-action="comment">
+                        {% bi "chat-left-text" %} Add Comment
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const APPLICATION_ID = {{ application.pk }}
+    const msg = document.getElementById("action-msg")
+
+    function showMsg(text, ok) {
+        msg.textContent = text
+        msg.className = `ac-note ${ok ? "ac-note--ok" : "ac-note--danger"}`
+    }
+
+    async function postAction(action) {
+        const body = new URLSearchParams()
+        const note = document.getElementById("note")
+        const commentText = document.getElementById("comment-text")
+        const internal = document.getElementById("comment-internal")
+        if (note) {
+            body.append("note", note.value)
+            body.append("reason", note.value)
+        }
+        if (action === "comment" && commentText) {
+            body.append("text", commentText.value)
+            if (internal && internal.checked) body.append("internal", "1")
+        }
+
+        const resp = await fetch(`/trials/review/${APPLICATION_ID}/${action}/`, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}",
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: body.toString(),
+        })
+        const data = await resp.json().catch(() => ({ok: false, message: "Server error."}))
+        showMsg(data.message || (data.ok ? "Done." : "Failed."), data.ok)
+        if (data.ok) {
+            // Reload to reflect the new timeline entry and status.
+            setTimeout(() => window.location.reload(), 500)
+        }
+    }
+
+    document.querySelectorAll("#action-panel [data-action]").forEach((el) => {
+        el.addEventListener("click", () => {
+            el.blur()
+            if (el.dataset.confirm && !confirm(el.dataset.confirm)) return
+            postAction(el.dataset.action)
+        })
+    })
+</script>
+{% endblock content %}

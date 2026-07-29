@@ -1022,6 +1022,9 @@ a.ac-link--featured:visited .ac-link__name { color: var(--ac-accent); }
 }
 .ac-tl--system { background: var(--ac-bg); border-style: dashed; }
 .ac-tl--system .ac-tl__text { color: var(--ac-dim); font-style: italic; font-size: .82rem; }
+/* Internal entries: staff-only in a mixed-audience timeline (pair with a
+   warn "internal" pill in the head so the marker isn't color-alone). */
+.ac-tl--internal { border-left: 3px solid var(--ac-warn); }
 
 /* ------------------------------------------------------- quote body --- */
 /* Verbatim player/machine text (report bodies, pasted output): monospace on

@@ -22,6 +22,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from apps.core.utils.staff import staff_name  # noqa: F401 - shared, re-exported
+from apps.core.utils.text import clean_text as _clean
 
 from .models import (
     CommentSource,
@@ -44,27 +45,6 @@ INSTRUCTIONS_MAX = 2000
 # --------------------------------------------------------------------------- #
 # Helpers
 # --------------------------------------------------------------------------- #
-
-# Bidirectional/direction-override codepoints that can spoof displayed order —
-# stripped to match the Rust `sanitize_text` (feedback.rs).
-_BIDI_OVERRIDES = frozenset(
-    chr(cp) for cp in list(range(0x202A, 0x202F)) + list(range(0x2066, 0x206A))
-)
-
-
-def _clean(text, limit) -> str:
-    """Strip control + bidi-override characters and truncate — mirrors
-    `sanitize_text`."""
-    if not text:
-        return ""
-    cleaned = "".join(
-        ch for ch in str(text)
-        if (ch in ("\n", "\t") or ord(ch) >= 0x20) and ch not in _BIDI_OVERRIDES
-    ).strip()
-    if len(cleaned) > limit:
-        cleaned = cleaned[:limit].rstrip()
-    return cleaned
-
 
 def _now():
     return timezone.now()

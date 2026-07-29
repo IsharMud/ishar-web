@@ -1,0 +1,173 @@
+{% extends "layout.html" %}
+{% load ishar %}
+{% block meta_title %}{{ WEBSITE_TITLE }} Immortal Trial{% endblock meta_title %}
+{% block meta_description %}Apply to join the {{ WEBSITE_TITLE }} staff: the Immortal Trial process, tracks, and expectations.{% endblock meta_description %}
+{% block meta_url %}{% url 'trials' %}#trials{% endblock meta_url %}
+{% block title %}{{ WEBSITE_TITLE }} Immortal Trial{% endblock title %}
+{% block scripts %}let focusTo = 'trials'{% endblock scripts %}
+{% block breadcrumbs %}
+    {% crumb "Immortal Trial" "stars" urlname="trials" anchor="trials" active=True %}
+{% endblock breadcrumbs %}
+{% block content %}
+<div class="ac">
+
+    <!-- Hero -->
+    <header class="ac-hero">
+        <span class="ac-hero__badge">{% bi "stars" %}</span>
+        <div class="ac-hero__text">
+            <h2 class="ac-hero__title"><span id="trials">The Immortal Trial</span></h2>
+            <p class="ac-hero__sub">
+                How mortals join the staff: a small, guided project that earns
+                the trust to build {{ WEBSITE_TITLE }}'s world.
+            </p>
+        </div>
+{% if application %}
+        <div class="ac-hero__status">
+            <a class="ac-pill ac-pill--status ac-pill--{{ application.status_pill }} text-decoration-none"
+               href="{% url 'trial_application' %}">{{ application.status_label }}</a>
+        </div>
+{% endif %}
+    </header>
+
+    <!-- What it is -->
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "signpost-split" %} How it works</div>
+        <p>
+            Ishar is a passion project — nobody here is paid, so everyone's
+            free time matters. The trial isn't there to stifle creativity;
+            it makes sure work gets finished, fits the larger game, and that
+            we can collaborate without burning each other out.
+        </p>
+        <p class="mb-0">
+            You start as an <strong>Immortal (Trial)</strong> with a small,
+            guided project scoped and approved by senior staff — it should
+            complete in about <strong>four weeks</strong>, with leeway for
+            active communication. Deliver it well, take feedback on board, and
+            you progress to a larger <strong>Proven</strong> project, then to
+            <strong>Artisan</strong>: earned autonomy to propose and build
+            passion projects of your own.
+        </p>
+    </div>
+
+    <!-- Tracks -->
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "signpost" %} Pick a track</div>
+        <div class="ac-grid">
+            <div class="ac-link" role="listitem">
+                <span class="ac-link__icon">{% bi "map" %}</span>
+                <span class="ac-link__body">
+                    <span class="ac-link__name">Zoner</span>
+                    <span class="ac-link__note d-block">
+                        Zone design, writing, lore. Trial: a 3–10 room
+                        mini-zone in an underdeveloped area, a quest line
+                        using existing mechanics, and an in-game lore book.
+                    </span>
+                </span>
+            </div>
+            <div class="ac-link" role="listitem">
+                <span class="ac-link__icon">{% bi "code-slash" %}</span>
+                <span class="ac-link__body">
+                    <span class="ac-link__name">Coder</span>
+                    <span class="ac-link__note d-block">
+                        Code features, scripting, bug fixes. Trial: fix a
+                        small bug, or add / tweak a quality-of-life command.
+                    </span>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Expectations -->
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "check2-square" %} What we expect</div>
+        <div class="d-flex flex-column gap-2">
+            <div class="ac-note" role="note">
+                {% bi "pencil" %}
+                <span><strong>Original work.</strong> During the trial, all creative
+                writing — room descriptions, quest dialogue, lore — must be your
+                own. Blatantly copy-pasted AI text is rejected outright; learn
+                the craft before leaning on the tool.</span>
+            </div>
+            <div class="ac-note" role="note">
+                {% bi "chat-dots" %}
+                <span><strong>Stay in communication.</strong> Missed deadlines
+                happen — silence doesn't work. If life gets in the way, say so.</span>
+            </div>
+            <div class="ac-note" role="note">
+                {% bi "bullseye" %}
+                <span><strong>Respect the scope.</strong> The failure modes are
+                few and known: expanding scope beyond the agreed project,
+                ignoring guidance, refusing feedback, or going quiet.</span>
+            </div>
+            <div class="ac-note" role="note">
+                {% bi "heart" %}
+                <span><strong>Stay a player.</strong> The best builders keep a
+                pulse on the mortal game — what players enjoy, where the
+                friction is, what's missing.</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Eligibility -->
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "person-check" %} Eligibility</div>
+        <p{% if not user.is_authenticated %} class="mb-0"{% endif %}>
+            To apply you should have been an active player for at least
+            <strong>one full season</strong> and reached
+            <strong>two remorts</strong> on your mortal character. This is a
+            guideline, not a gate — staff review every application on its
+            merits.
+        </p>
+{% if user.is_authenticated and eligibility %}
+        <div class="ac-tiles">
+            <div class="ac-tile {% if eligibility.meets_seasons %}ac-tile--accent{% else %}ac-tile--warn{% endif %}">
+                <span class="ac-tile__n">{{ eligibility.seasons_played }}</span>
+                <span class="ac-tile__label">Season{{ eligibility.seasons_played|pluralize }} played</span>
+            </div>
+            <div class="ac-tile {% if eligibility.meets_remorts %}ac-tile--accent{% else %}ac-tile--warn{% endif %}">
+                <span class="ac-tile__n">{{ eligibility.best_remorts }}</span>
+                <span class="ac-tile__label">Best remorts</span>
+            </div>
+        </div>
+        <p class="mb-0 mt-2">
+{% if eligibility.eligible %}
+            <span class="ac-pill ac-pill--ok">meets the guideline</span>
+{% else %}
+            <span class="ac-pill ac-pill--warn">below the guideline</span>
+            — you can still apply; tell us why in your proposal.
+{% endif %}
+        </p>
+{% endif %}
+    </div>
+
+    <!-- Call to action -->
+    <div class="ac-panel">
+{% if not user.is_authenticated %}
+        <p>Ready to apply? Log in with your game account first.</p>
+        <a class="ac-cta ac-cta--accent" href="{% url 'login' %}?next={% url 'trial_apply' %}">
+            {% bi "box-arrow-in-right" %} Log in to apply
+        </a>
+{% elif application and application.is_submitted %}
+        <p>Your application is in — staff aim to review within seven days.</p>
+        <a class="ac-cta ac-cta--accent" href="{% url 'trial_application' %}">
+            {% bi "envelope-paper" %} View your application
+        </a>
+{% elif application and application.is_needs_revision %}
+        <p>Staff sent your application back with feedback — revise and resubmit when ready.</p>
+        <a class="ac-cta ac-cta--accent" href="{% url 'trial_apply' %}">
+            {% bi "pencil-square" %} Revise your application
+        </a>
+{% else %}
+        <p>Bring creativity and follow-through, and you'll earn the freedom to
+           tell the stories and build the worlds you're here for.</p>
+        <a class="ac-cta ac-cta--accent" href="{% url 'trial_apply' %}">
+            {% bi "stars" %} Apply for the Immortal Trial
+        </a>
+{% if application %}
+        <a class="ac-btn ms-2" href="{% url 'trial_application' %}">Past application</a>
+{% endif %}
+{% endif %}
+    </div>
+
+</div>
+{% endblock content %}

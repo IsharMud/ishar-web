@@ -107,6 +107,16 @@
                     <span class="ac-link__note d-block">Design tokens &amp; components, live</span>
                 </span>
             </a>
+            <a class="ac-link" href="{% url 'trial_review' %}#review" title="Trial Review">
+                <span class="ac-link__icon">{% bi "stars" %}</span>
+                <span class="ac-link__body">
+                    <span class="ac-link__name">Trial Review</span>
+                    <span class="ac-link__note d-block">Immortal applications — review &amp; decide</span>
+                </span>
+{% if TRIALS_PENDING %}
+                <span class="ac-link__side ac-pill ac-pill--warn" title="{{ TRIALS_PENDING }} awaiting review">{{ TRIALS_PENDING }}</span>
+{% endif %}
+            </a>
     {% endif %}
         </div>
     </div>
@@ -141,6 +151,16 @@
                 </span>
 {% if SURVEYS_OPEN %}
                 <span class="ac-link__side ac-pill ac-pill--ok" title="{{ SURVEYS_OPEN }} awaiting your answers">{{ SURVEYS_OPEN }}</span>
+{% endif %}
+            </a>
+            <a class="ac-link" href="{% url 'trials' %}#trials" title="Immortal Trial">
+                <span class="ac-link__icon">{% bi "stars" %}</span>
+                <span class="ac-link__body">
+                    <span class="ac-link__name">Immortal Trial</span>
+                    <span class="ac-link__note d-block">Apply to join the staff</span>
+                </span>
+{% if TRIAL_ATTENTION %}
+                <span class="ac-link__side ac-pill ac-pill--warn" title="Your application needs revision">!</span>
 {% endif %}
             </a>
             <a class="ac-link" href="{% url 'challenges' %}#challenges" title="Challenges">

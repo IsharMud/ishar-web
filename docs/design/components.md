@@ -262,8 +262,10 @@ patches. Status: **formalized** (supersedes Bootstrap `.pagination`).
 Stacked entries: round source-icon tile, head line (author — `--staff` renders
 info-blue — pills, right-aligned time), pre-wrapped text. `--system` entries
 recede (deepest surface, dashed border, dim italic text) so human conversation
-stays foreground.
-Used: feedback detail. Status: **formalized.**
+stays foreground. `--internal` marks staff-only entries in a mixed-audience
+timeline (warn left edge — always paired with a warn "internal" pill in the
+head so the marker isn't color-alone).
+Used: feedback detail, trial review detail. Status: **formalized.**
 
 ### `.ac-quote` — verbatim text block
 Monospace `pre` on the deepest surface with a strong left edge — for captured

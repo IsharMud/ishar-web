@@ -155,6 +155,7 @@ INSTALLED_APPS = [
     "apps.SeasonsConfig",
     "apps.SkillsConfig",
     "apps.SurveysConfig",
+    "apps.TrialsConfig",
 #    "daphne",
     "channels",
 ]
@@ -197,6 +198,7 @@ TEMPLATES = [
                 "apps.patchnotes.contexts.patch_notes_unread",
                 "apps.seasons.contexts.current_season",
                 "apps.surveys.contexts.surveys_open",
+                "apps.trials.contexts.trials_badges",
             ],
 #            "libraries": {
 #                "ishar": "apps.core.templatetags"
