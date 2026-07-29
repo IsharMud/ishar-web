@@ -67,10 +67,10 @@
                     <dt>Track</dt><dd>{{ application.get_track_display }}</dd>
                 </dl>
                 <div class="ac-label mt-2">Project proposal</div>
-                <pre class="ac-quote">{{ application.proposal }}</pre>
+                <pre class="ac-quote">{{ application.proposal|urlize }}</pre>
 {% if application.experience %}
                 <div class="ac-label mt-2">Experience</div>
-                <pre class="ac-quote">{{ application.experience }}</pre>
+                <pre class="ac-quote">{{ application.experience|urlize }}</pre>
 {% endif %}
             </div>
 
@@ -90,7 +90,7 @@
 {% endif %}
                                 <span class="ac-tl__time" title="{{ comment.created_at }}">{{ comment.created_at|naturaltime }}</span>
                             </div>
-                            <div class="ac-tl__text">{{ comment.body }}</div>
+                            <div class="ac-tl__text">{{ comment.body|urlize }}</div>
                         </div>
                     </div>
 {% empty %}
