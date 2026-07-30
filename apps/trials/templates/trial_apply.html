@@ -1,5 +1,6 @@
 {% extends "layout.html" %}
 {% load ishar %}
+{% load l10n %}
 {% block meta_title %}{{ WEBSITE_TITLE }} Trial Application{% endblock meta_title %}
 {% block meta_description %}Apply for the {{ WEBSITE_TITLE }} Immortal Trial.{% endblock meta_description %}
 {% block meta_url %}{% url 'trial_apply' %}#apply{% endblock meta_url %}
@@ -46,7 +47,7 @@
             <div class="ac-panel__h">{% bi "person" %} Who you are</div>
             <label class="ac-label" for="character_name">Character name</label>
             <input class="ac-field" id="character_name" name="character_name"
-                   maxlength="{{ caps.character }}" list="character-names" required
+                   maxlength="{{ caps.character|unlocalize }}" list="character-names" required
                    value="{{ application.character_name|default:'' }}"
                    placeholder="The mortal you're known by">
             <datalist id="character-names">
@@ -84,13 +85,13 @@
                 quality-of-life command.
             </label>
             <textarea class="ac-field" id="proposal" name="proposal" rows="8"
-                      maxlength="{{ caps.proposal }}" required
+                      maxlength="{{ caps.proposal|unlocalize }}" required
                       placeholder="The project, why it fits the game, and roughly how you'd spend the four weeks…">{{ application.proposal|default:'' }}</textarea>
             <label class="ac-label mt-3" for="experience">
                 Relevant experience <span class="text-secondary">(optional)</span>
             </label>
             <textarea class="ac-field" id="experience" name="experience" rows="4"
-                      maxlength="{{ caps.experience }}"
+                      maxlength="{{ caps.experience|unlocalize }}"
                       placeholder="Building, writing, or coding you've done — here or elsewhere">{{ application.experience|default:'' }}</textarea>
         </div>
 
