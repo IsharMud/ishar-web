@@ -532,6 +532,7 @@
     // policy in apps/connect/testserver.py; the bridge re-checks it
     // server-side before dialing, so this only shapes the UI).
     var TEST_ALLOWED = {{ test_server_allowed|yesno:"true,false" }};
+    var TEST_TIER = "{{ test_server_tier|escapejs }}";  // open | closed | staff
 
     // --- ANSI color theme (all 16 standard colors) ---
     var mudTheme = {
@@ -750,9 +751,15 @@
         if (pkg === "Char.Status") {
             try {
                 var st = JSON.parse(body);
-                if (st && st.name && sess.displayName !== String(st.name)) {
-                    sess.displayName = String(st.name);
-                    renderSessionTabs();
+                // Test sessions keep the marker in the label: amber alone
+                // can't distinguish the same character on prod vs staging.
+                if (st && st.name) {
+                    var want = (sess.server === "test" ? "Test · " : "")
+                        + String(st.name);
+                    if (sess.displayName !== want) {
+                        sess.displayName = want;
+                        renderSessionTabs();
+                    }
                 }
             } catch (e) {}
         }
@@ -1040,7 +1047,7 @@
                     sess.state = "dead";
                     sess.reconnectVisible = true;
                     if (isFocused(sess)) syncFocusUi(); else renderSessionTabs();
-                    sess.term.writeln("\r\n\x1b[1;33m--- The test server is not open to your account right now. ---\x1b[0m");
+                    sess.term.writeln("\r\n\x1b[1;33m--- The test server is not open to your account right now. If a beta just opened or closed, reload the page. ---\x1b[0m");
                     return;
                 }
                 if (event.code === 1000) {
@@ -1886,7 +1893,9 @@
                 break;
             case "test": {
                 if (!TEST_ALLOWED) {
-                    sysln("The test server is not open to your account right now.");
+                    sysln(TEST_TIER === "closed" && !isAuthed
+                        ? "A closed beta is running — log in to check your test-server access."
+                        : "The test server is not open to your account right now.");
                     break;
                 }
                 var testOpen = null;
@@ -2574,10 +2583,12 @@
     }
 
     // The test-server entry rides the same picker (also /test — guests in an
-    // open beta have no "+" button). One test session at a time.
+    // open beta have no "+" button). One test session at a time: picking it
+    // again just focuses the open one, like /test.
     function appendTestPick() {
         if (!TEST_ALLOWED) return;
-        var open = sessions.some(function(s) { return s.server === "test"; });
+        var open = null;
+        sessions.forEach(function(s) { if (s.server === "test") open = s; });
         var b = document.createElement("button");
         b.type = "button";
         b.className = "sess-pick sess-pick--test";
@@ -2593,15 +2604,14 @@
 
         var meta = document.createElement("span");
         meta.className = "sess-pick__meta";
-        meta.textContent = "staging";
+        meta.textContent = open ? "open — switch"
+            : (TEST_TIER === "open" ? "open beta"
+                : TEST_TIER === "closed" ? "closed beta" : "staff");
         b.appendChild(meta);
 
-        if (open) {
-            b.disabled = true;
-            b.title = "Already open in a session";
-        }
         b.addEventListener("click", function() {
             closeSessionPop();
+            if (open) { Sessions.focus(open); return; }
             var s = Sessions.create({ server: "test" });
             if (s) Sessions.focus(s);
         });
@@ -2758,6 +2768,14 @@
         first = focusedSession;
     }
     if (!first) first = Sessions.create({});
+
+    // Test-server access is invisible unless announced — the picker is behind
+    // "+" (and guests have no "+" at all), so say it once at load.
+    if (TEST_ALLOWED && !isDemo) {
+        sysln(TEST_TIER === "open"
+            ? "An open beta is running on the test server — /test (or the + menu) opens a session there."
+            : "You have test-server access — /test (or the + menu) opens a staging session.");
+    }
 
     // Demo mode (/connect?demo=1): populate the HUD with sample data for design
     // review without a GMCP-enabled server. Skips the live connection.

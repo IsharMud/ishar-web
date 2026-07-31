@@ -13,22 +13,25 @@ Tiers:
 * **Closed beta** — accounts flagged ``beta_tester``, plus staff.
 * **Beta off** (or the staging DB unreachable) — staff only. Failing closed
   costs nothing: the game refuses non-staff logins in those states anyway.
+
+"Staff" here is Artisan+ (``is_artisan``), matching the game gate's
+``IMM_ARTISAN`` floor exactly — the two policies must not drift.
 """
 import logging
 
 from django.conf import settings
 from django.core.cache import cache
 
+from apps.seasons.models.season import GameState
+
 
 logger = logging.getLogger(__name__)
 
-# seasons.game_state values (ishar-mud src/include/constants.h, game_state_t).
-GAME_STATE_OPEN_BETA = 3
-GAME_STATE_CLOSED_BETA = 4
-
 # The staging DB is an internet hop that backs both page renders and every
 # websocket connect — cache the state briefly, including "unreachable" so a
-# down box doesn't cost a 3s connect timeout per request.
+# down box doesn't cost a connect timeout per request. The cache means the
+# policy trails `admin beta` by up to 60s; that's advisory-tier only, since
+# the game re-gates every login itself.
 _CACHE_KEY = "connect.test_server.game_state"
 _CACHE_SECONDS = 60
 _UNREACHABLE = "unreachable"
@@ -53,6 +56,10 @@ def staging_game_state():
             .values_list("game_state", flat=True)
             .first()
         )
+        if state is None:
+            # Reachable but no active season — a mis-refreshed staging DB,
+            # not a down box. Same fail-closed result, different fix.
+            logger.warning("Staging DB reachable but no active season row")
     except Exception as exc:
         logger.warning("Staging game_state lookup failed: %s", exc)
         state = None
@@ -62,15 +69,25 @@ def staging_game_state():
     return state
 
 
+def tier() -> str:
+    """The current access tier: ``open``, ``closed``, or ``staff``."""
+    state = staging_game_state()
+    if state == GameState.OPEN_BETA:
+        return "open"
+    if state == GameState.CLOSED_BETA:
+        return "closed"
+    return "staff"
+
+
 def allowed(user) -> bool:
     """Whether this user may open a test-server session right now."""
     if not enabled():
         return False
-    state = staging_game_state()
-    if state == GAME_STATE_OPEN_BETA:
+    current = tier()
+    if current == "open":
         return True
     if not getattr(user, "is_authenticated", False):
         return False
-    if user.is_eternal():
+    if user.is_artisan():
         return True
-    return state == GAME_STATE_CLOSED_BETA and bool(user.beta_tester)
+    return current == "closed" and bool(user.beta_tester)

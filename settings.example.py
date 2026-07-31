@@ -58,7 +58,7 @@ CACHE_MIDDLEWARE_KEY_PREFIX = f"{DJANGO_CACHE_KEY}_"
 # Database(s).
 DATABASES = {
     # Production
-    "isharmud.com": {
+    "default": {
         "ENGINE": "apps.core.backends",
         "NAME": "ishar",
         "USER": "ishar",
@@ -71,14 +71,13 @@ DATABASES = {
     "staging": {
         "ENGINE": "apps.core.backends",
         "NAME": "ishar_test",
-        "USER": "ishar",
+        "USER": "web_bridge",
         "PASSWORD": "",
         "HOST": "staging.isharmud.com",
         "PORT": 3306,
-        "OPTIONS": {"connect_timeout": 3},
+        "OPTIONS": {"connect_timeout": 3, "read_timeout": 5},
     },
 }
-DATABASES["default"] = DATABASES.get(ALLOWED_HOSTS[0], DATABASES["isharmud.com"])
 
 # Default primary key field type.
 DEFAULT_AUTO_FIELD = "apps.core.models.unsigned.UnsignedAutoField"

@@ -23,5 +23,7 @@ class ConnectView(TemplateView):
         # safely-escaped JSON, then handed to IsharHUD.init({skillIcons}).
         ctx["skill_icons"] = SKILL_ICONS
         # Advisory only — the websocket consumer re-checks before dialing.
+        # The tier shapes client-side copy (announcement, refusal hints).
         ctx["test_server_allowed"] = testserver.allowed(self.request.user)
+        ctx["test_server_tier"] = testserver.tier()
         return ctx

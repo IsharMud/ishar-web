@@ -19,17 +19,14 @@ from apps.core.utils import webadmin
 from apps.core.utils.staff import staff_name
 from apps.core.views.mixins import GodRequiredMixin, NeverCacheMixin
 
+from ..models.season import GameState
 from ..utils.current import get_current_season
 
 
-# `seasons.game_state` values — the game's enum game_state_t (constants.h).
-GAME_STATES = {
-    0: "Normal",
-    1: "Season cycle (awaiting start)",
-    2: "Maintenance",
-    3: "Open beta",
-    4: "Closed beta",
-}
+# Console display labels over the shared GameState anchor; the cycle state
+# gets an operator-facing hint the generic label lacks.
+GAME_STATES = {s.value: s.label for s in GameState}
+GAME_STATES[GameState.SEASON_CYCLE] = "Season cycle (awaiting start)"
 
 # The automatic season-end countdown events (game-fired; display only here).
 SEASON_END_LADDER = (
@@ -54,8 +51,10 @@ class SeasonConsoleView(GodRequiredMixin, NeverCacheMixin, TemplateView):
         context["game_state_label"] = GAME_STATES.get(
             season.game_state, f"Unknown ({season.game_state})"
         )
-        context["game_state_normal"] = season.game_state == 0
-        context["game_state_mid_cycle"] = season.game_state == 1
+        context["game_state_normal"] = season.game_state == GameState.NORMAL
+        context["game_state_mid_cycle"] = (
+            season.game_state == GameState.SEASON_CYCLE
+        )
         context["season_end_ladder"] = [
             {
                 "days": days,

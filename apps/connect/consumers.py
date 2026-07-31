@@ -160,6 +160,8 @@ class TelnetConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
         if self._server == "test":
+            # Advisory-tier re-check (shares the policy's 60s state cache);
+            # the staging game's own login gates are the authority.
             try:
                 permitted = await database_sync_to_async(testserver.allowed)(
                     user
@@ -277,6 +279,8 @@ class TelnetConsumer(AsyncWebsocketConsumer):
 
         from .models import WebLoginToken
 
+        if not self._account_email:
+            raise LookupError("no email on the authenticated account")
         staging_id = (
             Account.objects.using("staging")
             .filter(email=self._account_email)
@@ -345,11 +349,21 @@ class TelnetConsumer(AsyncWebsocketConsumer):
                 )
         except Exception as exc:
             # E.g. the game-side migration hasn't run yet, or (test) the
-            # staging copy has no row for this email. Manual login works.
+            # staging copy has no row for this email. Manual login works —
+            # but on the test server that's a surprise worth explaining:
+            # the account may postdate the last staging refresh, and an old
+            # refresh can even hold a previous password.
             logger.warning(
                 "Auto-login mint failed for account %s (%s): %s",
                 account_id, self._server, exc,
             )
+            if self._server == "test":
+                await self.send(text_data=(
+                    "\r\n\x1b[90m--- Auto-login isn't available on the test"
+                    " server right now - log in with your email and"
+                    " password. Accounts newer than the last test refresh"
+                    " may not exist here yet. ---\x1b[0m\r\n"
+                ))
             return
 
         if self._writer and not self._writer.is_closing():

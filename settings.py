@@ -62,12 +62,13 @@ CACHE_MIDDLEWARE_ALIAS =  DJANGO_CACHE_KEY
 CACHE_MIDDLEWARE_SECONDS = 300
 CACHE_MIDDLEWARE_KEY_PREFIX = f"{DJANGO_CACHE_KEY}_"
 
-# Database(s).
+# Database(s). Fully env-driven — the old hostname-keyed selection is gone
+# (staging has no website; there is one site and it talks to prod).
 DATABASES = {
     # Production. In a container these come from the env (the compose file
     # passes DB_HOST=ishar-db, DB_PASSWORD=<app pw>, etc.); the literals are
     # the non-container defaults.
-    "isharmud.com": {
+    "default": {
         "ENGINE": "apps.core.backends",
         "NAME":     getenv("DB_NAME", "ishar"),
         "USER":     getenv("DB_USER", "ishar"),
@@ -75,24 +76,25 @@ DATABASES = {
         "HOST":     getenv("DB_HOST", "127.0.0.1"),
         "PORT": int(getenv("DB_PORT", 3306))
     },
-    # The staging game's own MariaDB, on the staging box (test-server bridge).
-    # Only the /connect test-server path uses it: the access policy reads the
-    # staging season's game_state, and the telnet consumer mints
-    # web_login_token rows there so auto-login works on staging too. This is
-    # an internet hop that may be down — every reader degrades (policy fails
-    # closed to staff, auto-login falls back to the manual prompt), hence the
-    # short connect_timeout.
+    # The staging game's own MariaDB, on the staging box (test-server bridge,
+    # ishar-mud docs/web_bridge_contracts.md Contract 4). Only the /connect
+    # test-server path uses it: the access policy reads the staging season's
+    # game_state, and the telnet consumer mints web_login_token rows there so
+    # auto-login works on staging too. web_bridge is a least-privilege user
+    # (SELECT seasons/accounts, INSERT web_login_token — grants in the
+    # contract doc). This is an internet hop that may be down — every reader
+    # degrades (policy fails closed to staff, auto-login falls back to the
+    # manual prompt), hence the short timeouts.
     "staging": {
         "ENGINE": "apps.core.backends",
         "NAME":     getenv("TEST_DB_NAME", "ishar_test"),
-        "USER":     getenv("TEST_DB_USER", "ishar"),
+        "USER":     getenv("TEST_DB_USER", "web_bridge"),
         "PASSWORD": getenv("TEST_DB_PASSWORD", ""),
         "HOST":     getenv("TEST_DB_HOST", "staging.isharmud.com"),
         "PORT": int(getenv("TEST_DB_PORT", 3306)),
-        "OPTIONS": {"connect_timeout": 3},
+        "OPTIONS": {"connect_timeout": 3, "read_timeout": 5},
     },
 }
-DATABASES["default"] = DATABASES.get(ALLOWED_HOSTS[0], DATABASES["isharmud.com"])
 
 # Default primary key field type.
 DEFAULT_AUTO_FIELD = "apps.core.models.unsigned.UnsignedAutoField"
