@@ -1216,7 +1216,6 @@
     }
     function renderVitals() {
         var v = S.vitals, st = S.status, tm = S.time;
-        var name = st ? String(st.name) : "—";
         var sub = st ? ("L" + st.level + " " + st.race + " " + st["class"])
                      : (S.connected ? "awaiting character data" : "not connected");
 
@@ -1269,7 +1268,6 @@
 
         var groups = [
             el("div", { class: "v-group v-identity" }, [
-                el("span", { class: "v-name", text: name }),
                 el("span", { class: "v-sub dim", text: sub })
             ]),
             el("div", { class: "v-group v-bars" }, barKids)
@@ -1285,11 +1283,14 @@
         }
         var world = el("div", { class: "v-group v-world" });
         if (tm) {
-            world.appendChild(el("span", { class: "v-clock", text:
-                (tm.night ? "☾ " : "☀ ") + tm.hour12 + tm.ampm
-                + (tm.day_name ? " · " + tm.day_name : "")
-                + (tm.month_name ? ", " + tm.month_name : "")
-                + (tm.year != null ? " · Yr " + tm.year : "") }));
+            world.appendChild(el("span", { class: "v-clock" }, [
+                el("span", { class: "v-clock-time",
+                    text: (tm.night ? "☾ " : "☀ ") + tm.hour12 + tm.ampm }),
+                el("span", { class: "v-clock-date", text:
+                    (tm.day_name ? " · " + tm.day_name : "")
+                    + (tm.month_name ? ", " + tm.month_name : "")
+                    + (tm.year != null ? " · Yr " + tm.year : "") })
+            ]));
             if (tm.season_id != null) {
                 var seasonPill = el("span", { class: "v-season", role: "button", tabindex: "0",
                     title: "Season & engagement details", "aria-label": "Season " + tm.season_id + " details",

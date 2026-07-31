@@ -514,6 +514,7 @@
     var terminalContainer = document.getElementById("terminal-container");
     var commandForm = document.getElementById("command-form");
     var commandInput = document.getElementById("command-input");
+    var topbarEl = document.getElementById("hud-topbar");
     var statusEl = document.getElementById("connection-status");
     var statusText = statusEl.querySelector(".status-text");
     var reconnectBtn = document.getElementById("reconnect-btn");
@@ -1120,9 +1121,10 @@
     }
 
     // --- Session tabs ---
-    // Rendered only with 2+ sessions, so a single-session page keeps
-    // today's zero-footprint topbar. Names are player data: textContent
-    // only.
+    // Always rendered, even for a lone session: the tab is the only visible
+    // handle on "which character am I", and hiding it until a second session
+    // existed left players clicking an inert name and never finding the "+".
+    // Names are player data: textContent only.
     // rAF-debounced tab refresh for high-frequency callers (a streaming
     // background terminal bumps unread on every write).
     var tabsScheduled = false;
@@ -1141,12 +1143,17 @@
         updatePeek();
         if (!sessionTabs) return;
         if (sessionAddBtn) sessionAddBtn.hidden = sessions.length >= MAX_SESSIONS;
+        if (topbarEl) {
+            topbarEl.classList.toggle("conn-ok",
+                !!focusedSession && focusedSession.state === "connected");
+        }
         while (sessionTabs.firstChild) sessionTabs.removeChild(sessionTabs.firstChild);
-        if (sessions.length < 2) return;
+        var lone = sessions.length < 2;
         sessions.forEach(function(s) {
             var name = s.displayName || ("Session " + s.slot);
             var tab = document.createElement("div");
             tab.className = "sess-tab";
+            if (lone) tab.classList.add("sess-tab--lone");
             if (isFocused(s)) tab.classList.add("sess-tab--active");
             if (s.isImmortal) tab.classList.add("sess-tab--immortal");
             if (s.bell) tab.classList.add("sess-tab--bell");
@@ -1155,7 +1162,9 @@
             btn.type = "button";
             btn.className = "sess-tab__btn";
             btn.setAttribute("aria-pressed", isFocused(s) ? "true" : "false");
-            btn.title = "Switch to " + name + " (Alt+C cycles)";
+            btn.title = lone
+                ? name + " — " + s.statusMsg + ". Open another character with +."
+                : "Switch to " + name + " (Alt+C cycles) — " + s.statusMsg;
 
             var dot = document.createElement("span");
             dot.className = "sess-tab__dot sess-dot--" + s.state;
@@ -1175,21 +1184,25 @@
             btn.addEventListener("click", function() { Sessions.focus(s); });
             tab.appendChild(btn);
 
-            var x = document.createElement("button");
-            x.type = "button";
-            x.className = "sess-tab__x";
-            x.setAttribute("aria-label", "Close the " + name + " session");
-            x.title = "Close the " + name + " session";
-            x.textContent = "×";
-            x.addEventListener("click", function(e) {
-                e.stopPropagation();
-                if (s.state === "connected"
-                        && !window.confirm(name + " is still connected — close this session?")) {
-                    return;
-                }
-                Sessions.close(s);
-            });
-            tab.appendChild(x);
+            // No close control on the only session — closing it would leave
+            // the page with no terminal at all.
+            if (!lone) {
+                var x = document.createElement("button");
+                x.type = "button";
+                x.className = "sess-tab__x";
+                x.setAttribute("aria-label", "Close the " + name + " session");
+                x.title = "Close the " + name + " session";
+                x.textContent = "×";
+                x.addEventListener("click", function(e) {
+                    e.stopPropagation();
+                    if (s.state === "connected"
+                            && !window.confirm(name + " is still connected — close this session?")) {
+                        return;
+                    }
+                    Sessions.close(s);
+                });
+                tab.appendChild(x);
+            }
 
             sessionTabs.appendChild(tab);
         });
