@@ -7,7 +7,7 @@ from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.conf import settings
 
-from . import tracker
+from . import testserver, tracker
 
 
 logger = logging.getLogger(__name__)
@@ -17,6 +17,9 @@ logger = logging.getLogger(__name__)
 # ending the session (a quit — don't fight it with an auto-reconnect loop).
 # 4000-4999 is the private-use range of RFC 6455.
 CLOSE_BRIDGE_FAILURE = 4502
+# The test-server policy refused this connection (beta tier, or the feature
+# is unconfigured). Terminal — the browser must not retry with backoff.
+CLOSE_TEST_FORBIDDEN = 4403
 
 # NUL-prefixed websocket text frames are the bridge's out-of-band control
 # channel (the browser's terminal stream never legitimately starts with NUL).
@@ -100,24 +103,35 @@ class TelnetConsumer(AsyncWebsocketConsumer):
             if user is not None and user.is_authenticated
             else None
         )
+        query = self.scope.get("query_string", b"").decode(
+            "utf-8", errors="replace"
+        )
+        params = parse_qs(query)
+        # `?server=test` dials the staging game instead of prod. The page
+        # only offers the option when the beta policy allows it, but the ws
+        # URL is forgeable — the policy is re-checked below before dialing.
+        self._server = (
+            "test" if (params.get("server") or [""])[0] == "test" else "prod"
+        )
         # States: account id set = waiting for the account prompt;
         # None = guest, already sent, or minting failed — leave manual login.
         # _account_id survives the attempt (auto-select needs it later).
         self._account_id = account_id
         self._autologin_account_id = account_id
+        # Test auto-login resolves the account by email: the staging DB is a
+        # refreshed copy of prod, so the same account may carry a different
+        # account_id there.
+        self._account_email = getattr(user, "email", None)
         self._prompt_tail = ""
         # Auto character select (#178): `ws/connect?character=<name>` names
         # the character this session is for. Only honored after a successful
         # webauth (the game validates ownership too — this is UX, not the
-        # security boundary), and never for guests.
+        # security boundary), and never for guests. Test sessions skip it:
+        # staging's character roster is a snapshot that may not match prod's.
         self._autoselect_name = None
         self._webauth_sent = False
         self._select_tail = ""
-        if account_id is not None:
-            query = self.scope.get("query_string", b"").decode(
-                "utf-8", errors="replace"
-            )
-            params = parse_qs(query)
+        if account_id is not None and self._server == "prod":
             requested = (params.get("character") or [""])[0].strip()
             if 0 < len(requested) <= 15:
                 self._autoselect_name = requested
@@ -145,8 +159,22 @@ class TelnetConsumer(AsyncWebsocketConsumer):
         # which would be indistinguishable from a network drop.
         await self.accept()
 
-        host = getattr(settings, "MUD_HOST", "localhost")
-        port = getattr(settings, "MUD_PORT", 23)
+        if self._server == "test":
+            try:
+                permitted = await database_sync_to_async(testserver.allowed)(
+                    user
+                )
+            except Exception as exc:
+                logger.warning("Test-server policy check failed: %s", exc)
+                permitted = False
+            if not permitted:
+                await self.close(code=CLOSE_TEST_FORBIDDEN)
+                return
+            host = settings.MUD_TEST_HOST
+            port = settings.MUD_TEST_PORT
+        else:
+            host = getattr(settings, "MUD_HOST", "localhost")
+            port = getattr(settings, "MUD_PORT", 23)
 
         try:
             self._reader, self._writer = await asyncio.wait_for(
@@ -237,6 +265,30 @@ class TelnetConsumer(AsyncWebsocketConsumer):
             true_level__gte=dj_settings.MIN_IMMORTAL_LEVEL,
         ).exists()
 
+    def _mint_test_token(self):
+        """Mint a staging auto-login token for this account's staging row.
+
+        The staging game consumes tokens from its own database only, and its
+        accounts table is a refreshed copy of prod — same email, possibly a
+        different account_id. No staging row for the email just raises, and
+        the caller degrades to the manual prompt.
+        """
+        from apps.accounts.models import Account
+
+        from .models import WebLoginToken
+
+        staging_id = (
+            Account.objects.using("staging")
+            .filter(email=self._account_email)
+            .values_list("account_id", flat=True)
+            .first()
+        )
+        if staging_id is None:
+            raise LookupError(
+                f"no staging account for {self._account_email!r}"
+            )
+        return WebLoginToken.mint(staging_id, using="staging")
+
     def _cache_naws(self, frame):
         """Remember the window size from a browser NAWS subnegotiation.
 
@@ -285,13 +337,18 @@ class TelnetConsumer(AsyncWebsocketConsumer):
         from .models import WebLoginToken
 
         try:
-            token = await database_sync_to_async(WebLoginToken.mint)(
-                account_id
-            )
+            if self._server == "test":
+                token = await database_sync_to_async(self._mint_test_token)()
+            else:
+                token = await database_sync_to_async(WebLoginToken.mint)(
+                    account_id
+                )
         except Exception as exc:
-            # E.g. the game-side migration hasn't run yet. Manual login works.
+            # E.g. the game-side migration hasn't run yet, or (test) the
+            # staging copy has no row for this email. Manual login works.
             logger.warning(
-                "Auto-login mint failed for account %s: %s", account_id, exc
+                "Auto-login mint failed for account %s (%s): %s",
+                account_id, self._server, exc,
             )
             return
 

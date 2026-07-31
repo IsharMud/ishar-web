@@ -57,15 +57,6 @@ CACHE_MIDDLEWARE_KEY_PREFIX = f"{DJANGO_CACHE_KEY}_"
 
 # Database(s).
 DATABASES = {
-    # Staging.
-    "staging.isharmud.com": {
-        "ENGINE": "apps.core.backends",
-        "NAME": "ishar_test",
-        "USER": "ishar_test",
-        "PASSWORD": "secret",
-        "HOST": "127.0.0.1",
-        "PORT": 3306
-    },
     # Production
     "isharmud.com": {
         "ENGINE": "apps.core.backends",
@@ -74,9 +65,20 @@ DATABASES = {
         "PASSWORD": "secret",
         "HOST": "127.0.0.1",
         "PORT": 3306
-    }
+    },
+    # The staging game's own MariaDB (test-server bridge). An empty password
+    # just disables the bridge readers gracefully.
+    "staging": {
+        "ENGINE": "apps.core.backends",
+        "NAME": "ishar_test",
+        "USER": "ishar",
+        "PASSWORD": "",
+        "HOST": "staging.isharmud.com",
+        "PORT": 3306,
+        "OPTIONS": {"connect_timeout": 3},
+    },
 }
-DATABASES["default"] = DATABASES[ALLOWED_HOSTS[0]]
+DATABASES["default"] = DATABASES.get(ALLOWED_HOSTS[0], DATABASES["isharmud.com"])
 
 # Default primary key field type.
 DEFAULT_AUTO_FIELD = "apps.core.models.unsigned.UnsignedAutoField"
@@ -254,6 +256,8 @@ HELPTAB = Path(MUD_HOME, "lib/Misc/helptab")
 # MUD connection.
 MUD_HOST = "isharmud.com"
 MUD_PORT = 23
+MUD_TEST_HOST = "staging.isharmud.com"
+MUD_TEST_PORT = 23
 
 # Alignments.
 ALIGNMENTS = {

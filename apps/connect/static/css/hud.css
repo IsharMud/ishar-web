@@ -524,6 +524,10 @@ button.v-tgt:hover { border-color: rgba(214, 75, 75, .8); }
 .sess-tab--lone .sess-tab__btn { padding-right: 9px; }
 .sess-tab--active { border-color: var(--ac-accent); background: var(--ac-wash); }
 .sess-tab--immortal .sess-tab__name { color: var(--ac-immortal); }
+/* Test-server sessions read amber-and-dashed so nobody mistakes staging for
+   the live game (dashed keeps it distinct from the amber active border). */
+.sess-tab--test { border-style: dashed; border-color: var(--ac-warn); background: var(--ac-warn-wash); }
+.sess-tab--test .sess-tab__name { color: var(--ac-warn); }
 .sess-tab__btn {
     display: inline-flex; align-items: center; gap: 5px;
     padding: 2px 2px 2px 8px; margin: 0; border: 0; background: none;
@@ -564,6 +568,8 @@ button.v-tgt:hover { border-color: rgba(214, 75, 75, .8); }
 .sess-pick__dot { width: .5rem; height: .5rem; border-radius: 50%; flex: none; background: var(--ac-dim); }
 .sess-pick__dot.is-online { background: var(--ac-ok); }
 .sess-pick--immortal .sess-pick__name { color: var(--ac-immortal); }
+.sess-pick--test .sess-pick__name { color: var(--ac-warn); }
+.sess-pick--test .sess-pick__dot { background: var(--ac-warn); }
 .sess-pick__name { font-weight: 700; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sess-pick__meta { font-size: .7rem; color: var(--ac-dim); white-space: nowrap; }
 .sess-note { padding: 6px 10px; font-size: .7rem; color: var(--ac-dim); }

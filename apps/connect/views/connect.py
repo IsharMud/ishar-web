@@ -2,6 +2,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.generic.base import TemplateView
 
+from apps.connect import testserver
 from apps.connect.skill_icons import SKILL_ICONS
 
 
@@ -21,4 +22,6 @@ class ConnectView(TemplateView):
         # name). Rendered via {{ ...|json_script }} so it reaches the page as
         # safely-escaped JSON, then handed to IsharHUD.init({skillIcons}).
         ctx["skill_icons"] = SKILL_ICONS
+        # Advisory only — the websocket consumer re-checks before dialing.
+        ctx["test_server_allowed"] = testserver.allowed(self.request.user)
         return ctx

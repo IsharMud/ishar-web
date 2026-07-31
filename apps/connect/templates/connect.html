@@ -528,6 +528,10 @@
     var isMobile = ("ontouchstart" in window) && window.innerWidth < 768;
     var isDemo = new URLSearchParams(location.search).has("demo");
     var isAuthed = {{ user.is_authenticated|yesno:"true,false" }};
+    // Whether this visitor may open a test-server session (the beta-tier
+    // policy in apps/connect/testserver.py; the bridge re-checks it
+    // server-side before dialing, so this only shapes the UI).
+    var TEST_ALLOWED = {{ test_server_allowed|yesno:"true,false" }};
 
     // --- ANSI color theme (all 16 standard colors) ---
     var mudTheme = {
@@ -721,6 +725,7 @@
     var MAX_SESSIONS = 3;
     var BACKOFF_MS = [1000, 2000, 5000, 10000];
     var CLOSE_BRIDGE_FAILURE = 4502;  // matches apps/connect/consumers.py
+    var CLOSE_TEST_FORBIDDEN = 4403;  // test-server policy refusal — terminal
     var SCROLLBACK_MAX = 512 * 1024;
     var CHAT_MAX = 200;               // mirrors hud.js CHAT_MAX
 
@@ -774,8 +779,10 @@
     function createSession(opts) {
         var sess = {
             slot: opts.slot,
+            server: opts.server === "test" ? "test" : "prod",
             charName: opts.character || null,
-            displayName: opts.character || null,
+            displayName: opts.character
+                || (opts.server === "test" ? "Test" : null),
             isImmortal: !!opts.isImmortal,
             echo: false,
             state: "connecting",
@@ -947,7 +954,10 @@
 
             var protocol = location.protocol === "https:" ? "wss:" : "ws:";
             var url = protocol + "//" + location.host + "/ws/connect";
-            if (sess.charName) url += "?character=" + encodeURIComponent(sess.charName);
+            var qs = [];
+            if (sess.charName) qs.push("character=" + encodeURIComponent(sess.charName));
+            if (sess.server === "test") qs.push("server=test");
+            if (qs.length) url += "?" + qs.join("&");
 
             sess.state = "connecting";
             sess.reconnectVisible = false;
@@ -1022,6 +1032,17 @@
                 // restart the backoff ladder instead of climbing it forever.
                 if (sess.openedAt && Date.now() - sess.openedAt > 30000) sess.reconnectAttempt = 0;
                 sess.openedAt = 0;
+                if (event.code === CLOSE_TEST_FORBIDDEN) {
+                    // The bridge refused a test-server session (beta tier
+                    // changed, or the feature is off). Terminal — a retry
+                    // would refuse identically.
+                    sess.quitClean = true;
+                    sess.state = "dead";
+                    sess.reconnectVisible = true;
+                    if (isFocused(sess)) syncFocusUi(); else renderSessionTabs();
+                    sess.term.writeln("\r\n\x1b[1;33m--- The test server is not open to your account right now. ---\x1b[0m");
+                    return;
+                }
                 if (event.code === 1000) {
                     // The game ended the session (e.g. quit) — don't fight a
                     // deliberate exit with an auto-reconnect loop.
@@ -1156,6 +1177,7 @@
             if (lone) tab.classList.add("sess-tab--lone");
             if (isFocused(s)) tab.classList.add("sess-tab--active");
             if (s.isImmortal) tab.classList.add("sess-tab--immortal");
+            if (s.server === "test") tab.classList.add("sess-tab--test");
             if (s.bell) tab.classList.add("sess-tab--bell");
 
             var btn = document.createElement("button");
@@ -1242,7 +1264,7 @@
             sessionStorage.setItem(ROSTER_KEY, JSON.stringify({
                 focused: focusedSession ? focusedSession.slot : null,
                 list: sessions.map(function(s) {
-                    return { slot: s.slot, character: s.charName, isImmortal: s.isImmortal };
+                    return { slot: s.slot, character: s.charName, isImmortal: s.isImmortal, server: s.server };
                 })
             }));
         } catch (e) {}
@@ -1268,7 +1290,8 @@
             var sess = createSession({
                 slot: slot,
                 character: opts && opts.character,
-                isImmortal: opts && opts.isImmortal
+                isImmortal: opts && opts.isImmortal,
+                server: opts && opts.server
             });
             if (!focusedSession) Sessions.focus(sess);
             if (!isDemo) sess.connect();
@@ -1814,6 +1837,13 @@
             ]
         }
     ];
+    // The test-server command only exists for visitors the beta policy
+    // admits — an unlisted binding is fine here because the command itself
+    // would just refuse.
+    if (TEST_ALLOWED) {
+        KEYS_CLIENT[0].rows.splice(1, 0,
+            { cmd: "/test", desc: "Open a session on the test server (staging)" });
+    }
     function keyGroups() {
         var hud = (window.IsharHUD && window.IsharHUD.keyHelp) ? window.IsharHUD.keyHelp() : [];
         return KEYS_TERMINAL.concat(hud, KEYS_CLIENT);
@@ -1854,6 +1884,24 @@
             case "clear":
                 if (focusedSession) focusedSession.term.clear();
                 break;
+            case "test": {
+                if (!TEST_ALLOWED) {
+                    sysln("The test server is not open to your account right now.");
+                    break;
+                }
+                var testOpen = null;
+                sessions.forEach(function(s) {
+                    if (s.server === "test") testOpen = s;
+                });
+                if (testOpen) {
+                    Sessions.focus(testOpen);
+                    break;
+                }
+                var testSess = Sessions.create({ server: "test" });
+                if (testSess) Sessions.focus(testSess);
+                else sysln("Session limit reached — close one first.");
+                break;
+            }
             case "aliases":
                 listAliases();
                 break;
@@ -2482,6 +2530,7 @@
         var chars = (payload && payload.characters) || [];
         if (!chars.length) {
             sessionPopNote("No characters on this account yet.");
+            appendTestPick();
             return;
         }
         chars.forEach(function(c) {
@@ -2516,11 +2565,47 @@
             });
             sessionPop.appendChild(b);
         });
+        appendTestPick();
         if (payload.multiplay_limit != null) {
             sessionPopNote("Season limit: " + payload.multiplay_limit
                 + " at once" + (payload.immortal_account ? " (immortals exempt)" : "")
                 + ". The game has the final say.");
         }
+    }
+
+    // The test-server entry rides the same picker (also /test — guests in an
+    // open beta have no "+" button). One test session at a time.
+    function appendTestPick() {
+        if (!TEST_ALLOWED) return;
+        var open = sessions.some(function(s) { return s.server === "test"; });
+        var b = document.createElement("button");
+        b.type = "button";
+        b.className = "sess-pick sess-pick--test";
+
+        var dot = document.createElement("span");
+        dot.className = "sess-pick__dot";
+        b.appendChild(dot);
+
+        var name = document.createElement("span");
+        name.className = "sess-pick__name";
+        name.textContent = "Test server";
+        b.appendChild(name);
+
+        var meta = document.createElement("span");
+        meta.className = "sess-pick__meta";
+        meta.textContent = "staging";
+        b.appendChild(meta);
+
+        if (open) {
+            b.disabled = true;
+            b.title = "Already open in a session";
+        }
+        b.addEventListener("click", function() {
+            closeSessionPop();
+            var s = Sessions.create({ server: "test" });
+            if (s) Sessions.focus(s);
+        });
+        sessionPop.appendChild(b);
     }
 
     if (sessionAddBtn) {
@@ -2665,7 +2750,8 @@
     if (roster) {
         roster.list.slice(0, MAX_SESSIONS).forEach(function(r) {
             var s = Sessions.create({
-                slot: r.slot, character: r.character, isImmortal: r.isImmortal
+                slot: r.slot, character: r.character, isImmortal: r.isImmortal,
+                server: r.server
             });
             if (s && r.slot === roster.focused) Sessions.focus(s);
         });
