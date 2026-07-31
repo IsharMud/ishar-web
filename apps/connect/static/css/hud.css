@@ -159,15 +159,15 @@ body.connect-page #content { padding: .5rem !important; }
 .status-connected { color: var(--ac-ok); }
 .status-disconnected { color: var(--ac-danger); }
 .status-connecting { color: var(--ac-accent); }
+/* While every session is up, the tab dots carry that news — a second green
+   dot beside them was the chip players kept clicking expecting a menu. */
+#hud-topbar.conn-ok #connection-status { display: none; }
 
-.v-identity { order: 2; display: flex; flex-direction: column; gap: 0; line-height: 1.1; min-width: 0; }
-.v-name { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 14rem; }
-.v-sub { font-size: .7rem; white-space: nowrap; }
+/* The session tab owns the character's name; this is the rest of the ident. */
+.v-identity { order: 2; display: flex; align-items: center; line-height: 1.1; min-width: 0; }
+.v-sub { font-size: .72rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 14rem; }
 
 .v-bars { order: 3; display: flex; align-items: center; flex-wrap: wrap; gap: 6px 8px; flex: 1 1 240px; min-width: 200px; }
-.v-res { order: 4; display: flex; align-items: center; gap: 14px; }
-.v-stat { display: flex; flex-direction: column; align-items: flex-end; line-height: 1.1; font-size: .82rem; font-weight: 700; color: var(--hud-gold); white-space: nowrap; }
-.v-stat-label { font-size: .56rem; text-transform: uppercase; letter-spacing: .06em; color: var(--ac-dim); font-weight: 600; }
 
 .v-targets { order: 4; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .v-tgt { font-size: .7rem; font-weight: 700; padding: 1px 8px; border-radius: 999px; border: 1px solid; max-width: 12rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -182,14 +182,18 @@ button.v-tgt:hover { border-color: rgba(214, 75, 75, .8); }
 
 .topbar-actions { order: 5; display: flex; gap: 6px; margin-left: auto; }
 
+/* Wraps rather than scrolls: a hidden-scrollbar overflow silently ate the
+   moons (they sit last) on any window too narrow for one line, which read as
+   the sky randomly disappearing between browsers. */
 .v-world {
     order: 6; flex-basis: 100%;
-    display: flex; align-items: center; gap: 10px;
-    font-size: .76rem; white-space: nowrap;
-    overflow-x: auto; scrollbar-width: none;
+    display: flex; align-items: center; flex-wrap: wrap; gap: 3px 10px;
+    font-size: .76rem;
 }
-.v-world::-webkit-scrollbar { display: none; }
-.v-clock { color: var(--ac-text); white-space: nowrap; }
+/* Flex, so the date half can drop out on a phone; the gap replaces the word
+   space the flex items would otherwise collapse. */
+.v-clock { color: var(--ac-text); white-space: nowrap; display: inline-flex; align-items: baseline; gap: .35em; }
+.v-clock-date { color: var(--ac-dim); }
 .v-season { color: var(--ac-accent); font-weight: 700; white-space: nowrap; padding: 1px 8px; border: 1px solid rgba(255, 170, 119, .45); background: var(--ac-wash); border-radius: 999px; cursor: pointer; }
 .v-season:hover { border-color: var(--ac-accent); color: var(--ac-accent-2); }
 .v-season:focus-visible { outline: 2px solid var(--ac-accent); outline-offset: 2px; }
@@ -200,9 +204,12 @@ button.v-tgt:hover { border-color: rgba(214, 75, 75, .8); }
 
 @media (max-width: 767.98px) {
     #hud-topbar { gap: 8px; }
-    .status-text, .v-res, .v-world, .v-targets, .ui-toggle-label,
+    .status-text, .v-targets, .ui-toggle-label,
     .topbar-actions .col-toggle { display: none; }
-    .v-name { max-width: 9rem; }
+    /* The hour and the sky stay at every width — they drive play. The long
+       date and the static race/class line are what give way; the tab still
+       names the character and the Status pane still has the rest. */
+    .v-clock-date, .v-sub { display: none; }
     .v-bars { order: 6; flex-basis: 100%; min-width: 0; flex-wrap: wrap; gap: 6px; }
     /* Tabs are the whole phone multiplay story — keep them tappable but
        let long names give way first. */
@@ -513,6 +520,8 @@ button.v-tgt:hover { border-color: rgba(214, 75, 75, .8); }
     border: 1px solid var(--ac-border); border-radius: 999px;
     background: var(--ac-panel);
 }
+/* No × to butt against, so the label needs its own right padding. */
+.sess-tab--lone .sess-tab__btn { padding-right: 9px; }
 .sess-tab--active { border-color: var(--ac-accent); background: var(--ac-wash); }
 .sess-tab--immortal .sess-tab__name { color: var(--ac-immortal); }
 .sess-tab__btn {

@@ -449,7 +449,9 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
   topbar: one `.sess-tab` per session (status dot `.sess-dot--<state>`, name
   tinted `--ac-immortal` for immortal-account characters via
   `.sess-tab--immortal`, `.sess-tab__n` unread count, `.sess-tab--bell`
-  danger-pulse, `.sess-tab__x` close), rendered only with 2+ sessions; the
+  danger-pulse, `.sess-tab__x` close) — **always rendered**, a lone session
+  getting `.sess-tab--lone` and no close control (decisions.md 2026-07-31);
+  `#hud-topbar.conn-ok` then hides the redundant `#connection-status`. The
   `+` (`#session-add`) opens the `#session-pop` character picker
   (`.sess-pick` rows fed by `/connect/characters/`). `#input-chip` by the
   command input names the driven character; `#mirror-btn` +
@@ -464,6 +466,10 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
 - **`.vbar` / `.mini`** — labeled vitals bars (HP/MP/MV/Foe/MM/Edge) and
   the tiny group-member triple. (XP is no longer a `.vbar` — it graduated to the
   ambient `#hud-xpstrip`; see below.)
+- **`.v-world`** — the topbar's world strip: `.v-clock`
+  (`.v-clock-time` + `.v-clock-date`), the `.v-season` pill, `.v-event`
+  flags and the `.v-moons` sky. Wraps rather than scrolls, and survives
+  the phone breakpoint minus `.v-clock-date` (decisions.md 2026-07-31).
 - **`.vbar-reserve`** — the hunger (`.food`, apple) / thirst (`.water`, droplet)
   icon riding the end of the HP and MV bars; `data-state` `ok`/`low`/`crit`
   tints it dim → `--hud-edge` → `--ac-danger`. Built client-side via `biSvg()`

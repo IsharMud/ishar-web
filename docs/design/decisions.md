@@ -9,6 +9,39 @@ Format: `## YYYY-MM-DD — Title` · **Decision** · **Why** · (optional) **Not
 
 ---
 
+## 2026-07-31 — The topbar tells the same story at every width
+
+**Decision.** Three rules for `#hud-topbar`:
+
+1. **The world strip never disappears.** `.v-world` wraps instead of
+   scrolling behind a hidden scrollbar, and below 768px it sheds only
+   `.v-clock-date` (the long date) and `.v-sub` (the static race/class
+   line) rather than being hidden wholesale. The hour, season, events and
+   moons are play information and stay at every width.
+2. **The session tab is always rendered**, including for a lone session
+   (`.sess-tab--lone`, no close control — closing the only terminal is not
+   a thing to offer). It, not `.v-identity`, owns the character's name.
+3. **One connection dot.** With a tab always present, `#connection-status`
+   is hidden while the focused session is connected (`#hud-topbar.conn-ok`)
+   and returns for connecting/reconnecting/disconnected, where its text is
+   the point.
+
+**Why.** A player reported the topbar "looking out of date" in Chrome but
+not Edge, and clicking the name chip doing nothing. Both were the topbar
+lying about its own state. Hiding `.v-world` below a breakpoint meant a
+snapped or zoomed desktop window silently lost the clock and the sky, so
+two browsers on one machine disagreed about what the client *is* — the
+worst kind of bug, because it reads as a stale deploy. And a name with a
+green dot beside a `+` is a control by every visual convention the site
+uses; rendering it as inert text while the real control (the tab) waited
+for a second session meant the multiplay feature had to be explained in
+chat, twice, to the player who most wanted it.
+
+**Notes.** The general rule: a responsive breakpoint may **reflow or
+abbreviate** HUD state, but may not delete it — if information is worth a
+row on a desktop it is worth a wrapped line on a phone. Dead `.v-res` /
+`.v-stat` rules removed in passing.
+
 ## 2026-07-28 — Keys & commands: one registry, two surfaces, and a rule
 
 **Decision.** Every key the web client binds and every `/` command it handles
