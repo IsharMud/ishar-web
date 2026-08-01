@@ -91,3 +91,46 @@ def allowed(user) -> bool:
     if user.is_artisan():
         return True
     return current == "closed" and bool(user.beta_tester)
+
+
+# Login-identity columns refreshed on every test connect. The rest of the
+# row is seeded once and then belongs to staging — gameplay writes stay
+# local, and players/characters are never synced.
+_IDENTITY_FIELDS = ("password", "beta_tester", "immortal_level", "banned_until")
+
+
+def sync_account(email: str) -> int:
+    """Seed or refresh this prod account on staging; return its staging id.
+
+    The unified-account model: one login identity everywhere, separate
+    character sets. The first test connect copies the whole prod accounts
+    row (fresh characters; the referrer id is nulled — it points into
+    prod's id space); after that only the identity columns track prod, so
+    a password change or beta revocation reaches staging the next time the
+    player web-connects. Raises on any failure — including a unique-key
+    collision with a stale staging row after a prod email change, which
+    needs a re-dump or admin cleanup — and the caller degrades to manual
+    login.
+    """
+    from apps.accounts.models import Account
+
+    prod = Account.objects.get(email=email)
+    staging_id = (
+        Account.objects.using("staging")
+        .filter(email=email)
+        .values_list("account_id", flat=True)
+        .first()
+    )
+    if staging_id is not None:
+        Account.objects.using("staging").filter(account_id=staging_id).update(
+            **{f: getattr(prod, f) for f in _IDENTITY_FIELDS}
+        )
+        return staging_id
+
+    values = {
+        f.attname: getattr(prod, f.attname)
+        for f in Account._meta.concrete_fields
+        if not f.primary_key
+    }
+    values["referrer_account_id"] = None
+    return Account.objects.using("staging").create(**values).account_id

@@ -268,29 +268,20 @@ class TelnetConsumer(AsyncWebsocketConsumer):
         ).exists()
 
     def _mint_test_token(self):
-        """Mint a staging auto-login token for this account's staging row.
+        """Mint a staging auto-login token, seeding the account if needed.
 
-        The staging game consumes tokens from its own database only, and its
-        accounts table is a refreshed copy of prod — same email, possibly a
-        different account_id. No staging row for the email just raises, and
-        the caller degrades to the manual prompt.
+        The staging game consumes tokens from its own database only, so the
+        account row must exist there too. sync_account() guarantees it: the
+        first test connect copies the prod account (with no characters),
+        later ones refresh the login identity so the current password and
+        beta/ban flags always apply. Any failure raises, and the caller
+        degrades to the manual prompt.
         """
-        from apps.accounts.models import Account
-
         from .models import WebLoginToken
 
         if not self._account_email:
             raise LookupError("no email on the authenticated account")
-        staging_id = (
-            Account.objects.using("staging")
-            .filter(email=self._account_email)
-            .values_list("account_id", flat=True)
-            .first()
-        )
-        if staging_id is None:
-            raise LookupError(
-                f"no staging account for {self._account_email!r}"
-            )
+        staging_id = testserver.sync_account(self._account_email)
         return WebLoginToken.mint(staging_id, using="staging")
 
     def _cache_naws(self, frame):
@@ -349,10 +340,10 @@ class TelnetConsumer(AsyncWebsocketConsumer):
                 )
         except Exception as exc:
             # E.g. the game-side migration hasn't run yet, or (test) the
-            # staging copy has no row for this email. Manual login works —
-            # but on the test server that's a surprise worth explaining:
-            # the account may postdate the last staging refresh, and an old
-            # refresh can even hold a previous password.
+            # account sync/mint against the staging DB failed. Manual login
+            # works — but on the test server that's a surprise worth
+            # explaining, and with the sync down the staging copy of the
+            # password may be stale too.
             logger.warning(
                 "Auto-login mint failed for account %s (%s): %s",
                 account_id, self._server, exc,
@@ -361,8 +352,7 @@ class TelnetConsumer(AsyncWebsocketConsumer):
                 await self.send(text_data=(
                     "\r\n\x1b[90m--- Auto-login isn't available on the test"
                     " server right now - log in with your email and"
-                    " password. Accounts newer than the last test refresh"
-                    " may not exist here yet. ---\x1b[0m\r\n"
+                    " password. ---\x1b[0m\r\n"
                 ))
             return
 
