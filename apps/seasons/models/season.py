@@ -8,6 +8,17 @@ from django.utils.timezone import now
 from .enigma import SeasonalEnigma
 
 
+class GameState(models.IntegerChoices):
+    """The game's ``game_state_t`` (ishar-mud ``src/include/constants.h``) —
+    the one web-side anchor for ``seasons.game_state`` values."""
+
+    NORMAL = 0, "Normal"
+    SEASON_CYCLE = 1, "Season cycle"
+    MAINTENANCE = 2, "Maintenance"
+    OPEN_BETA = 3, "Open beta"
+    CLOSED_BETA = 4, "Closed beta"
+
+
 class Season(models.Model):
     """Ishar season."""
 

@@ -21,7 +21,7 @@ The flow, and the two rules that make it safe:
 import hashlib
 import secrets
 
-from django.db import connection, models
+from django.db import connections, models
 
 from apps.core.models.unsigned import UnsignedAutoField
 
@@ -71,18 +71,21 @@ class WebLoginToken(models.Model):
         return f"Web login token for account {self.account_id}"
 
     @classmethod
-    def mint(cls, account_id: int) -> str:
+    def mint(cls, account_id: int, using: str = "default") -> str:
         """Mint a token for *account_id* and return the plaintext.
 
         The row stores only the SHA-256; ``expires_at`` is computed **in the
         database** (``NOW() + INTERVAL 90 SECOND``) so the same clock that
         checks the TTL game-side also sets it — no Django/MariaDB timezone or
-        clock-skew coupling. Raises on any DB error (e.g. the game migration
-        has not run yet); the caller degrades to manual login.
+        clock-skew coupling. *using* selects which game's table gets the row —
+        each game only ever consumes tokens from its own database, so a
+        test-server session mints into the ``staging`` alias. Raises on any DB
+        error (e.g. the game migration has not run yet); the caller degrades
+        to manual login.
         """
         token = secrets.token_urlsafe(32)
         token_hash = hashlib.sha256(token.encode("ascii")).hexdigest()
-        with connection.cursor() as cursor:
+        with connections[using].cursor() as cursor:
             cursor.execute(
                 "INSERT INTO web_login_token (token_hash, account_id, expires_at)"
                 " VALUES (%s, %s, NOW() + INTERVAL %s SECOND)",

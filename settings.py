@@ -62,30 +62,39 @@ CACHE_MIDDLEWARE_ALIAS =  DJANGO_CACHE_KEY
 CACHE_MIDDLEWARE_SECONDS = 300
 CACHE_MIDDLEWARE_KEY_PREFIX = f"{DJANGO_CACHE_KEY}_"
 
-# Database(s).
+# Database(s). Fully env-driven — the old hostname-keyed selection is gone
+# (staging has no website; there is one site and it talks to prod).
 DATABASES = {
-    # Staging.
-    "staging.isharmud.com": {
-        "ENGINE": "apps.core.backends",
-        "NAME": "ishar_test",
-        "USER": "ishar_test",
-        "PASSWORD": "secret",
-        "HOST": "127.0.0.1",
-        "PORT": 3306
-    },
     # Production. In a container these come from the env (the compose file
     # passes DB_HOST=ishar-db, DB_PASSWORD=<app pw>, etc.); the literals are
     # the non-container defaults.
-    "isharmud.com": {
+    "default": {
         "ENGINE": "apps.core.backends",
         "NAME":     getenv("DB_NAME", "ishar"),
         "USER":     getenv("DB_USER", "ishar"),
         "PASSWORD": getenv("DB_PASSWORD", "secret"),
         "HOST":     getenv("DB_HOST", "127.0.0.1"),
         "PORT": int(getenv("DB_PORT", 3306))
-    }
+    },
+    # The staging game's own MariaDB, on the staging box (test-server bridge,
+    # ishar-mud docs/web_bridge_contracts.md Contract 4). Only the /connect
+    # test-server path uses it: the access policy reads the staging season's
+    # game_state, and the telnet consumer mints web_login_token rows there so
+    # auto-login works on staging too. web_bridge is a least-privilege user
+    # (SELECT seasons/accounts, INSERT web_login_token — grants in the
+    # contract doc). This is an internet hop that may be down — every reader
+    # degrades (policy fails closed to staff, auto-login falls back to the
+    # manual prompt), hence the short timeouts.
+    "staging": {
+        "ENGINE": "apps.core.backends",
+        "NAME":     getenv("TEST_DB_NAME", "ishar_test"),
+        "USER":     getenv("TEST_DB_USER", "web_bridge"),
+        "PASSWORD": getenv("TEST_DB_PASSWORD", ""),
+        "HOST":     getenv("TEST_DB_HOST", "staging.isharmud.com"),
+        "PORT": int(getenv("TEST_DB_PORT", 3306)),
+        "OPTIONS": {"connect_timeout": 3, "read_timeout": 5},
+    },
 }
-DATABASES["default"] = DATABASES[ALLOWED_HOSTS[0]]
 
 # Default primary key field type.
 DEFAULT_AUTO_FIELD = "apps.core.models.unsigned.UnsignedAutoField"
@@ -274,6 +283,12 @@ HELPTAB = Path(MUD_HOME, "lib/Misc/helptab")
 # Docker network instead of looping out through the public hostname.
 MUD_HOST = getenv("MUD_HOST", "isharmud.com")
 MUD_PORT = int(getenv("MUD_PORT", 23))
+
+# Test server (the staging box's game). Who may open a test session is decided
+# by apps.connect.testserver from the staging season's beta state. An empty
+# MUD_TEST_HOST removes the test option from /connect entirely.
+MUD_TEST_HOST = getenv("MUD_TEST_HOST", "staging.isharmud.com")
+MUD_TEST_PORT = int(getenv("MUD_TEST_PORT", 23))
 
 # Web deploy button (#1754). The God-gated deploy page (/portal/deploy/) POSTs
 # to an endpoint that talks to the host deploy agent over this bind-mounted unix
