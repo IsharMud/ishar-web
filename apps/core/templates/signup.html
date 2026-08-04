@@ -1,0 +1,141 @@
+{% extends "layout.html" %}
+{% load ishar %}
+{% block meta_title %}{{ WEBSITE_TITLE }} Create Account{% endblock meta_title %}
+{% block meta_description %}Create a free {{ WEBSITE_TITLE }} account.{% endblock meta_description %}
+{% block meta_url %}{% url 'signup' %}{% endblock meta_url %}
+{% block title %}{{ WEBSITE_TITLE }} Create Account{% endblock title %}
+{% block breadcrumbs %}
+    {% crumb "Create Account" "person-plus" urlname="signup" active=True %}
+{% endblock breadcrumbs %}
+{% block content %}
+<div class="ac">
+    <div class="ac-panel mx-auto w-100" style="max-width: 28rem;">
+        <div class="ac-panel__h">{% bi "person-plus" %} Create Account</div>
+{% if step == "email" and gate_message %}
+        <div class="ac-note ac-note--warn" role="alert">
+            {% bi "hourglass-split" %}
+            <span>{{ gate_message }}</span>
+        </div>
+{% else %}
+{% if step == "email" %}
+        <p class="ac-panel__hint">
+            Enter your e-mail address and we'll send you a 6-digit
+            verification code.
+        </p>
+{% else %}
+        <p class="ac-panel__hint">
+            We sent a code to <strong>{{ signup_email }}</strong>. Enter it
+            below and pick your account name and password.
+        </p>
+{% endif %}
+{% if resend_notice %}
+        <div class="ac-note ac-note--ok mb-3" role="status">
+            {% bi "envelope" %}
+            <span>{{ resend_notice }}</span>
+        </div>
+{% endif %}
+{% if resend_error %}
+        <div class="ac-note ac-note--danger mb-3" role="alert">
+            {% bi "exclamation-circle" %}
+            <span>{{ resend_error }}</span>
+        </div>
+{% endif %}
+{% if form.non_field_errors %}
+{% for err_msg in form.non_field_errors %}
+        <div class="ac-note ac-note--danger mb-3" role="alert">
+            {% bi "exclamation-circle" %}
+            <span>{{ err_msg }}</span>
+        </div>
+{% endfor %}
+{% endif %}
+        <form method="post" id="signup-form">
+            {% csrf_token %}
+{% if step == "email" %}
+            <label for="id_email" class="ac-label">E-mail Address</label>
+            <div class="ac-inputgroup mb-1">
+                <span class="ac-inputgroup__icon">{% bi "envelope" %}</span>
+                <input class="ac-input" type="email" name="email" autocomplete="email" maxlength="29" required autofocus id="id_email">
+            </div>
+{% for err_msg in form.email.errors %}
+            <div class="ac-note ac-note--danger mb-2" role="alert">
+                {% bi "exclamation-circle" %}
+                <span>{{ err_msg }}</span>
+            </div>
+{% endfor %}
+            <button class="ac-cta ac-cta--accent mt-3" type="submit">
+                {% bi "envelope" %}
+                Send Code
+            </button>
+{% else %}
+            <label for="id_code" class="ac-label">Verification Code</label>
+            <div class="ac-inputgroup mb-1">
+                <span class="ac-inputgroup__icon">{% bi "shield-lock" %}</span>
+                <input class="ac-input" type="text" name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required autofocus id="id_code">
+            </div>
+{% for err_msg in form.code.errors %}
+            <div class="ac-note ac-note--danger mb-2" role="alert">
+                {% bi "exclamation-circle" %}
+                <span>{{ err_msg }}</span>
+            </div>
+{% endfor %}
+            <label for="id_account_name" class="ac-label">Account Name</label>
+            <p class="ac-panel__hint mb-1" id="accountNameHint">
+                3&ndash;13 letters &mdash; this is what you'll log in with.
+            </p>
+            <div class="ac-inputgroup mb-1">
+                <span class="ac-inputgroup__icon">{% bi "person" %}</span>
+                <input aria-describedby="accountNameHint" class="ac-input" type="text" name="account_name" autocapitalize="none" autocomplete="username" maxlength="13" required id="id_account_name">
+            </div>
+{% for err_msg in form.account_name.errors %}
+            <div class="ac-note ac-note--danger mb-2" role="alert">
+                {% bi "exclamation-circle" %}
+                <span>{{ err_msg }}</span>
+            </div>
+{% endfor %}
+            <label for="id_password1" class="ac-label">Password</label>
+            <div class="ac-inputgroup mb-1">
+                <span class="ac-inputgroup__icon">{% bi "key" %}</span>
+                <input class="ac-input" type="password" name="password1" autocomplete="new-password" required id="id_password1">
+            </div>
+{% for err_msg in form.password1.errors %}
+            <div class="ac-note ac-note--danger mb-2" role="alert">
+                {% bi "exclamation-circle" %}
+                <span>{{ err_msg }}</span>
+            </div>
+{% endfor %}
+            <label for="id_password2" class="ac-label">Confirm Password</label>
+            <div class="ac-inputgroup mb-1">
+                <span class="ac-inputgroup__icon">{% bi "key" %}</span>
+                <input class="ac-input" type="password" name="password2" autocomplete="new-password" required id="id_password2">
+            </div>
+{% for err_msg in form.password2.errors %}
+            <div class="ac-note ac-note--danger mb-2" role="alert">
+                {% bi "exclamation-circle" %}
+                <span>{{ err_msg }}</span>
+            </div>
+{% endfor %}
+            <button class="ac-cta ac-cta--accent mt-3" type="submit">
+                {% bi "person-plus" %}
+                Create Account
+            </button>
+{% endif %}
+        </form>
+{% if step == "verify" %}
+        <form method="post" class="mt-3">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="resend">
+            <button class="ac-btn" type="submit">
+                {% bi "arrow-clockwise" %}
+                Resend code
+            </button>
+        </form>
+{% endif %}
+{% endif %}
+{% if step == "email" %}
+        <p class="ac-panel__hint mb-0 mt-3">
+            Already have an account? <a href="{% url 'login' %}">Log in</a>.
+        </p>
+{% endif %}
+    </div>
+</div>
+{% endblock content %}

@@ -149,6 +149,15 @@ class Account(AbstractBaseUser, PermissionsMixin):
         help_text="Account which referred this account.",
         verbose_name="Referrer Account",
     )
+    email_verified_at = models.DateTimeField(
+        blank=True,
+        null=True,
+        help_text=(
+            "When the e-mail address was verified. Web signups verify "
+            "before creation; game-created accounts are NULL."
+        ),
+        verbose_name="E-mail Verified At",
+    )
 
     EMAIL_FIELD = "email"
     USERNAME_FIELD = "account_name"

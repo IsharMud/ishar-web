@@ -112,16 +112,19 @@ CSRF_COOKIE_SAMESITE = SESSION_COOKIE_SAMESITE = "Strict"
 CSRF_COOKIE_SECURE = SESSION_COOKIE_SECURE = True
 CSRF_TRUSTED_ORIGINS = tuple(f"https://{h}" for h in ALLOWED_HOSTS)
 
-# E-mail.
+# E-mail. SMTP relay comes from the environment (signup verification codes
+# need real delivery); the localhost defaults keep dev harmless.
 ADMIN_EMAIL = f"admin@{ALLOWED_HOSTS[0]}"
 ADMINS = MANAGERS = (
     (f"{WEBSITE_TITLE} Administrator", ADMIN_EMAIL),
 )
-DEFAULT_FROM_EMAIL = SERVER_EMAIL = ADMIN_EMAIL
+DEFAULT_FROM_EMAIL = SERVER_EMAIL = getenv("EMAIL_FROM", ADMIN_EMAIL)
 EMAIL_SUBJECT_PREFIX = f"{WEBSITE_TITLE} ({ALLOWED_HOSTS[0]}) [Django]: "
-EMAIL_HOST = "127.0.0.1"
-EMAIL_PORT = 25
-EMAIL_HOST_USER = EMAIL_HOST_PASSWORD = None
+EMAIL_HOST = getenv("EMAIL_HOST", "127.0.0.1")
+EMAIL_PORT = int(getenv("EMAIL_PORT", 25))
+EMAIL_HOST_USER = getenv("EMAIL_HOST_USER") or None
+EMAIL_HOST_PASSWORD = getenv("EMAIL_HOST_PASSWORD") or None
+EMAIL_USE_TLS = bool(getenv("EMAIL_USE_TLS", ""))
 
 # Application definition.
 INSTALLED_APPS = [
