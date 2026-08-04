@@ -30,7 +30,7 @@
     "use strict";
 
     var H = null;      // context handed over by IsharHUD.registerMap()
-    var cfg = { urls: null, csrf: "", authed: false, demo: false };
+    var cfg = { urls: null, csrf: "", demo: false };
 
     // ------------------------------------------------------------------
     // State
@@ -814,7 +814,7 @@
     // ------------------------------------------------------------------
     // Live feed: called by hud.js on every Room.Info.
     // ------------------------------------------------------------------
-    function enabled() { return cfg.demo || cfg.authed; }
+    function enabled() { return cfg.demo || !!cfg.urls; }
 
     function onRoom(room) {
         if (!enabled()) return;
@@ -2219,7 +2219,6 @@
     window.IsharMap = {
         init: function (opts) {
             opts = opts || {};
-            cfg.authed = !!opts.authenticated;
             cfg.csrf = String(opts.csrf || "");
             if (opts.urls && typeof opts.urls === "object") cfg.urls = opts.urls;
             if (/[?&]demo=1/.test(window.location.search)) seedDemo();

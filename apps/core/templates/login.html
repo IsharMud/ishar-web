@@ -42,6 +42,10 @@
                 Log In
             </button>
         </form>
+        <p class="ac-panel__hint mb-0 mt-3">
+            New to Ishar?
+            <a href="{% url 'signup' %}{% if next %}?next={{ next|urlencode }}{% endif %}">Create an account</a>.
+        </p>
     </div>
 </div>
 {% endif %}

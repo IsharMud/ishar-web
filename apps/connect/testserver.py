@@ -9,13 +9,17 @@ off the staging season's persisted ``game_state`` (set in-game with
 
 Tiers:
 
-* **Open beta** — everyone, guests included.
+* **Open beta** — every signed-in account.
 * **Closed beta** — accounts flagged ``beta_tester``, plus staff.
 * **Beta off** (or the staging DB unreachable) — staff only. Failing closed
   costs nothing: the game refuses non-staff logins in those states anyway.
 
 "Staff" here is Artisan+ (``is_artisan``), matching the game gate's
 ``IMM_ARTISAN`` floor exactly — the two policies must not drift.
+
+Deliberate web/telnet difference: the raw staging telnet port still admits
+anonymous visitors during open beta, but ``/connect`` requires a portal
+login for every session, test included.
 """
 import logging
 
@@ -83,11 +87,11 @@ def allowed(user) -> bool:
     """Whether this user may open a test-server session right now."""
     if not enabled():
         return False
+    if not getattr(user, "is_authenticated", False):
+        return False
     current = tier()
     if current == "open":
         return True
-    if not getattr(user, "is_authenticated", False):
-        return False
     if user.is_artisan():
         return True
     return current == "closed" and bool(user.beta_tester)

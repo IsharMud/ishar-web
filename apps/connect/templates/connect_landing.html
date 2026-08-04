@@ -1,0 +1,59 @@
+{% extends "layout.html" %}
+{% load ishar %}
+{% block meta_title %}{{ WEBSITE_TITLE }} - Play in your browser{% endblock meta_title %}
+{% block meta_description %}Play {{ WEBSITE_TITLE }} in your browser. Sign in or create a free account to start.{% endblock meta_description %}
+{% block meta_url %}{% url 'connect' %}{% endblock meta_url %}
+{% block title %}Play {{ WEBSITE_TITLE }}{% endblock title %}
+{% block breadcrumbs %}
+    {% crumb "Play" "controller" urlname="connect" active=True %}
+{% endblock breadcrumbs %}
+{% block content %}
+<div class="ac">
+
+    <header class="ac-hero">
+        <span class="ac-hero__badge">{% bi "controller" %}</span>
+        <div class="ac-hero__text">
+            <h2 class="ac-hero__title">Play Ishar in your browser</h2>
+            <p class="ac-hero__sub">
+                Free to play, no download. The web client signs you into your
+                Ishar account &mdash; log in or create one to start.
+            </p>
+        </div>
+        <div class="ac-hero__status">
+            <a class="ac-cta ac-cta--accent" href="{% url 'login' %}?next={% url 'connect' %}">
+                {% bi "door-open" %}
+                Log In
+            </a>
+            <a class="ac-btn ac-btn--accent" href="{% url 'signup' %}?next={% url 'connect' %}">
+                {% bi "person-plus" %}
+                Create Account
+            </a>
+        </div>
+    </header>
+
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "unlock" %} What your account unlocks</div>
+        <ul class="mb-0">
+            <li>
+                <strong>No password prompts</strong> &mdash; every session is
+                signed in automatically, straight to character select.
+            </li>
+            <li>
+                <strong>Multiple characters at once</strong> &mdash; open up to
+                three sessions in one page and switch between them with tabs.
+            </li>
+            <li>
+                <strong>Your setup follows you</strong> &mdash; action bar, map
+                discoveries, and tracked quests sync between phone and desktop.
+            </li>
+        </ul>
+        <p class="ac-panel__hint mb-0 mt-3">
+            New to Ishar? Creating an account takes a minute &mdash; you'll make
+            your first character in the game itself.
+            Prefer your own <a href="{% url 'clients' %}#clients">MUD client</a>?
+            Point it at <code>isharmud.com</code> port <code>23</code>.
+        </p>
+    </div>
+
+</div>
+{% endblock content %}

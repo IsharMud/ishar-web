@@ -70,11 +70,11 @@
     // be dragged; unlocked is edit mode — taps rearrange instead of firing.
     var barLocked = localStorage.getItem("ishar.barUnlocked") !== "1";
     var pickedSlot = null;                     // tap-to-swap source (edit mode)
-    // Per-character bar sync (isharmud/ishar-web#167). Signed in, the action
-    // bar lives server-side keyed on the connected character; localStorage is
-    // a write-through cache and the guest fallback. barChar is the character
-    // whose bar is currently live (set from Char.Status).
-    var barCfg = { url: "", csrf: "", authed: false };
+    // Per-character bar sync (isharmud/ishar-web#167). The action bar lives
+    // server-side keyed on the connected character; localStorage is a
+    // write-through cache for a fast reconnect paint. barChar is the
+    // character whose bar is currently live (set from Char.Status).
+    var barCfg = { url: "", csrf: "" };
     var barChar = null;
     var barSeq = 0;            // fetch generation, guards a stale async load
     var barSaveTimer = null;   // debounce handle for the save POST
@@ -218,7 +218,6 @@
           available: function () { return (S.professions || []).length > 0 || !!S.craft; } },
         { key: "map", title: "Map", hotkey: "m",
           render: function () { if (mapMod) mapMod.renderOverlay(); },
-          // Account-gated: guests map nothing, so they get no launcher.
           available: function () { return !!(mapMod && mapMod.enabled()); } },
         // Quest Log: Char.Quests dynamic state joined to the web-served
         // static catalog; tracked quests pin to the top and feed the
@@ -372,8 +371,8 @@
     function writeSlotsCache() {
         try { localStorage.setItem("ishar.slots", JSON.stringify(slotsArray())); } catch (e) {}
     }
-    // A slot edit: cache locally (the guest fallback + a fast reconnect paint)
-    // and, when signed in, mirror the active character's bar to the server.
+    // A slot edit: cache locally (a fast reconnect paint) and mirror the
+    // active character's bar to the server.
     function saveSlots() { writeSlotsCache(); pushBar(); }
     function slotKeyOf(s) { return nameOf(s && s.name).toLowerCase(); }
     function slotIndexOf(key) { for (var i = 0; i < slots.length; i++) if (slots[i] === key) return i; return -1; }
@@ -494,11 +493,11 @@
         if (barPending) { postBar(barPending.name, barPending.slots); barPending = null; }
     }
     // Debounced mirror of the active character's bar to the server. A no-op
-    // for guests and before Char.Status names the character. The pending
-    // snapshot is captured now, so a save can't pick up a later character's
-    // slots when it fires.
+    // before Char.Status names the character. The pending snapshot is
+    // captured now, so a save can't pick up a later character's slots when
+    // it fires.
     function pushBar() {
-        if (!barCfg.authed || !barCfg.url || !barChar) return;
+        if (!barCfg.url || !barChar) return;
         barPending = { name: barChar, slots: slotsArray() };
         if (barSaveTimer) clearTimeout(barSaveTimer);
         barSaveTimer = setTimeout(flushBar, 600);
@@ -510,7 +509,7 @@
     // (see barMigrated), then starts empty.
     function onCharacter(name) {
         name = String(name || "").trim();
-        if (!name || !barCfg.authed || !barCfg.url || name === barChar) return;
+        if (!name || !barCfg.url || name === barChar) return;
         flushBar();   // persist the previous character's pending edit first
         barChar = name;
         var seq = ++barSeq;
@@ -4489,9 +4488,9 @@
     // step labels, reward names — is fetched once over HTTP and joined
     // client-side on quest id. Tracking (pin-to-top + the objectives
     // tracker over the terminal) is account state, so pins follow the
-    // player between phone and desktop; guests fall back to localStorage.
+    // player between phone and desktop.
     // ------------------------------------------------------------------
-    var questCfg = { urls: null, csrf: "", authed: false };
+    var questCfg = { urls: null, csrf: "" };
     var questCatalog = null;          // id -> catalog entry, once fetched
     var questCatalogLoading = false;
     var questTracked = [];            // tracked quest ids, pin order
@@ -4904,7 +4903,7 @@
     }
 
     function ensureQuestCatalog() {
-        if (questCatalog || questCatalogLoading || !questCfg.urls || !questCfg.authed) return;
+        if (questCatalog || questCatalogLoading || !questCfg.urls) return;
         questCatalogLoading = true;
         fetch(questCfg.urls.catalog, { credentials: "same-origin" })
             .then(function (r) { return r.ok ? r.json() : null; })
@@ -4920,15 +4919,7 @@
     }
 
     function loadQuestTracked() {
-        if (!questCfg.authed || !questCfg.urls) {
-            try {
-                var arr = JSON.parse(localStorage.getItem("ishar.questTracked"));
-                if (Array.isArray(arr)) {
-                    questTracked = arr.filter(function (v) { return typeof v === "number"; });
-                }
-            } catch (e) {}
-            return;
-        }
+        if (!questCfg.urls) return;
         fetch(questCfg.urls.tracked, { credentials: "same-origin" })
             .then(function (r) { return r.ok ? r.json() : null; })
             .then(function (data) {
@@ -4949,10 +4940,7 @@
         else questTracked = questTracked.filter(function (v) { return v !== id; });
         if (overlayVisible("quests")) renderQuests();
         renderQuestTracker();
-        if (!questCfg.authed || !questCfg.urls) {
-            try { localStorage.setItem("ishar.questTracked", JSON.stringify(questTracked)); } catch (e) {}
-            return;
-        }
+        if (!questCfg.urls) return;
         fetch(questCfg.urls.track, {
             method: "POST", credentials: "same-origin",
             headers: { "Content-Type": "application/json", "X-CSRFToken": questCfg.csrf },
@@ -5963,12 +5951,10 @@
         if (opts.quests && typeof opts.quests === "object") {
             questCfg.urls = opts.quests.urls || null;
             questCfg.csrf = String(opts.quests.csrf || "");
-            questCfg.authed = !!opts.quests.authed;
         }
         if (opts.bar && typeof opts.bar === "object") {
             barCfg.url = String(opts.bar.url || "");
             barCfg.csrf = String(opts.bar.csrf || "");
-            barCfg.authed = !!opts.bar.authed;
         }
 
         dom.app = document.getElementById("connect-app");

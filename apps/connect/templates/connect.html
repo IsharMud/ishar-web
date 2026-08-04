@@ -46,16 +46,14 @@
             <span class="status-text">Connecting&hellip;</span>
         </span>
         {# Multiplay chrome: tabs render only with 2+ sessions; the "+" #}
-        {# opens the character picker (authenticated accounts only). #}
+        {# opens the character picker. #}
         <div id="session-tabs" aria-label="Game sessions"></div>
-        {% if user.is_authenticated %}
         <button class="hud-btn hud-btn--icon" type="button" id="session-add"
                 aria-expanded="false" aria-controls="session-pop"
                 title="Open another character" aria-label="Open another character">
             {% bi "plus-lg" %}
         </button>
         <div id="session-pop" hidden></div>
-        {% endif %}
         <div id="vitals-bar"></div>
         <!-- Ambient self buff/debuff timer icons — always visible by the vitals
            (hud.js renderSelfAffects). Bare icons; a countdown chip + pulse
@@ -527,7 +525,6 @@
 
     var isMobile = ("ontouchstart" in window) && window.innerWidth < 768;
     var isDemo = new URLSearchParams(location.search).has("demo");
-    var isAuthed = {{ user.is_authenticated|yesno:"true,false" }};
     // Whether this visitor may open a test-server session (the beta-tier
     // policy in apps/connect/testserver.py; the bridge re-checks it
     // server-side before dialing, so this only shapes the UI).
@@ -727,6 +724,7 @@
     var BACKOFF_MS = [1000, 2000, 5000, 10000];
     var CLOSE_BRIDGE_FAILURE = 4502;  // matches apps/connect/consumers.py
     var CLOSE_TEST_FORBIDDEN = 4403;  // test-server policy refusal — terminal
+    var CLOSE_UNAUTHENTICATED = 4401; // portal session gone — back to /login/
     var SCROLLBACK_MAX = 512 * 1024;
     var CHAT_MAX = 200;               // mirrors hud.js CHAT_MAX
 
@@ -1039,6 +1037,19 @@
                 // restart the backoff ladder instead of climbing it forever.
                 if (sess.openedAt && Date.now() - sess.openedAt > 30000) sess.reconnectAttempt = 0;
                 sess.openedAt = 0;
+                if (event.code === CLOSE_UNAUTHENTICATED) {
+                    // The portal session expired or cookies were cleared —
+                    // every socket would refuse identically, so send the
+                    // player back through login instead of retrying.
+                    sess.quitClean = true;
+                    sess.state = "dead";
+                    if (isFocused(sess)) syncFocusUi(); else renderSessionTabs();
+                    sess.term.writeln("\r\n\x1b[1;33m--- Your session has expired. Taking you to the login page… ---\x1b[0m");
+                    setTimeout(function() {
+                        location.href = "/login/?next=/connect/";
+                    }, 1500);
+                    return;
+                }
                 if (event.code === CLOSE_TEST_FORBIDDEN) {
                     // The bridge refused a test-server session (beta tier
                     // changed, or the feature is off). Terminal — a retry
@@ -1266,7 +1277,7 @@
     // re-selects its character through the bridge.
     var ROSTER_KEY = "ishar.sessions";
     function saveRoster() {
-        if (isDemo || !isAuthed) return;
+        if (isDemo) return;
         try {
             sessionStorage.setItem(ROSTER_KEY, JSON.stringify({
                 focused: focusedSession ? focusedSession.slot : null,
@@ -1277,7 +1288,7 @@
         } catch (e) {}
     }
     function loadRoster() {
-        if (isDemo || !isAuthed) return null;
+        if (isDemo) return null;
         try {
             var r = JSON.parse(sessionStorage.getItem(ROSTER_KEY));
             if (r && Array.isArray(r.list) && r.list.length) return r;
@@ -1893,9 +1904,7 @@
                 break;
             case "test": {
                 if (!TEST_ALLOWED) {
-                    sysln(TEST_TIER === "closed" && !isAuthed
-                        ? "A closed beta is running — log in to check your test-server access."
-                        : "The test server is not open to your account right now.");
+                    sysln("The test server is not open to your account right now.");
                     break;
                 }
                 var testOpen = null;
@@ -2083,7 +2092,6 @@
             // Quest Log endpoints: the static catalog + account tracking state
             // (same CSRF source as the map — the cookie is HttpOnly).
             quests: {
-                authed: {{ user.is_authenticated|yesno:"true,false" }},
                 csrf: (document.querySelector("#command-form [name=csrfmiddlewaretoken]") || {}).value || "",
                 urls: {
                     catalog: "{% url 'quest_catalog' %}",
@@ -2091,22 +2099,19 @@
                     track: "{% url 'quest_track' %}"
                 }
             },
-            // Per-character action bar: server-persisted for signed-in players,
-            // keyed on the connected character (same CSRF source as the map).
+            // Per-character action bar: server-persisted, keyed on the
+            // connected character (same CSRF source as the map).
             bar: {
-                authed: {{ user.is_authenticated|yesno:"true,false" }},
                 csrf: (document.querySelector("#command-form [name=csrfmiddlewaretoken]") || {}).value || "",
                 url: "{% url 'hud_bar' %}"
             }
         });
     }
-    // The map module rides the same page: account gate, reversed endpoint
-    // URLs (the /0/ is a placeholder the client swaps for the real
-    // vnum/zone), and the CSRF token from the form field above (the cookie
-    // is HttpOnly).
+    // The map module rides the same page: reversed endpoint URLs (the /0/
+    // is a placeholder the client swaps for the real vnum/zone), and the
+    // CSRF token from the form field above (the cookie is HttpOnly).
     if (window.IsharMap) {
         window.IsharMap.init({
-            authenticated: {{ user.is_authenticated|yesno:"true,false" }},
             csrf: (document.querySelector("#command-form [name=csrfmiddlewaretoken]") || {}).value || "",
             urls: {
                 graph: "{% url 'map_graph' vnum=0 %}",
@@ -2582,9 +2587,8 @@
         }
     }
 
-    // The test-server entry rides the same picker (also /test — guests in an
-    // open beta have no "+" button). One test session at a time: picking it
-    // again just focuses the open one, like /test.
+    // The test-server entry rides the same picker (also /test). One test
+    // session at a time: picking it again just focuses the open one.
     function appendTestPick() {
         if (!TEST_ALLOWED) return;
         var open = null;
@@ -2770,7 +2774,7 @@
     if (!first) first = Sessions.create({});
 
     // Test-server access is invisible unless announced — the picker is behind
-    // "+" (and guests have no "+" at all), so say it once at load.
+    // "+", so say it once at load.
     if (TEST_ALLOWED && !isDemo) {
         sysln(TEST_TIER === "open"
             ? "An open beta is running on the test server — /test (or the + menu) opens a session there."

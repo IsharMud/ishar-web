@@ -20,6 +20,11 @@ CLOSE_BRIDGE_FAILURE = 4502
 # The test-server policy refused this connection (beta tier, or the feature
 # is unconfigured). Terminal — the browser must not retry with backoff.
 CLOSE_TEST_FORBIDDEN = 4403
+# No portal session on the socket. Terminal — the browser must send the
+# player back through /login/, not retry. Defense in depth: /connect only
+# renders the client for authenticated users, so this fires when a session
+# expired mid-play or cookies were cleared.
+CLOSE_UNAUTHENTICATED = 4401
 
 # NUL-prefixed websocket text frames are the bridge's out-of-band control
 # channel (the browser's terminal stream never legitimately starts with NUL).
@@ -114,7 +119,7 @@ class TelnetConsumer(AsyncWebsocketConsumer):
             "test" if (params.get("server") or [""])[0] == "test" else "prod"
         )
         # States: account id set = waiting for the account prompt;
-        # None = guest, already sent, or minting failed — leave manual login.
+        # None = already sent or minting failed — leave manual login.
         # _account_id survives the attempt (auto-select needs it later).
         self._account_id = account_id
         self._autologin_account_id = account_id
@@ -126,8 +131,8 @@ class TelnetConsumer(AsyncWebsocketConsumer):
         # Auto character select (#178): `ws/connect?character=<name>` names
         # the character this session is for. Only honored after a successful
         # webauth (the game validates ownership too — this is UX, not the
-        # security boundary), and never for guests. Test sessions skip it:
-        # staging's character roster is a snapshot that may not match prod's.
+        # security boundary). Test sessions skip it: staging's character
+        # roster is a snapshot that may not match prod's.
         self._autoselect_name = None
         self._webauth_sent = False
         self._select_tail = ""
@@ -158,6 +163,10 @@ class TelnetConsumer(AsyncWebsocketConsumer):
         # socket surfaces in the browser as a bare handshake failure (1006),
         # which would be indistinguishable from a network drop.
         await self.accept()
+
+        if account_id is None:
+            await self.close(code=CLOSE_UNAUTHENTICATED)
+            return
 
         if self._server == "test":
             # Advisory-tier re-check (shares the policy's 60s state cache);
