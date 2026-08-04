@@ -114,6 +114,22 @@
                 <span>{{ err_msg }}</span>
             </div>
 {% endfor %}
+            <label for="id_friend_code" class="ac-label">Friend Code <span class="text-secondary">(optional)</span></label>
+            <p class="ac-panel__hint mb-1" id="friendCodeHint">
+                Referred by a friend? Enter their 8-character code &mdash;
+                you'll both earn bonuses while you learn the game.
+            </p>
+            <div class="ac-inputgroup mb-1">
+                <span class="ac-inputgroup__icon">{% bi "share" %}</span>
+                <input aria-describedby="friendCodeHint" class="ac-input" type="text" name="friend_code" autocapitalize="characters" autocomplete="off" maxlength="8" value="{{ form.friend_code.value|default:'' }}" id="id_friend_code">
+            </div>
+            <p class="ac-panel__hint mb-1" id="friend-code-status" role="status" hidden></p>
+{% for err_msg in form.friend_code.errors %}
+            <div class="ac-note ac-note--danger mb-2" role="alert">
+                {% bi "exclamation-circle" %}
+                <span>{{ err_msg }}</span>
+            </div>
+{% endfor %}
             <button class="ac-cta ac-cta--accent mt-3" type="submit">
                 {% bi "person-plus" %}
                 Create Account
@@ -138,4 +154,49 @@
 {% endif %}
     </div>
 </div>
+{% if step == "verify" %}
+<script>
+(function() {
+    "use strict";
+    var input = document.getElementById("id_friend_code");
+    var status = document.getElementById("friend-code-status");
+    if (!input || !status) return;
+    var CODE_RE = /^[0-9A-HJKMNP-TV-Z]{8}$/;  // Crockford base32
+    var timer = null;
+    var seq = 0;
+    function show(text, cls) {
+        status.textContent = text;
+        status.className = "ac-panel__hint mb-1 " + cls;
+        status.hidden = false;
+    }
+    function check() {
+        var code = input.value.trim().toUpperCase();
+        if (!code) { status.hidden = true; return; }
+        if (!CODE_RE.test(code)) {
+            show("Codes are 8 letters and digits.", "text-secondary");
+            return;
+        }
+        var mySeq = ++seq;
+        fetch("{% url 'signup_friend_code' %}?code=" + encodeURIComponent(code), {
+            credentials: "same-origin"
+        }).then(function(r) { return r.ok ? r.json() : null; })
+            .then(function(data) {
+                if (mySeq !== seq || !data) return;
+                if (data.found) {
+                    show("Friend code for " + data.account_name
+                        + " received — they'll be your referrer.", "text-success");
+                } else {
+                    show("No account found with that friend code. "
+                        + "Please check and try again.", "text-danger");
+                }
+            })
+            .catch(function() {});
+    }
+    input.addEventListener("input", function() {
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(check, 400);
+    });
+})();
+</script>
+{% endif %}
 {% endblock content %}

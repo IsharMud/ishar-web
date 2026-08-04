@@ -8,7 +8,7 @@ from django.core.exceptions import ValidationError
 
 from apps.accounts.models import Account
 from apps.accounts.validators import (
-    account_name_error, email_error, password_error,
+    account_name_error, email_error, friend_code_error, password_error,
 )
 
 
@@ -72,10 +72,39 @@ class SignupVerifyForm(forms.Form):
             "class": "ac-input",
         }),
     )
+    friend_code = forms.CharField(
+        required=False,
+        max_length=12,
+        label="Friend Code",
+        widget=forms.TextInput(attrs={
+            "autocapitalize": "characters",
+            "autocomplete": "off",
+            "maxlength": "8",
+            "class": "ac-input",
+        }),
+    )
 
     def __init__(self, *args, email="", **kwargs):
         super().__init__(*args, **kwargs)
         self.email = email
+        # The Account resolved from a valid friend code; the view hands it
+        # to create_user(referrer=...).
+        self.referrer = None
+
+    def clean_friend_code(self):
+        code = self.cleaned_data["friend_code"].strip().upper()
+        if not code:
+            return ""
+        error = friend_code_error(code)
+        if error:
+            raise ValidationError(error)
+        self.referrer = Account.objects.filter(friend_code=code).first()
+        if self.referrer is None:
+            raise ValidationError(
+                "No account found with that friend code. Please check "
+                "and try again."
+            )
+        return code
 
     def clean_account_name(self):
         name = self.cleaned_data["account_name"].strip().lower()

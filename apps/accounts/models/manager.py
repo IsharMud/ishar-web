@@ -6,12 +6,8 @@ from django.db import IntegrityError
 from django.utils.timezone import now
 from passlib.hash import md5_crypt
 
+from apps.accounts.validators import CROCKFORD32
 from apps.core.utils.ip import ip2dec
-
-
-# The game's gen_friend_code (src/kernel/accounts.c): 5 random bytes packed
-# into 40 bits, emitted as 8 Crockford-base32 characters.
-CROCKFORD32 = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
 
 # accounts.account_gift is a NOT NULL TIMESTAMP the game seeds with
 # FROM_UNIXTIME(0); epoch+1s stays inside the TIMESTAMP range under strict
@@ -20,6 +16,8 @@ ACCOUNT_GIFT_NEVER = datetime(1970, 1, 1, 0, 0, 1, tzinfo=timezone.utc)
 
 
 def gen_friend_code() -> str:
+    # The game's algorithm (src/kernel/accounts.c): 5 random bytes packed
+    # into 40 bits, emitted as 8 Crockford-base32 characters.
     packed = int.from_bytes(secrets.token_bytes(5), "big")
     out = []
     for _ in range(8):
@@ -33,7 +31,7 @@ class AccountManager(BaseUserManager):
 
     def create_user(
         self, email=None, account_name=None, password=None,
-        ip=None, ident="web",
+        ip=None, ident="web", referrer=None,
     ):
         """Insert an ``accounts`` row the way the game does.
 
@@ -84,7 +82,7 @@ class AccountManager(BaseUserManager):
                     beta_tester=0,
                     free_refresh=0,
                     friend_code=gen_friend_code(),
-                    referrer_account=None,
+                    referrer_account=referrer,
                     email_verified_at=when,
                 )
             except IntegrityError as exc:

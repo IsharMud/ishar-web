@@ -64,6 +64,11 @@ EMAIL_MIN, EMAIL_MAX = 3, 29
 NAME_MIN, NAME_MAX = 3, 13
 PASSWORD_MIN, PASSWORD_MAX = 4, 64
 
+# The game's friend-code alphabet (gen_friend_code, src/kernel/accounts.c):
+# Crockford base32 — no I, L, O, or U.
+CROCKFORD32 = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
+FRIEND_CODE_LEN = 8
+
 
 def email_error(email):
     """Length/charset rules on top of Django's format validation."""
@@ -141,4 +146,17 @@ def password_error(password, account_name="", email=""):
     local_part = email.split("@", 1)[0].lower() if email else ""
     if lowered and lowered in (account_name.lower(), local_part):
         return "Your password can't be your account name or e-mail address."
+    return None
+
+
+def friend_code_error(code):
+    """Format check on an already trimmed/uppercased friend code
+    (mirrors the game's ``account friend`` rule)."""
+    if len(code) != FRIEND_CODE_LEN or any(
+        c not in CROCKFORD32 for c in code
+    ):
+        return (
+            "That doesn't look like a valid friend code. "
+            "Codes are 8 characters."
+        )
     return None

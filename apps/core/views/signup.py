@@ -21,12 +21,14 @@ from django.contrib.auth import login
 from django.core.cache import cache
 from django.core.mail import send_mail
 from django.db import DatabaseError, IntegrityError
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse, reverse_lazy
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.timezone import now
+from django.views.generic.base import View
 from django.views.generic.edit import FormView
 
+from apps.accounts.validators import friend_code_error
 from apps.core.forms import SignupEmailForm, SignupVerifyForm
 from apps.core.models import SignupVerification
 from apps.core.utils.ip import client_ip
@@ -42,6 +44,8 @@ SESSION_EMAIL_KEY = "signup_email"
 SESSION_NEXT_KEY = "signup_next"
 IP_SEND_LIMIT = 10          # sends per address per hour
 IP_SEND_WINDOW = 60 * 60
+IP_CODE_CHECK_LIMIT = 30    # friend-code lookups per address per hour
+IP_CODE_CHECK_WINDOW = 60 * 60
 
 
 def signup_gate_message():
@@ -69,15 +73,19 @@ def signup_gate_message():
     return None
 
 
-def _ip_send_allowed(request) -> bool:
-    key = f"signup.send.{client_ip(request) or 'unknown'}"
-    if cache.add(key, 1, IP_SEND_WINDOW):
+def _ip_allowed(request, action, limit, window) -> bool:
+    key = f"signup.{action}.{client_ip(request) or 'unknown'}"
+    if cache.add(key, 1, window):
         return True
     try:
-        return cache.incr(key) <= IP_SEND_LIMIT
+        return cache.incr(key) <= limit
     except ValueError:
-        cache.add(key, 1, IP_SEND_WINDOW)
+        cache.add(key, 1, window)
         return True
+
+
+def _ip_send_allowed(request) -> bool:
+    return _ip_allowed(request, "send", IP_SEND_LIMIT, IP_SEND_WINDOW)
 
 
 def _send_code(request, email):
@@ -260,6 +268,7 @@ class SignupVerifyView(NeverCacheMixin, FormView):
                 account_name=form.cleaned_data["account_name"],
                 password=form.cleaned_data["password1"],
                 ip=client_ip(self.request),
+                referrer=form.referrer,
             )
         except IntegrityError:
             # Lost a race on email/name despite the form checks; the
@@ -278,3 +287,32 @@ class SignupVerifyView(NeverCacheMixin, FormView):
 
     def get_success_url(self):
         return self.request.session.pop(SESSION_NEXT_KEY, None) or "/connect/"
+
+
+class FriendCodeCheckView(NeverCacheMixin, View):
+    """Live referral-code lookup for the signup form (GET ``?code=``).
+
+    Echoing the matched account name mirrors the game's own confirm
+    prompt ("You wish to use %s as your referrer...?") — possession of
+    the code is the authorization. The form's ``clean_friend_code``
+    stays the authority; this only feeds the status line.
+    """
+
+    http_method_names = ("get",)
+
+    def get(self, request, *args, **kwargs):
+        if not _ip_allowed(
+            request, "codecheck", IP_CODE_CHECK_LIMIT, IP_CODE_CHECK_WINDOW
+        ):
+            return JsonResponse({"error": "rate_limited"}, status=429)
+        code = request.GET.get("code", "").strip().upper()
+        if friend_code_error(code):
+            return JsonResponse({"found": False})
+        from apps.accounts.models import Account
+
+        referrer = Account.objects.filter(friend_code=code).first()
+        if referrer is None:
+            return JsonResponse({"found": False})
+        return JsonResponse(
+            {"found": True, "account_name": referrer.account_name}
+        )

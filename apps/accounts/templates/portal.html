@@ -309,6 +309,16 @@
                 {{ request.user.created_at|naturaltime }}
                 (<time datetime="{{ request.user.created_at|date:'c' }}">{{ request.user.created_at|date:"N j, Y" }}</time>)
             </dd>
+{% if request.user.friend_code %}
+            <dt>Friend Code</dt>
+            <dd>
+                <code>{{ request.user.friend_code }}</code>
+                <span class="ac-switch__note d-block">Friends who enter it at signup earn bonuses with you.</span>
+            </dd>
+{% endif %}
+{% if request.user.referrer_account %}
+            <dt>Referred By</dt><dd>{{ request.user.referrer_account.account_name }}</dd>
+{% endif %}
         </dl>
         <div class="form-check form-switch ac-switch">
             <input class="form-check-input" type="checkbox" role="switch" id="privateSwitch"{% if request.user.is_private %} checked{% endif %}>

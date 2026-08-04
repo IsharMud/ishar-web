@@ -5,7 +5,9 @@ from apps.players.views.who import PlayerWhoView
 
 from .views import HomeView, StartView, UpgradesView, SupportView
 from .views.auth import IsharLoginView, IsharLogoutView
-from .views.signup import SignupView, SignupVerifyView
+from .views.signup import (
+    FriendCodeCheckView, SignupView, SignupVerifyView,
+)
 from .views.styleguide import StyleGuideView
 
 
@@ -18,6 +20,11 @@ urlpatterns = [
     path("logout/", IsharLogoutView.as_view(), name="logout"),
     path("signup/", SignupView.as_view(), name="signup"),
     path("signup/verify/", SignupVerifyView.as_view(), name="signup_verify"),
+    path(
+        "signup/friend-code/",
+        FriendCodeCheckView.as_view(),
+        name="signup_friend_code",
+    ),
 
     path("start/", StartView.as_view(), name="start"),
     path("support/", SupportView.as_view(), name="support"),

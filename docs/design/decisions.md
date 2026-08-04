@@ -9,6 +9,37 @@ Format: `## YYYY-MM-DD — Title` · **Decision** · **Why** · (optional) **Not
 
 ---
 
+## 2026-08-04 — Signup takes a friend code; the portal shows yours
+
+**Decision.** Web signup gains the game's referral step
+(isharmud/ishar-web#197): an optional **Friend Code** field on the verify
+page, validated to the `account friend` rule (trim, uppercase, exactly 8
+Crockford-base32 chars), resolved against `accounts.friend_code`, and
+passed into `create_user(referrer=…)` so the row is born with
+`referrer_account_id` set — no game change needed, since the XP/essence
+payouts key off the column plus `is_new_account()`. A small rate-limited
+GET endpoint (`/signup/friend-code/`) powers a **live status line**
+("Friend code for *name* received — they'll be your referrer."), set via
+`textContent` with the server-side form clean as the authority; a wrong
+code blocks submit with the game's own copy. The portal's Account panel
+now shows **your own** friend code (till now only the in-game `account`
+command revealed it) plus "Referred By" when set.
+
+**The name-echo call.** Resolving a code names an account to whoever holds
+it. That mirrors the game exactly — its confirm prompt echoes "You wish to
+use %s as your referrer...?" — so possession of the code is treated as the
+authorization, and codes are bearer tokens players hand out deliberately.
+The endpoint is an oracle over a 2^40 space; per-IP rate limiting is
+hygiene, not a load-bearing defense. Like the game, there is **no same-IP
+guard and no referral cap** — matching policy, not inventing it; either is
+a future option if abuse appears (`create_haddr`/`create_isp` are stored).
+
+**Notes.** Field order mirrors telnet signup (referral last, blank skips).
+Verification: harness cases over `friend_code_error`, `manage.py check`,
+template compiles, `node --check` on the page script, headless-Chromium
+shots of the found/not-found states at 1400/390px. The live round-trip
+against real codes is the owner's on-prod check.
+
 ## 2026-08-04 — /connect requires the portal account; signup is web-first with a verified e-mail
 
 **Decision.** The web client is signed-in-only (isharmud/ishar-web#196), and
