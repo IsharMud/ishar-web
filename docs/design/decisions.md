@@ -9,6 +9,70 @@ Format: `## YYYY-MM-DD — Title` · **Decision** · **Why** · (optional) **Not
 
 ---
 
+## 2026-08-04 — /connect requires the portal account; signup is web-first with a verified e-mail
+
+**Decision.** The web client is signed-in-only (isharmud/ishar-web#196), and
+the site gains its first self-serve signup:
+
+- **Guests hitting `/connect` get a landing page**, not a terminal: one
+  `.ac-hero` + a "what your account unlocks" panel (auto-login to character
+  select, up to three sessions, cross-device bar/map/quest state) with Log In
+  / Create Account CTAs. The page — not a redirect — because the login↔features
+  link was the thing nobody could see.
+- **The websocket refuses anonymous sockets** with `4401` (terminal, beside
+  the `4403` precedent); the client prints "session expired" and routes to
+  `/login/?next=/connect/`. This only fires when a session dies mid-play —
+  guests never reach the client page anymore.
+- **Every guest fallback is deleted** (green-field): `isAuthed` branches in
+  `connect.html`, the `authed` flags into `IsharHUD.init`/`IsharMap.init`,
+  the bar/quest localStorage *source-of-truth* roles in `hud.js` (localStorage
+  stays as the write-through reconnect cache per the 2026-07-21 ADR), and
+  `testserver.py`'s guest open-beta admission. This supersedes the "guest
+  fallback" clauses of the 2026-07-21 bar ADR and the Quest Log ADR's "guests
+  degrade to localStorage."
+- **Signup is verify-first**: e-mail → 6-digit code (15-min TTL, 5 attempts,
+  resend cooldown, per-IP send caps; SMTP via env settings) → code + account
+  name + password creates the `accounts` row already verified and logs in.
+  No unverified rows ever exist in the game's table; pending state lives in
+  site-owned `web_signup_verification`. A code beats a signed link on this
+  playerbase: mail is read on a different device than the open signup tab,
+  and single-use GET links get eaten by scanner bots.
+- **Creation mirrors the game**: season `game_state` gates signup with the
+  game's own refusal copy; validation ports `illegal_account`/`illegal_name`/
+  `illegal_password`; the INSERT sets every NOT NULL column the way
+  `new_account()` does (MD5-crypt, Crockford friend code, /16 ISP, signed
+  haddr) and never upserts (ishar-mud#1711). Web rows are marked
+  `ident="web"` and stamp the new `accounts.email_verified_at` column
+  (ishar-mud diesel migration; contract 5 in `web_bridge_contracts.md`).
+- **`SignupVerification` lives in apps/core, not apps/accounts** — applied
+  migrations elsewhere carry `swappable_dependency(AUTH_USER_MODEL)`, so the
+  accounts app must stay migration-free or every existing DB fails with
+  InconsistentMigrationHistory. Core also owns the login page; signup is its
+  sibling (`/signup/`, `/signup/verify/`).
+
+**Trade-offs, accepted.** Step 1 reveals whether an e-mail has an account
+(enumeration) — honest UX beats obscurity for a ~11-player community.
+`?demo=1` now requires login (design previews use the file harness). The
+raw telnet port still admits guests and still offers `new` — two front
+doors, one policy, by reading the same season state.
+
+**Why.** Auto-login and multiplay were already portal-session features by
+construction — the consumer mints `webauth` for `scope["user"]`, and the
+game counts multiplay per account (the bridge presents one shared IP, so
+the account is the only identity axis web sessions have). A guest terminal
+that explained none of that was the worst of both: the flagship "Play Now"
+funnel landed first-time visitors on a raw telnet prompt whose only signup
+path was typing `new`. This infra (SMTP + verification) is deliberately the
+foundation for password reset, which remains its own future task.
+
+**Notes.** Verification: `py_compile` + `manage.py check`, a pure-logic
+harness over the ported validators / friend-code / ip2dec round-trips /
+md5-crypt, template compiles, `node --check`, headless-Chromium screenshots
+of landing + signup steps at 1400/390px. Left to the owner on prod: real
+SMTP delivery, the full signup → webauth → character-select round trip, the
+diesel migration on both DBs (must land **before** this deploys — the model
+declares the column), and whether X-Forwarded-For reaches Django.
+
 ## 2026-07-31 — The topbar tells the same story at every width
 
 **Decision.** Three rules for `#hud-topbar`:
