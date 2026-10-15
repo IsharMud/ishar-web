@@ -1,0 +1,195 @@
+{% extends "layout.html" %}
+{% load ishar %}
+{% block meta_title %}The Fated - {{ WEBSITE_TITLE }} Season Guide{% endblock meta_title %}
+{% block meta_description %}How a Fated life runs in {{ WEBSITE_TITLE }}: one thread under permadeath, a skill drawn at every level, one bound at every remort, knots tied at the start, and the summit where the eleventh prayer ascends.{% endblock meta_description %}
+{% block meta_url %}{% url 'fated' %}#fated{% endblock meta_url %}
+{% block title %}The Fated - {{ WEBSITE_TITLE }}{% endblock title %}
+{% block breadcrumbs %}
+    {% crumb "The Fated" "bezier2" urlname="fated" anchor="fated" active=True %}
+{% endblock breadcrumbs %}
+{% block content %}
+<div class="ac">
+
+    <header class="ac-hero">
+        <span class="ac-hero__badge">{% bi "bezier2" %}</span>
+        <div class="ac-hero__text">
+            <h2 class="ac-hero__title">The Fated</h2>
+            <p class="ac-hero__sub">
+                One thread, spun once. What a Fated life is, from the first draw to the eleventh prayer.
+            </p>
+        </div>
+{% if fated_season %}
+        <div class="ac-hero__status">
+            <span class="ac-pill ac-pill--status ac-pill--accent ac-pill--live">this season</span>
+        </div>
+{% endif %}
+    </header>
+
+    <div class="ac-panel">
+        <div class="ac-panel__h" id="thread">
+            {% bi "person" %} One thread
+            <a class="anchor-link" href="#thread" aria-label="Link to this section: One thread"></a>
+        </div>
+        <p>
+            In a Fated season there is one class, and it learns no fixed list of skills.
+            A Fated walks Ishar under permadeath: when the thread is cut, that life is over,
+            and the next one begins at level 1. Only one living Fated may exist on an
+            account; a new thread is spun only after the old one ends — by death, by
+            <code>abandon run</code>, or by ascension.
+        </p>
+        <p class="mb-0">
+            Everything that belongs to the account — essence, upgrades, remembrances,
+            achievements, titles — was never at stake. Only the life is.
+        </p>
+    </div>
+
+    <div class="ac-panel">
+        <div class="ac-panel__h" id="draw">
+            {% bi "shuffle" %} The draw
+            <a class="anchor-link" href="#draw" aria-label="Link to this section: The draw"></a>
+        </div>
+        <p>
+            At each level the Dancers offer a random draw of skills. Choose one and it is
+            yours for this life. Rarer skills enter the draw as you grow, and skills unlock
+            along pathways: the plain arts are open to everyone, and each line's strongest
+            skills appear only once you hold a foundation for them. Your first choice, at
+            level 1, is a guaranteed key — a core skill that opens one pathway on the spot.
+        </p>
+        <p class="mb-0">
+            The choice is made at the moment of leveling, so advance with
+            <code>train level</code> when you are ready to choose.
+        </p>
+    </div>
+
+    <div class="ac-panel">
+        <div class="ac-panel__h" id="bind">
+            {% bi "link-45deg" %} The bind
+            <a class="anchor-link" href="#bind" aria-label="Link to this section: The bind"></a>
+        </div>
+        <p>
+            A life holds {{ summit }} remorts. At each remort, one skill learned this life may be
+            <strong>bound</strong> to your soul. A bound thread belongs to the account: every
+            future Fated life begins already knowing it, at the strength it was bound —
+            through death and through ascension alike. A skill is bound once, at the level
+            you have practiced it to.
+        </p>
+        <p class="mb-0">
+            Bound threads can be <strong>severed</strong> with <code>sever &lt;skill&gt;</code>:
+            the thread's weight is shed, but the skill is gone for the season and can never
+            be re-bound. Your pool is on your
+            <a href="{% url 'portal' %}#loom">portal page</a>, thread by thread.
+        </p>
+    </div>
+
+    <div class="ac-panel">
+        <div class="ac-panel__h" id="knots">
+            {% bi "bezier2" %} Knots
+            <a class="anchor-link" href="#knots" aria-label="Link to this section: Knots"></a>
+        </div>
+        <p>
+            When a thread is spun, the loom asks which <strong>knots</strong> to tie. Each
+            knot is a rule the loom holds you to for that whole life — healing that lands
+            lighter, recall that fails, foes that think a step sharper — and each carries a
+            weight. Some knots can be pulled tighter: a harsher version of the same rule at a
+            higher weight, which replaces the looser one rather than stacking with it.
+        </p>
+        <p class="mb-0">
+            Knots are immutable once tied. Death, abandonment and ascension all untie them,
+            and the next life ties its own. Study the whole menu on the
+            <a href="{% url 'knots' %}#knots">knots page</a> before you spin; a rule is never
+            discovered mid-fight.
+        </p>
+    </div>
+
+    <div class="ac-panel">
+        <div class="ac-panel__h" id="tension">
+            {% bi "speedometer" %} Burden and Tension
+            <a class="anchor-link" href="#tension" aria-label="Link to this section: Burden and Tension"></a>
+        </div>
+        <p>
+            {% include "partials/burden_table.html" %}
+            That is your <strong>loom burden</strong>: a heavy pool is real power, and a
+            heavier climb.
+        </p>
+        <p>
+            Your <strong>Tension</strong> is the total weight of your knots minus your loom
+            burden, never below zero, and it is locked the moment the knots are tied. It is
+            the one number the outside world sees: on your character page, in the web client,
+            and on the <a href="{% url 'tension_leaders' %}#tension">Tension board</a>.
+        </p>
+        <p class="mb-0">
+            A life with no knots is played at Tension 0: the full game, one climb's pay, no
+            rank. Burden prices the climb, never the life — at zero knots it does nothing.
+        </p>
+    </div>
+
+    <div class="ac-panel">
+        <div class="ac-panel__h" id="summit">
+            {% bi "arrow-up-circle" %} The summit
+            <a class="anchor-link" href="#summit" aria-label="Link to this section: The summit"></a>
+        </div>
+        <p>
+            Remort {{ summit }} is the summit, and there is no way past it. The eleventh prayer does
+            not remort — it <strong>ascends</strong>: the loom draws every thread of you taut and
+            reweaves you from nothing. You will be warned when your tenth bind completes, and
+            asked to confirm at the altar; declining is simply "not yet".
+        </p>
+        <dl class="ac-kv mb-2">
+            <dt>What you keep</dt>
+            <dd>Every bound thread — ascension never touches the pool.</dd>
+            <dt>What you lose</dt>
+            <dd>This life: its level, renown, gear, and the offering.</dd>
+            <dt>What you bank</dt>
+            <dd>Woven essence, at the Tension this climb was played at.</dd>
+        </dl>
+        <p class="mb-0">
+            A character parked at remort {{ summit }} may keep playing, but earns no essence beyond one
+            climb's worth and holds no rank — while every death returns them to the same
+            floor an ascender starts from.
+        </p>
+    </div>
+
+    <div class="ac-panel">
+        <div class="ac-panel__h" id="woven">
+            {% bi "gem" %} Woven and loose
+            <a class="anchor-link" href="#woven" aria-label="Link to this section: Woven and loose"></a>
+        </div>
+        <p>
+            Fated essence comes in two states. <strong>Woven</strong> essence has been banked
+            by an ascension: locked in the moment you ascend, it survives death and pays out
+            when the season ends. A completed climb is worth {{ bank_floor }} woven essence at
+            Tension 0, and a fifth more for every point of Tension it was climbed at.
+        </p>
+        <p class="mb-0">
+            <strong>Loose</strong> essence is the current climb: the best remort you have
+            reached, multiplied by that life's Tension, paid when the season ends. Loose
+            essence is not lost on death — the high-water mark persists. Ascending weaves it
+            in and begins the next climb. Without ascending, loose essence caps at one climb's
+            worth for the whole season.
+        </p>
+    </div>
+
+    <div class="ac-panel">
+        <div class="ac-panel__h" id="marks">
+            {% bi "trophy" %} Your mark on the season
+            <a class="anchor-link" href="#marks" aria-label="Link to this section: Your mark on the season"></a>
+        </div>
+        <p>
+            The best net Tension at which you <em>complete</em> a climb is your mark. It ranks
+            the <a href="{% url 'tension_leaders' %}#tension">season board</a> and the
+            <a href="{% url 'tension_leaders_lifetime' %}#tension">lifetime board</a>, and it
+            earns the loom's <a href="{% url 'achievements' %}#general-tension">trophies</a> —
+            the first tightening at Tension 1, pulled taut at 3, wound tight at 5 with the
+            title <em>the Rewoven</em>. The loom keeps one more for those who stand level with it.
+        </p>
+        <p class="ac-panel__hint mb-0">
+            In the game:
+{% for topic in help_topics %}
+            <a href="{% url 'help_page' help_topic=topic %}#topic">help {{ topic|lower }}</a>{% if not forloop.last %} ·{% endif %}
+{% endfor %}
+            · <a href="{% url 'help_page' help_topic='Fated' %}#topic">help fated</a>
+        </p>
+    </div>
+
+</div>
+{% endblock content %}

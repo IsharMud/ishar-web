@@ -77,6 +77,7 @@ the bound threads with rarity and burden. Context: standing, loom, owner
         </div>
 {% endif %}
         <p class="ac-panel__hint mt-2 mb-0">
+            {% include "partials/burden_table.html" %}
             Help:
 {% for topic in help_topics %}
             <a href="{% url 'help_page' help_topic=topic %}#topic">{{ topic }}</a>{% if not forloop.last %} ·{% endif %}

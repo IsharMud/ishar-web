@@ -364,6 +364,13 @@ thread through). Context comes from `apps/fated/context.py`; include with
 `life`/`between_lives` and `standing`/`loom`/`help_topics`. Used: player
 profile, portal. Status: **formalized** (decisions.md 2026-10-15).
 
+### `.ac-row--tied` / `.ac-row--severed` — Fated row states
+`--tied` (ok wash, ok icon, no strike-through) marks a knot the viewer's own
+thread has tied on the knot menu; `--severed` (dim strike-through) marks a
+cut bound thread on the Loom. The rarity → burden scale is
+`partials/burden_table.html` (context: `burden_table`), carried by the
+explainer, the knot menu and the Loom panel. Status: **formalized.**
+
 ### `.ac-row--done` / `.ac-row:target` — row states
 `--done` checks a record off: title struck through in ok-green, icon tile
 turns ok (challenges). `:target` washes a deep-linked row amber (row `id`s +

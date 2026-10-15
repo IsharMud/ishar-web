@@ -168,6 +168,12 @@
                                         Basics
                                     </a>
                                 </li>
+                                <li class="nav-item" title="The Fated — how a Fated life runs">
+                                    <a class="nav-link dropdown-item icon-link icon-link-hover" href="{% url 'fated' %}#fated">
+                                        {% bi "bezier2" %}
+                                        The Fated
+                                    </a>
+                                </li>
                                 <li class="nav-item" title="Get Started">
                                     <a class="nav-link dropdown-item icon-link icon-link-hover" href="{% url 'start' %}#start">
                                         {% bi "rocket-takeoff" %}
@@ -496,6 +502,14 @@
                         Season {{ CURRENT_SEASON.season_id }}
                     </a>
                 </div>
+{% if CURRENT_SEASON.is_fated %}
+                <div class="col-12 col-sm py-1">
+                    <a class="icon-link icon-link-hover" href="{% url 'fated' %}#fated" title="A Fated season: {{ CURRENT_SEASON.enigma.enigma_name }}">
+                        {% bi "bezier2" %}
+                        {{ CURRENT_SEASON.enigma.enigma_name|default:"Fated" }}
+                    </a>
+                </div>
+{% endif %}
                 <div class="col-12 col-sm py-1">
                     <span class="icon-link">
                         {% bi "hourglass-split" css="text-secondary" %}

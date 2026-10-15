@@ -34,6 +34,7 @@ urlpatterns = [
     path("discord/", RedirectView.as_view(url=settings.DISCORD["URL"]), name="discord"),
     path("events/", include("apps.events.urls"), name="events"),
     path("faq/", include("apps.faqs.urls"), name="faq"),
+    path("fated/", include("apps.fated.urls"), name="fated"),
     path("feedback/", include("apps.feedback.urls"), name="feedback"),
     path("help/", include("apps.help.urls"), name="help"),
     path("history/", include("apps.history.urls"), name="history"),

@@ -2,7 +2,7 @@
 the portal so both pages read the same numbers from the same code."""
 from apps.seasons.utils import get_current_season
 
-from .tension import HELP_TOPICS, account_loom, account_standing, player_life
+from .tension import HELP_TOPICS, account_loom, account_standing, burden_table, player_life
 
 
 def fated_season_active() -> bool:
@@ -24,6 +24,7 @@ def account_tension_context(account, in_fated_season=None) -> dict:
         "standing": account_standing(account),
         "loom": account_loom(account),
         "help_topics": HELP_TOPICS,
+        "burden_table": burden_table(),
     }
 
 

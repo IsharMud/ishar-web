@@ -812,6 +812,14 @@ a.ac-row__link:hover { color: var(--ac-accent); }
     background: var(--ac-ok-wash);
     border-color: rgba(76, 187, 23, .35);
 }
+/* A knot the viewer's own thread has tied: ok-tinted, no strike-through. */
+.ac-row--tied { background: var(--ac-ok-wash); }
+.ac-row--tied .ac-row__icon {
+    color: var(--ac-ok);
+    background: var(--ac-ok-wash);
+    border-color: rgba(76, 187, 23, .35);
+}
+
 /* A severed bound thread: still listed, struck through, weighing nothing. */
 .ac-row--severed .ac-row__title,
 .ac-row--severed .ac-row__title a.ac-row__link:link,

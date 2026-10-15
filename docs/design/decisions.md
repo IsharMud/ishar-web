@@ -9,6 +9,31 @@ Format: `## YYYY-MM-DD — Title` · **Decision** · **Why** · (optional) **Not
 
 ---
 
+## 2026-10-15 — The Fated explainer, the public knot menu, and season theming by enigma
+
+**Decision.** Three public surfaces for a playerbase that meets permadeath,
+draws, binds, knots and ascension all at once. `/fated/` walks one life from
+the first draw to the eleventh prayer in the loom's register (threads, knots,
+woven, loose, drawn taut — no genre vocabulary), one `.ac-panel` per stage,
+each ending in the in-game help topic it mirrors. `/fated/knots/` is the
+loom's whole menu — one panel per family, tiers ascending with a `tighter`
+pill and the rule as the row meta, the weight as an accent pill — and marks
+the viewer's own living thread's tied knots (`.ac-row--tied`, ok wash, no
+strike-through: tied is a state, not a completion). The rarity → burden scale
+is one shared partial (`partials/burden_table.html`) that the explainer, the
+knot menu and the Loom panel all carry, so the question "what would this
+bind weigh" is answered wherever a thread is shown. Theming keys on
+`Season.is_fated` (`enigma_id = 2`): the footer season strip gains the
+enigma's name as a link to `/fated/`, the current-season page a Fated panel,
+and the Help dropdown a "The Fated" entry.
+
+**Why.** The help entries are canonical but scattered across five topics;
+the explainer is the reading order. The tying prompt is the one decision a
+life cannot undo, so the menu must be readable before the thread is spun.
+Theming stays light — a name, a link, a panel — because the enigma's own
+flavor strings are game-owned copy, and the site should point at the game's
+words rather than rewrite them.
+
 ## 2026-10-15 — Tension: the web reads the loom, never prices it (Fated season 16)
 
 **Decision.** Tension (ishar-mud#1800, the Fated challenge layer) gets one

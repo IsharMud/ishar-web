@@ -61,6 +61,11 @@ def thread_burden(rarity, skill_type, skill_level) -> int:
     return per_bind
 
 
+def burden_table() -> list:
+    """(rarity name, burden per bind as a decimal) for every rarity."""
+    return [(name, tenths(b)) for name, b in zip(RARITY_NAMES, RARITY_BURDEN)]
+
+
 def net_tension(knot_weight: int, burden: int) -> int:
     """(knot weight − burden) floored at 0, in whole points."""
     return max(0, int(knot_weight) - int(burden)) // 10
