@@ -9,6 +9,91 @@ Format: `## YYYY-MM-DD — Title` · **Decision** · **Why** · (optional) **Not
 
 ---
 
+## 2026-10-15 — Tension: the web reads the loom, never prices it (Fated season 16)
+
+**Decision.** Tension (ishar-mud#1800, the Fated challenge layer) gets one
+domain app, `apps/fated`, holding the two game-owned tables the site had
+not modeled (`tension_modifiers` — the knot menu — and
+`account_fated_skills` — the bound pool) and the arithmetic mirrored from
+`dbase/tension.c` (`apps/fated/tension.py`: integer tenths, rarity → burden
+2/3/5/10/15, passives per bound tier, net = (knots − burden) floored at 0,
+`bank(T) = f(10) × (100 + 20T) / 100`). The web **never writes** these
+tables and **never substitutes its own net Tension for the game's**:
+`players.tension_locked` is the number every surface shows; the mirrored
+math exists only for breakdowns (the knot weight, the live loom burden,
+what an ascension would bank). Four surfaces share two partials:
+
+- **Player profile** (Fated character, Fated season): a *Tension* panel —
+  the `score` line as tiles (Tension · N of 10 · banks on ascension), the
+  tied knots as `.ac-rows` with their rules and weights, three copy states
+  (between lives / the loom is asking for knots / at the summit) — and a
+  *Loom* panel.
+- **The Loom** (profile + portal): woven / loose / best / lifetime-best
+  tiles, then the bound threads as `.ac-rows` with rarity, bound level or
+  tier, and burden; a severed thread stays listed, struck through, weighing
+  nothing. The hint sentence carries the one rule players most need:
+  loose essence is never at risk.
+- **Leaderboards** `/leaders/tension/` and `/leaders/tension/lifetime/`:
+  accounts (not characters — Tension is account standing) by
+  `season_max_tension` / `max_tension`, woven essence then name as
+  tie-breaks, zero rows excluded; a `.ac-filter` chip nav joins the three
+  boards. The hero says in one sentence that only a completed climb
+  counts, so a thread parked at the summit is not surprised by its absence.
+- **Achievements** `/achievements/`: the catalog the game's `achievement`
+  command renders, grouped category → sub-category (`parent_category` is
+  the sub-category despite its name), hidden rows omitted entirely until
+  the viewer has earned them, rewards as pills (points amber, essence ok,
+  title info, item warn; both sex forms of a title when they differ). Wired
+  into the Portal dropdown, a portal card and the sitemap.
+
+Visibility is one rule everywhere: a Fated character in a Fated season
+(`seasons.enigma_id = 2`, `player_common.class_id = 17`); outside that the
+panels do not exist, because the season columns read as zeros. The lifetime
+best alone survives as a hero pill on the portal.
+
+**Why.** Account-level Tension state belongs to the account, character-level
+to the life; a single app with one context module (`apps/fated/context.py`)
+keeps the profile and the portal reading the same numbers from the same
+code. Excluding zero rows and ranking accounts rather than characters makes
+the board say what the game means by rank. Recomputing net Tension on the
+web would drift the moment a weight is retuned — so the site shows the lock
+and explains it, in the loom's own words (threads, knots, woven, loose,
+drawn taut); no genre vocabulary reaches a player.
+
+**Notes.** `.ac-tile__of` is new: a dim denominator inside a tile's number
+("3 of 10"). The epic (ishar-web#113) was written against
+`accounts.season_tension` / `season_tension_remorts`; those columns no
+longer exist and the ranking it proposed (hardcore remorts as tie-break) is
+superseded by woven essence. Help pages need no mirror: `/help/Tension`,
+`Knots`, `Ascension`, `Woven` (and the `Loose`, `Burden`, `Ascend`, `Knot`
+aliases) serve the game's `helptab` verbatim through the existing live
+mount; the panels link to them.
+
+## 2026-10-15 — HUD: Tension lives inside the Season overlay, with a topbar pill
+
+**Decision.** The `tension` block of `Char.Season` (GMCP 11.12.0; present
+only for Fated viewers) renders as the first section of the Season overlay
+— tiles (Tension · remorts of summit), the tied knots with rules and tenths
+weights, the loom burden thread by thread, the season line (woven / loose /
+best / lifetime best) — not as a new overlay app. A `.v-tension` pill joins
+`.v-season` in the topbar world strip (`T4 · 3/10`, or an orange `Knots?`
+while `locked` is −1) and opens the same overlay. When the knots are untied
+the section says the loom is asking for them instead of showing zeros.
+Nothing is recomputed client-side; tenths render as one decimal.
+
+**Why.** Tension is season standing, and the season pill is already the
+door to season standing; a second app would split one story across two
+windows and spend a micro-menu slot. The pill makes the live lock and the
+climb legible at a glance — the two numbers a Fated player checks between
+fights — without adding a bar or a strip to the ambient tier.
+
+**Notes.** The topbar launchers carry `.overlay-opener`, which the
+outside-click dismissal now exempts: a click on the season pill was
+opening the overlay and the document handler was closing it in the same
+event (pre-existing; found while verifying the Tension pill headless).
+The demo feed (`/connect?demo=1`) now carries a Fated viewer with the
+contract's sample block.
+
 ## 2026-07-31 — The topbar tells the same story at every width
 
 **Decision.** Three rules for `#hud-topbar`:

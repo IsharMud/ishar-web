@@ -198,6 +198,11 @@ button.v-tgt:hover { border-color: rgba(214, 75, 75, .8); }
 .v-season:hover { border-color: var(--ac-accent); color: var(--ac-accent-2); }
 .v-season:focus-visible { outline: 2px solid var(--ac-accent); outline-offset: 2px; }
 .v-event { color: var(--hud-event); white-space: nowrap; }
+/* Tension pill (Fated viewers): the season pill's sibling, same launcher. */
+.v-tension { color: var(--ac-accent-2); font-weight: 700; white-space: nowrap; padding: 1px 8px; border: 1px solid rgba(255, 170, 119, .45); border-radius: 999px; cursor: pointer; font-variant-numeric: tabular-nums; }
+.v-tension.asking { color: var(--ac-warn); border-color: rgba(255, 136, 0, .45); background: var(--ac-warn-wash); }
+.v-tension:hover { border-color: var(--ac-accent); }
+.v-tension:focus-visible { outline: 2px solid var(--ac-accent); outline-offset: 2px; }
 .v-moons { display: inline-flex; align-items: center; gap: 5px; }
 .v-moon { color: var(--hud-moon); font-weight: 700; font-size: 1.05em; line-height: 1; cursor: default; }
 .v-moon.is-down { color: var(--hud-moon-down); }
@@ -1943,6 +1948,24 @@ button.v-tgt:hover { border-color: rgba(214, 75, 75, .8); }
 .season-ms-rw { flex: 1; min-width: 0; overflow-wrap: anywhere; }
 .season-ms-row.next .season-ms-rw { color: var(--ac-accent-2); }
 .season-ms-badge { flex: none; font-size: .56rem; letter-spacing: .05em; text-transform: uppercase; color: var(--ac-accent); border: 1px solid rgba(255, 170, 119, .4); border-radius: 999px; padding: 1px 7px; }
+
+/* Tension section of the Season overlay (Fated viewers only). */
+.tn-asking { font-size: .78rem; color: var(--ac-warn); border: 1px solid rgba(255, 136, 0, .4); background: var(--ac-warn-wash); border-radius: var(--ac-radius-sm); padding: 7px 9px; }
+.tn-line { font-size: .72rem; color: var(--ac-dim); margin-top: 7px; }
+.season-tile.tn-summit .season-tile-n { color: var(--ac-warn); }
+.season-tile-n small { font-size: .62rem; font-weight: 600; color: var(--ac-dim); }
+.tn-h { display: flex; justify-content: space-between; align-items: baseline; margin-top: 10px; font-size: .62rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ac-dim); }
+.tn-n { color: var(--ac-accent-2); font-variant-numeric: tabular-nums; letter-spacing: 0; }
+.tn-rows { display: flex; flex-direction: column; margin-top: 4px; }
+.tn-row { padding: 6px 4px; border-top: 1px solid var(--ac-border); font-size: .78rem; }
+.tn-row:first-child { border-top: 0; }
+.tn-row-h { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.tn-name { flex: 1; min-width: 0; font-weight: 600; color: var(--ac-text); overflow-wrap: anywhere; }
+.tn-w { flex: none; font-size: .68rem; color: var(--ac-accent-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tn-rule { font-size: .72rem; color: var(--ac-dim); margin-top: 2px; overflow-wrap: anywhere; }
+.tn-thread { display: flex; align-items: baseline; gap: 8px; }
+.tn-meta { flex: none; font-size: .68rem; color: var(--ac-dim); white-space: nowrap; }
+.tn-empty { font-size: .72rem; font-style: italic; color: var(--ac-dim); padding: 4px; }
 
 .season-events { display: flex; gap: 7px; flex-wrap: wrap; }
 .season-event { display: inline-flex; align-items: center; gap: 4px; font-size: .72rem; color: var(--hud-event); background: rgba(232, 176, 75, .08); border: 1px solid rgba(232, 176, 75, .3); border-radius: 999px; padding: 2px 9px; white-space: nowrap; }

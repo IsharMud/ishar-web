@@ -20,6 +20,11 @@ SKILL_TYPE_NAMES = {
     0: "Passive", 1: "Skill", 2: "Spell", 3: "Craft", 4: "Enchant", 5: "Passive",
 }
 
+PASSIVE_SKILL_TYPE = 5
+
+# ``skills.rarity`` -> label, matching the game's ``get_skill_rarity``.
+RARITY_NAMES = ("Common", "Uncommon", "Rare", "Epic", "Legendary")
+
 # Ishar in-band color codes are "@c" followed by one code character.
 _COLOR_RE = re.compile(r"@c.")
 

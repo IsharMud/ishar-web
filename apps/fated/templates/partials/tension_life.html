@@ -1,0 +1,64 @@
+{% load ishar %}
+{% comment %}
+This life's Tension for a Fated character: the `score` line and the knots.
+Context: life (apps.fated.tension.Life), between_lives, player.
+{% endcomment %}
+    <div class="ac-panel">
+        <div class="ac-panel__h" id="tension">
+            {% bi "bezier2" %}
+            Tension
+            <a class="anchor-link" href="#tension" aria-label="Link to this section: Tension"></a>
+        </div>
+{% if between_lives %}
+        <p class="ac-panel__hint">
+            {{ player.name|title }} is between lives — the next thread ties its own knots.
+        </p>
+{% elif life.untied %}
+        <p class="ac-panel__hint">
+            The loom is asking for knots: this life's Tension is set the moment they are tied.
+        </p>
+{% else %}
+        <div class="ac-tiles">
+            <span class="ac-tile {% if life.tension %}ac-tile--accent{% else %}ac-tile--muted{% endif %}" title="Net Tension, locked when the knots were tied">
+                <span class="ac-tile__n">{{ life.tension }}</span>
+                <span class="ac-tile__label">Tension</span>
+            </span>
+            <span class="ac-tile {% if life.at_summit %}ac-tile--warn{% else %}ac-tile--info{% endif %}" title="Remorts this life, of the {{ life.summit }} a life can hold">
+                <span class="ac-tile__n">{{ life.remorts }}<span class="ac-tile__of">of {{ life.summit }}</span></span>
+                <span class="ac-tile__label">Remorts</span>
+            </span>
+            <span class="ac-tile ac-tile--muted" title="Woven essence this climb banks on ascension at Tension {{ life.tension }}">
+                <span class="ac-tile__n">{{ life.bank }}</span>
+                <span class="ac-tile__label">Banks on ascension</span>
+            </span>
+        </div>
+        <p class="ac-panel__hint mt-2 mb-0">
+{% if life.at_summit %}
+            {{ player.name|title }} stands at the summit — the eleventh prayer ascends.
+{% else %}
+            Locked at {{ life.tension }} when this thread was spun — knots {{ life.knot_weight_display }}, loom burden now {{ life.burden_display }}.
+{% endif %}
+        </p>
+{% if life.knots %}
+        <div class="ac-rows mt-2">
+{% for knot in life.knots %}
+            <div class="ac-row">
+                <span class="ac-row__icon">{% bi "bezier2" %}</span>
+                <div class="ac-row__main">
+                    <div class="ac-row__title">{{ knot.name }}</div>
+                    <div class="ac-row__meta"><span>{{ knot.rule }}</span></div>
+                </div>
+                <div class="ac-row__side">
+                    <span class="ac-pill ac-pill--accent" title="Knot weight">{{ knot.weight_display }}</span>
+                </div>
+            </div>
+{% endfor %}
+        </div>
+{% else %}
+        <div class="ac-empty mt-2">
+            {% bi "bezier2" %}
+            <span>No knots tied — this life is played at Tension 0: the full game, one climb's pay, no rank.</span>
+        </div>
+{% endif %}
+{% endif %}
+    </div>

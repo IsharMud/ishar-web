@@ -146,6 +146,13 @@ class Season(models.Model):
             f" - {self.expiration_date.strftime(dt_fmt)})"
         )
 
+    @property
+    def is_fated(self) -> bool:
+        """A Fated season: the Fractured Threads enigma, where Tension runs."""
+        from apps.fated.tension import FATED_ENIGMA_ID
+
+        return self.enigma_id == FATED_ENIGMA_ID
+
     def get_absolute_url(self) -> str:
         return reverse(
             viewname="season",

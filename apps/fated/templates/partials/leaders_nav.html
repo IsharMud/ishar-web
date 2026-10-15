@@ -1,0 +1,10 @@
+{% load ishar %}
+{% comment %}
+Board switcher shared by the character leaderboard and the two Tension boards.
+Context: board ("characters" | "tension" | "lifetime").
+{% endcomment %}
+    <nav class="ac-filter mb-3" aria-label="Leaderboards">
+        <a class="ac-chip{% if board == 'characters' %} ac-chip--active{% endif %}" href="{% url 'leaders' %}#leaders">{% bi "trophy" %} Characters</a>
+        <a class="ac-chip{% if board == 'tension' %} ac-chip--active{% endif %}" href="{% url 'tension_leaders' %}#tension">{% bi "bezier2" %} Tension</a>
+        <a class="ac-chip{% if board == 'lifetime' %} ac-chip--active{% endif %}" href="{% url 'tension_leaders_lifetime' %}#tension">{% bi "infinity" %} Lifetime Tension</a>
+    </nav>

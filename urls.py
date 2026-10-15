@@ -25,6 +25,7 @@ urlpatterns = [
         {"sitemaps": sitemaps},
         name="django.contrib.sitemaps.views.sitemap",
     ),
+    path("achievements/", include("apps.achievements.urls"), name="achievements"),
     path("api/", include(api_router.urls), name="api"),
     path("i18n/", include('django.conf.urls.i18n')),
     path("connect/", include("apps.connect.urls"), name="connect"),

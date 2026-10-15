@@ -7,6 +7,7 @@ from .conditions import ConditionsConfig
 from .core import CoreConfig
 from .events import EventsConfig
 from .faqs import FAQsConfig
+from .fated import FatedConfig
 from .feedback import FeedbackConfig
 from .help import HelpConfig
 from .history import HistoryConfig
