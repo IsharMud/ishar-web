@@ -1,0 +1,94 @@
+{% extends "layout.html" %}
+{% load humanize %}
+{% load ishar %}
+{% block meta_title %}{{ WEBSITE_TITLE }} Tension Leaderboard{% if lifetime %} - Lifetime{% endif %}{% endblock meta_title %}
+{% block meta_description %}{{ WEBSITE_TITLE }} Tension leaderboard: accounts ranked by the best net Tension at which they completed a Fated climb.{% endblock meta_description %}
+{% block meta_url %}{% url 'tension_leaders' %}{% endblock meta_url %}
+{% block title %}{{ WEBSITE_TITLE }} Tension Leaderboard{% if lifetime %} - Lifetime{% endif %}{% endblock title %}
+{% block scripts %}let focusTo = 'leaders'{% endblock scripts %}
+{% block breadcrumbs %}
+    {% crumb "Portal" "person-gear" urlname="portal" anchor="portal" %}
+    {% crumb "Leaders" "trophy" urlname="leaders" anchor="leaders" %}
+{% if lifetime %}
+    {% crumb "Tension" "bezier2" urlname="tension_leaders" anchor="tension" %}
+    {% crumb "Lifetime" "infinity" active=True %}
+{% else %}
+    {% crumb "Tension" "bezier2" urlname="tension_leaders" anchor="tension" active=True %}
+{% endif %}
+{% endblock breadcrumbs %}
+{% block content %}
+<div class="ac ac--wide">
+
+    <header class="ac-hero">
+        <span class="ac-hero__badge">{% bi "bezier2" %}</span>
+        <div class="ac-hero__text">
+            <h2 class="ac-hero__title">Tension{% if lifetime %} — Lifetime{% else %} — This Season{% endif %}</h2>
+            <p class="ac-hero__sub">
+                Accounts ranked by the best net Tension at which they completed a climb;
+                woven essence breaks ties. Only a completed climb counts — a thread parked
+                at the summit holds no rank until the eleventh prayer ascends.
+            </p>
+        </div>
+        <div class="ac-hero__status">
+            <span class="ac-pill ac-pill--accent" title="Accounts on this board">
+                {{ leaders|length }} account{{ leaders|length|pluralize }}
+            </span>
+        </div>
+    </header>
+
+    {% include "partials/leaders_nav.html" with board=lifetime|yesno:"lifetime,tension" %}
+
+{% if leaders %}
+    <div class="ac-tablewrap">
+        <table class="ac-table" id="tensionTable">
+            <caption class="visually-hidden">
+                {{ WEBSITE_TITLE }} Tension rankings{% if lifetime %}, lifetime{% else %} this season{% endif %}.
+            </caption>
+            <thead>
+                <tr>
+                    <th class="ac-table__num" scope="col">#</th>
+                    <th scope="col">Account</th>
+                    <th class="ac-table__num" scope="col" title="Best net Tension at which a climb was completed">Tension</th>
+{% if lifetime %}
+                    <th class="ac-table__num" scope="col" title="Best this season">Season</th>
+{% endif %}
+                    <th class="ac-table__num" scope="col" title="Essence banked by ascension this season">Woven</th>
+                    <th class="ac-table__num" scope="col" title="This climb's high-water, paid at season's end">Loose</th>
+                </tr>
+            </thead>
+            <tbody>
+{% for leader in leaders %}
+                <tr>
+                    <td class="ac-table__rank{% if forloop.counter <= 3 %} ac-table__rank--top{% endif %}">{{ forloop.counter }}</td>
+                    <td>
+                        {{ leader.account_name }}
+{% for fated in leader.fated_players %}
+                        <span class="ac-table__sub">{{ fated.player_link }}</span>
+{% endfor %}
+                    </td>
+                    <td class="ac-table__num">{% if lifetime %}{{ leader.max_tension }}{% else %}{{ leader.season_max_tension }}{% endif %}</td>
+{% if lifetime %}
+                    <td class="ac-table__num">{{ leader.season_max_tension }}</td>
+{% endif %}
+                    <td class="ac-table__num">{{ leader.season_woven_essence|intcomma }}</td>
+                    <td class="ac-table__num">{{ leader.season_loose_essence|intcomma }}</td>
+                </tr>
+{% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="ac-empty">
+        {% bi "bezier2" %}
+{% if lifetime %}
+        <span>No account has completed a climb yet.</span>
+{% elif fated_season %}
+        <span>No climb has been completed this season yet — the first ascension starts the board.</span>
+{% else %}
+        <span>Tension runs in Fated seasons; there is no board to show right now.</span>
+{% endif %}
+    </div>
+{% endif %}
+
+</div>
+{% endblock content %}

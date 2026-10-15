@@ -3,7 +3,9 @@ from django.urls import reverse
 from django.utils.functional import cached_property
 
 from apps.core.models.textarea import NoStripTextareaField
-from apps.skills.utils import SKILL_TYPE_NAMES, stat_name, strip_color
+from apps.skills.utils import (
+    PASSIVE_SKILL_TYPE, RARITY_NAMES, SKILL_TYPE_NAMES, stat_name, strip_color,
+)
 
 from .type.position import PlayerPosition
 from .type.save import SkillSaveType
@@ -159,6 +161,18 @@ class Skill(models.Model):
         help_text="Display text of object related to the skill.",
         verbose_name="Object Display",
     )
+    passive_tiers = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+        help_text="Number of tiers a passive can be bound to.",
+        verbose_name="Passive Tiers",
+    )
+    rarity = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+        help_text="Draft rarity: 0 common, 1 uncommon, 2 rare, 3 epic, 4 legendary.",
+        verbose_name="Rarity",
+    )
     req_save = models.IntegerField(
         blank=True,
         choices=SkillSaveType,
@@ -232,6 +246,15 @@ class Skill(models.Model):
     @property
     def is_skill(self) -> bool:
         return self.skill_type == SkillType.SKILL
+
+    @property
+    def is_passive(self) -> bool:
+        return self.skill_type == PASSIVE_SKILL_TYPE
+
+    @property
+    def rarity_name(self) -> str:
+        """Game-faithful rarity label (``get_skill_rarity``)."""
+        return RARITY_NAMES[min(max(self.rarity or 0, 0), len(RARITY_NAMES) - 1)]
 
     @property
     def description_display(self) -> str:

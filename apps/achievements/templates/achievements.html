@@ -1,0 +1,123 @@
+{% extends "layout.html" %}
+{% load humanize %}
+{% load ishar %}
+{% block meta_title %}{{ WEBSITE_TITLE }} Achievements{% endblock meta_title %}
+{% block meta_description %}Every {{ WEBSITE_TITLE }} achievement — the trophies, titles and points a free online MUD account can earn.{% endblock meta_description %}
+{% block meta_url %}{% url 'achievements' %}#achievements{% endblock meta_url %}
+{% block title %}{{ WEBSITE_TITLE }} Achievements{% endblock title %}
+{% block scripts %}let focusTo = 'achievements'{% endblock scripts %}
+{% block breadcrumbs %}
+    {% crumb "Portal" "person-gear" urlname="portal" anchor="portal" %}
+    {% crumb "Achievements" "award-fill" urlname="achievements" anchor="achievements" active=True %}
+{% endblock breadcrumbs %}
+{% block content %}
+<div class="ac">
+
+    <header class="ac-hero">
+        <span class="ac-hero__badge">{% bi "award-fill" %}</span>
+        <div class="ac-hero__text">
+            <h2 class="ac-hero__title">Achievements</h2>
+            <p class="ac-hero__sub">
+                Account-wide trophies: earn one on any character and it is yours for good.
+{% if hidden_exist %}
+                Some stay hidden until you earn them.
+{% endif %}
+            </p>
+        </div>
+{% if viewer %}
+        <div class="ac-hero__status">
+            <span class="ac-pill ac-pill--accent" title="Achievement points on this account">
+                {{ viewer.achievement_points|default:0 }} pts
+            </span>
+        </div>
+{% endif %}
+    </header>
+
+{% if viewer %}
+    <div class="ac-tiles">
+        <span class="ac-tile {% if done_count %}ac-tile--ok{% else %}ac-tile--muted{% endif %}">
+            <span class="ac-tile__n">{{ done_count }}</span>
+            <span class="ac-tile__label">Earned</span>
+        </span>
+        <span class="ac-tile ac-tile--info">
+            <span class="ac-tile__n">{{ shown }}</span>
+            <span class="ac-tile__label">In view</span>
+        </span>
+        <span class="ac-tile {% if points_total %}ac-tile--accent{% else %}ac-tile--muted{% endif %}">
+            <span class="ac-tile__n">{{ points_total }}</span>
+            <span class="ac-tile__label">Points earned</span>
+        </span>
+    </div>
+{% else %}
+    <div class="ac-note">
+        {% bi "person" %}
+        <span><a href="{% url 'login' %}?next={% url 'achievements' %}">Log in</a> to see which of these your account holds.</span>
+    </div>
+{% endif %}
+
+{% for group in groups %}
+    <div class="ac-panel">
+        <div class="ac-panel__h" id="{{ group.anchor }}">
+            {% bi "award" %}
+            {{ group.label|lower|title }}
+            <a class="anchor-link" href="#{{ group.anchor }}" aria-label="Link to this section: {{ group.label }}"></a>
+{% if viewer %}
+            <span class="ac-pill {% if group.done == group.rows|length %}ac-pill--ok{% elif group.done %}ac-pill--info{% else %}ac-pill--muted{% endif %} ms-auto">{{ group.done }} / {{ group.rows|length }}</span>
+{% endif %}
+        </div>
+        <div class="ac-rows">
+{% for row in group.rows %}
+            <div class="ac-row{% if row.done %} ac-row--done{% endif %}" id="achievement-{{ row.achievement.pk }}">
+                <span class="ac-row__icon">
+{% if row.done %}
+                    {% bi "check-circle" label="Earned" %}
+{% elif row.achievement.is_hidden %}
+                    {% bi "eye-slash" label="Hidden" %}
+{% else %}
+                    {% bi "award" %}
+{% endif %}
+                </span>
+                <div class="ac-row__main">
+                    <div class="ac-row__title">
+                        <a class="ac-row__link" href="#achievement-{{ row.achievement.pk }}" title="Link to this achievement">{{ row.achievement.name }}</a>
+{% if row.achievement.is_hidden %}
+                        <span class="ac-pill ac-pill--muted ms-1">hidden</span>
+{% endif %}
+                    </div>
+                    <div class="ac-row__meta">
+                        <span>{{ row.achievement.description|striptags }}</span>
+                    </div>
+{% if row.criteria and not row.done %}
+                    <div class="ac-row__meta">
+{% for crit in row.criteria %}
+                        <span>{% bi "check2-square" %} {{ crit }}</span>
+{% endfor %}
+                    </div>
+{% endif %}
+{% if row.done %}
+                    <div class="ac-row__meta">
+                        <span title="{{ row.completed_at }}">{% bi "calendar-check" %} earned {{ row.completed_at|naturaltime }}{% if row.completed_by %} by {{ row.completed_by }}{% endif %}</span>
+                    </div>
+{% endif %}
+                </div>
+                <div class="ac-row__side">
+{% if row.points %}
+                    <span class="ac-pill ac-pill--accent" title="Achievement points">{{ row.points }} pts</span>
+{% endif %}
+{% for reward in row.rewards %}
+                    <span class="ac-pill ac-pill--{{ reward.css }}">{{ reward.label }}</span>
+{% endfor %}
+                </div>
+            </div>
+{% endfor %}
+        </div>
+    </div>
+{% empty %}
+    <div class="ac-empty">
+        {% bi "award" %}
+        <span>No achievements are on the books yet.</span>
+    </div>
+{% endfor %}
+
+</div>
+{% endblock content %}

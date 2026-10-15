@@ -268,6 +268,16 @@ class PlayerBase(models.Model):
         help_text="Player game type.",
         verbose_name="Game Type",
     )
+    tension_locked = models.SmallIntegerField(
+        default=-1,
+        help_text="This life's net Tension, locked when the knots were tied; -1 while untied.",
+        verbose_name="Tension Locked",
+    )
+    knots_mask = models.PositiveIntegerField(
+        default=0,
+        help_text="Tied knots: bit (modifier_id - 1) per knot on the loom's menu.",
+        verbose_name="Knots Mask",
+    )
     birth = models.DateTimeField(
         help_text="Date and time that the player was created.",
         verbose_name="Birth",
@@ -437,6 +447,14 @@ class PlayerBase(models.Model):
         if self.game_type == GameType.HARDCORE:
             return True
         return False
+
+    @display(boolean=True, description="Fated?")
+    def is_fated(self) -> bool:
+        # The Fated class carries Tension; every other class has none.
+        from apps.fated.tension import FATED_CLASS_ID
+
+        common = getattr(self, "common", None)
+        return common is not None and common.player_class_id == FATED_CLASS_ID
 
     @display(boolean=True, description="Survival?", ordering="-game_type")
     def is_survival(self) -> bool:

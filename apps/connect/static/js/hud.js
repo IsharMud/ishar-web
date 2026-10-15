@@ -1292,7 +1292,7 @@
                     + (tm.year != null ? " · Yr " + tm.year : "") })
             ]));
             if (tm.season_id != null) {
-                var seasonPill = el("span", { class: "v-season", role: "button", tabindex: "0",
+                var seasonPill = el("span", { class: "v-season overlay-opener", role: "button", tabindex: "0",
                     title: "Season & engagement details", "aria-label": "Season " + tm.season_id + " details",
                     text: "Season " + tm.season_id,
                     onclick: function () { toggleOverlay("season"); } });
@@ -1300,6 +1300,17 @@
                     if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); toggleOverlay("season"); }
                 });
                 world.appendChild(seasonPill);
+            }
+            var tn = S.season && S.season.tension;
+            if (tn) {
+                var tnText = tn.locked < 0 ? "Knots?" : "T" + tn.locked + " · " + tn.remorts + "/" + tn.summit;
+                var tnPill = el("span", { class: "v-tension overlay-opener" + (tn.locked < 0 ? " asking" : ""), role: "button", tabindex: "0",
+                    title: tensionPillTip(tn), "aria-label": tensionPillTip(tn), text: tnText,
+                    onclick: function () { toggleOverlay("season"); } });
+                tnPill.addEventListener("keydown", function (ev) {
+                    if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); toggleOverlay("season"); }
+                });
+                world.appendChild(tnPill);
             }
             (tm.events || []).forEach(function (e) {
                 world.appendChild(el("span", { class: "v-event", title: "Global event", text: "⚑ " + e.name + (e.seconds ? " (" + fmtDur(e.seconds) + ")" : "") }));
@@ -4544,7 +4555,9 @@
             name: String(s.name || ""),
             endsAt: Number(s.ends_in) > 0 ? now() + Number(s.ends_in) : 0,
             essence: s.essence || null,
-            eng: s.engagement || null
+            eng: s.engagement || null,
+            // Fated viewers only (GMCP 11.12.0); absent means "not a Fated".
+            tension: s.tension || null
         };
         updateMicro();
         renderVitals();   // the topbar season pill becomes a launcher
@@ -4617,6 +4630,8 @@
         }
         secs.push(head);
 
+        if (s.tension) secs.push(seasonSection("Tension", tensionBlock(s.tension)));
+
         var eng = s.eng;
         if (eng) secs.push(seasonSection("Engagement Track", engagementBlock(eng)));
 
@@ -4644,6 +4659,92 @@
         }
 
         fill(host, secs);
+    }
+
+    // ------------------------------------------------------------------
+    // Tension (the `tension` block of Char.Season; Fated viewers only).
+    // Weights and burden arrive in integer tenths; `locked` is the life's
+    // authoritative net Tension and -1 while the terminal shows the tying
+    // prompt. Nothing is recomputed here — the game owns every number.
+    // ------------------------------------------------------------------
+    function tenths(v) {
+        v = Math.trunc(Number(v) || 0);
+        var a = Math.abs(v);
+        return (v < 0 ? "-" : "") + Math.floor(a / 10) + "." + (a % 10);
+    }
+    var RARITY_NAMES = ["common", "uncommon", "rare", "epic", "legendary"];
+    function tensionPillTip(tn) {
+        if (tn.locked < 0) return "The loom is asking for knots — answer in the terminal; open Season for the menu";
+        var tip = "Tension " + tn.locked + " · remort " + tn.remorts + " of " + tn.summit;
+        if (tn.remorts >= tn.summit) tip += " — the eleventh prayer ascends";
+        return tip + " · open Season for the knots";
+    }
+    function tensionBlock(tn) {
+        var out = [];
+        var atSummit = Number(tn.remorts) >= Number(tn.summit);
+        if (tn.locked < 0) {
+            out.push(el("div", { class: "tn-asking", text:
+                "The loom is asking for knots. Answer the prompt in the terminal — this life's Tension is set the moment they are tied." }));
+        } else {
+            out.push(el("div", { class: "season-tiles" }, [
+                seasonTile(tn.locked, "Tension"),
+                el("div", { class: "season-tile" + (atSummit ? " tn-summit" : "") }, [
+                    el("span", { class: "season-tile-n" }, [String(tn.remorts), el("small", { text: " of " + tn.summit })]),
+                    el("span", { class: "season-tile-l", text: "Remorts" })
+                ])
+            ]));
+            out.push(el("div", { class: "tn-line", text: atSummit
+                ? "At the summit — the eleventh prayer ascends."
+                : "Locked when this thread was spun: knots " + tenths(tn.knot_weight) + ", loom burden now " + tenths(tn.burden) + "." }));
+        }
+
+        var knots = tn.knots || [];
+        out.push(el("div", { class: "tn-h" }, [
+            el("span", { text: "Knots" }),
+            el("span", { class: "tn-n", text: knots.length ? tenths(tn.knot_weight) : "none" })
+        ]));
+        if (knots.length) {
+            out.push(el("div", { class: "tn-rows" }, knots.map(function (k) {
+                return el("div", { class: "tn-row" }, [
+                    el("div", { class: "tn-row-h" }, [
+                        el("span", { class: "tn-name", text: k.name || "—" }),
+                        el("span", { class: "tn-w", text: tenths(k.weight) })
+                    ]),
+                    k.rule ? el("div", { class: "tn-rule", text: k.rule }) : null
+                ]);
+            })));
+        } else if (tn.locked >= 0) {
+            out.push(el("div", { class: "tn-empty", text: "No knots tied — this life is played at Tension 0: the full game, one climb's pay, no rank." }));
+        }
+
+        var threads = tn.threads || [];
+        out.push(el("div", { class: "tn-h" }, [
+            el("span", { text: "Loom burden" }),
+            el("span", { class: "tn-n", text: tenths(tn.burden) })
+        ]));
+        if (threads.length) {
+            out.push(el("div", { class: "tn-rows" }, threads.map(function (t) {
+                var rarity = RARITY_NAMES[clamp(t.rarity, 0, RARITY_NAMES.length - 1)];
+                return el("div", { class: "tn-row tn-thread" }, [
+                    el("span", { class: "tn-name", text: t.name || "—" }),
+                    el("span", { class: "tn-meta", text: rarity + " · " + (t.level != null ? "lvl " + t.level : "") }),
+                    el("span", { class: "tn-w", text: tenths(t.burden) })
+                ]);
+            })));
+        } else {
+            out.push(el("div", { class: "tn-empty", text: "No threads bound yet — the first bind comes with the first remort." }));
+        }
+
+        out.push(el("div", { class: "tn-h" }, [el("span", { text: "This season" })]));
+        out.push(el("div", { class: "season-tiles" }, [
+            seasonTile(tn.woven, "Woven"),
+            seasonTile(tn.loose, "Loose"),
+            seasonTile(tn.best, "Best"),
+            seasonTile(tn.lifetime_best, "Lifetime best")
+        ]));
+        out.push(el("div", { class: "tn-line", text:
+            "Woven essence is banked by ascension and survives death; loose is this climb's high-water, also never lost. Only a completed climb sets a best." }));
+        return out;
     }
 
     function engagementBlock(eng) {
@@ -6063,6 +6164,9 @@
         });
 
         // Outside tap dismisses the sheet, the overlay window and any open menu.
+        // Launchers outside the micro-menu and dock (the topbar season and
+        // Tension pills) carry .overlay-opener: their own onclick toggles the
+        // app, so this listener must not close what they just opened.
         document.addEventListener("click", function (e) {
             // A click that re-renders its own panel (e.g. a recipe-list
             // disclosure) detaches the target before this listener runs —
@@ -6072,12 +6176,12 @@
             if (e.target && e.target.isConnected === false) return;
             if (menuOpen && !dom.menu.contains(e.target) && !e.target.closest("[data-menu],.row-more,.menu-opener")) closeMenu();
             if (overlayName && !mqMobile.matches && dom.overlay &&
-                !dom.overlay.contains(e.target) && !e.target.closest("#hud-micro") &&
+                !dom.overlay.contains(e.target) && !e.target.closest("#hud-micro, .overlay-opener") &&
                 !dom.menu.contains(e.target)) {
                 setOverlay(null);
             }
             if (!sheetName || !mqMobile.matches) return;
-            if (dom.sheet.contains(e.target) || dom.dock.contains(e.target)) return;
+            if (dom.sheet.contains(e.target) || dom.dock.contains(e.target) || e.target.closest(".overlay-opener")) return;
             if (dom.menu.contains(e.target)) return;
             setSheet(null);
         });
@@ -6182,10 +6286,17 @@
         for (var i = 11; i <= 90; i++) bigSkills.push({ id: i, name: "spell " + i, type: (i % 3 ? "spell" : "skill"), percent: 40 + (i % 60), usable: (i % 4 !== 0), category: ["damage", "heal", "misc"][i % 3], target_type: ["offensive", "defensive", "none"][i % 3], mana_pct: 20 + (i % 40), mana: (20 + (i % 40)) * 3, min_position: "Standing" });
 
         var feeds = {
-            "Char.Status": { name: "Aelwyn", "class": "Magician", race: "Elf", position: "Standing", level: 45, align: 350, xp: 1250000, tnl: 48000, gold: 18230, bank: 500000, remort: 3 },
+            "Char.Status": { name: "Aelwyn", "class": "Fated", race: "Elf", position: "Standing", level: 45, align: 350, xp: 1250000, tnl: 48000, gold: 18230, bank: 500000, remort: 3 },
             "Char.Vitals": { hp: 412, maxhp: 480, mp: 130, maxmp: 300, move: 198, maxmove: 240, position: "Standing", opponent_hp_pct: 35, metamagic: 60, metamagic_max: 100, metamagic_regen: 5, food: 27, water: 9 },
             "Game.Time": { hour: 21, hour12: 9, ampm: "pm", day: 14, day_name: "Sunday", month: 6, month_name: "the Long Shadows", year: 1247, night: true, season_id: 15, season_end: 0, events: [{ name: "Double Essence", seconds: 5400 }, { name: "Festival of Flames" }], moons: [{ id: 0, name: "Shavar", phase: 4, phase_name: "full", position: "almost directly overhead", light: "blazing bright", up: true }, { id: 3, name: "Chenchir", phase: 6, phase_name: "last quarter", position: "lowering through the western sky", light: "fading", up: true }] },
-            "Char.Season": { season_id: 15, name: "Enigma of the Tempest", ends_in: 1058400, essence: { current: 1240, lifetime: 8890 }, engagement: { progress: 54.0, milestones_done: 5, xp_bonus_pct: 8, shop_discount_pct: 15, axes: [{ key: "crafting", earned: 200, cap: 365, weight: 3 }, { key: "exploration", earned: 180, cap: 310, weight: 4 }, { key: "general", earned: 140, cap: 200, weight: 4 }], unclaimed: 2, milestones: [{ n: 1, at: 8.0, done: true, claimed: true, claimable: false, reward: "+4% XP (passive)" }, { n: 2, at: 20.0, done: true, claimed: true, claimable: false, reward: "an ornate chest + -5% shop prices (passive)" }, { n: 3, at: 30.0, done: true, claimed: false, claimable: true, reward: "+40 Renown" }, { n: 4, at: 42.0, done: true, claimed: true, claimable: false, reward: "+4% XP (passive) + Memory: a tempest's echo" }, { n: 5, at: 54.0, done: true, claimed: false, claimable: true, reward: "-10% shop prices (passive)" }, { n: 6, at: 68.0, done: false, claimed: false, claimable: false, reward: "Memory: a tempest's echo" }, { n: 7, at: 82.0, done: false, claimed: false, claimable: false, reward: "+80 Renown" }, { n: 8, at: 100.0, done: false, claimed: false, claimable: false, reward: "Title: World-Walker" }], next: { at: 68.0, remaining: 14.0, reward: "Memory: a tempest's echo" } } },
+            "Char.Season": { season_id: 15, name: "Enigma of the Tempest", ends_in: 1058400, essence: { current: 1240, lifetime: 8890 }, engagement: { progress: 54.0, milestones_done: 5, xp_bonus_pct: 8, shop_discount_pct: 15, axes: [{ key: "crafting", earned: 200, cap: 365, weight: 3 }, { key: "exploration", earned: 180, cap: 310, weight: 4 }, { key: "general", earned: 140, cap: 200, weight: 4 }], unclaimed: 2, milestones: [{ n: 1, at: 8.0, done: true, claimed: true, claimable: false, reward: "+4% XP (passive)" }, { n: 2, at: 20.0, done: true, claimed: true, claimable: false, reward: "an ornate chest + -5% shop prices (passive)" }, { n: 3, at: 30.0, done: true, claimed: false, claimable: true, reward: "+40 Renown" }, { n: 4, at: 42.0, done: true, claimed: true, claimable: false, reward: "+4% XP (passive) + Memory: a tempest's echo" }, { n: 5, at: 54.0, done: true, claimed: false, claimable: true, reward: "-10% shop prices (passive)" }, { n: 6, at: 68.0, done: false, claimed: false, claimable: false, reward: "Memory: a tempest's echo" }, { n: 7, at: 82.0, done: false, claimed: false, claimable: false, reward: "+80 Renown" }, { n: 8, at: 100.0, done: false, claimed: false, claimable: false, reward: "Title: World-Walker" }], next: { at: 68.0, remaining: 14.0, reward: "Memory: a tempest's echo" } },
+                tension: { locked: 4, knot_weight: 45, burden: 5, remorts: 3, summit: 10,
+                    knots: [
+                        { id: 1, family: "weave_watches", tier: 1, name: "The Weave Watches", weight: 20, rule: "Foes fighting you think a step sharper; you weigh half again heavier in every foe's eyes." },
+                        { id: 8, family: "exposed", tier: 2, name: "Laid Bare", weight: 35, rule: "You take 25% more damage from all sources." }
+                    ],
+                    threads: [{ skill_id: 51, name: "Frostbite", level: 50, rarity: 2, burden: 5 }],
+                    woven: 28, loose: 2, best: 4, lifetime_best: 4 } },
             "Char.Achievements": { points: 45, achievements: [
                 { id: 3, name: "Welcome to Ishar!", desc: "Create your first character and begin your journey within the world of Ishar!", category: "GENERAL", points: 5, done: true, date: Math.floor(Date.now() / 1000) - 86400 * 40, by: "Aelwyn" },
                 { id: 5, name: "Well on your way!", desc: "Reach level 5 on any class for the first time.", category: "GENERAL", points: 5, done: true, date: Math.floor(Date.now() / 1000) - 86400 * 38, by: "Aelwyn" },

@@ -1,0 +1,86 @@
+{% load ishar %}
+{% comment %}
+The account's loom: season standing (woven / loose / best, lifetime best) and
+the bound threads with rarity and burden. Context: standing, loom, owner
+(bool: the viewer is this account), help_topics.
+{% endcomment %}
+    <div class="ac-panel">
+        <div class="ac-panel__h" id="loom">
+            {% bi "diagram-3" %}
+            The Loom
+            <a class="anchor-link" href="#loom" aria-label="Link to this section: The Loom"></a>
+        </div>
+        <p class="ac-panel__hint">
+            Woven essence is banked by ascension and survives death; loose essence is
+            the current climb's high-water, also never lost. Both pay out at season's end.
+            Only a completed climb sets a best.
+        </p>
+        <div class="ac-tiles">
+            <span class="ac-tile {% if standing.woven %}ac-tile--ok{% else %}ac-tile--muted{% endif %}" title="Essence woven in by ascension this season">
+                <span class="ac-tile__n">{{ standing.woven }}</span>
+                <span class="ac-tile__label">Woven</span>
+            </span>
+            <span class="ac-tile {% if standing.loose %}ac-tile--info{% else %}ac-tile--muted{% endif %}" title="This climb's high-water, paid at season's end">
+                <span class="ac-tile__n">{{ standing.loose }}</span>
+                <span class="ac-tile__label">Loose</span>
+            </span>
+            <span class="ac-tile {% if standing.best %}ac-tile--accent{% else %}ac-tile--muted{% endif %}" title="Best net Tension at which a climb was completed this season">
+                <span class="ac-tile__n">{{ standing.best }}</span>
+                <span class="ac-tile__label">Best this season</span>
+            </span>
+            <span class="ac-tile {% if standing.lifetime_best %}ac-tile--accent{% else %}ac-tile--muted{% endif %}" title="Best net Tension at which a climb was ever completed">
+                <span class="ac-tile__n">{{ standing.lifetime_best }}</span>
+                <span class="ac-tile__label">Lifetime best</span>
+            </span>
+        </div>
+
+        <div class="ac-panel__h mt-3" id="threads">
+            {% bi "link-45deg" %}
+            Bound Threads{% if loom.bound %} ({{ loom.bound|length }}){% endif %}
+            <a class="anchor-link" href="#threads" aria-label="Link to this section: Bound Threads"></a>
+            <span class="ac-pill {% if loom.burden %}ac-pill--warn{% else %}ac-pill--muted{% endif %} ms-auto" title="Loom burden: the pool's total weight against this account's knots">burden {{ loom.burden_display }}</span>
+        </div>
+{% if loom.threads %}
+        <div class="ac-rows">
+{% for thread in loom.threads %}
+            <div class="ac-row{% if thread.severed %} ac-row--severed{% endif %}">
+                <span class="ac-row__icon">{% if thread.severed %}{% bi "scissors" label="Severed" %}{% else %}{% bi "link-45deg" %}{% endif %}</span>
+                <div class="ac-row__main">
+                    <div class="ac-row__title">
+                        <a class="ac-row__link" href="{% url 'skill_page' thread.name %}#skill">{{ thread.name }}</a>
+                    </div>
+                    <div class="ac-row__meta">
+                        <span>{{ thread.rarity_name|lower }}</span>
+{% if thread.severed %}
+                        <span>severed — gone for the season, weighs nothing</span>
+{% elif thread.passive %}
+                        <span title="A passive weighs its burden once per bound tier">tier {{ thread.level }}</span>
+{% else %}
+                        <span title="Bound skill level">level {{ thread.level }}</span>
+{% endif %}
+                    </div>
+                </div>
+                <div class="ac-row__side">
+{% if thread.severed %}
+                    <span class="ac-pill ac-pill--muted">severed</span>
+{% else %}
+                    <span class="ac-pill ac-pill--warn" title="Burden this thread adds">{{ thread.burden_display }}</span>
+{% endif %}
+                </div>
+            </div>
+{% endfor %}
+        </div>
+{% else %}
+        <div class="ac-empty">
+            {% bi "link-45deg" %}
+            <span>No threads are bound to this account yet — the first bind comes with the first remort.</span>
+        </div>
+{% endif %}
+        <p class="ac-panel__hint mt-2 mb-0">
+            {% include "partials/burden_table.html" %}
+            Help:
+{% for topic in help_topics %}
+            <a href="{% url 'help_page' help_topic=topic %}#topic">{{ topic }}</a>{% if not forloop.last %} ·{% endif %}
+{% endfor %}
+        </p>
+    </div>

@@ -38,6 +38,17 @@ class AccountAdmin(UserAdmin):
             },
         ),
         (
+            "Tension",
+            {
+                "fields": (
+                    "season_max_tension",
+                    "season_woven_essence",
+                    "season_loose_essence",
+                    "max_tension",
+                )
+            },
+        ),
+        (
             "Last",
             {
                 "fields": (
@@ -104,6 +115,10 @@ class AccountAdmin(UserAdmin):
         "last_isp",
         "last_ident",
         "seasonal_earned",
+        "season_max_tension",
+        "season_woven_essence",
+        "season_loose_essence",
+        "max_tension",
         "friend_code",
         "referrer_account"
     )

@@ -1,0 +1,88 @@
+{% extends "layout.html" %}
+{% load ishar %}
+{% block meta_title %}Knots - The Loom's Menu - {{ WEBSITE_TITLE }}{% endblock meta_title %}
+{% block meta_description %}Every knot the loom offers a Fated life in {{ WEBSITE_TITLE }}: the rule, its weight, and the tighter tiers — plan a life before you spin the thread.{% endblock meta_description %}
+{% block meta_url %}{% url 'knots' %}#knots{% endblock meta_url %}
+{% block title %}Knots - {{ WEBSITE_TITLE }}{% endblock title %}
+{% block breadcrumbs %}
+    {% crumb "The Fated" "bezier2" urlname="fated" anchor="fated" %}
+    {% crumb "Knots" "bezier2" urlname="knots" anchor="knots" active=True %}
+{% endblock breadcrumbs %}
+{% block content %}
+<div class="ac">
+
+    <header class="ac-hero">
+        <span class="ac-hero__badge">{% bi "bezier2" %}</span>
+        <div class="ac-hero__text">
+            <h2 class="ac-hero__title">Knots</h2>
+            <p class="ac-hero__sub">
+                The loom's whole menu. A knot is a rule tied for a whole life, with a weight;
+                a tighter tier replaces the looser one, so only one knot per family counts.
+                Tie on as many as you can bear — your Tension is their weight minus your loom burden.
+            </p>
+        </div>
+        <div class="ac-hero__status d-flex flex-wrap gap-1 justify-content-end">
+            <span class="ac-pill ac-pill--accent" title="Knots on the menu">{{ knot_count }} knots</span>
+            <span class="ac-pill ac-pill--muted" title="Total weight with every family at its tightest tier">{{ top_weight }} at the top</span>
+        </div>
+    </header>
+
+{% if character %}
+    <div class="ac-note{% if tied_any %} ac-note--ok{% endif %}">
+        {% bi "person" %}
+{% if tied_any %}
+        <span>{{ character.name|title }}'s tied knots are marked below — locked at Tension {{ character.tension_locked }} when the thread was spun.</span>
+{% elif character.tension_locked == -1 %}
+        <span>The loom is asking {{ character.name|title }} for knots right now — answer the prompt in the game.</span>
+{% else %}
+        <span>{{ character.name|title }} is playing this life with no knots tied: Tension 0, the full game, one climb's pay, no rank.</span>
+{% endif %}
+    </div>
+{% endif %}
+
+{% for family in families %}
+    <div class="ac-panel">
+        <div class="ac-rows">
+{% for knot in family.knots %}
+            <div class="ac-row{% if knot.tied %} ac-row--tied{% endif %}" id="knot-{{ knot.modifier.pk }}">
+                <span class="ac-row__icon">{% if knot.tied %}{% bi "check-circle" label="Tied" %}{% elif knot.modifier.tier > 1 %}{% bi "arrow-up-short" label="Tighter" %}{% else %}{% bi "bezier2" %}{% endif %}</span>
+                <div class="ac-row__main">
+                    <div class="ac-row__title">
+                        <a class="ac-row__link" href="#knot-{{ knot.modifier.pk }}">{{ knot.name }}</a>
+{% if knot.modifier.tier > 1 %}
+                        <span class="ac-pill ac-pill--muted ms-1" title="A tighter tie of the knot above; replaces it, never stacks">tighter</span>
+{% endif %}
+{% if knot.tied %}
+                        <span class="ac-pill ac-pill--ok ms-1">tied</span>
+{% endif %}
+                    </div>
+                    <div class="ac-row__meta"><span>{{ knot.rule }}</span></div>
+                </div>
+                <div class="ac-row__side">
+                    <span class="ac-pill ac-pill--accent" title="Knot weight">{{ knot.weight_display }}</span>
+                </div>
+            </div>
+{% endfor %}
+        </div>
+    </div>
+{% empty %}
+    <div class="ac-empty">
+        {% bi "bezier2" %}
+        <span>The loom has not set out its menu yet.</span>
+    </div>
+{% endfor %}
+
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "link-45deg" %} Against the knots: loom burden</div>
+        <p class="mb-0">
+            {% include "partials/burden_table.html" %}
+            A severed thread weighs nothing. Net Tension is the knots' weight minus the burden, never below zero, locked when the knots are tied.
+            <a href="{% url 'fated' %}#tension">How a Fated life runs</a> ·
+{% for topic in help_topics %}
+            <a href="{% url 'help_page' help_topic=topic %}#topic">help {{ topic|lower }}</a>{% if not forloop.last %} ·{% endif %}
+{% endfor %}
+        </p>
+    </div>
+
+</div>
+{% endblock content %}
