@@ -140,6 +140,30 @@ class Account(AbstractBaseUser, PermissionsMixin):
         help_text="Friend code of the account.",
         verbose_name="Friend Code",
     )
+    # Tension (Fated seasons; game-written, read-only here). The season
+    #   fields zero at the cycle; max_tension is the lifetime record. "Best"
+    #   is the highest net Tension at which a climb was completed (ascended) —
+    #   parking at the summit mints nothing.
+    season_max_tension = models.PositiveSmallIntegerField(
+        default=0,
+        help_text="Best net Tension at which a climb was completed this season.",
+        verbose_name="Season Best Tension",
+    )
+    season_woven_essence = models.PositiveIntegerField(
+        default=0,
+        help_text="Essence banked by ascension this season (death-proof).",
+        verbose_name="Season Woven Essence",
+    )
+    season_loose_essence = models.PositiveIntegerField(
+        default=0,
+        help_text="This season's unascended climb high-water (never lost on death).",
+        verbose_name="Season Loose Essence",
+    )
+    max_tension = models.PositiveSmallIntegerField(
+        default=0,
+        help_text="Lifetime best net Tension at which a climb was completed.",
+        verbose_name="Lifetime Best Tension",
+    )
     referrer_account = models.ForeignKey(
         db_column="referrer_account_id",
         to='self',

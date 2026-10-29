@@ -30,6 +30,9 @@
             <span class="ac-pill ac-pill--status ac-pill--danger">dead</span>
 {% elif player.player_type == 'Survival' or player.player_type == 'Hardcore' %}
             <span class="ac-pill ac-pill--status ac-pill--warn">{{ player.player_type|lower }}</span>
+{% if tension.life and not tension.life.untied and not tension.between_lives %}
+            <span class="ac-pill ac-pill--accent" title="This life's net Tension">tension {{ tension.life.tension }}</span>
+{% endif %}
 {% else %}
             <span class="ac-pill ac-pill--status ac-pill--muted">{{ player.player_type|default:"unknown"|lower }} player</span>
 {% endif %}
@@ -131,6 +134,11 @@
         </div>
 {% endif %}
     </div>
+
+{% if tension %}
+{% include "partials/tension_life.html" with life=tension.life between_lives=tension.between_lives %}
+{% include "partials/tension_loom.html" with standing=tension.standing loom=tension.loom help_topics=tension.help_topics burden_table=tension.burden_table %}
+{% endif %}
 
     <div class="ac-panel">
         <div class="ac-panel__h" id="kit">

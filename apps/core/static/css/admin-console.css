@@ -590,6 +590,8 @@ a.ac-tile:hover { background: var(--ac-elev); border-color: var(--ac-border-2); 
     color: var(--ac-text);
     font-variant-numeric: tabular-nums;
 }
+/* A unit or denominator inside the big number ("3 of 10"). */
+.ac-tile__of { font-size: .5em; font-weight: 600; color: var(--ac-dim); margin-left: .35em; letter-spacing: 0; }
 .ac-tile__label {
     font-size: .7rem;
     font-weight: 700;
@@ -810,6 +812,24 @@ a.ac-row__link:hover { color: var(--ac-accent); }
     background: var(--ac-ok-wash);
     border-color: rgba(76, 187, 23, .35);
 }
+/* A knot the viewer's own thread has tied: ok-tinted, no strike-through. */
+.ac-row--tied { background: var(--ac-ok-wash); }
+.ac-row--tied .ac-row__icon {
+    color: var(--ac-ok);
+    background: var(--ac-ok-wash);
+    border-color: rgba(76, 187, 23, .35);
+}
+
+/* A severed bound thread: still listed, struck through, weighing nothing. */
+.ac-row--severed .ac-row__title,
+.ac-row--severed .ac-row__title a.ac-row__link:link,
+.ac-row--severed .ac-row__title a.ac-row__link:visited {
+    color: var(--ac-dim);
+    text-decoration: line-through;
+    text-decoration-color: var(--ac-border-2);
+    text-decoration-thickness: .12rem;
+}
+.ac-row--severed .ac-row__icon { color: var(--ac-dim); }
 
 /* ------------------------------------------------------- data table --- */
 /* Token-aligned table for genuinely column-comparable data (leaderboards);

@@ -146,6 +146,7 @@ INSTALLED_APPS = [
     "apps.ConnectConfig",
     "apps.EventsConfig",
     "apps.FAQsConfig",
+    "apps.FatedConfig",
     "apps.FeedbackConfig",
     "apps.HelpConfig",
     "apps.HistoryConfig",

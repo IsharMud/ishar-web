@@ -24,6 +24,9 @@ class StaticViewSitemap(Sitemap):
             "events",
             "news",
             "trials",
+            "achievements",
+            "fated",
+            "knots",
         ]
 
     def location(self, item):
@@ -44,6 +47,9 @@ class StaticViewSitemap(Sitemap):
             "history": 0.6,
             "support": 0.5,
             "trials": 0.6,
+            "achievements": 0.6,
+            "fated": 0.8,
+            "knots": 0.7,
         }
         return priorities.get(item, 0.5)
 
@@ -62,5 +68,8 @@ class StaticViewSitemap(Sitemap):
             "support": "yearly",
             "connect": "monthly",
             "trials": "monthly",
+            "achievements": "monthly",
+            "fated": "monthly",
+            "knots": "monthly",
         }
         return frequencies.get(item, "weekly")

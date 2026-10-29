@@ -1,0 +1,8 @@
+{% comment %}
+The rarity → burden scale, one line. Context: burden_table (name, decimal).
+{% endcomment %}
+            Every bound thread weighs by rarity —
+{% for name, burden in burden_table %}
+            <span class="text-nowrap">{{ name|lower }} <strong>{{ burden }}</strong></span>{% if not forloop.last %} ·{% endif %}
+{% endfor %}
+            — and a passive weighs its burden once per bound tier.

@@ -349,6 +349,28 @@ the two columns sit side by side.
 Used: player profile (public — see decisions.md 2026-07-27).
 Status: **formalized.**
 
+### `.ac-tile__of` — denominator inside a tile
+A dim, half-size unit after the tile's number: `3<span class="ac-tile__of">of 10</span>`.
+Used: the profile Tension panel (remorts of the summit). Status: **formalized.**
+
+### Tension partials — `partials/tension_life.html`, `partials/tension_loom.html`
+The Fated surfaces (`apps/fated/templates/partials/`), built from tiles,
+rows and pills only. *Life*: Tension · remorts of 10 · banks on ascension
+tiles, the tied knots as rows (rule in `__meta`, weight pill in `__side`),
+copy states for untied / between lives / at the summit. *Loom*: woven /
+loose / best / lifetime tiles, then the bound threads as rows (rarity and
+level or tier in `__meta`, burden pill; `.ac-row--severed` strikes a cut
+thread through). Context comes from `apps/fated/context.py`; include with
+`life`/`between_lives` and `standing`/`loom`/`help_topics`. Used: player
+profile, portal. Status: **formalized** (decisions.md 2026-10-15).
+
+### `.ac-row--tied` / `.ac-row--severed` — Fated row states
+`--tied` (ok wash, ok icon, no strike-through) marks a knot the viewer's own
+thread has tied on the knot menu; `--severed` (dim strike-through) marks a
+cut bound thread on the Loom. The rarity → burden scale is
+`partials/burden_table.html` (context: `burden_table`), carried by the
+explainer, the knot menu and the Loom panel. Status: **formalized.**
+
 ### `.ac-row--done` / `.ac-row:target` — row states
 `--done` checks a record off: title struck through in ok-green, icon tile
 turns ok (challenges). `:target` washes a deep-linked row amber (row `id`s +
@@ -467,7 +489,9 @@ same conventions (radii, focus, coarse-pointer, reduced-motion). Highlights:
   the tiny group-member triple. (XP is no longer a `.vbar` — it graduated to the
   ambient `#hud-xpstrip`; see below.)
 - **`.v-world`** — the topbar's world strip: `.v-clock`
-  (`.v-clock-time` + `.v-clock-date`), the `.v-season` pill, `.v-event`
+  (`.v-clock-time` + `.v-clock-date`), the `.v-season` pill, the `.v-tension`
+  pill (Fated viewers: `T4 · 3/10`, `.asking` while the knots are untied;
+  both pills are `.overlay-opener`s that launch the Season overlay), `.v-event`
   flags and the `.v-moons` sky. Wraps rather than scrolls, and survives
   the phone breakpoint minus `.v-clock-date` (decisions.md 2026-07-31).
 - **`.vbar-reserve`** — the hunger (`.food`, apple) / thirst (`.water`, droplet)

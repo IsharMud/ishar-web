@@ -5,6 +5,7 @@ from django.views.generic.detail import DetailView
 
 from apps.accounts.models import Account
 from apps.core.views.mixins import NeverCacheMixin
+from apps.fated.context import player_tension_context
 
 from ..kit import build_kit
 from ..models.player import Player
@@ -68,6 +69,9 @@ class PlayerView(LoginRequiredMixin, NeverCacheMixin, DetailView):
         context["can_inspect"] = can_inspect
         if can_inspect:
             context["standing"] = self.build_standing(player)
+        # The Tension and Loom panels exist only for a Fated character in a
+        #   Fated season — anywhere else the columns read as zeros.
+        context["tension"] = player_tension_context(player)
         return context
 
     @staticmethod

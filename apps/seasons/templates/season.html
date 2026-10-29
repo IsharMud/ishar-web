@@ -41,6 +41,26 @@
     </div>
 {% endif %}
 
+{% if season.is_fated %}
+    <div class="ac-panel">
+        <div class="ac-panel__h" id="fated">
+            {% bi "bezier2" %}
+            {{ season.enigma.enigma_name|default:"A Fated season" }}
+            <a class="anchor-link" href="#fated" aria-label="Link to this section: Fated"></a>
+        </div>
+        <p>
+            This is a Fated season: one class, one living thread per account, a skill
+            drawn at every level and one bound at every remort — and the loom's knots,
+            burden and Tension on top. Ten remorts is the summit; the eleventh prayer ascends.
+        </p>
+        <p class="mb-0">
+            <a href="{% url 'fated' %}#fated">How a Fated life runs</a> ·
+            <a href="{% url 'knots' %}#knots">the knot menu</a> ·
+            <a href="{% url 'tension_leaders' %}#tension">the Tension board</a>
+        </p>
+    </div>
+{% endif %}
+
     <div class="ac-panel">
         <div class="ac-panel__h" id="essence">
             {% bi "gem" %}
