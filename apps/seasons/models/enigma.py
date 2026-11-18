@@ -43,6 +43,12 @@ class SeasonalEnigma(models.Model):
         verbose_name=_("Enigma Character Select")
     )
 
+    season_duration_months = models.PositiveSmallIntegerField(
+        default=4,
+        help_text=_("How many months a season under this enigma lasts."),
+        verbose_name=_("Season Duration (Months)")
+    )
+
     class Meta:
         managed = False
         db_table = "seasonal_enigma"

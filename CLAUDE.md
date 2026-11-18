@@ -162,6 +162,8 @@ apps/                 one Django app per game domain (accounts, feedback,
   accounts/           Account model, portal, deploy console, password, private
   connect/            the web telnet client (Channels consumer + hud.css)
   feedback/           feedback submission + staff triage dashboard
+  seasons/            season pages, the God-gated Season Console and
+                      Engagement Track console (queue-backed editors)
   fated/              Tension: knot menu + bound-pool models, the mirrored
                       Tension math, the Tension boards and profile partials
   achievements/       achievement models/admin + the public catalog page

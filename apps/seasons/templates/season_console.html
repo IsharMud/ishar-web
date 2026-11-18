@@ -50,7 +50,19 @@
             <dd>{% if season.auto_cycle %}on — the game cycles and starts the next season automatically at expiration{% else %}off — expiration passes without a cycle until one is requested{% endif %}</dd>
             <dt>Next enigma</dt>
             <dd>{% if season.next_enigma %}{{ season.next_enigma.enigma_name }}{% else %}not set{% endif %}</dd>
+{% if next_length %}
+            <dt>Next season length</dt>
+            <dd>
+                {{ next_length.effective }} month{{ next_length.effective|pluralize }}
+                {% if next_length.override %}(override; the enigma's default is {{ next_length.default }}){% else %}(the enigma's default){% endif %}
+            </dd>
+{% endif %}
         </dl>
+        <div class="ac-subrow">
+            <a class="ac-btn" href="{% url 'track_console' %}#console">
+                {% bi "signpost-split" %} Engagement track
+            </a>
+        </div>
     </div>
 
     <div class="ac-panel">
@@ -97,6 +109,33 @@
                 </div>
             </div>
         </form>
+{% if next_length %}
+        <hr>
+        <form id="nextLengthForm" onsubmit="return false;">
+            <div class="row g-2 align-items-end">
+                <div class="col-12 col-sm">
+                    <label class="ac-label" for="nextLengthSelect">
+                        Next season length
+                    </label>
+                    <select class="ac-field" id="nextLengthSelect">
+                        <option value=""{% if not next_length.override %} selected{% endif %}>Enigma default ({{ next_length.default }} month{{ next_length.default|pluralize }})</option>
+{% for months in season_months_range %}
+                        <option value="{{ months }}"{% if months == next_length.override %} selected{% endif %}>{{ months }} month{{ months|pluralize }}</option>
+{% endfor %}
+                    </select>
+                </div>
+                <div class="col-12 col-sm-auto">
+                    <button class="ac-btn ac-btn--accent" type="submit">
+                        {% bi "calendar-range" %} Set length
+                    </button>
+                </div>
+            </div>
+            <p class="ac-panel__hint mb-0 mt-2">
+                Applies to the next cycle only; the season after returns to
+                its enigma's default.
+            </p>
+        </form>
+{% endif %}
         <hr>
         <div class="ac-switch">
             <div class="form-check form-switch">
@@ -275,6 +314,16 @@
         // datetime-local is naive browser-local time; send UTC ISO.
         run({ action: "set_expiration", expiration: new Date(value).toISOString() });
     });
+
+    const nextLengthForm = document.getElementById("nextLengthForm");
+    if (nextLengthForm) {
+        nextLengthForm.addEventListener("submit", function () {
+            run({
+                action: "set_next_duration",
+                months: document.getElementById("nextLengthSelect").value,
+            });
+        });
+    }
 
     document.getElementById("autoCycleSwitch").addEventListener("change", function () {
         run(

@@ -1,15 +1,16 @@
 """Shared poll/cancel endpoints for the `web_admin_queue` outbox.
 
-Both staff consoles (events: Eternal+, season: God) enqueue commands and then
-poll the same queue, so the read/cancel endpoints live once, here. The floor
-is Eternal; season rows are additionally God-guarded on cancel (matching the
-enqueue gate — an Eternal must not be able to cancel a God's pending season
-command, and the game re-checks privileges on execution anyway).
+The staff consoles (events: Eternal+; season and engagement track: God)
+enqueue commands and then poll the same queue, so the read/cancel endpoints
+live once, here. The floor is Eternal; God-floor verbs are additionally
+God-guarded on cancel (matching the enqueue gate — an Eternal must not be
+able to cancel a God's pending season command, and the game re-checks
+privileges on execution anyway).
 """
 from django.http import JsonResponse
 from django.views.generic.base import View
 
-from ..models.webadmin import WebAdminTask
+from ..models.webadmin import GOD_COMMANDS, WebAdminTask
 from ..utils import webadmin
 from ..utils.staff import staff_name
 from .mixins import EternalRequiredMixin, NeverCacheMixin
@@ -57,7 +58,7 @@ class WebAdminCancelView(EternalRequiredMixin, NeverCacheMixin, View):
         task = _get_task(request)
         if task is None:
             return JsonResponse({"message": "Unknown task."}, status=404)
-        if task.command.startswith("season_") and not request.user.is_god():
+        if task.command in GOD_COMMANDS and not request.user.is_god():
             return JsonResponse({"message": "Unknown task."}, status=404)
         cancelled = webadmin.cancel(task.id, staff_name(request.user))
         task.refresh_from_db()
