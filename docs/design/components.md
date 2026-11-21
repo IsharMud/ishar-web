@@ -45,6 +45,35 @@ Defined in `apps/core/static/css/admin-console.css`, **loaded globally by
 Reference implementations: `deploy.html` (staff console), `home.html` /
 `help_page.html` (public pages), and `/styleguide` live.
 
+### `.ac-track` — editable milestone stack
+A column of milestone cards, each a threshold header over reward rows; built
+by the page's JS (`createElement`/`textContent`), not server-rendered. A
+reward row is a grid: on phones the type select spans the row and
+value/count/remove share the next line; from 576px it is one line.
+```html
+<div class="ac-track">
+  <section class="ac-track__ms">
+    <div class="ac-track__head">
+      <span class="ac-track__n">#1</span>
+      <label class="ac-label">At</label>
+      <input class="ac-field ac-track__pct" type="number"> <span class="ac-track__unit">%</span>
+      {# optional .ac-pill: "3 claimed" / "new" #}
+      <button class="ac-btn ac-btn--danger ac-track__remove">Remove</button>
+    </div>
+    <div class="ac-track__rewards">
+      <div class="ac-track__reward">
+        <select class="ac-field">…</select>
+        <input class="ac-field" type="number">
+        <input class="ac-field ac-track__count" type="number"> {# loot boxes only #}
+        <button class="ac-btn ac-track__remove">Remove</button>
+        <span class="ac-track__name">resolved name / effect</span> {# --missing = danger #}
+      </div>
+    </div>
+  </section>
+</div>
+```
+Used by: `track_console.html`. Status: **formalized.**
+
 ### `.ac-hero` — page header banner
 Gradient + 3px amber left edge, circular badge, title, subtitle, optional status
 pill on the right.

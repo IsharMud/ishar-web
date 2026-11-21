@@ -20,6 +20,7 @@ from apps.core.utils.staff import staff_name
 from apps.core.views.mixins import GodRequiredMixin, NeverCacheMixin
 
 from ..models.season import GameState
+from ..tracks import SEASON_MONTHS_RANGE, next_season_length
 from ..utils.current import get_current_season
 
 
@@ -63,10 +64,13 @@ class SeasonConsoleView(GodRequiredMixin, NeverCacheMixin, TemplateView):
             }
             for days, name in SEASON_END_LADDER
         ]
+        context["next_length"] = next_season_length(season)
+        context["season_months_range"] = SEASON_MONTHS_RANGE
         context["recent_tasks"] = WebAdminTask.objects.filter(
             command__in=(
                 WebAdminCommand.SEASON_SET_EXPIRATION,
                 WebAdminCommand.SEASON_SET_AUTO_CYCLE,
+                WebAdminCommand.SEASON_SET_NEXT_DURATION,
                 WebAdminCommand.SEASON_CYCLE,
                 WebAdminCommand.SEASON_START,
             )
@@ -111,6 +115,20 @@ class SeasonActionView(GodRequiredMixin, NeverCacheMixin, View):
                 return JsonResponse({"message": "Bad auto-cycle value."}, status=400)
             command = WebAdminCommand.SEASON_SET_AUTO_CYCLE
             payload = {"enabled": enabled == "1"}
+
+        elif action == "set_next_duration":
+            # Blank clears the override: the going-live enigma's default applies.
+            raw = request.POST.get("months", "")
+            if raw == "":
+                months = None
+            elif raw.isdigit() and int(raw) in SEASON_MONTHS_RANGE:
+                months = int(raw)
+            else:
+                return JsonResponse(
+                    {"message": "Season length must be 1-12 months."}, status=400
+                )
+            command = WebAdminCommand.SEASON_SET_NEXT_DURATION
+            payload = {"months": months}
 
         elif action in ("cycle", "start"):
             # Re-auth: password re-entry on the request itself, deploy-style.

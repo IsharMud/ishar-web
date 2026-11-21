@@ -1,10 +1,10 @@
 """
 Web admin command outbox (`web_admin_queue` table).
 
-The game loads `global_event` and `seasons` at boot only, so the website
-cannot write that state directly — a Django UPDATE would be invisible to the
-running game until a reboot. Instead the staff consoles (events, season)
-enqueue an *intent* here; the game drains one command per game-minute,
+The game loads `global_event`, `seasons` and the engagement track at boot
+only, so the website cannot write that state directly — a Django UPDATE would
+be invisible to the running game until a reboot. Instead the staff consoles
+(events, season, engagement track) enqueue an *intent* here; the game drains one command per game-minute,
 validates it (verb, parameter bounds, and a re-check of the enqueuing
 account's `immortal_level` against the verb's privilege floor), executes it
 through its own entry points, and writes `status`/`result` back for the
@@ -32,6 +32,19 @@ class WebAdminCommand(models.TextChoices):
     SEASON_START = "season_start", _("Start Season")
     REBOOT_NOTICE = "reboot_notice", _("Announce Scheduled Reboot")
     REBOOT_CANCEL = "reboot_cancel", _("Cancel Scheduled Reboot")
+    ENGAGEMENT_SET_TRACK = "engagement_set_track", _("Set Engagement Track")
+    SEASON_SET_NEXT_DURATION = (
+        "season_set_next_duration", _("Set Next Season Length")
+    )
+
+
+# Verbs the game executes only for a God; the consoles' enqueue views and the
+# shared cancel endpoint gate on the same set.
+GOD_COMMANDS = frozenset(
+    command
+    for command in WebAdminCommand
+    if command.startswith(("season_", "engagement_"))
+)
 
 
 class WebAdminStatus(models.TextChoices):
@@ -63,8 +76,8 @@ class WebAdminTask(models.Model):
         blank=True,
         null=True,
         help_text=(
-            "Verb parameters:"
-            " {event_type?, duration_seconds?, expiration_date?, enabled?}."
+            "Verb parameters; the shape per verb is the game's contract"
+            " (docs/web_bridge_contracts.md in ishar-mud)."
         ),
         verbose_name="Payload",
     )

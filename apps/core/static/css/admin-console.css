@@ -1366,3 +1366,55 @@ button.ac-doll__slot.ac-doll__slot--active:hover {
         background: var(--ac-bg);
     }
 }
+
+/* ------------------------------------------------------ track editor --- */
+/* A stack of editable milestone cards (the engagement track console): a
+   threshold header over a list of reward rows. Phone-first: a reward's type
+   takes the full width and its value/count/remove share the line below. */
+.ac-track { display: flex; flex-direction: column; gap: .6rem; }
+.ac-track__hint { margin-top: .7rem; }
+.ac-track__ms {
+    padding: .7rem .8rem .8rem;
+    background: var(--ac-bg);
+    border: 1px solid var(--ac-border);
+    border-radius: var(--ac-radius);
+}
+.ac-track__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .4rem .55rem;
+    margin-bottom: .6rem;
+}
+.ac-track__head > .ac-label { margin: 0; }
+.ac-track__n {
+    min-width: 2rem;
+    font-family: var(--bs-font-monospace, monospace);
+    font-weight: 700;
+    color: var(--ac-accent);
+}
+.ac-track__pct { width: 5.5rem; }
+.ac-track__unit { color: var(--ac-dim); margin-left: -.3rem; }
+.ac-track__remove { margin-left: auto; }
+.ac-track__rewards { display: flex; flex-direction: column; gap: .5rem; margin-bottom: .6rem; }
+.ac-track__reward {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: .4rem;
+}
+.ac-track__reward > select:first-child { grid-column: 1 / -1; }
+.ac-track__count { width: 4.5rem; }
+.ac-track__name {
+    grid-column: 1 / -1;
+    min-height: 1.1em;
+    font-size: .78rem;
+    color: var(--ac-dim);
+}
+.ac-track__name--missing { color: var(--ac-danger); }
+.ac-track__actions { margin-top: 0; }
+@media (min-width: 576px) {
+    .ac-track__reward { grid-template-columns: minmax(11rem, 1.2fr) minmax(7rem, 1fr) auto auto; }
+    .ac-track__reward > select:first-child { grid-column: auto; }
+    .ac-track__reward > .ac-track__remove { grid-column: -2; }
+}

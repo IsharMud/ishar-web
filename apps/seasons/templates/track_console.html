@@ -1,0 +1,571 @@
+{% extends "layout.html" %}
+{% load humanize %}
+{% load ishar %}
+{% load static %}
+{% block meta_title %}Engagement Track{% endblock meta_title %}
+{% block meta_description %}Staff console for the {{ WEBSITE_TITLE }} seasonal engagement track.{% endblock meta_description %}
+{% block meta_url %}{% url 'track_console' %}#console{% endblock meta_url %}
+{% block title %}Engagement Track{% endblock title %}
+{% block breadcrumbs %}
+    {% crumb "Portal" "person-gear" urlname="portal" anchor="portal" %}
+    {% crumb "Season Console" "hourglass-split" urlname="season_console" %}
+    {% crumb "Engagement Track" "signpost-split" urlname="track_console" anchor="console" active=True %}
+{% endblock breadcrumbs %}
+{% block content %}
+<div class="ac">
+
+    <header class="ac-hero">
+        <span class="ac-hero__badge">{% bi "signpost-split" %}</span>
+        <div class="ac-hero__text">
+            <h2 class="ac-hero__title">Engagement Track</h2>
+            <p class="ac-hero__sub">
+                Season {{ season.season_id }}
+                {% if season.enigma %}&middot; {{ season.enigma.enigma_name }}{% endif %}
+                &middot; milestones and rewards along the season track.
+            </p>
+        </div>
+        <div class="ac-hero__status">
+            <span class="ac-pill ac-pill--status ac-pill--muted" id="livePill"></span>
+        </div>
+    </header>
+
+{% if not track_state %}
+    <div class="ac-note ac-note--warn">
+        {% bi "exclamation-triangle" %}
+        <span>
+            The game has not published its engagement tracks yet. Deploy the
+            game first (its migration creates them), then reload this page.
+        </span>
+    </div>
+{% else %}
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "collection" %} Track</div>
+        <div class="ac-seg ac-seg--wrap" role="radiogroup" aria-label="Track to edit">
+            <input class="btn-check" type="radio" name="scope" id="scopeCurrent" value="current" checked>
+            <label class="ac-seg__item" for="scopeCurrent">Season {{ season.season_id }}</label>
+            <input class="btn-check" type="radio" name="scope" id="scopeUpcoming" value="upcoming">
+            <label class="ac-seg__item" for="scopeUpcoming">Next season</label>
+            <input class="btn-check" type="radio" name="scope" id="scopeStandard" value="standard">
+            <label class="ac-seg__item" for="scopeStandard">Standard template</label>
+        </div>
+        <p class="ac-panel__hint ac-track__hint" id="scopeHint"></p>
+        <div class="ac-note ac-note--warn d-none" id="liveNote">
+            {% bi "broadcast" %}
+            <span id="liveNoteText"></span>
+        </div>
+    </div>
+
+    <div class="ac-panel">
+        <div class="ac-panel__h">
+            {% bi "flag" %} Milestones
+            <span class="ac-pill ac-pill--warn d-none" id="dirtyPill">unsaved changes</span>
+        </div>
+        <div class="ac-track" id="milestones"></div>
+        <div class="ac-subrow">
+            <button class="ac-btn" id="addMilestoneBtn" type="button">
+                {% bi "plus-lg" %} Add milestone
+            </button>
+            <span class="ac-empty-inline" id="summary" aria-live="polite"></span>
+        </div>
+    </div>
+
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "check2-square" %} Apply</div>
+        <div class="ac-subrow ac-track__actions">
+            <button class="ac-btn ac-btn--accent" id="saveBtn" type="button">
+                {% bi "cloud-upload" %} <span id="saveBtnText">Save track</span>
+            </button>
+            <button class="ac-btn" id="copyStandardBtn" type="button">
+                {% bi "files" %} Start from the standard template
+            </button>
+            <button class="ac-btn ac-btn--danger" id="revertBtn" type="button">
+                {% bi "arrow-counterclockwise" %} Revert to the standard template
+            </button>
+        </div>
+    </div>
+
+    <div class="ac-note d-none" id="queueNote" aria-live="polite">
+        <span id="queueNoteText"></span>
+    </div>
+{% endif %}
+
+    <div class="ac-panel">
+        <div class="ac-panel__h">{% bi "clock-history" %} Recent changes</div>
+{% if recent_tasks %}
+        <div class="ac-rows">
+{% for task in recent_tasks %}
+            <div class="ac-row">
+                <span class="ac-row__icon">{% bi "terminal" %}</span>
+                <div class="ac-row__main">
+                    <div class="ac-row__title">{{ task.get_command_display }}</div>
+                    <div class="ac-row__meta">
+                        <span>{% bi "person" %} {{ task.actor_name }}</span>
+                        <span>
+                            {% bi "clock" %}
+                            <time datetime="{{ task.created_at|date:'c' }}">{{ task.created_at|naturaltime }}</time>
+                        </span>
+{% if task.result %}
+                        <span class="mono">{{ task.result }}</span>
+{% endif %}
+                    </div>
+                </div>
+                <div class="ac-row__side">
+{% if task.status == "pending" %}
+                    <span class="ac-pill ac-pill--warn ac-pill--live">pending</span>
+                    <button class="ac-btn" type="button" data-cancel-task="{{ task.id }}">
+                        {% bi "x-circle" %} Cancel
+                    </button>
+{% elif task.status == "done" %}
+                    <span class="ac-pill ac-pill--ok">done</span>
+{% elif task.status == "cancelled" %}
+                    <span class="ac-pill ac-pill--muted">cancelled</span>
+{% else %}
+                    <span class="ac-pill ac-pill--danger">error</span>
+{% endif %}
+                </div>
+            </div>
+{% endfor %}
+        </div>
+{% else %}
+        <div class="ac-empty">
+            {% bi "terminal" %}
+            <span>No track changes have been queued yet.</span>
+        </div>
+{% endif %}
+    </div>
+
+</div>
+{% include "partials/webadmin_js.html" %}
+{% if track_state %}
+{{ track_state|json_script:"trackState" }}
+<script>
+(function () {
+    "use strict";
+
+    const queue = window.WebAdminQueue;
+    const runUrl = "{% url 'track_console_run' %}";
+    const spriteUrl = "{% static 'bootstrap-icons/bootstrap-icons.svg' %}";
+    const data = JSON.parse(document.getElementById("trackState").textContent);
+    const kinds = {};
+    data.kinds.forEach(function (k) { kinds[k.kind] = k; });
+    const objectNames = data.objects;
+    const CAP_BPS = 10000;
+
+    // One working copy per track, so switching tabs never loses edits.
+    const drafts = {};
+    const dirty = {};
+    Object.keys(data.scopes).forEach(function (scope) {
+        drafts[scope] = clone(data.scopes[scope].milestones);
+        dirty[scope] = false;
+    });
+    let scope = "current";
+
+    const list = document.getElementById("milestones");
+    const note = document.getElementById("queueNote");
+    const noteText = document.getElementById("queueNoteText");
+
+    function clone(value) { return JSON.parse(JSON.stringify(value)); }
+
+    function el(tag, className, text) {
+        const node = document.createElement(tag);
+        if (className) { node.className = className; }
+        if (text !== undefined) { node.textContent = text; }
+        return node;
+    }
+
+    function icon(name) {
+        const ns = "http://www.w3.org/2000/svg";
+        const svg = document.createElementNS(ns, "svg");
+        svg.setAttribute("class", "bi");
+        svg.setAttribute("aria-hidden", "true");
+        const use = document.createElementNS(ns, "use");
+        use.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", spriteUrl + "#" + name);
+        svg.appendChild(use);
+        return svg;
+    }
+
+    function button(className, iconName, label, onClick) {
+        const btn = el("button", "ac-btn" + (className ? " " + className : ""));
+        btn.type = "button";
+        btn.appendChild(icon(iconName));
+        btn.appendChild(el("span", "", label));
+        btn.addEventListener("click", onClick);
+        return btn;
+    }
+
+    function showNote(text, kind) {
+        note.className = "ac-note" + (kind ? " ac-note--" + kind : "");
+        noteText.textContent = text;
+    }
+
+    function touch() {
+        dirty[scope] = true;
+        renderChrome();
+    }
+
+    function claimsFor(milestone) {
+        if (!data.scopes[scope].live || milestone.slot === undefined) { return 0; }
+        return data.claims[milestone.slot] || 0;
+    }
+
+    function percent(bps) { return String(bps / 100); }
+
+    function rewardText(reward) {
+        switch (reward.kind) {
+        case "xp_buff_percent": return "+" + reward.value + "% XP";
+        case "shop_discount_percent": return "-" + reward.value + "% shop prices";
+        case "renown": return "+" + reward.value + " renown";
+        case "essence": return "+" + reward.value + " essence";
+        default: return "";
+        }
+    }
+
+    // ---- reward row -----------------------------------------------------
+
+    function describeObject(hint, vnum) {
+        hint.className = "ac-track__name";
+        if (!vnum) { hint.textContent = ""; return; }
+        if (objectNames[vnum] !== undefined) {
+            hint.textContent = objectNames[vnum] || "no such object";
+            hint.classList.toggle("ac-track__name--missing", !objectNames[vnum]);
+            return;
+        }
+        hint.textContent = "looking up...";
+        queue.post(runUrl, { action: "lookup", vnum: vnum }).then(function (r) {
+            objectNames[vnum] = r.status === 200 ? r.data.name : "";
+            describeObject(hint, vnum);
+        }).catch(function () { hint.textContent = ""; });
+    }
+
+    function rewardRow(milestone, reward, index) {
+        const row = el("div", "ac-track__reward");
+        const meta = kinds[reward.kind];
+
+        const kindSelect = el("select", "ac-field");
+        kindSelect.setAttribute("aria-label", "Reward type");
+        data.kinds.forEach(function (k) {
+            const option = el("option", "", k.label);
+            option.value = k.kind;
+            option.selected = k.kind === reward.kind;
+            kindSelect.appendChild(option);
+        });
+        kindSelect.addEventListener("change", function () {
+            milestone.rewards[index] = { kind: kindSelect.value, value: 1 };
+            if (kindSelect.value === "loot_box") { milestone.rewards[index].count = 1; }
+            if (kindSelect.value === "title" && data.titles.length) {
+                milestone.rewards[index].value = data.titles[0].id;
+            }
+            touch();
+            render();
+        });
+        row.appendChild(kindSelect);
+
+        const hint = el("span", "ac-track__name");
+        if (reward.kind === "title") {
+            const titleSelect = el("select", "ac-field");
+            titleSelect.setAttribute("aria-label", "Title");
+            data.titles.forEach(function (t) {
+                const option = el("option", "", "#" + t.id + " " + t.name);
+                option.value = t.id;
+                option.selected = t.id === reward.value;
+                titleSelect.appendChild(option);
+            });
+            titleSelect.addEventListener("change", function () {
+                reward.value = Number(titleSelect.value);
+                touch();
+            });
+            row.appendChild(titleSelect);
+        } else {
+            const valueInput = el("input", "ac-field");
+            valueInput.type = "number";
+            valueInput.inputMode = "numeric";
+            valueInput.min = "1";
+            if (meta.max) { valueInput.max = String(meta.max); }
+            valueInput.value = reward.value;
+            valueInput.setAttribute("aria-label", meta.value_label);
+            valueInput.placeholder = meta.value_label;
+            valueInput.addEventListener("input", function () {
+                reward.value = Math.trunc(Number(valueInput.value)) || 0;
+                touch();
+            });
+            if (reward.kind === "loot_box" || reward.kind === "memory") {
+                valueInput.addEventListener("change", function () {
+                    describeObject(hint, reward.value);
+                });
+                describeObject(hint, reward.value);
+            } else {
+                hint.textContent = rewardText(reward);
+                valueInput.addEventListener("input", function () {
+                    hint.textContent = rewardText(reward);
+                });
+            }
+            row.appendChild(valueInput);
+        }
+
+        if (reward.kind === "loot_box") {
+            const countInput = el("input", "ac-field ac-track__count");
+            countInput.type = "number";
+            countInput.inputMode = "numeric";
+            countInput.min = "1";
+            countInput.max = String(data.limits.loot_box_count);
+            countInput.value = reward.count || 1;
+            countInput.setAttribute("aria-label", "How many");
+            countInput.addEventListener("input", function () {
+                reward.count = Math.trunc(Number(countInput.value)) || 0;
+                touch();
+            });
+            row.appendChild(countInput);
+        }
+
+        const remove = button("", "x-lg", "Remove", function () {
+            milestone.rewards.splice(index, 1);
+            touch();
+            render();
+        });
+        remove.classList.add("ac-track__remove");
+        remove.disabled = milestone.rewards.length === 1;
+        row.appendChild(remove);
+        row.appendChild(hint);
+        return row;
+    }
+
+    // ---- milestone card -------------------------------------------------
+
+    function milestoneCard(milestone, index) {
+        const draft = drafts[scope];
+        const card = el("section", "ac-track__ms");
+        const head = el("div", "ac-track__head");
+        head.appendChild(el("span", "ac-track__n", "#" + (index + 1)));
+
+        const pctId = "pct" + index;
+        const pctLabel = el("label", "ac-label", "At");
+        pctLabel.htmlFor = pctId;
+        head.appendChild(pctLabel);
+        const pct = el("input", "ac-field ac-track__pct");
+        pct.id = pctId;
+        pct.type = "number";
+        pct.inputMode = "decimal";
+        pct.min = "0.5";
+        pct.max = "100";
+        pct.step = "0.5";
+        pct.value = percent(milestone.at_bps);
+        pct.addEventListener("input", function () {
+            milestone.at_bps = Math.round(Number(pct.value) * 100) || 0;
+            touch();
+        });
+        // Re-order once the number is settled, not on every keystroke.
+        pct.addEventListener("change", function () {
+            draft.sort(function (a, b) { return a.at_bps - b.at_bps; });
+            render();
+        });
+        head.appendChild(pct);
+        head.appendChild(el("span", "ac-track__unit", "%"));
+
+        const claimed = claimsFor(milestone);
+        if (claimed) {
+            head.appendChild(el("span", "ac-pill ac-pill--info", claimed + " claimed"));
+        } else if (milestone.slot === undefined) {
+            head.appendChild(el("span", "ac-pill ac-pill--accent", "new"));
+        }
+
+        const remove = button("ac-btn--danger", "trash", "Remove", function () {
+            if (claimed && !window.confirm(
+                claimed + " account(s) already claimed this milestone. " +
+                "Removing it does not take their rewards back. Remove it?"
+            )) { return; }
+            draft.splice(index, 1);
+            touch();
+            render();
+        });
+        remove.classList.add("ac-track__remove");
+        remove.disabled = draft.length === 1;
+        head.appendChild(remove);
+        card.appendChild(head);
+
+        const rewards = el("div", "ac-track__rewards");
+        milestone.rewards.forEach(function (reward, rewardIndex) {
+            rewards.appendChild(rewardRow(milestone, reward, rewardIndex));
+        });
+        card.appendChild(rewards);
+
+        const add = button("", "plus-lg", "Add reward", function () {
+            milestone.rewards.push({ kind: "renown", value: 1 });
+            touch();
+            render();
+        });
+        add.disabled = milestone.rewards.length >= data.limits.rewards;
+        card.appendChild(add);
+        return card;
+    }
+
+    // ---- page chrome ----------------------------------------------------
+
+    function summarize(draft) {
+        const totals = {};
+        draft.forEach(function (m) {
+            m.rewards.forEach(function (r) {
+                totals[r.kind] = (totals[r.kind] || 0) + r.value;
+            });
+        });
+        const parts = [
+            draft.length + " milestone" + (draft.length === 1 ? "" : "s") +
+            " (up to " + draft.length + " essence at season end)",
+        ];
+        if (totals.xp_buff_percent) { parts.push("+" + totals.xp_buff_percent + "% XP"); }
+        if (totals.shop_discount_percent) { parts.push("-" + totals.shop_discount_percent + "% shop prices"); }
+        if (totals.renown) { parts.push(totals.renown + " renown"); }
+        if (totals.essence) { parts.push(totals.essence + " essence in rewards"); }
+        return parts.join(" · ");
+    }
+
+    function hintFor(info) {
+        const by = " Last changed by " + info.updated_by + ".";
+        if (scope === "current") {
+            return info.custom
+                ? info.label + " runs its own track." + by
+                : info.label + " runs the standard template. Saving here gives this season " +
+                  "its own track; the template itself is untouched.";
+        }
+        if (scope === "upcoming") {
+            return info.custom
+                ? "A custom track is staged for the next season and takes effect when the season cycles." + by
+                : "Nothing is staged: the next season will run the standard template. " +
+                  "Save here to stage a custom track for it.";
+        }
+        return "What every season runs unless it has a track of its own." + by;
+    }
+
+    function renderChrome() {
+        const info = data.scopes[scope];
+        const draft = drafts[scope];
+        document.getElementById("scopeHint").textContent = hintFor(info);
+        document.getElementById("summary").textContent = summarize(draft);
+        document.getElementById("dirtyPill").classList.toggle("d-none", !dirty[scope]);
+
+        const livePill = document.getElementById("livePill");
+        const currentCustom = data.scopes.current.custom;
+        livePill.textContent = currentCustom ? "custom track live" : "standard track live";
+        livePill.className = "ac-pill ac-pill--status ac-pill--live " +
+            (currentCustom ? "ac-pill--accent" : "ac-pill--ok");
+
+        const claimedTotal = Object.keys(data.claims).length;
+        const liveNote = document.getElementById("liveNote");
+        liveNote.classList.toggle("d-none", !info.live);
+        document.getElementById("liveNoteText").textContent =
+            "Players are on this track right now, so a save takes effect on the game's next minute. " +
+            (claimedTotal
+                ? "Milestones already claimed stay claimed: changing their rewards does not re-grant them."
+                : "Nobody has claimed a milestone yet this season.");
+
+        document.getElementById("saveBtnText").textContent =
+            scope === "standard" ? "Save the standard template" :
+            scope === "upcoming" ? "Stage for next season" : "Save this season's track";
+        document.getElementById("addMilestoneBtn").disabled = draft.length >= data.limits.milestones;
+        document.getElementById("copyStandardBtn").classList.toggle("d-none", scope === "standard");
+        document.getElementById("revertBtn").classList.toggle("d-none", scope === "standard" || !info.custom);
+    }
+
+    function render() {
+        list.replaceChildren();
+        drafts[scope].forEach(function (milestone, index) {
+            list.appendChild(milestoneCard(milestone, index));
+        });
+        renderChrome();
+    }
+
+    // ---- actions --------------------------------------------------------
+
+    function watchTask(taskId) {
+        showNote("Queued (#" + taskId + ") - waiting for the game's next minute pulse...", "");
+        queue.watch(taskId, function (task, stale) {
+            if (task.status === "pending" && stale) {
+                showNote("Still pending (#" + taskId + ") - the game may be down. " +
+                    "The change stays queued and applies when the game returns.", "warn");
+            }
+        }, function (task) {
+            if (task.status === "done") {
+                showNote("Done: " + (task.result || "track updated."), "ok");
+                setTimeout(function () { window.location.reload(); }, 1500);
+            } else {
+                showNote((task.status === "cancelled" ? "Cancelled: " : "Failed: ") +
+                    (task.result || "see recent changes."), "danger");
+            }
+        });
+    }
+
+    function run(params) {
+        queue.post(runUrl, params).then(function (r) {
+            if (r.status === 200 && r.data.queued) {
+                watchTask(r.data.task_id);
+            } else {
+                showNote("Not saved: " + (r.data.message || ("HTTP " + r.status)), "danger");
+            }
+        }).catch(function () {
+            showNote("Network error - nothing was queued.", "danger");
+        });
+    }
+
+    document.querySelectorAll('input[name="scope"]').forEach(function (radio) {
+        radio.addEventListener("change", function () {
+            scope = radio.value;
+            render();
+        });
+    });
+
+    document.getElementById("addMilestoneBtn").addEventListener("click", function () {
+        const draft = drafts[scope];
+        const last = draft[draft.length - 1];
+        // Slot the newcomer halfway into the final stretch; 100% stays the capstone.
+        const before = draft.length > 1 ? draft[draft.length - 2].at_bps : 0;
+        const at = Math.round((before + last.at_bps) / 200) * 100;
+        draft.splice(draft.length - 1, 0, {
+            at_bps: at > before && at < CAP_BPS ? at : before + 50,
+            rewards: [{ kind: "renown", value: 1 }],
+        });
+        touch();
+        render();
+    });
+
+    document.getElementById("copyStandardBtn").addEventListener("click", function () {
+        if (dirty[scope] && !window.confirm("Replace your unsaved edits with the standard template?")) {
+            return;
+        }
+        drafts[scope] = clone(data.scopes.standard.milestones);
+        touch();
+        render();
+    });
+
+    document.getElementById("saveBtn").addEventListener("click", function () {
+        const draft = drafts[scope];
+        draft.sort(function (a, b) { return a.at_bps - b.at_bps; });
+        render();
+        run({ action: "save", scope: scope, milestones: JSON.stringify(draft) });
+    });
+
+    document.getElementById("revertBtn").addEventListener("click", function () {
+        const what = scope === "current" ? data.scopes.current.label : "the next season";
+        if (!window.confirm("Discard the custom track for " + what + " and run the standard template?")) {
+            return;
+        }
+        run({ action: "revert", scope: scope });
+    });
+
+    document.querySelectorAll("[data-cancel-task]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            btn.disabled = true;
+            queue.cancel(btn.dataset.cancelTask).then(function (r) {
+                if (r.data.cancelled) {
+                    showNote("Cancelled #" + btn.dataset.cancelTask + ".", "ok");
+                    setTimeout(function () { window.location.reload(); }, 1000);
+                } else {
+                    showNote("Too late to cancel - the game already claimed it.", "warn");
+                }
+            });
+        });
+    });
+
+    render();
+})();
+</script>
+{% endif %}
+{% endblock content %}

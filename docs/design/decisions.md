@@ -2637,3 +2637,42 @@ enqueue a transactional-outbox row). Specific calls:
 private `_clean` to `apps/core/utils/text.py` for both apps. Public `/trials/`
 page carries the policy summary; portal cards + Portal dropdown entries wired
 for both surfaces with `TRIALS_PENDING` / `TRIAL_ATTENTION` badges.
+
+## 2026-11-18 — Engagement Track console: an editor for game-owned data, saved through the queue
+
+**Problem.** The season's engagement track was a compiled constant in the
+game, so two seasons shipped placeholder rewards. The game now stores tracks
+as data with a standard template as the default (ishar-mud#1969); staff need
+to see and remix them from a phone (#199).
+
+**Decision.** A God-gated **Engagement Track** page under the Season Console
+(`/season/console/track/`), plus a next-season-length control on the Season
+Console itself. Specific calls:
+
+1. **The site never writes `engagement_tracks`.** The game holds the live
+   track in memory and validates against state the site cannot see atomically
+   (claim receipts, loaded titles and objects). A save enqueues
+   `engagement_set_track` on `web_admin_queue`, like every other season verb.
+   `apps/seasons/tracks.py` mirrors the game's bounds for immediate feedback
+   only; the game's result string is the verdict.
+2. **Three tabs, one editor.** This season, next season, the standard
+   template — same component, one working copy per tab so switching never
+   loses edits. A season with no track of its own shows the template's
+   milestones and says so; saving gives it its own track.
+3. **Live edits are allowed and labelled, not blocked.** The tab that players
+   are on carries a warn note, and each milestone shows how many accounts
+   have claimed it. Removing a claimed milestone asks first.
+4. **Milestone identity is the game's `slot`.** The editor round-trips it and
+   omits it on new milestones (pill: "new"); it never invents one.
+5. **Game-owned columns the site may be ahead of are read raw and guarded.**
+   `seasons.next_duration_months` is not on the `Season` model: a missing
+   column there would 500 every season page, where a guarded read just hides
+   one control. Same rule for `engagement_tracks` — the page degrades to a
+   "deploy the game first" note.
+6. **`GOD_COMMANDS`** in `apps/core/models/webadmin.py` replaces the cancel
+   endpoint's `startswith("season_")` test, so a new God-floor verb family is
+   guarded by adding it to one set.
+
+**Notes.** New component `.ac-track` (catalog updated). Verified against a
+local MariaDB with the game schema and the game's real queue drainer: save →
+queue row → game applies → page shows the staged track.
