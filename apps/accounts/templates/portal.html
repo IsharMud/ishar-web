@@ -274,6 +274,7 @@
     </div>
 
 {% if tension %}
+{% include "partials/season_essence.html" with essence=tension.essence %}
 {% include "partials/tension_loom.html" with standing=tension.standing loom=tension.loom help_topics=tension.help_topics burden_table=tension.burden_table %}
 {% endif %}
 
@@ -281,7 +282,7 @@
         <!-- Essence -->
         <div class="col-md-5 d-flex">
             <div class="ac-panel flex-fill">
-                <div class="ac-panel__h">{% bi "gem" %} Essence</div>
+                <div class="ac-panel__h" id="essence">{% bi "gem" %} Essence</div>
                 <p class="ac-panel__hint">
                     Reward points earned each season, preserved across seasons —
                     spend them in-game with <code>shop</code>.
@@ -292,10 +293,12 @@
                         <span class="ac-tile__n">{{ request.user.current_essence }}</span>
                         <span class="ac-tile__label">Current</span>
                     </span>
-                    <span class="ac-tile {% if request.user.seasonal_earned %}ac-tile--ok{% else %}ac-tile--muted{% endif %}">
-                        <span class="ac-tile__n">{{ request.user.seasonal_earned }}</span>
-                        <span class="ac-tile__label">Earned this season</span>
-                    </span>
+{% if tension %}
+                    <a class="ac-tile {% if tension.essence.total %}ac-tile--ok{% else %}ac-tile--muted{% endif %}" href="#season-essence" title="Essence this season, broken down above">
+                        <span class="ac-tile__n">{{ tension.essence.total }}</span>
+                        <span class="ac-tile__label">This season</span>
+                    </a>
+{% endif %}
                 </div>
             </div>
         </div>

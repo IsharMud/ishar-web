@@ -887,6 +887,10 @@ a.ac-row__link:hover { color: var(--ac-accent); }
     color: var(--ac-dim);
 }
 .ac-table__rank--top { color: var(--ac-accent); font-weight: 700; }
+/* A row the reader should find first (the remort that passes a high-water). */
+.ac-table tbody tr.ac-table__row--mark,
+.ac-table tbody tr.ac-table__row--mark:hover { background: var(--ac-wash); }
+.ac-table__row--mark > * { color: var(--ac-accent); }
 /* Secondary line under a cell's main value (e.g. class under player name). */
 .ac-table__sub {
     display: block;
@@ -1341,6 +1345,13 @@ button.ac-doll__slot.ac-doll__slot--active:hover {
     .ac-seg { width: 100%; }
     .ac-seg__item { flex: 1 1 0; justify-content: center; padding: .5rem .5rem; }
     .ac-panel { padding: .9rem .9rem; }
+    /* Two tiles abreast rather than a single tall column. */
+    .ac-tiles { grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr)); }
+    /* Tighter cells so a four-column table fits a phone without scrolling. */
+    .ac-table thead th,
+    .ac-table tbody td,
+    .ac-table tbody th { padding: .5rem .5rem; }
+    .ac-table thead th { letter-spacing: .05em; }
 }
 
 /* ------------------------------------------------- touch ergonomics --- */

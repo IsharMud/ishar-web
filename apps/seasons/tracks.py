@@ -159,6 +159,20 @@ def claim_counts(season_id: int) -> dict[int, int]:
         return {int(slot): int(count) for slot, count in cursor.fetchall()}
 
 
+def claimed_milestones(account_id: int, season_id: int) -> int:
+    """Milestones an account has claimed this season. The game pays one
+    essence per milestone *reached*, which it derives on read and never
+    stores, so a reached-but-unclaimed milestone is missing here: this is a
+    lower bound on the engagement essence."""
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "SELECT COUNT(DISTINCT milestone) FROM accounts_engagement_rewards"
+            " WHERE account_id = %s AND season_id = %s",
+            [account_id, season_id],
+        )
+        return int(cursor.fetchone()[0])
+
+
 def console_state(season) -> dict | None:
     """Everything the track console's editor needs, or None when the game's
     `engagement_tracks` migration has not run yet."""

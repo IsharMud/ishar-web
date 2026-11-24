@@ -1,0 +1,141 @@
+{% load ishar %}
+{% comment %}
+A Fated account's essence this season: the stored woven and loose (never
+recomputed), the season bonuses, and the life in hand priced remort by remort
+through to its ascension. Context: essence (apps.fated.essence.SeasonEssence),
+between_lives (bool, profile only).
+{% endcomment %}
+    <div class="ac-panel">
+        <div class="ac-panel__h" id="season-essence">
+            {% bi "gem" %}
+            Essence This Season
+            <a class="anchor-link" href="#season-essence" aria-label="Link to this section: Essence This Season"></a>
+        </div>
+        <p class="ac-panel__hint">
+            What the season pays this account when it ends, reckoned as the game reckons it.
+        </p>
+        <div class="ac-tiles">
+            <span class="ac-tile {% if essence.total %}ac-tile--accent{% else %}ac-tile--muted{% endif %}" title="Woven + loose + season bonuses + engagement milestones claimed">
+                <span class="ac-tile__n">{{ essence.total }}</span>
+                <span class="ac-tile__label">This season</span>
+            </span>
+            <span class="ac-tile {% if essence.woven %}ac-tile--ok{% else %}ac-tile--muted{% endif %}" title="Banked by ascension">
+                <span class="ac-tile__n">{{ essence.woven }}</span>
+                <span class="ac-tile__label">Woven</span>
+            </span>
+            <span class="ac-tile {% if essence.loose %}ac-tile--info{% else %}ac-tile--muted{% endif %}" title="The season's high-water across lives">
+                <span class="ac-tile__n">{{ essence.loose }}</span>
+                <span class="ac-tile__label">Loose</span>
+            </span>
+{% if essence.has_life %}
+            <span class="ac-tile {% if essence.life_worth %}ac-tile--info{% else %}ac-tile--muted{% endif %}" title="What {{ essence.life_name }} stands at now: remort {{ essence.life_remorts }}, Tension {{ essence.tension }}">
+                <span class="ac-tile__n">{{ essence.life_worth }}</span>
+                <span class="ac-tile__label">This life</span>
+            </span>
+{% endif %}
+        </div>
+
+        <dl class="ac-kv mt-3">
+            <dt>Woven<small class="d-block">banked by ascension</small></dt>
+            <dd>{{ essence.woven }}</dd>
+            <dt>Loose<small class="d-block">{% if essence.sourced %}set at remort {{ essence.loose_remorts }}, Tension {{ essence.loose_tension }}{% elif essence.earlier_rule %}set under the earlier rule{% else %}no remort made yet this season{% endif %}</small></dt>
+            <dd>{{ essence.loose }}</dd>
+{% if essence.played_bonus %}
+            <dt>Played a Fated this season</dt>
+            <dd>+{{ essence.played_bonus }}</dd>
+{% endif %}
+{% if essence.climb_bonus %}
+            <dt>Holding woven or loose essence</dt>
+            <dd>+{{ essence.climb_bonus }}</dd>
+{% endif %}
+            <dt>Engagement milestones claimed</dt>
+            <dd>+{{ essence.milestones }}</dd>
+            <dt class="text-body">Essence this season</dt>
+            <dd class="text-ishar fw-bold">{{ essence.total }}</dd>
+        </dl>
+{% if essence.earlier_rule %}
+        <p class="ac-panel__hint mt-2 mb-0">
+            The loose high-water of {{ essence.loose }} was set before the game recorded which
+            life set it, under the earlier rule. It stands as it is until a life passes it or
+            a climb is woven in.
+        </p>
+{% endif %}
+        <p class="ac-panel__hint mt-2 mb-0">
+            The game pays one essence for every engagement milestone reached; this page sees
+            only those claimed, so <code>season</code> in the game has the exact total.
+        </p>
+
+        <div class="ac-panel__h mt-3" id="this-life">
+            {% bi "activity" %}
+            This Life{% if essence.has_life %} — {{ essence.life_name }}{% endif %}
+            <a class="anchor-link" href="#this-life" aria-label="Link to this section: This Life"></a>
+        </div>
+{% if not essence.has_life %}
+        <div class="ac-empty">
+            {% bi "activity" %}
+            <span>{% if between_lives %}{{ player.name|title }} is between lives.{% else %}No Fated life is under way.{% endif %} The loose high-water holds until a life passes it.</span>
+        </div>
+{% else %}
+        <p class="mb-2">
+            {{ essence.life_name }} stands at remort {{ essence.life_remorts }}, Tension {{ essence.tension }}:
+            <strong>{{ essence.life_worth }}</strong> loose essence{% if essence.life_untied %} — the knots are not tied yet, so this life is reckoned at Tension 0 until they are{% endif %}.
+        </p>
+    {% if essence.below_high_water %}
+        <div class="ac-note mb-2">
+            {% bi "info-circle" %}
+            <span>
+                That is below the season's high-water of {{ essence.loose }}, which holds until a
+                life passes it — the season counts {{ essence.loose }}.
+            </span>
+        </div>
+    {% elif essence.loose %}
+        <p class="ac-panel__hint mb-2">This life holds the season's high-water.</p>
+    {% endif %}
+
+    {% if essence.steps %}
+        <p class="ac-panel__hint mb-2">
+            Each remort of this life is worth {{ essence.multiplier_display }} at Tension {{ essence.tension }}.
+        {% if essence.passes_at %}
+            It passes the high-water at remort {{ essence.passes_at.remorts }}, worth {{ essence.passes_at.worth }}.
+        {% elif essence.below_high_water %}
+            No remort of this life passes the high-water of {{ essence.loose }}.
+        {% else %}
+            Each remort from here raises the high-water.
+        {% endif %}
+        </p>
+        <div class="ac-tablewrap">
+            <table class="ac-table">
+                <thead><tr>
+                    <th scope="col">Remort</th>
+                    <th class="ac-table__num" scope="col">This life</th>
+                    <th class="ac-table__num" scope="col">Loose</th>
+                    <th class="ac-table__num" scope="col">Season</th>
+                </tr></thead>
+                <tbody>
+        {% for step in essence.steps %}
+                    <tr{% if step.passes %} class="ac-table__row--mark"{% endif %}>
+                        <th scope="row">{{ step.remorts }}{% if step.remorts == essence.summit %}<span class="ac-table__sub">the summit</span>{% endif %}</th>
+                        <td class="ac-table__num">{{ step.worth }}</td>
+                        <td class="ac-table__num">{{ step.loose }}{% if step.passes %}<span class="ac-table__sub">passes {{ essence.loose }}</span>{% elif step.worth < essence.loose %}<span class="ac-table__sub">holds</span>{% endif %}</td>
+                        <td class="ac-table__num">{{ step.total }}</td>
+                    </tr>
+        {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% elif essence.at_summit %}
+        <p class="ac-panel__hint mb-2">{{ essence.life_name }} stands at the summit — the eleventh prayer ascends.</p>
+    {% endif %}
+    {% with ascension=essence.ascension %}
+        <div class="ac-note {% if ascension.change < 0 %}ac-note--warn{% else %}ac-note--ok{% endif %} mt-3">
+            {% bi "arrow-up-circle" %}
+            <span>
+                <strong>Ascending at Tension {{ ascension.tension }} banks {{ ascension.bank }} woven essence</strong>
+                in place of the {{ ascension.loose_replaced }} loose the season would hold at the summit:
+                the season goes from {{ ascension.total_before }} to {{ ascension.total_after }}
+                ({{ ascension.change_display }}){% if ascension.change < 0 %}, because the high-water an earlier life set is worth more than this climb banks{% endif %}.
+            </span>
+        </div>
+    {% endwith %}
+{% endif %}
+    </div>

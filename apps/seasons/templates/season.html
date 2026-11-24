@@ -77,10 +77,9 @@
         </p>
 {% if request.user and not request.user.is_anonymous %}
         <p class="mb-0">
-            You can view your current essence balance,
-            and see how many points you have earned so far this season,
-            by visiting your
-            <a href="{% url 'portal' %}#essence" title="account portal page">account portal page</a>.
+            You can view your current essence balance{% if season.is_fated %},
+            and what this season's climbs have earned,{% endif %} on your
+            <a href="{% url 'portal' %}#{% if season.is_fated %}season-essence{% else %}essence{% endif %}" title="account portal page">account portal page</a>.
         </p>
 {% endif %}
     </div>

@@ -140,7 +140,7 @@
             <dt>What you lose</dt>
             <dd>This life: its level, renown, gear, and the offering.</dd>
             <dt>What you bank</dt>
-            <dd>Woven essence, at the Tension this climb was played at.</dd>
+            <dd>Woven essence at the Tension this climb was played at, in place of the season's loose essence.</dd>
         </dl>
         <p class="mb-0">
             A character parked at remort {{ summit }} may keep playing, but earns no essence beyond one
@@ -161,11 +161,14 @@
             Tension 0, and a fifth more for every point of Tension it was climbed at.
         </p>
         <p class="mb-0">
-            <strong>Loose</strong> essence is the current climb: the best remort you have
-            reached, multiplied by that life's Tension, paid when the season ends. Loose
-            essence is not lost on death — the high-water mark persists. Ascending weaves it
-            in and begins the next climb. Without ascending, loose essence caps at one climb's
-            worth for the whole season.
+            <strong>Loose</strong> essence is the season's high-water across lives: every remort a
+            life makes is worth one essence, multiplied by that life's Tension, and the best any
+            life has reached is what the season pays. It is kept through death — a new life
+            starts below it, and the high-water holds until a life climbs past it. Ascending
+            weaves the climb in as woven essence in place of loose and begins the next one; the
+            eleventh prayer pays more than any remort before it.{% if request.user.is_authenticated %}
+            Your <a href="{% url 'portal' %}#season-essence">portal</a> shows where your
+            high-water was set and the remort at which your current life passes it.{% endif %}
         </p>
     </div>
 

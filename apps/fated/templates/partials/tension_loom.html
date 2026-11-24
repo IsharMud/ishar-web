@@ -1,8 +1,8 @@
 {% load ishar %}
 {% comment %}
-The account's loom: season standing (woven / loose / best, lifetime best) and
-the bound threads with rarity and burden. Context: standing, loom, owner
-(bool: the viewer is this account), help_topics.
+The account's loom: best completed climbs (this season, lifetime) and the
+bound threads with rarity and burden. Essence lives in season_essence.html.
+Context: standing, loom, help_topics, burden_table.
 {% endcomment %}
     <div class="ac-panel">
         <div class="ac-panel__h" id="loom">
@@ -11,19 +11,9 @@ the bound threads with rarity and burden. Context: standing, loom, owner
             <a class="anchor-link" href="#loom" aria-label="Link to this section: The Loom"></a>
         </div>
         <p class="ac-panel__hint">
-            Woven essence is banked by ascension and survives death; loose essence is
-            the current climb's high-water, also never lost. Both pay out at season's end.
-            Only a completed climb sets a best.
+            Only a completed climb sets a best: the highest net Tension at which a life ascended.
         </p>
         <div class="ac-tiles">
-            <span class="ac-tile {% if standing.woven %}ac-tile--ok{% else %}ac-tile--muted{% endif %}" title="Essence woven in by ascension this season">
-                <span class="ac-tile__n">{{ standing.woven }}</span>
-                <span class="ac-tile__label">Woven</span>
-            </span>
-            <span class="ac-tile {% if standing.loose %}ac-tile--info{% else %}ac-tile--muted{% endif %}" title="This climb's high-water, paid at season's end">
-                <span class="ac-tile__n">{{ standing.loose }}</span>
-                <span class="ac-tile__label">Loose</span>
-            </span>
             <span class="ac-tile {% if standing.best %}ac-tile--accent{% else %}ac-tile--muted{% endif %}" title="Best net Tension at which a climb was completed this season">
                 <span class="ac-tile__n">{{ standing.best }}</span>
                 <span class="ac-tile__label">Best this season</span>
