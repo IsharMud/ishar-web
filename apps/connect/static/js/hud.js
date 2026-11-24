@@ -4640,7 +4640,8 @@
                 seasonTile(s.essence.current, "Current"),
                 seasonTile(s.essence.lifetime, "Lifetime")
             ];
-            if (s.essence.this_season != null) tiles.push(seasonTile(s.essence.this_season, "This Season"));
+            var fatedTotal = fatedSeasonTotal(s.tension, s.eng);
+            if (fatedTotal != null) tiles.push(seasonTile(fatedTotal, "This Season"));
             secs.push(seasonSection("Essence", el("div", { class: "season-tiles" }, tiles)));
         }
 
@@ -4673,6 +4674,55 @@
         return (v < 0 ? "-" : "") + Math.floor(a / 10) + "." + (a % 10);
     }
     var RARITY_NAMES = ["common", "uncommon", "rare", "epic", "legendary"];
+
+    // Fated essence, priced with the site's constants (apps/fated/essence.py,
+    // handed over by init). Woven and loose are the account's stored values
+    // and are only displayed; the formulas price the life in hand. Without
+    // the constants nothing is priced rather than guessed.
+    var essenceRules = null;
+    function essMultiply(v, t) {
+        return Math.floor(v * (100 + essenceRules.slope_pct * Math.max(0, Math.trunc(Number(t) || 0))) / 100);
+    }
+    function essLoose(r, t) { return essMultiply(clamp(Math.trunc(Number(r) || 0), 0, essenceRules.summit), t); }
+    function essBank(t) { return essMultiply(essenceRules.bank_base, t); }
+    // A Fated viewer has played a Fated this season, so the +2 always applies.
+    // engagement.milestones_done is the game's exact count of milestones reached.
+    function essTotal(woven, loose, milestones) {
+        var climb = woven + loose;
+        return climb + 2 + (climb > 0 ? 1 : 0) + milestones;
+    }
+    function fatedSeasonTotal(tn, eng) {
+        if (!tn || !essenceRules) return null;
+        return essTotal(Number(tn.woven) || 0, Number(tn.loose) || 0, Number(eng && eng.milestones_done) || 0);
+    }
+    function signed(n) { return n > 0 ? "+" + n : n < 0 ? "\u2212" + Math.abs(n) : "\u00b10"; }
+    function looseLines(tn, eng) {
+        var lines = [];
+        var woven = Number(tn.woven) || 0, loose = Number(tn.loose) || 0;
+        if (loose > 0) {
+            lines.push(Number(tn.loose_remorts) > 0
+                ? "Loose set at remort " + tn.loose_remorts + ", Tension " + (Number(tn.loose_tension) || 0) + "."
+                : "Loose was set under the earlier rule; it stands until a life passes it or a climb is woven in.");
+        }
+        if (!essenceRules || tn.locked < 0) return lines;
+        var t = Number(tn.locked), r = Math.trunc(Number(tn.remorts) || 0), top = essenceRules.summit;
+        var worth = essLoose(r, t);
+        lines.push(worth < loose
+            ? "This life stands at " + worth + " — below the high-water of " + loose + ", which holds until a life passes it."
+            : "This life stands at " + worth + " and holds the high-water.");
+        if (r < top) {
+            var at = 0;
+            for (var n = r + 1; n <= top && !at; n++) if (worth < loose && essLoose(n, t) > loose) at = n;
+            if (at) lines.push("It passes the high-water at remort " + at + " (" + essLoose(at, t) + ").");
+            else if (worth < loose) lines.push("No remort of this life passes it.");
+        }
+        var m = Number(eng && eng.milestones_done) || 0;
+        var held = Math.max(loose, essLoose(top, t)), banked = essBank(t);
+        var before = essTotal(woven, held, m), after = essTotal(woven + banked, 0, m);
+        lines.push("Ascending at Tension " + Math.max(0, t) + " banks " + banked + " woven in place of " + held +
+            " loose: this season " + before + " \u2192 " + after + " (" + signed(after - before) + ").");
+        return lines;
+    }
     function tensionPillTip(tn) {
         if (tn.locked < 0) return "The loom is asking for knots — answer in the terminal; open Season for the menu";
         var tip = "Tension " + tn.locked + " · remort " + tn.remorts + " of " + tn.summit;
@@ -4743,7 +4793,10 @@
             seasonTile(tn.lifetime_best, "Lifetime best")
         ]));
         out.push(el("div", { class: "tn-line", text:
-            "Woven essence is banked by ascension and survives death; loose is this climb's high-water, also never lost. Only a completed climb sets a best." }));
+            "Woven is banked by ascension; loose is the season's high-water across lives, kept through death. Only a completed climb sets a best." }));
+        looseLines(tn, S.season && S.season.eng).forEach(function (line) {
+            out.push(el("div", { class: "tn-line", text: line }));
+        });
         return out;
     }
 
@@ -6061,6 +6114,7 @@
         if (opts.spriteUrl) spriteUrl = String(opts.spriteUrl);
         if (opts.biUrl) biUrl = String(opts.biUrl);
         if (opts.skillIcons && typeof opts.skillIcons === "object") curatedIcons = opts.skillIcons;
+        if (opts.essenceRules && typeof opts.essenceRules === "object") essenceRules = opts.essenceRules;
         if (opts.quests && typeof opts.quests === "object") {
             questCfg.urls = opts.quests.urls || null;
             questCfg.csrf = String(opts.quests.csrf || "");
@@ -6296,7 +6350,7 @@
                         { id: 8, family: "exposed", tier: 2, name: "Laid Bare", weight: 35, rule: "You take 25% more damage from all sources." }
                     ],
                     threads: [{ skill_id: 51, name: "Frostbite", level: 50, rarity: 2, burden: 5 }],
-                    woven: 28, loose: 2, best: 4, lifetime_best: 4 } },
+                    woven: 28, loose: 21, loose_remorts: 0, loose_tension: 0, best: 4, lifetime_best: 4 } },
             "Char.Achievements": { points: 45, achievements: [
                 { id: 3, name: "Welcome to Ishar!", desc: "Create your first character and begin your journey within the world of Ishar!", category: "GENERAL", points: 5, done: true, date: Math.floor(Date.now() / 1000) - 86400 * 40, by: "Aelwyn" },
                 { id: 5, name: "Well on your way!", desc: "Reach level 5 on any class for the first time.", category: "GENERAL", points: 5, done: true, date: Math.floor(Date.now() / 1000) - 86400 * 38, by: "Aelwyn" },

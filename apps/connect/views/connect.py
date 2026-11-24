@@ -4,6 +4,7 @@ from django.views.generic.base import TemplateView
 
 from apps.connect import testserver
 from apps.connect.skill_icons import SKILL_ICONS
+from apps.fated import essence
 
 
 @method_decorator(ensure_csrf_cookie, name="get")
@@ -22,6 +23,7 @@ class ConnectView(TemplateView):
         # name). Rendered via {{ ...|json_script }} so it reaches the page as
         # safely-escaped JSON, then handed to IsharHUD.init({skillIcons}).
         ctx["skill_icons"] = SKILL_ICONS
+        ctx["essence_rules"] = essence.rules()
         # Advisory only — the websocket consumer re-checks before dialing.
         # The tier shapes client-side copy (announcement, refusal hints).
         ctx["test_server_allowed"] = testserver.allowed(self.request.user)
