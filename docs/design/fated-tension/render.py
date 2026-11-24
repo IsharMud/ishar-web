@@ -44,10 +44,11 @@ html, _ = get(c, "/player/Aelwyn/", "player_aelwyn")
 check("player_aelwyn", html,
       "tension 4",                       # hero pill: locked value is authoritative
       "4 Tension", "3 of 10 Remorts",
-      "28 Banks on ascension",           # bank(4) = 16 * 180 / 100 = 28
-      "Locked at 4 when this thread was spun — knots 3.5, loom burden now 0.5",          # Weave Watches 2.0 + Exposed 1.5; Frostbite rare 0.5
+            "Locked at 4 when this thread was spun — knots 3.5, loom burden now 0.5",          # Weave Watches 2.0 + Exposed 1.5; Frostbite rare 0.5
       "The Weave Watches", "Exposed", "2.0", "1.5",
       "28 Woven", "2 Loose", "4 Best this season", "4 Lifetime best",
+      "Ascending at Tension 4 banks 28 woven essence",   # bank(4) = 16 * 180 / 100
+      "33 This season",                  # 28 + 2 + 2 + 1, no milestones claimed
       "Frostbite", "rare", "level 50", "0.5",
       "Bless", "severed", "burden 0.5",
       "Help: Tension · Knots · Ascension · Woven")
@@ -93,7 +94,7 @@ check("player_tam", html, "between lives")
 _, r = get(c, "/player/Wren/", "player_wren_denied", status=404)
 cst = Client(); cst.force_login(staff)
 html, _ = get(cst, "/player/Wren/", "player_wren_staff")
-check("player_wren_staff", html, "stands at the summit — the eleventh prayer ascends", "7 Tension", "10 of 10", "38 Banks on ascension")   # bank(7) = 16 * 240 / 100
+check("player_wren_staff", html, "stands at the summit — the eleventh prayer ascends", "7 Tension", "10 of 10", "Ascending at Tension 7 banks 38 woven essence")   # bank(7) = 16 * 240 / 100
 
 # Help mirror: the game's helptab served through the site's parser.
 for topic in ("Tension", "Knots", "Ascension", "Woven"):
@@ -101,7 +102,7 @@ for topic in ("Tension", "Knots", "Ascension", "Woven"):
     check(f"help_{topic}", html, topic)
 check("help_Tension", open(os.path.join(OUT, "help_tension.html")).read(), "Tension is the measure of how tightly the weave is drawn against you")
 check("help_Ascension", open(os.path.join(OUT, "help_ascension.html")).read(), "the eleventh prayer ascends")
-check("help_Woven", open(os.path.join(OUT, "help_woven.html")).read(), "Loose essence is not lost on death")
+check("help_Woven", open(os.path.join(OUT, "help_woven.html")).read(), "It is not lost on death")
 _, r = get(anon, "/help/Loose/", "help_loose", status=302)
 if r.status_code == 302 and "/help/Woven/" not in r["Location"]:
     failures.append(f"help_loose: redirected to {r['Location']}")
@@ -112,7 +113,7 @@ _, r = get(anon, "/help/Burden/", "help_burden", status=302)
 html, _ = get(anon, "/fated/", "fated_anon")
 check("fated_anon", html, "The Fated", "One thread", "The draw", "The bind", "Knots", "Burden and Tension",
       "common 0.2", "legendary 1.5", "16 woven essence at Tension 0", "The summit", "Woven and loose",
-      "Loose essence is not lost on death", "the Rewoven", "help tension", "this season",
+      "season's high-water across lives", "It is kept through death", "the Rewoven", "help tension", "this season",
       absent=("Loom's Equal", "heat", "meta-progression", "roguelite", "build"))
 html, _ = get(anon, "/fated/knots/", "knots_anon")
 check("knots_anon", html, "16 knots", "24.0 at the top", "The Weave Watches", "Stanched", "Unmended", "tighter",
@@ -133,4 +134,50 @@ html, _ = get(anon, "/help/", "help_index")
 check("help_nav", html, "The Fated")
 html, _ = get(c, "/portal/", "portal_burden")
 check("portal_burden", html, "Every bound thread weighs by rarity", "rare 0.5")
+
+# --- essence this season (ishar-mud#1990 / #2004) -----------------------
+def get_text(client, path, name):
+    html, _ = get(client, path, name)
+    return text(html)
+c = Client(); c.force_login(Account.objects.get(account_name="Maren"))
+t = get_text(c, "/player/Corwen/", "player_corwen")
+check("player_corwen", t,
+      "30 This season", "0 Woven", "21 Loose", "4 This life",
+      "set under the earlier rule", "Played a Fated this season +2",
+      "Holding woven or loose essence +1", "Engagement milestones claimed +6",
+      "Essence this season 30",
+      "Corwen stands at remort 1, Tension 19: 4 loose essence",
+      "below the season's high-water of 21",
+      "Each remort of this life is worth ×4.8 at Tension 19",
+      "It passes the high-water at remort 5, worth 24",
+      "5 24 24 passes 21 33", "4 19 21 holds 30", "10 the summit 48 48 57",
+      "Ascending at Tension 19 banks 76 woven essence",
+      "in place of the 48 loose", "from 57 to 85 (+28)",
+      absent=("at risk", "unbanked", "lost on death", "Banks on ascension"))
+t = get_text(c, "/portal/", "portal_maren")
+check("portal_maren", t, "30 This season", "Corwen stands at remort 1", "passes 21", "Earned this season" and "This season")
+
+c.force_login(Account.objects.get(account_name="Isolde"))
+t = get_text(c, "/player/Brannoc/", "player_brannoc")
+check("player_brannoc", t, "16 Woven", "48 Loose", "set at remort 10, Tension 19",
+      "Essence this season 67", "2 loose essence", "No remort of this life passes the high-water of 48",
+      "banks 16 woven essence", "from 67 to 35 (−32)", "an earlier life set is worth more",
+      absent=("earlier rule",))
+
+c.force_login(Account.objects.get(account_name="Boric"))
+t = get_text(c, "/player/Tam/", "player_tam")         # between lives
+check("player_tam", t, "Tam is between lives. The loose high-water holds", "5 Loose", "set under the earlier rule",
+      absent=("Ascending at",))
+t = get_text(c, "/player/Lanya/", "player_lanya")     # knots untied
+check("player_lanya", t, "the knots are not tied yet, so this life is reckoned at Tension 0")
+
+c.force_login(Account.objects.get(account_name="Tyrell"))
+t = get_text(c, "/player/Rook/", "player_rook")       # not Fated
+check("player_rook", t, absent=("Essence This Season",))
+t = get_text(c, "/portal/", "portal_tyrell")
+check("portal_tyrell", t, "Aelwyn stands at remort 3, Tension 4", "33 This season")
+for path, name in (("/fated/", "fated"), ("/season/", "season"), ("/connect/", "connect")):
+    t = get_text(c, path, name)
+check("fated", text(open(f"{OUT}/fated.html").read()), "season's high-water across lives", "in place of the season's loose essence")
 print("\n".join(failures) if failures else "ALL CHECKS PASSED")
+

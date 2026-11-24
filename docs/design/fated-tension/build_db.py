@@ -132,4 +132,17 @@ AchievementReward.objects.create(achievement=chal, reward_type=1, reward_value=1
 AchievementReward.objects.create(achievement=chal, reward_type=0, reward_value=10)
 AccountAchievement.objects.create(account=tyrell, achievement=tight, is_completed=1, completion_date=now - dt.timedelta(days=1), completed_by="Aelwyn")
 AccountAchievement.objects.create(account=selra, achievement=equal, is_completed=1, completion_date=now - dt.timedelta(days=1), completed_by="Wren")
+
+# ishar-mud#1990's real case: woven 0, loose 21 under the earlier rule, six
+# milestones claimed, the living character at remort 1, Tension 19.
+real = account(6, "Maren", season_woven_essence=0, season_loose_essence=21, season_loose_remorts=0, season_loose_tension=0, season_max_tension=0, max_tension=0)
+player(6, "Corwen", real, locked=19, mask=65, remorts=1)
+# A high-water set at Tension 19 by an earlier life; the life in hand is at 0.
+high = account(7, "Isolde", season_woven_essence=16, season_loose_essence=48, season_loose_remorts=10, season_loose_tension=19, season_max_tension=0, max_tension=0)
+player(7, "Brannoc", high, locked=0, mask=0, remorts=2)
+with connection.cursor() as c:
+    c.execute("CREATE TABLE accounts_engagement_rewards (account_engagement_reward_id integer primary key, account_id integer, season_id integer, milestone integer, track_xp_total integer, achieved_at text)")
+    for slot in range(6):
+        c.execute("INSERT INTO accounts_engagement_rewards (account_id, season_id, milestone) VALUES (6, 16, %s)", [slot])
+    c.execute("INSERT INTO accounts_engagement_rewards (account_id, season_id, milestone) VALUES (6, 15, 7)")
 print("knots:", TensionModifier.objects.count(), "achievements:", Achievement.objects.count())

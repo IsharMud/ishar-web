@@ -2676,3 +2676,61 @@ Console itself. Specific calls:
 **Notes.** New component `.ac-track` (catalog updated). Verified against a
 local MariaDB with the game schema and the game's real queue drainer: save →
 queue row → game applies → page shows the staged track.
+
+## 2026-11-24 — Fated essence: one rules module, the stored high-water shown as-is, the life in hand priced
+
+**Problem.** Players reported the essence figure "not accurate once you die
+mid run and start again". The portal's "Earned this season" was
+`Account.seasonal_earned`: the pre-Fated formula `2 + r + ⌊r/5⌋·3` over the
+best of `remorts` / `player_stats.hardcore_remorts`. It had no Tension and
+ignored the account's stored woven and loose essence. After a restart the
+living character is worth far less than the season's stored high-water.
+ishar-mud#1990 / #2004 also changed the loose rule from
+`(r + ⌊r/5⌋·3)·m(T)` to `r·m(T)` and started recording the life that set the
+high-water (`accounts.season_loose_remorts` / `_tension`).
+
+**Decision.** A shared **Essence This Season** panel
+(`partials/season_essence.html`) on the Fated profile and the portal. It
+replaces `seasonal_earned`, which is deleted. Specific calls:
+
+1. **One rules module.** `apps/fated/essence.py` has no Django imports and
+   holds the three constants (slope 20, summit 10, bank base 16) and the
+   math. `tension.py`, the views and the HUD all read from it. The HUD gets
+   the constants through `json_script` on `/connect/`, not a JS copy; without
+   them it prices nothing. `apps/fated/tests.py` pins the #1990 tables
+   (`python -m unittest apps.fated.tests`, no database).
+2. **What pays is displayed, never recomputed.** Woven and loose are the
+   account's columns. The formulas only price the life in hand: what it
+   stands at now, each further remort (a table of this life / loose / season
+   per remort, with the first remort that passes the high-water marked), and
+   its ascension. The ascension note shows the season total before and after.
+   It turns warn when the change is negative, which happens when an earlier,
+   higher-Tension life set a high-water above this climb's bank.
+3. **The source is shown, or named as missing.** "Set at remort R, Tension
+   T", or "set under the earlier rule" when the game recorded none.
+4. **Engagement milestones are claim receipts, labelled as a lower bound.**
+   The game pays one essence per milestone *reached*, which it derives on read
+   and never stores. The site counts `accounts_engagement_rewards` for the
+   season and says that `season` in the game has the exact figure. The HUD
+   uses `Char.Season`'s `milestones_done`, which is exact.
+5. **The two new columns are modelled on `Account`.** This departs from the
+   2026-11-18 rule (read game columns raw and guarded) on purpose. A raw read
+   would leave the auth model permanently incomplete. In return, **the web
+   deploy must follow the game reboot that runs the
+   `loose_essence_source` migration**: `Account` loads on every logged-in
+   request, so shipping first fails every one of them.
+6. **Copy.** Loose essence is "the season's high-water across lives", kept
+   through death. It is never described as at risk, unbanked or lost. The
+   Loom panel now carries only best / lifetime best and the threads. The
+   Tension panel drops its bare "Banks on ascension" tile, because the
+   ascension note says what banking replaces.
+7. **Phones, site-wide.** `.ac-tiles` go two abreast below 576px (minimum
+   8rem, down from 9.5rem, which stacked every four-tile panel into one tall
+   column). `.ac-table` cells tighten there too, so a four-column table fits
+   with no sideways scroll.
+
+**Notes.** New: `partials/season_essence.html`, `.ac-table__row--mark`
+(catalog updated). Outside a Fated season the portal no longer shows a
+this-season figure: the normal enigma's per-class tally was never what
+`seasonal_earned` computed, and porting it is separate work. Verified with
+the sqlite harness in `fated-tension/` (fixture includes #1990's real case).

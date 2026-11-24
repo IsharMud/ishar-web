@@ -209,8 +209,9 @@ filter.
   </a>
 </div>
 ```
-Used: feedback dashboard. Status: **formalized** (supersedes the classic
-`display-6` card tile on admin surfaces).
+Below 576px the grid goes two abreast (minimum 8rem). Used: feedback
+dashboard. Status: **formalized** (supersedes the classic `display-6` card
+tile on admin surfaces).
 
 ### `.ac-bars` + `.ac-bar` — single-series magnitude bars
 Server-rendered horizontal bar rows: label · track+fill · value. One hue per
@@ -384,14 +385,29 @@ Used: the profile Tension panel (remorts of the summit). Status: **formalized.**
 
 ### Tension partials — `partials/tension_life.html`, `partials/tension_loom.html`
 The Fated surfaces (`apps/fated/templates/partials/`), built from tiles,
-rows and pills only. *Life*: Tension · remorts of 10 · banks on ascension
-tiles, the tied knots as rows (rule in `__meta`, weight pill in `__side`),
-copy states for untied / between lives / at the summit. *Loom*: woven /
-loose / best / lifetime tiles, then the bound threads as rows (rarity and
-level or tier in `__meta`, burden pill; `.ac-row--severed` strikes a cut
-thread through). Context comes from `apps/fated/context.py`; include with
+rows and pills only. *Life*: Tension · remorts of 10 tiles, the tied knots
+as rows (rule in `__meta`, weight pill in `__side`), copy states for untied /
+between lives / at the summit. *Loom*: best / lifetime best tiles, then the
+bound threads as rows (rarity and level or tier in `__meta`, burden pill;
+`.ac-row--severed` strikes a cut thread through). Essence is the essence
+partial's. Context comes from `apps/fated/context.py`; include with
 `life`/`between_lives` and `standing`/`loom`/`help_topics`. Used: player
 profile, portal. Status: **formalized** (decisions.md 2026-10-15).
+
+### Essence partial — `partials/season_essence.html`
+A Fated account's essence this season (context: `essence`, an
+`apps.fated.essence.SeasonEssence`, plus `between_lives` on the profile).
+Tiles: this season · woven · loose · this life. An `.ac-kv` breakdown
+(woven, loose with its source, the +2/+1 bonuses, milestones claimed, the
+total). Then **This Life**: what the life stands at, a plain `.ac-note` when
+it is below the high-water, the per-remort projection as an `.ac-table`
+(first passing row `--mark`ed), and an ascension `.ac-note` (`--ok`, or
+`--warn` when ascending would lower the total). Used: player profile,
+portal. Status: **formalized** (decisions.md 2026-11-24).
+
+### `.ac-table__row--mark` — the row to find first
+Amber wash and amber text on one table row, e.g. the remort that passes a
+high-water. One per table. Status: **formalized.**
 
 ### `.ac-row--tied` / `.ac-row--severed` — Fated row states
 `--tied` (ok wash, ok icon, no strike-through) marks a knot the viewer's own

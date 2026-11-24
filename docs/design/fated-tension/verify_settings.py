@@ -1,11 +1,14 @@
 """Verification-only settings: the real settings.py over sqlite, with the
 game's helptab from the ishar-mud clone. Never used in production."""
+import os
+import tempfile
+
 from settings import *  # noqa
 
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": "/tmp/claude-0/-home-user-ishar-web/f631e60d-2c23-527e-b7f0-18ab25133956/scratchpad/verify.sqlite3",
+        "NAME": os.path.join(tempfile.gettempdir(), "ishar-verify.sqlite3"),
     }
 }
 ALLOWED_HOSTS = ["testserver", "localhost", "127.0.0.1"]

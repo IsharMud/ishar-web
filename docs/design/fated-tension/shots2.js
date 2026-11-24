@@ -1,5 +1,5 @@
-const { chromium } = require('/opt/node-tools/node_modules/playwright');
-const OUT = '/tmp/claude-0/-home-user-ishar-web/f631e60d-2c23-527e-b7f0-18ab25133956/scratchpad/shots/';
+const { chromium } = require('playwright');
+const OUT = __dirname + '/';
 const BASE = 'http://127.0.0.1:8765';
 const pages = [
   ['fated', '/fated/', null],
@@ -8,7 +8,7 @@ const pages = [
   ['portal_loom', '/portal/?as=Tyrell', '#threads'],
 ];
 (async () => {
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
+  const browser = await chromium.launch();
   for (const [w, label] of [[390, 'phone'], [1280, 'desktop']]) {
     const ctx = await browser.newContext({ viewport: { width: w, height: 900 } });
     for (const [name, path, anchor] of pages) {
