@@ -33,7 +33,6 @@ class AccountAdmin(UserAdmin):
                     "current_essence",
                     "earned_essence",
                     "bugs_reported",
-                    "seasonal_earned",
                 )
             },
         ),
@@ -44,6 +43,8 @@ class AccountAdmin(UserAdmin):
                     "season_max_tension",
                     "season_woven_essence",
                     "season_loose_essence",
+                    "season_loose_remorts",
+                    "season_loose_tension",
                     "max_tension",
                 )
             },
@@ -114,10 +115,11 @@ class AccountAdmin(UserAdmin):
         "last_ip",
         "last_isp",
         "last_ident",
-        "seasonal_earned",
         "season_max_tension",
         "season_woven_essence",
         "season_loose_essence",
+        "season_loose_remorts",
+        "season_loose_tension",
         "max_tension",
         "friend_code",
         "referrer_account"

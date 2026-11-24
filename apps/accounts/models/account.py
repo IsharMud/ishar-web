@@ -1,5 +1,4 @@
 from datetime import datetime
-from django.conf import settings
 from django.db import models
 from django.contrib import admin
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
@@ -156,8 +155,20 @@ class Account(AbstractBaseUser, PermissionsMixin):
     )
     season_loose_essence = models.PositiveIntegerField(
         default=0,
-        help_text="This season's unascended climb high-water (never lost on death).",
+        help_text="The season's loose-essence high-water across lives (never lost on death).",
         verbose_name="Season Loose Essence",
+    )
+    # The life that set the loose high-water (ishar-mud#1990). Both 0 with
+    #   loose essence held means it was set under the earlier rule, unsourced.
+    season_loose_remorts = models.PositiveSmallIntegerField(
+        default=0,
+        help_text="Remorts of the life that set the loose high-water; 0 if unrecorded.",
+        verbose_name="Season Loose Remorts",
+    )
+    season_loose_tension = models.PositiveSmallIntegerField(
+        default=0,
+        help_text="Net Tension of the life that set the loose high-water.",
+        verbose_name="Season Loose Tension",
     )
     max_tension = models.PositiveSmallIntegerField(
         default=0,
@@ -313,35 +324,6 @@ class Account(AbstractBaseUser, PermissionsMixin):
     def player_count(self) -> int:
         """Number of players for the account."""
         return self.players.count()
-
-    @property
-    @admin.display(description="Seasonal Earned", ordering="seasonal_earned")
-    def seasonal_earned(self) -> int:
-        """Amount of essence earned for the account, based upon players."""
-        earned = 0
-
-        # Only consider accounts with playable characters (non-Immortals).
-        chars = self.players.filter(
-            true_level__lt=settings.MIN_IMMORTAL_LEVEL
-        )
-        if chars and chars.count() > 0:
-
-            # "Mostly the same - 2 for playing, 3 per 5 remorts."
-            earned = 2
-
-            # Find maximum remorts of players within this account.
-            #   Get higher of either "remorts" or "hardcore_remorts".
-            max_remorts = max(
-                chars.aggregate(
-                    remorts=models.Max("remorts"),
-                    hardcore_remorts=models.Max("statistics__hardcore_remorts")
-                ).values()
-            )
-
-            earned += max_remorts
-            earned += int(max_remorts / 5) * 3
-
-        return earned
 
     def set_password(self, raw_password: str = None) -> bool:
         """Method to set the account password."""
