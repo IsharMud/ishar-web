@@ -8,9 +8,10 @@ from apps.core.views.mixins import NeverCacheMixin
 from apps.players.models import Player
 
 from .context import fated_season_active
+from .essence import SUMMIT, bank
 from .tension import (
-    FATED_CLASS_ID, HELP_TOPICS, KNOTS_UNTIED, SUMMIT_REMORTS, Knot, bank,
-    burden_table, knot_menu, tenths,
+    FATED_CLASS_ID, HELP_TOPICS, KNOTS_UNTIED, Knot, burden_table, knot_menu,
+    tenths,
 )
 
 
@@ -63,7 +64,7 @@ class FatedView(TemplateView):
         context = super().get_context_data(**kwargs)
         context["burden_table"] = burden_table()
         context["bank_floor"] = bank(0)
-        context["summit"] = SUMMIT_REMORTS
+        context["summit"] = SUMMIT
         context["help_topics"] = HELP_TOPICS
         context["fated_season"] = fated_season_active()
         return context

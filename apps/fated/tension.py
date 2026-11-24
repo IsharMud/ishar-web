@@ -7,13 +7,12 @@ from dataclasses import dataclass, field
 
 from apps.skills.utils import PASSIVE_SKILL_TYPE, RARITY_NAMES
 
+from .essence import SUMMIT
 from .models import AccountFatedSkill, TensionModifier
 
 
 FATED_CLASS_ID = 17            # player_common.class_id of the Fated class
 FATED_ENIGMA_ID = 2            # seasonal_enigma_id of Fractured Threads
-SUMMIT_REMORTS = 10            # the prayer after the summit ascends
-MULT_SLOPE_PCT = 20            # m(T) = (100 + 20T) / 100
 KNOTS_UNTIED = -1              # players.tension_locked before the knots are tied
 
 RARITY_BURDEN = (2, 3, 5, 10, 15)   # tenths per bind, by rarity index
@@ -26,22 +25,6 @@ def tenths(value) -> str:
     value = int(value or 0)
     sign = "-" if value < 0 else ""
     return f"{sign}{abs(value) // 10}.{abs(value) % 10}"
-
-
-def essence_formula(remorts: int) -> int:
-    """f(r) = r + (r/5)*3 — the per-character essence formula."""
-    remorts = max(0, int(remorts))
-    return remorts + (remorts // 5) * 3
-
-
-def multiply(value: int, tension: int) -> int:
-    """value × m(T), integer division last."""
-    return value * (100 + MULT_SLOPE_PCT * max(0, int(tension))) // 100
-
-
-def bank(tension: int) -> int:
-    """Woven essence an ascension banks at net Tension T: f(10) × m(T)."""
-    return multiply(essence_formula(SUMMIT_REMORTS), tension)
 
 
 def rarity_name(rarity) -> str:
@@ -186,7 +169,7 @@ class Life:
     remorts: int
     knots: list
     burden: int                      # tenths, live
-    summit: int = SUMMIT_REMORTS
+    summit: int = SUMMIT
 
     @property
     def untied(self) -> bool:
@@ -212,10 +195,6 @@ class Life:
     def at_summit(self) -> bool:
         return self.remorts >= self.summit
 
-    @property
-    def bank(self) -> int:
-        return bank(self.tension)
-
 
 def player_life(player, loom=None) -> Life:
     loom = loom if loom is not None else account_loom(player.account)
@@ -229,26 +208,14 @@ def player_life(player, loom=None) -> Life:
 
 @dataclass
 class Standing:
-    """An account's season and lifetime Tension standing."""
+    """An account's best completed climbs, this season and lifetime."""
 
-    woven: int
-    loose: int
     best: int
     lifetime_best: int
-
-    @property
-    def this_season(self) -> int:
-        return self.woven + self.loose
-
-    @property
-    def any(self) -> bool:
-        return bool(self.woven or self.loose or self.best or self.lifetime_best)
 
 
 def account_standing(account) -> Standing:
     return Standing(
-        woven=account.season_woven_essence or 0,
-        loose=account.season_loose_essence or 0,
         best=account.season_max_tension or 0,
         lifetime_best=account.max_tension or 0,
     )
