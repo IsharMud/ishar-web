@@ -234,16 +234,13 @@ class Account(AbstractBaseUser, PermissionsMixin):
     @admin.display(boolean=True, description="Active?")
     def is_active(self) -> bool:
         """Boolean whether account is active."""
-        if self.is_banned() is True:
-            return False
-        return True
+        return not self.is_banned()
 
     @admin.display(boolean=True, description="Banned?")
     def is_banned(self) -> bool:
-        if self.banned_until and isinstance(self.is_banned, datetime):
-            if self.banned_until > now():
-                return True
-        return False
+        # The game marks "not banned" with a past timestamp as often as
+        # NULL, so only a future expiry counts.
+        return self.banned_until is not None and self.banned_until > now()
 
     @admin.display(boolean=True, description="Artisan?")
     def is_artisan(self) -> bool:

@@ -23,7 +23,3 @@ class IsharUserAuthBackend(ModelBackend):
         if user and user.check_password(raw_password=password):
             return user
         return None
-
-    def get_user(self, user_id=None):
-        # Get a user by account ID.
-        return self.model.objects.get(account_id=user_id)
